@@ -1,2 +1,0 @@
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar qc libnoggit-math.a  CMakeFiles/noggit-math.dir/src/math/matrix_4x4.cpp.o CMakeFiles/noggit-math.dir/src/math/vector_2d.cpp.o
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib libnoggit-math.a
