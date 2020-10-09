@@ -318,13 +318,16 @@ private:
   std::vector<math::vector_3d> _vertex_box_points;
 
   // buffers;
-  opengl::scoped::deferred_upload_buffers<4> _buffers;
+  opengl::scoped::deferred_upload_buffers<5> _buffers;
   opengl::scoped::deferred_upload_vertex_arrays<2> _vertex_arrays;
+
+  std::vector<uint16_t> const _box_indices = {5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7};
 
   GLuint const& _vao = _vertex_arrays[0];
   GLuint const& _transform_buffer = _buffers[0];
   GLuint const& _vertices_buffer = _buffers[1];
   GLuint const& _indices_buffer = _buffers[3];
+  GLuint const& _box_indices_buffer = _buffers[4];
 
   GLuint const& _box_vao = _vertex_arrays[1];
   GLuint const& _box_vbo = _buffers[2];

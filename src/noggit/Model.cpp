@@ -1525,7 +1525,6 @@ void Model::draw_ribbons( opengl::scoped::use_program& ribbons_shader
 
 void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count)
 {
-  static std::vector<uint16_t> const indices ({5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7});
 
   opengl::scoped::vao_binder const _ (_box_vao);
 
@@ -1539,7 +1538,9 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
     m2_box_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
-  gl.drawElementsInstanced (GL_LINE_STRIP, indices.size(), GL_UNSIGNED_SHORT, indices.data(), box_count);
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_box_indices_buffer);
+
+  gl.drawElementsInstanced (GL_LINE_STRIP, _box_indices.size(), GL_UNSIGNED_SHORT, nullptr, box_count);
 }
 
 
@@ -1627,6 +1628,9 @@ void Model::upload()
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(uint16_t), _indices.data(), GL_STATIC_DRAW);
+
+  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> box_indices_binder(_box_indices_buffer);
+  gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _box_indices.size() * sizeof(uint16_t), _box_indices.data(), GL_STATIC_DRAW);
 
   _finished_upload = true;
 }
