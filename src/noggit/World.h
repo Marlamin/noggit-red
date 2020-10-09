@@ -126,7 +126,7 @@ public:
             );
 
   unsigned int getAreaID (math::vector_3d const&);
-  void setAreaID(math::vector_3d const& pos, int id, bool adt);
+  void setAreaID(math::vector_3d const& pos, int id, bool adt,  float radius = -1.0f);
 
   selection_result intersect ( math::matrix_4x4 const& model_view
                              , math::ray const&

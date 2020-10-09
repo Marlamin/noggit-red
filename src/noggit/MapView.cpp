@@ -1842,7 +1842,7 @@ void MapView::tick (float dt)
             if (_mod_shift_down)
             {
               // draw the selected AreaId on current selected chunk
-              _world->setAreaID(_cursor_pos, _selected_area_id, false);
+              _world->setAreaID(_cursor_pos, _selected_area_id, false, ZoneIDBrowser->brushRadius());
             }
             else if (_mod_ctrl_down)
             {
@@ -2348,6 +2348,9 @@ void MapView::draw_map()
   case editing_mode::mccv:
     radius = shaderTool->brushRadius();
     break;
+  case editing_mode::areaid:
+    radius = ZoneIDBrowser->brushRadius();
+    break;
   }
 
   //! \note Select terrain below mouse, if no item selected or the item is map.
@@ -2706,6 +2709,10 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     case editing_mode::mccv:
       shaderTool->changeRadius(relative_movement.dx() / XSENS);
       break;
+    case editing_mode::areaid:
+      ZoneIDBrowser->changeRadius(relative_movement.dx() / XSENS);
+      break;
+
     }
   }
 

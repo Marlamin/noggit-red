@@ -7,6 +7,7 @@
 #include <noggit/Misc.h>
 
 #include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QFormLayout>
 
 #include <iostream>
 #include <sstream>
@@ -21,8 +22,21 @@ namespace noggit
       , _area_tree(new QTreeWidget())
       , mapID(-1)
     {
-      new QVBoxLayout(this);
-      this->layout()->addWidget(_area_tree);
+      auto layout = new QFormLayout(this);
+
+      _radius_spin = new QDoubleSpinBox (this);
+      _radius_spin->setRange (0.0f, 250.0f);
+      _radius_spin->setDecimals (2);
+      _radius_spin->setValue (_radius);
+
+      layout->addRow ("Radius:", _radius_spin);
+
+      _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
+      _radius_slider->setRange (0, 100);
+      _radius_slider->setSliderPosition (_radius);
+
+      layout->addRow (_radius_slider);
+      layout->addRow (_area_tree);
       
 
       connect ( _area_tree, &QTreeWidget::itemSelectionChanged
@@ -35,6 +49,24 @@ namespace noggit
                   }
                 }
               );
+
+      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
+          , [&] (double v)
+                {
+                  _radius = v;
+                  QSignalBlocker const blocker(_radius_slider);
+                  _radius_slider->setSliderPosition ((int)std::round (v));
+                }
+      );
+
+      connect ( _radius_slider, &QSlider::valueChanged
+          , [&] (int v)
+                {
+                  _radius = v;
+                  QSignalBlocker const blocker(_radius_spin);
+                  _radius_spin->setValue(v);
+                }
+      );
     }
 
     void zone_id_browser::setMapID(int id)
@@ -87,6 +119,11 @@ namespace noggit
           add_area(i->getInt(AreaDB::AreaID));
         }
       }
+    }
+
+    void zone_id_browser::changeRadius(float change)
+    {
+      _radius_spin->setValue (_radius + change);
     }
 
     QTreeWidgetItem* zone_id_browser::create_or_get_tree_widget_item(int area_id)

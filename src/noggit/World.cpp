@@ -1411,7 +1411,7 @@ void World::CropWaterADT(const tile_index& pos)
   for_tile_at(pos, [](MapTile* tile) { tile->CropWater(); });
 }
 
-void World::setAreaID(math::vector_3d const& pos, int id, bool adt)
+void World::setAreaID(math::vector_3d const& pos, int id, bool adt, float radius)
 {
   if (adt)
   {
@@ -1419,7 +1419,22 @@ void World::setAreaID(math::vector_3d const& pos, int id, bool adt)
   }
   else
   {
-    for_chunk_at(pos, [&](MapChunk* chunk) { chunk->setAreaID(id);});
+
+    if (radius >= 0)
+    {
+      for_all_chunks_in_range(pos, radius,
+                              [&] (MapChunk* chunk)
+                              {
+                                chunk->setAreaID(id);
+                                return true;
+                              }
+      );
+
+    }
+    else
+    {
+      for_chunk_at(pos, [&](MapChunk* chunk) { chunk->setAreaID(id);});
+    }
   }
 }
 
