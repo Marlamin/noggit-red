@@ -135,9 +135,10 @@ private:
   opengl::scoped::deferred_upload_vertex_arrays<2> _mfbo_vaos;
   GLuint const& _mfbo_bottom_vao = _mfbo_vaos[0];
   GLuint const& _mfbo_top_vao = _mfbo_vaos[1];
-  opengl::scoped::deferred_upload_buffers<2> _mfbo_vbos;
+  opengl::scoped::deferred_upload_buffers<3> _mfbo_vbos;
   GLuint const& _mfbo_bottom_vbo = _mfbo_vbos[0];
   GLuint const& _mfbo_top_vbo = _mfbo_vbos[1];
+  GLuint const& _mfbo_indices = _mfbo_vbos[2];
 
   // MHDR:
   int mFlags;

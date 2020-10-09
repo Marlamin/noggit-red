@@ -2,4 +2,4 @@
 
 #pragma once
 
-#define STRPRODUCTVER "3.d4ca960+"
+#define STRPRODUCTVER "3.1589217+"

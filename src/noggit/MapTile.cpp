@@ -434,20 +434,30 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
       mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
+    {
+      opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
+      gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint16_t), indices.data(), GL_STATIC_DRAW);
+    }
+
     _mfbo_buffer_are_setup = true;
   }
 
   {
     opengl::scoped::vao_binder const _(_mfbo_bottom_vao);
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
+
     mfbo_shader.uniform("color", math::vector_4d(1.0f, 1.0f, 0.0f, 0.2f));
-    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, indices.data());
+    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, nullptr);
   }
 
   {
     opengl::scoped::vao_binder const _(_mfbo_top_vao);
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
+
     mfbo_shader.uniform("color", math::vector_4d(0.0f, 1.0f, 1.0f, 0.2f));
-    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, indices.data());
+    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, nullptr);
   }
+
 }
 
 void MapTile::drawWater ( math::frustum const& frustum
