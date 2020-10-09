@@ -1,0 +1,39 @@
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__we4099 failed with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_54f0d/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_54f0d.dir/build.make CMakeFiles/cmTC_54f0d.dir/build
+Building CXX object CMakeFiles/cmTC_54f0d.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -Wno-padded -DCXX_COMPILER_SUPPORTS__we4099 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   /we4099 -o CMakeFiles/cmTC_54f0d.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+clang: [0;1;31merror: [0mno such file or directory: '/we4099'[0m
+make[1]: *** [CMakeFiles/cmTC_54f0d.dir/src.cxx.o] Error 1
+make: *** [cmTC_54f0d/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__EHa failed with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_b1601/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_b1601.dir/build.make CMakeFiles/cmTC_b1601.dir/build
+Building CXX object CMakeFiles/cmTC_b1601.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -Wno-padded -Werror=mismatched-tags -Wno-multichar -DCXX_COMPILER_SUPPORTS__EHa -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   /EHa -o CMakeFiles/cmTC_b1601.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+clang: [0;1;31merror: [0mno such file or directory: '/EHa'[0m
+make[1]: *** [CMakeFiles/cmTC_b1601.dir/src.cxx.o] Error 1
+make: *** [cmTC_b1601/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__MP failed with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_05c6c/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_05c6c.dir/build.make CMakeFiles/cmTC_05c6c.dir/build
+Building CXX object CMakeFiles/cmTC_05c6c.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -Wno-padded -Werror=mismatched-tags -Wno-multichar -DCXX_COMPILER_SUPPORTS__MP -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   /MP -o CMakeFiles/cmTC_05c6c.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+clang: [0;1;31merror: [0mno such file or directory: '/MP'[0m
+make[1]: *** [CMakeFiles/cmTC_05c6c.dir/src.cxx.o] Error 1
+make: *** [cmTC_05c6c/fast] Error 2
+
+
+Source file was:
+int main() { return 0; }

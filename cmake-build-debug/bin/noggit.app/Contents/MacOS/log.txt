@@ -1,0 +1,513 @@
+142 - (application.cpp:214): Noggit Studio - 3.4b8b34b3+
+143 - (application.cpp:239): Game path: "/Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a"
+144 - (application.cpp:244): Project path: /Volumes/APFS/Prophecy/
+144 - (application.cpp:114): Locale: ruRU
+165 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/common.MPQ
+233 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/common-2.MPQ
+271 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/expansion.MPQ
+286 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/lichking.MPQ
+345 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/patch.MPQ
+373 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/patch-2.MPQ
+391 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/patch-3.MPQ
+441 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/patch-4.MPQ
+517 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/patch-5.MPQ
+550 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/patch-6.MPQ
+631 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/patch-8.MPQ
+656 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/patch-l.MPQ
+699 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/ruRU/locale-ruRU.MPQ
+717 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/ruRU/expansion-locale-ruRU.MPQ
+728 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/ruRU/lichking-locale-ruRU.MPQ
+753 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/ruRU/patch-ruRU.MPQ
+779 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/ruRU/patch-ruRU-2.MPQ
+781 - (MPQ.cpp:53): [Debug] Opened archive /Volumes/NTFS/WoWModding/World of Warcraft 3.3.5a/Data/ruRU/patch-ruRU-3.MPQ
+1278 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\AreaTable.dbc"
+1493 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\Map.dbc"
+1818 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\LoadingScreens.dbc"
+2391 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\Light.dbc"
+2679 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\LightParams.dbc"
+2904 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\LightSkybox.dbc"
+2963 - (MPQ.cpp:106): [Debug] Completed listfile loading: 342116 files
+2985 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\LightIntBand.dbc"
+3035 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\LightFloatBand.dbc"
+3051 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\GroundEffectDoodad.dbc"
+3062 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\GroundEffectTexture.dbc"
+3088 - (DBCFile.cpp:22): [Debug] Opening DBC "DBFilesClient\LiquidType.dbc"
+3265 - (application.cpp:281): [Debug] GL: Version: 4.1 INTEL-14.5.22
+3265 - (application.cpp:282): [Debug] GL: Vendor: Intel Inc.
+3265 - (application.cpp:283): [Debug] GL: Renderer: Intel(R) Iris(TM) Plus Graphics 640
+3377 - (main_window.cpp:282): [Debug] No bookmarks file.
+3911 - (World.cpp:63): World 13: EasternKingdoms has no WDT file!
+3957 - (World.cpp:63): World 451: development has no WDT file!
+4013 - (World.cpp:63): World 582: Transport176244 has no WDT file!
+4013 - (World.cpp:63): World 584: Transport176231 has no WDT file!
+4015 - (World.cpp:63): World 586: Transport181645 has no WDT file!
+4015 - (World.cpp:63): World 587: Transport177233 has no WDT file!
+4015 - (World.cpp:63): World 588: Transport176310 has no WDT file!
+4015 - (World.cpp:63): World 589: Transport175080 has no WDT file!
+4015 - (World.cpp:63): World 590: Transport176495 has no WDT file!
+4015 - (World.cpp:63): World 591: Transport164871 has no WDT file!
+4016 - (World.cpp:63): World 592: Transport186238 has no WDT file!
+4016 - (World.cpp:63): World 593: Transport20808 has no WDT file!
+4016 - (World.cpp:63): World 594: Transport187038 has no WDT file!
+4017 - (World.cpp:63): World 596: Transport187263 has no WDT file!
+4039 - (World.cpp:63): World 610: Transport_Tirisfal _Vengeance_Landing has no WDT file!
+4039 - (World.cpp:63): World 612: Transport_Menethil_Valgarde has no WDT file!
+4039 - (World.cpp:63): World 613: Transport_Orgrimmar_Warsong_Hold has no WDT file!
+4040 - (World.cpp:63): World 614: Transport_Stormwind_Valiance_Keep has no WDT file!
+4047 - (World.cpp:63): World 620: Transport_Moa'ki_Unu'pe has no WDT file!
+4047 - (World.cpp:63): World 621: Transport_Moa'ki_Kamagua has no WDT file!
+4047 - (World.cpp:63): World 622: Transport192241 has no WDT file!
+4047 - (World.cpp:63): World 623: Transport192242 has no WDT file!
+4053 - (World.cpp:63): World 641: Transport_AllianceAirshipBG has no WDT file!
+4053 - (World.cpp:63): World 642: Transport_HordeAirshipBG has no WDT file!
+4053 - (World.cpp:63): World 647: Transport_Orgrimmar_to_Thunderbluff has no WDT file!
+4058 - (World.cpp:63): World 672: Transport197347 has no WDT file!
+4058 - (World.cpp:63): World 673: Transport197348 has no WDT file!
+4058 - (World.cpp:63): World 712: Transport197349 has no WDT file!
+4058 - (World.cpp:63): World 713: Transport197350 has no WDT file!
+4058 - (World.cpp:63): World 718: Transport201834 has no WDT file!
+4060 - (World.cpp:63): World 725: Mall has no WDT file!
+4493 - (World.cpp:111): [Debug] Loading world "Azeroth".
+26558 - (MapTile.cpp:61): Opening tile 29, 28 ("World\Maps\Azeroth\Azeroth_29_28.adt") from disk.
+26705 - (MapTile.cpp:311): [Debug] Done loading tile 29,28.
+26794 - (MapTile.cpp:61): Opening tile 28, 27 ("World\Maps\Azeroth\Azeroth_28_27.adt") from disk.
+26872 - (MapTile.cpp:61): Opening tile 29, 27 ("World\Maps\Azeroth\Azeroth_29_27.adt") from disk.
+27287 - (MapTile.cpp:311): [Debug] Done loading tile 28,27.
+27302 - (MapTile.cpp:311): [Debug] Done loading tile 29,27.
+27426 - (MapTile.cpp:61): Opening tile 30, 27 ("World\Maps\Azeroth\Azeroth_30_27.adt") from disk.
+27565 - (MapTile.cpp:61): Opening tile 28, 28 ("World\Maps\Azeroth\Azeroth_28_28.adt") from disk.
+28364 - (MapTile.cpp:311): [Debug] Done loading tile 28,28.
+28394 - (MapTile.cpp:311): [Debug] Done loading tile 30,27.
+28552 - (MapTile.cpp:61): Opening tile 30, 28 ("World\Maps\Azeroth\Azeroth_30_28.adt") from disk.
+28655 - (MapTile.cpp:61): Opening tile 28, 29 ("World\Maps\Azeroth\Azeroth_28_29.adt") from disk.
+28964 - (MapTile.cpp:311): [Debug] Done loading tile 30,28.
+29071 - (MapTile.cpp:311): [Debug] Done loading tile 28,29.
+29130 - (MapTile.cpp:61): Opening tile 29, 29 ("World\Maps\Azeroth\Azeroth_29_29.adt") from disk.
+29239 - (MapTile.cpp:61): Opening tile 30, 29 ("World\Maps\Azeroth\Azeroth_30_29.adt") from disk.
+29641 - (MapTile.cpp:311): [Debug] Done loading tile 29,29.
+29793 - (MapTile.cpp:311): [Debug] Done loading tile 30,29.
+29823 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_fern_b01.m2 could not be loaded
+30613 - (AsyncObject.h:67): [Error] environments/stars/8swa_sky01.m2 could not be loaded
+30616 - (AsyncObject.h:67): [Error] world/expansion07/doodads/drustvari/8dv_drustvari_well01.m2 could not be loaded
+32265 - (AsyncObject.h:67): [Error] world/expansion06/doodads/valsharah/7vs_blackrook_corn01.m2 could not be loaded
+32723 - (AsyncObject.h:67): [Error] environments/stars/8zul_sky02.m2 could not be loaded
+32842 - (AsyncObject.h:67): [Error] environments/stars/8dru_corlanesky01.m2 could not be loaded
+32874 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_docks_narrow02.wmo could not be loaded
+32875 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_stairjunction_tall_narrow_01.wmo could not be loaded
+32875 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_docks_stairsnarrow02.wmo could not be loaded
+33715 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_wallposter06.m2 could not be loaded
+33863 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightelf/7ne_nightelf_chair01old.m2 could not be loaded
+33975 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_crate03.m2 could not be loaded
+33986 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_cratestack01.m2 could not be loaded
+34721 - (AsyncObject.h:67): [Error] world/expansion07/doodads/desertzone/8des_oasisbush_b01.m2 could not be loaded
+35410 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_wallposter04.m2 could not be loaded
+36386 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_mosshanging_b01.m2 could not be loaded
+36388 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_mossclump_a04.m2 could not be loaded
+36388 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_mosshanging_b02.m2 could not be loaded
+36442 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_fern_a01.m2 could not be loaded
+36452 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_mossclump_a02.m2 could not be loaded
+36480 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_mosshanging_b03.m2 could not be loaded
+36496 - (AsyncObject.h:67): [Error] world/expansion07/doodads/desertzone/8des_oasismoss_a01.m2 could not be loaded
+36510 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_fern_b02.m2 could not be loaded
+37623 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_shaman_furrug02.m2 could not be loaded
+37624 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_shaman_furrug01.m2 could not be loaded
+37915 - (AsyncObject.h:67): [Error] world/expansion07/doodads/desertzone/8des_bramblewall_b02.m2 could not be loaded
+38584 - (AsyncObject.h:67): [Error] world/wmo/kultiras/pirate/8pi_kultiras_stairs01.wmo could not be loaded
+38589 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_docks_wide03.wmo could not be loaded
+38795 - (AsyncObject.h:67): [Error] world/expansion06/doodads/aszuna/7az_gardenfallenleaves_b01.m2 could not be loaded
+38795 - (AsyncObject.h:67): [Error] world/expansion06/doodads/aszuna/7az_gardenfallenleaves_b02.m2 could not be loaded
+39307 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_wallposter05.m2 could not be loaded
+39603 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_treecanopy_a01.m2 could not be loaded
+41989 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightelf/7ne_nightelf_bookstack01old.m2 could not be loaded
+43050 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_thistletea01.m2 could not be loaded
+43298 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_paladin_door01.m2 could not be loaded
+43373 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_walllamp01.m2 could not be loaded
+43608 - (Model.cpp:354): [Debug] wrong texture coord combo index on fuckported model: world/expansion05/doodads/tanaanjungle/doodads/6tj_lightray01.m2
+43612 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_skull02.m2 could not be loaded
+43887 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_archwinebottle02.m2 could not be loaded
+44465 - (Model.cpp:1039l): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot04.m2'  - (Model.cpp:1039unimplemented emitter type: 0): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot_pile03.m2' unimplemented emitter type: 0
+
+nimplemented emitter type: 0
+44466 - (Model.cpp:103944466): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot04.m2' unimplemented emitter type: 51
+
+nimp - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot_pile03.m2' unimplemented emitter type: 17
+44466 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot_pile03.m2' unimplemented emitter type: 0
+44472 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot03.m2' unimplemented emitter type: 0
+44493 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot_pile02.m2' unimplemented emitter type: 0
+44494 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot_pile02.m2' unimplemented emitter type: 73
+44500 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot02.m2' unimplemented emitter type: 0
+44500 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot02.m2' unimplemented emitter type: 127
+44501 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot05.m2' unimplemented emitter type: 0
+44506 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot07.m2' unimplemented emitter type: 0
+44556 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot_pile01.m2' unimplemented emitter type: 0
+44556 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/murloc/7mu_murloc_loot_pile01.m2' unimplemented emitter type: -109
+46026 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion05/tanaanjungle/6tj_dirt02_512.blp'
+60223 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/fol/lordaeron/8hu_kultiras_mausoleum_map08.blp'
+64391 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_docks_woodtrim01.blp'
+64471 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_docks_pillar_rope01.blp'
+64801 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/fol/lordaeron/lrd_leak_decal.blp'
+66536 - (TextureManager.cpp:226): [Error] file not found: 'world/lordaeron/silverpine/passivedoodads/trees/silverpinetree_bark.blp'
+66568 - (TextureManager.cpp:226): [Error] file not found: 'world/lordaeron/silverpine/passivedoodads/trees/silverpinetree_log.blp'
+68145 - (TextureManager.cpp:226): [Error] file not found: 'spells/smoke_wispy_mask_blend.blp'
+68179 - (TextureManager.cpp:226): [Error] file not found: 'spells/cloud_puffysofter_mod4x.blp'
+1103661 - (MapTile.cpp:61): Opening tile 28, 30 ("World\Maps\Azeroth\Azeroth_28_30.adt") from disk.
+1103776 - (MapTile.cpp:61): Opening tile 29, 30 ("World\Maps\Azeroth\Azeroth_29_30.adt") from disk.
+1104513 - (MapTile.cpp:311): [Debug] Done loading tile 29,30.
+1104871 - (MapTile.cpp:61): Opening tile 30, 30 ("World\Maps\Azeroth\Azeroth_30_30.adt") from disk.
+1105126 - (MapTile.cpp:311): [Debug] Done loading tile 28,30.
+1105632 - (MapTile.cpp:311): [Debug] Done loading tile 30,30.
+1106045 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_stadiumbench_row02.m2 could not be loaded
+1106046 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_stadiumbench_row03.m2 could not be loaded
+1109640 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion06/arathibasinwinter/7abw_rock01_1024.blp'
+1109820 - (MapTile.cpp:61): Opening tile 31, 28 ("World\Maps\Azeroth\Azeroth_31_28.adt") from disk.
+1109922 - (MapTile.cpp:61): Opening tile 31, 29 ("World\Maps\Azeroth\Azeroth_31_29.adt") from disk.
+1110138 - (MapTile.cpp:311): [Debug] Done loading tile 31,28.
+1110251 - (MapTile.cpp:61): Opening tile 31, 30 ("World\Maps\Azeroth\Azeroth_31_30.adt") from disk.
+1110725 - (MapTile.cpp:311): [Debug] Done loading tile 31,29.
+1110812 - (MapTile.cpp:311): [Debug] Done loading tile 31,30.
+1129058 - (MapTile.cpp:61): Opening tile 31, 27 ("World\Maps\Azeroth\Azeroth_31_27.adt") from disk.
+1129295 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_rock_a02.m2 could not be loaded
+1129296 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_rock_a03.m2 could not be loaded
+1129298 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_rock_a04.m2 could not be loaded
+1129346 - (AsyncObject.h:67): [Error] world/expansion07/doodads/pirate/8pi_kultiras_docksstone02.m2 could not be loaded
+1129375 - (MapTile.cpp:311): [Debug] Done loading tile 31,27.
+1139141 - (MapTile.cpp:61): Opening tile 32, 28 ("World\Maps\Azeroth\Azeroth_32_28.adt") from disk.
+1139344 - (MapTile.cpp:61): Opening tile 32, 29 ("World\Maps\Azeroth\Azeroth_32_29.adt") from disk.
+1139941 - (MapTile.cpp:311): [Debug] Done loading tile 32,29.
+1139982 - (MapTile.cpp:311): [Debug] Done loading tile 32,28.
+1140163 - (MapTile.cpp:61): Opening tile 32, 30 ("World\Maps\Azeroth\Azeroth_32_30.adt") from disk.
+1140314 - (AsyncObject.h:67): [Error] world/expansion06/doodads/valsharah/7vs_blackrook_tallgrass_b01.m2 could not be loaded
+1140314 - (AsyncObject.h:67): [Error] world/expansion06/doodads/valsharah/7vs_blackrook_tallgrass_c01.m2 could not be loaded
+1140475 - (MapTile.cpp:311): [Debug] Done loading tile 32,30.
+1141031 - (Model.cpp:211): [Debug] Texture 1 has a lenght of 0 for 'world/expansion07/doodads/human/8hu_kultiras_wagon02.m2
+1141198 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_docks_narrow_cap01.wmo could not be loaded
+1141199 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_docks_narrow01.wmo could not be loaded
+1141389 - (AsyncObject.h:67): [Error] world/expansion07/doodads/drustvari/8dv_drustvari_rubble02.m2 could not be loaded
+1142711 - (AsyncObject.h:67): [Error]  could not be loaded
+1146320 - (MapTile.cpp:61): Opening tile 30, 31 ("World\Maps\Azeroth\Azeroth_30_31.adt") from disk.
+1146430 - (MapTile.cpp:61): Opening tile 31, 31 ("World\Maps\Azeroth\Azeroth_31_31.adt") from disk.
+1146798 - (MapTile.cpp:311): [Debug] Done loading tile 30,31.
+1146923 - (MapTile.cpp:61): Opening tile 32, 31 ("World\Maps\Azeroth\Azeroth_32_31.adt") from disk.
+1147403 - (MapTile.cpp:311): [Debug] Done loading tile 31,31.
+1147512 - (MapTile.cpp:311): [Debug] Done loading tile 32,31.
+1149044 - (AsyncObject.h:67): [Error] world/expansion06/doodads/highmountain/7hm_waterfall14.m2 could not be loaded
+1149380 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_barrel01.m2 could not be loaded
+1149381 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_clothdrape01.m2 could not be loaded
+1149381 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_clothdrape02.m2 could not be loaded
+1149381 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_clothdrape03.m2 could not be loaded
+1149381 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_clothdrape04.m2 could not be loaded
+1149381 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_hanginglamp01.m2 could not be loaded
+1149382 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_stadiumbench_row01.m2 could not be loaded
+1149868 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion07/kultiraszone/8kul_gnomejunkpile01_1024.blp'
+1150209 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion07/kultiraszone/8kul_grass03_512.blp'
+1156522 - (TextureManager.cpp:226): [Error] file not found: 'world/environment/doodad/junkergnomes/textures/8ju_gnome_exterior/8ju_gnome_texturemap03.blp'
+1159011 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_military_ceiling01.blp'
+1159156 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_proudmooredoor01.blp'
+1159191 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_military_trims02.blp'
+1159205 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_military_floorstone05.blp'
+1159251 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_proudmoorestoneblock01.blp'
+1160583 - (MapTile.cpp:61): Opening tile 29, 26 ("World\Maps\Azeroth\Azeroth_29_26.adt") from disk.
+1160726 - (MapTile.cpp:61): Opening tile 30, 26 ("World\Maps\Azeroth\Azeroth_30_26.adt") from disk.
+1161352 - (MapTile.cpp:311): [Debug] Done loading tile 29,26.
+1161498 - (MapTile.cpp:61): Opening tile 31, 26 ("World\Maps\Azeroth\Azeroth_31_26.adt") from disk.
+1162079 - (MapTile.cpp:311): [Debug] Done loading tile 31,26.
+1162235 - (MapTile.cpp:311): [Debug] Done loading tile 30,26.
+1162265 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_docks_stairsnarrow03.wmo could not be loaded
+1163503 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_shaman_rockslab_a01.m2 could not be loaded
+1163730 - (AsyncObject.h:67): [Error] world/expansion06/doodads/suramar/7sr_gardentreeleaves_b01.m2 could not be loaded
+1163731 - (AsyncObject.h:67): [Error] world/expansion06/doodads/suramar/7sr_gardentreeleaves_b02.m2 could not be loaded
+1164592 - (AsyncObject.h:67): [Error] world/expansion07/doodads/drustvari/8dv_drustvari_wallpiece04.m2 could not be loaded
+1164593 - (AsyncObject.h:67): [Error] world/expansion07/doodads/drustvari/8dv_drustvari_wallpiece02.m2 could not be loaded
+1164593 - (AsyncObject.h:67): [Error] world/expansion07/doodads/drustvari/8dv_drustvari_wallpiece03.m2 could not be loaded
+1165034 - (MapTile.cpp:61): Opening tile 32, 27 ("World\Maps\Azeroth\Azeroth_32_27.adt") from disk.
+1165252 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_pillowpile03_wall.m2 could not be loaded
+1165254 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_floorpillow01.m2 could not be loaded
+1165533 - (MapTile.cpp:311): [Debug] Done loading tile 32,27.
+1166174 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_crate01.m2 could not be loaded
+1166175 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_crate02.m2 could not be loaded
+1166175 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_lockbox01.m2 could not be loaded
+1166175 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_cratestack03.m2 could not be loaded
+1166330 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_archwinebottle03.m2 could not be loaded
+1166394 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_floorpillow02.m2 could not be loaded
+1166404 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_floorpillow03.m2 could not be loaded
+1166405 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_floorpillow04.m2 could not be loaded
+1166406 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_floorpillow05.m2 could not be loaded
+1166434 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_pillowpile03.m2 could not be loaded
+1166435 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_platter01.m2 could not be loaded
+1166436 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_platter02.m2 could not be loaded
+1166436 - (Model.cpp:1039): [Error] Loading particles for 'world/expansion06/doodads/nightborn/7nb_nightborn_lantern01.m2' unimplemented emitter type: 0
+1166436 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_platter03.m2 could not be loaded
+1166436 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_platter04.m2 could not be loaded
+1166438 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_rug01.m2 could not be loaded
+1166438 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_rug03.m2 could not be loaded
+1166438 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_rug04.m2 could not be loaded
+1166438 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_scroll03.m2 could not be loaded
+1166439 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_scrollpile02.m2 could not be loaded
+1167315 - (AsyncObject.h:67): [Error] world/expansion07/doodads/serpentine/8se_serpentine_pillow01.m2 could not be loaded
+1167316 - (AsyncObject.h:67): [Error] world/expansion07/doodads/serpentine/8se_serpentine_pillow03.m2 could not be loaded
+1168343 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_docks_wide01.wmo could not be loaded
+1168426 - (AsyncObject.h:67): [Error] world/expansion07/doodads/witch/8wi_witch_candle01.m2 could not be loaded
+1168427 - (AsyncObject.h:67): [Error] world/expansion07/doodads/witch/8wi_witch_candle02.m2 could not be loaded
+1168585 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_mosshanging_a01.m2 could not be loaded
+1168585 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_mosscards_a03.m2 could not be loaded
+1168586 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_mossclump_b01.m2 could not be loaded
+1168586 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_mosscards_a01.m2 could not be loaded
+1169165 - (AsyncObject.h:67): [Error] world/expansion06/doodads/suramar/7sr_gardenflowerclump_a04.m2 could not be loaded
+1169186 - (AsyncObject.h:67): [Error] world/expansion06/doodads/araknashal/7an_silverhand_symbol.m2 could not be loaded
+1170028 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_docks_tile01.blp'
+1173208 - (TextureManager.cpp:226): [Error] file not found: 'world/expansion06/doodads/nightborn/7nb_nightborn_bookstack01.blp'
+1175501 - (TextureManager.cpp:226): [Error] file not found: 'world/expansion06/doodads/karazanopera.blp'
+1176191 - (TextureManager.cpp:226): [Error] file not found: 'world/expansion07/doodads/tortollan/8to_tortollan_sign02.blp'
+1176192 - (TextureManager.cpp:226): [Error] file not found: 'world/expansion07/doodads/tortollan/8to_tortollan_wok01.blp'
+1176294 - (TextureManager.cpp:226): [Error] file not found: 'world/expansion07/doodads/witch/8wi_witch_torch01.blp'
+1621699 - (MapTile.cpp:61): Opening tile 29, 31 ("World\Maps\Azeroth\Azeroth_29_31.adt") from disk.
+1622123 - (MapTile.cpp:311): [Debug] Done loading tile 29,31.
+1626999 - (MapTile.cpp:61): Opening tile 28, 31 ("World\Maps\Azeroth\Azeroth_28_31.adt") from disk.
+1627376 - (MapTile.cpp:311): [Debug] Done loading tile 28,31.
+1643961 - (MapTile.cpp:61): Opening tile 32, 26 ("World\Maps\Azeroth\Azeroth_32_26.adt") from disk.
+1644311 - (MapTile.cpp:311): [Debug] Done loading tile 32,26.
+1645217 - (MapTile.cpp:61): Opening tile 33, 26 ("World\Maps\Azeroth\Azeroth_33_26.adt") from disk.
+1645349 - (MapTile.cpp:61): Opening tile 33, 27 ("World\Maps\Azeroth\Azeroth_33_27.adt") from disk.
+1645657 - (MapTile.cpp:311): [Debug] Done loading tile 33,26.
+1645946 - (MapTile.cpp:61): Opening tile 33, 28 ("World\Maps\Azeroth\Azeroth_33_28.adt") from disk.
+1646400 - (MapTile.cpp:311): [Debug] Done loading tile 33,27.
+1646745 - (map_index.cpp:384): Unload Tile 28-31
+1647087 - (MapTile.cpp:311): [Debug] Done loading tile 33,28.
+1647719 - (AsyncObject.h:67): [Error] world/expansion05/doodads/tanaanjungle/doodads/6tj_patchswamp_bush_b01.m2 could not be loaded
+1648040 - (AsyncObject.h:67): [Error] world/expansion06/doodads/stormwind/7sw_stormwind_flowerarangement01.m2 could not be loaded
+1648722 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_waterivy_b01.m2 could not be loaded
+1650131 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion07/kultiraszone/8kul_dirt01_512.blp'
+1650244 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion05/nagrand/6ng_dirt03_512.blp'
+1650265 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion05/nagrand/6ng_dirt01_256.blp'
+1652273 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion05/ashrand/6ar_grass01_512.blp'
+1652290 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion05/nagrand/6ng_grass04_512.blp'
+1652382 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion05/nagrand/6ng_dirt04_512.blp'
+1652413 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion05/ashrand/6ar_flower02_512.blp'
+1660112 - (MapTile.cpp:61): Opening tile 34, 26 ("World\Maps\Azeroth\Azeroth_34_26.adt") from disk.
+1660199 - (MapTile.cpp:61): Opening tile 34, 27 ("World\Maps\Azeroth\Azeroth_34_27.adt") from disk.
+1660714 - (MapTile.cpp:311): [Debug] Done loading tile 34,26.
+1660770 - (MapTile.cpp:311): [Debug] Done loading tile 34,27.
+1660887 - (MapTile.cpp:61): Opening tile 34, 28 ("World\Maps\Azeroth\Azeroth_34_28.adt") from disk.
+1661619 - (MapTile.cpp:311): [Debug] Done loading tile 34,28.
+1662349 - (MapTile.cpp:61): Opening tile 32, 25 ("World\Maps\Azeroth\Azeroth_32_25.adt") from disk.
+1662450 - (MapTile.cpp:61): Opening tile 33, 25 ("World\Maps\Azeroth\Azeroth_33_25.adt") from disk.
+1662681 - (MapTile.cpp:311): [Debug] Done loading tile 32,25.
+1662758 - (MapTile.cpp:61): Opening tile 34, 25 ("World\Maps\Azeroth\Azeroth_34_25.adt") from disk.
+1663308 - (MapTile.cpp:311): [Debug] Done loading tile 33,25.
+1663363 - (MapTile.cpp:311): [Debug] Done loading tile 34,25.
+1665013 - (map_index.cpp:384): Unload Tile 28-27
+1665744 - (map_index.cpp:384): Unload Tile 28-28
+1666289 - (map_index.cpp:384): Unload Tile 28-29
+1666755 - (map_index.cpp:384): Unload Tile 28-30
+1667181 - (map_index.cpp:384): Unload Tile 29-30
+1667455 - (map_index.cpp:384): Unload Tile 29-31
+1667724 - (map_index.cpp:384): Unload Tile 30-31
+1668094 - (map_index.cpp:384): Unload Tile 31-31
+1668397 - (map_index.cpp:384): Unload Tile 32-31
+1711162 - (MapTile.cpp:61): Opening tile 35, 32 ("World\Maps\Azeroth\Azeroth_35_32.adt") from disk.
+1711430 - (MapTile.cpp:311): [Debug] Done loading tile 35,32.
+1711583 - (MapTile.cpp:61): Opening tile 34, 31 ("World\Maps\Azeroth\Azeroth_34_31.adt") from disk.
+1711795 - (MapTile.cpp:61): Opening tile 35, 31 ("World\Maps\Azeroth\Azeroth_35_31.adt") from disk.
+1712278 - (MapTile.cpp:311): [Debug] Done loading tile 35,31.
+1712318 - (MapTile.cpp:311): [Debug] Done loading tile 34,31.
+1712477 - (MapTile.cpp:61): Opening tile 36, 31 ("World\Maps\Azeroth\Azeroth_36_31.adt") from disk.
+1712549 - (MapTile.cpp:61): Opening tile 34, 32 ("World\Maps\Azeroth\Azeroth_34_32.adt") from disk.
+1712927 - (MapTile.cpp:311): [Debug] Done loading tile 36,31.
+1713047 - (MapTile.cpp:61): Opening tile 36, 32 ("World\Maps\Azeroth\Azeroth_36_32.adt") from disk.
+1713413 - (MapTile.cpp:311): [Debug] Done loading tile 34,32.
+1713529 - (MapTile.cpp:61): Opening tile 34, 33 ("World\Maps\Azeroth\Azeroth_34_33.adt") from disk.
+1713946 - (MapTile.cpp:311): [Debug] Done loading tile 36,32.
+1714053 - (MapTile.cpp:61): Opening tile 35, 33 ("World\Maps\Azeroth\Azeroth_35_33.adt") from disk.
+1714694 - (MapTile.cpp:311): [Debug] Done loading tile 34,33.
+1714779 - (MapTile.cpp:311): [Debug] Done loading tile 35,33.
+1714800 - (MapTile.cpp:61): Opening tile 36, 33 ("World\Maps\Azeroth\Azeroth_36_33.adt") from disk.
+1714868 - (MapTile.cpp:61): Opening tile 29, 32 ("World\Maps\Azeroth\Azeroth_29_32.adt") from disk.
+1715084 - (MapTile.cpp:311): [Debug] Done loading tile 29,32.
+1715142 - (MapTile.cpp:311): [Debug] Done loading tile 36,33.
+1715274 - (MapTile.cpp:61): Opening tile 28, 31 ("World\Maps\Azeroth\Azeroth_28_31.adt") from disk.
+1715331 - (MapTile.cpp:61): Opening tile 29, 31 ("World\Maps\Azeroth\Azeroth_29_31.adt") from disk.
+1716170 - (MapTile.cpp:311): [Debug] Done loading tile 29,31.
+1716286 - (MapTile.cpp:311): [Debug] Done loading tile 28,31.
+1716373 - (MapTile.cpp:61): Opening tile 30, 31 ("World\Maps\Azeroth\Azeroth_30_31.adt") from disk.
+1716549 - (MapTile.cpp:61): Opening tile 28, 32 ("World\Maps\Azeroth\Azeroth_28_32.adt") from disk.
+1716942 - (MapTile.cpp:311): [Debug] Done loading tile 30,31.
+1717032 - (MapTile.cpp:61): Opening tile 30, 32 ("World\Maps\Azeroth\Azeroth_30_32.adt") from disk.
+1717420 - (map_index.cpp:384): Unload Tile 32-25
+1717464 - (MapTile.cpp:311): [Debug] Done loading tile 30,32.
+1717663 - (MapTile.cpp:61): Opening tile 28, 33 ("World\Maps\Azeroth\Azeroth_28_33.adt") from disk.
+1718006 - (map_index.cpp:384): Unload Tile 33-25
+1718490 - (map_index.cpp:384): Unload Tile 34-25
+1719137 - (map_index.cpp:384): Unload Tile 29-26
+1720383 - (map_index.cpp:384): Unload Tile 30-26
+1721238 - (map_index.cpp:384): Unload Tile 31-26
+1722204 - (map_index.cpp:384): Unload Tile 32-26
+1723565 - (map_index.cpp:384): Unload Tile 33-26
+1724748 - (map_index.cpp:384): Unload Tile 34-26
+1726112 - (map_index.cpp:384): Unload Tile 30-27
+1727405 - (map_index.cpp:384): Unload Tile 31-27
+1728609 - (map_index.cpp:384): Unload Tile 32-27
+1729771 - (map_index.cpp:384): Unload Tile 33-27
+1730758 - (map_index.cpp:384): Unload Tile 34-27
+1731490 - (map_index.cpp:384): Unload Tile 33-28
+1732098 - (map_index.cpp:384): Unload Tile 34-28
+1732589 - (map_index.cpp:384): Unload Tile 34-31
+1733095 - (map_index.cpp:384): Unload Tile 35-31
+1733623 - (map_index.cpp:384): Unload Tile 36-31
+1734234 - (map_index.cpp:384): Unload Tile 35-32
+1734731 - (map_index.cpp:384): Unload Tile 36-32
+1735254 - (map_index.cpp:384): Unload Tile 34-33
+1735809 - (map_index.cpp:384): Unload Tile 35-33
+1736306 - (map_index.cpp:384): Unload Tile 36-33
+1759462 - (MapTile.cpp:311): [Debug] Done loading tile 28,32.
+1760256 - (MapTile.cpp:61): Opening tile 29, 33 ("World\Maps\Azeroth\Azeroth_29_33.adt") from disk.
+1761480 - (MapTile.cpp:311): [Debug] Done loading tile 29,33.
+1761738 - (MapTile.cpp:61): Opening tile 30, 33 ("World\Maps\Azeroth\Azeroth_30_33.adt") from disk.
+1762399 - (MapTile.cpp:311): [Debug] Done loading tile 30,33.
+1762546 - (MapTile.cpp:311): [Debug] Done loading tile 28,33.
+1766691 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_stadiumbench_row02.m2 could not be loaded
+1766970 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_stadiumbench_row03.m2 could not be loaded
+1769045 - (MapTile.cpp:61): Opening tile 28, 34 ("World\Maps\Azeroth\Azeroth_28_34.adt") from disk.
+1769832 - (MapTile.cpp:311): [Debug] Done loading tile 28,34.
+1770102 - (MapTile.cpp:61): Opening tile 29, 34 ("World\Maps\Azeroth\Azeroth_29_34.adt") from disk.
+1772108 - (MapTile.cpp:61): Opening tile 30, 34 ("World\Maps\Azeroth\Azeroth_30_34.adt") from disk.
+1773444 - (MapTile.cpp:311): [Debug] Done loading tile 29,34.
+1773917 - (AsyncObject.h:67): [Error] world/expansion07/doodads/zuldazarzone/8zul_ivybush_a02.m2 could not be loaded
+1773918 - (AsyncObject.h:67): [Error] world/expansion07/doodads/zuldazarzone/8zul_ivybush_a01.m2 could not be loaded
+1773998 - (MapTile.cpp:311): [Debug] Done loading tile 30,34.
+1778985 - (map_index.cpp:384): Unload Tile 29-27
+1779670 - (AsyncObject.h:67): [Error] world/expansion06/doodads/forsaken/7fk_forsaken_stagegrave01.m2 could not be loaded
+1779670 - (AsyncObject.h:67): [Error] world/expansion06/doodads/forsaken/7fk_forsaken_grave05.m2 could not be loaded
+1779671 - (AsyncObject.h:67): [Error] world/expansion06/doodads/forsaken/7fk_forsaken_grave02.m2 could not be loaded
+1779671 - (AsyncObject.h:67): [Error] world/expansion06/doodads/forsaken/7fk_forsaken_grave01.m2 could not be loaded
+1781575 - (map_index.cpp:384): Unload Tile 30-28
+1783869 - (map_index.cpp:384): Unload Tile 31-28
+1786457 - (map_index.cpp:384): Unload Tile 32-28
+1786669 - (Model.cpp:354): [Debug] wrong texture coord combo index on fuckported model: world/expansion05/doodads/tanaanjungle/doodads/6tj_lightray01.m2
+1787178 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion07/kultiraszone/8kul_grass03_512.blp'
+1787461 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion07/kultiraszone/8kul_gnomejunkpile01_1024.blp'
+1788625 - (map_index.cpp:384): Unload Tile 34-32
+1794427 - (TextureManager.cpp:226): [Error] file not found: 'world/environment/doodad/junkergnomes/textures/8ju_gnome_exterior/8ju_gnome_texturemap03.blp'
+1799739 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/unknown/2736025.blp'
+1799764 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/unknown/2965091.blp'
+1803826 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_woodcolumn01.blp'
+1850719 - (MapTile.cpp:61): Opening tile 31, 32 ("World\Maps\Azeroth\Azeroth_31_32.adt") from disk.
+1851015 - (MapTile.cpp:61): Opening tile 31, 33 ("World\Maps\Azeroth\Azeroth_31_33.adt") from disk.
+1851789 - (MapTile.cpp:311): [Debug] Done loading tile 31,32.
+1852070 - (MapTile.cpp:61): Opening tile 31, 34 ("World\Maps\Azeroth\Azeroth_31_34.adt") from disk.
+1856590 - (map_index.cpp:384): Unload Tile 29-28
+1856713 - (MapTile.cpp:311): [Debug] Done loading tile 31,33.
+1856817 - (AsyncObject.h:67): [Error] world/expansion06/doodads/suramar/7sr_gardenflowerclump_a04.m2 could not be loaded
+1858670 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion07/kultiraszone/8kul_grass03_512.blp'
+1859465 - (MapTile.cpp:311): [Debug] Done loading tile 31,34.
+1865087 - (MapTile.cpp:61): Opening tile 29, 35 ("World\Maps\Azeroth\Azeroth_29_35.adt") from disk.
+1865317 - (MapTile.cpp:61): Opening tile 30, 35 ("World\Maps\Azeroth\Azeroth_30_35.adt") from disk.
+1865706 - (MapTile.cpp:311): [Debug] Done loading tile 29,35.
+1865821 - (MapTile.cpp:61): Opening tile 31, 35 ("World\Maps\Azeroth\Azeroth_31_35.adt") from disk.
+1867203 - (MapTile.cpp:311): [Debug] Done loading tile 31,35.
+1867257 - (MapTile.cpp:311): [Debug] Done loading tile 30,35.
+1870772 - (map_index.cpp:384): Unload Tile 29-29
+1871713 - (map_index.cpp:384): Unload Tile 31-29
+1872944 - (map_index.cpp:384): Unload Tile 32-29
+1883005 - (MapTile.cpp:61): Opening tile 32, 33 ("World\Maps\Azeroth\Azeroth_32_33.adt") from disk.
+1883156 - (MapTile.cpp:61): Opening tile 32, 34 ("World\Maps\Azeroth\Azeroth_32_34.adt") from disk.
+1883559 - (MapTile.cpp:311): [Debug] Done loading tile 32,33.
+1883664 - (MapTile.cpp:61): Opening tile 32, 35 ("World\Maps\Azeroth\Azeroth_32_35.adt") from disk.
+1884675 - (MapTile.cpp:311): [Debug] Done loading tile 32,35.
+1884808 - (AsyncObject.h:67): [Error] world/wmo/kultiras/kultiraszone/8kul_cavemicro03.wmo could not be loaded
+1884915 - (MapTile.cpp:311): [Debug] Done loading tile 32,34.
+1885371 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_crate03.m2 could not be loaded
+1885393 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_shaman_furrug02.m2 could not be loaded
+1885394 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_shaman_furrug01.m2 could not be loaded
+1885394 - (AsyncObject.h:67): [Error] world/expansion06/doodads/vrykul/7vr_vrykul_roadplank05.m2 could not be loaded
+1885629 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_stairjunction_tall_narrow_01.wmo could not be loaded
+1885684 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_docks_wide01.wmo could not be loaded
+1885922 - (AsyncObject.h:67): [Error] world/expansion06/doodads/stormwind/7sw_stormwind_lion01.m2 could not be loaded
+1885941 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_rock_a02.m2 could not be loaded
+1886032 - (map_index.cpp:384): Unload Tile 30-29
+1886082 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_rock_a04.m2 could not be loaded
+1886856 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_fruitbasket01.m2 could not be loaded
+1887555 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightelf/7ne_nightelf_chair03old.m2 could not be loaded
+1887556 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightelf/7ne_nightelf_chair01old.m2 could not be loaded
+1887612 - (AsyncObject.h:67): [Error] world/expansion06/doodads/stormwind/7sw_stormwind_funerarycandle01.m2 could not be loaded
+1887660 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightelf/7ne_nightelf_bookstack01old.m2 could not be loaded
+1891659 - (TextureManager.cpp:226): [Error] file not found: 'creature/chimera2/electric_liquid_purple_a_doublealpha.blp'
+1891796 - (MapTile.cpp:61): Opening tile 33, 33 ("World\Maps\Azeroth\Azeroth_33_33.adt") from disk.
+1891922 - (MapTile.cpp:61): Opening tile 33, 34 ("World\Maps\Azeroth\Azeroth_33_34.adt") from disk.
+1892578 - (MapTile.cpp:311): [Debug] Done loading tile 33,33.
+1892716 - (MapTile.cpp:61): Opening tile 33, 35 ("World\Maps\Azeroth\Azeroth_33_35.adt") from disk.
+1893846 - (MapTile.cpp:311): [Debug] Done loading tile 33,35.
+1894111 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_docks_wide03.wmo could not be loaded
+1894239 - (MapTile.cpp:311): [Debug] Done loading tile 33,34.
+1895113 - (AsyncObject.h:67): [Error] world/expansion07/doodads/desertzone/8des_oasisflowers_b01.m2 could not be loaded
+1895113 - (AsyncObject.h:67): [Error] world/expansion07/doodads/desertzone/8des_oasisflowers_a01.m2 could not be loaded
+1895784 - (AsyncObject.h:67): [Error] world/expansion07/doodads/swampzone/8swa_rock_a03.m2 could not be loaded
+1895821 - (AsyncObject.h:67): [Error] world/expansion07/doodads/pirate/8pi_kultiras_docksstone02.m2 could not be loaded
+1895885 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_cratestack03.m2 could not be loaded
+1896637 - (Model.cpp:211): [Debug] Texture 1 has a lenght of 0 for 'world/expansion07/doodads/human/8hu_kultiras_wagon02.m2
+1896730 - (AsyncObject.h:67): [Error] world/expansion06/doodads/stormwind/7sw_stormwind_footmanmemorial.m2 could not be loaded
+1896976 - (AsyncObject.h:67): [Error] world/expansion06/doodads/stormwind/7sw_stormwind_flowerarangement01.m2 could not be loaded
+1898515 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_docks_tile01.blp'
+1900594 - (MapTile.cpp:61): Opening tile 34, 33 ("World\Maps\Azeroth\Azeroth_34_33.adt") from disk.
+1900717 - (MapTile.cpp:61): Opening tile 34, 34 ("World\Maps\Azeroth\Azeroth_34_34.adt") from disk.
+1901025 - (MapTile.cpp:311): [Debug] Done loading tile 34,34.
+1901136 - (MapTile.cpp:61): Opening tile 34, 35 ("World\Maps\Azeroth\Azeroth_34_35.adt") from disk.
+1902413 - (MapTile.cpp:311): [Debug] Done loading tile 34,35.
+1902519 - (MapTile.cpp:311): [Debug] Done loading tile 34,33.
+1903208 - (AsyncObject.h:67): [Error] world/expansion06/doodads/vrykul/7vr_vrykul_roadplank06.m2 could not be loaded
+1903228 - (AsyncObject.h:67): [Error] world/expansion06/doodads/vrykul/7vr_vrykul_roadplank04.m2 could not be loaded
+1904265 - (AsyncObject.h:67): [Error]  could not be loaded
+1905322 - (TextureManager.cpp:226): [Error] file not found: 'tileset/expansion05/spiresofarrak/6sa_dirt01_512.blp'
+1905480 - (TextureManager.cpp:226): [Error] file not found: 'dungeons/textures/8hu_kultiras/8hu_kultiras_metaltrim03.blp'
+1905680 - (TextureManager.cpp:226): [Error] file not found: 'lrd_basestone01.blp'
+1906304 - (map_index.cpp:384): Unload Tile 28-31
+1909631 - (MapTile.cpp:61): Opening tile 35, 33 ("World\Maps\Azeroth\Azeroth_35_33.adt") from disk.
+1909778 - (MapTile.cpp:61): Opening tile 35, 34 ("World\Maps\Azeroth\Azeroth_35_34.adt") from disk.
+1910547 - (MapTile.cpp:311): [Debug] Done loading tile 35,33.
+1910556 - (MapTile.cpp:311): [Debug] Done loading tile 35,34.
+1910741 - (MapTile.cpp:61): Opening tile 35, 35 ("World\Maps\Azeroth\Azeroth_35_35.adt") from disk.
+1911134 - (AsyncObject.h:67): [Error] world/wmo/kultiras/human/8hu_kultiras_gallows01.wmo could not be loaded
+1911443 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_scroll03.m2 could not be loaded
+1911443 - (AsyncObject.h:67): [Error] world/expansion06/doodads/nightborn/7nb_nightborn_scrollbag03.m2 could not be loaded
+1912026 - (MapTile.cpp:311): [Debug] Done loading tile 35,35.
+1912322 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_hangingropesmall02.m2 could not be loaded
+1912410 - (AsyncObject.h:67): [Error] world/expansion06/doodads/artifact/7af_rogue_stadiumbench_row01.m2 could not be loaded
+1912571 - (AsyncObject.h:67): [Error] world/expansion06/doodads/tauren/7tr_tauren_skull01.m2 could not be loaded
+1913800 - (AsyncObject.h:67): [Error] world/expansion06/doodads/aszuna/7az_olivetreerootsdark_b03.m2 could not be loaded
+1913801 - (AsyncObject.h:67): [Error] world/expansion07/doodads/desertzone/8des_oasismangrovetree_a01.m2 could not be loaded
+1914498 - (Model.cpp:354): [Debug] wrong texture coord combo index on fuckported model: world/expansion05/doodads/dwarf/6dw_dwarf_lavafall.m2
+1914502 - (Model.cpp:354): [Debug] wrong texture coord combo index on fuckported model: world/expansion05/doodads/dwarf/6dw_dwarf_lavafall.m2
+1914502 - (Model.cpp:354): [Debug] wrong texture coord combo index on fuckported model: world/expansion05/doodads/dwarf/6dw_dwarf_lavafall.m2
+1914993 - (AsyncObject.h:67): [Error] spells/6fx_bonfire.m2 could not be loaded
+1915493 - (TextureManager.cpp:226): [Error] file not found: 'lrd_wall_07.blp'
+1915531 - (TextureManager.cpp:226): [Error] file not found: 'lrd_metal_post.blp'
+1915534 - (TextureManager.cpp:226): [Error] file not found: 'lrd_brickwall.blp'
+1915539 - (TextureManager.cpp:226): [Error] file not found: 'lrd_floorslabs.blp'
+1915941 - (map_index.cpp:384): Unload Tile 30-30
+1917479 - (map_index.cpp:384): Unload Tile 29-31
+1919153 - (map_index.cpp:384): Unload Tile 29-32
+1920456 - (map_index.cpp:384): Unload Tile 29-33
+1921427 - (map_index.cpp:384): Unload Tile 28-34
+1922357 - (map_index.cpp:384): Unload Tile 29-35
+1924230 - (MapTile.cpp:61): Opening tile 33, 36 ("World\Maps\Azeroth\Azeroth_33_36.adt") from disk.
+1924371 - (MapTile.cpp:61): Opening tile 34, 36 ("World\Maps\Azeroth\Azeroth_34_36.adt") from disk.
+1924715 - (MapTile.cpp:311): [Debug] Done loading tile 33,36.
+1924880 - (MapTile.cpp:311): [Debug] Done loading tile 34,36.
+1924892 - (MapTile.cpp:61): Opening tile 35, 36 ("World\Maps\Azeroth\Azeroth_35_36.adt") from disk.
+1925960 - (MapTile.cpp:311): [Debug] Done loading tile 35,36.
+1929508 - (map_index.cpp:384): Unload Tile 31-30
+1930906 - (map_index.cpp:384): Unload Tile 32-30
+1932025 - (map_index.cpp:384): Unload Tile 30-31
+1933050 - (map_index.cpp:384): Unload Tile 29-34
+1933290 - (MapTile.cpp:61): Opening tile 36, 34 ("World\Maps\Azeroth\Azeroth_36_34.adt") from disk.
+1933432 - (MapTile.cpp:61): Opening tile 36, 35 ("World\Maps\Azeroth\Azeroth_36_35.adt") from disk.
+1933806 - (MapTile.cpp:311): [Debug] Done loading tile 36,34.
+1933914 - (MapTile.cpp:61): Opening tile 36, 36 ("World\Maps\Azeroth\Azeroth_36_36.adt") from disk.
+1935161 - (MapTile.cpp:311): [Debug] Done loading tile 36,36.
+1935198 - (MapTile.cpp:311): [Debug] Done loading tile 36,35.
+1935809 - (Model.cpp:354): [Debug] wrong texture coord combo index on fuckported model: world/expansion05/doodads/orc/doodads/6or_garrison_lamppost_rank1.m2
+1936139 - (AsyncObject.h:67): [Error] world/expansion07/doodads/outlaw/8hu_outlaw_gangplank01.m2 could not be loaded
+1936775 - (AsyncObject.h:67): [Error] world/nodxt/detail/6nggrass05.m2 could not be loaded
+1936786 - (AsyncObject.h:67): [Error] world/nodxt/detail/6nggrass04.m2 could not be loaded
+1940238 - (map_index.cpp:384): Unload Tile 30-32
+1941383 - (map_index.cpp:384): Unload Tile 30-33
+1942489 - (map_index.cpp:384): Unload Tile 30-34

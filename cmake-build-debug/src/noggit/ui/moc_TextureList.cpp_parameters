@@ -1,0 +1,7 @@
+-I/Volumes/APFS/NoggitQT/include
+-I/Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/tmp
+-I/Volumes/APFS/NoggitQT/src
+-DDEBUG__LOGGINGTOCONSOLE
+-o
+/Volumes/APFS/NoggitQT/cmake-build-debug/src/noggit/ui/moc_TextureList.cpp
+/Volumes/APFS/NoggitQT/src/noggit/ui/TextureList.hpp

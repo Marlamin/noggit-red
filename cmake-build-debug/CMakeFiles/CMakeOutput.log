@@ -1,0 +1,762 @@
+The system is: Darwin - 19.4.0 - x86_64
+Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+Compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+
+The C compiler identification is AppleClang, found in "/Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/3.15.3/CompilerIdC/a.out"
+
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: /usr/bin/g++ 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+
+The CXX compiler identification is AppleClang, found in "/Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/3.15.3/CompilerIdCXX/a.out"
+
+Determining if the C compiler works passed with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_0ab05/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_0ab05.dir/build.make CMakeFiles/cmTC_0ab05.dir/build
+Building C object CMakeFiles/cmTC_0ab05.dir/testCCompiler.c.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -o CMakeFiles/cmTC_0ab05.dir/testCCompiler.c.o   -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/testCCompiler.c
+Linking C executable cmTC_0ab05
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0ab05.dir/link.txt --verbose=1
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_0ab05.dir/testCCompiler.c.o  -o cmTC_0ab05 
+
+
+
+Detecting C compiler ABI info compiled with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_90a2b/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_90a2b.dir/build.make CMakeFiles/cmTC_90a2b.dir/build
+Building C object CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -v -Wl,-v -o CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o   -c /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.15/Modules/CMakeCCompilerABI.c
+Apple clang version 11.0.3 (clang-1103.0.32.59)
+Target: x86_64-apple-darwin19.4.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+clang: warning: -Wl,-v: 'linker' input unused [-Wunused-command-line-argument]
+ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple x86_64-apple-macosx10.15.0 -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -mthread-model posix -mframe-pointer=all -fno-strict-return -masm-verbose -munwind-tables -target-sdk-version=10.15.4 -target-cpu penryn -dwarf-column-info -debugger-tuning=lldb -target-linker-version 556.6 -v -coverage-notes-file /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.gcno -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -Wno-objc-signed-char-bool-implicit-int-conversion -Wno-extra-semi-stmt -Wno-quoted-include-in-framework-header -fdebug-compilation-dir /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fobjc-runtime=macosx-10.15.0 -fmax-type-align=16 -fdiagnostics-show-option -o CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o -x c /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.15/Modules/CMakeCCompilerABI.c
+clang -cc1 version 11.0.3 (clang-1103.0.32.59) default target x86_64-apple-darwin19.4.0
+ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/local/include"
+ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/Library/Frameworks"
+#include "..." search starts here:
+#include <...> search starts here:
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks (framework directory)
+End of search list.
+Linking C executable cmTC_90a2b
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_90a2b.dir/link.txt --verbose=1
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names  -v -Wl,-v CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o  -o cmTC_90a2b 
+Apple clang version 11.0.3 (clang-1103.0.32.59)
+Target: x86_64-apple-darwin19.4.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch x86_64 -platform_version macos 10.15.0 10.15.4 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -o cmTC_90a2b -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a
+@(#)PROGRAM:ld  PROJECT:ld64-556.6
+BUILD 13:10:29 Apr  7 2020
+configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em
+Library search paths:
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib
+Framework search paths:
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/
+
+
+
+Parsed C implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include]
+    add: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include]
+    add: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+  end of search list found
+  collapse include dir [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include] ==> [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include]
+  collapse include dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include]
+  collapse include dir [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include] ==> [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+  implicit include dirs: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+
+
+Parsed C implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/make cmTC_90a2b/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_90a2b.dir/build.make CMakeFiles/cmTC_90a2b.dir/build]
+  ignore line: [Building C object CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o]
+  ignore line: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -v -Wl,-v -o CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o   -c /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.15/Modules/CMakeCCompilerABI.c]
+  ignore line: [Apple clang version 11.0.3 (clang-1103.0.32.59)]
+  ignore line: [Target: x86_64-apple-darwin19.4.0]
+  ignore line: [Thread model: posix]
+  ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
+  ignore line: [clang: warning: -Wl,-v: 'linker' input unused [-Wunused-command-line-argument]]
+  ignore line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple x86_64-apple-macosx10.15.0 -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -mthread-model posix -mframe-pointer=all -fno-strict-return -masm-verbose -munwind-tables -target-sdk-version=10.15.4 -target-cpu penryn -dwarf-column-info -debugger-tuning=lldb -target-linker-version 556.6 -v -coverage-notes-file /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.gcno -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -Wno-objc-signed-char-bool-implicit-int-conversion -Wno-extra-semi-stmt -Wno-quoted-include-in-framework-header -fdebug-compilation-dir /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fobjc-runtime=macosx-10.15.0 -fmax-type-align=16 -fdiagnostics-show-option -o CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o -x c /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.15/Modules/CMakeCCompilerABI.c]
+  ignore line: [clang -cc1 version 11.0.3 (clang-1103.0.32.59) default target x86_64-apple-darwin19.4.0]
+  ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/local/include"]
+  ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/Library/Frameworks"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks (framework directory)]
+  ignore line: [End of search list.]
+  ignore line: [Linking C executable cmTC_90a2b]
+  ignore line: [/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_90a2b.dir/link.txt --verbose=1]
+  ignore line: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names  -v -Wl,-v CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o  -o cmTC_90a2b ]
+  ignore line: [Apple clang version 11.0.3 (clang-1103.0.32.59)]
+  ignore line: [Target: x86_64-apple-darwin19.4.0]
+  ignore line: [Thread model: posix]
+  ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
+  link line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch x86_64 -platform_version macos 10.15.0 10.15.4 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -o cmTC_90a2b -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a]
+    arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld] ==> ignore
+    arg [-demangle] ==> ignore
+    arg [-lto_library] ==> ignore, skip following value
+    arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib] ==> skip value of -lto_library
+    arg [-dynamic] ==> ignore
+    arg [-arch] ==> ignore
+    arg [x86_64] ==> ignore
+    arg [-platform_version] ==> ignore
+    arg [macos] ==> ignore
+    arg [10.15.0] ==> ignore
+    arg [10.15.4] ==> ignore
+    arg [-syslibroot] ==> ignore
+    arg [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_90a2b] ==> ignore
+    arg [-search_paths_first] ==> ignore
+    arg [-headerpad_max_install_names] ==> ignore
+    arg [-v] ==> ignore
+    arg [CMakeFiles/cmTC_90a2b.dir/CMakeCCompilerABI.c.o] ==> ignore
+    arg [-lSystem] ==> lib [System]
+    arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a] ==> lib [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a]
+  Library search paths: [;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib]
+  Framework search paths: [;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/]
+  remove lib [System]
+  remove lib [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a]
+  collapse library dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib]
+  collapse framework dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks]
+  implicit libs: []
+  implicit dirs: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib]
+  implicit fwks: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks]
+
+
+Determining if the CXX compiler works passed with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d42d6/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_d42d6.dir/build.make CMakeFiles/cmTC_d42d6.dir/build
+Building CXX object CMakeFiles/cmTC_d42d6.dir/testCXXCompiler.cxx.o
+/usr/bin/g++    -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -o CMakeFiles/cmTC_d42d6.dir/testCXXCompiler.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_d42d6
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d42d6.dir/link.txt --verbose=1
+/usr/bin/g++    -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_d42d6.dir/testCXXCompiler.cxx.o  -o cmTC_d42d6 
+
+
+
+Detecting CXX compiler ABI info compiled with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_9df81/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_9df81.dir/build.make CMakeFiles/cmTC_9df81.dir/build
+Building CXX object CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/g++    -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -v -Wl,-v -o CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o -c /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.15/Modules/CMakeCXXCompilerABI.cpp
+Apple clang version 11.0.3 (clang-1103.0.32.59)
+Target: x86_64-apple-darwin19.4.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+clang: warning: -Wl,-v: 'linker' input unused [-Wunused-command-line-argument]
+ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple x86_64-apple-macosx10.15.0 -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mthread-model posix -mframe-pointer=all -fno-strict-return -masm-verbose -munwind-tables -target-sdk-version=10.15.4 -target-cpu penryn -dwarf-column-info -debugger-tuning=lldb -target-linker-version 556.6 -v -coverage-notes-file /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.gcno -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -stdlib=libc++ -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1 -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include/c++/v1 -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -Wno-objc-signed-char-bool-implicit-int-conversion -Wno-extra-semi-stmt -Wno-quoted-include-in-framework-header -fdeprecated-macro -fdebug-compilation-dir /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fobjc-runtime=macosx-10.15.0 -fcxx-exceptions -fexceptions -fmax-type-align=16 -fdiagnostics-show-option -o CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o -x c++ /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.15/Modules/CMakeCXXCompilerABI.cpp
+clang -cc1 version 11.0.3 (clang-1103.0.32.59) default target x86_64-apple-darwin19.4.0
+ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include/c++/v1"
+ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/local/include"
+ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/Library/Frameworks"
+#include "..." search starts here:
+#include <...> search starts here:
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include
+ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include
+ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks (framework directory)
+End of search list.
+Linking CXX executable cmTC_9df81
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9df81.dir/link.txt --verbose=1
+/usr/bin/g++    -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names  -v -Wl,-v CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_9df81 
+Apple clang version 11.0.3 (clang-1103.0.32.59)
+Target: x86_64-apple-darwin19.4.0
+Thread model: posix
+InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
+ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch x86_64 -platform_version macos 10.15.0 10.15.4 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -o cmTC_9df81 -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a
+@(#)PROGRAM:ld  PROJECT:ld64-556.6
+BUILD 13:10:29 Apr  7 2020
+configured to support archs: armv6 armv7 armv7s arm64 arm64e arm64_32 i386 x86_64 x86_64h armv6m armv7k armv7m armv7em
+Library search paths:
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib
+Framework search paths:
+	/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/
+
+
+
+Parsed CXX implicit include dir info from above output: rv=done
+  found start of include info
+  found start of implicit include info
+    add: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1]
+    add: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include]
+    add: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include]
+    add: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+  end of search list found
+  collapse include dir [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1] ==> [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1]
+  collapse include dir [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include] ==> [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include]
+  collapse include dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include]
+  collapse include dir [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include] ==> [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+  implicit include dirs: [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+
+
+Parsed CXX implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command(s):/usr/bin/make cmTC_9df81/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_9df81.dir/build.make CMakeFiles/cmTC_9df81.dir/build]
+  ignore line: [Building CXX object CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/usr/bin/g++    -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -v -Wl,-v -o CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o -c /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.15/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Apple clang version 11.0.3 (clang-1103.0.32.59)]
+  ignore line: [Target: x86_64-apple-darwin19.4.0]
+  ignore line: [Thread model: posix]
+  ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
+  ignore line: [clang: warning: -Wl,-v: 'linker' input unused [-Wunused-command-line-argument]]
+  ignore line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang" -cc1 -triple x86_64-apple-macosx10.15.0 -Wdeprecated-objc-isa-usage -Werror=deprecated-objc-isa-usage -emit-obj -mrelax-all -disable-free -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model pic -pic-level 2 -mthread-model posix -mframe-pointer=all -fno-strict-return -masm-verbose -munwind-tables -target-sdk-version=10.15.4 -target-cpu penryn -dwarf-column-info -debugger-tuning=lldb -target-linker-version 556.6 -v -coverage-notes-file /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.gcno -resource-dir /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -stdlib=libc++ -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1 -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include/c++/v1 -internal-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/local/include -internal-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include -internal-externc-isystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include -Wno-objc-signed-char-bool-implicit-int-conversion -Wno-extra-semi-stmt -Wno-quoted-include-in-framework-header -fdeprecated-macro -fdebug-compilation-dir /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp -ferror-limit 19 -fmessage-length 0 -stack-protector 1 -fstack-check -mdarwin-stkchk-strong-link -fblocks -fencode-extended-block-signature -fregister-global-dtors-with-atexit -fobjc-runtime=macosx-10.15.0 -fcxx-exceptions -fexceptions -fmax-type-align=16 -fdiagnostics-show-option -o CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o -x c++ /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.15/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [clang -cc1 version 11.0.3 (clang-1103.0.32.59) default target x86_64-apple-darwin19.4.0]
+  ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include/c++/v1"]
+  ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/local/include"]
+  ignore line: [ignoring nonexistent directory "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/Library/Frameworks"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/include]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/include]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include]
+  ignore line: [ /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks (framework directory)]
+  ignore line: [End of search list.]
+  ignore line: [Linking CXX executable cmTC_9df81]
+  ignore line: [/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9df81.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/g++    -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names  -v -Wl,-v CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_9df81 ]
+  ignore line: [Apple clang version 11.0.3 (clang-1103.0.32.59)]
+  ignore line: [Target: x86_64-apple-darwin19.4.0]
+  ignore line: [Thread model: posix]
+  ignore line: [InstalledDir: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin]
+  link line: [ "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld" -demangle -lto_library /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib -dynamic -arch x86_64 -platform_version macos 10.15.0 10.15.4 -syslibroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -o cmTC_9df81 -search_paths_first -headerpad_max_install_names -v CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o -lc++ -lSystem /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a]
+    arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld] ==> ignore
+    arg [-demangle] ==> ignore
+    arg [-lto_library] ==> ignore, skip following value
+    arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libLTO.dylib] ==> skip value of -lto_library
+    arg [-dynamic] ==> ignore
+    arg [-arch] ==> ignore
+    arg [x86_64] ==> ignore
+    arg [-platform_version] ==> ignore
+    arg [macos] ==> ignore
+    arg [10.15.0] ==> ignore
+    arg [10.15.4] ==> ignore
+    arg [-syslibroot] ==> ignore
+    arg [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_9df81] ==> ignore
+    arg [-search_paths_first] ==> ignore
+    arg [-headerpad_max_install_names] ==> ignore
+    arg [-v] ==> ignore
+    arg [CMakeFiles/cmTC_9df81.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [-lc++] ==> lib [c++]
+    arg [-lSystem] ==> lib [System]
+    arg [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a] ==> lib [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a]
+  Library search paths: [;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib]
+  Framework search paths: [;/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/]
+  remove lib [System]
+  remove lib [/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/clang/11.0.3/lib/darwin/libclang_rt.osx.a]
+  collapse library dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib]
+  collapse framework dir [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/] ==> [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks]
+  implicit libs: [c++]
+  implicit dirs: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/usr/lib]
+  implicit fwks: [/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks]
+
+
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__fcolor_diagnostics succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_16db6/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_16db6.dir/build.make CMakeFiles/cmTC_16db6.dir/build
+Building CXX object CMakeFiles/cmTC_16db6.dir/src.cxx.o
+/usr/bin/g++    -DCXX_COMPILER_SUPPORTS__fcolor_diagnostics -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -fcolor-diagnostics -o CMakeFiles/cmTC_16db6.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_16db6
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_16db6.dir/link.txt --verbose=1
+/usr/bin/g++   -DCXX_COMPILER_SUPPORTS__fcolor_diagnostics -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_16db6.dir/src.cxx.o  -o cmTC_16db6 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_reorder succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_6c260/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_6c260.dir/build.make CMakeFiles/cmTC_6c260.dir/build
+Building CXX object CMakeFiles/cmTC_6c260.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -DCXX_COMPILER_SUPPORTS__Werror_reorder -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=reorder -o CMakeFiles/cmTC_6c260.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_6c260
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6c260.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -DCXX_COMPILER_SUPPORTS__Werror_reorder -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_6c260.dir/src.cxx.o  -o cmTC_6c260 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_conditional_uninitialized succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3f031/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_3f031.dir/build.make CMakeFiles/cmTC_3f031.dir/build
+Building CXX object CMakeFiles/cmTC_3f031.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -DCXX_COMPILER_SUPPORTS__Werror_conditional_uninitialized -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=conditional-uninitialized -o CMakeFiles/cmTC_3f031.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_3f031
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3f031.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -DCXX_COMPILER_SUPPORTS__Werror_conditional_uninitialized -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_3f031.dir/src.cxx.o  -o cmTC_3f031 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_unused succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d1889/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_d1889.dir/build.make CMakeFiles/cmTC_d1889.dir/build
+Building CXX object CMakeFiles/cmTC_d1889.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -DCXX_COMPILER_SUPPORTS__Werror_unused -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=unused -o CMakeFiles/cmTC_d1889.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_d1889
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d1889.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -DCXX_COMPILER_SUPPORTS__Werror_unused -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_d1889.dir/src.cxx.o  -o cmTC_d1889 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_unused_parameter succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_42cf4/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_42cf4.dir/build.make CMakeFiles/cmTC_42cf4.dir/build
+Building CXX object CMakeFiles/cmTC_42cf4.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -DCXX_COMPILER_SUPPORTS__Werror_unused_parameter -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=unused-parameter -o CMakeFiles/cmTC_42cf4.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_42cf4
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_42cf4.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -DCXX_COMPILER_SUPPORTS__Werror_unused_parameter -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_42cf4.dir/src.cxx.o  -o cmTC_42cf4 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_unused_private_field succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_200d3/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_200d3.dir/build.make CMakeFiles/cmTC_200d3.dir/build
+Building CXX object CMakeFiles/cmTC_200d3.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -DCXX_COMPILER_SUPPORTS__Werror_unused_private_field -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=unused-private-field -o CMakeFiles/cmTC_200d3.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_200d3
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_200d3.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -DCXX_COMPILER_SUPPORTS__Werror_unused_private_field -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_200d3.dir/src.cxx.o  -o cmTC_200d3 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_missing_variable_declarations succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_9080f/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_9080f.dir/build.make CMakeFiles/cmTC_9080f.dir/build
+Building CXX object CMakeFiles/cmTC_9080f.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -DCXX_COMPILER_SUPPORTS__Werror_missing_variable_declarations -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=missing-variable-declarations -o CMakeFiles/cmTC_9080f.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_9080f
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9080f.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -DCXX_COMPILER_SUPPORTS__Werror_missing_variable_declarations -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_9080f.dir/src.cxx.o  -o cmTC_9080f 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_missing_prototypes succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_6a710/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_6a710.dir/build.make CMakeFiles/cmTC_6a710.dir/build
+Building CXX object CMakeFiles/cmTC_6a710.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -DCXX_COMPILER_SUPPORTS__Werror_missing_prototypes -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=missing-prototypes -o CMakeFiles/cmTC_6a710.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_6a710
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6a710.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -DCXX_COMPILER_SUPPORTS__Werror_missing_prototypes -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_6a710.dir/src.cxx.o  -o cmTC_6a710 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_deprecated succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_b0d94/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_b0d94.dir/build.make CMakeFiles/cmTC_b0d94.dir/build
+Building CXX object CMakeFiles/cmTC_b0d94.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -DCXX_COMPILER_SUPPORTS__Werror_deprecated -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=deprecated -o CMakeFiles/cmTC_b0d94.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_b0d94
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b0d94.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -DCXX_COMPILER_SUPPORTS__Werror_deprecated -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_b0d94.dir/src.cxx.o  -o cmTC_b0d94 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_missing_braces succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_66fe6/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_66fe6.dir/build.make CMakeFiles/cmTC_66fe6.dir/build
+Building CXX object CMakeFiles/cmTC_66fe6.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -DCXX_COMPILER_SUPPORTS__Werror_missing_braces -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=missing-braces -o CMakeFiles/cmTC_66fe6.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_66fe6
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_66fe6.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -DCXX_COMPILER_SUPPORTS__Werror_missing_braces -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_66fe6.dir/src.cxx.o  -o cmTC_66fe6 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_inconsistent_missing_override succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_2df1c/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_2df1c.dir/build.make CMakeFiles/cmTC_2df1c.dir/build
+Building CXX object CMakeFiles/cmTC_2df1c.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -DCXX_COMPILER_SUPPORTS__Werror_inconsistent_missing_override -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=inconsistent-missing-override -o CMakeFiles/cmTC_2df1c.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_2df1c
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2df1c.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -DCXX_COMPILER_SUPPORTS__Werror_inconsistent_missing_override -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_2df1c.dir/src.cxx.o  -o cmTC_2df1c 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_parentheses succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_724ea/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_724ea.dir/build.make CMakeFiles/cmTC_724ea.dir/build
+Building CXX object CMakeFiles/cmTC_724ea.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -DCXX_COMPILER_SUPPORTS__Werror_parentheses -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=parentheses -o CMakeFiles/cmTC_724ea.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_724ea
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_724ea.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -DCXX_COMPILER_SUPPORTS__Werror_parentheses -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_724ea.dir/src.cxx.o  -o cmTC_724ea 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_shift_sign_overflow succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_88f5d/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_88f5d.dir/build.make CMakeFiles/cmTC_88f5d.dir/build
+Building CXX object CMakeFiles/cmTC_88f5d.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -DCXX_COMPILER_SUPPORTS__Werror_shift_sign_overflow -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=shift-sign-overflow -o CMakeFiles/cmTC_88f5d.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_88f5d
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_88f5d.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -DCXX_COMPILER_SUPPORTS__Werror_shift_sign_overflow -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_88f5d.dir/src.cxx.o  -o cmTC_88f5d 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_c__98_compat succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_160d3/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_160d3.dir/build.make CMakeFiles/cmTC_160d3.dir/build
+Building CXX object CMakeFiles/cmTC_160d3.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -DCXX_COMPILER_SUPPORTS__Wno_c__98_compat -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-c++98-compat -o CMakeFiles/cmTC_160d3.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_160d3
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_160d3.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -DCXX_COMPILER_SUPPORTS__Wno_c__98_compat -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_160d3.dir/src.cxx.o  -o cmTC_160d3 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_c__98_compat_pedantic succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_0e602/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_0e602.dir/build.make CMakeFiles/cmTC_0e602.dir/build
+Building CXX object CMakeFiles/cmTC_0e602.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -DCXX_COMPILER_SUPPORTS__Wno_c__98_compat_pedantic -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-c++98-compat-pedantic -o CMakeFiles/cmTC_0e602.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_0e602
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0e602.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -DCXX_COMPILER_SUPPORTS__Wno_c__98_compat_pedantic -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_0e602.dir/src.cxx.o  -o cmTC_0e602 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_gnu_anonymous_struct succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3eb7c/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_3eb7c.dir/build.make CMakeFiles/cmTC_3eb7c.dir/build
+Building CXX object CMakeFiles/cmTC_3eb7c.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -DCXX_COMPILER_SUPPORTS__Wno_gnu_anonymous_struct -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-gnu-anonymous-struct -o CMakeFiles/cmTC_3eb7c.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_3eb7c
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3eb7c.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -DCXX_COMPILER_SUPPORTS__Wno_gnu_anonymous_struct -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_3eb7c.dir/src.cxx.o  -o cmTC_3eb7c 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_variadic_macros succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_98ee5/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_98ee5.dir/build.make CMakeFiles/cmTC_98ee5.dir/build
+Building CXX object CMakeFiles/cmTC_98ee5.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -DCXX_COMPILER_SUPPORTS__Wno_variadic_macros -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-variadic-macros -o CMakeFiles/cmTC_98ee5.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_98ee5
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_98ee5.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -DCXX_COMPILER_SUPPORTS__Wno_variadic_macros -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_98ee5.dir/src.cxx.o  -o cmTC_98ee5 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_vla succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_76f48/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_76f48.dir/build.make CMakeFiles/cmTC_76f48.dir/build
+Building CXX object CMakeFiles/cmTC_76f48.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -DCXX_COMPILER_SUPPORTS__Wno_vla -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-vla -o CMakeFiles/cmTC_76f48.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_76f48
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_76f48.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -DCXX_COMPILER_SUPPORTS__Wno_vla -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_76f48.dir/src.cxx.o  -o cmTC_76f48 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_vla_extension succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_1b6b1/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_1b6b1.dir/build.make CMakeFiles/cmTC_1b6b1.dir/build
+Building CXX object CMakeFiles/cmTC_1b6b1.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -DCXX_COMPILER_SUPPORTS__Wno_vla_extension -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-vla-extension -o CMakeFiles/cmTC_1b6b1.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_1b6b1
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1b6b1.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -DCXX_COMPILER_SUPPORTS__Wno_vla_extension -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_1b6b1.dir/src.cxx.o  -o cmTC_1b6b1 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_zero_length_array succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3146e/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_3146e.dir/build.make CMakeFiles/cmTC_3146e.dir/build
+Building CXX object CMakeFiles/cmTC_3146e.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -DCXX_COMPILER_SUPPORTS__Wno_zero_length_array -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-zero-length-array -o CMakeFiles/cmTC_3146e.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_3146e
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3146e.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -DCXX_COMPILER_SUPPORTS__Wno_zero_length_array -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_3146e.dir/src.cxx.o  -o cmTC_3146e 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_gnu_zero_variadic_macro_arguments succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_0093c/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_0093c.dir/build.make CMakeFiles/cmTC_0093c.dir/build
+Building CXX object CMakeFiles/cmTC_0093c.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -DCXX_COMPILER_SUPPORTS__Wno_gnu_zero_variadic_macro_arguments -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-gnu-zero-variadic-macro-arguments -o CMakeFiles/cmTC_0093c.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_0093c
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0093c.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -DCXX_COMPILER_SUPPORTS__Wno_gnu_zero_variadic_macro_arguments -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_0093c.dir/src.cxx.o  -o cmTC_0093c 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_nested_anon_types succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_67b90/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_67b90.dir/build.make CMakeFiles/cmTC_67b90.dir/build
+Building CXX object CMakeFiles/cmTC_67b90.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -DCXX_COMPILER_SUPPORTS__Wno_nested_anon_types -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-nested-anon-types -o CMakeFiles/cmTC_67b90.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_67b90
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_67b90.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -DCXX_COMPILER_SUPPORTS__Wno_nested_anon_types -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_67b90.dir/src.cxx.o  -o cmTC_67b90 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_four_char_constants succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e0627/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_e0627.dir/build.make CMakeFiles/cmTC_e0627.dir/build
+Building CXX object CMakeFiles/cmTC_e0627.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -DCXX_COMPILER_SUPPORTS__Wno_four_char_constants -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-four-char-constants -o CMakeFiles/cmTC_e0627.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_e0627
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e0627.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -DCXX_COMPILER_SUPPORTS__Wno_four_char_constants -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_e0627.dir/src.cxx.o  -o cmTC_e0627 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_exit_time_destructors succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_975d7/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_975d7.dir/build.make CMakeFiles/cmTC_975d7.dir/build
+Building CXX object CMakeFiles/cmTC_975d7.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -DCXX_COMPILER_SUPPORTS__Wno_exit_time_destructors -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-exit-time-destructors -o CMakeFiles/cmTC_975d7.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_975d7
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_975d7.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -DCXX_COMPILER_SUPPORTS__Wno_exit_time_destructors -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_975d7.dir/src.cxx.o  -o cmTC_975d7 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_global_constructors succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_e8475/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_e8475.dir/build.make CMakeFiles/cmTC_e8475.dir/build
+Building CXX object CMakeFiles/cmTC_e8475.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -DCXX_COMPILER_SUPPORTS__Wno_global_constructors -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-global-constructors -o CMakeFiles/cmTC_e8475.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_e8475
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e8475.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -DCXX_COMPILER_SUPPORTS__Wno_global_constructors -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_e8475.dir/src.cxx.o  -o cmTC_e8475 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_disabled_macro_expansion succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_19c63/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_19c63.dir/build.make CMakeFiles/cmTC_19c63.dir/build
+Building CXX object CMakeFiles/cmTC_19c63.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -DCXX_COMPILER_SUPPORTS__Wno_disabled_macro_expansion -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-disabled-macro-expansion -o CMakeFiles/cmTC_19c63.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_19c63
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_19c63.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -DCXX_COMPILER_SUPPORTS__Wno_disabled_macro_expansion -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_19c63.dir/src.cxx.o  -o cmTC_19c63 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_weak_vtables succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_d658d/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_d658d.dir/build.make CMakeFiles/cmTC_d658d.dir/build
+Building CXX object CMakeFiles/cmTC_d658d.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -DCXX_COMPILER_SUPPORTS__Wno_weak_vtables -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-weak-vtables -o CMakeFiles/cmTC_d658d.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_d658d
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d658d.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -DCXX_COMPILER_SUPPORTS__Wno_weak_vtables -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_d658d.dir/src.cxx.o  -o cmTC_d658d 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_weak_template_vtables succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_1f7ab/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_1f7ab.dir/build.make CMakeFiles/cmTC_1f7ab.dir/build
+Building CXX object CMakeFiles/cmTC_1f7ab.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -DCXX_COMPILER_SUPPORTS__Wno_weak_template_vtables -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-weak-template-vtables -o CMakeFiles/cmTC_1f7ab.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_1f7ab
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1f7ab.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -DCXX_COMPILER_SUPPORTS__Wno_weak_template_vtables -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_1f7ab.dir/src.cxx.o  -o cmTC_1f7ab 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_date_time succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_45ca2/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_45ca2.dir/build.make CMakeFiles/cmTC_45ca2.dir/build
+Building CXX object CMakeFiles/cmTC_45ca2.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -DCXX_COMPILER_SUPPORTS__Wno_date_time -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-date-time -o CMakeFiles/cmTC_45ca2.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_45ca2
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_45ca2.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -DCXX_COMPILER_SUPPORTS__Wno_date_time -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_45ca2.dir/src.cxx.o  -o cmTC_45ca2 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_padded succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_68b97/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_68b97.dir/build.make CMakeFiles/cmTC_68b97.dir/build
+Building CXX object CMakeFiles/cmTC_68b97.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -DCXX_COMPILER_SUPPORTS__Wno_padded -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-padded -o CMakeFiles/cmTC_68b97.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_68b97
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_68b97.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -DCXX_COMPILER_SUPPORTS__Wno_padded -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_68b97.dir/src.cxx.o  -o cmTC_68b97 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Werror_mismatched_tags succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_042b1/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_042b1.dir/build.make CMakeFiles/cmTC_042b1.dir/build
+Building CXX object CMakeFiles/cmTC_042b1.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -Wno-padded -DCXX_COMPILER_SUPPORTS__Werror_mismatched_tags -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Werror=mismatched-tags -o CMakeFiles/cmTC_042b1.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_042b1
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_042b1.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -Wno-padded -DCXX_COMPILER_SUPPORTS__Werror_mismatched_tags -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_042b1.dir/src.cxx.o  -o cmTC_042b1 
+
+
+Source file was:
+int main() { return 0; }
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_multichar succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_3280d/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_3280d.dir/build.make CMakeFiles/cmTC_3280d.dir/build
+Building CXX object CMakeFiles/cmTC_3280d.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -Wno-padded -Werror=mismatched-tags -DCXX_COMPILER_SUPPORTS__Wno_multichar -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-multichar -o CMakeFiles/cmTC_3280d.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_3280d
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3280d.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -Wno-padded -Werror=mismatched-tags -DCXX_COMPILER_SUPPORTS__Wno_multichar -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_3280d.dir/src.cxx.o  -o cmTC_3280d 
+
+
+Source file was:
+int main() { return 0; }
+Determining if the include file pthread.h exists passed with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_41bef/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_41bef.dir/build.make CMakeFiles/cmTC_41bef.dir/build
+Building C object CMakeFiles/cmTC_41bef.dir/CheckIncludeFile.c.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -o CMakeFiles/cmTC_41bef.dir/CheckIncludeFile.c.o   -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/CheckIncludeFile.c
+Linking C executable cmTC_41bef
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_41bef.dir/link.txt --verbose=1
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_41bef.dir/CheckIncludeFile.c.o  -o cmTC_41bef 
+
+
+
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_51a84/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_51a84.dir/build.make CMakeFiles/cmTC_51a84.dir/build
+Building C object CMakeFiles/cmTC_51a84.dir/src.c.o
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc   -DCMAKE_HAVE_LIBC_PTHREAD -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -o CMakeFiles/cmTC_51a84.dir/src.c.o   -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.c
+Linking C executable cmTC_51a84
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_51a84.dir/link.txt --verbose=1
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc  -DCMAKE_HAVE_LIBC_PTHREAD -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_51a84.dir/src.c.o  -o cmTC_51a84 
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Performing C++ SOURCE FILE Test CXX_COMPILER_SUPPORTS__Wno_error_deprecated_declarations succeeded with the following output:
+Change Dir: /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_c3f94/fast && /Applications/Xcode.app/Contents/Developer/usr/bin/make -f CMakeFiles/cmTC_c3f94.dir/build.make CMakeFiles/cmTC_c3f94.dir/build
+Building CXX object CMakeFiles/cmTC_c3f94.dir/src.cxx.o
+/usr/bin/g++    -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -Wno-padded -Werror=mismatched-tags -Wno-multichar -DCXX_COMPILER_SUPPORTS__Wno_error_deprecated_declarations -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk   -Wno-error=deprecated-declarations -o CMakeFiles/cmTC_c3f94.dir/src.cxx.o -c /Volumes/APFS/NoggitQT/cmake-build-debug/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_c3f94
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c3f94.dir/link.txt --verbose=1
+/usr/bin/g++  -fcolor-diagnostics -Werror=reorder -Werror=conditional-uninitialized -Werror=unused -Werror=unused-parameter -Werror=unused-private-field -Werror=missing-variable-declarations -Werror=missing-prototypes -Werror=deprecated -Werror=missing-braces -Werror=inconsistent-missing-override -Werror=parentheses -Werror=shift-sign-overflow -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-gnu-anonymous-struct -Wno-variadic-macros -Wno-vla -Wno-vla-extension -Wno-zero-length-array -Wno-gnu-zero-variadic-macro-arguments -Wno-nested-anon-types -Wno-four-char-constants -Wno-exit-time-destructors -Wno-global-constructors -Wno-disabled-macro-expansion -Wno-weak-vtables -Wno-weak-template-vtables -Wno-date-time -Wno-padded -Werror=mismatched-tags -Wno-multichar -DCXX_COMPILER_SUPPORTS__Wno_error_deprecated_declarations -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/cmTC_c3f94.dir/src.cxx.o  -o cmTC_c3f94 
+
+
+Source file was:
+int main() { return 0; }
