@@ -14,6 +14,7 @@
 #include <qt-color-widgets/gradient_slider.hpp>
 #include <qt-color-widgets/color_list_widget.hpp>
 
+class World;
 
 namespace noggit
 {
@@ -21,6 +22,7 @@ namespace noggit
   {
     class shader_tool : public QWidget
     {
+      Q_OBJECT
     public:
       shader_tool(math::vector_4d& color, QWidget* parent = nullptr);
 

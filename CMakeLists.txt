@@ -22,6 +22,24 @@ macro (add_compiler_flag_if_supported _VAR _FLAG)
   endif()
 endmacro()
 
+MACRO(COLLECT_FILES recursive result dir_source ext_list)
+  LIST(APPEND globbing ${ext_list})
+  SET(directory ${PROJECT_SOURCE_DIR}/${dir_source})
+  LIST(TRANSFORM globbing PREPEND ${directory}/*)
+
+  IF(${recursive})
+    FILE(GLOB_RECURSE files RELATIVE ${directory} CONFIGURE_DEPENDS ${globbing})
+  ELSE()
+    FILE(GLOB files RELATIVE ${directory} CONFIGURE_DEPENDS ${globbing})
+  ENDIF()
+
+  LIST(TRANSFORM files PREPEND ${dir_source}/)
+  SET(${result} ${files})
+  UNSET(files)
+  UNSET(directory)
+  UNSET(globbing)
+ENDMACRO()
+
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -fcolor-diagnostics)
 
 # covered by CMAKE_CXX_STANDARD
@@ -194,219 +212,18 @@ include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 
 # And do the job.
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
-
-set ( noggit_root_sources
-      src/noggit/AsyncLoader.cpp
-      src/noggit/Brush.cpp
-      src/noggit/ChunkWater.cpp
-      src/noggit/cursor_render.cpp
-      src/noggit/DBC.cpp
-      src/noggit/DBCFile.cpp
-      src/noggit/Log.cpp
-      src/noggit/MPQ.cpp
-      src/noggit/MapChunk.cpp
-      src/noggit/MapTile.cpp
-      src/noggit/MapView.cpp
-      src/noggit/Misc.cpp
-      src/noggit/Model.cpp
-      src/noggit/ModelInstance.cpp
-      src/noggit/ModelManager.cpp
-      src/noggit/Particle.cpp
-      src/noggit/Sky.cpp
-      src/noggit/TextureManager.cpp
-      src/noggit/TileWater.cpp
-      src/noggit/WMO.cpp
-      src/noggit/WMOInstance.cpp
-      src/noggit/World.cpp
-      src/noggit/alphamap.cpp
-      src/noggit/application.cpp
-      src/noggit/camera.cpp
-      src/noggit/error_handling.cpp
-      src/noggit/liquid_layer.cpp
-      src/noggit/liquid_render.cpp
-      src/noggit/map_horizon.cpp
-      src/noggit/map_index.cpp
-      src/noggit/texture_set.cpp
-      src/noggit/uid_storage.cpp
-      src/noggit/wmo_liquid.cpp
-      src/noggit/world_model_instances_storage.cpp
-      src/noggit/world_tile_update_queue.cpp
-    )
-
-set ( noggit_ui_sources
-      src/noggit/ui/About.cpp
-      src/noggit/ui/clickable_label.cpp
-      src/noggit/ui/CurrentTexture.cpp
-      src/noggit/ui/CursorSwitcher.cpp
-      src/noggit/ui/DetailInfos.cpp
-      src/noggit/ui/FlattenTool.cpp
-      src/noggit/ui/font_awesome.cpp
-      src/noggit/ui/font_noggit.cpp
-      src/noggit/ui/Help.cpp
-      src/noggit/ui/HelperModels.cpp
-      src/noggit/ui/ModelImport.cpp
-      src/noggit/ui/ObjectEditor.cpp
-      src/noggit/ui/RotationEditor.cpp
-      src/noggit/ui/TexturePicker.cpp
-      src/noggit/ui/texture_swapper.cpp
-      src/noggit/ui/TexturingGUI.cpp
-      src/noggit/ui/texturing_tool.cpp
-      src/noggit/ui/Toolbar.cpp
-      src/noggit/ui/SettingsPanel.cpp
-      src/noggit/ui/Water.cpp
-      src/noggit/ui/ZoneIDBrowser.cpp
-      src/noggit/ui/main_window.cpp
-      src/noggit/ui/minimap_widget.cpp
-      src/noggit/ui/shader_tool.cpp
-      src/noggit/ui/terrain_tool.cpp
-      src/noggit/ui/uid_fix_window.cpp
-      src/noggit/ui/texture_palette_small.cpp
-      src/noggit/ui/TextureList.cpp
-    )
-
-set ( math_sources
-      src/math/bounding_box.cpp
-      src/math/frustum.cpp
-      src/math/matrix_4x4.cpp
-      src/math/ray.cpp
-      src/math/vector_2d.cpp
-    )
-
-set ( opengl_sources
-      src/opengl/context.cpp
-      src/opengl/primitives.cpp
-      src/opengl/shader.cpp
-      src/opengl/texture.cpp
-    )
-
+COLLECT_FILES(false noggit_root_sources src/noggit .cpp)
+COLLECT_FILES(true noggit_ui_sources src/noggit/ui .cpp)
+COLLECT_FILES(false math_sources src/math .cpp)
+COLLECT_FILES(false opengl_sources src/opengl .cpp)
 set ( util_sources
       src/util/exception_to_string.cpp
     )
-
-set ( noggit_root_headers
-      src/noggit/Animated.h
-      src/noggit/AsyncLoader.h
-      src/noggit/AsyncObject.h
-      src/noggit/Brush.h
-      src/noggit/camera.hpp
-      src/noggit/ChunkWater.hpp
-      src/noggit/cursor_render.hpp
-      src/noggit/DBC.h
-      src/noggit/DBCFile.h
-      src/noggit/Log.h
-      src/noggit/MPQ.h
-      src/noggit/map_enums.hpp
-      src/noggit/MapChunk.h
-      src/noggit/MapHeaders.h
-      src/noggit/MapTile.h
-      src/noggit/MapView.h
-      src/noggit/Misc.h
-      src/noggit/Model.h
-      src/noggit/ModelHeaders.h
-      src/noggit/ModelInstance.h
-      src/noggit/ModelManager.h
-      src/noggit/Particle.h
-      src/noggit/Selection.h
-      src/noggit/Sky.h
-      src/noggit/TextureManager.h
-      src/noggit/TileWater.hpp
-      src/noggit/WMO.h
-      src/noggit/WMOInstance.h
-      src/noggit/World.h
-      src/noggit/alphamap.hpp
-      src/noggit/errorHandling.h
-      src/noggit/liquid_layer.hpp
-      src/noggit/liquid_render.hpp
-      src/noggit/map_horizon.h
-      src/noggit/map_index.hpp
-      src/noggit/multimap_with_normalized_key.hpp
-      src/noggit/texture_set.hpp
-      src/noggit/tile_index.hpp
-      src/noggit/tool_enums.hpp
-      src/noggit/uid_storage.hpp
-      src/noggit/wmo_liquid.hpp
-      src/noggit/world_model_instances_storage.hpp
-      src/noggit/world_tile_update_queue.hpp
-    )
-
-set ( noggit_ui_headers
-      src/noggit/ui/About.h
-      src/noggit/ui/clickable_label.hpp
-      src/noggit/ui/CurrentTexture.h
-      src/noggit/ui/CursorSwitcher.h
-      src/noggit/ui/DetailInfos.h
-      src/noggit/ui/FlattenTool.hpp
-      src/noggit/ui/font_awesome.hpp
-      src/noggit/ui/font_noggit.hpp
-      src/noggit/ui/Help.h
-      src/noggit/ui/HelperModels.h
-      src/noggit/ui/ModelImport.h
-      src/noggit/ui/ObjectEditor.h
-      src/noggit/ui/RotationEditor.h
-      src/noggit/ui/TexturePicker.h
-      src/noggit/ui/texture_swapper.hpp
-      src/noggit/ui/TexturingGUI.h
-      src/noggit/ui/texturing_tool.hpp
-      src/noggit/ui/Toolbar.h
-      src/noggit/ui/SettingsPanel.h
-      src/noggit/ui/Water.h
-      src/noggit/ui/ZoneIDBrowser.h
-      src/noggit/ui/main_window.hpp
-      src/noggit/ui/minimap_widget.hpp
-      src/noggit/ui/shader_tool.hpp
-      src/noggit/ui/terrain_tool.hpp
-      src/noggit/ui/uid_fix_window.hpp
-      src/noggit/ui/texture_palette_small.hpp
-      src/noggit/ui/TextureList.hpp
-    )
-
-set ( math_headers
-      src/math/bounding_box.hpp
-      src/math/constants.hpp
-      src/math/frustum.hpp
-      src/math/interpolation.hpp
-      src/math/matrix_4x4.hpp
-      src/math/projection.hpp
-      src/math/quaternion.hpp
-      src/math/ray.hpp
-      src/math/trig.hpp
-      src/math/vector_2d.hpp
-      src/math/vector_3d.hpp
-      src/math/vector_4d.hpp
-    )
-
-set ( opengl_headers
-      src/opengl/context.hpp
-      src/opengl/primitives.hpp
-      src/opengl/scoped.hpp
-      src/opengl/shader.fwd.hpp
-      src/opengl/shader.hpp
-      src/opengl/texture.hpp
-      src/opengl/types.hpp
-    )
-
-set ( shaders
-      src/glsl/m2_vert.glsl
-      src/glsl/m2_frag.glsl
-      src/glsl/m2_box_vert.glsl
-      src/glsl/m2_box_frag.glsl
-      src/glsl/particle_vert.glsl
-      src/glsl/particle_frag.glsl
-      src/glsl/ribbon_vert.glsl
-      src/glsl/ribbon_frag.glsl
-      src/glsl/terrain_vert.glsl
-      src/glsl/terrain_frag.glsl
-      src/glsl/wmo_vert.glsl
-      src/glsl/wmo_frag.glsl
-      src/glsl/liquid_vert.glsl
-      src/glsl/liquid_frag.glsl
-      src/glsl/mfbo_vert.glsl
-      src/glsl/mfbo_frag.glsl
-      src/glsl/cursor_vert.glsl
-      src/glsl/cursor_frag.glsl
-      src/glsl/horizon_vert.glsl
-      src/glsl/horizon_frag.glsl
-    )
+COLLECT_FILES(false noggit_root_headers src/noggit ".h;.hpp")
+COLLECT_FILES(true noggit_ui_headers src/noggit/ui ".h;.hpp")
+COLLECT_FILES(false math_headers src/math ".h;.hpp")
+COLLECT_FILES(false opengl_headers src/opengl ".h;.hpp")
+COLLECT_FILES(false shaders src/glsl .glsl)
 
 IF(WIN32)
   set ( os_sources
@@ -418,27 +235,20 @@ IF(WIN32)
       )
 ENDIF(WIN32)
 
+COLLECT_FILES(true headers_to_moc src/noggit ".h;.hpp")
+# here we need only those which contain qt meta identifiers
+FOREACH(file IN LISTS headers_to_moc)
+  SET(file_full ${file})
+  STRING(PREPEND file_full ${PROJECT_SOURCE_DIR}/)
+  FILE(STRINGS ${file_full} contents REGEX "Q_OBJECT[\t ]*")
 
-list (APPEND headers_to_moc
-  src/noggit/MapView.h
-  src/noggit/bool_toggle_property.hpp
-  src/noggit/ui/terrain_tool.hpp
-  src/noggit/ui/TexturePicker.h
-  src/noggit/ui/TexturingGUI.h
-  src/noggit/ui/Water.h
-  src/noggit/ui/ZoneIDBrowser.h
-  src/noggit/ui/clickable_label.hpp
-  src/noggit/ui/minimap_widget.hpp
-  src/noggit/ui/uid_fix_window.hpp
-  src/noggit/ui/widget.hpp
-  src/noggit/ui/texture_palette_small.hpp
-  src/noggit/ui/TextureList.hpp
-  src/noggit/ui/main_window.hpp
-  src/noggit/unsigned_int_property.hpp
-  src/noggit/ui/CurrentTexture.h
-)
-qt5_wrap_cpp (moced ${headers_to_moc} ${headers_to_moc})
+  IF("${contents}" STREQUAL "")
+    LIST(REMOVE_ITEM headers_to_moc ${file})
+  ENDIF()
+ENDFOREACH()
 
+UNSET(file_full)
+qt5_wrap_cpp (moced ${headers_to_moc})
 source_group("noggit"  FILES ${noggit_root_sources} ${noggit_root_headers})
 source_group("noggit\\ui"  FILES ${noggit_ui_sources} ${noggit_ui_headers})
 source_group("opengl"  FILES ${opengl_sources} ${opengl_headers})
