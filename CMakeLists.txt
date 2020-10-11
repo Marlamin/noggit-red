@@ -240,7 +240,7 @@ COLLECT_FILES(true headers_to_moc src/noggit ".h;.hpp")
 FOREACH(file IN LISTS headers_to_moc)
   SET(file_full ${file})
   STRING(PREPEND file_full ${PROJECT_SOURCE_DIR}/)
-  FILE(STRINGS ${file_full} contents REGEX "Q_OBJECT[\t ]*")
+  FILE(STRINGS ${file_full} contents NEWLINE_CONSUME REGEX "Q_OBJECT[\t ;]*\n")
 
   IF("${contents}" STREQUAL "")
     LIST(REMOVE_ITEM headers_to_moc ${file})
