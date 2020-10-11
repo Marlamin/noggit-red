@@ -48,6 +48,7 @@ namespace noggit
     class water;
     class zone_id_browser;
     class texture_palette_small;
+    class hole_tool;
     struct main_window;
     struct tileset_chooser;
   }
@@ -306,4 +307,6 @@ private:
   QDockWidget* _vertex_shading_dock;
   noggit::ui::texturing_tool* texturingTool;
   QDockWidget* _texturing_dock;
+  noggit::ui::hole_tool* holeTool;
+  QDockWidget* _hole_tool_dock;
 };

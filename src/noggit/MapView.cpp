@@ -33,6 +33,7 @@
 #include <noggit/ui/terrain_tool.hpp>
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
+#include <noggit/ui/hole_tool.hpp>
 #include <noggit/ui/texture_palette_small.hpp>
 #include <opengl/scoped.hpp>
 
@@ -88,6 +89,8 @@ void MapView::set_editing_mode (editing_mode mode)
 
   terrainMode = mode;
   _toolbar->check_tool (mode);
+
+  this->activateWindow();
 }
 
 void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
@@ -119,6 +122,9 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
     break;
   case editing_mode::object:
     _object_editor_dock->setVisible(!ui_hidden);
+    break;
+  case editing_mode::holes:
+    _hole_tool_dock->setVisible(!ui_hidden);
     break;
   }
 
@@ -217,6 +223,11 @@ void MapView::createGUI()
   texturingTool = new noggit::ui::texturing_tool(&_camera.position, _world.get(), &_show_texture_palette_small_window, _texturing_dock);
   _texturing_dock->setWidget(texturingTool);
   _tool_properties_docks.insert(_texturing_dock);
+
+  _hole_tool_dock = new QDockWidget("Holes", this);
+  holeTool = new noggit::ui::hole_tool(_hole_tool_dock);
+  _hole_tool_dock->setWidget(holeTool);
+  _tool_properties_docks.insert(_hole_tool_dock);
 
   _areaid_editor_dock = new QDockWidget("Area ID", this);
   ZoneIDBrowser = new noggit::ui::zone_id_browser(_areaid_editor_dock);
