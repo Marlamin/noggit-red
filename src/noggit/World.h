@@ -163,6 +163,7 @@ public:
   void remove_from_selection(std::uint32_t uid);
   void reset_selection();
   void delete_selected_models();
+  void range_add_to_selection(math::vector_3d const& pos, float radius, bool remove);
 
   enum class m2_scaling_type
   {

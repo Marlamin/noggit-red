@@ -123,6 +123,8 @@ public:
 
   bool tile_is_being_reloaded() const { return _tile_is_being_reloaded; }
 
+  std::vector<uint32_t>* get_uids() { return &uids; }
+
 private:
   tile_mode _mode;
   bool _tile_is_being_reloaded;

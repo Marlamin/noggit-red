@@ -2282,3 +2282,65 @@ void World::update_models_by_filename()
 
   need_model_updates = false;
 }
+
+void World::range_add_to_selection(math::vector_3d const& pos, float radius, bool remove)
+{
+  for_tile_at(pos, [this, pos, radius, remove](MapTile* tile)
+  {
+    std::vector<uint32_t>* uids = tile->get_uids();
+
+    if (remove)
+    {
+      for (uint32_t uid : *uids)
+      {
+        auto instance = _model_instance_storage.get_instance(uid);
+
+        if (instance.get().which() == eEntry_WMO)
+        {
+          auto wmo = boost::get<selected_wmo_type>(instance.get());
+
+          if ((wmo->pos - pos).length() <= radius && is_selected(wmo))
+          {
+            remove_from_selection(wmo);
+          }
+
+        } else
+        {
+          auto model = boost::get<selected_model_type>(instance.get());
+
+          if ((model->pos - pos).length() <= radius && is_selected(model))
+          {
+            remove_from_selection(model);
+          }
+        }
+      }
+    }
+    else
+    {
+      for (uint32_t uid : *uids)
+      {
+        auto instance = _model_instance_storage.get_instance(uid);
+
+        if (instance.get().which() == eEntry_WMO)
+        {
+          auto wmo = boost::get<selected_wmo_type>(instance.get());
+
+          if ((wmo->pos - pos).length() <= radius && !is_selected(wmo))
+          {
+            add_to_selection(wmo);
+          }
+
+        } else
+        {
+          auto model = boost::get<selected_model_type>(instance.get());
+
+          if ((model->pos - pos).length() <= radius && !is_selected(model))
+          {
+            add_to_selection(model);
+          }
+        }
+      }
+    }
+
+  });
+}

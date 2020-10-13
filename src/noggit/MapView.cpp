@@ -2262,6 +2262,18 @@ void MapView::doSelection (bool selectTerrainOnly)
           _world->remove_from_selection(hit);
         }
       }
+      else if (hit.which() == eEntry_MapChunk)
+      {
+        _world->range_add_to_selection(_cursor_pos, objectEditor->brushRadius(), false);
+      }
+
+    }
+    else if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier))
+    {
+      if (hit.which() == eEntry_MapChunk)
+      {
+        _world->range_add_to_selection(_cursor_pos, objectEditor->brushRadius(), true);
+      }
     }
     else
     {
@@ -2364,6 +2376,9 @@ void MapView::draw_map()
     break;
   case editing_mode::holes:
     radius = holeTool->brushRadius();
+    break;
+  case editing_mode::object:
+    radius = objectEditor->brushRadius();
     break;
   }
 
@@ -2696,6 +2711,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     {
       terrainTool->moveVertices (_world.get(), -relative_movement.dy() / YSENS);
     }
+
   }
 
 
@@ -2729,7 +2745,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     case editing_mode::holes:
       holeTool->changeRadius(relative_movement.dx() / XSENS);
       break;
-
+    case editing_mode::object:
+      objectEditor->changeRadius(relative_movement.dx() / XSENS);
+      break;
     }
   }
 
@@ -2749,6 +2767,14 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     case editing_mode::mccv:
       shaderTool->changeSpeed(relative_movement.dx() / XSENS);
       break;
+    }
+  }
+
+  if (leftMouse && (_mod_shift_down || _mod_ctrl_down))
+  {
+    if (terrainMode == editing_mode::object)
+    {
+      doSelection(false); // Required for radius selection in Object mode
     }
   }
 

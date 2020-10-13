@@ -9,6 +9,8 @@
 #include <QLabel>
 #include <QWidget>
 #include <QSettings>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QSlider>
 
 #include <boost/optional.hpp>
 
@@ -72,12 +74,21 @@ namespace noggit
                        );
       void togglePasteMode();
 
+      void changeRadius(float change);
+
+      float brushRadius() const { return _radius; }
+
       model_import *modelImport;
       rotation_editor* rotationEditor;
       helper_models* helper_models_widget;
       QSize sizeHint() const override;
 
     private:
+      float _radius = 15.0f;
+
+      QSlider* _radius_slider;
+      QDoubleSpinBox* _radius_spin;
+
       QSettings* _settings;
 
       QButtonGroup* pasteModeGroup;

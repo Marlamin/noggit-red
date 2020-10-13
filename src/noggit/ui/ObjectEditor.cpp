@@ -53,6 +53,19 @@ namespace noggit
     {
       auto layout = new QFormLayout (this);
 
+      _radius_spin = new QDoubleSpinBox (this);
+      _radius_spin->setRange (0.0f, 100.0f);
+      _radius_spin->setDecimals (2);
+      _radius_spin->setValue (_radius);
+
+      layout->addRow ("Radius:", _radius_spin);
+
+      _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
+      _radius_slider->setRange (0, 100);
+      _radius_slider->setSliderPosition (_radius);
+
+      layout->addRow (_radius_slider);
+
       QGroupBox *copyBox = new QGroupBox("Copy options", this);
       auto copy_layout = new QFormLayout (copyBox);
 
@@ -222,6 +235,24 @@ namespace noggit
       scaleRangeStart->setValue(paste_params->minScale);
       scaleRangeEnd->setValue(paste_params->maxScale);
 
+      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
+          , [&] (double v)
+                {
+                  _radius = v;
+                  QSignalBlocker const blocker(_radius_slider);
+                  _radius_slider->setSliderPosition ((int)std::round (v));
+                }
+      );
+
+      connect ( _radius_slider, &QSlider::valueChanged
+          , [&] (int v)
+                {
+                  _radius = v;
+                  QSignalBlocker const blocker(_radius_spin);
+                  _radius_spin->setValue(v);
+                }
+      );
+
       connect ( rotRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
                 {
@@ -345,6 +376,11 @@ namespace noggit
           delete wi;
         }
       }
+    }
+
+    void object_editor::changeRadius(float change)
+    {
+      _radius_spin->setValue (_radius + change);
     }
 
     void object_editor::showImportModels()
