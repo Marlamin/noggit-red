@@ -231,7 +231,7 @@ public:
   void removeTexDuplicateOnADT(math::vector_3d const& pos);
   void change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 
-  void setHole(math::vector_3d const& pos, bool big, bool hole);
+  void setHole(math::vector_3d const& pos, float radius, bool big, bool hole);
   void setHoleADT(math::vector_3d const& pos, bool hole);
 
   void addM2 ( std::string const& filename

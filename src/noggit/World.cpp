@@ -1647,14 +1647,21 @@ void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_bl
   for_chunk_at(pos, [&](MapChunk* chunk) {chunk->switchTexture(oldTexture, std::move (newTexture));});
 }
 
-void World::setHole(math::vector_3d const& pos, bool big, bool hole)
+void World::setHole(math::vector_3d const& pos, float radius, bool big, bool hole)
 {
-  for_chunk_at(pos, [&](MapChunk* chunk) { chunk->setHole(pos, big, hole); });
+  for_all_chunks_in_range
+      ( pos, radius
+        , [&](MapChunk* chunk)
+        {
+          chunk->setHole(pos, radius, big, hole);
+          return true;
+        }
+      );
 }
 
 void World::setHoleADT(math::vector_3d const& pos, bool hole)
 {
-  for_all_chunks_on_tile(pos, [&](MapChunk* chunk) { chunk->setHole(pos, true, hole); });
+  for_all_chunks_on_tile(pos, [&](MapChunk* chunk) { chunk->setHole(pos, 1.0f, true, hole); });
 }
 
 

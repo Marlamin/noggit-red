@@ -32,7 +32,7 @@ namespace noggit
       layout->addRow ("Radius:", _radius_spin);
 
       _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
-      _radius_slider->setRange (0, 100);
+      _radius_slider->setRange (0, 250);
       _radius_slider->setSliderPosition (_radius);
 
       layout->addRow (_radius_slider);

@@ -1038,7 +1038,7 @@ bool MapChunk::isHole(int i, int j)
   return (holes & ((1 << ((j * 4) + i)))) != 0;
 }
 
-void MapChunk::setHole(math::vector_3d const& pos, bool big, bool add)
+void MapChunk::setHole(math::vector_3d const& pos, float radius, bool big, bool add)
 {
   if (big)
   {
@@ -1046,8 +1046,21 @@ void MapChunk::setHole(math::vector_3d const& pos, bool big, bool add)
   }
   else
   {
-    int v = 1 << ((int)((pos.z - zbase) / MINICHUNKSIZE) * 4 + (int)((pos.x - xbase) / MINICHUNKSIZE));
-    holes = add ? (holes | v) : (holes & ~v);
+    for (int x = 0; x < 4; ++x)
+    {
+      for (int y = 0; y < 4; ++y)
+      {
+        if (misc::getShortestDist(pos.x, pos.z, xbase + (MINICHUNKSIZE * x),
+                          zbase + (MINICHUNKSIZE * y), MINICHUNKSIZE) <= radius)
+        {
+          int v = 1 << (y * 4 + x);
+          holes = add ? (holes | v) : (holes & ~v);
+        }
+
+      }
+    }
+
+
   }
 
   initStrip();

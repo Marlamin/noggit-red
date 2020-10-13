@@ -174,7 +174,7 @@ public:
 
   //! \todo implement Action stack for these
   bool isHole(int i, int j);
-  void setHole(math::vector_3d const& pos, bool big, bool add);
+  void setHole(math::vector_3d const& pos, float radius, bool big, bool add);
 
   void setFlag(bool value, uint32_t);
 

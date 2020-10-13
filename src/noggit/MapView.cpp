@@ -1840,11 +1840,11 @@ void MapView::tick (float dt)
           // no undermap check here, else it's impossible to remove holes
           if (_mod_shift_down)
           {
-            _world->setHole(_cursor_pos, _mod_alt_down, false);
+            _world->setHole(_cursor_pos, holeTool->brushRadius(),_mod_alt_down, false);
           }
           else if (_mod_ctrl_down && !underMap)
           {
-            _world->setHole(_cursor_pos, _mod_alt_down, true);
+            _world->setHole(_cursor_pos, holeTool->brushRadius(), _mod_alt_down, true);
           }
           break;
         case editing_mode::areaid:
@@ -2362,6 +2362,9 @@ void MapView::draw_map()
   case editing_mode::areaid:
     radius = ZoneIDBrowser->brushRadius();
     break;
+  case editing_mode::holes:
+    radius = holeTool->brushRadius();
+    break;
   }
 
   //! \note Select terrain below mouse, if no item selected or the item is map.
@@ -2722,6 +2725,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       break;
     case editing_mode::areaid:
       ZoneIDBrowser->changeRadius(relative_movement.dx() / XSENS);
+      break;
+    case editing_mode::holes:
+      holeTool->changeRadius(relative_movement.dx() / XSENS);
       break;
 
     }
