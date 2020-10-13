@@ -227,12 +227,9 @@ COLLECT_FILES(false shaders src/glsl .glsl)
 
 IF(WIN32)
   set ( os_sources
-        include/win/StackWalker.cpp
-      )
-
+        include/win/StackWalker.cpp)
   set ( os_headers
-        include/win/StackWalker.h
-          src/noggit/ui/hole_tool.cpp src/noggit/ui/hole_tool.hpp)
+        include/win/StackWalker.h)
 ENDIF(WIN32)
 
 COLLECT_FILES(true headers_to_moc src/noggit ".h;.hpp")
