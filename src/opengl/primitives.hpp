@@ -23,6 +23,7 @@ namespace opengl
       wire_box() {}
       wire_box( const wire_box&);
       wire_box& operator=( wire_box& );
+
     public:
       static wire_box& getInstance() {
         static wire_box  instance;
