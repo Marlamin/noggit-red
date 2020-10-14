@@ -113,19 +113,11 @@ namespace opengl
           , GL_STATIC_DRAW
       );
 
-      auto test = glGetError();
-
       opengl::scoped::use_program shader (*_program.get());
-
-      test = glGetError();
 
       opengl::scoped::vao_binder const _ (_vao[0]);
 
-      test = glGetError();
-
       shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-      test = glGetError();
 
       _buffers_are_setup = true;
 
