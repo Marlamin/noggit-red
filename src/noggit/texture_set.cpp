@@ -10,6 +10,7 @@
 
 #include <algorithm>    // std::min
 #include <iostream>     // std::cout
+#include <boost/format.hpp>
 
 #include <boost/utility/in_place_factory.hpp>
 
@@ -112,8 +113,13 @@ void TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to
     // prevent texture duplication
     if (replacement_texture_level != -1 && replacement_texture_level != texture_to_replace_level)
     {
+      std::string fallback_tex_name = (boost::format("error_%d.blp") % replacement_texture_level).str();
+      auto fallback = scoped_blp_texture_reference(fallback_tex_name);
+
+      textures[replacement_texture_level] = std::move(fallback);
+
       // temp alphamap changes are applied in here
-      merge_layers(texture_to_replace_level, replacement_texture_level);
+      // merge_layers(texture_to_replace_level, replacement_texture_level);
     }
   }
 }
