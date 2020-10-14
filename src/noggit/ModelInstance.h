@@ -11,6 +11,7 @@
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
 #include <opengl/shader.fwd.hpp>
+#include <opengl/primitives.hpp>
 
 namespace math { class frustum; }
 class Model;

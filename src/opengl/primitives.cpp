@@ -15,92 +15,122 @@ namespace opengl
 {
   namespace primitives
   {
-    wire_box::wire_box ( math::vector_3d const& min_point
-                       , math::vector_3d const& max_point
-                       )
-      : _program { { GL_VERTEX_SHADER
-                   , R"code(
-#version 330 core
-
-in vec4 position;
-
-uniform mat4 model_view;
-uniform mat4 projection;
-uniform mat4 transform;
-
-void main()
-{
-  gl_Position = projection * model_view * transform * position;
-}
-)code"
-                   }
-                 , { GL_FRAGMENT_SHADER
-                   , R"code(
-#version 330 core
-
-uniform vec4 color;
-
-out vec4 out_color;
-
-void main()
-{
-  out_color = color;
-}
-)code"
-                   }
-                 }
-    {
-      std::vector<math::vector_3d> positions (math::box_points (min_point, max_point));
-      
-      static std::array<std::uint8_t, 16> const indices
-        {{5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7}};
-
-      _vao.upload();
-
-      {
-        scoped::buffer_binder<GL_ARRAY_BUFFER> const buffer (_positions);
-        gl.bufferData ( GL_ARRAY_BUFFER
-                      , positions.size() * sizeof (*positions.data())
-                      , positions.data()
-                      , GL_STATIC_DRAW
-                      );
-      }
-
-      {
-        scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const buffer (_indices);
-        gl.bufferData ( GL_ELEMENT_ARRAY_BUFFER
-                      , indices.size() * sizeof (*indices.data())
-                      , indices.data()
-                      , GL_STATIC_DRAW
-                      );
-      }
-    }
-
     void wire_box::draw ( math::matrix_4x4 const& model_view
                         , math::matrix_4x4 const& projection
                         , math::matrix_4x4 const& transform
                         , math::vector_4d const& color
-                        ) const
+                        , math::vector_3d const& min_point
+                        , math::vector_3d const& max_point
+                        )
     {
-      opengl::scoped::use_program wire_box_shader {_program};
+
+      if (!_buffers_are_setup)
+      {
+        setup_buffers();
+      }
+
+      opengl::scoped::use_program wire_box_shader {*_program.get()};
 
       wire_box_shader.uniform("model_view", model_view);
       wire_box_shader.uniform("projection", projection);
       wire_box_shader.uniform("transform", transform);
       wire_box_shader.uniform("color", color);
+      wire_box_shader.uniform("pointPositions", math::box_points (min_point, max_point));
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
       
       opengl::scoped::vao_binder const _(_vao[0]);
-      scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices (_positions);
-      wire_box_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-      scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices (_indices);
 
       gl.drawElements (GL_LINE_STRIP, _indices, 16, GL_UNSIGNED_BYTE, nullptr);
     }
-  
+
+    void wire_box::setup_buffers()
+    {
+      _program.reset(new opengl::program( {{ GL_VERTEX_SHADER
+                     , R"code(
+                          #version 330 core
+
+                          in vec4 position;
+
+                          uniform vec3 pointPositions[8];
+                          uniform mat4 model_view;
+                          uniform mat4 projection;
+                          uniform mat4 transform;
+
+                          void main()
+                          {
+                            vec4 pos = position; // hack to get rid of compiler optimizations, else Noggit crashes
+                            gl_Position = projection * model_view * transform * vec4(pointPositions[gl_VertexID], 1.0);
+                          }
+                          )code"}
+                     , { GL_FRAGMENT_SHADER
+                     , R"code(
+                          #version 330 core
+
+                          uniform vec4 color;
+
+                          out vec4 out_color;
+
+                          void main()
+                          {
+                            out_color = color;
+                          }
+                          )code"
+                     }
+      }));
+
+      _vao.upload();
+      _buffers.upload();
+
+      //std::vector<math::vector_3d> positions (math::box_points (min_point, max_point));
+
+      std::vector<math::vector_3d> positions = {
+          {-0.5f, -0.5f, -0.5f},
+          {0.5f, -0.5f, -0.5f},
+          {0.5f, 0.5f, -0.5f},
+          {-0.5f, 0.5f, -0.5f},
+          {-0.5f, -0.5f, 0.5f},
+          {0.5f, -0.5f, 0.5f},
+          {0.5f, 0.5f, 0.5f},
+          {-0.5f, 0.5f, 0.5f},
+      };
+
+      static std::array<std::uint8_t, 16> const indices
+          {{5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7}};
+
+      scoped::buffer_binder<GL_ARRAY_BUFFER> const pos_buffer (_positions);
+      gl.bufferData ( GL_ARRAY_BUFFER
+          , positions.size() * sizeof (*positions.data())
+          , positions.data()
+          , GL_STATIC_DRAW
+      );
+
+      scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (_indices);
+      gl.bufferData ( GL_ELEMENT_ARRAY_BUFFER
+          , indices.size() * sizeof (*indices.data())
+          , indices.data()
+          , GL_STATIC_DRAW
+      );
+
+      auto test = glGetError();
+
+      opengl::scoped::use_program shader (*_program.get());
+
+      test = glGetError();
+
+      opengl::scoped::vao_binder const _ (_vao[0]);
+
+      test = glGetError();
+
+      shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+      test = glGetError();
+
+      _buffers_are_setup = true;
+
+    }
+
 
     void sphere::draw( math::matrix_4x4 const& mvp
                      , math::vector_3d const& pos

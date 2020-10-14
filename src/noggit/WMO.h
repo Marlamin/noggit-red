@@ -12,6 +12,7 @@
 #include <noggit/TextureManager.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/wmo_liquid.hpp>
+#include <opengl/primitives.hpp>
 
 #include <boost/optional.hpp>
 

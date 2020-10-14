@@ -53,39 +53,39 @@ void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
 
   if (is_current_selection)
   {
-    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.collision_box_min)
-                                 , misc::transform_model_box_coords(model->header.collision_box_max)
-                                 ).draw ( model_view
-                                        , projection
-                                        , transform_matrix_transposed()
-                                        , { 1.0f, 1.0f, 0.0f, 1.0f }
-                                        );
+    opengl::primitives::wire_box::getInstance().draw ( model_view
+                                                      , projection
+                                                      , transform_matrix_transposed()
+                                                      , { 1.0f, 1.0f, 0.0f, 1.0f }
+                                                      , misc::transform_model_box_coords(model->header.collision_box_min)
+                                                      , misc::transform_model_box_coords(model->header.collision_box_max)
+                                                      );
 
-    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
-                                 , misc::transform_model_box_coords(model->header.bounding_box_max)
-                                 ).draw ( model_view
-                                        , projection
-                                        , transform_matrix_transposed()
-                                        , {1.0f, 1.0f, 1.0f, 1.0f}
-                                        );
+    opengl::primitives::wire_box::getInstance().draw ( model_view
+                                  , projection
+                                  , transform_matrix_transposed()
+                                  , {1.0f, 1.0f, 1.0f, 1.0f}
+                                  , misc::transform_model_box_coords(model->header.bounding_box_min)
+                                  , misc::transform_model_box_coords(model->header.bounding_box_max)
+                                  );
 
-    opengl::primitives::wire_box ( _extents[0]
-                                 , _extents[1]
-                                 ).draw ( model_view
-                                        , projection
-                                        , math::matrix_4x4(math::matrix_4x4::unit)
-                                        , {0.0f, 1.0f, 0.0f, 1.0f}
-                                        );
+    opengl::primitives::wire_box::getInstance().draw ( model_view
+                                                      , projection
+                                                      , math::matrix_4x4(math::matrix_4x4::unit)
+                                                      , {0.0f, 1.0f, 0.0f, 1.0f}
+                                                      , _extents[0]
+                                                      , _extents[1]
+                                                      );
   }
   else
   {
-    opengl::primitives::wire_box ( misc::transform_model_box_coords(model->header.bounding_box_min)
-                                 , misc::transform_model_box_coords(model->header.bounding_box_max)
-                                 ).draw ( model_view
-                                        , projection
-                                        , transform_matrix_transposed()
-                                        , {0.5f, 0.5f, 0.5f, 1.0f}
-                                        );
+    opengl::primitives::wire_box::getInstance().draw ( model_view
+                                                      , projection
+                                                      , transform_matrix_transposed()
+                                                      , {0.5f, 0.5f, 0.5f, 1.0f}
+                                                      , misc::transform_model_box_coords(model->header.bounding_box_min)
+                                                      , misc::transform_model_box_coords(model->header.bounding_box_max)
+                                                      );
   }
 }
 

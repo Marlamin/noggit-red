@@ -19,23 +19,34 @@ namespace opengl
   {
     class wire_box
     {
+    private:
+      wire_box() {}
+      wire_box( const wire_box&);
+      wire_box& operator=( wire_box& );
     public:
-      wire_box ( math::vector_3d const& min_point
-               , math::vector_3d const& max_point
-               );
+      static wire_box& getInstance() {
+        static wire_box  instance;
+        return instance;
+      }
 
       void draw ( math::matrix_4x4 const& model_view
                 , math::matrix_4x4 const& projection
                 , math::matrix_4x4 const& transform
                 , math::vector_4d const& color
-                ) const;
+                , math::vector_3d const& min_point
+                , math::vector_3d const& max_point
+                );
 
     private:
+      bool _buffers_are_setup = false;
+
+      void setup_buffers();
+
       scoped::deferred_upload_vertex_arrays<1> _vao;
-      scoped::buffers<2> _buffers;
+      scoped::deferred_upload_buffers<2> _buffers;
       GLuint const& _positions = _buffers[0];
       GLuint const& _indices = _buffers[1];
-      opengl::program _program;
+      std::unique_ptr<opengl::program> _program;
     };
 
     class sphere

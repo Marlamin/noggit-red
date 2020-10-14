@@ -368,21 +368,22 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
 
     for (auto& group : groups)
     {
-      opengl::primitives::wire_box(group.BoundingBoxMin, group.BoundingBoxMax)
-        .draw( model_view
-             , projection
-             , transform_matrix_transposed
-             , {1.0f, 1.0f, 1.0f, 1.0f}
-             );
+      opengl::primitives::wire_box::getInstance().draw( model_view
+                                                       , projection
+                                                       , transform_matrix_transposed
+                                                       , {1.0f, 1.0f, 1.0f, 1.0f}
+                                                       , group.BoundingBoxMin
+                                                       , group.BoundingBoxMax
+                                                       );
     }
 
-    opengl::primitives::wire_box ( math::vector_3d(extents[0].x, extents[0].z, -extents[0].y)
-                                 , math::vector_3d(extents[1].x, extents[1].z, -extents[1].y)
-                                 ).draw ( model_view
-                                        , projection
-                                        , transform_matrix_transposed
-                                        , {1.0f, 0.0f, 0.0f, 1.0f}
-                                        );
+    opengl::primitives::wire_box::getInstance().draw ( model_view
+                                                      , projection
+                                                      , transform_matrix_transposed
+                                                      , {1.0f, 0.0f, 0.0f, 1.0f}
+                                                      , math::vector_3d(extents[0].x, extents[0].z, -extents[0].y)
+                                                      , math::vector_3d(extents[1].x, extents[1].z, -extents[1].y)
+                                                      );
 
   }
 }
