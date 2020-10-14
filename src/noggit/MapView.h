@@ -101,7 +101,7 @@ private:
 
   math::ray intersect_ray() const;
   selection_result intersect_result(bool terrain_only);
-  void doSelection(bool selectTerrainOnly);
+  void doSelection(bool selectTerrainOnly, bool mouseMove = false);
   void update_cursor_pos();
 
   display_mode _display_mode;

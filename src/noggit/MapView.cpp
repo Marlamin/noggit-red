@@ -2237,7 +2237,7 @@ selection_result MapView::intersect_result(bool terrain_only)
   return results;
 }
 
-void MapView::doSelection (bool selectTerrainOnly)
+void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
 {
   selection_result results(intersect_result(selectTerrainOnly));
 
@@ -2257,7 +2257,7 @@ void MapView::doSelection (bool selectTerrainOnly)
         {
           _world->add_to_selection(hit);
         }
-        else
+        else if (!mouseMove)
         {
           _world->remove_from_selection(hit);
         }
@@ -2275,7 +2275,7 @@ void MapView::doSelection (bool selectTerrainOnly)
         _world->range_add_to_selection(_cursor_pos, objectEditor->brushRadius(), true);
       }
     }
-    else
+    else if (!_mod_space_down && !_mod_alt_down)
     {
       _world->reset_selection();
       _world->add_to_selection(hit);
@@ -2774,7 +2774,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     if (terrainMode == editing_mode::object)
     {
-      doSelection(false); // Required for radius selection in Object mode
+      doSelection(false, true); // Required for radius selection in Object mode
     }
   }
 
@@ -2854,7 +2854,10 @@ void MapView::mousePressEvent(QMouseEvent* event)
 
   if (leftMouse)
   {
-    doSelection(false);
+    if (!(terrainMode == editing_mode::mccv && _mod_ctrl_down))
+    {
+      doSelection(false);
+    }
   }
   else if (rightMouse)
   {

@@ -84,7 +84,7 @@ namespace noggit
       QSize sizeHint() const override;
 
     private:
-      float _radius = 15.0f;
+      float _radius = 0.01f;
 
       QSlider* _radius_slider;
       QDoubleSpinBox* _radius_spin;
