@@ -2568,13 +2568,49 @@ void MapView::keyPressEvent (QKeyEvent *event)
   }
   if (event->key() == Qt::Key_Home)
   {
-	  _camera.position = math::vector_3d(_cursor_pos.x, _cursor_pos.y + 50, _cursor_pos.z); ;
+	  _camera.position = math::vector_3d(_cursor_pos.x, _cursor_pos.y + 50, _cursor_pos.z);
+    _camera_moved_since_last_draw = true;
 	  _minimap->update();
   }
 
   if (event->key() == Qt::Key_L)
   {
     freelook = true;
+  }
+
+  if (_display_mode == display_mode::in_2D)
+  {
+    tile_index cur_tile = tile_index(_camera.position);
+
+    if (event->key() == Qt::Key_Up)
+    {
+      auto next_z = cur_tile.z - 1;
+      _camera.position = math::vector_3d((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
+      _camera_moved_since_last_draw = true;
+      _minimap->update();
+    }
+    else if (event->key() == Qt::Key_Down)
+    {
+      auto next_z = cur_tile.z + 1;
+      _camera.position = math::vector_3d((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
+      _camera_moved_since_last_draw = true;
+      _minimap->update();
+    }
+    else if (event->key() == Qt::Key_Left)
+    {
+      auto next_x = cur_tile.x - 1;
+      _camera.position = math::vector_3d((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
+      _camera_moved_since_last_draw = true;
+      _minimap->update();
+    }
+    else if (event->key() == Qt::Key_Right)
+    {
+      auto next_x = cur_tile.x + 1;
+      _camera.position = math::vector_3d((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
+      _camera_moved_since_last_draw = true;
+      _minimap->update();
+    }
+
   }
 }
 
