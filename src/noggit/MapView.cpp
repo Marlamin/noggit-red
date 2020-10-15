@@ -2249,33 +2249,41 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
   {
     auto const& hit (results.front().second);
 
-    if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
+    if (terrainMode == editing_mode::object)
     {
-      if (hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
+      if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
       {
-        if (!_world->is_selected(hit))
+        if (hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
         {
-          _world->add_to_selection(hit);
+          if (!_world->is_selected(hit))
+          {
+            _world->add_to_selection(hit);
+          }
+          else if (!mouseMove)
+          {
+            _world->remove_from_selection(hit);
+          }
         }
-        else if (!mouseMove)
+        else if (hit.which() == eEntry_MapChunk)
         {
-          _world->remove_from_selection(hit);
+          _world->range_add_to_selection(_cursor_pos, objectEditor->brushRadius(), false);
         }
-      }
-      else if (hit.which() == eEntry_MapChunk)
-      {
-        _world->range_add_to_selection(_cursor_pos, objectEditor->brushRadius(), false);
-      }
 
-    }
-    else if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier))
-    {
-      if (hit.which() == eEntry_MapChunk)
+      }
+      else if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier))
       {
-        _world->range_add_to_selection(_cursor_pos, objectEditor->brushRadius(), true);
+        if (hit.which() == eEntry_MapChunk)
+        {
+          _world->range_add_to_selection(_cursor_pos, objectEditor->brushRadius(), true);
+        }
+      }
+      else if (!_mod_space_down && !_mod_alt_down && !_mod_ctrl_down)
+      {
+        _world->reset_selection();
+        _world->add_to_selection(hit);
       }
     }
-    else if (!_mod_space_down && !_mod_alt_down)
+    else if (hit.which() == eEntry_MapChunk)
     {
       _world->reset_selection();
       _world->add_to_selection(hit);
@@ -2854,9 +2862,13 @@ void MapView::mousePressEvent(QMouseEvent* event)
 
   if (leftMouse)
   {
-    if (!(terrainMode == editing_mode::mccv && _mod_ctrl_down))
+    if (terrainMode == editing_mode::object && !_mod_ctrl_down)
     {
       doSelection(false);
+    }
+    else
+    {
+      doSelection(true);
     }
   }
   else if (rightMouse)
