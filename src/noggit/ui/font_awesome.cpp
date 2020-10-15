@@ -5,6 +5,7 @@
 #include <QtGui/QFontDatabase>
 #include <QtGui/QPainter>
 #include <QtWidgets/QMessageBox>
+#include <QtWidgets/QWidget>
 
 #include <noggit/ui/font_awesome.hpp>
 #include <noggit/Log.h>
@@ -31,10 +32,15 @@ namespace noggit
     {
     painter->save();
       {
+        QWidget* temp_btn = new QWidget();
+
+
         painter->setPen ( (state == QIcon::On || mode == QIcon::Active)
-                        ? QColor (0, 0, 0)
-                        : QColor (100, 100, 100)
+                        ? temp_btn->palette().color(QPalette::WindowText)
+                        : temp_btn->palette().color(QPalette::AlternateBase)
                         );
+
+        delete temp_btn;
 
         if (!_fonts.count (rect.height()))
         {
