@@ -35,10 +35,7 @@ namespace noggit
         QWidget* temp_btn = new QWidget();
 
 
-        painter->setPen ( (state == QIcon::On || mode == QIcon::Active)
-                        ? temp_btn->palette().color(QPalette::WindowText)
-                        : temp_btn->palette().color(QPalette::AlternateBase)
-                        );
+        painter->setPen (temp_btn->palette().color(QPalette::WindowText));
 
         delete temp_btn;
 
