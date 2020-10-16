@@ -147,7 +147,7 @@ namespace noggit
       _texture_paths.emplace(display_name.toStdString());
 
       QListWidgetItem* list_item = new QListWidgetItem(_texture_list);
-      list_item->setIcon(render_blp_to_pixmap(filename, _texture_list->iconSize().width(), _texture_list->iconSize().height()));
+      list_item->setIcon(*render_blp_to_pixmap(filename, _texture_list->iconSize().width(), _texture_list->iconSize().height()));
       list_item->setToolTip(display_name);
       list_item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 

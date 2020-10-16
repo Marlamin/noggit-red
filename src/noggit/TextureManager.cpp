@@ -260,13 +260,19 @@ void blp_texture::finishLoading()
 
 namespace noggit
 {
-  QPixmap render_blp_to_pixmap ( std::string const& blp_filename
+  QPixmap* render_blp_to_pixmap ( std::string const& blp_filename
                                , int width
                                , int height
                                )
   {
-    opengl::context::save_current_context const context_save (::gl);
+    static std::map<std::tuple<std::string, int, int>, QPixmap> cache{};
+    std::tuple<std::string, int, int> const curEntry{blp_filename, width, height};
+    auto it{cache.find(curEntry)};
 
+    if(it != cache.end())
+      return &it->second;
+
+    opengl::context::save_current_context const context_save (::gl);
     QOpenGLContext context;
     context.create();
 
@@ -388,17 +394,17 @@ out_color = vec4(texture(tex, f_tex_coord/2.f + vec2(0.5)).rgb, 1.);
 
     gl.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
-    QPixmap pixmap (QPixmap::fromImage (pixel_buffer.toImage()));
-
+    QPixmap result{};
+    result = std::move(QPixmap::fromImage(pixel_buffer.toImage()));
     pixel_buffer.release();
 
-    if (pixmap.isNull())
+    if (result.isNull())
     {
       throw std::runtime_error
         ("failed rendering " + blp_filename + " to pixmap");
     }
 
-    return pixmap;
+    return &(cache[curEntry] = std::move(result));
   }
 }
 

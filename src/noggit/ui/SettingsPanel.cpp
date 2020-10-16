@@ -175,7 +175,7 @@ namespace noggit
       new QHBoxLayout (warning);
       auto icon (new QLabel (warning));
       icon->setPixmap
-        (render_blp_to_pixmap ("interface/gossipframe/availablequesticon.blp"));
+        (*render_blp_to_pixmap ("interface/gossipframe/availablequesticon.blp"));
       warning->layout()->addWidget (icon);
       warning->layout()->addWidget
         (new QLabel ("Changes may not take effect until next launch.", warning));

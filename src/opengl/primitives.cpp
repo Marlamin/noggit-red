@@ -51,8 +51,6 @@ namespace opengl
                      , R"code(
                           #version 330 core
 
-                          in vec4 position;
-
                           uniform vec3 pointPositions[8];
                           uniform mat4 model_view;
                           uniform mat4 projection;
@@ -60,7 +58,6 @@ namespace opengl
 
                           void main()
                           {
-                            vec4 pos = position; // hack to get rid of compiler optimizations, else Noggit crashes
                             gl_Position = projection * model_view * transform * vec4(pointPositions[gl_VertexID], 1.0);
                           }
                           )code"}
@@ -85,26 +82,8 @@ namespace opengl
 
       //std::vector<math::vector_3d> positions (math::box_points (min_point, max_point));
 
-      std::vector<math::vector_3d> positions = {
-          {-0.5f, -0.5f, -0.5f},
-          {0.5f, -0.5f, -0.5f},
-          {0.5f, 0.5f, -0.5f},
-          {-0.5f, 0.5f, -0.5f},
-          {-0.5f, -0.5f, 0.5f},
-          {0.5f, -0.5f, 0.5f},
-          {0.5f, 0.5f, 0.5f},
-          {-0.5f, 0.5f, 0.5f},
-      };
-
       static std::array<std::uint8_t, 16> const indices
           {{5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7}};
-
-      scoped::buffer_binder<GL_ARRAY_BUFFER> const pos_buffer (_positions);
-      gl.bufferData ( GL_ARRAY_BUFFER
-          , positions.size() * sizeof (*positions.data())
-          , positions.data()
-          , GL_STATIC_DRAW
-      );
 
       scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (_indices);
       gl.bufferData ( GL_ELEMENT_ARRAY_BUFFER
@@ -116,8 +95,6 @@ namespace opengl
       opengl::scoped::use_program shader (*_program.get());
 
       opengl::scoped::vao_binder const _ (_vao[0]);
-
-      shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       _buffers_are_setup = true;
 

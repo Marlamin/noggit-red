@@ -44,9 +44,8 @@ namespace opengl
       void setup_buffers();
 
       scoped::deferred_upload_vertex_arrays<1> _vao;
-      scoped::deferred_upload_buffers<2> _buffers;
-      GLuint const& _positions = _buffers[0];
-      GLuint const& _indices = _buffers[1];
+      scoped::deferred_upload_buffers<1> _buffers;
+      GLuint const& _indices = _buffers[0];
       std::unique_ptr<opengl::program> _program;
     };
 

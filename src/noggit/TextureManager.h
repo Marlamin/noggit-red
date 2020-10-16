@@ -81,7 +81,7 @@ private:
 
 namespace noggit
 {
-  QPixmap render_blp_to_pixmap ( std::string const& blp_filename
+  QPixmap* render_blp_to_pixmap ( std::string const& blp_filename
                                , int width = -1
                                , int height = -1
                                );
