@@ -56,7 +56,7 @@ namespace noggit
       _need_update = false;
 
       show();
-      setPixmap (*render_blp_to_pixmap (_filename, width(), height()));
+      setPixmap (*BLPRenderer::getInstance().render_blp_to_pixmap (_filename, width(), height()));
       setToolTip(QString::fromStdString(_filename));
     }
 

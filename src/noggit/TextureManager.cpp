@@ -3,15 +3,9 @@
 #include <math/vector_2d.hpp>
 #include <noggit/TextureManager.h>
 #include <noggit/Log.h> // LogDebug
-#include <opengl/context.hpp>
-#include <opengl/scoped.hpp>
-#include <opengl/shader.hpp>
 
 #include <QtCore/QString>
-#include <QtGui/QOffscreenSurface>
-#include <QtGui/QOpenGLFramebufferObjectFormat>
 #include <QtGui/QPixmap>
-#include <QtOpenGL/QGLPixelBuffer>
 
 #include <algorithm>
 
@@ -260,43 +254,126 @@ void blp_texture::finishLoading()
 
 namespace noggit
 {
-  QPixmap* render_blp_to_pixmap ( std::string const& blp_filename
-                               , int width
-                               , int height
-                               )
-  {
-    static std::map<std::tuple<std::string, int, int>, QPixmap> cache{};
-    std::tuple<std::string, int, int> const curEntry{blp_filename, width, height};
-    auto it{cache.find(curEntry)};
 
-    if(it != cache.end())
-      return &it->second;
+  BLPRenderer::BLPRenderer()
+  {
+    _cache = {};
 
     opengl::context::save_current_context const context_save (::gl);
-    QOpenGLContext context;
-    context.create();
+    _context.create();
 
-    QOpenGLFramebufferObjectFormat fmt;
-    fmt.setSamples(1);
-    fmt.setInternalTextureFormat(GL_RGBA8);
+    _fmt.setSamples(1);
+    _fmt.setInternalTextureFormat(GL_RGBA8);
 
-    QOffscreenSurface surface;
-    surface.create();
+    _surface.create();
 
-    context.makeCurrent(&surface);
+    _context.makeCurrent(&_surface);
 
-    opengl::context::scoped_setter const context_set (::gl, &context);
+    opengl::context::scoped_setter const context_set (::gl, &_context);
 
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth;
 
-    opengl::scoped::deferred_upload_vertex_arrays<1> vao;
-    vao.upload();
-    opengl::scoped::deferred_upload_buffers<3> buffers;
-    buffers.upload();
-    GLuint const& indices_vbo = buffers[0];
-    GLuint const& vertices_vbo = buffers[1];
-    GLuint const& texcoords_vbo = buffers[2];
+    _vao.upload();
+    _buffers.upload();
+
+    GLuint const& indices_vbo = _buffers[0];
+    GLuint const& vertices_vbo = _buffers[1];
+    GLuint const& texcoords_vbo = _buffers[2];
+
+    std::vector<math::vector_2d> vertices =
+        {
+             {-1.0f, -1.0f}
+            ,{-1.0f, 1.0f}
+            ,{ 1.0f, 1.0f}
+            ,{ 1.0f, -1.0f}
+        };
+    std::vector<math::vector_2d> texcoords =
+        {
+             {0.f, 0.f}
+            ,{0.f, 1.0f}
+            ,{1.0f, 1.0f}
+            ,{1.0f, 0.f}
+        };
+    std::vector<std::uint16_t> indices = {0,1,2, 2,3,0};
+
+    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(vertices_vbo, vertices, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(texcoords_vbo, texcoords, GL_STATIC_DRAW);
+    gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(indices_vbo, indices, GL_STATIC_DRAW);
+
+
+    _program.reset(new opengl::program
+                      (
+                          {
+                              {
+                                  GL_VERTEX_SHADER, R"code(
+                                  #version 330 core
+
+                                  in vec4 position;
+                                  in vec2 tex_coord;
+                                  out vec2 f_tex_coord;
+
+                                  uniform float width;
+                                  uniform float height;
+
+                                  void main()
+                                  {
+                                    f_tex_coord = vec2(tex_coord.x * width, -tex_coord.y * height);
+                                    gl_Position = vec4(position.x * width / 2, position.y * height / 2, position.z, 1.0);
+                                  }
+                                  )code"
+                              },
+                              {
+                                  GL_FRAGMENT_SHADER, R"code(
+                                  #version 330 core
+
+                                  uniform sampler2D tex;
+
+                                  in vec2 f_tex_coord;
+
+                                  layout(location = 0) out vec4 out_color;
+
+                                  void main()
+                                  {
+                                    out_color = vec4(texture(tex, f_tex_coord/2.f + vec2(0.5)).rgb, 1.);
+                                  }
+                                  )code"
+                              }
+                          }
+                      ));
+    
+    opengl::scoped::use_program shader (*_program.get());
+    
+    opengl::scoped::vao_binder const _ (_vao[0]);
+
+    {
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_binder (vertices_vbo);
+      shader.attrib("position", 2, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+    {
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> texcoords_binder (texcoords_vbo);
+      shader.attrib("tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
+
+  }
+
+  QPixmap* BLPRenderer::render_blp_to_pixmap ( std::string const& blp_filename
+                                               , int width
+                                               , int height
+                                               )
+  {
+    std::tuple<std::string, int, int> const curEntry{blp_filename, width, height};
+    auto it{_cache.find(curEntry)};
+
+    if(it != _cache.end())
+      return &it->second;
+
+    opengl::context::save_current_context const context_save (::gl);
+
+    _context.makeCurrent(&_surface);
+
+    opengl::context::scoped_setter const context_set (::gl, &_context);
 
     opengl::texture::set_active_texture(0);
     blp_texture texture(blp_filename);
@@ -307,90 +384,25 @@ namespace noggit
 
     float h = static_cast<float>(height);
     float w = static_cast<float>(width);
-    float half_h = h * 0.5f;
-    float half_w = w * 0.5f;
 
-    std::vector<math::vector_2d> vertices =
-    {
-       {-half_w, -half_h}
-      ,{-half_w, half_h}
-      ,{ half_w, half_h}
-      ,{ half_w, -half_h}
-    };
-    std::vector<math::vector_2d> texcoords =
-    {
-       {0.f, 0.f}
-      ,{0.f, h}
-      ,{w, h}
-      ,{w, 0.f}
-    };
-    std::vector<std::uint16_t> indices = {0,1,2, 2,3,0};
-
-    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(vertices_vbo, vertices, GL_STATIC_DRAW);
-    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(texcoords_vbo, texcoords, GL_STATIC_DRAW);
-    gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(indices_vbo, indices, GL_STATIC_DRAW);
-
-    QOpenGLFramebufferObject pixel_buffer(width, height, fmt);
+    QOpenGLFramebufferObject pixel_buffer(width, height, _fmt);
     pixel_buffer.bind();
 
     gl.viewport(0, 0, w, h);
     gl.clearColor(.0f, .0f, .0f, 1.f);
     gl.clear(GL_COLOR_BUFFER_BIT);
-
-    opengl::program program
-    (
-      {
-        {
-          GL_VERTEX_SHADER, R"code(
-#version 330 core
-
-in vec4 position;
-in vec2 tex_coord;
-out vec2 f_tex_coord;
-
-void main()
-{
-f_tex_coord = vec2(tex_coord.x, -tex_coord.y);
-gl_Position = position;
-}
-)code"
-        },
-        {
-          GL_FRAGMENT_SHADER,
-          R"code(
-#version 330 core
-
-uniform sampler2D tex;
-
-in vec2 f_tex_coord;
-
-layout(location = 0) out vec4 out_color;
-
-void main()
-{
-out_color = vec4(texture(tex, f_tex_coord/2.f + vec2(0.5)).rgb, 1.);
-}
-)code"
-        }
-      }
-    );
-
-    opengl::scoped::use_program shader (program);
+    
+    opengl::scoped::use_program shader (*_program.get());
 
     shader.uniform("tex", 0);
+    shader.uniform("width", w);
+    shader.uniform("height", h);
+
     texture.bind();
 
-    opengl::scoped::vao_binder const _ (vao[0]);
-
-    {
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_binder (vertices_vbo);
-      shader.attrib("position", 2, GL_FLOAT, GL_FALSE, 0, 0);
-    }
-    {
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> texcoords_binder (texcoords_vbo);
-      shader.attrib("tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
-    }
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(indices_vbo);
+    opengl::scoped::vao_binder const _ (_vao[0]);
+    
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_buffers[0]);
 
     gl.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
@@ -404,7 +416,7 @@ out_color = vec4(texture(tex, f_tex_coord/2.f + vec2(0.5)).rgb, 1.);
         ("failed rendering " + blp_filename + " to pixmap");
     }
 
-    return &(cache[curEntry] = std::move(result));
+    return &(_cache[curEntry] = std::move(result));
   }
 }
 

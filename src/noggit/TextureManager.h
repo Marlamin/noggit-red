@@ -5,12 +5,20 @@
 #include <noggit/AsyncObject.h>
 #include <noggit/multimap_with_normalized_key.hpp>
 #include <opengl/texture.hpp>
+#include <opengl/context.hpp>
+#include <opengl/scoped.hpp>
+#include <opengl/shader.hpp>
+
+#include <QtGui/QOffscreenSurface>
+#include <QtGui/QOpenGLFramebufferObjectFormat>
+#include <QtOpenGL/QGLPixelBuffer>
 
 #include <boost/optional.hpp>
 
 #include <map>
 #include <string>
 #include <vector>
+
 
 struct BLPHeader;
 
@@ -81,8 +89,35 @@ private:
 
 namespace noggit
 {
-  QPixmap* render_blp_to_pixmap ( std::string const& blp_filename
-                               , int width = -1
-                               , int height = -1
-                               );
+
+  class BLPRenderer
+  {
+  private:
+    BLPRenderer();
+
+    BLPRenderer( const BLPRenderer&);
+    BLPRenderer& operator=( BLPRenderer& );
+
+    std::map<std::tuple<std::string, int, int>, QPixmap> _cache;
+
+    QOpenGLContext _context;
+    QOpenGLFramebufferObjectFormat _fmt;
+    QOffscreenSurface _surface;
+    std::unique_ptr<opengl::program> _program;
+
+    opengl::scoped::deferred_upload_vertex_arrays<1> _vao;
+    opengl::scoped::deferred_upload_buffers<3> _buffers;
+
+  public:
+    static BLPRenderer& getInstance()
+    {
+      static BLPRenderer  instance;
+      return instance;
+    }
+
+    QPixmap* render_blp_to_pixmap ( std::string const& blp_filename, int width = -1, int height = -1);
+
+  };
+
+
 }

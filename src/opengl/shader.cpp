@@ -128,7 +128,7 @@ namespace opengl
     }
   }
 
-  //! \todo cache lookups?
+  //! \todo _cache lookups?
   GLuint program::uniform_location (std::string const& name) const
   {
     return gl.getUniformLocation (*_handle, name.c_str());

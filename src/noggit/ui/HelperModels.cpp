@@ -27,7 +27,7 @@ namespace noggit
       layout->addLayout (bottom_layout);
 
       auto icon (new QLabel (this));
-      icon->setPixmap (*render_blp_to_pixmap ("interface/icons/inv_misc_enggizmos_swissarmy.blp"));
+      icon->setPixmap (*BLPRenderer::getInstance().render_blp_to_pixmap ("interface/icons/inv_misc_enggizmos_swissarmy.blp"));
       top_layout->addWidget (icon);
       top_layout->addWidget (new QLabel ("Select a model to add.\nYou should select a chunk first.", this));
 
