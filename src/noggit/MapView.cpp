@@ -2251,7 +2251,7 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
 
     if (terrainMode == editing_mode::object)
     {
-      if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ShiftModifier))
+      if (_mod_shift_down)
       {
         if (hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
         {
@@ -2268,9 +2268,8 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
         {
           _world->range_add_to_selection(_cursor_pos, objectEditor->brushRadius(), false);
         }
-
       }
-      else if (QGuiApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier))
+      else if (_mod_ctrl_down)
       {
         if (hit.which() == eEntry_MapChunk)
         {
@@ -2283,7 +2282,7 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
         _world->add_to_selection(hit);
       }
     }
-    else if (hit.which() == eEntry_MapChunk)
+    else if (hit.which() == eEntry_MapChunk && !mouseMove)
     {
       _world->reset_selection();
       _world->add_to_selection(hit);
