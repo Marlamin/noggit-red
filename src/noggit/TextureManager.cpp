@@ -230,7 +230,7 @@ void blp_texture::finishLoading()
   if (f.isEof())
   {
     finished = true;
-    throw std::runtime_error ("File " + filename + " does not exists");
+    throw std::runtime_error ("File " + filename + " does not exist");
   }
 
   char const* lData = f.getPointer();
@@ -250,6 +250,7 @@ void blp_texture::finishLoading()
   {
     finished = true;
     throw std::logic_error ("unimplemented BLP colorEncoding");
+
   }
 
   f.close();
