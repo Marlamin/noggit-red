@@ -418,6 +418,11 @@ namespace noggit
 
     return &(_cache[curEntry] = std::move(result));
   }
+
+  BLPRenderer::~BLPRenderer()
+  {
+    opengl::context::scoped_setter const context_set (::gl, &_context);
+  }
 }
 
 scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& filename)

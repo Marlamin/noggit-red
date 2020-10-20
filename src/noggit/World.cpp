@@ -3,6 +3,7 @@
 #include <noggit/World.h>
 
 #include <math/frustum.hpp>
+#include <math/projection.hpp>
 #include <noggit/Brush.h> // brush
 #include <noggit/ChunkWater.hpp>
 #include <noggit/DBC.h>
@@ -503,7 +504,6 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
       math::vector_3d rot_result = math::matrix_4x4(math::matrix_4x4::rotation_xyz, {rx, ry, rz}) * diff_pos;
 
       pos += rot_result - diff_pos;
-      dir += dir_change;
     }
     else
     {
@@ -1758,9 +1758,349 @@ void World::convert_alphamap(bool to_big_alpha)
   mapIndex.save();
 }
 
-void World::saveMap (int, int)
+void World::drawMinimap ( MapTile *tile
+    , math::matrix_4x4 const& model_view
+    , math::matrix_4x4 const& projection
+    , math::vector_3d const& camera_pos
+)
 {
-  throw std::runtime_error("minimap saving not implemented");
+  if (!_display_initialized)
+  {
+    initDisplay();
+    _display_initialized = true;
+  }
+
+  math::matrix_4x4 const mvp(model_view * projection);
+  math::frustum const frustum(mvp);
+
+  if (!_m2_program_mini)
+  {
+    _m2_program_mini.reset
+        (new opengl::program
+             {{GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs")},
+              {GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs")}
+             }
+        );
+  }
+  if (!_m2_instanced_program_mini)
+  {
+    _m2_instanced_program_mini.reset
+        (new opengl::program
+             {{GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs", {"instanced"})},
+              {GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs")}
+             }
+        );
+  }
+
+  if (!_mcnk_program_mini)
+  {
+    _mcnk_program_mini.reset
+        (new opengl::program
+             {{GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("terrain_vs")},
+              {GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("terrain_fs")}
+             }
+        );
+  }
+
+  if (!_liquid_render_mini)
+  {
+    _liquid_render_mini.emplace();
+  }
+  if (!_wmo_program_mini)
+  {
+    _wmo_program_mini.reset
+        (new opengl::program
+             {{GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("wmo_vs")},
+              {GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs")}
+             }
+        );
+  }
+
+  int daytime = static_cast<int>(time) % 2880;
+
+  skies->update_sky_colors(camera_pos, daytime);
+  outdoorLightStats = ol->getLightStats(daytime);
+
+  math::vector_3d light_dir = outdoorLightStats.dayDir;
+  light_dir = {-light_dir.y, -light_dir.z, -light_dir.x};
+  // todo: figure out why I need to use a different light vector for the terrain
+  math::vector_3d terrain_light_dir = {-light_dir.z, light_dir.y, -light_dir.x};
+
+  math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
+  math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);
+
+  culldistance = _view_distance;
+
+  gl.enable(GL_DEPTH_TEST);
+  gl.depthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
+  gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  // draw terrain
+  {
+    opengl::scoped::use_program mcnk_shader{*_mcnk_program_mini.get()};
+
+    mcnk_shader.uniform("model_view", model_view);
+    mcnk_shader.uniform("projection", projection);
+
+    mcnk_shader.uniform("draw_lines", 0);
+    mcnk_shader.uniform("draw_hole_lines", 0);
+    mcnk_shader.uniform("draw_areaid_overlay", 0);
+    mcnk_shader.uniform("draw_terrain_height_contour", 0);
+
+    mcnk_shader.uniform("draw_impassible_flag", 0);
+
+    mcnk_shader.uniform("draw_wireframe", 0);
+    mcnk_shader.uniform("wireframe_type", _settings->value("wireframe/type", 0).toInt());
+    mcnk_shader.uniform("wireframe_radius", _settings->value("wireframe/radius", 1.5f).toFloat());
+    mcnk_shader.uniform("wireframe_width", _settings->value("wireframe/width", 1.f).toFloat());
+
+    // !\ todo store the color somewhere ?
+    QColor c = _settings->value("wireframe/color").value<QColor>();
+    math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
+    mcnk_shader.uniform("wireframe_color", wireframe_color);
+
+    mcnk_shader.uniform("draw_fog", 0);
+    mcnk_shader.uniform("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
+    // !\ todo use light dbcs values
+    mcnk_shader.uniform("fog_end", fogdistance);
+    mcnk_shader.uniform("fog_start", 0.5f);
+    mcnk_shader.uniform("camera", camera_pos);
+
+    mcnk_shader.uniform("light_dir", terrain_light_dir);
+    mcnk_shader.uniform("diffuse_color", diffuse_color);
+    mcnk_shader.uniform("ambient_color", ambient_color);
+
+    mcnk_shader.uniform("draw_cursor_circle", 0);
+
+    mcnk_shader.uniform("alphamap", 0);
+    mcnk_shader.uniform("tex0", 1);
+    mcnk_shader.uniform("tex1", 2);
+    mcnk_shader.uniform("tex2", 3);
+    mcnk_shader.uniform("tex3", 4);
+    mcnk_shader.uniform("shadow_map", 5);
+
+    mcnk_shader.uniform("tex_anim_0", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_1", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_2", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_3", math::vector_2d());
+
+    std::map<int, misc::random_color> area_id_colors;
+
+    tile->draw(frustum, mcnk_shader, detailtexcoords, culldistance, camera_pos, true, false,
+               false, false, false, area_id_colors, animtime,
+               display_mode::in_2D
+    );
+
+    tile_index m_tile = tile_index (camera_pos);
+    m_tile.z -= 1;
+
+    bool unload = !mapIndex.tileLoaded(m_tile) && !mapIndex.tileAwaitingLoading(m_tile);
+    MapTile* mTile = mapIndex.loadTile(m_tile);
+
+    if (mTile)
+    {
+      mTile->wait_until_loaded();
+
+      mTile->draw(frustum, mcnk_shader, detailtexcoords, culldistance, camera_pos, true, false,
+                 false, false, false, area_id_colors, animtime,
+                 display_mode::in_2D
+      );
+    }
+
+    gl.bindVertexArray(0);
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  }
+
+  // M2s / models
+  {
+
+    if (need_model_updates)
+    {
+      update_models_by_filename();
+    }
+
+    std::unordered_map<Model *, std::size_t> model_boxes_to_draw;
+    std::unordered_map<Model *, std::size_t> model_with_particles;
+
+    {
+      opengl::scoped::use_program m2_shader{*_m2_instanced_program_mini.get()};
+
+      m2_shader.uniform("model_view", model_view);
+      m2_shader.uniform("projection", projection);
+      m2_shader.uniform("tex1", 0);
+      m2_shader.uniform("tex2", 1);
+
+      m2_shader.uniform("draw_fog", 0);
+
+      m2_shader.uniform("light_dir", light_dir);
+      m2_shader.uniform("diffuse_color", diffuse_color);
+      m2_shader.uniform("ambient_color", ambient_color);
+
+      for (auto &it : _models_by_filename)
+      {
+        it.second[0]->model->wait_until_loaded();
+        it.second[0]->model->draw(model_view, it.second, m2_shader, frustum, culldistance, camera_pos, false,
+                                  animtime, false, false, model_with_particles,
+                                  model_boxes_to_draw, display_mode::in_2D
+        );
+      }
+
+    }
+  }
+
+  // Setup liquid lighting
+  {
+    opengl::scoped::use_program water_shader{_liquid_render_mini->shader_program()};
+    water_shader.uniform("animtime", static_cast<float>(animtime) / 2880.f);
+
+    water_shader.uniform("model_view", model_view);
+    water_shader.uniform("projection", projection);
+
+    math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], skies->ocean_shallow_alpha());
+    math::vector_4d ocean_color_dark(skies->color_set[OCEAN_COLOR_DARK], skies->ocean_deep_alpha());
+    math::vector_4d river_color_light(skies->color_set[RIVER_COLOR_LIGHT], skies->river_shallow_alpha());
+    math::vector_4d river_color_dark(skies->color_set[RIVER_COLOR_DARK], skies->river_deep_alpha());
+
+    water_shader.uniform("ocean_color_light", ocean_color_light);
+    water_shader.uniform("ocean_color_dark", ocean_color_dark);
+    water_shader.uniform("river_color_light", river_color_light);
+    water_shader.uniform("river_color_dark", river_color_dark);
+    water_shader.uniform("use_transform", 1);
+
+  }
+
+  // WMOs / map objects
+  {
+    opengl::scoped::use_program wmo_program{*_wmo_program_mini.get()};
+
+    wmo_program.uniform("model_view", model_view);
+    wmo_program.uniform("projection", projection);
+    wmo_program.uniform("tex1", 0);
+    wmo_program.uniform("tex2", 1);
+
+    wmo_program.uniform("draw_fog", 0);
+
+    wmo_program.uniform("exterior_light_dir", light_dir);
+    wmo_program.uniform("exterior_diffuse_color", diffuse_color);
+    wmo_program.uniform("exterior_ambient_color", ambient_color);
+
+    _model_instance_storage.for_each_wmo_instance([&](WMOInstance &wmo)
+                                                  {
+                                                    wmo.wmo->wait_until_loaded();
+                                                    wmo.draw(wmo_program, model_view, projection, frustum,
+                                                             culldistance, camera_pos, false, false,
+                                                             false, _liquid_render.get(), current_selection(),
+                                                             animtime, skies->hasSkies(), display_mode::in_2D
+                                                    );
+
+                                                  });
+
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.enable(GL_CULL_FACE);
+  }
+
+  // Liquids
+  {
+    _liquid_render_mini->force_texture_update();
+
+    // draw the water on both sides
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+
+    opengl::scoped::use_program water_shader{_liquid_render_mini->shader_program()};
+
+    water_shader.uniform("use_transform", 0);
+
+    tile->drawWater(frustum, culldistance, camera_pos, true, _liquid_render.get(), water_shader, animtime,
+                    -1, display_mode::in_2D
+    );
+
+    gl.bindVertexArray(0);
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  }
+}
+
+
+void World::saveMinimap (int width, int height)
+{
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+
+        //drawMinimap(mTile);
+
+        if (unload)
+        {
+          mapIndex.unloadTile(tile);
+        }
+      }
+    }
+  }
+
+}
+
+void World::saveMinimap(int width, int height, tile_index const& tile_idx)
+{
+  // Setup framebuffer
+  QOpenGLFramebufferObjectFormat fmt;
+  fmt.setSamples(1);
+  fmt.setInternalTextureFormat(GL_RGBA8);
+  fmt.setAttachment(QOpenGLFramebufferObject::Depth);
+
+  QOpenGLFramebufferObject pixel_buffer(width, height, fmt);
+  pixel_buffer.bind();
+
+  gl.viewport(0, 0, width, height);
+  gl.clearColor(.0f, .0f, .0f, 1.f);
+  gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // Load tile
+  bool unload = !mapIndex.tileLoaded(tile_idx) && !mapIndex.tileAwaitingLoading(tile_idx);
+  MapTile* mTile = mapIndex.loadTile(tile_idx);
+
+  if (mTile)
+  {
+    mTile->wait_until_loaded();
+    wait_for_all_tile_updates();
+
+    float max_height = getMaxTileHeight(tile_idx);
+
+    // setup view matrices
+    auto projection = math::ortho(
+        -TILESIZE / 2.0f,
+        TILESIZE / 2.0f,
+        -TILESIZE / 2.0f,
+        TILESIZE / 2.0f,
+        5.f,
+        10000.0f
+    );
+
+    auto look_at = math::look_at(math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 10.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f),
+                                 math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 9.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0 - 0.005f),
+                                 math::vector_3d(0.f,1.f, 0.f));
+
+    drawMinimap(mTile, look_at.transposed(), projection.transposed(), math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 15.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f));
+
+    QImage image = pixel_buffer.toImage();
+    image.save("/Users/sshumakov/Desktop/test_minimap.png");
+
+    if (unload)
+    {
+      mapIndex.unloadTile(tile_idx);
+    }
+  }
+
+  pixel_buffer.release();
 }
 
 void World::deleteModelInstance(int pUniqueID)
@@ -2343,4 +2683,33 @@ void World::range_add_to_selection(math::vector_3d const& pos, float radius, boo
     }
 
   });
+}
+
+float World::getMaxTileHeight(const tile_index& tile)
+{
+
+  MapTile* m_tile = mapIndex.getTile(tile);
+
+  float max_height = m_tile->getMaxHeight();
+
+  std::vector<uint32_t>* uids = m_tile->get_uids();
+
+  for (uint32_t uid : *uids)
+  {
+    auto instance = _model_instance_storage.get_instance(uid);
+
+    if (instance.get().which() == eEntry_WMO)
+    {
+      auto wmo = boost::get<selected_wmo_type>(instance.get());
+      max_height = std::max(max_height, std::max(wmo->extents[0].y, wmo->extents[1].y));
+    }
+    else
+    {
+      auto model = boost::get<selected_model_type>(instance.get());
+      max_height = std::max(max_height, std::max(model->extents()[0].y, model->extents()[1].y));
+    }
+  }
+
+
+  return max_height;
 }

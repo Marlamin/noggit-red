@@ -62,6 +62,8 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <thread>
+#include <chrono>
 
 
 static const float XSENS = 15.0f;
@@ -1529,6 +1531,15 @@ void MapView::initializeGL()
 void MapView::paintGL()
 {
   opengl::context::scoped_setter const _ (::gl, context());
+
+  if (Saving)
+  {
+    // std::this_thread::sleep_for(std::chrono::seconds {10});
+    _world->saveMinimap(512, 512, tile_index (_camera.position));
+    Saving = false;
+    return;
+  }
+
   const qreal now(_startup_time.elapsed() / 1000.0);
 
   _last_frame_durations.emplace_back (now - _last_update);

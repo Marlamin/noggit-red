@@ -24,6 +24,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <limits>
 
 MapTile::MapTile( int pX
                 , int pZ
@@ -321,12 +322,15 @@ bool MapTile::isTile(int pX, int pZ)
 
 float MapTile::getMaxHeight()
 {
-  float maxHeight = -99999.0f;
+  float maxHeight = std::numeric_limits<float>::min();
+
   for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
   {
     maxHeight = std::max(mChunks[nextChunk / 16][nextChunk % 16]->vmax.y, maxHeight);
   }
+
   return maxHeight;
+
 }
 
 void MapTile::convert_alphamap(bool to_big_alpha)

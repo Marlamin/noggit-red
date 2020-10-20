@@ -38,7 +38,7 @@ struct blp_texture : public opengl::texture, AsyncObject
 
   virtual async_priority loading_priority() const
   {
-    return async_priority::low;
+    return async_priority::high;
   }
 
 private:
@@ -114,6 +114,8 @@ namespace noggit
       static BLPRenderer  instance;
       return instance;
     }
+
+    ~BLPRenderer();
 
     QPixmap* render_blp_to_pixmap ( std::string const& blp_filename, int width = -1, int height = -1);
 

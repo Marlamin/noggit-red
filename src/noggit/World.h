@@ -260,7 +260,13 @@ public:
   void updateTilesModel(ModelInstance* m2, model_update type);
   void wait_for_all_tile_updates();
 
-  void saveMap (int width, int height);
+  void saveMinimap (int width, int height);
+  void saveMinimap (int width, int height, tile_index const& tile_idx);
+  void drawMinimap ( MapTile *tile
+      , math::matrix_4x4 const& model_view
+      , math::matrix_4x4 const& projection
+      , math::vector_3d const& camera_pos
+  );
 
   void deleteModelInstance(int pUniqueID);
   void deleteWMOInstance(int pUniqueID);
@@ -312,6 +318,8 @@ public:
   void updateVertexCenter();
   void clearVertexSelection();
 
+  float getMaxTileHeight(const tile_index& tile);
+
   math::vector_3d const& vertexCenter();
 
   void recalc_norms (MapChunk*) const;
@@ -348,9 +356,16 @@ private:
   std::unique_ptr<opengl::program> _m2_box_program;
   std::unique_ptr<opengl::program> _wmo_program;
 
+  // Minimap programs. Ugly, but those can't be shared between contexts, so we compile twice
+  std::unique_ptr<opengl::program> _mcnk_program_mini;
+  std::unique_ptr<opengl::program> _m2_program_mini;
+  std::unique_ptr<opengl::program> _m2_instanced_program_mini;
+  std::unique_ptr<opengl::program> _wmo_program_mini;
+
   noggit::cursor_render _cursor_render;
   opengl::primitives::sphere _sphere_render;
   opengl::primitives::square _square_render;
 
   boost::optional<liquid_render> _liquid_render = boost::none;
+  boost::optional<liquid_render> _liquid_render_mini = boost::none;
 };
