@@ -26,6 +26,8 @@ public:
   
   void ensure_deletable (AsyncObject*);
 
+  bool is_loading();
+
   AsyncLoader(int numThreads);
   ~AsyncLoader();
 

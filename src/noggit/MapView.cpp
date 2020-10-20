@@ -1534,17 +1534,46 @@ void MapView::paintGL()
 
   if (Saving)
   {
-    // std::this_thread::sleep_for(std::chrono::seconds {10});
-    _world->saveMinimap(512, 512, tile_index (_camera.position));
-    Saving = false;
-    return;
+    // increment tile indices here
+    if (mmap_render_success)
+    {
+      mmap_render_index++;
+    }
+
+    tile_index tile = tile_index(mmap_render_index / 64, mmap_render_index % 64);
+
+    if (_world->mapIndex.hasTile(tile))
+    {
+      mmap_render_success = _world->saveMinimap(512, 512, tile);
+    }
+    else
+    {
+      do
+      {
+        mmap_render_index++;
+        tile.x = mmap_render_index / 64;
+        tile.z = mmap_render_index % 64;
+
+      } while (!_world->mapIndex.hasTile(tile) && mmap_render_index != 4095);
+    }
+
+    if (mmap_render_success && mmap_render_index == 4095)
+    {
+      Saving = false;
+      mmap_render_index = 0;
+      mmap_render_success = false;
+    }
   }
 
   const qreal now(_startup_time.elapsed() / 1000.0);
 
   _last_frame_durations.emplace_back (now - _last_update);
 
-  tick (now - _last_update);
+  if (!Saving)
+  {
+    tick (now - _last_update);
+  }
+
   _last_update = now;
 
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1556,12 +1585,13 @@ void MapView::paintGL()
     _uid_duplicate_warning_shown = true;
 
     QMessageBox::critical( this
-                          , "UID ALREADY IN USE"
-                          , "Please enable 'Always check for max UID', mysql uid store or synchronize your "
-                            "uid.ini file if you're sharing the map between several mappers.\n\n"
-                            "Use 'Editor > Force uid check on next opening' to fix the issue."
-                          );
+        , "UID ALREADY IN USE"
+        , "Please enable 'Always check for max UID', mysql uid store or synchronize your "
+          "uid.ini file if you're sharing the map between several mappers.\n\n"
+          "Use 'Editor > Force uid check on next opening' to fix the issue."
+    );
   }
+
 }
 
 void MapView::resizeGL (int width, int height)

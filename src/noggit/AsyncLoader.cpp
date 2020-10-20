@@ -8,6 +8,26 @@
 #include <algorithm>
 #include <list>
 
+bool AsyncLoader::is_loading()
+{
+  std::lock_guard<std::mutex> const lock (_guard);
+  if (_currently_loading.empty())
+  {
+    return false;
+  }
+  else
+  {
+    for (auto async_obj : _currently_loading)
+    {
+      if (!async_obj->loading_failed() && async_obj->filename.length()) // the filename check is a hack
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 void AsyncLoader::process()
 {
   AsyncObject* object = nullptr;

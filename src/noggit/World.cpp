@@ -1861,11 +1861,6 @@ void World::drawMinimap ( MapTile *tile
     mcnk_shader.uniform("wireframe_color", wireframe_color);
 
     mcnk_shader.uniform("draw_fog", 0);
-    mcnk_shader.uniform("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
-    // !\ todo use light dbcs values
-    mcnk_shader.uniform("fog_end", fogdistance);
-    mcnk_shader.uniform("fog_start", 0.5f);
-    mcnk_shader.uniform("camera", camera_pos);
 
     mcnk_shader.uniform("light_dir", terrain_light_dir);
     mcnk_shader.uniform("diffuse_color", diffuse_color);
@@ -1895,7 +1890,7 @@ void World::drawMinimap ( MapTile *tile
     tile_index m_tile = tile_index (camera_pos);
     m_tile.z -= 1;
 
-    bool unload = !mapIndex.tileLoaded(m_tile) && !mapIndex.tileAwaitingLoading(m_tile);
+    bool unload = !mapIndex.has_unsaved_changes(m_tile);
     MapTile* mTile = mapIndex.loadTile(m_tile);
 
     if (mTile)
@@ -1906,6 +1901,11 @@ void World::drawMinimap ( MapTile *tile
                  false, false, false, area_id_colors, animtime,
                  display_mode::in_2D
       );
+    }
+
+    if (unload)
+    {
+      mapIndex.unloadTile(m_tile);
     }
 
     gl.bindVertexArray(0);
@@ -2049,7 +2049,7 @@ void World::saveMinimap (int width, int height)
 
 }
 
-void World::saveMinimap(int width, int height, tile_index const& tile_idx)
+bool World::saveMinimap(int width, int height, tile_index const& tile_idx)
 {
   // Setup framebuffer
   QOpenGLFramebufferObjectFormat fmt;
@@ -2065,13 +2065,18 @@ void World::saveMinimap(int width, int height, tile_index const& tile_idx)
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Load tile
-  bool unload = !mapIndex.tileLoaded(tile_idx) && !mapIndex.tileAwaitingLoading(tile_idx);
+  bool unload = !mapIndex.has_unsaved_changes(tile_idx);
   MapTile* mTile = mapIndex.loadTile(tile_idx);
 
   if (mTile)
   {
     mTile->wait_until_loaded();
     wait_for_all_tile_updates();
+
+    if (AsyncLoader::instance().is_loading())
+    {
+     return false;
+    }
 
     float max_height = getMaxTileHeight(tile_idx);
 
@@ -2092,7 +2097,7 @@ void World::saveMinimap(int width, int height, tile_index const& tile_idx)
     drawMinimap(mTile, look_at.transposed(), projection.transposed(), math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 15.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f));
 
     QImage image = pixel_buffer.toImage();
-    image.save("/Users/sshumakov/Desktop/test_minimap.png");
+    image.save(("/Users/sshumakov/Desktop/MinimapGenTest/test_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str());
 
     if (unload)
     {
@@ -2101,6 +2106,8 @@ void World::saveMinimap(int width, int height, tile_index const& tile_idx)
   }
 
   pixel_buffer.release();
+
+  return true;
 }
 
 void World::deleteModelInstance(int pUniqueID)

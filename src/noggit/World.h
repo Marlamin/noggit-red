@@ -49,6 +49,8 @@ private:
   std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
   noggit::world_model_instances_storage _model_instance_storage;
   noggit::world_tile_update_queue _tile_update_queue;
+  std::mutex _guard;
+
 public:
   MapIndex mapIndex;
   noggit::map_horizon horizon;
@@ -261,7 +263,7 @@ public:
   void wait_for_all_tile_updates();
 
   void saveMinimap (int width, int height);
-  void saveMinimap (int width, int height, tile_index const& tile_idx);
+  bool saveMinimap (int width, int height, tile_index const& tile_idx);
   void drawMinimap ( MapTile *tile
       , math::matrix_4x4 const& model_view
       , math::matrix_4x4 const& projection

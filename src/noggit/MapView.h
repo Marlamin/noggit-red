@@ -140,6 +140,9 @@ private:
   bool  leftClicked = false;
   bool  rightMouse = false;
 
+  bool mmap_render_success = false;
+  int mmap_render_index = 0;
+
   // Vars for the ground editing toggle mode store the status of some
   // view settings when the ground editing mode is switched on to
   // restore them if switch back again
