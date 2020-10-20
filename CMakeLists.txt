@@ -216,6 +216,7 @@ COLLECT_FILES(false noggit_root_sources src/noggit .cpp)
 COLLECT_FILES(true noggit_ui_sources src/noggit/ui .cpp)
 COLLECT_FILES(false math_sources src/math .cpp)
 COLLECT_FILES(false opengl_sources src/opengl .cpp)
+COLLECT_FILES(true red_sources src/noggit/Red .cpp)
 set ( util_sources
       src/util/exception_to_string.cpp
     )
@@ -224,6 +225,7 @@ COLLECT_FILES(true noggit_ui_headers src/noggit/ui ".h;.hpp")
 COLLECT_FILES(false math_headers src/math ".h;.hpp")
 COLLECT_FILES(false opengl_headers src/opengl ".h;.hpp")
 COLLECT_FILES(false shaders src/glsl .glsl)
+COLLECT_FILES(true red_headers src/noggit/Red ".hpp;.inl")
 
 IF(WIN32)
   set ( os_sources
@@ -254,6 +256,7 @@ source_group("external"  FILES ${external_sources} ${external_headers})
 source_group("os"  FILES ${os_sources} ${os_headers})
 source_group("util"  FILES ${util_sources})
 source_group("glsl"  FILES ${shaders})
+source_group("noggit/Red" FILES ${red_headers} ${red_sources})
 
 qt5_add_resources (compiled_resource_files "resources/resources.qrc")
 
@@ -268,6 +271,7 @@ ADD_EXECUTABLE ( noggit
                   ${mysql_sources}
                   ${os_sources}
                   ${util_sources}
+                  ${red_sources}
                   ${noggit_root_headers}
                   ${noggit_ui_headers}
                   ${opengl_headers}
@@ -277,6 +281,7 @@ ADD_EXECUTABLE ( noggit
                   ${os_headers}
                   ${ResFiles}
                   ${moced}
+                  ${red_headers}
                   ${compiled_resource_files}
                   ${shaders}
                   ${force_update_file}
