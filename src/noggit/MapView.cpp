@@ -1563,31 +1563,25 @@ void MapView::saveMinimap(noggit::MinimapRenderSettings* settings)
     case noggit::MinimapGenMode::MAP:
     {
       // increment tile indices here
-      if (mmap_render_success)
-      {
-        mmap_render_index++;
-      }
-
       tile_index tile = tile_index(mmap_render_index / 64, mmap_render_index % 64);
 
       if (_world->mapIndex.hasTile(tile))
       {
         mmap_render_success = _world->saveMinimap(512, 512, tile);
+
+        if (mmap_render_success)
+        {
+          mmap_render_index++;
+        }
       }
       else
-      {
-        do
+      {do
         {
           mmap_render_index++;
           tile.x = mmap_render_index / 64;
           tile.z = mmap_render_index % 64;
 
         } while (!_world->mapIndex.hasTile(tile) && mmap_render_index != 4095 );
-
-        if (mmap_render_success)
-        {
-          mmap_render_index--;
-        }
 
       }
 
