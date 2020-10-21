@@ -168,7 +168,7 @@ private:
   uid_fix_mode _uid_fix;
   bool _from_bookmark;
 
-  bool Saving = false;
+  bool saving_minimap = false;
 
   noggit::ui::toolbar* _toolbar;
 
@@ -200,7 +200,7 @@ public:
   void selectModel(std::string const& model);
   void change_selected_wmo_doodadset(int set);
   void saveMinimap(noggit::MinimapRenderSettings* settings);
-  void initMinimapSave() { Saving = true; };
+  void initMinimapSave() { saving_minimap = true; };
 
   void set_editing_mode (editing_mode);
 

@@ -1011,7 +1011,7 @@ void MapView::createGUI()
   ADD_ACTION (view_menu, "Decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
   ADD_ACTION (view_menu, "Increase camera speed", Qt::Key_P, [this] { _camera.move_speed *= 2.0f; });
 
-  ADD_ACTION (file_menu, "Save minimaps", "Ctrl+Shift+P", [this] { Saving = true; });
+  ADD_ACTION (file_menu, "Save minimaps", "Ctrl+Shift+P", [this] { saving_minimap = true; });
 
   ADD_ACTION ( view_menu
              , "Turn camera around 180°"
@@ -1550,12 +1550,12 @@ void MapView::saveMinimap(noggit::MinimapRenderSettings* settings)
       }
       else
       {
-        Saving = false;
+        saving_minimap = false;
       }
 
       if (mmap_render_success)
       {
-        Saving = false;
+        saving_minimap = false;
       }
 
       break;
@@ -1593,7 +1593,7 @@ void MapView::saveMinimap(noggit::MinimapRenderSettings* settings)
 
       if (mmap_render_success && mmap_render_index >= 4095)
       {
-        Saving = false;
+        saving_minimap = false;
         mmap_render_index = 0;
         mmap_render_success = false;
       }
@@ -1613,7 +1613,7 @@ void MapView::paintGL()
 {
   opengl::context::scoped_setter const _ (::gl, context());
 
-  if (Saving)
+  if (saving_minimap)
   {
     saveMinimap(minimapTool->getMinimapRenderSettings());
   }
@@ -1622,7 +1622,7 @@ void MapView::paintGL()
 
   _last_frame_durations.emplace_back (now - _last_update);
 
-  if (!Saving)
+  if (!saving_minimap)
   {
     tick (now - _last_update);
   }
