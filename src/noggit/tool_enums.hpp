@@ -70,6 +70,7 @@ enum class editing_mode
   water,
   mccv,
   object,
+  minimap
 };
 
 enum water_opacity

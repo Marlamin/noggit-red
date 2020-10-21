@@ -35,6 +35,7 @@
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/hole_tool.hpp>
 #include <noggit/ui/texture_palette_small.hpp>
+#include <noggit/ui/MinimapCreator.hpp>
 #include <opengl/scoped.hpp>
 
 #include "revision.h"
@@ -62,8 +63,6 @@
 #include <regex>
 #include <string>
 #include <vector>
-#include <thread>
-#include <chrono>
 
 
 static const float XSENS = 15.0f;
@@ -127,6 +126,9 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
     break;
   case editing_mode::holes:
     _hole_tool_dock->setVisible(!ui_hidden);
+    break;
+  case editing_mode::minimap:
+    _minimap_tool_dock->setVisible(!ui_hidden);
     break;
   }
 
@@ -194,7 +196,6 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 void MapView::createGUI()
 {
   // create tool widgets
-
   _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
   terrainTool = new noggit::ui::terrain_tool(_terrain_tool_dock);
   _terrain_tool_dock->setWidget(terrainTool);
@@ -266,6 +267,11 @@ void MapView::createGUI()
   shaderTool = new noggit::ui::shader_tool(shader_color, _vertex_shading_dock);
   _vertex_shading_dock->setWidget(shaderTool);
   _tool_properties_docks.insert(_vertex_shading_dock);
+
+  _minimap_tool_dock = new QDockWidget("Minimap Creator", this);
+  minimapTool = new noggit::ui::MinimapCreator(this);
+  _minimap_tool_dock->setWidget(minimapTool);
+  _tool_properties_docks.insert(_minimap_tool_dock);
 
   _object_editor_dock = new QDockWidget("Object", this);
   objectEditor = new noggit::ui::object_editor(this
@@ -1528,41 +1534,88 @@ void MapView::initializeGL()
   }
 }
 
+
+void MapView::saveMinimap(noggit::MinimapRenderSettings* settings)
+{
+
+  switch (settings->export_mode)
+  {
+    case noggit::MinimapGenMode::CURRENT_ADT:
+    {
+      tile_index tile = tile_index(_camera.position);
+
+      if (_world->mapIndex.hasTile(tile))
+      {
+        mmap_render_success = _world->saveMinimap(512, 512, tile);
+      }
+      else
+      {
+        Saving = false;
+      }
+
+      if (mmap_render_success)
+      {
+        Saving = false;
+      }
+
+      break;
+    }
+    case noggit::MinimapGenMode::MAP:
+    {
+      // increment tile indices here
+      if (mmap_render_success)
+      {
+        mmap_render_index++;
+      }
+
+      tile_index tile = tile_index(mmap_render_index / 64, mmap_render_index % 64);
+
+      if (_world->mapIndex.hasTile(tile))
+      {
+        mmap_render_success = _world->saveMinimap(512, 512, tile);
+      }
+      else
+      {
+        do
+        {
+          mmap_render_index++;
+          tile.x = mmap_render_index / 64;
+          tile.z = mmap_render_index % 64;
+
+        } while (!_world->mapIndex.hasTile(tile) && mmap_render_index != 4095 );
+
+        if (mmap_render_success)
+        {
+          mmap_render_index--;
+        }
+
+      }
+
+      if (mmap_render_success && mmap_render_index >= 4095)
+      {
+        Saving = false;
+        mmap_render_index = 0;
+        mmap_render_success = false;
+      }
+
+      break;
+    }
+    case noggit::MinimapGenMode::SELECTED_ADTS:
+    {
+      break;
+    }
+  }
+
+
+}
+
 void MapView::paintGL()
 {
   opengl::context::scoped_setter const _ (::gl, context());
 
   if (Saving)
   {
-    // increment tile indices here
-    if (mmap_render_success)
-    {
-      mmap_render_index++;
-    }
-
-    tile_index tile = tile_index(mmap_render_index / 64, mmap_render_index % 64);
-
-    if (_world->mapIndex.hasTile(tile))
-    {
-      mmap_render_success = _world->saveMinimap(512, 512, tile);
-    }
-    else
-    {
-      do
-      {
-        mmap_render_index++;
-        tile.x = mmap_render_index / 64;
-        tile.z = mmap_render_index % 64;
-
-      } while (!_world->mapIndex.hasTile(tile) && mmap_render_index != 4095);
-    }
-
-    if (mmap_render_success && mmap_render_index == 4095)
-    {
-      Saving = false;
-      mmap_render_index = 0;
-      mmap_render_success = false;
-    }
+    saveMinimap(minimapTool->getMinimapRenderSettings());
   }
 
   const qreal now(_startup_time.elapsed() / 1000.0);

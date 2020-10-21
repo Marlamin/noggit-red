@@ -10,6 +10,7 @@
 #include <noggit/camera.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/ObjectEditor.h>
+#include <noggit/ui/MinimapCreator.hpp>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/unsigned_int_property.hpp>
 
@@ -198,6 +199,8 @@ public:
   void tick (float dt);
   void selectModel(std::string const& model);
   void change_selected_wmo_doodadset(int set);
+  void saveMinimap(noggit::MinimapRenderSettings* settings);
+  void initMinimapSave() { Saving = true; };
 
   void set_editing_mode (editing_mode);
 
@@ -312,4 +315,6 @@ private:
   QDockWidget* _texturing_dock;
   noggit::ui::hole_tool* holeTool;
   QDockWidget* _hole_tool_dock;
+  noggit::ui::MinimapCreator* minimapTool;
+  QDockWidget* _minimap_tool_dock;
 };
