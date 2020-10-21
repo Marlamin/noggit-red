@@ -68,7 +68,7 @@ namespace noggit
       bool _draw_camera;
       bool _draw_boundaries;
 
-      bool _use_selection;
+      bool _use_selection = false;
       bool _is_selecting = false;
     };
   }

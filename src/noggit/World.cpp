@@ -1844,30 +1844,12 @@ void World::drawMinimap ( MapTile *tile
     mcnk_shader.uniform("model_view", model_view);
     mcnk_shader.uniform("projection", projection);
 
-    mcnk_shader.uniform("draw_lines", 0);
-    mcnk_shader.uniform("draw_hole_lines", 0);
-    mcnk_shader.uniform("draw_areaid_overlay", 0);
-    mcnk_shader.uniform("draw_terrain_height_contour", 0);
-
-    mcnk_shader.uniform("draw_impassible_flag", 0);
-
-    mcnk_shader.uniform("draw_wireframe", 0);
-    mcnk_shader.uniform("wireframe_type", _settings->value("wireframe/type", 0).toInt());
-    mcnk_shader.uniform("wireframe_radius", _settings->value("wireframe/radius", 1.5f).toFloat());
-    mcnk_shader.uniform("wireframe_width", _settings->value("wireframe/width", 1.f).toFloat());
-
-    // !\ todo store the color somewhere ?
-    QColor c = _settings->value("wireframe/color").value<QColor>();
-    math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
-    mcnk_shader.uniform("wireframe_color", wireframe_color);
-
-    mcnk_shader.uniform("draw_fog", 0);
+    mcnk_shader.uniform("draw_lines", static_cast<int>(settings->draw_adt_grid));
+    mcnk_shader.uniform("draw_terrain_height_contour", static_cast<int>(settings->draw_elevation));
 
     mcnk_shader.uniform("light_dir", terrain_light_dir);
     mcnk_shader.uniform("diffuse_color", diffuse_color);
     mcnk_shader.uniform("ambient_color", ambient_color);
-
-    mcnk_shader.uniform("draw_cursor_circle", 0);
 
     mcnk_shader.uniform("alphamap", 0);
     mcnk_shader.uniform("tex0", 1);
@@ -1914,6 +1896,7 @@ void World::drawMinimap ( MapTile *tile
   }
 
   // M2s / models
+  if (settings->draw_m2)
   {
 
     if (need_model_updates)
@@ -1932,8 +1915,6 @@ void World::drawMinimap ( MapTile *tile
       m2_shader.uniform("tex1", 0);
       m2_shader.uniform("tex2", 1);
 
-      m2_shader.uniform("draw_fog", 0);
-
       m2_shader.uniform("light_dir", light_dir);
       m2_shader.uniform("diffuse_color", diffuse_color);
       m2_shader.uniform("ambient_color", ambient_color);
@@ -1951,6 +1932,7 @@ void World::drawMinimap ( MapTile *tile
   }
 
   // Setup liquid lighting
+  if (settings->draw_water)
   {
     opengl::scoped::use_program water_shader{_liquid_render_mini->shader_program()};
     water_shader.uniform("animtime", static_cast<float>(animtime) / 2880.f);
@@ -1972,6 +1954,7 @@ void World::drawMinimap ( MapTile *tile
   }
 
   // WMOs / map objects
+  if (settings->draw_wmo)
   {
     opengl::scoped::use_program wmo_program{*_wmo_program_mini.get()};
 
@@ -2003,6 +1986,7 @@ void World::drawMinimap ( MapTile *tile
   }
 
   // Liquids
+  if (settings->draw_water)
   {
     _liquid_render_mini->force_texture_update();
 
