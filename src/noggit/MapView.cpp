@@ -1293,6 +1293,8 @@ void MapView::createGUI()
   addHotkey(Qt::Key_8, MOD_ctrl, [this] { change_selected_wmo_doodadset(8); });
   addHotkey(Qt::Key_9, MOD_ctrl, [this] { change_selected_wmo_doodadset(9); });
 
+  addHotkey(Qt::Key_Escape, MOD_none, [this] { _main_window->close(); });
+
   connect(_main_window, &noggit::ui::main_window::exit_prompt_opened, this, &MapView::on_exit_prompt);
 }
 
