@@ -3,6 +3,7 @@
 #pragma once
 
 #include <QWidget>
+#include <array>
 
 namespace math
 {
@@ -39,12 +40,20 @@ namespace noggit
         { _draw_boundaries = draw_boundaries_; update(); return _draw_boundaries; }
       inline const bool& draw_boundaries() const { return _draw_boundaries; }
 
+      inline const std::array<bool, 4096>* use_selection (std::array<bool, 4096>* selection_)
+      { _use_selection = true; _selected_tiles = selection_; update(); return _selected_tiles; }
+      inline const std::array<bool, 4096>* selection() const { return _selected_tiles; }
+
       inline void camera (noggit::camera* camera) { _camera = camera; }
 
     protected:
       virtual void paintEvent (QPaintEvent*) override;
       virtual void mouseDoubleClickEvent (QMouseEvent*) override;
       virtual void mouseMoveEvent(QMouseEvent*) override;
+      virtual void mousePressEvent(QMouseEvent* event) override;
+      virtual void mouseReleaseEvent(QMouseEvent* event) override;
+
+      QPoint locateTile(QMouseEvent* event);
 
     signals:
       void map_clicked (const ::math::vector_3d&);
@@ -53,9 +62,14 @@ namespace noggit
     private:
       World const* _world;
       noggit::camera* _camera;
+      std::array<bool, 4096>* _selected_tiles;
+
       bool _draw_skies;
       bool _draw_camera;
       bool _draw_boundaries;
+
+      bool _use_selection;
+      bool _is_selecting = false;
     };
   }
 }

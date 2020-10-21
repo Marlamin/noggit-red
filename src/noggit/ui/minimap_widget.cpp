@@ -5,10 +5,13 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QToolTip>
+#include <QFormLayout>
+#include <QApplication>
 
 #include <noggit/Sky.h>
 #include <noggit/World.h>
 #include <noggit/camera.hpp>
+#include <QTransform>
 
 namespace noggit
 {
@@ -21,12 +24,13 @@ namespace noggit
       , _draw_skies (false)
     {
       setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-      setMouseTracking(true);
+      //setMouseTracking(true);
+      setMaximumSize(QSize(1024, 1024));
     }
 
     QSize minimap_widget::sizeHint() const
     {
-      return QSize (700, 700);
+      return QSize (1024, 1024);
     }
 
     //! \todo Only redraw stuff as told in event.
@@ -44,6 +48,8 @@ namespace noggit
                              | QPainter::TextAntialiasing
                              | QPainter::SmoothPixmapTransform
                              );
+
+
 
       if (world())
       {
@@ -102,6 +108,17 @@ namespace noggit
                                          )
                                  );
               }
+              
+              if (_use_selection && _selected_tiles->at(64 * i + j))
+              {
+                painter.setPen(QColor::fromRgbF(1.0f, 0.0f, 0.0f, 1.f));
+                painter.drawRect ( QRect ( tile_size * i + 1
+                    , tile_size * j + 1
+                    , tile_size - 2
+                    , tile_size - 2
+                    )
+                );
+              }
             }
           }
         }
@@ -146,13 +163,25 @@ namespace noggit
       else
       {
         //! \todo Draw something so user realizes this will become the minimap.
-        painter.setPen (Qt::black);
+        painter.setPen (palette().color(QPalette::WindowText));
         painter.setFont (QFont ("Arial", 30));
         painter.drawText ( drawing_rect
                          , Qt::AlignCenter
-                         , tr ("Select a map on the left side.")
+                         , tr ("Select a map")
                          );
       }
+    }
+
+    QPoint minimap_widget::locateTile(QMouseEvent* event)
+    {
+      const int smaller_side ((qMin (rect().width(), rect().height()) / 64) * 64);
+      const int tile_size (smaller_side / 64);
+      //! \note event->pos() / tile_size seems to be using floating point arithmetic, therefore getting wrong results.
+      const QPoint tile ( event->pos().x() / float(tile_size)
+          , event->pos().y() / float(tile_size)
+      );
+
+      return tile;
     }
 
     void minimap_widget::mouseDoubleClickEvent (QMouseEvent* event)
@@ -163,14 +192,7 @@ namespace noggit
         return;
       }
 
-      const int smaller_side ((qMin (rect().width(), rect().height()) / 64) * 64);
-      const int tile_size (smaller_side / 64);
-      //! \note event->pos() / tile_size seems to be using floating point arithmetic, therefore getting wrong results.
-      const QPoint tile ( event->pos().x() / tile_size
-                        , event->pos().y() / tile_size
-                        );
-
-      emit tile_clicked (tile);
+      QPoint tile = locateTile(event);
 
       if (!world()->mapIndex.hasTile (tile_index (tile.x(), tile.y())))
       {
@@ -180,24 +202,48 @@ namespace noggit
 
       event->accept();
 
-      emit map_clicked ( ::math::vector_3d ( (event->pos().x() / float (tile_size)) * TILESIZE
-                                           , 0.0f
-                                           , (event->pos().y() / float (tile_size)) * TILESIZE
-                                           )
-                       );
+      emit map_clicked(::math::vector_3d ( tile.x() * TILESIZE + TILESIZE / 2
+                                         , 0.0f, tile.y() * TILESIZE + TILESIZE / 2));
+    }
+
+    void minimap_widget::mousePressEvent(QMouseEvent* event)
+    {
+      if (event->button() != Qt::LeftButton)
+      {
+        event->ignore();
+        return;
+      }
+
+      QPoint tile = locateTile(event);
+      emit tile_clicked(tile);
+      _is_selecting = true;
+
+      update();
+    }
+
+    void minimap_widget::mouseReleaseEvent(QMouseEvent* event)
+    {
+      _is_selecting = false;
+      update();
     }
 
     void minimap_widget::mouseMoveEvent(QMouseEvent* event)
     {
       if (world())
       {
-        const int smaller_side((qMin(rect().width(), rect().height()) / 64) * 64);
-        const int tile_size(smaller_side / 64);
-        int x = event->pos().x(), y = event->pos().y();
+        QPoint tile = locateTile(event);
 
-        std::string str("ADT: " + std::to_string(x / tile_size) + "_" + std::to_string(y / tile_size));
+        std::string str("ADT: " + std::to_string(tile.x()) + "_" + std::to_string(tile.y()));
 
-        QToolTip::showText(mapToGlobal(QPoint(x, y+5)), QString::fromStdString(str));
+        QToolTip::showText(mapToGlobal(QPoint(event->pos().x(), event->pos().y() + 5)), QString::fromStdString(str));
+
+        if (_is_selecting)
+        {
+          emit tile_clicked(tile);
+        }
+
+        update();
+
       }
     }
   }

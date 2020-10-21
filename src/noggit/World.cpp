@@ -1762,6 +1762,7 @@ void World::drawMinimap ( MapTile *tile
     , math::matrix_4x4 const& model_view
     , math::matrix_4x4 const& projection
     , math::vector_3d const& camera_pos
+    , MinimapRenderSettings* settings
 )
 {
   if (!_display_initialized)
@@ -1829,7 +1830,7 @@ void World::drawMinimap ( MapTile *tile
   math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
   math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);
 
-  culldistance = _view_distance;
+  culldistance = 100000.0f;
 
   gl.enable(GL_DEPTH_TEST);
   gl.depthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
@@ -2021,35 +2022,7 @@ void World::drawMinimap ( MapTile *tile
   }
 }
 
-
-void World::saveMinimap (int width, int height)
-{
-  for (size_t z = 0; z < 64; z++)
-  {
-    for (size_t x = 0; x < 64; x++)
-    {
-      tile_index tile(x, z);
-
-      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
-      MapTile* mTile = mapIndex.loadTile(tile);
-
-      if (mTile)
-      {
-        mTile->wait_until_loaded();
-
-        //drawMinimap(mTile);
-
-        if (unload)
-        {
-          mapIndex.unloadTile(tile);
-        }
-      }
-    }
-  }
-
-}
-
-bool World::saveMinimap(int width, int height, tile_index const& tile_idx)
+bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* settings)
 {
   // Setup framebuffer
   QOpenGLFramebufferObjectFormat fmt;
@@ -2057,10 +2030,10 @@ bool World::saveMinimap(int width, int height, tile_index const& tile_idx)
   fmt.setInternalTextureFormat(GL_RGBA8);
   fmt.setAttachment(QOpenGLFramebufferObject::Depth);
 
-  QOpenGLFramebufferObject pixel_buffer(width, height, fmt);
+  QOpenGLFramebufferObject pixel_buffer(settings->resolution, settings->resolution, fmt);
   pixel_buffer.bind();
 
-  gl.viewport(0, 0, width, height);
+  gl.viewport(0, 0, settings->resolution, settings->resolution);
   gl.clearColor(.0f, .0f, .0f, 1.f);
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -2087,14 +2060,19 @@ bool World::saveMinimap(int width, int height, tile_index const& tile_idx)
         -TILESIZE / 2.0f,
         TILESIZE / 2.0f,
         5.f,
-        10000.0f
+        100000.0f
     );
 
     auto look_at = math::look_at(math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 10.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f),
                                  math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 9.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0 - 0.005f),
                                  math::vector_3d(0.f,1.f, 0.f));
 
-    drawMinimap(mTile, look_at.transposed(), projection.transposed(), math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 15.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f));
+    drawMinimap(mTile
+        , look_at.transposed()
+        , projection.transposed()
+        , math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f
+            , max_height + 15.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f)
+        , settings);
 
     QImage image = pixel_buffer.toImage();
     image.save(("/Users/sshumakov/Desktop/MinimapGenTest/test_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str());

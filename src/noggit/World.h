@@ -16,6 +16,7 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/world_tile_update_queue.hpp>
 #include <noggit/world_model_instances_storage.hpp>
+#include <noggit/ui/MinimapCreator.hpp>
 #include <opengl/primitives.hpp>
 #include <opengl/shader.fwd.hpp>
 
@@ -262,12 +263,12 @@ public:
   void updateTilesModel(ModelInstance* m2, model_update type);
   void wait_for_all_tile_updates();
 
-  void saveMinimap (int width, int height);
-  bool saveMinimap (int width, int height, tile_index const& tile_idx);
+  bool saveMinimap (tile_index const& tile_idx, MinimapRenderSettings* settings);
   void drawMinimap ( MapTile *tile
       , math::matrix_4x4 const& model_view
       , math::matrix_4x4 const& projection
       , math::vector_3d const& camera_pos
+      , MinimapRenderSettings* settings
   );
 
   void deleteModelInstance(int pUniqueID);

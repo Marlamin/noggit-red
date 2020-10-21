@@ -137,6 +137,11 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
 
 void MapView::ResetSelectedObjectRotation()
 {
+  if (terrainMode != editing_mode::object)
+  {
+    return;
+  }
+
   for (auto& selection : _world->current_selection())
   {
     if (selection.which() == eEntry_WMO)
@@ -161,6 +166,11 @@ void MapView::ResetSelectedObjectRotation()
 
 void MapView::snap_selected_models_to_the_ground()
 {
+  if (terrainMode != editing_mode::object)
+  {
+    return;
+  }
+
   _world->snap_selected_models_to_the_ground();
   _rotation_editor_need_update = true;
 }
@@ -168,6 +178,11 @@ void MapView::snap_selected_models_to_the_ground()
 
 void MapView::DeleteSelectedObject()
 {
+  if (terrainMode != editing_mode::object)
+  {
+    return;
+  }
+
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
 
@@ -269,7 +284,8 @@ void MapView::createGUI()
   _tool_properties_docks.insert(_vertex_shading_dock);
 
   _minimap_tool_dock = new QDockWidget("Minimap Creator", this);
-  minimapTool = new noggit::ui::MinimapCreator(this);
+  _minimap_tool_dock->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+  minimapTool = new noggit::ui::MinimapCreator(this, _world.get(), _minimap_tool_dock);
   _minimap_tool_dock->setWidget(minimapTool);
   _tool_properties_docks.insert(_minimap_tool_dock);
 
@@ -1537,18 +1553,21 @@ void MapView::initializeGL()
 }
 
 
-void MapView::saveMinimap(noggit::MinimapRenderSettings* settings)
+void MapView::saveMinimap(MinimapRenderSettings* settings)
 {
+  // This convoluted logic is necessary here if we want to draw minimaps in the same OpenGL context.
+  // And we do, to avoid loading geometry twice. Even though, offscreen one in the background would be nice.
+  // The idea is, if rendering fails due to unfinished loading, we skip to the next frame until we are able to render.
 
   switch (settings->export_mode)
   {
-    case noggit::MinimapGenMode::CURRENT_ADT:
+    case MinimapGenMode::CURRENT_ADT:
     {
       tile_index tile = tile_index(_camera.position);
 
       if (_world->mapIndex.hasTile(tile))
       {
-        mmap_render_success = _world->saveMinimap(512, 512, tile);
+        mmap_render_success = _world->saveMinimap(tile, settings);
       }
       else
       {
@@ -1562,14 +1581,13 @@ void MapView::saveMinimap(noggit::MinimapRenderSettings* settings)
 
       break;
     }
-    case noggit::MinimapGenMode::MAP:
+    case MinimapGenMode::MAP:
     {
-      // increment tile indices here
       tile_index tile = tile_index(mmap_render_index / 64, mmap_render_index % 64);
 
       if (_world->mapIndex.hasTile(tile))
       {
-        mmap_render_success = _world->saveMinimap(512, 512, tile);
+        mmap_render_success = _world->saveMinimap(tile, settings);
 
         if (mmap_render_success)
         {
@@ -1577,7 +1595,8 @@ void MapView::saveMinimap(noggit::MinimapRenderSettings* settings)
         }
       }
       else
-      {do
+      {
+        do
         {
           mmap_render_index++;
           tile.x = mmap_render_index / 64;
@@ -1596,8 +1615,52 @@ void MapView::saveMinimap(noggit::MinimapRenderSettings* settings)
 
       break;
     }
-    case noggit::MinimapGenMode::SELECTED_ADTS:
+    case MinimapGenMode::SELECTED_ADTS:
     {
+      auto selected_tiles = minimapTool->getSelectedTiles();
+
+      while (mmap_render_index < 4096)
+      {
+
+        bool is_selected = selected_tiles->at(mmap_render_index);
+
+        if (is_selected)
+        {
+          tile_index tile = tile_index(mmap_render_index / 64, mmap_render_index % 64);
+
+          if (_world->mapIndex.hasTile(tile))
+          {
+            mmap_render_success = _world->saveMinimap(tile, settings);
+
+            if (mmap_render_success)
+            {
+              mmap_render_index++;
+              break;
+            }
+            else
+            {
+              break;
+            }
+          }
+          else
+          {
+            mmap_render_index++;
+          }
+        }
+        else
+        {
+          mmap_render_index++;
+        }
+
+      }
+
+      if (mmap_render_success && mmap_render_index >= 4095)
+      {
+        saving_minimap = false;
+        mmap_render_index = 0;
+        mmap_render_success = false;
+      }
+
       break;
     }
   }
@@ -2339,8 +2402,20 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
   {
     auto const& hit (results.front().second);
 
-    if (terrainMode == editing_mode::object)
+    if (terrainMode == editing_mode::object || terrainMode == editing_mode::minimap)
     {
+      float radius = 0.0f;
+      switch (terrainMode)
+      {
+        case editing_mode::object:
+         radius = objectEditor->brushRadius();
+         break;
+
+        case editing_mode::minimap:
+          radius = minimapTool->brushRadius();
+          break;
+      }
+
       if (_mod_shift_down)
       {
         if (hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
@@ -2356,14 +2431,14 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
         }
         else if (hit.which() == eEntry_MapChunk)
         {
-          _world->range_add_to_selection(_cursor_pos, objectEditor->brushRadius(), false);
+          _world->range_add_to_selection(_cursor_pos, radius, false);
         }
       }
       else if (_mod_ctrl_down)
       {
         if (hit.which() == eEntry_MapChunk)
         {
-          _world->range_add_to_selection(_cursor_pos, objectEditor->brushRadius(), true);
+          _world->range_add_to_selection(_cursor_pos, radius, true);
         }
       }
       else if (!_mod_space_down && !_mod_alt_down && !_mod_ctrl_down)
@@ -2476,6 +2551,9 @@ void MapView::draw_map()
     break;
   case editing_mode::object:
     radius = objectEditor->brushRadius();
+    break;
+  case editing_mode::minimap:
+    radius = minimapTool->brushRadius();
     break;
   }
 
@@ -2881,6 +2959,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     case editing_mode::object:
       objectEditor->changeRadius(relative_movement.dx() / XSENS);
       break;
+    case editing_mode::minimap:
+      minimapTool->changeRadius(relative_movement.dx() / XSENS);
+      break;
     }
   }
 
@@ -2905,7 +2986,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
   if (leftMouse && (_mod_shift_down || _mod_ctrl_down))
   {
-    if (terrainMode == editing_mode::object)
+    if (terrainMode == editing_mode::object || terrainMode == editing_mode::minimap)
     {
       doSelection(false, true); // Required for radius selection in Object mode
     }
@@ -2987,7 +3068,7 @@ void MapView::mousePressEvent(QMouseEvent* event)
 
   if (leftMouse)
   {
-    if (terrainMode == editing_mode::object && !_mod_ctrl_down)
+    if ((terrainMode == editing_mode::object || terrainMode == editing_mode::minimap)  && !_mod_ctrl_down)
     {
       doSelection(false);
     }

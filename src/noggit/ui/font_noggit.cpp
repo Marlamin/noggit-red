@@ -33,10 +33,11 @@ namespace noggit
       {
         painter->save();
         {
-          painter->setPen((state == QIcon::On || mode == QIcon::Active)
-            ? QColor(0, 0, 0)
-            : QColor(0, 0, 0)
-          );
+          QWidget* temp_btn = new QWidget();
+
+          painter->setPen(temp_btn->palette().color(QPalette::WindowText));
+
+          delete temp_btn;
 
           if (!_fonts.count(rect.height()))
           {

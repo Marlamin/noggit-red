@@ -3,6 +3,7 @@
 #include "MinimapCreator.hpp"
 
 #include <noggit/MapView.h>
+#include <noggit/World.h>
 
 #include <util/qt/overload.hpp>
 
@@ -12,6 +13,10 @@
 #include <QButtonGroup>
 #include <QPushButton>
 #include <QTabWidget>
+#include <QScrollArea>
+#include <QWheelEvent>
+#include <QApplication>
+#include <QComboBox>
 
 
 namespace noggit
@@ -20,16 +25,40 @@ namespace noggit
   {
     MinimapCreator::MinimapCreator (
         MapView* mapView,
+        World* world,
         QWidget* parent ) : QWidget(parent)
     {
+      setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
       auto layout = new QHBoxLayout(this);
 
-      auto layout_left = new QFormLayout (this);
+      // Left side
 
-      layout->addItem(layout_left);
+      auto layout_left = new QFormLayout (this);
+      layout->addLayout(layout_left);
+
+      auto scroll_minimap = new QScrollArea(this);
+      scroll_minimap->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+
+      _minimap_widget = new minimap_widget(this);
+      layout_left->addWidget(scroll_minimap);
+
+      scroll_minimap->setAlignment(Qt::AlignCenter);
+      scroll_minimap->setWidget(_minimap_widget);
+      scroll_minimap->setWidgetResizable(true);
+      scroll_minimap->setFixedSize(QSize(512, 512));
+
+
+      _minimap_widget->world(world);
+      _minimap_widget->draw_boundaries(true);
+      _minimap_widget->use_selection(&_selected_tiles);
+
+      // Right side
+
+      auto layout_right = new QFormLayout (this);
+      layout->addLayout(layout_right);
 
       auto settings_tabs = new QTabWidget (this);
-      layout->addWidget(settings_tabs);
+      layout_right->addWidget(settings_tabs);
 
       // Generate
       auto generate_widget = new QWidget(this);
@@ -62,6 +91,17 @@ namespace noggit
       generate_layout->addRow (render_settings_box);
 
       auto render_settings_box_layout = new QFormLayout (render_settings_box);
+
+      render_settings_box_layout->addRow(new QLabel("Resolution:"));
+      auto resolution = new QComboBox(this);
+      resolution->addItem("256");
+      resolution->addItem("512");
+      resolution->addItem("1024");
+      resolution->addItem("2048");
+      resolution->addItem("4096");
+      resolution->setCurrentText("512");
+
+      render_settings_box_layout->addRow (resolution);
 
       auto draw_models = new QCheckBox("Draw models", render_settings_box);
       draw_models->setChecked(_render_settings.draw_m2);
@@ -105,6 +145,13 @@ namespace noggit
 
       // Render settings
 
+      connect ( resolution, &QComboBox::currentTextChanged
+          , [&] (QString s)
+                {
+                  _render_settings.resolution = s.toInt();
+                }
+      );
+
       connect (draw_models, &QCheckBox::stateChanged, [this] (int s)
       {
         _render_settings.draw_m2 = s;
@@ -146,7 +193,43 @@ namespace noggit
         mapView->initMinimapSave();
       });
 
-      setMinimumWidth(sizeHint().width());
+      // Selection
+
+      QObject::connect
+          ( _minimap_widget,  &minimap_widget::tile_clicked
+              , [this, world] (QPoint tile)
+            {
+              if (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
+              {
+                int x = tile.x() - 1;
+                int y = tile.y() - 1;
+
+                for (int i = 0; i < 3; ++i)
+                {
+                  for (int j = 0; j < 3; ++j)
+                  {
+                    if (world->mapIndex.hasTile(tile_index(x + i, y + j)))
+                    {
+                      _selected_tiles[64 * (x + i) + (y + j)] = !QApplication::keyboardModifiers().testFlag(
+                          Qt::ControlModifier);
+                    }
+
+                  }
+                }
+              }
+              else
+              {
+                if (world->mapIndex.hasTile(tile_index(tile.x(), tile.y())))
+                {
+                  _selected_tiles[64 * tile.x() + tile.y()] = !QApplication::keyboardModifiers().testFlag(
+                      Qt::ControlModifier);
+                }
+              }
+
+              update();
+            }
+          );
+
     }
 
     void MinimapCreator::changeRadius(float change)
@@ -156,7 +239,33 @@ namespace noggit
 
     QSize MinimapCreator::sizeHint() const
     {
-      return QSize(215, height());
+      return QSize(width(), height());
+    }
+
+    void MinimapCreator::wheelEvent(QWheelEvent* event)
+    {
+
+      if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
+      {
+        const int degrees = event->angleDelta().y() / 8;
+        int steps = degrees / 15;
+
+        auto base_size = _minimap_widget->width();
+
+        if (steps > 0)
+        {
+          auto new_size = std::max(512, base_size + 64);
+          _minimap_widget->setFixedSize(new_size, new_size);
+        }
+        else
+        {
+          auto new_size = std::min(4096, base_size - 64);
+          _minimap_widget->setFixedSize(new_size, new_size);
+        }
+
+        event->ignore();
+      }
+
     }
   }
 }
