@@ -47,6 +47,7 @@ using StripType = uint16_t;
 class World
 {
 private:
+  std::vector<selection_type> _current_selection;
   std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
   noggit::world_model_instances_storage _model_instance_storage;
   noggit::world_tile_update_queue _tile_update_queue;
@@ -146,7 +147,6 @@ public:
 
 private:
   // Information about the currently selected model / WMO / triangle.
-  std::vector<selection_type> _current_selection;
   boost::optional<math::vector_3d> _multi_select_pivot;
   int _selected_model_count = 0;
   void update_selection_pivot();
