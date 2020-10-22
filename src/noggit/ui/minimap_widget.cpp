@@ -208,9 +208,11 @@ namespace noggit
 
     void minimap_widget::mousePressEvent(QMouseEvent* event)
     {
-      if (event->button() != Qt::LeftButton)
+      if (event->button() == Qt::RightButton)
       {
-        event->ignore();
+        _is_selecting = false;
+        emit reset_selection();
+
         return;
       }
 

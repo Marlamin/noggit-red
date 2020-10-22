@@ -56,8 +56,9 @@ namespace noggit
       QPoint locateTile(QMouseEvent* event);
 
     signals:
-      void map_clicked (const ::math::vector_3d&);
-      void tile_clicked (const QPoint&);
+      void map_clicked(const ::math::vector_3d&);
+      void tile_clicked(const QPoint&);
+      void reset_selection();
 
     private:
       World const* _world;

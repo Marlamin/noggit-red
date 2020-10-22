@@ -212,7 +212,7 @@ namespace noggit
     {
       gamePathField->actual->setText (_settings->value ("project/game_path").toString());
       projectPathField->actual->setText (_settings->value ("project/path").toString());
-      importPathField->actual->setText (_settings->value ("project/import_file").toString());
+      importPathField->actual->setText (_settings->value ("project/import_file", "import.txt").toString());
       wmvLogPathField->actual->setText (_settings->value ("project/wmv_log_file").toString());
       viewDistanceField->setValue (_settings->value ("view_distance", 1000.f).toFloat());
       farZField->setValue (_settings->value ("farZ", 2048.f).toFloat());

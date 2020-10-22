@@ -216,8 +216,8 @@ namespace noggit
                   {
                     if (world->mapIndex.hasTile(tile_index(x + i, y + j)))
                     {
-                      _render_settings.selected_tiles[64 * (x + i) + (y + j)] = !QApplication::keyboardModifiers().testFlag(
-                          Qt::ControlModifier);
+                      _render_settings.selected_tiles[64 * (x + i) + (y + j)]
+                        = !QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
                     }
 
                   }
@@ -227,12 +227,20 @@ namespace noggit
               {
                 if (world->mapIndex.hasTile(tile_index(tile.x(), tile.y())))
                 {
-                  _render_settings.selected_tiles[64 * tile.x() + tile.y()] = !QApplication::keyboardModifiers().testFlag(
-                      Qt::ControlModifier);
+                  _render_settings.selected_tiles[64 * tile.x() + tile.y()]
+                    = !QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
                 }
               }
 
               update();
+            }
+          );
+
+      QObject::connect
+          ( _minimap_widget,  &minimap_widget::reset_selection
+              , [this, world] ()
+            {
+              _render_settings.selected_tiles.fill(false);
             }
           );
 
