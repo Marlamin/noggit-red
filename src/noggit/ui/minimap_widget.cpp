@@ -26,6 +26,7 @@ namespace noggit
       setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
       //setMouseTracking(true);
       setMaximumSize(QSize(1024, 1024));
+      setMinimumSize(QSize(512, 512));
     }
 
     QSize minimap_widget::sizeHint() const

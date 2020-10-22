@@ -29,7 +29,7 @@ namespace noggit
         World* world,
         QWidget* parent ) : QWidget(parent)
     {
-      setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+      //setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
       auto layout = new QHBoxLayout(this);
 
       // Left side
@@ -48,7 +48,6 @@ namespace noggit
       scroll_minimap->setWidgetResizable(true);
       scroll_minimap->setFixedSize(QSize(512, 512));
 
-
       _minimap_widget->world(world);
       _minimap_widget->draw_boundaries(true);
       _minimap_widget->use_selection(&_render_settings.selected_tiles);
@@ -60,6 +59,7 @@ namespace noggit
       layout->addLayout(layout_right);
 
       auto settings_tabs = new QTabWidget (this);
+      settings_tabs->setFixedWidth(300);
       layout_right->addWidget(settings_tabs);
 
       // Generate
@@ -128,6 +128,14 @@ namespace noggit
       _progress_bar = new QProgressBar(this);
       _progress_bar->setRange(0, 4096);
       generate_layout->addRow (_progress_bar);
+
+      // Generate
+      auto filter_widget = new QWidget(this);
+      auto filter_layout = new QFormLayout(filter_widget);
+      settings_tabs->addTab(filter_widget, "Filter");
+
+      _m2_model_filter_include = new QListWidget(filter_widget);
+      filter_layout->addRow(_m2_model_filter_include);
 
       // Connections
 
@@ -281,5 +289,27 @@ namespace noggit
       }
 
     }
+
+    void MinimapCreator::includeM2Model(std::string filename)
+    {
+      auto item = new QListWidgetItem();
+      _m2_model_filter_include->addItem(item);
+      auto entry_wgt = new MinimapM2ModelFilterEntry(this);
+      // entry_wgt->set
+      item->setSizeHint(entry_wgt->minimumSizeHint());
+      _m2_model_filter_include->setItemWidget(item, entry_wgt);
+    }
+
+    MinimapM2ModelFilterEntry::MinimapM2ModelFilterEntry(MinimapCreator* parent) : QWidget(parent)
+    {
+      auto layout = new QHBoxLayout(this);
+      layout->addWidget(_filename = new QLineEdit(this));
+      layout->addWidget(_size_category_spin = new QDoubleSpinBox(this));
+      _size_category_spin->setRange (0.0f, 100.0f);
+      _size_category_spin->setDecimals (2);
+      _size_category_spin->setValue (0.0);
+
+    }
+
   }
 }
