@@ -35,6 +35,7 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMessageBox>
+#include <QSplashScreen>
 
 #include "revision.h"
 
@@ -207,6 +208,10 @@ Noggit::Noggit(int argc, char *argv[])
   : fullscreen(false)
   , doAntiAliasing(true)
 {
+  QPixmap pixmap = QPixmap(":splash");
+  QSplashScreen splash(pixmap);
+  splash.show();
+
   InitLogging();
   assert (argc >= 1); (void) argc;
   initPath(argv);
@@ -246,7 +251,10 @@ Noggit::Noggit(int argc, char *argv[])
   settings.setValue ("project/game_path", path.absolutePath());
   settings.setValue ("project/path", QString::fromStdString(project_path));
 
+  splash.showMessage("Loading game files...");
   loadMPQs(); // listfiles are not available straight away! They are async! Do not rely on anything at this point!
+
+  splash.showMessage("Reading databases...");
   OpenDBs();
 
   if (!QGLFormat::hasOpenGL())
