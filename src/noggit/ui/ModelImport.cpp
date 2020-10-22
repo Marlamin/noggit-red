@@ -12,7 +12,8 @@
 #include <regex>
 #include <string>
 
-#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QHBoxLayout>
 
 namespace noggit
 {
@@ -22,9 +23,14 @@ namespace noggit
       : QWidget (object_editor, Qt::Tool | Qt::WindowStaysOnTopHint)
     {
       setWindowIcon (QIcon (":/icon"));
-      auto layout (new QFormLayout (this));
+      auto layout (new QVBoxLayout (this));
 
-      layout->addRow ("Filter", _textBox = new QLineEdit (this));
+      auto layout_filter = new QHBoxLayout(this);
+      layout_filter->addWidget(new QLabel("Filter:", this));
+      layout_filter->addWidget (_textBox = new QLineEdit (this));
+
+      layout->addLayout(layout_filter);
+
       connect ( _textBox, &QLineEdit::textChanged
               , [this]
                 {
@@ -32,7 +38,8 @@ namespace noggit
                 }
               );
 
-      layout->addWidget (_list = new QListWidget (this));
+      _list = new QListWidget (this);
+      layout->addWidget (_list);
 
       buildModelList();
 
