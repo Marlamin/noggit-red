@@ -121,6 +121,7 @@ public:
             , bool draw_hole_lines
             , bool draw_models_with_box
             , bool draw_hidden_models
+            , MinimapRenderSettings* minimap_render_settings
             , std::map<int, misc::random_color>& area_id_colors
             , bool draw_fog
             , eTerrainType ground_editing_brush

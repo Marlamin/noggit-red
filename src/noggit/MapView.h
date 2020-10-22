@@ -201,6 +201,7 @@ public:
   void change_selected_wmo_doodadset(int set);
   void saveMinimap(MinimapRenderSettings* settings);
   void initMinimapSave() { saving_minimap = true; };
+  noggit::camera* getCamera() { return &_camera; };
 
   void set_editing_mode (editing_mode);
 

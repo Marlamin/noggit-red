@@ -17,6 +17,7 @@
 #include <QWheelEvent>
 #include <QApplication>
 #include <QComboBox>
+#include <QProgressBar>
 
 
 namespace noggit
@@ -50,7 +51,8 @@ namespace noggit
 
       _minimap_widget->world(world);
       _minimap_widget->draw_boundaries(true);
-      _minimap_widget->use_selection(&_selected_tiles);
+      _minimap_widget->use_selection(&_render_settings.selected_tiles);
+      _minimap_widget->camera(mapView->getCamera());
 
       // Right side
 
@@ -122,6 +124,10 @@ namespace noggit
       auto draw_elevation = new QCheckBox("Draw elevation lines", render_settings_box);
       draw_elevation->setChecked(_render_settings.draw_elevation);
       render_settings_box_layout->addRow (draw_elevation);
+
+      _progress_bar = new QProgressBar(this);
+      _progress_bar->setRange(0, 4096);
+      generate_layout->addRow (_progress_bar);
 
       // Connections
 
@@ -210,7 +216,7 @@ namespace noggit
                   {
                     if (world->mapIndex.hasTile(tile_index(x + i, y + j)))
                     {
-                      _selected_tiles[64 * (x + i) + (y + j)] = !QApplication::keyboardModifiers().testFlag(
+                      _render_settings.selected_tiles[64 * (x + i) + (y + j)] = !QApplication::keyboardModifiers().testFlag(
                           Qt::ControlModifier);
                     }
 
@@ -221,7 +227,7 @@ namespace noggit
               {
                 if (world->mapIndex.hasTile(tile_index(tile.x(), tile.y())))
                 {
-                  _selected_tiles[64 * tile.x() + tile.y()] = !QApplication::keyboardModifiers().testFlag(
+                  _render_settings.selected_tiles[64 * tile.x() + tile.y()] = !QApplication::keyboardModifiers().testFlag(
                       Qt::ControlModifier);
                 }
               }

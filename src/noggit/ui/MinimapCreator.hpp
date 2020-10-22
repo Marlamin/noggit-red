@@ -4,9 +4,9 @@
 
 #include <QLabel>
 #include <QWidget>
-#include <QSettings>
-#include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
+#include <QDoubleSpinBox>
+#include <QProgressBar>
 
 #include <boost/optional.hpp>
 #include <string>
@@ -43,6 +43,7 @@ struct MinimapRenderSettings
   std::vector<uint32_t> m2_instance_filter_include; // include specific M2 instances
   std::vector<std::string> wmo_model_filter_exclude; // exclude WMOs by filename
   std::vector<uint32_t> wmo_instance_filter_exclude; // exclude specific WMO instances
+  std::array<bool, 4096> selected_tiles = {false};
 };
 
 
@@ -60,12 +61,14 @@ namespace noggit
 
       float brushRadius() const { return _radius; }
 
-      std::array<bool, 4096>* getSelectedTiles() { return &_selected_tiles; };
+      std::array<bool, 4096>* getSelectedTiles() { return &_render_settings.selected_tiles; };
 
       MinimapRenderSettings* getMinimapRenderSettings() { return &_render_settings; };
 
       QSize sizeHint() const override;
       void wheelEvent(QWheelEvent* event) override;
+
+      void progressUpdate(int value) { _progress_bar->setValue(value); };
 
     private:
       float _radius = 0.01f;
@@ -73,8 +76,7 @@ namespace noggit
       QSlider* _radius_slider;
       QDoubleSpinBox* _radius_spin;
       minimap_widget* _minimap_widget;
-
-      std::array<bool, 4096> _selected_tiles = {false};
+      QProgressBar* _progress_bar;
 
     };
   }

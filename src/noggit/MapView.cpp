@@ -1665,6 +1665,8 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
     }
   }
 
+  minimapTool->progressUpdate(mmap_render_index);
+
 
 }
 
@@ -2596,6 +2598,7 @@ void MapView::draw_map()
                , _draw_hole_lines.get() || terrainMode == editing_mode::holes
                , _draw_models_with_box.get()
                , _draw_hidden_models.get()
+               , minimapTool->getMinimapRenderSettings()
                , _area_id_colors
                , _draw_fog.get()
                , terrainTool->_edit_type

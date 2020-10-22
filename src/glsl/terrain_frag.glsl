@@ -20,6 +20,8 @@ uniform bool draw_impassible_flag;
 uniform bool draw_terrain_height_contour;
 uniform bool draw_lines;
 uniform bool draw_hole_lines;
+uniform bool draw_selection;
+uniform bool draw_shadows;
 
 uniform bool draw_wireframe;
 uniform int wireframe_type;
@@ -120,9 +122,16 @@ void main()
     out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
   }
 
-  float shadow_alpha = texture(shadow_map, vary_texcoord / 8.0).r;
+  if(draw_selection)
+  {
+   out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
+  }
 
-  out_color = vec4 (out_color.rgb * (1.0 - shadow_alpha), 1.0);
+  if (draw_shadows)
+  {
+    float shadow_alpha = texture(shadow_map, vary_texcoord / 8.0).r;
+    out_color = vec4 (out_color.rgb * (1.0 - shadow_alpha), 1.0);
+  }
 
   if (draw_terrain_height_contour)
   {

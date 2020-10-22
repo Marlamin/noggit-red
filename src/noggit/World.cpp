@@ -664,6 +664,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , bool draw_hole_lines
                  , bool draw_models_with_box
                  , bool draw_hidden_models
+                 , MinimapRenderSettings* minimap_render_settings
                  , std::map<int, misc::random_color>& area_id_colors
                  , bool draw_fog
                  , eTerrainType ground_editing_brush
@@ -909,6 +910,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("tex1", 2);
     mcnk_shader.uniform("tex2", 3);
     mcnk_shader.uniform("tex3", 4);
+    mcnk_shader.uniform("draw_shadows", 1);
     mcnk_shader.uniform("shadow_map", 5);
 
     mcnk_shader.uniform("tex_anim_0", math::vector_2d());
@@ -918,6 +920,17 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
+
+      if (terrainMode == editing_mode::minimap
+        && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z))
+      {
+        mcnk_shader.uniform("draw_selection", 1);
+      }
+      else
+      {
+        mcnk_shader.uniform("draw_selection", 0);
+      }
+
       tile->draw ( frustum
                  , mcnk_shader
                  , detailtexcoords
@@ -1856,6 +1869,8 @@ void World::drawMinimap ( MapTile *tile
     mcnk_shader.uniform("tex1", 2);
     mcnk_shader.uniform("tex2", 3);
     mcnk_shader.uniform("tex3", 4);
+
+    mcnk_shader.uniform("draw_shadows", 0);
     mcnk_shader.uniform("shadow_map", 5);
 
     mcnk_shader.uniform("tex_anim_0", math::vector_2d());
