@@ -99,6 +99,7 @@ namespace noggit
       MinimapM2ModelFilterEntry(MinimapCreator* parent = nullptr);
 
       QString getFileName() { return _filename->text(); };
+      void setFileName(const std::string& filename) { _filename->setText(QString(filename.c_str())); };
       float getSizeCategory() { return static_cast<float>(_size_category_spin->value()); };
 
     private:
