@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "MinimapCreator.hpp"
+#include "font_awesome.hpp"
 
 #include <noggit/MapView.h>
 #include <noggit/World.h>
@@ -54,7 +55,6 @@ namespace noggit
       _minimap_widget->camera(mapView->getCamera());
 
       // Right side
-
       auto layout_right = new QFormLayout (this);
       layout->addLayout(layout_right);
 
@@ -129,15 +129,99 @@ namespace noggit
       _progress_bar->setRange(0, 4096);
       generate_layout->addRow (_progress_bar);
 
-      // Generate
+      // Filter
       auto filter_widget = new QWidget(this);
       auto filter_layout = new QFormLayout(filter_widget);
+
       settings_tabs->addTab(filter_widget, "Filter");
 
-      _m2_model_filter_include = new QListWidget(filter_widget);
-      filter_layout->addRow(_m2_model_filter_include);
+      auto m2_include_box = new QGroupBox("Render options", filter_widget);
+      filter_layout->addRow(m2_include_box);
+
+      auto m2_include_box_layout = new QFormLayout (m2_include_box);
+
+      _m2_model_filter_include = new QListWidget(m2_include_box);
+      _render_settings.m2_model_filter_include = _m2_model_filter_include;
+
+      m2_include_box_layout->addRow(_m2_model_filter_include);
+
+      auto m2_include_box_layout_btns = new QHBoxLayout(m2_include_box);
+      m2_include_box_layout->addRow(m2_include_box_layout_btns);
+
+      auto add_btn = new QPushButton(m2_include_box);
+      add_btn->setIcon(font_awesome_icon(font_awesome::plus));
+      m2_include_box_layout_btns->addWidget(add_btn);
+
+      auto remove_btn = new QPushButton(m2_include_box);
+      remove_btn->setIcon(font_awesome_icon(font_awesome::timescircle));
+      m2_include_box_layout_btns->addWidget(remove_btn);
+
 
       // Connections
+
+      // Filter buttons
+
+      connect(add_btn, &QPushButton::clicked,
+          [=]()
+                {
+                  if (!world->has_selection())
+                  {
+                    return;
+                  }
+
+                  for (auto& selection : world->current_selection())
+                  {
+                    if (selection.which() == eEntry_MapChunk)
+                    {
+                      continue;
+                    }
+
+                    std::string path;
+
+                    if (selection.which() == eEntry_Model)
+                    {
+                      path = boost::get<selected_model_type>(selection)->model->filename;
+                      includeM2Model(path);
+                    }
+
+                  }
+
+                }
+      );
+
+      connect(remove_btn, &QPushButton::clicked,
+              [=]()
+              {
+                for (auto item : _m2_model_filter_include->selectedItems())
+                {
+                  auto item_ = _m2_model_filter_include->takeItem(_m2_model_filter_include->row(item));
+                  delete item_;
+                }
+
+                if (!world->has_selection())
+                {
+                  return;
+                }
+
+                for (auto& selection : world->current_selection())
+                {
+                  if (selection.which() == eEntry_MapChunk)
+                  {
+                    continue;
+                  }
+
+                  std::string path;
+
+                  if (selection.which() == eEntry_Model)
+                  {
+                    path = boost::get<selected_model_type>(selection)->model->filename;
+                    unincludeM2Model(path);
+                  }
+
+                }
+
+              }
+      );
 
       connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
           , [&] (double v)
@@ -292,12 +376,44 @@ namespace noggit
 
     void MinimapCreator::includeM2Model(std::string filename)
     {
+      bool already_added = false;
+
+      for (int i = 0; i < _m2_model_filter_include->count(); ++i)
+      {
+        if (!reinterpret_cast<MinimapM2ModelFilterEntry*>(_m2_model_filter_include->itemWidget(
+            _m2_model_filter_include->item(i)))->getFileName().toStdString().compare(filename))
+        {
+          already_added = true;
+          break;
+        }
+      }
+
+      if (already_added)
+      {
+        return;
+      }
+
       auto item = new QListWidgetItem();
       _m2_model_filter_include->addItem(item);
       auto entry_wgt = new MinimapM2ModelFilterEntry(this);
-      // entry_wgt->set
+      entry_wgt->setFileName(filename);
       item->setSizeHint(entry_wgt->minimumSizeHint());
       _m2_model_filter_include->setItemWidget(item, entry_wgt);
+    }
+
+    void MinimapCreator::unincludeM2Model(std::string filename)
+    {
+
+      for (int i = 0; i < _m2_model_filter_include->count(); ++i )
+      {
+        if (!reinterpret_cast<MinimapM2ModelFilterEntry*>(_m2_model_filter_include->itemWidget(
+            _m2_model_filter_include->item(i)))->getFileName().toStdString().compare(filename))
+        {
+          auto item = _m2_model_filter_include->takeItem(i);
+          delete item;
+        }
+      }
+
     }
 
     MinimapM2ModelFilterEntry::MinimapM2ModelFilterEntry(MinimapCreator* parent) : QWidget(parent)
