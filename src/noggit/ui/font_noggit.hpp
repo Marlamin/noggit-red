@@ -70,7 +70,18 @@ namespace noggit
         f9 = 0xf898,
         f10 = 0xf899,
         f11 = 0xf89A,
-        f12 = 0xf89B     
+        f12 = 0xf89B,
+        TOOL_RAISE_LOWER = 0xF89C,
+        TOOL_FLATTEN_BLUR = 0xF89D,
+        TOOL_TEXTURE_PAINT = 0xF89E,
+        TOOL_HOLE_CUTTER = 0xF89F,
+        TOOL_AREA_DESIGNATOR = 0xF8A0,
+        TOOL_IMPASS_DESIGNATOR = 0xF8A1,
+        TOOL_WATER_EDITOR = 0xF8A2,
+        TOOL_VERTEX_PAINT = 0xF8A3,
+        TOOL_OBJECT_EDITOR = 0xF8A4,
+        TOOL_MINIMAP_EDITOR = 0xF8A5,
+        TOOL_STAMP = 0xF8A6
       };
     };
 
