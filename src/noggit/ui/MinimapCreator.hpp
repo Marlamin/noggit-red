@@ -81,6 +81,7 @@ namespace noggit
       void progressUpdate(int value) { _progress_bar->setValue(value); };
 
       void includeM2Model(std::string filename);
+      void unincludeM2Model(std::string filename);
 
     private:
       float _radius = 0.01f;

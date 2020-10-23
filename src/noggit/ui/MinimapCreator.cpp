@@ -189,6 +189,40 @@ namespace noggit
                 }
       );
 
+      connect(remove_btn, &QPushButton::clicked,
+              [=]()
+              {
+                for (auto item : _m2_model_filter_include->selectedItems())
+                {
+                  auto item_ = _m2_model_filter_include->takeItem(_m2_model_filter_include->row(item));
+                  delete item_;
+                }
+
+                if (!world->has_selection())
+                {
+                  return;
+                }
+
+                for (auto& selection : world->current_selection())
+                {
+                  if (selection.which() == eEntry_MapChunk)
+                  {
+                    continue;
+                  }
+
+                  std::string path;
+
+                  if (selection.which() == eEntry_Model)
+                  {
+                    path = boost::get<selected_model_type>(selection)->model->filename;
+                    unincludeM2Model(path);
+                  }
+
+                }
+
+              }
+      );
+
       connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
           , [&] (double v)
                 {
@@ -342,12 +376,44 @@ namespace noggit
 
     void MinimapCreator::includeM2Model(std::string filename)
     {
+      bool already_added = false;
+
+      for (int i = 0; i < _m2_model_filter_include->count(); ++i)
+      {
+        if (!reinterpret_cast<MinimapM2ModelFilterEntry*>(_m2_model_filter_include->itemWidget(
+            _m2_model_filter_include->item(i)))->getFileName().toStdString().compare(filename))
+        {
+          already_added = true;
+          break;
+        }
+      }
+
+      if (already_added)
+      {
+        return;
+      }
+
       auto item = new QListWidgetItem();
       _m2_model_filter_include->addItem(item);
       auto entry_wgt = new MinimapM2ModelFilterEntry(this);
       entry_wgt->setFileName(filename);
       item->setSizeHint(entry_wgt->minimumSizeHint());
       _m2_model_filter_include->setItemWidget(item, entry_wgt);
+    }
+
+    void MinimapCreator::unincludeM2Model(std::string filename)
+    {
+
+      for (int i = 0; i < _m2_model_filter_include->count(); ++i )
+      {
+        if (!reinterpret_cast<MinimapM2ModelFilterEntry*>(_m2_model_filter_include->itemWidget(
+            _m2_model_filter_include->item(i)))->getFileName().toStdString().compare(filename))
+        {
+          auto item = _m2_model_filter_include->takeItem(i);
+          delete item;
+        }
+      }
+
     }
 
     MinimapM2ModelFilterEntry::MinimapM2ModelFilterEntry(MinimapCreator* parent) : QWidget(parent)
