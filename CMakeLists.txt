@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.3)
 cmake_policy (SET CMP0057 NEW) # "Support new IN_LIST if() operator."
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Project name
