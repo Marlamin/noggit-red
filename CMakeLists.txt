@@ -260,6 +260,8 @@ source_group("noggit/Red" FILES ${red_headers} ${red_sources})
 
 COLLECT_FILES(false resource_files resources .qrc)
 qt5_add_resources (compiled_resource_files ${resource_files})
+COLLECT_FILES(true ui_files src .ui)
+qt5_wrap_ui(compiled_ui_files ${ui_files})
 
 ADD_EXECUTABLE ( noggit
                   WIN32
@@ -284,6 +286,7 @@ ADD_EXECUTABLE ( noggit
                   ${moced}
                   ${red_headers}
                   ${compiled_resource_files}
+                  ${compiled_ui_files}
                   ${shaders}
                   ${force_update_file}
                 )
