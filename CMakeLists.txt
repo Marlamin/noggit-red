@@ -258,7 +258,8 @@ source_group("util"  FILES ${util_sources})
 source_group("glsl"  FILES ${shaders})
 source_group("noggit/Red" FILES ${red_headers} ${red_sources})
 
-qt5_add_resources (compiled_resource_files "resources/resources.qrc")
+COLLECT_FILES(false resource_files resources .qrc)
+qt5_add_resources (compiled_resource_files ${resource_files})
 
 ADD_EXECUTABLE ( noggit
                   WIN32
