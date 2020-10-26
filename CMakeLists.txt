@@ -209,10 +209,11 @@ ENDIF()
 includePlattform("postfind")
 
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
-include_directories(PRIVATE ${CMAKE_BINARY_DIR})
+include_directories(PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # And do the job.
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/noggit/ui/style/framelesswindow" )
 COLLECT_FILES(false noggit_root_sources src/noggit .cpp)
 COLLECT_FILES(true noggit_ui_sources src/noggit/ui .cpp)
 COLLECT_FILES(false math_sources src/math .cpp)

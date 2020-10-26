@@ -290,19 +290,9 @@ Noggit::Noggit(int argc, char *argv[])
 
   qApp->setStyle(new DarkStyle);
 
-  // create frameless window (and set windowState or title)
-  FramelessWindow framelessWindow;
-  framelessWindow.setWindowState(Qt::WindowMaximized);
-  framelessWindow.setWindowTitle("Noggit Red");
-  //framelessWindow.setWindowIcon(a.style()->standardIcon(QStyle::SP_DesktopIcon));
-
-
   main_window = std::make_unique<noggit::ui::main_window>();
-  // add the mainwindow to our custom frameless window
-  framelessWindow.setContent(main_window.get());
-  framelessWindow.showMaximized();
 
-  /*if (fullscreen)
+  if (fullscreen)
   {
     main_window->showFullScreen();
   }
@@ -310,7 +300,6 @@ Noggit::Noggit(int argc, char *argv[])
   {
     main_window->showMaximized();
   }
-  */
 }
 
 namespace
@@ -365,13 +354,6 @@ int main(int argc, char *argv[])
   splash.show();
 
   Noggit app (argc, argv);
-
-
-  QFile File("./themes/dark/theme.qss");
-  File.open(QFile::ReadOnly);
-  QString StyleSheet = QLatin1String(File.readAll());
-
-  qapp.setStyleSheet(StyleSheet);
 
   return qapp.exec();
 }

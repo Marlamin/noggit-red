@@ -2373,7 +2373,7 @@ selection_result MapView::intersect_result(bool terrain_only)
     ( model_view().transposed()
     , intersect_ray()
     , terrain_only
-    , terrainMode == editing_mode::object
+    , terrainMode == editing_mode::object || terrainMode == editing_mode::minimap
     , _draw_terrain.get()
     , _draw_wmo.get()
     , _draw_models.get()

@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QtWidgets/QSlider>
 #include <QDoubleSpinBox>
+#include <QSpinBox>
 #include <QProgressBar>
 #include <QLineEdit>
 #include <QListWidget>
@@ -39,10 +40,14 @@ struct MinimapRenderSettings
   bool draw_water = true;
   bool draw_adt_grid = false;
   bool draw_elevation = false;
+  bool use_filters = false;
 
   std::array<bool, 4096> selected_tiles = {false};
 
   QListWidget* m2_model_filter_include;
+  QListWidget* m2_instance_filter_include;
+  QListWidget* wmo_model_filter_exclude;
+  QListWidget* wmo_instance_filter_exclude;
 
   // Filtering
   /*
@@ -82,6 +87,14 @@ namespace noggit
 
       void includeM2Model(std::string filename);
       void unincludeM2Model(std::string filename);
+      void includeM2Instance(uint32_t uid);
+      void unincludeM2Instance(uint32_t uid);
+
+      void excludeWMOModel(std::string filename);
+      void unexcludeWMOModel(std::string filename);
+      void excludeWMOInstance(uint32_t uid);
+      void unexcludeWMOInstance(uint32_t uid);
+
 
     private:
       float _radius = 0.01f;
@@ -91,6 +104,9 @@ namespace noggit
       minimap_widget* _minimap_widget;
       QProgressBar* _progress_bar;
       QListWidget* _m2_model_filter_include;
+      QListWidget* _m2_instance_filter_include;
+      QListWidget* _wmo_model_filter_exclude;
+      QListWidget* _wmo_instance_filter_exclude;
 
     };
 
@@ -106,6 +122,31 @@ namespace noggit
     private:
       QLineEdit* _filename;
       QDoubleSpinBox* _size_category_spin;
+    };
+
+    class MinimapWMOModelFilterEntry : public QWidget
+    {
+    public:
+      MinimapWMOModelFilterEntry(MinimapCreator* parent = nullptr);
+
+      QString getFileName() { return _filename->text(); };
+      void setFileName(const std::string& filename) { _filename->setText(QString(filename.c_str())); };
+
+    private:
+      QLineEdit* _filename;
+    };
+
+    class MinimapInstanceFilterEntry : public QWidget
+    {
+    public:
+      MinimapInstanceFilterEntry(MinimapCreator* parent = nullptr);
+
+      uint32_t getUid() { return _uid; };
+      void setUid(uint32_t uid) { _uid = uid; _uid_label->setText(QString::fromStdString(std::to_string(uid))); };
+
+    private:
+      uint32_t _uid;
+      QLabel* _uid_label;
     };
   }
 }

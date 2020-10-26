@@ -1911,7 +1911,7 @@ void World::drawMinimap ( MapTile *tile
   }
 
   // M2s / models
-  if (settings->draw_m2)
+  if (settings->draw_m2 || settings->use_filters)
   {
 
     if (need_model_updates)
@@ -1936,10 +1936,54 @@ void World::drawMinimap ( MapTile *tile
 
       for (auto &it : _models_by_filename)
       {
+        std::vector<ModelInstance*> instances;
+
+        if (settings->use_filters)
+        {
+          instances = it.second;
+          for (auto instance : it.second)
+          {
+            bool found_model = false;
+            bool found_instance = false;
+
+            for (int i = 0; i < settings->m2_model_filter_include->count(); ++i)
+            {
+              auto item_wgt_m = reinterpret_cast<noggit::ui::MinimapM2ModelFilterEntry *>(
+                  settings->m2_model_filter_include->itemWidget(settings->m2_model_filter_include->item(i)));
+
+              if (item_wgt_m->getFileName().toStdString() == instance->model->filename
+                  && item_wgt_m->getSizeCategory() <= instance->size_cat)
+              {
+                found_model = true;
+              }
+            }
+
+            for (int i = 0; i < settings->m2_instance_filter_include->count(); ++i)
+            {
+              auto item_wgt_i = reinterpret_cast<noggit::ui::MinimapInstanceFilterEntry*>(
+                  settings->m2_instance_filter_include->itemWidget(settings->m2_instance_filter_include->item(i)));
+
+              if (item_wgt_i->getUid() == instance->uid)
+              {
+                found_instance = true;
+              }
+            }
+
+            if (!(found_model || found_instance))
+            {
+              std::vector<ModelInstance*>::iterator position = std::find(instances.begin(), instances.end(), instance);
+              if (position != instances.end())
+              {
+                instances.erase(position);
+              }
+            }
+          }
+        }
+
         it.second[0]->model->wait_until_loaded();
-        it.second[0]->model->draw(model_view, it.second, m2_shader, frustum, culldistance, camera_pos, false,
-                                  animtime, false, false, model_with_particles,
-                                  model_boxes_to_draw, display_mode::in_2D
+        it.second[0]->model->draw(model_view, settings->use_filters ? instances : it.second, m2_shader, frustum,
+                                  culldistance, camera_pos, false,animtime, false,
+                                  false, model_with_particles,model_boxes_to_draw, display_mode::in_2D
         );
       }
 
@@ -1984,16 +2028,52 @@ void World::drawMinimap ( MapTile *tile
     wmo_program.uniform("exterior_diffuse_color", diffuse_color);
     wmo_program.uniform("exterior_ambient_color", ambient_color);
 
-    _model_instance_storage.for_each_wmo_instance([&](WMOInstance &wmo)
-                                                  {
-                                                    wmo.wmo->wait_until_loaded();
-                                                    wmo.draw(wmo_program, model_view, projection, frustum,
-                                                             culldistance, camera_pos, false, false,
-                                                             false, _liquid_render.get(), current_selection(),
-                                                             animtime, skies->hasSkies(), display_mode::in_2D
-                                                    );
+    _model_instance_storage.for_each_wmo_instance(
+        [&](WMOInstance &wmo)
+        {
+          if (settings->use_filters)
+          {
+            bool found_model = false;
+            bool found_instance = false;
 
-                                                  });
+            for (int i = 0; i < settings->wmo_model_filter_exclude->count(); ++i)
+            {
+              auto item_wgt_m = reinterpret_cast<noggit::ui::MinimapWMOModelFilterEntry*>(
+                  settings->wmo_model_filter_exclude->itemWidget(settings->wmo_model_filter_exclude->item(i)));
+
+              if (item_wgt_m->getFileName().toStdString() == wmo.wmo->filename)
+              {
+                found_model = true;
+              }
+            }
+
+            for (int i = 0; i < settings->wmo_instance_filter_exclude->count(); ++i)
+            {
+              auto item_wgt_i = reinterpret_cast<noggit::ui::MinimapInstanceFilterEntry*>(
+                  settings->wmo_instance_filter_exclude->itemWidget(settings->wmo_instance_filter_exclude->item(i)));
+
+              if (item_wgt_i->getUid() == wmo.mUniqueID)
+              {
+                found_instance = true;
+              }
+            }
+
+            // For WMOs we exclude models from rendering
+            if (found_model || found_instance)
+            {
+              return;
+            }
+
+          }
+
+          wmo.wmo->wait_until_loaded();
+          wmo.draw(wmo_program, model_view, projection, frustum,
+                   culldistance, camera_pos, false, false,
+                   false, _liquid_render.get(), current_selection(),
+                   animtime, skies->hasSkies(), display_mode::in_2D
+          );
+
+        });
 
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
