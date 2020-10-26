@@ -39,6 +39,9 @@
 
 #include "revision.h"
 
+#include <noggit/ui/style/framelesswindow/framelesswindow.h>
+#include <noggit/ui/style/DarkStyle.h>
+
 class Noggit
 {
 public:
@@ -284,8 +287,22 @@ Noggit::Noggit(int argc, char *argv[])
   LogDebug << "GL: Vendor: " << gl.getString (GL_VENDOR) << std::endl;
   LogDebug << "GL: Renderer: " << gl.getString (GL_RENDERER) << std::endl;
 
+
+  qApp->setStyle(new DarkStyle);
+
+  // create frameless window (and set windowState or title)
+  FramelessWindow framelessWindow;
+  framelessWindow.setWindowState(Qt::WindowMaximized);
+  framelessWindow.setWindowTitle("Noggit Red");
+  //framelessWindow.setWindowIcon(a.style()->standardIcon(QStyle::SP_DesktopIcon));
+
+
   main_window = std::make_unique<noggit::ui::main_window>();
-  if (fullscreen)
+  // add the mainwindow to our custom frameless window
+  framelessWindow.setContent(main_window.get());
+  framelessWindow.showMaximized();
+
+  /*if (fullscreen)
   {
     main_window->showFullScreen();
   }
@@ -293,6 +310,7 @@ Noggit::Noggit(int argc, char *argv[])
   {
     main_window->showMaximized();
   }
+  */
 }
 
 namespace
@@ -347,6 +365,13 @@ int main(int argc, char *argv[])
   splash.show();
 
   Noggit app (argc, argv);
+
+
+  QFile File("./themes/dark/theme.qss");
+  File.open(QFile::ReadOnly);
+  QString StyleSheet = QLatin1String(File.readAll());
+
+  qapp.setStyleSheet(StyleSheet);
 
   return qapp.exec();
 }
