@@ -209,7 +209,7 @@ ENDIF()
 includePlattform("postfind")
 
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
-include_directories(PRIVATE ${CMAKE_BINARY_DIR})
+include_directories(PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # And do the job.
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
