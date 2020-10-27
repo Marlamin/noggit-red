@@ -278,9 +278,137 @@ namespace noggit
       clear_btn_wmo_i->setIcon(font_awesome_icon(font_awesome::trash));
       wmo_instance_exclude_box_layout_btns->addWidget(clear_btn_wmo_i);
 
+      // Lighting
+
+      auto lighting_widget = new QWidget(this);
+      auto lighting_layout = new QFormLayout(filter_widget);
+      lighting_widget->setLayout(lighting_layout);
+
+      settings_tabs->addTab(lighting_widget, "Lighting");
+
+      auto diffuse_color = new color_widgets::ColorSelector (this);
+      diffuse_color->setDisplayMode (color_widgets::ColorSelector::NoAlpha);
+      diffuse_color->setColor (QColor::fromRgbF (_render_settings.diffuse_color.x,
+                                                 _render_settings.diffuse_color.y,
+                                                 _render_settings.diffuse_color.z));
+      diffuse_color->setMinimumHeight(25);
+
+      lighting_layout->addRow("Diffuse color:", diffuse_color);
+
+      auto ambient_color = new color_widgets::ColorSelector (this);
+      ambient_color->setDisplayMode (color_widgets::ColorSelector::NoAlpha);
+      ambient_color->setColor (QColor::fromRgbF (_render_settings.ambient_color.x,
+                                                 _render_settings.ambient_color.y,
+                                                 _render_settings.ambient_color.z));
+      ambient_color->setMinimumHeight(25);
+
+      lighting_layout->addRow("Ambient color:", ambient_color);
+
+      auto ocean_color_light = new color_widgets::ColorSelector (this);
+      ocean_color_light->setColor (QColor::fromRgbF (_render_settings.ocean_color_light.x,
+                                                 _render_settings.ocean_color_light.y,
+                                                 _render_settings.ocean_color_light.z,
+                                                 _render_settings.ocean_color_light.w));
+      ocean_color_light->setMinimumHeight(25);
+
+      lighting_layout->addRow("Ocean light color:", ocean_color_light);
+
+      auto ocean_color_dark = new color_widgets::ColorSelector (this);
+      ocean_color_dark->setColor (QColor::fromRgbF (_render_settings.ocean_color_dark.x,
+                                                 _render_settings.ocean_color_dark.y,
+                                                 _render_settings.ocean_color_dark.z,
+                                                 _render_settings.ocean_color_dark.w));
+      ocean_color_dark->setMinimumHeight(25);
+
+      lighting_layout->addRow("Ocean dakr color:", ocean_color_dark);
+
+      auto river_color_light = new color_widgets::ColorSelector (this);
+      river_color_light->setColor (QColor::fromRgbF (_render_settings.river_color_light.x,
+                                                 _render_settings.river_color_light.y,
+                                                 _render_settings.river_color_light.z,
+                                                 _render_settings.river_color_light.w));
+      river_color_light->setMinimumHeight(25);
+
+      lighting_layout->addRow("River light color:", river_color_light);
+
+      auto river_color_dark = new color_widgets::ColorSelector (this);
+      river_color_dark->setColor (QColor::fromRgbF (_render_settings.river_color_dark.x,
+                                                 _render_settings.river_color_dark.y,
+                                                 _render_settings.river_color_dark.z,
+                                                 _render_settings.river_color_dark.w));
+      river_color_dark->setMinimumHeight(25);
+
+      lighting_layout->addRow("River dark color:", river_color_dark);
+
       // Connections
 
       // Filter buttons
+
+      // Lighting colors
+      connect(diffuse_color, &color_widgets::ColorSelector::colorChanged,
+          [this] (QColor new_color)
+          {
+
+            _render_settings.diffuse_color = {static_cast<float>(new_color.redF()),
+                                              static_cast<float>(new_color.greenF()),
+                                              static_cast<float>(new_color.blueF())};
+                                             }
+      );
+
+
+      connect(ambient_color, &color_widgets::ColorSelector::colorChanged,
+              [this] (QColor new_color)
+              {
+
+                _render_settings.ambient_color = {static_cast<float>(new_color.redF()),
+                                                  static_cast<float>(new_color.greenF()),
+                                                  static_cast<float>(new_color.blueF())};
+              }
+      );
+
+      connect(ocean_color_light, &color_widgets::ColorSelector::colorChanged,
+              [this] (QColor new_color)
+              {
+
+                _render_settings.ocean_color_light = {static_cast<float>(new_color.redF()),
+                                                      static_cast<float>(new_color.greenF()),
+                                                      static_cast<float>(new_color.blueF()),
+                                                      static_cast<float>(new_color.alphaF())};
+              }
+      );
+
+      connect(ocean_color_dark, &color_widgets::ColorSelector::colorChanged,
+              [this] (QColor new_color)
+              {
+
+                _render_settings.ocean_color_dark = {static_cast<float>(new_color.redF()),
+                                                    static_cast<float>(new_color.greenF()),
+                                                    static_cast<float>(new_color.blueF()),
+                                                    static_cast<float>(new_color.alphaF())};
+              }
+      );
+
+      connect(river_color_light, &color_widgets::ColorSelector::colorChanged,
+              [this] (QColor new_color)
+              {
+
+                _render_settings.river_color_light = {static_cast<float>(new_color.redF()),
+                                                      static_cast<float>(new_color.greenF()),
+                                                      static_cast<float>(new_color.blueF()),
+                                                      static_cast<float>(new_color.alphaF())};
+              }
+      );
+
+      connect(river_color_dark , &color_widgets::ColorSelector::colorChanged,
+              [this] (QColor new_color)
+              {
+
+                _render_settings.river_color_dark = {static_cast<float>(new_color.redF()),
+                                                    static_cast<float>(new_color.greenF()),
+                                                    static_cast<float>(new_color.blueF()),
+                                                    static_cast<float>(new_color.alphaF())};
+              }
+      );
 
       // M2 model filter
       connect(add_btn, &QPushButton::clicked,

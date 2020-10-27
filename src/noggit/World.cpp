@@ -1832,16 +1832,12 @@ void World::drawMinimap ( MapTile *tile
 
   int daytime = static_cast<int>(time) % 2880;
 
-  skies->update_sky_colors(camera_pos, daytime);
   outdoorLightStats = ol->getLightStats(daytime);
 
   math::vector_3d light_dir = outdoorLightStats.dayDir;
   light_dir = {-light_dir.y, -light_dir.z, -light_dir.x};
   // todo: figure out why I need to use a different light vector for the terrain
   math::vector_3d terrain_light_dir = {-light_dir.z, light_dir.y, -light_dir.x};
-
-  math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
-  math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);
 
   culldistance = 100000.0f;
 
@@ -1861,8 +1857,8 @@ void World::drawMinimap ( MapTile *tile
     mcnk_shader.uniform("draw_terrain_height_contour", static_cast<int>(settings->draw_elevation));
 
     mcnk_shader.uniform("light_dir", terrain_light_dir);
-    mcnk_shader.uniform("diffuse_color", diffuse_color);
-    mcnk_shader.uniform("ambient_color", ambient_color);
+    mcnk_shader.uniform("diffuse_color",  settings->diffuse_color);
+    mcnk_shader.uniform("ambient_color", settings->ambient_color);
 
     mcnk_shader.uniform("alphamap", 0);
     mcnk_shader.uniform("tex0", 1);
@@ -1931,8 +1927,8 @@ void World::drawMinimap ( MapTile *tile
       m2_shader.uniform("tex2", 1);
 
       m2_shader.uniform("light_dir", light_dir);
-      m2_shader.uniform("diffuse_color", diffuse_color);
-      m2_shader.uniform("ambient_color", ambient_color);
+      m2_shader.uniform("diffuse_color", settings->diffuse_color);
+      m2_shader.uniform("ambient_color", settings->ambient_color);
 
       for (auto &it : _models_by_filename)
       {
@@ -1999,15 +1995,10 @@ void World::drawMinimap ( MapTile *tile
     water_shader.uniform("model_view", model_view);
     water_shader.uniform("projection", projection);
 
-    math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], skies->ocean_shallow_alpha());
-    math::vector_4d ocean_color_dark(skies->color_set[OCEAN_COLOR_DARK], skies->ocean_deep_alpha());
-    math::vector_4d river_color_light(skies->color_set[RIVER_COLOR_LIGHT], skies->river_shallow_alpha());
-    math::vector_4d river_color_dark(skies->color_set[RIVER_COLOR_DARK], skies->river_deep_alpha());
-
-    water_shader.uniform("ocean_color_light", ocean_color_light);
-    water_shader.uniform("ocean_color_dark", ocean_color_dark);
-    water_shader.uniform("river_color_light", river_color_light);
-    water_shader.uniform("river_color_dark", river_color_dark);
+    water_shader.uniform("ocean_color_light", settings->ocean_color_light);
+    water_shader.uniform("ocean_color_dark", settings->ocean_color_dark);
+    water_shader.uniform("river_color_light", settings->river_color_light);
+    water_shader.uniform("river_color_dark", settings->river_color_dark);
     water_shader.uniform("use_transform", 1);
 
   }
@@ -2025,8 +2016,8 @@ void World::drawMinimap ( MapTile *tile
     wmo_program.uniform("draw_fog", 0);
 
     wmo_program.uniform("exterior_light_dir", light_dir);
-    wmo_program.uniform("exterior_diffuse_color", diffuse_color);
-    wmo_program.uniform("exterior_ambient_color", ambient_color);
+    wmo_program.uniform("exterior_diffuse_color", settings->diffuse_color);
+    wmo_program.uniform("exterior_ambient_color", settings->ambient_color);
 
     _model_instance_storage.for_each_wmo_instance(
         [&](WMOInstance &wmo)
@@ -2154,7 +2145,15 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
         , settings);
 
     QImage image = pixel_buffer.toImage();
-    image.save(("/Users/sshumakov/Desktop/MinimapGenTest/test_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str());
+
+    QSettings settings;
+    QString str = settings.value ("project/path").toString();
+    if (!(str.endsWith('\\') || str.endsWith('/')))
+    {
+      str += "/";
+    }
+
+    image.save((str.toStdString() + "/textures/minimap/" + basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str());
 
     if (unload)
     {
