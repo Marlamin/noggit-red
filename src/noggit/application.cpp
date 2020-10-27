@@ -39,6 +39,9 @@
 
 #include "revision.h"
 
+#include <noggit/ui/style/framelesswindow/framelesswindow.h>
+#include <noggit/ui/style/DarkStyle.h>
+
 class Noggit
 {
 public:
@@ -284,7 +287,11 @@ Noggit::Noggit(int argc, char *argv[])
   LogDebug << "GL: Vendor: " << gl.getString (GL_VENDOR) << std::endl;
   LogDebug << "GL: Renderer: " << gl.getString (GL_RENDERER) << std::endl;
 
+
+  qApp->setStyle(new DarkStyle);
+
   main_window = std::make_unique<noggit::ui::main_window>();
+
   if (fullscreen)
   {
     main_window->showFullScreen();

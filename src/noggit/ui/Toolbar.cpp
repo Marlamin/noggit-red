@@ -20,7 +20,7 @@ namespace noggit
       add_tool_icon (editing_mode::mccv,         tr("Vertex Painter"),    font_noggit::TOOL_VERTEX_PAINT);
       add_tool_icon (editing_mode::object,       tr("Object Editor"),     font_noggit::TOOL_OBJECT_EDITOR);
       add_tool_icon (editing_mode::minimap,      tr("Minimap Editor"),    font_noggit::TOOL_MINIMAP_EDITOR);
-      add_tool_icon(editing_mode::stamp, tr("Stamp Mode"), font_noggit::TOOL_STAMP);
+      add_tool_icon(editing_mode::stamp,         tr("Stamp Mode"),        font_noggit::TOOL_STAMP);
     }
 
     void toolbar::add_tool_icon(editing_mode mode, const QString& name, const font_noggit::icons& icon)

@@ -28,6 +28,7 @@
 #include <boost/thread/thread.hpp>
 
 #include <QtWidgets/QMessageBox>
+#include <QTCore/QDir>
 
 #include <algorithm>
 #include <cassert>
@@ -1830,18 +1831,21 @@ void World::drawMinimap ( MapTile *tile
         );
   }
 
+  // Also load a tile above the current one to correct the lookat approximation
+  tile_index m_tile = tile_index (camera_pos);
+  m_tile.z -= 1;
+
+  bool unload = !mapIndex.has_unsaved_changes(m_tile);
+  MapTile* mTile = mapIndex.loadTile(m_tile);
+
   int daytime = static_cast<int>(time) % 2880;
 
-  skies->update_sky_colors(camera_pos, daytime);
   outdoorLightStats = ol->getLightStats(daytime);
 
   math::vector_3d light_dir = outdoorLightStats.dayDir;
   light_dir = {-light_dir.y, -light_dir.z, -light_dir.x};
   // todo: figure out why I need to use a different light vector for the terrain
   math::vector_3d terrain_light_dir = {-light_dir.z, light_dir.y, -light_dir.x};
-
-  math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
-  math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);
 
   culldistance = 100000.0f;
 
@@ -1861,8 +1865,8 @@ void World::drawMinimap ( MapTile *tile
     mcnk_shader.uniform("draw_terrain_height_contour", static_cast<int>(settings->draw_elevation));
 
     mcnk_shader.uniform("light_dir", terrain_light_dir);
-    mcnk_shader.uniform("diffuse_color", diffuse_color);
-    mcnk_shader.uniform("ambient_color", ambient_color);
+    mcnk_shader.uniform("diffuse_color",  settings->diffuse_color);
+    mcnk_shader.uniform("ambient_color", settings->ambient_color);
 
     mcnk_shader.uniform("alphamap", 0);
     mcnk_shader.uniform("tex0", 1);
@@ -1885,12 +1889,6 @@ void World::drawMinimap ( MapTile *tile
                display_mode::in_2D
     );
 
-    tile_index m_tile = tile_index (camera_pos);
-    m_tile.z -= 1;
-
-    bool unload = !mapIndex.has_unsaved_changes(m_tile);
-    MapTile* mTile = mapIndex.loadTile(m_tile);
-
     if (mTile)
     {
       mTile->wait_until_loaded();
@@ -1901,17 +1899,12 @@ void World::drawMinimap ( MapTile *tile
       );
     }
 
-    if (unload)
-    {
-      mapIndex.unloadTile(m_tile);
-    }
-
     gl.bindVertexArray(0);
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
   // M2s / models
-  if (settings->draw_m2)
+  if (settings->draw_m2 || settings->use_filters)
   {
 
     if (need_model_updates)
@@ -1931,15 +1924,59 @@ void World::drawMinimap ( MapTile *tile
       m2_shader.uniform("tex2", 1);
 
       m2_shader.uniform("light_dir", light_dir);
-      m2_shader.uniform("diffuse_color", diffuse_color);
-      m2_shader.uniform("ambient_color", ambient_color);
+      m2_shader.uniform("diffuse_color", settings->diffuse_color);
+      m2_shader.uniform("ambient_color", settings->ambient_color);
 
       for (auto &it : _models_by_filename)
       {
+        std::vector<ModelInstance*> instances;
+
+        if (settings->use_filters)
+        {
+          instances = it.second;
+          for (auto instance : it.second)
+          {
+            bool found_model = false;
+            bool found_instance = false;
+
+            for (int i = 0; i < settings->m2_model_filter_include->count(); ++i)
+            {
+              auto item_wgt_m = reinterpret_cast<noggit::ui::MinimapM2ModelFilterEntry *>(
+                  settings->m2_model_filter_include->itemWidget(settings->m2_model_filter_include->item(i)));
+
+              if (item_wgt_m->getFileName().toStdString() == instance->model->filename
+                  && item_wgt_m->getSizeCategory() <= instance->size_cat)
+              {
+                found_model = true;
+              }
+            }
+
+            for (int i = 0; i < settings->m2_instance_filter_include->count(); ++i)
+            {
+              auto item_wgt_i = reinterpret_cast<noggit::ui::MinimapInstanceFilterEntry*>(
+                  settings->m2_instance_filter_include->itemWidget(settings->m2_instance_filter_include->item(i)));
+
+              if (item_wgt_i->getUid() == instance->uid)
+              {
+                found_instance = true;
+              }
+            }
+
+            if (!(found_model || found_instance))
+            {
+              std::vector<ModelInstance*>::iterator position = std::find(instances.begin(), instances.end(), instance);
+              if (position != instances.end())
+              {
+                instances.erase(position);
+              }
+            }
+          }
+        }
+
         it.second[0]->model->wait_until_loaded();
-        it.second[0]->model->draw(model_view, it.second, m2_shader, frustum, culldistance, camera_pos, false,
-                                  animtime, false, false, model_with_particles,
-                                  model_boxes_to_draw, display_mode::in_2D
+        it.second[0]->model->draw(model_view, settings->use_filters ? instances : it.second, m2_shader, frustum,
+                                  culldistance, camera_pos, false,animtime, false,
+                                  false, model_with_particles,model_boxes_to_draw, display_mode::in_2D
         );
       }
 
@@ -1955,15 +1992,10 @@ void World::drawMinimap ( MapTile *tile
     water_shader.uniform("model_view", model_view);
     water_shader.uniform("projection", projection);
 
-    math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], skies->ocean_shallow_alpha());
-    math::vector_4d ocean_color_dark(skies->color_set[OCEAN_COLOR_DARK], skies->ocean_deep_alpha());
-    math::vector_4d river_color_light(skies->color_set[RIVER_COLOR_LIGHT], skies->river_shallow_alpha());
-    math::vector_4d river_color_dark(skies->color_set[RIVER_COLOR_DARK], skies->river_deep_alpha());
-
-    water_shader.uniform("ocean_color_light", ocean_color_light);
-    water_shader.uniform("ocean_color_dark", ocean_color_dark);
-    water_shader.uniform("river_color_light", river_color_light);
-    water_shader.uniform("river_color_dark", river_color_dark);
+    water_shader.uniform("ocean_color_light", settings->ocean_color_light);
+    water_shader.uniform("ocean_color_dark", settings->ocean_color_dark);
+    water_shader.uniform("river_color_light", settings->river_color_light);
+    water_shader.uniform("river_color_dark", settings->river_color_dark);
     water_shader.uniform("use_transform", 1);
 
   }
@@ -1981,19 +2013,55 @@ void World::drawMinimap ( MapTile *tile
     wmo_program.uniform("draw_fog", 0);
 
     wmo_program.uniform("exterior_light_dir", light_dir);
-    wmo_program.uniform("exterior_diffuse_color", diffuse_color);
-    wmo_program.uniform("exterior_ambient_color", ambient_color);
+    wmo_program.uniform("exterior_diffuse_color", settings->diffuse_color);
+    wmo_program.uniform("exterior_ambient_color", settings->ambient_color);
 
-    _model_instance_storage.for_each_wmo_instance([&](WMOInstance &wmo)
-                                                  {
-                                                    wmo.wmo->wait_until_loaded();
-                                                    wmo.draw(wmo_program, model_view, projection, frustum,
-                                                             culldistance, camera_pos, false, false,
-                                                             false, _liquid_render.get(), current_selection(),
-                                                             animtime, skies->hasSkies(), display_mode::in_2D
-                                                    );
+    _model_instance_storage.for_each_wmo_instance(
+        [&](WMOInstance &wmo)
+        {
+          if (settings->use_filters)
+          {
+            bool found_model = false;
+            bool found_instance = false;
 
-                                                  });
+            for (int i = 0; i < settings->wmo_model_filter_exclude->count(); ++i)
+            {
+              auto item_wgt_m = reinterpret_cast<noggit::ui::MinimapWMOModelFilterEntry*>(
+                  settings->wmo_model_filter_exclude->itemWidget(settings->wmo_model_filter_exclude->item(i)));
+
+              if (item_wgt_m->getFileName().toStdString() == wmo.wmo->filename)
+              {
+                found_model = true;
+              }
+            }
+
+            for (int i = 0; i < settings->wmo_instance_filter_exclude->count(); ++i)
+            {
+              auto item_wgt_i = reinterpret_cast<noggit::ui::MinimapInstanceFilterEntry*>(
+                  settings->wmo_instance_filter_exclude->itemWidget(settings->wmo_instance_filter_exclude->item(i)));
+
+              if (item_wgt_i->getUid() == wmo.mUniqueID)
+              {
+                found_instance = true;
+              }
+            }
+
+            // For WMOs we exclude models from rendering
+            if (found_model || found_instance)
+            {
+              return;
+            }
+
+          }
+
+          wmo.wmo->wait_until_loaded();
+          wmo.draw(wmo_program, model_view, projection, frustum,
+                   culldistance, camera_pos, false, false,
+                   false, _liquid_render.get(), current_selection(),
+                   animtime, skies->hasSkies(), display_mode::in_2D
+          );
+
+        });
 
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -2016,8 +2084,22 @@ void World::drawMinimap ( MapTile *tile
                     -1, display_mode::in_2D
     );
 
+    if (mTile)
+    {
+      mTile->wait_until_loaded();
+
+      mTile->drawWater(frustum, culldistance, camera_pos, true, _liquid_render.get(), water_shader, animtime,
+                      -1, display_mode::in_2D
+      );
+    }
+
     gl.bindVertexArray(0);
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  }
+
+  if (unload)
+  {
+    mapIndex.unloadTile(m_tile);
   }
 }
 
@@ -2074,7 +2156,19 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
         , settings);
 
     QImage image = pixel_buffer.toImage();
-    image.save(("/Users/sshumakov/Desktop/MinimapGenTest/test_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str());
+
+    QSettings settings;
+    QString str = settings.value ("project/path").toString();
+    if (!(str.endsWith('\\') || str.endsWith('/')))
+    {
+      str += "/";
+    }
+
+    QDir dir(str + "/textures/minimap/");
+    if (!dir.exists())
+      dir.mkpath(".");
+
+    image.save(dir.filePath(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str()));
 
     if (unload)
     {

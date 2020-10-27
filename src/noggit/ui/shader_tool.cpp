@@ -99,7 +99,7 @@ namespace noggit
       _color_palette->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
       layout->addRow(_color_palette);
 
-      auto info_label (new QLabel("drag&drop colors to select them", this));
+      auto info_label (new QLabel("Drag&Drop colors to select.", this));
       info_label->setAlignment(Qt::AlignCenter);
 
       layout->addRow(info_label);

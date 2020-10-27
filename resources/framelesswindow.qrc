@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>../src/noggit/ui/style/images/icon_window_minimize.png</file>
+        <file>../src/noggit/ui/style/images/icon_window_restore.png</file>
+        <file>../src/noggit/ui/style/images/icon_window_maximize.png</file>
+        <file>../src/noggit/ui/style/images/icon_window_close.png</file>
+    </qresource>
+</RCC>

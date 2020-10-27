@@ -161,6 +161,7 @@ public:
   boost::optional<selection_type> get_last_selected_model() const;
   bool has_selection() const { return !_current_selection.empty(); }
   bool has_multiple_model_selected() const { return _selected_model_count > 1; }
+  int get_selected_model_count() const { return _selected_model_count; }
   void set_current_selection(selection_type entry);
   void add_to_selection(selection_type entry);
   void remove_from_selection(selection_type entry);

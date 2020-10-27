@@ -4,19 +4,24 @@
 
 #include <QLabel>
 #include <QWidget>
-#include <QtWidgets/QSlider>
+#include <QSlider>
 #include <QDoubleSpinBox>
+#include <QSpinBox>
 #include <QProgressBar>
 #include <QLineEdit>
 #include <QListWidget>
+#include <qt-color-widgets/color_selector.hpp>
 
 #include <boost/optional.hpp>
 #include <string>
 #include <unordered_map>
 #include <vector>
 #include <array>
+#include <math/vector_4d.hpp>
+#include <math/vector_3d.hpp>
 
 #include <noggit/ui/minimap_widget.hpp>
+
 
 class MapView;
 class World;
@@ -30,7 +35,7 @@ enum MinimapGenMode
 
 struct MinimapRenderSettings
 {
-  MinimapGenMode export_mode; // Export mode
+  MinimapGenMode export_mode;
 
   // Render settings
   int resolution = 512;
@@ -39,19 +44,24 @@ struct MinimapRenderSettings
   bool draw_water = true;
   bool draw_adt_grid = false;
   bool draw_elevation = false;
+  bool use_filters = false;
 
+  // Selection
   std::array<bool, 4096> selected_tiles = {false};
 
-  QListWidget* m2_model_filter_include;
-
   // Filtering
-  /*
-  std::unordered_map<std::string, float> m2_model_filter_include; // filename, size category
-  std::vector<uint32_t> m2_instance_filter_include; // include specific M2 instances
-  std::vector<std::string> wmo_model_filter_exclude; // exclude WMOs by filename
-  std::vector<uint32_t> wmo_instance_filter_exclude; // exclude specific WMO instances
-  */
+  QListWidget* m2_model_filter_include;
+  QListWidget* m2_instance_filter_include;
+  QListWidget* wmo_model_filter_exclude;
+  QListWidget* wmo_instance_filter_exclude;
 
+  // Lighting
+  math::vector_3d diffuse_color = {1.0, 0.532352924, 0.0};
+  math::vector_3d ambient_color = {0.407770514, 0.508424163, 0.602650642};
+  math::vector_4d ocean_color_light = {0.0693173409, 0.294008732, 0.348329663, 0.75};
+  math::vector_4d ocean_color_dark = {0.000762581825, 0.113907099, 0.161220074, 1.0};
+  math::vector_4d river_color_light = {0.308351517, 0.363725543, 0.0798838138, 0.5};
+  math::vector_4d river_color_dark = {0.19945538, 0.320697188, 0.332425594, 1.0};
 
 };
 
@@ -82,6 +92,14 @@ namespace noggit
 
       void includeM2Model(std::string filename);
       void unincludeM2Model(std::string filename);
+      void includeM2Instance(uint32_t uid);
+      void unincludeM2Instance(uint32_t uid);
+
+      void excludeWMOModel(std::string filename);
+      void unexcludeWMOModel(std::string filename);
+      void excludeWMOInstance(uint32_t uid);
+      void unexcludeWMOInstance(uint32_t uid);
+
 
     private:
       float _radius = 0.01f;
@@ -91,6 +109,9 @@ namespace noggit
       minimap_widget* _minimap_widget;
       QProgressBar* _progress_bar;
       QListWidget* _m2_model_filter_include;
+      QListWidget* _m2_instance_filter_include;
+      QListWidget* _wmo_model_filter_exclude;
+      QListWidget* _wmo_instance_filter_exclude;
 
     };
 
@@ -106,6 +127,31 @@ namespace noggit
     private:
       QLineEdit* _filename;
       QDoubleSpinBox* _size_category_spin;
+    };
+
+    class MinimapWMOModelFilterEntry : public QWidget
+    {
+    public:
+      MinimapWMOModelFilterEntry(MinimapCreator* parent = nullptr);
+
+      QString getFileName() { return _filename->text(); };
+      void setFileName(const std::string& filename) { _filename->setText(QString(filename.c_str())); };
+
+    private:
+      QLineEdit* _filename;
+    };
+
+    class MinimapInstanceFilterEntry : public QWidget
+    {
+    public:
+      MinimapInstanceFilterEntry(MinimapCreator* parent = nullptr);
+
+      uint32_t getUid() { return _uid; };
+      void setUid(uint32_t uid) { _uid = uid; _uid_label->setText(QString::fromStdString(std::to_string(uid))); };
+
+    private:
+      uint32_t _uid;
+      QLabel* _uid_label;
     };
   }
 }
