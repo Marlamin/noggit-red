@@ -28,7 +28,7 @@
 #include <boost/thread/thread.hpp>
 
 #include <QtWidgets/QMessageBox>
-#include <QTCore/QDir>
+#include <QDir>
 
 #include <algorithm>
 #include <cassert>
