@@ -1831,6 +1831,13 @@ void World::drawMinimap ( MapTile *tile
         );
   }
 
+  // Also load a tile above the current one to correct the lookat approximation
+  tile_index m_tile = tile_index (camera_pos);
+  m_tile.z -= 1;
+
+  bool unload = !mapIndex.has_unsaved_changes(m_tile);
+  MapTile* mTile = mapIndex.loadTile(m_tile);
+
   int daytime = static_cast<int>(time) % 2880;
 
   outdoorLightStats = ol->getLightStats(daytime);
@@ -1882,12 +1889,6 @@ void World::drawMinimap ( MapTile *tile
                display_mode::in_2D
     );
 
-    tile_index m_tile = tile_index (camera_pos);
-    m_tile.z -= 1;
-
-    bool unload = !mapIndex.has_unsaved_changes(m_tile);
-    MapTile* mTile = mapIndex.loadTile(m_tile);
-
     if (mTile)
     {
       mTile->wait_until_loaded();
@@ -1896,11 +1897,6 @@ void World::drawMinimap ( MapTile *tile
                  false, false, false, area_id_colors, animtime,
                  display_mode::in_2D
       );
-    }
-
-    if (unload)
-    {
-      mapIndex.unloadTile(m_tile);
     }
 
     gl.bindVertexArray(0);
@@ -2088,8 +2084,22 @@ void World::drawMinimap ( MapTile *tile
                     -1, display_mode::in_2D
     );
 
+    if (mTile)
+    {
+      mTile->wait_until_loaded();
+
+      mTile->drawWater(frustum, culldistance, camera_pos, true, _liquid_render.get(), water_shader, animtime,
+                      -1, display_mode::in_2D
+      );
+    }
+
     gl.bindVertexArray(0);
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  }
+
+  if (unload)
+  {
+    mapIndex.unloadTile(m_tile);
   }
 }
 

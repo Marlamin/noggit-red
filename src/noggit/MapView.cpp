@@ -1677,6 +1677,7 @@ void MapView::paintGL()
   if (saving_minimap)
   {
     saveMinimap(minimapTool->getMinimapRenderSettings());
+    _main_window->setEnabled(false);
   }
 
   const qreal now(_startup_time.elapsed() / 1000.0);
@@ -1686,6 +1687,7 @@ void MapView::paintGL()
   if (!saving_minimap)
   {
     tick (now - _last_update);
+    _main_window->setEnabled(true);
   }
 
   _last_update = now;
@@ -1693,6 +1695,11 @@ void MapView::paintGL()
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   draw_map();
+
+  if (saving_minimap)
+  {
+    gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
 
   if (_world->uid_duplicates_found() && !_uid_duplicate_warning_shown)
   {
