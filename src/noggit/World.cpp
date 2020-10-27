@@ -28,6 +28,7 @@
 #include <boost/thread/thread.hpp>
 
 #include <QtWidgets/QMessageBox>
+#include <QTCore/QDir>
 
 #include <algorithm>
 #include <cassert>
@@ -2153,7 +2154,11 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
       str += "/";
     }
 
-    image.save((str.toStdString() + "/textures/minimap/" + basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str());
+    QDir dir(str + "/textures/minimap/");
+    if (!dir.exists())
+      dir.mkpath(".");
+
+    image.save(dir.filePath(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str()));
 
     if (unload)
     {
