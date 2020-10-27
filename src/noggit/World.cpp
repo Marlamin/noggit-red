@@ -1987,7 +1987,7 @@ void World::drawMinimap ( MapTile *tile
   if (settings->draw_water)
   {
     opengl::scoped::use_program water_shader{_liquid_render_mini->shader_program()};
-    water_shader.uniform("animtime", static_cast<float>(animtime) / 2880.f);
+    water_shader.uniform("animtime", 0.0f);
 
     water_shader.uniform("model_view", model_view);
     water_shader.uniform("projection", projection);
@@ -2057,7 +2057,7 @@ void World::drawMinimap ( MapTile *tile
           wmo.wmo->wait_until_loaded();
           wmo.draw(wmo_program, model_view, projection, frustum,
                    culldistance, camera_pos, false, false,
-                   false, _liquid_render.get(), current_selection(),
+                   false, _liquid_render_mini.get(), current_selection(),
                    animtime, skies->hasSkies(), display_mode::in_2D
           );
 
@@ -2065,7 +2065,6 @@ void World::drawMinimap ( MapTile *tile
 
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    gl.enable(GL_CULL_FACE);
   }
 
   // Liquids
@@ -2080,7 +2079,7 @@ void World::drawMinimap ( MapTile *tile
 
     water_shader.uniform("use_transform", 0);
 
-    tile->drawWater(frustum, culldistance, camera_pos, true, _liquid_render.get(), water_shader, animtime,
+    tile->drawWater(frustum, culldistance, camera_pos, true, _liquid_render_mini.get(), water_shader, animtime,
                     -1, display_mode::in_2D
     );
 
@@ -2088,7 +2087,7 @@ void World::drawMinimap ( MapTile *tile
     {
       mTile->wait_until_loaded();
 
-      mTile->drawWater(frustum, culldistance, camera_pos, true, _liquid_render.get(), water_shader, animtime,
+      mTile->drawWater(frustum, culldistance, camera_pos, true, _liquid_render_mini.get(), water_shader, animtime,
                       -1, display_mode::in_2D
       );
     }

@@ -320,7 +320,7 @@ namespace noggit
                                                  _render_settings.ocean_color_dark.w));
       ocean_color_dark->setMinimumHeight(25);
 
-      lighting_layout->addRow("Ocean dakr color:", ocean_color_dark);
+      lighting_layout->addRow("Ocean dark color:", ocean_color_dark);
 
       auto river_color_light = new color_widgets::ColorSelector (this);
       river_color_light->setColor (QColor::fromRgbF (_render_settings.river_color_light.x,
