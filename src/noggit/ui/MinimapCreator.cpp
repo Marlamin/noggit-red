@@ -1071,14 +1071,9 @@ namespace noggit
 
         for (const auto& m2_instance_val : m2_instances)
         {
-          if (m2_instance_val.isObject())
+          if (m2_instance_val.isArray())
           {
-            QJsonObject m2_instance = m2_instance_val.toObject();
-
-            uint32_t uid = m2_instance["uid"].toInt();
-
-            includeM2Instance(uid);
-
+            includeM2Instance(m2_instance_val.toInt());
           }
         }
 
@@ -1087,14 +1082,9 @@ namespace noggit
 
         for (const auto& wmo_model_val : wmo_models)
         {
-          if (wmo_model_val.isObject())
+          if (wmo_model_val.isArray())
           {
-            QJsonObject wmo_model = wmo_model_val.toObject();
-
-            QString filename = wmo_model["filename"].toString();
-
-            excludeWMOModel(filename.toStdString());
-
+            excludeWMOModel(wmo_model_val.toString().toStdString());
           }
         }
 
@@ -1103,14 +1093,9 @@ namespace noggit
 
         for (const auto& wmo_instance_val : wmo_instances)
         {
-          if (wmo_instance_val.isObject())
+          if (wmo_instance_val.isArray())
           {
-            QJsonObject wmo_instance = wmo_instance_val.toObject();
-
-            uint32_t uid = wmo_instance["uid"].toInt();
-
-            excludeWMOInstance(uid);
-
+            excludeWMOInstance(wmo_instance_val.toInt());
           }
         }
 
@@ -1164,9 +1149,7 @@ namespace noggit
         auto item_wgt = reinterpret_cast<MinimapInstanceFilterEntry*>(_m2_instance_filter_include->itemWidget(
             _m2_instance_filter_include->item(i)));
 
-        QJsonObject item = QJsonObject();
-        item.insert("uid", QJsonValue(static_cast<int>(item_wgt->getUid())));
-        m2_instances.append(item);
+        m2_instances.append(QJsonValue(static_cast<int>(item_wgt->getUid())));
       }
 
       // wmo models
@@ -1175,9 +1158,7 @@ namespace noggit
         auto item_wgt = reinterpret_cast<MinimapWMOModelFilterEntry*>(_wmo_model_filter_exclude->itemWidget(
             _wmo_model_filter_exclude->item(i)));
 
-        QJsonObject item = QJsonObject();
-        item.insert("filename", QJsonValue(item_wgt->getFileName()));
-        wmo_models.append(item);
+        wmo_models.append(QJsonValue(item_wgt->getFileName()));
       }
 
       // wmo instances
@@ -1186,9 +1167,7 @@ namespace noggit
         auto item_wgt = reinterpret_cast<MinimapInstanceFilterEntry*>(_wmo_instance_filter_exclude->itemWidget(
             _wmo_instance_filter_exclude->item(i)));
 
-        QJsonObject item = QJsonObject();
-        item.insert("uid", QJsonValue(static_cast<int>(item_wgt->getUid())));
-        wmo_instances.append(item);
+        wmo_instances.append(QJsonValue(static_cast<int>(item_wgt->getUid())));
       }
 
       json_root_obj.insert("m2_models", m2_models);
