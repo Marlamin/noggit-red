@@ -2154,6 +2154,12 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
             , max_height + 15.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f)
         , settings);
 
+    // Clearing alpha from image
+    gl.colorMask(FALSE, FALSE, FALSE, TRUE);
+    gl.clearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    gl.colorMask(TRUE, TRUE, TRUE, TRUE);
+
     QImage image = pixel_buffer.toImage();
 
     QSettings settings;
