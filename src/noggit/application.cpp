@@ -39,8 +39,6 @@
 
 #include "revision.h"
 
-#include <noggit/ui/style/framelesswindow/framelesswindow.h>
-#include <noggit/ui/style/DarkStyle.h>
 
 class Noggit
 {
@@ -288,9 +286,14 @@ Noggit::Noggit(int argc, char *argv[])
   LogDebug << "GL: Renderer: " << gl.getString (GL_RENDERER) << std::endl;
 
 
-  qApp->setStyle(new DarkStyle);
-
   main_window = std::make_unique<noggit::ui::main_window>();
+
+
+  QFile File("./themes/dark/theme.qss");
+  File.open(QFile::ReadOnly);
+  QString StyleSheet = QLatin1String(File.readAll());
+
+  qApp->setStyleSheet(StyleSheet);
 
   if (fullscreen)
   {
