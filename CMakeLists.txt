@@ -214,11 +214,19 @@ include_directories(PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 # And do the job.
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/noggit/ui/style/framelesswindow" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libimagequant" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libpng" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libtxc_dxtn" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/pngpp" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/zlib" )
+
 COLLECT_FILES(false noggit_root_sources src/noggit .cpp)
 COLLECT_FILES(true noggit_ui_sources src/noggit/ui .cpp)
 COLLECT_FILES(false math_sources src/math .cpp)
 COLLECT_FILES(false opengl_sources src/opengl .cpp)
 COLLECT_FILES(true red_sources src/noggit/Red .cpp)
+COLLECT_FILES(true png_blp_sources src/external/PNG2BLP ".c;.cpp;")
 set ( util_sources
       src/util/exception_to_string.cpp
     )
@@ -228,6 +236,7 @@ COLLECT_FILES(false math_headers src/math ".h;.hpp")
 COLLECT_FILES(false opengl_headers src/opengl ".h;.hpp")
 COLLECT_FILES(false shaders src/glsl .glsl)
 COLLECT_FILES(true red_headers src/noggit/Red ".hpp;.inl")
+COLLECT_FILES(true png_blp_headers src/external/PNG2BLP ".h;.hpp;")
 
 IF(WIN32)
   set ( os_sources
@@ -259,6 +268,7 @@ source_group("os"  FILES ${os_sources} ${os_headers})
 source_group("util"  FILES ${util_sources})
 source_group("glsl"  FILES ${shaders})
 source_group("noggit/Red" FILES ${red_headers} ${red_sources})
+source_group("png_blp" FILES ${png_blp_headers} ${png_blp_sources})
 
 COLLECT_FILES(false resource_files resources .qrc)
 qt5_add_resources (compiled_resource_files ${resource_files})
@@ -277,6 +287,7 @@ ADD_EXECUTABLE ( noggit
                   ${os_sources}
                   ${util_sources}
                   ${red_sources}
+                  ${png_blp_sources}
                   ${noggit_root_headers}
                   ${noggit_ui_headers}
                   ${opengl_headers}
@@ -284,6 +295,7 @@ ADD_EXECUTABLE ( noggit
                   ${external_headers}
                   ${mysql_headers}
                   ${os_headers}
+                  ${png_blp_headers}
                   ${ResFiles}
                   ${moced}
                   ${red_headers}

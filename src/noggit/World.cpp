@@ -23,12 +23,16 @@
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
+#include <external/PNG2BLP/Png2Blp.h>
+
 #include <boost/filesystem.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/thread/thread.hpp>
 
 #include <QtWidgets/QMessageBox>
 #include <QDir>
+#include <QBuffer>
+#include <QByteArray>
 
 #include <algorithm>
 #include <cassert>
@@ -2173,7 +2177,27 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     if (!dir.exists())
       dir.mkpath(".");
 
-    image.save(dir.filePath(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str()));
+    QByteArray bytes;
+    QBuffer buffer( &bytes );
+    buffer.open( QIODevice::WriteOnly );
+
+    image.save( &buffer, "PNG" );
+
+    auto blp = Png2Blp();
+    blp.load(reinterpret_cast<const void*>(bytes.constData()), bytes.size());
+
+    uint32_t file_size;
+    void* blp_image = blp.createBlpDxtInMemory(true, FORMAT_DXT5, file_size);
+
+    QFile file(dir.filePath(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".blp").c_str()));
+    file.open(QIODevice::WriteOnly);
+    QDataStream out(&file);
+
+    out.writeRawData(reinterpret_cast<char*>(blp_image), file_size);
+
+    file.close();
+
+    // image.save(dir.filePath(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str()));
 
     if (unload)
     {
