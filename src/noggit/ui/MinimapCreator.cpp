@@ -1071,10 +1071,7 @@ namespace noggit
 
         for (const auto& m2_instance_val : m2_instances)
         {
-          if (m2_instance_val.isArray())
-          {
-            includeM2Instance(m2_instance_val.toInt());
-          }
+          includeM2Instance(m2_instance_val.toInt());
         }
 
         // WMO models
@@ -1082,10 +1079,7 @@ namespace noggit
 
         for (const auto& wmo_model_val : wmo_models)
         {
-          if (wmo_model_val.isArray())
-          {
-            excludeWMOModel(wmo_model_val.toString().toStdString());
-          }
+          excludeWMOModel(wmo_model_val.toString().toStdString());
         }
 
         // WMO instances
@@ -1093,10 +1087,7 @@ namespace noggit
 
         for (const auto& wmo_instance_val : wmo_instances)
         {
-          if (wmo_instance_val.isArray())
-          {
-            excludeWMOInstance(wmo_instance_val.toInt());
-          }
+          excludeWMOInstance(wmo_instance_val.toInt());
         }
 
       }
