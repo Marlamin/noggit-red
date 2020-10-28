@@ -3206,6 +3206,9 @@ void MapView::save(save_mode mode)
 {
   bool save = true;
 
+  // Save minimap creator model filters
+  minimapTool->saveFiltersToJSON();
+
   if (AsyncLoader::instance().important_object_failed_loading())
   {
     save = false;

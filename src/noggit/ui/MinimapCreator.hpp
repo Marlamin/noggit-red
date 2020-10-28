@@ -90,7 +90,7 @@ namespace noggit
 
       void progressUpdate(int value) { _progress_bar->setValue(value); };
 
-      void includeM2Model(std::string filename);
+      void includeM2Model(std::string filename, float size_cat = 0.0f);
       void unincludeM2Model(std::string filename);
       void includeM2Instance(uint32_t uid);
       void unincludeM2Instance(uint32_t uid);
@@ -100,6 +100,8 @@ namespace noggit
       void excludeWMOInstance(uint32_t uid);
       void unexcludeWMOInstance(uint32_t uid);
 
+      void loadFiltersFromJSON();
+      void saveFiltersToJSON();
 
     private:
       float _radius = 0.01f;
@@ -122,6 +124,7 @@ namespace noggit
 
       QString getFileName() { return _filename->text(); };
       void setFileName(const std::string& filename) { _filename->setText(QString(filename.c_str())); };
+      void setSizeCategory(float size_cat) {_size_category_spin->setValue(size_cat); };
       float getSizeCategory() { return static_cast<float>(_size_category_spin->value()); };
 
     private:

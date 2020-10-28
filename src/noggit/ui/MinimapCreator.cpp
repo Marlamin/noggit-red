@@ -5,6 +5,7 @@
 
 #include <noggit/MapView.h>
 #include <noggit/World.h>
+#include <noggit/Log.h>
 
 #include <util/qt/overload.hpp>
 
@@ -19,7 +20,10 @@
 #include <QApplication>
 #include <QComboBox>
 #include <QProgressBar>
-
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QByteArray>
 
 namespace noggit
 {
@@ -339,6 +343,8 @@ namespace noggit
       river_color_dark->setMinimumHeight(25);
 
       lighting_layout->addRow("River dark color:", river_color_dark);
+
+      loadFiltersFromJSON();
 
       // Connections
 
@@ -856,7 +862,7 @@ namespace noggit
 
     }
 
-    void MinimapCreator::includeM2Model(std::string filename)
+    void MinimapCreator::includeM2Model(std::string filename, float size_cat)
     {
       bool already_added = false;
 
@@ -879,6 +885,7 @@ namespace noggit
       _m2_model_filter_include->addItem(item);
       auto entry_wgt = new MinimapM2ModelFilterEntry(this);
       entry_wgt->setFileName(filename);
+      entry_wgt->setSizeCategory(size_cat);
       item->setSizeHint(entry_wgt->minimumSizeHint());
       _m2_model_filter_include->setItemWidget(item, entry_wgt);
     }
@@ -1018,6 +1025,181 @@ namespace noggit
           delete item;
         }
       }
+    }
+
+    void MinimapCreator::loadFiltersFromJSON()
+    {
+      QSettings settings;
+      QString str = settings.value ("project/path").toString();
+      if (!(str.endsWith('\\') || str.endsWith('/')))
+      {
+        str += "/";
+      }
+
+      QFile json_file = QFile(str + "/noggit_mmap_filters.json");
+      if (!json_file.open(QIODevice::ReadOnly))
+      {
+        return;
+      }
+
+      QByteArray save_data = json_file.readAll();
+      QJsonDocument json_doc(QJsonDocument::fromJson(save_data));
+
+      if (json_doc.isObject())
+      {
+        QJsonObject doc_object = json_doc.object();
+
+        // M2 models
+        QJsonArray  m2_models = doc_object["m2_models"].toArray();
+
+        for (const auto& m2_model_val : m2_models)
+        {
+          if (m2_model_val.isObject())
+          {
+            QJsonObject m2_model = m2_model_val.toObject();
+
+            QString filename = m2_model["filename"].toString();
+            double size_cat = m2_model["size_category"].toDouble();
+
+            includeM2Model(filename.toStdString(), static_cast<float>(size_cat));
+
+          }
+        }
+
+        // M2 instances
+        QJsonArray  m2_instances = doc_object["m2_instances"].toArray();
+
+        for (const auto& m2_instance_val : m2_instances)
+        {
+          if (m2_instance_val.isObject())
+          {
+            QJsonObject m2_instance = m2_instance_val.toObject();
+
+            uint32_t uid = m2_instance["uid"].toInt();
+
+            includeM2Instance(uid);
+
+          }
+        }
+
+        // WMO models
+        QJsonArray wmo_models = doc_object["wmo_models"].toArray();
+
+        for (const auto& wmo_model_val : wmo_models)
+        {
+          if (wmo_model_val.isObject())
+          {
+            QJsonObject wmo_model = wmo_model_val.toObject();
+
+            QString filename = wmo_model["filename"].toString();
+
+            excludeWMOModel(filename.toStdString());
+
+          }
+        }
+
+        // WMO instances
+        QJsonArray wmo_instances = doc_object["wmo_instances"].toArray();
+
+        for (const auto& wmo_instance_val : wmo_instances)
+        {
+          if (wmo_instance_val.isObject())
+          {
+            QJsonObject wmo_instance = wmo_instance_val.toObject();
+
+            uint32_t uid = wmo_instance["uid"].toInt();
+
+            excludeWMOInstance(uid);
+
+          }
+        }
+
+      }
+
+      json_file.close();
+
+    }
+
+    void MinimapCreator::saveFiltersToJSON()
+    {
+      QSettings settings;
+      QString str = settings.value ("project/path").toString();
+      if (!(str.endsWith('\\') || str.endsWith('/')))
+      {
+        str += "/";
+      }
+
+      QJsonDocument json_doc;
+
+      QFile json_file = QFile(str + "/noggit_mmap_filters.json");
+      if (!json_file.open(QIODevice::WriteOnly | QIODevice::Text | QFile::Truncate))
+      {
+        LogError << "Unable to save minimap creator model filters to JSON document." << std::endl;
+        return;
+      }
+
+      json_doc = QJsonDocument();
+
+      QJsonObject json_root_obj = QJsonObject();
+      QJsonArray m2_models = QJsonArray();
+      QJsonArray m2_instances = QJsonArray();
+      QJsonArray wmo_models = QJsonArray();
+      QJsonArray wmo_instances = QJsonArray();
+
+      // m2 models
+      for (int i = 0; i < _m2_model_filter_include->count(); ++i)
+      {
+        auto item_wgt = reinterpret_cast<MinimapM2ModelFilterEntry*>(_m2_model_filter_include->itemWidget(
+            _m2_model_filter_include->item(i)));
+
+        QJsonObject item = QJsonObject();
+        item.insert("filename", QJsonValue(item_wgt->getFileName()));
+        item.insert("size_category", QJsonValue(static_cast<double>(item_wgt->getSizeCategory())));
+        m2_models.append(item);
+      }
+
+      // m2 instances
+      for (int i = 0; i < _m2_instance_filter_include->count(); ++i)
+      {
+        auto item_wgt = reinterpret_cast<MinimapInstanceFilterEntry*>(_m2_instance_filter_include->itemWidget(
+            _m2_instance_filter_include->item(i)));
+
+        QJsonObject item = QJsonObject();
+        item.insert("uid", QJsonValue(static_cast<int>(item_wgt->getUid())));
+        m2_instances.append(item);
+      }
+
+      // wmo models
+      for (int i = 0; i < _wmo_model_filter_exclude->count(); ++i)
+      {
+        auto item_wgt = reinterpret_cast<MinimapWMOModelFilterEntry*>(_wmo_model_filter_exclude->itemWidget(
+            _wmo_model_filter_exclude->item(i)));
+
+        QJsonObject item = QJsonObject();
+        item.insert("filename", QJsonValue(item_wgt->getFileName()));
+        wmo_models.append(item);
+      }
+
+      // wmo instances
+      for (int i = 0; i < _wmo_instance_filter_exclude->count(); ++i)
+      {
+        auto item_wgt = reinterpret_cast<MinimapInstanceFilterEntry*>(_wmo_instance_filter_exclude->itemWidget(
+            _wmo_instance_filter_exclude->item(i)));
+
+        QJsonObject item = QJsonObject();
+        item.insert("uid", QJsonValue(static_cast<int>(item_wgt->getUid())));
+        wmo_instances.append(item);
+      }
+
+      json_root_obj.insert("m2_models", m2_models);
+      json_root_obj.insert("m2_instances", m2_instances);
+      json_root_obj.insert("wmo_models", wmo_models);
+      json_root_obj.insert("wmo_instances", wmo_instances);
+
+      json_doc.setObject(json_root_obj);
+      json_file.write(json_doc.toJson());
+      json_file.close();
+
     }
 
     MinimapM2ModelFilterEntry::MinimapM2ModelFilterEntry(MinimapCreator* parent) : QWidget(parent)
