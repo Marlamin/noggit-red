@@ -34,7 +34,7 @@ namespace noggit
       {
         QWidget* temp_btn = new QWidget();
 
-
+        temp_btn->ensurePolished();
         painter->setPen (temp_btn->palette().color(QPalette::WindowText));
 
         delete temp_btn;
