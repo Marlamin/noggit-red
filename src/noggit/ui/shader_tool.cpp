@@ -177,8 +177,8 @@ namespace noggit
 
       connect (color_wheel, &color_widgets::ColorWheel::colorChanged, color_picker, &color_widgets::ColorSelector::setColor);
 
-      setMinimumWidth(sizeHint().width());
-
+      setMinimumWidth(250);
+      setMaximumWidth(250);
     }
 
     void shader_tool::changeShader

@@ -1,0 +1,635 @@
+$light = #504d55;
+$half_light = #383440;
+$base = #2e2b35;
+$half_dark = #28252e;
+$dark = #24222a;
+
+$highlight =  #be3b29;
+$hover =  #ffffff;
+$text = #d7d7d7;
+$disabled = #7f7f7f;
+
+
+
+
+QWidget {
+	background: $base;
+	border: none;
+	color: $text;
+	outline: 0;
+}
+QWidget:disabled {
+	color: $disabled;
+	outline: none;
+}
+QDockWidget::title {
+	background: $base;
+	padding-left: 12px;
+}
+QDockWidget::close-button, QDockWidget::float-button {
+    border: 1px solid $base;
+    background: $light;
+
+}
+
+
+QMenu {
+    background-color: $base; /* sets background of the menu */
+    border: none;
+}
+QMenu::item {
+    /* sets background of menu item. set this to something non-transparent
+        if you want menu color and menu item color to be different */
+    background-color: transparent;
+}
+QMenu::item:selected { /* when user selects item using mouse or keyboard */
+    background-color: $light;
+}
+
+
+
+QMenu::separator {
+    height: 1px;
+    background: $light;
+}
+
+
+QMenuBar {
+    background-color: $base;
+}
+QMenuBar::item {
+    padding: 1px 10px;
+}
+
+QMenuBar::item:selected { /* when selected using mouse or keyboard */
+    background: $light;
+}
+
+QMenuBar::item:pressed {
+    background: $half_dark;
+}
+
+
+
+QToolBar {
+    background: $base;
+    spacing: 3px; /* spacing between items in the tool bar */
+	min-height: 42px;
+	min-width: 42px;
+}
+QToolBar::separator {
+    background: $half_light;
+	width: 2px;
+}
+QToolBar::handle:horizontal {
+    border-left: 2px solid $half_light;
+	 border-right: 2px solid $half_light;
+	width: 2px;
+	background: $half_dark;
+	margin-left: 4px;
+	margin-right: 4px;
+}
+QToolBar::handle:vertical {
+    border-top: 2px solid $half_light;
+	 border-bottom: 2px solid $half_light;
+	height: 2px;
+	background: $half_dark;
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+
+
+
+
+
+
+
+QLineEdit {
+	color: $text;
+    padding: 0 8px;
+    background: $half_dark;
+    selection-background-color: $highlight;
+}
+QLineEdit:read-only {
+    background: $base;
+}
+QFrame {
+	background: $half_dark;
+}
+QLabel {
+	background: transparent;
+	padding: 2px 4px;
+}
+QGroupBox QLabel:disabled {
+	color: $disabled;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+
+
+
+
+QGroupBox::indicator {
+	width: 14px;
+	height: 14px;
+	margin-top: 1px;
+}
+QGroupBox::indicator:unchecked {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_unchecked.png);
+}
+QGroupBox::indicator:unchecked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_unchecked_hover.png);
+}
+QGroupBox::indicator:checked {
+		image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked.png);
+}
+QGroupBox::indicator:checked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked_hover.png);
+}
+
+
+
+QGroupBox {
+	font-weight: bold;
+	border: 1px solid $half_light;
+	padding-top: 22px;
+	padding-left: 12px;
+	padding-right: 12px;
+	padding-bottom: 4px;
+	outline: none;
+
+}
+QGroupBox::title {
+	background: none;
+	border-bottom: 1px solid $highlight;
+	border-top: 1px solid $half_light;
+	color: $text;
+	subcontrol-origin: margin;
+	subcontrol-position: top center;
+	padding: 4px 0px;
+	spacing: 8px;
+}
+
+
+
+
+
+
+QTabBar::tab {
+	background: $half_light;
+	border: 1px solid $base;
+	border-bottom: none;
+	padding: 4px 10px;
+	min-width: 55px;
+}
+QTabBar::tab:left, QTabBar::tab:right {
+	min-width: 15px;
+	min-height: 35px;
+	padding: 4px 6px;
+}
+QTabBar::tab:left:selected {
+	border: none;
+	border-left: 3px solid $highlight;
+}
+QTabBar::tab:left:selected:hover {
+	border: none;
+	border-left: 3px solid $highlight;
+}
+QTabBar::tab:left:hover {
+	border: none;
+	border-left: 1px solid $highlight;
+}
+QTabBar::tab:right:selected {
+	border: none;
+	border-right: 3px solid $highlight;
+}
+QTabBar::tab:right:selected:hover {
+	border: none;
+	border-right: 3px solid $highlight;
+}
+QTabBar::tab:right:hover {
+	border: none;
+	border-right: 1px solid $highlight;
+}
+
+
+QTabBar::tab:hover {
+	background: $light;
+	border-top: 1px solid $highlight;
+}
+QTabBar::tab:selected {
+	background: $base;
+	border-top: 3px solid $highlight;
+}
+
+QCheckBox {
+    spacing: 8px;
+}
+QCheckBox:hover {
+	color: $hover;
+}
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+}
+QCheckBox::indicator:unchecked {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_unchecked.png);
+}
+QCheckBox::indicator:unchecked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_unchecked_hover.png);
+}
+QCheckBox::indicator:unchecked:disabled {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_unchecked_disabled.png);
+}
+QCheckBox::indicator:checked {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked.png);
+}
+QCheckBox::indicator:checked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked_hover.png);
+}
+QCheckBox::indicator:checked:disabled {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked_disabled.png);
+}
+QCheckBox::indicator:indeterminate {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked.png);
+}
+
+
+QRadioButton {
+	spacing: 8px;
+}
+
+QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+}
+QRadioButton:hover {
+	color: $hover;
+}
+QRadioButton::indicator::unchecked {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_unchecked.png);
+}
+
+QRadioButton::indicator:unchecked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_unchecked_hover.png);
+}
+
+QRadioButton::indicator:unchecked:disabled {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_unchecked_disabled.png);
+}
+
+QRadioButton::indicator:checked {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_checked.png);
+}
+
+QRadioButton::indicator:checked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_checked_hover.png);
+}
+
+QRadioButton::indicator:checked:disabled {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_checked_disabled.png);
+}
+
+
+
+
+
+QScrollBar:horizontal {
+	background: $half_dark;
+    height: 16px;
+}
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal, QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: $half_dark;
+}
+QScrollBar::handle:horizontal {
+    background: $light;
+	border: 1px solid $half_light;
+	border-radius: 8px;
+    min-width: 20px;
+}
+QScrollBar:vertical {
+	background: $half_dark;
+    width: 16px;
+}
+QScrollBar::handle:vertical {
+    background: $light;
+	border: 1px solid $half_light;
+	border-radius: 8px;
+    min-height: 20px;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+	width: 0px;
+}
+ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical  {
+	 height: 0px;
+ }
+
+
+
+
+
+QToolButton {
+    background-color: $base;
+	border: 1px solid transparent;
+	padding: 0px;
+	width: 30px;
+	height: 30px;
+	color: $text;
+}
+
+QToolButton:hover {
+    background-color: $half_light;
+	border: 1px solid $light;
+}
+QToolButton:pressed {
+	background-color: $half_dark;
+    border: 1px solid $half_light;
+}
+QToolButton:selected {
+	background-color: $half_dark;
+    border: 1px solid $half_light;
+
+}
+
+QToolButton[popupMode="1"] { /* only for MenuButtonPopup */
+    min-width: 60px;
+	padding-right: 26px; /* make way for the popup button */
+	padding-left: 4px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+
+
+/* the subcontrols below are used only in the MenuButtonPopup mode */
+QToolButton::menu-button {
+    border: 1px solid $half_light;
+    width: 20px;
+}
+
+QToolButton::menu-button:hover {
+    border: 1px solid $light;
+}
+
+
+
+QDialogButtonBox QPushButton {
+	padding: 6px 26px;
+}
+ /*QDialogButtonBox {
+	min-width: 250px;
+	min-height: 35px;
+}*/
+
+QPushButton {
+	 background-color: $half_light;
+	 border: 1px solid $light;
+	 border-radius: 1px;
+	 padding: 6px 6px;
+ }
+QPushButton:hover {
+	background-color: $light;
+ }
+QPushButton:pressed {
+	background-color: $half_dark;
+ }
+QPushButton:disabled {
+	background-color: $half_dark;
+	color: $light;
+ }
+
+
+
+
+
+QAbstractSpinBox {
+    padding-right: 15px; /* make room for the arrows */
+	background: $half_dark;
+}
+QAbstractSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right; /* position at the top right corner */
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/spinup.png) 1;
+}
+QAbstractSpinBox::up-button:pressed, QAbstractSpinBox::up-button:off {
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/spinup_pressed.png) 1;
+}
+QAbstractSpinBox::up-button:disabled {
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/spinup_disabled.png) 1;
+}
+QAbstractSpinBox::up-arrow {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/up_arrow.png);
+}
+QAbstractSpinBox::up-arrow:disabled, QAbstractSpinBox::up-arrow:off { /* off state when value is max */
+   image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/down_arrow_disabled.png);
+}
+QAbstractSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right; /* position at bottom right corner */
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/spindown.png) 1;
+}
+QAbstractSpinBox::down-button:pressed, QAbstractSpinBox::down-button:off {
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/spindown_pressed.png) 1;
+}
+QAbstractSpinBox::down-button:disabled {
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/spindown_disabled.png) 1;
+}
+QAbstractSpinBox::down-arrow {
+	image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/down_arrow.png);
+}
+QAbstractSpinBox::down-arrow:disabled, QAbstractSpinBox::down-arrow:off { /* off state when value in min */
+   image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/up_arrow_disabled.png);
+}
+
+
+
+QComboBox {
+    border: none;
+    padding: 3px 18px 3px 6px;
+    min-width: 6em;
+}
+QComboBox:editable {
+    background: $half_dark;
+}
+QComboBox:!editable, QComboBox::drop-down:editable {
+     background: $half_light;
+}
+/* QComboBox gets the "on" state when the popup is open */
+QComboBox:!editable:on, QComboBox::drop-down:editable:on {
+    background: $light;
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 18px;
+    border: none;
+}
+QComboBox::down-arrow {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/down_arrow.png);
+}
+
+
+QSlider::groove:horizontal {
+    height: 6px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+    background: $half_dark;
+	border: 1px solid $half_light;
+}
+
+QSlider::handle:horizontal {
+    background: $highlight;
+    width: 7px;
+    margin: -5px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 2px;
+	border: 1px solid $half_dark;
+}
+QSlider::add-page:horizontal {
+    background: $half_dark;
+	border: 1px solid $half_light;
+}
+QSlider::sub-page:horizontal {
+    background-color: qlineargradient(x0:0, y0:0, x1:1, y1:0, stop:0 $highlight, stop:1 $base);
+	border: 1px solid $half_light;
+
+}
+
+
+
+
+QSlider::groove:vertical {
+    width: 6px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+    background: $half_dark;
+		border: 1px solid $half_light;
+}
+
+QSlider::handle:vertical {
+    background: $highlight;
+    height: 7px;
+    margin: 0 -5px; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 2px;
+		border: 1px solid $half_dark;
+}
+QSlider::add-page:vertical {
+    background: $half_dark;
+		border: 1px solid $half_light;
+}
+QSlider::sub-page:vertical {
+    background-color: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 $base, stop:1 $highlight);
+		border: 1px solid $half_light;
+}
+
+
+QStatusBar {
+    background: $base;
+}
+QStatusBar::item {
+    border-left: 1px solid $half_light;
+}
+
+
+QTableView {
+	color: $disabled;
+	background-color: $half_dark;
+	selection-color: $text;
+    selection-background-color: $half_light;
+	gridline-color: $light;
+}
+
+QTableView QTableCornerButton::section {
+    background: $half_light;
+	border-style: solid;
+    border-bottom: 1px solid $light;
+	border-right: 1px solid $light;
+}
+
+QHeaderView::section {
+    background-color: $half_light;
+    color: white;
+    padding: 0px 4px;
+	border-style: solid;
+    border-right: 1px solid $light;
+	border-bottom: 1px solid $light;
+}
+
+QHeaderView::section:checked
+{
+    background-color: $light;
+}
+
+/* style the sort indicator */
+QHeaderView::down-arrow {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/down_arrow.png);
+}
+
+QHeaderView::up-arrow {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/up_arrow.png);
+}
+
+
+
+
+QProgressBar {
+    border: 1px solid $half_light;
+    border-radius: 2px;
+	text-align: center;
+	background-color: $half_dark;
+}
+
+QProgressBar::chunk {
+    background-color: $highlight;
+    width: 1px;
+}
+
+
+
+QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/vline.png) 0;
+}
+
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_branch_more.png) 0;
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_branch_end.png) 0;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+        border-image: none;
+        image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_branch_closed.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+        border-image: none;
+		image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_branch_open.png);
+}
+
+
+
+/*======================================*/
+QListView {
+	border: none;
+	outline: none;
+}
+QListView::item {
+	background-color: $half_dark;
+	min-height: 18px;
+}
+QListView::item:alternate {
+	background: $dark;
+}
+
+QListView::item:selected {
+	background: $highlight;
+}
+
+/*=======================================*/
+
+
+color_widgets--ColorSelector {
+	min-width: 100px;
+	max-height: 30px;
+}

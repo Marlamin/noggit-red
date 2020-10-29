@@ -23,7 +23,8 @@ namespace noggit
       , _flatten_type(eFlattenType_Linear)
       , _flatten_mode(true, true)
     {
-      setMinimumWidth(sizeHint().width());
+      setMinimumWidth(250);
+      setMaximumWidth(250);
       auto layout (new QFormLayout (this));
 
       _type_button_box = new QButtonGroup (this);
@@ -82,10 +83,10 @@ namespace noggit
       flatten_blur_layout->addWidget(_lock_down_checkbox = new QCheckBox(this), 0, 1);
 
       _lock_up_checkbox->setChecked(_flatten_mode.raise);
-      _lock_up_checkbox->setText("raise");
+      _lock_up_checkbox->setText("Raise");
       _lock_up_checkbox->setToolTip("Raise the terrain when using the tool");
       _lock_down_checkbox->setChecked(_flatten_mode.lower);
-      _lock_down_checkbox->setText("lower");
+      _lock_down_checkbox->setText("Lower");
       _lock_down_checkbox->setToolTip("Lower the terrain when using the tool");
 
       layout->addRow(flatten_blur_group);

@@ -26,6 +26,9 @@ namespace noggit
 
       layout->addRow (_radius_slider);
 
+      setMinimumWidth(250);
+      setMaximumWidth(250);
+
       connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
           , [&] (double v)
                 {

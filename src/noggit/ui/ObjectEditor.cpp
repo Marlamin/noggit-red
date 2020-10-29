@@ -352,7 +352,8 @@ namespace noggit
              , [=]() { helper_models_widget->show(); }
              );    
 
-      setMinimumWidth(sizeHint().width());
+      setMinimumWidth(250);
+      setMaximumWidth(250);
 
       auto mv_pos = mapView->pos();
       auto mv_size = mapView->size();

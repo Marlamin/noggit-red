@@ -231,7 +231,8 @@ namespace noggit
                   }
                 );
 
-      setMinimumWidth(sizeHint().width());
+      setMinimumWidth(250);
+      setMaximumWidth(250);
     }
 
     void terrain_tool::changeTerrain

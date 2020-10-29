@@ -100,16 +100,23 @@ namespace noggit
 
       QString _brush_level_slider_style = 
         "QSlider::groove:vertical { \n "
-        "  background-color: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop: 0 black, stop: 1 #FFFFFF); \n "
+        "  background-color: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop: 0 black, stop: 1 white); \n "
         "  width: 35px; \n"
         "  margin: 0 0 0 0; \n "
         "} \n "
         "QSlider::handle:vertical { \n"
-        "  background-color: red; \n"
+        "  background-color: #be3b29; \n"
         "  height: 5px; \n" 
         "} \n"
         "QSlider::vertical { \n"
         "  width: 35px; \n"
+        "  max-height: 100px; \n"
+        "} \n"
+        "QSlider::add-page:vertical { \n"
+        "  background: transparent; \n"
+        "} \n"
+        "QSlider::sub-page:vertical { \n"
+        "  background: transparent; \n"
         "} \n";
 
       _brush_level_slider->setStyleSheet(_brush_level_slider_style);
@@ -133,6 +140,13 @@ namespace noggit
       _spray_content = new QWidget(_spray_mode_group);
       auto spray_layout (new QFormLayout (_spray_content));
       _spray_mode_group->setLayout(spray_layout);
+
+      QString _spray_mode_group_style =
+      "QWidget { \n"
+      "  background: transparent; \n"
+      "} \n";
+
+      _spray_mode_group->setStyleSheet(_spray_mode_group_style);
 
       _inner_radius_cb = new QCheckBox("Inner radius", _spray_content);
       spray_layout->addRow(_inner_radius_cb);
@@ -365,7 +379,10 @@ namespace noggit
       set_radius(15.0f);
       toggle_tool(); // to disable
 
-      setMinimumWidth(sizeHint().width());
+      setMinimumWidth(250);
+      setMaximumWidth(250);
+      setMinimumHeight(540);
+      setMaximumHeight(540);
     }
 
     void texturing_tool::update_brush_hardness()
