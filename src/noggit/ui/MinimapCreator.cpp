@@ -24,6 +24,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QByteArray>
+#include <QPalette>
 
 namespace noggit
 {
@@ -296,6 +297,8 @@ namespace noggit
                                                  _render_settings.diffuse_color.y,
                                                  _render_settings.diffuse_color.z));
       diffuse_color->setMinimumHeight(25);
+      diffuse_color->setMinimumWidth(100);
+
 
       lighting_layout->addRow("Diffuse color:", diffuse_color);
 
@@ -305,6 +308,7 @@ namespace noggit
                                                  _render_settings.ambient_color.y,
                                                  _render_settings.ambient_color.z));
       ambient_color->setMinimumHeight(25);
+      ambient_color->setMinimumWidth(100);
 
       lighting_layout->addRow("Ambient color:", ambient_color);
 
@@ -314,6 +318,7 @@ namespace noggit
                                                  _render_settings.ocean_color_light.z,
                                                  _render_settings.ocean_color_light.w));
       ocean_color_light->setMinimumHeight(25);
+      ocean_color_light->setMinimumWidth(100);
 
       lighting_layout->addRow("Ocean light color:", ocean_color_light);
 
@@ -323,6 +328,7 @@ namespace noggit
                                                  _render_settings.ocean_color_dark.z,
                                                  _render_settings.ocean_color_dark.w));
       ocean_color_dark->setMinimumHeight(25);
+      ocean_color_dark->setMinimumWidth(100);
 
       lighting_layout->addRow("Ocean dark color:", ocean_color_dark);
 
@@ -332,6 +338,7 @@ namespace noggit
                                                  _render_settings.river_color_light.z,
                                                  _render_settings.river_color_light.w));
       river_color_light->setMinimumHeight(25);
+      river_color_light->setMinimumWidth(100);
 
       lighting_layout->addRow("River light color:", river_color_light);
 
@@ -341,6 +348,7 @@ namespace noggit
                                                  _render_settings.river_color_dark.z,
                                                  _render_settings.river_color_dark.w));
       river_color_dark->setMinimumHeight(25);
+      river_color_dark->setMinimumWidth(100);
 
       lighting_layout->addRow("River dark color:", river_color_dark);
 
@@ -927,6 +935,12 @@ namespace noggit
       auto item = new QListWidgetItem();
       _m2_instance_filter_include->addItem(item);
       auto entry_wgt = new MinimapInstanceFilterEntry(this);
+
+      QPalette pal = entry_wgt->palette();
+      pal.setColor(QPalette::Window, Qt::black);
+      //entry_wgt->setAutoFillBackground(true);
+      //entry_wgt->setPalette(pal);
+
       entry_wgt->setUid(uid);
       item->setSizeHint(entry_wgt->minimumSizeHint());
       _m2_instance_filter_include->setItemWidget(item, entry_wgt);
@@ -1172,8 +1186,9 @@ namespace noggit
 
     }
 
-    MinimapM2ModelFilterEntry::MinimapM2ModelFilterEntry(MinimapCreator* parent) : QWidget(parent)
+    MinimapM2ModelFilterEntry::MinimapM2ModelFilterEntry(QWidget* parent) : QWidget(parent)
     {
+      setAttribute(Qt::WA_TranslucentBackground);
       auto layout = new QHBoxLayout(this);
       layout->setContentsMargins(5, 2, 5, 2);
       layout->addWidget(_filename = new QLineEdit(this));
@@ -1184,18 +1199,22 @@ namespace noggit
 
     }
 
-     MinimapWMOModelFilterEntry::MinimapWMOModelFilterEntry(MinimapCreator* parent) : QWidget(parent)
+     MinimapWMOModelFilterEntry::MinimapWMOModelFilterEntry(QWidget* parent) : QWidget(parent)
     {
+      setAttribute(Qt::WA_TranslucentBackground);
       auto layout = new QHBoxLayout(this);
       layout->addWidget(_filename = new QLineEdit(this));
+      _filename->setAttribute(Qt::WA_TranslucentBackground);
       layout->setContentsMargins(5, 2, 5, 2);
       _filename->setEnabled(false);
     }
 
-    MinimapInstanceFilterEntry::MinimapInstanceFilterEntry(MinimapCreator* parent) : QWidget(parent)
+    MinimapInstanceFilterEntry::MinimapInstanceFilterEntry(QWidget* parent) : QWidget(parent)
     {
+      setAttribute(Qt::WA_TranslucentBackground);
       auto layout = new QHBoxLayout(this);
       layout->addWidget(_uid_label = new QLabel(this));
+      _uid_label->setAttribute(Qt::WA_TranslucentBackground);
       layout->setContentsMargins(5, 2, 5, 2);
     }
 

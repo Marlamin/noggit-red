@@ -120,7 +120,7 @@ namespace noggit
     class MinimapM2ModelFilterEntry : public QWidget
     {
     public:
-      MinimapM2ModelFilterEntry(MinimapCreator* parent = nullptr);
+      MinimapM2ModelFilterEntry(QWidget* parent = nullptr);
 
       QString getFileName() { return _filename->text(); };
       void setFileName(const std::string& filename) { _filename->setText(QString(filename.c_str())); };
@@ -135,7 +135,7 @@ namespace noggit
     class MinimapWMOModelFilterEntry : public QWidget
     {
     public:
-      MinimapWMOModelFilterEntry(MinimapCreator* parent = nullptr);
+      MinimapWMOModelFilterEntry(QWidget* parent = nullptr);
 
       QString getFileName() { return _filename->text(); };
       void setFileName(const std::string& filename) { _filename->setText(QString(filename.c_str())); };
@@ -147,7 +147,7 @@ namespace noggit
     class MinimapInstanceFilterEntry : public QWidget
     {
     public:
-      MinimapInstanceFilterEntry(MinimapCreator* parent = nullptr);
+      MinimapInstanceFilterEntry(QWidget* parent = nullptr);
 
       uint32_t getUid() { return _uid; };
       void setUid(uint32_t uid) { _uid = uid; _uid_label->setText(QString::fromStdString(std::to_string(uid))); };
