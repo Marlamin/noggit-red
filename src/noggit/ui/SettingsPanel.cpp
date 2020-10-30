@@ -153,8 +153,6 @@ namespace noggit
                 }
       );
 
-      _theme->setCurrentText("Dark");
-
       theme_layout->addRow("Theme", _theme);
 
       layout->addRow (theme_box);
@@ -276,6 +274,7 @@ namespace noggit
       _adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
       _uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
       _additional_file_loading_log->setChecked(_settings->value("additional_file_loading_log", false).toBool());
+      _theme->setCurrentText(_settings->value("theme", "Dark").toString());
 
 #ifdef USE_MYSQL_UID_STORAGE
       _mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
@@ -322,6 +321,7 @@ namespace noggit
       _settings->setValue ("wireframe/radius", _wireframe_radius->value());
       _settings->setValue ("wireframe/width", _wireframe_width->value());
       _settings->setValue ("wireframe/color", _wireframe_color->color());      
+      _settings->setValue ("theme", _theme->currentText());
 
 	  _settings->sync();
     }
