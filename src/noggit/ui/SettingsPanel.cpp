@@ -1,10 +1,12 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/SettingsPanel.h>
+#include <noggit/Log.h>
 
 #include <noggit/TextureManager.h>
 #include <util/qt/overload.hpp>
 
+#include <boost/format.hpp>
 
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QFileDialog>
@@ -13,6 +15,9 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QRadioButton>
+#include <QtWidgets/QComboBox>
+#include <QDir>
+#include <QApplication>
 
 
 #include <algorithm>
@@ -109,6 +114,51 @@ namespace noggit
 
       layout->addRow (_mysql_box);
 
+      auto theme_box (new QGroupBox ("Theme", this));
+      auto theme_layout (new QFormLayout (theme_box));
+      _theme = new QComboBox(this);
+      _theme->addItem("System");
+
+      QDir theme_dir = QDir("./themes/");
+      if (theme_dir.exists())
+      {
+        for (auto dir : theme_dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
+        {
+          if (QDir(theme_dir.path() + "/" + dir).exists("theme.qss"))
+          {
+            _theme->addItem(dir);
+          }
+        }
+      }
+      else
+      {
+        LogError << "Failed to load themes. The \"themes/\" folder does not exist in Noggit directory. Using system theme." << std::endl;
+      }
+
+      connect ( _theme, &QComboBox::currentTextChanged
+          , [&] (QString s)
+                {
+                  if (s == "System")
+                  {
+                    qApp->setStyleSheet("");
+                    return;
+                  }
+
+                  QFile file((boost::format("./themes/%s/theme.qss") % s.toStdString().c_str()).str().c_str());
+                  if (file.open(QFile::ReadOnly))
+                  {
+                    QString style_sheet = QLatin1String(file.readAll());
+                    qApp->setStyleSheet(style_sheet);;
+                  }
+                }
+      );
+
+      _theme->setCurrentText("Dark");
+
+      theme_layout->addRow("Theme", _theme);
+
+      layout->addRow (theme_box);
+
       auto wireframe_box (new QGroupBox ("Wireframe", this));
       auto wireframe_layout (new QFormLayout (wireframe_box));
 
@@ -142,9 +192,9 @@ namespace noggit
       layout->addRow ("VSync", _vsync_cb = new QCheckBox (this));
       layout->addRow ("Anti Aliasing", _anti_aliasing_cb = new QCheckBox(this));
       layout->addRow ("Fullscreen", _fullscreen_cb = new QCheckBox(this));
-      _vsync_cb->setToolTip("Require restart");
-      _anti_aliasing_cb->setToolTip("Require restart");
-      _fullscreen_cb->setToolTip("Require restart");
+      _vsync_cb->setToolTip("Requires restart");
+      _anti_aliasing_cb->setToolTip("Requires restart");
+      _fullscreen_cb->setToolTip("Requires restart");
 
       layout->addRow ( "View Distance"
                      , viewDistanceField = new QDoubleSpinBox

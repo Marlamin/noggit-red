@@ -13,6 +13,7 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QSpinBox>
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QComboBox>
 
 namespace util
 {
@@ -61,7 +62,7 @@ namespace noggit
       QLineEdit* _mysql_pwd_field;
       QLineEdit* _mysql_db_field;
 #endif
-
+      QComboBox* _theme;
       QButtonGroup* _wireframe_type_group;
       QDoubleSpinBox* _wireframe_radius;
       QDoubleSpinBox* _wireframe_width;
