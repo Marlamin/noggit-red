@@ -17,6 +17,7 @@
 #include <mutex>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 
 enum class uid_fix_status
@@ -209,6 +210,9 @@ public:
     return _uid_fix_all_in_progress;
   }
 
+  void loadMinimapMD5translate();
+  void saveMinimapMD5translate();
+
 private:
 	uint32_t getHighestGUIDFromFile(const std::string& pFilename) const;
 
@@ -218,6 +222,7 @@ private:
 
 public:
   int const _map_id;
+  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _minimap_md5translate;
 
 private:
   std::string globalWMOName;
@@ -231,6 +236,7 @@ private:
   bool mHasAGlobalWMO;
   bool noadt;
   bool changed;
+
   bool _sort_models_by_size_class;
 
   bool autoheight;

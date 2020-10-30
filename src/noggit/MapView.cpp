@@ -1606,6 +1606,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
       if (mmap_render_success)
       {
         saving_minimap = false;
+        _world->mapIndex.saveMinimapMD5translate();
       }
 
       break;
@@ -1640,6 +1641,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
         saving_minimap = false;
         mmap_render_index = 0;
         mmap_render_success = false;
+        _world->mapIndex.saveMinimapMD5translate();
       }
 
       break;
@@ -1688,6 +1690,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
         saving_minimap = false;
         mmap_render_index = 0;
         mmap_render_success = false;
+        _world->mapIndex.saveMinimapMD5translate();
       }
 
       break;
