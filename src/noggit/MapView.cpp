@@ -1723,6 +1723,8 @@ void MapView::paintGL()
 
   _last_update = now;
 
+  makeCurrent();
+
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   draw_map();
