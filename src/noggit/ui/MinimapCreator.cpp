@@ -10,6 +10,7 @@
 #include <util/qt/overload.hpp>
 
 #include <QFormLayout>
+#include <QGridLayout>
 #include <QGroupBox>
 #include <QCheckBox>
 #include <QButtonGroup>
@@ -110,33 +111,52 @@ namespace noggit
 
       render_settings_box_layout->addRow (resolution);
 
-      auto draw_models = new QCheckBox("Draw models", render_settings_box);
+      auto file_format = new QComboBox(this);
+      file_format->addItem(".blp");
+      file_format->addItem(".png");
+      file_format->setCurrentText(".blp");
+
+      render_settings_box_layout->addRow (file_format);
+
+      auto draw_elements_box_layout = new QGridLayout();
+      render_settings_box_layout->addItem(draw_elements_box_layout);
+
+      auto draw_models = new QCheckBox("Models", render_settings_box);
       draw_models->setChecked(_render_settings.draw_m2);
-      render_settings_box_layout->addRow (draw_models);
+      draw_elements_box_layout->addWidget(draw_models, 0, 0);
 
-      auto draw_wmos = new QCheckBox("Draw WMOs", render_settings_box);
+      auto draw_wmos = new QCheckBox("WMOs", render_settings_box);
       draw_wmos->setChecked(_render_settings.draw_wmo);
-      render_settings_box_layout->addRow (draw_wmos);
+      draw_elements_box_layout->addWidget(draw_wmos, 1, 0);
 
-      auto draw_water = new QCheckBox("Draw water", render_settings_box);
+      auto draw_water = new QCheckBox("Water", render_settings_box);
       draw_water->setChecked(_render_settings.draw_water);
-      render_settings_box_layout->addRow (draw_water);
+      draw_elements_box_layout->addWidget(draw_water, 2, 0);
 
-      auto draw_adt = new QCheckBox("Draw ADT grid", render_settings_box);
-      draw_adt->setChecked(_render_settings.draw_adt_grid);
-      render_settings_box_layout->addRow (draw_adt);
-
-      auto draw_elevation = new QCheckBox("Draw elevation lines", render_settings_box);
-      draw_elevation->setChecked(_render_settings.draw_elevation);
-      render_settings_box_layout->addRow (draw_elevation);
-
-      auto use_filters = new QCheckBox("Use filters", render_settings_box);
+      auto use_filters = new QCheckBox("Filter", render_settings_box);
       use_filters->setChecked(_render_settings.use_filters);
-      render_settings_box_layout->addRow (use_filters);
+      draw_elements_box_layout->addWidget(use_filters, 3, 0);
+
+      auto draw_adt = new QCheckBox("ADT grid", render_settings_box);
+      draw_adt->setChecked(_render_settings.draw_adt_grid);
+      draw_elements_box_layout->addWidget(draw_adt, 0, 1);
+
+      auto draw_elevation = new QCheckBox("Elevation", render_settings_box);
+      draw_elevation->setChecked(_render_settings.draw_elevation);
+      draw_elements_box_layout->addWidget(draw_elevation, 1, 1);
+
+      auto draw_shadows = new QCheckBox("Shadows", render_settings_box);
+      draw_elevation->setChecked(_render_settings.draw_shadows);
+      draw_elements_box_layout->addWidget(draw_shadows, 2, 1);
+
+      auto combined_minimap = new QCheckBox("Combine", render_settings_box);
+      combined_minimap->setChecked(_render_settings.combined_minimap);
+      draw_elements_box_layout->addWidget(combined_minimap, 3, 1);
+
 
       _progress_bar = new QProgressBar(this);
       _progress_bar->setRange(0, 4096);
-      generate_layout->addRow (_progress_bar);
+      generate_layout->addRow(_progress_bar);
 
       // Filter
       auto filter_widget = new QWidget(this);
@@ -741,6 +761,13 @@ namespace noggit
                 }
       );
 
+      connect ( file_format, &QComboBox::currentTextChanged
+          , [&] (QString s)
+                {
+                  _render_settings.file_format = s.toStdString();
+                }
+      );
+
       connect (draw_models, &QCheckBox::stateChanged, [this] (int s)
       {
         _render_settings.draw_m2 = s;
@@ -769,6 +796,16 @@ namespace noggit
       connect (use_filters, &QCheckBox::stateChanged, [this] (int s)
       {
         _render_settings.use_filters = s;
+      });
+
+      connect (draw_shadows, &QCheckBox::stateChanged, [this] (int s)
+      {
+        _render_settings.draw_shadows = s;
+      });
+
+      connect (combined_minimap, &QCheckBox::stateChanged, [this] (int s)
+      {
+        _render_settings.combined_minimap = s;
       });
 
       // Buttons
