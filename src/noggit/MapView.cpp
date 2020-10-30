@@ -37,6 +37,7 @@
 #include <noggit/ui/texture_palette_small.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
 #include <opengl/scoped.hpp>
+#include <noggit/Red/StampMode/Ui/Model/Item.hpp>
 
 #include "revision.h"
 
@@ -63,6 +64,7 @@
 #include <regex>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 
 static const float XSENS = 15.0f;
@@ -129,6 +131,9 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
     break;
   case editing_mode::minimap:
     _minimap_tool_dock->setVisible(!ui_hidden);
+    break;
+  case editing_mode::stamp:
+    _dockStamp.setVisible(!ui_hidden);
     break;
   }
 
@@ -237,22 +242,22 @@ void MapView::createGUI()
   _flatten_blur_dock->setWidget(flattenTool);
   _tool_properties_docks.insert(_flatten_blur_dock);
 
-  _texturing_dock = new QDockWidget("Texturing", this);
+  _texturing_dock = new QDockWidget("Texture Painter", this);
   texturingTool = new noggit::ui::texturing_tool(&_camera.position, _world.get(), &_show_texture_palette_small_window, _texturing_dock);
   _texturing_dock->setWidget(texturingTool);
   _tool_properties_docks.insert(_texturing_dock);
 
-  _hole_tool_dock = new QDockWidget("Holes", this);
+  _hole_tool_dock = new QDockWidget("Hole Cutter", this);
   holeTool = new noggit::ui::hole_tool(_hole_tool_dock);
   _hole_tool_dock->setWidget(holeTool);
   _tool_properties_docks.insert(_hole_tool_dock);
 
-  _areaid_editor_dock = new QDockWidget("Area ID", this);
+  _areaid_editor_dock = new QDockWidget("Area Designator", this);
   ZoneIDBrowser = new noggit::ui::zone_id_browser(_areaid_editor_dock);
   _areaid_editor_dock->setWidget(ZoneIDBrowser);
   _tool_properties_docks.insert(_areaid_editor_dock);
 
-  _water_editor_dock = new QDockWidget("Water", this);
+  _water_editor_dock = new QDockWidget("Water Editor", this);
   guiWater = new noggit::ui::water(&_displayed_water_layer, &_display_all_water_layers, _water_editor_dock);
   _water_editor_dock->setWidget(guiWater);
   _tool_properties_docks.insert(_water_editor_dock);
@@ -278,18 +283,18 @@ void MapView::createGUI()
     }
   );
 
-  _vertex_shading_dock = new QDockWidget("Vertex Shading", this);
+  _vertex_shading_dock = new QDockWidget("Vertex Painter", this);
   shaderTool = new noggit::ui::shader_tool(shader_color, _vertex_shading_dock);
   _vertex_shading_dock->setWidget(shaderTool);
   _tool_properties_docks.insert(_vertex_shading_dock);
 
-  _minimap_tool_dock = new QDockWidget("Minimap Creator", this);
+  _minimap_tool_dock = new QDockWidget("Minimap Editor", this);
   _minimap_tool_dock->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   minimapTool = new noggit::ui::MinimapCreator(this, _world.get(), _minimap_tool_dock);
   _minimap_tool_dock->setWidget(minimapTool);
   _tool_properties_docks.insert(_minimap_tool_dock);
 
-  _object_editor_dock = new QDockWidget("Object", this);
+  _object_editor_dock = new QDockWidget("Object Editor", this);
   objectEditor = new noggit::ui::object_editor(this
     , _world.get()
     , &_move_model_to_cursor_position
@@ -1355,11 +1360,17 @@ MapView::MapView( math::degrees camera_yaw0
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
   , _texture_palette_dock(new QDockWidget(this))
+  , _dockStamp{"Stamp Tool", this}
+  , _modeStampTool{&_showStampPalette, this}
+  , _modeStampPaletteMain{this}
 {
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   _main_window->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
   _main_window->setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
   _main_window->setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
+
+  if(QString pathProject{_settings->value("project/path").toString()}; !(pathProject.endsWith('\\') || pathProject.endsWith('/')))
+    _settings->setValue("project/path", pathProject.append('/'));
 
   _main_window->statusBar()->addWidget (_status_position);
   connect ( this
@@ -1456,6 +1467,10 @@ MapView::MapView( math::degrees camera_yaw0
   _startup_time.start();
   _update_every_event_loop.start (0);
   connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
+  _tool_properties_docks.insert(&_dockStamp);
+  _dockStamp.setWidget(&_modeStampTool);
+  connect(&_showStampPalette, &noggit::bool_toggle_property::changed, &_modeStampPaletteMain, &QWidget::show);
+  connect(&_modeStampPaletteMain, &noggit::Red::StampMode::Ui::PaletteMain::itemSelected, &_modeStampTool, &noggit::Red::StampMode::Ui::Tool::setPixmap);
 }
 
 void MapView::tabletEvent(QTabletEvent* event)
@@ -1463,6 +1478,20 @@ void MapView::tabletEvent(QTabletEvent* event)
   _tablet_pressure = event->pressure();
   event->setAccepted(true);
     
+}
+
+auto MapView::populateImageModel(QStandardItemModel* model) const -> void
+{
+  using namespace noggit::Red::StampMode::Ui::Model;
+  namespace fs = std::filesystem;
+
+  for(auto& image : fs::directory_iterator{_settings->value("project/path").toString().toStdString() + "Images/"})
+    if(!image.is_directory())
+    {
+      auto item{new Item{image.path().string().c_str()}};
+      item->setText(image.path().filename().c_str());
+      model->appendRow(item);
+    }
 }
 
 void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
@@ -1546,7 +1575,7 @@ void MapView::initializeGL()
       , "UID Warning"
       , "Some models were missing or couldn't be loaded. "
         "This will lead to culling (visibility) errors in game\n"
-        "It is recommanded to fix those models (listed in the log file) and run the uid fix all again."
+        "It is recommended to fix those models (listed in the log file) and run the uid fix all again."
       , QMessageBox::Ok
       );
   }
@@ -2067,6 +2096,14 @@ void MapView::tick (float dt)
             }
           }
           break;
+          case editing_mode::stamp:
+            if(!underMap)
+            {
+              if(_mod_shift_down)
+                _modeStampTool.stamp(_world.get(), _cursor_pos, dt, true);
+              else if(_mod_ctrl_down)
+                _modeStampTool.stamp(_world.get(), _cursor_pos, dt, false);
+            }
         }
       }
     }
@@ -2564,6 +2601,10 @@ void MapView::draw_map()
   case editing_mode::minimap:
     radius = minimapTool->brushRadius();
     break;
+    case editing_mode::stamp:
+      radius = _modeStampTool.getOuterRadius();
+      inner_radius = _modeStampTool.getInnerRadius() / radius;
+      break;
   }
 
   //! \note Select terrain below mouse, if no item selected or the item is map.

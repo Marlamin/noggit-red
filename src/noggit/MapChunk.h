@@ -27,6 +27,7 @@ namespace math
 class Brush;
 class ChunkWater;
 class sExtendableArray;
+class QPixmap;
 
 using StripType = uint16_t;
 static const int mapbufsize = 9 * 9 + 8 * 8; // chunk size
@@ -156,6 +157,8 @@ public:
                    , std::function<boost::optional<float> (float, float)> height
                    );
 
+  auto stamp(math::vector_3d const& pos, float dt, bool doAdd, QImage const& pixmap, float radiusOuter
+  , float radiusInner, float rotation) -> void;
   void selectVertex(math::vector_3d const& pos, float radius, std::set<math::vector_3d*>& vertices);
   void fixVertices(std::set<math::vector_3d*>& selected);
   // for the vertex tool

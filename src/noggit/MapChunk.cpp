@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <iostream>
 #include <map>
+#include <QPixmap>
+#include <QImage>
 
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode)
   : _mode(mode)
@@ -977,6 +979,28 @@ bool MapChunk::blurTerrain ( math::vector_3d const& pos
   return changed;
 }
 
+auto MapChunk::stamp(math::vector_3d const& pos, float dt, bool doAdd, QImage const& img, float radiusOuter
+, float radiusInner, float rotation) -> void
+{
+  bool changed{false};
+
+  for(int i{}; i < mapbufsize; ++i)
+  {
+    /*if(std::abs(misc::dist(mVertices[i].x, mVertices[i].z, pos.x, pos.z) / radiusOuter) > 1.f)
+      continue;*/
+
+    if(std::abs(pos.x - mVertices[i].x) > radiusOuter || std::abs(pos.z - mVertices[i].z) > radiusOuter)
+      continue;
+
+    math::vector_3d const diff{mVertices[i] - pos};
+    mVertices[i].y += (doAdd ? .5f : -.5f) * ((img.pixel(std::floor(diff.x + radiusOuter)
+    , std::floor(diff.z + radiusOuter)) & 0xFF) / 255.f);
+    changed = true;
+  }
+
+  if(changed)
+    updateVerticesData();
+}
 
 void MapChunk::eraseTextures()
 {

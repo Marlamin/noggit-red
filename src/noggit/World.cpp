@@ -33,6 +33,8 @@
 #include <QDir>
 #include <QBuffer>
 #include <QByteArray>
+#include <QPixmap>
+#include <QImage>
 
 #include <algorithm>
 #include <cassert>
@@ -915,6 +917,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("tex1", 2);
     mcnk_shader.uniform("tex2", 3);
     mcnk_shader.uniform("tex3", 4);
+    //mcnk_shader.uniform("stampBrush", 5);
     mcnk_shader.uniform("draw_shadows", 1);
     mcnk_shader.uniform("shadow_map", 5);
 
@@ -1547,6 +1550,17 @@ math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
   return color;
 }
 
+auto World::stamp(math::vector_3d const& pos, float dt, bool doAdd, QPixmap const* pixmap, float radiusOuter
+, float radiusInner, float rotation) -> void
+{
+  QMatrix matrix;
+  matrix.rotate(rotation);
+  int const k{static_cast<int>(std::floor(radiusOuter)) * 2};
+  QImage const img{pixmap->transformed(matrix).scaled(k, k).toImage()};
+  for_all_chunks_in_range(pos, radiusOuter, [=](MapChunk* chunk) -> bool { chunk->stamp(pos, dt, doAdd, img
+  , radiusOuter, radiusInner, rotation); return true; }, [this](MapChunk* chunk) -> void { recalc_norms(chunk); });
+}
+
 void World::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
 {
   for_all_chunks_in_range
@@ -2159,10 +2173,10 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
         , settings);
 
     // Clearing alpha from image
-    gl.colorMask(FALSE, FALSE, FALSE, TRUE);
+    gl.colorMask(false, false, false, true);
     gl.clearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-    gl.colorMask(TRUE, TRUE, TRUE, TRUE);
+    gl.colorMask(true, true, true, true);
 
     QImage image = pixel_buffer.toImage();
 

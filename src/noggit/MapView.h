@@ -13,6 +13,8 @@
 #include <noggit/ui/MinimapCreator.hpp>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/unsigned_int_property.hpp>
+#include <noggit/Red/StampMode/Ui/Tool.hpp>
+#include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
 
 #include <boost/optional.hpp>
 
@@ -26,6 +28,7 @@
 
 #include <forward_list>
 #include <map>
+#include <unordered_map>
 #include <unordered_set>
 
 
@@ -201,6 +204,7 @@ public:
   void change_selected_wmo_doodadset(int set);
   void saveMinimap(MinimapRenderSettings* settings);
   void initMinimapSave() { saving_minimap = true; };
+  auto populateImageModel(QStandardItemModel* model) const -> void;
   noggit::camera* getCamera() { return &_camera; };
 
   void set_editing_mode (editing_mode);
@@ -282,6 +286,7 @@ private:
   noggit::bool_toggle_property _show_keybindings_window = {false};
   noggit::bool_toggle_property _show_texture_palette_window = {false};
   noggit::bool_toggle_property _show_texture_palette_small_window = {false};
+  noggit::bool_toggle_property _showStampPalette{false};
 
   noggit::ui::minimap_widget* _minimap;
   QDockWidget* _minimap_dock;
@@ -318,4 +323,8 @@ private:
   QDockWidget* _hole_tool_dock;
   noggit::ui::MinimapCreator* minimapTool;
   QDockWidget* _minimap_tool_dock;
+  QDockWidget _dockStamp;
+  noggit::Red::StampMode::Ui::Tool _modeStampTool;
+  noggit::Red::StampMode::Ui::PaletteMain _modeStampPaletteMain;
+  std::unordered_map<std::string, QPixmap> _images;
 };

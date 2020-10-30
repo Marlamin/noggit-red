@@ -6,6 +6,7 @@ uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 uniform sampler2D tex3;
+//uniform sampler2D stampBrush;
 uniform vec2 tex_anim_0;
 uniform vec2 tex_anim_1;
 uniform vec2 tex_anim_2;
