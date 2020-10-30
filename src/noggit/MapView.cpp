@@ -66,7 +66,6 @@
 #include <vector>
 #include <filesystem>
 
-
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
 
@@ -1489,7 +1488,7 @@ auto MapView::populateImageModel(QStandardItemModel* model) const -> void
     if(!image.is_directory())
     {
       auto item{new Item{image.path().string().c_str()}};
-      item->setText(image.path().filename().c_str());
+      item->setText(QString::fromStdString(image.path().filename().string()));
       model->appendRow(item);
     }
 }
