@@ -21,7 +21,7 @@ namespace noggit
       , _filename("tileset\\generic\\black.blp")
       , _need_update(true)
     {
-      QSizePolicy policy (QSizePolicy::Maximum, QSizePolicy::Maximum);
+      QSizePolicy policy (QSizePolicy::Fixed, QSizePolicy::Fixed);
       setSizePolicy (policy);
       setMinimumSize(128, 128);
       setAcceptDrops(accept_drop);
@@ -56,7 +56,7 @@ namespace noggit
       _need_update = false;
 
       show();
-      setPixmap (*BLPRenderer::getInstance().render_blp_to_pixmap (_filename, width(), height()));
+      setPixmap (*BLPRenderer::getInstance().render_blp_to_pixmap (_filename, 128, 128));
       setToolTip(QString::fromStdString(_filename));
     }
 
