@@ -110,7 +110,8 @@ namespace noggit
         "} \n"
         "QSlider::vertical { \n"
         "  width: 35px; \n"
-        "  max-height: 100px; \n"
+        "  min-height: 100px; \n"
+        "  max-height: 200px; \n"
         "} \n"
         "QSlider::add-page:vertical { \n"
         "  background: transparent; \n"
@@ -374,7 +375,6 @@ namespace noggit
 
       setMinimumWidth(250);
       setMaximumWidth(250);
-      setMinimumHeight(540);
     }
 
     void texturing_tool::update_brush_hardness()

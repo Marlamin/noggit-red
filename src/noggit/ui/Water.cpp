@@ -227,7 +227,8 @@ namespace noggit
               );
 
       updateData();
-      setMinimumWidth(sizeHint().width());
+      setMinimumWidth(250);
+
     }
 
     void water::updatePos(tile_index const& newTile)
