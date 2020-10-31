@@ -40,7 +40,6 @@ namespace noggit
   class camera;
   namespace ui
   {
-    class cursor_switcher;
     class detail_infos;
     class flatten_blur_tool;
     class help;
@@ -78,6 +77,7 @@ private:
 
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
+  CursorType _cursorType;
   math::vector_3d _cursor_pos;
   float _cursorRotation;
   bool look, freelook;
@@ -191,7 +191,6 @@ public slots:
 public:
   math::vector_4d cursor_color;
   math::vector_4d shader_color;
-  noggit::unsigned_int_property cursor_type;
 
   MapView ( math::degrees ah0
           , math::degrees av0
@@ -288,7 +287,6 @@ private:
   noggit::bool_toggle_property _show_minimap_window = {false};
   noggit::bool_toggle_property _show_minimap_borders = {true};
   noggit::bool_toggle_property _show_minimap_skies = {false};
-  noggit::bool_toggle_property _show_cursor_switcher_window = {false};
   noggit::bool_toggle_property _show_keybindings_window = {false};
   noggit::bool_toggle_property _show_texture_palette_window = {false};
   noggit::bool_toggle_property _show_texture_palette_small_window = {false};
@@ -302,7 +300,6 @@ private:
 
   void setToolPropertyWidgetVisibility(editing_mode mode);
 
-  std::unique_ptr<noggit::ui::cursor_switcher> _cursor_switcher;
   noggit::ui::help* _keybindings;
 
   std::unordered_set<QDockWidget*> _tool_properties_docks;

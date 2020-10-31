@@ -14,7 +14,6 @@
 #include <noggit/map_index.hpp>
 #include <noggit/uid_storage.hpp>
 #include <noggit/ui/CurrentTexture.h>
-#include <noggit/ui/CursorSwitcher.h> // cursor_switcher
 #include <noggit/ui/DetailInfos.h> // detailInfos
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/Help.h>
@@ -38,6 +37,7 @@
 #include <noggit/ui/MinimapCreator.hpp>
 #include <opengl/scoped.hpp>
 #include <noggit/Red/StampMode/Ui/Model/Item.hpp>
+#include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
 
 #include "revision.h"
 
@@ -91,7 +91,7 @@ void MapView::set_editing_mode (editing_mode mode)
 
   terrainMode = mode;
   _toolbar->check_tool (mode);
-
+  _cursorType = terrainMode == editing_mode::stamp ? CursorType::STAMP : CursorType::CIRCLE;
   this->activateWindow();
 }
 
@@ -754,7 +754,6 @@ void MapView::createGUI()
       TexturePalette,
       TexturePicker,
       guidetailInfos,
-      _cursor_switcher.get(),
       _keybindings,
       _minimap_dock,
       objectEditor->modelImport,
@@ -805,13 +804,6 @@ void MapView::createGUI()
           );
   connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
           , &_show_detail_info_window, &noggit::bool_toggle_property::set
-          );
-  ADD_TOGGLE (view_menu, "Cursor switcher", "Ctrl+Alt+C", _show_cursor_switcher_window);
-  connect ( &_show_cursor_switcher_window, &noggit::bool_toggle_property::changed
-          , _cursor_switcher.get(), &QWidget::setVisible
-          );
-  connect ( _cursor_switcher.get(), &noggit::ui::widget::visibilityChanged
-          , &_show_cursor_switcher_window, &noggit::bool_toggle_property::set
           );
   ADD_TOGGLE (view_menu, "Texture palette", Qt::Key_X, _show_texture_palette_window);
   connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
@@ -975,18 +967,6 @@ void MapView::createGUI()
                 objectEditor->copy_current_selection(_world.get());
               }
             , [this] { return terrainMode == editing_mode::object; }
-            );
-
-  addHotkey ( Qt::Key_C
-            , MOD_shift
-            , [this]
-              {
-                do
-                {
-                  cursor_type.set ((cursor_type.get() + 1) % static_cast<unsigned int>(cursor_mode::mode_count));
-                } while (cursor_type.get() == static_cast<unsigned int>(cursor_mode::unused)); // hack to not get the unused cursor type
-              }
-            , [this] { return terrainMode != editing_mode::object; }
             );
 
   addHotkey ( Qt::Key_V
@@ -1321,7 +1301,6 @@ void MapView::createGUI()
 void MapView::on_exit_prompt()
 {
   // hide all popups
-  _cursor_switcher->hide();
   _keybindings->hide();
   _minimap_dock->hide();
   _texture_palette_small->hide();
@@ -1348,7 +1327,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _settings (new QSettings (this))
   , cursor_color (1.f, 1.f, 1.f, 1.f)
   , shader_color (1.f, 1.f, 1.f, 1.f)
-  , cursor_type (static_cast<unsigned int>(cursor_mode::terrain))
+  , _cursorType{CursorType::CIRCLE}
   , _main_window (main_window)
   , _world (std::move (world))
   , _status_position (new QLabel (this))
@@ -1429,25 +1408,6 @@ MapView::MapView( math::degrees camera_yaw0
   connect(this, &QObject::destroyed, _minimap, &QObject::deleteLater);
 
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
-
-  cursor_type.set (_settings->value ("cursor/default_type", static_cast<unsigned int>(cursor_mode::terrain)).toUInt());
-
-  cursor_color.x = _settings->value ("cursor/color/r", 1).toFloat();
-  cursor_color.y = _settings->value ("cursor/color/g", 1).toFloat();
-  cursor_color.z = _settings->value ("cursor/color/b", 1).toFloat();
-  cursor_color.w = _settings->value ("cursor/color/a", 1).toFloat();
-
-  connect(&cursor_type, &noggit::unsigned_int_property::changed, [&] (unsigned int type)
-  {
-    _settings->setValue("cursor/default_type", type);
-  });
-
-  if (cursor_type.get() == static_cast<unsigned int>(cursor_mode::unused))
-  {
-    cursor_type.set(static_cast<unsigned int>(cursor_mode::terrain));
-  }
-
-  _cursor_switcher.reset(new noggit::ui::cursor_switcher (this, cursor_color, cursor_type));
 
   setFocusPolicy (Qt::StrongFocus);
   setMouseTracking (true);
@@ -2652,7 +2612,7 @@ void MapView::draw_map()
                , _cursor_pos
                , _cursorRotation
                , terrainMode == editing_mode::mccv ? shader_color : cursor_color
-               , cursor_type.get()
+               , _cursorType
                , radius
                , texturingTool->show_unpaintable_chunks()
                , _draw_contour.get()

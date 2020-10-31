@@ -81,14 +81,11 @@ enum water_opacity
   custom_opacity,
 };
 
-enum class cursor_mode : unsigned int
+enum class CursorType
 {
-  none,
-  disk,
-  sphere,
-  unused, // left it there to avoid issues
-  terrain,
-  mode_count
+  NONE = 0,
+  CIRCLE = 1,
+  STAMP = 2
 };
 
 enum display_mode

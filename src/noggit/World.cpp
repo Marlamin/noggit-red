@@ -645,7 +645,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , math::vector_3d const& cursor_pos
                  , float cursorRotation
                  , math::vector_4d const& cursor_color
-                 , int cursor_type
+                 , CursorType cursor_type
                  , float brush_radius
                  , bool show_unpaintable_chunks
                  , bool draw_contour
@@ -690,8 +690,6 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   math::matrix_4x4 const mvp(model_view * projection);
   math::frustum const frustum (mvp);
-
-  cursor_mode cursor = static_cast<cursor_mode>(cursor_type);
 
   if (!_m2_program)
   {
@@ -902,9 +900,9 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("ambient_color", ambient_color);
 
 
-    if (cursor == cursor_mode::terrain)
+    if (cursor_type != CursorType::NONE)
     {
-      mcnk_shader.uniform ("draw_cursor_circle", 1);
+      mcnk_shader.uniform ("draw_cursor_circle", static_cast<int>(cursor_type));
       mcnk_shader.uniform ("cursor_position", cursor_pos);
       mcnk_shader.uniform("cursorRotation", cursorRotation);
       mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
@@ -964,31 +962,6 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     gl.bindVertexArray(0);
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  }
-
-  if(cursor != cursor_mode::terrain && cursor != cursor_mode::none)
-  {
-    opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
-    gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-    noggit::cursor_render::mode mode;
-
-    if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Quadra)
-    {
-      mode = cursor == cursor_mode::sphere
-        ? noggit::cursor_render::mode::square
-        : noggit::cursor_render::mode::cube;
-    }
-    else if (cursor == cursor_mode::sphere)
-    {
-      mode = noggit::cursor_render::mode::sphere;
-    }
-    else
-    {
-      mode = noggit::cursor_render::mode::circle;
-    }
-
-    _cursor_render.draw(mode, mvp, cursor_color, cursor_pos, brush_radius, inner_radius_ratio);
   }
 
   if (terrainMode == editing_mode::object && has_multiple_model_selected())

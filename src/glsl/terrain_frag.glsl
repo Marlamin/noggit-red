@@ -37,7 +37,7 @@ uniform vec4 fog_color;
 uniform float fog_start;
 uniform float fog_end;
 
-uniform bool draw_cursor_circle;
+uniform int draw_cursor_circle;
 uniform vec3 cursor_position;
 uniform float cursorRotation;
 uniform float outer_cursor_radius;
@@ -197,7 +197,7 @@ void main()
 	  }
   }
 
-  if (!draw_cursor_circle)
+  if(draw_cursor_circle == 1)
   {
     float diff = length(vary_position.xz - cursor_position.xz);
     diff = min(abs(diff - outer_cursor_radius), abs(diff - outer_cursor_radius * inner_cursor_ratio));
@@ -205,8 +205,7 @@ void main()
 
     out_color.rgb = mix(cursor_color.rgb, out_color.rgb, alpha);
   }
-
-  if(draw_cursor_circle)
+  else if(draw_cursor_circle == 2)
   {
     float angle = cursorRotation * 2.0 * PI;
     vec2 topleft = cursor_position.xz;
