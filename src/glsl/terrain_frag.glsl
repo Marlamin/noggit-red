@@ -214,13 +214,16 @@ void main()
     topleft.y -= outer_cursor_radius;
     vec2 texcoord = (vary_position.xz - topleft) / (outer_cursor_radius * 2.0f) - 0.5;
     vec2 rotatedTexcoord;
-    rotatedTexcoord.x = texcoord.x * sin(angle) + texcoord.y * cos(angle) + 0.5;
-    rotatedTexcoord.y = texcoord.y * sin(angle) + texcoord.x * cos(angle) + 0.5;
-    out_color.rgb = mix(out_color.rgb, texture(stampBrush, rotatedTexcoord).rgb
+    rotatedTexcoord.x = texcoord.x * cos(angle) + texcoord.y * sin(angle) + 0.5;
+    rotatedTexcoord.y = texcoord.y * cos(angle) - texcoord.x * sin(angle) + 0.5;
+    /*out_color.rgb = mix(out_color.rgb, texture(stampBrush, rotatedTexcoord).rgb
     , 1.0 * (int(length(vary_position.xz - cursor_position.xz) / outer_cursor_radius < 1.0))
+    * (1.0 - length(vary_position.xz - cursor_position.xz) / outer_cursor_radius));*/
+    out_color.rgb = mix(out_color.rgb, cursor_color.rgb, texture(stampBrush, rotatedTexcoord).r
+    * (int(length(vary_position.xz - cursor_position.xz) / outer_cursor_radius < 1.0))
     * (1.0 - length(vary_position.xz - cursor_position.xz) / outer_cursor_radius));
 
-    vec2 posRel = vary_position.xz - cursor_position.xz;
+    /*vec2 posRel = vary_position.xz - cursor_position.xz;
     float pos_x = posRel.x * sin(angle) - posRel.y * cos(angle);
     float pos_z = posRel.y * sin(angle) + posRel.x * cos(angle);
     float diff_x = abs(pos_x);
@@ -231,6 +234,6 @@ void main()
     float alpha = 1.0 * (1 - int((diff_x < outer_cursor_radius && diff_z < outer_cursor_radius
     && (outer_cursor_radius - diff_x <= d || outer_cursor_radius - diff_z <= d)) || (diff_x < inner_radius
     && diff_z < inner_radius && (inner_radius - diff_x <= d || inner_radius - diff_z <= d))));
-    out_color.rgb = mix(cursor_color.rgb, out_color.rgb, alpha);
+    out_color.rgb = mix(cursor_color.rgb, out_color.rgb, alpha);*/
   }
 }
