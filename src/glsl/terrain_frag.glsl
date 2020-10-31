@@ -212,16 +212,11 @@ void main()
     vec2 topleft = cursor_position.xz;
     topleft.x -= outer_cursor_radius;
     topleft.y -= outer_cursor_radius;
-    vec2 relTopleft = topleft - cursor_position.xz;
-    vec2 rotatedTopleft;
-    rotatedTopleft.x = relTopleft.x * sin(angle) - relTopleft.y * cos(angle);
-    rotatedTopleft.y = relTopleft.y * sin(angle) + relTopleft.x * cos(angle);
-    vec2 posRel2 = (vary_position.xz - rotatedTopleft) / (outer_cursor_radius * 2.0f);
-    // vec2 texcoord = (vary_position.xz - topleft) / (outer_cursor_radius * 2.0f) - 0.5;
-    // vec2 rotatedTexcoord;
-    // rotatedTexcoord.x = texcoord.x * sin(angle) + texcoord.y * cos(angle) + 0.5;
-    // rotatedTexcoord.y = texcoord.y * sin(angle) + texcoord.x * cos(angle) + 0.5;
-    out_color.rgb = mix(out_color.rgb, texture(stampBrush, posRel2).rgb
+    vec2 texcoord = (vary_position.xz - topleft) / (outer_cursor_radius * 2.0f) - 0.5;
+    vec2 rotatedTexcoord;
+    rotatedTexcoord.x = texcoord.x * sin(angle) + texcoord.y * cos(angle) + 0.5;
+    rotatedTexcoord.y = texcoord.y * sin(angle) + texcoord.x * cos(angle) + 0.5;
+    out_color.rgb = mix(out_color.rgb, texture(stampBrush, rotatedTexcoord).rgb
     , 1.0 * (int(length(vary_position.xz - cursor_position.xz) / outer_cursor_radius < 1.0))
     * (1.0 - length(vary_position.xz - cursor_position.xz) / outer_cursor_radius));
 
