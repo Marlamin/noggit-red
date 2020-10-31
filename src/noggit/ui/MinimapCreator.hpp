@@ -36,6 +36,7 @@ enum MinimapGenMode
 struct MinimapRenderSettings
 {
   MinimapGenMode export_mode;
+  std::string file_format = ".blp";
 
   // Render settings
   int resolution = 512;
@@ -44,7 +45,9 @@ struct MinimapRenderSettings
   bool draw_water = true;
   bool draw_adt_grid = false;
   bool draw_elevation = false;
+  bool draw_shadows = false;
   bool use_filters = false;
+  bool combined_minimap = false;
 
   // Selection
   std::array<bool, 4096> selected_tiles = {false};

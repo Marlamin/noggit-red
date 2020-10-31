@@ -288,13 +288,6 @@ Noggit::Noggit(int argc, char *argv[])
 
   main_window = std::make_unique<noggit::ui::main_window>();
 
-
-  QFile File("./themes/dark/theme.qss");
-  File.open(QFile::ReadOnly);
-  QString StyleSheet = QLatin1String(File.readAll());
-
-  qApp->setStyleSheet(StyleSheet);
-
   if (fullscreen)
   {
     main_window->showFullScreen();

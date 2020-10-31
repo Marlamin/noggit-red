@@ -110,7 +110,8 @@ namespace noggit
         "} \n"
         "QSlider::vertical { \n"
         "  width: 35px; \n"
-        "  max-height: 100px; \n"
+        "  min-height: 100px; \n"
+        "  max-height: 200px; \n"
         "} \n"
         "QSlider::add-page:vertical { \n"
         "  background: transparent; \n"
@@ -140,13 +141,6 @@ namespace noggit
       _spray_content = new QWidget(_spray_mode_group);
       auto spray_layout (new QFormLayout (_spray_content));
       _spray_mode_group->setLayout(spray_layout);
-
-      QString _spray_mode_group_style =
-      "QWidget { \n"
-      "  background: transparent; \n"
-      "} \n";
-
-      _spray_mode_group->setStyleSheet(_spray_mode_group_style);
 
       _inner_radius_cb = new QCheckBox("Inner radius", _spray_content);
       spray_layout->addRow(_inner_radius_cb);
@@ -381,8 +375,6 @@ namespace noggit
 
       setMinimumWidth(250);
       setMaximumWidth(250);
-      setMinimumHeight(540);
-      setMaximumHeight(540);
     }
 
     void texturing_tool::update_brush_hardness()

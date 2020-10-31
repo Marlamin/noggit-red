@@ -28,6 +28,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/range/adaptor/map.hpp>
 #include <boost/thread/thread.hpp>
+#include <boost/format.hpp>
 
 #include <QtWidgets/QMessageBox>
 #include <QDir>
@@ -2186,8 +2187,8 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
 
     QImage image = pixel_buffer.toImage();
 
-    QSettings settings;
-    QString str = settings.value ("project/path").toString();
+    QSettings app_settings;
+    QString str = app_settings.value ("project/path").toString();
     if (!(str.endsWith('\\') || str.endsWith('/')))
     {
       str += "/";
@@ -2209,13 +2210,54 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     uint32_t file_size;
     void* blp_image = blp.createBlpDxtInMemory(true, FORMAT_DXT5, file_size);
 
-    QFile file(dir.filePath(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".blp").c_str()));
-    file.open(QIODevice::WriteOnly);
-    QDataStream out(&file);
+    std::string tex_name = std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".blp");
 
+    QFile file(dir.filePath(tex_name.c_str()));
+    file.open(QIODevice::WriteOnly);
+
+    QDataStream out(&file);
     out.writeRawData(reinterpret_cast<char*>(blp_image), file_size);
 
     file.close();
+
+    // Write combined file
+    if (settings->combined_minimap)
+    {
+      QString image_path = QString(std::string(basename + "_combined_minimap.png").c_str());
+      QImage combined_image;
+
+      if (dir.exists(image_path))
+      {
+        combined_image = QImage(dir.filePath(image_path));
+
+        if (combined_image.width() != 8192 | combined_image.height() != 8192)
+        {
+          combined_image = QImage(8192, 8192, QImage::Format_ARGB32);
+        }
+      }
+      else
+      {
+        combined_image = QImage(8192, 8192, QImage::Format_ARGB32);
+      }
+
+      QImage scaled_image = image.scaled(128, 128,  Qt::KeepAspectRatio);
+
+      for (int i = 0; i < 128; ++i)
+      {
+        for (int j = 0; j < 128; ++j)
+        {
+          combined_image.setPixelColor(tile_idx.x * 128 + j, tile_idx.z * 128 + i, scaled_image.pixelColor(j, i));
+        }
+      }
+
+      combined_image.save(dir.filePath(image_path));
+
+    }
+
+    // Register in md5translate.trs
+    std::string map_name = gMapDB.getMapName(mapIndex._map_id);
+    std::string tilename_left = (boost::format("%s\\map_%d_%02d.blp") % map_name % tile_idx.x % tile_idx.z).str();
+    mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
 
     // image.save(dir.filePath(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str()));
 

@@ -14,10 +14,15 @@
 #include <noggit/uid_storage.hpp>
 
 #include <QtCore/QSettings>
+#include <QByteArray>
+#include <QTextStream>
+#include <QRegExp>
+#include <QFile>
 
 #include <boost/range/adaptor/map.hpp>
 
 #include <forward_list>
+#include <cstdlib>
 
 MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   : basename(pBasename)
@@ -136,6 +141,8 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   // -----------------------------------------------------
 
   theFile.close();
+
+  loadMinimapMD5translate();
 }
 
 void MapIndex::saveall (World* world)
@@ -959,4 +966,89 @@ void MapIndex::loadMaxUID()
     saveMaxUID();
   }
 #endif
+}
+
+void MapIndex::loadMinimapMD5translate()
+{
+  if (!MPQFile::exists("textures/minimap/md5translate.trs"))
+  {
+    LogError << "md5translate.trs was not found. "
+                "Noggit will generate a new one in the project directory on minimap save." << std::endl;
+    return;
+  }
+
+  MPQFile md5trs_file("textures/minimap/md5translate.trs");
+
+  size_t size = md5trs_file.getSize();
+  void* buffer_raw = std::malloc(size);
+  md5trs_file.read(buffer_raw, size);
+
+  QByteArray md5trs_bytes(static_cast<char*>(buffer_raw), size);
+
+  QTextStream md5trs_stream(md5trs_bytes, QIODevice::ReadOnly);
+
+  QString cur_dir = "";
+  while (!md5trs_stream.atEnd())
+  {
+    QString line = md5trs_stream.readLine();
+
+    if (!line.length())
+    {
+      continue;
+    }
+
+    if (line.startsWith("dir: ", Qt::CaseInsensitive))
+    {
+      QStringList dir_line_split = line.split(" ");
+      cur_dir = dir_line_split[1];
+      continue;
+    }
+
+    QStringList line_split = line.split(QRegExp("[\t]"));
+
+    if (cur_dir.length())
+    {
+      _minimap_md5translate[cur_dir.toStdString()][line_split[0].toStdString()] = line_split[1].toStdString();
+    }
+
+  }
+
+}
+
+void MapIndex::saveMinimapMD5translate()
+{
+  QSettings settings;
+  QString str = settings.value ("project/path").toString();
+  if (!(str.endsWith('\\') || str.endsWith('/')))
+  {
+    str += "/";
+  }
+
+  QString filepath = str + "/textures/minimap/md5translate.trs";
+
+  QFile file = QFile(filepath);
+  if (file.open(QIODevice::WriteOnly | QIODevice::Text | QFile::Truncate))
+  {
+    QTextStream out(&file);
+
+    for (auto it = _minimap_md5translate.begin(); it != _minimap_md5translate.end(); ++it)
+    {
+      out << "dir: " << it->first.c_str() << "\n"; // save dir
+
+      for (auto it_ = it->second.begin(); it_ != it->second.end(); ++it_)
+      {
+        out << it_->first.c_str() << "\t" << it_->second.c_str() << "\n";
+      }
+    }
+
+    file.close();
+  }
+  else
+  {
+    LogError << "Failed saving md5translate.trs. File can't be opened." << std::endl;
+  }
+
+
+
+
 }
