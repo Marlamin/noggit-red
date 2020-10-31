@@ -6,7 +6,7 @@ uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 uniform sampler2D tex3;
-//uniform sampler2D stampBrush;
+uniform sampler2D stampBrush;
 uniform vec2 tex_anim_0;
 uniform vec2 tex_anim_1;
 uniform vec2 tex_anim_2;
@@ -39,6 +39,7 @@ uniform float fog_end;
 
 uniform bool draw_cursor_circle;
 uniform vec3 cursor_position;
+uniform float cursorRotation;
 uniform float outer_cursor_radius;
 uniform float inner_cursor_ratio;
 uniform vec4 cursor_color;
@@ -58,6 +59,7 @@ const float TILESIZE  = 533.33333;
 const float CHUNKSIZE = TILESIZE / 16.0;
 const float HOLESIZE  = CHUNKSIZE * 0.25;
 const float UNITSIZE = HOLESIZE * 0.5;
+const float PI = 3.14159265358979323846;
 
 vec4 texture_blend() 
 {
@@ -195,12 +197,45 @@ void main()
 	  }
   }
 
-  if (draw_cursor_circle)
+  if (!draw_cursor_circle)
   {
     float diff = length(vary_position.xz - cursor_position.xz);
     diff = min(abs(diff - outer_cursor_radius), abs(diff - outer_cursor_radius * inner_cursor_ratio));
     float alpha = smoothstep(0.0, length(fw.xz), diff);
 
+    out_color.rgb = mix(cursor_color.rgb, out_color.rgb, alpha);
+  }
+
+  if(draw_cursor_circle)
+  {
+    float angle = cursorRotation * 2.0 * PI;
+    vec2 topleft = cursor_position.xz;
+    topleft.x -= outer_cursor_radius;
+    topleft.y -= outer_cursor_radius;
+    vec2 relTopleft = topleft - cursor_position.xz;
+    vec2 rotatedTopleft;
+    rotatedTopleft.x = relTopleft.x * sin(angle) - relTopleft.y * cos(angle);
+    rotatedTopleft.y = relTopleft.y * sin(angle) + relTopleft.x * cos(angle);
+    vec2 posRel2 = (vary_position.xz - rotatedTopleft) / (outer_cursor_radius * 2.0f);
+    // vec2 texcoord = (vary_position.xz - topleft) / (outer_cursor_radius * 2.0f) - 0.5;
+    // vec2 rotatedTexcoord;
+    // rotatedTexcoord.x = texcoord.x * sin(angle) + texcoord.y * cos(angle) + 0.5;
+    // rotatedTexcoord.y = texcoord.y * sin(angle) + texcoord.x * cos(angle) + 0.5;
+    out_color.rgb = mix(out_color.rgb, texture(stampBrush, posRel2).rgb
+    , 1.0 * (int(length(vary_position.xz - cursor_position.xz) / outer_cursor_radius < 1.0))
+    * (1.0 - length(vary_position.xz - cursor_position.xz) / outer_cursor_radius));
+
+    vec2 posRel = vary_position.xz - cursor_position.xz;
+    float pos_x = posRel.x * sin(angle) - posRel.y * cos(angle);
+    float pos_z = posRel.y * sin(angle) + posRel.x * cos(angle);
+    float diff_x = abs(pos_x);
+    float diff_z = abs(pos_z);
+    float inner_radius = outer_cursor_radius * inner_cursor_ratio;
+    float d = length(fw);
+
+    float alpha = 1.0 * (1 - int((diff_x < outer_cursor_radius && diff_z < outer_cursor_radius
+    && (outer_cursor_radius - diff_x <= d || outer_cursor_radius - diff_z <= d)) || (diff_x < inner_radius
+    && diff_z < inner_radius && (inner_radius - diff_x <= d || inner_radius - diff_z <= d))));
     out_color.rgb = mix(cursor_color.rgb, out_color.rgb, alpha);
   }
 }

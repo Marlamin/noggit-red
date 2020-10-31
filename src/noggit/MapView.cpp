@@ -1360,7 +1360,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _minimap_dock (new QDockWidget ("Minimap", this))
   , _texture_palette_dock(new QDockWidget(this))
   , _dockStamp{"Stamp Tool", this}
-  , _modeStampTool{&_showStampPalette, this}
+  , _modeStampTool{&_showStampPalette, &_cursorRotation, this}
   , _modeStampPaletteMain{this}
 {
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
@@ -1491,6 +1491,24 @@ auto MapView::populateImageModel(QStandardItemModel* model) const -> void
       item->setText(QString::fromStdString(image.path().filename().string()));
       model->appendRow(item);
     }
+}
+
+auto MapView::setBrushTexture(QPixmap const* pixmap) -> void
+{
+  auto img{pixmap->toImage()};
+  _data.clear();
+  _data.resize(img.height() * img.width());
+  _dims.first = img.width();
+  _dims.second = img.height();
+
+  for(int i{}; i < img.height(); ++i)
+    for(int j{}; j < img.width(); ++j)
+      _data[i * img.width() + j] = img.pixel(j, i);
+}
+
+auto MapView::getBrushTexture(void) -> opengl::texture*
+{
+  return &_texBrush;
 }
 
 void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
@@ -1721,6 +1739,17 @@ void MapView::paintGL()
   _last_update = now;
 
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  if(!_data.empty())
+  {
+    opengl::texture::set_active_texture(6);
+    _texBrush.bind();
+    gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _dims.first, _dims.second, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data.data());
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  }
 
   draw_map();
 
@@ -2616,6 +2645,7 @@ void MapView::draw_map()
   _world->draw ( model_view().transposed()
                , projection().transposed()
                , _cursor_pos
+               , _cursorRotation
                , terrainMode == editing_mode::mccv ? shader_color : cursor_color
                , cursor_type.get()
                , radius
@@ -2651,6 +2681,7 @@ void MapView::draw_map()
                , terrainTool->_edit_type
                , _display_all_water_layers.get() ? -1 : _displayed_water_layer.get()
                , _display_mode
+               , &_texBrush
                );
 
   // reset after each world::draw call

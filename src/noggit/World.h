@@ -93,6 +93,7 @@ public:
   void draw ( math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection
             , math::vector_3d const& cursor_pos
+            , float cursorRotation
             , math::vector_4d const& cursor_color
             , int cursor_type
             , float brush_radius
@@ -129,6 +130,7 @@ public:
             , eTerrainType ground_editing_brush
             , int water_layer
             , display_mode display
+            , opengl::texture* texBrush
             );
 
   unsigned int getAreaID (math::vector_3d const&);

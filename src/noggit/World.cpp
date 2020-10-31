@@ -642,6 +642,7 @@ void World::initDisplay()
 void World::draw ( math::matrix_4x4 const& model_view
                  , math::matrix_4x4 const& projection
                  , math::vector_3d const& cursor_pos
+                 , float cursorRotation
                  , math::vector_4d const& cursor_color
                  , int cursor_type
                  , float brush_radius
@@ -677,6 +678,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , eTerrainType ground_editing_brush
                  , int water_layer
                  , display_mode display
+                 , opengl::texture* texBrush
                  )
 {
   if (!_display_initialized)
@@ -903,6 +905,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       mcnk_shader.uniform ("draw_cursor_circle", 1);
       mcnk_shader.uniform ("cursor_position", cursor_pos);
+      mcnk_shader.uniform("cursorRotation", cursorRotation);
       mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
       mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
       mcnk_shader.uniform ("cursor_color", cursor_color);
@@ -912,12 +915,15 @@ void World::draw ( math::matrix_4x4 const& model_view
       mcnk_shader.uniform ("draw_cursor_circle", 0);
     }
 
+    opengl::texture::set_active_texture(6);
+    texBrush->bind();
+
     mcnk_shader.uniform("alphamap", 0);
     mcnk_shader.uniform("tex0", 1);
     mcnk_shader.uniform("tex1", 2);
     mcnk_shader.uniform("tex2", 3);
     mcnk_shader.uniform("tex3", 4);
-    //mcnk_shader.uniform("stampBrush", 5);
+    mcnk_shader.uniform("stampBrush", 6);
     mcnk_shader.uniform("draw_shadows", 1);
     mcnk_shader.uniform("shadow_map", 5);
 

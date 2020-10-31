@@ -15,6 +15,7 @@
 #include <noggit/unsigned_int_property.hpp>
 #include <noggit/Red/StampMode/Ui/Tool.hpp>
 #include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
+#include <opengl/texture.hpp>
 
 #include <boost/optional.hpp>
 
@@ -78,6 +79,7 @@ private:
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
   math::vector_3d _cursor_pos;
+  float _cursorRotation;
   bool look, freelook;
   bool ui_hidden = false;
 
@@ -100,6 +102,8 @@ private:
 public:
   noggit::bool_toggle_property _draw_hidden_models = {false};
 private:
+  std::vector<unsigned> _data;
+  std::pair<unsigned, unsigned> _dims;
   int _selected_area_id = -1;
   std::map<int, misc::random_color> _area_id_colors;
 
@@ -205,6 +209,8 @@ public:
   void saveMinimap(MinimapRenderSettings* settings);
   void initMinimapSave() { saving_minimap = true; };
   auto populateImageModel(QStandardItemModel* model) const -> void;
+  auto setBrushTexture(QPixmap const* pixmap) -> void;
+  auto getBrushTexture(void) -> opengl::texture*;
   noggit::camera* getCamera() { return &_camera; };
 
   void set_editing_mode (editing_mode);
@@ -327,4 +333,5 @@ private:
   noggit::Red::StampMode::Ui::Tool _modeStampTool;
   noggit::Red::StampMode::Ui::PaletteMain _modeStampPaletteMain;
   std::unordered_map<std::string, QPixmap> _images;
+  opengl::texture _texBrush;
 };

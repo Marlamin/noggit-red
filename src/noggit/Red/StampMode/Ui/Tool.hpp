@@ -28,7 +28,7 @@ namespace noggit
       Q_OBJECT
       public:
       explicit
-      Tool(bool_toggle_property* showPalette, QWidget* parent = nullptr);
+      Tool(bool_toggle_property* showPalette, float* cursorRotation, QWidget* parent = nullptr);
       auto stamp(World* world, math::vector_3d const& pos, float dt, bool doAdd) const -> void;
       auto getOuterRadius(void) const -> float;
       auto getInnerRadius(void) const -> float;
@@ -36,6 +36,7 @@ namespace noggit
       public slots:
       void setPixmap(QPixmap const* pixmap);
       private:
+      float* _cursorRotation;
       float _radiusOuter;
       float _radiusInner;
       float _rotation;
