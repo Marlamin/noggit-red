@@ -1342,6 +1342,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _modeStampTool{&_showStampPalette, &_cursorRotation, this}
   , _modeStampPaletteMain{this}
 {
+  setCursor(Qt::BlankCursor);
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   _main_window->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
   _main_window->setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);

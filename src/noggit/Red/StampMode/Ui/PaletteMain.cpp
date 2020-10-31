@@ -26,8 +26,12 @@ PaletteMain::PaletteMain(MapView* parent)
   _view.setIconSize({128, 128});
   _view.setWrapping(true);
   _view.setModel(&_model);
-  connect(&_view, &QAbstractItemView::clicked, [this](QModelIndex const& index) -> void { emit itemSelected(index.data(Qt::UserRole).value<QPixmap const*>()); });
-  connect(this, &PaletteMain::itemSelected, [parent](QPixmap const* pixmap) -> void { parent->setBrushTexture(pixmap); });
+  connect(&_view, &QAbstractItemView::clicked, [this, parent](QModelIndex const& index) -> void
+  {
+    QPixmap const* pixmap{index.data(Qt::UserRole).value<QPixmap const*>()};
+    parent->setBrushTexture(pixmap);
+    emit itemSelected(pixmap);
+  });
   _layout.addWidget(&_view);
 }
 
