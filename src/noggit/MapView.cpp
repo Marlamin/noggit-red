@@ -1,9 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/projection.hpp>
-#include <noggit/Brush.h> // brush
 #include <noggit/DBC.h>
-#include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
 #include <noggit/Misc.h>
@@ -36,16 +34,13 @@
 #include <noggit/ui/texture_palette_small.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
 #include <opengl/scoped.hpp>
-#include <noggit/Red/StampMode/Ui/Model/Item.hpp>
 #include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
 
 #include "revision.h"
 
 #include <boost/algorithm/string/predicate.hpp>
-#include <boost/filesystem.hpp>
 
 #include <QtCore/QTimer>
-#include <QtGui/QKeyEvent>
 #include <QtGui/QMouseEvent>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMenuBar>
@@ -57,14 +52,11 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
-#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <map>
-#include <regex>
 #include <string>
 #include <vector>
-#include <filesystem>
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -1439,20 +1431,6 @@ void MapView::tabletEvent(QTabletEvent* event)
   _tablet_pressure = event->pressure();
   event->setAccepted(true);
     
-}
-
-auto MapView::populateImageModel(QStandardItemModel* model) const -> void
-{
-  using namespace noggit::Red::StampMode::Ui::Model;
-  namespace fs = std::filesystem;
-
-  for(auto& image : fs::directory_iterator{"./Images"})
-    if(!image.is_directory())
-    {
-      auto item{new Item{image.path().string().c_str()}};
-      item->setText(QString::fromStdString(image.path().filename().string()));
-      model->appendRow(item);
-    }
 }
 
 auto MapView::setBrushTexture(QPixmap const* pixmap) -> void

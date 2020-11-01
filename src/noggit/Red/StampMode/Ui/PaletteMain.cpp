@@ -5,6 +5,8 @@
 #include <QListView>
 #include <QContextMenuEvent>
 #include <noggit/MapView.h>
+#include <noggit/Red/StampMode/Ui/Model/Item.hpp>
+#include <filesystem>
 
 using namespace noggit::Red::StampMode::Ui;
 
@@ -17,7 +19,19 @@ PaletteMain::PaletteMain(MapView* parent)
   setMinimumHeight(480);
   setWindowFlag(Qt::WindowStaysOnTopHint);
   setLayout(&_layout);
-  parent->populateImageModel(&_model);
+  namespace fs = std::filesystem;
+  using namespace noggit::Red::StampMode::Ui::Model;
+
+  for(auto& entry : fs::directory_iterator{"./samples"})
+  {
+    if(!entry.is_regular_file())
+      continue;
+
+    auto item{new Item{entry.path().string().c_str()}};
+    item->setText(QString::fromStdString(entry.path().filename().string()));
+    _model.appendRow(item);
+  }
+
   _view.setEditTriggers(QAbstractItemView::NoEditTriggers);
   _view.setViewMode(QListView::IconMode);
   _view.setMovement(QListView::Static);
