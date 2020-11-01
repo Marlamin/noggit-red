@@ -2186,6 +2186,7 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     gl.colorMask(true, true, true, true);
 
     QImage image = pixel_buffer.toImage();
+    image = image.convertToFormat(QImage::Format_RGBA8888);
 
     QSettings app_settings;
     QString str = app_settings.value ("project/path").toString();
@@ -2203,12 +2204,13 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     buffer.open( QIODevice::WriteOnly );
 
     image.save( &buffer, "PNG" );
+    image.save(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str());
 
     auto blp = Png2Blp();
     blp.load(reinterpret_cast<const void*>(bytes.constData()), bytes.size());
 
     uint32_t file_size;
-    void* blp_image = blp.createBlpDxtInMemory(true, FORMAT_DXT5, file_size);
+    void* blp_image = blp.createBlpUncompressedInMemory(true, file_size);
 
     std::string tex_name = std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".blp");
 
@@ -2232,12 +2234,12 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
 
         if (combined_image.width() != 8192 | combined_image.height() != 8192)
         {
-          combined_image = QImage(8192, 8192, QImage::Format_ARGB32);
+          combined_image = QImage(8192, 8192, QImage::Format_RGBA8888);
         }
       }
       else
       {
-        combined_image = QImage(8192, 8192, QImage::Format_ARGB32);
+        combined_image = QImage(8192, 8192, QImage::Format_RGBA8888);
       }
 
       QImage scaled_image = image.scaled(128, 128,  Qt::KeepAspectRatio);

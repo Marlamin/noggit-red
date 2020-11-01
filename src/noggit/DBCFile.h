@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <cstring>
+#include <algorithm>
 
 class DBCFile
 {
@@ -14,11 +16,19 @@ public:
 
   // Open database. It must be openened before it can be used.
   void open();
+  void save();
 
   class NotFound : public std::runtime_error
   {
   public:
-    NotFound() : std::runtime_error("Key was not found")
+    NotFound() : std::runtime_error("Key was not found.")
+    { }
+  };
+
+  class AlreadyExists : public std::runtime_error
+  {
+  public:
+    AlreadyExists() : std::runtime_error("Key already exists.")
     { }
   };
 
@@ -26,35 +36,35 @@ public:
   class Record
   {
   public:
-    const float& getFloat(size_t field) const
+     float& getFloat(size_t field) 
     {
       assert(field < file.fieldCount);
       return *reinterpret_cast<float*>(offset + field * 4);
     }
-    const unsigned int& getUInt(size_t field) const
+     unsigned int& getUInt(size_t field) 
     {
       assert(field < file.fieldCount);
       return *reinterpret_cast<unsigned int*>(offset + field * 4);
     }
-    const int& getInt(size_t field) const
+     int& getInt(size_t field) 
     {
       assert(field < file.fieldCount);
       return *reinterpret_cast<int*>(offset + field * 4);
     }
-    const char *getString(size_t field) const
+     char *getString(size_t field) 
     {
       assert(field < file.fieldCount);
       size_t stringOffset = getUInt(field);
       assert(stringOffset < file.stringSize);
       return file.stringTable.data() + stringOffset;
     }
-    const char *getLocalizedString(size_t field, int locale = -1) const
+     char *getLocalizedString(size_t field, int locale = -1) 
     {
       int loc = locale;
       if (locale == -1)
       {
         assert(field < file.fieldCount - 8);
-        for (loc = 0; loc < 9; loc++)
+        for (loc = 0; loc < 16; loc++)
         {
           size_t stringOffset = getUInt(field + loc);
           if (stringOffset != 0)
@@ -67,9 +77,38 @@ public:
       assert(stringOffset < file.stringSize);
       return file.stringTable.data() + stringOffset;
     }
+
+    template<typename T> inline
+    void write(size_t field, T val)
+    {
+      static_assert(sizeof(T) == 4, "This function only writes int/uint/float values.");
+      assert(field < file.fieldCount);
+      *reinterpret_cast<T*>(offset + field * 4) = val;
+    }
+
+    void writeString(size_t field, std::string& val)
+    {
+      assert(field < file.fieldCount);
+
+      size_t old_size = file.stringTable.size();
+      *reinterpret_cast<unsigned int*>(offset + field * 4) = file.stringTable.size();
+      file.stringTable.resize(old_size + val.size() + 1);
+      std::copy(val.c_str(), val.c_str() + val.size() + 1, file.stringTable.data() + old_size);
+    }
+
+    void writeLocalizedString(size_t field,  std::string& val, int locale)
+    {
+      assert(field < file.fieldCount);
+
+      size_t old_size = file.stringTable.size();
+      *reinterpret_cast<unsigned int*>(offset + field + locale * 4) = file.stringTable.size();
+      file.stringTable.resize(old_size + val.size() + 1);
+      std::copy(val.c_str(), val.c_str() + val.size() + 1, file.stringTable.data() + old_size);
+    }
+
   private:
-    Record(const DBCFile &pfile, unsigned char *poffset) : file(pfile), offset(poffset) {}
-    const DBCFile &file;
+    Record(DBCFile &pfile, unsigned char *poffset) : file(pfile), offset(poffset) {}
+    DBCFile &file;
     unsigned char *offset;
 
     friend class DBCFile;
@@ -80,7 +119,7 @@ public:
   class Iterator
   {
   public:
-    Iterator(const DBCFile &file, unsigned char *offset) :
+    Iterator(DBCFile &file, unsigned char *offset) :
       record(file, offset) {}
     /// Advance (prefix only)
     Iterator & operator++() {
@@ -88,16 +127,16 @@ public:
       return *this;
     }
     /// Return address of current instance
-    Record const & operator*() const { return record; }
-    const Record* operator->() const {
+    Record & operator*() { return record; }
+    Record* operator->() {
       return &record;
     }
     /// Comparison
-    bool operator==(const Iterator &b) const
+    bool operator==( Iterator const &b)
     {
       return record.offset == b.record.offset;
     }
-    bool operator!=(const Iterator &b) const
+    bool operator!=( Iterator const &b)
     {
       return record.offset != b.record.offset;
     }
@@ -119,8 +158,8 @@ public:
     return Iterator(*this, data.data() + data.size());
   }
 
-  inline size_t getRecordCount() const { return recordCount; }
-  inline size_t getFieldCount() const { return fieldCount; }
+  inline size_t getRecordCount()  { return recordCount; }
+  inline size_t getFieldCount()  { return fieldCount; }
   inline Record getByID(unsigned int id, size_t field = 0)
   {
     for (Iterator i = begin(); i != end(); ++i)
@@ -131,12 +170,16 @@ public:
     throw NotFound();
   }
 
+  Record addRecord(size_t id, size_t id_field = 0);
+  Record addRecordCopy(size_t id, size_t id_from, size_t id_field = 0);
+  void removeRecord(size_t id, size_t id_field = 0);
+
 private:
   std::string filename;
-  size_t recordSize;
-  size_t recordCount;
-  size_t fieldCount;
-  size_t stringSize;
+  std::uint32_t recordSize;
+  std::uint32_t recordCount;
+  std::uint32_t fieldCount;
+  std::uint32_t stringSize;
   std::vector<unsigned char> data;
   std::vector<char> stringTable;
 };

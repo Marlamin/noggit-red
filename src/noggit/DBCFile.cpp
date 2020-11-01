@@ -5,6 +5,19 @@
 #include <noggit/MPQ.h>
 
 #include <string>
+#include <QSettings>
+#include <QDir>
+#include <fstream>
+#include <cstdint>
+#include <algorithm>
+#include <cstring>
+
+
+template<typename T> inline
+auto write(std::ostream& stream, T const& val) -> void
+{
+  stream.write(reinterpret_cast<char const*>(&val), sizeof(T));
+}
 
 DBCFile::DBCFile(const std::string& _filename)
   : filename(_filename)
@@ -43,3 +56,115 @@ void DBCFile::open()
 
   f.close();
 }
+
+void DBCFile::save()
+{
+  QSettings app_settings;
+  QString str = app_settings.value ("project/path").toString();
+  if (!(str.endsWith('\\') || str.endsWith('/')))
+  {
+    str += "/";
+  }
+
+  std::string filename_proj = noggit::mpq::normalized_filename(str.toStdString() + filename);
+  QDir dir(str + "/DBFilesClient/");
+  if (!dir.exists())
+    dir.mkpath(".");
+
+  std::ofstream stream(filename_proj, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
+
+  stream << 'W' << 'D' << 'B' << 'C';
+
+
+  write(stream, recordCount);
+  write(stream, fieldCount);
+  write(stream, recordSize);
+  write(stream, stringSize);
+
+  stream.write(reinterpret_cast<char*>(data.data()), data.size());
+  stream.write(stringTable.data(), stringSize);
+  stream.close();
+}
+
+DBCFile::Record DBCFile::addRecord(size_t id, size_t id_field)
+{
+  recordCount++;
+
+  for (Iterator i = begin(); i != end(); ++i)
+  {
+    if (i->getUInt(id_field) == id)
+      throw AlreadyExists();
+  }
+
+  size_t old_size = data.size();
+  data.resize(old_size + recordSize);
+  *reinterpret_cast<unsigned int*>(data.data() + old_size + id_field * sizeof(std::uint32_t)) = id;
+
+  return Record(*this, data.data() + old_size);
+}
+
+DBCFile::Record DBCFile::addRecordCopy(size_t id, size_t id_from, size_t id_field)
+{
+  recordCount++;
+
+  bool from_found = false;
+  size_t from_idx = 0;
+
+  for (Iterator i = begin(); i != end(); ++i)
+  {
+    if (i->getUInt(id_field) == id)
+      throw AlreadyExists();
+
+    if (i->getUInt(id_field) == id_from)
+    {
+      from_found = true;
+    }
+
+    if (!from_found)
+    {
+      from_idx++;
+    }
+  }
+
+  if (!from_found)
+  {
+    throw NotFound();
+  }
+
+  size_t old_size = data.size();
+  data.resize(old_size + recordSize);
+
+  Record record_from = getRecord(from_idx);
+  std::copy(data.data() + from_idx * recordSize, data.data() + from_idx * recordSize + recordSize, data.data() + old_size);
+  *reinterpret_cast<unsigned int*>(data.data() + old_size + id_field * sizeof(std::uint32_t)) = id;
+
+  return Record(*this, data.data() + old_size);
+}
+
+void DBCFile::removeRecord(size_t id, size_t id_field)
+{
+  recordCount--;
+  size_t counter = 0;
+
+  for (Iterator i = begin(); i != end(); ++i)
+  {
+    if (i->getUInt(id_field) == id)
+    {
+      size_t initial_size = data.size();
+
+      unsigned char* record = data.data() + counter * recordSize;
+      std::memmove(record, record + recordSize, recordSize * (recordCount - counter + 1));
+      data.resize(initial_size - recordSize);
+      return;
+    }
+
+    counter++;
+
+  }
+
+  throw NotFound();
+
+}
+
+
+

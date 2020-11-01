@@ -1605,6 +1605,8 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
   // And we do, to avoid loading geometry twice. Even though, offscreen one in the background would be nice.
   // The idea is, if rendering fails due to unfinished loading, we skip to the next frame until we are able to render.
 
+  opengl::context::scoped_setter const _ (::gl, context());
+
   switch (settings->export_mode)
   {
     case MinimapGenMode::CURRENT_ADT:

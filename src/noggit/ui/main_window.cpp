@@ -10,6 +10,7 @@
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/uid_storage.hpp>
+#include <noggit/Red/MapCreationWizard/UI/MapCreationWizard.hpp>
 
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
@@ -261,6 +262,9 @@ namespace noggit
       layout->addWidget (_minimap);
 
       setCentralWidget (widget);
+
+      auto test = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard();
+      test->show();
     }
 
     void main_window::rebuild_menu()

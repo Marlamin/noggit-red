@@ -187,7 +187,7 @@ namespace noggit
 
     void minimap_widget::mouseDoubleClickEvent (QMouseEvent* event)
     {
-      if (event->button() != Qt::LeftButton)
+      if (event->button() != Qt::LeftButton || !_world)
       {
         event->ignore();
         return;
