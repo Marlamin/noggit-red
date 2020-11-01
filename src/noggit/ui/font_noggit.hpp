@@ -81,7 +81,9 @@ namespace noggit
         TOOL_VERTEX_PAINT = 0xF8A3,
         TOOL_OBJECT_EDITOR = 0xF8A4,
         TOOL_MINIMAP_EDITOR = 0xF8A5,
-        TOOL_STAMP = 0xF8A6
+        TOOL_STAMP = 0xF8A6,
+        SETTINGS = 0xf8a7,
+        FAVORITE = 0xf8a8
       };
     };
 
