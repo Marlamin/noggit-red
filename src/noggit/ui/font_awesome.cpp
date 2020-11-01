@@ -37,7 +37,25 @@ namespace noggit
         temp_btn->ensurePolished();
         painter->setPen (temp_btn->palette().color(QPalette::WindowText));
 
+        QColor normal_button_color;
+        if (mode == QIcon::Normal)
+        {
+            normal_button_color = temp_btn->palette().color(QPalette::WindowText);
+        }
+
+        QColor off_button_color;
+        if (state == QIcon::Off)
+        {
+            off_button_color = temp_btn->palette().color(QPalette::Shadow);
+        }
+
+        QColor disabled_button_color;
+        if (mode == QIcon::Disabled)
+        {
+            disabled_button_color = temp_btn->palette().color(QPalette::BrightText);
+        }
         delete temp_btn;
+
 
         if (!_fonts.count (rect.height()))
         {
@@ -82,5 +100,7 @@ namespace noggit
     font_awesome_icon::font_awesome_icon (font_awesome::icons const& icon)
       : QIcon (new font_awesome_icon_engine (QString (QChar (icon))))
     {}
+
+    
   }
 }

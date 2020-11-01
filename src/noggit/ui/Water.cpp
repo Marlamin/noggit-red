@@ -42,7 +42,7 @@ namespace noggit
     {
       auto layout (new QFormLayout (this));
 
-      auto brush_group (new QGroupBox (this));
+      auto brush_group(new QGroupBox("Brush", this));
       auto brush_layout (new QFormLayout (brush_group));
 
       _radius_spin = new QDoubleSpinBox (this);
