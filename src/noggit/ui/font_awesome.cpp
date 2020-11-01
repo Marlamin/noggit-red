@@ -35,25 +35,23 @@ namespace noggit
         QWidget* temp_btn = new QWidget();
 
         temp_btn->ensurePolished();
-        painter->setPen (temp_btn->palette().color(QPalette::WindowText));
 
-        QColor normal_button_color;
+        QColor color;
         if (mode == QIcon::Normal)
         {
-            normal_button_color = temp_btn->palette().color(QPalette::WindowText);
+          color = temp_btn->palette().color(QPalette::WindowText);
+        }
+        else if (state == QIcon::Off)
+        {
+          color = temp_btn->palette().color(QPalette::Shadow);
+        }
+        else if (mode == QIcon::Disabled)
+        {
+          color = temp_btn->palette().color(QPalette::BrightText);
         }
 
-        QColor off_button_color;
-        if (state == QIcon::Off)
-        {
-            off_button_color = temp_btn->palette().color(QPalette::Shadow);
-        }
+        painter->setPen(color);
 
-        QColor disabled_button_color;
-        if (mode == QIcon::Disabled)
-        {
-            disabled_button_color = temp_btn->palette().color(QPalette::BrightText);
-        }
         delete temp_btn;
 
 

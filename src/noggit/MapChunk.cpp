@@ -22,11 +22,86 @@
 #include <QPixmap>
 #include <QImage>
 
-MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode)
+MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode, bool init_empty, int chunk_idx)
   : _mode(mode)
   , mt(maintile)
   , use_big_alphamap(bigAlpha)
 {
+
+  if (init_empty)
+  {
+
+    header.flags = 0;
+    px = header.ix = chunk_idx / 16;
+    py = header.iy = chunk_idx % 16;
+
+    header.zpos = ZEROPOINT - (maintile->zbase + py * CHUNKSIZE);
+    header.xpos = ZEROPOINT - (maintile->xbase + px * CHUNKSIZE);
+    header.ypos = 0.0f;
+
+    areaID = header.areaid = 0;
+
+    zbase = header.zpos;
+    xbase = header.xpos;
+    ybase = header.ypos;
+
+    texture_set = nullptr;
+
+    // Generate normals
+    for (int i = 0; i < mapbufsize; ++i)
+    {
+      mNormals[i] = {0.0f, 1.0f, 0.0f};
+    }
+
+    // Clear shadows
+    memset(_shadow_map, 0, 64 * 64);
+
+    // Do not write MCCV
+    hasMCCV = false;
+
+    holes = 0;
+
+    zbase = zbase*-1.0f + ZEROPOINT;
+    xbase = xbase*-1.0f + ZEROPOINT;
+
+    vmin.y = 0.0f;
+    vmin = math::vector_3d(9999999.0f, 9999999.0f, 9999999.0f);
+    vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
+
+    math::vector_3d *ttv = mVertices;
+
+    for (int j = 0; j < 17; ++j) {
+      for (int i = 0; i < ((j % 2) ? 8 : 9); ++i) {
+        float xpos, zpos;
+        xpos = i * UNITSIZE;
+        zpos = j * 0.5f * UNITSIZE;
+        if (j % 2) {
+          xpos += UNITSIZE*0.5f;
+        }
+        math::vector_3d v = math::vector_3d(xbase + xpos, ybase + 0.0f, zbase + zpos);
+        *ttv++ = v;
+        vmin.y = std::min(vmin.y, v.y);
+        vmax.y = std::max(vmax.y, v.y);
+      }
+    }
+
+    vmin.x = xbase;
+    vmin.z = zbase;
+    vmax.x = xbase + 8 * UNITSIZE;
+    vmax.z = zbase + 8 * UNITSIZE;
+
+    update_intersect_points();
+
+    // use absolute y pos in vertices
+    ybase = 0.0f;
+    header.ypos = 0.0f;
+
+    vcenter = (vmin + vmax) * 0.5f;
+
+    return;
+  }
+
+
   uint32_t fourcc;
   uint32_t size;
 
@@ -1157,16 +1232,19 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   memset(lMCNK_header->low_quality_texture_map, 0, 0x10);
 
-  std::vector<uint8_t> lod_texture_map = texture_set->lod_texture_map();
-
-  for (int i = 0; i < lod_texture_map.size(); ++i)
+  if (texture_set)
   {
-    const size_t array_index(i / 4);
-    // it's a uint2 array so we need to write the uint2 in the order they will be on disk,
-    // this means writing to the highest bits of the uint8 first
-    const size_t bit_index((3 - ((i) % 4)) * 2);
+    std::vector<uint8_t> lod_texture_map = texture_set->lod_texture_map();
 
-    lMCNK_header->low_quality_texture_map[array_index] |= ((lod_texture_map[i] & 3) << bit_index);
+    for (int i = 0; i < lod_texture_map.size(); ++i)
+    {
+      const size_t array_index(i / 4);
+      // it's a uint2 array so we need to write the uint2 in the order they will be on disk,
+      // this means writing to the highest bits of the uint8 first
+      const size_t bit_index((3 - ((i) % 4)) * 2);
+
+      lMCNK_header->low_quality_texture_map[array_index] |= ((lod_texture_map[i] & 3) << bit_index);
+    }
   }
 
   lCurrentPosition += 8 + 0x80;
@@ -1244,39 +1322,46 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   // MCLY
   //        {
-  size_t lMCLY_Size = texture_set->num() * 0x10;
+  size_t lMCLY_Size = texture_set ? texture_set->num() * 0x10 : 0;
 
   lADTFile.Extend(8 + lMCLY_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size);
 
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsLayer = lCurrentPosition - lMCNK_Position;
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = texture_set->num();
+  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = texture_set ? texture_set->num() : 0;
 
-  std::vector<std::vector<uint8_t>> alphamaps = texture_set->save_alpha(use_big_alphamap);
+  std::vector<std::vector<uint8_t>> alphamaps;
+
   int lMCAL_Size = 0;
 
-  // MCLY data
-  for (size_t j = 0; j < texture_set->num(); ++j)
+  if (texture_set)
   {
-    ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>(lCurrentPosition + 8 + 0x10 * j);
+    alphamaps = texture_set->save_alpha(use_big_alphamap);
 
-    lLayer->textureID = lTextures.find(texture_set->filename(j))->second;
-    lLayer->flags = texture_set->flag(j);
-    lLayer->ofsAlpha = lMCAL_Size;
-    lLayer->effectID = texture_set->effect(j);
-
-    if (j == 0)
+    // MCLY data
+    for (size_t j = 0; j < texture_set->num(); ++j)
     {
-      lLayer->flags &= ~(FLAG_USE_ALPHA | FLAG_ALPHA_COMPRESSED);
-    }
-    else
-    {
-      lLayer->flags |= FLAG_USE_ALPHA;
-      //! \todo find out why compression fuck up textures ingame
-      lLayer->flags &= ~FLAG_ALPHA_COMPRESSED;
+      ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>(lCurrentPosition + 8 + 0x10 * j);
 
-      lMCAL_Size += alphamaps[j - 1].size();
+      lLayer->textureID = lTextures.find(texture_set->filename(j))->second;
+      lLayer->flags = texture_set->flag(j);
+      lLayer->ofsAlpha = lMCAL_Size;
+      lLayer->effectID = texture_set->effect(j);
+
+      if (j == 0)
+      {
+        lLayer->flags &= ~(FLAG_USE_ALPHA | FLAG_ALPHA_COMPRESSED);
+      }
+      else
+      {
+        lLayer->flags |= FLAG_USE_ALPHA;
+        //! \todo find out why compression fuck up textures ingame
+        lLayer->flags &= ~FLAG_ALPHA_COMPRESSED;
+
+        lMCAL_Size += alphamaps[j - 1].size();
+      }
     }
+
   }
 
   lCurrentPosition += 8 + lMCLY_Size;

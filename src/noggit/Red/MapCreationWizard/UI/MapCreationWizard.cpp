@@ -188,6 +188,43 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
             }
   );
 
+  // Selection
+
+  QObject::connect
+      ( _minimap_widget,  &noggit::ui::minimap_widget::tile_clicked
+          , [this] (QPoint tile)
+        {
+          if (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
+          {
+            int x = tile.x() - 1;
+            int y = tile.y() - 1;
+
+            for (int i = 0; i < 3; ++i)
+            {
+              for (int j = 0; j < 3; ++j)
+              {
+                if (!_world->mapIndex.hasTile(tile_index(x + i, y + j)))
+                {
+                  _world->mapIndex.addTile(tile_index(x + i, y + j));
+                  // _world->mapIndex.saveTile(tile_index(x + i, y + j), _world.get(), true);
+                  // _world->mapIndex.save();
+                }
+
+              }
+            }
+          }
+          else
+          {
+            if (_world->mapIndex.hasTile(tile_index(tile.x(), tile.y())))
+            {
+              //
+            }
+          }
+
+          update();
+        }
+      );
+
 }
 
 void MapCreationWizard::selectMap(int map_id)
@@ -195,7 +232,7 @@ void MapCreationWizard::selectMap(int map_id)
 
   DBCFile::Record record = gMapDB.getByID(map_id);
 
-  _world = std::make_unique<World>(record.getString(MapDB::InternalName), map_id); // verify if leaks here
+  _world = std::make_unique<World>(record.getString(MapDB::InternalName), map_id);
   _minimap_widget->world(_world.get());
 
   _directory->setText(record.getString(1));

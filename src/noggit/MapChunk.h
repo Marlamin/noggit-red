@@ -89,7 +89,7 @@ private:
   opengl::scoped::deferred_upload_buffers<4> lod_indices;
 
 public:
-  MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha, tile_mode mode);
+  MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha, tile_mode mode, bool init_empty = false, int chunk_idx = 0);
 
   MapTile *mt;
   math::vector_3d vmin, vmax, vcenter;

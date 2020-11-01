@@ -554,7 +554,7 @@ void MapTile::saveTile(World* world)
     if (!model)
     {
       // todo: save elsewhere if this happens ? it shouldn't but still
-      LogError << "Could not fine model with uid=" << uid << " when saving " << filename << std::endl;
+      LogError << "Could not find model with uid=" << uid << " when saving " << filename << std::endl;
     }
     else
     {
@@ -616,6 +616,11 @@ void MapTile::saveTile(World* world)
   {
     for (int j = 0; j < 16; ++j)
     {
+      if (!mChunks[i][j]->texture_set)
+      {
+        continue;
+      }
+
       for (size_t tex = 0; tex < mChunks[i][j]->texture_set->num(); tex++)
       {
         if (lTextures.find(mChunks[i][j]->texture_set->filename(tex)) == lTextures.end())
@@ -940,5 +945,13 @@ void MapTile::add_model(uint32_t uid)
   if (std::find(uids.begin(), uids.end(), uid) == uids.end())
   {
     uids.push_back(uid);
+  }
+}
+
+void MapTile::initEmptyChunks()
+{
+  for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
+  {
+    mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, nullptr, mBigAlpha, _mode, true, nextChunk);
   }
 }

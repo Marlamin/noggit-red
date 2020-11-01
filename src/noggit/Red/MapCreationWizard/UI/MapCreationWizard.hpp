@@ -78,8 +78,8 @@ namespace noggit
       void wheelEvent(QWheelEvent *event) override;
 
     private:
-      ui::minimap_widget *_minimap_widget;
-      QComboBox *_selected_map;
+      ui::minimap_widget* _minimap_widget;
+      QComboBox* _selected_map;
       QGroupBox* _map_settings;
 
       // Map settings

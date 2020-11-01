@@ -406,11 +406,25 @@ bool MapIndex::isTileExternal(const tile_index& tile) const
   return tile.is_valid() && mTiles[tile.z][tile.x].onDisc;
 }
 
-void MapIndex::saveTile(const tile_index& tile, World* world)
+void MapIndex::saveTile(const tile_index& tile, World* world, bool save_unloaded)
 {
   world->wait_for_all_tile_updates();
 
 	// save given tile
+	if (save_unloaded)
+  {
+    QSettings settings;
+    auto filepath = boost::filesystem::path (settings.value ("project/path").toString().toStdString())
+                    / noggit::mpq::normalized_filename (mTiles[tile.z][tile.x].tile->filename);
+
+    QFile file(filepath.c_str());
+    file.open(QIODevice::WriteOnly);
+
+    mTiles[tile.z][tile.x].tile->initEmptyChunks();
+    mTiles[tile.z][tile.x].tile->saveTile(world);
+    return;
+  }
+
 	if (tileLoaded(tile))
 	{
     saveMaxUID();
@@ -1051,4 +1065,27 @@ void MapIndex::saveMinimapMD5translate()
 
 
 
+}
+
+void MapIndex::addTile(const tile_index& tile)
+{
+  int j = tile.z;
+  int i = tile.x;
+
+  std::stringstream filename;
+  filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
+
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(),
+      mBigAlpha, true, use_mclq_green_lava(), false, _world);
+
+  mTiles[tile.z][tile.x].onDisc = true;
+  mTiles[tile.z][tile.x].flags |= 0x1;
+  mTiles[tile.z][tile.x].tile->changed = true;
+
+  if (mTiles[tile.z][tile.x].onDisc)
+  {
+    mTiles[tile.z][tile.x].flags |= 1;
+  }
+
+  changed = true;
 }

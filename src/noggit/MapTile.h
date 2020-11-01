@@ -125,6 +125,8 @@ public:
 
   std::vector<uint32_t>* get_uids() { return &uids; }
 
+  void initEmptyChunks();
+
 private:
   tile_mode _mode;
   bool _tile_is_being_reloaded;
