@@ -1446,7 +1446,7 @@ auto MapView::populateImageModel(QStandardItemModel* model) const -> void
   using namespace noggit::Red::StampMode::Ui::Model;
   namespace fs = std::filesystem;
 
-  for(auto& image : fs::directory_iterator{_settings->value("stamping/samples").toString().toStdString()})
+  for(auto& image : fs::directory_iterator{"./Images"})
     if(!image.is_directory())
     {
       auto item{new Item{image.path().string().c_str()}};

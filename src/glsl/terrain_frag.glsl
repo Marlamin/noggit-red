@@ -220,7 +220,7 @@ void main()
     * (1.0 - length(vary_position.xz - cursor_position.xz) / outer_cursor_radius));*/
     out_color.rgb = mix(out_color.rgb, cursor_color.rgb, texture(stampBrush, rotatedTexcoord).r
     * int(abs(vary_position.x - cursor_position.x) <= outer_cursor_radius
-    || abs(vary_position.z - cursor_position.z) <= outer_cursor_radius));
+    && abs(vary_position.z - cursor_position.z) <= outer_cursor_radius));
     /*vec2 posRel = vary_position.xz - cursor_position.xz;
     float pos_x = posRel.x * sin(angle) - posRel.y * cos(angle);
     float pos_z = posRel.y * sin(angle) + posRel.x * cos(angle);
