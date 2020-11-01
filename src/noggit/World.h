@@ -130,7 +130,6 @@ public:
             , eTerrainType ground_editing_brush
             , int water_layer
             , display_mode display
-            , opengl::texture* texBrush
             );
 
   unsigned int getAreaID (math::vector_3d const&);

@@ -679,7 +679,6 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , eTerrainType ground_editing_brush
                  , int water_layer
                  , display_mode display
-                 , opengl::texture* texBrush
                  )
 {
   if (!_display_initialized)
@@ -913,9 +912,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       mcnk_shader.uniform ("draw_cursor_circle", 0);
     }
-
-    opengl::texture::set_active_texture(6);
-    texBrush->bind();
 
     mcnk_shader.uniform("alphamap", 0);
     mcnk_shader.uniform("tex0", 1);

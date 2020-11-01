@@ -1341,6 +1341,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _dockStamp{"Stamp Tool", this}
   , _modeStampTool{&_showStampPalette, &_cursorRotation, this}
   , _modeStampPaletteMain{this}
+  , _texBrush{new opengl::texture{}}
 {
   setCursor(Qt::BlankCursor);
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
@@ -1457,14 +1458,23 @@ auto MapView::populateImageModel(QStandardItemModel* model) const -> void
 auto MapView::setBrushTexture(QPixmap const* pixmap) -> void
 {
   auto img{pixmap->toImage()};
-  _data.clear();
-  _data.resize(img.height() * img.width());
-  _dims.first = img.width();
-  _dims.second = img.height();
+  int const height{img.height()};
+  int const width{img.width()};
+  std::vector<std::uint32_t> tex(height * width);
 
-  for(int i{}; i < img.height(); ++i)
-    for(int j{}; j < img.width(); ++j)
-      _data[i * img.width() + j] = img.pixel(j, i);
+  for(int i{}; i < height; ++i)
+    for(int j{}; j < width; ++j)
+      tex[i * width + j] = img.pixel(j, i);
+
+  makeCurrent();
+  opengl::context::scoped_setter const _{gl, context()};
+  opengl::texture::set_active_texture(6);
+  _texBrush->bind();
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.data());
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
@@ -1701,17 +1711,6 @@ void MapView::paintGL()
 
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  if(!_data.empty())
-  {
-    opengl::texture::set_active_texture(6);
-    _texBrush.bind();
-    gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _dims.first, _dims.second, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data.data());
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  }
-
   draw_map();
 
   if (saving_minimap)
@@ -1744,6 +1743,7 @@ MapView::~MapView()
 {
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
+  delete _texBrush;
 
   // when the uid fix fail the UI isn't created
   if (!_uid_fix_failed)
@@ -2642,7 +2642,6 @@ void MapView::draw_map()
                , terrainTool->_edit_type
                , _display_all_water_layers.get() ? -1 : _displayed_water_layer.get()
                , _display_mode
-               , &_texBrush
                );
 
   // reset after each world::draw call

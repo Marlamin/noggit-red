@@ -102,8 +102,6 @@ private:
 public:
   noggit::bool_toggle_property _draw_hidden_models = {false};
 private:
-  std::vector<unsigned> _data;
-  std::pair<unsigned, unsigned> _dims;
   int _selected_area_id = -1;
   std::map<int, misc::random_color> _area_id_colors;
 
@@ -329,5 +327,5 @@ private:
   noggit::Red::StampMode::Ui::Tool _modeStampTool;
   noggit::Red::StampMode::Ui::PaletteMain _modeStampPaletteMain;
   std::unordered_map<std::string, QPixmap> _images;
-  opengl::texture _texBrush;
+  opengl::texture* const _texBrush;
 };
