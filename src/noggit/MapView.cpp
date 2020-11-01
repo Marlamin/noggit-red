@@ -1445,7 +1445,7 @@ auto MapView::populateImageModel(QStandardItemModel* model) const -> void
   using namespace noggit::Red::StampMode::Ui::Model;
   namespace fs = std::filesystem;
 
-  for(auto& image : fs::directory_iterator{_settings->value("project/path").toString().toStdString() + "Images/"})
+  for(auto& image : fs::directory_iterator{_settings->value("stamping/samples").toString().toStdString()})
     if(!image.is_directory())
     {
       auto item{new Item{image.path().string().c_str()}};
@@ -1465,11 +1465,6 @@ auto MapView::setBrushTexture(QPixmap const* pixmap) -> void
   for(int i{}; i < img.height(); ++i)
     for(int j{}; j < img.width(); ++j)
       _data[i * img.width() + j] = img.pixel(j, i);
-}
-
-auto MapView::getBrushTexture(void) -> opengl::texture*
-{
-  return &_texBrush;
 }
 
 void MapView::move_camera_with_auto_height (math::vector_3d const& pos)

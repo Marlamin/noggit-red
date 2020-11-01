@@ -90,8 +90,9 @@ namespace noggit
       browse_row (&gamePathField, "Game Path", "project/game_path", util::file_line_edit::directories);
       browse_row (&projectPathField, "Project Path", "project/path", util::file_line_edit::directories);
       browse_row (&importPathField, "Import Path", "project/import_file", util::file_line_edit::files);
-      browse_row (&wmvLogPathField, "WMV Log Path", "project/wmv_log_file", util::file_line_edit::files);      
-
+      browse_row (&wmvLogPathField, "WMV Log Path", "project/wmv_log_file", util::file_line_edit::files);
+      browse_row(&_stampingSamples, "Stamping samples root directory", "stamping/samples", util::file_line_edit::directories);
+      browse_row(&_stampingBrushes, "Stamping brush configs root directory", "stamping/brushes", util::file_line_edit::directories);
       _mysql_box = new QGroupBox ("MySQL (uid storage)", this);
       _mysql_box->setToolTip ("Store the maps' max model unique id (uid) in a mysql database to sync your uids with different computers/users to avoid duplications");
       auto mysql_layout (new QFormLayout (_mysql_box));
@@ -262,6 +263,8 @@ namespace noggit
       projectPathField->actual->setText (_settings->value ("project/path").toString());
       importPathField->actual->setText (_settings->value ("project/import_file", "import.txt").toString());
       wmvLogPathField->actual->setText (_settings->value ("project/wmv_log_file").toString());
+      _stampingSamples->actual->setText(_settings->value("stamping/samples").toString());
+      _stampingBrushes->actual->setText(_settings->value("stamping/brushes").toString());
       viewDistanceField->setValue (_settings->value ("view_distance", 1000.f).toFloat());
       farZField->setValue (_settings->value ("farZ", 2048.f).toFloat());
       tabletModeCheck->setChecked (_settings->value ("tablet/enabled", false).toBool());
@@ -296,6 +299,8 @@ namespace noggit
       _settings->setValue ("project/path", projectPathField->actual->text());
       _settings->setValue ("project/import_file", importPathField->actual->text());
       _settings->setValue ("project/wmv_log_file", wmvLogPathField->actual->text());
+      _settings->setValue("stamping/samples", _stampingSamples->actual->text());
+      _settings->setValue("stamping/brushes", _stampingBrushes->actual->text());
       _settings->setValue ("farZ", farZField->value());
       _settings->setValue ("view_distance", viewDistanceField->value());
       _settings->setValue ("tablet/enabled", tabletModeCheck->isChecked());

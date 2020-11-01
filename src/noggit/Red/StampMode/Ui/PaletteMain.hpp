@@ -16,19 +16,15 @@ namespace noggit::Red::StampMode::Ui
   {
     Q_OBJECT
     public:
-    explicit
-    PaletteMain(MapView* parent);
-
-    auto contextMenuEvent(QContextMenuEvent* event) -> void override;
-
+      explicit
+      PaletteMain(MapView* parent);
+      auto contextMenuEvent(QContextMenuEvent* event) -> void override;
     signals:
-
-    void itemSelected(QPixmap const* pixmap) const;
-
+      void itemSelected(QPixmap const* pixmap) const;
     private:
-    QGridLayout _layout;
-    QStandardItemModel _model;
-    QListView _view;
+      QGridLayout _layout;
+      QStandardItemModel _model;
+      QListView _view;
   };
 }
 

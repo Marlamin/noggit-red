@@ -42,6 +42,8 @@ namespace noggit
       util::file_line_edit* projectPathField;
       util::file_line_edit* importPathField;
       util::file_line_edit* wmvLogPathField;
+      util::file_line_edit* _stampingSamples;
+      util::file_line_edit* _stampingBrushes;
       QDoubleSpinBox* viewDistanceField;
       QDoubleSpinBox* farZField;
       QSpinBox* _adt_unload_dist;
