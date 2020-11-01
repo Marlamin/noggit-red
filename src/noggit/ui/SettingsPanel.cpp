@@ -221,13 +221,21 @@ namespace noggit
       layout->addRow("Additional file loading log", _additional_file_loading_log = new QCheckBox(this));
 
       auto warning (new QWidget (this));
-      new QHBoxLayout (warning);
-      auto icon (new QLabel (warning));
-      icon->setPixmap
-        (*BLPRenderer::getInstance().render_blp_to_pixmap ("interface/gossipframe/availablequesticon.blp"));
-      warning->layout()->addWidget (icon);
+      
+      (new QHBoxLayout (warning))->setAlignment(Qt::AlignHCenter);
+
       warning->layout()->addWidget
-        (new QLabel ("Changes may not take effect until next launch.", warning));
+        (new QLabel ("Changes may not take effect until next launch", warning));      
+
+      warning->setStyleSheet(
+          "QLabel { \n "
+          "  font-size: 14px; \n "
+          "  font-weight: bold; \n "
+          "  margin-top: 8px; \n "
+          "  margin-bottom: 4px; \n "
+          "  position: center; \n "
+          "} \n ");
+
       layout->addRow (warning);
 
       auto buttonBox ( new QDialogButtonBox ( QDialogButtonBox::Save
