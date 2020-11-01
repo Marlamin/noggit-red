@@ -98,29 +98,8 @@ namespace noggit
       _brush_level_slider->setRange (0, 255);
       _brush_level_slider->setSliderPosition (_brush_level);
 
-      QString _brush_level_slider_style = 
-        "QSlider::groove:vertical { \n "
-        "  background-color: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop: 0 black, stop: 1 white); \n "
-        "  width: 35px; \n"
-        "  margin: 0 0 0 0; \n "
-        "} \n "
-        "QSlider::handle:vertical { \n"
-        "  background-color: #be3b29; \n"
-        "  height: 5px; \n" 
-        "} \n"
-        "QSlider::vertical { \n"
-        "  width: 35px; \n"
-        "  min-height: 100px; \n"
-        "  max-height: 200px; \n"
-        "} \n"
-        "QSlider::add-page:vertical { \n"
-        "  background: transparent; \n"
-        "} \n"
-        "QSlider::sub-page:vertical { \n"
-        "  background: transparent; \n"
-        "} \n";
+      _brush_level_slider->setAccessibleName("texturing_brush_level_slider");
 
-      _brush_level_slider->setStyleSheet(_brush_level_slider_style);
       slider_layout_right->addWidget(_brush_level_slider, 0, Qt::AlignHCenter);
 
       _brush_level_spin = new QSpinBox(tool_widget);

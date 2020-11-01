@@ -103,9 +103,9 @@ namespace noggit
       _speed_slider->setSliderPosition (_speed * 100);
 
 
-      _speed_box = new QGroupBox (this);
+      QGroupBox* _speed_box(new QGroupBox("Speed"));
       QFormLayout* speed_layout (new QFormLayout (_speed_box));
-      speed_layout->addRow ("Speed:", _speed_spin);
+      speed_layout->addRow (_speed_spin);
       speed_layout->addRow (_speed_slider);
 
       layout->addWidget (_speed_box);
