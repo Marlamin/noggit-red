@@ -88,9 +88,15 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   add_btn->setIcon(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::plus));
   layout_selector->addWidget(add_btn);
 
+  add_btn->setAccessibleName("map_wizard_add_button");
+  add_btn->setFixedSize(36, 22);
+
   auto remove_btn = new QPushButton(this);
-  remove_btn->setIcon(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::timescircle));
+  remove_btn->setIcon(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::times));
   layout_selector->addWidget(remove_btn);
+  
+  remove_btn->setAccessibleName("map_wizard_remove_button");
+  remove_btn->setFixedSize(36, 22);
 
   _map_settings = new QGroupBox("Map settings", this);
   layout_right->addWidget(_map_settings);
