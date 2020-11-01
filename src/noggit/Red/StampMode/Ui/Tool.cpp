@@ -12,10 +12,11 @@ auto Tool::setPixmap(QPixmap const* pixmap) -> void
 }
 
 Tool::Tool(bool_toggle_property* showPalette, float* cursorRotation, QWidget* parent)
-: QWidget{parent}, _cursorRotation{cursorRotation}, _radiusOuter{25.f}, _radiusInner{10.f}, _layout{this}, _label{this}
-, _btnPalette{"Open Palette", this}, _sliderRadiusOuter{Qt::Orientation::Horizontal, this}
-, _spinboxRadiusOuter{this}, _sliderRadiusInner{Qt::Orientation::Horizontal, this}
-, _spinboxRadiusInner{this}, _dialRotation{this}, _curPixmap{nullptr}
+: QWidget{parent}, _cursorRotation{cursorRotation}, _radiusOuter{25.f}, _radiusInner{10.f}, _layout{this}
+, _label{this}, _btnPalette{"Open Palette", this}
+, _sliderRadiusOuter{Qt::Orientation::Horizontal, this}, _spinboxRadiusOuter{this}
+, _sliderRadiusInner{Qt::Orientation::Horizontal, this}, _spinboxRadiusInner{this}
+, _dialRotation{this}, _curPixmap{nullptr}
 {
   _layout.addRow(&_label);
   _layout.addRow(&_btnPalette);
@@ -92,13 +93,10 @@ Tool::Tool(bool_toggle_property* showPalette, float* cursorRotation, QWidget* pa
     QSignalBlocker blocker{&_sliderRadiusInner};
     _sliderRadiusInner.setValue(val);
   });
-  auto label{new QLabel{this}};
-  _layout.addRow(label);
-  connect(&_dialRotation, &QDial::valueChanged, [this, label](int val) -> void
+  connect(&_dialRotation, &QDial::valueChanged, [this](int val) -> void
   {
     _rotation = val;
     *_cursorRotation = _rotation / 360.0f;
-    label->setText(QString::number(*_cursorRotation));
   });
   _dialRotation.setValue(0);
 }
@@ -111,11 +109,6 @@ auto Tool::getOuterRadius(void) const -> float
 auto Tool::getInnerRadius(void) const -> float
 {
   return _radiusInner;
-}
-
-auto Tool::getRotation(void) const -> float
-{
-  return _rotation;
 }
 
 auto Tool::stamp(World* world, math::vector_3d const& pos, float dt, bool doAdd) const -> void

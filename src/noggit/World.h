@@ -95,7 +95,7 @@ public:
             , math::vector_3d const& cursor_pos
             , float cursorRotation
             , math::vector_4d const& cursor_color
-            , int cursor_type
+            , CursorType cursor_type
             , float brush_radius
             , bool show_unpaintable_chunks
             , bool draw_contour
@@ -130,7 +130,6 @@ public:
             , eTerrainType ground_editing_brush
             , int water_layer
             , display_mode display
-            , opengl::texture* texBrush
             );
 
   unsigned int getAreaID (math::vector_3d const&);

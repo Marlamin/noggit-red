@@ -14,11 +14,11 @@ namespace noggit::Red::StampMode::Ui::Model
   class Item : public QStandardItem
   {
     public:
-    explicit
-    Item(QString const& filepath);
-    auto data(int role) const -> QVariant override;
+      explicit
+      Item(QString const& filepath);
+      auto data(int role) const -> QVariant override;
     private:
-    QPixmap _pixmap;
+      QPixmap _pixmap;
   };
 }
 
