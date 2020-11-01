@@ -45,7 +45,7 @@ AbstractWidgetList::AbstractWidgetList(QWidget *parent) :
 
 
     QVBoxLayout *verticalLayout = new QVBoxLayout(this);
-    verticalLayout->setContentsMargins(0, 0, 0, 0);
+
     p->table = new QTableWidget(this);
     verticalLayout->addWidget(p->table);
 
@@ -55,7 +55,7 @@ AbstractWidgetList::AbstractWidgetList(QWidget *parent) :
     p->table->insertColumn(2);
     p->table->insertColumn(3);
 
-    p->table->setColumnWidth(0,64);
+    p->table->setColumnWidth(0,97);
     p->table->setColumnWidth(1,24);
     p->table->setColumnWidth(2,24);
     p->table->setColumnWidth(3,24);
@@ -65,7 +65,7 @@ AbstractWidgetList::AbstractWidgetList(QWidget *parent) :
     p->table->setShowGrid(false);
 
     QPushButton* add_button = new QPushButton(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::plus),
-                                              tr("Add New"));
+                                              tr("Add Color"));
 
     verticalLayout->addWidget(add_button);
     connect(add_button,&QAbstractButton::clicked,this, &AbstractWidgetList::append);
@@ -116,18 +116,13 @@ void AbstractWidgetList::appendWidget(QWidget *w)
     int row = count();
     p->table->insertRow(row);
 
-    QString button_style =
-      "QToolButton { \n "
-      "  border: none; \n "
-      "} \n";
-
     QWidget* b_up = create_button(w,&p->mapper_up, noggit::ui::font_awesome_icon(noggit::ui::font_awesome::chevronup),tr(""), tr("Move Up"));
-    b_up->setStyleSheet(button_style);
     QWidget* b_down = create_button(w,&p->mapper_down, noggit::ui::font_awesome_icon(noggit::ui::font_awesome::chevrondown),tr(""), tr("Move Down"));
-    b_down->setStyleSheet(button_style);
-    QWidget* b_remove = create_button(w,&p->mapper_remove, noggit::ui::font_awesome_icon(noggit::ui::font_awesome::timescircle),tr(""), tr("Remove"));
+    QWidget* b_remove = create_button(w,&p->mapper_remove, noggit::ui::font_awesome_icon(noggit::ui::font_awesome::times),tr(""), tr("Remove"));
 
-    b_remove->setStyleSheet(button_style);
+    QPalette pal = b_up->palette();
+    pal.setColor(QPalette::Window, Qt::black);
+
     if ( row == 0 )
         b_up->setEnabled(false);
     else

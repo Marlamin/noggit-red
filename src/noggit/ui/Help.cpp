@@ -56,8 +56,6 @@ namespace noggit
       generate_hotkey_row({font_noggit::q, font_noggit::e},                                   "\a,\aMove up and down", basic_controls_layout);
       generate_hotkey_row({font_noggit::w, font_noggit::a , font_noggit::s , font_noggit::d}, "\a\a\a\aMove left, right, forward, backwards", basic_controls_layout);
       generate_hotkey_row({font_noggit::home},                                                "\aMove position to the cursor", basic_controls_layout);
-      generate_hotkey_row({font_noggit::shift, font_noggit::c},                               "\a+\aSwitch cursor type", basic_controls_layout);
-      generate_hotkey_row({font_noggit::ctrl, font_noggit::alt},                              "\a+\aToggle cursor options", basic_controls_layout);
       generate_hotkey_row({font_noggit::m},                                                   "\aShow map", basic_controls_layout);
       generate_hotkey_row({font_noggit::u},                                                   "\a2D texture editor", basic_controls_layout);
       generate_hotkey_row({font_noggit::ctrl, font_noggit::f1},                               "\a+\aThis help", basic_controls_layout);
