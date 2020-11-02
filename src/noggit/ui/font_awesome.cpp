@@ -41,13 +41,25 @@ namespace noggit
         {
           color = temp_btn->palette().color(QPalette::WindowText);
         }
-        else if (state == QIcon::Off)
-        {
-          color = temp_btn->palette().color(QPalette::Shadow);
-        }
         else if (mode == QIcon::Disabled)
         {
+          color = temp_btn->palette().color(QPalette::ToolTipText);
+        }
+        else if (mode == QIcon::Active)
+        {
           color = temp_btn->palette().color(QPalette::BrightText);
+        }
+        else if (mode == QIcon::Selected)
+        {
+            color = temp_btn->palette().color(QPalette::Midlight);
+        }
+        else if (state == QIcon::Off)
+        {
+            color = temp_btn->palette().color(QPalette::ToolTipText);
+        }
+        else if (state == QIcon::On)
+        {
+            color = temp_btn->palette().color(QPalette::Light);
         }
 
         painter->setPen(color);

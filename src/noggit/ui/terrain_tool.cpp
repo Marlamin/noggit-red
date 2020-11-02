@@ -27,7 +27,8 @@ namespace noggit
       , _cursor_pos(nullptr)
       , _vertex_mode(eVertexMode_Center)
     {
-
+      setMinimumWidth(250);
+      setMaximumWidth(250);
       auto layout (new QFormLayout (this));
 
       _type_button_group = new QButtonGroup (this);
@@ -62,7 +63,7 @@ namespace noggit
       terrain_type_layout->addWidget (radio_gauss, 3, 0);
       terrain_type_layout->addWidget (radio_vertex, 3, 1);
 
-      layout->addWidget (terrain_type_group);
+      layout->addRow (terrain_type_group);
 
       _radius_spin = new QDoubleSpinBox (this);
       _radius_spin->setRange (0.0f, 1000.0f);
@@ -83,14 +84,8 @@ namespace noggit
       _inner_radius_slider->setRange (0, 100);
       _inner_radius_slider->setSliderPosition ((int)std::round (_inner_radius * 100));
 
-      QGroupBox* radius_group (new QGroupBox ("Radius"));
-      QFormLayout* radius_layout (new QFormLayout (radius_group));
-      radius_layout->addRow ("Outer:", _radius_spin);
-      radius_layout->addRow (_radius_slider);
-      radius_layout->addRow ("Inner:", _inner_radius_spin);
-      radius_layout->addRow (_inner_radius_slider);
-
-      layout->addWidget (radius_group);
+      QGroupBox* settings_group(new QGroupBox ("Settings"));
+      QFormLayout* settings_layout (new QFormLayout (settings_group));
 
       _speed_spin = new QDoubleSpinBox (this);
       _speed_spin->setRange (0.0f, 10.0f);
@@ -101,14 +96,15 @@ namespace noggit
       _speed_slider->setRange (0, 10 * 100);
       _speed_slider->setSingleStep (50);
       _speed_slider->setSliderPosition (_speed * 100);
+      
+      settings_layout->addRow("Outer Radius:", _radius_spin);
+      settings_layout->addRow(_radius_slider);
+      settings_layout->addRow("Inner Radius:", _inner_radius_spin);
+      settings_layout->addRow(_inner_radius_slider);
+      settings_layout->addRow("Speed:", _speed_spin);
+      settings_layout->addRow(_speed_slider);
 
-
-      QGroupBox* _speed_box(new QGroupBox("Speed"));
-      QFormLayout* speed_layout (new QFormLayout (_speed_box));
-      speed_layout->addRow (_speed_spin);
-      speed_layout->addRow (_speed_slider);
-
-      layout->addWidget (_speed_box);
+      layout->addRow(settings_group);
 
       _vertex_type_group = new QGroupBox ("Vertex edit");
       QVBoxLayout* vertex_layout (new QVBoxLayout (_vertex_type_group));
@@ -145,7 +141,7 @@ namespace noggit
 
       vertex_layout->addItem (vertex_angle_layout);
 
-      layout->addWidget (_vertex_type_group);
+      layout->addRow(_vertex_type_group);
       _vertex_type_group->hide();
 
       connect ( _type_button_group, qOverload<int> (&QButtonGroup::buttonClicked)
@@ -231,8 +227,6 @@ namespace noggit
                   }
                 );
 
-      setMinimumWidth(250);
-      setMaximumWidth(250);
     }
 
     void terrain_tool::changeTerrain
@@ -364,18 +358,16 @@ namespace noggit
       if (_edit_type != eTerrainType_Vertex)
       {
         _vertex_type_group->hide();
-        _speed_box->show();
       }
       else
       {
         _vertex_type_group->show();
-        _speed_box->hide();
       }
     }
 
     QSize terrain_tool::sizeHint() const
     {
-      return QSize(215, height());
+      return QSize(250, height());
     }
   }
 }

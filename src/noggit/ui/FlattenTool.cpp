@@ -49,32 +49,34 @@ namespace noggit
 
       layout->addRow (flatten_type_group);
 
+      QGroupBox* settings_group(new QGroupBox("Settings"));
+      auto settings_layout = new QFormLayout(settings_group);
+
       _radius_spin = new QDoubleSpinBox (this);
       _radius_spin->setRange (0.0f, 1000.0f);
       _radius_spin->setDecimals (2);
       _radius_spin->setValue (_radius);
 
-      layout->addRow ("Radius:", _radius_spin);
-
       _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
       _radius_slider->setRange (0, 1000);
       _radius_slider->setSliderPosition (_radius);
-
-      layout->addRow (_radius_slider);
 
       _speed_spin = new QDoubleSpinBox (this);
       _speed_spin->setRange (0.0f, 10.0f);
       _speed_spin->setDecimals (2);
       _speed_spin->setValue (_speed);
 
-      layout->addRow ("Speed:", _speed_spin);
-
       _speed_slider = new QSlider (Qt::Orientation::Horizontal, this);
       _speed_slider->setRange (0, 10 * 100);
       _speed_slider->setSingleStep (50);
       _speed_slider->setSliderPosition (_speed * 100);
 
-      layout->addRow(_speed_slider);
+      settings_layout->addRow("Radius:", _radius_spin);
+      settings_layout->addRow(_radius_slider);
+      settings_layout->addRow("Speed:", _speed_spin);
+      settings_layout->addRow(_speed_slider);
+
+      layout->addRow(settings_group);
 
       QGroupBox* flatten_blur_group = new QGroupBox("Flatten/Blur", this);
       auto flatten_blur_layout = new QGridLayout(flatten_blur_group);
@@ -346,7 +348,7 @@ namespace noggit
 
     QSize flatten_blur_tool::sizeHint() const
     {
-      return QSize(215, height());
+      return QSize(250, height());
     }
   }
 }
