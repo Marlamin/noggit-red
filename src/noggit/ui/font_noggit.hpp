@@ -83,7 +83,21 @@ namespace noggit
         TOOL_MINIMAP_EDITOR = 0xF8A5,
         TOOL_STAMP = 0xF8A6,
         SETTINGS = 0xf8a7,
-        FAVORITE = 0xf8a8
+        FAVORITE = 0xf8a8,
+        VISIBILITY_WMO = 0xf8a9,
+        VISIBILITY_WMO_DOODADS = 0xf8aa,
+        VISIBILITY_DOODADS = 0xf8ab,
+        VISIBILITY_WITH_BOX = 0xf8ac,
+        UNUSED_1 = 0xf8ad,
+        VISIBILITY_TERRAIN = 0xf8ae,
+        VISIBILITY_LINES = 0xf8af,
+        VISIBILITY_WIREFRAME = 0xf8b0,
+        VISIBILITY_CONTOURS = 0xf8b1,
+        VISIBILITY_FOG = 0xf8b2,
+        VISIBILITY_WATER = 0xf8b3,
+        VISIBILITY_GROUNDEFFECTS= 0xf8b4,
+        VISIBILITY_FLIGHT_BOUNDS = 0xf8b5,
+        VISIBILITY_HIDDEN_MODELS = 0xf8b6
       };
     };
 
