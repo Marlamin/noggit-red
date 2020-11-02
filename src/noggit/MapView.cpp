@@ -1698,7 +1698,7 @@ void MapView::paintGL()
     gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
-  if (_world->uid_duplicates_found() && !_uid_duplicate_warning_shown)
+  if (!saving_minimap && _world->uid_duplicates_found() && !_uid_duplicate_warning_shown)
   {
     _uid_duplicate_warning_shown = true;
 

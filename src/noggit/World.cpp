@@ -2172,7 +2172,7 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
 
     if (settings->file_format == ".png")
     {
-      image.save(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str());
+      image.save(dir.filePath(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str()));
     }
     else if (settings->file_format == ".blp")
     {
