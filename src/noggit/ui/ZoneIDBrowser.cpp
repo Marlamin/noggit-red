@@ -38,6 +38,7 @@ namespace noggit
       layout->addRow (_radius_slider);
       layout->addRow (_area_tree);
       
+      setMinimumWidth(250);
 
       connect ( _area_tree, &QTreeWidget::itemSelectionChanged
               , [this]

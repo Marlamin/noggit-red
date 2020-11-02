@@ -340,7 +340,7 @@ namespace noggit
 
     QSize water::sizeHint() const
     {
-      return QSize(215, height());
+      return QSize(250, height());
     }
   }
 }

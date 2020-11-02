@@ -53,18 +53,21 @@ namespace noggit
     {
       auto layout = new QFormLayout (this);
 
+      QGroupBox* radius_group = new QGroupBox("Radius");
+      auto radius_layout = new QFormLayout(radius_group);
+
       _radius_spin = new QDoubleSpinBox (this);
       _radius_spin->setRange (0.0f, 100.0f);
       _radius_spin->setDecimals (2);
       _radius_spin->setValue (_radius);
 
-      layout->addRow ("Radius:", _radius_spin);
-
       _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
       _radius_slider->setRange (0, 100);
       _radius_slider->setSliderPosition (_radius);
 
-      layout->addRow (_radius_slider);
+      radius_layout->addRow (_radius_slider);
+      radius_layout->addRow(_radius_spin);
+      layout->addRow(radius_group);
 
       QGroupBox *copyBox = new QGroupBox("Copy options", this);
       auto copy_layout = new QFormLayout (copyBox);

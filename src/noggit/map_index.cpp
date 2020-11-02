@@ -417,7 +417,7 @@ void MapIndex::saveTile(const tile_index& tile, World* world, bool save_unloaded
     auto filepath = boost::filesystem::path (settings.value ("project/path").toString().toStdString())
                     / noggit::mpq::normalized_filename (mTiles[tile.z][tile.x].tile->filename);
 
-    QFile file(filepath.c_str());
+    QFile file(filepath.string().c_str());
     file.open(QIODevice::WriteOnly);
 
     mTiles[tile.z][tile.x].tile->initEmptyChunks();
