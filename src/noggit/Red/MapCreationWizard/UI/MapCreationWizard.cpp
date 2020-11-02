@@ -111,7 +111,7 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   _instance_type->addItem("None");
   _instance_type->setItemData(0, QVariant(0));
 
-  _instance_type->addItem("Instance Crusade");
+  _instance_type->addItem("Instance");
   _instance_type->setItemData(1, QVariant(1));
 
   _instance_type->addItem("Raid");
@@ -177,9 +177,33 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   _max_players = new QSpinBox(_map_settings);
   map_settings_layout->addRow("Max players:",_max_players);
 
+  // Bottom row
+  auto btn_row_layout = new QHBoxLayout(this);
+  btn_row_layout->setAlignment(Qt::AlignRight);
+
+  auto save_btn = new QPushButton("Save", this);
+  auto discard_btn = new QPushButton("Discard", this);
+  btn_row_layout->addWidget(save_btn);
+  btn_row_layout->addWidget(discard_btn);
+
+  layout_right->addItem(btn_row_layout);
+
+
   selectMap(_selected_map->itemData(_selected_map->currentIndex()).toInt());
 
   // Connections
+
+  connect(save_btn, &QPushButton::clicked
+      ,[&] ()
+      {
+        saveCurrentEntry();
+      });
+
+  connect(discard_btn, &QPushButton::clicked
+      ,[&] ()
+      {
+
+      });
 
   connect(_selected_map, QOverload<int>::of(&QComboBox::currentIndexChanged)
       , [&] (int index)
@@ -205,19 +229,33 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
               {
                 if (!_world->mapIndex.hasTile(tile_index(x + i, y + j)))
                 {
-                  _world->mapIndex.addTile(tile_index(x + i, y + j));
-                  // _world->mapIndex.saveTile(tile_index(x + i, y + j), _world.get(), true);
-                  // _world->mapIndex.save();
+                  if (!QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
+                  {
+                    _world->mapIndex.addTile(tile_index(x + i, y + j));
+                  }
                 }
-
+                else if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
+                {
+                  _world->mapIndex.removeTile(tile_index(x + i, y + j));
+                }
               }
             }
           }
           else
           {
-            if (_world->mapIndex.hasTile(tile_index(tile.x(), tile.y())))
+            int x = tile.x();
+            int y = tile.y();
+
+            if (!_world->mapIndex.hasTile(tile_index(x, y)))
             {
-              //
+              if (!QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
+              {
+                _world->mapIndex.addTile(tile_index(x, y));
+              }
+            }
+            else if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
+            {
+              _world->mapIndex.removeTile(tile_index(x, y));
             }
           }
 
@@ -231,6 +269,7 @@ void MapCreationWizard::selectMap(int map_id)
 {
 
   DBCFile::Record record = gMapDB.getByID(map_id);
+  _cur_map_id = map_id;
 
   _world = std::make_unique<World>(record.getString(MapDB::InternalName), map_id);
   _minimap_widget->world(_world.get());
@@ -289,6 +328,42 @@ void MapCreationWizard::wheelEvent(QWheelEvent* event)
   }
 
 }
+
+void MapCreationWizard::saveCurrentEntry()
+{
+  // Save ADTs to disk
+  _world->mapIndex.saveChanged(_world.get(), true);
+  _world->mapIndex.save();
+
+  // Save Map.dbc record
+  DBCFile::Record record = _is_new_record ? gMapDB.addRecord(_cur_map_id) : gMapDB.getByID(_cur_map_id);
+
+  record.writeString(1, _directory->text().toStdString());
+  record.write(2, _instance_type->itemData(_instance_type->currentIndex()).toInt());
+  _map_name->toRecord(record, 5);
+
+  record.write(22, _area_table_id->value());
+  _map_desc_alliance->toRecord(record, 23);
+  _map_desc_horde->toRecord(record, 40);
+  record.write(57, _loading_screen->value());
+  record.write(58, static_cast<float>(_minimap_icon_scale->value()));
+  record.write(59, _corpse_map_id->itemData(_corpse_map_id->currentIndex()).toInt());
+  record.write(60, static_cast<float>(_corpse_x->value()));
+  record.write(61, static_cast<float>(_corpse_y->value()));
+  record.write(62, _time_of_day_override->value());
+  record.write(63, _expansion_id->itemData(_expansion_id->currentIndex()).toInt());
+  record.write(64, _raid_offset->value());
+  record.write(65, _max_players->value());
+
+  gMapDB.save();
+
+}
+
+void MapCreationWizard::discardChanges()
+{
+
+}
+
 
 LocaleDBCEntry::LocaleDBCEntry(QWidget* parent) : QWidget(parent)
 {
@@ -379,7 +454,7 @@ void LocaleDBCEntry::setCurrentLocale(const std::string& locale)
   _show_entry->setCurrentWidget(_widget_map.at(locale));
 }
 
-void LocaleDBCEntry::fill(DBCFile::Record& record, size_t field, size_t id_field)
+void LocaleDBCEntry::fill(DBCFile::Record& record, size_t field)
 {
   for (int loc = 0; loc < 16; ++loc)
   {
@@ -387,6 +462,16 @@ void LocaleDBCEntry::fill(DBCFile::Record& record, size_t field, size_t id_field
   }
 
   _flags->setValue(record.getInt(field + 16));
+}
+
+void LocaleDBCEntry::toRecord(DBCFile::Record &record, size_t field)
+{
+  for (int loc = 0; loc < 16; ++loc)
+  {
+    record.writeLocalizedString(field,getValue(loc), loc);
+  }
+
+  record.write(field + 16, _flags->value());
 }
 
 

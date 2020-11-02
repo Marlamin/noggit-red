@@ -41,7 +41,10 @@ namespace noggit
           _widget_map.at(_locale_names[locale])->setText(QString::fromStdString(val));
         }
 
-        void fill(DBCFile::Record& record, size_t field, size_t id_field = 0);
+        std::string getValue(int locale) { return  _widget_map.at(_locale_names[locale])->text().toStdString(); };
+
+        void fill(DBCFile::Record& record, size_t field);
+        void toRecord(DBCFile::Record& record, size_t field);
 
       private:
         QComboBox* _current_locale;
@@ -107,7 +110,13 @@ namespace noggit
 
       std::unique_ptr<World> _world;
 
+      bool _is_new_record = false;
+      int _cur_map_id = 0;
+
       void selectMap(int map_id);
+
+      void saveCurrentEntry();
+      void discardChanges();
 
     };
   }

@@ -163,8 +163,8 @@ public:
   void setFlag(bool to, math::vector_3d const& pos, uint32_t flag);
   bool has_unsaved_changes(const tile_index& tile) const;
 
-  void saveTile(const tile_index& tile, World*, bool save_unloaded=false);
-  void saveChanged (World*);
+  void saveTile(const tile_index& tile, World*, bool save_unloaded = false);
+  void saveChanged (World*, bool save_unloaded = false);
   void reloadTile(const tile_index& tile);
   void unloadTiles(const tile_index& tile);  // unloads all tiles more then x adts away from given
   void unloadTile(const tile_index& tile);  // unload given tile
@@ -200,6 +200,7 @@ public:
   void loadMaxUID();
 
   void addTile(const tile_index& tile);
+  void removeTile(const tile_index& tile);
 
   // todo: find out how wow choose to use the green lava in outland
   inline bool use_mclq_green_lava() const

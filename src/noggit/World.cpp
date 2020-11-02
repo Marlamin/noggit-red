@@ -1868,7 +1868,7 @@ void World::drawMinimap ( MapTile *tile
     mcnk_shader.uniform("tex2", 3);
     mcnk_shader.uniform("tex3", 4);
 
-    mcnk_shader.uniform("draw_shadows", 0);
+    mcnk_shader.uniform("draw_shadows", static_cast<int>(settings->draw_shadows));
     mcnk_shader.uniform("shadow_map", 5);
 
     mcnk_shader.uniform("tex_anim_0", math::vector_2d());
@@ -2168,28 +2168,34 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     if (!dir.exists())
       dir.mkpath(".");
 
-    QByteArray bytes;
-    QBuffer buffer( &bytes );
-    buffer.open( QIODevice::WriteOnly );
-
-    image.save( &buffer, "PNG" );
-    image.save(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str());
-
-    auto blp = Png2Blp();
-    blp.load(reinterpret_cast<const void*>(bytes.constData()), bytes.size());
-
-    uint32_t file_size;
-    void* blp_image = blp.createBlpUncompressedInMemory(true, file_size);
-
     std::string tex_name = std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".blp");
 
-    QFile file(dir.filePath(tex_name.c_str()));
-    file.open(QIODevice::WriteOnly);
+    if (settings->file_format == ".png")
+    {
+      image.save(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str());
+    }
+    else if (settings->file_format == ".blp")
+    {
+      QByteArray bytes;
+      QBuffer buffer( &bytes );
+      buffer.open( QIODevice::WriteOnly );
 
-    QDataStream out(&file);
-    out.writeRawData(reinterpret_cast<char*>(blp_image), file_size);
+      image.save( &buffer, "PNG" );
 
-    file.close();
+      auto blp = Png2Blp();
+      blp.load(reinterpret_cast<const void*>(bytes.constData()), bytes.size());
+
+      uint32_t file_size;
+      void* blp_image = blp.createBlpUncompressedInMemory(true, file_size);
+
+      QFile file(dir.filePath(tex_name.c_str()));
+      file.open(QIODevice::WriteOnly);
+
+      QDataStream out(&file);
+      out.writeRawData(reinterpret_cast<char*>(blp_image), file_size);
+
+      file.close();
+    }
 
     // Write combined file
     if (settings->combined_minimap)
@@ -2229,8 +2235,6 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     std::string map_name = gMapDB.getMapName(mapIndex._map_id);
     std::string tilename_left = (boost::format("%s\\map_%d_%02d.blp") % map_name % tile_idx.x % tile_idx.z).str();
     mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
-
-    // image.save(dir.filePath(std::string(basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str()));
 
     if (unload)
     {
