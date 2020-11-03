@@ -32,6 +32,7 @@ namespace noggit
 
     signals:
       void exit_prompt_opened();
+      void map_selected(int map_id);
 
     private:
       void loadMap (int mapID);

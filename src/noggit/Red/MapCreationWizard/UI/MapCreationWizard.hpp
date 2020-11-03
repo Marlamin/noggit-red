@@ -82,7 +82,7 @@ namespace noggit
 
     private:
       ui::minimap_widget* _minimap_widget;
-      QComboBox* _selected_map;
+      int _selected_map;
       QGroupBox* _map_settings;
 
       // Map settings

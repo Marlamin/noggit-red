@@ -151,6 +151,8 @@ namespace noggit
 
     void main_window::loadMap(int mapID)
     {
+      emit map_selected(mapID);
+
       _minimap->world (nullptr);
 
       _world.reset();
@@ -275,7 +277,7 @@ namespace noggit
       minimap_holder_layout->setAlignment(Qt::AlignCenter);
       right_side->addTab(minimap_holder, "Enter map");
 
-      auto map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard();
+      auto map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard(this);
       right_side->addTab(map_creation_wizard, "Edit map");
 
       layout->addWidget(right_side);

@@ -3,6 +3,7 @@
 #include "MapCreationWizard.hpp"
 
 #include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/main_window.hpp>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <noggit/Log.h>
@@ -29,7 +30,6 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   setWindowIcon (QIcon (":/icon"));
   setWindowFlags(Qt::Window | Qt::WindowStaysOnTopHint);
 
-  //setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
   auto layout = new QHBoxLayout(this);
 
   // Left side
@@ -54,11 +54,8 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   layout->addLayout(layout_right);
 
   auto layout_selector = new QHBoxLayout(this);
+  layout_selector->setAlignment(Qt::AlignLeft);
   layout_right->addItem(layout_selector);
-
-  _selected_map = new QComboBox(this);
-  layout_selector->addWidget(new QLabel("Map:"));
-  layout_selector->addWidget(_selected_map);
 
   _corpse_map_id = new QComboBox(this);
   _corpse_map_id->addItem("None");
@@ -75,23 +72,20 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
     if (area_type < 0 ||area_type > 4 || !World::IsEditableWorld(map_id))
       continue;
 
-    _selected_map->addItem(QString::number(map_id) + " - " + QString::fromUtf8 (name.c_str()));
-    _selected_map->setItemData(count, QVariant (map_id));
-
     _corpse_map_id->addItem(QString::number(map_id) + " - " + QString::fromUtf8 (name.c_str()));
     _corpse_map_id->setItemData(count + 1, QVariant (map_id));
 
     count++;
   }
 
-  auto add_btn = new QPushButton(this);
+  auto add_btn = new QPushButton("Add",this);
   add_btn->setIcon(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::plus));
   layout_selector->addWidget(add_btn);
 
   add_btn->setAccessibleName("map_wizard_add_button");
   add_btn->setFixedSize(36, 22);
 
-  auto remove_btn = new QPushButton(this);
+  auto remove_btn = new QPushButton("Remove",this);
   remove_btn->setIcon(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::times));
   layout_selector->addWidget(remove_btn);
   
@@ -188,9 +182,6 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
 
   layout_right->addItem(btn_row_layout);
 
-
-  selectMap(_selected_map->itemData(_selected_map->currentIndex()).toInt());
-
   // Connections
 
   connect(save_btn, &QPushButton::clicked
@@ -205,10 +196,10 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
 
       });
 
-  connect(_selected_map, QOverload<int>::of(&QComboBox::currentIndexChanged)
+  connect(reinterpret_cast<noggit::ui::main_window*>(parent), QOverload<int>::of(&noggit::ui::main_window::map_selected)
       , [&] (int index)
             {
-              selectMap(_selected_map->itemData(index).toInt());
+              selectMap(index);
             }
   );
 
