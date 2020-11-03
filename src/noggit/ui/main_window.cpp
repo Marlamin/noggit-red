@@ -183,7 +183,6 @@ namespace noggit
       QListWidget* battlegrounds_table (new QListWidget (widget));
       QListWidget* arenas_table (new QListWidget (widget));
       QListWidget* bookmarks_table (new QListWidget (widget));
-      auto map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard();
 
       QTabWidget* entry_points_tabs (new QTabWidget (widget));
 
@@ -193,9 +192,6 @@ namespace noggit
       entry_points_tabs->addTab (battlegrounds_table, "Battlegrounds");
       entry_points_tabs->addTab (arenas_table, "Arenas");
       entry_points_tabs->addTab (bookmarks_table, "Bookmarks");
-      entry_points_tabs->addTab (empty_space, "ES");
-      entry_points_tabs->setTabEnabled(6, false);
-      entry_points_tabs->addTab (map_creation_wizard, "Edit");
 
       layout->addWidget (entry_points_tabs);
 
@@ -269,19 +265,24 @@ namespace noggit
           }
         );
 
+      auto right_side = new QTabWidget(this);
+      right_side->setDocumentMode(true);
+
       auto minimap_holder = new QWidget(this);
       auto minimap_holder_layout = new QHBoxLayout(this);
       minimap_holder->setLayout(minimap_holder_layout);
       minimap_holder_layout->addWidget(_minimap);
       minimap_holder_layout->setAlignment(Qt::AlignCenter);
-      layout->addWidget(minimap_holder);
+      right_side->addTab(minimap_holder, "Enter map");
+
+      auto map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard();
+      right_side->addTab(map_creation_wizard, "Edit map");
+
+      layout->addWidget(right_side);
 
       setCentralWidget (widget);
 
-      entry_points_tabs->setStyleSheet("QTabBar::tab:disabled {"
-                                                      "width: 300px;"
-                                                      "color: transparent;"
-                                                      "background: transparent;}");
+
       _minimap->adjustSize();
     }
 
