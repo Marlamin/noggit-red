@@ -438,6 +438,8 @@ LocaleDBCEntry::LocaleDBCEntry(QWidget* parent) : QWidget(parent)
               setCurrentLocale(_current_locale->currentText().toStdString());
             }
   );
+
+  setMaximumHeight(_en->height());
 }
 
 void LocaleDBCEntry::setCurrentLocale(const std::string& locale)
