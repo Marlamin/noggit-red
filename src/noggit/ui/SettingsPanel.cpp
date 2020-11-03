@@ -182,7 +182,9 @@ namespace noggit
       _wireframe_width->setSingleStep(0.1);
       wireframe_layout->addRow ("Width", _wireframe_width);
 
+      
       wireframe_layout->addRow ("Color", _wireframe_color = new color_widgets::ColorSelector (wireframe_box));
+      _wireframe_color->setColor(Qt::white);
       layout->addRow (wireframe_box);
 
       
