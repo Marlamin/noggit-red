@@ -83,14 +83,12 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   layout_selector->addWidget(add_btn);
 
   add_btn->setAccessibleName("map_wizard_add_button");
-  add_btn->setFixedSize(36, 22);
 
   auto remove_btn = new QPushButton("Remove",this);
   remove_btn->setIcon(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::times));
   layout_selector->addWidget(remove_btn);
   
   remove_btn->setAccessibleName("map_wizard_remove_button");
-  remove_btn->setFixedSize(36, 22);
 
   _map_settings = new QGroupBox("Map settings", this);
   layout_right->addWidget(_map_settings);
@@ -179,6 +177,8 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   auto discard_btn = new QPushButton("Discard", this);
   btn_row_layout->addWidget(save_btn);
   btn_row_layout->addWidget(discard_btn);
+  save_btn->setAccessibleName("map_wizard_save_button");
+  discard_btn->setAccessibleName("map_wizard_discard_button");
 
   layout_right->addItem(btn_row_layout);
 
