@@ -47,11 +47,17 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   scroll_minimap->setAlignment(Qt::AlignCenter);
   scroll_minimap->setWidget(_minimap_widget);
   scroll_minimap->setWidgetResizable(true);
-  scroll_minimap->setFixedSize(QSize(512, 512));
+  scroll_minimap->setMinimumSize(QSize(380, 380));
+  scroll_minimap->setMaximumSize(QSize(704, 704));
 
   // Right side
+
+  auto layout_right_holder = new QWidget(this);
+  layout_right_holder->setMinimumWidth(300);
+  layout_right_holder->setMaximumWidth(300);
   auto layout_right = new QVBoxLayout (this);
-  layout->addLayout(layout_right);
+  layout_right_holder->setLayout(layout_right);
+  layout->addWidget(layout_right_holder);
 
   auto layout_selector = new QHBoxLayout(this);
   layout_selector->setAlignment(Qt::AlignLeft);

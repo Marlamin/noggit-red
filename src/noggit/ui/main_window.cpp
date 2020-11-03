@@ -185,6 +185,7 @@ namespace noggit
       QListWidget* bookmarks_table (new QListWidget (widget));
 
       QTabWidget* entry_points_tabs (new QTabWidget (widget));
+      entry_points_tabs->setMaximumWidth(600);
 
       entry_points_tabs->addTab (continents_table, "Continents");
       entry_points_tabs->addTab (dungeons_table, "Dungeons");
