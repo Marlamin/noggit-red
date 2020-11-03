@@ -13,16 +13,18 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
 
   add_tool_icon(&mapView->_draw_models, tr("Doodads"), font_noggit::VISIBILITY_DOODADS);
+  add_tool_icon(&mapView->_draw_wmo, tr("WMOs"), font_noggit::VISIBILITY_WMO);
   add_tool_icon(&mapView->_draw_wmo_doodads, tr("WMO doodads"), font_noggit::VISIBILITY_WMO_DOODADS);
   add_tool_icon(&mapView->_draw_terrain, tr("Terrain"), font_noggit::VISIBILITY_TERRAIN);
   add_tool_icon(&mapView->_draw_water, tr("Water"), font_noggit::VISIBILITY_WATER);
-  add_tool_icon(&mapView->_draw_wmo, tr("WMOs"), font_noggit::VISIBILITY_WMO);
+  
   addSeparator();
 
   add_tool_icon(&mapView->_draw_lines, tr("Lines"), font_noggit::VISIBILITY_LINES);
-  add_tool_icon(&mapView->_draw_contour, tr("Contours"), font_noggit::VISIBILITY_CONTOURS);
-  add_tool_icon(&mapView->_draw_wireframe, tr("Wireframe"), font_noggit::VISIBILITY_WIREFRAME);
   add_tool_icon(&mapView->_draw_hole_lines, tr("Hole lines"), font_noggit::VISIBILITY_HOLE_LINES);
+  add_tool_icon(&mapView->_draw_wireframe, tr("Wireframe"), font_noggit::VISIBILITY_WIREFRAME);
+  add_tool_icon(&mapView->_draw_contour, tr("Contours"), font_noggit::VISIBILITY_CONTOURS);
+  
   addSeparator();
 
   // Animation
