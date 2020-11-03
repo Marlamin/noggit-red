@@ -1300,6 +1300,7 @@ void MapView::on_exit_prompt()
 {
   // hide all popups
   _keybindings->hide();
+  _minimap_tool_dock->hide();
   _minimap_dock->hide();
   _texture_palette_small->hide();
   objectEditor->helper_models_widget->hide();
