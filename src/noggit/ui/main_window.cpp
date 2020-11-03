@@ -177,8 +177,6 @@ namespace noggit
       auto layout (new QHBoxLayout (widget));
       layout->setAlignment(Qt::AlignLeft);
 
-      auto empty_space (new QWidget(this));
-
       QListWidget* continents_table (new QListWidget (widget));
       QListWidget* dungeons_table (new QListWidget (widget));
       QListWidget* raids_table (new QListWidget (widget));
