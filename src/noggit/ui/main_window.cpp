@@ -22,6 +22,8 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
+#include <boost/format.hpp>
+
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
 
@@ -171,6 +173,9 @@ namespace noggit
     {
       auto widget (new QWidget(this));
       auto layout (new QHBoxLayout (widget));
+      layout->setAlignment(Qt::AlignLeft);
+
+      auto empty_space (new QWidget(this));
 
       QListWidget* continents_table (new QListWidget (widget));
       QListWidget* dungeons_table (new QListWidget (widget));
@@ -178,14 +183,19 @@ namespace noggit
       QListWidget* battlegrounds_table (new QListWidget (widget));
       QListWidget* arenas_table (new QListWidget (widget));
       QListWidget* bookmarks_table (new QListWidget (widget));
+      auto map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard();
 
       QTabWidget* entry_points_tabs (new QTabWidget (widget));
+
       entry_points_tabs->addTab (continents_table, "Continents");
       entry_points_tabs->addTab (dungeons_table, "Dungeons");
       entry_points_tabs->addTab (raids_table, "Raids");
       entry_points_tabs->addTab (battlegrounds_table, "Battlegrounds");
       entry_points_tabs->addTab (arenas_table, "Arenas");
       entry_points_tabs->addTab (bookmarks_table, "Bookmarks");
+      entry_points_tabs->addTab (empty_space, "ES");
+      entry_points_tabs->setTabEnabled(6, false);
+      entry_points_tabs->addTab (map_creation_wizard, "Edit");
 
       layout->addWidget (entry_points_tabs);
 
@@ -259,12 +269,20 @@ namespace noggit
           }
         );
 
-      layout->addWidget (_minimap);
+      auto minimap_holder = new QWidget(this);
+      auto minimap_holder_layout = new QHBoxLayout(this);
+      minimap_holder->setLayout(minimap_holder_layout);
+      minimap_holder_layout->addWidget(_minimap);
+      minimap_holder_layout->setAlignment(Qt::AlignCenter);
+      layout->addWidget(minimap_holder);
 
       setCentralWidget (widget);
 
-      auto test = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard();
-      test->show();
+      entry_points_tabs->setStyleSheet("QTabBar::tab:disabled {"
+                                                      "width: 300px;"
+                                                      "color: transparent;"
+                                                      "background: transparent;}");
+      _minimap->adjustSize();
     }
 
     void main_window::rebuild_menu()
