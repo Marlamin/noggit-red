@@ -10,6 +10,9 @@ namespace noggit
       : _set_editing_mode (set_editing_mode)
       , _tool_group(this)
     {
+      setContextMenuPolicy(Qt::PreventContextMenu);
+      setAllowedAreas(Qt::LeftToolBarArea);
+
       add_tool_icon (editing_mode::ground,       tr("Raise / Lower"),     font_noggit::TOOL_RAISE_LOWER);
       add_tool_icon (editing_mode::flatten_blur, tr("Flatten / Blur"),    font_noggit::TOOL_FLATTEN_BLUR);
       add_tool_icon (editing_mode::paint,        tr("Texture Painter"),   font_noggit::TOOL_TEXTURE_PAINT);
