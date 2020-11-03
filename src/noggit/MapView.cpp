@@ -35,6 +35,7 @@
 #include <noggit/ui/MinimapCreator.hpp>
 #include <opengl/scoped.hpp>
 #include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
+#include <noggit/Red/ViewToolbar/Ui/ViewToolbar.hpp>
 
 #include "revision.h"
 
@@ -433,7 +434,7 @@ void MapView::createGUI()
     for (auto dock : _tool_properties_docks)
     {
       dock->setFloating(true);
-      dock->move(_main_window->geometry().topRight().x() - dock->rect().width() - 20, _main_window->geometry().topRight().y() + 40);
+      dock->move(_main_window->geometry().topRight().x() - dock->rect().width() - 20, _main_window->geometry().topRight().y() + 65);
     }
   }
 
@@ -459,11 +460,15 @@ void MapView::createGUI()
 
   connect(this, &QObject::destroyed, _texture_palette_dock, &QObject::deleteLater);
    
-  // create toolbar
+  // create toolbars
 
   _toolbar = new noggit::ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
   _main_window->addToolBar(Qt::LeftToolBarArea, _toolbar);
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
+
+  _view_toolbar = new noggit::Red::ViewToolbar::Ui::ViewToolbar(this);
+  _main_window->addToolBar(Qt::TopToolBarArea, _view_toolbar);
+  connect (this, &QObject::destroyed, _view_toolbar, &QObject::deleteLater);
 
   auto file_menu (_main_window->menuBar()->addMenu ("Editor"));
   connect (this, &QObject::destroyed, file_menu, &QObject::deleteLater);
@@ -692,15 +697,15 @@ void MapView::createGUI()
   ADD_TOGGLE (view_menu, "Water", Qt::Key_F4, _draw_water);
   ADD_TOGGLE (view_menu, "WMOs", Qt::Key_F6, _draw_wmo);
   ADD_TOGGLE (view_menu, "Lines", Qt::Key_F7, _draw_lines);
-  ADD_TOGGLE (view_menu, "Map contour infos", Qt::Key_F9, _draw_contour);
+  ADD_TOGGLE (view_menu, "Contours", Qt::Key_F9, _draw_contour);
   ADD_TOGGLE (view_menu, "Wireframe", Qt::Key_F10, _draw_wireframe);
   ADD_TOGGLE (view_menu, "Toggle Animation", Qt::Key_F11, _draw_model_animations);
   ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
   ADD_TOGGLE_NS (view_menu, "Flight Bounds", _draw_mfbo);
-  ADD_TOGGLE (view_menu, "Hole lines always on", "Shift+F7", _draw_hole_lines);
+  ADD_TOGGLE (view_menu, "Hole lines", "Shift+F7", _draw_hole_lines);
   ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
   //! \todo space+h in object mode
-  ADD_TOGGLE_NS (view_menu, "Draw hidden models", _draw_hidden_models);
+  ADD_TOGGLE_NS (view_menu, "Hidden models", _draw_hidden_models);
 
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Minimap"));
@@ -776,6 +781,7 @@ void MapView::createGUI()
 
     _main_window->statusBar()->setVisible(ui_hidden);
     _toolbar->setVisible(ui_hidden);
+    _view_toolbar->setVisible(ui_hidden);
 
     ui_hidden = !ui_hidden;
     

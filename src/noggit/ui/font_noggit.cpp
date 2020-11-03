@@ -33,34 +33,18 @@ namespace noggit
       {
         painter->save();
         {
-          QWidget* temp_btn = new QWidget();
+          auto temp_btn = new QWidget();
 
           temp_btn->ensurePolished();
 
           QColor color;
-          if (mode == QIcon::Normal)
+          if (state == QIcon::On)
           {
               color = temp_btn->palette().color(QPalette::WindowText);
           }
-          else if (mode == QIcon::Disabled)
-          {
-              color = temp_btn->palette().color(QPalette::ToolTipText);
-          }
-          else if (mode == QIcon::Active)
-          {
-              color = temp_btn->palette().color(QPalette::BrightText);
-          }
-          else if (mode == QIcon::Selected)
-          {
-              color = temp_btn->palette().color(QPalette::Highlight);
-          }
           else if (state == QIcon::Off)
           {
-              color = temp_btn->palette().color(QPalette::ToolTipText);
-          }
-          else if (state == QIcon::On)
-          {
-              color = temp_btn->palette().color(QPalette::Light);
+              color = temp_btn->palette().color(QPalette::Disabled, QPalette::WindowText);
           }
 
           painter->setPen(color);

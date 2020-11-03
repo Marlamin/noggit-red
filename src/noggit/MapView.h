@@ -37,6 +37,13 @@ class World;
 
 namespace noggit
 {
+
+  namespace Red::ViewToolbar::Ui
+  {
+    class ViewToolbar;
+  }
+
+
   class camera;
   namespace ui
   {
@@ -86,6 +93,7 @@ private:
   noggit::camera _camera;
   bool _camera_moved_since_last_draw = true;
 
+public:
   noggit::bool_toggle_property _draw_contour = {false};
   noggit::bool_toggle_property _draw_mfbo = {false};
   noggit::bool_toggle_property _draw_wireframe = {false};
@@ -99,7 +107,6 @@ private:
   noggit::bool_toggle_property _draw_hole_lines = {false};
   noggit::bool_toggle_property _draw_models_with_box = {false};
   noggit::bool_toggle_property _draw_fog = {false};
-public:
   noggit::bool_toggle_property _draw_hidden_models = {false};
 private:
   int _selected_area_id = -1;
@@ -176,6 +183,7 @@ private:
   bool saving_minimap = false;
 
   noggit::ui::toolbar* _toolbar;
+  noggit::Red::ViewToolbar::Ui::ViewToolbar* _view_toolbar;
 
   void save(save_mode mode);
 
