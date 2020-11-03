@@ -33,11 +33,10 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   auto layout = new QHBoxLayout(this);
 
   // Left side
-  auto layout_left = new QFormLayout (this);
+  auto layout_left = new QHBoxLayout(this);
   layout->addLayout(layout_left);
 
   auto scroll_minimap = new QScrollArea(this);
-  scroll_minimap->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
   _minimap_widget = new noggit::ui::minimap_widget(this);
   _minimap_widget->draw_boundaries(true);
@@ -47,21 +46,21 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   scroll_minimap->setAlignment(Qt::AlignCenter);
   scroll_minimap->setWidget(_minimap_widget);
   scroll_minimap->setWidgetResizable(true);
-  scroll_minimap->setMinimumSize(QSize(380, 380));
-  scroll_minimap->setMaximumSize(QSize(704, 704));
 
   // Right side
-
   auto layout_right_holder = new QWidget(this);
   layout_right_holder->setMinimumWidth(300);
-  layout_right_holder->setMaximumWidth(300);
-  auto layout_right = new QVBoxLayout (this);
+  layout_right_holder->setMaximumWidth(550);
+  auto layout_right = new QVBoxLayout (layout_right_holder);
   layout_right_holder->setLayout(layout_right);
   layout->addWidget(layout_right_holder);
 
-  auto layout_selector = new QHBoxLayout(this);
+  auto layout_selector_wgt = new QWidget(layout_right_holder);
+  auto layout_selector = new QHBoxLayout(layout_selector_wgt);
+  layout_selector_wgt->setLayout(layout_selector);
+
   layout_selector->setAlignment(Qt::AlignLeft);
-  layout_right->addItem(layout_selector);
+  layout_right->addWidget(layout_selector_wgt);
 
   _corpse_map_id = new QComboBox(this);
   _corpse_map_id->addItem("None");
@@ -176,7 +175,9 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   map_settings_layout->addRow("Max players:",_max_players);
 
   // Bottom row
-  auto btn_row_layout = new QHBoxLayout(this);
+  auto bottom_row_wgt = new QWidget(layout_right_holder);
+  auto btn_row_layout = new QHBoxLayout(layout_right_holder);
+  bottom_row_wgt->setLayout(btn_row_layout);
   btn_row_layout->setAlignment(Qt::AlignRight);
 
   auto save_btn = new QPushButton("Save", this);
@@ -186,7 +187,7 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   save_btn->setAccessibleName("map_wizard_save_button");
   discard_btn->setAccessibleName("map_wizard_discard_button");
 
-  layout_right->addItem(btn_row_layout);
+  layout_right->addWidget(bottom_row_wgt);
 
   // Connections
 
