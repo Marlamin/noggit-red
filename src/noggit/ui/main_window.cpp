@@ -65,7 +65,8 @@ namespace noggit
       _menuBar = menuBar();
       titleBarWidget.horizontalLayout->insertWidget(1, _menuBar);
       _menuBar->setMaximumHeight(20);
-
+      
+      titleBarWidget.iconButton->setAccessibleName("titlebar_icon");
       titleBarWidget.minimizeButton->setIcon(font_awesome_icon(font_awesome::windowminimize));
       titleBarWidget.minimizeButton->setIconSize(QSize(14, 14));
       titleBarWidget.minimizeButton->setAccessibleName("titlebar_minimize");
