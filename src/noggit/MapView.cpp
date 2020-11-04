@@ -434,7 +434,7 @@ void MapView::createGUI()
     for (auto dock : _tool_properties_docks)
     {
       dock->setFloating(true);
-      dock->move(_main_window->geometry().topRight().x() - dock->rect().width() - 20, _main_window->geometry().topRight().y() + 65);
+      dock->move(_main_window->geometry().topRight().x() - dock->rect().width() - 20, _main_window->geometry().topRight().y() + 80);
     }
   }
 
