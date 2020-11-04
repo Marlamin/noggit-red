@@ -54,7 +54,7 @@ namespace noggit
 
       createBookmarkList();
 
-      
+
       _about = new about(this);
 
       QWidget *widget = new QWidget(this);
@@ -65,7 +65,7 @@ namespace noggit
       _menuBar = menuBar();
       titleBarWidget.horizontalLayout->insertWidget(1, _menuBar);
       _menuBar->setMaximumHeight(20);
-      
+
       titleBarWidget.minimizeButton->setIcon(font_awesome_icon(font_awesome::windowminimize));
       titleBarWidget.minimizeButton->setIconSize(QSize(14, 14));
       titleBarWidget.minimizeButton->setAccessibleName("titlebar_minimize");
@@ -326,10 +326,10 @@ namespace noggit
           }
         );
 
-      auto right_side_holder = new QWidget(this);
       auto right_side = new QTabWidget(this);
 
       auto minimap_holder = new QWidget(this);
+      minimap_holder->setContentsMargins(0, 0, 0, 0);
       auto minimap_holder_layout = new QHBoxLayout(this);
       minimap_holder->setLayout(minimap_holder_layout);
       minimap_holder_layout->addWidget(_minimap);
@@ -339,9 +339,7 @@ namespace noggit
       _map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard(this);
       right_side->addTab(_map_creation_wizard, "Edit map");
 
-      right_side_holder->setLayout(new QHBoxLayout(right_side_holder));
-      right_side_holder->layout()->addWidget(right_side);
-      layout->addWidget(right_side_holder);
+      layout->addWidget(right_side);
 
       setCentralWidget (widget);
 
