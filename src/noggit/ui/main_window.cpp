@@ -44,6 +44,7 @@ namespace noggit
       : QMainWindow (nullptr)
       , _null_widget (new QWidget (this))
     {
+
       std::stringstream title;
       title << "Noggit - " << STRPRODUCTVER;
       setWindowTitle (QString::fromStdString (title.str()));
@@ -62,7 +63,6 @@ namespace noggit
       _settings = new settings(this);
 
       _menuBar = menuBar();
-      _menuBar->setNativeMenuBar(false);
       titleBarWidget.horizontalLayout->insertWidget(1, _menuBar);
       _menuBar->setMaximumHeight(20);
       
@@ -326,8 +326,8 @@ namespace noggit
           }
         );
 
+      auto right_side_holder = new QWidget(this);
       auto right_side = new QTabWidget(this);
-      right_side->setDocumentMode(true);
 
       auto minimap_holder = new QWidget(this);
       auto minimap_holder_layout = new QHBoxLayout(this);
@@ -339,7 +339,9 @@ namespace noggit
       _map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard(this);
       right_side->addTab(_map_creation_wizard, "Edit map");
 
-      layout->addWidget(right_side);
+      right_side_holder->setLayout(new QHBoxLayout(right_side_holder));
+      right_side_holder->layout()->addWidget(right_side);
+      layout->addWidget(right_side_holder);
 
       setCentralWidget (widget);
 
