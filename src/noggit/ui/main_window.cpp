@@ -59,7 +59,7 @@ namespace noggit
       Ui::TitleBar titleBarWidget;
       titleBarWidget.setupUi(widget);
 
-      _menuBar = new QMenuBar(nullptr);
+      _menuBar = menuBar();
       _menuBar->setNativeMenuBar(false);
       titleBarWidget.horizontalLayout->insertWidget(1, _menuBar);
       _menuBar->setMaximumHeight(20);
