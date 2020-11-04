@@ -186,6 +186,7 @@ if (USE_SQL)
 endif()
 
 add_subdirectory (src/external/qt-color-widgets)
+add_subdirectory (src/external/framelesshelper)
 
 # Add the found include directories to our include list.
 include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/include/")
@@ -220,6 +221,7 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libpng" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libtxc_dxtn" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/pngpp" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/zlib" )
+include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 COLLECT_FILES(false noggit_root_sources src/noggit .cpp)
 COLLECT_FILES(true noggit_ui_sources src/noggit/ui .cpp)
@@ -315,6 +317,7 @@ TARGET_LINK_LIBRARIES (noggit
   Qt5::OpenGL
   Qt5::OpenGLExtensions
   ColorWidgets-qt5
+  FramelessHelper
 )
 
 set (_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")

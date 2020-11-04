@@ -18,6 +18,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread/thread.hpp>
 
+#include <external/framelesshelper/framelesswindowsmanager.h>
+
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
@@ -287,6 +289,8 @@ Noggit::Noggit(int argc, char *argv[])
 
 
   main_window = std::make_unique<noggit::ui::main_window>();
+
+  FramelessWindowsManager::addWindow(main_window.get());
 
   if (fullscreen)
   {
