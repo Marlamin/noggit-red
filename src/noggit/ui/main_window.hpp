@@ -4,7 +4,7 @@
 #include <math/trig.hpp>
 #include <noggit/World.h>
 #include <noggit/ui/uid_fix_window.hpp>
-#include <noggit/Red/MapCreationWizard/UI/MapCreationWizard.hpp>
+#include <noggit/Red/MapCreationWizard/Ui/MapCreationWizard.hpp>
 
 #include <QtWidgets/QMainWindow>
 
