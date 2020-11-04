@@ -4,6 +4,7 @@
 #include <math/trig.hpp>
 #include <noggit/World.h>
 #include <noggit/ui/uid_fix_window.hpp>
+#include <noggit/Red/MapCreationWizard/UI/MapCreationWizard.hpp>
 
 #include <QtWidgets/QMainWindow>
 
@@ -77,6 +78,7 @@ namespace noggit
       settings* _settings;
       about* _about;
       QWidget* _null_widget;
+      noggit::Red::MapCreationWizard::Ui::MapCreationWizard* _map_creation_wizard;
 
       std::unique_ptr<World> _world;
 

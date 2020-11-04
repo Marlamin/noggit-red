@@ -61,7 +61,7 @@ namespace noggit
       void reset_selection();
 
     private:
-      World const* _world;
+      World* _world;
       noggit::camera* _camera;
       std::array<bool, 4096>* _selected_tiles;
 

@@ -20,8 +20,8 @@
 
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/widget.hpp>
+#include <noggit/World.h>
 
-class World;
 
 namespace noggit
 {
@@ -78,7 +78,10 @@ namespace noggit
     {
     public:
       MapCreationWizard(QWidget *parent = nullptr);
+      ~MapCreationWizard();
+
       void wheelEvent(QWheelEvent *event) override;
+      void destroyFakeWorld() { if(_world) delete _world; _world = nullptr; _minimap_widget->world (nullptr); };
 
     private:
       ui::minimap_widget* _minimap_widget;
@@ -108,10 +111,12 @@ namespace noggit
       QSpinBox* _raid_offset;
       QSpinBox* _max_players;
 
-      std::unique_ptr<World> _world;
+      World* _world = nullptr;
 
       bool _is_new_record = false;
       int _cur_map_id = 0;
+
+      QMetaObject::Connection _connection;
 
       void selectMap(int map_id);
 

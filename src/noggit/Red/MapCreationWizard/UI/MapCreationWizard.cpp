@@ -203,11 +203,12 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
 
       });
 
-  connect(reinterpret_cast<noggit::ui::main_window*>(parent), QOverload<int>::of(&noggit::ui::main_window::map_selected)
-      , [&] (int index)
-            {
-              selectMap(index);
-            }
+  _connection = connect(reinterpret_cast<noggit::ui::main_window*>(parent),
+                        QOverload<int>::of(&noggit::ui::main_window::map_selected)
+                        , [&] (int index)
+                              {
+                                selectMap(index);
+                              }
   );
 
   // Selection
@@ -269,8 +270,13 @@ void MapCreationWizard::selectMap(int map_id)
   DBCFile::Record record = gMapDB.getByID(map_id);
   _cur_map_id = map_id;
 
-  _world = std::make_unique<World>(record.getString(MapDB::InternalName), map_id);
-  _minimap_widget->world(_world.get());
+  if (_world)
+  {
+    delete _world;
+  }
+
+  _world = new World(record.getString(MapDB::InternalName), map_id);
+  _minimap_widget->world(_world);
 
   _directory->setText(record.getString(1));
   _instance_type->setCurrentIndex(record.getInt(2));
@@ -330,7 +336,7 @@ void MapCreationWizard::wheelEvent(QWheelEvent* event)
 void MapCreationWizard::saveCurrentEntry()
 {
   // Save ADTs to disk
-  _world->mapIndex.saveChanged(_world.get(), true);
+  _world->mapIndex.saveChanged(_world, true);
   _world->mapIndex.save();
 
   // Save Map.dbc record
@@ -360,6 +366,12 @@ void MapCreationWizard::saveCurrentEntry()
 void MapCreationWizard::discardChanges()
 {
 
+}
+
+MapCreationWizard::~MapCreationWizard()
+{
+  delete _world;
+  disconnect(_connection);
 }
 
 

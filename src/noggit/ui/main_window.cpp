@@ -141,6 +141,8 @@ namespace noggit
                                  , bool from_bookmark
                                  )
     {
+      _map_creation_wizard->destroyFakeWorld();
+      delete _map_creation_wizard;
       auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix, from_bookmark));
       connect(mapview, &MapView::uid_fix_failed, [this]() { prompt_uid_fix_failure(); });
 
@@ -151,8 +153,6 @@ namespace noggit
 
     void main_window::loadMap(int mapID)
     {
-      emit map_selected(mapID);
-
       _minimap->world (nullptr);
 
       _world.reset();
@@ -163,6 +163,7 @@ namespace noggit
         {
           _world = std::make_unique<World> (it->getString(MapDB::InternalName), mapID);
           _minimap->world (_world.get());
+          emit map_selected(mapID);
 
           return;
         }
@@ -276,13 +277,12 @@ namespace noggit
       minimap_holder_layout->setAlignment(Qt::AlignCenter);
       right_side->addTab(minimap_holder, "Enter map");
 
-      auto map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard(this);
-      right_side->addTab(map_creation_wizard, "Edit map");
+      _map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard(this);
+      right_side->addTab(_map_creation_wizard, "Edit map");
 
       layout->addWidget(right_side);
 
       setCentralWidget (widget);
-
 
       _minimap->adjustSize();
     }
