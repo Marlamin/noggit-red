@@ -105,6 +105,12 @@ namespace noggit
       };
     };
 
+    class font_noggit_button_style : public QWidget
+    {
+    public:
+      font_noggit_button_style(QWidget* parent = nullptr) : QWidget(parent) {};
+    };
+
     class font_noggit_icon : public QIcon
     {
     public:

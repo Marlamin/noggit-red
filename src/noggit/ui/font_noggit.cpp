@@ -33,7 +33,7 @@ namespace noggit
       {
         painter->save();
         {
-          auto temp_btn = new QWidget();
+          auto temp_btn = new font_noggit_button_style();
 
           temp_btn->ensurePolished();
 
