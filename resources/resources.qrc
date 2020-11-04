@@ -7,6 +7,14 @@
     <qresource prefix="/">
         <file alias="icon">../media/noggit_icon.png</file>
         <file alias="splash">../media/splash.png</file>
+        <file>../media/button_minimize_black.svg</file>
+        <file>../media/button_minimize_white.svg</file>
+        <file>../media/button_maximize_black.svg</file>
+        <file>../media/button_maximize_white.svg</file>
+        <file>../media/button_restore_black.svg</file>
+        <file>../media/button_restore_white.svg</file>
+        <file>../media/button_close_black.svg</file>
+        <file>../media/button_close_white.svg</file>
     </qresource>
     <qresource prefix="/shader">
       <file alias="m2_vs">../src/glsl/m2_vert.glsl</file>

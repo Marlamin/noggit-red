@@ -75,6 +75,10 @@
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
      </property>
+     <property name="icon">
+      <iconset resource="./resources/resources.qrc">
+       <normaloff>:icon</normaloff>:icon</iconset>
+     </property>
      <property name="iconSize">
       <size>
        <width>24</width>
@@ -146,8 +150,8 @@
       <string>Minimize</string>
      </property>
      <property name="icon">
-      <iconset resource="../images.qrc">
-       <normaloff>:/images/button_minimize_black.svg</normaloff>:/images/button_minimize_black.svg</iconset>
+      <iconset resource="./resources/resources.qrc">
+       <normaloff>:./media/button_minimize_black.svg</normaloff>:./media/button_minimize_black.svg</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -187,9 +191,9 @@
       <string>Maximize</string>
      </property>
      <property name="icon">
-      <iconset resource="../images.qrc">
-       <normaloff>:/images/button_maximize_black.svg</normaloff>
-       <normalon>:/images/button_restore_black.svg</normalon>:/images/button_maximize_black.svg</iconset>
+      <iconset resource="./resources/resources.qrc">
+       <normaloff>:./media/button_maximize_black.svg</normaloff>
+       <normalon>:./media/button_restore_black.svg</normalon>:./media/button_maximize_black.svg</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -232,8 +236,8 @@
       <string>Close</string>
      </property>
      <property name="icon">
-      <iconset resource="../images.qrc">
-       <normaloff>:/images/button_close_black.svg</normaloff>:/images/button_close_black.svg</iconset>
+      <iconset resource="./resources/resources.qrc">
+       <normaloff>:./media/button_close_black.svg</normaloff>:./media/button_close_black.svg</iconset>
      </property>
      <property name="iconSize">
       <size>
@@ -247,7 +251,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="../images.qrc"/>
+  <include location="./resources/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

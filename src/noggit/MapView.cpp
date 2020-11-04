@@ -470,19 +470,19 @@ void MapView::createGUI()
   _main_window->addToolBar(Qt::TopToolBarArea, _view_toolbar);
   connect (this, &QObject::destroyed, _view_toolbar, &QObject::deleteLater);
 
-  auto file_menu (_main_window->menuBar()->addMenu ("Editor"));
+  auto file_menu (_main_window->_menuBar->addMenu ("Editor"));
   connect (this, &QObject::destroyed, file_menu, &QObject::deleteLater);
 
-  auto edit_menu (_main_window->menuBar()->addMenu ("Edit"));
+  auto edit_menu (_main_window->_menuBar->addMenu ("Edit"));
   connect (this, &QObject::destroyed, edit_menu, &QObject::deleteLater);
 
-  auto assist_menu (_main_window->menuBar()->addMenu ("Assist"));
+  auto assist_menu (_main_window->_menuBar->addMenu ("Assist"));
   connect (this, &QObject::destroyed, assist_menu, &QObject::deleteLater);
 
-  auto view_menu (_main_window->menuBar()->addMenu ("View"));
+  auto view_menu (_main_window->_menuBar->addMenu ("View"));
   connect (this, &QObject::destroyed, view_menu, &QObject::deleteLater);
 
-  auto help_menu (_main_window->menuBar()->addMenu ("Help"));
+  auto help_menu (_main_window->_menuBar->addMenu ("Help"));
   connect (this, &QObject::destroyed, help_menu, &QObject::deleteLater);
 
 #define ADD_ACTION(menu, name, shortcut, on_action)               \

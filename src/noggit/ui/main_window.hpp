@@ -28,6 +28,7 @@ namespace noggit
 
       void prompt_exit(QCloseEvent* event);
       void prompt_uid_fix_failure();
+      QMenuBar* _menuBar;
 
       std::unordered_set<QWidget*> displayed_widgets;
 

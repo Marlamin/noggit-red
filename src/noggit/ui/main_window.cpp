@@ -32,6 +32,8 @@
 
 #include "revision.h"
 
+#include "ui_TitleBar.h"
+#include <external/framelesshelper/framelesswindowsmanager.h>
 
 namespace noggit
 {
@@ -53,7 +55,45 @@ namespace noggit
       _settings = new settings(this);
       _about = new about(this);
 
-      auto file_menu (menuBar()->addMenu ("&Noggit"));
+      QWidget *widget = new QWidget(this);
+      Ui::TitleBar titleBarWidget;
+      titleBarWidget.setupUi(widget);
+
+      _menuBar = new QMenuBar(nullptr);
+      _menuBar->setNativeMenuBar(false);
+      titleBarWidget.horizontalLayout->insertWidget(1, _menuBar);
+      _menuBar->setMaximumHeight(20);
+
+      setMenuWidget(widget);
+
+      QObject::connect(this,
+                       &QMainWindow::windowTitleChanged,
+                       titleBarWidget.titleLabel,
+                       &QLabel::setText);
+
+      QObject::connect(titleBarWidget.closeButton,
+                       &QPushButton::clicked,
+                       this,
+                       &QMainWindow::close);
+
+      QObject::connect(titleBarWidget.minimizeButton,
+                       &QPushButton::clicked,
+                       this,
+                       &QMainWindow::showMinimized);
+
+      QObject::connect(titleBarWidget.maximizeButton,
+                       &QPushButton::clicked,
+                       [this, titleBarWidget]() {
+                         if (this->isMaximized()) {
+                           this->showNormal();
+                           titleBarWidget.maximizeButton->setToolTip(QObject::tr("Maximize"));
+                         } else {
+                           this->showMaximized();
+                           titleBarWidget.maximizeButton->setToolTip(QObject::tr("Restore"));
+                         }
+                       });
+
+      auto file_menu (_menuBar->addMenu ("&Noggit"));
 
       auto settings_action (file_menu->addAction ("Settings"));
       QObject::connect ( settings_action, &QAction::triggered
@@ -78,6 +118,14 @@ namespace noggit
                             close();
                          }
                        );
+
+      FramelessWindowsManager::addIgnoreObject(this, _menuBar);
+      FramelessWindowsManager::addIgnoreObject(this, titleBarWidget.minimizeButton);
+      FramelessWindowsManager::addIgnoreObject(this, titleBarWidget.maximizeButton);
+      FramelessWindowsManager::addIgnoreObject(this, titleBarWidget.closeButton);
+
+      FramelessWindowsManager::setResizable(this, true);
+      FramelessWindowsManager::setMinimumSize(this, {1280, 720});
 
       build_menu();
     }
