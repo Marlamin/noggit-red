@@ -976,7 +976,7 @@ namespace noggit
     class font_awesome_button_style : public QWidget
     {
     public:
-      font_awesome_button_style(QWidget* parent = nullptr) : QWidget(parent) {};
+        font_awesome_button_style(QWidget* parent = nullptr) : QWidget(parent) { setAccessibleName("font_noggit_button_style");};
     };
 
     class font_awesome_icon : public QIcon

@@ -108,7 +108,7 @@ namespace noggit
     class font_noggit_button_style : public QWidget
     {
     public:
-      font_noggit_button_style(QWidget* parent = nullptr) : QWidget(parent) {};
+        font_noggit_button_style(QWidget* parent = nullptr) : QWidget(parent) { setAccessibleName("font_noggit_button_style"); };
     };
 
     class font_noggit_icon : public QIcon

@@ -10,32 +10,7 @@
     <height>26</height>
    </rect>
   </property>
-  <property name="styleSheet">
-   <string notr="true">#iconButton, #minimizeButton, #maximizeButton, #closeButton {
-  background-color: transparent;
-  border-radius: 0px;
-}
 
-#minimizeButton:hover, #maximizeButton:hover {
-  border-style: none;
-  background-color: #80c7c7c7;
-}
-
-#minimizeButton:pressed, #maximizeButton:pressed {
-  border-style: none;
-  background-color: #80808080;
-}
-
-#closeButton:hover {
-  border-style: none;
-  background-color: #e81123;
-}
-
-#closeButton:pressed {
-  border-style: none;
-  background-color: #8c0a15;
-}</string>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
     <number>0</number>
@@ -200,9 +175,6 @@
        <width>45</width>
        <height>30</height>
       </size>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
      </property>
     </widget>
    </item>

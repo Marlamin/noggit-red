@@ -11,6 +11,7 @@
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/uid_storage.hpp>
 #include <noggit/Red/MapCreationWizard/Ui/MapCreationWizard.hpp>
+#include <noggit/ui/font_awesome.hpp>
 
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
@@ -52,18 +53,28 @@ namespace noggit
 
       createBookmarkList();
 
-      _settings = new settings(this);
+      
       _about = new about(this);
 
       QWidget *widget = new QWidget(this);
       Ui::TitleBar titleBarWidget;
       titleBarWidget.setupUi(widget);
+      _settings = new settings(this);
 
       _menuBar = menuBar();
       _menuBar->setNativeMenuBar(false);
       titleBarWidget.horizontalLayout->insertWidget(1, _menuBar);
       _menuBar->setMaximumHeight(20);
-
+      
+      titleBarWidget.minimizeButton->setIcon(font_awesome_icon(font_awesome::windowminimize));
+      titleBarWidget.minimizeButton->setIconSize(QSize(14, 14));
+      titleBarWidget.minimizeButton->setAccessibleName("titlebar_minimize");
+      titleBarWidget.maximizeButton->setIcon(font_awesome_icon(font_awesome::windowrestore));
+      titleBarWidget.maximizeButton->setAccessibleName("titlebar_maximize");
+      titleBarWidget.maximizeButton->setIconSize(QSize(14, 14));
+      titleBarWidget.closeButton->setIcon(font_awesome_icon(font_awesome::times));
+      titleBarWidget.closeButton->setAccessibleName("titlebar_close");
+      titleBarWidget.closeButton->setIconSize(QSize(16, 16));
       setMenuWidget(widget);
 
       QObject::connect(this,
