@@ -52,7 +52,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <property name="tabBarAutoHide">
       <bool>false</bool>
@@ -106,7 +106,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton">
+                   <widget class="QPushButton" name="gamePathField_browse">
                     <property name="text">
                      <string>Browse</string>
                     </property>
@@ -133,7 +133,7 @@
                    <widget class="QLineEdit" name="projectPathField"/>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_2">
+                   <widget class="QPushButton" name="projectPathField_browse">
                     <property name="text">
                      <string>Browse</string>
                     </property>
@@ -160,7 +160,7 @@
                    <widget class="QLineEdit" name="importPathField"/>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_3">
+                   <widget class="QPushButton" name="importPathField_browse">
                     <property name="text">
                      <string>Browse</string>
                     </property>
@@ -187,7 +187,7 @@
                    <widget class="QLineEdit" name="wmvLogPathField"/>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_4">
+                   <widget class="QPushButton" name="wmvLogPathField_browse">
                     <property name="text">
                      <string>Browse</string>
                     </property>
@@ -1256,14 +1256,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_6">
+      <widget class="QPushButton" name="saveButton">
        <property name="text">
         <string>Save</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_5">
+      <widget class="QPushButton" name="discardButton">
        <property name="text">
         <string>Discard</string>
        </property>
