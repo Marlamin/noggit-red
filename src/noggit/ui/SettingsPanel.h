@@ -15,21 +15,6 @@
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QComboBox>
 
-namespace util
-{
-  struct file_line_edit : public QWidget
-  {
-    enum mode
-    {
-      files,
-      directories,
-    };
-
-    file_line_edit (mode, QString browse_title, QWidget* parent);
-
-    QLineEdit* actual;
-  };
-}
 
 namespace noggit
 {

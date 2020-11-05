@@ -26,38 +26,6 @@
 
 namespace util
 {
-  file_line_edit::file_line_edit (mode m, QString browse_title, QWidget* parent)
-    : QWidget (parent)
-  {
-    new QHBoxLayout (this);
-    layout()->setContentsMargins (0, 0, 0, 0);
-
-    layout()->addWidget (actual = new QLineEdit);
-    auto button (new QPushButton ("Browse…", this));
-    layout()->addWidget (button);
-
-    connect ( button, &QPushButton::clicked
-            , [=]
-              {
-                auto result
-                  ( m == files
-                  ? QFileDialog::getOpenFileName
-                      (nullptr, browse_title, actual->text())
-                  : QFileDialog::getExistingDirectory
-                      (nullptr, browse_title, actual->text())
-                  );
-                if (!result.isNull())
-                {
-                  if (m == directories && !(result.endsWith ("/") || result.endsWith ("\\")))
-                  {
-                    result += "/";
-                  }
-                  actual->setText (result);
-                }
-              }
-            );
-  }
-}
 
 namespace noggit
 {
@@ -70,37 +38,107 @@ namespace noggit
       Ui::SettingsPanel SettingsPanelUi;
       SettingsPanelUi.setupUi(this);
 
-      auto browse_row
-        ( [&] (util::file_line_edit** line, char const* title, QString const& key, util::file_line_edit::mode mode)
-          {
-            layout->addRow
-              ( title
-              , *line = new util::file_line_edit (mode, title, this)
-              );
-            connect ( (*line)->actual, &QLineEdit::textChanged
-                    , [&, key] (QString value)
-                      {
-                        _settings->setValue (key, value);
-                      }
-                    );
-          }
-        );
-
       connect(SettingsPanelUi.gamePathField, &QLineEdit::textChanged
-            , [&, key](QString value)
+            , [&](QString value)
             {
-              _settings->setValue(key, value);
+              _settings->setValue("project/game_path", value);
             }
           );
 
 
-#ifdef USE_MYSQL_UID_STORAGE
+      connect ( SettingsPanelUi.gamePathFieldBrowse, &QPushButton::clicked
+          , [=]
+          {
+            auto result(QFileDialog::getExistingDirectory(
+                nullptr, "WoW Client Path", SettingsPanelUi.gamePathField->text()));
 
-#else
-      
-#endif
+            if (!result.isNull())
+            {
+              if (!(result.endsWith ("/") || result.endsWith ("\\")))
+              {
+                result += "/";
+              }
 
-      _theme->addItem("System");
+              SettingsPanelUi.gamePathField->setText(result);
+            }
+          }
+      );
+
+      connect(SettingsPanelUi.projectPathField, &QLineEdit::textChanged
+          , [&](QString value)
+              {
+                _settings->setValue("project/path", value);
+              }
+      );
+
+
+      connect ( SettingsPanelUi.projectPathFieldBrowse, &QPushButton::clicked
+          , [=]
+                {
+                  auto result(QFileDialog::getExistingDirectory(
+                      nullptr, "Project Path", SettingsPanelUi.projectPathField->text()));
+
+                  if (!result.isNull())
+                  {
+                    if (!(result.endsWith ("/") || result.endsWith ("\\")))
+                    {
+                      result += "/";
+                    }
+
+                    SettingsPanelUi.projectPathField->setText(result);
+                  }
+                }
+      );
+
+      connect(SettingsPanelUi.importPathField, &QLineEdit::textChanged
+          , [&](QString value)
+              {
+                _settings->setValue("project/import_file", value);
+              }
+      );
+
+
+      connect ( SettingsPanelUi.importPathFieldBrowse, &QPushButton::clicked
+          , [=]
+                {
+                  auto result(QFileDialog::getOpenFileName(
+                      nullptr, "Import File Path", SettingsPanelUi.importPathField->text()));
+
+                  if (!result.isNull())
+                  {
+                    SettingsPanelUi.importPathField->setText(result);
+                  }
+                }
+      );
+
+      connect(SettingsPanelUi.wmvLogPathField, &QLineEdit::textChanged
+          , [&](QString value)
+              {
+                _settings->setValue("project/import_file", value);
+              }
+      );
+
+
+      connect ( SettingsPanelUi.wmvLogPathFieldBrowse, &QPushButton::clicked
+          , [=]
+                {
+                  auto result(QFileDialog::getOpenFileName(
+                      nullptr, "WMV Log Path", SettingsPanelUi.wmvLogPathField->text()));
+
+                  if (!result.isNull())
+                  {
+                    SettingsPanelUi.wmvLogPathField->setText(result);
+                  }
+                }
+      );
+
+
+      #ifdef USE_MYSQL_UID_STORAGE
+        SettingsPanelUi.MySQL_box->setEnabled(true);
+        SettingsPanelUi.mysql_warning->setVisible(false);
+      #endif
+
+      SettingsPanelUi._theme->addItem("System");
 
       QDir theme_dir = QDir("./themes/");
       if (theme_dir.exists())
@@ -109,7 +147,7 @@ namespace noggit
         {
           if (QDir(theme_dir.path() + "/" + dir).exists("theme.qss"))
           {
-            _theme->addItem(dir);
+            SettingsPanelUi._theme->addItem(dir);
           }
         }
       }
@@ -118,7 +156,7 @@ namespace noggit
         LogError << "Failed to load themes. The \"themes/\" folder does not exist in Noggit directory. Using system theme." << std::endl;
       }
 
-      connect ( _theme, &QComboBox::currentTextChanged
+      connect ( SettingsPanelUi._theme, &QComboBox::currentTextChanged
           , [&] (QString s)
                 {
                   if (s == "System")
@@ -135,10 +173,10 @@ namespace noggit
                   }
                 }
       );
-     
-      _wireframe_color->setColor(Qt::white);
 
-      connect ( buttonBox, &QDialogButtonBox::accepted
+      SettingsPanelUi._wireframe_color->setColor(Qt::white);
+
+      connect ( SettingsPanelUi.saveButton, &QPushButton::clicked
               , [this]
                 {
                   hide();
@@ -146,7 +184,7 @@ namespace noggit
                 }
               );
 
-      connect ( buttonBox, &QDialogButtonBox::rejected
+      connect ( SettingsPanelUi.discardButton, &QPushButton::clicked
               , [this]
                 {
                   hide();
