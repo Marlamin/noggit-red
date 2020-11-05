@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>418</width>
-    <height>560</height>
+    <height>552</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -52,7 +52,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>3</number>
      </property>
      <property name="tabBarAutoHide">
       <bool>false</bool>
@@ -86,7 +86,7 @@
                    <widget class="QLabel" name="label">
                     <property name="minimumSize">
                      <size>
-                      <width>75</width>
+                      <width>90</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -120,7 +120,7 @@
                    <widget class="QLabel" name="label_2">
                     <property name="minimumSize">
                      <size>
-                      <width>75</width>
+                      <width>90</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -147,7 +147,7 @@
                    <widget class="QLabel" name="label_3">
                     <property name="minimumSize">
                      <size>
-                      <width>75</width>
+                      <width>90</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -174,7 +174,7 @@
                    <widget class="QLabel" name="label_4">
                     <property name="minimumSize">
                      <size>
-                      <width>75</width>
+                      <width>90</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -302,9 +302,6 @@
                   </item>
                   <item>
                    <widget class="QRadioButton" name="radio_wire_cursor">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
                     <property name="text">
                      <string>Around cursor</string>
                     </property>
@@ -360,7 +357,7 @@
                    <widget class="QDoubleSpinBox" name="_wireframe_radius">
                     <property name="minimumSize">
                      <size>
-                      <width>60</width>
+                      <width>100</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -422,7 +419,7 @@
                    <widget class="QDoubleSpinBox" name="_wireframe_width">
                     <property name="minimumSize">
                      <size>
-                      <width>60</width>
+                      <width>100</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -481,7 +478,7 @@
                    <widget class="color_widgets::ColorSelector" name="_wireframe_color" native="true">
                     <property name="minimumSize">
                      <size>
-                      <width>60</width>
+                      <width>100</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -1141,6 +1138,12 @@
            <property name="title">
             <string>MySQL</string>
            </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="flat">
+            <bool>false</bool>
+           </property>
            <property name="checkable">
             <bool>false</bool>
            </property>
@@ -1230,7 +1233,7 @@
               <item>
                <widget class="QLabel" name="mysql_warning">
                 <property name="text">
-                 <string>Your noggit was built without MySQLl, you can't use this feature.</string>
+                 <string>Your noggit was built without MySQL, you can't use this feature.</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
