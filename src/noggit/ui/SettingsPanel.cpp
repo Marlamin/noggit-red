@@ -19,6 +19,8 @@
 #include <QDir>
 #include <QApplication>
 
+#include <ui_SettingsPanel.h>
+
 
 #include <algorithm>
 
@@ -65,10 +67,8 @@ namespace noggit
       : QDialog (parent)
       , _settings (new QSettings (this))
     {
-      setWindowIcon (QIcon (":/icon"));
-      setWindowTitle ("Settings");
-
-      auto layout (new QFormLayout (this));
+      Ui::SettingsPanel SettingsPanelUi;
+      SettingsPanelUi.setupUi(this);
 
       auto browse_row
         ( [&] (util::file_line_edit** line, char const* title, QString const& key, util::file_line_edit::mode mode)
@@ -86,36 +86,20 @@ namespace noggit
           }
         );
 
+      connect(SettingsPanelUi.gamePathField, &QLineEdit::textChanged
+            , [&, key](QString value)
+            {
+              _settings->setValue(key, value);
+            }
+          );
 
-      browse_row (&gamePathField, "Game Path", "project/game_path", util::file_line_edit::directories);
-      browse_row (&projectPathField, "Project Path", "project/path", util::file_line_edit::directories);
-      browse_row (&importPathField, "Import Path", "project/import_file", util::file_line_edit::files);
-      browse_row (&wmvLogPathField, "WMV Log Path", "project/wmv_log_file", util::file_line_edit::files);
-      _mysql_box = new QGroupBox ("MySQL (uid storage)", this);
-      _mysql_box->setToolTip ("Store the maps' max model unique id (uid) in a mysql database to sync your uids with different computers/users to avoid duplications");
-      auto mysql_layout (new QFormLayout (_mysql_box));
 
 #ifdef USE_MYSQL_UID_STORAGE
-      mysql_box->setCheckable (true);
 
-      _mysql_server_field = new QLineEdit(_settings->value("project/mysql/server").toString(), this);
-      _mysql_user_field = new QLineEdit(_settings->value("project/mysql/user").toString(), this);
-      _mysql_pwd_field = new QLineEdit(_settings->value("project/mysql/pwd").toString(), this);
-      _mysql_db_field = new QLineEdit(_settings->value("project/mysql/db").toString(), this);
-
-      mysql_layout->addRow("Server", _mysql_server_field);
-      mysql_layout->addRow("User", _mysql_user_field);
-      mysql_layout->addRow("Password", _mysql_pwd_field);
-      mysql_layout->addRow("Database", _mysql_db_field);
 #else
-      mysql_layout->addRow (new QLabel ("Your noggit wasn't build with mysql, you can't use this feature"));
+      
 #endif
 
-      layout->addRow (_mysql_box);
-
-      auto theme_box (new QGroupBox ("Theme", this));
-      auto theme_layout (new QFormLayout (theme_box));
-      _theme = new QComboBox(this);
       _theme->addItem("System");
 
       QDir theme_dir = QDir("./themes/");
@@ -151,99 +135,8 @@ namespace noggit
                   }
                 }
       );
-
-      theme_layout->addRow("Theme", _theme);
-
-      layout->addRow (theme_box);
-
-      auto wireframe_box (new QGroupBox ("Wireframe", this));
-      auto wireframe_layout (new QFormLayout (wireframe_box));
-
-      _wireframe_type_group = new QButtonGroup (wireframe_box);
-
-      auto radio_wire_full (new QRadioButton ("Full wireframe"));
-      auto radio_wire_cursor (new QRadioButton ("Around cursor"));
-
-      _wireframe_type_group->addButton (radio_wire_full, 0);
-      _wireframe_type_group->addButton (radio_wire_cursor, 1);     
-
-      wireframe_layout->addRow (new QLabel ("Type:"));
-      wireframe_layout->addRow (radio_wire_full);
-      wireframe_layout->addRow (radio_wire_cursor);
-
-      _wireframe_radius = new QDoubleSpinBox (wireframe_box);
-      _wireframe_radius->setRange (1.0, 100.0);
-
-      wireframe_layout->addRow ("Radius", _wireframe_radius);
-      wireframe_layout->addRow (new QLabel ("(real radius = cursor radius * wireframe radius)"));
-
-      _wireframe_width = new QDoubleSpinBox (wireframe_box);
-      _wireframe_width->setRange (0.0, 10.0);
-      _wireframe_width->setSingleStep(0.1);
-      wireframe_layout->addRow ("Width", _wireframe_width);
-
-      
-      wireframe_layout->addRow ("Color", _wireframe_color = new color_widgets::ColorSelector (wireframe_box));
+     
       _wireframe_color->setColor(Qt::white);
-      layout->addRow (wireframe_box);
-
-      
-      layout->addRow ("VSync", _vsync_cb = new QCheckBox (this));
-      layout->addRow ("Anti Aliasing", _anti_aliasing_cb = new QCheckBox(this));
-      layout->addRow ("Fullscreen", _fullscreen_cb = new QCheckBox(this));
-      _vsync_cb->setToolTip("Requires restart");
-      _anti_aliasing_cb->setToolTip("Requires restart");
-      _fullscreen_cb->setToolTip("Requires restart");
-
-      layout->addRow ( "View Distance"
-                     , viewDistanceField = new QDoubleSpinBox
-                     );
-      viewDistanceField->setRange (0.f, 1048576.f);      
-
-      layout->addRow ( "FarZ"
-                     , farZField = new QDoubleSpinBox
-                     );
-      farZField->setRange (0.f, 1048576.f);
-
-      layout->addRow ( "Adt unloading distance (in adt)", _adt_unload_dist = new QSpinBox(this));
-      _adt_unload_dist->setRange(1, 64);
-
-      layout->addRow ("Adt unloading check interval (sec)", _adt_unload_check_interval = new QSpinBox(this));
-      _adt_unload_check_interval->setMinimum(1);
-
-      layout->addRow ("Always check for max UID", _uid_cb = new QCheckBox(this));
-
-      layout->addRow ("Tablet support", tabletModeCheck = new QCheckBox(this));
-
-      layout->addRow("Undock tool properties", _undock_tool_properties = new QCheckBox(this));
-      layout->addRow("Undock quick access texture palette", _undock_small_texture_palette = new QCheckBox(this));
-
-      layout->addRow("Additional file loading log", _additional_file_loading_log = new QCheckBox(this));
-
-      auto warning (new QWidget (this));
-      
-      (new QHBoxLayout (warning))->setAlignment(Qt::AlignHCenter);
-
-      warning->layout()->addWidget
-        (new QLabel ("Changes may not take effect until next launch", warning));      
-
-      warning->setStyleSheet(
-          "QLabel { \n "
-          "  font-size: 14px; \n "
-          "  font-weight: bold; \n "
-          "  margin-top: 8px; \n "
-          "  margin-bottom: 4px; \n "
-          "  position: center; \n "
-          "} \n ");
-
-      layout->addRow (warning);
-
-      auto buttonBox ( new QDialogButtonBox ( QDialogButtonBox::Save
-                                            | QDialogButtonBox::Cancel
-                                            )
-                     );
-
-      layout->addRow (buttonBox);
 
       connect ( buttonBox, &QDialogButtonBox::accepted
               , [this]
