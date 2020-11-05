@@ -54,7 +54,6 @@ namespace noggit
 
       createBookmarkList();
 
-
       _about = new about(this);
 
       QWidget *widget = new QWidget(this);
@@ -107,7 +106,7 @@ namespace noggit
                          }
                        });
 
-      auto file_menu (_menuBar->addMenu ("&Noggit"));
+      auto file_menu (_menuBar->addMenu ("&Editor"));
 
       auto settings_action (file_menu->addAction ("Settings"));
       QObject::connect ( settings_action, &QAction::triggered
@@ -140,6 +139,25 @@ namespace noggit
 
       FramelessWindowsManager::setResizable(this, true);
       FramelessWindowsManager::setMinimumSize(this, {1280, 720});
+
+      _continents_table = new QListWidget (widget);
+      _dungeons_table = new QListWidget (widget);
+      _raids_table = new QListWidget (widget);
+      _battlegrounds_table = new QListWidget (widget);
+      _arenas_table = new QListWidget (widget);
+
+      std::array<QListWidget*, 5> type_to_table
+          {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table}};
+
+      for (auto& table : type_to_table)
+      {
+        QObject::connect ( table, &QListWidget::itemClicked
+            , [this] (QListWidgetItem* item)
+                           {
+                             loadMap (item->data (Qt::UserRole).toInt());
+                           }
+        );
+      }
 
       build_menu();
     }
@@ -240,11 +258,6 @@ namespace noggit
       auto layout (new QHBoxLayout (widget));
       layout->setAlignment(Qt::AlignLeft);
 
-      _continents_table = new QListWidget (widget);
-      _dungeons_table = new QListWidget (widget);
-      _raids_table = new QListWidget (widget);
-      _battlegrounds_table = new QListWidget (widget);
-      _arenas_table = new QListWidget (widget);
       QListWidget* bookmarks_table (new QListWidget (widget));
 
       QTabWidget* entry_points_tabs (new QTabWidget (widget));
@@ -314,11 +327,6 @@ namespace noggit
       minimap_holder_layout->setAlignment(Qt::AlignCenter);
       right_side->addTab(minimap_holder, "Enter map");
 
-      if (_map_creation_wizard)
-      {
-        disconnect(_map_wizard_connection);
-      }
-
       _map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard(this);
 
       _map_wizard_connection = connect(_map_creation_wizard, &noggit::Red::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated
@@ -346,12 +354,6 @@ namespace noggit
       for (auto& table : type_to_table)
       {
         table->clear();
-        QObject::connect ( table, &QListWidget::itemClicked
-            , [this] (QListWidgetItem* item)
-                           {
-                             loadMap (item->data (Qt::UserRole).toInt());
-                           }
-        );
       }
 
       for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
@@ -367,13 +369,13 @@ namespace noggit
         auto item (new QListWidgetItem (QString::number(e.mapID) + " - " + QString::fromUtf8 (e.name.c_str()), type_to_table[e.areaType]));
         item->setData (Qt::UserRole, QVariant (e.mapID));
       }
-
-
-
     }
 
     void main_window::rebuild_menu()
     {
+      disconnect(_map_wizard_connection);
+      delete _map_creation_wizard;
+      delete _null_widget;
       setCentralWidget(_null_widget = new QWidget(this));
 
       createBookmarkList();
