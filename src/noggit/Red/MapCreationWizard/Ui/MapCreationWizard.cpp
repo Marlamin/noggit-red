@@ -394,7 +394,7 @@ void MapCreationWizard::saveCurrentEntry()
     QSettings settings;
     auto project_path = boost::filesystem::path (settings.value ("project/path").toString().toStdString());
 
-    QDir dir((project_path / "/world/maps/" / map_internal_name).c_str());
+    QDir dir((project_path / "/world/maps/" / map_internal_name).string().c_str());
 
     if (!dir.exists())
       dir.mkpath(".");
