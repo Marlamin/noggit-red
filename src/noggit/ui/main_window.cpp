@@ -66,7 +66,8 @@ namespace noggit
       titleBarWidget.horizontalLayout->insertWidget(1, _menuBar);
       titleBarWidget.horizontalLayout->insertWidget(1, new QLabel(title.str().c_str(), this));
       _menuBar->setMaximumHeight(20);
-
+      
+      titleBarWidget.iconButton->setAccessibleName("titlebar_icon");
       titleBarWidget.minimizeButton->setIcon(font_awesome_icon(font_awesome::windowminimize));
       titleBarWidget.minimizeButton->setIconSize(QSize(14, 14));
       titleBarWidget.minimizeButton->setAccessibleName("titlebar_minimize");
