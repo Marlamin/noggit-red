@@ -52,7 +52,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>1</number>
      </property>
      <property name="tabBarAutoHide">
       <bool>false</bool>
@@ -355,6 +355,12 @@
                   </item>
                   <item>
                    <widget class="QDoubleSpinBox" name="_wireframe_radius">
+                    <property name="minimumSize">
+                     <size>
+                      <width>60</width>
+                      <height>0</height>
+                     </size>
+                    </property>
                     <property name="toolTip">
                      <string>real radius = cursor radius * wireframe radius</string>
                     </property>
@@ -411,6 +417,12 @@
                   </item>
                   <item>
                    <widget class="QDoubleSpinBox" name="_wireframe_width">
+                    <property name="minimumSize">
+                     <size>
+                      <width>60</width>
+                      <height>0</height>
+                     </size>
+                    </property>
                     <property name="maximum">
                      <double>10.000000000000000</double>
                     </property>
@@ -463,10 +475,10 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="ColorSelector" name="_wireframe_color" native="true">
+                   <widget class="color_widgets::ColorSelector" name="_wireframe_color" native="true">
                     <property name="minimumSize">
                      <size>
-                      <width>53</width>
+                      <width>60</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -1275,9 +1287,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ColorSelector</class>
+   <class>color_widgets::ColorSelector</class>
    <extends>QWidget</extends>
-   <header location="global">src/external/qt-color-widgets/qt-color-widgets/color_selector.hpp</header>
+   <header location="global">external/qt-color-widgets/qt-color-widgets/color_selector.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
