@@ -52,7 +52,7 @@
       <string/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>3</number>
      </property>
      <property name="tabBarAutoHide">
       <bool>false</bool>
@@ -282,6 +282,12 @@
                     <property name="text">
                      <string>Full</string>
                     </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                    <property name="autoExclusive">
+                     <bool>false</bool>
+                    </property>
                     <attribute name="buttonGroup">
                      <string notr="true">_wireframe_type_group</string>
                     </attribute>
@@ -303,10 +309,13 @@
                   <item>
                    <widget class="QRadioButton" name="radio_wire_cursor">
                     <property name="enabled">
-                     <bool>false</bool>
+                     <bool>true</bool>
                     </property>
                     <property name="text">
                      <string>Around cursor</string>
+                    </property>
+                    <property name="autoExclusive">
+                     <bool>false</bool>
                     </property>
                     <attribute name="buttonGroup">
                      <string notr="true">_wireframe_type_group</string>
