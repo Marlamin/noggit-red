@@ -32,20 +32,20 @@ namespace noggit
     settings::settings(QWidget *parent)
         : QDialog(parent), _settings(new QSettings(this))
     {
-      SettingsPanelUi = new Ui::SettingsPanel;
-      SettingsPanelUi->setupUi(this);
+      ui = new Ui::SettingsPanel;
+      ui->setupUi(this);
 
-      connect(SettingsPanelUi->gamePathField, &QLineEdit::textChanged, [&](QString value)
+      connect(ui->gamePathField, &QLineEdit::textChanged, [&](QString value)
               {
                 _settings->setValue("project/game_path", value);
               }
       );
 
 
-      connect(SettingsPanelUi->gamePathField_browse, &QPushButton::clicked, [=]
+      connect(ui->gamePathField_browse, &QPushButton::clicked, [=]
               {
                 auto result(QFileDialog::getExistingDirectory(
-                    nullptr, "WoW Client Path", SettingsPanelUi->gamePathField->text()));
+                    nullptr, "WoW Client Path", ui->gamePathField->text()));
 
                 if (!result.isNull())
                 {
@@ -54,22 +54,22 @@ namespace noggit
                     result += "/";
                   }
 
-                  SettingsPanelUi->gamePathField->setText(result);
+                  ui->gamePathField->setText(result);
                 }
               }
       );
 
-      connect(SettingsPanelUi->projectPathField, &QLineEdit::textChanged, [&](QString value)
+      connect(ui->projectPathField, &QLineEdit::textChanged, [&](QString value)
               {
                 _settings->setValue("project/path", value);
               }
       );
 
 
-      connect(SettingsPanelUi->projectPathField_browse, &QPushButton::clicked, [=]
+      connect(ui->projectPathField_browse, &QPushButton::clicked, [=]
               {
                 auto result(QFileDialog::getExistingDirectory(
-                    nullptr, "Project Path", SettingsPanelUi->projectPathField->text()));
+                    nullptr, "Project Path", ui->projectPathField->text()));
 
                 if (!result.isNull())
                 {
@@ -78,56 +78,56 @@ namespace noggit
                     result += "/";
                   }
 
-                  SettingsPanelUi->projectPathField->setText(result);
+                  ui->projectPathField->setText(result);
                 }
               }
       );
 
-      connect(SettingsPanelUi->importPathField, &QLineEdit::textChanged, [&](QString value)
+      connect(ui->importPathField, &QLineEdit::textChanged, [&](QString value)
               {
                 _settings->setValue("project/import_file", value);
               }
       );
 
 
-      connect(SettingsPanelUi->importPathField_browse, &QPushButton::clicked, [=]
+      connect(ui->importPathField_browse, &QPushButton::clicked, [=]
               {
                 auto result(QFileDialog::getOpenFileName(
-                    nullptr, "Import File Path", SettingsPanelUi->importPathField->text()));
+                    nullptr, "Import File Path", ui->importPathField->text()));
 
                 if (!result.isNull())
                 {
-                  SettingsPanelUi->importPathField->setText(result);
+                  ui->importPathField->setText(result);
                 }
               }
       );
 
-      connect(SettingsPanelUi->wmvLogPathField, &QLineEdit::textChanged, [&](QString value)
+      connect(ui->wmvLogPathField, &QLineEdit::textChanged, [&](QString value)
               {
                 _settings->setValue("project/import_file", value);
               }
       );
 
 
-      connect(SettingsPanelUi->wmvLogPathField_browse, &QPushButton::clicked, [=]
+      connect(ui->wmvLogPathField_browse, &QPushButton::clicked, [=]
               {
                 auto result(QFileDialog::getOpenFileName(
-                    nullptr, "WMV Log Path", SettingsPanelUi->wmvLogPathField->text()));
+                    nullptr, "WMV Log Path", ui->wmvLogPathField->text()));
 
                 if (!result.isNull())
                 {
-                  SettingsPanelUi->wmvLogPathField->setText(result);
+                  ui->wmvLogPathField->setText(result);
                 }
               }
       );
 
 
 #ifdef USE_MYSQL_UID_STORAGE
-      SettingsPanelUi->MySQL_box->setEnabled(true);
-      SettingsPanelUi->mysql_warning->setVisible(false);
+      ui->MySQL_box->setEnabled(true);
+      ui->mysql_warning->setVisible(false);
 #endif
 
-      SettingsPanelUi->_theme->addItem("System");
+      ui->_theme->addItem("System");
 
       QDir theme_dir = QDir("./themes/");
       if (theme_dir.exists())
@@ -136,7 +136,7 @@ namespace noggit
         {
           if (QDir(theme_dir.path() + "/" + dir).exists("theme.qss"))
           {
-            SettingsPanelUi->_theme->addItem(dir);
+            ui->_theme->addItem(dir);
           }
         }
       } else
@@ -146,7 +146,7 @@ namespace noggit
             << std::endl;
       }
 
-      connect(SettingsPanelUi->_theme, &QComboBox::currentTextChanged, [&](QString s)
+      connect(ui->_theme, &QComboBox::currentTextChanged, [&](QString s)
               {
                 if (s == "System")
                 {
@@ -163,16 +163,16 @@ namespace noggit
               }
       );
 
-      SettingsPanelUi->_wireframe_color->setColor(Qt::white);
+      ui->_wireframe_color->setColor(Qt::white);
 
-      connect(SettingsPanelUi->saveButton, &QPushButton::clicked, [this]
+      connect(ui->saveButton, &QPushButton::clicked, [this]
               {
                 hide();
                 save_changes();
               }
       );
 
-      connect(SettingsPanelUi->discardButton, &QPushButton::clicked, [this]
+      connect(ui->discardButton, &QPushButton::clicked, [this]
               {
                 hide();
                 discard_changes();
@@ -185,60 +185,70 @@ namespace noggit
 
     void settings::discard_changes()
     {
-      SettingsPanelUi->gamePathField->setText(_settings->value("project/game_path").toString());
-      SettingsPanelUi->projectPathField->setText(_settings->value("project/path").toString());
-      SettingsPanelUi->importPathField->setText(_settings->value("project/import_file", "import.txt").toString());
-      SettingsPanelUi->wmvLogPathField->setText(_settings->value("project/wmv_log_file").toString());
-      SettingsPanelUi->viewDistanceField->setValue(_settings->value("view_distance", 1000.f).toFloat());
-      SettingsPanelUi->farZField->setValue(_settings->value("farZ", 2048.f).toFloat());
-      SettingsPanelUi->tabletModeCheck->setChecked(_settings->value("tablet/enabled", false).toBool());
-      SettingsPanelUi->_undock_tool_properties->setChecked(
+      ui->gamePathField->setText(_settings->value("project/game_path").toString());
+      ui->projectPathField->setText(_settings->value("project/path").toString());
+      ui->importPathField->setText(_settings->value("project/import_file", "import.txt").toString());
+      ui->wmvLogPathField->setText(_settings->value("project/wmv_log_file").toString());
+      ui->viewDistanceField->setValue(_settings->value("view_distance", 1000.f).toFloat());
+      ui->farZField->setValue(_settings->value("farZ", 2048.f).toFloat());
+      ui->tabletModeCheck->setChecked(_settings->value("tablet/enabled", false).toBool());
+      ui->_undock_tool_properties->setChecked(
           _settings->value("undock_tool_properties/enabled", true).toBool());
-      SettingsPanelUi->_undock_small_texture_palette->setChecked(
+      ui->_undock_small_texture_palette->setChecked(
           _settings->value("undock_small_texture_palette/enabled", true).toBool());
-      SettingsPanelUi->_vsync_cb->setChecked(_settings->value("vsync", false).toBool());
-      SettingsPanelUi->_anti_aliasing_cb->setChecked(_settings->value("anti_aliasing", false).toBool());
-      SettingsPanelUi->_fullscreen_cb->setChecked(_settings->value("fullscreen", false).toBool());
-      SettingsPanelUi->_adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
-      SettingsPanelUi->_adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
-      SettingsPanelUi->_uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
-      SettingsPanelUi->_additional_file_loading_log->setChecked(
+      ui->_vsync_cb->setChecked(_settings->value("vsync", false).toBool());
+      ui->_anti_aliasing_cb->setChecked(_settings->value("anti_aliasing", false).toBool());
+      ui->_fullscreen_cb->setChecked(_settings->value("fullscreen", false).toBool());
+      ui->_adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
+      ui->_adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
+      ui->_uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
+      ui->_additional_file_loading_log->setChecked(
           _settings->value("additional_file_loading_log", false).toBool());
-      SettingsPanelUi->_theme->setCurrentText(_settings->value("theme", "Dark").toString());
+      ui->_theme->setCurrentText(_settings->value("theme", "Dark").toString());
 
 #ifdef USE_MYSQL_UID_STORAGE
-      SettingsPanelUi->_mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
-      SettingsPanelUi->_mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
-      SettingsPanelUi->_mysql_user_field->setText(_settings->value ("project/mysql/user").toString());
-      SettingsPanelUi->_mysql_pwd_field->setText (_settings->value ("project/mysql/pwd").toString());
-      SettingsPanelUi->_mysql_db_field->setText (_settings->value ("project/mysql/db").toString());
+      ui->_mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
+      ui->_mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
+      ui->_mysql_user_field->setText(_settings->value ("project/mysql/user").toString());
+      ui->_mysql_pwd_field->setText (_settings->value ("project/mysql/pwd").toString());
+      ui->_mysql_db_field->setText (_settings->value ("project/mysql/db").toString());
 #endif
 
-      //SettingsPanelUi->_wireframe_type_group->button(_settings->value("wireframe/type", 0).toInt())->toggle();
-      SettingsPanelUi->_wireframe_radius->setValue(_settings->value("wireframe/radius", 1.5f).toFloat());
-      SettingsPanelUi->_wireframe_width->setValue(_settings->value("wireframe/width", 1.f).toFloat());
-      SettingsPanelUi->_wireframe_color->setColor(_settings->value("wireframe/color").value<QColor>());
+      int wireframe_type = _settings->value("wireframe/type", 0).toInt();
+
+      if (wireframe_type)
+      {
+        ui->radio_wire_cursor->setChecked(true);
+      }
+      else
+      {
+        ui->radio_wire_full->setChecked(true);
+      }
+
+      ui->_wireframe_radius->setValue(_settings->value("wireframe/radius", 1.5f).toFloat());
+      ui->_wireframe_width->setValue(_settings->value("wireframe/width", 1.f).toFloat());
+      ui->_wireframe_color->setColor(_settings->value("wireframe/color").value<QColor>());
     }
 
     void settings::save_changes()
     {
-      _settings->setValue("project/game_path", SettingsPanelUi->gamePathField->text());
-      _settings->setValue("project/path", SettingsPanelUi->projectPathField->text());
-      _settings->setValue("project/import_file", SettingsPanelUi->importPathField->text());
-      _settings->setValue("project/wmv_log_file", SettingsPanelUi->wmvLogPathField->text());
-      _settings->setValue("farZ", SettingsPanelUi->farZField->value());
-      _settings->setValue("view_distance", SettingsPanelUi->viewDistanceField->value());
-      _settings->setValue("tablet/enabled", SettingsPanelUi->tabletModeCheck->isChecked());
-      _settings->setValue("undock_tool_properties/enabled", SettingsPanelUi->_undock_tool_properties->isChecked());
+      _settings->setValue("project/game_path", ui->gamePathField->text());
+      _settings->setValue("project/path", ui->projectPathField->text());
+      _settings->setValue("project/import_file", ui->importPathField->text());
+      _settings->setValue("project/wmv_log_file", ui->wmvLogPathField->text());
+      _settings->setValue("farZ", ui->farZField->value());
+      _settings->setValue("view_distance", ui->viewDistanceField->value());
+      _settings->setValue("tablet/enabled", ui->tabletModeCheck->isChecked());
+      _settings->setValue("undock_tool_properties/enabled", ui->_undock_tool_properties->isChecked());
       _settings->setValue("undock_small_texture_palette/enabled",
-                          SettingsPanelUi->_undock_small_texture_palette->isChecked());
-      _settings->setValue("vsync", SettingsPanelUi->_vsync_cb->isChecked());
-      _settings->setValue("anti_aliasing", SettingsPanelUi->_anti_aliasing_cb->isChecked());
-      _settings->setValue("fullscreen", SettingsPanelUi->_fullscreen_cb->isChecked());
-      _settings->setValue("unload_dist", SettingsPanelUi->_adt_unload_dist->value());
-      _settings->setValue("unload_interval", SettingsPanelUi->_adt_unload_check_interval->value());
-      _settings->setValue("uid_startup_check", SettingsPanelUi->_uid_cb->isChecked());
-      _settings->setValue("additional_file_loading_log", SettingsPanelUi->_additional_file_loading_log->isChecked());
+                          ui->_undock_small_texture_palette->isChecked());
+      _settings->setValue("vsync", ui->_vsync_cb->isChecked());
+      _settings->setValue("anti_aliasing", ui->_anti_aliasing_cb->isChecked());
+      _settings->setValue("fullscreen", ui->_fullscreen_cb->isChecked());
+      _settings->setValue("unload_dist", ui->_adt_unload_dist->value());
+      _settings->setValue("unload_interval", ui->_adt_unload_check_interval->value());
+      _settings->setValue("uid_startup_check", ui->_uid_cb->isChecked());
+      _settings->setValue("additional_file_loading_log", ui->_additional_file_loading_log->isChecked());
 
 #ifdef USE_MYSQL_UID_STORAGE
       _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());
@@ -248,11 +258,11 @@ namespace noggit
       _settings->setValue ("project/mysql/db", _mysql_db_field->text());
 #endif
 
-      _settings->setValue("wireframe/type", SettingsPanelUi->_wireframe_type_group->checkedId());
-      _settings->setValue("wireframe/radius", SettingsPanelUi->_wireframe_radius->value());
-      _settings->setValue("wireframe/width", SettingsPanelUi->_wireframe_width->value());
-      _settings->setValue("wireframe/color", SettingsPanelUi->_wireframe_color->color());
-      _settings->setValue("theme", SettingsPanelUi->_theme->currentText());
+      _settings->setValue("wireframe/type", ui->_wireframe_type_group->checkedId());
+      _settings->setValue("wireframe/radius", ui->_wireframe_radius->value());
+      _settings->setValue("wireframe/width", ui->_wireframe_width->value());
+      _settings->setValue("wireframe/color", ui->_wireframe_color->color());
+      _settings->setValue("theme", ui->_theme->currentText());
 
       _settings->sync();
     }

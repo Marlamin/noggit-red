@@ -4,7 +4,7 @@
 
 #include "revision.h"
 
-#include <Ui_About.h>
+#include <ui_About.h>
 
 namespace noggit
 {

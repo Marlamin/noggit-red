@@ -16,7 +16,7 @@ namespace noggit
     class settings : public QDialog
     {
       QSettings* _settings;
-      Ui::SettingsPanel* SettingsPanelUi;
+      Ui::SettingsPanel* ui;
     public:
       settings(QWidget* parent = nullptr);
       void discard_changes();
