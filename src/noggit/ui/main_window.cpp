@@ -63,6 +63,8 @@ namespace noggit
       titleBarWidget.setupUi(widget);
       _settings = new settings(this);
 
+      FramelessWindowsManager::addWindow(_settings);
+
       _menuBar = menuBar();
       _menuBar->setNativeMenuBar(false);
       titleBarWidget.horizontalLayout->insertWidget(1, _menuBar);

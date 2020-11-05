@@ -20,6 +20,7 @@
 #include <QApplication>
 
 #include <ui_SettingsPanel.h>
+#include <ui_TitleBar.h>
 
 
 #include <algorithm>
@@ -32,8 +33,12 @@ namespace noggit
     settings::settings(QWidget *parent)
         : QDialog(parent), _settings(new QSettings(this))
     {
+
       ui = new Ui::SettingsPanel;
       ui->setupUi(this);
+
+      Ui::TitleBar titleBarWidget;
+      titleBarWidget.setupUi(ui->titlebar);
 
       connect(ui->gamePathField, &QLineEdit::textChanged, [&](QString value)
               {
