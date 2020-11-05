@@ -313,6 +313,7 @@ namespace noggit
       minimap_holder_layout->addWidget(_minimap);
       minimap_holder_layout->setAlignment(Qt::AlignCenter);
       right_side->addTab(minimap_holder, "Enter map");
+      minimap_holder->setAccessibleName("main_menu_minimap_holder");
 
       if (_map_creation_wizard)
       {
