@@ -96,10 +96,10 @@ bool World::IsEditableWorld(int pMapId)
   return false;
 }
 
-World::World(const std::string& name, int map_id)
+World::World(const std::string& name, int map_id, bool create_empty)
   : _model_instance_storage(this)
   , _tile_update_queue(this)
-  , mapIndex (name, map_id, this)
+  , mapIndex (name, map_id, this, create_empty)
   , horizon(name, &mapIndex)
   , mWmoFilename("")
   , mWmoEntry(ENTRY_MODF())
@@ -2856,4 +2856,10 @@ float World::getMaxTileHeight(const tile_index& tile)
 
 
   return max_height;
+}
+
+void World::setBasename(const std::string &name)
+{
+  basename = name;
+  mapIndex.set_basename(name);
 }

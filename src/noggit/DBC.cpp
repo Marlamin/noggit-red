@@ -106,6 +106,19 @@ std::string MapDB::getMapName(int pMapID)
   return mapName;
 }
 
+int MapDB::findMapName(const std::string &map_name)
+{
+  for (Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
+  {
+    if (i->getString(MapDB::InternalName) == map_name)
+    {
+      return static_cast<int>(i->getUInt(MapDB::MapID));
+    }
+  }
+
+  return -1;
+}
+
 const char * getGroundEffectDoodad(unsigned int effectID, int DoodadNum)
 {
   try

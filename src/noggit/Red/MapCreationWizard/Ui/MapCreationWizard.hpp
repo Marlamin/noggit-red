@@ -11,6 +11,7 @@
 #include <QComboBox>
 #include <QGroupBox>
 #include <QSpinBox>
+#include <QCheckBox>
 #include <QDoubleSpinBox>
 #include <QHBoxLayout>
 #include <QStackedWidget>
@@ -44,6 +45,7 @@ namespace noggit
         std::string getValue(int locale) { return  _widget_map.at(_locale_names[locale])->text().toStdString(); };
 
         void fill(DBCFile::Record& record, size_t field);
+        void clear();
         void toRecord(DBCFile::Record& record, size_t field);
 
       private:
@@ -76,12 +78,17 @@ namespace noggit
 
     class MapCreationWizard : public ui::widget
     {
+      Q_OBJECT
+
     public:
       MapCreationWizard(QWidget *parent = nullptr);
       ~MapCreationWizard();
 
       void wheelEvent(QWheelEvent *event) override;
       void destroyFakeWorld() { if(_world) delete _world; _world = nullptr; _minimap_widget->world (nullptr); };
+
+    signals:
+      void map_dbc_updated();
 
     private:
       ui::minimap_widget* _minimap_widget;
@@ -90,6 +97,10 @@ namespace noggit
 
       // Map settings
       QLineEdit* _directory;
+
+      QCheckBox* _is_big_alpha;
+      QCheckBox* _sort_by_size_cat;
+
       QComboBox* _instance_type;
 
       LocaleDBCEntry* _map_name;
@@ -114,7 +125,7 @@ namespace noggit
       World* _world = nullptr;
 
       bool _is_new_record = false;
-      int _cur_map_id = 0;
+      int _cur_map_id = -1;
 
       QMetaObject::Connection _connection;
 
@@ -122,6 +133,9 @@ namespace noggit
 
       void saveCurrentEntry();
       void discardChanges();
+
+      void addNewMap();
+      void removeMap();
 
     };
   }

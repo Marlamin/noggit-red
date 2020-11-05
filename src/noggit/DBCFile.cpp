@@ -166,5 +166,18 @@ void DBCFile::removeRecord(size_t id, size_t id_field)
 
 }
 
+int DBCFile::getEmptyRecordID(size_t id_field)
+{
+
+  unsigned int id = 0;
+
+  for (Iterator i = begin(); i != end(); ++i)
+  {
+    id = std::max(i->getUInt(id_field), id);
+  }
+
+  return static_cast<int>(++id);
+}
+
 
 

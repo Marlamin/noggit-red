@@ -24,7 +24,7 @@
 #include <forward_list>
 #include <cstdlib>
 
-MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
+MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world, bool create_empty)
   : basename(pBasename)
   , _map_id (map_id)
   , _last_unload_time((clock() / CLOCKS_PER_SEC)) // to not try to unload right away
@@ -40,6 +40,27 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world)
   QSettings settings;
   _unload_interval = settings.value("unload_interval", 5).toInt();
   _unload_dist = settings.value("unload_dist", 5).toInt();
+
+  if (create_empty)
+  {
+
+    mHasAGlobalWMO = false;
+    mBigAlpha = true;
+    _sort_models_by_size_class = true;
+    changed = false;
+
+    for (int j = 0; j < 64; ++j)
+    {
+      for (int i = 0; i < 64; ++i)
+      {
+        mTiles[j][i].tile = nullptr;
+        mTiles[j][i].onDisc = false;
+        mTiles[j][i].flags = 0;
+      }
+    }
+
+    return;
+  }
 
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
@@ -1130,4 +1151,25 @@ void MapIndex::removeTile(const tile_index &tile)
   mTiles[tile.z][tile.x].onDisc = false;
 
   changed = true;
+}
+
+void MapIndex::set_basename(const std::string &pBasename)
+{
+  basename = pBasename;
+
+  for (int z = 0; z < 64; ++z)
+  {
+    for (int x = 0; x < 64; ++x)
+    {
+      if (!mTiles[z][x].tile)
+      {
+        continue;
+      }
+
+      std::stringstream filename;
+      filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
+
+      mTiles[z][x].tile->setFilename(filename.str());
+    }
+  }
 }

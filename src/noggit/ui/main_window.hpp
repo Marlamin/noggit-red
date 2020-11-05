@@ -28,6 +28,8 @@ namespace noggit
 
       void prompt_exit(QCloseEvent* event);
       void prompt_uid_fix_failure();
+      void build_map_lists();
+
       QMenuBar* _menuBar;
 
       std::unordered_set<QWidget*> displayed_widgets;
@@ -79,7 +81,15 @@ namespace noggit
       settings* _settings;
       about* _about;
       QWidget* _null_widget;
+
       noggit::Red::MapCreationWizard::Ui::MapCreationWizard* _map_creation_wizard;
+      QMetaObject::Connection _map_wizard_connection;
+
+      QListWidget* _continents_table;
+      QListWidget* _dungeons_table;
+      QListWidget* _raids_table;
+      QListWidget* _battlegrounds_table;
+      QListWidget* _arenas_table;
 
       std::unique_ptr<World> _world;
 

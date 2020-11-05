@@ -25,7 +25,7 @@
 #pragma once
 
 #include "framelesshelper_global.h"
-#include <QtQuick/QQuickItem>
+#include <QQuickItem>
 
 #if (defined(Q_OS_WIN) || defined(Q_OS_WIN32) || defined(Q_OS_WIN64) || defined(Q_OS_WINRT)) \
     && !defined(Q_OS_WINDOWS)

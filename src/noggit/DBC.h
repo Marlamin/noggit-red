@@ -40,6 +40,7 @@ public:
 
   static const size_t LoadingScreen = 57;    // uint [LoadingScreen]
   static std::string getMapName(int pMapID);
+  static int findMapName(const std::string& map_name);
 };
 
 class LoadingScreensDB : public DBCFile

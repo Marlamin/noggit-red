@@ -29,7 +29,7 @@ protected:
   AsyncObject(std::string filename) : filename(filename) {}
 
 public:
-  std::string const filename;
+  std::string filename;
 
   AsyncObject() = delete;
   virtual ~AsyncObject() = default;

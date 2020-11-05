@@ -25,7 +25,7 @@
 #include "framelessquickhelper.h"
 
 #include "framelesswindowsmanager.h"
-#include <QtQuick/QQuickWindow>
+#include <QQuickWindow>
 #ifdef Q_OS_WINDOWS
 #include "winnativeeventfilter.h"
 #include <QOperatingSystemVersion>

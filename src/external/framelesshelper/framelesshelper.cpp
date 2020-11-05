@@ -319,6 +319,7 @@ bool FramelessHelper::eventFilter(QObject *object, QEvent *event)
 {
     Q_ASSERT(object);
     Q_ASSERT(event);
+    QPointF m_pCurMousePos = {};
     const auto isWindowTopLevel = [](QObject *window) -> bool {
         Q_ASSERT(window);
         if (window->isWindowType()) {
@@ -486,21 +487,53 @@ bool FramelessHelper::eventFilter(QObject *object, QEvent *event)
         return false;
     };
     const auto moveOrResize =
-        [this, &getWindowEdges, &isResizePermitted, &isInTitlebarArea](const QPointF &globalPoint,
-                                                                       const QPointF &point,
-                                                                       QObject *object) {
+        [this,
+         &getWindowEdges,
+         &isResizePermitted,
+         &isInTitlebarArea,
+         &m_pCurMousePos](const QPointF &globalPoint, const QPointF &point, QObject *object) {
             Q_ASSERT(object);
             QWindow *window = getWindowHandle(object);
             if (window) {
+                const int deltaX = m_pCurMousePos.x() - globalPoint.x();
+                const int deltaY = m_pCurMousePos.y() - globalPoint.y();
                 const Qt::Edges edges = getWindowEdges(point, window->width(), window->height());
                 if (edges == Qt::Edges{}) {
                     if (isInTitlebarArea(globalPoint, point, object)) {
-                        window->startSystemMove();
+                        if (!window->startSystemMove()) {
+                            // Fallback to the traditional way.
+                            window->setX(window->x() + deltaX);
+                            window->setY(window->y() + deltaY);
+                        }
                     }
                 } else {
                     if (window->windowStates().testFlag(Qt::WindowState::WindowNoState)
                         && isResizePermitted(globalPoint, point, object) && getResizable(object)) {
-                        window->startSystemResize(edges);
+                        if (!window->startSystemResize(edges)) {
+                            // Fallback to the traditional way.
+                            bool leftHandled = false, topHandled = false;
+                            int newX = window->x();
+                            int newY = window->y();
+                            int newWidth = window->width();
+                            int newHeight = window->height();
+                            if (edges.testFlag(Qt::Edge::LeftEdge)) {
+                                newX += deltaX;
+                                newWidth -= deltaX;
+                                leftHandled = true;
+                            }
+                            if (edges.testFlag(Qt::Edge::TopEdge)) {
+                                newY += deltaY;
+                                newHeight -= deltaY;
+                                topHandled = true;
+                            }
+                            if (!leftHandled) {
+                                newWidth += deltaX;
+                            }
+                            if (!topHandled) {
+                                newHeight += deltaY;
+                            }
+                            window->setGeometry(newX, newY, newWidth, newHeight);
+                        }
                     }
                 }
             } else {
@@ -568,6 +601,7 @@ bool FramelessHelper::eventFilter(QObject *object, QEvent *event)
     case QEvent::MouseMove: {
         const auto mouseEvent = static_cast<QMouseEvent *>(event);
         if (mouseEvent) {
+            m_pCurMousePos = mouseEvent->screenPos();
             QWindow *window = getWindowHandle(object);
             if (window) {
                 if (window->windowStates().testFlag(Qt::WindowState::WindowNoState)

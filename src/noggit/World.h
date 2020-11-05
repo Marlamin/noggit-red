@@ -85,7 +85,9 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  explicit World(const std::string& name, int map_id);
+  explicit World(const std::string& name, int map_id, bool create_empty = false);
+
+  void setBasename(const std::string& name);
 
   void initDisplay();
 

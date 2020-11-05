@@ -149,7 +149,9 @@ public:
       );
   }
 
-  MapIndex(const std::string& pBasename, int map_id, World*);
+  MapIndex(const std::string& pBasename, int map_id, World*, bool create_empty = false);
+
+  void set_basename(const std::string& pBasename);
 
   void enterTile(const tile_index& tile);
   MapTile *loadTile(const tile_index& tile, bool reloading = false);
@@ -189,8 +191,10 @@ public:
 
   void convert_alphamap(bool to_big_alpha);
   bool hasBigAlpha() const { return mBigAlpha; }
+  void setBigAlpha(bool state) { mBigAlpha = state; };
 
   bool sort_models_by_size_class() const { return _sort_models_by_size_class; }
+  void set_sort_models_by_size_class(bool state) { _sort_models_by_size_class = state; }
 
   uint32_t newGUID();
 
@@ -221,7 +225,7 @@ private:
 
   bool _uid_fix_all_in_progress = false;
 
-  const std::string basename;
+  std::string basename;
 
 public:
   int const _map_id;

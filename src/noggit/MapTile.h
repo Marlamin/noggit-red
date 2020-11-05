@@ -127,6 +127,8 @@ public:
 
   void initEmptyChunks();
 
+  void setFilename(const std::string& new_filename) {filename = new_filename;};
+
 private:
   tile_mode _mode;
   bool _tile_is_being_reloaded;

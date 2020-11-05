@@ -20,15 +20,15 @@
 #include <QWheelEvent>
 #include <QApplication>
 #include <QComboBox>
+#include <QCheckBox>
 #include <QStackedWidget>
+#include <QDir>
+#include <QMessageBox>
 
 using namespace noggit::Red::MapCreationWizard::Ui;
 
 MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(parent)
 {
-  setWindowTitle ("Map Creation Wizard");
-  setWindowIcon (QIcon (":/icon"));
-  setWindowFlags(Qt::Window | Qt::WindowStaysOnTopHint);
 
   auto layout = new QHBoxLayout(this);
 
@@ -83,7 +83,7 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
     count++;
   }
 
-  auto add_btn = new QPushButton("Add",this);
+  auto add_btn = new QPushButton("New",this);
   add_btn->setIcon(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::plus));
   layout_selector->addWidget(add_btn);
 
@@ -103,6 +103,16 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
 
   _directory = new QLineEdit(_map_settings);
   map_settings_layout->addRow("Map directory:", _directory);
+
+  _is_big_alpha = new QCheckBox(this);
+  map_settings_layout->addRow("Big alpha:", _is_big_alpha);
+  _is_big_alpha->setChecked(true);
+
+  _sort_by_size_cat = new QCheckBox(this);
+  map_settings_layout->addRow("Sort models", _sort_by_size_cat);
+  _sort_by_size_cat->setChecked(true);
+  _sort_by_size_cat->setToolTip("Sorts models based on their size on save. May help increase loading speed of the map.");
+
 
   _instance_type = new QComboBox(_map_settings);
   _instance_type->addItem("None");
@@ -200,8 +210,20 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   connect(discard_btn, &QPushButton::clicked
       ,[&] ()
       {
-
+        discardChanges();
       });
+
+  connect(add_btn, &QPushButton::clicked
+      ,[&] ()
+          {
+            addNewMap();
+          });
+
+  connect(remove_btn, &QPushButton::clicked
+      ,[&] ()
+          {
+            removeMap();
+          });
 
   _connection = connect(reinterpret_cast<noggit::ui::main_window*>(parent),
                         QOverload<int>::of(&noggit::ui::main_window::map_selected)
@@ -266,6 +288,7 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
 
 void MapCreationWizard::selectMap(int map_id)
 {
+  _is_new_record = false;
 
   DBCFile::Record record = gMapDB.getByID(map_id);
   _cur_map_id = map_id;
@@ -279,6 +302,13 @@ void MapCreationWizard::selectMap(int map_id)
   _minimap_widget->world(_world);
 
   _directory->setText(record.getString(1));
+  _directory->setEnabled(false);
+
+  _is_big_alpha->setChecked(_world->mapIndex.hasBigAlpha());
+  _is_big_alpha->setEnabled(false);
+
+  _sort_by_size_cat->setChecked(_world->mapIndex.sort_models_by_size_class());
+
   _instance_type->setCurrentIndex(record.getInt(2));
 
   _map_name->fill(record, 5);
@@ -335,7 +365,51 @@ void MapCreationWizard::wheelEvent(QWheelEvent* event)
 
 void MapCreationWizard::saveCurrentEntry()
 {
-  // Save ADTs to disk
+
+  if (_is_new_record)
+  {
+    auto map_internal_name = _directory->text().toStdString();
+
+    // Check if map with that name already exists
+    int id = gMapDB.findMapName(map_internal_name);
+
+    if (id >= 0)
+    {
+      QMessageBox prompt;
+      prompt.setIcon (QMessageBox::Warning);
+      prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
+      prompt.setText ("Warning!");
+      prompt.setInformativeText ("Saving failed. The map with this directory name already exists. Rename it to save.");
+      prompt.addButton ("Okay", QMessageBox::AcceptRole);
+      prompt.setWindowFlags (Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+
+      prompt.exec();
+      return;
+    }
+
+    // Create WDT empty file for new map
+    std::stringstream filename;
+    filename << "World\\Maps\\" << map_internal_name << "\\" << map_internal_name << ".wdt";
+
+    QSettings settings;
+    auto project_path = boost::filesystem::path (settings.value ("project/path").toString().toStdString());
+
+    QDir dir((project_path / "/world/maps/" / map_internal_name).c_str());
+
+    if (!dir.exists())
+      dir.mkpath(".");
+
+    auto filepath = project_path / noggit::mpq::normalized_filename (filename.str());
+
+    QFile file(filepath.string().c_str());
+    file.open(QIODevice::WriteOnly);
+    file.close();
+  }
+
+  // Save ADTs and WDT to disk
+  _world->mapIndex.setBigAlpha(_is_big_alpha->isChecked());
+  _world->setBasename(_directory->text().toStdString());
+  _world->mapIndex.set_sort_models_by_size_class(_sort_by_size_cat->isChecked());
   _world->mapIndex.saveChanged(_world, true);
   _world->mapIndex.save();
 
@@ -343,6 +417,7 @@ void MapCreationWizard::saveCurrentEntry()
   DBCFile::Record record = _is_new_record ? gMapDB.addRecord(_cur_map_id) : gMapDB.getByID(_cur_map_id);
 
   record.writeString(1, _directory->text().toStdString());
+
   record.write(2, _instance_type->itemData(_instance_type->currentIndex()).toInt());
   _map_name->toRecord(record, 5);
 
@@ -361,10 +436,22 @@ void MapCreationWizard::saveCurrentEntry()
 
   gMapDB.save();
 
+  emit map_dbc_updated();
+
+  _is_new_record = false;
+
 }
 
 void MapCreationWizard::discardChanges()
 {
+  if (!_is_new_record)
+  {
+    selectMap(_cur_map_id);
+  }
+  else
+  {
+    addNewMap();
+  }
 
 }
 
@@ -372,6 +459,62 @@ MapCreationWizard::~MapCreationWizard()
 {
   delete _world;
   disconnect(_connection);
+}
+
+void MapCreationWizard::addNewMap()
+{
+  _is_new_record = true;
+  _cur_map_id = gMapDB.getEmptyRecordID();
+
+  if (_world)
+  {
+    delete _world;
+  }
+
+  _world = new World("New_Map", _cur_map_id, true);
+  _minimap_widget->world(_world);
+
+  _directory->setText("New_Map");
+  _directory->setEnabled(true);
+
+  _is_big_alpha->setChecked(true);
+  _is_big_alpha->setEnabled(true);
+
+  _sort_by_size_cat->setChecked(true);
+
+  _instance_type->setCurrentIndex(0);
+
+  _map_name->clear();
+  _area_table_id->setValue(0);
+
+  _map_desc_alliance->clear();
+  _map_desc_horde->clear();
+
+  _loading_screen->setValue(0);
+  _minimap_icon_scale->setValue(0.0f);
+
+  _corpse_map_id->setCurrentIndex(0);
+
+
+  _corpse_x->setValue(0.0f);
+  _corpse_y->setValue(0.0f);
+  _time_of_day_override->setValue(0);
+  _expansion_id->setCurrentIndex(0);
+  _raid_offset->setValue(0);
+  _max_players->setValue(0);
+}
+
+void MapCreationWizard::removeMap()
+{
+  if (!_is_new_record && _cur_map_id >= 0)
+  {
+    gMapDB.removeRecord(_cur_map_id);
+    gMapDB.save();
+  }
+
+  emit map_dbc_updated();
+
+  addNewMap();
 }
 
 
@@ -484,6 +627,16 @@ void LocaleDBCEntry::toRecord(DBCFile::Record &record, size_t field)
   }
 
   record.write(field + 16, _flags->value());
+}
+
+void LocaleDBCEntry::clear()
+{
+  for (int loc = 0; loc < 16; ++loc)
+  {
+    setValue("", loc);
+  }
+
+  _flags->setValue(0);
 }
 
 

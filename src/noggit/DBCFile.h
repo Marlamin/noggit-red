@@ -187,6 +187,7 @@ public:
   Record addRecord(size_t id, size_t id_field = 0);
   Record addRecordCopy(size_t id, size_t id_from, size_t id_field = 0);
   void removeRecord(size_t id, size_t id_field = 0);
+  int getEmptyRecordID(size_t id_field = 0);
 
 private:
   std::string filename;
