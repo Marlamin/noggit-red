@@ -22,6 +22,7 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QStackedWidget>
 
 #include <boost/format.hpp>
 
@@ -35,6 +36,7 @@
 
 #include "ui_TitleBar.h"
 #include <external/framelesshelper/framelesswindowsmanager.h>
+
 
 namespace noggit
 {
@@ -140,25 +142,6 @@ namespace noggit
       FramelessWindowsManager::setResizable(this, true);
       FramelessWindowsManager::setMinimumSize(this, {1280, 720});
 
-      _continents_table = new QListWidget (widget);
-      _dungeons_table = new QListWidget (widget);
-      _raids_table = new QListWidget (widget);
-      _battlegrounds_table = new QListWidget (widget);
-      _arenas_table = new QListWidget (widget);
-
-      std::array<QListWidget*, 5> type_to_table
-          {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table}};
-
-      for (auto& table : type_to_table)
-      {
-        QObject::connect ( table, &QListWidget::itemClicked
-            , [this] (QListWidgetItem* item)
-                           {
-                             loadMap (item->data (Qt::UserRole).toInt());
-                           }
-        );
-      }
-
       build_menu();
     }
 
@@ -222,13 +205,16 @@ namespace noggit
                                  )
     {
       _map_creation_wizard->destroyFakeWorld();
-      delete _map_creation_wizard;
-      auto mapview (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix, from_bookmark));
-      connect(mapview, &MapView::uid_fix_failed, [this]() { prompt_uid_fix_failure(); });
+
+      _stack_widget->removeWidget(_map_view);
+      _map_view =  (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix, from_bookmark));
+      connect(_map_view, &MapView::uid_fix_failed, [this]() { prompt_uid_fix_failure(); });
+
+      _stack_widget->addWidget(_map_view);
+      _stack_widget->setCurrentIndex(1);
 
       map_loaded = true;
 
-      setCentralWidget (mapview);
     }
 
     void main_window::loadMap(int mapID)
@@ -254,11 +240,34 @@ namespace noggit
 
     void main_window::build_menu()
     {
-      auto widget (new QWidget(this));
+      _stack_widget = new QStackedWidget(this);
+
+      auto widget (new QWidget(_stack_widget));
+      _stack_widget->addWidget(widget);
+
       auto layout (new QHBoxLayout (widget));
       layout->setAlignment(Qt::AlignLeft);
 
       QListWidget* bookmarks_table (new QListWidget (widget));
+      _continents_table = new QListWidget (widget);
+      _dungeons_table = new QListWidget (widget);
+      _raids_table = new QListWidget (widget);
+      _battlegrounds_table = new QListWidget (widget);
+      _arenas_table = new QListWidget (widget);
+
+      std::array<QListWidget*, 5> type_to_table
+          {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table}};
+
+      for (auto& table : type_to_table)
+      {
+        QObject::connect ( table, &QListWidget::itemClicked
+            , [this] (QListWidgetItem* item)
+                           {
+                             loadMap (item->data (Qt::UserRole).toInt());
+                           }
+        );
+      }
+
 
       QTabWidget* entry_points_tabs (new QTabWidget (widget));
       entry_points_tabs->setMaximumWidth(600);
@@ -341,7 +350,7 @@ namespace noggit
 
       layout->addWidget(right_side);
 
-      setCentralWidget (widget);
+      setCentralWidget (_stack_widget);
 
       _minimap->adjustSize();
     }
@@ -372,17 +381,6 @@ namespace noggit
       }
     }
 
-    void main_window::rebuild_menu()
-    {
-      disconnect(_map_wizard_connection);
-      delete _map_creation_wizard;
-      delete _null_widget;
-      setCentralWidget(_null_widget = new QWidget(this));
-
-      createBookmarkList();
-      build_menu();
-      map_loaded = false;
-    }
 
     void main_window::createBookmarkList()
     {
@@ -447,7 +445,12 @@ namespace noggit
       switch (prompt.buttonRole(prompt.clickedButton()))
       {
         case QMessageBox::AcceptRole:
-          rebuild_menu();
+          _stack_widget->setCurrentIndex(0);
+          _stack_widget->removeWidget(_map_view);
+          delete _map_view;
+          _minimap->world (nullptr);
+
+          map_loaded = false;
           break;
         case QMessageBox::DestructiveRole:
           setCentralWidget(_null_widget = new QWidget(this));
@@ -461,7 +464,7 @@ namespace noggit
 
     void main_window::prompt_uid_fix_failure()
     {
-      rebuild_menu();
+      _stack_widget->setCurrentIndex(0);
 
       QMessageBox::critical
         ( nullptr

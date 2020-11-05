@@ -3,10 +3,12 @@
 #include <math/vector_3d.hpp>
 #include <math/trig.hpp>
 #include <noggit/World.h>
+#include <noggit/MapView.h>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/Red/MapCreationWizard/Ui/MapCreationWizard.hpp>
 
 #include <QtWidgets/QMainWindow>
+#include <QtWidgets/QStackedWidget>
 
 #include <string>
 #include <unordered_set>
@@ -56,7 +58,6 @@ namespace noggit
 
       void createBookmarkList();
       void build_menu();
-      void rebuild_menu();
 
       struct MapEntry
       {
@@ -81,6 +82,8 @@ namespace noggit
       settings* _settings;
       about* _about;
       QWidget* _null_widget;
+      MapView* _map_view;
+      QStackedWidget* _stack_widget;
 
       noggit::Red::MapCreationWizard::Ui::MapCreationWizard* _map_creation_wizard;
       QMetaObject::Connection _map_wizard_connection;
