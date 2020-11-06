@@ -12,6 +12,7 @@
 #include <noggit/uid_storage.hpp>
 #include <noggit/Red/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FramelessWindow.hpp>
 
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
@@ -58,52 +59,21 @@ namespace noggit
 
       _about = new about(this);
 
-      QWidget *widget = new QWidget(this);
-      Ui::TitleBar titleBarWidget;
-      titleBarWidget.setupUi(widget);
+      _menuBar = menuBar();
+
       _settings = new settings(this);
 
-      FramelessWindowsManager::addWindow(_settings);
+      QSettings settings;
 
-      _menuBar = menuBar();
-      titleBarWidget.horizontalLayout->insertWidget(1, new QLabel(title.str().c_str(), this));
-      titleBarWidget.horizontalLayout->insertWidget(1, _menuBar);
+      if (!settings.value("systemWindowFrame", false).toBool())
+      {
+        QWidget *widget = new QWidget(this);
+        Ui::TitleBar* titleBarWidget = setupFramelessWindow(widget, this, minimumSize(), maximumSize(), true);
+        titleBarWidget->horizontalLayout->insertWidget(2, _menuBar);
+        setMenuWidget(widget);
+      }
 
-      titleBarWidget.iconButton->setAccessibleName("titlebar_icon");
-      titleBarWidget.minimizeButton->setIcon(font_awesome_icon(font_awesome::windowminimize));
-      titleBarWidget.minimizeButton->setIconSize(QSize(14, 14));
-      titleBarWidget.minimizeButton->setAccessibleName("titlebar_minimize");
-      titleBarWidget.maximizeButton->setIcon(font_awesome_icon(font_awesome::windowrestore));
-      titleBarWidget.maximizeButton->setAccessibleName("titlebar_maximize");
-      titleBarWidget.maximizeButton->setIconSize(QSize(14, 14));
-      titleBarWidget.closeButton->setIcon(font_awesome_icon(font_awesome::times));
-      titleBarWidget.closeButton->setAccessibleName("titlebar_close");
-      titleBarWidget.closeButton->setIconSize(QSize(16, 16));
-      setMenuWidget(widget);
-
-      _menuBar->setNativeMenuBar(false);
-
-      QObject::connect(titleBarWidget.closeButton,
-                       &QPushButton::clicked,
-                       this,
-                       &QMainWindow::close);
-
-      QObject::connect(titleBarWidget.minimizeButton,
-                       &QPushButton::clicked,
-                       this,
-                       &QMainWindow::showMinimized);
-
-      QObject::connect(titleBarWidget.maximizeButton,
-                       &QPushButton::clicked,
-                       [this, titleBarWidget]() {
-                         if (this->isMaximized()) {
-                           this->showNormal();
-                           titleBarWidget.maximizeButton->setToolTip(QObject::tr("Maximize"));
-                         } else {
-                           this->showMaximized();
-                           titleBarWidget.maximizeButton->setToolTip(QObject::tr("Restore"));
-                         }
-                       });
+      _menuBar->setNativeMenuBar(settings.value("nativeMenubar", true).toBool());
 
       auto file_menu (_menuBar->addMenu ("&Noggit"));
 
@@ -133,14 +103,6 @@ namespace noggit
 
 
       _menuBar->adjustSize();
-
-      FramelessWindowsManager::addIgnoreObject(this, _menuBar);
-      FramelessWindowsManager::addIgnoreObject(this, titleBarWidget.minimizeButton);
-      FramelessWindowsManager::addIgnoreObject(this, titleBarWidget.maximizeButton);
-      FramelessWindowsManager::addIgnoreObject(this, titleBarWidget.closeButton);
-
-      FramelessWindowsManager::setResizable(this, true);
-      FramelessWindowsManager::setMinimumSize(this, {1280, 720});
 
       build_menu();
     }

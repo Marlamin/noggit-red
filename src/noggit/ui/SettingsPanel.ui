@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>418</width>
-    <height>618</height>
+    <width>650</width>
+    <height>582</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,7 +18,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>418</width>
+    <width>650</width>
     <height>560</height>
    </size>
   </property>
@@ -264,13 +264,49 @@
               <property name="alignment">
                <set>Qt::AlignCenter</set>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_42">
+              <layout class="QVBoxLayout" name="verticalLayout_2">
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_43">
                  <item>
                   <widget class="QComboBox" name="_theme">
                    <property name="sizeAdjustPolicy">
                     <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_3">
+                 <item>
+                  <widget class="QRadioButton" name="_systemWindowFrame">
+                   <property name="toolTip">
+                    <string>Turns on default system window frame instead of Noggit's styled one. Requires restart.</string>
+                   </property>
+                   <property name="text">
+                    <string>System window frame</string>
+                   </property>
+                   <property name="checked">
+                    <bool>false</bool>
+                   </property>
+                   <property name="autoExclusive">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="_nativeMenubar">
+                   <property name="toolTip">
+                    <string>Moves top menu to system's dedicated space for application menus. Supported by Mac OS and some other platforms. Requires restart.</string>
+                   </property>
+                   <property name="text">
+                    <string>Native menubar</string>
+                   </property>
+                   <property name="checked">
+                    <bool>true</bool>
+                   </property>
+                   <property name="autoExclusive">
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>

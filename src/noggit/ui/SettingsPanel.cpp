@@ -5,6 +5,7 @@
 
 #include <noggit/TextureManager.h>
 #include <util/qt/overload.hpp>
+#include <noggit/ui/FramelessWindow.hpp>
 
 #include <boost/format.hpp>
 
@@ -30,16 +31,14 @@ namespace noggit
 {
   namespace ui
   {
-    settings::settings(QWidget *parent)
-        : QDialog(parent), _settings(new QSettings(this))
+    settings::settings(QWidget *parent) : QDialog(parent), _settings(new QSettings(this))
     {
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
 
       ui = new Ui::SettingsPanel;
       ui->setupUi(this);
 
-      Ui::TitleBar titleBarWidget;
-      titleBarWidget.setupUi(ui->titlebar);
+      setupFramelessWindow(ui->titlebar, this, minimumSize(), maximumSize(), false);
 
       connect(ui->gamePathField, &QLineEdit::textChanged, [&](QString value)
               {
@@ -208,6 +207,8 @@ namespace noggit
       ui->_adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
       ui->_adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
       ui->_uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
+      ui->_systemWindowFrame->setChecked(_settings->value("systemWindowFrame", false).toBool());
+      ui->_nativeMenubar->setChecked(_settings->value("nativeMenubar", true).toBool());
       ui->_additional_file_loading_log->setChecked(
           _settings->value("additional_file_loading_log", false).toBool());
       ui->_theme->setCurrentText(_settings->value("theme", "Dark").toString());
@@ -255,6 +256,8 @@ namespace noggit
       _settings->setValue("unload_interval", ui->_adt_unload_check_interval->value());
       _settings->setValue("uid_startup_check", ui->_uid_cb->isChecked());
       _settings->setValue("additional_file_loading_log", ui->_additional_file_loading_log->isChecked());
+      _settings->setValue("systemWindowFrame", ui->_systemWindowFrame->isChecked());
+      _settings->setValue("nativeMenubar", ui->_nativeMenubar->isChecked());
 
 #ifdef USE_MYSQL_UID_STORAGE
       _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());

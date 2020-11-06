@@ -290,8 +290,6 @@ Noggit::Noggit(int argc, char *argv[])
 
   main_window = std::make_unique<noggit::ui::main_window>();
 
-  FramelessWindowsManager::addWindow(main_window.get());
-
   if (fullscreen)
   {
     main_window->showFullScreen();
