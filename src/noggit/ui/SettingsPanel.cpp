@@ -33,6 +33,7 @@ namespace noggit
     settings::settings(QWidget *parent)
         : QDialog(parent), _settings(new QSettings(this))
     {
+      setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
 
       ui = new Ui::SettingsPanel;
       ui->setupUi(this);
