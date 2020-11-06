@@ -7,10 +7,12 @@
     <x>0</x>
     <y>0</y>
     <width>423</width>
-    <height>26</height>
+    <height>38</height>
    </rect>
   </property>
-
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
     <number>0</number>
@@ -28,59 +30,29 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QPushButton" name="iconButton">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>26</width>
-       <height>26</height>
-      </size>
-     </property>
+    <widget class="QLabel" name="iconButton">
      <property name="maximumSize">
       <size>
        <width>26</width>
        <height>26</height>
       </size>
      </property>
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
+     <property name="styleSheet">
+      <string notr="true">border: 3px solid green;</string>
      </property>
-     <property name="icon">
-      <iconset resource="./resources/resources.qrc">
-       <normaloff>:icon</normaloff>:icon</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>24</width>
-       <height>24</height>
-      </size>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item>
-    <widget class="QLabel" name="titleLabel">
      <property name="text">
       <string/>
      </property>
+     <property name="pixmap">
+      <pixmap resource="../../../resources/resources.qrc">:/icon</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="menuLayout"/>
    </item>
    <item>
     <spacer name="horizontalSpacer">
@@ -125,7 +97,7 @@
       <string>Minimize</string>
      </property>
      <property name="icon">
-      <iconset resource="./resources/resources.qrc">
+      <iconset>
        <normaloff>:./media/button_minimize_black.svg</normaloff>:./media/button_minimize_black.svg</iconset>
      </property>
      <property name="iconSize">
@@ -166,7 +138,7 @@
       <string>Maximize</string>
      </property>
      <property name="icon">
-      <iconset resource="./resources/resources.qrc">
+      <iconset>
        <normaloff>:./media/button_maximize_black.svg</normaloff>
        <normalon>:./media/button_restore_black.svg</normalon>:./media/button_maximize_black.svg</iconset>
      </property>
@@ -208,7 +180,7 @@
       <string>Close</string>
      </property>
      <property name="icon">
-      <iconset resource="./resources/resources.qrc">
+      <iconset>
        <normaloff>:./media/button_close_black.svg</normaloff>:./media/button_close_black.svg</iconset>
      </property>
      <property name="iconSize">
@@ -223,7 +195,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="./resources/resources.qrc"/>
+  <include location="../../../resources/resources.qrc"/>
  </resources>
  <connections/>
 </ui>
