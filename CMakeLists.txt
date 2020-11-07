@@ -214,7 +214,6 @@ include_directories(PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # And do the job.
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/noggit/ui/style/framelesswindow" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libimagequant" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libpng" )
