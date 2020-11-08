@@ -15,6 +15,7 @@
 #include <noggit/unsigned_int_property.hpp>
 #include <noggit/Red/StampMode/Ui/Tool.hpp>
 #include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
+#include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <opengl/texture.hpp>
 
 #include <boost/optional.hpp>
@@ -336,4 +337,8 @@ private:
   noggit::Red::StampMode::Ui::PaletteMain _modeStampPaletteMain;
   std::unordered_map<std::string, QPixmap> _images;
   opengl::texture* const _texBrush;
+
+  noggit::Red::AssetBrowser::Ui::AssetBrowserWidget* _asset_browser;
+
+
 };

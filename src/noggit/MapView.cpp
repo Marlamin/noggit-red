@@ -36,6 +36,7 @@
 #include <opengl/scoped.hpp>
 #include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
 #include <noggit/Red/ViewToolbar/Ui/ViewToolbar.hpp>
+#include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 
 #include "revision.h"
 
@@ -207,6 +208,10 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 
 void MapView::createGUI()
 {
+
+  _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this);
+  _asset_browser->show();
+
   // create tool widgets
   _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
   terrainTool = new noggit::ui::terrain_tool(_terrain_tool_dock);
