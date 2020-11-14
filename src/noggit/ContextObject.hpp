@@ -6,7 +6,8 @@ namespace noggit
   enum NoggitRenderContext
   {
     MAP_VIEW,
-    ASSET_BROWSER
+    ASSET_BROWSER,
+    ASSET_BROWSER_PREVIEW
   };
 }
 

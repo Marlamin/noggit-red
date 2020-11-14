@@ -12,7 +12,6 @@
 #include <QElapsedTimer>
 #include <QTimer>
 
-
 #include <math/matrix_4x4.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/camera.hpp>
@@ -20,6 +19,7 @@
 #include <noggit/Selection.h>
 #include <noggit/WMO.h>
 #include <noggit/Model.h>
+#include <noggit/Red/PreviewRenderer/PreviewRenderer.hpp>
 
 
 namespace noggit
@@ -27,15 +27,13 @@ namespace noggit
   namespace Red::AssetBrowser
   {
 
-    class ModelViewer : public QOpenGLWidget
+  class ModelViewer : public PreviewRenderer
     {
       Q_OBJECT
 
     public:
         explicit ModelViewer(QWidget* parent = nullptr);
-
-        void resetCamera();
-        void setModel(std::string const& filename);
+        void setModel(std::string const& filename) override;
 
     private:
 
@@ -47,25 +45,8 @@ namespace noggit
       QElapsedTimer _startup_time;
       qreal _last_update = 0.f;
 
-      noggit::camera _camera;
-      QSettings* _settings;
-
-      std::unique_ptr<opengl::program> _m2_program;
-      std::unique_ptr<opengl::program> _m2_instanced_program;
-      std::unique_ptr<opengl::program> _m2_particles_program;
-      std::unique_ptr<opengl::program> _m2_ribbons_program;
-      std::unique_ptr<opengl::program> _m2_box_program;
-      std::unique_ptr<opengl::program> _wmo_program;
-
-      boost::optional<liquid_render> _liquid_render = boost::none;
-
-      selection_type _model_instance;
-
       void tick(float dt);
-      void draw();
-      math::matrix_4x4 model_view() const;
-      math::matrix_4x4 projection() const;
-      float aspect_ratio() const;
+      float aspect_ratio() const override;
 
       void initializeGL() override;
       void paintGL() override;

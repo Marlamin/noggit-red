@@ -2,12 +2,15 @@
 #include <ui_AssetBrowser.h>
 #include <noggit/MPQ.h>
 #include <noggit/Log.h>
+#include <noggit/ContextObject.hpp>
 
 #include <QStandardItemModel>
 #include <QItemSelectionModel>
 #include <QRegularExpression>
 #include <QDir>
 #include <QSettings>
+#include <QPixmap>
+#include <QIcon>
 
 using namespace noggit::Red::AssetBrowser::Ui;
 
@@ -18,8 +21,11 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
   ui->setupUi(this);
 
   _model = new QStandardItemModel(this);
-
+  ui->listfileTree->setIconSize(QSize(128, 128));
   ui->listfileTree->setModel(_model);
+
+  _preview_renderer = new PreviewRenderer(128, 128, noggit::NoggitRenderContext::ASSET_BROWSER_PREVIEW, this);
+  _preview_renderer->setVisible(false);
 
   connect(ui->listfileTree->selectionModel(), &QItemSelectionModel::selectionChanged
       ,[=] (const QItemSelection& selected, const QItemSelection& deselected)
@@ -45,7 +51,11 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
               auto path = child.data(Qt::UserRole).toString();
               if (path.endsWith(".wmo") || path.endsWith(".m2"))
               {
-                // do icon rendering here
+                _preview_renderer->setModelOffscreen(path.toStdString());
+
+                auto preview_pixmap = _preview_renderer->renderToPixmap();
+                auto item = _model->itemFromIndex(child);
+                item->setIcon(QIcon(*preview_pixmap));
               }
             }
           }

@@ -19,7 +19,7 @@ bool AsyncLoader::is_loading()
   {
     for (auto async_obj : _currently_loading)
     {
-      if (!async_obj->loading_failed() && async_obj->filename.length()) // the filename check is a hack
+      if ((!async_obj->loading_failed() && async_obj->filename.length())) // the filename check is a hack
       {
         return true;
       }
@@ -95,7 +95,9 @@ void AsyncLoader::process()
     catch (...)
     {
       std::lock_guard<std::mutex> const lock(_guard);
+
       object->error_on_loading();
+      _currently_loading.remove(object);
 
       if (object->is_required_when_saving())
       {
