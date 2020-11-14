@@ -1,9 +1,10 @@
 #ifndef NOGGIT_ASSETBROWSER_HPP
 #define NOGGIT_ASSETBROWSER_HPP
 
-#include <QWidget>
 #include <ui_AssetBrowser.h>
+#include <noggit/Red/AssetBrowser/Ui/Model/TreeManager.hpp>
 
+#include <QWidget>
 #include <QStandardItemModel>
 
 
@@ -22,6 +23,7 @@ namespace noggit
       QStandardItemModel* _model;
 
       void updateModelData();
+      void recurseDirectory(Model::TreeManager& tree_mgr, const QString& s_dir, const QString& project_dir);
 
     };
   }

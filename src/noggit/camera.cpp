@@ -115,7 +115,7 @@ namespace noggit
   {
     position = {0.f, 0.f, 0.f};
     _roll = math::degrees(0.0f);
-    _yaw =  math::degrees(0.f);
+    _yaw =  math::degrees(45.f);
     _pitch =  math::degrees(0.f);
   }
 }
