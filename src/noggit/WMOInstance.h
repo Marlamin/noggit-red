@@ -5,6 +5,7 @@
 #include <math/ray.hpp>
 #include <math/vector_3d.hpp> // math::vector_3d
 #include <noggit/WMO.h>
+#include <noggit/ContextObject.hpp>
 
 #include <cstdint>
 #include <set>
@@ -30,7 +31,8 @@ public:
 
 private:
   void update_doodads();
-  
+
+  noggit::NoggitRenderContext _context;
   uint16_t _doodadset;
 
   std::map<uint32_t, std::vector<wmo_doodad_instance>> _doodads_per_group;
@@ -41,8 +43,11 @@ private:
   math::matrix_4x4 _transform_mat_transposed = math::matrix_4x4::uninitialized;
 
 public:
-  WMOInstance(std::string const& filename, ENTRY_MODF const* d);
-  explicit WMOInstance(std::string const& filename);
+  WMOInstance(std::string const& filename, ENTRY_MODF const* d
+              , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+
+  explicit WMOInstance(std::string const& filename
+                      , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
 
   WMOInstance(WMOInstance const& other) = default;
   WMOInstance& operator=(WMOInstance const& other) = default;
@@ -62,6 +67,7 @@ public:
     , _transform_mat(other._transform_mat)
     , _transform_mat_inverted(other._transform_mat_inverted)
     , _transform_mat_transposed(other._transform_mat_transposed)
+    , _context(other._context)
   {
     std::swap (extents, other.extents);
   }
@@ -83,6 +89,7 @@ public:
     std::swap(_transform_mat, other._transform_mat);
     std::swap(_transform_mat_inverted, other._transform_mat_inverted);
     std::swap(_transform_mat_transposed, other._transform_mat_transposed);
+    std::swap(_context, other._context);
     return *this;
   }
   /*

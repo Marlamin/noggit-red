@@ -4,6 +4,7 @@
 
 #include <noggit/AsyncLoader.h>
 #include <noggit/AsyncObject.h>
+#include <noggit/ContextObject.hpp>
 #include <noggit/Log.h>
 #include <noggit/MPQ.h>
 
@@ -13,11 +14,26 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <QOpenGLContext>
+
+struct pair_hash
+{
+  template <class T1, class T2>
+  std::size_t operator() (const std::pair<T1,T2> &p) const
+  {
+    auto h1 = std::hash<T1>{}(p.first);
+    auto h2 = std::hash<T2>{}(p.second);
+
+    return h1 ^ h2; // use hash combine here
+  }
+};
+
 
 namespace noggit
 {
+
   template<typename T>
-    struct async_object_multimap_with_normalized_key
+  struct async_object_multimap_with_normalized_key
   {
     async_object_multimap_with_normalized_key (std::function<std::string (std::string)> normalize = &mpq::normalized_filename)
       : _normalize (std::move (normalize))
@@ -25,24 +41,29 @@ namespace noggit
 
     ~async_object_multimap_with_normalized_key()
     {
+      /*
       apply ( [&] (std::string const& key, T const&)
               {
-                LogDebug << key << ": " << _counts.at (key) << std::endl;
+                auto pair = std::make_pair(context, key);
+                LogDebug << key << ": " << _counts.at(pair) << std::endl;
               }
             );
+            */
     }
 
     template<typename... Args>
-      T* emplace (std::string const& filename, Args&&... args)
+      T* emplace (std::string const& filename, noggit::NoggitRenderContext context, Args&&... args)
     {
       std::string const normalized (_normalize (filename));
+      auto pair = std::make_pair(context, normalized);
+      //LogDebug << "Emplacing " << normalized << " into context" << context << std::endl;
 
       {
         boost::mutex::scoped_lock const lock(_mutex);
 
-        if ([&] { return _counts[normalized]++; }())
+        if ([&] { return _counts[pair]++; }())
         {
-          return &_elements.at (normalized);
+          return &_elements.at (pair);
         }
       }
         
@@ -51,8 +72,8 @@ namespace noggit
                      {
                        boost::mutex::scoped_lock const lock(_mutex);
                        return &_elements.emplace ( std::piecewise_construct
-                                                 , std::forward_as_tuple (normalized)
-                                                 , std::forward_as_tuple (normalized, args...)
+                                                 , std::forward_as_tuple (pair)
+                                                 , std::forward_as_tuple (normalized, context, args...)
                                                  ).first->second;
                      }()
                    );
@@ -61,17 +82,20 @@ namespace noggit
 
       return obj; 
     }
-    void erase (std::string const& filename)
-    {    
+    void erase (std::string const& filename, noggit::NoggitRenderContext context)
+    {
       std::string const normalized (_normalize (filename));
+      auto pair = std::make_pair(context, normalized);
+      //LogDebug << "Erasing " << normalized << " from context" << context << std::endl;
+
       AsyncObject* obj = nullptr;
 
       {
         boost::mutex::scoped_lock lock(_mutex);
 
-        if (--_counts.at (normalized) == 0)
+        if (--_counts.at(pair) == 0)
         {
-          obj = static_cast<AsyncObject*>(&_elements.at(normalized));
+          obj = static_cast<AsyncObject*>(&_elements.at(pair));
         }
       }
 
@@ -85,17 +109,18 @@ namespace noggit
 
         {
           boost::mutex::scoped_lock lock(_mutex);
-          _elements.erase (normalized);
-          _counts.erase (normalized);
+          _elements.erase(pair);
+          _counts.erase(pair);
         }
       }
     }
     void apply (std::function<void (std::string const&, T&)> fun)
     {
       boost::mutex::scoped_lock lock(_mutex);
+
       for (auto& element : _elements)
       {
-        fun (element.first, element.second);
+        fun (element.first.second, element.second);
       }
     }
     void apply (std::function<void (std::string const&, T const&)> fun) const
@@ -103,14 +128,16 @@ namespace noggit
       boost::mutex::scoped_lock lock(_mutex);
       for (auto const& element : _elements)
       {
-        fun (element.first, element.second);
+        fun (element.first.second, element.second);
       }
     }
 
   private:
-    std::map<std::string, T> _elements;
-    std::unordered_map<std::string, std::size_t> _counts;
+    std::map<std::pair<int, std::string>, T> _elements;
+    std::unordered_map<std::pair<int, std::string>, std::size_t, pair_hash> _counts;
     std::function<std::string (std::string)> _normalize;
     boost::mutex _mutex;
   };
+
 }
+

@@ -21,9 +21,10 @@
 #include <vector>
 
 
-WMO::WMO(const std::string& filenameArg)
+WMO::WMO(const std::string& filenameArg, noggit::NoggitRenderContext context)
   : AsyncObject(filenameArg)
   , _finished_upload(false)
+  , _context(context)
 {
 }
 
@@ -118,7 +119,7 @@ void WMO::finishLoading ()
 
         if (mapping.second)
         {
-          textures.emplace_back(texture);
+          textures.emplace_back(texture, _context);
         }
         return mapping.first->second;
       }
@@ -176,7 +177,7 @@ void WMO::finishLoading ()
     {
       if (MPQFile::exists(path))
       {
-        skybox = scoped_model_reference(path);
+        skybox = scoped_model_reference(path, _context);
       }
     }
   }
@@ -293,7 +294,7 @@ void WMO::finishLoading ()
     size_t after_entry (f.getPos() + 0x28);
     f.read (&x, sizeof (x));
 
-    modelis.emplace_back(ddnames + x.name_offset, &f);
+    modelis.emplace_back(ddnames + x.name_offset, &f, _context);
     model_nearest_light_vector.emplace_back();
 
     f.seek (after_entry);

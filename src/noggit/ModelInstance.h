@@ -8,6 +8,7 @@
 #include <noggit/MapHeaders.h> // ENTRY_MDDF
 #include <noggit/ModelManager.h>
 #include <noggit/Selection.h>
+#include <noggit/ContextObject.hpp>
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
 #include <opengl/shader.fwd.hpp>
@@ -38,8 +39,12 @@ public:
   // longest side of an AABB transformed model's bounding box from the M2 header
   float size_cat;
 
-  explicit ModelInstance(std::string const& filename);
-  explicit ModelInstance(std::string const& filename, ENTRY_MDDF const*d);
+  explicit ModelInstance(std::string const& filename,
+                        noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+
+  explicit ModelInstance(std::string const& filename,
+                        ENTRY_MDDF const*d,
+                        noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
 
   ModelInstance(ModelInstance const& other) = default;
   ModelInstance& operator= (ModelInstance const& other) = default;
@@ -56,8 +61,10 @@ public:
     , _extents(other._extents)
     , _transform_mat_transposed(other._transform_mat_transposed)
     , _transform_mat_inverted(other._transform_mat_inverted)
+    , _context(other._context)
   {
   }
+
   ModelInstance& operator= (ModelInstance&& other)
   {
     std::swap (model, other.model);
@@ -71,6 +78,7 @@ public:
     std::swap (_extents, other._extents);
     std::swap(_transform_mat_transposed, other._transform_mat_transposed);
     std::swap(_transform_mat_inverted, other._transform_mat_inverted);
+    std::swap(_context, other._context);
     return *this;
   }
 
@@ -102,6 +110,8 @@ public:
 
 protected:
   bool _need_recalc_extents = true;
+  noggit::NoggitRenderContext _context;
+
   std::vector<math::vector_3d> _extents = std::vector<math::vector_3d>(2);
 
   virtual void update_transform_matrix();
@@ -116,16 +126,19 @@ public:
   math::quaternion doodad_orientation;
   math::vector_3d world_pos;
 
-  explicit wmo_doodad_instance(std::string const& filename, MPQFile* f);
+  explicit wmo_doodad_instance(std::string const& filename
+      , MPQFile* f
+      , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
 
   wmo_doodad_instance(wmo_doodad_instance const& other) = default;
   wmo_doodad_instance& operator= (wmo_doodad_instance const& other) = default;
 
-  wmo_doodad_instance (wmo_doodad_instance&& other)
-    : ModelInstance (other)
-    , doodad_orientation (other.doodad_orientation)
-    , world_pos (other.world_pos)
+  wmo_doodad_instance(wmo_doodad_instance&& other)
+    : ModelInstance(other)
+    , doodad_orientation(other.doodad_orientation)
+    , world_pos(other.world_pos)
     , _need_matrix_update(other._need_matrix_update)
+    , _context(other._context)
   {
   }
 
@@ -135,6 +148,7 @@ public:
     std::swap (doodad_orientation, other.doodad_orientation);
     std::swap (world_pos, other.world_pos);
     std::swap (_need_matrix_update, other._need_matrix_update);
+    std::swap (_context, other._context);
     return *this;
   }
 
@@ -149,4 +163,5 @@ protected:
 
 private:
   bool _need_matrix_update = true;
+  noggit::NoggitRenderContext _context;
 };

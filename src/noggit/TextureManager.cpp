@@ -207,8 +207,9 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
   }
 }
 
-blp_texture::blp_texture(const std::string& filenameArg)
+blp_texture::blp_texture(const std::string& filenameArg, noggit::NoggitRenderContext context)
   : AsyncObject(filenameArg)
+  , _context(context)
 {
 }
 
@@ -425,17 +426,19 @@ namespace noggit
   }
 }
 
-scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& filename)
-  : _blp_texture (TextureManager::_.emplace (filename))
+scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& filename, noggit::NoggitRenderContext context)
+  : _blp_texture(TextureManager::_.emplace(filename, context))
+  , _context(context)
 {}
 
 scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_reference const& other)
-  : _blp_texture (other._blp_texture ? TextureManager::_.emplace (other._blp_texture->filename) : nullptr)
+  : _blp_texture(other._blp_texture ? TextureManager::_.emplace(other._blp_texture->filename, other._context) : nullptr)
+  , _context(other._context)
 {}
 
 void scoped_blp_texture_reference::Deleter::operator() (blp_texture* texture) const
 {
-  TextureManager::_.erase (texture->filename);
+  TextureManager::_.erase(texture->filename, texture->getContext());
 }
 
 blp_texture* scoped_blp_texture_reference::operator->() const
@@ -449,5 +452,5 @@ blp_texture* scoped_blp_texture_reference::get() const
 
 bool scoped_blp_texture_reference::operator== (scoped_blp_texture_reference const& other) const
 {
-  return std::tie (_blp_texture) == std::tie (other._blp_texture);
+  return std::tie(_blp_texture) == std::tie(other._blp_texture);
 }

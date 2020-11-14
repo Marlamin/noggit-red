@@ -166,6 +166,8 @@ namespace opengl
       void bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage);
 
     void drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices);
+
+    QOpenGLContext* getCurrentContext();
   };
 }
 

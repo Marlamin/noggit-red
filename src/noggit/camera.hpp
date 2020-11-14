@@ -34,6 +34,8 @@ namespace noggit
     void move_horizontal (float sign, float dt);
     void move_vertical (float sign, float dt);
 
+    void move_forward_factor (float sign, float factor);
+
     math::vector_3d position;
     float move_speed;
 

@@ -10,13 +10,14 @@
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 
-WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d)
-  : wmo(filename)
+WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggit::NoggitRenderContext context)
+  : wmo(filename, context)
   , pos(math::vector_3d(d->pos[0], d->pos[1], d->pos[2]))
   , dir(math::vector_3d(d->rot[0], d->rot[1], d->rot[2]))
   , mUniqueID(d->uniqueID), mFlags(d->flags)
   , mUnknown(d->unknown), mNameset(d->nameSet)
   , _doodadset(d->doodadSet)
+  , _context(context)
 {
   extents[0] = math::vector_3d(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
   extents[1] = math::vector_3d(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
@@ -25,8 +26,8 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d)
   change_doodadset(_doodadset);
 }
 
-WMOInstance::WMOInstance(std::string const& filename)
-  : wmo(filename)
+WMOInstance::WMOInstance(std::string const& filename, noggit::NoggitRenderContext context)
+  : wmo(filename, context)
   , pos(math::vector_3d(0.0f, 0.0f, 0.0f))
   , dir(math::vector_3d(0.0f, 0.0f, 0.0f))
   , mUniqueID(0)
@@ -34,6 +35,7 @@ WMOInstance::WMOInstance(std::string const& filename)
   , mUnknown(0)
   , mNameset(0)
   , _doodadset(0)
+  , _context(context)
 {
   change_doodadset(_doodadset);
 }

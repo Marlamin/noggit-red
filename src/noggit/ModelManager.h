@@ -4,6 +4,7 @@
 
 #include <noggit/Model.h>
 #include <noggit/multimap_with_normalized_key.hpp>
+#include <noggit/ContextObject.hpp>
 
 #include <map>
 #include <string>
@@ -27,37 +28,46 @@ private:
 
 struct scoped_model_reference
 {
-  scoped_model_reference (std::string const& filename)
-    : _valid (true)
-    , _filename (filename)
-    , _model (ModelManager::_.emplace (_filename))
+  scoped_model_reference (
+      std::string const& filename
+      , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW)
+
+    : _valid(true)
+    , _filename(filename)
+    , _model(ModelManager::_.emplace (_filename, context))
+    , _context(context)
+
   {}
 
   scoped_model_reference (scoped_model_reference const& other)
     : _valid (other._valid)
     , _filename (other._filename)
-    , _model (ModelManager::_.emplace (_filename))
+    , _model (ModelManager::_.emplace(_filename, other._context))
+    , _context(other._context)
   {}
   scoped_model_reference& operator= (scoped_model_reference const& other)
   {
     _valid = other._valid;
     _filename = other._filename;
-    _model = ModelManager::_.emplace (_filename);
+    _model = ModelManager::_.emplace (_filename, other._context);
+    _context = other._context;
     return *this;
   }
 
   scoped_model_reference (scoped_model_reference&& other)
-    : _valid (other._valid)
-    , _filename (other._filename)
-    , _model (other._model)
+    : _valid(other._valid)
+    , _filename(other._filename)
+    , _model(other._model)
+    , _context(other._context)
   {
     other._valid = false;
   }
   scoped_model_reference& operator= (scoped_model_reference&& other)
   {
-    std::swap (_valid, other._valid);
-    std::swap (_filename, other._filename);
-    std::swap (_model, other._model);
+    std::swap(_valid, other._valid);
+    std::swap(_filename, other._filename);
+    std::swap(_model, other._model);
+    std::swap(_context, other._context);
     other._valid = false;
     return *this;
   }
@@ -66,7 +76,7 @@ struct scoped_model_reference
   {
     if (_valid)
     {
-      ModelManager::_.erase (_filename);
+      ModelManager::_.erase(_filename, _context);
     }
   }
 
@@ -83,4 +93,5 @@ private:
   bool _valid;
   std::string _filename;
   Model* _model;
+  noggit::NoggitRenderContext _context;
 };

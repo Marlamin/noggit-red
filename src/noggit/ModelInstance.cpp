@@ -7,17 +7,20 @@
 #include <noggit/Model.h> // Model, etc.
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h>
+#include <noggit/ContextObject.hpp>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
-ModelInstance::ModelInstance(std::string const& filename)
-  : model (filename)
+ModelInstance::ModelInstance(std::string const& filename, noggit::NoggitRenderContext context)
+  : model (filename, context)
+  , _context(context)
 {
 }
 
-ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d)
-  : model (filename)
+ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, noggit::NoggitRenderContext context)
+  : model (filename, context)
+  , _context(context)
 {
 	uid = d->uniqueID;
 	pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
@@ -239,8 +242,9 @@ std::vector<math::vector_3d> const& ModelInstance::extents()
 }
 
 
-wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f)
-  : ModelInstance (filename)
+wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f, noggit::NoggitRenderContext context)
+  : ModelInstance(filename, context)
+  , _context(context)
 {
   float ff[4];
 

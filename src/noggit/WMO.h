@@ -12,6 +12,7 @@
 #include <noggit/TextureManager.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/wmo_liquid.hpp>
+#include <noggit/ContextObject.hpp>
 #include <opengl/primitives.hpp>
 
 #include <boost/optional.hpp>
@@ -249,7 +250,7 @@ static_assert ( sizeof (mohd_flags) == sizeof (std::uint16_t)
 class WMO : public AsyncObject
 {
 public:
-  explicit WMO(const std::string& name);
+  explicit WMO(const std::string& name, noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
 
   void draw ( opengl::scoped::use_program& wmo_shader
             , math::matrix_4x4 const& model_view
@@ -267,6 +268,7 @@ public:
             , bool world_has_skies
             , display_mode display
             );
+
   bool draw_skybox( math::matrix_4x4 const& model_view
                   , math::vector_3d const& camera_pos
                   , opengl::scoped::use_program& m2_shader
@@ -308,6 +310,8 @@ public:
 
   boost::optional<scoped_model_reference> skybox;
 
+  noggit::NoggitRenderContext _context;
+
   bool is_hidden() const { return _hidden; }
   void toggle_visibility() { _hidden = !_hidden; }
   void show() { _hidden = false ; }
@@ -333,22 +337,26 @@ private:
 
 struct scoped_wmo_reference
 {
-  scoped_wmo_reference (std::string const& filename)
-    : _valid (true)
-    , _filename (filename)
-    , _wmo (WMOManager::_.emplace (_filename))
+  scoped_wmo_reference (std::string const& filename
+    , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW)
+    : _valid(true)
+    , _filename(filename)
+    , _context(context)
+    , _wmo (WMOManager::_.emplace(_filename, context))
   {}
 
   scoped_wmo_reference (scoped_wmo_reference const& other)
-    : _valid (other._valid)
-    , _filename (other._filename)
-    , _wmo (WMOManager::_.emplace (_filename))
+    : _valid(other._valid)
+    , _filename(other._filename)
+    , _wmo(WMOManager::_.emplace(_filename, other._context))
+    , _context(other._context)
   {}
   scoped_wmo_reference& operator= (scoped_wmo_reference const& other)
   {
     _valid = other._valid;
     _filename = other._filename;
-    _wmo = WMOManager::_.emplace (_filename);
+    _wmo = WMOManager::_.emplace(_filename, other._context);
+    _context = other._context;
     return *this;
   }
 
@@ -356,6 +364,7 @@ struct scoped_wmo_reference
     : _valid (other._valid)
     , _filename (other._filename)
     , _wmo (other._wmo)
+    , _context (other._context)
   {
     other._valid = false;
   }
@@ -364,6 +373,7 @@ struct scoped_wmo_reference
     std::swap(_valid, other._valid);
     std::swap(_filename, other._filename);
     std::swap(_wmo, other._wmo);
+    std::swap(_context, other._context);
     other._valid = false;
     return *this;
   }
@@ -372,7 +382,7 @@ struct scoped_wmo_reference
   {
     if (_valid)
     {
-      WMOManager::_.erase (_filename);
+      WMOManager::_.erase(_filename, _context);
     }
   }
 
@@ -390,4 +400,5 @@ private:
 
   std::string _filename;
   WMO* _wmo;
+  noggit::NoggitRenderContext _context;
 };

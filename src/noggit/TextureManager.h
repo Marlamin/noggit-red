@@ -3,6 +3,7 @@
 #pragma once
 
 #include <noggit/AsyncObject.h>
+#include <noggit/ContextObject.hpp>
 #include <noggit/multimap_with_normalized_key.hpp>
 #include <opengl/texture.hpp>
 #include <opengl/context.hpp>
@@ -22,9 +23,10 @@
 
 struct BLPHeader;
 
+struct scoped_blp_texture_reference;
 struct blp_texture : public opengl::texture, AsyncObject
 {
-  blp_texture (std::string const& filename);
+  blp_texture (std::string const& filename, noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
   void finishLoading();
 
   void loadFromUncompressedData(BLPHeader const* lHeader, char const* lData);
@@ -35,6 +37,8 @@ struct blp_texture : public opengl::texture, AsyncObject
 
   void bind();
   void upload();
+
+  noggit::NoggitRenderContext getContext() { return _context; };
 
   virtual async_priority loading_priority() const
   {
@@ -47,13 +51,14 @@ private:
   int _width;
   int _height;
 
+  noggit::NoggitRenderContext _context;
+
 private:
   std::map<int, std::vector<uint32_t>> _data;
   std::map<int, std::vector<uint8_t>> _compressed_data;
   boost::optional<GLint> _compression_format;
 };
 
-struct scoped_blp_texture_reference;
 class TextureManager
 {
 public:
@@ -67,7 +72,8 @@ private:
 struct scoped_blp_texture_reference
 {
   scoped_blp_texture_reference() = delete;
-  scoped_blp_texture_reference (std::string const& filename);
+  scoped_blp_texture_reference (std::string const& filename,
+                                noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
   scoped_blp_texture_reference (scoped_blp_texture_reference const& other);
   scoped_blp_texture_reference (scoped_blp_texture_reference&&) = default;
   scoped_blp_texture_reference& operator= (scoped_blp_texture_reference const&) = delete;
@@ -85,6 +91,7 @@ private:
     void operator() (blp_texture*) const;
   };
   std::unique_ptr<blp_texture, Deleter> _blp_texture;
+  noggit::NoggitRenderContext _context;
 };
 
 namespace noggit

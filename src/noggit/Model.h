@@ -14,6 +14,7 @@
 #include <noggit/Particle.h>
 #include <noggit/TextureManager.h>
 #include <noggit/tool_enums.hpp>
+#include <noggit/ContextObject.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
 
@@ -211,7 +212,7 @@ public:
     return std::vector<T>(start, start + count);
   }
 
-  Model(const std::string& name);
+  Model(const std::string& name, noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
 
   void draw( math::matrix_4x4 const& model_view
            , ModelInstance& instance
@@ -296,6 +297,8 @@ private:
   int _current_anim_seq;
   int _anim_time;
   int _global_animtime;
+
+  noggit::NoggitRenderContext _context;
 
   void initCommon(const MPQFile& f);
   bool isAnimated(const MPQFile& f);

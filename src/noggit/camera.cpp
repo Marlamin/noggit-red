@@ -91,6 +91,11 @@ namespace noggit
     position += direction() * sign * move_speed * dt;
   }
 
+  void camera::move_forward_factor (float sign, float factor)
+  {
+    position += direction() * sign * factor;
+  }
+
   void camera::move_horizontal (float sign, float dt)
   {
     math::vector_3d const up (0.0f, 1.0f, 0.0f);

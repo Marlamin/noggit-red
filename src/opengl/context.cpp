@@ -124,7 +124,7 @@ namespace opengl
         {
           errors += _extra_info();
 #ifndef NOGGIT_DO_NOT_THROW_ON_OPENGL_ERRORS
-          LogError << _function << ":" + errors << std::endl;
+           LogError << _function << ":" + errors << std::endl;
 #else
           throw std::runtime_error (_function + ":" + errors);
 #endif
@@ -750,5 +750,10 @@ namespace opengl
   {
     scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (index_buffer);
     return drawElements (mode, count, type, indices);
+  }
+
+  QOpenGLContext* context::getCurrentContext()
+  {
+    return _current_context;
   }
 }

@@ -16,9 +16,10 @@
 #include <sstream>
 #include <string>
 
-Model::Model(const std::string& filename)
+Model::Model(const std::string& filename, noggit::NoggitRenderContext context)
   : AsyncObject(filename)
   , _finished_upload(false)
+  , _context(context)
 {
   memset(&header, 0, sizeof(ModelHeader));
 }
@@ -1610,7 +1611,7 @@ void Model::lightsOff(opengl::light lbase)
 void Model::upload()
 {
   for (std::string texture : _textureFilenames)
-    _textures.emplace_back(texture);
+    _textures.emplace_back(texture, _context);
 
   _buffers.upload();
   _vertex_arrays.upload();
