@@ -97,12 +97,13 @@ void AsyncLoader::process()
       std::lock_guard<std::mutex> const lock(_guard);
 
       object->error_on_loading();
-      _currently_loading.remove(object);
 
       if (object->is_required_when_saving())
       {
         _important_object_failed_loading = true;
       }
+
+      _currently_loading.remove(object);
     }
   }
 }
