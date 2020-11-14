@@ -77,26 +77,24 @@ void ModelViewer::setModel(std::string const &filename)
 
 void ModelViewer::resetCamera()
 {
+  _camera.reset();
   float radius = 0.f;
 
   if (_model_instance.which() == eEntry_WMO)
   {
     WMOInstance* wmo = boost::get<selected_wmo_type>(_model_instance);
-    auto bb_center = (wmo->extents[0] + wmo->extents[1]) / 2;
-    radius = (bb_center - wmo->extents[0]).length();
+    _camera.position = (wmo->extents[0] + wmo->extents[1]) / 2.0f;
+    radius = std::max((_camera.position - wmo->extents[0]).length(), (_camera.position - wmo->extents[1]).length());
 
   }
   else
   {
     ModelInstance* model = boost::get<selected_model_type>(_model_instance);
-    auto extents = model->extents();
-
-    auto bb_center = (extents[0] + extents[1]) / 2;
-    radius = (bb_center - extents[0]).length();
+    _camera.position = (model->extents()[0] + model->extents()[1]) / 2.0f;
+    radius = std::max((_camera.position - model->extents()[0]).length(), (_camera.position - model->extents()[1]).length());
   }
 
-  float distance_factor = abs( aspect_ratio() * radius / sin(_camera.fov()) / 2);
-  _camera.position = {0.f, 0.f, 0.f};
+  float distance_factor = abs( aspect_ratio() * radius / sin(_camera.fov()._ / 2.f));
   _camera.move_forward_factor(-1.f, distance_factor);
 
 }

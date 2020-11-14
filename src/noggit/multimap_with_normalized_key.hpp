@@ -48,7 +48,7 @@ namespace noggit
                 LogDebug << key << ": " << _counts.at(pair) << std::endl;
               }
             );
-            */
+      */
     }
 
     template<typename... Args>

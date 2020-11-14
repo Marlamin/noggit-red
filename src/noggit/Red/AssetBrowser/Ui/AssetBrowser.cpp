@@ -33,6 +33,24 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
       }
   );
 
+  // Handle preview rendering
+  connect(ui->listfileTree, &QTreeView::expanded
+      ,[this] (const QModelIndex& index)
+          {
+            for (int i = 0; i != _model->rowCount(index); ++i)
+            {
+              auto child = index.child(i, 0);
+              auto path = child.data(Qt::UserRole).toString();
+              if (path.endsWith(".wmo") || path.endsWith(".m2"))
+              {
+                // do icon rendering here
+              }
+            }
+          }
+
+  );
+
+
   auto start = std::chrono::high_resolution_clock::now();
 
   updateModelData();

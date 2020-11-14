@@ -25,6 +25,8 @@ QStandardItem* TreeManager::addItem(QString path)
     {
       item->appendRow((child = new QStandardItem(elt)));
       child->setData(QVariant(path_remainder), Qt::UserRole);
+      child->setEditable(false);
+      child->setCheckable(false);
 
       layered_items[path_remainder] = child;
     }
