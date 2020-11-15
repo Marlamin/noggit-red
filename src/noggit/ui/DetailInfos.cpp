@@ -9,7 +9,7 @@ namespace noggit
   namespace ui
   {
     detail_infos::detail_infos(QWidget* parent)
-      : widget (parent)
+      : widget (parent, Qt::Window)
     {
       setWindowFlags (Qt::Tool);
       auto layout (new QFormLayout (this));

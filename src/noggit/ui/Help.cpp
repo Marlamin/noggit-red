@@ -17,7 +17,7 @@ namespace noggit
   {
 
     help::help(QWidget* parent)
-      : widget (parent)
+      : widget (parent, Qt::Window)
     {
       setWindowTitle ("Help");
       setWindowIcon (QIcon (":/icon"));
