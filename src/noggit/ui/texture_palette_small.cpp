@@ -107,7 +107,7 @@ namespace noggit
       connect(_add_button, &QAbstractButton::clicked, this, &texture_palette_small::addTexture);
 
       _remove_button = new QPushButton(this);
-      _remove_button->setIcon(font_awesome_icon(font_awesome::timescircle));
+      _remove_button->setIcon(font_awesome_icon(font_awesome::times));
       button_layout->addWidget(_remove_button);
       connect(_remove_button, &QAbstractButton::clicked, this, &texture_palette_small::removeSelectedTexture);
 

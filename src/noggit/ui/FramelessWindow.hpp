@@ -25,15 +25,16 @@ namespace noggit::ui
     titleBarWidget->windowTitle->setText(window->windowTitle());
 
     titleBarWidget->iconButton->setAccessibleName("titlebar_icon");
+    titleBarWidget->iconButton->setMinimumWidth(32);
     titleBarWidget->minimizeButton->setIcon(font_awesome_icon(font_awesome::windowminimize));
-    titleBarWidget->minimizeButton->setIconSize(QSize(14, 14));
+    titleBarWidget->minimizeButton->setIconSize(QSize(16, 16));
     titleBarWidget->minimizeButton->setAccessibleName("titlebar_minimize");
-    titleBarWidget->maximizeButton->setIcon(font_awesome_icon(font_awesome::windowrestore));
+    titleBarWidget->maximizeButton->setIcon(font_awesome_icon(font_awesome::windowmaximize));
     titleBarWidget->maximizeButton->setAccessibleName("titlebar_maximize");
     titleBarWidget->maximizeButton->setIconSize(QSize(14, 14));
     titleBarWidget->closeButton->setIcon(font_awesome_icon(font_awesome::times));
     titleBarWidget->closeButton->setAccessibleName("titlebar_close");
-    titleBarWidget->closeButton->setIconSize(QSize(16, 16));
+    titleBarWidget->closeButton->setIconSize(QSize(18, 18));
 
     QObject::connect(titleBarWidget->closeButton,
                      &QPushButton::clicked,
