@@ -16,7 +16,7 @@ QStandardItem* TreeManager::addItem(QString path)
 
   while (!p.isEmpty())
   {
-    QString elt = p.takeFirst();
+    QString elt = p.takeFirst().toLower();
     path_remainder = path_remainder + elt;
 
     QStandardItem* child = find(path_remainder);
