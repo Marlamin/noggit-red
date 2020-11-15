@@ -14,6 +14,7 @@
 #include <chrono>
 
 #include <QSettings>
+#include <QColor>
 
 
 using namespace noggit::Red;
@@ -68,6 +69,16 @@ void PreviewRenderer::setModel(std::string const &filename)
   {
     throw std::logic_error("Preview renderer only supports viewing M2 and WMO for now.");
   }
+
+  auto diffuse_color = _settings->value("assetBrowser/diffuse_light").value<QColor>();
+  _diffuse_light = {static_cast<float>(diffuse_color.redF()),
+                    static_cast<float>(diffuse_color.greenF()),
+                    static_cast<float>(diffuse_color.blueF())};
+
+ auto ambient_color = _settings->value("assetBrowser/ambient_light").value<QColor>();
+ _ambient_light = {static_cast<float>(ambient_color.redF()),
+                   static_cast<float>(ambient_color.greenF()),
+                   static_cast<float>(ambient_color.blueF())};
 
   resetCamera();
 }
@@ -201,8 +212,8 @@ void PreviewRenderer::draw()
       wmo_program.uniform("draw_fog", 0);
 
       wmo_program.uniform("exterior_light_dir", math::vector_3d(0.0f, 1.0f, 0.0f));
-      wmo_program.uniform("exterior_diffuse_color", math::vector_3d(1.0f, 1.0f, 1.0f));
-      wmo_program.uniform("exterior_ambient_color", math::vector_3d(1.0f, 1.0f, 1.0f));
+      wmo_program.uniform("exterior_diffuse_color", _diffuse_light);
+      wmo_program.uniform("exterior_ambient_color", _ambient_light);
 
      for (auto& wmo_instance : _wmo_instances)
      {
@@ -244,8 +255,8 @@ void PreviewRenderer::draw()
     m2_shader.uniform("draw_fog", 0);
 
     m2_shader.uniform("light_dir", math::vector_3d(0.0f, 1.0f, 0.0f));
-    m2_shader.uniform("diffuse_color", math::vector_3d(1.0f, 1.0f, 1.0f));
-    m2_shader.uniform("ambient_color", math::vector_3d(1.0f, 1.0f, 1.0f));
+    m2_shader.uniform("diffuse_color", _diffuse_light);
+    m2_shader.uniform("ambient_color", _ambient_light);
 
     for (auto& model_instance : _model_instances)
     {

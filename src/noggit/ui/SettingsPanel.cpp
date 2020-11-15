@@ -213,6 +213,19 @@ namespace noggit
           _settings->value("additional_file_loading_log", false).toBool());
       ui->_theme->setCurrentText(_settings->value("theme", "Dark").toString());
 
+      ui->assetBrowserBgCol->setColor(_settings->value("assetBrowser/background_color",
+QVariant::fromValue(QColor(127, 127, 127))).value<QColor>());
+      ui->assetBrowserDiffuseLight->setColor(_settings->value("assetBrowser/diffuse_light",
+QVariant::fromValue(QColor::fromRgbF(1.0f, 0.532352924f, 0.0f))).value<QColor>());
+
+      ui->assetBrowserAmbientLight->setColor(_settings->value("assetBrowser/ambient_light",
+QVariant::fromValue(QColor::fromRgbF(0.407770514f, 0.508424163f, 0.602650642f))).value<QColor>());
+
+      ui->assetBrowserCopyToClipboard->setChecked(_settings->value("assetBrowser/copy_to_clipboard", true).toBool());
+      ui->assetBrowserDefaultModel->setText(_settings->value("assetBrowser/default_model",
+                                     "world/wmo/azeroth/human/buildings/human_farm/farm.wmo").toString());
+      ui->assetBrowserMoveSensitivity->setValue(_settings->value("assetBrowser/move_sensitivity", 15.0f).toFloat());
+
 
 #ifdef USE_MYSQL_UID_STORAGE
       ui->_mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
@@ -273,6 +286,12 @@ namespace noggit
       _settings->setValue("wireframe/width", ui->_wireframe_width->value());
       _settings->setValue("wireframe/color", ui->_wireframe_color->color());
       _settings->setValue("theme", ui->_theme->currentText());
+      _settings->setValue("assetBrowser/background_color", ui->assetBrowserBgCol->color());
+      _settings->setValue("assetBrowser/diffuse_light", ui->assetBrowserDiffuseLight->color());
+      _settings->setValue("assetBrowser/ambient_light", ui->assetBrowserAmbientLight->color());
+      _settings->setValue("assetBrowser/copy_to_clipboard", ui->assetBrowserCopyToClipboard->isChecked());
+      _settings->setValue("assetBrowser/default_model", ui->assetBrowserDefaultModel->text());
+      _settings->setValue("assetBrowser/move_sensitivity", ui->assetBrowserMoveSensitivity->text());
 
       _settings->sync();
     }

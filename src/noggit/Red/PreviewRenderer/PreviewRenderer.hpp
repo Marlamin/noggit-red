@@ -71,6 +71,9 @@ namespace noggit::Red
     QOpenGLContext _offscreen_context;
     QOpenGLFramebufferObjectFormat _fmt;
     QOffscreenSurface _offscreen_surface;
+
+    math::vector_3d _diffuse_light;
+    math::vector_3d _ambient_light;
   };
 
 }
