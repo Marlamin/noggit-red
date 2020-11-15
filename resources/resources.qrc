@@ -1,7 +1,7 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/fonts">
-        <file>fa-solid-900.ttf</file>
+        <file>Font Awesome 5 Pro-Regular-400.otf</file>
         <file>noggit_font.ttf</file>
     </qresource>
     <qresource prefix="/">
