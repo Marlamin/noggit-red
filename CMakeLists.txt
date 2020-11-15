@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.3)
 cmake_policy (SET CMP0057 NEW) # "Support new IN_LIST if() operator."
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
+set (CMAKE_C_STANDARD  11)
+set (CMAKE_C_STANDARD_REQUIRED  ON)
 
 # Project name
 project(Noggit)
@@ -80,6 +82,8 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Werror=mismatched-tags)
 
 # yes, we intend to use multi-character character constants
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
+
+add_compiler_flag_if_supported (CMAKE_C_FLAGS -Wno-implicit-function-declaration)
 
 if(WIN32)
   OPTION(NAME_REUSE_AS_ERROR "Make name reuse warnings errors ?" OFF)

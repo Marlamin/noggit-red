@@ -3,6 +3,7 @@
 #include <noggit/MPQ.h>
 #include <noggit/Log.h>
 #include <noggit/ContextObject.hpp>
+#include <noggit/ui/FramelessWindow.hpp>
 
 #include <QStandardItemModel>
 #include <QItemSelectionModel>
@@ -16,9 +17,10 @@ using namespace noggit::Red::AssetBrowser::Ui;
 
 AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
 {
-  setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
   ui = new ::Ui::AssetBrowser;
   ui->setupUi(this);
+  ui::setupFramelessWindow(ui->titlebar, this, minimumSize(), maximumSize(), false);
+  setWindowFlags(windowFlags() | Qt::Tool | Qt::WindowStaysOnTopHint);
 
   _model = new QStandardItemModel(this);
   _sort_model = new QSortFilterProxyModel(this);
@@ -84,14 +86,8 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
 
   );
 
-  auto start = std::chrono::high_resolution_clock::now();
-
   updateModelData();
 
-  auto stop = std::chrono::high_resolution_clock::now();
-
-  auto duration = duration_cast<std::chrono::seconds>(stop - start);
-  LogDebug << duration.count() << std::endl;
 
 }
 

@@ -368,7 +368,7 @@ QPixmap* PreviewRenderer::renderToPixmap()
 
   do
   {
-    std::this_thread::sleep_for(std::chrono::nanoseconds (10));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
     gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw();
   } while (async_loader.is_loading());
