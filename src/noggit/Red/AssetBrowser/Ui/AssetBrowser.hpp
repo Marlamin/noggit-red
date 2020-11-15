@@ -7,6 +7,7 @@
 
 #include <QWidget>
 #include <QStandardItemModel>
+#include <QSortFilterProxyModel>
 
 
 namespace noggit
@@ -22,6 +23,7 @@ namespace noggit
     private:
       ::Ui::AssetBrowser* ui;
       QStandardItemModel* _model;
+      QSortFilterProxyModel* _sort_model;
       PreviewRenderer* _preview_renderer;
 
 

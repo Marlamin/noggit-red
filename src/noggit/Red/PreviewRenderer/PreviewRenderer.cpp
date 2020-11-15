@@ -92,7 +92,7 @@ void PreviewRenderer::resetCamera()
   radius = std::max((_camera.position - extents[0]).length(), (_camera.position - extents[1]).length());
 
   float distance_factor = abs( aspect_ratio() * radius / sin(_camera.fov()._ / 2.f));
-  _camera.move_forward_factor(-1.f, distance_factor);
+  _camera.move_forward_factor(-1.f, 0.75f * distance_factor);
 
 }
 
@@ -366,12 +366,18 @@ QPixmap* PreviewRenderer::renderToPixmap()
 
   auto& async_loader = AsyncLoader::instance();
 
-  while(async_loader.is_loading())
+  do
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    std::this_thread::sleep_for(std::chrono::nanoseconds (10));
     gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw();
-  }
+  } while (async_loader.is_loading());
+
+  // Clearing alpha from image
+  gl.colorMask(false, false, false, true);
+  gl.clearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+  gl.colorMask(true, true, true, true);
 
   QPixmap result{};
   result = std::move(QPixmap::fromImage(pixel_buffer.toImage()));

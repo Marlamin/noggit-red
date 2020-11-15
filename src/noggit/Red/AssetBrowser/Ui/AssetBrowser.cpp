@@ -21,11 +21,24 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
   ui->setupUi(this);
 
   _model = new QStandardItemModel(this);
-  ui->listfileTree->setIconSize(QSize(128, 128));
-  ui->listfileTree->setModel(_model);
+  _sort_model = new QSortFilterProxyModel(this);
+  _sort_model->setFilterCaseSensitivity(Qt::CaseInsensitive);
+  _sort_model->setFilterRole(Qt::UserRole);
+  _sort_model->setRecursiveFilteringEnabled(true);
 
-  _preview_renderer = new PreviewRenderer(128, 128, noggit::NoggitRenderContext::ASSET_BROWSER_PREVIEW, this);
+  ui->listfileTree->setIconSize(QSize(90, 90));
+
+  _sort_model->setSourceModel(_model);
+  ui->listfileTree->setModel(_sort_model);
+
+  _preview_renderer = new PreviewRenderer(90, 90,
+      noggit::NoggitRenderContext::ASSET_BROWSER_PREVIEW, this);
   _preview_renderer->setVisible(false);
+
+  // just to initialize context, ugly-ish
+  _preview_renderer->setModelOffscreen("world/wmo/azeroth/buildings/human_farm/farm.wmo");
+  _preview_renderer->renderToPixmap();
+
 
   connect(ui->listfileTree->selectionModel(), &QItemSelectionModel::selectionChanged
       ,[=] (const QItemSelection& selected, const QItemSelection& deselected)
@@ -35,7 +48,7 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
           auto path = index.data(Qt::UserRole).toString();
           if (path.endsWith(".wmo") || path.endsWith(".m2"))
           {
-            ui->openGLWidget->setModel(path.toStdString());
+            ui->viewport->setModel(path.toStdString());
           }
         }
       }
@@ -45,7 +58,7 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
   connect(ui->listfileTree, &QTreeView::expanded
       ,[this] (const QModelIndex& index)
           {
-            for (int i = 0; i != _model->rowCount(index); ++i)
+            for (int i = 0; i != _sort_model->rowCount(index); ++i)
             {
               auto child = index.child(i, 0);
               auto path = child.data(Qt::UserRole).toString();
@@ -54,7 +67,7 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
                 _preview_renderer->setModelOffscreen(path.toStdString());
 
                 auto preview_pixmap = _preview_renderer->renderToPixmap();
-                auto item = _model->itemFromIndex(child);
+                auto item = _model->itemFromIndex(_sort_model->mapToSource(child));
                 item->setIcon(QIcon(*preview_pixmap));
               }
             }
@@ -62,6 +75,14 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
 
   );
 
+  // Handle search
+  connect(ui->searchButton, &QPushButton::clicked
+      ,[this]()
+          {
+            _sort_model->setFilterFixedString(ui->searchField->text());
+          }
+
+  );
 
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -120,6 +141,9 @@ void AssetBrowserWidget::updateModelData()
   QSettings settings;
   QString project_dir = settings.value("project/path").toString();
   recurseDirectory(tree_mgr, project_dir, project_dir);
+
+  _sort_model->setSortRole(Qt::UserRole);
+  _sort_model->sort(0, Qt::AscendingOrder);
 }
 
 AssetBrowserWidget::~AssetBrowserWidget()
