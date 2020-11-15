@@ -34,7 +34,7 @@ void ModelViewer::initializeGL()
 {
   opengl::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, width(), height());
-  gl.clearColor (0.7f, 0.5f, 0.5f, 1.0f);
+  gl.clearColor (0.5f, 0.5f, 0.5f, 1.0f);
 }
 
 void ModelViewer::paintGL()
@@ -165,46 +165,46 @@ void ModelViewer::keyPressEvent(QKeyEvent* event)
 {
   if (event->key() == Qt::Key_W)
   {
-    moving = 1.0f;
+    moving = 0.5f;
   }
   if (event->key() == Qt::Key_S)
   {
-    moving = -1.0f;
+    moving = -0.5f;
   }
 
   if (event->key() == Qt::Key_Up)
   {
-    lookat = 0.75f;
+    lookat = 0.5f;
   }
   if (event->key() == Qt::Key_Down)
   {
-    lookat = -0.75f;
+    lookat = -0.5f;
   }
 
   if (event->key() == Qt::Key_Right)
   {
-    turn = 0.75f;
+    turn = 0.5f;
   }
   if (event->key() == Qt::Key_Left)
   {
-    turn = -0.75f;
+    turn = -0.5f;
   }
 
   if (event->key() == Qt::Key_D)
   {
-    strafing = 1.0f;
+    strafing = 0.5f;
   }
   if (event->key() == Qt::Key_A)
   {
-    strafing = -1.0f;
+    strafing = -0.5f;
   }
 
   if (event->key() == Qt::Key_Q)
   {
-    updown = 1.0f;
+    updown = 0.5f;
   }
   if (event->key() == Qt::Key_E)
   {
-    updown = -1.0f;
+    updown = -0.5f;
   }
 }

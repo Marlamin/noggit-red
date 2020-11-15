@@ -92,7 +92,7 @@ void PreviewRenderer::resetCamera()
   radius = std::max((_camera.position - extents[0]).length(), (_camera.position - extents[1]).length());
 
   float distance_factor = abs( aspect_ratio() * radius / sin(_camera.fov()._ / 2.f));
-  _camera.move_forward_factor(-1.f, 0.75f * distance_factor);
+  _camera.move_forward_factor(-1.f, distance_factor);
 
 }
 
@@ -302,7 +302,7 @@ math::matrix_4x4 PreviewRenderer::model_view() const
 math::matrix_4x4 PreviewRenderer::projection() const
 {
   float far_z = _settings->value("farZ", 2048).toFloat();
-  return math::perspective(_camera.fov(), aspect_ratio(), 1.f, far_z);
+  return math::perspective(_camera.fov(), aspect_ratio(), 0.1f, far_z);
 }
 
 float PreviewRenderer::aspect_ratio() const
@@ -359,7 +359,7 @@ QPixmap* PreviewRenderer::renderToPixmap()
   pixel_buffer.bind();
 
   gl.viewport(0, 0, _width, _height);
-  gl.clearColor(0.75f, 0.5f, 0.5f, 1.f);
+  gl.clearColor(0.5f, 0.5f, 0.5f, 1.f);
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   draw();
@@ -372,6 +372,8 @@ QPixmap* PreviewRenderer::renderToPixmap()
     gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw();
   } while (async_loader.is_loading());
+  gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  draw();
 
   // Clearing alpha from image
   gl.colorMask(false, false, false, true);
