@@ -213,6 +213,7 @@ namespace noggit
           _settings->value("additional_file_loading_log", false).toBool());
       ui->_theme->setCurrentText(_settings->value("theme", "Dark").toString());
 
+
 #ifdef USE_MYSQL_UID_STORAGE
       ui->_mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
       ui->_mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
