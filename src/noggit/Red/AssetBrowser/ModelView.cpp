@@ -83,6 +83,9 @@ void ModelViewer::tick(float dt)
   {
     _camera.move_vertical(updown, dt);
   }
+
+  _animtime += dt * 1000.0f;
+
 }
 
 void ModelViewer::setModel(std::string const& filename)

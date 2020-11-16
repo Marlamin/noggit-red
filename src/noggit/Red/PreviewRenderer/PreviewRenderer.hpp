@@ -57,6 +57,8 @@ namespace noggit::Red
     std::vector<ModelInstance> _model_instances;
     std::vector<WMOInstance> _wmo_instances;
 
+    float _animtime = 0.f;
+
     std::vector<math::vector_3d> calcSceneExtents();
     virtual void draw();
     virtual math::matrix_4x4 model_view() const;
@@ -78,6 +80,7 @@ namespace noggit::Red
     math::vector_3d _diffuse_light;
     math::vector_3d _ambient_light;
     math::vector_3d _light_dir;
+
   };
 
 }

@@ -198,7 +198,7 @@ void PreviewRenderer::draw()
     // set anim time only once per frame
     {
       opengl::scoped::use_program water_shader {_liquid_render->shader_program()};
-      water_shader.uniform("animtime", 0 / 2880.f);
+      water_shader.uniform("animtime", _animtime / 2880.f);
 
       water_shader.uniform("model_view", model_view().transposed());
       water_shader.uniform("projection", projection().transposed());
@@ -260,6 +260,8 @@ void PreviewRenderer::draw()
   std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 
   {
+    ModelManager::resetAnim();
+
     opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
     m2_shader.uniform("model_view", model_view().transposed());
@@ -282,7 +284,7 @@ void PreviewRenderer::draw()
           , culldistance
           , _camera.position
           , false
-          , 0
+          , _animtime
           , false
           , false
           , model_with_particles
@@ -303,7 +305,7 @@ void PreviewRenderer::draw()
             , culldistance
             , _camera.position
             , false
-            , 0
+            , _animtime
             , false
             , false
             , model_with_particles
