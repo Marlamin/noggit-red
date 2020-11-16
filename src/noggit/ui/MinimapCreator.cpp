@@ -197,11 +197,11 @@ namespace noggit
       m2_include_box_layout_btns->addWidget(add_btn);
 
       auto remove_btn = new QPushButton("Remove", m2_include_widget);
-      remove_btn->setIcon(font_awesome_icon(font_awesome::timescircle));
+      remove_btn->setIcon(font_awesome_icon(font_awesome::times));
       m2_include_box_layout_btns->addWidget(remove_btn);
 
       auto clear_btn = new QPushButton("Clear all", m2_include_widget);
-      clear_btn->setIcon(font_awesome_icon(font_awesome::trash));
+      clear_btn->setIcon(font_awesome_icon(font_awesome::trashalt));
       m2_include_box_layout_btns->addWidget(clear_btn);
 
       // M2 instance include tab
@@ -230,11 +230,11 @@ namespace noggit
       m2_instance_include_box_layout_btns->addWidget(add_btn_m2i);
 
       auto remove_btn_m2i = new QPushButton("Remove", m2_instance_include_widget);
-      remove_btn_m2i->setIcon(font_awesome_icon(font_awesome::timescircle));
+      remove_btn_m2i->setIcon(font_awesome_icon(font_awesome::times));
       m2_instance_include_box_layout_btns->addWidget(remove_btn_m2i);
 
       auto clear_btn_m2i = new QPushButton("Clear all", m2_instance_include_widget);
-      clear_btn_m2i->setIcon(font_awesome_icon(font_awesome::trash));
+      clear_btn_m2i->setIcon(font_awesome_icon(font_awesome::trashalt));
       m2_instance_include_box_layout_btns->addWidget(clear_btn_m2i);
 
       // WMO model exclude tab
@@ -263,11 +263,11 @@ namespace noggit
       wmo_exclude_box_layout_btns->addWidget(add_btn_wmo);
 
       auto remove_btn_wmo = new QPushButton("Remove", wmo_exclude_widget);
-      remove_btn_wmo->setIcon(font_awesome_icon(font_awesome::timescircle));
+      remove_btn_wmo->setIcon(font_awesome_icon(font_awesome::times));
       wmo_exclude_box_layout_btns->addWidget(remove_btn_wmo);
 
       auto clear_btn_wmo = new QPushButton("Clear all", wmo_exclude_widget);
-      clear_btn_wmo->setIcon(font_awesome_icon(font_awesome::trash));
+      clear_btn_wmo->setIcon(font_awesome_icon(font_awesome::trashalt));
       wmo_exclude_box_layout_btns->addWidget(clear_btn_wmo);
 
       // WMO instance exclude tab
@@ -296,11 +296,11 @@ namespace noggit
       wmo_instance_exclude_box_layout_btns->addWidget(add_btn_wmo_i);
 
       auto remove_btn_wmo_i = new QPushButton("Remove", wmo_instance_exclude_widget);
-      remove_btn_wmo_i->setIcon(font_awesome_icon(font_awesome::timescircle));
+      remove_btn_wmo_i->setIcon(font_awesome_icon(font_awesome::times));
       wmo_instance_exclude_box_layout_btns->addWidget(remove_btn_wmo_i);
 
       auto clear_btn_wmo_i = new QPushButton("Clear all", wmo_instance_exclude_widget);
-      clear_btn_wmo_i->setIcon(font_awesome_icon(font_awesome::trash));
+      clear_btn_wmo_i->setIcon(font_awesome_icon(font_awesome::trashalt));
       wmo_instance_exclude_box_layout_btns->addWidget(clear_btn_wmo_i);
 
       // Lighting
