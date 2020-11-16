@@ -10,13 +10,14 @@
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
 #include <QRegularExpression>
+#include <QMainWindow>
 
 
 namespace noggit
 {
   namespace Red::AssetBrowser::Ui
   {
-    class AssetBrowserWidget : public QWidget
+    class AssetBrowserWidget : public QMainWindow
     {
     public:
       AssetBrowserWidget(QWidget* parent = nullptr);

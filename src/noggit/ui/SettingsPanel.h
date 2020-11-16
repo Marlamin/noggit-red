@@ -5,7 +5,7 @@
 #include <qt-color-widgets/color_selector.hpp>
 
 #include <QtCore/QSettings>
-#include <QDialog>
+#include <QMainWindow>
 #include <ui_SettingsPanel.h>
 
 
@@ -13,7 +13,7 @@ namespace noggit
 {
   namespace ui
   {
-    class settings : public QDialog
+    class settings : public QMainWindow
     {
       QSettings* _settings;
       Ui::SettingsPanel* ui;

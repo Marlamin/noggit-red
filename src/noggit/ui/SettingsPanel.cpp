@@ -31,14 +31,19 @@ namespace noggit
 {
   namespace ui
   {
-    settings::settings(QWidget *parent) : QDialog(parent), _settings(new QSettings(this))
+    settings::settings(QWidget *parent) : QMainWindow(parent, Qt::Window), _settings(new QSettings(this))
     {
-      setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
-
+      auto body = new QWidget(this);
       ui = new Ui::SettingsPanel;
-      ui->setupUi(this);
+      ui->setupUi(body);
+      setCentralWidget(body);
+      setWindowTitle("Settings");
 
-      setupFramelessWindow(ui->titlebar, this, minimumSize(), maximumSize(), false);
+      auto titlebar = new QWidget(this);
+      setupFramelessWindow(titlebar, this, minimumSize(), maximumSize(), false);
+      setMenuWidget(titlebar);
+
+      setWindowFlags(windowFlags() | Qt::Tool | Qt::WindowStaysOnTopHint);
 
       connect(ui->gamePathField, &QLineEdit::textChanged, [&](QString value)
               {

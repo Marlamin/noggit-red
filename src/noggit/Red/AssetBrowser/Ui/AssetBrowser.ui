@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1226</width>
-    <height>764</height>
+    <width>1195</width>
+    <height>792</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -50,16 +50,6 @@
       <property name="bottomMargin">
        <number>12</number>
       </property>
-      <item>
-       <widget class="QWidget" name="titlebar" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </item>
       <item>
        <widget class="QSplitter" name="splitter">
         <property name="orientation">

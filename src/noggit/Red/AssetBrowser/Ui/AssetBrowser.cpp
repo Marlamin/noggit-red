@@ -17,10 +17,19 @@
 using namespace noggit::Red::AssetBrowser::Ui;
 
 AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
+: QMainWindow(parent, Qt::Window)
 {
+  setWindowTitle("Asset Browser");
+
+  auto body = new QWidget(this);
   ui = new ::Ui::AssetBrowser;
-  ui->setupUi(this);
-  ui::setupFramelessWindow(ui->titlebar, this, minimumSize(), maximumSize(), true);
+  ui->setupUi(body);
+  setCentralWidget(body);
+
+  auto titlebar = new QWidget(this);
+  ui::setupFramelessWindow(titlebar, this, minimumSize(), maximumSize(), true);
+  setMenuWidget(titlebar);
+
   setWindowFlags(windowFlags() | Qt::Tool | Qt::WindowStaysOnTopHint);
 
   _model = new QStandardItemModel(this);
