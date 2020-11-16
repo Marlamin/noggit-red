@@ -8,6 +8,7 @@
 #include <QWidget>
 #include <QStandardItemModel>
 #include <QSortFilterProxyModel>
+#include <QRegularExpression>
 
 
 namespace noggit
@@ -25,6 +26,7 @@ namespace noggit
       QStandardItemModel* _model;
       QSortFilterProxyModel* _sort_model;
       PreviewRenderer* _preview_renderer;
+      QRegularExpression _wmo_group_and_lod_regex;
 
 
       void updateModelData();

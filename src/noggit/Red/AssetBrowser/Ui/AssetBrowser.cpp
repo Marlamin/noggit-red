@@ -7,7 +7,6 @@
 
 #include <QStandardItemModel>
 #include <QItemSelectionModel>
-#include <QRegularExpression>
 #include <QDir>
 #include <QSettings>
 #include <QPixmap>
@@ -86,6 +85,8 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
 
   );
 
+  _wmo_group_and_lod_regex = QRegularExpression(".+_\\d{3}(_lod.+)*.wmo");
+
   updateModelData();
 
 
@@ -110,7 +111,7 @@ void AssetBrowserWidget::recurseDirectory(Model::TreeManager& tree_mgr, const QS
     }
     else
     {
-      if (!((q_path.endsWith(".wmo") && !QRegularExpression(".+_\\d{3}(_lod.+)*.wmo").match(q_path).hasMatch())
+      if (!((q_path.endsWith(".wmo") && !_wmo_group_and_lod_regex.match(q_path).hasMatch())
       || q_path.endsWith(".m2")))
         continue;
 
@@ -126,7 +127,7 @@ void AssetBrowserWidget::updateModelData()
   {
     QString q_path = QString(path.c_str());
 
-    if (!((q_path.endsWith(".wmo") && !QRegularExpression(".+_\\d{3}(_lod.+)*.wmo").match(q_path).hasMatch())
+    if (!((q_path.endsWith(".wmo") && !_wmo_group_and_lod_regex.match(q_path).hasMatch())
     || q_path.endsWith(".m2")))
       continue;
 
