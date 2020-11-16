@@ -291,7 +291,7 @@ namespace noggit
       _settings->setValue("assetBrowser/ambient_light", ui->assetBrowserAmbientLight->color());
       _settings->setValue("assetBrowser/copy_to_clipboard", ui->assetBrowserCopyToClipboard->isChecked());
       _settings->setValue("assetBrowser/default_model", ui->assetBrowserDefaultModel->text());
-      _settings->setValue("assetBrowser/move_sensitivity", ui->assetBrowserMoveSensitivity->text());
+      _settings->setValue("assetBrowser/move_sensitivity", ui->assetBrowserMoveSensitivity->value());
 
       _settings->sync();
     }

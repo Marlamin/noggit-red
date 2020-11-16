@@ -15,6 +15,8 @@
 
 #include <QSettings>
 #include <QColor>
+#include <QMatrix4x4>
+#include <QVector3D>
 
 
 using namespace noggit::Red;
@@ -105,9 +107,9 @@ void PreviewRenderer::setModelOffscreen(std::string const& filename)
 }
 
 
-void PreviewRenderer::resetCamera()
+void PreviewRenderer::resetCamera(float x, float y, float z, float roll, float yaw, float pitch)
 {
-  _camera.reset();
+  _camera.reset(x, y, z, roll, yaw, pitch);
   float radius = 0.f;
 
   std::vector<math::vector_3d> extents = calcSceneExtents();
@@ -414,6 +416,21 @@ QPixmap* PreviewRenderer::renderToPixmap()
   }
 
   return &(_cache[curEntry] = std::move(result));
+}
+
+void PreviewRenderer::setLightDirection(float y, float z)
+{
+  _light_dir = {1.f, 0.f, 0.f};
+  QMatrix4x4 matrix = QMatrix4x4();
+  matrix.rotate(z, 1.f, 0.f, 0.f);
+  matrix.rotate(y, 0.f, 1.f, 0.f);
+
+  QVector3D light_dir = {_light_dir.x, _light_dir.y, _light_dir.z};
+  light_dir = matrix * light_dir;
+
+  _light_dir.x = light_dir.x();
+  _light_dir.y = light_dir.y();
+  _light_dir.z = light_dir.z();
 }
 
 

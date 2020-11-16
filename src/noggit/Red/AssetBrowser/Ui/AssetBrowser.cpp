@@ -143,6 +143,26 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
       }
   );
 
+  connect(viewport_overlay_ui->cameraXButton, &QPushButton::clicked
+      ,[this]()
+      {
+          ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, -90.f, 0.f);
+      }
+  );
+
+  connect(viewport_overlay_ui->cameraYButton, &QPushButton::clicked
+      ,[this]()
+      {
+          ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, 0, 90.f);
+      }
+  );
+
+  connect(viewport_overlay_ui->cameraZButton, &QPushButton::clicked
+      ,[this]()
+      {
+          ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
+      }
+  );
 
   _wmo_group_and_lod_regex = QRegularExpression(".+_\\d{3}(_lod.+)*.wmo");
 

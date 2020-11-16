@@ -111,11 +111,11 @@ namespace noggit
     position += up * sign * move_speed * dt;
   }
 
-  void camera::reset()
+  void camera::reset(float x, float y, float z, float roll, float yaw, float pitch)
   {
-    position = {0.f, 0.f, 0.f};
-    _roll = math::degrees(0.0f);
-    _yaw =  math::degrees(105.f);
-    _pitch =  math::degrees(20.f);
+    position = {x, y, z};
+    _roll = math::degrees(roll);
+    _yaw =  math::degrees(yaw);
+    _pitch =  math::degrees(pitch);
   }
 }

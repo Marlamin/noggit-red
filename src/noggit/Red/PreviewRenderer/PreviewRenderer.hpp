@@ -30,14 +30,14 @@ namespace noggit::Red
   public:
     explicit PreviewRenderer(int width, int height, noggit::NoggitRenderContext context, QWidget* parent = nullptr);
 
-    void resetCamera();
+    void resetCamera(float x = 0.f, float y = 0.f, float z = 0.f, float roll = 0.f, float yaw = 120.f, float pitch = 20.f);
     QPixmap* renderToPixmap();
 
     virtual void setModel(std::string const& filename);
     void setModelOffscreen(std::string const& filename);
     virtual void setPrefab(std::string const& filename) {};
 
-    void setLightDirection(float y, float z) { _light_dir.y = y / 180.0f; _light_dir.x = z / 180.0f; };
+    void setLightDirection(float y, float z);
 
   protected:
 

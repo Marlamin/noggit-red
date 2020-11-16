@@ -36,7 +36,7 @@ namespace noggit
 
     void move_forward_factor (float sign, float factor);
 
-    void reset();
+    void reset(float x, float y, float z, float roll, float yaw, float pitch);
 
     math::vector_3d position;
     float move_speed;
