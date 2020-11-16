@@ -35,6 +35,9 @@ namespace noggit
         explicit ModelViewer(QWidget* parent = nullptr);
         void setModel(std::string const& filename) override;
 
+    signals:
+      void resized();
+
     private:
 
       QTimer _update_every_event_loop;

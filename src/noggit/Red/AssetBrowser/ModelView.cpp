@@ -35,6 +35,7 @@ void ModelViewer::initializeGL()
   opengl::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, width(), height());
   gl.clearColor (0.5f, 0.5f, 0.5f, 1.0f);
+  emit resized();
 }
 
 void ModelViewer::paintGL()
@@ -57,6 +58,7 @@ void ModelViewer::resizeGL(int w, int h)
 {
   opengl::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, w, h);
+  emit resized();
 }
 
 void ModelViewer::tick(float dt)

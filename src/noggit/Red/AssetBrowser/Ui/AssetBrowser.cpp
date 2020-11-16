@@ -1,5 +1,6 @@
 #include "AssetBrowser.hpp"
 #include <ui_AssetBrowser.h>
+#include <ui_AssetBrowserOverlay.h>
 #include <noggit/MPQ.h>
 #include <noggit/Log.h>
 #include <noggit/ContextObject.hpp>
@@ -11,6 +12,7 @@
 #include <QSettings>
 #include <QPixmap>
 #include <QIcon>
+#include <QDialog>
 
 using namespace noggit::Red::AssetBrowser::Ui;
 
@@ -18,7 +20,7 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
 {
   ui = new ::Ui::AssetBrowser;
   ui->setupUi(this);
-  ui::setupFramelessWindow(ui->titlebar, this, minimumSize(), maximumSize(), false);
+  ui::setupFramelessWindow(ui->titlebar, this, minimumSize(), maximumSize(), true);
   setWindowFlags(windowFlags() | Qt::Tool | Qt::WindowStaysOnTopHint);
 
   _model = new QStandardItemModel(this);
@@ -26,6 +28,28 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
   _sort_model->setFilterCaseSensitivity(Qt::CaseInsensitive);
   _sort_model->setFilterRole(Qt::UserRole);
   _sort_model->setRecursiveFilteringEnabled(true);
+
+  // test
+  auto overlay = new QWidget(ui->viewport);
+  auto overlay_ui = ::Ui::AssetBrowserOverlay();
+  overlay_ui.setupUi(overlay);
+  overlay->setAttribute(Qt::WA_TranslucentBackground);
+  overlay->setMouseTracking(true);
+  overlay->setGeometry(0,0,ui->viewport->width(),ui->viewport->height());
+
+  connect(ui->viewport, &ModelViewer::resized
+      ,[this, overlay]()
+      {
+        overlay->setGeometry(0,0,ui->viewport->width(),ui->viewport->height());
+      }
+  );
+
+  ui->viewport->installEventFilter(overlay);
+  overlay->show();
+
+  // drag'n'drop
+  ui->listfileTree->setDragEnabled(true);
+  ui->listfileTree->setDragDropMode(QAbstractItemView::DragOnly);
 
   ui->listfileTree->setIconSize(QSize(90, 90));
 
