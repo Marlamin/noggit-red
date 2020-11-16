@@ -34,9 +34,12 @@ namespace noggit
     public:
         explicit ModelViewer(QWidget* parent = nullptr);
         void setModel(std::string const& filename) override;
+        void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; }
+        float getMoveSensitivity() { return _move_sensitivity; }
 
     signals:
       void resized();
+      void sensitivity_changed();
 
     private:
 
@@ -47,6 +50,7 @@ namespace noggit
 
       QElapsedTimer _startup_time;
       qreal _last_update = 0.f;
+      float _move_sensitivity = 0.5f;
 
       void tick(float dt);
       float aspect_ratio() const override;

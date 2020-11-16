@@ -37,6 +37,8 @@ namespace noggit::Red
     void setModelOffscreen(std::string const& filename);
     virtual void setPrefab(std::string const& filename) {};
 
+    void setLightDirection(float y, float z) { _light_dir.y = y / 180.0f; _light_dir.x = z / 180.0f; };
+
   protected:
 
     noggit::camera _camera;
@@ -72,8 +74,10 @@ namespace noggit::Red
     QOpenGLFramebufferObjectFormat _fmt;
     QOffscreenSurface _offscreen_surface;
 
+    math::vector_3d _background_color;
     math::vector_3d _diffuse_light;
     math::vector_3d _ambient_light;
+    math::vector_3d _light_dir;
   };
 
 }

@@ -1,6 +1,4 @@
 #include "AssetBrowser.hpp"
-#include <ui_AssetBrowser.h>
-#include <ui_AssetBrowserOverlay.h>
 #include <noggit/MPQ.h>
 #include <noggit/Log.h>
 #include <noggit/ContextObject.hpp>
@@ -13,6 +11,8 @@
 #include <QPixmap>
 #include <QIcon>
 #include <QDialog>
+#include <QDial>
+#include <QSlider>
 
 using namespace noggit::Red::AssetBrowser::Ui;
 
@@ -31,8 +31,8 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
 
   // test
   auto overlay = new QWidget(ui->viewport);
-  auto overlay_ui = ::Ui::AssetBrowserOverlay();
-  overlay_ui.setupUi(overlay);
+  viewport_overlay_ui = new ::Ui::AssetBrowserOverlay();
+  viewport_overlay_ui->setupUi(overlay);
   overlay->setAttribute(Qt::WA_TranslucentBackground);
   overlay->setMouseTracking(true);
   overlay->setGeometry(0,0,ui->viewport->width(),ui->viewport->height());
@@ -46,6 +46,8 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
 
   ui->viewport->installEventFilter(overlay);
   overlay->show();
+
+  ui->viewport->setLightDirection(120.0f, 60.0f);
 
   // drag'n'drop
   ui->listfileTree->setDragEnabled(true);
@@ -79,35 +81,68 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
       }
   );
 
-  // Handle preview rendering
+  // Handle preview rendering and drag
   connect(ui->listfileTree, &QTreeView::expanded
       ,[this] (const QModelIndex& index)
+      {
+        for (int i = 0; i != _sort_model->rowCount(index); ++i)
+        {
+          auto child = index.child(i, 0);
+          auto path = child.data(Qt::UserRole).toString();
+          if (path.endsWith(".wmo") || path.endsWith(".m2"))
           {
-            for (int i = 0; i != _sort_model->rowCount(index); ++i)
-            {
-              auto child = index.child(i, 0);
-              auto path = child.data(Qt::UserRole).toString();
-              if (path.endsWith(".wmo") || path.endsWith(".m2"))
-              {
-                _preview_renderer->setModelOffscreen(path.toStdString());
+            _preview_renderer->setModelOffscreen(path.toStdString());
 
-                auto preview_pixmap = _preview_renderer->renderToPixmap();
-                auto item = _model->itemFromIndex(_sort_model->mapToSource(child));
-                item->setIcon(QIcon(*preview_pixmap));
-              }
-            }
+            auto preview_pixmap = _preview_renderer->renderToPixmap();
+            auto item = _model->itemFromIndex(_sort_model->mapToSource(child));
+            item->setIcon(QIcon(*preview_pixmap));
+            item->setDragEnabled(true);
+            item->setFlags(item->flags() | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
           }
+        }
+      }
 
   );
 
   // Handle search
   connect(ui->searchButton, &QPushButton::clicked
       ,[this]()
-          {
-            _sort_model->setFilterFixedString(ui->searchField->text());
-          }
+      {
+        _sort_model->setFilterFixedString(ui->searchField->text());
+      }
 
   );
+
+  connect(viewport_overlay_ui->lightDirY, &QDial::valueChanged
+      ,[this]()
+      {
+        ui->viewport->setLightDirection(viewport_overlay_ui->lightDirY->value(),
+                                        viewport_overlay_ui->lightDirZ->value());
+      }
+  );
+
+  connect(viewport_overlay_ui->lightDirZ, &QSlider::valueChanged
+      ,[this]()
+      {
+        ui->viewport->setLightDirection(viewport_overlay_ui->lightDirY->value(),
+                                        viewport_overlay_ui->lightDirZ->value());
+      }
+  );
+
+  connect(viewport_overlay_ui->moveSensitivitySlider, &QSlider::valueChanged
+      ,[this]()
+      {
+        ui->viewport->setMoveSensitivity(static_cast<float>(viewport_overlay_ui->moveSensitivitySlider->value()));
+      }
+  );
+
+  connect(ui->viewport, &ModelViewer::sensitivity_changed
+      ,[this]()
+      {
+        viewport_overlay_ui->moveSensitivitySlider->setValue(ui->viewport->getMoveSensitivity() * 30.0f);
+      }
+  );
+
 
   _wmo_group_and_lod_regex = QRegularExpression(".+_\\d{3}(_lod.+)*.wmo");
 

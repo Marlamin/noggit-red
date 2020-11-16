@@ -12,8 +12,6 @@
 
 using namespace noggit::Red::AssetBrowser;
 
-static const float XSENS = 15.0f;
-static const float YSENS = 15.0f;
 
 ModelViewer::ModelViewer(QWidget* parent)
  : PreviewRenderer(0, 0, noggit::NoggitRenderContext::ASSET_BROWSER, parent)
@@ -25,6 +23,8 @@ ModelViewer::ModelViewer(QWidget* parent)
   look = false;
   moving = strafing = updown = lookat = turn = 0.0f;
   mousedir = -1.0f;
+
+  _move_sensitivity = _settings->value("assetBrowser/move_sensitivity", 15.0f).toFloat() / 30.0f;
 
   _update_every_event_loop.start (0);
   connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
@@ -103,8 +103,8 @@ void ModelViewer::mouseMoveEvent(QMouseEvent* event)
 
   if (look)
   {
-    _camera.add_to_yaw(math::degrees(relative_movement.dx() / XSENS));
-    _camera.add_to_pitch(math::degrees(mousedir * relative_movement.dy() / YSENS));
+    _camera.add_to_yaw(math::degrees(relative_movement.dx() / 20.0f));
+    _camera.add_to_pitch(math::degrees(mousedir * relative_movement.dy() / 20.0f));
   }
 
   _last_mouse_pos = event->pos();
@@ -122,7 +122,16 @@ void ModelViewer::mouseReleaseEvent(QMouseEvent* event)
 
 void ModelViewer::wheelEvent(QWheelEvent* event)
 {
+  if (event->angleDelta().y() > 0)
+  {
+    _move_sensitivity = std::min(_move_sensitivity + 0.5f / 30.0f, 1.0f);
+  }
+  else
+  {
+    _move_sensitivity = std::max(_move_sensitivity - 0.5f / 30.0f, 1.0f / 30.0f);
+  }
 
+  emit sensitivity_changed();
 }
 
 void ModelViewer::keyReleaseEvent(QKeyEvent* event)
@@ -167,46 +176,46 @@ void ModelViewer::keyPressEvent(QKeyEvent* event)
 {
   if (event->key() == Qt::Key_W)
   {
-    moving = 0.5f;
+    moving = _move_sensitivity;
   }
   if (event->key() == Qt::Key_S)
   {
-    moving = -0.5f;
+    moving = -_move_sensitivity;
   }
 
   if (event->key() == Qt::Key_Up)
   {
-    lookat = 0.5f;
+    lookat = _move_sensitivity;
   }
   if (event->key() == Qt::Key_Down)
   {
-    lookat = -0.5f;
+    lookat = -_move_sensitivity;
   }
 
   if (event->key() == Qt::Key_Right)
   {
-    turn = 0.5f;
+    turn = _move_sensitivity;
   }
   if (event->key() == Qt::Key_Left)
   {
-    turn = -0.5f;
+    turn = -_move_sensitivity;
   }
 
   if (event->key() == Qt::Key_D)
   {
-    strafing = 0.5f;
+    strafing = _move_sensitivity;
   }
   if (event->key() == Qt::Key_A)
   {
-    strafing = -0.5f;
+    strafing = -_move_sensitivity;
   }
 
   if (event->key() == Qt::Key_Q)
   {
-    updown = 0.5f;
+    updown = _move_sensitivity;
   }
   if (event->key() == Qt::Key_E)
   {
-    updown = -0.5f;
+    updown = -_move_sensitivity;
   }
 }

@@ -27,8 +27,6 @@ QStandardItem* TreeManager::addItem(QString path)
       child->setData(QVariant(path_remainder), Qt::UserRole);
       child->setEditable(false);
       child->setCheckable(false);
-      child->setDragEnabled(true);
-      child->setFlags(child->flags() | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 
       layered_items[path_remainder] = child;
     }

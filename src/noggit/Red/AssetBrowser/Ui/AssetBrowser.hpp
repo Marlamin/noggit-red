@@ -2,6 +2,7 @@
 #define NOGGIT_ASSETBROWSER_HPP
 
 #include <ui_AssetBrowser.h>
+#include <ui_AssetBrowserOverlay.h>
 #include <noggit/Red/AssetBrowser/Ui/Model/TreeManager.hpp>
 #include <noggit/Red/PreviewRenderer/PreviewRenderer.hpp>
 
@@ -23,6 +24,7 @@ namespace noggit
 
     private:
       ::Ui::AssetBrowser* ui;
+      ::Ui::AssetBrowserOverlay* viewport_overlay_ui;
       QStandardItemModel* _model;
       QSortFilterProxyModel* _sort_model;
       PreviewRenderer* _preview_renderer;

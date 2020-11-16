@@ -82,7 +82,7 @@
          <string/>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>4</number>
         </property>
         <property name="tabBarAutoHide">
          <bool>false</bool>
@@ -1833,6 +1833,15 @@
                        <width>64</width>
                        <height>0</height>
                       </size>
+                     </property>
+                     <property name="minimum">
+                      <double>1.000000000000000</double>
+                     </property>
+                     <property name="maximum">
+                      <double>30.000000000000000</double>
+                     </property>
+                     <property name="value">
+                      <double>15.000000000000000</double>
                      </property>
                     </widget>
                    </item>

@@ -41,6 +41,8 @@ PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderCont
   _offscreen_context.makeCurrent(&_offscreen_surface);
 
   opengl::context::scoped_setter const context_set (::gl, &_offscreen_context);
+
+  _light_dir = math::vector_3d(0.0f, 1.0f, 0.0f);
 }
 
 void PreviewRenderer::setModel(std::string const &filename)
@@ -70,15 +72,25 @@ void PreviewRenderer::setModel(std::string const &filename)
     throw std::logic_error("Preview renderer only supports viewing M2 and WMO for now.");
   }
 
-  auto diffuse_color = _settings->value("assetBrowser/diffuse_light").value<QColor>();
+  auto diffuse_color = _settings->value("assetBrowser/diffuse_light",
+    QVariant::fromValue(QColor::fromRgbF(1.0f, 0.532352924f, 0.0f))).value<QColor>();
   _diffuse_light = {static_cast<float>(diffuse_color.redF()),
                     static_cast<float>(diffuse_color.greenF()),
                     static_cast<float>(diffuse_color.blueF())};
 
- auto ambient_color = _settings->value("assetBrowser/ambient_light").value<QColor>();
+ auto ambient_color = _settings->value("assetBrowser/ambient_light",
+     QVariant::fromValue(QColor::fromRgbF(0.407770514f, 0.508424163f, 0.602650642f))).value<QColor>();
+
  _ambient_light = {static_cast<float>(ambient_color.redF()),
                    static_cast<float>(ambient_color.greenF()),
                    static_cast<float>(ambient_color.blueF())};
+
+  auto background_color = _settings->value("assetBrowser/background_color",
+     QVariant::fromValue(QColor(127, 127, 127))).value<QColor>();
+
+  _background_color = {static_cast<float>(background_color.redF()),
+                       static_cast<float>(background_color.greenF()),
+                       static_cast<float>(background_color.blueF())};
 
   resetCamera();
 }
@@ -211,7 +223,7 @@ void PreviewRenderer::draw()
 
       wmo_program.uniform("draw_fog", 0);
 
-      wmo_program.uniform("exterior_light_dir", math::vector_3d(0.0f, 1.0f, 0.0f));
+      wmo_program.uniform("exterior_light_dir", _light_dir);
       wmo_program.uniform("exterior_diffuse_color", _diffuse_light);
       wmo_program.uniform("exterior_ambient_color", _ambient_light);
 
@@ -254,7 +266,7 @@ void PreviewRenderer::draw()
     m2_shader.uniform("tex2", 1);
     m2_shader.uniform("draw_fog", 0);
 
-    m2_shader.uniform("light_dir", math::vector_3d(0.0f, 1.0f, 0.0f));
+    m2_shader.uniform("light_dir", _light_dir);
     m2_shader.uniform("diffuse_color", _diffuse_light);
     m2_shader.uniform("ambient_color", _ambient_light);
 
