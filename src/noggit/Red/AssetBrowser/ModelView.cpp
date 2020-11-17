@@ -96,6 +96,7 @@ void ModelViewer::setModel(std::string const& filename)
   makeCurrent();
   PreviewRenderer::setModel(filename);
   emit model_set(filename);
+  _last_selected_model = filename;
 }
 
 float ModelViewer::aspect_ratio() const
@@ -246,4 +247,24 @@ QStringList ModelViewer::getDoodadSetNames(const std::string& filename)
   }
 
   return std::move(names);
+}
+
+void ModelViewer::setActiveDoodadSet(const std::string& filename, const std::string& doodadset_name)
+{
+  for (auto& wmo_instance : _wmo_instances)
+  {
+    if (wmo_instance.wmo->filename != filename)
+    {
+      continue;
+    }
+
+    int counter = 0;
+    for (auto& doodad_set : wmo_instance.wmo->doodadsets)
+    {
+      wmo_instance.change_doodadset(counter);
+      counter++;
+    }
+
+    break;
+  }
 }

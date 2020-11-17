@@ -94,7 +94,6 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
           if (path.endsWith(".m2") || path.endsWith(".wmo"))
           {
             ui->viewport->setModel(path.toStdString());
-
           }
         }
       }
@@ -105,6 +104,7 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
       ,[=] (const std::string& filename)
       {
         viewport_overlay_ui->doodadSetSelector->insertItems(0, ui->viewport->getDoodadSetNames(filename));
+        viewport_overlay_ui->doodadSetSelector->setVisible(QString::fromStdString(filename).endsWith(".wmo"));
       }
   );
 
@@ -196,6 +196,14 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
       {
           ui->viewport->resetCamera();
       }
+  );
+
+  connect(viewport_overlay_ui->doodadSetSelector, qOverload<int>(&QComboBox::currentIndexChanged)
+      ,[this](int index)
+          {
+              ui->viewport->setActiveDoodadSet(ui->viewport->getLastSelectedModel(),
+                                               viewport_overlay_ui->doodadSetSelector->currentText().toStdString());
+          }
   );
 
   // Render toggles

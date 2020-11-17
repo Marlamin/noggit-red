@@ -38,6 +38,8 @@ namespace noggit
       void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; };
       float getMoveSensitivity() { return _move_sensitivity; };
       QStringList getDoodadSetNames(std::string const& filename);
+      void setActiveDoodadSet(std::string const& filename, std::string const& doodadset_name);
+      std::string& getLastSelectedModel() { return _last_selected_model; };
 
 
     signals:
@@ -51,6 +53,7 @@ namespace noggit
       QPointF _last_mouse_pos;
       float moving, strafing, updown, mousedir, turn, lookat;
       bool look;
+      std::string _last_selected_model;
 
       QElapsedTimer _startup_time;
       qreal _last_update = 0.f;
