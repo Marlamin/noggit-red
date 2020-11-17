@@ -422,10 +422,10 @@ QPixmap* PreviewRenderer::renderToPixmap()
 
 void PreviewRenderer::setLightDirection(float y, float z)
 {
-  _light_dir = {1.f, 0.f, 0.f};
+  _light_dir = {1.f, 0.5f, 0.f};
   QMatrix4x4 matrix = QMatrix4x4();
-  matrix.rotate(z, 1.f, 0.f, 0.f);
-  matrix.rotate(y, 0.f, 1.f, 0.f);
+  matrix.rotate(z, 0.f, 1.f, 0.f);
+  matrix.rotate(y, 1.f, 0.f, 0.f);
 
   QVector3D light_dir = {_light_dir.x, _light_dir.y, _light_dir.z};
   light_dir = matrix * light_dir;
