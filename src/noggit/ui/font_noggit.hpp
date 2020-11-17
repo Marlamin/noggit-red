@@ -101,7 +101,21 @@ namespace noggit
         VISIBILITY_HOLE_LINES = 0xf8b7,
         VISIBILITY_ANIMATION = 0xf8b8,
         VISIBILITY_ANIMATION_2 = 0xf8b8,
-        VISIBILITY_LIGHT = 0xf8ba
+        VISIBILITY_LIGHT = 0xf8ba,
+        INFO = 0xf8bb,
+        VISIBILITY_PARTICLES = 0xf8bc,
+        TIME_NORMAL = 0xf8bd,
+        TIME_PAUSE = 0xf8be,
+        TIME_SPEED = 0xf8bf,
+        CAMERA_TURN = 0xf8c0,
+        CAMERA_SPEED_SLOWER = 0xf8c1,
+        CAMERA_SPEED_FASTER = 0xf8c2,
+        TEXTURE_PALETTE = 0xf8c3,
+        TEXTURE_PALETTE_FAVORITE = 0xf8c4,
+        MOUSE_INVERT = 0xf8c5,
+        UI_TOGGLE = 0xf8c6,
+        VIEW_MODE_2D = 0xf8c7,
+        VIEW_AXIS = 0xf8c8
       };
     };
 
