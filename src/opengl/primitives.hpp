@@ -4,8 +4,10 @@
 
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
+#include <noggit/ContextObject.hpp>
 
 #include <memory>
+#include <unordered_map>
 
 namespace math
 {
@@ -19,15 +21,23 @@ namespace opengl
   {
     class wire_box
     {
-    private:
+    public:
       wire_box() {}
       wire_box( const wire_box&);
-      wire_box& operator=( wire_box& );
+      wire_box& operator=( wire_box& box ) { return *this; };
 
     public:
-      static wire_box& getInstance() {
-        static wire_box  instance;
-        return instance;
+      static wire_box& getInstance(noggit::NoggitRenderContext context)
+      {
+        static std::unordered_map<noggit::NoggitRenderContext, wire_box> instances;
+
+        if (instances.find(context) == instances.end())
+        {
+          wire_box instance;
+          instances[context] = instance;
+        }
+
+        return instances.at(context);
       }
 
       void draw ( math::matrix_4x4 const& model_view

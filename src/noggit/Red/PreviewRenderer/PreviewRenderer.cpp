@@ -460,6 +460,7 @@ QPixmap* PreviewRenderer::renderToPixmap()
   gl.clearColor(0.5f, 0.5f, 0.5f, 1.f);
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  tick(20.f);
   draw();
 
   auto& async_loader = AsyncLoader::instance();
