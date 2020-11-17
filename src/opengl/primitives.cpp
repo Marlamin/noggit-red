@@ -10,6 +10,7 @@
 #include <opengl/types.hpp>
 
 #include <array>
+#include <vector>
 
 namespace opengl
 {
@@ -99,6 +100,133 @@ namespace opengl
       _buffers_are_setup = true;
 
     }
+
+      void grid::draw( math::matrix_4x4 const& mvp
+          , math::vector_3d const& pos
+          , math::vector_4d const& color
+          , float radius
+      )
+      {
+        if (!_buffers_are_setup)
+        {
+          setup_buffers();
+        }
+
+        opengl::scoped::use_program sphere_shader {*_program.get()};
+
+        sphere_shader.uniform("model_view_projection", mvp);
+        sphere_shader.uniform("origin", pos);
+        sphere_shader.uniform("color", color);
+        sphere_shader.uniform("radius", radius);
+
+        opengl::scoped::vao_binder const _(_vao[0]);
+        gl.drawElements(GL_LINES, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
+      }
+
+
+      void grid::setup_buffers()
+      {
+        _vao.upload();
+        _buffers.upload();
+
+        _program.reset(new opengl::program({{ GL_VERTEX_SHADER
+                                                , R"code(
+                                                #version 330 core
+
+                                                in vec4 position;
+
+                                                uniform mat4 model_view_projection;
+                                                uniform vec3 origin;
+                                                uniform float radius;
+
+                                                void main()
+                                                {
+                                                  vec4 pos = position;
+                                                  pos.xyz *= radius;
+
+                                                  vec3 origin_fixed = vec3(origin.x - radius / 2.0f, origin.y, origin.z - radius / 2.0f);
+                                                  pos.xyz += origin_fixed;
+                                                  gl_Position = model_view_projection * pos;
+                                                }
+                                                )code"
+                                            }
+                                               , { GL_FRAGMENT_SHADER
+                                                , R"code(
+                                                #version 330 core
+
+                                                uniform vec4 color;
+
+                                                out vec4 out_color;
+
+                                                void main()
+                                                {
+                                                  out_color = color;
+                                                }
+                                                )code"
+                                            }
+                                           }));
+
+
+        std::vector<math::vector_3d> vertices;
+        std::vector<std::uint16_t> indices;
+
+        int slices = 20;
+
+        for(int j = 0; j <= slices; ++j)
+        {
+          for(int i = 0; i <= slices; ++i)
+          {
+            float x = static_cast<float>(i) / static_cast<float>(slices);
+            float y = 0;
+            float z = static_cast<float>(j) / static_cast<float>(slices);
+            vertices.push_back(math::vector_3d(x, y, z));
+          }
+        }
+
+        for(int j = 0; j < slices; ++j)
+        {
+          for(int i = 0; i < slices; ++i)
+          {
+
+            int row1 =  j * (slices + 1);
+            int row2 = (j + 1) * (slices + 1);
+
+            indices.push_back(row1 + i);
+            indices.push_back(row1 + i + 1);
+            indices.push_back(row1 + i + 1);
+            indices.push_back(row2 + i + 1);
+
+            indices.push_back(row2 + i + 1);
+            indices.push_back(row2 + i);
+            indices.push_back(row2 + i);
+            indices.push_back(row1 + i);
+
+          }
+        }
+
+        _indice_count = indices.size();
+
+        gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>
+            (_vertices_vbo, vertices, GL_STATIC_DRAW);
+        gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>
+            (_indices_vbo, indices, GL_STATIC_DRAW);
+
+
+        scoped::index_buffer_manual_binder indices_binder(_indices_vbo);
+
+        opengl::scoped::use_program shader (*_program.get());
+
+        {
+          opengl::scoped::vao_binder const _ (_vao[0]);
+
+          opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
+          shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+          indices_binder.bind();
+        }
+
+        _buffers_are_setup = true;
+      }
 
 
     void sphere::draw( math::matrix_4x4 const& mvp

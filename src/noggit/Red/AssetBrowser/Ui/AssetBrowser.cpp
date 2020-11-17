@@ -60,6 +60,7 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
   viewport_overlay_ui->toggleParticlesButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_UNUSED));
   viewport_overlay_ui->toggleBoundingBoxButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_WITH_BOX));
   viewport_overlay_ui->toggleWMOButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_WMO));
+  viewport_overlay_ui->toggleGridButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_LINES));
 
   ui->viewport->installEventFilter(overlay);
   overlay->show();
@@ -192,6 +193,8 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
           [this]() {ui->viewport->_draw_models.toggle();});
   connect(viewport_overlay_ui->toggleAnimationButton, &QPushButton::clicked,
           [this]() {ui->viewport->_draw_animated.toggle();});
+  connect(viewport_overlay_ui->toggleGridButton, &QPushButton::clicked,
+          [this]() {ui->viewport->_draw_grid.toggle();});
 
   connect(&ui->viewport->_draw_wmo, &bool_toggle_property::changed,
           [this](bool state) {ui->viewport->_draw_wmo.set(state);});
@@ -203,6 +206,8 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
           [this](bool state) {ui->viewport->_draw_models.set(state);});
   connect(&ui->viewport->_draw_animated, &bool_toggle_property::changed,
           [this](bool state) {ui->viewport->_draw_animated.set(state);});
+  connect(&ui->viewport->_draw_grid, &bool_toggle_property::changed,
+          [this](bool state) {ui->viewport->_draw_grid.set(state);});
 
   _wmo_group_and_lod_regex = QRegularExpression(".+_\\d{3}(_lod.+)*.wmo");
 

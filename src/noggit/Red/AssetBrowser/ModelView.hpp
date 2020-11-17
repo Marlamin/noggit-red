@@ -34,10 +34,8 @@ namespace noggit
     public:
       explicit ModelViewer(QWidget* parent = nullptr);
       void setModel(std::string const& filename) override;
-      void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; }
-      float getMoveSensitivity() { return _move_sensitivity; }
-
-      ~ModelViewer();
+      void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; };
+      float getMoveSensitivity() { return _move_sensitivity; };
 
     signals:
       void resized();

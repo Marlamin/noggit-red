@@ -1,6 +1,7 @@
 #include "PreviewRenderer.hpp"
 
 #include <opengl/scoped.hpp>
+#include <opengl/primitives.hpp>
 #include <math/projection.hpp>
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
@@ -389,6 +390,13 @@ void PreviewRenderer::draw()
 
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  if (_draw_grid.get())
+  {
+    _grid.draw(mvp, math::vector_3d(0.f, 0.f, 0.f),
+               math::vector_4d(0.7f, 0.7f, 0.7f, 1.0f), 30.f);
+
+  }
 
 }
 

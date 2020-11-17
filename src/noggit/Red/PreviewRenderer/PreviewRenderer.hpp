@@ -10,6 +10,7 @@
 #include <noggit/Model.h>
 #include <noggit/ContextObject.hpp>
 #include <noggit/bool_toggle_property.hpp>
+#include <opengl/primitives.hpp>
 
 #include <QOpenGLWidget>
 #include <QSettings>
@@ -45,6 +46,9 @@ namespace noggit::Red
     bool_toggle_property _draw_particles = {true};
     bool_toggle_property _draw_animated = {true};
     bool_toggle_property _draw_boxes = {false};
+    bool_toggle_property _draw_grid = {false};
+
+    ~PreviewRenderer();
 
   protected:
 
@@ -64,6 +68,8 @@ namespace noggit::Red
 
     std::vector<ModelInstance> _model_instances;
     std::vector<WMOInstance> _wmo_instances;
+
+    opengl::primitives::grid _grid;
 
     float _animtime = 0.f;
 
