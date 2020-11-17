@@ -295,3 +295,11 @@ AssetBrowserWidget::~AssetBrowserWidget()
 {
   delete ui;
 }
+
+void AssetBrowserWidget::keyPressEvent(QKeyEvent *event)
+{
+  if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+  {
+    _sort_model->setFilterFixedString(ui->searchField->text());
+  }
+}

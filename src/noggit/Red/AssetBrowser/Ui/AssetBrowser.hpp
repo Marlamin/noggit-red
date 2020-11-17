@@ -34,6 +34,9 @@ namespace noggit
       void updateModelData();
       void recurseDirectory(Model::TreeManager& tree_mgr, const QString& s_dir, const QString& project_dir);
 
+    protected:
+      void keyPressEvent(QKeyEvent* event) override;
+
     };
   }
 }
