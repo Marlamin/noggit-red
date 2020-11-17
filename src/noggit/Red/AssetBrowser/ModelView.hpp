@@ -37,6 +37,8 @@ namespace noggit
       void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; }
       float getMoveSensitivity() { return _move_sensitivity; }
 
+      ~ModelViewer();
+
     signals:
       void resized();
       void sensitivity_changed();

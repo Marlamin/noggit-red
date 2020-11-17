@@ -15,12 +15,14 @@ using namespace noggit::Red::AssetBrowser;
 
 ModelViewer::ModelViewer(QWidget* parent)
  : PreviewRenderer(0, 0, noggit::NoggitRenderContext::ASSET_BROWSER, parent)
+ , look(false)
+ , mousedir(-1.0f)
 {
   setFocusPolicy(Qt::StrongFocus);
   setMouseTracking (true);
+  _offscreen_mode = false;
 
   _startup_time.start();
-  look = false;
   moving = strafing = updown = lookat = turn = 0.0f;
   mousedir = -1.0f;
 

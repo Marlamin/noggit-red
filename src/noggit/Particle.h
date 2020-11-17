@@ -82,7 +82,9 @@ class ParticleSystem
 public:
   float tofs;
 
-  ParticleSystem(Model*, const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals);
+  ParticleSystem(Model*, const MPQFile& f, const ModelParticleEmitterDef &mta,
+                 int *globals, noggit::NoggitRenderContext context);
+
   ParticleSystem(ParticleSystem const& other);
   ParticleSystem(ParticleSystem&&);
   ParticleSystem& operator= (ParticleSystem const&) = delete;
@@ -112,6 +114,7 @@ private:
   GLuint const& _colors_vbo = _buffers[2];
   GLuint const& _texcoord_vbo = _buffers[3];
   GLuint const& _indices_vbo = _buffers[4];
+  noggit::NoggitRenderContext _context;
 };
 
 
@@ -151,7 +154,9 @@ class RibbonEmitter
   std::list<RibbonSegment> segs;
 
 public:
-  RibbonEmitter(Model*, const MPQFile &f, ModelRibbonEmitterDef const& mta, int *globals);
+  RibbonEmitter(Model*, const MPQFile &f, ModelRibbonEmitterDef const& mta, int *globals
+                , noggit::NoggitRenderContext context);
+
   RibbonEmitter(RibbonEmitter const& other);
   RibbonEmitter(RibbonEmitter&&);
   RibbonEmitter& operator= (RibbonEmitter const&) = delete;
@@ -173,4 +178,5 @@ private:
   GLuint const& _vertices_vbo = _buffers[0];
   GLuint const& _texcoord_vbo = _buffers[1];
   GLuint const& _indices_vbo = _buffers[2];
+  noggit::NoggitRenderContext _context;
 };

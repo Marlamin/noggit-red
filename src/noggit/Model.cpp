@@ -1033,7 +1033,7 @@ void Model::initAnimated(const MPQFile& f)
     {
       try
       {
-        _particles.emplace_back (this, f, pdefs[i], _global_sequences.data());
+        _particles.emplace_back(this, f, pdefs[i], _global_sequences.data(), _context);
       }
       catch (std::logic_error error)
       {
@@ -1048,7 +1048,7 @@ void Model::initAnimated(const MPQFile& f)
   if (header.nRibbonEmitters) {
     ModelRibbonEmitterDef const* rdefs = reinterpret_cast<ModelRibbonEmitterDef const*>(f.getBuffer() + header.ofsRibbonEmitters);
     for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
-      _ribbons.emplace_back(this, f, rdefs[i], _global_sequences.data());
+      _ribbons.emplace_back(this, f, rdefs[i], _global_sequences.data(), _context);
     }
   }
   

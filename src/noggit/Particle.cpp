@@ -16,7 +16,11 @@ T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
   else return math::interpolation::linear((life - mid) / (1.0f - mid), b, c);
 }
 
-ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParticleEmitterDef &mta, int *globals)
+ParticleSystem::ParticleSystem(Model* model_
+                               , const MPQFile& f
+                               , const ModelParticleEmitterDef &mta
+                               , int *globals
+                               , noggit::NoggitRenderContext context)
   : model (model_)
   , emitter_type(mta.EmitterType)
   , emitter ( mta.EmitterType == 1 ? std::unique_ptr<ParticleEmitter> (std::make_unique<PlaneParticleEmitter>())
@@ -50,6 +54,7 @@ ParticleSystem::ParticleSystem(Model* model_, const MPQFile& f, const ModelParti
   , parent (&model->bones[mta.bone])
   , flags(mta.flags)
   , tofs (misc::frand())
+  , _context(context)
 {
   math::vector_3d colors2[3];
   memcpy(colors2, f.getBuffer() + mta.p.colors.ofsKeys, sizeof(math::vector_3d) * 3);
@@ -108,6 +113,7 @@ ParticleSystem::ParticleSystem(ParticleSystem const& other)
   , parent(other.parent)
   , flags(other.flags)
   , tofs(other.tofs)
+  , _context(other._context)
 {
 
 }
@@ -148,6 +154,7 @@ ParticleSystem::ParticleSystem(ParticleSystem&& other)
   , parent(other.parent)
   , flags(other.flags)
   , tofs(other.tofs)
+  , _context(other._context)
 {
 
 }
@@ -761,7 +768,11 @@ Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int t
   return p;
 }
 
-RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitterDef const& mta, int *globals)
+RibbonEmitter::RibbonEmitter(Model* model_
+                             , const MPQFile &f
+                             , ModelRibbonEmitterDef const& mta
+                             , int *globals
+                             , noggit::NoggitRenderContext context)
   : model (model_)
   , color (mta.color, f, globals)
   , opacity (mta.opacity, f, globals)
@@ -776,12 +787,14 @@ RibbonEmitter::RibbonEmitter(Model* model_, const MPQFile &f, ModelRibbonEmitter
    //! \todo  figure out actual correct way to calculate length
    // in BFD, res is 60 and len is 0.6, the trails are very short (too long here)
    // in CoT, res and len are like 10 but the trails are supposed to be much longer (too short here)
+  , _context(context)
 {
   _texture_ids = Model::M2Array<uint16_t>(f, mta.ofsTextures, mta.nTextures);
   _material_ids = Model::M2Array<uint16_t>(f, mta.ofsMaterials, mta.nMaterials);
 
    // create first segment
   segs.emplace_back(tpos, 0);
+
 }
 
 RibbonEmitter::RibbonEmitter(RibbonEmitter const& other)
@@ -803,6 +816,7 @@ RibbonEmitter::RibbonEmitter(RibbonEmitter const& other)
   , _texture_ids(other._texture_ids)
   , _material_ids(other._material_ids)
   , segs(other.segs)
+  , _context(other._context)
 {
 
 }
@@ -826,6 +840,7 @@ RibbonEmitter::RibbonEmitter(RibbonEmitter&& other)
   , _texture_ids(other._texture_ids)
   , _material_ids(other._material_ids)
   , segs(other.segs)
+  , _context(other._context)
 {
 
 }

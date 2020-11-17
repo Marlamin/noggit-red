@@ -48,6 +48,7 @@ namespace noggit::Red
 
   protected:
 
+    bool _offscreen_mode = true;
     noggit::camera _camera;
     QSettings* _settings;
     std::string _filename;

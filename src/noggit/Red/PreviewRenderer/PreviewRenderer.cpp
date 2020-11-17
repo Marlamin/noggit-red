@@ -528,4 +528,45 @@ void PreviewRenderer::tick(float dt)
   }
 }
 
+PreviewRenderer::~PreviewRenderer()
+{
+  if (_offscreen_mode)
+  {
+    opengl::context::save_current_context const context_save (::gl);
+    _offscreen_context.makeCurrent(&_offscreen_surface);
+    opengl::context::scoped_setter const context_set (::gl, &_offscreen_context);
+
+    _model_instances.clear();
+    _wmo_instances.clear();
+
+    _m2_program.reset();
+    _m2_instanced_program.reset();
+    _m2_particles_program.reset();
+    _m2_ribbons_program.reset();
+    _m2_box_program.reset();
+    _wmo_program.reset();
+
+    _liquid_render = boost::none;
+
+  }
+  else
+  {
+    makeCurrent();
+    opengl::context::scoped_setter const context_set (::gl, context());
+
+    _model_instances.clear();
+    _wmo_instances.clear();
+
+    _m2_program.reset();
+    _m2_instanced_program.reset();
+    _m2_particles_program.reset();
+    _m2_ribbons_program.reset();
+    _m2_box_program.reset();
+    _wmo_program.reset();
+
+    _liquid_render = boost::none;
+  }
+
+};
+
 
