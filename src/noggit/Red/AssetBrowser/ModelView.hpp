@@ -32,10 +32,10 @@ namespace noggit
       Q_OBJECT
 
     public:
-        explicit ModelViewer(QWidget* parent = nullptr);
-        void setModel(std::string const& filename) override;
-        void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; }
-        float getMoveSensitivity() { return _move_sensitivity; }
+      explicit ModelViewer(QWidget* parent = nullptr);
+      void setModel(std::string const& filename) override;
+      void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; }
+      float getMoveSensitivity() { return _move_sensitivity; }
 
     signals:
       void resized();
@@ -52,7 +52,7 @@ namespace noggit
       qreal _last_update = 0.f;
       float _move_sensitivity = 0.5f;
 
-      void tick(float dt);
+      void tick(float dt) override;
       float aspect_ratio() const override;
 
       void initializeGL() override;

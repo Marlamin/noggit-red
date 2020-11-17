@@ -126,7 +126,6 @@ void PreviewRenderer::draw()
 {
 
   float culldistance = 10000000;
-  bool draw_doodads_wmo = true;
 
   math::matrix_4x4 const mvp(model_view().transposed() * projection().transposed());
   math::frustum const frustum (mvp);
@@ -147,6 +146,16 @@ void PreviewRenderer::draw()
         ( new opengl::program
               { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs", {"instanced"}) }
                   , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+              }
+        );
+  }
+
+  if (!_m2_box_program)
+  {
+    _m2_box_program.reset
+        ( new opengl::program
+              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_box_vs") }
+                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_box_fs") }
               }
         );
   }
@@ -180,6 +189,8 @@ void PreviewRenderer::draw()
         );
   }
 
+
+
   if (!_liquid_render)
   {
     _liquid_render.emplace();
@@ -193,7 +204,7 @@ void PreviewRenderer::draw()
   // draw WMOs
   std::unordered_map<std::string, std::vector<ModelInstance*>> _wmo_doodads;
 
-  if (!_wmo_instances.empty())
+  if (_draw_wmo.get() && !_wmo_instances.empty())
   {
     // set anim time only once per frame
     {
@@ -233,7 +244,7 @@ void PreviewRenderer::draw()
      {
        wmo_instance.draw(
            wmo_program, model_view().transposed(), projection().transposed(), frustum, culldistance,
-           math::vector_3d(0.0f, 0.0f, 0.0f), false, false // doodads
+           math::vector_3d(0.0f, 0.0f, 0.0f), _draw_boxes.get(), _draw_models.get() // doodads
            , false, _liquid_render.get(), std::vector<selection_type>(), 0, false, display_mode::in_3D
        );
 
@@ -241,13 +252,10 @@ void PreviewRenderer::draw()
        gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
        gl.enable(GL_CULL_FACE);
 
-       if (draw_doodads_wmo)
+       for (auto& doodad : wmo_instance.get_visible_doodads(frustum, culldistance, _camera.position,
+                                                            false,display_mode::in_3D))
        {
-         for (auto& doodad : wmo_instance.get_visible_doodads(frustum, culldistance, _camera.position, false,
-                                                               display_mode::in_3D))
-         {
-           _wmo_doodads[doodad->model->filename].push_back(doodad);
-         }
+         _wmo_doodads[doodad->model->filename].push_back(doodad);
        }
      }
 
@@ -259,8 +267,10 @@ void PreviewRenderer::draw()
   std::unordered_map<Model*, std::size_t> model_with_particles;
   std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 
+  if (_draw_models.get() && !(_model_instances.empty() && _wmo_doodads.empty()))
   {
-    ModelManager::resetAnim();
+    if (_draw_animated.get())
+      ModelManager::resetAnim();
 
     opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
@@ -285,39 +295,100 @@ void PreviewRenderer::draw()
           , _camera.position
           , false
           , _animtime
-          , false
-          , false
+          , _draw_particles.get()
+          , _draw_boxes.get()
           , model_with_particles
           , model_boxes_to_draw
           , display_mode::in_3D
       );
     }
 
-    if (draw_doodads_wmo)
+    for (auto& it : _wmo_doodads)
     {
-      for (auto& it : _wmo_doodads)
+      it.second[0]->model->draw(
+          model_view().transposed()
+          , it.second
+          , m2_shader
+          , frustum
+          , culldistance
+          , _camera.position
+          , false
+          , _animtime
+          , _draw_particles.get()
+          , _draw_boxes.get()
+          , model_with_particles
+          , model_boxes_to_draw
+          , display_mode::in_3D
+      );
+    }
+
+    if(_draw_boxes.get() && !model_boxes_to_draw.empty())
+    {
+      opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
+
+      m2_box_shader.uniform ("model_view", model_view().transposed());
+      m2_box_shader.uniform ("projection", projection().transposed());
+
+      opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
+      gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+      for (auto& it : model_boxes_to_draw)
       {
-        it.second[0]->model->draw(
-            model_view().transposed()
-            , it.second
-            , m2_shader
-            , frustum
-            , culldistance
-            , _camera.position
-            , false
-            , _animtime
-            , false
-            , false
-            , model_with_particles
-            , model_boxes_to_draw
-            , display_mode::in_3D
-        );
+        math::vector_4d color = it.first->is_hidden()
+                                ? math::vector_4d(0.f, 0.f, 1.f, 1.f)
+                                : ( it.first->use_fake_geometry()
+                                    ? math::vector_4d(1.f, 0.f, 0.f, 1.f)
+                                    : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f)
+                                )
+        ;
+
+        m2_box_shader.uniform("color", color);
+        it.first->draw_box(m2_box_shader, it.second);
       }
     }
   }
 
   gl.bindVertexArray(0);
   gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  // model particles
+  if (_draw_animated.get() && !model_with_particles.empty())
+  {
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+
+    opengl::scoped::use_program particles_shader {*_m2_particles_program.get()};
+
+    particles_shader.uniform("model_view_projection", mvp);
+    particles_shader.uniform("tex", 0);
+    opengl::texture::set_active_texture(0);
+
+    for (auto& it : model_with_particles)
+    {
+      it.first->draw_particles(model_view().transposed(), particles_shader, it.second);
+    }
+  }
+
+  if (_draw_animated.get() && !model_with_particles.empty())
+  {
+    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+
+    opengl::scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
+
+    ribbon_shader.uniform("model_view_projection", mvp);
+    ribbon_shader.uniform("tex", 0);
+
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+
+    for (auto& it : model_with_particles)
+    {
+      it.first->draw_ribbons(ribbon_shader, it.second);
+    }
+  }
+
+  gl.enable(GL_BLEND);
+  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 }
 
@@ -433,6 +504,27 @@ void PreviewRenderer::setLightDirection(float y, float z)
   _light_dir.x = light_dir.x();
   _light_dir.y = light_dir.y();
   _light_dir.z = light_dir.z();
+}
+
+
+void PreviewRenderer::update_emitters(float dt)
+{
+  while (dt > 0.1f)
+  {
+    ModelManager::updateEmitters(0.1f);
+    dt -= 0.1f;
+  }
+  ModelManager::updateEmitters(dt);
+}
+
+void PreviewRenderer::tick(float dt)
+{
+  _animtime += dt * 1000.0f;
+
+  if (_draw_animated.get())
+  {
+    update_emitters(dt);
+  }
 }
 
 

@@ -9,6 +9,7 @@
 #include <noggit/WMO.h>
 #include <noggit/Model.h>
 #include <noggit/ContextObject.hpp>
+#include <noggit/bool_toggle_property.hpp>
 
 #include <QOpenGLWidget>
 #include <QSettings>
@@ -39,6 +40,12 @@ namespace noggit::Red
 
     void setLightDirection(float y, float z);
 
+    bool_toggle_property _draw_models = {true};
+    bool_toggle_property _draw_wmo = {true};
+    bool_toggle_property _draw_particles = {true};
+    bool_toggle_property _draw_animated = {true};
+    bool_toggle_property _draw_boxes = {false};
+
   protected:
 
     noggit::camera _camera;
@@ -61,9 +68,12 @@ namespace noggit::Red
 
     std::vector<math::vector_3d> calcSceneExtents();
     virtual void draw();
+    virtual void tick(float dt);
     virtual math::matrix_4x4 model_view() const;
     virtual math::matrix_4x4 projection() const;
     virtual float aspect_ratio() const;
+
+    void update_emitters(float dt);
 
   private:
     int _width;

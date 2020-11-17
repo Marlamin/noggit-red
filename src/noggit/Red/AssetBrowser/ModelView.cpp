@@ -63,6 +63,8 @@ void ModelViewer::resizeGL(int w, int h)
 
 void ModelViewer::tick(float dt)
 {
+  PreviewRenderer::tick(dt);
+
   if (turn)
   {
     _camera.add_to_yaw(math::degrees(turn));
@@ -83,8 +85,6 @@ void ModelViewer::tick(float dt)
   {
     _camera.move_vertical(updown, dt);
   }
-
-  _animtime += dt * 1000.0f;
 
 }
 

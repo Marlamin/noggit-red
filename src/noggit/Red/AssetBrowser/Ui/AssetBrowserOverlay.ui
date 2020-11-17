@@ -30,67 +30,17 @@
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <property name="spacing">
+        <number>-1</number>
+       </property>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_8">
          <property name="spacing">
           <number>-1</number>
          </property>
-         <item>
-          <widget class="QPushButton" name="toggleAnimationButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>16</width>
-             <height>16</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="toggleParticlesButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
+         <property name="sizeConstraint">
+          <enum>QLayout::SetDefaultConstraint</enum>
+         </property>
          <item>
           <widget class="QPushButton" name="toggleModelsButton">
            <property name="sizePolicy">
@@ -101,8 +51,8 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>16</width>
-             <height>16</height>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -110,6 +60,9 @@
              <width>32</width>
              <height>32</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Draw models</string>
            </property>
            <property name="text">
             <string/>
@@ -132,8 +85,8 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>16</width>
-             <height>16</height>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -141,6 +94,77 @@
              <width>32</width>
              <height>32</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Draw WMOs</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="toggleParticlesButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Draw particles</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="toggleAnimationButton">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Draw animation</string>
            </property>
            <property name="text">
             <string/>
@@ -161,11 +185,20 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
            <property name="maximumSize">
             <size>
              <width>32</width>
              <height>32</height>
             </size>
+           </property>
+           <property name="toolTip">
+            <string>Draw bounding boxes</string>
            </property>
            <property name="text">
             <string/>
@@ -187,7 +220,7 @@
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>40</width>
+           <width>550</width>
            <height>20</height>
           </size>
          </property>

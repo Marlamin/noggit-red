@@ -3,6 +3,7 @@
 #include <noggit/Log.h>
 #include <noggit/ContextObject.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
+#include <noggit/ui/font_noggit.hpp>
 
 #include <QStandardItemModel>
 #include <QItemSelectionModel>
@@ -15,6 +16,7 @@
 #include <QSlider>
 
 using namespace noggit::Red::AssetBrowser::Ui;
+using namespace noggit::ui;
 
 AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
 : QMainWindow(parent, Qt::Window)
@@ -52,6 +54,12 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
         overlay->setGeometry(0,0,ui->viewport->width(),ui->viewport->height());
       }
   );
+
+  viewport_overlay_ui->toggleAnimationButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_ANIMATION));
+  viewport_overlay_ui->toggleModelsButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_DOODADS));
+  viewport_overlay_ui->toggleParticlesButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_UNUSED));
+  viewport_overlay_ui->toggleBoundingBoxButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_WITH_BOX));
+  viewport_overlay_ui->toggleWMOButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_WMO));
 
   ui->viewport->installEventFilter(overlay);
   overlay->show();
@@ -172,6 +180,29 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
           ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
       }
   );
+
+  // Render toggles
+  connect(viewport_overlay_ui->toggleWMOButton, &QPushButton::clicked,
+          [this]() {ui->viewport->_draw_wmo.toggle();});
+  connect(viewport_overlay_ui->toggleBoundingBoxButton, &QPushButton::clicked,
+          [this]() {ui->viewport->_draw_boxes.toggle();});
+  connect(viewport_overlay_ui->toggleParticlesButton, &QPushButton::clicked,
+          [this]() {ui->viewport->_draw_particles.toggle();});
+  connect(viewport_overlay_ui->toggleModelsButton, &QPushButton::clicked,
+          [this]() {ui->viewport->_draw_models.toggle();});
+  connect(viewport_overlay_ui->toggleAnimationButton, &QPushButton::clicked,
+          [this]() {ui->viewport->_draw_animated.toggle();});
+
+  connect(&ui->viewport->_draw_wmo, &bool_toggle_property::changed,
+          [this](bool state) {ui->viewport->_draw_wmo.set(state);});
+  connect(&ui->viewport->_draw_boxes, &bool_toggle_property::changed,
+          [this](bool state) {ui->viewport->_draw_boxes.set(state);});
+  connect(&ui->viewport->_draw_particles, &bool_toggle_property::changed,
+          [this](bool state) {ui->viewport->_draw_particles.set(state);});
+  connect(&ui->viewport->_draw_models, &bool_toggle_property::changed,
+          [this](bool state) {ui->viewport->_draw_models.set(state);});
+  connect(&ui->viewport->_draw_animated, &bool_toggle_property::changed,
+          [this](bool state) {ui->viewport->_draw_animated.set(state);});
 
   _wmo_group_and_lod_regex = QRegularExpression(".+_\\d{3}(_lod.+)*.wmo");
 

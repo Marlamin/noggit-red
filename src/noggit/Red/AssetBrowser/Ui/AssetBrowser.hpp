@@ -31,7 +31,6 @@ namespace noggit
       PreviewRenderer* _preview_renderer;
       QRegularExpression _wmo_group_and_lod_regex;
 
-
       void updateModelData();
       void recurseDirectory(Model::TreeManager& tree_mgr, const QString& s_dir, const QString& project_dir);
 
