@@ -11,6 +11,7 @@
 #include <QPointF>
 #include <QElapsedTimer>
 #include <QTimer>
+#include <QStringList>
 
 #include <math/matrix_4x4.hpp>
 #include <math/vector_3d.hpp>
@@ -36,10 +37,13 @@ namespace noggit
       void setModel(std::string const& filename) override;
       void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; };
       float getMoveSensitivity() { return _move_sensitivity; };
+      QStringList getDoodadSetNames(std::string const& filename);
+
 
     signals:
       void resized();
       void sensitivity_changed();
+      void model_set(std::string const& filename);
 
     private:
 

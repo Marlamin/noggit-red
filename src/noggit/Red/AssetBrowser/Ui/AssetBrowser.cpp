@@ -91,11 +91,20 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
         for (auto index : selected.indexes())
         {
           auto path = index.data(Qt::UserRole).toString();
-          if (path.endsWith(".wmo") || path.endsWith(".m2"))
+          if (path.endsWith(".m2") || path.endsWith(".wmo"))
           {
             ui->viewport->setModel(path.toStdString());
+
           }
         }
+      }
+  );
+
+
+  connect(ui->viewport, &ModelViewer::model_set
+      ,[=] (const std::string& filename)
+      {
+        viewport_overlay_ui->doodadSetSelector->insertItems(0, ui->viewport->getDoodadSetNames(filename));
       }
   );
 
@@ -179,6 +188,13 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
       ,[this]()
       {
           ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
+      }
+  );
+
+  connect(viewport_overlay_ui->cameraResetButton, &QPushButton::clicked
+      ,[this]()
+      {
+          ui->viewport->resetCamera();
       }
   );
 
