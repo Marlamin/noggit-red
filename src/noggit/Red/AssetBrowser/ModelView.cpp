@@ -95,6 +95,7 @@ void ModelViewer::setModel(std::string const& filename)
   opengl::context::scoped_setter const _ (::gl, context());
   makeCurrent();
   PreviewRenderer::setModel(filename);
+  emit model_set(filename);
 }
 
 float ModelViewer::aspect_ratio() const
@@ -170,11 +171,11 @@ void ModelViewer::keyReleaseEvent(QKeyEvent* event)
 
 void ModelViewer::focusOutEvent(QFocusEvent* event)
 {
-  //moving = 0.0f;
-  //lookat = 0.0f;
- // turn = 0.0f;
-  //strafing = 0.0f;
- // updown = 0.0f;
+  moving = 0.0f;
+  lookat = 0.0f;
+  turn = 0.0f;
+  strafing = 0.0f;
+  updown = 0.0f;
 }
 
 void ModelViewer::keyPressEvent(QKeyEvent* event)
@@ -223,4 +224,26 @@ void ModelViewer::keyPressEvent(QKeyEvent* event)
   {
     updown = -_move_sensitivity;
   }
+}
+
+QStringList ModelViewer::getDoodadSetNames(const std::string& filename)
+{
+  QStringList names;
+
+  for (auto& wmo_instance : _wmo_instances)
+  {
+    if (wmo_instance.wmo->filename != filename)
+    {
+      continue;
+    }
+
+    for (auto& doodad_set : wmo_instance.wmo->doodadsets)
+    {
+      names.append(doodad_set.name);
+    }
+
+    break;
+  }
+
+  return std::move(names);
 }
