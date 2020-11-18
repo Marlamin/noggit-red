@@ -14,9 +14,12 @@
 
 #include <boost/utility/in_place_factory.hpp>
 
-TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps)
+TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile
+                        , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
+                        , noggit::NoggitRenderContext context)
   : nTextures(header.nLayers)
   , _do_not_convert_alphamaps(do_not_convert_alphamaps)
+  , _context(context)
 {
   for (int i = 0; i < 64; ++i)
   {
@@ -36,7 +39,7 @@ TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, M
     {
       f->read (&_layers_info[i], sizeof(ENTRY_MCLY));
 
-      textures.emplace_back (tile->mTextureFilenames[_layers_info[i].textureID]);
+      textures.emplace_back (tile->mTextureFilenames[_layers_info[i].textureID], _context);
     }
 
     size_t alpha_base = base + header.ofsAlpha + 8;
@@ -114,7 +117,7 @@ void TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to
     if (replacement_texture_level != -1 && replacement_texture_level != texture_to_replace_level)
     {
       std::string fallback_tex_name = (boost::format("error_%d.blp") % replacement_texture_level).str();
-      auto fallback = scoped_blp_texture_reference(fallback_tex_name);
+      auto fallback = scoped_blp_texture_reference(fallback_tex_name, _context);
 
       textures[replacement_texture_level] = std::move(fallback);
 

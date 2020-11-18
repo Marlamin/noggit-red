@@ -37,6 +37,7 @@
 #include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
 #include <noggit/Red/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
+#include <noggit/Red/PresetEditor/Ui/PresetEditor.hpp>
 
 #include "revision.h"
 
@@ -212,6 +213,9 @@ void MapView::createGUI()
   _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this);
   _asset_browser->show();
 
+  auto preset_editor = new noggit::Red::PresetEditor::Ui::PresetEditorWidget(this);
+  preset_editor->show();
+
   // create tool widgets
   _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
   terrainTool = new noggit::ui::terrain_tool(_terrain_tool_dock);
@@ -330,7 +334,7 @@ void MapView::createGUI()
              makeCurrent();
              opengl::context::scoped_setter const _(::gl, context());
 
-             noggit::ui::selected_texture::set(filename);
+             noggit::ui::selected_texture::set({filename, _context});
            }
          );
   connect(texturingTool->_current_texture, &noggit::ui::current_texture::clicked
@@ -345,7 +349,7 @@ void MapView::createGUI()
       makeCurrent();
       opengl::context::scoped_setter const _(::gl, context());
 
-      noggit::ui::selected_texture::set(filename);
+      noggit::ui::selected_texture::set({filename, _context});
       texturingTool->_current_texture->set_texture(filename);
     }
   );
@@ -361,7 +365,7 @@ void MapView::createGUI()
       makeCurrent();
       opengl::context::scoped_setter const _(::gl, context());
 
-      noggit::ui::selected_texture::set(filename);
+      noggit::ui::selected_texture::set({filename, _context});
       texturingTool->_current_texture->set_texture(filename);
     }
   );
@@ -3043,13 +3047,13 @@ void MapView::selectModel(std::string const& model)
 {
   if (boost::ends_with (model, ".m2"))
   {
-    ModelInstance mi(model);
+    ModelInstance mi(model, _context);
     _world->set_current_selection(boost::get<selected_model_type>(&mi));
 
   }
   else if (boost::ends_with (model, ".wmo"))
   {
-    WMOInstance wi(model);
+    WMOInstance wi(model, _context);
     _world->set_current_selection(boost::get<selected_wmo_type>(&wi));
   }
 

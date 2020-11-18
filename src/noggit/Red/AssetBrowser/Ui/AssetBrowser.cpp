@@ -40,7 +40,6 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
   _sort_model->setFilterRole(Qt::UserRole);
   _sort_model->setRecursiveFilteringEnabled(true);
 
-  // test
   auto overlay = new QWidget(ui->viewport);
   viewport_overlay_ui = new ::Ui::AssetBrowserOverlay();
   viewport_overlay_ui->setupUi(overlay);
@@ -131,71 +130,81 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
 
   );
 
-  // Handle search
+  setupConnectsCommon();
+
+  _wmo_group_and_lod_regex = QRegularExpression(".+_\\d{3}(_lod.+)*.wmo");
+
+  updateModelData();
+
+
+}
+
+void AssetBrowserWidget::setupConnectsCommon()
+{
   connect(ui->searchButton, &QPushButton::clicked
       ,[this]()
-      {
-        _sort_model->setFilterFixedString(ui->searchField->text());
-      }
+          {
+              _sort_model->setFilterFixedString(ui->searchField->text());
+          }
 
   );
 
   connect(viewport_overlay_ui->lightDirY, &QDial::valueChanged
       ,[this]()
-      {
-        ui->viewport->setLightDirection(viewport_overlay_ui->lightDirY->value(),
-                                        viewport_overlay_ui->lightDirZ->value());
-      }
+          {
+              ui->viewport->setLightDirection(viewport_overlay_ui->lightDirY->value(),
+                                              viewport_overlay_ui->lightDirZ->value());
+          }
   );
 
   connect(viewport_overlay_ui->lightDirZ, &QSlider::valueChanged
       ,[this]()
-      {
-        ui->viewport->setLightDirection(viewport_overlay_ui->lightDirY->value(),
-                                        viewport_overlay_ui->lightDirZ->value());
-      }
+          {
+              ui->viewport->setLightDirection(viewport_overlay_ui->lightDirY->value(),
+                                              viewport_overlay_ui->lightDirZ->value());
+          }
   );
 
   connect(viewport_overlay_ui->moveSensitivitySlider, &QSlider::valueChanged
       ,[this]()
-      {
-        ui->viewport->setMoveSensitivity(static_cast<float>(viewport_overlay_ui->moveSensitivitySlider->value()));
-      }
+          {
+              ui->viewport->setMoveSensitivity(static_cast<float>(viewport_overlay_ui->moveSensitivitySlider->value()));
+          }
   );
 
   connect(ui->viewport, &ModelViewer::sensitivity_changed
       ,[this]()
-      {
-        viewport_overlay_ui->moveSensitivitySlider->setValue(ui->viewport->getMoveSensitivity() * 30.0f);
-      }
+          {
+              viewport_overlay_ui->moveSensitivitySlider->setValue(ui->viewport->getMoveSensitivity() * 30.0f);
+          }
   );
 
   connect(viewport_overlay_ui->cameraXButton, &QPushButton::clicked
       ,[this]()
-      {
-          ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, -90.f, 0.f);
-      }
+          {
+              ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, -90.f, 0.f);
+          }
   );
 
   connect(viewport_overlay_ui->cameraYButton, &QPushButton::clicked
       ,[this]()
-      {
-          ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, 0, 90.f);
-      }
+          {
+              ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, 0, 90.f);
+          }
   );
 
   connect(viewport_overlay_ui->cameraZButton, &QPushButton::clicked
       ,[this]()
-      {
-          ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
-      }
+          {
+              ui->viewport->resetCamera(0.f, 0.f, 0.f, 0.f, 0.f, 0.f);
+          }
   );
 
   connect(viewport_overlay_ui->cameraResetButton, &QPushButton::clicked
       ,[this]()
-      {
-          ui->viewport->resetCamera();
-      }
+          {
+              ui->viewport->resetCamera();
+          }
   );
 
   connect(viewport_overlay_ui->doodadSetSelector, qOverload<int>(&QComboBox::currentIndexChanged)
@@ -232,12 +241,6 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
           [this](bool state) {ui->viewport->_draw_animated.set(state);});
   connect(&ui->viewport->_draw_grid, &bool_toggle_property::changed,
           [this](bool state) {ui->viewport->_draw_grid.set(state);});
-
-  _wmo_group_and_lod_regex = QRegularExpression(".+_\\d{3}(_lod.+)*.wmo");
-
-  updateModelData();
-
-
 }
 
 // Add WMOs and M2s from project directory recursively

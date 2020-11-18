@@ -24,7 +24,8 @@
 #include <forward_list>
 #include <cstdlib>
 
-MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world, bool create_empty)
+MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
+                    noggit::NoggitRenderContext context, bool create_empty)
   : basename(pBasename)
   , _map_id (map_id)
   , _last_unload_time((clock() / CLOCKS_PER_SEC)) // to not try to unload right away
@@ -35,6 +36,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world, bool
   , _sort_models_by_size_class(false)
   , highestGUID(0)
   , _world (world)
+  , _context(context)
 {
 
   QSettings settings;
@@ -365,7 +367,8 @@ MapTile* MapIndex::loadTile(const tile_index& tile, bool reloading)
     return nullptr;
   }
 
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(), mBigAlpha, true, use_mclq_green_lava(), reloading, _world);
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(),
+     mBigAlpha, true, use_mclq_green_lava(), reloading, _world, _context);
 
   MapTile* adt = mTiles[tile.z][tile.x].tile.get();
 
@@ -867,11 +870,11 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
       for (ENTRY_MDDF& entry : modelEntries)
       {
-        models.emplace_front(modelFilenames[entry.nameID], &entry);
+        models.emplace_front(modelFilenames[entry.nameID], &entry, _context);
       }
       for (ENTRY_MODF& entry : wmoEntries)
       {
-        wmos.emplace_front(wmoFilenames[entry.nameID], &entry);
+        wmos.emplace_front(wmoFilenames[entry.nameID], &entry, _context);
       }
     }
   }
@@ -958,7 +961,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
       filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
 
       // load the tile without the models
-      MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), false, world, tile_mode::uid_fix_all);
+      MapTile tile(x, z, filename.str(), mBigAlpha, false, use_mclq_green_lava(), false, world, _context, tile_mode::uid_fix_all);
       tile.finishLoading();
 
       // add the uids to the tile to be able to save the models
@@ -1130,7 +1133,7 @@ void MapIndex::addTile(const tile_index& tile)
   filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
   mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(),
-      mBigAlpha, true, use_mclq_green_lava(), false, _world);
+      mBigAlpha, true, use_mclq_green_lava(), false, _world, _context);
 
   mTiles[tile.z][tile.x].flags |= 0x1;
   mTiles[tile.z][tile.x].tile->changed = true;
@@ -1145,7 +1148,7 @@ void MapIndex::removeTile(const tile_index &tile)
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
   mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(),
-                                                           mBigAlpha, true, use_mclq_green_lava(), false, _world);
+     mBigAlpha, true, use_mclq_green_lava(), false, _world, _context);
 
   mTiles[tile.z][tile.x].tile->changed = true;
   mTiles[tile.z][tile.x].onDisc = false;

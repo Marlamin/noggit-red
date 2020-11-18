@@ -34,6 +34,7 @@ MapTile::MapTile( int pX
                 , bool use_mclq_green_lava
                 , bool reloading_tile
                 , World* world
+                , noggit::NoggitRenderContext context
                 , tile_mode mode
                 )
   : AsyncObject(pFilename)
@@ -47,6 +48,7 @@ MapTile::MapTile( int pX
   , mBigAlpha(pBigAlpha)
   , _load_models(pLoadModels)
   , _world(world)
+  , _context(context)
 {
 }
 
@@ -284,14 +286,16 @@ void MapTile::finishLoading()
 
     for (auto const& object : lWMOInstances)
     {
-      add_model(_world->add_wmo_instance(WMOInstance(mWMOFilenames[object.nameID], &object), _tile_is_being_reloaded));
+      add_model(_world->add_wmo_instance(WMOInstance(mWMOFilenames[object.nameID],
+                                                     &object, _context), _tile_is_being_reloaded));
     }
 
     // - Load M2s ------------------------------------------
 
     for (auto const& model : lModelInstances)
     {
-      add_model(_world->add_model_instance(ModelInstance(mModelFilenames[model.nameID], &model), _tile_is_being_reloaded));
+      add_model(_world->add_model_instance(ModelInstance(mModelFilenames[model.nameID],
+                                                         &model, _context), _tile_is_being_reloaded));
     }
 
     _world->need_model_updates = true;
@@ -302,7 +306,7 @@ void MapTile::finishLoading()
   for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
   {
     theFile.seek(lMCNKOffsets[nextChunk]);
-    mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha, _mode);
+    mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha, _mode, _context);
   }
 
   theFile.close();
@@ -952,6 +956,6 @@ void MapTile::initEmptyChunks()
 {
   for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
   {
-    mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, nullptr, mBigAlpha, _mode, true, nextChunk);
+    mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, nullptr, mBigAlpha, _mode, _context, true, nextChunk);
   }
 }

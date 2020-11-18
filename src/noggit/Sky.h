@@ -6,6 +6,7 @@
 #include <noggit/DBCFile.h>
 #include <noggit/MPQ.h>
 #include <noggit/ModelInstance.h>
+#include <noggit/ContextObject.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
 
@@ -58,7 +59,7 @@ public:
   math::vector_3d pos;
   float r1, r2;
 
-  explicit Sky(DBCFile::Iterator data);
+  explicit Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context);
 
   std::vector<SkyColor> colorRows[36];
   int mmin[36];
@@ -87,6 +88,8 @@ private:
   float _river_deep_alpha;
   float _ocean_shallow_alpha;
   float _ocean_deep_alpha;
+
+  noggit::NoggitRenderContext _context;
 };
 
 enum SkyColorNames 
@@ -130,7 +133,7 @@ public:
   std::vector<Sky> skies;
   std::vector<math::vector_3d> color_set = std::vector<math::vector_3d>(NUM_SkyColorNames);
 
-  explicit Skies(unsigned int mapid);
+  explicit Skies(unsigned int mapid, noggit::NoggitRenderContext context);
 
   void findSkyWeights(math::vector_3d pos);
   void update_sky_colors(math::vector_3d pos, int time);
@@ -171,4 +174,6 @@ private:
   GLuint const& _indices_vbo = _buffers[2];
 
   std::unique_ptr<opengl::program> _program;
+
+  noggit::NoggitRenderContext _context;
 };

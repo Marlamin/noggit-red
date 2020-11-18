@@ -43,11 +43,9 @@ private:
   math::matrix_4x4 _transform_mat_transposed = math::matrix_4x4::uninitialized;
 
 public:
-  WMOInstance(std::string const& filename, ENTRY_MODF const* d
-              , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+  WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggit::NoggitRenderContext context);
 
-  explicit WMOInstance(std::string const& filename
-                      , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+  explicit WMOInstance(std::string const& filename, noggit::NoggitRenderContext context);
 
   WMOInstance(WMOInstance const& other) = default;
   WMOInstance& operator=(WMOInstance const& other) = default;

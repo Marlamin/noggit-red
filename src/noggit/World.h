@@ -17,6 +17,7 @@
 #include <noggit/world_tile_update_queue.hpp>
 #include <noggit/world_model_instances_storage.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
+#include <noggit/ContextObject.hpp>
 #include <opengl/primitives.hpp>
 #include <opengl/shader.fwd.hpp>
 
@@ -85,7 +86,7 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  explicit World(const std::string& name, int map_id, bool create_empty = false);
+  explicit World(const std::string& name, int map_id, noggit::NoggitRenderContext context, bool create_empty = false);
 
   void setBasename(const std::string& name);
 
@@ -136,6 +137,8 @@ public:
 
   unsigned int getAreaID (math::vector_3d const&);
   void setAreaID(math::vector_3d const& pos, int id, bool adt,  float radius = -1.0f);
+
+  noggit::NoggitRenderContext getRenderContext() { return _context; };
 
   selection_result intersect ( math::matrix_4x4 const& model_view
                              , math::ray const&
@@ -379,4 +382,6 @@ private:
 
   boost::optional<liquid_render> _liquid_render = boost::none;
   boost::optional<liquid_render> _liquid_render_mini = boost::none;
+
+  noggit::NoggitRenderContext _context;
 };

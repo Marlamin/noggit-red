@@ -5,6 +5,7 @@
 #include <noggit/MPQ.h>
 #include <noggit/alphamap.hpp>
 #include <noggit/MapHeaders.h>
+#include <noggit/ContextObject.hpp>
 
 #include <cstdint>
 #include <array>
@@ -28,7 +29,9 @@ class TextureSet
 {
 public:
   TextureSet() = delete;
-  TextureSet(MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile, bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps);
+  TextureSet(MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile
+             , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
+             , noggit::NoggitRenderContext context);
 
   math::vector_2d anim_uv_offset(int id, int animtime) const;
 
@@ -101,4 +104,6 @@ private:
   void create_temporary_alphamaps_if_needed();
 
   bool _do_not_convert_alphamaps;
+
+  noggit::NoggitRenderContext _context;
 };

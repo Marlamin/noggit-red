@@ -436,7 +436,7 @@ bool WMO::draw_skybox ( math::matrix_4x4 const& model_view
 
     if (camera_pos.is_inside_of(extent.first, extent.second))
     {
-      ModelInstance sky(skybox.get()->filename);
+      ModelInstance sky(skybox.get()->filename, _context);
       sky.pos = camera_pos;
       sky.scale = 2.f;
       sky.recalcExtents();

@@ -37,6 +37,8 @@ namespace noggit
     protected:
       void keyPressEvent(QKeyEvent* event) override;
 
+      void setupConnectsCommon();
+
     };
   }
 }

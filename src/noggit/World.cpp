@@ -96,10 +96,10 @@ bool World::IsEditableWorld(int pMapId)
   return false;
 }
 
-World::World(const std::string& name, int map_id, bool create_empty)
+World::World(const std::string& name, int map_id, noggit::NoggitRenderContext context, bool create_empty)
   : _model_instance_storage(this)
   , _tile_update_queue(this)
-  , mapIndex (name, map_id, this, create_empty)
+  , mapIndex (name, map_id, this, context, create_empty)
   , horizon(name, &mapIndex)
   , mWmoFilename("")
   , mWmoEntry(ENTRY_MODF())
@@ -116,6 +116,7 @@ World::World(const std::string& name, int map_id, bool create_empty)
   , _current_selection()
   , _settings (new QSettings())
   , _view_distance(_settings->value ("view_distance", 1000.f).toFloat())
+  , _context(context)
 {
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 }
@@ -626,7 +627,7 @@ void World::initDisplay()
 
   if (mapIndex.hasAGlobalWMO())
   {
-    WMOInstance inst(mWmoFilename, &mWmoEntry);
+    WMOInstance inst(mWmoFilename, &mWmoEntry, _context);
 
     _model_instance_storage.add_wmo_instance(std::move(inst), false);
   }
@@ -635,7 +636,7 @@ void World::initDisplay()
     _horizon_render = std::make_unique<noggit::map_horizon::render>(horizon);
   }
 
-  skies = std::make_unique<Skies> (mapIndex._map_id);
+  skies = std::make_unique<Skies> (mapIndex._map_id, _context);
 
   ol = std::make_unique<OutdoorLighting> ("World\\dnc.db");
 }
@@ -755,7 +756,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   }
   if (!_liquid_render)
   {
-    _liquid_render.emplace();
+    _liquid_render.emplace(_context);
   }
   if (!_wmo_program)
   {
@@ -1813,7 +1814,7 @@ void World::drawMinimap ( MapTile *tile
 
   if (!_liquid_render_mini)
   {
-    _liquid_render_mini.emplace();
+    _liquid_render_mini.emplace(_context);
   }
   if (!_wmo_program_mini)
   {
@@ -2296,7 +2297,7 @@ void World::addM2 ( std::string const& filename
                   , noggit::object_paste_params* paste_params
                   )
 {
-  ModelInstance model_instance = ModelInstance(filename);
+  ModelInstance model_instance = ModelInstance(filename, _context);
 
   model_instance.uid = mapIndex.newGUID();
   model_instance.pos = newPos;
@@ -2339,7 +2340,7 @@ void World::addWMO ( std::string const& filename
                    , math::vector_3d rotation
                    )
 {
-  WMOInstance wmo_instance(filename);
+  WMOInstance wmo_instance(filename, _context);
 
   wmo_instance.mUniqueID = mapIndex.newGUID();
   wmo_instance.pos = newPos;

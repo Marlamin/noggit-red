@@ -13,8 +13,8 @@
 using namespace noggit::Red::AssetBrowser;
 
 
-ModelViewer::ModelViewer(QWidget* parent)
- : PreviewRenderer(0, 0, noggit::NoggitRenderContext::ASSET_BROWSER, parent)
+ModelViewer::ModelViewer(QWidget* parent, noggit::NoggitRenderContext context)
+ : PreviewRenderer(0, 0, context, parent)
  , look(false)
  , mousedir(-1.0f)
 {

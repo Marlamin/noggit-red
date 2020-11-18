@@ -5,6 +5,7 @@
 
 #include <noggit/MPQ.h>
 #include <noggit/TextureManager.h>
+#include <noggit/ContextObject.hpp>
 #include <opengl/shader.hpp>
 
 #include <string>
@@ -14,7 +15,7 @@
 class liquid_render
 {
 public:
-  liquid_render() = default;
+  liquid_render(noggit::NoggitRenderContext context) : _context(context) {};
   void prepare_draw ( opengl::scoped::use_program& water_shader
                     , int liquid_id
                     , int animtime
@@ -42,4 +43,6 @@ private:
   std::map<int, int> _liquid_id_types;
   std::map<int, math::vector_2d> _float_param_by_liquid_id;
   std::map<int, std::vector<scoped_blp_texture_reference>> _textures_by_liquid_id;
+
+  noggit::NoggitRenderContext _context;
 };

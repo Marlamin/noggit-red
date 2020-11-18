@@ -250,7 +250,7 @@ static_assert ( sizeof (mohd_flags) == sizeof (std::uint16_t)
 class WMO : public AsyncObject
 {
 public:
-  explicit WMO(const std::string& name, noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+  explicit WMO(const std::string& name, noggit::NoggitRenderContext context );
 
   void draw ( opengl::scoped::use_program& wmo_shader
             , math::matrix_4x4 const& model_view
@@ -337,8 +337,7 @@ private:
 
 struct scoped_wmo_reference
 {
-  scoped_wmo_reference (std::string const& filename
-    , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW)
+  scoped_wmo_reference (std::string const& filename, noggit::NoggitRenderContext context)
     : _valid(true)
     , _filename(filename)
     , _context(context)

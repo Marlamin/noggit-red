@@ -105,7 +105,7 @@ void liquid_render::add_liquid_id(int liquid_id)
   {
     try 
     {
-      textures.emplace_back(boost::str(boost::format(filename) % i));
+      textures.emplace_back(boost::str(boost::format(filename) % i), _context);
     }
     catch (...)
     {
@@ -116,7 +116,7 @@ void liquid_render::add_liquid_id(int liquid_id)
   // make sure there's at least one texture
   if (textures.empty())
   {
-    textures.emplace_back ("textures/shanecube.blp");
+    textures.emplace_back ("textures/shanecube.blp", _context);
   }
 }
 

@@ -21,7 +21,8 @@ SkyColor::SkyColor(int t, int col)
   color.x = ((col & 0xff0000) >> 16) / 255.0f;
 }
 
-Sky::Sky(DBCFile::Iterator data)
+Sky::Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context)
+: _context(context)
 {
   pos = math::vector_3d(data->getFloat(LightDB::PositionX) / skymul, data->getFloat(LightDB::PositionY) / skymul, data->getFloat(LightDB::PositionZ) / skymul);
   r1 = data->getFloat(LightDB::RadiusInner) / skymul;
@@ -92,7 +93,7 @@ Sky::Sky(DBCFile::Iterator data)
 
     if (skybox_id)
     {
-      skybox.emplace(gLightSkyboxDB.getByID(skybox_id).getString(LightSkyboxDB::filename));
+      skybox.emplace(gLightSkyboxDB.getByID(skybox_id).getString(LightSkyboxDB::filename), _context);
     }
   }
   catch (...)
@@ -164,14 +165,15 @@ const int cnum = 7;
 const int hseg = 32;
 
 
-Skies::Skies(unsigned int mapid)
-  : stars (ModelInstance("Environments\\Stars\\Stars.mdx"))
+Skies::Skies(unsigned int mapid, noggit::NoggitRenderContext context)
+  : stars (ModelInstance("Environments\\Stars\\Stars.mdx", context))
+  , _context(context)
 {
   for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i)
   {
     if (mapid == i->getUInt(LightDB::Map))
     {
-      Sky s(i);
+      Sky s(i, _context);
       skies.push_back(s);
       numSkies++;
     }
@@ -183,7 +185,7 @@ Skies::Skies(unsigned int mapid)
     {
       if (0 == i->getUInt(LightDB::Map))
       {
-        Sky s(i);
+        Sky s(i, _context);
         skies.push_back(s);
         numSkies++;
         break;

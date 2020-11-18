@@ -33,7 +33,9 @@ namespace noggit
       Q_OBJECT
 
     public:
-      explicit ModelViewer(QWidget* parent = nullptr);
+      explicit ModelViewer(QWidget* parent = nullptr
+          , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::ASSET_BROWSER);
+
       void setModel(std::string const& filename) override;
       void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; };
       float getMoveSensitivity() { return _move_sensitivity; };

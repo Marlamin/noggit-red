@@ -194,7 +194,7 @@ void PreviewRenderer::draw()
 
   if (!_liquid_render)
   {
-    _liquid_render.emplace();
+    _liquid_render.emplace(_context);
   }
 
   gl.enable(GL_DEPTH_TEST);

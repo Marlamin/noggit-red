@@ -86,6 +86,8 @@ namespace noggit
     private:
       float _radius = 0.01f;
 
+      MapView* _map_view;
+
       QSlider* _radius_slider;
       QDoubleSpinBox* _radius_spin;
 

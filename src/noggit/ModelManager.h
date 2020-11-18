@@ -29,8 +29,7 @@ private:
 struct scoped_model_reference
 {
   scoped_model_reference (
-      std::string const& filename
-      , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW)
+      std::string const& filename, noggit::NoggitRenderContext context)
 
     : _valid(true)
     , _filename(filename)

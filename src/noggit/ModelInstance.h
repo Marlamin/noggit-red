@@ -39,12 +39,9 @@ public:
   // longest side of an AABB transformed model's bounding box from the M2 header
   float size_cat;
 
-  explicit ModelInstance(std::string const& filename,
-                        noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+  explicit ModelInstance(std::string const& filename, noggit::NoggitRenderContext context);
 
-  explicit ModelInstance(std::string const& filename,
-                        ENTRY_MDDF const*d,
-                        noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+  explicit ModelInstance(std::string const& filename, ENTRY_MDDF const*d, noggit::NoggitRenderContext context);
 
   ModelInstance(ModelInstance const& other) = default;
   ModelInstance& operator= (ModelInstance const& other) = default;
@@ -128,7 +125,7 @@ public:
 
   explicit wmo_doodad_instance(std::string const& filename
       , MPQFile* f
-      , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+      , noggit::NoggitRenderContext context );
 
   wmo_doodad_instance(wmo_doodad_instance const& other) = default;
   wmo_doodad_instance& operator= (wmo_doodad_instance const& other) = default;

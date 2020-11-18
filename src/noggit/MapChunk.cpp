@@ -22,10 +22,12 @@
 #include <QPixmap>
 #include <QImage>
 
-MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode, bool init_empty, int chunk_idx)
+MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
+                   tile_mode mode, noggit::NoggitRenderContext context, bool init_empty, int chunk_idx)
   : _mode(mode)
   , mt(maintile)
   , use_big_alphamap(bigAlpha)
+  , _context(context)
 {
 
   if (init_empty)
@@ -138,7 +140,8 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha, tile_mode mode,
     vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
   }
 
-  texture_set = std::make_unique<TextureSet>(header, f, base, maintile, bigAlpha, !!header_flags.flags.do_not_fix_alpha_map, mode == tile_mode::uid_fix_all);
+  texture_set = std::make_unique<TextureSet>(header, f, base, maintile, bigAlpha,
+     !!header_flags.flags.do_not_fix_alpha_map, mode == tile_mode::uid_fix_all, _context);
 
   // - MCVT ----------------------------------------------
   {

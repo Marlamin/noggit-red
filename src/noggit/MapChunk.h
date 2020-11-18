@@ -11,6 +11,7 @@
 #include <noggit/WMOInstance.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/tool_enums.hpp>
+#include <noggit/ContextObject.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
 #include <noggit/Misc.h>
@@ -89,7 +90,8 @@ private:
   opengl::scoped::deferred_upload_buffers<4> lod_indices;
 
 public:
-  MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha, tile_mode mode, bool init_empty = false, int chunk_idx = 0);
+  MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha, tile_mode mode, noggit::NoggitRenderContext context
+           , bool init_empty = false, int chunk_idx = 0);
 
   MapTile *mt;
   math::vector_3d vmin, vmax, vcenter;
@@ -123,6 +125,9 @@ private:
   bool _need_visibility_update = true;
   boost::optional<int> _lod_level = boost::none; // none = no lod
   size_t _lod_level_indice_count = 0;
+
+  noggit::NoggitRenderContext _context;
+
 public:
 
   void draw ( math::frustum const& frustum

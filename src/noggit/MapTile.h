@@ -11,6 +11,7 @@
 #include <noggit/tile_index.hpp>
 #include <noggit/tool_enums.hpp>
 #include <opengl/shader.fwd.hpp>
+#include <noggit/ContextObject.hpp>
 #include <noggit/Misc.h>
 
 #include <map>
@@ -36,6 +37,7 @@ public:
          , bool use_mclq_green_lava
          , bool reloading_tile
          , World*
+         , noggit::NoggitRenderContext context
          , tile_mode mode = tile_mode::edit
          );
   ~MapTile();
@@ -162,6 +164,8 @@ private:
 
   bool _load_models;
   World* _world;
+
+  noggit::NoggitRenderContext _context;
 
   friend class MapChunk;
   friend class TextureSet;

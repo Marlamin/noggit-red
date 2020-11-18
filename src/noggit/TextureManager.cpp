@@ -377,7 +377,7 @@ namespace noggit
     opengl::context::scoped_setter const context_set (::gl, &_context);
 
     opengl::texture::set_active_texture(0);
-    blp_texture texture(blp_filename);
+    blp_texture texture(blp_filename, noggit::NoggitRenderContext::BLP_RENDERER);
     texture.finishLoading();
 
     width = width == -1 ? texture.width() : width;

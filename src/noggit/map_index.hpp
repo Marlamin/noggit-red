@@ -7,6 +7,7 @@
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/tile_index.hpp>
+#include <noggit/ContextObject.hpp>
 
 #include <boost/range/iterator_range.hpp>
 
@@ -149,7 +150,7 @@ public:
       );
   }
 
-  MapIndex(const std::string& pBasename, int map_id, World*, bool create_empty = false);
+  MapIndex(const std::string& pBasename, int map_id, World*, noggit::NoggitRenderContext context, bool create_empty = false);
 
   void set_basename(const std::string& pBasename);
 
@@ -258,6 +259,8 @@ private:
 
   //! \todo REMOVE!
   World* _world;
+
+  noggit::NoggitRenderContext _context;
 
   std::mutex _mutex;
 };

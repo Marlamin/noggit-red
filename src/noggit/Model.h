@@ -212,7 +212,7 @@ public:
     return std::vector<T>(start, start + count);
   }
 
-  Model(const std::string& name, noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+  Model(const std::string& name, noggit::NoggitRenderContext context );
 
   void draw( math::matrix_4x4 const& model_view
            , ModelInstance& instance

@@ -24,6 +24,7 @@ namespace noggit
       : QWidget (parent)
       , _texture_to_swap()
       , _radius(15.f)
+      , _world(world)
     {
       setWindowTitle ("Swap");
       setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -102,7 +103,7 @@ namespace noggit
 
     void texture_swapper::set_texture(std::string const& filename)
     {
-      _texture_to_swap = std::move(scoped_blp_texture_reference(filename));
+      _texture_to_swap = std::move(scoped_blp_texture_reference(filename, _world->getRenderContext()));
     }
   }
 }

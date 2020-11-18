@@ -63,6 +63,7 @@ namespace noggit
       QGroupBox* _brush_mode_group;
       QSlider* _radius_slider;
       QDoubleSpinBox* _radius_spin;
+      World* _world;
     };
   }
 }

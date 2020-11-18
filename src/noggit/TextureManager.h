@@ -26,7 +26,7 @@ struct BLPHeader;
 struct scoped_blp_texture_reference;
 struct blp_texture : public opengl::texture, AsyncObject
 {
-  blp_texture (std::string const& filename, noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+  blp_texture (std::string const& filename, noggit::NoggitRenderContext context);
   void finishLoading();
 
   void loadFromUncompressedData(BLPHeader const* lHeader, char const* lData);
@@ -72,8 +72,7 @@ private:
 struct scoped_blp_texture_reference
 {
   scoped_blp_texture_reference() = delete;
-  scoped_blp_texture_reference (std::string const& filename,
-                                noggit::NoggitRenderContext context = noggit::NoggitRenderContext::MAP_VIEW);
+  scoped_blp_texture_reference (std::string const& filename, noggit::NoggitRenderContext context);
   scoped_blp_texture_reference (scoped_blp_texture_reference const& other);
   scoped_blp_texture_reference (scoped_blp_texture_reference&&) = default;
   scoped_blp_texture_reference& operator= (scoped_blp_texture_reference const&) = delete;

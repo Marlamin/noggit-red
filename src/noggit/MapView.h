@@ -220,6 +220,8 @@ public:
 
   void set_editing_mode (editing_mode);
 
+  noggit::NoggitRenderContext getRenderContext() { return _context; };
+
 private:
   enum Modifier
   {
@@ -340,5 +342,6 @@ private:
 
   noggit::Red::AssetBrowser::Ui::AssetBrowserWidget* _asset_browser;
 
+  noggit::NoggitRenderContext _context = noggit::NoggitRenderContext::MAP_VIEW;
 
 };

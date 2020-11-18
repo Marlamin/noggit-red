@@ -4,6 +4,7 @@
 #include <noggit/DBCFile.h>
 #include <noggit/Log.h>
 #include <noggit/World.h>
+#include <noggit/ContextObject.hpp>
 #include <noggit/ui/About.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/SettingsPanel.h>
@@ -189,7 +190,8 @@ namespace noggit
       {
         if (it->getInt(MapDB::MapID) == mapID)
         {
-          _world = std::make_unique<World> (it->getString(MapDB::InternalName), mapID);
+          _world = std::make_unique<World> (it->getString(MapDB::InternalName), mapID,
+                                            noggit::NoggitRenderContext::MAP_VIEW);
           _minimap->world (_world.get());
           emit map_selected(mapID);
 
@@ -263,7 +265,8 @@ namespace noggit
                            {
                              if (it->getInt(MapDB::MapID) == entry.mapID)
                              {
-                               _world = std::make_unique<World> (it->getString(MapDB::InternalName), entry.mapID);
+                               _world = std::make_unique<World> (it->getString(MapDB::InternalName),
+                                                                 entry.mapID, noggit::NoggitRenderContext::MAP_VIEW);
                                check_uid_then_enter_map ( entry.pos
                                                         , math::degrees (entry.camera_pitch)
                                                         , math::degrees (entry.camera_yaw)

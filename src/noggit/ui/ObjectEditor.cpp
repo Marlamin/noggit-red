@@ -50,6 +50,7 @@ namespace noggit
             , _copy_model_stats (true)
             , selected()
             , pasteMode(PASTE_ON_TERRAIN)
+            , _map_view(mapView)
     {
       auto layout = new QFormLayout (this);
 
@@ -537,7 +538,7 @@ namespace noggit
 
       if (boost::ends_with (filename, ".m2"))
       {
-        ModelInstance* mi = new ModelInstance(filename);
+        ModelInstance* mi = new ModelInstance(filename, _map_view->getRenderContext());
 
         _model_instance_created.push_back(mi);
 
@@ -546,7 +547,7 @@ namespace noggit
       }
       else if (boost::ends_with (filename, ".wmo"))
       {
-        WMOInstance* wi = new WMOInstance(filename);
+        WMOInstance* wi = new WMOInstance(filename, _map_view->getRenderContext());
 
         _model_instance_created.push_back(wi);
 
@@ -572,7 +573,7 @@ namespace noggit
         if (selection.which() == eEntry_Model)
         {
           auto original = boost::get<selected_model_type>(selection);
-          auto clone = new ModelInstance(original->model->filename);
+          auto clone = new ModelInstance(original->model->filename, _map_view->getRenderContext());
           
           clone->scale = original->scale;
           clone->dir = original->dir;
@@ -584,7 +585,7 @@ namespace noggit
         else if (selection.which() == eEntry_WMO)
         {
           auto original = boost::get<selected_wmo_type>(selection);
-          auto clone = new WMOInstance(original->wmo->filename);
+          auto clone = new WMOInstance(original->wmo->filename, _map_view->getRenderContext());
           clone->dir = original->dir;
           clone->pos = pivot ? original->pos - pivot.get() : math::vector_3d();
 
