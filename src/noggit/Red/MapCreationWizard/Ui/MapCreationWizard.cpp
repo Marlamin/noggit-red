@@ -298,7 +298,7 @@ void MapCreationWizard::selectMap(int map_id)
     delete _world;
   }
 
-  _world = new World(record.getString(MapDB::InternalName), map_id);
+  _world = new World(record.getString(MapDB::InternalName), map_id, noggit::NoggitRenderContext::MAP_VIEW);
   _minimap_widget->world(_world);
 
   _directory->setText(record.getString(1));
@@ -471,7 +471,7 @@ void MapCreationWizard::addNewMap()
     delete _world;
   }
 
-  _world = new World("New_Map", _cur_map_id, true);
+  _world = new World("New_Map", _cur_map_id, noggit::NoggitRenderContext::MAP_VIEW, true);
   _minimap_widget->world(_world);
 
   _directory->setText("New_Map");

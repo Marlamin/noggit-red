@@ -49,7 +49,7 @@ namespace noggit
       void sensitivity_changed();
       void model_set(std::string const& filename);
 
-    private:
+    protected:
 
       QTimer _update_every_event_loop;
       QPointF _last_mouse_pos;
