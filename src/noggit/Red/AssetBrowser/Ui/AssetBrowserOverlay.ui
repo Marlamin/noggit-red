@@ -426,7 +426,7 @@
           <string>overlay_label</string>
          </property>
          <property name="autoFillBackground">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <property name="text">
           <string>Doodadset:</string>
@@ -541,7 +541,7 @@
         <string>overlay_label</string>
        </property>
        <property name="autoFillBackground">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="text">
         <string>Light direction:</string>
@@ -574,7 +574,7 @@
           </size>
          </property>
          <property name="autoFillBackground">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <property name="minimum">
           <number>-180</number>
