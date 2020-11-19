@@ -74,7 +74,7 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
     std::string name = i->getLocalizedString(MapDB::Name);
     int area_type = i->getUInt(MapDB::AreaType);
 
-    if (area_type < 0 ||area_type > 4 || !World::IsEditableWorld(map_id))
+    if (area_type < 0 || area_type > 4 || !World::IsEditableWorld(map_id))
       continue;
 
     _corpse_map_id->addItem(QString::number(map_id) + " - " + QString::fromUtf8 (name.c_str()));

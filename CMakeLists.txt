@@ -191,6 +191,7 @@ endif()
 
 add_subdirectory (src/external/qt-color-widgets)
 add_subdirectory (src/external/framelesshelper)
+add_subdirectory (src/external/qtimgui)
 
 # Add the found include directories to our include list.
 include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/include/")
@@ -224,6 +225,7 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libpng" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libtxc_dxtn" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/pngpp" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/zlib" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguizmo" )
 include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 COLLECT_FILES(false noggit_root_sources src/noggit .cpp)
@@ -232,6 +234,7 @@ COLLECT_FILES(false math_sources src/math .cpp)
 COLLECT_FILES(false opengl_sources src/opengl .cpp)
 COLLECT_FILES(true red_sources src/noggit/Red .cpp)
 COLLECT_FILES(true png_blp_sources src/external/PNG2BLP ".c;.cpp;")
+COLLECT_FILES(false imguizmo_sources src/external/imguizmo ".c;.cpp;")
 set ( util_sources
       src/util/exception_to_string.cpp
     )
@@ -242,6 +245,7 @@ COLLECT_FILES(false opengl_headers src/opengl ".h;.hpp")
 COLLECT_FILES(false shaders src/glsl .glsl)
 COLLECT_FILES(true red_headers src/noggit/Red ".hpp;.inl")
 COLLECT_FILES(true png_blp_headers src/external/PNG2BLP ".h;.hpp;")
+COLLECT_FILES(false imguizmo_headers src/external/imguizmo ".h;.hpp;")
 
 IF(WIN32)
   set ( os_sources
@@ -274,6 +278,7 @@ source_group("util"  FILES ${util_sources})
 source_group("glsl"  FILES ${shaders})
 source_group("noggit/Red" FILES ${red_headers} ${red_sources})
 source_group("png_blp" FILES ${png_blp_headers} ${png_blp_sources})
+source_group("imguizmo" FILES ${imguizmo_headers} ${imguizmo_sources})
 
 COLLECT_FILES(false resource_files resources .qrc)
 qt5_add_resources (compiled_resource_files ${resource_files})
@@ -293,6 +298,7 @@ ADD_EXECUTABLE ( noggit
                   ${util_sources}
                   ${red_sources}
                   ${png_blp_sources}
+                  ${imguizmo_sources}
                   ${noggit_root_headers}
                   ${noggit_ui_headers}
                   ${opengl_headers}
@@ -304,6 +310,7 @@ ADD_EXECUTABLE ( noggit
                   ${ResFiles}
                   ${moced}
                   ${red_headers}
+                  ${imguizmo_headers}
                   ${compiled_resource_files}
                   ${compiled_ui_files}
                   ${shaders}
@@ -321,6 +328,7 @@ TARGET_LINK_LIBRARIES (noggit
   Qt5::OpenGLExtensions
   ColorWidgets-qt5
   FramelessHelper
+  qt_imgui_widgets
 )
 
 set (_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")

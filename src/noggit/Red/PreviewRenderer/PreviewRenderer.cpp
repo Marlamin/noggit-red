@@ -468,7 +468,7 @@ QPixmap* PreviewRenderer::renderToPixmap()
   gl.clearColor(0.5f, 0.5f, 0.5f, 1.f);
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  tick(20.f);
+  tick(1.0f);
   draw();
 
   auto& async_loader = AsyncLoader::instance();
@@ -528,6 +528,8 @@ void PreviewRenderer::update_emitters(float dt)
 
 void PreviewRenderer::tick(float dt)
 {
+  dt = std::min(dt, 1.0f);
+
   _animtime += dt * 1000.0f;
 
   if (_draw_animated.get())

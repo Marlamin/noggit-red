@@ -4,6 +4,8 @@
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ContextObject.hpp>
+#include <external/qtimgui/QtImGui.h>
+#include <external/qtimgui/imgui/imgui.h>
 
 #include <vector>
 #include <cmath>
@@ -38,6 +40,8 @@ void ModelViewer::initializeGL()
   gl.viewport(0.0f, 0.0f, width(), height());
   gl.clearColor (0.5f, 0.5f, 0.5f, 1.0f);
   emit resized();
+
+  _imgui_context = QtImGui::initialize(this);
 }
 
 void ModelViewer::paintGL()
@@ -54,6 +58,15 @@ void ModelViewer::paintGL()
   _last_update = now;
 
   draw();
+
+  ImGui::SetCurrentContext(_imgui_context);
+  QtImGui::newFrame();
+
+  ImGui::Text("Test");
+
+  ImGui::Render();
+
+
 }
 
 void ModelViewer::resizeGL(int w, int h)
@@ -119,12 +132,14 @@ void ModelViewer::mouseMoveEvent(QMouseEvent* event)
 
 void ModelViewer::mousePressEvent(QMouseEvent* event)
 {
-  look = true;
+  if (event->button() == Qt::RightButton)
+    look = true;
 }
 
 void ModelViewer::mouseReleaseEvent(QMouseEvent* event)
 {
-  look = false;
+  if (event->button() == Qt::RightButton)
+    look = false;
 }
 
 void ModelViewer::wheelEvent(QWheelEvent* event)

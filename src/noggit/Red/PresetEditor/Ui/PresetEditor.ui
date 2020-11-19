@@ -47,6 +47,18 @@
       </size>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="leftMargin">
+       <number>8</number>
+      </property>
+      <property name="topMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>8</number>
+      </property>
+      <property name="bottomMargin">
+       <number>8</number>
+      </property>
       <item>
        <widget class="QSplitter" name="splitter_2">
         <property name="minimumSize">
@@ -63,7 +75,7 @@
           <enum>Qt::Horizontal</enum>
          </property>
          <widget class="QWidget" name="verticalLayoutWidget">
-          <layout class="QVBoxLayout" name="verticalLayout">
+          <layout class="QVBoxLayout" name="directoryBar">
            <property name="spacing">
             <number>0</number>
            </property>
@@ -164,7 +176,7 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="widget_2" native="true">
+         <widget class="QWidget" name="viewportHolder" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
             <horstretch>0</horstretch>
@@ -194,145 +206,197 @@
             <number>0</number>
            </property>
            <item>
-            <widget class="noggit::Red::PresetEditor::ModelViewer" name="viewport">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-               <horstretch>1</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
+            <widget class="QTabWidget" name="tabWidget">
+             <property name="currentIndex">
+              <number>0</number>
              </property>
-             <property name="minimumSize">
-              <size>
-               <width>500</width>
-               <height>400</height>
-              </size>
-             </property>
+             <widget class="QWidget" name="viewport_tab">
+              <attribute name="title">
+               <string>Viewport</string>
+              </attribute>
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QSplitter" name="splitter_3">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <widget class="noggit::Red::PresetEditor::ModelViewer" name="viewport">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+                    <horstretch>1</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>500</width>
+                    <height>400</height>
+                   </size>
+                  </property>
+                 </widget>
+                 <widget class="QWidget" name="toolPanel" native="true">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>400</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <layout class="QVBoxLayout" name="verticalLayout">
+                   <item>
+                    <widget class="QToolBox" name="toolBox">
+                     <property name="currentIndex">
+                      <number>0</number>
+                     </property>
+                     <widget class="QWidget" name="page">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>376</width>
+                        <height>684</height>
+                       </rect>
+                      </property>
+                      <attribute name="label">
+                       <string>World navigation</string>
+                      </attribute>
+                      <layout class="QVBoxLayout" name="verticalLayout_6">
+                       <item alignment="Qt::AlignHCenter|Qt::AlignTop">
+                        <widget class="QWidget" name="widget_3" native="true">
+                         <layout class="QVBoxLayout" name="verticalLayout_7">
+                          <property name="spacing">
+                           <number>0</number>
+                          </property>
+                          <property name="leftMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="rightMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>0</number>
+                          </property>
+                          <item alignment="Qt::AlignTop">
+                           <widget class="QWidget" name="mapSelector_2" native="true">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <layout class="QHBoxLayout" name="horizontalLayout_4">
+                             <property name="spacing">
+                              <number>-1</number>
+                             </property>
+                             <property name="leftMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="topMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="rightMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="bottomMargin">
+                              <number>0</number>
+                             </property>
+                             <item>
+                              <widget class="QLabel" name="label_2">
+                               <property name="sizePolicy">
+                                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                                </sizepolicy>
+                               </property>
+                               <property name="text">
+                                <string>Map:</string>
+                               </property>
+                               <property name="scaledContents">
+                                <bool>false</bool>
+                               </property>
+                              </widget>
+                             </item>
+                             <item>
+                              <widget class="QComboBox" name="worldSelector"/>
+                             </item>
+                             <item>
+                              <widget class="QPushButton" name="worldUnloadButton">
+                               <property name="text">
+                                <string>Load</string>
+                               </property>
+                              </widget>
+                             </item>
+                            </layout>
+                           </widget>
+                          </item>
+                          <item alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+                           <widget class="noggit::ui::minimap_widget" name="minimapWidget" native="true">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+                              <horstretch>1</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                     <widget class="QWidget" name="page_2">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>376</width>
+                        <height>684</height>
+                       </rect>
+                      </property>
+                      <attribute name="label">
+                       <string>Page 2</string>
+                      </attribute>
+                     </widget>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+             <widget class="QWidget" name="nodes_tab">
+              <attribute name="title">
+               <string>Nodes</string>
+              </attribute>
+             </widget>
             </widget>
            </item>
           </layout>
          </widget>
-        </widget>
-        <widget class="QWidget" name="toolPanel" native="true">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>400</width>
-           <height>0</height>
-          </size>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QToolBox" name="toolBox">
-            <property name="currentIndex">
-             <number>0</number>
-            </property>
-            <widget class="QWidget" name="page">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>561</width>
-               <height>702</height>
-              </rect>
-             </property>
-             <attribute name="label">
-              <string>World navigation</string>
-             </attribute>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <item>
-               <widget class="QWidget" name="widget_3" native="true">
-                <layout class="QVBoxLayout" name="verticalLayout_6">
-                 <property name="spacing">
-                  <number>0</number>
-                 </property>
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QWidget" name="mapSelector_2" native="true">
-                   <layout class="QHBoxLayout" name="horizontalLayout_4">
-                    <property name="spacing">
-                     <number>-1</number>
-                    </property>
-                    <property name="leftMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="topMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="rightMargin">
-                     <number>0</number>
-                    </property>
-                    <property name="bottomMargin">
-                     <number>0</number>
-                    </property>
-                    <item>
-                     <widget class="QLabel" name="label_2">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="text">
-                       <string>Map:</string>
-                      </property>
-                      <property name="scaledContents">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QComboBox" name="comboBox_3"/>
-                    </item>
-                   </layout>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="noggit::ui::minimap_widget" name="minimapHolder_2" native="true">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-                     <horstretch>1</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="page_2">
-             <property name="geometry">
-              <rect>
-               <x>0</x>
-               <y>0</y>
-               <width>561</width>
-               <height>702</height>
-              </rect>
-             </property>
-             <attribute name="label">
-              <string>Page 2</string>
-             </attribute>
-            </widget>
-           </widget>
-          </item>
-         </layout>
         </widget>
        </widget>
       </item>

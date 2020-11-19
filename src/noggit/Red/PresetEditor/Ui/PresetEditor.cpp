@@ -1,6 +1,7 @@
 #include "PresetEditor.hpp"
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/font_noggit.hpp>
+#include <noggit/DBC.h>
 
 
 using namespace noggit::Red::PresetEditor::Ui;
@@ -73,6 +74,33 @@ PresetEditorWidget::PresetEditorWidget(QWidget *parent)
 
   setupConnectsCommon();
 
+  // Fill selector combo
+  ui->worldSelector->addItem("None");
+  ui->worldSelector->setItemData(0, QVariant(-1));
+  int count = 1;
+  for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
+  {
+    int map_id = i->getInt(MapDB::MapID);
+    std::string name = i->getLocalizedString(MapDB::Name);
+    int area_type = i->getUInt(MapDB::AreaType);
+
+    if (area_type < 0 || area_type > 4 || !World::IsEditableWorld(map_id))
+      continue;
+
+    ui->worldSelector->addItem(QString::number(map_id) + " - " + QString::fromUtf8 (name.c_str()));
+    ui->worldSelector->setItemData(count, QVariant(map_id), Qt::UserRole);
+
+    auto map_internal_name = i->getString(MapDB::InternalName);
+    ui->worldSelector->setItemData(count, QVariant(QString::fromStdString(map_internal_name)), Qt::UserRole + 1);
+
+    count++;
+
+  }
+
+  // Handle minimap widget
+  ui->minimapWidget->draw_boundaries(true);
+  ui->minimapWidget->camera(ui->viewport->getWorldCamera());
+
 }
 
 void PresetEditorWidget::setupConnectsCommon()
@@ -83,6 +111,25 @@ void PresetEditorWidget::setupConnectsCommon()
               _sort_model->setFilterFixedString(ui->searchField->text());
           }
 
+  );
+
+  connect(ui->worldUnloadButton, &QPushButton::clicked
+      ,[this]()
+          {
+              int map_id = ui->worldSelector->itemData(ui->worldSelector->currentIndex(), Qt::UserRole).toInt();
+
+              ui->viewport->loadWorldUnderlay(
+                ui->worldSelector->itemData(ui->worldSelector->currentIndex(), Qt::UserRole + 1).toString().toStdString(), map_id);
+              ui->minimapWidget->world(ui->viewport->getWorld());
+          }
+
+  );
+
+  connect(ui->minimapWidget, &minimap_widget::map_clicked
+      , [this] (::math::vector_3d const& pos)
+          {
+              ui->viewport->getWorldCamera()->position = pos;
+          }
   );
 
   connect(viewport_overlay_ui->lightDirY, &QDial::valueChanged
