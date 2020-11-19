@@ -6,6 +6,7 @@
 #include <QCursor>
 #include <QDebug>
 #include <unordered_map>
+#include <<stdexcept>>
 
 #ifdef ANDROID
 #define GL_VERTEX_ARRAY_BINDING           0x85B5 // Missing in android as of May 2020
