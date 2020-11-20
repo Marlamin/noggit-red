@@ -101,8 +101,12 @@ void ModelViewer::paintGL()
 
   auto delta_mat = math::matrix_4x4(math::matrix_4x4::unit).transposed();
 
-  ImGuizmo::Manipulate(static_cast<float*>(model_view().transposed()),
-                       static_cast<float*>(projection().transposed()),
+  auto mview = model_view().transposed();
+  auto proj = projection().transposed();
+
+  ImGuizmo::SetID(1);
+  ImGuizmo::Manipulate(static_cast<float*>(mview),
+                       static_cast<float*>(proj),
                        ImGuizmo::TRANSLATE,
                        ImGuizmo::WORLD,
                        obj_mat,
@@ -196,6 +200,7 @@ void ModelViewer::tick(float dt)
 
 void ModelViewer::mouseMoveEvent(QMouseEvent *event)
 {
+
   QLineF const relative_movement (_last_mouse_pos, event->pos());
 
   if (look)

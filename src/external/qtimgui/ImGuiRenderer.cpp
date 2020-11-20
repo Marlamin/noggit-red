@@ -413,7 +413,7 @@ ImGuiRenderer* ImGuiRenderer::instance(ImGuiContext* context) {
     }
     else
     {
-      instance = QtImGui::instances[context];
+      instance = it->second;
     }
 
     return instance;
@@ -431,7 +431,7 @@ ImGuiRenderer* ImGuiRenderer::instance() {
     }
     else
     {
-      instance = instances[context];
+      instance = it->second;
     }
 
     return instance;
