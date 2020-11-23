@@ -963,12 +963,12 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   if (terrainMode == editing_mode::object && has_multiple_model_selected())
   {
-    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, 2.f);
+    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, 0.3f);
   }
 
   if (use_ref_pos)
   {
-    _sphere_render.draw(mvp, ref_pos, cursor_color, 2.f);
+    _sphere_render.draw(mvp, ref_pos, cursor_color, 0.3f);
   }
 
   if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex)
@@ -1111,7 +1111,7 @@ void World::draw ( math::matrix_4x4 const& model_view
         auto model = boost::get<selected_model_type>(selection);
         if (model->is_visible(frustum, culldistance, camera_pos, display))
         {
-          model->draw_box(model_view, projection, true);
+          model->draw_box(model_view, projection, false); // make optional!
         }
       }
     }

@@ -1,0 +1,64 @@
+#ifndef NOGGIT_VIEWPORTGIZMO_HPP
+#define NOGGIT_VIEWPORTGIZMO_HPP
+
+#include <external/qtimgui/QtImGui.h>
+#include <external/qtimgui/imgui/imgui.h>
+#include <external/imguizmo/ImGuizmo.h>
+#include <noggit/Selection.h>
+#include <math/matrix_4x4.hpp>
+#include <noggit/World.h>
+
+#include <vector>
+
+namespace noggit
+{
+    namespace Red::ViewportGizmo
+    {
+        enum GizmoContext
+        {
+          MAP_VIEW,
+          ASSET_BROWSER,
+          PREVIEW_EDITOR
+        };
+
+        enum GizmoInternalMode
+        {
+            MODEL,
+            WMO,
+            MULTISELECTION
+        };
+
+        // This class is intended to be used by QOpenGLWidget presenting an ImGui drawing context.
+        // To use pass the context via setImGuiContext() in initializeGL() of a QOpenGLWidget and call the required
+        // gizmo method in paintGL()
+
+        class ViewportGizmo
+        {
+        public:
+            ViewportGizmo(GizmoContext gizmo_context, World* world);
+
+            void handleTransformGizmo(std::vector<selection_type> const& selection
+                , math::matrix_4x4 const& model_view
+                , math::matrix_4x4 const& projection);
+
+            void setCurrentGizmoOperation(ImGuizmo::OPERATION operation) { _gizmo_operation = operation; }
+            void setCurrentGizmoMode(ImGuizmo::MODE mode) { _gizmo_mode = mode; }
+            bool isOver() {ImGuizmo::SetID(_gizmo_context); return ImGuizmo::IsOver();};
+            bool isUsing() {ImGuizmo::SetID(_gizmo_context); return ImGuizmo::IsUsing();};
+            void setUseMultiselectionPivot(bool use_pivot) { _use_multiselection_pivot = use_pivot; };
+            void setMultiselectionPivot(math::vector_3d const& pivot) { _multiselection_pivot = pivot; };
+
+        private:
+
+            World* _world;
+            ImGuizmo::OPERATION _gizmo_operation;
+            ImGuizmo::MODE _gizmo_mode;
+            GizmoContext _gizmo_context;
+            bool _use_multiselection_pivot;
+            math::vector_3d _multiselection_pivot;
+            float _last_pivot_scale;
+        };
+    }
+}
+
+#endif //NOGGIT_VIEWPORTGIZMO_HPP
