@@ -3,8 +3,7 @@
 #include <external/qtimgui/imgui/imgui.h>
 #include <external/imguizmo/ImGuizmo.h>
 
-#include <QMatrix4x4>
-#include <QVector3D>
+#include <vector>
 
 using namespace noggit::Red::PresetEditor;
 
@@ -12,6 +11,7 @@ ModelViewer::ModelViewer(QWidget *parent)
 : AssetBrowser::ModelViewer(parent, noggit::NoggitRenderContext::PRESET_EDITOR)
 , _world(nullptr)
 , _world_camera(_camera.position, _camera.yaw(), _camera.pitch())
+, _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::PRESET_EDITOR)
 {
 }
 
@@ -80,61 +80,37 @@ void ModelViewer::paintGL()
 
   draw();
 
-  ImGui::SetCurrentContext(_imgui_context);
-  QtImGui::newFrame();
-
-
-  ImGuizmo::SetDrawlist();
-
-
-  ImGuizmo::SetOrthographic(false);
-  ImGuizmo::BeginFrame();
-
-  ImGuiIO& io = ImGui::GetIO();
-  ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-
-  auto obj_mat = _wmo_instances[0].transform_matrix().transposed();
-  float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-
-  ImGuizmo::DecomposeMatrixToComponents(obj_mat, matrixTranslation, matrixRotation, matrixScale);
-  ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, obj_mat);
-
-  auto delta_mat = math::matrix_4x4(math::matrix_4x4::unit).transposed();
-
-  auto mview = model_view().transposed();
-  auto proj = projection().transposed();
-
-  ImGuizmo::SetID(1);
-  ImGuizmo::Manipulate(static_cast<float*>(mview),
-                       static_cast<float*>(proj),
-                       ImGuizmo::TRANSLATE,
-                       ImGuizmo::WORLD,
-                       obj_mat,
-                       delta_mat,
-                       NULL);
-
-
-  std::string test;
-  for (int i = 0; i < 16; ++i)
+  if (_gizmo_on.get())
   {
-    test += std::to_string(static_cast<float*>(delta_mat)[i]) + " ";
+    ImGui::SetCurrentContext(_imgui_context);
+    QtImGui::newFrame();
+
+    static bool is_open = false;
+    ImGui::SetNextWindowBgAlpha(0.0f);
+    ImGui::SetNextWindowPos(ImVec2(-100.f, -100.f));
+    ImGui::Begin("Gizmo", &is_open, ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar
+                                        | ImGuiWindowFlags_::ImGuiWindowFlags_NoBackground);
+
+    auto mv = model_view();
+    auto proj = projection();
+
+    _transform_gizmo.setCurrentGizmoOperation(_gizmo_operation);
+    _transform_gizmo.setCurrentGizmoMode(_gizmo_mode);
+    _transform_gizmo.setUseMultiselectionPivot(false);
+
+    //_transform_gizmo.setMultiselectionPivot(pivot);
+    // TEMP HACK!!!
+    std::vector<selection_type> selection;
+    selection.emplace_back(&_wmo_instances[0]);
+
+    _transform_gizmo.handleTransformGizmo(selection, mv, proj);
+
+    //_world->update_selection_pivot();
+
+    ImGui::End();
+    ImGui::Render();
+
   }
-
-  QMatrix4x4 new_mat (static_cast<float*>(delta_mat));
-  QVector3D pos = {_wmo_instances[0].pos.x, _wmo_instances[0].pos.y, _wmo_instances[0].pos.z};
-  QVector3D transform = pos * new_mat;
-  _wmo_instances[0].pos = {transform.x(), transform.y(), transform.z()};
-  _wmo_instances[0].recalcExtents();
-
-  test += "\n" + std::to_string(_wmo_instances[0].pos.x) + " "
-      + std::to_string(_wmo_instances[0].pos.y)
-      + " " + std::to_string(_wmo_instances[0].pos.z);
-
-
-
-  ImGui::Text(test.c_str());
-
-  ImGui::Render();
 }
 
 void ModelViewer::loadWorldUnderlay(const std::string& internal_name, int map_id)
@@ -215,6 +191,7 @@ void ModelViewer::mouseMoveEvent(QMouseEvent *event)
 void ModelViewer::initializeGL()
 {
   AssetBrowser::ModelViewer::initializeGL();
+  _imgui_context = QtImGui::initialize(this);
 
 }
 

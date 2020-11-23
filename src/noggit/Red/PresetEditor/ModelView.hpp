@@ -2,6 +2,10 @@
 #define NOGGIT_MODELVIEW_HPP
 
 #include <noggit/Red/AssetBrowser/ModelView.hpp>
+#include <external/qtimgui/QtImGui.h>
+#include <external/qtimgui/imgui/imgui.h>
+#include <external/imguizmo/ImGuizmo.h>
+#include <noggit/Red/ViewportGizmo/ViewportGizmo.hpp>
 #include <noggit/World.h>
 #include <noggit/camera.hpp>
 
@@ -35,6 +39,12 @@ namespace noggit
         math::matrix_4x4 world_projection() const;
 
         void mouseMoveEvent(QMouseEvent* event) override;
+
+        ViewportGizmo::ViewportGizmo _transform_gizmo;
+        ImGuiContext* _imgui_context;
+        ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
+        ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
+        noggit::bool_toggle_property _gizmo_on = {true};
 
 
     };

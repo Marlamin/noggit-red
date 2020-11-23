@@ -17,8 +17,7 @@ namespace noggit
         enum GizmoContext
         {
           MAP_VIEW,
-          ASSET_BROWSER,
-          PREVIEW_EDITOR
+          PRESET_EDITOR
         };
 
         enum GizmoInternalMode
@@ -35,7 +34,7 @@ namespace noggit
         class ViewportGizmo
         {
         public:
-            ViewportGizmo(GizmoContext gizmo_context, World* world);
+            ViewportGizmo(GizmoContext gizmo_context, World* world = nullptr);
 
             void handleTransformGizmo(std::vector<selection_type> const& selection
                 , math::matrix_4x4 const& model_view
@@ -47,6 +46,7 @@ namespace noggit
             bool isUsing() {ImGuizmo::SetID(_gizmo_context); return ImGuizmo::IsUsing();};
             void setUseMultiselectionPivot(bool use_pivot) { _use_multiselection_pivot = use_pivot; };
             void setMultiselectionPivot(math::vector_3d const& pivot) { _multiselection_pivot = pivot; };
+            void setWorld(World* world) { _world = world; }
 
         private:
 

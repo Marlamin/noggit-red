@@ -210,11 +210,11 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 void MapView::createGUI()
 {
 
-  //_asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this);
-  //_asset_browser->show();
+  _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this);
+  _asset_browser->show();
 
-  //auto preset_editor = new noggit::Red::PresetEditor::Ui::PresetEditorWidget(this);
-  //preset_editor->show();
+  auto preset_editor = new noggit::Red::PresetEditor::Ui::PresetEditorWidget(this);
+  preset_editor->show();
 
   auto overlay = new QWidget(this);
   _viewport_overlay_ui = new ::Ui::MapViewOverlay();
@@ -1415,11 +1415,10 @@ MapView::MapView( math::degrees camera_yaw0
   , _modeStampTool{&_showStampPalette, &_cursorRotation, this}
   , _modeStampPaletteMain{this}
   , _texBrush{new opengl::texture{}}
-  , _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW, nullptr)
+  , _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW)
 {
-  //setCursor(Qt::BlankCursor);
 
-  _transform_gizmo = noggit::Red::ViewportGizmo::ViewportGizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW, _world.get());
+  _transform_gizmo.setWorld(_world.get());
 
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   _main_window->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
@@ -1787,6 +1786,7 @@ void MapView::paintGL()
     gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
+  if (_gizmo_on.get())
   {
     ImGui::SetCurrentContext(_imgui_context);
     QtImGui::newFrame();
@@ -1808,7 +1808,6 @@ void MapView::paintGL()
         _world->multi_select_pivot().get() : math::vector_3d(0.f, 0.f, 0.f);
 
     _transform_gizmo.setMultiselectionPivot(pivot);
-
     _transform_gizmo.handleTransformGizmo(_world->current_selection(), mv, proj);
 
     _world->update_selection_pivot();

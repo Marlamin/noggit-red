@@ -4,9 +4,6 @@
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ContextObject.hpp>
-#include <external/qtimgui/QtImGui.h>
-#include <external/qtimgui/imgui/imgui.h>
-#include <external/imguizmo/ImGuizmo.h>
 
 #include <vector>
 #include <cmath>
@@ -43,8 +40,6 @@ void ModelViewer::initializeGL()
   gl.viewport(0.0f, 0.0f, width(), height());
   gl.clearColor (0.5f, 0.5f, 0.5f, 1.0f);
   emit resized();
-
-  _imgui_context = QtImGui::initialize(this);
 }
 
 void ModelViewer::paintGL()
@@ -61,64 +56,6 @@ void ModelViewer::paintGL()
   _last_update = now;
 
   draw();
-
-  ImGui::SetCurrentContext(_imgui_context);
-  QtImGui::newFrame();
-
-  ImGuizmo::SetDrawlist();
-
-
-  ImGuizmo::SetOrthographic(false);
-  ImGuizmo::BeginFrame();
-
-  ImGuiIO& io = ImGui::GetIO();
-  ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-
-  auto obj_mat = _wmo_instances[0].transform_matrix().transposed();
-  float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-
-  ImGuizmo::DecomposeMatrixToComponents(obj_mat, matrixTranslation, matrixRotation, matrixScale);
-  ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, obj_mat);
-
-  auto delta_mat = math::matrix_4x4(math::matrix_4x4::unit).transposed();
-
-  auto mview = model_view().transposed();
-  auto proj = projection().transposed();
-
-  ImGuizmo::SetID(0);
-  ImGuizmo::Manipulate(static_cast<float*>(mview),
-                       static_cast<float*>(proj),
-                       ImGuizmo::TRANSLATE,
-                       ImGuizmo::WORLD,
-                       obj_mat,
-                       delta_mat,
-                       NULL);
-
-
-  std::string test;
-  for (int i = 0; i < 16; ++i)
-  {
-    test += std::to_string(static_cast<float*>(delta_mat)[i]) + " ";
-  }
-
-  QMatrix4x4 new_mat (static_cast<float*>(delta_mat));
-  QVector3D pos = {_wmo_instances[0].pos.x, _wmo_instances[0].pos.y, _wmo_instances[0].pos.z};
-  QVector3D transform = pos * new_mat;
-  _wmo_instances[0].pos = {transform.x(), transform.y(), transform.z()};
-  _wmo_instances[0].recalcExtents();
-
-  test += "\n" + std::to_string(_wmo_instances[0].pos.x) + " "
-          + std::to_string(_wmo_instances[0].pos.y)
-          + " " + std::to_string(_wmo_instances[0].pos.z);
-
-
-
-  ImGui::Text(test.c_str());
-
-
-
-  ImGui::Render();
-
 
 }
 

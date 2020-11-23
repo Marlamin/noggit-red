@@ -21,7 +21,6 @@
 #include <noggit/WMO.h>
 #include <noggit/Model.h>
 #include <noggit/Red/PreviewRenderer/PreviewRenderer.hpp>
-#include <external/qtimgui/QtImGui.h>
 
 
 namespace noggit
@@ -76,8 +75,6 @@ namespace noggit
       void keyReleaseEvent(QKeyEvent* event) override;
       void keyPressEvent(QKeyEvent* event) override;
       void focusOutEvent(QFocusEvent* event) override;
-
-      ImGuiContext* _imgui_context;
 
     };
   }

@@ -149,7 +149,8 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
 
       switch (_gizmo_operation)
       {
-        _world->updateTilesEntry(selection[0], model_update::remove);
+        if (_world)
+          _world->updateTilesEntry(selection[0], model_update::remove);
 
         case ImGuizmo::TRANSLATE:
         {
@@ -231,7 +232,8 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
           wmo_instance->recalcExtents();
         }
 
-        _world->updateTilesEntry(selection[0], model_update::add);
+        if (_world)
+         _world->updateTilesEntry(selection[0], model_update::add);
       }
     }
   }
@@ -280,7 +282,8 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
 
       switch (_gizmo_operation)
       {
-        _world->updateTilesEntry(selection[0], model_update::remove);
+        if (_world)
+          _world->updateTilesEntry(selection[0], model_update::remove);
 
         case ImGuizmo::TRANSLATE:
         {
@@ -313,7 +316,8 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
           wmo_instance->recalcExtents();
         }
 
-        _world->updateTilesEntry(selection[0], model_update::add);
+        if (_world)
+          _world->updateTilesEntry(selection[0], model_update::add);
       }
     }
   }
