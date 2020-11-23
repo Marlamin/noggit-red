@@ -663,6 +663,8 @@ namespace ImGuizmo
       //
       int mCurrentOperation;
 
+      bool mScaleAxisLock = false;
+
       float mX = 0.f;
       float mY = 0.f;
       float mWidth = 0.f;
@@ -1839,6 +1841,11 @@ namespace ImGuizmo
       return modified;
    }
 
+   void SetScaleGizmoAxisLock(bool isLocked)
+   {
+     gContext.mScaleAxisLock = isLocked;
+   }
+
    static bool HandleScale(float* matrix, float* deltaMatrix, int& type, const float* snap)
    {
       ImGuiIO& io = ImGui::GetIO();
@@ -1880,7 +1887,7 @@ namespace ImGuizmo
          vec_t delta = newOrigin - gContext.mModel.v.position;
 
          // 1 axis constraint
-         if (gContext.mCurrentOperation >= SCALE_X && gContext.mCurrentOperation <= SCALE_Z)
+         if (!gContext.mScaleAxisLock && gContext.mCurrentOperation >= SCALE_X && gContext.mCurrentOperation <= SCALE_Z)
          {
             int axisIndex = gContext.mCurrentOperation - SCALE_X;
             const vec_t& axisValue = *(vec_t*)&gContext.mModel.m[axisIndex];
@@ -1907,7 +1914,7 @@ namespace ImGuizmo
 
          // no 0 allowed
          for (int i = 0; i < 3; i++)
-            gContext.mScale[i] = max(gContext.mScale[i], 0.001f);
+            gContext.mScale[i] = max(gContext.mScale[i] * gContext.mScaleValueOrigin[i], 0.001f);
 
          if (gContext.mScaleLast != gContext.mScale)
          {
@@ -1917,14 +1924,14 @@ namespace ImGuizmo
 
          // compute matrix & delta
          matrix_t deltaMatrixScale;
-         deltaMatrixScale.Scale(gContext.mScale * gContext.mScaleValueOrigin);
+         deltaMatrixScale.Scale(gContext.mScale);
 
          matrix_t res = deltaMatrixScale * gContext.mModel;
          *(matrix_t*)matrix = res;
 
          if (deltaMatrix)
          {
-            deltaMatrixScale.Scale(gContext.mScale);
+            //deltaMatrixScale.Scale(gContext.mScale);
             memcpy(deltaMatrix, deltaMatrixScale.m16, sizeof(float) * 16);
          }
 
@@ -2589,5 +2596,15 @@ namespace ImGuizmo
       // restore view/projection because it was used to compute ray
       ComputeContext(svgView.m16, svgProjection.m16, gContext.mModelSource.m16, gContext.mMode);
    }
+
+    float GetOperationScaleOrigin()
+    {
+        return gContext.mScaleValueOrigin.x;
+    }
+
+    float GetOperationScaleLast()
+    {
+        return gContext.mScaleLast.x;
+    }
 };
 

@@ -210,11 +210,76 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 void MapView::createGUI()
 {
 
-  _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this);
-  _asset_browser->show();
+  //_asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this);
+  //_asset_browser->show();
 
-  auto preset_editor = new noggit::Red::PresetEditor::Ui::PresetEditorWidget(this);
-  preset_editor->show();
+  //auto preset_editor = new noggit::Red::PresetEditor::Ui::PresetEditorWidget(this);
+  //preset_editor->show();
+
+  auto overlay = new QWidget(this);
+  _viewport_overlay_ui = new ::Ui::MapViewOverlay();
+  _viewport_overlay_ui->setupUi(overlay);
+  overlay->setAttribute(Qt::WA_TranslucentBackground);
+  overlay->setMouseTracking(true);
+  overlay->setGeometry(0,0, width(), height());
+
+  connect(this, &MapView::resized
+      ,[this, overlay]()
+          {
+              overlay->setGeometry(0, 0, width(), height());
+          }
+  );
+
+  connect(_viewport_overlay_ui->gizmoVisibleButton, &QPushButton::clicked
+      ,[this]()
+      {
+          _gizmo_on.set(_viewport_overlay_ui->gizmoVisibleButton->isChecked());
+      }
+  );
+
+  connect(&_gizmo_on, &noggit::bool_toggle_property::changed
+      ,[this](bool state)
+      {
+         _viewport_overlay_ui->gizmoVisibleButton->setChecked(state);
+      }
+  );
+
+  connect(_viewport_overlay_ui->gizmoModeButton, &QPushButton::clicked
+      ,[this]()
+      {
+          if (_viewport_overlay_ui->gizmoVisibleButton->isChecked())
+          {
+            _gizmo_mode = ImGuizmo::MODE::WORLD;
+          }
+          else
+          {
+            _gizmo_mode = ImGuizmo::MODE::LOCAL;
+          }
+      }
+  );
+
+  connect(_viewport_overlay_ui->gizmoTranslateButton, &QPushButton::clicked
+      ,[this]()
+          {
+              _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
+          }
+  );
+
+  connect(_viewport_overlay_ui->gizmoRotateButton, &QPushButton::clicked
+      ,[this]()
+          {
+              _gizmo_operation = ImGuizmo::OPERATION::ROTATE;
+          }
+  );
+
+  connect(_viewport_overlay_ui->gizmoScaleButton, &QPushButton::clicked
+      ,[this]()
+          {
+              _gizmo_operation = ImGuizmo::OPERATION::SCALE;
+          }
+  );
+
+
 
   // create tool widgets
   _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
@@ -1350,8 +1415,12 @@ MapView::MapView( math::degrees camera_yaw0
   , _modeStampTool{&_showStampPalette, &_cursorRotation, this}
   , _modeStampPaletteMain{this}
   , _texBrush{new opengl::texture{}}
+  , _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW, nullptr)
 {
-  setCursor(Qt::BlankCursor);
+  //setCursor(Qt::BlankCursor);
+
+  _transform_gizmo = noggit::Red::ViewportGizmo::ViewportGizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW, _world.get());
+
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   _main_window->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
   _main_window->setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
@@ -1556,6 +1625,10 @@ void MapView::initializeGL()
       , QMessageBox::Ok
       );
   }
+
+  _imgui_context = QtImGui::initialize(this);
+
+  emit resized();
 }
 
 
@@ -1714,6 +1787,37 @@ void MapView::paintGL()
     gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
+  {
+    ImGui::SetCurrentContext(_imgui_context);
+    QtImGui::newFrame();
+
+    static bool is_open = false;
+    ImGui::SetNextWindowBgAlpha(0.0f);
+    ImGui::SetNextWindowPos(ImVec2(-100.f, -100.f));
+    ImGui::Begin("Gizmo", &is_open, ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar
+                                                | ImGuiWindowFlags_::ImGuiWindowFlags_NoBackground);
+
+    auto mv = model_view();
+    auto proj = projection();
+
+    _transform_gizmo.setCurrentGizmoOperation(_gizmo_operation);
+    _transform_gizmo.setCurrentGizmoMode(_gizmo_mode);
+    _transform_gizmo.setUseMultiselectionPivot(_use_median_pivot_point.get());
+
+    auto pivot = _world->multi_select_pivot().is_initialized() ?
+        _world->multi_select_pivot().get() : math::vector_3d(0.f, 0.f, 0.f);
+
+    _transform_gizmo.setMultiselectionPivot(pivot);
+
+    _transform_gizmo.handleTransformGizmo(_world->current_selection(), mv, proj);
+
+    _world->update_selection_pivot();
+
+    ImGui::End();
+    ImGui::Render();
+
+  }
+
   if (!saving_minimap && _world->uid_duplicates_found() && !_uid_duplicate_warning_shown)
   {
     _uid_duplicate_warning_shown = true;
@@ -1732,6 +1836,7 @@ void MapView::resizeGL (int width, int height)
 {
   opengl::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, width, height);
+  emit resized();
 }
 
 
@@ -1740,6 +1845,7 @@ MapView::~MapView()
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
   delete _texBrush;
+  delete _viewport_overlay_ui;
 
   // when the uid fix fail the UI isn't created
   if (!_uid_fix_failed)
@@ -2423,6 +2529,9 @@ selection_result MapView::intersect_result(bool terrain_only)
 
 void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
 {
+  if (_transform_gizmo.isUsing() || _transform_gizmo.isOver())
+    return;
+
   selection_result results(intersect_result(selectTerrainOnly));
 
   if (results.empty())

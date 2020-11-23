@@ -16,6 +16,8 @@
 #include <noggit/Red/StampMode/Ui/Tool.hpp>
 #include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
+#include <noggit/Red/ViewportGizmo/ViewportGizmo.hpp>
+#include <external/qtimgui/QtImGui.h>
 #include <opengl/texture.hpp>
 
 #include <boost/optional.hpp>
@@ -32,6 +34,8 @@
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
+
+#include <ui_MapViewOverlay.h>
 
 
 class World;
@@ -189,9 +193,12 @@ private:
   void save(save_mode mode);
 
   QSettings* _settings;
+  noggit::Red::ViewportGizmo::ViewportGizmo _transform_gizmo;
+  ImGuiContext* _imgui_context;
 
 signals:
   void uid_fix_failed();
+  void resized();
 public slots:
   void on_exit_prompt();
 
@@ -343,5 +350,10 @@ private:
   noggit::Red::AssetBrowser::Ui::AssetBrowserWidget* _asset_browser;
 
   noggit::NoggitRenderContext _context = noggit::NoggitRenderContext::MAP_VIEW;
+
+  ::Ui::MapViewOverlay* _viewport_overlay_ui;
+  ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
+  ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
+  noggit::bool_toggle_property _gizmo_on = {true};
 
 };

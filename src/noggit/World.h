@@ -154,11 +154,11 @@ public:
 
 private:
   // Information about the currently selected model / WMO / triangle.
-  boost::optional<math::vector_3d> _multi_select_pivot;
   int _selected_model_count = 0;
-  void update_selection_pivot();
+  boost::optional<math::vector_3d> _multi_select_pivot;
 public:
 
+  void update_selection_pivot();
   boost::optional<math::vector_3d> const& multi_select_pivot() const { return _multi_select_pivot; }
 
   // Selection related methods.
