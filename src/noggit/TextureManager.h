@@ -37,6 +37,7 @@ struct blp_texture : public opengl::texture, AsyncObject
 
   void bind();
   void upload();
+  void unload();
 
   noggit::NoggitRenderContext getContext() { return _context; };
 
@@ -63,6 +64,7 @@ class TextureManager
 {
 public:
   static void report();
+  static void unload_all(noggit::NoggitRenderContext context);
 
 private:
   friend struct scoped_blp_texture_reference;

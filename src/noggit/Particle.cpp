@@ -503,6 +503,13 @@ void ParticleSystem::upload()
   _uploaded = true;
 }
 
+void ParticleSystem::unload()
+{
+  _vertex_array.unload();
+  _buffers.unload();
+  _uploaded = false;
+}
+
 namespace
 {
   //Generates the rotation matrix based on spread
@@ -984,4 +991,11 @@ void RibbonEmitter::upload()
   _vertex_array.upload();
   _buffers.upload();
   _uploaded = true;
+}
+
+void RibbonEmitter::unload()
+{
+  _vertex_array.unload();
+  _buffers.unload();
+  _uploaded = false;
 }

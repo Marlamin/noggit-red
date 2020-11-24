@@ -17,6 +17,7 @@
 #include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/Red/ViewportGizmo/ViewportGizmo.hpp>
+#include <noggit/Red/ViewportManager/ViewportManager.hpp>
 #include <external/qtimgui/QtImGui.h>
 #include <opengl/texture.hpp>
 
@@ -29,11 +30,13 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QOpenGLWidget>
 #include <QWidgetAction>
+#include <QOpenGLContext>
 
 #include <forward_list>
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
+#include <thread>
 
 #include <ui_MapViewOverlay.h>
 
@@ -77,7 +80,7 @@ enum class save_mode
   all
 };
 
-class MapView : public QOpenGLWidget
+class MapView : public noggit::Red::ViewportManager::Viewport
 {
   Q_OBJECT
 private:
@@ -262,6 +265,8 @@ private:
 
   QTimer _update_every_event_loop;
 
+  QOpenGLContext* _last_opengl_context;
+
   virtual void tabletEvent(QTabletEvent* event) override;
   virtual void initializeGL() override;
   virtual void paintGL() override;
@@ -315,6 +320,8 @@ private:
 
   void setToolPropertyWidgetVisibility(editing_mode mode);
 
+  void unloadOpenglData(bool from_manager = false) override;
+
   noggit::ui::help* _keybindings;
 
   std::unordered_set<QDockWidget*> _tool_properties_docks;
@@ -355,5 +362,6 @@ private:
   ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
   ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
   noggit::bool_toggle_property _gizmo_on = {true};
+  bool _destroying = false;
 
 };

@@ -621,8 +621,6 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
 
 void World::initDisplay()
 {
-  initGlobalVBOs(&detailtexcoords, &alphatexcoords);
-
   mapIndex.setAdt(false);
 
   if (mapIndex.hasAGlobalWMO())
@@ -686,6 +684,12 @@ void World::draw ( math::matrix_4x4 const& model_view
   {
     initDisplay();
     _display_initialized = true;
+  }
+
+  if (!_global_vbos_initialized)
+  {
+    initGlobalVBOs(&detailtexcoords, &alphatexcoords);
+    _global_vbos_initialized = true;
   }
 
   math::matrix_4x4 const mvp(model_view * projection);
@@ -1780,6 +1784,12 @@ void World::drawMinimap ( MapTile *tile
     _display_initialized = true;
   }
 
+  if (!_global_vbos_initialized)
+  {
+    initGlobalVBOs(&detailtexcoords, &alphatexcoords);
+    _global_vbos_initialized = true;
+  }
+
   math::matrix_4x4 const mvp(model_view * projection);
   math::frustum const frustum(mvp);
 
@@ -2863,4 +2873,38 @@ void World::setBasename(const std::string &name)
 {
   basename = name;
   mapIndex.set_basename(name);
+}
+
+void World::unload_shaders()
+{
+  _mcnk_program.reset();
+  _mfbo_program.reset();
+  _m2_program.reset();
+  _m2_instanced_program.reset();
+  _m2_particles_program.reset();
+  _m2_ribbons_program.reset();
+  _m2_box_program.reset();
+  _wmo_program.reset();
+
+  _mcnk_program_mini.reset();
+  _m2_program_mini.reset();
+  _m2_instanced_program_mini.reset();
+  _wmo_program_mini.reset();
+
+  _cursor_render.unload();
+  _sphere_render.unload();
+  _square_render.unload();
+
+  _liquid_render = boost::none;
+  _liquid_render_mini = boost::none;
+
+  skies->unload();
+
+  gl.deleteBuffers(1, &detailtexcoords);
+  gl.deleteBuffers(1, &alphatexcoords);
+
+  detailtexcoords = 0;
+  alphatexcoords = 0;
+
+  _global_vbos_initialized = false;
 }

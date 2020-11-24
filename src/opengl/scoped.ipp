@@ -134,6 +134,13 @@ namespace opengl
     }
 
     template<std::size_t count>
+    void deferred_upload_buffers<count>::unload()
+    {
+      gl.deleteBuffers(count, _buffers);
+      _buffer_generated = false;
+    }
+
+    template<std::size_t count>
       deferred_upload_buffers<count>::~deferred_upload_buffers()
     {
       if (_buffer_generated)
@@ -171,6 +178,13 @@ namespace opengl
     {
       gl.genVertexArrays (count, _vertex_arrays);
       _buffer_generated = true;
+    }
+
+    template<std::size_t count>
+    void deferred_upload_vertex_arrays<count>::unload()
+    {
+      gl.deleteVertexArray(count, _vertex_arrays);
+      _buffer_generated = false;
     }
 
     template<std::size_t count>

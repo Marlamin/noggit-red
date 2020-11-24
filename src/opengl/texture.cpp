@@ -46,4 +46,14 @@ namespace opengl
   {
     gl.activeTexture (GL_TEXTURE0 + num);
   }
+
+  void texture::unload()
+  {
+    if (_id > 0 && _id != -1)
+    {
+      gl.deleteTextures (1, &_id);
+    }
+
+    _id = 0;
+  }
 }

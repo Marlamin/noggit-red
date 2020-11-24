@@ -24,7 +24,7 @@ using namespace noggit::Red;
 
 
 PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderContext context, QWidget* parent)
-  : QOpenGLWidget(parent)
+  :  noggit::Red::ViewportManager::Viewport(parent)
   , _camera (math::vector_3d(0.0f, 0.0f, 0.0f), math::degrees(0.0f), math::degrees(0.0f))
   , _settings (new QSettings())
   , _width(width)
@@ -540,6 +540,8 @@ void PreviewRenderer::tick(float dt)
 
 PreviewRenderer::~PreviewRenderer()
 {
+  _destroying = true;
+
   if (_offscreen_mode)
   {
     opengl::context::save_current_context const context_save (::gl);
@@ -577,6 +579,38 @@ PreviewRenderer::~PreviewRenderer()
     _liquid_render = boost::none;
   }
 
-};
+}
 
 
+void PreviewRenderer::unload_shaders()
+{
+  _m2_program.reset();
+  _m2_instanced_program.reset();
+  _m2_particles_program.reset();
+  _m2_ribbons_program.reset();
+  _m2_box_program.reset();
+  _wmo_program.reset();
+
+  _liquid_render = boost::none;
+}
+
+void PreviewRenderer::unloadOpenglData(bool from_manager)
+{
+  if (_destroying || !context() || _offscreen_mode)
+    return;
+
+  LogDebug << "Changing context of Asset Browser / Preset Editor." << std::endl;
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
+
+  ModelManager::unload_all(_context);
+  WMOManager::unload_all(_context);
+  TextureManager::unload_all(_context);
+
+  PreviewRenderer::unload_shaders();
+
+  LogDebug << "Changed context of Asset Browser / Preset Editor.." << std::endl;
+
+  if (!from_manager)
+    ViewportManager::ViewportManager::unloadOpenglData(this);
+}

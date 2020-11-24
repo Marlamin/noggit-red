@@ -101,6 +101,15 @@ namespace opengl
 
     }
 
+      void wire_box::unload()
+      {
+        _vao.unload();
+        _buffers.unload();
+        _program.reset();
+
+        _buffers_are_setup = false;
+      }
+
       void grid::draw( math::matrix_4x4 const& mvp
           , math::vector_3d const& pos
           , math::vector_4d const& color
@@ -228,8 +237,17 @@ namespace opengl
         _buffers_are_setup = true;
       }
 
+      void grid::unload()
+      {
+        _vao.unload();
+        _buffers.unload();
+        _program.reset();
 
-    void sphere::draw( math::matrix_4x4 const& mvp
+        _buffers_are_setup = false;
+      }
+
+
+      void sphere::draw( math::matrix_4x4 const& mvp
                      , math::vector_3d const& pos
                      , math::vector_4d const& color
                      , float radius
@@ -349,9 +367,18 @@ void main()
 
       _buffers_are_setup = true;
     }
-  
 
-    void square::draw( math::matrix_4x4 const& mvp
+      void sphere::unload()
+      {
+        _vao.unload();
+        _buffers.unload();
+        _program.reset();
+
+        _buffers_are_setup = false;
+      }
+
+
+      void square::draw( math::matrix_4x4 const& mvp
                      , math::vector_3d const& pos
                      , float radius
                      , math::radians inclination
@@ -458,5 +485,15 @@ void main()
 
       _buffers_are_setup = true;
     }
+
+      void square::unload()
+      {
+        _vao.unload();
+        _buffers.unload();
+        _program.reset();
+
+        _buffers_are_setup = false;
+
+      }
   }
 }

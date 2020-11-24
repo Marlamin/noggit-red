@@ -1615,3 +1615,15 @@ ChunkWater* MapChunk::liquid_chunk() const
 {
   return mt->Water.getChunk(px, py);
 }
+
+void MapChunk::unload()
+{
+  _vertex_array.unload();
+  _buffers.unload();
+  lod_indices.unload();
+
+  shadow.unload();
+
+  _uploaded = false;
+  _need_vao_update = true;
+}

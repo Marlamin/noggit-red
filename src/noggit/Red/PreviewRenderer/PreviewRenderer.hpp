@@ -10,6 +10,7 @@
 #include <noggit/Model.h>
 #include <noggit/ContextObject.hpp>
 #include <noggit/bool_toggle_property.hpp>
+#include <noggit/Red/ViewportManager/ViewportManager.hpp>
 #include <opengl/primitives.hpp>
 
 #include <QOpenGLWidget>
@@ -25,7 +26,7 @@
 namespace noggit::Red
 {
 
-  class PreviewRenderer : public QOpenGLWidget
+class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
   {
     Q_OBJECT
 
@@ -72,6 +73,9 @@ namespace noggit::Red
     opengl::primitives::grid _grid;
 
     float _animtime = 0.f;
+    noggit::NoggitRenderContext _context;
+
+    bool _destroying = false;
 
     std::vector<math::vector_3d> calcSceneExtents();
     virtual void draw();
@@ -82,10 +86,13 @@ namespace noggit::Red
 
     void update_emitters(float dt);
 
+    void unload_shaders();
+
+    void unloadOpenglData(bool from_manager = false) override;
+
   private:
     int _width;
     int _height;
-    noggit::NoggitRenderContext _context;
 
     std::map<std::tuple<std::string, int, int>, QPixmap> _cache;
 

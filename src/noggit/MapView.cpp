@@ -38,6 +38,7 @@
 #include <noggit/Red/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/Red/PresetEditor/Ui/PresetEditor.hpp>
+#include <external/QtAdvancedDockingSystem/src/DockManager.h>
 
 #include "revision.h"
 
@@ -60,6 +61,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <thread>
+
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
@@ -210,8 +213,11 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 void MapView::createGUI()
 {
 
+  ads::CDockWidget* asset_browser_dock = new ads::CDockWidget("Asset Browser");
   _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this);
-  _asset_browser->show();
+  //_asset_browser->show();
+  asset_browser_dock->setWidget(_asset_browser);
+  _main_window->getDockManager()->addDockWidget(ads::TopDockWidgetArea, asset_browser_dock);
 
   auto preset_editor = new noggit::Red::PresetEditor::Ui::PresetEditorWidget(this);
   preset_editor->show();
@@ -1508,6 +1514,8 @@ MapView::MapView( math::degrees camera_yaw0
   _dockStamp.setWidget(&_modeStampTool);
   connect(&_showStampPalette, &noggit::bool_toggle_property::changed, &_modeStampPaletteMain, &QWidget::show);
   connect(&_modeStampPaletteMain, &noggit::Red::StampMode::Ui::PaletteMain::itemSelected, &_modeStampTool, &noggit::Red::StampMode::Ui::Tool::setPixmap);
+
+  createGUI();
 }
 
 void MapView::tabletEvent(QTabletEvent* event)
@@ -1574,9 +1582,17 @@ void MapView::on_uid_fix_fail()
 
 void MapView::initializeGL()
 {
+
   bool uid_warning = false;
 
   opengl::context::scoped_setter const _ (::gl, context());
+
+  connect(context(), &QOpenGLContext::aboutToBeDestroyed,
+          [this]()
+          {
+              unloadOpenglData();
+          });
+
   gl.viewport(0.0f, 0.0f, width(), height());
 
   gl.clearColor (0.0f, 0.0f, 0.0f, 1.0f);
@@ -1604,8 +1620,6 @@ void MapView::initializeGL()
 
   _uid_fix = uid_fix_mode::none;
 
-  createGUI();
-
   set_editing_mode (editing_mode::ground);
 
   if (!_from_bookmark)
@@ -1628,6 +1642,8 @@ void MapView::initializeGL()
   _imgui_context = QtImGui::initialize(this);
 
   emit resized();
+
+  _last_opengl_context = context();
 }
 
 
@@ -1755,6 +1771,12 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
 void MapView::paintGL()
 {
+  if (!context()->isValid())
+    return;
+
+  if (_last_opengl_context != context())
+    return;
+
   opengl::context::scoped_setter const _ (::gl, context());
 
   if (saving_minimap)
@@ -1842,6 +1864,8 @@ void MapView::resizeGL (int width, int height)
 MapView::~MapView()
 {
   makeCurrent();
+  _destroying = false;
+
   opengl::context::scoped_setter const _ (::gl, context());
   delete _texBrush;
   delete _viewport_overlay_ui;
@@ -3433,4 +3457,37 @@ void MapView::save(save_mode mode)
 void MapView::addHotkey(Qt::Key key, size_t modifiers, std::function<void()> function, std::function<bool()> condition)
 {
   hotkeys.emplace_front (key, modifiers, function, condition);
+}
+
+void MapView::unloadOpenglData(bool from_manager)
+{
+  if (_destroying || _world->mapIndex.loaded_tiles().empty() || !context())
+    return;
+
+  LogDebug << "Changing context of MapView." << std::endl;
+
+  makeCurrent();
+  opengl::context::scoped_setter const _ (::gl, context());
+
+  ModelManager::unload_all(_context);
+  WMOManager::unload_all(_context);
+  TextureManager::unload_all(_context);
+
+  for (MapTile* tile : _world->mapIndex.loaded_tiles())
+  {
+    for (int i = 0; i < 16; ++i)
+    {
+      for (int j = 0; j < 16; ++j)
+      {
+        tile->getChunk(i, j)->unload();
+      }
+    }
+  }
+
+  _world->unload_shaders();
+
+  if (!from_manager)
+    noggit::Red::ViewportManager::ViewportManager::unloadOpenglData(this);
+
+  LogDebug << "Changed context of MapView." << std::endl;
 }

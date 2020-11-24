@@ -22,6 +22,17 @@ void TextureManager::report()
   LogDebug << output;
 }
 
+void TextureManager::unload_all(noggit::NoggitRenderContext context)
+{
+  _.context_aware_apply(
+      [&] (std::string const&, blp_texture& blp_texture)
+      {
+          blp_texture.unload();
+      }
+      , context
+  );
+}
+
 #include <cstdint>
 //! \todo Cross-platform syntax for packed structs.
 #pragma pack(push,1)
@@ -97,6 +108,15 @@ void blp_texture::upload()
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   _uploaded = true;
+}
+
+void blp_texture::unload()
+{
+  _uploaded = false;
+  opengl::texture::unload();
+
+  // load data back from file. pretty sad. maybe keep it after loading?
+  finishLoading();
 }
 
 void blp_texture::loadFromUncompressedData(BLPHeader const* lHeader, char const* lData)

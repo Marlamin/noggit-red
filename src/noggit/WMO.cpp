@@ -477,6 +477,14 @@ std::map<uint32_t, std::vector<wmo_doodad_instance>> WMO::doodads_per_group(uint
   return doodads;
 }
 
+void WMO::unload()
+{
+  for (auto& group : groups)
+  {
+    group.unload();
+  }
+}
+
 void WMOLight::init(MPQFile* f)
 {
   char type[4];
@@ -630,6 +638,15 @@ void WMOGroup::upload()
                                  );
 
   _uploaded = true;
+}
+
+void WMOGroup::unload()
+{
+  _vertex_array.unload();
+  _buffers.unload();
+
+  _uploaded = false;
+  _vao_is_setup = false;
 }
 
 void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
@@ -1379,4 +1396,15 @@ void WMOManager::clear_hidden_wmos()
               wmo.show();
             }
           );
+}
+
+void WMOManager::unload_all(noggit::NoggitRenderContext context)
+{
+    _.context_aware_apply(
+        [&] (std::string const&, WMO& wmo)
+        {
+            wmo.unload();
+        }
+        , context
+    );
 }

@@ -102,6 +102,8 @@ public:
   friend class PlaneParticleEmitter;
   friend class SphereParticleEmitter;
 
+  void unload();
+
 private:
   bool _uploaded = false;
   void upload();
@@ -167,6 +169,8 @@ public:
            , GLuint const& transform_vbo
            , int instances_count
            );
+
+  void unload();
 
 private:
   bool _uploaded = false;

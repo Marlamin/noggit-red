@@ -18,6 +18,7 @@ namespace opengl
     texture& operator= (texture&&);
 
     virtual void bind();
+    virtual void unload();
 
     static void set_active_texture (size_t num = 0);
 

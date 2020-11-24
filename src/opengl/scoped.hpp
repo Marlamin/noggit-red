@@ -99,6 +99,7 @@ namespace opengl
       deferred_upload_buffers& operator= (deferred_upload_buffers&&) = delete;
 
       void upload();
+      void unload();
       GLuint const& operator[] (std::size_t i) const;
 
     private:
@@ -135,6 +136,7 @@ namespace opengl
       deferred_upload_vertex_arrays& operator= (deferred_upload_vertex_arrays&&) = delete;
 
       void upload();
+      void unload();
       bool buffer_generated() const;
       GLuint const& operator[] (std::size_t i) const;
 

@@ -132,6 +132,30 @@ namespace noggit
       }
     }
 
+    void context_aware_apply(std::function<void (std::string const&, T&)> fun, noggit::NoggitRenderContext context)
+    {
+      boost::mutex::scoped_lock lock(_mutex);
+
+      for (auto& element : _elements)
+      {
+        if (element.first.first != context)
+          continue;
+
+        fun (element.first.second, element.second);
+      }
+    }
+    void context_aware_apply(std::function<void (std::string const&, T const&)> fun, noggit::NoggitRenderContext context) const
+    {
+      boost::mutex::scoped_lock lock(_mutex);
+      for (auto const& element : _elements)
+      {
+        if (element.first.first != context)
+          continue;
+
+        fun (element.first.second, element.second);
+      }
+    }
+
   private:
     std::map<std::pair<int, std::string>, T> _elements;
     std::unordered_map<std::pair<int, std::string>, std::size_t, pair_hash> _counts;

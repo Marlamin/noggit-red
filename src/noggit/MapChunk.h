@@ -108,6 +108,8 @@ public:
 
   math::vector_3d mVertices[mapbufsize];
 
+  void unload();
+
   bool is_visible ( const float& cull_distance
                   , const math::frustum& frustum
                   , const math::vector_3d& camera

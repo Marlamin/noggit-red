@@ -158,6 +158,8 @@ private:
   boost::optional<math::vector_3d> _multi_select_pivot;
 public:
 
+  void unload_shaders();
+
   void update_selection_pivot();
   boost::optional<math::vector_3d> const& multi_select_pivot() const { return _multi_select_pivot; }
 
@@ -356,6 +358,7 @@ private:
   std::unique_ptr<noggit::map_horizon::render> _horizon_render;
 
   bool _display_initialized = false;
+  bool _global_vbos_initialized = false;
 
   QSettings* _settings;
 

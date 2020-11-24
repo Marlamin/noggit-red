@@ -224,4 +224,14 @@ namespace noggit
 
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
+
+    void cursor_render::unload()
+    {
+      _vaos.unload();
+      _vbos.unload();
+
+      _cursor_program.reset();
+
+      _uploaded = false;
+    }
 }

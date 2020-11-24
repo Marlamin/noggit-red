@@ -43,11 +43,14 @@ namespace noggit
       void setActiveDoodadSet(std::string const& filename, std::string const& doodadset_name);
       std::string& getLastSelectedModel() { return _last_selected_model; };
 
+      ~ModelViewer() override;
+
 
     signals:
       void resized();
       void sensitivity_changed();
       void model_set(std::string const& filename);
+      void gl_data_unloaded();
 
     protected:
 

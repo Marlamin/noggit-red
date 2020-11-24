@@ -107,6 +107,8 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
       }
   );
 
+  connect(ui->viewport, &ModelViewer::gl_data_unloaded,[=] () { emit gl_data_unloaded(); });
+
   // Handle preview rendering and drag
   connect(ui->listfileTree, &QTreeView::expanded
       ,[this] (const QModelIndex& index)

@@ -25,11 +25,14 @@ namespace noggit
 
     void draw(mode cursor_mode, math::matrix_4x4 const& mvp, math::vector_4d color, math::vector_3d const& pos, float radius, float inner_radius_ratio = 0.f);
 
+      void unload();
+
   private:
     bool _uploaded = false;
 
     void upload();
-    void create_circle_buffer(opengl::scoped::use_program& shader);
+
+      void create_circle_buffer(opengl::scoped::use_program& shader);
     void create_sphere_buffer(opengl::scoped::use_program& shader);
     void create_square_buffer(opengl::scoped::use_program& shader);
     void create_cube_buffer(opengl::scoped::use_program& shader);

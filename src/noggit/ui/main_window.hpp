@@ -6,6 +6,7 @@
 #include <noggit/MapView.h>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/Red/MapCreationWizard/Ui/MapCreationWizard.hpp>
+#include <external/QtAdvancedDockingSystem/src/DockManager.h>
 
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QStackedWidget>
@@ -31,6 +32,7 @@ namespace noggit
       void prompt_exit(QCloseEvent* event);
       void prompt_uid_fix_failure();
       void build_map_lists();
+      ads::CDockManager* getDockManager() { return _dock_manager; };
 
       QMenuBar* _menuBar;
 
@@ -84,6 +86,7 @@ namespace noggit
       QWidget* _null_widget;
       MapView* _map_view;
       QStackedWidget* _stack_widget;
+      ads::CDockManager* _dock_manager;
 
       noggit::Red::MapCreationWizard::Ui::MapCreationWizard* _map_creation_wizard;
       QMetaObject::Connection _map_wizard_connection;

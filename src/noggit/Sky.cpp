@@ -348,6 +348,17 @@ bool Skies::draw( math::matrix_4x4 const& model_view
   return true;
 }
 
+void Skies::unload()
+{
+  _program.reset();
+  _vertex_array.unload();
+  _buffers.unload();
+
+  _uploaded = false;
+  _need_vao_update = true;
+
+}
+
 void Skies::upload()
 {
   _program.reset(new opengl::program(

@@ -148,6 +148,8 @@ public:
 
   bool has_skybox() const { return header.flags.skybox; }
 
+  void unload();
+
 private:
   void load_mocv(MPQFile& f, uint32_t size);
   void fix_vertex_color_alpha();
@@ -184,6 +186,7 @@ private:
   bool _vao_is_setup = false;
 
   void upload();
+
   void setup_vao(opengl::scoped::use_program& wmo_shader);
 };
 
@@ -285,6 +288,8 @@ public:
 
   void finishLoading();
 
+  void unload();
+
   std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads_per_group(uint16_t doodadset) const;
 
   bool draw_group_boundingboxes;
@@ -330,6 +335,7 @@ class WMOManager
 public:
   static void report();
   static void clear_hidden_wmos();
+  static void unload_all(noggit::NoggitRenderContext context);
 private:
   friend struct scoped_wmo_reference;
   static noggit::async_object_multimap_with_normalized_key<WMO> _;

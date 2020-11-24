@@ -66,3 +66,14 @@ void ModelManager::clear_hidden_models()
             }
           );
 }
+
+void ModelManager::unload_all(noggit::NoggitRenderContext context)
+{
+  _.context_aware_apply(
+      [&] (std::string const&, Model& model)
+      {
+          model.unload();
+      }
+      , context
+  );
+}

@@ -48,6 +48,8 @@ namespace opengl
                 , math::vector_3d const& max_point
                 );
 
+      void unload();
+
     private:
       bool _buffers_are_setup = false;
 
@@ -67,6 +69,7 @@ namespace opengl
             , math::vector_4d const& color
             , float radius
         );
+        void unload();
     private:
         bool _buffers_are_setup = false;
 
@@ -89,6 +92,8 @@ namespace opengl
                , math::vector_4d const& color
                , float radius
                );
+      void unload();
+
     private:
       bool _buffers_are_setup = false;
 
@@ -113,6 +118,7 @@ namespace opengl
                , math::radians orientation
                , math::vector_4d const& color
                );
+      void unload();
     private:
       bool _buffers_are_setup = false;
 

@@ -19,9 +19,13 @@ namespace noggit
   {
     class AssetBrowserWidget : public QMainWindow
     {
+      Q_OBJECT
     public:
       AssetBrowserWidget(QWidget* parent = nullptr);
       ~AssetBrowserWidget();
+
+    signals:
+        void gl_data_unloaded();
 
     private:
       ::Ui::AssetBrowser* ui;

@@ -155,6 +155,8 @@ public:
   float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
   float ocean_deep_alpha() const { return _ocean_deep_alpha; }
 
+  void unload();
+
 private:
   bool _uploaded = false;
   bool _need_color_buffer_update = true;

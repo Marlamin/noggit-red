@@ -192,6 +192,7 @@ endif()
 add_subdirectory (src/external/qt-color-widgets)
 add_subdirectory (src/external/framelesshelper)
 add_subdirectory (src/external/qtimgui)
+add_subdirectory (src/external/QtAdvancedDockingSystem)
 
 # Add the found include directories to our include list.
 include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/include/")
@@ -329,6 +330,7 @@ TARGET_LINK_LIBRARIES (noggit
   ColorWidgets-qt5
   FramelessHelper
   qt_imgui_widgets
+  qtadvanceddocking
 )
 
 set (_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")

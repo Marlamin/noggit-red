@@ -204,7 +204,19 @@ namespace noggit
 
     void main_window::build_menu()
     {
-      _stack_widget = new QStackedWidget(this);
+      _dock_manager = new ads::CDockManager(this);
+      _dock_manager->setStyleSheet("");
+      _stack_widget = new QStackedWidget(_dock_manager);
+
+      ads::CDockWidget* dock_mapview = new ads::CDockWidget("Map");
+      dock_mapview->setWidget(_stack_widget);
+
+      // Add the toggleViewAction of the dock widget to the menu to give
+      // the user the possibility to show the dock widget if it has been closed
+      //ui->menuView->addAction(dock_mapview->toggleViewAction());
+
+      // Add the dock widget to the top dock widget area
+      _dock_manager->addDockWidget(ads::TopDockWidgetArea, dock_mapview);
 
       auto widget (new QWidget(_stack_widget));
       _stack_widget->addWidget(widget);
@@ -315,7 +327,7 @@ namespace noggit
 
       layout->addWidget(right_side);
 
-      setCentralWidget (_stack_widget);
+      //setCentralWidget (_stack_widget);
 
       _minimap->adjustSize();
     }

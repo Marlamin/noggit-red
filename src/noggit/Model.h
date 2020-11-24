@@ -290,7 +290,9 @@ public:
 
   float rad;
   float trans;
-  bool animcalc;  
+  bool animcalc;
+
+  void unload();
 
 private:
   bool _per_instance_animation;
@@ -316,7 +318,7 @@ private:
 
   void upload();
 
-  bool _finished_upload;
+    bool _finished_upload;
 
   std::vector<math::vector_3d> _vertex_box_points;
 

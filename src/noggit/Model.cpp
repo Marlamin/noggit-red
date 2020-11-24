@@ -1636,6 +1636,27 @@ void Model::upload()
   _finished_upload = true;
 }
 
+void Model::unload()
+{
+  _textures.clear();
+  _buffers.unload();
+  _vertex_arrays.unload();
+
+  for (auto& particle : _particles)
+  {
+    particle.unload();
+  }
+
+  for (auto& ribbon : _ribbons)
+  {
+    ribbon.unload();
+  }
+
+  _finished_upload = false;
+
+
+}
+
 void Model::updateEmitters(float dt)
 {
   if (finished)
