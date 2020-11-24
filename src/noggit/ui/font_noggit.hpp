@@ -115,7 +115,14 @@ namespace noggit
         MOUSE_INVERT = 0xf8c5,
         UI_TOGGLE = 0xf8c6,
         VIEW_MODE_2D = 0xf8c7,
-        VIEW_AXIS = 0xf8c8
+        VIEW_AXIS = 0xf8c8,
+        GIZMO_TRANSLATE = 0xf8c9,
+        GIZMO_ROTATE = 0xf8ca,
+        GIZMO_SCALE = 0xf8cb,
+        GIZMO_VISIBILITY = 0xf8cc,
+        GIZMO_GLOBAL = 0xf8cd,
+        GIZMO_LOCAL = 0xf8ce,
+        GIZMO_VISIBILITY_ALL = 0xf8cf
       };
     };
 
