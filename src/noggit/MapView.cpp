@@ -215,12 +215,13 @@ void MapView::createGUI()
 
   ads::CDockWidget* asset_browser_dock = new ads::CDockWidget("Asset Browser");
   _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this);
-  //_asset_browser->show();
   asset_browser_dock->setWidget(_asset_browser);
-  _main_window->getDockManager()->addDockWidget(ads::TopDockWidgetArea, asset_browser_dock);
+  auto dock_area_bottom = _main_window->getDockManager()->addDockWidgetTab(ads::BottomDockWidgetArea, asset_browser_dock);
 
+  ads::CDockWidget* preset_editor_dock = new ads::CDockWidget("Preset Editor");
   auto preset_editor = new noggit::Red::PresetEditor::Ui::PresetEditorWidget(this);
-  preset_editor->show();
+  preset_editor_dock->setWidget(preset_editor);
+  _main_window->getDockManager()->addDockWidgetTabToArea(preset_editor_dock, dock_area_bottom);
 
   auto overlay = new QWidget(this);
   _viewport_overlay_ui = new ::Ui::MapViewOverlay();

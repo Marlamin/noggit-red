@@ -50,6 +50,8 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
   WMOInstance* wmo_instance;
   ModelInstance* model_instance;
 
+  ImGuizmo::SetID(_gizmo_context);
+
   ImGuizmo::SetDrawlist();
 
   ImGuizmo::SetOrthographic(false);
@@ -58,8 +60,6 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
 
   ImGuiIO& io = ImGui::GetIO();
   ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-
-  ImGuizmo::SetID(_gizmo_context);
 
   math::matrix_4x4 delta_matrix = math::matrix_4x4(math::matrix_4x4::unit).transposed();
   math::matrix_4x4 object_matrix = {math::matrix_4x4::unit};
