@@ -3,9 +3,107 @@
 #include <noggit/ui/font_noggit.hpp>
 #include <noggit/DBC.h>
 
+#include <external/NodeEditor/include/nodes/NodeData>
+#include <external/NodeEditor/include/nodes/FlowScene>
+#include <external/NodeEditor/include/nodes/FlowView>
+#include <external/NodeEditor/include/nodes/ConnectionStyle>
+#include <external/NodeEditor/include/nodes/TypeConverter>
+#include <noggit/Red/PresetEditor/Nodes/MathNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/BaseNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/Data/DecimalData.hpp>
+#include <noggit/Red/PresetEditor/Nodes/Data/IntegerData.hpp>
+
 
 using namespace noggit::Red::PresetEditor::Ui;
 using namespace noggit::ui;
+
+using QtNodes::DataModelRegistry;
+using QtNodes::FlowScene;
+using QtNodes::FlowView;
+using QtNodes::ConnectionStyle;
+using QtNodes::TypeConverter;
+using QtNodes::TypeConverterId;
+
+using noggit::Red::PresetEditor::Nodes::MathNode;
+using noggit::Red::PresetEditor::Nodes::BaseNode;
+
+static std::shared_ptr<DataModelRegistry>
+registerDataModels()
+{
+  auto ret = std::make_shared<DataModelRegistry>();
+ // ret->registerModel<NumberSourceDataModel>("I/O//Sources");
+
+  //ret->registerModel<NumberDisplayDataModel>("I/O//Displays");
+
+  ret->registerModel<MathNode>("Operators");
+
+  /*
+  ret->registerTypeConverter(std::make_pair(DecimalData().type(),
+                                            IntegerData().type()),
+                             TypeConverter{DecimalToIntegerConverter()});
+
+
+
+  ret->registerTypeConverter(std::make_pair(IntegerData().type(),
+                                            DecimalData().type()),
+                             TypeConverter{IntegerToDecimalConverter()});
+
+  */
+
+  return ret;
+}
+
+
+static
+void
+setStyle()
+{
+  ConnectionStyle::setConnectionStyle(
+      R"(
+    {
+    "FlowViewStyle": {
+      "BackgroundColor": [53, 53, 53],
+      "FineGridColor": [60, 60, 60],
+      "CoarseGridColor": [25, 25, 25]
+    },
+    "NodeStyle": {
+      "NormalBoundaryColor": [255, 255, 255],
+      "SelectedBoundaryColor": [255, 165, 0],
+      "GradientColor0": "gray",
+      "GradientColor1": [80, 80, 80],
+      "GradientColor2": [64, 64, 64],
+      "GradientColor3": [58, 58, 58],
+      "ShadowColor": [20, 20, 20],
+      "FontColor" : "white",
+      "FontColorFaded" : "gray",
+      "ConnectionPointColor": [169, 169, 169],
+      "FilledConnectionPointColor": "cyan",
+      "ErrorColor": "red",
+      "WarningColor": [128, 128, 0],
+
+      "PenWidth": 1.0,
+      "HoveredPenWidth": 1.5,
+
+      "ConnectionPointDiameter": 8.0,
+
+      "Opacity": 0.8
+    },
+    "ConnectionStyle": {
+      "ConstructionColor": "gray",
+      "NormalColor": "darkcyan",
+      "SelectedColor": [100, 100, 100],
+      "SelectedHaloColor": "orange",
+      "HoveredColor": "lightcyan",
+
+      "LineWidth": 3.0,
+      "ConstructionLineWidth": 2.0,
+      "PointDiameter": 10.0,
+
+      "UseDataDefinedColors": false
+    }
+  }
+  )");
+}
 
 PresetEditorWidget::PresetEditorWidget(QWidget *parent)
 : QMainWindow(parent, Qt::Window)
@@ -101,6 +199,26 @@ PresetEditorWidget::PresetEditorWidget(QWidget *parent)
   ui->minimapWidget->draw_boundaries(true);
   ui->minimapWidget->camera(ui->viewport->getWorldCamera());
 
+  // Handles nodes
+  ::setStyle();
+  auto nodes_tab = ui->editorTabs->widget(1);
+  auto scene = new FlowScene(::registerDataModels(), nodes_tab);
+  nodes_tab->setLayout(new QVBoxLayout(nodes_tab));
+  nodes_tab->layout()->addWidget(new FlowView(scene));
+  nodes_tab->layout()->setContentsMargins(0, 0, 0, 0);
+  nodes_tab->layout()->setSpacing(0);
+  nodes_tab->resize(800, 600);
+
+  connect(ui->executeButton, &QPushButton::clicked
+    , [this, scene]()
+    {
+      scene->iterateOverNodeDataDependentOrder(
+          [](NodeDataModel* model)
+          {
+            reinterpret_cast<BaseNode*>(model)->compute();
+          }
+          );
+    });
 }
 
 void PresetEditorWidget::setupConnectsCommon()

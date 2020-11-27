@@ -38,6 +38,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMessageBox>
 #include <QSplashScreen>
+#include <QStyleFactory>
 
 #include "revision.h"
 
@@ -343,6 +344,7 @@ int main(int argc, char *argv[])
   noggit::RegisterErrorHandlers();
   std::set_terminate (noggit_terminate_handler);
 
+  QApplication::setStyle(QStyleFactory::create("Fusion"));
   QApplication qapp (argc, argv);
   qapp.setApplicationName ("Noggit");
   qapp.setOrganizationName ("Noggit");

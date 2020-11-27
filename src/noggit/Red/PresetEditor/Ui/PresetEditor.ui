@@ -208,7 +208,7 @@
            <item>
             <widget class="QTabWidget" name="editorTabs">
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="viewport_tab">
               <attribute name="title">
@@ -263,10 +263,10 @@
                    </size>
                   </property>
                   <layout class="QVBoxLayout" name="verticalLayout">
-                   <item>
+                   <item alignment="Qt::AlignTop">
                     <widget class="QToolBox" name="toolBox">
                      <property name="currentIndex">
-                      <number>0</number>
+                      <number>1</number>
                      </property>
                      <widget class="QWidget" name="page">
                       <property name="geometry">
@@ -274,7 +274,7 @@
                         <x>0</x>
                         <y>0</y>
                         <width>376</width>
-                        <height>684</height>
+                        <height>76</height>
                        </rect>
                       </property>
                       <attribute name="label">
@@ -372,13 +372,22 @@
                        <rect>
                         <x>0</x>
                         <y>0</y>
-                        <width>98</width>
-                        <height>28</height>
+                        <width>376</width>
+                        <height>76</height>
                        </rect>
                       </property>
                       <attribute name="label">
                        <string>Page 2</string>
                       </attribute>
+                      <layout class="QVBoxLayout" name="verticalLayout_3">
+                       <item alignment="Qt::AlignTop">
+                        <widget class="QPushButton" name="executeButton">
+                         <property name="text">
+                          <string>Execute</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
                     </widget>
                    </item>
