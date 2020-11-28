@@ -39,6 +39,7 @@
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/Red/PresetEditor/Ui/PresetEditor.hpp>
 #include <external/QtAdvancedDockingSystem/src/DockManager.h>
+#include <external/imguipiemenu/PieMenu.hpp>
 
 #include "revision.h"
 
@@ -1836,6 +1837,54 @@ void MapView::paintGL()
     _world->update_selection_pivot();
 
     ImGui::End();
+
+    /* Example */
+    std::string sText;
+
+    if(ImGui::IsMouseClicked( 1 ) )
+    {
+      ImGui::OpenPopup( "PieMenu" );
+    }
+
+    if( BeginPiePopup( "PieMenu", 1 ) )
+    {
+      if( PieMenuItem( "Test1" ) ) sText = "Test1";
+      if( PieMenuItem( "Test2" ) )
+      {
+        sText = "Test2";
+      }
+      if( PieMenuItem( "Test3", false ) ) sText = "Test3";
+      if( BeginPieMenu( "Sub" ) )
+      {
+        if( BeginPieMenu( "Sub sub\nmenu" ) )
+        {
+          if( PieMenuItem( "SubSub" ) ) sText = "SubSub";
+          if( PieMenuItem( "SubSub2" ) ) sText = "SubSub2";
+          EndPieMenu();
+        }
+        if( PieMenuItem( "TestSub" ) ) sText = "TestSub";
+        if( PieMenuItem( "TestSub2" ) ) sText = "TestSub2";
+        EndPieMenu();
+      }
+      if( BeginPieMenu( "Sub2" ) )
+      {
+        if( PieMenuItem( "TestSub" ) ) sText = "TestSub";
+        if( BeginPieMenu( "Sub sub\nmenu" ) )
+        {
+          if( PieMenuItem( "SubSub" ) ) sText = "SubSub";
+          if( PieMenuItem( "SubSub2" ) ) sText = "SubSub2";
+          EndPieMenu();
+        }
+        if( PieMenuItem( "TestSub2" ) ) sText = "TestSub2";
+        EndPieMenu();
+      }
+
+      EndPiePopup();
+    }
+
+    ImGui::ShowDemoWindow();
+    ImGui::ShowStyleEditor();
+
     ImGui::Render();
 
   }

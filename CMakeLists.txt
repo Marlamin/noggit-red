@@ -228,6 +228,7 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libtxc_dxtn" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/pngpp" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/zlib" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguizmo" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguipiemenu" )
 include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 COLLECT_FILES(false noggit_root_sources src/noggit .cpp)
@@ -237,6 +238,7 @@ COLLECT_FILES(false opengl_sources src/opengl .cpp)
 COLLECT_FILES(true red_sources src/noggit/Red .cpp)
 COLLECT_FILES(true png_blp_sources src/external/PNG2BLP ".c;.cpp;")
 COLLECT_FILES(false imguizmo_sources src/external/imguizmo ".c;.cpp;")
+COLLECT_FILES(false imguipiemenu_sources src/external/imguipiemenu ".c;.cpp;")
 set ( util_sources
       src/util/exception_to_string.cpp
     )
@@ -248,6 +250,7 @@ COLLECT_FILES(false shaders src/glsl .glsl)
 COLLECT_FILES(true red_headers src/noggit/Red ".hpp;.inl")
 COLLECT_FILES(true png_blp_headers src/external/PNG2BLP ".h;.hpp;")
 COLLECT_FILES(false imguizmo_headers src/external/imguizmo ".h;.hpp;")
+COLLECT_FILES(false imguipiemenu_headers src/external/imguipiemenu ".h;.hpp;")
 
 IF(WIN32)
   set ( os_sources
@@ -301,6 +304,7 @@ ADD_EXECUTABLE ( noggit
                   ${red_sources}
                   ${png_blp_sources}
                   ${imguizmo_sources}
+                  ${imguipiemenu_sources}
                   ${noggit_root_headers}
                   ${noggit_ui_headers}
                   ${opengl_headers}
@@ -313,6 +317,7 @@ ADD_EXECUTABLE ( noggit
                   ${moced}
                   ${red_headers}
                   ${imguizmo_headers}
+                  ${imguipiemenu_headers}
                   ${compiled_resource_files}
                   ${compiled_ui_files}
                   ${shaders}
