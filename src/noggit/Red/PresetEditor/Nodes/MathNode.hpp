@@ -28,7 +28,7 @@ namespace noggit
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
 
-        private:
+        protected:
             QDoubleSpinBox* _first;
             QDoubleSpinBox* _second;
             QComboBox* _operation;

@@ -1,6 +1,6 @@
 #include "MathNode.hpp"
 #include "BaseNode.inl"
-#include "Data/DecimalData.hpp"
+#include "Data/GenericData.hpp"
 #include <cmath>
 
 using namespace noggit::Red::PresetEditor::Nodes;
@@ -43,12 +43,12 @@ void MathNode::compute()
   auto first_shared = _in_ports[0].in_value.lock();
   auto second_shared = _in_ports[1].in_value.lock();
 
-  auto first = dynamic_cast<DecimalData*>(first_shared.get());
-  auto second = dynamic_cast<DecimalData*>(second_shared.get());
+  auto first = static_cast<DecimalData*>(first_shared.get());
+  auto second = static_cast<DecimalData*>(second_shared.get());
 
   // handle defaults
-  double first_number = first ? first->number() : _first->value();
-  double second_number = second ? second->number() : _second->value();
+  double first_number = first ? first->value() : _first->value();
+  double second_number = second ? second->value() : _second->value();
 
   setValidationState(NodeValidationState::Warning);
 

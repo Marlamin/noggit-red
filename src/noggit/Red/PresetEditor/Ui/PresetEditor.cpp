@@ -9,9 +9,13 @@
 #include <external/NodeEditor/include/nodes/ConnectionStyle>
 #include <external/NodeEditor/include/nodes/TypeConverter>
 #include <noggit/Red/PresetEditor/Nodes/MathNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/ConditionNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/LogicIfNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/LogicBeginNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/PrintNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/BaseNode.hpp>
-#include <noggit/Red/PresetEditor/Nodes/Data/DecimalData.hpp>
-#include <noggit/Red/PresetEditor/Nodes/Data/IntegerData.hpp>
+#include <noggit/Red/PresetEditor/Nodes/Data/GenericTypeConverter.hpp>
+#include <noggit/Red/PresetEditor/Nodes/Scene/NodeScene.hpp>
 
 
 using namespace noggit::Red::PresetEditor::Ui;
@@ -25,7 +29,17 @@ using QtNodes::TypeConverter;
 using QtNodes::TypeConverterId;
 
 using noggit::Red::PresetEditor::Nodes::MathNode;
+using noggit::Red::PresetEditor::Nodes::ConditionNode;
+using noggit::Red::PresetEditor::Nodes::LogicIfNode;
+using noggit::Red::PresetEditor::Nodes::LogicBeginNode;
+using noggit::Red::PresetEditor::Nodes::PrintNode;
 using noggit::Red::PresetEditor::Nodes::BaseNode;
+using noggit::Red::PresetEditor::Nodes::NodeScene;
+
+#define REGISTER_TYPE_CONVERTER(T_FROM, T_TO)             \
+registerTypeConverter(std::make_pair(T_FROM##Data().type(), \
+T_TO##Data().type()),                                     \
+TypeConverter{T_FROM##To##T_TO##TypeConverter()})
 
 static std::shared_ptr<DataModelRegistry>
 registerDataModels()
@@ -35,20 +49,18 @@ registerDataModels()
 
   //ret->registerModel<NumberDisplayDataModel>("I/O//Displays");
 
-  ret->registerModel<MathNode>("Operators");
+  ret->registerModel<MathNode>("Math");
+  ret->registerModel<ConditionNode>("Logic");
+  ret->registerModel<LogicBeginNode>("Logic//Flow");
+  ret->registerModel<LogicIfNode>("Logic//Flow");
+  ret->registerModel<PrintNode>("Functions//Generic");
 
-  /*
-  ret->registerTypeConverter(std::make_pair(DecimalData().type(),
-                                            IntegerData().type()),
-                             TypeConverter{DecimalToIntegerConverter()});
-
-
-
-  ret->registerTypeConverter(std::make_pair(IntegerData().type(),
-                                            DecimalData().type()),
-                             TypeConverter{IntegerToDecimalConverter()});
-
-  */
+  ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);
+  ret->REGISTER_TYPE_CONVERTER(Decimal, Boolean);
+  ret->REGISTER_TYPE_CONVERTER(Integer, Decimal);
+  ret->REGISTER_TYPE_CONVERTER(Integer, Boolean);
+  ret->REGISTER_TYPE_CONVERTER(Boolean, Decimal);
+  ret->REGISTER_TYPE_CONVERTER(Boolean, Integer);
 
   return ret;
 }
@@ -202,7 +214,7 @@ PresetEditorWidget::PresetEditorWidget(QWidget *parent)
   // Handles nodes
   ::setStyle();
   auto nodes_tab = ui->editorTabs->widget(1);
-  auto scene = new FlowScene(::registerDataModels(), nodes_tab);
+  auto scene = new NodeScene(::registerDataModels(), nodes_tab);
   nodes_tab->setLayout(new QVBoxLayout(nodes_tab));
   nodes_tab->layout()->addWidget(new FlowView(scene));
   nodes_tab->layout()->setContentsMargins(0, 0, 0, 0);
@@ -212,13 +224,18 @@ PresetEditorWidget::PresetEditorWidget(QWidget *parent)
   connect(ui->executeButton, &QPushButton::clicked
     , [this, scene]()
     {
+    /*
       scene->iterateOverNodeDataDependentOrder(
           [](NodeDataModel* model)
           {
             reinterpret_cast<BaseNode*>(model)->compute();
           }
           );
+             */
+
+    scene->execute();
     });
+
 }
 
 void PresetEditorWidget::setupConnectsCommon()

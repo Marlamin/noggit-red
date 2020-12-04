@@ -128,6 +128,12 @@ unsigned int BaseNode::nPorts(PortType port_type) const
   }
 }
 
+ConnectionPolicy BaseNode::portOutConnectionPolicy(PortIndex port_index) const
+{
+  return _out_ports[port_index].connection_policy;
+}
+
+
 QWidget* BaseNode::portDefaultValueWidget(PortIndex port_index)
 {
   return _in_ports[port_index].default_widget;
@@ -147,6 +153,22 @@ void BaseNode::inputConnectionCreated(const Connection& connection)
 
   if (default_widget)
     default_widget->setVisible(false);
+}
+
+QJsonObject BaseNode::save() const
+{
+  QJsonObject json_obj;
+
+  json_obj["name"] = name();
+  json_obj["caption"] = caption();
+
+  return json_obj;
+}
+
+void BaseNode::restore(const QJsonObject& json_obj)
+{
+  setName(json_obj["name"].toString());
+  setCaption(json_obj["caption"].toString());
 }
 
 

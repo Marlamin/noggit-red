@@ -5,6 +5,9 @@
 #include <QClipboard>
 #include <QCursor>
 #include <QDebug>
+#include <QWidget>
+#include <QPushButton>
+#include <QPalette>
 #include <unordered_map>
 #include <stdexcept>
 
@@ -75,6 +78,8 @@ void ImGuiRenderer::initialize(WindowWrapper *window, ImGuiContext* context) {
     };
 
     window->installEventFilter(this);
+
+    applyQtStyle();
 }
 
 void ImGuiRenderer::renderDrawList(ImDrawData *draw_data)
@@ -436,5 +441,135 @@ ImGuiRenderer* ImGuiRenderer::instance() {
 
     return instance;
   }
+
+void ImGuiRenderer::applyQtStyle()
+{
+    auto temp = new QWidget();
+    auto temp_btn = new QPushButton();
+    temp->ensurePolished();
+    temp_btn->ensurePolished();
+
+    auto& palette = temp->palette();
+    auto& palette_btn = temp_btn->palette();
+
+    auto& style = ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
+    auto& qBgColor                 = palette.color(QPalette::Window);
+    const ImVec4 bgColor           = {static_cast<float>(qBgColor.redF()),
+                                      static_cast<float>(qBgColor.greenF()),
+                                      static_cast<float>(qBgColor.blueF()),
+                                      static_cast<float>(qBgColor.alphaF())};
+
+    auto& qLightBgColor            = palette.color(QPalette::AlternateBase);
+    const ImVec4 lightBgColor      = {static_cast<float>(qLightBgColor.redF()),
+                                      static_cast<float>(qLightBgColor.greenF()),
+                                      static_cast<float>(qLightBgColor.blueF()),
+                                      static_cast<float>(qLightBgColor.alphaF())};
+
+    auto& qVeryLightBgColor        = palette.color(QPalette::Light);
+    const ImVec4 veryLightBgColor  = {static_cast<float>(qVeryLightBgColor.redF()),
+                                      static_cast<float>(qVeryLightBgColor.greenF()),
+                                      static_cast<float>(qVeryLightBgColor.blueF()),
+                                      static_cast<float>(qVeryLightBgColor.alphaF())};
+
+
+    auto& qPanelColor               = palette_btn.color(QPalette::Window);
+    const ImVec4 panelColor         = {static_cast<float>(qPanelColor.redF()),
+                                       static_cast<float>(qPanelColor.greenF()),
+                                       static_cast<float>(qPanelColor.blueF()),
+                                       static_cast<float>(qPanelColor.alphaF())};
+
+
+    auto& qPanelHoverColor          = palette.color(QPalette::Highlight);
+    const ImVec4 panelHoverColor    = {static_cast<float>(qPanelHoverColor.redF()),
+                                       static_cast<float>(qPanelHoverColor.greenF()),
+                                       static_cast<float>(qPanelHoverColor.blueF()),
+                                       static_cast<float>(qPanelHoverColor.alphaF())};
+
+    auto& qPanelActiveColor         = palette.color(QPalette::Highlight);
+    const ImVec4 panelActiveColor   = {static_cast<float>(qPanelActiveColor.redF()),
+                                       static_cast<float>(qPanelActiveColor.greenF()),
+                                       static_cast<float>(qPanelActiveColor.blueF()),
+                                       static_cast<float>(qPanelActiveColor.alphaF())};
+
+    auto& qTextColor                = palette.color(QPalette::WindowText);
+    const ImVec4 textColor          = {static_cast<float>(qTextColor.redF()),
+                                       static_cast<float>(qTextColor.greenF()),
+                                       static_cast<float>(qTextColor.blueF()),
+                                       static_cast<float>(qTextColor.alphaF())};
+
+
+    auto& qTextDisabledColor        = palette.color(QPalette::Inactive, QPalette::WindowText);
+    const ImVec4 textDisabledColor  = {static_cast<float>(qTextDisabledColor.redF()),
+                                       static_cast<float>(qTextDisabledColor.greenF()),
+                                       static_cast<float>(qTextDisabledColor.blueF()),
+                                       static_cast<float>(qTextDisabledColor.alphaF())};
+
+
+    auto& qBorderColor              = palette_btn.color(QPalette::Window);
+    const ImVec4 borderColor        = {static_cast<float>(qBorderColor.redF()),
+                                       static_cast<float>(qBorderColor.greenF()),
+                                       static_cast<float>(qBorderColor.blueF()),
+                                       static_cast<float>(qBorderColor.alphaF())};
+
+    delete temp;
+    delete temp_btn;
+
+    colors[ImGuiCol_Text]                 = textColor;
+    colors[ImGuiCol_TextDisabled]         = textDisabledColor;
+    colors[ImGuiCol_TextSelectedBg]       = panelActiveColor;
+    colors[ImGuiCol_WindowBg]             = bgColor;
+    colors[ImGuiCol_ChildBg]              = bgColor;
+    colors[ImGuiCol_PopupBg]              = bgColor;
+    colors[ImGuiCol_Border]               = borderColor;
+    colors[ImGuiCol_BorderShadow]         = borderColor;
+    colors[ImGuiCol_FrameBg]              = panelColor;
+    colors[ImGuiCol_FrameBgHovered]       = panelHoverColor;
+    colors[ImGuiCol_FrameBgActive]        = panelActiveColor;
+    colors[ImGuiCol_TitleBg]              = bgColor;
+    colors[ImGuiCol_TitleBgActive]        = bgColor;
+    colors[ImGuiCol_TitleBgCollapsed]     = bgColor;
+    colors[ImGuiCol_MenuBarBg]            = panelColor;
+    colors[ImGuiCol_ScrollbarBg]          = panelColor;
+    colors[ImGuiCol_ScrollbarGrab]        = lightBgColor;
+    colors[ImGuiCol_ScrollbarGrabHovered] = veryLightBgColor;
+    colors[ImGuiCol_ScrollbarGrabActive]  = veryLightBgColor;
+    colors[ImGuiCol_CheckMark]            = panelActiveColor;
+    colors[ImGuiCol_SliderGrab]           = panelHoverColor;
+    colors[ImGuiCol_SliderGrabActive]     = panelActiveColor;
+    colors[ImGuiCol_Button]               = panelColor;
+    colors[ImGuiCol_ButtonHovered]        = panelHoverColor;
+    colors[ImGuiCol_ButtonActive]         = panelHoverColor;
+    colors[ImGuiCol_Header]               = panelColor;
+    colors[ImGuiCol_HeaderHovered]        = panelHoverColor;
+    colors[ImGuiCol_HeaderActive]         = panelActiveColor;
+    colors[ImGuiCol_Separator]            = borderColor;
+    colors[ImGuiCol_SeparatorHovered]     = borderColor;
+    colors[ImGuiCol_SeparatorActive]      = borderColor;
+    colors[ImGuiCol_ResizeGrip]           = bgColor;
+    colors[ImGuiCol_ResizeGripHovered]    = panelColor;
+    colors[ImGuiCol_ResizeGripActive]     = lightBgColor;
+    colors[ImGuiCol_PlotLines]            = panelActiveColor;
+    colors[ImGuiCol_PlotLinesHovered]     = panelHoverColor;
+    colors[ImGuiCol_PlotHistogram]        = panelActiveColor;
+    colors[ImGuiCol_PlotHistogramHovered] = panelHoverColor;
+    colors[ImGuiCol_ModalWindowDarkening] = bgColor;
+    colors[ImGuiCol_DragDropTarget]       = bgColor;
+    colors[ImGuiCol_NavHighlight]         = bgColor;
+    colors[ImGuiCol_Tab]                  = bgColor;
+    colors[ImGuiCol_TabActive]            = panelActiveColor;
+    colors[ImGuiCol_TabUnfocused]         = bgColor;
+    colors[ImGuiCol_TabUnfocusedActive]   = panelActiveColor;
+    colors[ImGuiCol_TabHovered]           = panelHoverColor;
+
+    style.WindowRounding    = 0.0f;
+    style.ChildRounding     = 0.0f;
+    style.FrameRounding     = 0.0f;
+    style.GrabRounding      = 0.0f;
+    style.PopupRounding     = 0.0f;
+    style.ScrollbarRounding = 0.0f;
+    style.TabRounding       = 0.0f;
+}
 
 }

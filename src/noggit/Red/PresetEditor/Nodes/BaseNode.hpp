@@ -27,6 +27,7 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 using QtNodes::Connection;
+using ConnectionPolicy = QtNodes::NodeDataModel::ConnectionPolicy;
 
 
 namespace noggit
@@ -50,6 +51,7 @@ namespace noggit
             bool caption_visible = true;
             std::unique_ptr<NodeData> data_type;
             std::shared_ptr<NodeData> out_value;
+            ConnectionPolicy connection_policy = ConnectionPolicy::Many;
         };
 
 
@@ -85,7 +87,27 @@ namespace noggit
 
             bool portCaptionVisible(PortType port_type, PortIndex port_index) const override;
 
+            ConnectionPolicy portOutConnectionPolicy(PortIndex port_index) const override;
+
             QWidget* portDefaultValueWidget(PortIndex port_index) override;
+
+            QJsonObject save() const override;
+            void restore(QJsonObject const& json_obj) override;
+
+            virtual bool isLogicNode() { return _is_logic_node; };
+            void setIsLogicNode(bool state) { _is_logic_node = state; };
+
+            virtual unsigned int nLogicBranches() { return _n_logic_branches; };
+            void setNLogicBranches(int n_branches) { _n_logic_branches = n_branches; };
+
+            virtual bool isComputed() { return _computed; };
+            void setComputed(bool state) { _computed = state; };
+
+            int logicBranchToExecute() { return _current_logic_branch; };
+            void setLogicBranchToExecute(int branch) { _current_logic_branch = branch; };
+
+            void setValidationMessage(QString const& message){_validation_error = message;};
+            void setValidationState(NodeValidationState state){_validation_state = state;};
 
             virtual void compute() = 0;
 
@@ -98,13 +120,14 @@ namespace noggit
 
             void setName(QString const& name) {_name = name;};
             void setCaption(QString const& caption){_caption = caption;};
-            void setValidationMessage(QString const& message){_validation_error = message;};
-            void setValidationState(NodeValidationState state){_validation_state = state;};
             void addWidget(QWidget* widget, PortIndex in_port = -1);
             void addWidget(QWidget* widget, QString const& label_text, PortIndex in_port = -1);
 
             template<typename T>
-            void addPort(PortType port_type,  QString const& caption, bool caption_visible);
+            void addPort(PortType port_type,
+                         QString const& caption,
+                         bool caption_visible,
+                         ConnectionPolicy out_policy = ConnectionPolicy::Many);
 
         protected:
 
@@ -119,6 +142,11 @@ namespace noggit
 
             NodeValidationState _validation_state = NodeValidationState::Warning;
             QString _validation_error = QString("Missing or incorrect inputs");
+
+            bool _is_logic_node = false;
+            unsigned int _n_logic_branches = 1;
+            int _current_logic_branch = 1;
+            bool _computed = false;
         };
 
     }
