@@ -46,12 +46,26 @@ struct UnderlyingTypeConvertGeneric
   }
 };
 
+template<typename T_from>
+struct StringConverter
+{
+    static std::string convert(T_from const& value)
+    {
+      return std::to_string(value);
+    }
+};
+
 
 
 #define DECLARE_TYPE_CONVERTER(DATA_FROM, DATA_TO, UTYPE_FROM, UTYPE_TO)  \
   using DATA_FROM##To##DATA_TO##TypeConverter =                           \
   GenericTypeConverter<DATA_FROM##Data, DATA_TO##Data,                    \
   UnderlyingTypeConvertGeneric<UTYPE_FROM, UTYPE_TO>>;
+
+
+#define DECLARE_TYPE_CONVERTER_EXT(DATA_FROM, DATA_TO, CONVERT_FUNCTOR)  \
+  using DATA_FROM##To##DATA_TO##TypeConverter =                                                \
+  GenericTypeConverter<DATA_FROM##Data, DATA_TO##Data, CONVERT_FUNCTOR>;
 
 
 DECLARE_TYPE_CONVERTER(Decimal, Integer, double, int)
@@ -62,8 +76,8 @@ DECLARE_TYPE_CONVERTER(Integer, Boolean, int, bool)
 
 DECLARE_TYPE_CONVERTER(Boolean, Integer, bool, int)
 DECLARE_TYPE_CONVERTER(Boolean, Decimal, bool, double)
-//DECLARE_TYPE_CONVERTER(Decimal, String)
-//DECLARE_TYPE_CONVERTER(Integer, String)
+DECLARE_TYPE_CONVERTER_EXT(Decimal, String, StringConverter<double>)
+DECLARE_TYPE_CONVERTER_EXT(Integer, String, StringConverter<int>)
 
 
 

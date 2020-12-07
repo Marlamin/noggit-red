@@ -1,8 +1,9 @@
-#ifndef NOGGIT_PRINTNODE_HPP
-#define NOGGIT_PRINTNODE_HPP
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#ifndef NOGGIT_LOGICBREAKNODE_HPP
+#define NOGGIT_LOGICBREAKNODE_HPP
 
 #include "LogicNodeBase.hpp"
-#include <QLineEdit>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -16,19 +17,19 @@ namespace noggit
 {
     namespace Red::PresetEditor::Nodes
     {
-        class PrintNode : public LogicNodeBase
+        class LogicBreakNode : public LogicNodeBase
         {
         Q_OBJECT
 
         public:
-            PrintNode();
+            LogicBreakNode();
             void compute() override;
             NodeValidationState validate() override;
-            QJsonObject save() const override;
-            void restore(QJsonObject const& json_obj) override;
+            bool doBreak() { return _do_break; };
+            bool setDoBreak(bool state) { _do_break = state; };
 
         private:
-            QLineEdit* _text;
+            bool _do_break = false;
 
         };
 
@@ -36,4 +37,4 @@ namespace noggit
 
 }
 
-#endif //NOGGIT_PRINTNODE_HPP
+#endif //NOGGIT_LOGICBREAKNODE_HPP

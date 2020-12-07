@@ -1,7 +1,7 @@
 #ifndef NOGGIT_LOGICBEGINNODE_HPP
 #define NOGGIT_LOGICBEGINNODE_HPP
 
-#include "BaseNode.hpp"
+#include "LogicNodeBase.hpp"
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -15,7 +15,7 @@ namespace noggit
 {
     namespace Red::PresetEditor::Nodes
     {
-        class LogicBeginNode : public BaseNode
+        class LogicBeginNode : public LogicNodeBase
         {
         Q_OBJECT
 

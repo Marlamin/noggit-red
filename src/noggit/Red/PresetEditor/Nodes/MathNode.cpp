@@ -102,3 +102,4 @@ void MathNode::restore(const QJsonObject& json_obj)
   _operation->setCurrentIndex(json_obj["operation"].toInt());
 }
 
+

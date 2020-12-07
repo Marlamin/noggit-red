@@ -7,7 +7,7 @@
 using namespace noggit::Red::PresetEditor::Nodes;
 
 PrintNode::PrintNode()
-: BaseNode()
+: LogicNodeBase()
 {
   setName("PrintNode");
   setCaption("Print()");
@@ -16,7 +16,7 @@ PrintNode::PrintNode()
   addPort<LogicData>(PortType::In, "Logic", true);
   addWidget(new QLabel(&_embedded_widget), 0);
 
-  addPort<DecimalData>(PortType::In, "String", true);
+  addPort<StringData>(PortType::In, "String", true);
   _text = new QLineEdit(&_embedded_widget);
   addWidget(_text, 1);
 
@@ -26,23 +26,9 @@ PrintNode::PrintNode()
 
 void PrintNode::compute()
 {
-  auto logic = _in_ports[0].in_value.lock();
-  auto logic_ptr = static_cast<LogicData*>(logic.get());
+  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
 
-  if (!logic_ptr)
-  {
-    setValidationState(NodeValidationState::Error);
-    setValidationMessage("Error: Failed to evaluate logic input");
-
-    _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
-
-    return;
-  }
-
-  setValidationState(NodeValidationState::Valid);
-
-  if(!logic_ptr->value())
+  if(!logic->value())
     return;
 
   auto text = _in_ports[1].in_value.lock();
@@ -71,6 +57,24 @@ void PrintNode::restore(const QJsonObject& json_obj)
   setName(json_obj["name"].toString());
   setCaption(json_obj["caption"].toString());
   _text->setText(json_obj["text"].toString());
+}
+
+NodeValidationState PrintNode::validate()
+{
+  setValidationState(NodeValidationState::Valid);
+  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
+
+  if (!logic)
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: Failed to evaluate logic input");
+
+    _out_ports[0].out_value = std::make_shared<LogicData>(false);
+    Q_EMIT dataUpdated(0);
+  }
+
+  return _validation_state;
+
 }
 
 

@@ -44,11 +44,8 @@ ConditionNode::ConditionNode()
 
 void ConditionNode::compute()
 {
-  auto first_shared = _in_ports[0].in_value.lock();
-  auto second_shared = _in_ports[1].in_value.lock();
-
-  auto first = static_cast<DecimalData*>(first_shared.get());
-  auto second = static_cast<DecimalData*>(second_shared.get());
+  auto first = static_cast<DecimalData*>(_in_ports[0].in_value.lock().get());
+  auto second = static_cast<DecimalData*>( _in_ports[1].in_value.lock().get());
 
   // handle defaults
   double first_number = first ? first->value() : _first->value();
@@ -111,5 +108,6 @@ void ConditionNode::restore(const QJsonObject& json_obj)
   _second->setValue(json_obj["default_second"].toDouble());
   _operation->setCurrentIndex(json_obj["operation"].toInt());
 }
+
 
 

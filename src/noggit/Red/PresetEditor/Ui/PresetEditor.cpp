@@ -12,7 +12,9 @@
 #include <noggit/Red/PresetEditor/Nodes/ConditionNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicIfNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicBeginNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/LogicBreakNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/PrintNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/ForLoopNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/Data/GenericTypeConverter.hpp>
 #include <noggit/Red/PresetEditor/Nodes/Scene/NodeScene.hpp>
@@ -33,6 +35,8 @@ using noggit::Red::PresetEditor::Nodes::ConditionNode;
 using noggit::Red::PresetEditor::Nodes::LogicIfNode;
 using noggit::Red::PresetEditor::Nodes::LogicBeginNode;
 using noggit::Red::PresetEditor::Nodes::PrintNode;
+using noggit::Red::PresetEditor::Nodes::ForLoopNode;
+using noggit::Red::PresetEditor::Nodes::LogicBreakNode;
 using noggit::Red::PresetEditor::Nodes::BaseNode;
 using noggit::Red::PresetEditor::Nodes::NodeScene;
 
@@ -53,6 +57,8 @@ registerDataModels()
   ret->registerModel<ConditionNode>("Logic");
   ret->registerModel<LogicBeginNode>("Logic//Flow");
   ret->registerModel<LogicIfNode>("Logic//Flow");
+  ret->registerModel<ForLoopNode>("Logic//Flow");
+  ret->registerModel<LogicBreakNode>("Logic//Flow");
   ret->registerModel<PrintNode>("Functions//Generic");
 
   ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);
@@ -61,6 +67,8 @@ registerDataModels()
   ret->REGISTER_TYPE_CONVERTER(Integer, Boolean);
   ret->REGISTER_TYPE_CONVERTER(Boolean, Decimal);
   ret->REGISTER_TYPE_CONVERTER(Boolean, Integer);
+  ret->REGISTER_TYPE_CONVERTER(Integer, String);
+  ret->REGISTER_TYPE_CONVERTER(Decimal, String);
 
   return ret;
 }

@@ -1,8 +1,9 @@
-#ifndef NOGGIT_PRINTNODE_HPP
-#define NOGGIT_PRINTNODE_HPP
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#ifndef NOGGIT_FORLOOPNODE_HPP
+#define NOGGIT_FORLOOPNODE_HPP
 
 #include "LogicNodeBase.hpp"
-#include <QLineEdit>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -16,24 +17,23 @@ namespace noggit
 {
     namespace Red::PresetEditor::Nodes
     {
-        class PrintNode : public LogicNodeBase
+        class ForLoopNode : public LogicNodeBase
         {
         Q_OBJECT
 
         public:
-            PrintNode();
+            ForLoopNode();
             void compute() override;
             NodeValidationState validate() override;
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
 
         private:
-            QLineEdit* _text;
-
+          QSpinBox* _n_iterations_default;
         };
 
     }
 
 }
 
-#endif //NOGGIT_PRINTNODE_HPP
+#endif //NOGGIT_FORLOOPNODE_HPP

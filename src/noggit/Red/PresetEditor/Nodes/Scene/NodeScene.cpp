@@ -20,6 +20,7 @@ void NodeScene::execute()
     if (model->isLogicNode() && model->name() == "LogicBeginNode")
     {
       begin = pair.second.get();
+      break;
     }
 
   }

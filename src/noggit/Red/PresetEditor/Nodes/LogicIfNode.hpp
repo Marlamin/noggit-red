@@ -1,7 +1,7 @@
 #ifndef NOGGIT_LOGICIFNODE_HPP
 #define NOGGIT_LOGICIFNODE_HPP
 
-#include "BaseNode.hpp"
+#include "LogicNodeBase.hpp"
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -15,13 +15,14 @@ namespace noggit
 {
     namespace Red::PresetEditor::Nodes
     {
-        class LogicIfNode : public BaseNode
+        class LogicIfNode : public LogicNodeBase
         {
         Q_OBJECT
 
         public:
             LogicIfNode();
             void compute() override;
+            NodeValidationState validate() override;
         };
 
     }

@@ -3,8 +3,7 @@
 
 #include <external/NodeEditor/include/nodes/FlowScene>
 #include <external/NodeEditor/include/nodes/Node>
-#include <vector>
-#include <unordered_map>
+#include <stack>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -24,15 +23,18 @@ namespace noggit
         {
         public:
             explicit LogicBranch(Node* logic_node);
-            void processNode(Node* node);
-            void executeNode(Node* node);
-            void executeNodeLeaves(Node* node);
+            void executeNode(Node* node, Node* source_node);
+            void executeNodeLeaves(Node* node, Node* source_node);
+            void markNodesComputed(Node* start_node, bool state);
+            void markNodeLeavesComputed(Node* start_node, Node* source_node, bool state);
+            void setCurrentLoop(Node* node) { _loop_stack.push(node); };
+            void unsetCurrentLoop() { _loop_stack.pop(); };
+            Node* getCurrentLoop() { return _loop_stack.top(); };
             void execute();
 
         private:
             Node* _logic_node;
-            std::vector<Node*> _nodes;
-            std::unordered_map<Node*, std::vector<LogicBranch>> _sub_branches;
+            std::stack<Node*> _loop_stack;
         };
 
     }

@@ -94,22 +94,16 @@ namespace noggit
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
 
-            virtual bool isLogicNode() { return _is_logic_node; };
-            void setIsLogicNode(bool state) { _is_logic_node = state; };
-
-            virtual unsigned int nLogicBranches() { return _n_logic_branches; };
-            void setNLogicBranches(int n_branches) { _n_logic_branches = n_branches; };
-
-            virtual bool isComputed() { return _computed; };
-            void setComputed(bool state) { _computed = state; };
-
-            int logicBranchToExecute() { return _current_logic_branch; };
-            void setLogicBranchToExecute(int branch) { _current_logic_branch = branch; };
+            virtual bool isLogicNode() { return false; };
 
             void setValidationMessage(QString const& message){_validation_error = message;};
             void setValidationState(NodeValidationState state){_validation_state = state;};
 
             virtual void compute() = 0;
+            virtual NodeValidationState validate() { return _validation_state; };
+
+            bool isComputed() { return _is_computed; };
+            void setComputed(bool state) { _is_computed = state; };
 
         public Q_SLOTS:
 
@@ -143,10 +137,7 @@ namespace noggit
             NodeValidationState _validation_state = NodeValidationState::Warning;
             QString _validation_error = QString("Missing or incorrect inputs");
 
-            bool _is_logic_node = false;
-            unsigned int _n_logic_branches = 1;
-            int _current_logic_branch = 1;
-            bool _computed = false;
+            bool _is_computed = false;
         };
 
     }
