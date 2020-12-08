@@ -15,6 +15,7 @@
 #include <noggit/Red/PresetEditor/Nodes/LogicBreakNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/PrintNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/ForLoopNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/LogicChainNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/Data/GenericTypeConverter.hpp>
 #include <noggit/Red/PresetEditor/Nodes/Scene/NodeScene.hpp>
@@ -37,6 +38,7 @@ using noggit::Red::PresetEditor::Nodes::LogicBeginNode;
 using noggit::Red::PresetEditor::Nodes::PrintNode;
 using noggit::Red::PresetEditor::Nodes::ForLoopNode;
 using noggit::Red::PresetEditor::Nodes::LogicBreakNode;
+using noggit::Red::PresetEditor::Nodes::LogicChainNode;
 using noggit::Red::PresetEditor::Nodes::BaseNode;
 using noggit::Red::PresetEditor::Nodes::NodeScene;
 
@@ -59,6 +61,7 @@ registerDataModels()
   ret->registerModel<LogicIfNode>("Logic//Flow");
   ret->registerModel<ForLoopNode>("Logic//Flow");
   ret->registerModel<LogicBreakNode>("Logic//Flow");
+  ret->registerModel<LogicChainNode>("Logic//Flow");
   ret->registerModel<PrintNode>("Functions//Generic");
 
   ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);
@@ -232,17 +235,20 @@ PresetEditorWidget::PresetEditorWidget(QWidget *parent)
   connect(ui->executeButton, &QPushButton::clicked
     , [this, scene]()
     {
-    /*
-      scene->iterateOverNodeDataDependentOrder(
-          [](NodeDataModel* model)
-          {
-            reinterpret_cast<BaseNode*>(model)->compute();
-          }
-          );
-             */
-
-    scene->execute();
+      scene->execute();
     });
+
+  connect(ui->loadButton, &QPushButton::clicked
+      , [this, scene]()
+          {
+            scene->load();
+          });
+
+  connect(ui->saveButton, &QPushButton::clicked
+      , [this, scene]()
+          {
+              scene->save();
+          });
 
 }
 

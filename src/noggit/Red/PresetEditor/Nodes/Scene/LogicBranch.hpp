@@ -29,7 +29,7 @@ namespace noggit
             void markNodeLeavesComputed(Node* start_node, Node* source_node, bool state);
             void setCurrentLoop(Node* node) { _loop_stack.push(node); };
             void unsetCurrentLoop() { _loop_stack.pop(); };
-            Node* getCurrentLoop() { return _loop_stack.top(); };
+            Node* getCurrentLoop() { return _loop_stack.empty() ? nullptr : _loop_stack.top(); };
             void execute();
 
         private:

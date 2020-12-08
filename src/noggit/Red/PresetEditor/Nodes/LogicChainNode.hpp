@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef NOGGIT_LOGICBREAKNODE_HPP
-#define NOGGIT_LOGICBREAKNODE_HPP
+#ifndef NOGGIT_LOGICCHAINNODE_HPP
+#define NOGGIT_LOGICCHAINNODE_HPP
 
 #include "LogicNodeBase.hpp"
 
@@ -17,19 +17,19 @@ namespace noggit
 {
     namespace Red::PresetEditor::Nodes
     {
-        class LogicBreakNode : public LogicNodeBase
+        class LogicChainNode : public LogicNodeBase
         {
         Q_OBJECT
 
         public:
-            LogicBreakNode();
+            LogicChainNode();
             void compute() override;
             NodeValidationState validate() override;
-            bool doBreak() { return _do_break; };
-            void setDoBreak(bool state) { _do_break = state; };
+
+        public Q_SLOTS:
+            void outputConnectionCreated(Connection const& connection) override;
 
         private:
-            bool _do_break = false;
 
         };
 
@@ -37,4 +37,4 @@ namespace noggit
 
 }
 
-#endif //NOGGIT_LOGICBREAKNODE_HPP
+#endif //NOGGIT_LOGICCHAINNODE_HPP

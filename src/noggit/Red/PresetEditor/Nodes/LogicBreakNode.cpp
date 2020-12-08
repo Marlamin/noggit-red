@@ -34,11 +34,6 @@ NodeValidationState LogicBreakNode::validate()
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate logic input");
 
-    _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    _out_ports[1].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
-    Q_EMIT dataUpdated(1);
-
     setLogicBranchToExecute(-1);
   }
 

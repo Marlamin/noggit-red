@@ -10,12 +10,11 @@ LogicIfNode::LogicIfNode()
 {
   setName("LogicIfNode");
   setCaption("Branch");
-  _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
   addPort<BooleanData>(PortType::In, "Boolean", true);
-  addPort<LogicData>(PortType::Out, "Then", true, ConnectionPolicy::One);
-  addPort<LogicData>(PortType::Out, "Else", true, ConnectionPolicy::One);
+  addPort<LogicData>(PortType::Out, "True", true, ConnectionPolicy::One);
+  addPort<LogicData>(PortType::Out, "False", true, ConnectionPolicy::One);
 
   setNLogicBranches(2);
 }

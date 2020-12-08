@@ -2,6 +2,7 @@
 #include "../BaseNode.hpp"
 #include "../LogicNodeBase.hpp"
 #include "../LogicBreakNode.hpp"
+#include "../Data/GenericData.hpp"
 
 #include <stdexcept>
 
@@ -29,16 +30,38 @@ void LogicBranch::executeNode(Node* node, Node* source_node)
   model->compute();
   model->setComputed(true);
 
+  // Handle loop breaking
   if(model->isLogicNode()
     && static_cast<LogicNodeBase*>(model)->name() == "LogicBreakNode"
     && static_cast<LogicBreakNode*>(model)->doBreak())
   {
-    static_cast<LogicNodeBase*>(getCurrentLoop()->nodeDataModel())->setIterationIndex(-1);
-    static_cast<LogicBreakNode*>(model)->setDoBreak(false);
+    auto break_node =  static_cast<LogicBreakNode*>(model);
+    if (_loop_stack.empty())
+    {
+      break_node->setValidationState(NodeValidationState::Error);
+      break_node->setValidationMessage("Error: break is outside any loop.");
+    }
+    else
+    {
+      Node* current_loop_node = getCurrentLoop();
+
+      static_cast<LogicNodeBase*>(getCurrentLoop()->nodeDataModel())->setIterationIndex(-1);
+      break_node->setDoBreak(false);
+      markNodesComputed(current_loop_node, true);
+    }
   }
 
+  // Handle dependant nodes
   for (int i = 0; i < model->nPorts(PortType::Out); ++i)
   {
+    // we do not process dependant data nodes here, discard them
+    if (model->dataType(PortType::Out, i).id != "logic")
+      continue;
+
+    // discard logic branches not suitable for evaluation
+    if (!static_cast<LogicData*>(model->outData(i).get())->value())
+      continue;
+
     auto const& connections = nodeState.connections(PortType::Out, i);
 
     for (auto const& pair : connections)
@@ -49,32 +72,31 @@ void LogicBranch::executeNode(Node* node, Node* source_node)
         continue;
 
       auto connected_model = static_cast<BaseNode*>(connected_node->nodeDataModel());
-      if (connected_model->isLogicNode())
+
+      executeNodeLeaves(connected_node, node); // Execute data node leaves
+      if (connected_model->validate() != NodeValidationState::Error)
       {
-        executeNodeLeaves(connected_node, node);
-        if (connected_model->validate() != NodeValidationState::Error)
+        auto logic_model = static_cast<LogicNodeBase*>(connected_node->nodeDataModel());
+
+        if (logic_model->isIterable()) // handle iteration nodes
         {
-          auto logic_model = static_cast<LogicNodeBase*>(connected_node->nodeDataModel());
-
-          if (logic_model->isIterable())
+          setCurrentLoop(connected_node);
+          int it_index = logic_model->getIterationindex();
+          while (it_index >= 0 && it_index < logic_model->getNIteraitons())
           {
-            setCurrentLoop(connected_node);
-            int it_index = logic_model->getIterationindex();
-            while (it_index >= 0 && it_index < logic_model->getNIteraitons())
-            {
-              markNodesComputed(connected_node, false);
-              executeNode(connected_node, node);
-              logic_model->setComputed(true);
-              it_index = logic_model->getIterationindex();
-            }
-            unsetCurrentLoop();
-
-          }
-          else
-          {
+            markNodesComputed(connected_node, false);
             executeNode(connected_node, node);
+            logic_model->setComputed(true);
+            it_index = logic_model->getIterationindex();
           }
+          unsetCurrentLoop();
+
         }
+        else // haandle regular nodes
+        {
+          executeNode(connected_node, node);
+        }
+
       }
     }
   }
