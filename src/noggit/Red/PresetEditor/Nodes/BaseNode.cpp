@@ -37,7 +37,7 @@ void BaseNode::setInData(std::shared_ptr<NodeData> data, PortIndex port_index)
 
 void BaseNode::addWidget(QWidget* widget, PortIndex in_port)
 {
-  auto row_layout = new QHBoxLayout(&_embedded_widget);
+  auto row_layout = new QHBoxLayout();
   row_layout->setSpacing(0);
   _embedded_widget_layout->addLayout(row_layout);
   auto spacer = new QLabel("", &_embedded_widget);
