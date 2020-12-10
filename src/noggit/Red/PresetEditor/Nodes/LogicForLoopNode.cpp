@@ -1,13 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "ForLoopNode.hpp"
+#include "LogicForLoopNode.hpp"
 
 #include "BaseNode.inl"
 #include "Data/GenericData.hpp"
 
 using namespace noggit::Red::PresetEditor::Nodes;
 
-ForLoopNode::ForLoopNode()
+LogicForLoopNode::LogicForLoopNode()
 : LogicNodeBase()
 {
   setName("ForLoopNode");
@@ -28,7 +28,7 @@ ForLoopNode::ForLoopNode()
   setIsIterable(true);
 }
 
-void ForLoopNode::compute()
+void LogicForLoopNode::compute()
 {
   auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
 
@@ -64,7 +64,7 @@ void ForLoopNode::compute()
 
 }
 
-QJsonObject ForLoopNode::save() const
+QJsonObject LogicForLoopNode::save() const
 {
   QJsonObject json_obj;
 
@@ -75,14 +75,14 @@ QJsonObject ForLoopNode::save() const
   return json_obj;
 }
 
-void ForLoopNode::restore(const QJsonObject& json_obj)
+void LogicForLoopNode::restore(const QJsonObject& json_obj)
 {
   setName(json_obj["name"].toString());
   setCaption(json_obj["caption"].toString());
   _n_iterations_default->setValue(json_obj["n_iterations"].toInt());
 }
 
-NodeValidationState ForLoopNode::validate()
+NodeValidationState LogicForLoopNode::validate()
 {
   setValidationState(NodeValidationState::Valid);
 

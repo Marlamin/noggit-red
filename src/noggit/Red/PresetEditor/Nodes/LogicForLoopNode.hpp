@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef NOGGIT_FORLOOPNODE_HPP
-#define NOGGIT_FORLOOPNODE_HPP
+#ifndef NOGGIT_LOGICFORLOOPNODE_HPP
+#define NOGGIT_LOGICFORLOOPNODE_HPP
 
 #include "LogicNodeBase.hpp"
 
@@ -17,12 +17,12 @@ namespace noggit
 {
     namespace Red::PresetEditor::Nodes
     {
-        class ForLoopNode : public LogicNodeBase
+        class LogicForLoopNode : public LogicNodeBase
         {
         Q_OBJECT
 
         public:
-            ForLoopNode();
+            LogicForLoopNode();
             void compute() override;
             NodeValidationState validate() override;
             QJsonObject save() const override;
@@ -36,4 +36,4 @@ namespace noggit
 
 }
 
-#endif //NOGGIT_FORLOOPNODE_HPP
+#endif //NOGGIT_LOGICFORLOOPNODE_HPP
