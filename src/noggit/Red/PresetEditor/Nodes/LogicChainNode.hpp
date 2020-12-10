@@ -24,10 +24,13 @@ namespace noggit
         public:
             LogicChainNode();
             void compute() override;
+            QJsonObject save() const override;
+            void restore(QJsonObject const& json_obj) override;
             NodeValidationState validate() override;
 
         public Q_SLOTS:
             void outputConnectionCreated(Connection const& connection) override;
+            void outputConnectionDeleted(Connection const& connection) override;
 
         private:
 

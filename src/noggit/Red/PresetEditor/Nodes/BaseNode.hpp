@@ -42,6 +42,7 @@ namespace noggit
             std::unique_ptr<NodeData> data_type;
             std::weak_ptr<NodeData> in_value;
             QWidget* default_widget = nullptr;
+            bool connected = false; // needed for multi-input only
         };
 
         struct OutNodePort
@@ -52,6 +53,7 @@ namespace noggit
             std::unique_ptr<NodeData> data_type;
             std::shared_ptr<NodeData> out_value;
             ConnectionPolicy connection_policy = ConnectionPolicy::Many;
+            bool connected = false; // needed for multi-input only
         };
 
 
@@ -122,6 +124,8 @@ namespace noggit
                          QString const& caption,
                          bool caption_visible,
                          ConnectionPolicy out_policy = ConnectionPolicy::Many);
+
+            void deletePort(PortType port_type, PortIndex port_index);
 
         protected:
 

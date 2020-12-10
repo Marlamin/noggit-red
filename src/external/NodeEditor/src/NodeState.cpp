@@ -61,8 +61,12 @@ setConnection(PortType portType,
 {
   auto &connections = getEntries(portType);
 
-  connections.at(portIndex).insert(std::make_pair(connection.id(),
-                                               &connection));
+  if (portIndex < connections.size())
+  {
+    connections.at(portIndex).insert(std::make_pair(connection.id(),
+                                                    &connection));
+  }
+
 }
 
 
@@ -72,7 +76,10 @@ eraseConnection(PortType portType,
                 PortIndex portIndex,
                 QUuid id)
 {
-  getEntries(portType)[portIndex].erase(id);
+  auto& entries = getEntries(portType);
+
+  if (portIndex < entries.size())
+    entries[portIndex].erase(id);
 }
 
 

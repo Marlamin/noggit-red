@@ -22,6 +22,11 @@ LogicChainNode::LogicChainNode()
 
 void LogicChainNode::compute()
 {
+  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
+
+  if (!logic->value())
+    return;
+
   for (auto& port : _out_ports)
   {
     port.out_value = std::make_shared<LogicData>(true);
@@ -30,11 +35,69 @@ void LogicChainNode::compute()
 
 NodeValidationState LogicChainNode::validate()
 {
-  return BaseNode::validate();
+  setValidationState(NodeValidationState::Valid);
+  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
+
+  if (!logic)
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: Failed to evaluate logic input");
+
+    setLogicBranchToExecute(-1);
+  }
+
+  return _validation_state;
 }
 
 void LogicChainNode::outputConnectionCreated(const Connection& connection)
 {
-  addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
+  _out_ports[connection.getPortIndex(PortType::Out)].connected = true;
+
+  if (_out_ports[_out_ports.size() - 1].connected)
+  {
+    addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
+    emit portAdded();
+  }
+}
+
+void LogicChainNode::outputConnectionDeleted(const Connection& connection)
+{
+  _out_ports[connection.getPortIndex(PortType::Out)].connected = false;
+
+  for (int i = static_cast<int>(_out_ports.size()) - 1; i != 1; --i)
+  {
+    if (!_out_ports[i].connected)
+    {
+      deletePort(PortType::Out, i);
+    }
+    else
+    {
+      addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
+      emit portAdded();
+      break;
+    }
+  }
+
+}
+
+
+QJsonObject LogicChainNode::save() const
+{
+  auto json_obj = BaseNode::save();
+  json_obj["n_dynamic_ports"] = static_cast<int>(_out_ports.size() - 1); // 1st port is presumed to be static
+
+  return json_obj;
+}
+
+void LogicChainNode::restore(const QJsonObject& json_obj)
+{
+  BaseNode::restore(json_obj);
+
+  for (int i = 0; i < json_obj["n_dynamic_ports"].toInt(); ++i)
+  {
+    addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
+  }
+
+  emit portAdded();
 }
 

@@ -100,11 +100,11 @@ NodeDataType BaseNode::dataType(PortType port_type, PortIndex port_index) const
 {
   if (port_type == PortType::In)
   {
-    return _in_ports[port_index].data_type->type();
+    return port_index < _in_ports.size() ? _in_ports[port_index].data_type->type() : NodeDataType {"invalid", "Invalid"};
   }
   else if (port_type == PortType::Out)
   {
-    return _out_ports[port_index].data_type->type();
+    return port_index < _out_ports.size() ? _out_ports[port_index].data_type->type() : NodeDataType {"invalid", "Invalid"};
   }
   else
   {
@@ -169,6 +169,16 @@ void BaseNode::restore(const QJsonObject& json_obj)
 {
   setName(json_obj["name"].toString());
   setCaption(json_obj["caption"].toString());
+}
+
+void BaseNode::deletePort(PortType port_type, PortIndex port_index)
+{
+  if (port_type == PortType::Out)
+    _out_ports.erase(_out_ports.begin() + port_index);
+  else if (port_type == PortType::In)
+    _in_ports.erase(_in_ports.begin() + port_index);
+
+  emit portRemoved();
 }
 
 
