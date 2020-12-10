@@ -106,10 +106,6 @@ NodeDataType BaseNode::dataType(PortType port_type, PortIndex port_index) const
   {
     return port_index < _out_ports.size() ? _out_ports[port_index].data_type->type() : NodeDataType {"invalid", "Invalid"};
   }
-  else
-  {
-    throw std::logic_error("Incorrect port type or port type None.");
-  }
 }
 
 unsigned int BaseNode::nPorts(PortType port_type) const
@@ -121,10 +117,6 @@ unsigned int BaseNode::nPorts(PortType port_type) const
   else if (port_type == PortType::Out)
   {
     return _out_ports.size();
-  }
-  else
-  {
-    throw std::logic_error("Incorrect port type or port type None.");
   }
 }
 

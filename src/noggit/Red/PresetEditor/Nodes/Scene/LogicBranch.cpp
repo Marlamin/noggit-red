@@ -2,6 +2,7 @@
 #include "../BaseNode.hpp"
 #include "../LogicNodeBase.hpp"
 #include "../LogicBreakNode.hpp"
+#include "../LogicContinueNode.hpp"
 #include "../Data/GenericData.hpp"
 
 #include <stdexcept>
@@ -30,24 +31,45 @@ void LogicBranch::executeNode(Node* node, Node* source_node)
   model->compute();
   model->setComputed(true);
 
-  // Handle loop breaking
-  if(model->isLogicNode()
-    && static_cast<LogicNodeBase*>(model)->name() == "LogicBreakNode"
-    && static_cast<LogicBreakNode*>(model)->doBreak())
+  // Handle loop breaking and continuing
+  if(model->isLogicNode())
   {
-    auto break_node =  static_cast<LogicBreakNode*>(model);
-    if (_loop_stack.empty())
-    {
-      break_node->setValidationState(NodeValidationState::Error);
-      break_node->setValidationMessage("Error: break is outside any loop.");
-    }
-    else
-    {
-      Node* current_loop_node = getCurrentLoop();
+    auto logic_node_model = static_cast<LogicNodeBase*>(model);
 
-      static_cast<LogicNodeBase*>(getCurrentLoop()->nodeDataModel())->setIterationIndex(-1);
-      break_node->setDoBreak(false);
-      markNodesComputed(current_loop_node, true);
+    if (logic_node_model->name() == "LogicBreakNode" && static_cast<LogicBreakNode*>(model)->doBreak())
+    {
+      auto break_node =  static_cast<LogicBreakNode*>(model);
+      if (_loop_stack.empty())
+      {
+        break_node->setValidationState(NodeValidationState::Error);
+        break_node->setValidationMessage("Error: break is outside any loop.");
+      }
+      else
+      {
+        Node* current_loop_node = getCurrentLoop();
+
+        static_cast<LogicNodeBase*>(getCurrentLoop()->nodeDataModel())->setIterationIndex(-1);
+        break_node->setDoBreak(false);
+        markNodesComputed(current_loop_node, true);
+      }
+    }
+    else if (logic_node_model->name() == "LogicContinueNode" && static_cast<LogicContinueNode*>(model)->doContinue())
+    {
+      auto continue_node =  static_cast<LogicContinueNode*>(model);
+      if (_loop_stack.empty())
+      {
+        continue_node->setValidationState(NodeValidationState::Error);
+        continue_node->setValidationMessage("Error: continue is outside any loop.");
+      }
+      else
+      {
+        Node* current_loop_node = getCurrentLoop();
+
+        auto loop_model = static_cast<LogicNodeBase*>(current_loop_node->nodeDataModel());
+        continue_node->setDoContinue(false);
+        markNodesComputed(current_loop_node, true);
+        loop_model->setComputed(false);
+      }
     }
   }
 

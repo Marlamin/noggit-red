@@ -13,6 +13,7 @@
 #include <noggit/Red/PresetEditor/Nodes/LogicIfNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicBeginNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicBreakNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/LogicContinueNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/PrintNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/ForLoopNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicChainNode.hpp>
@@ -38,6 +39,7 @@ using noggit::Red::PresetEditor::Nodes::LogicBeginNode;
 using noggit::Red::PresetEditor::Nodes::PrintNode;
 using noggit::Red::PresetEditor::Nodes::ForLoopNode;
 using noggit::Red::PresetEditor::Nodes::LogicBreakNode;
+using noggit::Red::PresetEditor::Nodes::LogicContinueNode;
 using noggit::Red::PresetEditor::Nodes::LogicChainNode;
 using noggit::Red::PresetEditor::Nodes::BaseNode;
 using noggit::Red::PresetEditor::Nodes::NodeScene;
@@ -61,6 +63,7 @@ registerDataModels()
   ret->registerModel<LogicIfNode>("Logic//Flow");
   ret->registerModel<ForLoopNode>("Logic//Flow");
   ret->registerModel<LogicBreakNode>("Logic//Flow");
+  ret->registerModel<LogicContinueNode>("Logic//Flow");
   ret->registerModel<LogicChainNode>("Logic//Flow");
   ret->registerModel<PrintNode>("Functions//Generic");
 
