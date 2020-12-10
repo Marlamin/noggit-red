@@ -22,11 +22,9 @@ LogicChainNode::LogicChainNode()
 
 void LogicChainNode::compute()
 {
-  int count = 0;
   for (auto& port : _out_ports)
   {
-    _out_ports[count].out_value = std::make_shared<LogicData>(true);
-    count++;
+    port.out_value = std::make_shared<LogicData>(true);
   }
 }
 

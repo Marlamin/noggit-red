@@ -42,9 +42,9 @@ using noggit::Red::PresetEditor::Nodes::LogicChainNode;
 using noggit::Red::PresetEditor::Nodes::BaseNode;
 using noggit::Red::PresetEditor::Nodes::NodeScene;
 
-#define REGISTER_TYPE_CONVERTER(T_FROM, T_TO)             \
+#define REGISTER_TYPE_CONVERTER(T_FROM, T_TO)               \
 registerTypeConverter(std::make_pair(T_FROM##Data().type(), \
-T_TO##Data().type()),                                     \
+T_TO##Data().type()),                                       \
 TypeConverter{T_FROM##To##T_TO##TypeConverter()})
 
 static std::shared_ptr<DataModelRegistry>
