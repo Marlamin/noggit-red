@@ -31,7 +31,7 @@ namespace noggit
         private:
           QSpinBox* _n_iterations_default;
 
-        }
+        };
 
     }
 

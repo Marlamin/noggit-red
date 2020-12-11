@@ -71,6 +71,9 @@ NodeGraphicsObject(FlowScene &scene,
 NodeGraphicsObject::
 ~NodeGraphicsObject()
 {
+  if (_proxyWidget)
+    _proxyWidget->setWidget(nullptr);
+
   _scene.removeItem(this);
 }
 
