@@ -29,5 +29,6 @@ public:
 
   /// Type for inner use
   virtual NodeDataType type() const = 0;
+  virtual std::unique_ptr<NodeData> instantiate() = 0;
 };
 }

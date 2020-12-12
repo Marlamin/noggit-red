@@ -33,11 +33,11 @@ ConditionNode::ConditionNode()
 
   addPort<DecimalData>(PortType::In, "Value", true);
   _first = new QDoubleSpinBox(&_embedded_widget);
-  addWidget(_first, 0);
+  addWidget(_first, PortType::In, 0);
 
   addPort<DecimalData>(PortType::In, "Value", true);
   _second = new QDoubleSpinBox(&_embedded_widget);
-  addWidget(_second, 1);
+  addWidget(_second, PortType::In, 1);
 
   addPort<BooleanData>(PortType::Out, "Boolean", true);
 }

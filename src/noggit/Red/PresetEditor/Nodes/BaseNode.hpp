@@ -53,6 +53,7 @@ namespace noggit
             std::unique_ptr<NodeData> data_type;
             std::shared_ptr<NodeData> out_value;
             ConnectionPolicy connection_policy = ConnectionPolicy::Many;
+            QWidget* default_widget = nullptr;
             bool connected = false; // needed for multi-input only
         };
 
@@ -75,6 +76,8 @@ namespace noggit
 
             void setInData(std::shared_ptr<NodeData> data, PortIndex port_index) override;
 
+            std::unique_ptr<NodeData>& dataModel(PortType port_type, PortIndex port_index);
+
             QWidget* embeddedWidget() override { return &_embedded_widget; }
 
             NodeValidationState validationState() const override { return _validation_state; };
@@ -91,7 +94,7 @@ namespace noggit
 
             ConnectionPolicy portOutConnectionPolicy(PortIndex port_index) const override;
 
-            QWidget* portDefaultValueWidget(PortIndex port_index) override;
+            QWidget* portDefaultValueWidget(PortType port_type, PortIndex port_index) override;
 
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
@@ -116,8 +119,8 @@ namespace noggit
 
             void setName(QString const& name) {_name = name;};
             void setCaption(QString const& caption){_caption = caption;};
-            void addWidget(QWidget* widget, PortIndex in_port = -1);
-            void addWidget(QWidget* widget, QString const& label_text, PortIndex in_port = -1);
+            void addWidget(QWidget* widget, PortType port_type = PortType::None, PortIndex port_index = -1);
+            void addWidget(QWidget* widget, QString const& label_text, PortType port_type = PortType::None, PortIndex port_index = -1);
 
             template<typename T>
             void addPort(PortType port_type,

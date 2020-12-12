@@ -30,12 +30,28 @@ std::shared_ptr<NodeData> BaseNode::outData(PortIndex port_index)
   return std::static_pointer_cast<NodeData>(_out_ports[port_index].out_value);
 }
 
+std::unique_ptr<NodeData>& BaseNode::dataModel(PortType port_type, PortIndex port_index)
+{
+  if (port_type == PortType::In)
+  {
+    return _in_ports[port_index].data_type;
+  }
+  else if (port_type == PortType::Out)
+  {
+    return _out_ports[port_index].data_type;
+  }
+  else
+  {
+    throw std::logic_error("Incorrect port type.");
+  }
+}
+
 void BaseNode::setInData(std::shared_ptr<NodeData> data, PortIndex port_index)
 {
   _in_ports[port_index].in_value = data;
 }
 
-void BaseNode::addWidget(QWidget* widget, PortIndex in_port)
+void BaseNode::addWidget(QWidget* widget, PortType port_type, PortIndex port_index)
 {
   auto row_layout = new QHBoxLayout();
   row_layout->setSpacing(0);
@@ -45,22 +61,30 @@ void BaseNode::addWidget(QWidget* widget, PortIndex in_port)
   row_layout->addWidget(spacer);
   row_layout->addWidget(widget);
 
-  if (in_port >= 0)
+  if (port_type == PortType::In && port_index >= 0)
   {
-    _in_ports[in_port].default_widget = widget;
+    _in_ports[port_index].default_widget = widget;
+  }
+  if (port_type == PortType::Out && port_index >= 0)
+  {
+    _out_ports[port_index].default_widget = widget;
   }
 }
 
-void BaseNode::addWidget(QWidget* widget, QString const& label_text, PortIndex in_port)
+void BaseNode::addWidget(QWidget* widget, QString const& label_text, PortType port_type, PortIndex port_index)
 {
   auto row_layout = new QHBoxLayout(&_embedded_widget);
   _embedded_widget_layout->addLayout(row_layout);
   row_layout->addWidget(new QLabel(label_text, &_embedded_widget));
   row_layout->addWidget(widget);
 
-  if (in_port >= 0)
+  if (port_type == PortType::In && port_index >= 0)
   {
-    _in_ports[in_port].default_widget = widget;
+    _in_ports[port_index].default_widget = widget;
+  }
+  if (port_type == PortType::Out && port_index >= 0)
+  {
+    _out_ports[port_index].default_widget = widget;
   }
 }
 
@@ -126,9 +150,18 @@ ConnectionPolicy BaseNode::portOutConnectionPolicy(PortIndex port_index) const
 }
 
 
-QWidget* BaseNode::portDefaultValueWidget(PortIndex port_index)
+QWidget* BaseNode::portDefaultValueWidget(PortType port_type, PortIndex port_index)
 {
-  return _in_ports[port_index].default_widget;
+  if (port_type == PortType::In)
+  {
+    return _in_ports[port_index].default_widget;
+  }
+  else if (port_type == PortType::Out)
+  {
+    return _out_ports[port_index].default_widget;
+  }
+
+  return nullptr;
 }
 
 void BaseNode::inputConnectionDeleted(const Connection& connection)
@@ -172,6 +205,8 @@ void BaseNode::deletePort(PortType port_type, PortIndex port_index)
 
   emit portRemoved();
 }
+
+
 
 
 

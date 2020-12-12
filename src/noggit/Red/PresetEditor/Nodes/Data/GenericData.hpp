@@ -36,6 +36,11 @@ public:
     [[nodiscard]]
     QString toQString() const { return C::to_string(_value); }
 
+    std::unique_ptr<NodeData> instantiate()
+    {
+      return std::make_unique<GenericData<Ty, type_id, type_name, C>>();
+    }
+
 
 private:
     Ty _value;
@@ -66,6 +71,8 @@ DECLARE_NODE_DATA_TYPE(vec4, Vector4D, glm::vec4)
 DECLARE_NODE_DATA_TYPE(mat4, Matrix4x4, glm::mat4)
 DECLARE_NODE_DATA_TYPE(mat3, Matrix3x3, glm::mat3)
 DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat)
+
+DECLARE_NODE_DATA_TYPE(any, Any, std::nullptr_t);
 
 
 

@@ -169,7 +169,12 @@ portScenePosition(PortIndex index,
     {
       double x = _width + nodeStyle.ConnectionPointDiameter;
 
-      result = QPointF(x, totalHeight);
+      auto default_widget = _dataModel->portDefaultValueWidget(PortType::Out, index);
+      result = QPointF(x, default_widget ?
+                          default_widget->pos().y()
+                          + captionHeight()
+                          + 10
+                          : totalHeight);
       break;
     }
 
@@ -177,7 +182,7 @@ portScenePosition(PortIndex index,
     {
       double x = 0.0 - nodeStyle.ConnectionPointDiameter;
 
-      auto default_widget = _dataModel->portDefaultValueWidget(index);
+      auto default_widget = _dataModel->portDefaultValueWidget(PortType::In, index);
       result = QPointF(x, default_widget ?
                           default_widget->pos().y()
                           + captionHeight()

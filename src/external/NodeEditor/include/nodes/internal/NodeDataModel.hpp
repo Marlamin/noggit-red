@@ -59,7 +59,7 @@ public:
   virtual QString
   name() const = 0;
 
-  virtual QWidget* portDefaultValueWidget(PortIndex port_index) { return nullptr; }
+  virtual QWidget* portDefaultValueWidget(PortType port_type, PortIndex port_index) { return nullptr; }
 
 public:
 

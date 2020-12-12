@@ -119,8 +119,16 @@ NodeConnectionInteraction::
          converter = _scene->registry().getTypeConverter(candidateNodeDataType , connectionDataType);
       }
 
+      if (connectionDataType.id == "any" ||  candidateNodeDataType.id == "any")
+      {
+        return true;
+      }
+
       return (converter != nullptr);
    }
+
+   if (connectionDataType.id == "any")
+     return false;
 
    return true;
 }

@@ -15,12 +15,12 @@ LogicForLoopNode::LogicForLoopNode()
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
-  addWidget(new QLabel(&_embedded_widget), 0);
+  addWidget(new QLabel(&_embedded_widget), PortType::In, 0);
   addPort<IntegerData>(PortType::In, "Times", true);
 
   _n_iterations_default = new QSpinBox(&_embedded_widget);
   _n_iterations_default->setMinimum(0);
-  addWidget(_n_iterations_default, 1);
+  addWidget(_n_iterations_default, PortType::In, 1);
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
   addPort<IntegerData>(PortType::Out, "Index", true, ConnectionPolicy::Many);
