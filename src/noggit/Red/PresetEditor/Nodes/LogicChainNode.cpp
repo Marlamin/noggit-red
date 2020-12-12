@@ -67,7 +67,7 @@ void LogicChainNode::outputConnectionDeleted(const Connection& connection)
 {
   _out_ports[connection.getPortIndex(PortType::Out)].connected = false;
 
-  for (int i = static_cast<int>(_out_ports.size()) - 1; i != 1; --i)
+  for (int i = static_cast<int>(_out_ports.size()) - 1; i != 0; --i)
   {
     if (!_out_ports[i].connected)
     {
