@@ -71,5 +71,22 @@ void LogicBeginNode::outputConnectionCreated(const Connection& connection)
 
 void LogicBeginNode::outputConnectionDeleted(const Connection& connection)
 {
-  NodeDataModel::outputConnectionDeleted(connection);
+  PortIndex port_index = connection.getPortIndex(PortType::Out);
+  _out_ports[port_index].connected = false;
+  _out_ports[port_index].data_type = std::make_unique<AnyData>();
+  _out_ports[port_index].caption = "Any";
+
+  for (int i = static_cast<int>(_out_ports.size()) - 1; i != 1; --i)
+  {
+    if (!_out_ports[i].connected)
+    {
+      deletePort(PortType::Out, i);
+    }
+    else
+    {
+      addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
+      emit portAdded();
+      break;
+    }
+  }
 }
