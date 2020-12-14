@@ -119,8 +119,12 @@ namespace noggit
 
             void setName(QString const& name) {_name = name;};
             void setCaption(QString const& caption){_caption = caption;};
-            void addWidget(QWidget* widget, PortType port_type = PortType::None, PortIndex port_index = -1);
-            void addWidget(QWidget* widget, QString const& label_text, PortType port_type = PortType::None, PortIndex port_index = -1);
+
+            void addWidgetTop(QWidget* widget);
+            void addWidgetBottom(QWidget* widget);
+            void addDefaultWidget(QWidget* widget, PortType port_type, PortIndex port_index);
+
+
 
             template<typename T>
             void addPort(PortType port_type,
@@ -129,6 +133,7 @@ namespace noggit
                          ConnectionPolicy out_policy = ConnectionPolicy::Many);
 
             void deletePort(PortType port_type, PortIndex port_index);
+            void deleteDefaultWidget(PortType port_type, PortIndex port_index);
 
         protected:
 
@@ -140,6 +145,8 @@ namespace noggit
 
             QWidget _embedded_widget;
             QVBoxLayout* _embedded_widget_layout;
+            QVBoxLayout* _embedded_widget_layout_top;
+            QVBoxLayout* _embedded_widget_layout_bottom;
 
             NodeValidationState _validation_state = NodeValidationState::Warning;
             QString _validation_error = QString("Missing or incorrect inputs");

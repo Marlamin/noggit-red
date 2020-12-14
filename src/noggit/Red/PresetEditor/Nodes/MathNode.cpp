@@ -15,7 +15,7 @@ MathNode::MathNode()
                         "Multiply",
                         "Divide",
                         "Modulo"});
-  addWidget(_operation);
+  addWidgetTop(_operation);
 
   setName("MathNode");
   setCaption("Add");
@@ -29,11 +29,11 @@ MathNode::MathNode()
 
   addPort<DecimalData>(PortType::In, "Value", true);
   _first = new QDoubleSpinBox(&_embedded_widget);
-  addWidget(_first, PortType::In, 0);
+  addDefaultWidget(_first, PortType::In, 0);
 
   addPort<DecimalData>(PortType::In, "Value", true);
   _second = new QDoubleSpinBox(&_embedded_widget);
-  addWidget(_second, PortType::In, 1);
+  addDefaultWidget(_second, PortType::In, 1);
 
   addPort<DecimalData>(PortType::Out, "Value", true);
 }

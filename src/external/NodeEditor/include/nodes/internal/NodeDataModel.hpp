@@ -168,6 +168,9 @@ Q_SIGNALS:
   void
   portRemoved();
 
+  void
+  visualsNeedUpdate();
+
 private:
 
   NodeStyle _nodeStyle;

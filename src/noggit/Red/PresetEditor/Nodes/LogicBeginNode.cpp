@@ -13,7 +13,9 @@ LogicBeginNode::LogicBeginNode()
   setValidationState(NodeValidationState::Valid);
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
+  addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, 0);
   addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
+  addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, 1);
 }
 
 void LogicBeginNode::compute()
@@ -52,12 +54,6 @@ void LogicBeginNode::outputConnectionCreated(const Connection& connection)
   PortIndex port_index = connection.getPortIndex(PortType::Out);
   _out_ports[port_index].connected = true;
 
-  if (_out_ports[_out_ports.size() - 1].connected)
-  {
-    addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
-    emit portAdded();
-  }
-
   auto connected_node = connection.getNode(PortType::In);
   auto connected_model = static_cast<BaseNode*>(connected_node->nodeDataModel());
   auto data_type = connected_model->dataType(PortType::In, connection.getPortIndex(PortType::In));
@@ -66,7 +62,20 @@ void LogicBeginNode::outputConnectionCreated(const Connection& connection)
   auto& connected_data = connected_model->dataModel(PortType::In, connected_index);
 
   _out_ports[port_index].data_type = connected_data->instantiate();
-  _out_ports[port_index].caption =connected_model->portCaption(PortType::In, connected_index);
+
+  deleteDefaultWidget(PortType::Out, port_index);
+  addDefaultWidget(_out_ports[port_index].data_type->default_widget(&_embedded_widget), PortType::Out, port_index);
+
+  _out_ports[port_index].caption = connected_model->portCaption(PortType::In, connected_index);
+
+  if (_out_ports[_out_ports.size() - 1].connected)
+  {
+    addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
+    addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, _out_ports.size() - 1);
+    emit portAdded();
+  }
+
+  emit visualsNeedUpdate();
 }
 
 void LogicBeginNode::outputConnectionDeleted(const Connection& connection)
@@ -75,6 +84,9 @@ void LogicBeginNode::outputConnectionDeleted(const Connection& connection)
   _out_ports[port_index].connected = false;
   _out_ports[port_index].data_type = std::make_unique<AnyData>();
   _out_ports[port_index].caption = "Any";
+
+  deleteDefaultWidget(PortType::Out, port_index);
+  addDefaultWidget(_out_ports[port_index].data_type->default_widget(&_embedded_widget), PortType::Out, port_index);
 
   for (int i = static_cast<int>(_out_ports.size()) - 1; i != 1; --i)
   {
@@ -85,8 +97,18 @@ void LogicBeginNode::outputConnectionDeleted(const Connection& connection)
     else
     {
       addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
+      addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, _out_ports.size() - 1);
       emit portAdded();
       break;
     }
   }
+
+  if (_out_ports[_out_ports.size() - 1].connected)
+  {
+    addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
+    addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, _out_ports.size() - 1);
+    emit portAdded();
+  }
+
+  emit visualsNeedUpdate();
 }

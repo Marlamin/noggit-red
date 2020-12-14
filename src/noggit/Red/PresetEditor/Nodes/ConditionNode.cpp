@@ -22,7 +22,7 @@ ConditionNode::ConditionNode()
                         "And",
                         "Or",
                         "Xor"});
-  addWidget(_operation);
+  addWidgetTop(_operation);
 
   QComboBox::connect(_operation, qOverload<int>(&QComboBox::currentIndexChanged)
       ,[this](int index)
@@ -33,11 +33,11 @@ ConditionNode::ConditionNode()
 
   addPort<DecimalData>(PortType::In, "Value", true);
   _first = new QDoubleSpinBox(&_embedded_widget);
-  addWidget(_first, PortType::In, 0);
+  addDefaultWidget(_first, PortType::In, 0);
 
   addPort<DecimalData>(PortType::In, "Value", true);
   _second = new QDoubleSpinBox(&_embedded_widget);
-  addWidget(_second, PortType::In, 1);
+  addDefaultWidget(_second, PortType::In, 1);
 
   addPort<BooleanData>(PortType::Out, "Boolean", true);
 }

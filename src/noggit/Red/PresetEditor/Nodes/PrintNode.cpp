@@ -14,11 +14,11 @@ PrintNode::PrintNode()
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
-  addWidget(new QLabel(&_embedded_widget), PortType::In, 0);
+  addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, 0);
 
   addPort<StringData>(PortType::In, "String", true);
   _text = new QLineEdit(&_embedded_widget);
-  addWidget(_text, PortType::In, 1);
+  addDefaultWidget(_text, PortType::In, 1);
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
 

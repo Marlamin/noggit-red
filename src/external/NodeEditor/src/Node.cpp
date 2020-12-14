@@ -41,6 +41,9 @@ Node(std::unique_ptr<NodeDataModel> && dataModel)
           this, &Node::onPortAdded);
   connect(_nodeDataModel.get(), &NodeDataModel::portRemoved,
           this, &Node::onPortRemoved);
+
+  connect(_nodeDataModel.get(), &NodeDataModel::visualsNeedUpdate,
+          this, &Node::recalculateVisuals);
 }
 
 
