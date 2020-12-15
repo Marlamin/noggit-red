@@ -30,7 +30,7 @@ BaseNode::BaseNode()
 
   _embedded_widget_layout = new QVBoxLayout();
   layout->addLayout(_embedded_widget_layout);
-  _embedded_widget_layout->setContentsMargins(5, 5, 5, 5);
+  _embedded_widget_layout->setContentsMargins(5, 0, 5, 0);
 
   _embedded_widget_layout_bottom = new QVBoxLayout();
   layout->addLayout(_embedded_widget_layout_bottom);
@@ -81,6 +81,8 @@ void BaseNode::addDefaultWidget(QWidget* widget, PortType port_type, PortIndex p
   {
     _out_ports[port_index].default_widget = widget;
   }
+
+  widget->adjustSize();
 }
 
 bool BaseNode::portCaptionVisible(PortType port_type, PortIndex port_index) const
@@ -126,7 +128,7 @@ NodeDataType BaseNode::dataType(PortType port_type, PortIndex port_index) const
     return port_index < _out_ports.size() ? _out_ports[port_index].data_type->type() : NodeDataType {"invalid", "Invalid"};
   }
 
-  throw std::logic_error("Invalid port type.");
+  return NodeDataType {"invalid", "Invalid"};
 }
 
 unsigned int BaseNode::nPorts(PortType port_type) const

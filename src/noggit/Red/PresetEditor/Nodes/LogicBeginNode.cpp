@@ -13,7 +13,9 @@ LogicBeginNode::LogicBeginNode()
   setValidationState(NodeValidationState::Valid);
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
-  addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, 0);
+  auto label = new QLabel(&_embedded_widget);
+  label->setMinimumWidth(180);
+  addDefaultWidget(label, PortType::Out, 0);
   addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
   addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, 1);
 }
@@ -25,12 +27,30 @@ void LogicBeginNode::compute()
 
   for (int i = 1; i < _out_ports.size(); ++i)
   {
-    auto type_id = _out_ports[i].data_type->type().id;
+    if (!_out_ports[i].connected)
+      continue;
 
-    if (type_id == "")
+    auto default_value = _out_ports[i].data_type->default_widget_data(_out_ports[i].default_widget);
+
+    if (!_out_ports[i].out_value)
     {
-
+      if (default_value)
+      {
+        _out_ports[i].out_value = default_value;
+        Q_EMIT dataUpdated(i);
+      }
+      else
+      {
+        setValidationState(NodeValidationState::Error);
+        setValidationMessage("Error: argument does not have a default value and was not passed.");
+        return;
+      }
     }
+    else
+    {
+      Q_EMIT dataUpdated(i);
+    }
+
   }
 }
 
@@ -41,18 +61,32 @@ NodeValidationState LogicBeginNode::validate()
 
 QJsonObject LogicBeginNode::save() const
 {
-  return BaseNode::save();
+  auto json_obj = BaseNode::save();
+  json_obj["n_dynamic_ports"] = static_cast<int>(_out_ports.size() - 2); // 1st 2 ports are presumed to be static
+
+  return json_obj;
 }
 
 void LogicBeginNode::restore(const QJsonObject& json_obj)
 {
   BaseNode::restore(json_obj);
+
+  for (int i = 0; i < json_obj["n_dynamic_ports"].toInt(); ++i)
+  {
+    addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
+    addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, 2 + i);
+  }
+
+  emit portAdded();
 }
 
 void LogicBeginNode::outputConnectionCreated(const Connection& connection)
 {
   PortIndex port_index = connection.getPortIndex(PortType::Out);
   _out_ports[port_index].connected = true;
+
+  if (!port_index) // no need to execute the following code for the first logic input
+    return;
 
   auto connected_node = connection.getNode(PortType::In);
   auto connected_model = static_cast<BaseNode*>(connected_node->nodeDataModel());
@@ -75,6 +109,7 @@ void LogicBeginNode::outputConnectionCreated(const Connection& connection)
     emit portAdded();
   }
 
+  _embedded_widget.adjustSize();
   emit visualsNeedUpdate();
 }
 

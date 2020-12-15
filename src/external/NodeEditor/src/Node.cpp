@@ -233,6 +233,11 @@ onPortAdded()
   _nodeState._outConnections.resize( nNewOut );
 
   //Recalculate the nodes visuals. A data change can result in the node taking more space than before, so this forces a recalculate+repaint on the affected node
+  auto widget = _nodeDataModel->embeddedWidget();
+
+  if (widget)
+    widget->adjustSize();
+
   _nodeGraphicsObject->setGeometryChanged();
   _nodeGeometry.recalculateSize();
   _nodeGraphicsObject->update();
@@ -256,6 +261,11 @@ onPortRemoved()
   _nodeGeometry._nSinks = nNewOut;
   _nodeState._outConnections.resize( nNewOut );
   // \todo Remove the lost connections.
+
+  auto widget = _nodeDataModel->embeddedWidget();
+
+  if (widget)
+    widget->adjustSize();
 
   recalculateVisuals();
 }
