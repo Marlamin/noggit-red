@@ -53,6 +53,19 @@ public:
       return D::generate(parent);
     }
 
+    std::shared_ptr<NodeData> default_widget_data(QWidget* widget) override
+    {
+      auto value = D::value(widget);
+
+      if constexpr (std::is_same<typeof(value), nullptr_t>::value)
+      {
+        auto data_ptr = std::make_shared<GenericData<Ty, type_id, type_name, C, D>>();
+        data_ptr.reset();
+        return data_ptr;
+      }
+      return std::make_shared<GenericData<Ty, type_id, type_name, C, D>>(value);
+    }
+
 
 private:
     Ty _value;
@@ -72,6 +85,11 @@ struct DefaultIntWidget
       widget->setRange(std::numeric_limits<std::int32_t>::min(), std::numeric_limits<std::int32_t>::max());
       return widget;
     }
+
+    static int value(QWidget* widget)
+    {
+      return static_cast<QSpinBox*>(widget)->value();
+    }
 };
 
 struct DefaultDecimalWidget
@@ -81,6 +99,11 @@ struct DefaultDecimalWidget
       auto widget = new QDoubleSpinBox(parent);
       widget->setRange(std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
       return widget;
+    }
+
+    static double value(QWidget* widget)
+    {
+      return static_cast<QDoubleSpinBox*>(widget)->value();
     }
 };
 
@@ -92,16 +115,31 @@ struct DefaultBooleanWidget
       widget->setChecked(false);
       return widget;
     }
+
+    static bool value(QWidget* widget)
+    {
+      return static_cast<QCheckBox*>(widget)->isChecked();
+    }
 };
 
 struct DefaultStringWidget
 {
     static QWidget* generate(QWidget* parent) { return new QLineEdit(parent); }
+
+    static std::string value(QWidget* widget)
+    {
+      return static_cast<QLineEdit*>(widget)->text().toStdString();
+    }
 };
 
 struct NoDefaultWidget
 {
     static QWidget* generate(QWidget* parent) { return new QLabel("", parent); }
+
+    static nullptr_t value(QWidget* widget)
+    {
+      return nullptr;
+    }
 };
 
 

@@ -31,6 +31,7 @@ public:
   /// Type for inner use
   virtual NodeDataType type() const = 0;
   virtual std::unique_ptr<NodeData> instantiate() = 0;
-  virtual QWidget* default_widget(QWidget* parent = nullptr) = 0;
+  virtual QWidget* default_widget(QWidget* parent) = 0;
+  virtual std::shared_ptr<NodeData> default_widget_data(QWidget* widget) = 0;
 };
 }
