@@ -14,6 +14,8 @@
 #include <noggit/Red/PresetEditor/Nodes/LogicBeginNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicBreakNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicContinueNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/LogicReturnNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/LogicReturnNoDataNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/PrintNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicForLoopNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicWhileLoopNode.hpp>
@@ -42,6 +44,8 @@ using noggit::Red::PresetEditor::Nodes::LogicForLoopNode;
 using noggit::Red::PresetEditor::Nodes::LogicWhileLoopNode;
 using noggit::Red::PresetEditor::Nodes::LogicBreakNode;
 using noggit::Red::PresetEditor::Nodes::LogicContinueNode;
+using noggit::Red::PresetEditor::Nodes::LogicReturnNode;
+using noggit::Red::PresetEditor::Nodes::LogicReturnNoDataNode;
 using noggit::Red::PresetEditor::Nodes::LogicChainNode;
 using noggit::Red::PresetEditor::Nodes::BaseNode;
 using noggit::Red::PresetEditor::Nodes::NodeScene;
@@ -68,6 +72,8 @@ registerDataModels()
   ret->registerModel<LogicBreakNode>("Logic//Flow");
   ret->registerModel<LogicContinueNode>("Logic//Flow");
   ret->registerModel<LogicChainNode>("Logic//Flow");
+  ret->registerModel<LogicReturnNode>("Logic//Flow");
+  ret->registerModel<LogicReturnNoDataNode>("Logic//Flow");
   ret->registerModel<PrintNode>("Functions//Generic");
 
   ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);

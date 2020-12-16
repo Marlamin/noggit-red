@@ -7,29 +7,51 @@
 
 using namespace noggit::Red::PresetEditor::Nodes;
 
-using QtNodes::Node;
 
 void NodeScene::execute()
 {
-  Node* begin = nullptr;
+  _begin_node = nullptr;
+  _return_node = nullptr;
+
   for (auto& pair : _nodes)
   {
     auto model = static_cast<BaseNode*>(pair.second.get()->nodeDataModel());
     model->setComputed(false);
 
-    if (model->isLogicNode() && model->name() == "LogicBeginNode")
+    if (model->isLogicNode())
     {
-      begin = pair.second.get();
+      if (model->name() == "LogicBeginNode")
+      {
+        if (_begin_node)
+        {
+          LogError << "Found more than one begin node in executed script. Aborting execution." << std::endl;
+          return;
+        }
+
+        _begin_node = pair.second.get();
+      }
+
+      if (model->name() == "LogicReturnNode")
+      {
+        if (_return_node)
+        {
+          LogError << "Found more than one data return node in executed script. Aborting execution." << std::endl;
+          return;
+        }
+
+        _return_node = pair.second.get();
+      }
+
     }
 
   }
 
-  if (!begin)
+  if (!_begin_node)
   {
     LogError << "No entry point found in the executed script. Aborting execution." << std::endl;
     return;
   }
 
-  auto main_branch = LogicBranch(begin);
+  auto main_branch = LogicBranch(_begin_node);
   main_branch.execute();
 }

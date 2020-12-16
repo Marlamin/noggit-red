@@ -33,8 +33,6 @@ NodeValidationState LogicContinueNode::validate()
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate logic input");
-
-    setLogicBranchToExecute(-1);
   }
 
   return _validation_state;

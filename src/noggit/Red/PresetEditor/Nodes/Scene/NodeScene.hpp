@@ -5,6 +5,7 @@
 
 using QtNodes::DataModelRegistry;
 using QtNodes::FlowScene;
+using QtNodes::Node;
 
 namespace noggit
 {
@@ -17,6 +18,9 @@ namespace noggit
                     QObject* parent = Q_NULLPTR) : FlowScene(std::move(registry), parent) {};
           void execute();
 
+      private:
+          Node* _begin_node = nullptr;
+          Node* _return_node = nullptr;
       };
     }
 }

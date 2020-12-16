@@ -10,7 +10,7 @@ using namespace noggit::Red::PresetEditor::Nodes;
 LogicForLoopNode::LogicForLoopNode()
 : LogicNodeBase()
 {
-  setName("ForLoopNode");
+  setName("LogicForLoopNode");
   setCaption("Repeat");
   _validation_state = NodeValidationState::Valid;
 

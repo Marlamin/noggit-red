@@ -2,6 +2,7 @@
 
 #include "BaseNode.inl"
 #include "Data/GenericData.hpp"
+#include "boost/format.hpp"
 
 using namespace noggit::Red::PresetEditor::Nodes;
 
@@ -42,7 +43,11 @@ void LogicBeginNode::compute()
       else
       {
         setValidationState(NodeValidationState::Error);
-        setValidationMessage("Error: argument does not have a default value and was not passed.");
+
+        auto message = boost::format("Error: Argument of type <%s> at port %d does not have a default value and was not passed.")
+            % _in_ports[i].data_type->type().name.toStdString() % i;
+
+        setValidationMessage(message.str().c_str());
         return;
       }
     }
@@ -115,8 +120,13 @@ void LogicBeginNode::outputConnectionCreated(const Connection& connection)
 
 void LogicBeginNode::outputConnectionDeleted(const Connection& connection)
 {
+
   PortIndex port_index = connection.getPortIndex(PortType::Out);
   _out_ports[port_index].connected = false;
+
+  if (!port_index) // no need to execute the following code for the first logic input
+    return;
+
   _out_ports[port_index].data_type = std::make_unique<AnyData>();
   _out_ports[port_index].caption = "Any";
 

@@ -17,11 +17,15 @@ LogicBranch::LogicBranch(Node* logic_node)
 
 void LogicBranch::execute()
 {
+  _return = false;
   executeNode(_logic_node, nullptr);
 }
 
 void LogicBranch::executeNode(Node* node, Node* source_node)
 {
+  if (_return)
+    return;
+
   auto model = static_cast<BaseNode*>(node->nodeDataModel());
   auto nodeState = node->nodeState();
 
@@ -71,7 +75,16 @@ void LogicBranch::executeNode(Node* node, Node* source_node)
         loop_model->setComputed(false);
       }
     }
+    else if (logic_node_model->name() == "LogicReturnNoDataNode")
+    {
+      _return = true;
+      return;
+    }
   }
+
+  // do not continue further if validation or execution has found a problem
+  if (model->validationState() == NodeValidationState::Error)
+    return;
 
   // Handle dependant nodes
   for (int i = 0; i < model->nPorts(PortType::Out); ++i)
@@ -104,7 +117,7 @@ void LogicBranch::executeNode(Node* node, Node* source_node)
         {
           setCurrentLoop(connected_node);
           int it_index = logic_model->getIterationindex();
-          while (it_index >= 0 && it_index < logic_model->getNIteraitons())
+          while (it_index >= 0 && it_index < logic_model->getNIteraitons() && !_return)
           {
             markNodesComputed(connected_node, false);
             executeNode(connected_node, node);

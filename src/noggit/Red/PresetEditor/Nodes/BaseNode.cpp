@@ -217,10 +217,16 @@ void BaseNode::deleteDefaultWidget(PortType port_type, PortIndex port_index)
 {
   if (port_type == PortType::Out)
   {
+    if (!_out_ports[port_index].default_widget)
+      return;
+
     _out_ports[port_index].default_widget = nullptr;
   }
   else if (port_type == PortType::In)
   {
+    if (!_in_ports[port_index].default_widget)
+      return;
+
     _in_ports[port_index].default_widget = nullptr;
   }
 

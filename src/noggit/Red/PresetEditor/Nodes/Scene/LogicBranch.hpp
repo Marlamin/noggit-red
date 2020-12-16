@@ -35,6 +35,7 @@ namespace noggit
         private:
             Node* _logic_node;
             std::stack<Node*> _loop_stack;
+            bool _return = false;
         };
 
     }
