@@ -69,6 +69,15 @@ QJsonObject LogicBeginNode::save() const
   auto json_obj = BaseNode::save();
   json_obj["n_dynamic_ports"] = static_cast<int>(_out_ports.size() - 2); // 1st 2 ports are presumed to be static
 
+  for (int i = 1; i < _out_ports.size(); ++i)
+  {
+    if (!_out_ports[i].connected || !_out_ports[i].default_widget)
+      continue;
+
+    auto port_name = "default_out_port_" + std::to_string(i);
+    _out_ports[i].data_type->to_json(_out_ports[i].default_widget, json_obj, port_name);
+  }
+
   return json_obj;
 }
 
@@ -83,6 +92,7 @@ void LogicBeginNode::restore(const QJsonObject& json_obj)
   }
 
   emit portAdded();
+
 }
 
 void LogicBeginNode::outputConnectionCreated(const Connection& connection)
@@ -156,4 +166,27 @@ void LogicBeginNode::outputConnectionDeleted(const Connection& connection)
   }
 
   emit visualsNeedUpdate();
+}
+
+void LogicBeginNode::restorePostConnection(const QJsonObject& json_obj)
+{
+  // restore default widget values
+  for (int i = 1; i < _out_ports.size(); ++i)
+  {
+    if (!_out_ports[i].default_widget)
+      continue;
+
+    auto port_name = "default_out_port_" + std::to_string(i);
+    _out_ports[i].data_type->from_json(_out_ports[i].default_widget, json_obj, port_name);
+
+  }
+
+  // remove unwanted ports if node is copied without connections
+  for (int i = static_cast<int>(_out_ports.size()) - 1; i != 1; --i)
+  {
+    if (_out_ports[i].connected)
+      break;
+
+    deletePort(PortType::Out, i);
+  }
 }

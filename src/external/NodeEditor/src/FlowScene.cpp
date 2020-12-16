@@ -564,9 +564,12 @@ void FlowScene::loadFromMemory(const QJsonObject& data)
 {
    QJsonArray nodesJsonArray = data["nodes"].toArray();
 
+   std::vector<Node*> nodes_restored;
+   nodes_restored.reserve(nodesJsonArray.count());
+
    for (QJsonValueRef node : nodesJsonArray)
    {
-      restoreNode(node.toObject());
+     nodes_restored.push_back(&restoreNode(node.toObject()));
    }
 
    QJsonArray connectionJsonArray = data["connections"].toArray();
@@ -575,6 +578,12 @@ void FlowScene::loadFromMemory(const QJsonObject& data)
    {
       restoreConnection(connection.toObject());
    }
+
+   for (int i = 0; i < nodesJsonArray.count(); ++i)
+   {
+     nodes_restored[i]->nodeDataModel()->restorePostConnection(nodesJsonArray[i].toObject()["model"].toObject());
+   }
+
 }
 
 QByteArray

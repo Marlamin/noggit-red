@@ -14,6 +14,8 @@
 #include <QDoubleSpinBox>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QJsonObject>
+#include <QJsonValue>
 
 using QtNodes::NodeDataType;
 using QtNodes::NodeData;
@@ -66,6 +68,30 @@ public:
       return std::make_shared<GenericData<Ty, type_id, type_name, C, D>>(value);
     }
 
+    void to_json(QWidget* widget, QJsonObject& json_obj, const std::string& name) override
+    {
+      auto value = D::value(widget);
+
+      if constexpr (!std::is_same<typeof(value), nullptr_t>::value)
+      {
+        if constexpr (std::is_same<typeof(value), std::string>::value)
+        {
+          json_obj[QString::fromStdString(name)] = value.c_str();
+        }
+        else
+        {
+          json_obj[QString::fromStdString(name)] = value;
+        }
+      }
+
+    };
+
+    void from_json(QWidget* widget, const QJsonObject& json_obj, const std::string& name) override
+    {
+      auto value = json_obj[name.c_str()];
+      D::setValue(widget, value);
+    };
+
 
 private:
     Ty _value;
@@ -90,6 +116,11 @@ struct DefaultIntWidget
     {
       return static_cast<QSpinBox*>(widget)->value();
     }
+
+    static void setValue(QWidget* widget, QJsonValue& value)
+    {
+      static_cast<QSpinBox*>(widget)->setValue(value.toInt());
+    }
 };
 
 struct DefaultDecimalWidget
@@ -104,6 +135,11 @@ struct DefaultDecimalWidget
     static double value(QWidget* widget)
     {
       return static_cast<QDoubleSpinBox*>(widget)->value();
+    }
+
+    static void setValue(QWidget* widget, QJsonValue& value)
+    {
+      static_cast<QDoubleSpinBox*>(widget)->setValue(value.toDouble());
     }
 };
 
@@ -120,6 +156,11 @@ struct DefaultBooleanWidget
     {
       return static_cast<QCheckBox*>(widget)->isChecked();
     }
+
+    static void setValue(QWidget* widget, QJsonValue& value)
+    {
+      static_cast<QCheckBox*>(widget)->setChecked(value.toBool());
+    }
 };
 
 struct DefaultStringWidget
@@ -129,6 +170,11 @@ struct DefaultStringWidget
     static std::string value(QWidget* widget)
     {
       return static_cast<QLineEdit*>(widget)->text().toStdString();
+    }
+
+    static void setValue(QWidget* widget, QJsonValue& value)
+    {
+      static_cast<QLineEdit*>(widget)->setText(value.toString());
     }
 };
 
@@ -140,6 +186,11 @@ struct NoDefaultWidget
     {
       return nullptr;
     }
+
+    static void setValue(QWidget* widget, QJsonValue& value)
+    {
+    }
+
 };
 
 

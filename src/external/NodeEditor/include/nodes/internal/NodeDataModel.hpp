@@ -126,6 +126,10 @@ public:
   virtual
   NodePainterDelegate* painterDelegate() const { return nullptr; }
 
+  virtual
+  void restorePostConnection(const QJsonObject& json_obj) {};
+
+
 public Q_SLOTS:
 
   virtual void
