@@ -184,9 +184,17 @@ void LogicBeginNode::restorePostConnection(const QJsonObject& json_obj)
   // remove unwanted ports if node is copied without connections
   for (int i = static_cast<int>(_out_ports.size()) - 1; i != 1; --i)
   {
-    if (_out_ports[i].connected)
+    if (!_out_ports[i].connected)
+    {
+      deletePort(PortType::Out, i);
+    }
+    else
+    {
+      addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
+      addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, _out_ports.size() - 1);
+      emit portAdded();
       break;
+    }
 
-    deletePort(PortType::Out, i);
   }
 }

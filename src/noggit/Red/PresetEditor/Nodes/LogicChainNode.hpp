@@ -26,6 +26,7 @@ namespace noggit
             void compute() override;
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
+            void restorePostConnection(const QJsonObject& json_obj) override;
             NodeValidationState validate() override;
 
         public Q_SLOTS:
