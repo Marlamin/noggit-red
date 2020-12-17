@@ -5,9 +5,13 @@
 #include <noggit/ui/font_awesome.hpp>
 
 #include <QFileDialog>
+#include <QTabWidget>
+#include <QMessageBox>
 
 using namespace noggit::Red::NodeEditor::Ui;
 using namespace noggit::Red::NodeEditor::Nodes;
+
+using QtNodes::FlowView;
 
 NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 : QMainWindow(parent, Qt::Window)
@@ -57,6 +61,47 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
           }
   );
 
+  connect(ui->nodeArea, &QTabWidget::tabCloseRequested
+    , [this](int index)
+    {
+        QWidget* tab_item = ui->nodeArea->widget(index);
+
+        auto scene = static_cast<FlowView*>(tab_item->layout()->itemAt(0)->widget())->getScene();
+
+        if (scene->getChanged())
+        {
+          QMessageBox prompt;
+          prompt.setIcon (QMessageBox::Warning);
+          prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
+          prompt.setText ("Close");
+          prompt.setInformativeText ("This page has unsaved changes.");
+          prompt.setDefaultButton ( prompt.addButton ("Save", QMessageBox::AcceptRole));
+          prompt.addButton ("Cancel", QMessageBox::RejectRole);
+          prompt.setWindowFlags (Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+
+          prompt.exec();
+
+          switch (prompt.buttonRole(prompt.clickedButton()))
+          {
+            case QMessageBox::AcceptRole:
+              scene->save();
+              break;
+            case QMessageBox::RejectRole:
+              break;
+            default:
+              break;
+          }
+        }
+
+        auto flow_view = static_cast<FlowView*>(tab_item->layout()->itemAt(0)->widget());
+        flow_view->deleteScene();
+        ui->nodeArea->removeTab(index);
+
+        delete flow_view;
+        delete tab_item;
+    }
+  );
+
   connect(ui->searchButton, &QPushButton::clicked
       , [this]()
       {
@@ -76,15 +121,16 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
       , [this]()
           {
             auto scene = new NodeScene(::registerDataModels());
-            auto node_view = new FlowView(scene);
-
             auto tab = new QWidget();
+
+            ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired), "New scene *");
+
+            auto node_view = new FlowView(scene, tab);
             auto layout = new QVBoxLayout(tab);
             layout->addWidget(node_view);
             layout->setContentsMargins(0, 0, 0, 0);
             layout->setSpacing(0);
 
-            ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired), "New scene *");
 
             connect(node_view, &FlowView::changed,
                     [=]
@@ -196,17 +242,17 @@ void NodeEditorWidget::loadScene(const QString& filepath)
   }
 
   auto scene = new NodeScene(::registerDataModels());
-  auto node_view = new FlowView(scene);
 
   auto tab = new QWidget();
+
+  scene->load(filepath);
+  ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired), scene->getSceneName());
+
+  auto node_view = new FlowView(scene, tab);
   auto layout = new QVBoxLayout(tab);
   layout->addWidget(node_view);
   layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
-
-  scene->load(filepath);
-
-  ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired), scene->getSceneName());
 
   connect(node_view, &FlowView::changed,
           [=]

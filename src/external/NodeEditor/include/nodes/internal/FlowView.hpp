@@ -29,6 +29,8 @@ public:
 
   FlowScene* getScene() { return _scene; };
 
+  void deleteScene();
+
 Q_SIGNALS:
     void changed();
 

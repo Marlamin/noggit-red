@@ -514,3 +514,12 @@ void FlowView::paste()
   _scene->setChanged(true);
   Q_EMIT changed();
 }
+
+void FlowView::deleteScene()
+{
+  if (!_scene)
+    return;
+
+  _scene->clearScene();
+  delete _scene;
+}
