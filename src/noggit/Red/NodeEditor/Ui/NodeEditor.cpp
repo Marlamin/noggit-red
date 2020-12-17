@@ -1,9 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "NodeEditor.hpp"
-#include "../NodeRegistry.hpp"
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/font_awesome.hpp>
+
+#include <QFileDialog>
 
 using namespace noggit::Red::NodeEditor::Ui;
 using namespace noggit::Red::NodeEditor::Nodes;
@@ -31,6 +32,7 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 
   _model->setNameFilters(filters);
   _model->setNameFilterDisables(false);
+  _model->setReadOnly(false);
 
   ui->scriptsTree->setModel(_model);
   ui->scriptsTree->setRootIndex(root_index);
@@ -42,6 +44,18 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 
   ui->nodeArea->setTabsClosable(true);
   ui->nodeArea->setMovable(true);
+
+  connect(ui->scriptsTree->selectionModel(), &QItemSelectionModel::selectionChanged
+      ,[=] (const QItemSelection& selected, const QItemSelection& deselected)
+          {
+              for (auto index : selected.indexes())
+              {
+                auto path = _model->filePath(index);
+                loadScene(path);
+                break;
+              }
+          }
+  );
 
   connect(ui->searchButton, &QPushButton::clicked
       , [this]()
@@ -91,30 +105,13 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
   connect(ui->loadButton, &QPushButton::clicked
       , [this]()
           {
-            auto scene = new NodeScene(::registerDataModels());
-            auto node_view = new FlowView(scene);
-            auto tab = new QWidget();
-            auto layout = new QVBoxLayout(tab);
-            layout->addWidget(node_view);
-            layout->setContentsMargins(0, 0, 0, 0);
-            layout->setSpacing(0);
 
-            scene->load();
+            auto path = QFileDialog::getOpenFileName(nullptr,
+                                                     tr("Open Noggit Script file"),
+                                                     "./scripts/",
+                                                     tr("Noggit Script files (*.ns)"));
 
-            ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired), scene->getSceneName());
-
-            connect(node_view, &FlowView::changed,
-                    [=]
-                    {
-                        int tab_idx = ui->nodeArea->currentIndex();
-                        auto text = ui->nodeArea->tabText(tab_idx);
-
-                        if (!text.endsWith(" *"))
-                        {
-                          ui->nodeArea->setTabText(tab_idx, text + " *");
-                        }
-
-                    });
+            loadScene(path);
           });
 
   ui->saveButton->setIcon(noggit::ui::font_awesome_icon(ui::font_awesome::icons::save));
@@ -150,15 +147,14 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 
               auto scene = static_cast<FlowView*>(tab->layout()->itemAt(0)->widget())->getScene();
               scene->save();
-              ui->nodeArea->setTabText(ui->nodeArea->currentIndex(), scene->getSceneName());
+              ui->nodeArea->setTabText(i, scene->getSceneName());
 
-              int tab_idx = ui->nodeArea->currentIndex();
-              auto text = ui->nodeArea->tabText(tab_idx);
+              auto text = ui->nodeArea->tabText(i);
 
               if (text.endsWith(" *"))
               {
                 text.chop(2);
-                ui->nodeArea->setTabText(tab_idx, text);
+                ui->nodeArea->setTabText(i, text);
               }
             }
 
@@ -181,4 +177,47 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 NodeEditorWidget::~NodeEditorWidget()
 {
 
+}
+
+void NodeEditorWidget::loadScene(const QString& filepath)
+{
+  for (int i = 0; i < ui->nodeArea->count(); ++i)
+  {
+    auto tab = ui->nodeArea->widget(i);
+
+    auto scene = static_cast<FlowView*>(tab->layout()->itemAt(0)->widget())->getScene();
+
+    if (QDir("./scripts/").relativeFilePath(filepath) == scene->getRelativePath())
+    {
+      ui->nodeArea->setCurrentIndex(i);
+      return;
+    }
+
+  }
+
+  auto scene = new NodeScene(::registerDataModels());
+  auto node_view = new FlowView(scene);
+
+  auto tab = new QWidget();
+  auto layout = new QVBoxLayout(tab);
+  layout->addWidget(node_view);
+  layout->setContentsMargins(0, 0, 0, 0);
+  layout->setSpacing(0);
+
+  scene->load(filepath);
+
+  ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired), scene->getSceneName());
+
+  connect(node_view, &FlowView::changed,
+          [=]
+          {
+              int tab_idx = ui->nodeArea->currentIndex();
+              auto text = ui->nodeArea->tabText(tab_idx);
+
+              if (!text.endsWith(" *"))
+              {
+                ui->nodeArea->setTabText(tab_idx, text + " *");
+              }
+
+          });
 }

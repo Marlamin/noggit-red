@@ -4,6 +4,7 @@
 #define NOGGIT_NODEEDITOR_HPP
 
 #include <ui_NodeEditor.h>
+#include "../NodeRegistry.hpp"
 
 #include <QWidget>
 #include <QMainWindow>
@@ -21,6 +22,8 @@ namespace noggit
         public:
             explicit NodeEditorWidget(QWidget* parent = nullptr);
             ~NodeEditorWidget() override;
+
+            void loadScene(QString const& filepath);
 
         private:
 

@@ -495,11 +495,20 @@ void
 FlowScene::
 save()
 {
-  QString fileName = !_relative_path.length() ?
-    QFileDialog::getSaveFileName(nullptr,
-                                 tr("Save Noggit Script file"),
-                                 "./scripts/",
-                                 tr("Noggit Script file (*.ns)")) : _relative_path;
+  bool use_relative = false;
+  QString fileName;
+  if (!_relative_path.length())
+  {
+    fileName =  QFileDialog::getSaveFileName(nullptr,
+                                             tr("Save Noggit Script file"),
+                                             "./scripts/",
+                                             tr("Noggit Script file (*.ns)"));
+  }
+  else
+  {
+    use_relative = true;
+    fileName = _relative_path;
+  }
 
   if (!fileName.isEmpty())
   {
@@ -513,7 +522,10 @@ save()
     }
     auto file_info = QFileInfo(file.fileName());
     _name = file_info.fileName();
-    _relative_path = QDir("/scripts/").relativeFilePath(file_info.absoluteFilePath());
+
+    if (!use_relative)
+      _relative_path = QDir("./scripts/").relativeFilePath(file_info.absoluteFilePath());
+
     _changed = false;
   }
 }
@@ -532,19 +544,26 @@ load()
   if (!QFileInfo::exists(fileName))
     return;
 
-  QFile file(fileName);
-
-  if (file.open(QIODevice::ReadOnly)){
-     clearScene();
-     loadFromMemory(file.readAll());
-
-     auto file_info = QFileInfo(file.fileName());
-     _name = file_info.fileName();
-     _relative_path = QDir("/scripts/").relativeFilePath(file_info.absoluteFilePath());
-     _changed = false;
-  }
+  load(fileName);
 }
 
+void FlowScene::load(QString const& filepath)
+{
+  if (!QFileInfo::exists(filepath))
+    return;
+
+  QFile file(filepath);
+
+  if (file.open(QIODevice::ReadOnly)){
+    clearScene();
+    loadFromMemory(file.readAll());
+
+    auto file_info = QFileInfo(file.fileName());
+    _name = file_info.fileName();
+    _relative_path = QDir("./scripts/").relativeFilePath(file_info.absoluteFilePath());
+    _changed = false;
+  }
+}
 
 QByteArray
 FlowScene::
