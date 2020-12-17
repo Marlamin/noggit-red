@@ -38,6 +38,7 @@
 #include <noggit/Red/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/Red/PresetEditor/Ui/PresetEditor.hpp>
+#include <noggit/Red/NodeEditor/Ui/NodeEditor.hpp>
 #include <external/QtAdvancedDockingSystem/src/DockManager.h>
 #include <external/imguipiemenu/PieMenu.hpp>
 
@@ -223,6 +224,11 @@ void MapView::createGUI()
   auto preset_editor = new noggit::Red::PresetEditor::Ui::PresetEditorWidget(this);
   preset_editor_dock->setWidget(preset_editor);
   _main_window->getDockManager()->addDockWidgetTabToArea(preset_editor_dock, dock_area_bottom);
+
+  ads::CDockWidget* node_editor_dock = new ads::CDockWidget("Node Editor");
+  auto node_editor = new noggit::Red::NodeEditor::Ui::NodeEditorWidget(this);
+  node_editor_dock->setWidget(node_editor);
+  _main_window->getDockManager()->addDockWidgetTabToArea(node_editor_dock, dock_area_bottom);
 
   auto overlay = new QWidget(this);
   _viewport_overlay_ui = new ::Ui::MapViewOverlay();

@@ -4,7 +4,7 @@
 #include "Data/GenericData.hpp"
 #include <noggit/Log.h>
 
-using namespace noggit::Red::PresetEditor::Nodes;
+using namespace noggit::Red::NodeEditor::Nodes;
 
 PrintNode::PrintNode()
 : LogicNodeBase()

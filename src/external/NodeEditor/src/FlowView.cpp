@@ -95,6 +95,8 @@ FlowView::setScene(FlowScene *scene)
   _deleteSelectionAction->setShortcut(Qt::Key_Delete);
   connect(_deleteSelectionAction, &QAction::triggered, this, &FlowView::deleteSelectedNodes);
   addAction(_deleteSelectionAction);
+
+  connect(_scene, &FlowScene::changed, [=]{ Q_EMIT changed(); });
 }
 
 
@@ -316,6 +318,9 @@ deleteSelectedNodes()
     if (auto n = qgraphicsitem_cast<NodeGraphicsObject*>(item))
       _scene->removeNode(n->node());
   }
+
+  _scene->setChanged(true);
+  Q_EMIT changed();
 }
 
 
@@ -348,6 +353,9 @@ keyPressEvent(QKeyEvent *event)
   }
 
   QGraphicsView::keyPressEvent(event);
+
+  _scene->setChanged(true);
+  Q_EMIT changed();
 }
 
 
@@ -365,6 +373,9 @@ keyReleaseEvent(QKeyEvent *event)
       break;
   }
   QGraphicsView::keyReleaseEvent(event);
+
+  _scene->setChanged(true);
+  Q_EMIT changed();
 }
 
 
@@ -377,6 +388,9 @@ mousePressEvent(QMouseEvent *event)
   {
     _clickPos = mapToScene(event->pos());
   }
+
+  _scene->setChanged(true);
+  Q_EMIT changed();
 }
 
 
@@ -480,6 +494,9 @@ void FlowView::copy()
    mimeData->setText(data);
 
    clipboard->setMimeData(mimeData);
+
+   _scene->setChanged(true);
+   Q_EMIT changed();
 }
 
 void FlowView::paste()
@@ -493,4 +510,7 @@ void FlowView::paste()
    } else if (mimeData->hasText()) {
       scene()->pasteNodes(mimeData->text().toUtf8(), mousePos);
    }
+
+  _scene->setChanged(true);
+  Q_EMIT changed();
 }

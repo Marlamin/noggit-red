@@ -5,7 +5,7 @@
 #include "BaseNode.inl"
 #include "Data/GenericData.hpp"
 
-using namespace noggit::Red::PresetEditor::Nodes;
+using namespace noggit::Red::NodeEditor::Nodes;
 
 LogicBreakNode::LogicBreakNode()
 : LogicNodeBase()

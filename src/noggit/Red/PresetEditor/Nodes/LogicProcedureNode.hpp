@@ -1,13 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef NOGGIT_LOGICRETURNNODE_HPP
-#define NOGGIT_LOGICRETURNNODE_HPP
+#ifndef NOGGIT_LOGICPROCEDURENODE_HPP
+#define NOGGIT_LOGICPROCEDURENODE_HPP
 
 #include "LogicNodeBase.hpp"
-#include <external/NodeEditor/include/nodes/Node>
 
 using QtNodes::PortType;
-using QtNodes::Node;
 using QtNodes::PortIndex;
 using QtNodes::NodeData;
 using QtNodes::NodeDataType;
@@ -19,20 +17,16 @@ namespace noggit
 {
     namespace Red::NodeEditor::Nodes
     {
-        class LogicReturnNode : public LogicNodeBase
+        class LogicProcedureNode : public LogicNodeBase
         {
         Q_OBJECT
 
         public:
-            LogicReturnNode();
+            LogicProcedureNode();
             void compute() override;
             NodeValidationState validate() override;
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
-
-        public Q_SLOTS:
-            void inputConnectionCreated(Connection const& connection) override;
-            void inputConnectionDeleted(Connection const& connection) override;
 
         private:
 
@@ -42,4 +36,4 @@ namespace noggit
 
 }
 
-#endif //NOGGIT_LOGICRETURNNODE_HPP
+#endif //NOGGIT_LOGICPROCEDURENODE_HPP

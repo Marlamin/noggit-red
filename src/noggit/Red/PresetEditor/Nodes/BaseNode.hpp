@@ -32,7 +32,7 @@ using ConnectionPolicy = QtNodes::NodeDataModel::ConnectionPolicy;
 
 namespace noggit
 {
-    namespace Red::PresetEditor::Nodes
+    namespace Red::NodeEditor::Nodes
     {
         struct InNodePort
         {

@@ -5,7 +5,7 @@
 #include <external/NodeEditor/include/nodes/Node>
 #include <noggit/Log.h>
 
-using namespace noggit::Red::PresetEditor::Nodes;
+using namespace noggit::Red::NodeEditor::Nodes;
 
 
 void NodeScene::execute()

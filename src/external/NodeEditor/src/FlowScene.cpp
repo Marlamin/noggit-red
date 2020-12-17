@@ -14,6 +14,9 @@
 #include <QtCore/QJsonArray>
 #include <QtCore/QtGlobal>
 #include <QtCore/QDebug>
+#include <QFileInfo>
+#include <QString>
+#include <QDir>
 
 #include "Node.hpp"
 #include "NodeGraphicsObject.hpp"
@@ -92,6 +95,8 @@ createConnection(PortType connectedPort,
             connectionCreated(c);
           });
 
+  _changed = true;
+  Q_EMIT changed();
   return connection;
 }
 
@@ -126,6 +131,8 @@ createConnection(Node& nodeIn,
 
   connectionCreated(*connection);
 
+  _changed = true;
+  Q_EMIT changed();
   return connection;
 }
 
@@ -175,6 +182,8 @@ restoreConnection(QJsonObject const &connectionJson)
   // Note: the connectionCreated(...) signal has already been sent
   // by createConnection(...)
 
+  _changed = true;
+  Q_EMIT changed();
   return connection;
 }
 
@@ -187,6 +196,8 @@ deleteConnection(Connection& connection)
   if (it != _connections.end()) {
     connection.removeFromNodes();
     _connections.erase(it);
+    _changed = true;
+  Q_EMIT changed();
   }
 }
 
@@ -205,6 +216,8 @@ createNode(std::unique_ptr<NodeDataModel> && dataModel)
 
   nodeCreated(*nodePtr);
   return *nodePtr;
+  _changed = true;
+  Q_EMIT changed();
 }
 
 
@@ -232,6 +245,8 @@ restoreNode(QJsonObject const& nodeJson)
   nodePlaced(*nodePtr);
   nodeCreated(*nodePtr);
   return *nodePtr;
+  _changed = true;
+  Q_EMIT changed();
 }
 
 
@@ -255,6 +270,8 @@ removeNode(Node& node)
   }
 
   _nodes.erase(node.id());
+  _changed = true;
+  Q_EMIT changed();
 }
 
 
@@ -468,29 +485,36 @@ clearScene()
   {
     removeNode( *_nodes.begin()->second );
   }
+  
+  _changed = true;
+  Q_EMIT changed();
 }
 
 
 void
 FlowScene::
-save() const
+save()
 {
-  QString fileName =
+  QString fileName = !_relative_path.length() ?
     QFileDialog::getSaveFileName(nullptr,
-                                 tr("Open Flow Scene"),
-                                 QDir::homePath(),
-                                 tr("Flow Scene Files (*.flow)"));
+                                 tr("Save Noggit Script file"),
+                                 "./scripts/",
+                                 tr("Noggit Script file (*.ns)")) : _relative_path;
 
   if (!fileName.isEmpty())
   {
-    if (!fileName.endsWith("flow", Qt::CaseInsensitive))
-      fileName += ".flow";
+    if (!fileName.endsWith("ns", Qt::CaseInsensitive))
+      fileName += ".ns";
 
     QFile file(fileName);
     if (file.open(QIODevice::WriteOnly))
     {
       file.write(saveToMemory());
     }
+    auto file_info = QFileInfo(file.fileName());
+    _name = file_info.fileName();
+    _relative_path = QDir("/scripts/").relativeFilePath(file_info.absoluteFilePath());
+    _changed = false;
   }
 }
 
@@ -501,9 +525,9 @@ load()
 {
   QString fileName =
     QFileDialog::getOpenFileName(nullptr,
-                                 tr("Open Flow Scene"),
-                                 QDir::homePath(),
-                                 tr("Flow Scene Files (*.flow)"));
+                                 tr("Open Noggit Script file"),
+                                 "./scripts/",
+                                 tr("Noggit Script files (*.ns)"));
 
   if (!QFileInfo::exists(fileName))
     return;
@@ -513,6 +537,11 @@ load()
   if (file.open(QIODevice::ReadOnly)){
      clearScene();
      loadFromMemory(file.readAll());
+
+     auto file_info = QFileInfo(file.fileName());
+     _name = file_info.fileName();
+     _relative_path = QDir("/scripts/").relativeFilePath(file_info.absoluteFilePath());
+     _changed = false;
   }
 }
 

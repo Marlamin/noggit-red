@@ -7,7 +7,7 @@
 
 #include <vector>
 
-using namespace noggit::Red::PresetEditor::Nodes;
+using namespace noggit::Red::NodeEditor::Nodes;
 
 LogicChainNode::LogicChainNode()
 : LogicNodeBase()

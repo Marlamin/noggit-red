@@ -14,7 +14,7 @@ using QtNodes::NodeValidationState;
 
 namespace noggit
 {
-    namespace Red::PresetEditor::Nodes
+    namespace Red::NodeEditor::Nodes
     {
         class PrintNode : public LogicNodeBase
         {

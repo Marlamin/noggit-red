@@ -3,7 +3,7 @@
 #include "Data/GenericData.hpp"
 #include <cmath>
 
-using namespace noggit::Red::PresetEditor::Nodes;
+using namespace noggit::Red::NodeEditor::Nodes;
 
 MathNode::MathNode()
 : BaseNode()

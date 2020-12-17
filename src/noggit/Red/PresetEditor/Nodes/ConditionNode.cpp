@@ -5,7 +5,7 @@
 #include <cmath>
 #include <limits>
 
-using namespace noggit::Red::PresetEditor::Nodes;
+using namespace noggit::Red::NodeEditor::Nodes;
 
 ConditionNode::ConditionNode()
 : BaseNode()

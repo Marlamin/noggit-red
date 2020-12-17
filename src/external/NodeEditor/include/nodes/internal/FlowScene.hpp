@@ -79,6 +79,9 @@ public:
 
   QSizeF getNodeSize(Node const& node) const;
 
+  QString const& getSceneName() { return _name; };
+  QString const& getRelativePath() { return _relative_path; };
+
 public:
 
   std::unordered_map<QUuid, std::unique_ptr<Node> > const & nodes() const;
@@ -94,7 +97,7 @@ public:
   void clearScene();
 
   /// Open a FileDialog to save the scene in a .flow file
-  void save() const;
+  void save();
 
   /// Load a FileDialog to open a scene from a .flow file
   void load();
@@ -113,6 +116,9 @@ public:
 
   //! Paste selected nodes to the scene replacing uuids with new ones with a certain offset from the original position.
   void pasteNodes(const QByteArray& data, const QPointF& pointOffset = QPointF(0,0));
+
+  void setChanged(bool state) { _changed = state; };
+  bool getChanged() { return _changed; };
 
 Q_SIGNALS:
 
@@ -148,6 +154,8 @@ Q_SIGNALS:
 
   void nodeContextMenu(Node& n, const QPointF& pos);
 
+  void changed();
+
 protected:
   using SharedConnection = std::shared_ptr<Connection>;
   using UniqueNode       = std::unique_ptr<Node>;
@@ -155,6 +163,10 @@ protected:
   std::unordered_map<QUuid, SharedConnection> _connections;
   std::unordered_map<QUuid, UniqueNode>       _nodes;
   std::shared_ptr<DataModelRegistry>          _registry;
+
+  QString _name;
+  QString _relative_path;
+  bool _changed;
 
 private Q_SLOTS:
 

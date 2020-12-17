@@ -4,7 +4,7 @@
 
 #include <QHBoxLayout>
 
-using namespace noggit::Red::PresetEditor::Nodes;
+using namespace noggit::Red::NodeEditor::Nodes;
 
 InNodePort::InNodePort(QString const& caption_, bool caption_visible_)
 : caption(caption_)

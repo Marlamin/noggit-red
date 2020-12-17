@@ -17,7 +17,7 @@ using QtNodes::Connection;
 
 namespace noggit
 {
-    namespace Red::PresetEditor::Nodes
+    namespace Red::NodeEditor::Nodes
     {
         class LogicBranch
         {

@@ -4,7 +4,7 @@
 #include "BaseNode.hpp"
 
 template<typename T>
-void noggit::Red::PresetEditor::Nodes::BaseNode::addPort(PortType port_type,
+void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
                                                          const QString &caption,
                                                          bool caption_visible,
                                                          ConnectionPolicy out_policy)

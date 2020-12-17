@@ -27,6 +27,11 @@ public:
 
   void setScene(FlowScene *scene);
 
+  FlowScene* getScene() { return _scene; };
+
+Q_SIGNALS:
+    void changed();
+
 public Q_SLOTS:
 
   void scaleUp();

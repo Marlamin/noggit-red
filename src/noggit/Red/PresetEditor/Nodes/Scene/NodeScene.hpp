@@ -9,7 +9,7 @@ using QtNodes::Node;
 
 namespace noggit
 {
-    namespace Red::PresetEditor::Nodes
+    namespace Red::NodeEditor::Nodes
     {
       class NodeScene : public FlowScene
       {
