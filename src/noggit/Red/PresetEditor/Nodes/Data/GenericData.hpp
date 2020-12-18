@@ -1,8 +1,12 @@
 #ifndef NOGGIT_GENERICDATA_HPP
 #define NOGGIT_GENERICDATA_HPP
 
+#include "../Widgets/ProcedureSelector.hpp"
+
 #include <external/NodeEditor/include/nodes/NodeDataModel>
 #include <external/glm/glm.hpp>
+
+#include <noggit/ui/font_awesome.hpp>
 
 #include <type_traits>
 #include <QString>
@@ -16,10 +20,13 @@
 #include <QCheckBox>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QHBoxLayout>
+#include <QPushButton>
 
 using QtNodes::NodeDataType;
 using QtNodes::NodeData;
 
+using namespace noggit::Red::NodeEditor::Nodes;
 
 template<typename Ty, const char* type_id, const char* type_name, typename C, typename D>
 class GenericData : public NodeData
@@ -178,6 +185,25 @@ struct DefaultStringWidget
     }
 };
 
+struct DefaultProcedureWidget
+{
+    static QWidget* generate(QWidget* parent)
+    {
+      return new ProcedureSelector(parent);
+    }
+
+    static std::string value(QWidget* widget)
+    {
+      return static_cast<QPushButton*>(widget->layout()->itemAt(0)->widget())->text().toStdString();
+    }
+
+    static void setValue(QWidget* widget, QJsonValue& value)
+    {
+      static_cast<QPushButton*>(widget->layout()->itemAt(0)->widget())->setText(value.toString());
+    }
+};
+
+
 struct NoDefaultWidget
 {
     static QWidget* generate(QWidget* parent) { return new QLabel("", parent); }
@@ -215,6 +241,7 @@ DECLARE_NODE_DATA_TYPE(mat3, Matrix3x3, glm::mat3, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat, NoDefaultWidget)
 
 DECLARE_NODE_DATA_TYPE(any, Any, std::nullptr_t, NoDefaultWidget);
+DECLARE_NODE_DATA_TYPE(procedure, Procedure, std::string, DefaultProcedureWidget);
 
 
 

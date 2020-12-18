@@ -17,6 +17,10 @@ namespace noggit
           NodeScene(std::shared_ptr<DataModelRegistry> registry,
                     QObject* parent = Q_NULLPTR) : FlowScene(std::move(registry), parent) {};
           void execute();
+          bool validate();
+
+          Node* getBeginNode() {return _begin_node; };
+          Node* getReturnNode() {return _return_node; };
 
       private:
           Node* _begin_node = nullptr;

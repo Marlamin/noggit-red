@@ -10,6 +10,15 @@ using namespace noggit::Red::NodeEditor::Nodes;
 
 void NodeScene::execute()
 {
+  if (!validate())
+    return;
+
+  auto main_branch = LogicBranch(_begin_node);
+  main_branch.execute();
+}
+
+bool NodeScene::validate()
+{
   _begin_node = nullptr;
   _return_node = nullptr;
 
@@ -24,8 +33,8 @@ void NodeScene::execute()
       {
         if (_begin_node)
         {
-          LogError << "Found more than one begin node in executed script. Aborting execution." << std::endl;
-          return;
+          LogError << "Error: Found more than one begin node in the script." << std::endl;
+          return false;
         }
 
         _begin_node = pair.second.get();
@@ -35,8 +44,8 @@ void NodeScene::execute()
       {
         if (_return_node)
         {
-          LogError << "Found more than one data return node in executed script. Aborting execution." << std::endl;
-          return;
+          LogError << "Error: Found more than one data return node in the script." << std::endl;
+          return false;
         }
 
         _return_node = pair.second.get();
@@ -48,10 +57,9 @@ void NodeScene::execute()
 
   if (!_begin_node)
   {
-    LogError << "No entry point found in the executed script. Aborting execution." << std::endl;
-    return;
+    LogError << "Error: No entry point found in the script." << std::endl;
+    return false;
   }
 
-  auto main_branch = LogicBranch(_begin_node);
-  main_branch.execute();
+  return true;
 }

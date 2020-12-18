@@ -21,6 +21,7 @@
 #include <noggit/Red/PresetEditor/Nodes/LogicForLoopNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicWhileLoopNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/LogicChainNode.hpp>
+#include <noggit/Red/PresetEditor/Nodes/LogicProcedureNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/PresetEditor/Nodes/Data/GenericTypeConverter.hpp>
 #include <noggit/Red/PresetEditor/Nodes/Scene/NodeScene.hpp>
@@ -57,6 +58,7 @@ namespace noggit
           ret->registerModel<LogicChainNode>("Logic//Flow");
           ret->registerModel<LogicReturnNode>("Logic//Flow");
           ret->registerModel<LogicReturnNoDataNode>("Logic//Flow");
+          ret->registerModel<LogicProcedureNode>("Logic//Flow");
           ret->registerModel<PrintNode>("Functions//Generic");
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);

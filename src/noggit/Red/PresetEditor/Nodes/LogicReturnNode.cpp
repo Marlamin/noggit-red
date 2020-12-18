@@ -48,7 +48,6 @@ void LogicReturnNode::restore(const QJsonObject& json_obj)
   for (int i = 0; i < json_obj["n_dynamic_ports"].toInt(); ++i)
   {
     addPort<AnyData>(PortType::In, "Any", true);
-    addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, 2 + i);
   }
 
   emit portAdded();

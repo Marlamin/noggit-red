@@ -10,7 +10,7 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicWhileLoopNode::LogicWhileLoopNode()
 : LogicNodeBase()
 {
-  setName("WhileLoopNode");
+  setName("LogicWhileLoopNode");
   setCaption("Repeat While");
   _validation_state = NodeValidationState::Valid;
 

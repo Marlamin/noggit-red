@@ -491,7 +491,7 @@ clearScene()
 }
 
 
-void
+bool
 FlowScene::
 save()
 {
@@ -507,7 +507,7 @@ save()
   else
   {
     use_relative = true;
-    fileName = _relative_path;
+    fileName = QDir("./scripts/").absoluteFilePath(_relative_path);
   }
 
   if (!fileName.isEmpty())
@@ -527,11 +527,15 @@ save()
       _relative_path = QDir("./scripts/").relativeFilePath(file_info.absoluteFilePath());
 
     _changed = false;
+
+    return true;
   }
+
+  return false;
 }
 
 
-void
+bool
 FlowScene::
 load()
 {
@@ -542,15 +546,15 @@ load()
                                  tr("Noggit Script files (*.ns)"));
 
   if (!QFileInfo::exists(fileName))
-    return;
+    return false;
 
-  load(fileName);
+  return load(fileName);
 }
 
-void FlowScene::load(QString const& filepath)
+bool FlowScene::load(QString const& filepath)
 {
   if (!QFileInfo::exists(filepath))
-    return;
+    return false;
 
   QFile file(filepath);
 
@@ -562,7 +566,10 @@ void FlowScene::load(QString const& filepath)
     _name = file_info.fileName();
     _relative_path = QDir("./scripts/").relativeFilePath(file_info.absoluteFilePath());
     _changed = false;
+    return true;
   }
+
+  return false;
 }
 
 QByteArray

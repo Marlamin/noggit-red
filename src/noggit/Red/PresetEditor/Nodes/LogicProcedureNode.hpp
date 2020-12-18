@@ -4,6 +4,9 @@
 #define NOGGIT_LOGICPROCEDURENODE_HPP
 
 #include "LogicNodeBase.hpp"
+#include "Scene/NodeScene.hpp"
+
+#include <vector>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -30,6 +33,11 @@ namespace noggit
 
         private:
 
+          void clearDynamicPorts();
+
+          QWidget* _procedure_default;
+          NodeScene* _scene;
+          QString _scene_path;
         };
 
     }

@@ -75,8 +75,6 @@ NodeValidationState LogicIfNode::validate()
     Q_EMIT dataUpdated(0);
     Q_EMIT dataUpdated(1);
 
-    setLogicBranchToExecute(-1);
-
     return _validation_state;
   }
 
@@ -87,7 +85,6 @@ NodeValidationState LogicIfNode::validate()
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Missing boolean input.");
-    setLogicBranchToExecute(-1);
     return _validation_state;
   }
 

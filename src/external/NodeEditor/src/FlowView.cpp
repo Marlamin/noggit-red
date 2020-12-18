@@ -11,6 +11,7 @@
 
 #include <QtOpenGL>
 #include <QtWidgets>
+#include <QApplication>
 
 #include <QDebug>
 #include <iostream>
