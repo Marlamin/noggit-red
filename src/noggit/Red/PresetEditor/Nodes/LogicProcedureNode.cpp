@@ -170,6 +170,7 @@ void LogicProcedureNode::compute()
                        % _out_ports[i].data_type->type().name.toStdString() % i;
 
         setValidationMessage(message.str().c_str());
+        delete _scene;
         return;
 
         sig_index_ret++;
@@ -182,6 +183,8 @@ void LogicProcedureNode::compute()
 
     _out_ports[0].out_value = std::make_shared<LogicData>(true);
     Q_EMIT dataUpdated(0);
+
+    delete _scene;
 
   }
 
