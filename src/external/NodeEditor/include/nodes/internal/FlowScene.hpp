@@ -82,6 +82,9 @@ public:
   QString const& getSceneName() { return _name; };
   QString const& getRelativePath() { return _relative_path; };
 
+  void setSceneName(QString const& name) { _name = name; };
+  void setRelativePath(QString const& path) { _relative_path = path; };
+
 public:
 
   std::unordered_map<QUuid, std::unique_ptr<Node> > const & nodes() const;

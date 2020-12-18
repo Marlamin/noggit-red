@@ -61,6 +61,28 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
           }
   );
 
+  connect(_model, &QFileSystemModel::fileRenamed
+  , [this] (const QString& path, const QString& old_name, const QString& new_name)
+  {
+    auto relative_path_old = QDir("./scripts/").relativeFilePath(QDir(path).filePath(old_name));
+    auto relative_path_new = QDir("./scripts/").relativeFilePath(QDir(path).filePath(new_name));
+
+    for (int i = 0; i < ui->nodeArea->count(); ++i)
+    {
+      auto tab = ui->nodeArea->widget(i);
+
+      auto scene = static_cast<FlowView*>(tab->layout()->itemAt(0)->widget())->getScene();
+
+      if (scene->getRelativePath() == relative_path_old)
+      {
+        scene->setRelativePath(relative_path_new);
+        scene->setSceneName(new_name);
+        ui->nodeArea->setTabText(i, scene->getChanged() ? new_name + " *" : new_name);
+      }
+    }
+
+  });
+
   connect(ui->nodeArea, &QTabWidget::tabCloseRequested
     , [this](int index)
     {
@@ -145,6 +167,18 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 
                       });
 
+          });
+
+  ui->clearButton->setIcon(noggit::ui::font_awesome_icon(ui::font_awesome::icons::eraser));
+  connect(ui->clearButton, &QPushButton::clicked
+      , [this]()
+          {
+              auto tab = ui->nodeArea->currentWidget();
+              if (!tab)
+                return;
+
+              auto scene = static_cast<FlowView*>(tab->layout()->itemAt(0)->widget())->getScene();
+              static_cast<NodeScene*>(scene)->clearScene();
           });
 
   ui->loadButton->setIcon(noggit::ui::font_awesome_icon(ui::font_awesome::icons::folderopen));
