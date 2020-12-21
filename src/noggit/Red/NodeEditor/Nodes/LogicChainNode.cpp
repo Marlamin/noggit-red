@@ -3,7 +3,7 @@
 #include "LogicChainNode.hpp"
 
 #include "BaseNode.inl"
-#include "Data/GenericData.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Data/GenericData.hpp"
 
 #include <vector>
 

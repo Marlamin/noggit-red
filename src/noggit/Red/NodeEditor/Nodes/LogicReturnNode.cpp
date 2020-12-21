@@ -3,7 +3,7 @@
 #include "LogicReturnNode.hpp"
 
 #include "BaseNode.inl"
-#include "Data/GenericData.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Data/GenericData.hpp"
 #include <boost/format.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;

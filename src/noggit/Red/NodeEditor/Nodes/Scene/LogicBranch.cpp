@@ -1,9 +1,9 @@
 #include "LogicBranch.hpp"
-#include "../BaseNode.hpp"
-#include "../LogicNodeBase.hpp"
-#include "../LogicBreakNode.hpp"
-#include "../LogicContinueNode.hpp"
-#include "../Data/GenericData.hpp"
+#include "noggit/Red/NodeEditor/Nodes/BaseNode.hpp"
+#include "noggit/Red/NodeEditor/Nodes/LogicNodeBase.hpp"
+#include "noggit/Red/NodeEditor/Nodes/LogicBreakNode.hpp"
+#include "noggit/Red/NodeEditor/Nodes/LogicContinueNode.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Data/GenericData.hpp"
 
 #include <stdexcept>
 

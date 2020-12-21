@@ -1,7 +1,7 @@
 #ifndef NOGGIT_GENERICDATA_HPP
 #define NOGGIT_GENERICDATA_HPP
 
-#include "../Widgets/ProcedureSelector.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Widgets/ProcedureSelector.hpp"
 
 #include <external/NodeEditor/include/nodes/NodeDataModel>
 #include <external/glm/glm.hpp>

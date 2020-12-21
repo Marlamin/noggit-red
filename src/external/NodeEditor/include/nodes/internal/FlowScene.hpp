@@ -37,6 +37,8 @@ public:
 
   FlowScene(QObject * parent = Q_NULLPTR);
 
+  //FlowScene(const FlowScene& flow_scene, QObject * parent = Q_NULLPTR);
+
   ~FlowScene() override;
 
 public:

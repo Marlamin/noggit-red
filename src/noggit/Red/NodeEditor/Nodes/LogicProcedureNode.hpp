@@ -4,7 +4,7 @@
 #define NOGGIT_LOGICPROCEDURENODE_HPP
 
 #include "LogicNodeBase.hpp"
-#include "Scene/NodeScene.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Scene/NodeScene.hpp"
 
 #include <vector>
 

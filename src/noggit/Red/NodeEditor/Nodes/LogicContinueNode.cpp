@@ -1,28 +1,30 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "LogicReturnNoDataNode.hpp"
+#include "LogicContinueNode.hpp"
 
 #include "BaseNode.inl"
-#include "Data/GenericData.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Data/GenericData.hpp"
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
-LogicReturnNoDataNode::LogicReturnNoDataNode()
+LogicContinueNode::LogicContinueNode()
 : LogicNodeBase()
 {
-  setName("LogicReturnNoDataNode");
-  setCaption("Return");
+  setName("LogicContinueNode");
+  setCaption("Continue");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
 }
 
-void LogicReturnNoDataNode::compute()
+void LogicContinueNode::compute()
 {
+  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
 
+  setDoContinue(logic->value());
 }
 
-NodeValidationState LogicReturnNoDataNode::validate()
+NodeValidationState LogicContinueNode::validate()
 {
   setValidationState(NodeValidationState::Valid);
   auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
@@ -35,7 +37,5 @@ NodeValidationState LogicReturnNoDataNode::validate()
 
   return _validation_state;
 }
-
-
 
 

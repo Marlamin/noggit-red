@@ -1,7 +1,7 @@
 #include "PrintNode.hpp"
 
 #include "BaseNode.inl"
-#include "Data/GenericData.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Data/GenericData.hpp"
 #include <noggit/Log.h>
 
 using namespace noggit::Red::NodeEditor::Nodes;

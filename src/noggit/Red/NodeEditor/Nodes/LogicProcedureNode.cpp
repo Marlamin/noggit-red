@@ -5,8 +5,8 @@
 #include "BaseNode.inl"
 #include "LogicBeginNode.hpp"
 #include "LogicReturnNode.hpp"
-#include "Data/GenericData.hpp"
-#include "Widgets/ProcedureSelector.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Data/GenericData.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Widgets/ProcedureSelector.hpp"
 
 #include <noggit/Red/NodeEditor/NodeRegistry.hpp>
 #include <boost/format.hpp>
@@ -193,14 +193,14 @@ void LogicProcedureNode::compute()
 
 QJsonObject LogicProcedureNode::save() const
 {
-  QJsonObject json_obj;
+  QJsonObject json_obj = BaseNode::save();
 
   return json_obj;
 }
 
 void LogicProcedureNode::restore(const QJsonObject& json_obj)
 {
-
+  BaseNode::restore(json_obj);
 }
 
 NodeValidationState LogicProcedureNode::validate()

@@ -1,6 +1,6 @@
 #include "NodeScene.hpp"
 #include "LogicBranch.hpp"
-#include "../BaseNode.hpp"
+#include "noggit/Red/NodeEditor/Nodes/BaseNode.hpp"
 
 #include <external/NodeEditor/include/nodes/Node>
 #include <noggit/Log.h>
