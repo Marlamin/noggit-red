@@ -30,6 +30,7 @@ namespace noggit
             NodeValidationState validate() override;
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
+            void setProcedure(QString const& path);
 
         private:
 

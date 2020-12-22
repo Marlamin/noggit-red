@@ -106,3 +106,14 @@ ProcedureSelector::ProcedureSelector(QWidget *parent)
                          model->setNameFilters(filters_search);
                      });
 }
+
+QString ProcedureSelector::getPath()
+{
+  return static_cast<QPushButton*>(layout()->itemAt(0)->widget())->text();
+}
+
+void ProcedureSelector::setPath(QString const& path)
+{
+  static_cast<QPushButton*>(layout()->itemAt(0)->widget())->setText(path);
+}
+

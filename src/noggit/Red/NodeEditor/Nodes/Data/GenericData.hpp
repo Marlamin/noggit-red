@@ -13,6 +13,7 @@
 #include <functional>
 #include <limits>
 #include <cstdint>
+#include <array>
 
 #include <QSpinBox>
 #include <QDoubleSpinBox>
@@ -72,7 +73,11 @@ public:
         data_ptr.reset();
         return data_ptr;
       }
-      return std::make_shared<GenericData<Ty, type_id, type_name, C, D>>(value);
+      else
+      {
+        return std::make_shared<GenericData<Ty, type_id, type_name, C, D>>(value);
+      }
+
     }
 
     void to_json(QWidget* widget, QJsonObject& json_obj, const std::string& name) override
@@ -219,14 +224,38 @@ struct NoDefaultWidget
 
 };
 
+struct TypeFactory
+{
+    static NodeData* create(const std::string& id)
+    {
+      const Creators_t::const_iterator iter = static_creators().find(id);
+      return iter == static_creators().end() ? 0 : (*iter->second)();
+    }
+
+private:
+    typedef NodeData* Creator_t();
+    typedef std::map<std::string, Creator_t*> Creators_t;
+    static Creators_t& static_creators() { static Creators_t s_creators; return s_creators; }
+
+    template<typename T> struct Register
+    {
+        static NodeData* create() { return new T(); };
+        static Creator_t* init_creator(const std::string& id) { return static_creators()[id] = create; }
+        static Creator_t* creator;
+    };
+};
 
 #define DECLARE_NODE_DATA_TYPE(TYPE_ID, TYPE_NAME, UNDERLYING_TYPE, DEFAULT_WIDGET_GEN)   \
   constexpr char  TYPE_ID##_typeid[] = #TYPE_ID;                                          \
   constexpr char  TYPE_ID##_typename[] = #TYPE_NAME;                                      \
   using TYPE_NAME##Data = GenericData<UNDERLYING_TYPE,                                    \
-  TYPE_ID##_typeid, TYPE_ID##_typename, toQStringGeneric<UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>;
+  TYPE_ID##_typeid, TYPE_ID##_typename, toQStringGeneric<UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>; \
+  template<> TypeFactory::Creator_t* TypeFactory::Register<GenericData<UNDERLYING_TYPE,                                    \
+  TYPE_ID##_typeid, TYPE_ID##_typename, toQStringGeneric<UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>>::creator = TypeFactory::Register<GenericData<UNDERLYING_TYPE,                                    \
+  TYPE_ID##_typeid, TYPE_ID##_typename, toQStringGeneric<UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>>::init_creator(#TYPE_ID);
 
 DECLARE_NODE_DATA_TYPE(int, Integer, int, DefaultIntWidget)
+
 DECLARE_NODE_DATA_TYPE(double, Decimal, double, DefaultDecimalWidget)
 DECLARE_NODE_DATA_TYPE(bool, Boolean, bool, DefaultBooleanWidget)
 DECLARE_NODE_DATA_TYPE(string, String, std::string, DefaultStringWidget)
@@ -238,11 +267,10 @@ DECLARE_NODE_DATA_TYPE(vec3, Vector3D, glm::vec3, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(vec4, Vector4D, glm::vec4, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(mat4, Matrix4x4, glm::mat4, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(mat3, Matrix3x3, glm::mat3, NoDefaultWidget)
-DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat, NoDefaultWidget)
+//DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat, NoDefaultWidget)
 
 DECLARE_NODE_DATA_TYPE(any, Any, std::nullptr_t, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(procedure, Procedure, std::string, DefaultProcedureWidget);
-
 
 
 #endif //NOGGIT_GENERICDATA_HPP

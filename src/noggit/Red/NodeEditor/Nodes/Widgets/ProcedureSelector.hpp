@@ -15,6 +15,8 @@ namespace noggit
 
         public:
             explicit ProcedureSelector(QWidget* parent = nullptr);
+            QString getPath();
+            void setPath(QString const& path);
 
         signals:
               void entry_updated(QString const& entry);
