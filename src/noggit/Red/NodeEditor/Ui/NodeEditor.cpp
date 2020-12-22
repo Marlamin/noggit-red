@@ -95,10 +95,10 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
           QMessageBox prompt;
           prompt.setIcon (QMessageBox::Warning);
           prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
-          prompt.setText ("Close");
-          prompt.setInformativeText ("This page has unsaved changes.");
+          prompt.setText ("Exit");
+          prompt.setInformativeText ("This page has unsaved changes. Exit without saving?");
           prompt.setDefaultButton ( prompt.addButton ("Save", QMessageBox::AcceptRole));
-          prompt.addButton ("Cancel", QMessageBox::RejectRole);
+          prompt.addButton ("Exit", QMessageBox::RejectRole);
           prompt.setWindowFlags (Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 
           prompt.exec();
