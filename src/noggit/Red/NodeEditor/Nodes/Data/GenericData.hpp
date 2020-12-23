@@ -5,6 +5,7 @@
 
 #include <external/NodeEditor/include/nodes/NodeDataModel>
 #include <external/glm/glm.hpp>
+#include <external/glm/gtc/quaternion.hpp>
 
 #include <noggit/ui/font_awesome.hpp>
 
@@ -250,9 +251,8 @@ private:
   constexpr char  TYPE_ID##_typename[] = #TYPE_NAME;                                      \
   using TYPE_NAME##Data = GenericData<UNDERLYING_TYPE,                                    \
   TYPE_ID##_typeid, TYPE_ID##_typename, toQStringGeneric<UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>; \
-  template<> TypeFactory::Creator_t* TypeFactory::Register<GenericData<UNDERLYING_TYPE,                                    \
-  TYPE_ID##_typeid, TYPE_ID##_typename, toQStringGeneric<UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>>::creator = TypeFactory::Register<GenericData<UNDERLYING_TYPE,                                    \
-  TYPE_ID##_typeid, TYPE_ID##_typename, toQStringGeneric<UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>>::init_creator(#TYPE_ID);
+                                                                                          \
+  template<> TypeFactory::Creator_t* TypeFactory::Register<TYPE_NAME##Data>::creator = TypeFactory::Register<TYPE_NAME##Data>::init_creator(#TYPE_ID);
 
 DECLARE_NODE_DATA_TYPE(int, Integer, int, DefaultIntWidget)
 
@@ -267,7 +267,7 @@ DECLARE_NODE_DATA_TYPE(vec3, Vector3D, glm::vec3, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(vec4, Vector4D, glm::vec4, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(mat4, Matrix4x4, glm::mat4, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(mat3, Matrix3x3, glm::mat3, NoDefaultWidget)
-//DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat, NoDefaultWidget)
+DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat, NoDefaultWidget)
 
 DECLARE_NODE_DATA_TYPE(any, Any, std::nullptr_t, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(procedure, Procedure, std::string, DefaultProcedureWidget);

@@ -572,9 +572,7 @@ bool FlowScene::load(QString const& filepath)
   return false;
 }
 
-QByteArray
-FlowScene::
-saveToMemory(QJsonDocument::JsonFormat format) const
+QJsonDocument FlowScene::saveToJson(QJsonDocument::JsonFormat format) const
 {
   QJsonObject sceneJson;
 
@@ -604,6 +602,15 @@ saveToMemory(QJsonDocument::JsonFormat format) const
 
   QJsonDocument document(sceneJson);
 
+  return std::move(document);
+}
+
+
+QByteArray
+FlowScene::
+saveToMemory(QJsonDocument::JsonFormat format) const
+{
+  QJsonDocument document = saveToJson(format);
   return document.toJson(format);
 }
 

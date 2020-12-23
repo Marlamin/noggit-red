@@ -47,9 +47,9 @@ void LogicProcedureNode::compute()
   if (!logic->value())
     return;
 
-  _scene = new NodeScene(::registerDataModels(), this);
+  _scene = gCurrentContext->getScene(QDir("./scripts/").absoluteFilePath(_scene_path), this);
 
-  if (!_scene->load(QDir("./scripts/").absoluteFilePath(_scene_path)))
+  if (!_scene)
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Scene loading failed.");
@@ -69,6 +69,8 @@ void LogicProcedureNode::compute()
     setValidationMessage("Error: No entry point found. (Begin node missing)");
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
     Q_EMIT dataUpdated(0);
+    delete _scene;
+    _scene = nullptr;
     return;
   }
 
@@ -116,6 +118,7 @@ void LogicProcedureNode::compute()
 
         setValidationMessage(message.str().c_str());
         delete _scene;
+        _scene = nullptr;
 
         _out_ports[0].out_value = std::make_shared<LogicData>(false);
         Q_EMIT dataUpdated(0);
@@ -130,6 +133,7 @@ void LogicProcedureNode::compute()
     }
 
     delete _scene;
+    _scene = nullptr;
 
   }
 
@@ -233,9 +237,9 @@ void LogicProcedureNode::setProcedure(const QString& path)
   clearDynamicPorts();
   setValidationState(NodeValidationState::Valid);
 
-  _scene = new NodeScene(::registerDataModels(), this);
+  _scene = gCurrentContext->getScene(QDir("./scripts/").absoluteFilePath(_scene_path), this);
 
-  if (!_scene->load(QDir("./scripts/").absoluteFilePath(path)))
+  if (_scene)
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Scene loading failed.");
@@ -251,6 +255,7 @@ void LogicProcedureNode::setProcedure(const QString& path)
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: No entry point found. (Begin node missing)");
+    delete _scene;
     return;
   }
 

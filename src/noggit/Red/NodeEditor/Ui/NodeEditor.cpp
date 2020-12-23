@@ -3,10 +3,13 @@
 #include "NodeEditor.hpp"
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/font_awesome.hpp>
+#include <noggit/Log.h>
 
 #include <QFileDialog>
 #include <QTabWidget>
 #include <QMessageBox>
+#include <QTime>
+#include <QElapsedTimer>
 
 using namespace noggit::Red::NodeEditor::Ui;
 using namespace noggit::Red::NodeEditor::Nodes;
@@ -249,7 +252,13 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
               return;
 
             auto scene = static_cast<FlowView*>(tab->layout()->itemAt(0)->widget())->getScene();
+
+            QElapsedTimer time = QElapsedTimer();
+            time.start();
+
             static_cast<NodeScene*>(scene)->execute();
+
+            LogDebug << "Time elapsed: " << QTime::fromMSecsSinceStartOfDay(time.elapsed()).toString(Qt::ISODateWithMs).toStdString() << std::endl;
 
           });
 }
