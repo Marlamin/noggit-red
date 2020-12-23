@@ -79,6 +79,12 @@ void LogicChainNode::outputConnectionDeleted(const Connection& connection)
     }
   }
 
+  if (_out_ports.size() == 1 && _out_ports[0].connected)
+  {
+    addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
+    emit portAdded();
+  }
+
 }
 
 
@@ -113,8 +119,7 @@ void LogicChainNode::restorePostConnection(const QJsonObject& json_obj)
     }
     else
     {
-      addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
-      addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, _out_ports.size() - 1);
+      addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
       emit portAdded();
       break;
     }
