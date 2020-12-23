@@ -57,7 +57,7 @@ void LogicChainNode::outputConnectionCreated(const Connection& connection)
   if (_out_ports[_out_ports.size() - 1].connected)
   {
     addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
-    emit portAdded();
+    emit portAdded(PortType::Out, _out_ports.size() - 1);
   }
 }
 
@@ -74,7 +74,7 @@ void LogicChainNode::outputConnectionDeleted(const Connection& connection)
     else
     {
       addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
-      emit portAdded();
+      emit portAdded(PortType::Out, _out_ports.size() - 1);
       break;
     }
   }
@@ -82,7 +82,7 @@ void LogicChainNode::outputConnectionDeleted(const Connection& connection)
   if (_out_ports.size() == 1 && _out_ports[0].connected)
   {
     addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
-    emit portAdded();
+    emit portAdded(PortType::Out, _out_ports.size() - 1);
   }
 
 }
@@ -103,9 +103,10 @@ void LogicChainNode::restore(const QJsonObject& json_obj)
   for (int i = 0; i < json_obj["n_dynamic_ports"].toInt(); ++i)
   {
     addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
+    emit portAdded(PortType::Out, _out_ports.size() - 1);
   }
 
-  emit portAdded();
+
 }
 
 void LogicChainNode::restorePostConnection(const QJsonObject& json_obj)
@@ -120,7 +121,7 @@ void LogicChainNode::restorePostConnection(const QJsonObject& json_obj)
     else
     {
       addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
-      emit portAdded();
+      emit portAdded(PortType::Out, _out_ports.size() - 1);
       break;
     }
   }

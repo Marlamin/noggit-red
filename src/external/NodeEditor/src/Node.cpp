@@ -220,17 +220,21 @@ onDataUpdated(PortIndex index)
 
 void
 Node::
-onPortAdded()
+onPortAdded(PortType port_type, PortIndex port_index)
 {
-  // port In
-  const unsigned int nNewIn = _nodeDataModel->nPorts(PortType::In);
-  _nodeGeometry._nSources = nNewIn;
-  _nodeState._inConnections.resize( nNewIn );
 
-  // port Out
-  const unsigned int nNewOut = _nodeDataModel->nPorts(PortType::Out);
-  _nodeGeometry._nSinks = nNewOut;
-  _nodeState._outConnections.resize( nNewOut );
+  if (port_type == PortType::In)
+  {
+    const unsigned int nNewIn = _nodeDataModel->nPorts(PortType::In);
+    _nodeGeometry._nSources = nNewIn;
+    _nodeState._inConnections.resize(nNewIn);
+  }
+  else if (port_type == PortType::Out)
+  {
+    const unsigned int nNewOut = _nodeDataModel->nPorts(PortType::Out);
+    _nodeGeometry._nSinks = nNewOut;
+    _nodeState._outConnections.resize( nNewOut );
+  }
 
   //Recalculate the nodes visuals. A data change can result in the node taking more space than before, so this forces a recalculate+repaint on the affected node
   auto widget = _nodeDataModel->embeddedWidget();
@@ -238,29 +242,61 @@ onPortAdded()
   if (widget)
     widget->adjustSize();
 
-  _nodeGraphicsObject->setGeometryChanged();
-  _nodeGeometry.recalculateSize();
-  _nodeGraphicsObject->update();
-
   recalculateVisuals();
 }
 
 
 void
 Node::
-onPortRemoved()
+onPortRemoved(PortType port_type, PortIndex port_index)
 {
-  // port In
-  const unsigned int nNewIn = _nodeDataModel->nPorts(PortType::In);
-  _nodeGeometry._nSources = nNewIn;
-  _nodeState._inConnections.resize( nNewIn );
-  // \todo Remove the lost connections.
 
-  // port Out
-  const unsigned int nNewOut = _nodeDataModel->nPorts(PortType::Out);
-  _nodeGeometry._nSinks = nNewOut;
-  _nodeState._outConnections.resize( nNewOut );
-  // \todo Remove the lost connections.
+  if (port_type == PortType::In)
+  {
+    auto& in_connections = _nodeState._inConnections[port_index];
+
+    std::vector<Connection*> connections_to_remove;
+    connections_to_remove.reserve(in_connections.size());
+
+    for (auto& it : in_connections)
+    {
+      connections_to_remove.push_back(it.second);
+    }
+
+    for (auto connection : connections_to_remove)
+    {
+      Q_EMIT requestConnectionRemove(*connection);
+    }
+
+    _nodeGeometry._nSources = _nodeDataModel->nPorts(PortType::In);
+
+    if (in_connections.empty())
+      _nodeState._inConnections.erase(_nodeState._inConnections.begin() + port_index);
+  }
+  else if (port_type == PortType::Out)
+  {
+
+    auto& out_connections = _nodeState._outConnections[port_index];
+
+    std::vector<Connection*> connections_to_remove;
+    connections_to_remove.reserve(out_connections.size());
+
+    for (auto& it : out_connections)
+    {
+      connections_to_remove.push_back(it.second);
+    }
+
+    for (auto connection : connections_to_remove)
+    {
+      Q_EMIT requestConnectionRemove(*connection);
+    }
+
+    const unsigned int nNewOut = _nodeDataModel->nPorts(PortType::Out);
+    _nodeGeometry._nSinks = nNewOut;
+
+    if (out_connections.empty())
+      _nodeState._outConnections.erase(_nodeState._outConnections.begin() + port_index);
+  }
 
   auto widget = _nodeDataModel->embeddedWidget();
 

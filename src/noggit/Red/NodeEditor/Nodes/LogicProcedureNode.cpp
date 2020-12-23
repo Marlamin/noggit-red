@@ -178,14 +178,14 @@ void LogicProcedureNode::restore(const QJsonObject& json_obj)
   {
     addPort<LogicData>(PortType::In, json_obj[("in_port_" + std::to_string(i + 2) + "_caption").c_str()].toString(), true);
     _in_ports[_in_ports.size() - 1].data_type = TypeFactory::create(json_obj[("in_port_" + std::to_string(i + 2)).c_str()].toString().toStdString())->instantiate();
-    emit portAdded();
+    emit portAdded(PortType::In, _in_ports.size() - 1);
   }
 
   for (int i = 0; i < json_obj["n_dynamic_out_ports"].toInt(); ++i)
   {
     addPort<LogicData>(PortType::Out, json_obj[("out_port_" + std::to_string(i + 1) + "_caption").c_str()].toString(), true);
     _out_ports[_out_ports.size() - 1].data_type = TypeFactory::create(json_obj[("out_port_" + std::to_string(i + 1)).c_str()].toString().toStdString())->instantiate();
-    emit portAdded();
+    emit portAdded(PortType::Out, _out_ports.size() - 1);
   }
 
 }
@@ -239,7 +239,7 @@ void LogicProcedureNode::setProcedure(const QString& path)
 
   _scene = gCurrentContext->getScene(QDir("./scripts/").absoluteFilePath(_scene_path), this);
 
-  if (_scene)
+  if (!_scene)
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Scene loading failed.");
@@ -269,7 +269,7 @@ void LogicProcedureNode::setProcedure(const QString& path)
 
     addPort<LogicData>(PortType::In, port.caption, true);
     _in_ports[_in_ports.size() - 1].data_type = port.data_type->instantiate();
-    emit portAdded();
+    emit portAdded(PortType::In, _in_ports.size() - 1);
   }
 
   auto return_node = _scene->getReturnNode();
@@ -286,7 +286,7 @@ void LogicProcedureNode::setProcedure(const QString& path)
 
       addPort<LogicData>(PortType::Out, port.caption, true);
       _out_ports[_out_ports.size() - 1].data_type = port.data_type->instantiate();
-      emit portAdded();
+      emit portAdded(PortType::Out, _out_ports.size() - 1);
     }
   }
 

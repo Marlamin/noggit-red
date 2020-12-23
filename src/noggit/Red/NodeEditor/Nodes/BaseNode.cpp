@@ -210,7 +210,7 @@ void BaseNode::deletePort(PortType port_type, PortIndex port_index)
   {
     _in_ports.erase(_in_ports.begin() + port_index);
   }
-  emit portRemoved();
+  emit portRemoved(port_type, port_index);
 }
 
 void BaseNode::deleteDefaultWidget(PortType port_type, PortIndex port_index)

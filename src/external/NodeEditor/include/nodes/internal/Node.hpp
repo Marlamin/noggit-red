@@ -85,6 +85,10 @@ public:
   NodeDataModel*
   nodeDataModel() const;
 
+Q_SIGNALS:
+  void
+  requestConnectionRemove(Connection& connection);
+
 public Q_SLOTS: // data propagation
 
   /// Propagates incoming data to the underlying model.
@@ -100,11 +104,11 @@ public Q_SLOTS: // data propagation
   /// update the graphic part if the size of the embeddedwidget changes
   /// Port added to the end.
   void
-  onPortAdded();
+  onPortAdded(PortType port_type, PortIndex port_index);
 
   /// Port removed from the end.
   void
-  onPortRemoved();
+  onPortRemoved(PortType port_type, PortIndex port_index);
 
 protected:
 

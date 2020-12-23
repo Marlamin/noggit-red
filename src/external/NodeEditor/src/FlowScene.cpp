@@ -207,6 +207,9 @@ FlowScene::
 createNode(std::unique_ptr<NodeDataModel> && dataModel)
 {
   auto node = detail::make_unique<Node>(std::move(dataModel));
+
+  connect(node.get(), &Node::requestConnectionRemove, this, &FlowScene::deleteConnection);
+
   auto ngo  = detail::make_unique<NodeGraphicsObject>(*this, *node);
 
   node->setGraphicsObject(std::move(ngo));
@@ -234,6 +237,9 @@ restoreNode(QJsonObject const& nodeJson)
                            modelName.toLocal8Bit().data());
 
   auto node = detail::make_unique<Node>(std::move(dataModel));
+
+  connect(node.get(), &Node::requestConnectionRemove, this, &FlowScene::deleteConnection);
+
   auto ngo  = detail::make_unique<NodeGraphicsObject>(*this, *node);
   node->setGraphicsObject(std::move(ngo));
 

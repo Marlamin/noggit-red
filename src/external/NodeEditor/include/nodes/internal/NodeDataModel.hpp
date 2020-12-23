@@ -167,10 +167,10 @@ Q_SIGNALS:
   computingFinished();
 
   void
-  portAdded();
+  portAdded(PortType port_type, PortIndex port_index);
 
   void
-  portRemoved();
+  portRemoved(PortType port_type, PortIndex port_index);
 
   void
   visualsNeedUpdate();
