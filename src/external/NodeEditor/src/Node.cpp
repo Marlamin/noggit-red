@@ -315,6 +315,6 @@ recalculateVisuals() const
   //Recalculate the nodes visuals. A data change can result in the node taking more space than before, so this forces a recalculate+repaint on the affected node
   _nodeGraphicsObject->setGeometryChanged();
   _nodeGeometry.recalculateSize();
-  _nodeGraphicsObject->update();
+  _nodeGraphicsObject->update(_nodeGeometry.boundingRect());
   _nodeGraphicsObject->moveConnections();
 }

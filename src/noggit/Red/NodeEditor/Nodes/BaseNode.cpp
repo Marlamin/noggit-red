@@ -167,7 +167,11 @@ QWidget* BaseNode::portDefaultValueWidget(PortType port_type, PortIndex port_ind
 
 void BaseNode::inputConnectionDeleted(const Connection& connection)
 {
-  auto default_widget = _in_ports[connection.getPortIndex(PortType::In)].default_widget;
+  auto& port = _in_ports[connection.getPortIndex(PortType::In)];
+
+  port.connected = false;
+
+  auto default_widget = port.default_widget;
 
   if (default_widget)
     default_widget->setVisible(true);
@@ -175,11 +179,28 @@ void BaseNode::inputConnectionDeleted(const Connection& connection)
 
 void BaseNode::inputConnectionCreated(const Connection& connection)
 {
-  auto default_widget = _in_ports[connection.getPortIndex(PortType::In)].default_widget;
+  auto& port = _in_ports[connection.getPortIndex(PortType::In)];
+
+  port.connected = true;
+
+  auto default_widget = port.default_widget;
 
   if (default_widget)
     default_widget->setVisible(false);
 }
+
+void BaseNode::outputConnectionCreated(const Connection& connection)
+{
+  auto& port = _out_ports[connection.getPortIndex(PortType::Out)];
+  port.connected = true;
+}
+
+void BaseNode::outputConnectionDeleted(const Connection& connection)
+{
+  auto& port = _out_ports[connection.getPortIndex(PortType::Out)];
+  port.connected = false;
+}
+
 
 QJsonObject BaseNode::save() const
 {

@@ -23,14 +23,14 @@ namespace noggit
         {
         public:
             explicit LogicBranch(Node* logic_node);
-            void executeNode(Node* node, Node* source_node);
-            void executeNodeLeaves(Node* node, Node* source_node);
+            bool executeNode(Node* node, Node* source_node);
+            bool executeNodeLeaves(Node* node, Node* source_node);
             void markNodesComputed(Node* start_node, bool state);
             void markNodeLeavesComputed(Node* start_node, Node* source_node, bool state);
             void setCurrentLoop(Node* node) { _loop_stack.push(node); };
             void unsetCurrentLoop() { _loop_stack.pop(); };
             Node* getCurrentLoop() { return _loop_stack.empty() ? nullptr : _loop_stack.top(); };
-            void execute();
+            bool execute();
 
         private:
             Node* _logic_node;

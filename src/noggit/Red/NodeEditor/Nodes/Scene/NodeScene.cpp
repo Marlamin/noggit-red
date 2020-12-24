@@ -8,13 +8,13 @@
 using namespace noggit::Red::NodeEditor::Nodes;
 
 
-void NodeScene::execute()
+bool NodeScene::execute()
 {
   if (!validate())
-    return;
+    return false;
 
   auto main_branch = LogicBranch(_begin_node);
-  main_branch.execute();
+  return main_branch.execute();
 }
 
 bool NodeScene::validate()

@@ -15,22 +15,22 @@ LogicBranch::LogicBranch(Node* logic_node)
 }
 
 
-void LogicBranch::execute()
+bool LogicBranch::execute()
 {
   _return = false;
-  executeNode(_logic_node, nullptr);
+  return executeNode(_logic_node, nullptr);
 }
 
-void LogicBranch::executeNode(Node* node, Node* source_node)
+bool LogicBranch::executeNode(Node* node, Node* source_node)
 {
   if (_return)
-    return;
+    return true;
 
   auto model = static_cast<BaseNode*>(node->nodeDataModel());
   auto nodeState = node->nodeState();
 
   if (model->isComputed())
-    return;
+    return true;
 
   model->compute();
   model->setComputed(true);
@@ -75,16 +75,16 @@ void LogicBranch::executeNode(Node* node, Node* source_node)
         loop_model->setComputed(false);
       }
     }
-    else if (logic_node_model->name() == "LogicReturnNoDataNode")
+    else if (logic_node_model->name() == "LogicReturnNoDataNode" || logic_node_model->name() == "LogicReturnNode")
     {
       _return = true;
-      return;
+      return true;
     }
   }
 
   // do not continue further if validation or execution has found a problem
   if (model->validationState() == NodeValidationState::Error)
-    return;
+    return false;
 
   // Handle dependant nodes
   for (int i = 0; i < model->nPorts(PortType::Out); ++i)
@@ -108,7 +108,14 @@ void LogicBranch::executeNode(Node* node, Node* source_node)
 
       auto connected_model = static_cast<BaseNode*>(connected_node->nodeDataModel());
 
-      executeNodeLeaves(connected_node, node); // Execute data node leaves
+      // Execute data node leaves
+      if (!executeNodeLeaves(connected_node, node))
+      {
+        connected_model->setValidationState(NodeValidationState::Error);
+        connected_model->setValidationMessage("Error: dependant leave nodes failed to execute.");
+        return false;
+      }
+
       if (connected_model->validate() != NodeValidationState::Error)
       {
         auto logic_model = static_cast<LogicNodeBase*>(connected_node->nodeDataModel());
@@ -120,7 +127,10 @@ void LogicBranch::executeNode(Node* node, Node* source_node)
           while (it_index >= 0 && it_index < logic_model->getNIteraitons() && !_return)
           {
             markNodesComputed(connected_node, false);
-            executeNode(connected_node, node);
+
+            if (!executeNode(connected_node, node))
+              return false;
+
             logic_model->setComputed(true);
             it_index = logic_model->getIterationindex();
           }
@@ -129,21 +139,24 @@ void LogicBranch::executeNode(Node* node, Node* source_node)
         }
         else // haandle regular nodes
         {
-          executeNode(connected_node, node);
+          if (!executeNode(connected_node, node))
+            return false;
         }
 
       }
     }
   }
+
+  return true;
 }
 
-void LogicBranch::executeNodeLeaves(Node* node, Node* source_node)
+bool LogicBranch::executeNodeLeaves(Node* node, Node* source_node)
 {
   auto model = static_cast<BaseNode*>(node->nodeDataModel());
   auto nodeState = node->nodeState();
 
   if (model->isComputed())
-    return;
+    return true;
 
   for (int i = 0; i < model->nPorts(PortType::In); ++i)
   {
@@ -168,10 +181,20 @@ void LogicBranch::executeNodeLeaves(Node* node, Node* source_node)
         continue;
       }
 
-      executeNodeLeaves(connected_node, node);
+      if (!executeNodeLeaves(connected_node, node))
+        return false;
+
+      if (connected_model->validate() == NodeValidationState::Error)
+        return false;
+
       connected_model->compute();
+
+      if (connected_model->validationState() == NodeValidationState::Error)
+        return false;
     }
   }
+
+  return true;
 }
 
 void LogicBranch::markNodesComputed(Node* start_node, bool state)
@@ -194,7 +217,6 @@ void LogicBranch::markNodesComputed(Node* start_node, bool state)
 
       markNodeLeavesComputed(connected_node, start_node, state);
       markNodesComputed(connected_node, state);
-
 
     }
 

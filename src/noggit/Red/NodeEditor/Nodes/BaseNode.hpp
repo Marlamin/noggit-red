@@ -114,6 +114,8 @@ namespace noggit
 
             void inputConnectionCreated(Connection const& connection) override;
             void inputConnectionDeleted(Connection const& connection) override;
+            void outputConnectionCreated(Connection const& connection) override;
+            void outputConnectionDeleted(Connection const& connection) override;
 
         protected:
 
@@ -128,6 +130,13 @@ namespace noggit
 
             template<typename T>
             void addPort(PortType port_type,
+                         QString const& caption,
+                         bool caption_visible,
+                         ConnectionPolicy out_policy = ConnectionPolicy::Many);
+
+            template<typename T>
+            void addPort(PortType port_type,
+                         PortIndex port_index,
                          QString const& caption,
                          bool caption_visible,
                          ConnectionPolicy out_policy = ConnectionPolicy::Many);

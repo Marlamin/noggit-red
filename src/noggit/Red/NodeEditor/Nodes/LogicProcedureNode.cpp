@@ -90,7 +90,14 @@ void LogicProcedureNode::compute()
     sig_index++;
   }
 
-  _scene->execute();
+  if (!_scene->execute())
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: Some error occured while executing procedure.");
+    delete _scene;
+    _scene = nullptr;
+    return;
+  }
 
   auto return_node = _scene->getReturnNode();
 
@@ -177,14 +184,22 @@ void LogicProcedureNode::restore(const QJsonObject& json_obj)
   for (int i = 0; i < json_obj["n_dynamic_in_ports"].toInt(); ++i)
   {
     addPort<LogicData>(PortType::In, json_obj[("in_port_" + std::to_string(i + 2) + "_caption").c_str()].toString(), true);
-    _in_ports[_in_ports.size() - 1].data_type = TypeFactory::create(json_obj[("in_port_" + std::to_string(i + 2)).c_str()].toString().toStdString())->instantiate();
+
+    std::unique_ptr<NodeData> type;
+    type.reset(TypeFactory::create(json_obj[("in_port_" + std::to_string(i + 2)).c_str()].toString().toStdString()));
+
+    _in_ports[_in_ports.size() - 1].data_type = std::move(type);
     emit portAdded(PortType::In, _in_ports.size() - 1);
   }
 
   for (int i = 0; i < json_obj["n_dynamic_out_ports"].toInt(); ++i)
   {
     addPort<LogicData>(PortType::Out, json_obj[("out_port_" + std::to_string(i + 1) + "_caption").c_str()].toString(), true);
-    _out_ports[_out_ports.size() - 1].data_type = TypeFactory::create(json_obj[("out_port_" + std::to_string(i + 1)).c_str()].toString().toStdString())->instantiate();
+
+    std::unique_ptr<NodeData> type;
+    type.reset(TypeFactory::create(json_obj[("out_port_" + std::to_string(i + 1)).c_str()].toString().toStdString()));
+
+    _out_ports[_out_ports.size() - 1].data_type = std::move(type);
     emit portAdded(PortType::Out, _out_ports.size() - 1);
   }
 

@@ -255,6 +255,7 @@ private:
   template<> TypeFactory::Creator_t* TypeFactory::Register<TYPE_NAME##Data>::creator = TypeFactory::Register<TYPE_NAME##Data>::init_creator(#TYPE_ID);
 
 DECLARE_NODE_DATA_TYPE(int, Integer, int, DefaultIntWidget)
+DECLARE_NODE_DATA_TYPE(uint, UnsignedInteger, unsigned int, DefaultIntWidget)
 
 DECLARE_NODE_DATA_TYPE(double, Decimal, double, DefaultDecimalWidget)
 DECLARE_NODE_DATA_TYPE(bool, Boolean, bool, DefaultBooleanWidget)
@@ -270,6 +271,7 @@ DECLARE_NODE_DATA_TYPE(mat3, Matrix3x3, glm::mat3, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat, NoDefaultWidget)
 
 DECLARE_NODE_DATA_TYPE(any, Any, std::nullptr_t, NoDefaultWidget);
+DECLARE_NODE_DATA_TYPE(undefined, Undefined, std::nullptr_t, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(procedure, Procedure, std::string, DefaultProcedureWidget);
 
 
