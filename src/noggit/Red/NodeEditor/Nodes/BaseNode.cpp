@@ -282,3 +282,4 @@ void BaseNode::addWidgetBottom(QWidget* widget)
 
 
 
+

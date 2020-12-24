@@ -141,6 +141,13 @@ namespace noggit
                          bool caption_visible,
                          ConnectionPolicy out_policy = ConnectionPolicy::Many);
 
+            template <typename T>
+            void addPortDynamic(PortType port_type,
+                         PortIndex port_index,
+                         QString const& caption,
+                         bool caption_visible,
+                         ConnectionPolicy out_policy = ConnectionPolicy::Many);
+
             void deletePort(PortType port_type, PortIndex port_index);
             void deleteDefaultWidget(PortType port_type, PortIndex port_index);
 

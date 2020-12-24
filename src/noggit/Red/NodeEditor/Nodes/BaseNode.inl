@@ -50,4 +50,13 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
   }
 }
 
+template<typename T>
+void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDynamic(PortType port_type, PortIndex port_index,
+                                                              const QString& caption, bool caption_visible,
+                                                              ConnectionPolicy out_policy)
+{
+  addPort<T>(port_type, port_index, caption, caption_visible, out_policy);
+  Q_EMIT portAdded(port_type, port_index);
+}
+
 #endif // NOGGIT_BASENODE_INL

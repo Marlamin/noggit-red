@@ -22,6 +22,7 @@
 #include <noggit/Red/NodeEditor/Nodes/LogicWhileLoopNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicChainNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicProcedureNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/DataConstantNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/GenericTypeConverter.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Scene/NodeScene.hpp>
@@ -48,6 +49,7 @@ namespace noggit
           auto ret = std::make_shared<DataModelRegistry>();
 
           ret->registerModel<MathNode>("Math");
+          ret->registerModel<DataConstantNode>("Data");
           ret->registerModel<ConditionNode>("Logic");
           ret->registerModel<LogicBeginNode>("Logic//Flow");
           ret->registerModel<LogicIfNode>("Logic//Flow");
