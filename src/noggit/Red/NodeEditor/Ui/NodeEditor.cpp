@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <QTime>
 #include <QElapsedTimer>
+#include <QModelIndex>
 
 using namespace noggit::Red::NodeEditor::Ui;
 using namespace noggit::Red::NodeEditor::Nodes;
@@ -52,16 +53,12 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
   ui->nodeArea->setTabsClosable(true);
   ui->nodeArea->setMovable(true);
 
-  connect(ui->scriptsTree->selectionModel(), &QItemSelectionModel::selectionChanged
-      ,[=] (const QItemSelection& selected, const QItemSelection& deselected)
-          {
-              for (auto index : selected.indexes())
-              {
-                auto path = _model->filePath(index);
-                loadScene(path);
-                break;
-              }
-          }
+  connect(ui->scriptsTree, &QTreeView::clicked
+      ,[=] (const QModelIndex& index)
+        {
+          auto path = _model->filePath(index);
+          loadScene(path);
+        }
   );
 
   connect(_model, &QFileSystemModel::fileRenamed
@@ -148,7 +145,10 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
             auto scene = new NodeScene(::registerDataModels());
             auto tab = new QWidget();
 
-            ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired), "New scene *");
+
+            ui->nodeArea->setCurrentIndex(
+                ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired)
+                                          , "New scene *"));
 
             auto node_view = new FlowView(scene, tab);
             auto layout = new QVBoxLayout(tab);
@@ -289,7 +289,9 @@ void NodeEditorWidget::loadScene(const QString& filepath)
   auto tab = new QWidget();
 
   scene->load(filepath);
-  ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired), scene->getSceneName());
+  ui->nodeArea->setCurrentIndex(
+      ui->nodeArea->addTab(tab,
+                           noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired), scene->getSceneName()));
 
   auto node_view = new FlowView(scene, tab);
   auto layout = new QVBoxLayout(tab);
