@@ -270,7 +270,9 @@ DECLARE_NODE_DATA_TYPE(mat4, Matrix4x4, glm::mat4, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(mat3, Matrix3x3, glm::mat3, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat, NoDefaultWidget)
 
+// Polymorph types
 DECLARE_NODE_DATA_TYPE(any, Any, std::nullptr_t, NoDefaultWidget);
+DECLARE_NODE_DATA_TYPE(basic, Basic, std::nullptr_t, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(undefined, Undefined, std::nullptr_t, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(procedure, Procedure, std::string, DefaultProcedureWidget);
 

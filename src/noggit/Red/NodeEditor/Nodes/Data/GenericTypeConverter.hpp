@@ -55,6 +55,12 @@ struct StringConverter
     }
 };
 
+template<typename T_from>
+struct BasicDataConverter
+{
+    static nullptr_t convert(T_from const& value) {return nullptr;}
+};
+
 
 
 #define DECLARE_TYPE_CONVERTER(DATA_FROM, DATA_TO, UTYPE_FROM, UTYPE_TO)  \
@@ -79,6 +85,11 @@ DECLARE_TYPE_CONVERTER(Boolean, Decimal, bool, double)
 DECLARE_TYPE_CONVERTER_EXT(Decimal, String, StringConverter<double>)
 DECLARE_TYPE_CONVERTER_EXT(Integer, String, StringConverter<int>)
 
+// Polymorph types
+DECLARE_TYPE_CONVERTER_EXT(Integer, Basic, BasicDataConverter<int>)
+DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, Basic, BasicDataConverter<unsigned int>)
+DECLARE_TYPE_CONVERTER_EXT(Decimal, Basic, BasicDataConverter<double>)
+DECLARE_TYPE_CONVERTER_EXT(String, Basic, BasicDataConverter<std::string>)
 
 
 #endif //NOGGIT_GENERICTYPECONVERTER_HPP

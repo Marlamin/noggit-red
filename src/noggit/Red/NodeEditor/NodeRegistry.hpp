@@ -70,6 +70,11 @@ namespace noggit
           ret->REGISTER_TYPE_CONVERTER(Integer, String);
           ret->REGISTER_TYPE_CONVERTER(Decimal, String);
 
+          ret->REGISTER_TYPE_CONVERTER(Integer, Basic);
+          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Basic);
+          ret->REGISTER_TYPE_CONVERTER(Decimal, Basic);
+          ret->REGISTER_TYPE_CONVERTER(String, Basic);
+
           return ret;
         }
 

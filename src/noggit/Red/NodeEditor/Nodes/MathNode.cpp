@@ -29,9 +29,9 @@ MathNode::MathNode()
           }
   );
 
-  addPort<AnyData>(PortType::In, "Any*", true);
+  addPort<BasicData>(PortType::In, "Basic", true);
 
-  addPort<AnyData>(PortType::In, "Any*", true);
+  addPort<BasicData>(PortType::In, "Basic", true);
 
   addPort<UndefinedData>(PortType::Out, "Undefined", true);
 }
@@ -128,9 +128,7 @@ void MathNode::inputConnectionCreated(const Connection& connection)
   PortIndex port_index = connection.getPortIndex(PortType::In);
   PortIndex other_port_index = port_index ? 0 : 1;
 
-  bool supported_type = false;
-
-  // Disconnect types which are not supported by the node.
+  /*/ Disconnect types which are not supported by the node.
   if (_type_map.find(connection.dataType(PortType::Out).id.toStdString()) == _type_map.end())
   {
     deletePort(PortType::In, port_index);
@@ -142,12 +140,13 @@ void MathNode::inputConnectionCreated(const Connection& connection)
     emit portAdded(PortType::Out, 0);
     return;
   }
+  */
 
   _in_ports[port_index].data_type.reset(TypeFactory::create(connection.dataType(PortType::Out).id.toStdString()));
   _in_ports[port_index].caption = _in_ports[port_index].data_type->type().name;
 
   auto other_type_id = _in_ports[other_port_index].data_type->type().id.toStdString();
-  if (other_type_id != "any")
+  if (other_type_id != "basic")
   {
     auto result_type_id = std::max(_type_map[_in_ports[port_index].data_type->type().id.toStdString()], _type_map[other_type_id]);
 
@@ -189,9 +188,8 @@ void MathNode::inputConnectionDeleted(const Connection& connection)
   BaseNode::inputConnectionDeleted(connection);
 
   PortIndex port_index = connection.getPortIndex(PortType::In);
-  deletePort(PortType::In, port_index);
-  addPort<AnyData>(PortType::In, port_index, "Any*", true);
-  emit portAdded(PortType::In, port_index);
+  _in_ports[port_index].data_type.reset(TypeFactory::create("basic"));
+  _in_ports[port_index].caption = "Basic";
 
   deletePort(PortType::Out, 0);
   addPort<UndefinedData>(PortType::Out, "Undefined", true);
