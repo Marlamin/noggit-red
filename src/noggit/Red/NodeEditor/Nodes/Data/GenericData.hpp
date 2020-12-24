@@ -14,7 +14,7 @@
 #include <functional>
 #include <limits>
 #include <cstdint>
-#include <array>
+#include <unordered_map>
 
 #include <QSpinBox>
 #include <QDoubleSpinBox>
