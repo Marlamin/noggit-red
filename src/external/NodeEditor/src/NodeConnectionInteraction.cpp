@@ -119,7 +119,7 @@ NodeConnectionInteraction::
          converter = _scene->registry().getTypeConverter(candidateNodeDataType , connectionDataType);
       }
 
-      if (connectionDataType.id == "any" ||  candidateNodeDataType.id == "any")
+      if (connectionDataType.id != "logic" && candidateNodeDataType.id == "any")
       {
         return true;
       }
@@ -129,6 +129,20 @@ NodeConnectionInteraction::
 
    if (connectionDataType.id == "any")
      return false;
+
+   // 5) handle containers
+
+   if (candidateNodeDataType.id == "list" || candidateNodeDataType.id == "dict")
+   {
+     if (candidateNodeDataType.parameter_type_id.isEmpty() && connectionDataType.parameter_type_id.isEmpty())
+       return false;
+
+     if (candidateNodeDataType.parameter_type_id.isEmpty() && !connectionDataType.parameter_type_id.isEmpty())
+      return true;
+
+     if (connectionDataType.parameter_type_id != candidateNodeDataType.parameter_type_id)
+       return false;
+   }
 
    return true;
 }

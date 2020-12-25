@@ -4,6 +4,7 @@
 #define NOGGIT_DATACONSTANTNODE_HPP
 
 #include "BaseNode.hpp"
+#include <external/tsl/robin_map.h>
 
 #include <QComboBox>
 
@@ -31,14 +32,14 @@ namespace noggit
 
         private:
           QComboBox* _type;
-          std::unordered_map<std::string, std::string> _type_map =         {{"Integer", "int"},
-                                                                            {"UnsignedInteger", "uint"},
-                                                                            {"Boolean", "bool"},
-                                                                            {"Decimal", "double"},
-                                                                            {"String", "string"},
-                                                                            {"Vector2D", "vec2"},
-                                                                            {"Vector3D", "vec3"},
-                                                                            {"Vector4D", "vec4"}};
+          tsl::robin_map<std::string, std::string> _type_map =         {{"Integer", "int"},
+                                                                        {"UnsignedInteger", "uint"},
+                                                                        {"Boolean", "bool"},
+                                                                        {"Decimal", "double"},
+                                                                        {"String", "string"},
+                                                                        {"Vector2D", "vec2"},
+                                                                        {"Vector3D", "vec3"},
+                                                                        {"Vector4D", "vec4"}};
         };
 
     }

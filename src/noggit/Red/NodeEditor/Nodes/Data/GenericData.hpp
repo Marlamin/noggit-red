@@ -45,7 +45,7 @@ public:
     [[nodiscard]]
     NodeDataType type() const override
     {
-      return NodeDataType {type_id, type_name};
+      return NodeDataType {type_id, type_name, _parameter_type_id};
     }
 
     [[nodiscard]]
@@ -275,6 +275,7 @@ DECLARE_NODE_DATA_TYPE(any, Any, std::nullptr_t, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(basic, Basic, std::nullptr_t, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(undefined, Undefined, std::nullptr_t, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(procedure, Procedure, std::string, DefaultProcedureWidget);
+DECLARE_NODE_DATA_TYPE(list, List, std::vector<std::shared_ptr<NodeData>>*, NoDefaultWidget);
 
 
 #endif //NOGGIT_GENERICDATA_HPP

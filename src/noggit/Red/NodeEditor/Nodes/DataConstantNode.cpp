@@ -41,8 +41,8 @@ DataConstantNode::DataConstantNode()
        addPortDynamic<AnyData>(PortType::In, 0, _type->currentText(), true);
        addPortDynamic<AnyData>(PortType::Out, 0, _type->currentText(), true);
 
-       _in_ports[0].data_type.reset(TypeFactory::create(type_id.c_str()));
-       _out_ports[0].data_type.reset(TypeFactory::create(type_id.c_str()));
+       _in_ports[0].data_type.reset(TypeFactory::create(type_id));
+       _out_ports[0].data_type.reset(TypeFactory::create(type_id));
 
        addDefaultWidget(_in_ports[0].data_type->default_widget(&_embedded_widget), PortType::In, 0);
 

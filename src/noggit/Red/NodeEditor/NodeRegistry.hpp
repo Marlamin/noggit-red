@@ -23,6 +23,8 @@
 #include <noggit/Red/NodeEditor/Nodes/LogicChainNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicProcedureNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataConstantNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/DataListNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/ListAddNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/GenericTypeConverter.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Scene/NodeScene.hpp>
@@ -62,6 +64,10 @@ namespace noggit
           ret->registerModel<LogicReturnNoDataNode>("Logic//Flow");
           ret->registerModel<LogicProcedureNode>("Logic//Flow");
           ret->registerModel<PrintNode>("Functions//Generic");
+
+          // List
+          ret->registerModel<DataListNode>("Containers//List");
+          ret->registerModel<ListAddNode>("Containers//List");
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);
           ret->REGISTER_TYPE_CONVERTER(Decimal, Boolean);

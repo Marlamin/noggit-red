@@ -13,6 +13,7 @@ struct NodeDataType
 {
   QString id;
   QString name;
+  QString parameter_type_id;
 };
 
 /// Class represents data transferred between nodes.
@@ -29,6 +30,8 @@ public:
     return (this->type().id == nodeData.type().id);
   }
 
+  virtual void set_parameter_type(QString const& type_id) { _parameter_type_id = type_id; };
+
   /// Type for inner use
   virtual NodeDataType type() const = 0;
   virtual std::unique_ptr<NodeData> instantiate() = 0;
@@ -36,5 +39,8 @@ public:
   virtual std::shared_ptr<NodeData> default_widget_data(QWidget* widget) = 0;
   virtual void to_json(QWidget* widget, QJsonObject& json_obj, const std::string& name) = 0;
   virtual void from_json(QWidget* widget, const QJsonObject& json_obj, const std::string& name) = 0;
+
+protected:
+  QString _parameter_type_id = "";
 };
 }

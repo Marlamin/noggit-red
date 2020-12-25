@@ -4,6 +4,7 @@
 #define NOGGIT_LOGICNODEBASE_HPP
 
 #include "BaseNode.hpp"
+#include "Data/GenericData.hpp"
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -39,6 +40,23 @@ namespace noggit
             void setNIterations(int n_iterations) { _n_iterations = n_iterations; };
             int getNIteraitons() { return _n_iterations; };
             void setIterationIndex(int index) { _iteration_index = index; };
+
+            NodeValidationState validate() override
+            {
+              setValidationState(NodeValidationState::Valid);
+              auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
+
+              if (!logic)
+              {
+                setValidationState(NodeValidationState::Error);
+                setValidationMessage("Error: Failed to evaluate logic input");
+
+                _out_ports[0].out_value = std::make_shared<LogicData>(false);
+                Q_EMIT dataUpdated(0);
+              }
+
+              return _validation_state;
+            };
 
 
         protected:

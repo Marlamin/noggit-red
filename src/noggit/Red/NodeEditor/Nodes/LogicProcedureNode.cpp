@@ -139,10 +139,10 @@ void LogicProcedureNode::compute()
       Q_EMIT dataUpdated(i);
     }
 
-    delete _scene;
-    _scene = nullptr;
-
   }
+
+  delete _scene;
+  _scene = nullptr;
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   Q_EMIT dataUpdated(0);
