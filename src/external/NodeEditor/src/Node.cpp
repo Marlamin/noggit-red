@@ -202,7 +202,7 @@ propagateData(std::shared_ptr<NodeData> nodeData,
 {
   _nodeDataModel->setInData(std::move(nodeData), inPortIndex);
 
-  recalculateVisuals();
+  //recalculateVisuals();
 }
 
 
