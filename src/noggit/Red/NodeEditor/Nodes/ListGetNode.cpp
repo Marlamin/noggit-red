@@ -113,7 +113,7 @@ void ListGetNode::inputConnectionCreated(const Connection& connection)
     _out_ports[1].caption = "Value<" + _out_ports[1].data_type->type().name + ">";
 
     // clean up connections if list type changes
-    if (_out_ports[1].connected)
+    if (_out_ports[1].connected && _out_ports[1].data_type->type().id != parameter_type)
     {
       auto this_node = connection.getNode(PortType::In);
       auto connections = this_node->nodeState().connections(PortType::Out, 1);
