@@ -75,15 +75,24 @@ struct BasicDataConverter
 
 
 DECLARE_TYPE_CONVERTER(Decimal, Integer, double, int)
+DECLARE_TYPE_CONVERTER(Decimal, UnsignedInteger, double, unsigned int)
 DECLARE_TYPE_CONVERTER(Decimal, Boolean, double, bool)
 
 DECLARE_TYPE_CONVERTER(Integer, Decimal, int, double)
+DECLARE_TYPE_CONVERTER(Integer, UnsignedInteger, int, unsigned int)
 DECLARE_TYPE_CONVERTER(Integer, Boolean, int, bool)
 
 DECLARE_TYPE_CONVERTER(Boolean, Integer, bool, int)
+DECLARE_TYPE_CONVERTER(Boolean, UnsignedInteger, bool, unsigned int)
 DECLARE_TYPE_CONVERTER(Boolean, Decimal, bool, double)
+
+DECLARE_TYPE_CONVERTER(UnsignedInteger, Integer, unsigned int, int)
+DECLARE_TYPE_CONVERTER(UnsignedInteger, Decimal, unsigned int, double)
+DECLARE_TYPE_CONVERTER(UnsignedInteger, Boolean, unsigned int, bool)
+
 DECLARE_TYPE_CONVERTER_EXT(Decimal, String, StringConverter<double>)
 DECLARE_TYPE_CONVERTER_EXT(Integer, String, StringConverter<int>)
+DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, String, StringConverter<unsigned int>)
 
 // Polymorph types
 DECLARE_TYPE_CONVERTER_EXT(Integer, Basic, BasicDataConverter<int>)

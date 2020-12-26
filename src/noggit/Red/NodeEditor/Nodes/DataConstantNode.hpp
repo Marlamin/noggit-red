@@ -33,7 +33,7 @@ namespace noggit
         private:
           QComboBox* _type;
           tsl::robin_map<std::string, std::string> _type_map =         {{"Integer", "int"},
-                                                                        {"UnsignedInteger", "uint"},
+                                                                        {"Unsigned Integer", "uint"},
                                                                         {"Boolean", "bool"},
                                                                         {"Decimal", "double"},
                                                                         {"String", "string"},

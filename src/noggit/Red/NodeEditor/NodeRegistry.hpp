@@ -25,6 +25,7 @@
 #include <noggit/Red/NodeEditor/Nodes/DataConstantNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataListNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/ListAddNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/ListGetNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/GenericTypeConverter.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Scene/NodeScene.hpp>
@@ -68,15 +69,27 @@ namespace noggit
           // List
           ret->registerModel<DataListNode>("Containers//List");
           ret->registerModel<ListAddNode>("Containers//List");
+          ret->registerModel<ListGetNode>("Containers//List");
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);
           ret->REGISTER_TYPE_CONVERTER(Decimal, Boolean);
+          ret->REGISTER_TYPE_CONVERTER(Decimal, UnsignedInteger);
+
           ret->REGISTER_TYPE_CONVERTER(Integer, Decimal);
           ret->REGISTER_TYPE_CONVERTER(Integer, Boolean);
+          ret->REGISTER_TYPE_CONVERTER(Integer, UnsignedInteger);
+
           ret->REGISTER_TYPE_CONVERTER(Boolean, Decimal);
           ret->REGISTER_TYPE_CONVERTER(Boolean, Integer);
+          ret->REGISTER_TYPE_CONVERTER(Boolean, UnsignedInteger);
+
           ret->REGISTER_TYPE_CONVERTER(Integer, String);
           ret->REGISTER_TYPE_CONVERTER(Decimal, String);
+          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, String);
+
+          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Decimal);
+          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Integer);
+          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Boolean);
 
           ret->REGISTER_TYPE_CONVERTER(Integer, Basic);
           ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Basic);
