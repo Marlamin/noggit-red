@@ -17,7 +17,7 @@ DataListNode::DataListNode()
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
-  addPort<LogicData>(PortType::Out, "Logic", true);
+  addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
 
   addPort<ListData>(PortType::Out, "List[Integer]", true);
   _out_ports[1].data_type->set_parameter_type("int");

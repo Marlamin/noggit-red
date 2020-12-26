@@ -28,7 +28,7 @@ ListGetNode::ListGetNode()
   addPort<UnsignedIntegerData>(PortType::In, "Index<UInteger>", true);
   addDefaultWidget(_in_ports[2].data_type->default_widget(&_embedded_widget), PortType::In, 2);
 
-  addPort<LogicData>(PortType::Out, "Logic", true);
+  addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
   addPort<UndefinedData>(PortType::Out, "Value<Undefined>", true);
 
 }

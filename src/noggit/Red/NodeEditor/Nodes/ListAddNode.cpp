@@ -56,7 +56,7 @@ ListAddNode::ListAddNode()
   addPort<UndefinedData>(PortType::In, "Value<Undefined>", true);
   addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, 2);
 
-  addPort<LogicData>(PortType::Out, "Logic", true);
+  addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
 
 }
 
