@@ -20,7 +20,7 @@ ListAddNode::ListAddNode()
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);
-  _operation->addItems({"Append", "Prepend", "Insert"});
+  _operation->addItems({"Append", "Prepend", "Insert", "Set"});
 
   QComboBox::connect(_operation, qOverload<int>(&QComboBox::currentIndexChanged)
       ,[this](int index)
@@ -33,6 +33,7 @@ ListAddNode::ListAddNode()
        switch (index)
        {
          case 2:
+         case 3:
            addPortDynamic<UnsignedIntegerData>(PortType::In, 3, "Index<UInteger>", true);
            addDefaultWidget(_in_ports[3].data_type->default_widget(&_embedded_widget), PortType::In, 3);
            break;
@@ -78,9 +79,35 @@ void ListAddNode::compute()
       list->insert(list->begin(), value);
       break;
     case 2:
+    {
       auto index_ptr = static_cast<UnsignedIntegerData*>(_in_ports[3].in_value.lock().get());
-      list->insert(list->begin() + (index_ptr ? index_ptr->value() : static_cast<QSpinBox*>(_in_ports[3].default_widget)->value()), value);
+      auto index = index_ptr ? index_ptr->value() : static_cast<QSpinBox*>(_in_ports[3].default_widget)->value();
+
+      if (index < 0 || index > list->size())
+      {
+        setValidationState(NodeValidationState::Error);
+        setValidationMessage("Error: invalid index.");
+        return;
+      }
+
+      list->insert(list->begin() + index, value);
       break;
+    }
+    case 3:
+    {
+      auto index_ptr = static_cast<UnsignedIntegerData *>(_in_ports[3].in_value.lock().get());
+      auto index = index_ptr ? index_ptr->value() : static_cast<QSpinBox*>(_in_ports[3].default_widget)->value();
+
+      if (index < 0 || index >= list->size())
+      {
+        setValidationState(NodeValidationState::Error);
+        setValidationMessage("Error: invalid index.");
+        return;
+      }
+
+      (*list)[index] = value;
+      break;
+    }
   }
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);

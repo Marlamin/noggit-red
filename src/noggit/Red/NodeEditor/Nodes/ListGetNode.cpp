@@ -43,7 +43,16 @@ void ListGetNode::compute()
   auto list = static_cast<ListData*>(_in_ports[1].in_value.lock().get())->value();
   auto index_ptr = static_cast<UnsignedIntegerData*>(_in_ports[2].in_value.lock().get());;
 
-  _out_ports[1].out_value = list->at((index_ptr ? index_ptr->value() : static_cast<QSpinBox*>(_in_ports[2].default_widget)->value()));
+  auto index = index_ptr ? index_ptr->value() : static_cast<QSpinBox*>(_in_ports[2].default_widget)->value();
+
+  if (index < 0 || index >= list->size())
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: invalid index.");
+    return;
+  }
+
+  _out_ports[1].out_value = list->at(index);
 
   Q_EMIT dataUpdated(1);
 
