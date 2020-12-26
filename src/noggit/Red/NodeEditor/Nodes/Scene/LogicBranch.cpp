@@ -27,7 +27,7 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
     return true;
 
   auto model = static_cast<BaseNode*>(node->nodeDataModel());
-  auto nodeState = node->nodeState();
+  auto& nodeState = node->nodeState();
 
   if (model->isComputed())
     return true;
@@ -153,7 +153,7 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
 bool LogicBranch::executeNodeLeaves(Node* node, Node* source_node)
 {
   auto model = static_cast<BaseNode*>(node->nodeDataModel());
-  auto nodeState = node->nodeState();
+  auto& nodeState = node->nodeState();
 
   if (model->isComputed())
     return true;
@@ -200,7 +200,7 @@ bool LogicBranch::executeNodeLeaves(Node* node, Node* source_node)
 void LogicBranch::markNodesComputed(Node* start_node, bool state)
 {
   auto model = static_cast<BaseNode*>(start_node->nodeDataModel());
-  auto nodeState = start_node->nodeState();
+  auto& nodeState = start_node->nodeState();
 
   model->setComputed(state);
 
@@ -226,7 +226,7 @@ void LogicBranch::markNodesComputed(Node* start_node, bool state)
 void LogicBranch::markNodeLeavesComputed(Node* start_node, Node* source_node, bool state)
 {
   auto model = static_cast<BaseNode*>(start_node->nodeDataModel());
-  auto nodeState = start_node->nodeState();
+  auto& nodeState = start_node->nodeState();
 
   model->setComputed(state);
 
