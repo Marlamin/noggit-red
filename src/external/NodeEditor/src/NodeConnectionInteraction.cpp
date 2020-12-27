@@ -124,9 +124,15 @@ NodeConnectionInteraction::
         return true;
       }
 
+      if (connectionDataType.id == "any" && candidateNodeDataType.id != "logic")
+      {
+        return true;
+      }
+
       return (converter != nullptr);
    }
 
+   // do not connect to Any ports to each other
    if (connectionDataType.id == "any")
      return false;
 
