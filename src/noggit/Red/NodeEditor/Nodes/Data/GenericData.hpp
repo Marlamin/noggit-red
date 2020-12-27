@@ -105,7 +105,6 @@ public:
       D::setValue(widget, value);
     };
 
-
 private:
     Ty _value;
 };
@@ -252,7 +251,9 @@ private:
   using TYPE_NAME##Data = GenericData<UNDERLYING_TYPE,                                    \
   TYPE_ID##_typeid, TYPE_ID##_typename, toQStringGeneric<UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>; \
                                                                                           \
-  template<> TypeFactory::Creator_t* TypeFactory::Register<TYPE_NAME##Data>::creator = TypeFactory::Register<TYPE_NAME##Data>::init_creator(#TYPE_ID);
+  template<> TypeFactory::Creator_t* TypeFactory::Register<TYPE_NAME##Data>::creator = TypeFactory::Register<TYPE_NAME##Data>::init_creator(#TYPE_ID); \
+
+DECLARE_NODE_DATA_TYPE(logic, Logic, bool, NoDefaultWidget)
 
 DECLARE_NODE_DATA_TYPE(int, Integer, int, DefaultIntWidget)
 DECLARE_NODE_DATA_TYPE(uint, UnsignedInteger, unsigned int, DefaultIntWidget)
@@ -260,7 +261,6 @@ DECLARE_NODE_DATA_TYPE(uint, UnsignedInteger, unsigned int, DefaultIntWidget)
 DECLARE_NODE_DATA_TYPE(double, Decimal, double, DefaultDecimalWidget)
 DECLARE_NODE_DATA_TYPE(bool, Boolean, bool, DefaultBooleanWidget)
 DECLARE_NODE_DATA_TYPE(string, String, std::string, DefaultStringWidget)
-DECLARE_NODE_DATA_TYPE(logic, Logic, bool, NoDefaultWidget)
 
 // GLM types
 DECLARE_NODE_DATA_TYPE(vec2, Vector2D, glm::vec2, NoDefaultWidget)

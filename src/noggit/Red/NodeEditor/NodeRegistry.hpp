@@ -151,7 +151,7 @@ namespace noggit
                 "ConstructionLineWidth": 2.0,
                 "PointDiameter": 10.0,
 
-                "UseDataDefinedColors": false
+                "UseDataDefinedColors": true
               }
             }
             )");

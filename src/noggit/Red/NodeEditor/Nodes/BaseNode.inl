@@ -24,6 +24,7 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
   {
     throw std::logic_error("Incorrect port type or port type None.");
   }
+
 }
 
 template<typename T>

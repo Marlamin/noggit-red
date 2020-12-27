@@ -163,6 +163,11 @@ QColor
 ConnectionStyle::
 normalColor(QString typeId) const
 {
+  static QColor logic_color = QColor::fromRgb(27, 242, 167);
+  static QColor regular_color = QColor::fromRgb(27, 167, 242);
+  return typeId == "logic" ?  logic_color : regular_color;
+
+  /*
   std::size_t hash = qHash(typeId);
 
   std::size_t const hue_range = 0xFF;
@@ -175,6 +180,8 @@ normalColor(QString typeId) const
   return QColor::fromHsl(hue,
                          sat,
                          160);
+
+                         */
 }
 
 
