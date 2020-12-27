@@ -45,7 +45,7 @@ void LogicBeginNode::compute()
         setValidationState(NodeValidationState::Error);
 
         auto message = boost::format("Error: Argument of type <%s> at port %d does not have a default value and was not passed.")
-            % _in_ports[i].data_type->type().name.toStdString() % i;
+            % _out_ports[i].data_type->type().name.toStdString() % i;
 
         setValidationMessage(message.str().c_str());
         return;
@@ -112,6 +112,7 @@ void LogicBeginNode::outputConnectionCreated(const Connection& connection)
   auto& connected_data = connected_model->dataModel(PortType::In, connected_index);
 
   _out_ports[port_index].data_type = connected_data->instantiate();
+  _out_ports[port_index].data_type->set_parameter_type(data_type.parameter_type_id);
 
   deleteDefaultWidget(PortType::Out, port_index);
   addDefaultWidget(_out_ports[port_index].data_type->default_widget(&_embedded_widget), PortType::Out, port_index);

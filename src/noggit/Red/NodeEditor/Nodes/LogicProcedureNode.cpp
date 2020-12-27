@@ -283,8 +283,11 @@ void LogicProcedureNode::setProcedure(const QString& path)
       continue;
 
     addPort<LogicData>(PortType::In, port.caption, true);
-    _in_ports[_in_ports.size() - 1].data_type = port.data_type->instantiate();
-    emit portAdded(PortType::In, _in_ports.size() - 1);
+
+    int port_idx = _in_ports.size() - 1; 
+    _in_ports[port_idx].data_type = port.data_type->instantiate();
+    _in_ports[port_idx].data_type->set_parameter_type(port.data_type->type().parameter_type_id);
+    emit portAdded(PortType::In, port_idx);
   }
 
   auto return_node = _scene->getReturnNode();
@@ -300,8 +303,10 @@ void LogicProcedureNode::setProcedure(const QString& path)
         continue;
 
       addPort<LogicData>(PortType::Out, port.caption, true);
-      _out_ports[_out_ports.size() - 1].data_type = port.data_type->instantiate();
-      emit portAdded(PortType::Out, _out_ports.size() - 1);
+      int port_idx = _out_ports.size() - 1;
+      _out_ports[port_idx].data_type = port.data_type->instantiate();
+      _out_ports[port_idx].data_type->set_parameter_type(port.data_type->type().parameter_type_id);
+      emit portAdded(PortType::Out, port_idx);
     }
   }
 

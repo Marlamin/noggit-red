@@ -1,10 +1,12 @@
 #include "BaseNode.hpp"
 
 #include <stdexcept>
+#include <external/NodeEditor/include/nodes/Node>
 
 #include <QHBoxLayout>
 
 using namespace noggit::Red::NodeEditor::Nodes;
+using QtNodes::Node;
 
 InNodePort::InNodePort(QString const& caption_, bool caption_visible_)
 : caption(caption_)
@@ -197,8 +199,11 @@ void BaseNode::outputConnectionCreated(const Connection& connection)
 
 void BaseNode::outputConnectionDeleted(const Connection& connection)
 {
-  auto& port = _out_ports[connection.getPortIndex(PortType::Out)];
-  port.connected = false;
+  auto port_index = connection.getPortIndex(PortType::Out);
+  auto& port = _out_ports[port_index];
+
+  if (connection.getNode(PortType::Out)->nodeState().connections(PortType::Out, port_index).empty())
+    port.connected = false;
 }
 
 

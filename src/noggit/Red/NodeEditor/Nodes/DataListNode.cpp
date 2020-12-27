@@ -10,7 +10,7 @@
 using namespace noggit::Red::NodeEditor::Nodes;
 
 DataListNode::DataListNode()
-: LogicNodeBase()
+: ListNodeBase()
 {
   setName("DataListNode");
   setCaption("List[Integer]");
@@ -23,20 +23,7 @@ DataListNode::DataListNode()
   _out_ports[1].data_type->set_parameter_type("int");
 
   _type = new QComboBox(&_embedded_widget);
-
-  _type->addItems({"Integer",
-                   "Unsigned Integer",
-                   "Boolean",
-                   "Decimal",
-                   "String",
-                   "Vector2D",
-                   "Vector3D",
-                   "Vector4D",
-                   "Matrix4x4",
-                   "Matrix3x3",
-                   "Quaternion",
-                   "Procedure"
-                  });
+  _type->addItems(_type_list);
 
   QComboBox::connect(_type, qOverload<int>(&QComboBox::currentIndexChanged)
       ,[this](int index)
@@ -49,7 +36,6 @@ DataListNode::DataListNode()
          setCaption("List[" + _type->currentText() + "]");
          deletePort(PortType::Out, 1);
 
-         auto& type_id = _type_map.at(_type->currentText().toStdString());
          addPortDynamic<ListData>(PortType::Out, 1, _caption, true);
 
          _out_ports[1].data_type->set_parameter_type(new_type_id);
@@ -69,7 +55,9 @@ void DataListNode::compute()
   _data.clear();
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  _out_ports[1].out_value = std::make_shared<ListData>(&_data);
+  auto list =  std::make_shared<ListData>(&_data);
+  list->set_parameter_type(_out_ports[1].data_type->type().parameter_type_id);
+  _out_ports[1].out_value = std::move(list);
 
   Q_EMIT dataUpdated(0);
   Q_EMIT dataUpdated(1);

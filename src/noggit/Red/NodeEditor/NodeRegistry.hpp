@@ -30,6 +30,7 @@
 #include <noggit/Red/NodeEditor/Nodes/ListClearNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/ListEraseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/ListReserveNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/ListDeclareNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/GenericTypeConverter.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Scene/NodeScene.hpp>
@@ -78,6 +79,7 @@ namespace noggit
           ret->registerModel<ListClearNode>("Containers//List");
           ret->registerModel<ListEraseNode>("Containers//List");
           ret->registerModel<ListReserveNode>("Containers//List");
+          ret->registerModel<ListDeclareNode>("Containers//List");
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);
           ret->REGISTER_TYPE_CONVERTER(Decimal, Boolean);

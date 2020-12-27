@@ -1,13 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef NOGGIT_DATALISTNODE_HPP
-#define NOGGIT_DATALISTNODE_HPP
+#ifndef NOGGIT_LISTDECLARENODE_HPP
+#define NOGGIT_LISTDECLARENODE_HPP
 
 #include "ListNodeBase.hpp"
-
 #include <QComboBox>
-#include <vector>
-#include <external/tsl/robin_map.h>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -21,24 +18,25 @@ namespace noggit
 {
     namespace Red::NodeEditor::Nodes
     {
-        class DataListNode : public ListNodeBase
+        class ListDeclareNode : public ListNodeBase
         {
         Q_OBJECT
 
         public:
-            DataListNode();
+            ListDeclareNode();
             void compute() override;
+            NodeValidationState validate() override;
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
+            bool isLogicNode() override { return false; };
 
         private:
             QComboBox* _type;
 
-            std::vector<std::shared_ptr<NodeData>> _data;
         };
 
     }
 
 }
 
-#endif //NOGGIT_DATALISTNODE_HPP
+#endif //NOGGIT_LISTDECLARENODE_HPP

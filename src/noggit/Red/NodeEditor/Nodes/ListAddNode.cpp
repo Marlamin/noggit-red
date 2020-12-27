@@ -182,8 +182,11 @@ void ListAddNode::inputConnectionCreated(const Connection& connection)
     _in_ports[1].data_type->set_parameter_type(parameter_type);
     _in_ports[1].caption = connection.getNode(PortType::Out)->nodeDataModel()->portCaption(PortType::Out, connection.getPortIndex(PortType::Out));
 
-    _in_ports[2].data_type.reset(TypeFactory::create(parameter_type.toStdString()));
-    _in_ports[2].caption = "Value<" + _in_ports[2].data_type->type().name + ">";
+    if (!parameter_type.isEmpty())
+    {
+      _in_ports[2].data_type.reset(TypeFactory::create(parameter_type.toStdString()));
+      _in_ports[2].caption = "Value<" + _in_ports[2].data_type->type().name + ">";
+    }
   }
   else if (port_index == 3 && _operation->currentIndex() == 3)
   {
