@@ -4,6 +4,7 @@
 
 using QtNodes::NodeDataModel;
 using QtNodes::NodeStyle;
+using QtNodes::Node;
 
 NodeDataModel::
 NodeDataModel()
@@ -39,3 +40,11 @@ setNodeStyle(NodeStyle const& style)
 {
   _nodeStyle = style;
 }
+
+void
+NodeDataModel::
+setNode(Node* node)
+{
+  _node = node;
+}
+

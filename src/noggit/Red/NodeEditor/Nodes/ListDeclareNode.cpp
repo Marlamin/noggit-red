@@ -33,6 +33,12 @@ ListDeclareNode::ListDeclareNode()
 
        addPortDynamic<ListData>(PortType::Out, 0, "List[" + _type->currentText() + "]", true);
        _out_ports[0].data_type->set_parameter_type(new_type_id);
+
+       deletePort(PortType::In, 0);
+
+       addPortDynamic<ListData>(PortType::In, 0, "List[" + _type->currentText() + "]", true);
+       _in_ports[0].data_type->set_parameter_type(new_type_id);
+
      }
   );
 

@@ -61,6 +61,8 @@ public:
 
   virtual QWidget* portDefaultValueWidget(PortType port_type, PortIndex port_index) { return nullptr; }
 
+  void setNode(Node* node);
+
 public:
 
   QJsonObject
@@ -178,5 +180,8 @@ Q_SIGNALS:
 private:
 
   NodeStyle _nodeStyle;
+
+protected:
+  Node* _node;
 };
 }

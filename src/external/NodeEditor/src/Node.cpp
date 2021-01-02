@@ -33,6 +33,7 @@ Node(std::unique_ptr<NodeDataModel> && dataModel)
   , _nodeGraphicsObject(nullptr)
 {
   _nodeGeometry.recalculateSize();
+  _nodeDataModel->setNode(this);
 
   // propagate data: model => node
   connect(_nodeDataModel.get(), &NodeDataModel::dataUpdated,

@@ -24,6 +24,7 @@
 #include <QJsonValue>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QLabel>
 
 using QtNodes::NodeDataType;
 using QtNodes::NodeData;

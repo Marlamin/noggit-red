@@ -15,6 +15,8 @@ bool NodeScene::execute()
 
   auto main_branch = LogicBranch(_begin_node);
   return main_branch.execute();
+
+  _variables.clear();
 }
 
 bool NodeScene::validate()
