@@ -309,7 +309,7 @@ struct DefaultVectorWidget
 
       for (int i = 0; i < SIZE; ++i)
       {
-        static_cast<QDoubleSpinBox*>(widget->layout()->itemAt(0)->widget())->setValue(array[i].toDouble());
+        static_cast<QDoubleSpinBox*>(widget->layout()->itemAt(i)->widget())->setValue(array[i].toDouble());
       }
     }
 };
