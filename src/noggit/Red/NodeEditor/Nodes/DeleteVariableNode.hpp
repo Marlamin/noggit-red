@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef NOGGIT_GETVARIABLENODE_HPP
-#define NOGGIT_GETVARIABLENODE_HPP
+#ifndef NOGGIT_DELETEVARIABLENODE_HPP
+#define NOGGIT_DELETEVARIABLENODE_HPP
 
 #include "LogicNodeBase.hpp"
 #include <external/tsl/robin_map.h>
@@ -20,20 +20,15 @@ namespace noggit
     {
         using VariableMap = tsl::robin_map<std::string, std::pair<std::string, std::shared_ptr<NodeData>>>;
 
-        class GetVariableNodeBase : public LogicNodeBase
+        class DeleteVariableNodeBase : public LogicNodeBase
         {
         Q_OBJECT
 
         public:
-            GetVariableNodeBase();
+            DeleteVariableNodeBase();
             void compute() override;
-            NodeValidationState validate() override;
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
-
-        public Q_SLOTS:
-            void outputConnectionCreated(const Connection& connection) override;
-            void outputConnectionDeleted(const Connection& connection) override;
 
         protected:
             virtual VariableMap* getVariableMap() = 0;
@@ -41,12 +36,12 @@ namespace noggit
 
         // Scene scope
 
-        class GetVariableNode : public GetVariableNodeBase
+        class DeleteVariableNode : public DeleteVariableNodeBase
         {
-            Q_OBJECT
+        Q_OBJECT
 
         public:
-            GetVariableNode();
+            DeleteVariableNode();
 
         protected:
             VariableMap* getVariableMap() override;
@@ -54,19 +49,20 @@ namespace noggit
 
         // Context scope
 
-        class GetContextVariableNode : public GetVariableNodeBase
+        class DeleteContextVariableNode : public DeleteVariableNodeBase
         {
         Q_OBJECT
 
         public:
-            GetContextVariableNode();
+            DeleteContextVariableNode();
 
         protected:
             VariableMap* getVariableMap() override;
         };
 
+
     }
 
 }
 
-#endif //NOGGIT_GETVARIABLENODE_HPP
+#endif //NOGGIT_DELETEVARIABLENODE_HPP

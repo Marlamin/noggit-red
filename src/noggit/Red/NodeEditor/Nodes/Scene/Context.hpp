@@ -14,6 +14,8 @@ namespace noggit
 {
     namespace Red::NodeEditor::Nodes
     {
+        using VariableMap = tsl::robin_map<std::string, std::pair<std::string, std::shared_ptr<NodeData>>>;
+
         enum NodeExecutionContext
         {
             MAP_VIEW,
@@ -31,11 +33,13 @@ namespace noggit
             NodeScene* getScene(QString const& path, QObject* parent = nullptr);
             NodeExecutionContext getContextType() { return _context_type; };
             void makeCurrent();
+            VariableMap* getVariableMap() { return &_variable_map; };
 
         private:
             World* _world;
             tsl::robin_map<std::string, QJsonDocument> _scene_cache;
             NodeExecutionContext _context_type;
+            VariableMap _variable_map;
 
         };
 

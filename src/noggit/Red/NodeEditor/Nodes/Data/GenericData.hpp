@@ -22,6 +22,7 @@
 #include <QCheckBox>
 #include <QJsonObject>
 #include <QJsonValue>
+#include <QJsonArray>
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLabel>
@@ -84,26 +85,12 @@ public:
 
     void to_json(QWidget* widget, QJsonObject& json_obj, const std::string& name) override
     {
-      auto value = D::value(widget);
-
-      if constexpr (!std::is_same<typeof(value), nullptr_t>::value)
-      {
-        if constexpr (std::is_same<typeof(value), std::string>::value)
-        {
-          json_obj[QString::fromStdString(name)] = value.c_str();
-        }
-        else
-        {
-          json_obj[QString::fromStdString(name)] = value;
-        }
-      }
-
+      D::toJson(widget, json_obj, name);
     };
 
     void from_json(QWidget* widget, const QJsonObject& json_obj, const std::string& name) override
     {
-      auto value = json_obj[name.c_str()];
-      D::setValue(widget, value);
+      D::fromJson(widget, json_obj, name);
     };
 
 private:
@@ -134,6 +121,17 @@ struct DefaultIntWidget
     {
       static_cast<QSpinBox*>(widget)->setValue(value.toInt());
     }
+
+    static void toJson(QWidget* widget, QJsonObject& json_obj, const std::string& name)
+    {
+      json_obj[name.c_str()] = static_cast<QSpinBox*>(widget)->value();
+    }
+
+    static void fromJson(QWidget* widget, const QJsonObject& json_obj, const std::string& name)
+    {
+      int value = json_obj[name.c_str()].toInt();
+      static_cast<QSpinBox*>(widget)->setValue(value);
+    }
 };
 
 struct DefaultDecimalWidget
@@ -153,6 +151,17 @@ struct DefaultDecimalWidget
     static void setValue(QWidget* widget, QJsonValue& value)
     {
       static_cast<QDoubleSpinBox*>(widget)->setValue(value.toDouble());
+    }
+
+    static void toJson(QWidget* widget, QJsonObject& json_obj, const std::string& name)
+    {
+      json_obj[name.c_str()] = static_cast<QDoubleSpinBox*>(widget)->value();
+    }
+
+    static void fromJson(QWidget* widget, const QJsonObject& json_obj, const std::string& name)
+    {
+      double value = json_obj[name.c_str()].toDouble();
+      static_cast<QDoubleSpinBox*>(widget)->setValue(value);
     }
 };
 
@@ -174,6 +183,17 @@ struct DefaultBooleanWidget
     {
       static_cast<QCheckBox*>(widget)->setChecked(value.toBool());
     }
+
+    static void toJson(QWidget* widget, QJsonObject& json_obj, const std::string& name)
+    {
+      json_obj[name.c_str()] = static_cast<QCheckBox*>(widget)->isChecked();
+    }
+
+    static void fromJson(QWidget* widget, const QJsonObject& json_obj, const std::string& name)
+    {
+      bool value = json_obj[name.c_str()].toBool();
+      static_cast<QCheckBox*>(widget)->setChecked(value);
+    }
 };
 
 struct DefaultStringWidget
@@ -188,6 +208,17 @@ struct DefaultStringWidget
     static void setValue(QWidget* widget, QJsonValue& value)
     {
       static_cast<QLineEdit*>(widget)->setText(value.toString());
+    }
+
+    static void toJson(QWidget* widget, QJsonObject& json_obj, const std::string& name)
+    {
+      json_obj[name.c_str()] = static_cast<QLineEdit*>(widget)->text();
+    }
+
+    static void fromJson(QWidget* widget, const QJsonObject& json_obj, const std::string& name)
+    {
+      QString value = json_obj[name.c_str()].toString();
+      static_cast<QLineEdit*>(widget)->setText(value);
     }
 };
 
@@ -207,8 +238,85 @@ struct DefaultProcedureWidget
     {
       static_cast<QPushButton*>(widget->layout()->itemAt(0)->widget())->setText(value.toString());
     }
+
+    static void toJson(QWidget* widget, QJsonObject& json_obj, const std::string& name)
+    {
+      json_obj[name.c_str()] = static_cast<QPushButton*>(widget->layout()->itemAt(0)->widget())->text();
+    }
+
+    static void fromJson(QWidget* widget, const QJsonObject& json_obj, const std::string& name)
+    {
+      QString value = json_obj[name.c_str()].toString();
+      static_cast<QPushButton*>(widget->layout()->itemAt(0)->widget())->setText(value);
+    }
 };
 
+template <typename T, int SIZE>
+struct DefaultVectorWidget
+{
+    static QWidget* generate(QWidget* parent)
+    {
+      auto widget = new QWidget(parent);
+      auto layout = new QVBoxLayout(widget);
+
+      for (int i = 0; i < SIZE; ++i)
+      {
+        auto axis = new QDoubleSpinBox(widget);
+        axis->setRange(std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
+        layout->addWidget(axis);
+      }
+
+      return widget;
+    }
+
+    static T value(QWidget* widget)
+    {
+      T vector;
+
+      for (int i = 0; i < SIZE; ++i)
+      {
+        vector[i] = static_cast<QDoubleSpinBox*>(widget->layout()->itemAt(i)->widget())->value();
+      }
+
+      return vector;
+    }
+
+    static void setValue(QWidget* widget, QJsonValue& value)
+    {
+      auto array = value.toArray();
+
+      for (int i = 0; i < SIZE; ++i)
+      {
+        static_cast<QDoubleSpinBox*>(widget->layout()->itemAt(i)->widget())->setValue(array[i].toDouble());
+      }
+    }
+
+    static void toJson(QWidget* widget, QJsonObject& json_obj, const std::string& name)
+    {
+      QJsonArray array = QJsonArray();
+
+      for (int i = 0; i < SIZE; ++i)
+      {
+        array.push_back(static_cast<QDoubleSpinBox*>(widget->layout()->itemAt(i)->widget())->value());
+      }
+
+      json_obj[name.c_str()] = array;
+    }
+
+    static void fromJson(QWidget* widget, const QJsonObject& json_obj, const std::string& name)
+    {
+      QJsonArray array = json_obj[name.c_str()].toArray();
+
+      for (int i = 0; i < SIZE; ++i)
+      {
+        static_cast<QDoubleSpinBox*>(widget->layout()->itemAt(0)->widget())->setValue(array[i].toDouble());
+      }
+    }
+};
+
+using DefaultVector2DWidget = DefaultVectorWidget<glm::vec2, 2>;
+using DefaultVector3DWidget = DefaultVectorWidget<glm::vec3, 3>;
+using DefaultVector4DWidget = DefaultVectorWidget<glm::vec4, 4>;
 
 struct NoDefaultWidget
 {
@@ -220,6 +328,14 @@ struct NoDefaultWidget
     }
 
     static void setValue(QWidget* widget, QJsonValue& value)
+    {
+    }
+
+    static void toJson(QWidget* widget, QJsonObject& json_obj, const std::string& name)
+    {
+    }
+
+    static void fromJson(QWidget* widget, const QJsonObject& json_obj, const std::string& name)
     {
     }
 
@@ -264,9 +380,9 @@ DECLARE_NODE_DATA_TYPE(bool, Boolean, bool, DefaultBooleanWidget)
 DECLARE_NODE_DATA_TYPE(string, String, std::string, DefaultStringWidget)
 
 // GLM types
-DECLARE_NODE_DATA_TYPE(vec2, Vector2D, glm::vec2, NoDefaultWidget)
-DECLARE_NODE_DATA_TYPE(vec3, Vector3D, glm::vec3, NoDefaultWidget)
-DECLARE_NODE_DATA_TYPE(vec4, Vector4D, glm::vec4, NoDefaultWidget)
+DECLARE_NODE_DATA_TYPE(vec2, Vector2D, glm::vec2, DefaultVector2DWidget)
+DECLARE_NODE_DATA_TYPE(vec3, Vector3D, glm::vec3, DefaultVector3DWidget)
+DECLARE_NODE_DATA_TYPE(vec4, Vector4D, glm::vec4, DefaultVector4DWidget)
 DECLARE_NODE_DATA_TYPE(mat4, Matrix4x4, glm::mat4, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(mat3, Matrix3x3, glm::mat3, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat, NoDefaultWidget)

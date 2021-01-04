@@ -5,19 +5,17 @@
 #include "BaseNode.inl"
 #include "Data/GenericData.hpp"
 #include "Scene/NodeScene.hpp"
+#include "Scene/Context.hpp"
 
 #include <boost/format.hpp>
-
 #include <external/NodeEditor/include/nodes/Node>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 using QtNodes::Node;
 
-GetVariableNode::GetVariableNode()
+GetVariableNodeBase::GetVariableNodeBase()
 : LogicNodeBase()
 {
-  setName("GetVariableNode");
-  setCaption("Get Variable");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -29,16 +27,17 @@ GetVariableNode::GetVariableNode()
   addPort<AnyData>(PortType::Out, "Any", true);
 }
 
-void GetVariableNode::compute()
+void GetVariableNodeBase::compute()
 {
   auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
 
   if (!logic->value())
     return;
 
-  auto variables = static_cast<NodeScene*>(_node->nodeGraphicsObject().scene())->getVariableMap();
+  auto variables = getVariableMap();
 
-  auto variable_name = _in_ports[1].connected ? static_cast<StringData*>(_in_ports[1].in_value.lock().get())->value() : static_cast<QLineEdit*>(_in_ports[1].default_widget)->text().toStdString();
+  auto variable_name = _in_ports[1].connected ? static_cast<StringData*>(_in_ports[1].in_value.lock().get())->value()
+                                              : static_cast<QLineEdit*>(_in_ports[1].default_widget)->text().toStdString();
 
   auto it = variables->find(variable_name);
 
@@ -65,7 +64,7 @@ void GetVariableNode::compute()
 
 }
 
-QJsonObject GetVariableNode::save() const
+QJsonObject GetVariableNodeBase::save() const
 {
   QJsonObject json_obj = BaseNode::save();
 
@@ -74,14 +73,14 @@ QJsonObject GetVariableNode::save() const
   return json_obj;
 }
 
-void GetVariableNode::restore(const QJsonObject& json_obj)
+void GetVariableNodeBase::restore(const QJsonObject& json_obj)
 {
   BaseNode::restore(json_obj);
 
   static_cast<QLineEdit*>(_in_ports[1].default_widget)->setText(json_obj["variable_name"].toString());
 }
 
-void GetVariableNode::outputConnectionCreated(const Connection& connection)
+void GetVariableNodeBase::outputConnectionCreated(const Connection& connection)
 {
   BaseNode::outputConnectionCreated(connection);
 
@@ -98,7 +97,7 @@ void GetVariableNode::outputConnectionCreated(const Connection& connection)
 
 }
 
-void GetVariableNode::outputConnectionDeleted(const Connection& connection)
+void GetVariableNodeBase::outputConnectionDeleted(const Connection& connection)
 {
   BaseNode::outputConnectionDeleted(connection);
 
@@ -112,9 +111,39 @@ void GetVariableNode::outputConnectionDeleted(const Connection& connection)
 
 }
 
-NodeValidationState GetVariableNode::validate()
+NodeValidationState GetVariableNodeBase::validate()
 {
   LogicNodeBase::validate();
 
   return _validation_state;
 }
+
+
+// Scene scope
+
+GetVariableNode::GetVariableNode()
+: GetVariableNodeBase()
+{
+  setName("GetVariableNode");
+  setCaption("Get Variable");
+}
+
+VariableMap* GetVariableNode::getVariableMap()
+{
+  return static_cast<NodeScene*>(_node->nodeGraphicsObject().scene())->getVariableMap();
+}
+
+// Context scope
+
+GetContextVariableNode::GetContextVariableNode()
+: GetVariableNodeBase()
+{
+  setName("GetContextVariableNode");
+  setCaption("Get Context Variable");
+}
+
+VariableMap* GetContextVariableNode::getVariableMap()
+{
+  return gCurrentContext->getVariableMap();
+}
+

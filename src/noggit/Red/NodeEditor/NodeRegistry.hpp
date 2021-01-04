@@ -35,6 +35,7 @@
 
 #include <noggit/Red/NodeEditor/Nodes/GetVariableNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/SetVariableNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/DeleteVariableNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/GenericTypeConverter.hpp>
@@ -65,7 +66,11 @@ namespace noggit
 
           ret->registerModel<DataConstantNode>("Data");
           ret->registerModel<GetVariableNode>("Data");
+          ret->registerModel<GetContextVariableNode>("Data");
           ret->registerModel<SetVariableNode>("Data");
+          ret->registerModel<SetContextVariableNode>("Data");
+          ret->registerModel<DeleteVariableNode>("Data");
+          ret->registerModel<DeleteContextVariableNode>("Data");
 
           ret->registerModel<ConditionNode>("Logic");
           ret->registerModel<LogicBeginNode>("Logic//Flow");

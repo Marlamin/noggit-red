@@ -4,6 +4,7 @@
 #define NOGGIT_SETVARIABLENODE_HPP
 
 #include "LogicNodeBase.hpp"
+#include <external/tsl/robin_map.h>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -17,12 +18,14 @@ namespace noggit
 {
     namespace Red::NodeEditor::Nodes
     {
-        class SetVariableNode : public LogicNodeBase
+        using VariableMap = tsl::robin_map<std::string, std::pair<std::string, std::shared_ptr<NodeData>>>;
+
+        class SetVariableNodeBase : public LogicNodeBase
         {
         Q_OBJECT
 
         public:
-            SetVariableNode();
+            SetVariableNodeBase();
             void compute() override;
             NodeValidationState validate() override;
             QJsonObject save() const override;
@@ -32,6 +35,35 @@ namespace noggit
             void inputConnectionCreated(const Connection& connection) override;
             void inputConnectionDeleted(const Connection& connection) override;
 
+        protected:
+            virtual VariableMap* getVariableMap() = 0;
+
+        };
+
+        // Scene scope
+
+        class SetVariableNode : public SetVariableNodeBase
+        {
+        Q_OBJECT
+
+        public:
+            SetVariableNode();
+
+        protected:
+            VariableMap* getVariableMap() override;
+        };
+
+        // Context scope
+
+        class SetContextVariableNode : public SetVariableNodeBase
+        {
+        Q_OBJECT
+
+        public:
+            SetContextVariableNode();
+
+        protected:
+            VariableMap* getVariableMap() override;
         };
 
     }

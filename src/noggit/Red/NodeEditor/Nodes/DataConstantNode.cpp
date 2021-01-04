@@ -83,10 +83,8 @@ void DataConstantNode::restore(const QJsonObject& json_obj)
   BaseNode::restore(json_obj);
 
   auto type = json_obj["type"].toString();
-  _in_ports[0].data_type->from_json(_in_ports[0].default_widget, json_obj, "value");
-
   _type->setCurrentText(type);
-
+  _in_ports[0].data_type->from_json(_in_ports[0].default_widget, json_obj, "value");
 
 }
 

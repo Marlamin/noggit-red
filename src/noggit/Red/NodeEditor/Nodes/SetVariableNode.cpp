@@ -5,6 +5,7 @@
 #include "BaseNode.inl"
 #include "Data/GenericData.hpp"
 #include "Scene/NodeScene.hpp"
+#include "Scene/Context.hpp"
 
 #include <boost/format.hpp>
 
@@ -12,11 +13,9 @@
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
-SetVariableNode::SetVariableNode()
+SetVariableNodeBase::SetVariableNodeBase()
 : LogicNodeBase()
 {
-  setName("SetVariableNode");
-  setCaption("Set Variable");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -29,12 +28,12 @@ SetVariableNode::SetVariableNode()
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void SetVariableNode::compute()
+void SetVariableNodeBase::compute()
 {
   if (!static_cast<LogicData*>(_in_ports[0].in_value.lock().get())->value())
     return;
 
-  auto variables = static_cast<NodeScene*>(_node->nodeGraphicsObject().scene())->getVariableMap();
+  auto variables = getVariableMap();
 
   auto variable_name = _in_ports[1].connected ? static_cast<StringData*>(_in_ports[1].in_value.lock().get())->value() : static_cast<QLineEdit*>(_in_ports[1].default_widget)->text().toStdString();
 
@@ -55,7 +54,7 @@ void SetVariableNode::compute()
   Q_EMIT dataUpdated(0);
 }
 
-QJsonObject SetVariableNode::save() const
+QJsonObject SetVariableNodeBase::save() const
 {
   QJsonObject json_obj = BaseNode::save();
 
@@ -64,14 +63,14 @@ QJsonObject SetVariableNode::save() const
   return json_obj;
 }
 
-void SetVariableNode::restore(const QJsonObject& json_obj)
+void SetVariableNodeBase::restore(const QJsonObject& json_obj)
 {
   BaseNode::restore(json_obj);
 
   static_cast<QLineEdit*>(_in_ports[1].default_widget)->setText(json_obj["variable_name"].toString());
 }
 
-void SetVariableNode::inputConnectionCreated(const Connection& connection)
+void SetVariableNodeBase::inputConnectionCreated(const Connection& connection)
 {
   BaseNode::inputConnectionCreated(connection);
 
@@ -86,7 +85,7 @@ void SetVariableNode::inputConnectionCreated(const Connection& connection)
 
 }
 
-void SetVariableNode::inputConnectionDeleted(const Connection& connection)
+void SetVariableNodeBase::inputConnectionDeleted(const Connection& connection)
 {
   BaseNode::inputConnectionDeleted(connection);
 
@@ -100,7 +99,7 @@ void SetVariableNode::inputConnectionDeleted(const Connection& connection)
 
 }
 
-NodeValidationState SetVariableNode::validate()
+NodeValidationState SetVariableNodeBase::validate()
   {
     return LogicNodeBase::validate();
 
@@ -113,4 +112,34 @@ NodeValidationState SetVariableNode::validate()
 
   return _validation_state;
 }
+
+// Scene scope
+
+SetVariableNode::SetVariableNode()
+: SetVariableNodeBase()
+{
+  setName("SetVariableNode");
+  setCaption("Set Variable");
+}
+
+VariableMap* SetVariableNode::getVariableMap()
+{
+  return static_cast<NodeScene*>(_node->nodeGraphicsObject().scene())->getVariableMap();
+}
+
+// Context scope
+
+SetContextVariableNode::SetContextVariableNode()
+: SetVariableNodeBase()
+{
+  setName("SetContextVariableNode");
+  setCaption("Set Context Variable");
+}
+
+VariableMap* SetContextVariableNode::getVariableMap()
+{
+  return gCurrentContext->getVariableMap();
+}
+
+
 
