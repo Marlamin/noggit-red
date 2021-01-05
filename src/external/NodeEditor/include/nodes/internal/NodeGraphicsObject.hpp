@@ -2,19 +2,34 @@
 
 #include <QtCore/QUuid>
 #include <QtWidgets/QGraphicsObject>
+#include <QGraphicsProxyWidget>
+#include <QGraphicsSceneMouseEvent>
 
 #include "Connection.hpp"
 
 #include "NodeGeometry.hpp"
 #include "NodeState.hpp"
 
-class QGraphicsProxyWidget;
-
 namespace QtNodes
 {
 
 class FlowScene;
 class FlowItemEntry;
+
+class ProxyWidget : public QGraphicsProxyWidget
+{
+    Q_OBJECT
+
+public:
+    ProxyWidget(QGraphicsItem* parent = nullptr) : QGraphicsProxyWidget(parent) {};
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override
+    {
+      QGraphicsProxyWidget::mousePressEvent(event);
+      event->accept();
+    };
+};
 
 /// Class reacts on GUI events, mouse clicks and
 /// forwards painting operation.

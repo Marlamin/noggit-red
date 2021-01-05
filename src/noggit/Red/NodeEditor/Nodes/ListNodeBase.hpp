@@ -29,7 +29,7 @@ namespace noggit
 
     protected:
       tsl::robin_map<std::string, std::string> _type_map = {
-          {{"Integer", "int"},
+          {   {"Integer", "int"},
               {"Unsigned Integer", "uint"},
               {"Boolean", "bool"},
               {"Decimal", "double"},
@@ -41,6 +41,7 @@ namespace noggit
               {"Matrix3x3", "mat3"},
               {"Quaternion", "quat"},
               {"Procedure", "procedure"},
+              {"Color", "color"}
           }
       };
 
@@ -55,7 +56,8 @@ namespace noggit
                                "Matrix4x4",
                                "Matrix3x3",
                                "Quaternion",
-                               "Procedure"
+                               "Procedure",
+                               "Color"
       };
 
     };

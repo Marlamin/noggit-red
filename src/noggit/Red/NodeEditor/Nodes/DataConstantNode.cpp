@@ -27,7 +27,8 @@ DataConstantNode::DataConstantNode()
                    "Boolean",
                    "Vector2D",
                    "Vector3D",
-                   "Vector4D"});
+                   "Vector4D",
+                   "Color"});
 
   QComboBox::connect(_type, qOverload<int>(&QComboBox::currentIndexChanged)
       ,[this](int index)

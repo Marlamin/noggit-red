@@ -10,6 +10,7 @@
 #include <external/NodeEditor/include/nodes/TypeConverter>
 
 #include <noggit/Red/NodeEditor/Nodes/MathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/ColorMathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/ConditionNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicIfNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicBeginNode.hpp>
@@ -63,6 +64,7 @@ namespace noggit
           auto ret = std::make_shared<DataModelRegistry>();
 
           ret->registerModel<MathNode>("Math");
+          ret->registerModel<ColorMathNode>("Math");
 
           ret->registerModel<DataConstantNode>("Data");
           ret->registerModel<GetVariableNode>("Data");
@@ -119,6 +121,13 @@ namespace noggit
           ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Basic);
           ret->REGISTER_TYPE_CONVERTER(Decimal, Basic);
           ret->REGISTER_TYPE_CONVERTER(String, Basic);
+
+          // Color
+          ret->REGISTER_TYPE_CONVERTER(Integer, Color);
+          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Color);
+          ret->REGISTER_TYPE_CONVERTER(Decimal, Color);
+          ret->REGISTER_TYPE_CONVERTER(Color, String);
+          ret->REGISTER_TYPE_CONVERTER(Color, Vector4D);
 
           return ret;
         }

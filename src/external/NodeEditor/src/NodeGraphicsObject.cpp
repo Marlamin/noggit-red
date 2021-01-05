@@ -102,7 +102,7 @@ embedQWidget()
 
   if (auto w = _node.nodeDataModel()->embeddedWidget())
   {
-    _proxyWidget = new QGraphicsProxyWidget(this);
+    _proxyWidget = new ProxyWidget(this);
 
     _proxyWidget->setWidget(w);
 
@@ -122,6 +122,7 @@ embedQWidget()
 
     _proxyWidget->setOpacity(1.0);
     _proxyWidget->setFlag(QGraphicsItem::ItemIgnoresParentOpacity);
+    _proxyWidget->setFlag(QGraphicsItem::ItemIsFocusable);
   }
 }
 
@@ -205,6 +206,8 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
   if (_locked)
     return;
+
+  QGraphicsObject::mousePressEvent(event);
 
   // deselect all other items after this one is selected
   if (!isSelected() &&
@@ -340,6 +343,7 @@ mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
   // position connections precisely after fast node move
   moveConnections();
+
 }
 
 
@@ -416,3 +420,4 @@ contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
   _scene.nodeContextMenu(node(), mapToScene(event->pos()));
 }
+

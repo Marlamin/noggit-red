@@ -6,6 +6,7 @@
 #include <external/NodeEditor/include/nodes/NodeDataModel>
 #include <external/glm/glm.hpp>
 #include <external/glm/gtc/quaternion.hpp>
+#include <external/qt-color-widgets/qt-color-widgets/color_selector.hpp>
 
 #include <noggit/ui/font_awesome.hpp>
 
@@ -26,6 +27,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLabel>
+#include <QColor>
 
 using QtNodes::NodeDataType;
 using QtNodes::NodeData;
@@ -318,6 +320,46 @@ using DefaultVector2DWidget = DefaultVectorWidget<glm::vec2, 2>;
 using DefaultVector3DWidget = DefaultVectorWidget<glm::vec3, 3>;
 using DefaultVector4DWidget = DefaultVectorWidget<glm::vec4, 4>;
 
+struct DefaultColorWidget
+{
+    static QWidget* generate(QWidget* parent)
+    {
+      return new color_widgets::ColorSelector(parent);
+    }
+
+    static QColor value(QWidget* widget)
+    {
+      return static_cast<color_widgets::ColorSelector*>(widget)->color();
+    }
+
+    static void setValue(QWidget* widget, QJsonValue& value)
+    {
+      auto array = value.toArray();
+      QColor color = QColor::fromRgb(array[0].toInt(), array[1].toInt(), array[2].toInt(), array[3].toInt());
+      static_cast<color_widgets::ColorSelector*>(widget)->setColor(color);
+    }
+
+    static void toJson(QWidget* widget, QJsonObject& json_obj, const std::string& name)
+    {
+      QJsonArray array = QJsonArray();
+      QColor color = static_cast<color_widgets::ColorSelector*>(widget)->color();
+
+      array.push_back(color.red());
+      array.push_back(color.green());
+      array.push_back(color.blue());
+      array.push_back(color.alpha());
+
+      json_obj[name.c_str()] = array;
+    }
+
+    static void fromJson(QWidget* widget, const QJsonObject& json_obj, const std::string& name)
+    {
+      QJsonArray array = json_obj[name.c_str()].toArray();
+      QColor color = QColor::fromRgb(array[0].toInt(), array[1].toInt(), array[2].toInt(), array[3].toInt());
+      static_cast<color_widgets::ColorSelector*>(widget)->setColor(color);
+    }
+};
+
 struct NoDefaultWidget
 {
     static QWidget* generate(QWidget* parent) { return new QLabel("", parent); }
@@ -393,6 +435,10 @@ DECLARE_NODE_DATA_TYPE(basic, Basic, std::nullptr_t, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(undefined, Undefined, std::nullptr_t, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(procedure, Procedure, std::string, DefaultProcedureWidget);
 DECLARE_NODE_DATA_TYPE(list, List, std::vector<std::shared_ptr<NodeData>>*, NoDefaultWidget);
+
+// Custom types
+DECLARE_NODE_DATA_TYPE(color, Color, QColor, DefaultColorWidget);
+
 
 
 #endif //NOGGIT_GENERICDATA_HPP

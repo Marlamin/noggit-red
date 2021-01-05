@@ -392,6 +392,8 @@ mousePressEvent(QMouseEvent *event)
 
   _scene->setChanged(true);
   Q_EMIT changed();
+
+  event->accept();
 }
 
 

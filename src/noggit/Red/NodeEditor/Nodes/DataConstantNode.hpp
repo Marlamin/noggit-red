@@ -39,7 +39,8 @@ namespace noggit
                                                                         {"String", "string"},
                                                                         {"Vector2D", "vec2"},
                                                                         {"Vector3D", "vec3"},
-                                                                        {"Vector4D", "vec4"}};
+                                                                        {"Vector4D", "vec4"},
+                                                                        {"Color", "color"}};
         };
 
     }

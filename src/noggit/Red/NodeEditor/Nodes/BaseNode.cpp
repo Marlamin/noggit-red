@@ -25,14 +25,15 @@ BaseNode::BaseNode()
   _embedded_widget.setAttribute(Qt::WA_TranslucentBackground);
 
   auto layout = new QVBoxLayout(&_embedded_widget);
+  layout->setContentsMargins(12, 12, 12, 12);
 
   _embedded_widget_layout_top = new QVBoxLayout();
   layout->addLayout(_embedded_widget_layout_top);
-  _embedded_widget_layout_top->setContentsMargins(5, 5, 5, 5);
+  _embedded_widget_layout_top->setContentsMargins(5, 20, 5, 5);
 
   _embedded_widget_layout = new QVBoxLayout();
   layout->addLayout(_embedded_widget_layout);
-  _embedded_widget_layout->setContentsMargins(5, 0, 5, 0);
+  _embedded_widget_layout->setContentsMargins(5, 5, 5, 5);
 
   _embedded_widget_layout_bottom = new QVBoxLayout();
   layout->addLayout(_embedded_widget_layout_bottom);

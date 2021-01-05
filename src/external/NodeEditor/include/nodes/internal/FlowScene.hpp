@@ -167,6 +167,7 @@ Q_SIGNALS:
   void changed();
 
 protected:
+
   using SharedConnection = std::shared_ptr<Connection>;
   using UniqueNode       = std::unique_ptr<Node>;
 

@@ -2,6 +2,7 @@
 #define NOGGIT_GENERICTYPECONVERTER_HPP
 
 #include <external/NodeEditor/include/nodes/NodeDataModel>
+#include <boost/format.hpp>
 #include "GenericData.hpp"
 
 using QtNodes::PortType;
@@ -58,7 +59,31 @@ struct StringConverter
 template<typename T_from>
 struct BasicDataConverter
 {
-    static nullptr_t convert(T_from const& value) {return nullptr;}
+    static nullptr_t convert(T_from const& value) { return nullptr; }
+};
+
+// Color converters
+
+template<typename T_from>
+struct ColorIntegerConverter
+{
+    static QColor convert(T_from const& value) { return QColor::fromRgb(value, value, value, value); }
+};
+
+
+struct ColorDecimalConverter
+{
+    static QColor convert(double const& value) { return QColor::fromRgbF(value, value, value, value); }
+};
+
+struct ColorStringConverter
+{
+    static std::string convert(QColor const& value) { return (boost::format("Color<%d, %d, %d, %d>") % value.red() % value.green() % value.blue() % value.alpha()).str(); }
+};
+
+struct ColorVector4DConverter
+{
+    static glm::vec4 convert(QColor const& value) { return glm::vec4(value.redF(), value.greenF(), value.blueF(), value.alphaF()); };
 };
 
 
@@ -99,6 +124,13 @@ DECLARE_TYPE_CONVERTER_EXT(Integer, Basic, BasicDataConverter<int>)
 DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, Basic, BasicDataConverter<unsigned int>)
 DECLARE_TYPE_CONVERTER_EXT(Decimal, Basic, BasicDataConverter<double>)
 DECLARE_TYPE_CONVERTER_EXT(String, Basic, BasicDataConverter<std::string>)
+
+// Custom types
+DECLARE_TYPE_CONVERTER_EXT(Integer, Color, ColorIntegerConverter<int>)
+DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, Color, ColorIntegerConverter<unsigned int>)
+DECLARE_TYPE_CONVERTER_EXT(Decimal, Color, ColorIntegerConverter<double>)
+DECLARE_TYPE_CONVERTER_EXT(Color, String, ColorStringConverter)
+DECLARE_TYPE_CONVERTER_EXT(Color, Vector4D, ColorVector4DConverter)
 
 
 #endif //NOGGIT_GENERICTYPECONVERTER_HPP
