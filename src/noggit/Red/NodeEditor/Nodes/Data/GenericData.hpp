@@ -327,15 +327,16 @@ struct DefaultColorWidget
       return new color_widgets::ColorSelector(parent);
     }
 
-    static QColor value(QWidget* widget)
+    static glm::vec4 value(QWidget* widget)
     {
-      return static_cast<color_widgets::ColorSelector*>(widget)->color();
+      QColor color = static_cast<color_widgets::ColorSelector*>(widget)->color();
+      return glm::vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF());
     }
 
     static void setValue(QWidget* widget, QJsonValue& value)
     {
       auto array = value.toArray();
-      QColor color = QColor::fromRgb(array[0].toInt(), array[1].toInt(), array[2].toInt(), array[3].toInt());
+      QColor color = QColor::fromRgbF(array[0].toDouble(), array[1].toDouble(), array[2].toDouble(), array[3].toDouble());
       static_cast<color_widgets::ColorSelector*>(widget)->setColor(color);
     }
 
@@ -344,10 +345,10 @@ struct DefaultColorWidget
       QJsonArray array = QJsonArray();
       QColor color = static_cast<color_widgets::ColorSelector*>(widget)->color();
 
-      array.push_back(color.red());
-      array.push_back(color.green());
-      array.push_back(color.blue());
-      array.push_back(color.alpha());
+      array.push_back(color.redF());
+      array.push_back(color.greenF());
+      array.push_back(color.blueF());
+      array.push_back(color.alphaF());
 
       json_obj[name.c_str()] = array;
     }
@@ -355,7 +356,7 @@ struct DefaultColorWidget
     static void fromJson(QWidget* widget, const QJsonObject& json_obj, const std::string& name)
     {
       QJsonArray array = json_obj[name.c_str()].toArray();
-      QColor color = QColor::fromRgb(array[0].toInt(), array[1].toInt(), array[2].toInt(), array[3].toInt());
+      QColor color = QColor::fromRgbF(array[0].toDouble(), array[1].toDouble(), array[2].toDouble(), array[3].toDouble());
       static_cast<color_widgets::ColorSelector*>(widget)->setColor(color);
     }
 };
@@ -437,7 +438,7 @@ DECLARE_NODE_DATA_TYPE(procedure, Procedure, std::string, DefaultProcedureWidget
 DECLARE_NODE_DATA_TYPE(list, List, std::vector<std::shared_ptr<NodeData>>*, NoDefaultWidget);
 
 // Custom types
-DECLARE_NODE_DATA_TYPE(color, Color, QColor, DefaultColorWidget);
+DECLARE_NODE_DATA_TYPE(color, Color, glm::vec4, DefaultColorWidget);
 
 
 

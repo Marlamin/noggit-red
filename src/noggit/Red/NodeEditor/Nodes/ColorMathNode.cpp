@@ -12,7 +12,7 @@ ColorMathNode::ColorMathNode()
 : BaseNode()
 {
   setName("ColorMathNode");
-  setCaption("Color Mix");
+  setCaption("Color Math");
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);
@@ -36,62 +36,64 @@ ColorMathNode::ColorMathNode()
 
 void ColorMathNode::compute()
 {
-  QColor color_1 = _in_ports[2].in_value.lock() ? static_cast<ColorData*>(_in_ports[2].in_value.lock().get())->value()
-      : static_cast<color_widgets::ColorSelector*>(_in_ports[2].default_widget)->color();
+  QColor q_color_1 = static_cast<color_widgets::ColorSelector*>(_in_ports[2].default_widget)->color();
+  glm::vec4 color_1 = _in_ports[2].in_value.lock() ? static_cast<ColorData*>(_in_ports[2].in_value.lock().get())->value()
+      : glm::vec4(q_color_1.redF(), q_color_1.greenF(), q_color_1.blueF(), q_color_1.alphaF());
 
-  QColor color_2 = _in_ports[3].in_value.lock() ? static_cast<ColorData*>(_in_ports[3].in_value.lock().get())->value()
-                                                : static_cast<color_widgets::ColorSelector*>(_in_ports[3].default_widget)->color();
+  QColor q_color_2 = static_cast<color_widgets::ColorSelector*>(_in_ports[3].default_widget)->color();
+  glm::vec4 color_2 = _in_ports[3].in_value.lock() ? static_cast<ColorData*>(_in_ports[3].in_value.lock().get())->value()
+                                                : glm::vec4(q_color_2.redF(), q_color_2.greenF(), q_color_2.blueF(), q_color_2.alphaF());
 
   bool clamp = _in_ports[1].in_value.lock() ? static_cast<BooleanData*>(_in_ports[1].in_value.lock().get())->value()
                                             : static_cast<QCheckBox*>(_in_ports[3].default_widget)->isChecked();
 
   double factor = _in_ports[0].in_value.lock() ? static_cast<DecimalData*>(_in_ports[0].in_value.lock().get())->value()
                                                : static_cast<QDoubleSpinBox*>(_in_ports[0].default_widget)->value();
-  QColor result;
+  glm::vec4 result;
 
   switch (_operation->currentIndex())
   {
     case 0: // Mix
-      result.setRed(color_1.red() * (1.0 - factor) + color_2.red() * factor);
-      result.setGreen(color_1.green() * (1.0 - factor) + color_2.green() * factor);
-      result.setBlue(color_1.blue() * (1.0 - factor) + color_2.blue() * factor);
-      result.setAlpha(color_1.alpha() * (1.0 - factor) + color_2.alpha() * factor);
+      for (int i = 0; i < 4; ++i)
+      {
+        result[i] = color_1[i] * (1.0 - factor) + color_2[i] * factor;
+      }
       break;
 
     case 1: // Add
-      result.setRed(color_1.red() + color_2.red() * factor);
-      result.setGreen(color_1.green() + color_2.green() * factor);
-      result.setBlue(color_1.blue() + color_2.blue() * factor);
-      result.setAlpha(color_1.alpha() + color_2.alpha() * factor);
+      for (int i = 0; i < 4; ++i)
+      {
+        result[i] = color_1[i] + color_2[i] * factor;
+      }
       break;
 
     case 2: // Subtract
-      result.setRed(color_1.red() - color_2.red() * factor);
-      result.setGreen(color_1.green() - color_2.green() * factor);
-      result.setBlue(color_1.blue() - color_2.blue() * factor);
-      result.setAlpha(color_1.alpha() - color_2.alpha() * factor);
+      for (int i = 0; i < 4; ++i)
+      {
+        result[i] = color_1[i] - color_2[i] * factor;
+      }
       break;
 
     case 3: // Multiply
-      result.setRed(color_1.red() * (color_2.red() * factor));
-      result.setGreen(color_1.green() * (color_2.green() * factor));
-      result.setBlue(color_1.blue() * (color_2.blue() * factor));
-      result.setAlpha(color_1.alpha() * (color_2.alpha() * factor));
+      for (int i = 0; i < 4; ++i)
+      {
+        result[i] = color_1[i] * (color_2[i] * factor);
+      }
       break;
     case 4: // Divide
-      result.setRed(color_1.red() / (color_2.red() * factor));
-      result.setGreen(color_1.green() / (color_2.green() * factor));
-      result.setBlue(color_1.blue() / (color_2.blue() * factor));
-      result.setAlpha(color_1.alpha() / (color_2.alpha() * factor));
+      for (int i = 0; i < 4; ++i)
+      {
+        result[i] = color_1[i] / (color_2[i] * factor);
+      }
       break;
   }
 
   if (clamp)
   {
-    result.setRed(std::max(std::min(result.red(), 255), 0));
-    result.setGreen(std::max(std::min(result.green(), 255), 0));
-    result.setBlue(std::max(std::min(result.blue(), 255), 0));
-    result.setAlpha(std::max(std::min(result.alpha(), 255), 0));
+    for (int i = 0; i < 4; ++i)
+    {
+      result[i] = std::max(std::min(result[i], 1.0f), 0.0f);
+    }
   }
 
   _out_ports[0].out_value = std::make_shared<ColorData>(result);

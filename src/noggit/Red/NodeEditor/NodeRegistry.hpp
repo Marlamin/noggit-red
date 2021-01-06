@@ -128,6 +128,7 @@ namespace noggit
           ret->REGISTER_TYPE_CONVERTER(Decimal, Color);
           ret->REGISTER_TYPE_CONVERTER(Color, String);
           ret->REGISTER_TYPE_CONVERTER(Color, Vector4D);
+          ret->REGISTER_TYPE_CONVERTER(Vector4D, Color);
 
           return ret;
         }

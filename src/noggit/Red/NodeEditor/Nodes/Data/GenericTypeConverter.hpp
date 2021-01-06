@@ -67,23 +67,23 @@ struct BasicDataConverter
 template<typename T_from>
 struct ColorIntegerConverter
 {
-    static QColor convert(T_from const& value) { return QColor::fromRgb(value, value, value, value); }
+    static glm::vec4 convert(T_from const& value) { return glm::vec4(value / 255.0, value / 255.0, value / 255.0, value / 255.0); }
 };
 
 
 struct ColorDecimalConverter
 {
-    static QColor convert(double const& value) { return QColor::fromRgbF(value, value, value, value); }
+    static glm::vec4 convert(double const& value) { return glm::vec4(value, value, value, value); }
 };
 
 struct ColorStringConverter
 {
-    static std::string convert(QColor const& value) { return (boost::format("Color<%d, %d, %d, %d>") % value.red() % value.green() % value.blue() % value.alpha()).str(); }
+    static std::string convert(glm::vec4 const& value) { return (boost::format("Color<%d, %d, %d, %d>") % value[0] % value[1] % value[2] % value[3]).str(); }
 };
 
 struct ColorVector4DConverter
 {
-    static glm::vec4 convert(QColor const& value) { return glm::vec4(value.redF(), value.greenF(), value.blueF(), value.alphaF()); };
+    static glm::vec4 convert(glm::vec4 const& value) { return value; };
 };
 
 
@@ -131,6 +131,7 @@ DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, Color, ColorIntegerConverter<unsigne
 DECLARE_TYPE_CONVERTER_EXT(Decimal, Color, ColorIntegerConverter<double>)
 DECLARE_TYPE_CONVERTER_EXT(Color, String, ColorStringConverter)
 DECLARE_TYPE_CONVERTER_EXT(Color, Vector4D, ColorVector4DConverter)
+DECLARE_TYPE_CONVERTER_EXT(Vector4D, Color, ColorVector4DConverter)
 
 
 #endif //NOGGIT_GENERICTYPECONVERTER_HPP
