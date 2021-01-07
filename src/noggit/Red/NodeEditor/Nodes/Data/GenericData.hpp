@@ -435,7 +435,6 @@ DECLARE_NODE_DATA_TYPE(vec2, Vector2D, glm::vec2, DefaultVector2DWidget)
 DECLARE_NODE_DATA_TYPE(vec3, Vector3D, glm::vec3, DefaultVector3DWidget)
 DECLARE_NODE_DATA_TYPE(vec4, Vector4D, glm::vec4, DefaultVector4DWidget)
 DECLARE_NODE_DATA_TYPE(mat4, Matrix4x4, glm::mat4, NoDefaultWidget)
-DECLARE_NODE_DATA_TYPE(mat3, Matrix3x3, glm::mat3, NoDefaultWidget)
 DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat, NoDefaultWidget)
 
 // Polymorph types

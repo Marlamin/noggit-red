@@ -13,6 +13,8 @@
 #include <noggit/Red/NodeEditor/Nodes/MathUnaryNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/ColorMathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/VectorMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/VectorScalarMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/MatrixMathNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/ConditionNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicIfNode.hpp>
@@ -72,6 +74,10 @@ namespace noggit
           ret->registerModel<Vector2DMathNode>("Math//Vector");
           ret->registerModel<Vector3DMathNode>("Math//Vector");
           ret->registerModel<Vector4DMathNode>("Math//Vector");
+          ret->registerModel<Vector2DScalarMathNode>("Math//Vector");
+          ret->registerModel<Vector3DScalarMathNode>("Math//Vector");
+          ret->registerModel<Vector4DScalarMathNode>("Math//Vector");
+          ret->registerModel<MatrixMathNode>("Math//Vector");
 
           ret->registerModel<DataConstantNode>("Data");
           ret->registerModel<GetVariableNode>("Data");
