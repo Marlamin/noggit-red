@@ -16,7 +16,11 @@ MathNode::MathNode()
                         "Subtract",
                         "Multiply",
                         "Divide",
-                        "Modulo"});
+                        "Modulo",
+                        "Min",
+                        "Max",
+                        "Pow"});
+
   addWidgetTop(_operation);
 
   setName("MathNode");
@@ -275,16 +279,16 @@ void MathNode::handleOperation(T first, T second)
   {
     switch (_operation->currentIndex())
     {
-      case 0:
+      case 0: // Add
         result = first + first;
         break;
-      case 1:
+      case 1: // Subtract
         result = first - first;
         break;
-      case 2:
+      case 2: // Multiply
         result = first * first;
         break;
-      case 3:
+      case 3: // Divide
         if constexpr (std::is_same<T, int>::value || std::is_same<T, unsigned int>::value)
         {
           if (!second)
@@ -301,7 +305,7 @@ void MathNode::handleOperation(T first, T second)
           result = first / first;
         }
         break;
-      case 4:
+      case 4: // Module
         if constexpr (std::is_same<T, int>::value || std::is_same<T, unsigned int>::value)
         {
           if (!second)
@@ -318,13 +322,25 @@ void MathNode::handleOperation(T first, T second)
           result = std::fmod(first, first);
         }
         break;
+
+      case 5: // Min
+        result = std::min(first, second);
+        break;
+
+      case 6: // Max
+        result = std::max(first, second);
+        break;
+
+      case 7: // Pow
+        result = std::pow(first, second);
+        break;
     }
   }
   else
   {
     switch (_operation->currentIndex())
     {
-      case 0:
+      case 0: // Concatenate
         result = first + first;
         break;
       default:

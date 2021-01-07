@@ -94,6 +94,11 @@ void ColorSelector::showDialog()
     p->dialog->show();
 }
 
+void ColorSelector::closeDialog()
+{
+  p->dialog->close();
+}
+
 void ColorSelector::setWheelFlags(ColorWheel::DisplayFlags flags)
 {
     p->dialog->setWheelFlags(flags);

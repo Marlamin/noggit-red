@@ -324,7 +324,15 @@ struct DefaultColorWidget
 {
     static QWidget* generate(QWidget* parent)
     {
-      return new color_widgets::ColorSelector(parent);
+      auto widget = new color_widgets::ColorSelector(parent);
+      widget->setColor({255, 255, 255, 255});
+      widget->setDisplayMode(color_widgets::ColorPreview::SplitAlpha);
+
+      // TODO: figure out what goes wrong here without this
+      widget->showDialog();
+      widget->closeDialog();
+
+      return widget;
     }
 
     static glm::vec4 value(QWidget* widget)

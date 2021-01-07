@@ -10,7 +10,10 @@
 #include <external/NodeEditor/include/nodes/TypeConverter>
 
 #include <noggit/Red/NodeEditor/Nodes/MathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/MathUnaryNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/ColorMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/VectorMathNode.hpp>
+
 #include <noggit/Red/NodeEditor/Nodes/ConditionNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicIfNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicBeginNode.hpp>
@@ -64,7 +67,11 @@ namespace noggit
           auto ret = std::make_shared<DataModelRegistry>();
 
           ret->registerModel<MathNode>("Math");
+          ret->registerModel<MathUnaryNode>("Math");
           ret->registerModel<ColorMathNode>("Math");
+          ret->registerModel<Vector2DMathNode>("Math//Vector");
+          ret->registerModel<Vector3DMathNode>("Math//Vector");
+          ret->registerModel<Vector4DMathNode>("Math//Vector");
 
           ret->registerModel<DataConstantNode>("Data");
           ret->registerModel<GetVariableNode>("Data");

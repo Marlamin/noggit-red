@@ -60,6 +60,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void showDialog();
+    void closeDialog();
     void setWheelFlags(ColorWheel::DisplayFlags flags);
 
 private Q_SLOTS:
