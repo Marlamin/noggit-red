@@ -19,6 +19,8 @@ MathUnaryNode::MathUnaryNode()
   _operation = new QComboBox(&_embedded_widget);
   _operation->addItems({"Sin", "Cos", "Tan", "Asin", "Acos", "Atan", "Floor", "Ceil", "Log"});
 
+  addWidgetTop(_operation);
+
   QComboBox::connect(_operation, qOverload<int>(&QComboBox::currentIndexChanged)
       ,[this](int index)
      {

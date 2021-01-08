@@ -47,6 +47,8 @@ VectorMathNodeBase<T, T1>::VectorMathNodeBase()
     type_name = "Vector2D";
   }
 
+  addWidgetTop(_operation);
+
   addPort<T>(PortType::In, type_name.c_str(), true);
   addDefaultWidget(_in_ports[0].data_type->default_widget(&_embedded_widget), PortType::In, 0);
 

@@ -18,6 +18,8 @@ ColorMathNode::ColorMathNode()
   _operation = new QComboBox(&_embedded_widget);
   _operation->addItems({"Mix", "Add", "Subtract", "Multiply", "Divide"});
 
+  addWidgetTop(_operation);
+
   addPort<DecimalData>(PortType::In, "Factor<Decimal>", true);
   addDefaultWidget(_in_ports[0].data_type->default_widget(&_embedded_widget), PortType::In, 0);
   static_cast<QDoubleSpinBox*>(_in_ports[0].default_widget)->setRange(0.0, 1.0);

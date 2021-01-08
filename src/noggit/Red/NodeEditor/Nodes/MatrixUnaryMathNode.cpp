@@ -24,6 +24,7 @@ MatrixUnaryMathNode::MatrixUnaryMathNode()
      }
   );
 
+  addWidgetTop(_operation);
   addPort<Matrix4x4Data>(PortType::In, "Matrix4x4", true);
   addPort<Matrix4x4Data>(PortType::Out, "Matrix4x4", true);
 }

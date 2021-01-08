@@ -12,11 +12,20 @@
 #include <noggit/Red/NodeEditor/Nodes/MathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/MathUnaryNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/ColorMathNode.hpp>
+
 #include <noggit/Red/NodeEditor/Nodes/VectorMathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/VectorScalarMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Vector2DToXYNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Vector3DToXYZNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Vector4DToXYZWNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/XYtoVector2D.hpp>
+#include <noggit/Red/NodeEditor/Nodes/XYZtoVector3DNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/XYZWtoVector4DNode.hpp>
+
 #include <noggit/Red/NodeEditor/Nodes/MatrixMathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/MatrixDecomposeNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/MatrixUnaryMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/MatrixRotateEulerNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/ConditionNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicIfNode.hpp>
@@ -44,6 +53,7 @@
 #include <noggit/Red/NodeEditor/Nodes/GetVariableNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/SetVariableNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DeleteVariableNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/MatrixNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/GenericTypeConverter.hpp>
@@ -73,15 +83,24 @@ namespace noggit
           ret->registerModel<MathNode>("Math");
           ret->registerModel<MathUnaryNode>("Math");
           ret->registerModel<ColorMathNode>("Math");
+
           ret->registerModel<Vector2DMathNode>("Math//Vector");
           ret->registerModel<Vector3DMathNode>("Math//Vector");
           ret->registerModel<Vector4DMathNode>("Math//Vector");
           ret->registerModel<Vector2DScalarMathNode>("Math//Vector");
           ret->registerModel<Vector3DScalarMathNode>("Math//Vector");
           ret->registerModel<Vector4DScalarMathNode>("Math//Vector");
+          ret->registerModel<XYtoVector2DNode>("Math//Vector");
+          ret->registerModel<XYZtoVector3DNode>("Math//Vector");
+          ret->registerModel<XYZWtoVector4DNode>("Math//Vector");
+          ret->registerModel<Vector2DToXYNode>("Math//Vector");
+          ret->registerModel<Vector3DToXYZNode>("Math//Vector");
+          ret->registerModel<Vector4DToXYZWNode>("Math//Vector");
+
           ret->registerModel<MatrixMathNode>("Math//Matrix");
           ret->registerModel<MatrixDecomposeNode>("Math//Matrix");
           ret->registerModel<MatrixUnaryMathNode>("Math//Matrix");
+          ret->registerModel<MatrixRotateEulerNode>("Math//Matrix");
 
           ret->registerModel<DataConstantNode>("Data");
           ret->registerModel<GetVariableNode>("Data");
@@ -90,6 +109,7 @@ namespace noggit
           ret->registerModel<SetContextVariableNode>("Data");
           ret->registerModel<DeleteVariableNode>("Data");
           ret->registerModel<DeleteContextVariableNode>("Data");
+          ret->registerModel<MatrixNode>("Data");
 
           ret->registerModel<ConditionNode>("Logic");
           ret->registerModel<LogicBeginNode>("Logic//Flow");

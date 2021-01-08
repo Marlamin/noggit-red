@@ -256,7 +256,7 @@ widgetPosition() const
     if (w->sizePolicy().verticalPolicy() & QSizePolicy::ExpandFlag)
     {
       // If the widget wants to use as much vertical space as possible, place it immediately after the caption.
-      return QPointF(_spacing + portWidth(PortType::In), captionHeight());
+      return QPointF(_spacing + portWidth(PortType::In), captionHeight() + 5.0);
     }
     else
     {
