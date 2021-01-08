@@ -23,8 +23,8 @@ GetVariableNodeBase::GetVariableNodeBase()
   addPort<StringData>(PortType::In, "Name<String>", true);
   addDefaultWidget(_in_ports[1].data_type->default_widget(&_embedded_widget), PortType::In, 1);
 
-  addPort<LogicData>(PortType::Out, "Logic", true);
-  addPort<AnyData>(PortType::Out, "Any", true);
+  addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
+  addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
 }
 
 void GetVariableNodeBase::compute()

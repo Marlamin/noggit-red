@@ -21,7 +21,7 @@ GetVariableLazyNodeBase::GetVariableLazyNodeBase()
   addPort<StringData>(PortType::In, "Name<String>", true);
   addDefaultWidget(_in_ports[0].data_type->default_widget(&_embedded_widget), PortType::In, 0);
 
-  addPort<AnyData>(PortType::Out, "Any", true);
+  addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
 }
 
 void GetVariableLazyNodeBase::compute()
