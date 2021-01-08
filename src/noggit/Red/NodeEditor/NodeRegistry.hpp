@@ -29,6 +29,7 @@
 #include <noggit/Red/NodeEditor/Nodes/MatrixDecomposeNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/MatrixUnaryMathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/MatrixTransformNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/MatrixRotateQuaternionNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/ConditionNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicIfNode.hpp>
@@ -54,6 +55,7 @@
 #include <noggit/Red/NodeEditor/Nodes/ListDeclareNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/GetVariableNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/GetVariableLazyNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/SetVariableNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DeleteVariableNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/MatrixNode.hpp>
@@ -106,10 +108,13 @@ namespace noggit
           ret->registerModel<MatrixDecomposeNode>("Math//Matrix");
           ret->registerModel<MatrixUnaryMathNode>("Math//Matrix");
           ret->registerModel<MatrixTransformNode>("Math//Matrix");
+          ret->registerModel<MatrixRotateQuaternionNode>("Math//Matrix");
 
           ret->registerModel<DataConstantNode>("Data");
           ret->registerModel<GetVariableNode>("Data");
+          ret->registerModel<GetVariableLazyNode>("Data");
           ret->registerModel<GetContextVariableNode>("Data");
+          ret->registerModel<GetContextVariableLazyNode>("Data");
           ret->registerModel<SetVariableNode>("Data");
           ret->registerModel<SetContextVariableNode>("Data");
           ret->registerModel<DeleteVariableNode>("Data");
