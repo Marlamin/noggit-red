@@ -280,13 +280,13 @@ void MathNode::handleOperation(T first, T second)
     switch (_operation->currentIndex())
     {
       case 0: // Add
-        result = first + first;
+        result = first + second;
         break;
       case 1: // Subtract
-        result = first - first;
+        result = first - second;
         break;
       case 2: // Multiply
-        result = first * first;
+        result = first * second;
         break;
       case 3: // Divide
         if constexpr (std::is_same<T, int>::value || std::is_same<T, unsigned int>::value)
@@ -298,11 +298,11 @@ void MathNode::handleOperation(T first, T second)
             return;
           }
 
-          result = first / first;
+          result = first / second;
         }
         else
         {
-          result = first / first;
+          result = first / second;
         }
         break;
       case 4: // Module
@@ -319,7 +319,7 @@ void MathNode::handleOperation(T first, T second)
         }
         else
         {
-          result = std::fmod(first, first);
+          result = std::fmod(first, second);
         }
         break;
 
@@ -341,7 +341,7 @@ void MathNode::handleOperation(T first, T second)
     switch (_operation->currentIndex())
     {
       case 0: // Concatenate
-        result = first + first;
+        result = first + second;
         break;
       default:
         throw std::logic_error("String type only supports concatenation in MathNode.");

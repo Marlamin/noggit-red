@@ -124,16 +124,35 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
         {
           setCurrentLoop(connected_node);
           int it_index = logic_model->getIterationindex();
-          while (it_index >= 0 && it_index < logic_model->getNIteraitons() && !_return)
+
+          if (connected_model->name() == "LogicForLoopNode")
           {
-            markNodesComputed(connected_node, false);
+            while (it_index >= 0 && it_index < logic_model->getNIteraitons() && !_return)
+            {
+              markNodesComputed(connected_node, false);
 
-            if (!executeNode(connected_node, node))
-              return false;
+              if (!executeNode(connected_node, node))
+                return false;
 
-            logic_model->setComputed(true);
-            it_index = logic_model->getIterationindex();
+              logic_model->setComputed(true);
+              it_index = logic_model->getIterationindex();
+            }
           }
+          else // while loop
+          {
+            while (it_index >= 0 && it_index < logic_model->getNIteraitons() && !_return)
+            {
+              markNodesComputed(connected_node, false);
+              executeNodeLeaves(connected_node, node);
+
+              if (!executeNode(connected_node, node))
+                return false;
+
+              it_index = logic_model->getIterationindex();
+            }
+          }
+
+
           unsetCurrentLoop();
 
         }
@@ -203,6 +222,7 @@ void LogicBranch::markNodesComputed(Node* start_node, bool state)
   auto& nodeState = start_node->nodeState();
 
   model->setComputed(state);
+  markNodeLeavesComputed(start_node, start_node, state);
 
   for (int i = 0; i < model->nPorts(PortType::Out); ++i)
   {

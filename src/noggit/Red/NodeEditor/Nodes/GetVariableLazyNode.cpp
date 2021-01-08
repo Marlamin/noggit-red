@@ -44,7 +44,7 @@ void GetVariableLazyNodeBase::compute()
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage((boost::format("Error: variable \"%s\" of type \"%s\" does not match required type \"%s\".")
-                          % variable_name % it->second.first.c_str() % _out_ports[1].data_type->type().id.toStdString()).str().c_str());
+                          % variable_name % it->second.first.c_str() % _out_ports[0].data_type->type().id.toStdString()).str().c_str());
     return;
   }
 
