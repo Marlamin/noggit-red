@@ -35,9 +35,9 @@ namespace noggit
 
           QComboBox::connect(_operation, qOverload<int>(&QComboBox::currentIndexChanged)
               ,[this](int index)
-                             {
-                                 setCaption(_operation->currentText());
-                             }
+             {
+                 setCaption(_operation->currentText());
+             }
           );
 
           std::string type_name;

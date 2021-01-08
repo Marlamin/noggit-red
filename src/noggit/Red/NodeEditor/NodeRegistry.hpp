@@ -11,7 +11,10 @@
 
 #include <noggit/Red/NodeEditor/Nodes/MathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/MathUnaryNode.hpp>
+
 #include <noggit/Red/NodeEditor/Nodes/ColorMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/ColorToRGBANode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/RGBAtoColorNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/VectorMathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/VectorScalarMathNode.hpp>
@@ -25,7 +28,7 @@
 #include <noggit/Red/NodeEditor/Nodes/MatrixMathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/MatrixDecomposeNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/MatrixUnaryMathNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/MatrixRotateEulerNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/MatrixTransformNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/ConditionNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/LogicIfNode.hpp>
@@ -82,7 +85,9 @@ namespace noggit
 
           ret->registerModel<MathNode>("Math");
           ret->registerModel<MathUnaryNode>("Math");
-          ret->registerModel<ColorMathNode>("Math");
+          ret->registerModel<ColorMathNode>("Math//Color");
+          ret->registerModel<ColorToRGBANode>("Math//Color");
+          ret->registerModel<RGBAtoColorNode>("Math//Color");
 
           ret->registerModel<Vector2DMathNode>("Math//Vector");
           ret->registerModel<Vector3DMathNode>("Math//Vector");
@@ -100,7 +105,7 @@ namespace noggit
           ret->registerModel<MatrixMathNode>("Math//Matrix");
           ret->registerModel<MatrixDecomposeNode>("Math//Matrix");
           ret->registerModel<MatrixUnaryMathNode>("Math//Matrix");
-          ret->registerModel<MatrixRotateEulerNode>("Math//Matrix");
+          ret->registerModel<MatrixTransformNode>("Math//Matrix");
 
           ret->registerModel<DataConstantNode>("Data");
           ret->registerModel<GetVariableNode>("Data");

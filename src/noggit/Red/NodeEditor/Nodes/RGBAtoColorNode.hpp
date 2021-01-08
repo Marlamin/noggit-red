@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef NOGGIT_MATRIXROTATEEULERNODE_HPP
-#define NOGGIT_MATRIXROTATEEULERNODE_HPP
+#ifndef NOGGIT_RGBATOCOLORNODE_HPP
+#define NOGGIT_RGBATOCOLORNODE_HPP
 
 #include "BaseNode.hpp"
 
@@ -17,18 +17,14 @@ namespace noggit
 {
     namespace Red::NodeEditor::Nodes
     {
-        class MatrixRotateEulerNode : public BaseNode
+        class RGBAtoColorNode : public BaseNode
         {
         Q_OBJECT
 
         public:
-            MatrixRotateEulerNode();
-            NodeValidationState validate() override;
+            RGBAtoColorNode();
             void compute() override;
-            QJsonObject save() const override;
-            void restore(QJsonObject const& json_obj) override;
-
-        private:
+            NodeValidationState validate() override;
 
         };
 
@@ -36,4 +32,4 @@ namespace noggit
 
 }
 
-#endif //NOGGIT_MATRIXROTATEEULERNODE_HPP
+#endif //NOGGIT_RGBATOCOLORNODE_HPP
