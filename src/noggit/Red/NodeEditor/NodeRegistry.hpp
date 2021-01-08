@@ -60,6 +60,9 @@
 #include <noggit/Red/NodeEditor/Nodes/DeleteVariableNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/MatrixNode.hpp>
 
+#include <noggit/Red/NodeEditor/Nodes/LoadImageNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/ImageInfoNode.hpp>
+
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/GenericTypeConverter.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Scene/NodeScene.hpp>
@@ -85,12 +88,16 @@ namespace noggit
         {
           auto ret = std::make_shared<DataModelRegistry>();
 
+          // Math
           ret->registerModel<MathNode>("Math");
           ret->registerModel<MathUnaryNode>("Math");
+
+          // Color Math
           ret->registerModel<ColorMathNode>("Math//Color");
           ret->registerModel<ColorToRGBANode>("Math//Color");
           ret->registerModel<RGBAtoColorNode>("Math//Color");
 
+          // Vector Math
           ret->registerModel<Vector2DMathNode>("Math//Vector");
           ret->registerModel<Vector3DMathNode>("Math//Vector");
           ret->registerModel<Vector4DMathNode>("Math//Vector");
@@ -104,12 +111,14 @@ namespace noggit
           ret->registerModel<Vector3DToXYZNode>("Math//Vector");
           ret->registerModel<Vector4DToXYZWNode>("Math//Vector");
 
+          // Matrix
           ret->registerModel<MatrixMathNode>("Math//Matrix");
           ret->registerModel<MatrixDecomposeNode>("Math//Matrix");
           ret->registerModel<MatrixUnaryMathNode>("Math//Matrix");
           ret->registerModel<MatrixTransformNode>("Math//Matrix");
           ret->registerModel<MatrixRotateQuaternionNode>("Math//Matrix");
 
+          // Data
           ret->registerModel<DataConstantNode>("Data");
           ret->registerModel<GetVariableNode>("Data");
           ret->registerModel<GetVariableLazyNode>("Data");
@@ -121,6 +130,11 @@ namespace noggit
           ret->registerModel<DeleteContextVariableNode>("Data");
           ret->registerModel<MatrixNode>("Data");
 
+          // Image
+          ret->registerModel<LoadImageNode>("Data//Image");
+          ret->registerModel<ImageInfoNode>("Data//Image");
+
+          // Logic
           ret->registerModel<ConditionNode>("Logic");
           ret->registerModel<LogicBeginNode>("Logic//Flow");
           ret->registerModel<LogicIfNode>("Logic//Flow");
@@ -143,6 +157,7 @@ namespace noggit
           ret->registerModel<ListEraseNode>("Containers//List");
           ret->registerModel<ListReserveNode>("Containers//List");
           ret->registerModel<ListDeclareNode>("Containers//List");
+
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);
           ret->REGISTER_TYPE_CONVERTER(Decimal, Boolean);

@@ -28,6 +28,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QColor>
+#include <QPixmap>
 
 using QtNodes::NodeDataType;
 using QtNodes::NodeData;
@@ -446,6 +447,7 @@ DECLARE_NODE_DATA_TYPE(list, List, std::vector<std::shared_ptr<NodeData>>*, NoDe
 
 // Custom types
 DECLARE_NODE_DATA_TYPE(color, Color, glm::vec4, DefaultColorWidget);
+DECLARE_NODE_DATA_TYPE(image, Image, QPixmap, NoDefaultWidget);
 
 
 
