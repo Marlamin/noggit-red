@@ -142,7 +142,7 @@ struct DefaultUnsignedIntWidget
     static QWidget* generate(QWidget* parent)
     {
       auto widget = new QSpinBox(parent);
-      widget->setRange(std::numeric_limits<std::uint32_t>::min(), std::numeric_limits<std::uint32_t>::max());
+      widget->setRange(0, std::numeric_limits<std::int32_t>::max());
       return widget;
     }
 

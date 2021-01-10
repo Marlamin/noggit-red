@@ -62,6 +62,11 @@
 
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/LoadImageNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageInfoNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageSaveNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageCreateNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageTranslateNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageScaleNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageRotateNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
@@ -133,6 +138,11 @@ namespace noggit
           // Image
           ret->registerModel<LoadImageNode>("Data//Image");
           ret->registerModel<ImageInfoNode>("Data//Image");
+          ret->registerModel<ImageSaveNode>("Data//Image");
+          ret->registerModel<ImageCreateNode>("Data//Image");
+          ret->registerModel<ImageTranslateNode>("Data//Image");
+          ret->registerModel<ImageScaleNode>("Data//Image");
+          ret->registerModel<ImageRotateNode>("Data//Image");
 
           // Logic
           ret->registerModel<ConditionNode>("Logic");

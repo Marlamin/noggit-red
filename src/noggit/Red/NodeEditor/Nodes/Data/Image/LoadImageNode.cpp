@@ -49,7 +49,7 @@ void LoadImageNode::compute()
   auto path_ptr = static_cast<StringData*>(_in_ports[1].in_value.lock().get());
   QString path = path_ptr ? path_ptr->value().c_str() : static_cast<QLineEdit*>(_in_ports[1].default_widget)->text();
 
-  if (!image.load(path, ".png"))
+  if (!image.load(path, "PNG"))
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to load image.");

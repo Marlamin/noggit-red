@@ -18,6 +18,8 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
   {
     auto& port = _out_ports.emplace_back(caption, caption_visible);
     port.data_type = std::make_unique<T>();
+
+    //assert(port.data_type->type().id == "logic" && out_policy == ConnectionPolicy::Many);
     port.connection_policy = out_policy;
   }
   else
@@ -43,6 +45,8 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
   {
     auto port = _out_ports.emplace(_out_ports.begin() + port_index, caption, caption_visible);
     port->data_type = std::make_unique<T>();
+
+    assert(!(port->data_type->type().id == "logic" && out_policy == ConnectionPolicy::Many));
     port->connection_policy = out_policy;
   }
   else
@@ -58,6 +62,72 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDynamic(PortType port_type
 {
   addPort<T>(port_type, port_index, caption, caption_visible, out_policy);
   Q_EMIT portAdded(port_type, port_index);
+}
+
+template<typename T>
+void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type,
+                                                              const QString &caption,
+                                                              bool caption_visible,
+                                                              ConnectionPolicy out_policy)
+{
+  addPort<T>(port_type, caption, caption_visible, out_policy);
+
+  if (port_type == PortType::In)
+  {
+    PortIndex index = _in_ports.size() - 1;
+    addDefaultWidget(_in_ports[index].data_type->default_widget(&_embedded_widget), port_type, index);
+  }
+  else if (port_type == PortType::Out)
+  {
+    PortIndex index = _out_ports.size() - 1;
+    addDefaultWidget(_out_ports[index].data_type->default_widget(&_embedded_widget), port_type, index);
+  }
+  else
+  {
+    throw std::logic_error("Incorrect port type or port type None.");
+  }
+
+}
+
+template<typename T>
+void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type,
+                                                              PortIndex port_index,
+                                                              const QString &caption,
+                                                              bool caption_visible,
+                                                              ConnectionPolicy out_policy)
+{
+  addPort<T>(port_type, port_index, caption, caption_visible, out_policy);
+
+  if (port_type == PortType::In)
+  {
+    addDefaultWidget(_in_ports[port_index].data_type->default_widget(&_embedded_widget), port_type, port_index);
+  }
+  else if (port_type == PortType::Out)
+  {
+    addDefaultWidget(_out_ports[port_index].data_type->default_widget(&_embedded_widget), port_type, port_index);
+  }
+  else
+  {
+    throw std::logic_error("Incorrect port type or port type None.");
+  }
+}
+
+template<typename T>
+void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefaultDynamic(PortType port_type, PortIndex port_index,
+                                                                     const QString& caption, bool caption_visible,
+                                                                     ConnectionPolicy out_policy)
+{
+  addPortDefault<T>(port_type, port_index, caption, caption_visible, out_policy);
+  Q_EMIT portAdded(port_type, port_index);
+}
+
+template <typename T>
+std::shared_ptr<T> noggit::Red::NodeEditor::Nodes::BaseNode::defaultPortData(PortType port_type, PortIndex port_index)
+{
+  assert (port_type == PortType::In);
+  T* data_ptr = static_cast<T*>(_in_ports[port_index].in_value.lock().get());
+  auto ret = data_ptr ? _in_ports[port_index].in_value.lock() : _in_ports[port_index].data_type->default_widget_data(_in_ports[port_index].default_widget);
+  return std::static_pointer_cast<T>(ret);
 }
 
 #endif // NOGGIT_BASENODE_INL

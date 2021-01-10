@@ -148,8 +148,35 @@ namespace noggit
                          bool caption_visible,
                          ConnectionPolicy out_policy = ConnectionPolicy::Many);
 
+
+            template<typename T>
+            void addPortDefault(PortType port_type,
+                         QString const& caption,
+                         bool caption_visible,
+                         ConnectionPolicy out_policy = ConnectionPolicy::Many);
+
+            template<typename T>
+            void addPortDefault(PortType port_type,
+                         PortIndex port_index,
+                         QString const& caption,
+                         bool caption_visible,
+                         ConnectionPolicy out_policy = ConnectionPolicy::Many);
+
+            template <typename T>
+            void addPortDefaultDynamic(PortType port_type,
+                                      PortIndex port_index,
+                                      QString const& caption,
+                                      bool caption_visible,
+                                      ConnectionPolicy out_policy = ConnectionPolicy::Many);
+
             void deletePort(PortType port_type, PortIndex port_index);
             void deleteDefaultWidget(PortType port_type, PortIndex port_index);
+
+            void defaultWidgetToJson(PortType port_type, PortIndex port_index, QJsonObject& json_obj, QString const& name) const;
+            void defaultWidgetFromJson(PortType port_type, PortIndex port_index, const QJsonObject& json_obj, QString const& name);
+
+            template <typename T>
+            std::shared_ptr<T> defaultPortData(PortType port_type, PortIndex port_index);
 
         protected:
 

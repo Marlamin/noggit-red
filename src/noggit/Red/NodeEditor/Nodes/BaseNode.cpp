@@ -282,6 +282,31 @@ void BaseNode::addWidgetBottom(QWidget* widget)
   _embedded_widget_layout_bottom->addWidget(widget);
 }
 
+void BaseNode::defaultWidgetToJson(PortType port_type, PortIndex port_index, QJsonObject& json_obj, const QString& name) const
+{
+  if (port_type == PortType::In)
+  {
+    _in_ports[port_index].data_type->to_json(_in_ports[port_index].default_widget, json_obj, name.toStdString());
+  }
+  else if (port_type == PortType::Out)
+  {
+    _out_ports[port_index].data_type->to_json(_out_ports[port_index].default_widget, json_obj, name.toStdString());
+  }
+}
+
+void BaseNode::defaultWidgetFromJson(PortType port_type, PortIndex port_index, const QJsonObject& json_obj, const QString& name)
+{
+  if (port_type == PortType::In)
+  {
+    _in_ports[port_index].data_type->from_json(_in_ports[port_index].default_widget, json_obj, name.toStdString());
+  }
+  else if (port_type == PortType::Out)
+  {
+    _out_ports[port_index].data_type->from_json(_out_ports[port_index].default_widget, json_obj, name.toStdString());
+  }
+}
+
+
 
 
 
