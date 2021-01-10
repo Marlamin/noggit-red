@@ -1,53 +1,49 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "ImageSaveNode.hpp"
+#include "ImageGetPixelNode.hpp"
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
-#include <QDir>
-#include <QFileInfo>
-
 using namespace noggit::Red::NodeEditor::Nodes;
 
-ImageSaveNode::ImageSaveNode()
+ImageGetPixelNode::ImageGetPixelNode()
 : LogicNodeBase()
 {
-  setName("ImageSaveNode");
-  setCaption("Image Save");
+  setName("ImageGetPixelNode");
+  setCaption("Image Get Pixel");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
   addPortDefault<ImageData>(PortType::In, "Image", true);
-  addPortDefault<StringData>(PortType::In, "Path<String>", true);
+  addPortDefault<Vector2DData>(PortType::In, "PixelXY<Vector2D>", true);
 
   addPort<LogicData>(PortType::Out, "Logic", true);
+  addPort<ColorData>(PortType::Out, "Color", true);
 }
 
-void ImageSaveNode::compute()
+void ImageGetPixelNode::compute()
 {
   QImage image = static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value();
-  auto path_ptr = static_cast<StringData*>(_in_ports[2].in_value.lock().get());
-  QString path = path_ptr ? path_ptr->value().c_str() : static_cast<QLineEdit*>(_in_ports[2].default_widget)->text();
+  glm::vec2 pixel_xy = defaultPortData<Vector2DData>(PortType::In, 2)->value();
 
-  QDir path_folder = QFileInfo(path).absoluteDir();
-  if(!path_folder.exists())
-  {
-    path_folder.mkpath(".");
-  }
-
-  if (path.isEmpty() || !image.save(path, "PNG"))
+  if (pixel_xy.x >= image.width() || pixel_xy.y >= image.height() || pixel_xy.y < 0 || pixel_xy.x < 0)
   {
     setValidationState(NodeValidationState::Error);
-    setValidationMessage("Error: saving image failed.");
+    setValidationMessage("Error: pixel coordinates are out of range.");
     return;
   }
 
+  QColor color = image.pixelColor(pixel_xy.x, pixel_xy.y);
+
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   Q_EMIT dataUpdated(0);
+
+  _out_ports[1].out_value = std::make_shared<ColorData>(glm::vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF()));
+  Q_EMIT dataUpdated(1);
 }
 
-NodeValidationState ImageSaveNode::validate()
+NodeValidationState ImageGetPixelNode::validate()
 {
   if (!static_cast<ImageData*>(_in_ports[1].in_value.lock().get()))
   {
@@ -56,22 +52,22 @@ NodeValidationState ImageSaveNode::validate()
     return _validation_state;
   }
 
-  return LogicNodeBase::validate();
+   return LogicNodeBase::validate();
 }
 
-QJsonObject ImageSaveNode::save() const
+QJsonObject ImageGetPixelNode::save() const
 {
   QJsonObject json_obj = BaseNode::save();
 
-  _in_ports[2].data_type->to_json(_in_ports[2].default_widget, json_obj, "path");
+  defaultWidgetToJson(PortType::In, 2, json_obj, "pixel_xy");
 
   return json_obj;
 }
 
-void ImageSaveNode::restore(const QJsonObject& json_obj)
+void ImageGetPixelNode::restore(const QJsonObject& json_obj)
 {
   BaseNode::restore(json_obj);
-  _in_ports[2].data_type->from_json(_in_ports[2].default_widget, json_obj, "path");
-}
 
+  defaultWidgetFromJson(PortType::In, 2, json_obj, "pixel_xy");
+}
 

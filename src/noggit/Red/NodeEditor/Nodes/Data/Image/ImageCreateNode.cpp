@@ -30,10 +30,10 @@ void ImageCreateNode::compute()
   unsigned int height = defaultPortData<UnsignedIntegerData>(PortType::In, 2)->value();
   glm::vec4 color = defaultPortData<ColorData>(PortType::In, 3)->value();
 
-  QPixmap pixmap = QPixmap(QSize(width, height));
-  pixmap.fill(QColor::fromRgbF(color.r, color.b, color.g, color.a));
+  QImage image = QImage(QSize(width, height), QImage::Format_RGBA8888);
+  image.fill(QColor::fromRgbF(color.r, color.b, color.g, color.a));
 
-  _out_ports[1].out_value = std::make_shared<ImageData>(pixmap);
+  _out_ports[1].out_value = std::make_shared<ImageData>(image);
   Q_EMIT dataUpdated(1);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
