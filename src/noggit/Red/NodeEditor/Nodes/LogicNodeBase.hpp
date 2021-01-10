@@ -4,7 +4,7 @@
 #define NOGGIT_LOGICNODEBASE_HPP
 
 #include "BaseNode.hpp"
-#include "Data/GenericData.hpp"
+#include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;

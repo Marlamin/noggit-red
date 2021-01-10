@@ -4,7 +4,7 @@
 #include <external/NodeEditor/include/nodes/FlowScene>
 #include <external/tsl/robin_map.h>
 
-#include "../Data/GenericData.hpp"
+#include "../DataTypes/GenericData.hpp"
 
 using QtNodes::DataModelRegistry;
 using QtNodes::FlowScene;

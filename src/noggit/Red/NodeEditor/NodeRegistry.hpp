@@ -9,62 +9,62 @@
 #include <external/NodeEditor/include/nodes/ConnectionStyle>
 #include <external/NodeEditor/include/nodes/TypeConverter>
 
-#include <noggit/Red/NodeEditor/Nodes/MathNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/MathUnaryNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/MathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/MathUnaryNode.hpp>
 
-#include <noggit/Red/NodeEditor/Nodes/ColorMathNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/ColorToRGBANode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/RGBAtoColorNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Color/ColorMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Color/ColorToRGBANode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Color/RGBAtoColorNode.hpp>
 
-#include <noggit/Red/NodeEditor/Nodes/VectorMathNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/VectorScalarMathNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Vector2DToXYNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Vector3DToXYZNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Vector4DToXYZWNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/XYtoVector2D.hpp>
-#include <noggit/Red/NodeEditor/Nodes/XYZtoVector3DNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/XYZWtoVector4DNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Vector/VectorMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Vector/VectorScalarMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Vector/Vector2DToXYNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Vector/Vector3DToXYZNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Vector/Vector4DToXYZWNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Vector/XYtoVector2D.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Vector/XYZtoVector3DNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Vector/XYZWtoVector4DNode.hpp>
 
-#include <noggit/Red/NodeEditor/Nodes/MatrixMathNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/MatrixDecomposeNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/MatrixUnaryMathNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/MatrixTransformNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/MatrixRotateQuaternionNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixDecomposeNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixUnaryMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixTransformNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixRotateQuaternionNode.hpp>
 
-#include <noggit/Red/NodeEditor/Nodes/ConditionNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/LogicIfNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/LogicBeginNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/LogicBreakNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/LogicContinueNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/LogicReturnNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/LogicReturnNoDataNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/PrintNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/LogicForLoopNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/LogicWhileLoopNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/LogicChainNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/LogicProcedureNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/DataConstantNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/ConditionNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicIfNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicBeginNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicBreakNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicContinueNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicReturnNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicReturnNoDataNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Functions/PrintNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicForLoopNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicWhileLoopNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicChainNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicProcedureNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/DataConstantNode.hpp>
 
-#include <noggit/Red/NodeEditor/Nodes/DataListNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/ListAddNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/ListGetNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/ListSizeNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/ListClearNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/ListEraseNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/ListReserveNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/ListDeclareNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/List/DataListNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/List/ListAddNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/List/ListGetNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/List/ListSizeNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/List/ListClearNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/List/ListEraseNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/List/ListReserveNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/List/ListDeclareNode.hpp>
 
-#include <noggit/Red/NodeEditor/Nodes/GetVariableNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/GetVariableLazyNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/SetVariableNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/DeleteVariableNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/MatrixNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/GetVariableNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/GetVariableLazyNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/SetVariableNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/DeleteVariableNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixNode.hpp>
 
-#include <noggit/Red/NodeEditor/Nodes/LoadImageNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/ImageInfoNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/LoadImageNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageInfoNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Data/GenericTypeConverter.hpp>
+#include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Scene/NodeScene.hpp>
 
 using QtNodes::DataModelRegistry;
@@ -112,6 +112,7 @@ namespace noggit
           ret->registerModel<Vector4DToXYZWNode>("Math//Vector");
 
           // Matrix
+          ret->registerModel<MatrixNode>("Math//Matrix");
           ret->registerModel<MatrixMathNode>("Math//Matrix");
           ret->registerModel<MatrixDecomposeNode>("Math//Matrix");
           ret->registerModel<MatrixUnaryMathNode>("Math//Matrix");
@@ -128,7 +129,6 @@ namespace noggit
           ret->registerModel<SetContextVariableNode>("Data");
           ret->registerModel<DeleteVariableNode>("Data");
           ret->registerModel<DeleteContextVariableNode>("Data");
-          ret->registerModel<MatrixNode>("Data");
 
           // Image
           ret->registerModel<LoadImageNode>("Data//Image");
