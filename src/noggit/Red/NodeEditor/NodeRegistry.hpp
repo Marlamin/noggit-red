@@ -96,6 +96,8 @@
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseSelectNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseTransformPointNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseTurbulenceNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseCurveNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseTerraceNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
@@ -197,6 +199,8 @@ namespace noggit
           ret->registerModel<NoiseExponentNode>("Data//Noise//Modifiers");
           ret->registerModel<NoiseInvertNode>("Data//Noise//Modifiers");
           ret->registerModel<NoiseScaleBiasNode>("Data//Noise//Modifiers");
+          ret->registerModel<NoiseCurveNode>("Data//Noise//Modifiers");
+          ret->registerModel<NoiseTerraceNode>("Data//Noise//Modifiers");
           ret->registerModel<NoiseBlendNode>("Data//Noise//Selectors");
           ret->registerModel<NoiseSelectNode>("Data//Noise//Selectors");
           ret->registerModel<NoiseDisplaceNode>("Data//Noise//Transform");
