@@ -31,7 +31,7 @@ void ImageFillNode::compute()
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   Q_EMIT dataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<ImageData>(image);
+  _out_ports[1].out_value = _in_ports[1].in_value.lock();
   Q_EMIT dataUpdated(1);
 }
 

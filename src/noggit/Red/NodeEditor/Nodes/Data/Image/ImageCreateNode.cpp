@@ -33,7 +33,7 @@ void ImageCreateNode::compute()
   QImage image = QImage(QSize(width, height), QImage::Format_RGBA8888);
   image.fill(QColor::fromRgbF(color.r, color.b, color.g, color.a));
 
-  _out_ports[1].out_value = std::make_shared<ImageData>(image);
+  _out_ports[1].out_value = std::make_shared<ImageData>(std::move(image));
   Q_EMIT dataUpdated(1);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);

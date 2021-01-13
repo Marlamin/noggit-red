@@ -67,6 +67,35 @@
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageTranslateNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageScaleNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageRotateNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageSetPixelNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageGetPixelNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageToGrayscaleNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageFillNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageInvertNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageMirrorNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageResizeNode.hpp>
+
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoisePerlinNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseToImageNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseVoronoiNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseBillowNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseCheckerboardNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseConstValueNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseCylindersNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseSpheresNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseRidgedMultiNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseMathNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseAbsNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseBlendNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseCacheNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseClampNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseDisplaceNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseExponentNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseInvertNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseScaleBiasNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseSelectNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseTransformPointNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseTurbulenceNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
@@ -143,6 +172,36 @@ namespace noggit
           ret->registerModel<ImageTranslateNode>("Data//Image");
           ret->registerModel<ImageScaleNode>("Data//Image");
           ret->registerModel<ImageRotateNode>("Data//Image");
+          ret->registerModel<ImageInvertNode>("Data//Image");
+          ret->registerModel<ImageFillNode>("Data//Image");
+          ret->registerModel<ImageResizeNode>("Data//Image");
+          ret->registerModel<ImageGetPixelNode>("Data//Image");
+          ret->registerModel<ImageSetPixelNode>("Data//Image");
+          ret->registerModel<ImageToGrayscaleNode>("Data//Image");
+          ret->registerModel<ImageMirrorNode>("Data//Image");
+
+          // Noise
+          ret->registerModel<NoisePerlinNode>("Data//Noise//Generators");
+          ret->registerModel<NoiseBillowNode>("Data//Noise//Generators");
+          ret->registerModel<NoiseVoronoiNode>("Data//Noise//Generators");
+          ret->registerModel<NoiseRidgedMultiNode>("Data//Noise//Generators");
+          ret->registerModel<NoiseSpheresNode>("Data//Noise//Generators");
+          ret->registerModel<NoiseCylindersNode>("Data//Noise//Generators");
+          ret->registerModel<NoiseConstValueNode>("Data//Noise//Generators");
+          ret->registerModel<NoiseCheckerboardNode>("Data//Noise//Generators");
+          ret->registerModel<NoiseMathNode>("Data//Noise");
+          ret->registerModel<NoiseToImageNode>("Data//Noise");
+          ret->registerModel<NoiseCacheNode>("Data//Noise");
+          ret->registerModel<NoiseAbsNode>("Data//Noise//Modifiers");
+          ret->registerModel<NoiseClampNode>("Data//Noise//Modifiers");
+          ret->registerModel<NoiseExponentNode>("Data//Noise//Modifiers");
+          ret->registerModel<NoiseInvertNode>("Data//Noise//Modifiers");
+          ret->registerModel<NoiseScaleBiasNode>("Data//Noise//Modifiers");
+          ret->registerModel<NoiseBlendNode>("Data//Noise//Selectors");
+          ret->registerModel<NoiseSelectNode>("Data//Noise//Selectors");
+          ret->registerModel<NoiseDisplaceNode>("Data//Noise//Transform");
+          ret->registerModel<NoiseTransformPointNode>("Data//Noise//Transform");
+          ret->registerModel<NoiseTurbulenceNode>("Data//Noise//Transform");
 
           // Logic
           ret->registerModel<ConditionNode>("Logic");

@@ -194,6 +194,7 @@ add_subdirectory (src/external/framelesshelper)
 add_subdirectory (src/external/qtimgui)
 add_subdirectory (src/external/QtAdvancedDockingSystem)
 add_subdirectory (src/external/NodeEditor)
+add_subdirectory (src/external/libnoise)
 
 # Add the found include directories to our include list.
 include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/include/")
@@ -229,6 +230,7 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/pngpp" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/zlib" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguizmo" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguipiemenu" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/libnoise/src" )
 include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 COLLECT_FILES(false noggit_root_sources src/noggit .cpp)
@@ -338,6 +340,8 @@ TARGET_LINK_LIBRARIES (noggit
   qt_imgui_widgets
   qtadvanceddocking
   nodes
+  noise-static
+  noiseutils-static
 )
 
 set (_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")

@@ -60,7 +60,7 @@ void LoadImageNode::compute()
 
   Q_EMIT dataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<ImageData>(image);
+  _out_ports[1].out_value = std::make_shared<ImageData>(std::move(image));
 
   Q_EMIT dataUpdated(1);
 }

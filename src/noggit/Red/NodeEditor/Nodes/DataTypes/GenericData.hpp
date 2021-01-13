@@ -7,6 +7,7 @@
 #include <external/glm/glm.hpp>
 #include <external/glm/gtc/quaternion.hpp>
 #include <external/qt-color-widgets/qt-color-widgets/color_selector.hpp>
+#include <external/libnoise/src/noise/noise.h>
 
 #include <noggit/ui/font_awesome.hpp>
 
@@ -55,6 +56,8 @@ public:
 
     [[nodiscard]]
     Type value() const { return _value; }
+
+    Ty* value_ptr() { return &_value; };
 
     [[nodiscard]]
     QString toQString() const { return C::to_string(_value); }
@@ -479,6 +482,7 @@ DECLARE_NODE_DATA_TYPE(list, List, std::vector<std::shared_ptr<NodeData>>*, NoDe
 // Custom types
 DECLARE_NODE_DATA_TYPE(color, Color, glm::vec4, DefaultColorWidget);
 DECLARE_NODE_DATA_TYPE(image, Image, QImage, NoDefaultWidget);
+DECLARE_NODE_DATA_TYPE(noise, Noise, std::shared_ptr<noise::module::Module>, NoDefaultWidget);
 
 
 

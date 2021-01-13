@@ -17,12 +17,12 @@ namespace noggit
 {
     namespace Red::NodeEditor::Nodes
     {
-        class InvertImageNode : public LogicNodeBase
+        class ImageInvertNode : public LogicNodeBase
         {
         Q_OBJECT
 
         public:
-            InvertImageNode();
+            ImageInvertNode();
             void compute() override;
             NodeValidationState validate() override;
 

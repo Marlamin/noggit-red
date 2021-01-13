@@ -25,23 +25,23 @@ ImageSetPixelNode::ImageSetPixelNode()
 
 void ImageSetPixelNode::compute()
 {
-  QImage image = static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value();
+  QImage* image = static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value_ptr();
   glm::vec2 pixel_xy = defaultPortData<Vector2DData>(PortType::In, 2)->value();
   glm::vec4 color = defaultPortData<ColorData>(PortType::In, 3)->value();
 
-  if (pixel_xy.x >= image.width() || pixel_xy.y >= image.height() || pixel_xy.y < 0 || pixel_xy.x < 0)
+  if (pixel_xy.x >= image->width() || pixel_xy.y >= image->height() || pixel_xy.y < 0 || pixel_xy.x < 0)
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: pixel coordinates are out of range.");
     return;
   }
 
-  image.setPixelColor(pixel_xy.x, pixel_xy.y, QColor::fromRgbF(color.r, color.g, color.b, color.a));
+  image->setPixelColor(pixel_xy.x, pixel_xy.y, QColor::fromRgbF(color.r, color.g, color.b, color.a));
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   Q_EMIT dataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<ImageData>(image);
+  _out_ports[1].out_value = _in_ports[1].in_value.lock();
   Q_EMIT dataUpdated(1);
 }
 

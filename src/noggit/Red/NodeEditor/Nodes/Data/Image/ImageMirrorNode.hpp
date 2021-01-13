@@ -17,12 +17,12 @@ namespace noggit
 {
     namespace Red::NodeEditor::Nodes
     {
-        class MirrorImageNode : public LogicNodeBase
+        class ImageMirrorNode : public LogicNodeBase
         {
         Q_OBJECT
 
         public:
-            MirrorImageNode();
+            ImageMirrorNode();
             void compute() override;
             NodeValidationState validate() override;
             QJsonObject save() const override;

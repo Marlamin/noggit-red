@@ -7,7 +7,7 @@
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
-MirrorImageNode::MirrorImageNode()
+ImageMirrorNode::ImageMirrorNode()
 : LogicNodeBase()
 {
   setName("ImageMirrorNode");
@@ -23,7 +23,7 @@ MirrorImageNode::MirrorImageNode()
   addPort<ImageData>(PortType::Out, "Image", true);
 }
 
-void MirrorImageNode::compute()
+void ImageMirrorNode::compute()
 {
   QImage image = static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value();
 
@@ -34,11 +34,11 @@ void MirrorImageNode::compute()
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   Q_EMIT dataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<ImageData>(new_img);
+  _out_ports[1].out_value = std::make_shared<ImageData>(std::move(new_img));
   Q_EMIT dataUpdated(1);
 }
 
-NodeValidationState MirrorImageNode::validate()
+NodeValidationState ImageMirrorNode::validate()
 {
   if (!static_cast<ImageData*>(_in_ports[1].in_value.lock().get()))
   {
@@ -50,7 +50,7 @@ NodeValidationState MirrorImageNode::validate()
    return LogicNodeBase::validate();
 }
 
-QJsonObject MirrorImageNode::save() const
+QJsonObject ImageMirrorNode::save() const
 {
   QJsonObject json_obj = BaseNode::save();
 
@@ -60,7 +60,7 @@ QJsonObject MirrorImageNode::save() const
   return json_obj;
 }
 
-void MirrorImageNode::restore(const QJsonObject& json_obj)
+void ImageMirrorNode::restore(const QJsonObject& json_obj)
 {
   BaseNode::restore(json_obj);
 
