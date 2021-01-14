@@ -37,7 +37,6 @@ void ImageFillNode::compute()
 
 NodeValidationState ImageFillNode::validate()
 {
-
   if (!static_cast<ImageData*>(_in_ports[1].in_value.lock().get()))
   {
     setValidationState(NodeValidationState::Error);
