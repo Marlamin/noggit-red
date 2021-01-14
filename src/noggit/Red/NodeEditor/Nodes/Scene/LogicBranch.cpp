@@ -194,11 +194,7 @@ bool LogicBranch::executeNodeLeaves(Node* node, Node* source_node)
         continue;
 
       if (connected_model->isLogicNode())
-      {
-        connected_model->setValidationState(NodeValidationState::Error);
-        connected_model->setValidationMessage("Error: Logic node is out of logic flow.");
         continue;
-      }
 
       if (!executeNodeLeaves(connected_node, node))
         return false;

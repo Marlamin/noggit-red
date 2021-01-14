@@ -4,6 +4,7 @@
 #define NOGGIT_CONTEXT_HPP
 
 #include <noggit/World.h>
+#include <noggit/Red/ViewportManager/ViewportManager.hpp>
 #include "NodeScene.hpp"
 #include <external/tsl/robin_map.h>
 
@@ -34,9 +35,12 @@ namespace noggit
             NodeExecutionContext getContextType() { return _context_type; };
             void makeCurrent();
             VariableMap* getVariableMap() { return &_variable_map; };
+            World* getWorld() { return _world; };
+            ViewportManager::ViewportManager* getViewport() { return _viewport; };
 
         private:
             World* _world;
+            ViewportManager::ViewportManager* _viewport;
             tsl::robin_map<std::string, QJsonDocument> _scene_cache;
             NodeExecutionContext _context_type;
             VariableMap _variable_map;

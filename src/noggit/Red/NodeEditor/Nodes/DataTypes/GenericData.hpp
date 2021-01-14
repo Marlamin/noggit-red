@@ -177,6 +177,7 @@ struct DefaultDecimalWidget
     {
       auto widget = new QDoubleSpinBox(parent);
       widget->setRange(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+      widget->setDecimals(7);
       return widget;
     }
 

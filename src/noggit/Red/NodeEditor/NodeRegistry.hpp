@@ -58,6 +58,8 @@
 #include <noggit/Red/NodeEditor/Nodes/Data/GetVariableLazyNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/SetVariableNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/DeleteVariableNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/String/StringEndsWithNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/String/StringSizeNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/LoadImageNode.hpp>
@@ -75,6 +77,7 @@
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageMirrorNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageResizeNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageGaussianBlurNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageMaskRandomPointsNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoisePerlinNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseToImageNode.hpp>
@@ -183,6 +186,11 @@ namespace noggit
           ret->registerModel<ImageToGrayscaleNode>("Data//Image");
           ret->registerModel<ImageMirrorNode>("Data//Image");
           ret->registerModel<ImageGaussianBlurNode>("Data//Image");
+          ret->registerModel<ImageMaskRandomPointsNode>("Data//Image");
+
+          // String
+          ret->registerModel<StringEndsWithNode>("Data//String");
+          ret->registerModel<StringSizeNode>("Data//String");
 
           // Noise
           ret->registerModel<NoisePerlinNode>("Data//Noise//Generators");
