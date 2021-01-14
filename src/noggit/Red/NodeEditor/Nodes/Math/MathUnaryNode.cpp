@@ -17,7 +17,7 @@ MathUnaryNode::MathUnaryNode()
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);
-  _operation->addItems({"Sin", "Cos", "Tan", "Asin", "Acos", "Atan", "Floor", "Ceil", "Log"});
+  _operation->addItems({"Sin", "Cos", "Tan", "Asin", "Acos", "Atan", "Floor", "Ceil", "Log", "Sqrt"});
 
   addWidgetTop(_operation);
 
@@ -74,6 +74,10 @@ void MathUnaryNode::compute()
 
     case 8: // Log
       result = std::log(value);
+      break;
+
+    case 9: // Sqrt
+      result = std::sqrt(value);
       break;
   }
 

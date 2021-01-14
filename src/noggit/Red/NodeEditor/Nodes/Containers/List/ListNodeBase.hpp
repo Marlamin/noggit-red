@@ -41,7 +41,11 @@ namespace noggit
               {"Matrix3x3", "mat3"},
               {"Quaternion", "quat"},
               {"Procedure", "procedure"},
-              {"Color", "color"}
+              {"Color", "color"},
+              {"Noise", "noise"},
+              {"Image", "image"},
+
+
           }
       };
 
@@ -57,7 +61,9 @@ namespace noggit
                                "Matrix3x3",
                                "Quaternion",
                                "Procedure",
-                               "Color"
+                               "Color",
+                               "Noise",
+                               "Image"
       };
 
     };
