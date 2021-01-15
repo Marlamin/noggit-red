@@ -25,10 +25,6 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
   ui->setupUi(body);
   setCentralWidget(body);
 
-  auto titlebar = new QWidget(this);
-  ui::setupFramelessWindow(titlebar, this, minimumSize(), maximumSize(), true);
-  setMenuWidget(titlebar);
-
   setWindowFlags(windowFlags() | Qt::Tool | Qt::WindowStaysOnTopHint);
 
   _model = new QFileSystemModel(this);
