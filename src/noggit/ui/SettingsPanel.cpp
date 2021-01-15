@@ -149,7 +149,8 @@ namespace noggit
             ui->_theme->addItem(dir);
           }
         }
-      } else
+      }
+      else
       {
         LogError
             << "Failed to load themes. The \"themes/\" folder does not exist in Noggit directory. Using system theme."

@@ -62,6 +62,12 @@
 #include <noggit/Red/NodeEditor/Nodes/Data/String/StringSizeNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixNode.hpp>
 
+#include <noggit/Red/NodeEditor/Nodes/Data/Random/RandomDecimalNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Random/RandomDecimalRangeNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Random/RandomIntegerNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Random/RandomIntegerRangeNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Random/RandomSeedNode.hpp>
+
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/LoadImageNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageInfoNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageSaveNode.hpp>
@@ -106,6 +112,10 @@
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Scene/NodeScene.hpp>
+
+#include <QSettings>
+#include <QDir>
+#include <QByteArray>
 
 using QtNodes::DataModelRegistry;
 using QtNodes::FlowScene;
@@ -191,6 +201,14 @@ namespace noggit
           // String
           ret->registerModel<StringEndsWithNode>("Data//String");
           ret->registerModel<StringSizeNode>("Data//String");
+
+
+          // Random
+          ret->registerModel<RandomDecimalNode>("Data//Random");
+          ret->registerModel<RandomDecimalRangeNode>("Data//Random");
+          ret->registerModel<RandomIntegerNode>("Data//Random");
+          ret->registerModel<RandomIntegerRangeNode>("Data//Random");
+          ret->registerModel<RandomSeedNode>("Data//Random");
 
           // Noise
           ret->registerModel<NoisePerlinNode>("Data//Noise//Generators");
@@ -281,51 +299,67 @@ namespace noggit
 
         static void setStyle()
         {
-          ConnectionStyle::setConnectionStyle(
-              R"(
-              {
-              "FlowViewStyle": {
-                "BackgroundColor": [53, 53, 53],
-                "FineGridColor": [60, 60, 60],
-                "CoarseGridColor": [25, 25, 25]
-              },
-              "NodeStyle": {
-                "NormalBoundaryColor": [255, 255, 255],
-                "SelectedBoundaryColor": [255, 165, 0],
-                "GradientColor0": "gray",
-                "GradientColor1": [80, 80, 80],
-                "GradientColor2": [64, 64, 64],
-                "GradientColor3": [58, 58, 58],
-                "ShadowColor": [20, 20, 20],
-                "FontColor" : "white",
-                "FontColorFaded" : "gray",
-                "ConnectionPointColor": [169, 169, 169],
-                "FilledConnectionPointColor": "cyan",
-                "ErrorColor": "red",
-                "WarningColor": [128, 128, 0],
+          QSettings settings;
+          QString theme = settings.value("theme", 1).toString();
+          QDir theme_dir = QDir("./themes/");
 
-                "PenWidth": 1.0,
-                "HoveredPenWidth": 1.5,
+          if (theme != "System" && theme_dir.exists() && QDir(theme_dir.path() + "/" + theme).exists("nodes_theme.json"))
+          {
+            QFile json_file = QFile(QDir(theme_dir.path() + "/" + theme).filePath("nodes_theme.json"));
+            json_file.open(QIODevice::ReadOnly);
 
-                "ConnectionPointDiameter": 8.0,
+            QByteArray save_data = json_file.readAll();
 
-                "Opacity": 0.8
-              },
-              "ConnectionStyle": {
-                "ConstructionColor": "gray",
-                "NormalColor": "darkcyan",
-                "SelectedColor": [100, 100, 100],
-                "SelectedHaloColor": "orange",
-                "HoveredColor": "lightcyan",
+            ConnectionStyle::setConnectionStyle(save_data);
+          }
+          else
+          {
+            ConnectionStyle::setConnectionStyle(
+                R"(
+                {
+                "FlowViewStyle": {
+                  "BackgroundColor": [53, 53, 53],
+                  "FineGridColor": [60, 60, 60],
+                  "CoarseGridColor": [25, 25, 25]
+                },
+                "NodeStyle": {
+                  "NormalBoundaryColor": [255, 255, 255],
+                  "SelectedBoundaryColor": [255, 165, 0],
+                  "GradientColor0": "gray",
+                  "GradientColor1": [80, 80, 80],
+                  "GradientColor2": [64, 64, 64],
+                  "GradientColor3": [58, 58, 58],
+                  "ShadowColor": [20, 20, 20],
+                  "FontColor" : "white",
+                  "FontColorFaded" : "gray",
+                  "ConnectionPointColor": [169, 169, 169],
+                  "FilledConnectionPointColor": "cyan",
+                  "ErrorColor": "red",
+                  "WarningColor": [128, 128, 0],
 
-                "LineWidth": 3.0,
-                "ConstructionLineWidth": 2.0,
-                "PointDiameter": 10.0,
+                  "PenWidth": 1.0,
+                  "HoveredPenWidth": 1.5,
 
-                "UseDataDefinedColors": true
+                  "ConnectionPointDiameter": 8.0,
+
+                  "Opacity": 0.8
+                },
+                "ConnectionStyle": {
+                  "ConstructionColor": "gray",
+                  "NormalColor": "darkcyan",
+                  "SelectedColor": [100, 100, 100],
+                  "SelectedHaloColor": "orange",
+                  "HoveredColor": "lightcyan",
+
+                  "LineWidth": 3.0,
+                  "ConstructionLineWidth": 2.0,
+                  "PointDiameter": 10.0,
+
+                  "UseDataDefinedColors": true
+                }
               }
-            }
             )");
+          }
         }
     }
 }
