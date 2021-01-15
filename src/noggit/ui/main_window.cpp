@@ -205,6 +205,7 @@ namespace noggit
     void main_window::build_menu()
     {
       _dock_manager = new ads::CDockManager(this);
+      _dock_manager->setConfigFlag(ads::CDockManager::eConfigFlag::AllTabsHaveCloseButton, true);
       //_dock_manager->setStyleSheet("");
       _stack_widget = new QStackedWidget(_dock_manager);
 
