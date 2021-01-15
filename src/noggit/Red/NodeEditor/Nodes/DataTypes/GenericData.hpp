@@ -76,7 +76,7 @@ public:
     {
       auto value = D::value(widget);
 
-      if constexpr (std::is_same<typeof(value), nullptr_t>::value)
+      if constexpr (std::is_same<decltype(value), nullptr_t>::value)
       {
         auto data_ptr = std::make_shared<GenericData<Ty, type_id, type_name, C, D>>();
         data_ptr.reset();
