@@ -7,6 +7,8 @@
 #include <external/NodeEditor/include/nodes/FlowScene>
 #include <external/NodeEditor/include/nodes/FlowView>
 #include <external/NodeEditor/include/nodes/ConnectionStyle>
+#include <external/NodeEditor/include/nodes/FlowViewStyle>
+#include <external/NodeEditor/include/nodes/NodeStyle>
 #include <external/NodeEditor/include/nodes/TypeConverter>
 
 #include <noggit/Red/NodeEditor/Nodes/Math/MathNode.hpp>
@@ -121,6 +123,8 @@ using QtNodes::DataModelRegistry;
 using QtNodes::FlowScene;
 using QtNodes::FlowView;
 using QtNodes::ConnectionStyle;
+using QtNodes::FlowViewStyle;
+using QtNodes::NodeStyle;
 using QtNodes::TypeConverter;
 using QtNodes::TypeConverterId;
 
@@ -311,54 +315,8 @@ namespace noggit
             QByteArray save_data = json_file.readAll();
 
             ConnectionStyle::setConnectionStyle(save_data);
-          }
-          else
-          {
-            ConnectionStyle::setConnectionStyle(
-                R"(
-                {
-                "FlowViewStyle": {
-                  "BackgroundColor": [53, 53, 53],
-                  "FineGridColor": [60, 60, 60],
-                  "CoarseGridColor": [25, 25, 25]
-                },
-                "NodeStyle": {
-                  "NormalBoundaryColor": [255, 255, 255],
-                  "SelectedBoundaryColor": [255, 165, 0],
-                  "GradientColor0": "gray",
-                  "GradientColor1": [80, 80, 80],
-                  "GradientColor2": [64, 64, 64],
-                  "GradientColor3": [58, 58, 58],
-                  "ShadowColor": [20, 20, 20],
-                  "FontColor" : "white",
-                  "FontColorFaded" : "gray",
-                  "ConnectionPointColor": [169, 169, 169],
-                  "FilledConnectionPointColor": "cyan",
-                  "ErrorColor": "red",
-                  "WarningColor": [128, 128, 0],
-
-                  "PenWidth": 1.0,
-                  "HoveredPenWidth": 1.5,
-
-                  "ConnectionPointDiameter": 8.0,
-
-                  "Opacity": 0.8
-                },
-                "ConnectionStyle": {
-                  "ConstructionColor": "gray",
-                  "NormalColor": "darkcyan",
-                  "SelectedColor": [100, 100, 100],
-                  "SelectedHaloColor": "orange",
-                  "HoveredColor": "lightcyan",
-
-                  "LineWidth": 3.0,
-                  "ConstructionLineWidth": 2.0,
-                  "PointDiameter": 10.0,
-
-                  "UseDataDefinedColors": true
-                }
-              }
-            )");
+            FlowViewStyle::setStyle(save_data);
+            NodeStyle::setNodeStyle(save_data);
           }
         }
     }
