@@ -24,7 +24,7 @@ namespace noggit
         public:
             explicit LogicBranch(Node* logic_node);
             bool executeNode(Node* node, Node* source_node);
-            bool executeNodeLeaves(Node* node, Node* source_node);
+            static bool executeNodeLeaves(Node* node, Node* source_node);
             void markNodesComputed(Node* start_node, bool state);
             void markNodeLeavesComputed(Node* start_node, Node* source_node, bool state);
             void setCurrentLoop(Node* node) { _loop_stack.push(node); };

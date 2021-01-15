@@ -41,7 +41,7 @@ NoisePerlinNode::NoisePerlinNode()
   persistence->setMinimum(0.0);
   persistence->setValue(0.5);
 
-  addPortDefault<UnsignedIntegerData>(PortType::In, "Seed<Integer>", true);
+  addPortDefault<UnsignedIntegerData>(PortType::In, "Seed<UInteger>", true);
 
   addPort<NoiseData>(PortType::Out, "Noise", true);
 

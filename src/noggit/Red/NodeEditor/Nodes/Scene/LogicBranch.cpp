@@ -109,7 +109,7 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
       auto connected_model = static_cast<BaseNode*>(connected_node->nodeDataModel());
 
       // Execute data node leaves
-      if (!executeNodeLeaves(connected_node, node))
+      if (!LogicBranch::executeNodeLeaves(connected_node, node))
       {
         connected_model->setValidationState(NodeValidationState::Error);
         connected_model->setValidationMessage("Error: dependant leave nodes failed to execute.");
@@ -143,7 +143,7 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
             while (it_index >= 0 && it_index < logic_model->getNIteraitons() && !_return)
             {
               markNodesComputed(connected_node, false);
-              executeNodeLeaves(connected_node, node);
+              LogicBranch::executeNodeLeaves(connected_node, node);
 
               if (!executeNode(connected_node, node))
                 return false;
@@ -190,13 +190,10 @@ bool LogicBranch::executeNodeLeaves(Node* node, Node* source_node)
 
       auto connected_model = static_cast<BaseNode*>(connected_node->nodeDataModel());
 
-      if (connected_node == source_node || connected_model->isComputed() || connected_node == getCurrentLoop())
+      if (connected_node == source_node || connected_model->isComputed() || connected_model->isLogicNode())
         continue;
 
-      if (connected_model->isLogicNode())
-        continue;
-
-      if (!executeNodeLeaves(connected_node, node))
+      if (!LogicBranch::executeNodeLeaves(connected_node, node))
         return false;
 
       if (connected_model->validate() == NodeValidationState::Error)
