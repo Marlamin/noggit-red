@@ -490,7 +490,7 @@ CDockManager::CDockManager(QWidget *parent) :
 	d->DockAreaOverlay = new CDockOverlay(this, CDockOverlay::ModeDockAreaOverlay);
 	d->ContainerOverlay = new CDockOverlay(this, CDockOverlay::ModeContainerOverlay);
 	d->Containers.append(this);
-	d->loadStylesheet();
+	//d->loadStylesheet();
 
 	if (CDockManager::testConfigFlag(CDockManager::FocusHighlighting))
 	{

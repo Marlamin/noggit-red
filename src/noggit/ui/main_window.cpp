@@ -205,7 +205,7 @@ namespace noggit
     void main_window::build_menu()
     {
       _dock_manager = new ads::CDockManager(this);
-      _dock_manager->setStyleSheet("");
+      //_dock_manager->setStyleSheet("");
       _stack_widget = new QStackedWidget(_dock_manager);
 
       ads::CDockWidget* dock_mapview = new ads::CDockWidget("Map");
