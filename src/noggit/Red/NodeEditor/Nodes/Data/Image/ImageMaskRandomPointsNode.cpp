@@ -64,12 +64,22 @@ void ImageMaskRandomPointsNode::compute()
 
 NodeValidationState ImageMaskRandomPointsNode::validate()
 {
-   return LogicNodeBase::validate();
+  if (!static_cast<ImageData*>(_in_ports[1].in_value.lock().get()))
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: failed to evaluate image input.");
+    return _validation_state;
+  }
+
+  return LogicNodeBase::validate();
 }
 
 QJsonObject ImageMaskRandomPointsNode::save() const
 {
   QJsonObject json_obj = BaseNode::save();
+
+  defaultWidgetToJson(PortType::In, 2, json_obj, "seed");
+  defaultWidgetToJson(PortType::In, 3, json_obj, "density");
 
   return json_obj;
 }
@@ -77,5 +87,8 @@ QJsonObject ImageMaskRandomPointsNode::save() const
 void ImageMaskRandomPointsNode::restore(const QJsonObject& json_obj)
 {
   BaseNode::restore(json_obj);
+
+  defaultWidgetFromJson(PortType::In, 2, json_obj, "seed");
+  defaultWidgetFromJson(PortType::In, 3, json_obj, "density");
 }
 
