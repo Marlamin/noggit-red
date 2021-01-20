@@ -97,7 +97,7 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
     if (!static_cast<LogicData*>(model->outData(i).get())->value())
       continue;
 
-    auto const& connections = nodeState.connections(PortType::Out, i);
+    auto const& connections = nodeState.connectionsRef(PortType::Out, i);
 
     for (auto const& pair : connections)
     {
@@ -152,7 +152,6 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
             }
           }
 
-
           unsetCurrentLoop();
 
         }
@@ -179,7 +178,7 @@ bool LogicBranch::executeNodeLeaves(Node* node, Node* source_node)
 
   for (int i = 0; i < model->nPorts(PortType::In); ++i)
   {
-    auto const& connections = nodeState.connections(PortType::In, i);
+    auto const& connections = nodeState.connectionsRef(PortType::In, i);
 
     for (auto const& pair : connections)
     {
@@ -219,7 +218,7 @@ void LogicBranch::markNodesComputed(Node* start_node, bool state)
 
   for (int i = 0; i < model->nPorts(PortType::Out); ++i)
   {
-    auto const& connections = nodeState.connections(PortType::Out, i);
+    auto const& connections = nodeState.connectionsRef(PortType::Out, i);
 
     for (auto const& pair : connections)
     {
@@ -245,7 +244,7 @@ void LogicBranch::markNodeLeavesComputed(Node* start_node, Node* source_node, bo
 
   for (int i = 0; i < model->nPorts(PortType::In); ++i)
   {
-    auto const& connections = nodeState.connections(PortType::In, i);
+    auto const& connections = nodeState.connectionsRef(PortType::In, i);
 
 
     for (auto const& pair : connections)

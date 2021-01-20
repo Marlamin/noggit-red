@@ -26,6 +26,7 @@ BaseNode::BaseNode()
 
   auto layout = new QVBoxLayout(&_embedded_widget);
   layout->setContentsMargins(12, 12, 12, 12);
+  layout->setAlignment(Qt::AlignHCenter);
 
   _embedded_widget_layout_top = new QVBoxLayout();
   layout->addLayout(_embedded_widget_layout_top);

@@ -124,10 +124,19 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefaultDynamic(PortType po
 template <typename T>
 std::shared_ptr<T> noggit::Red::NodeEditor::Nodes::BaseNode::defaultPortData(PortType port_type, PortIndex port_index)
 {
-  assert (port_type == PortType::In);
-  T* data_ptr = static_cast<T*>(_in_ports[port_index].in_value.lock().get());
-  auto ret = data_ptr ? _in_ports[port_index].in_value.lock() : _in_ports[port_index].data_type->default_widget_data(_in_ports[port_index].default_widget);
-  return std::static_pointer_cast<T>(ret);
+  if (port_type == PortType::In)
+  {
+    T* data_ptr = static_cast<T*>(_in_ports[port_index].in_value.lock().get());
+    auto ret = data_ptr ? _in_ports[port_index].in_value.lock() : _in_ports[port_index].data_type->default_widget_data(_in_ports[port_index].default_widget);
+    return std::static_pointer_cast<T>(ret);
+  }
+  else if (port_type == PortType::Out)
+  {
+    auto ret = _out_ports[port_index].data_type->default_widget_data(_out_ports[port_index].default_widget);
+    return std::static_pointer_cast<T>(ret);
+  }
+
+  throw std::logic_error("Incorrect port type or port type None.");
 }
 
 #endif // NOGGIT_BASENODE_INL

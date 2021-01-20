@@ -1431,7 +1431,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _texBrush{new opengl::texture{}}
   , _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW)
 {
-
+  _context = noggit::NoggitRenderContext::MAP_VIEW;
   _transform_gizmo.setWorld(_world.get());
 
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);

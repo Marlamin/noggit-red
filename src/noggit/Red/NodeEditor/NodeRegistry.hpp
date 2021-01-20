@@ -86,6 +86,9 @@
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageResizeNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageGaussianBlurNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageMaskRandomPointsNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageBlendOpenGLNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageSetRegionNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/Image/ImageGetRegionNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoisePerlinNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseToImageNode.hpp>
@@ -111,6 +114,14 @@
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseCurveNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseTerraceNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseViewerNode.hpp>
+
+#include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainRaiseLowerNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainFlattenNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainBlurNode.hpp>
+
+#include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingTilesetNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingPaintTextureNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingSprayTextureNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
@@ -202,6 +213,9 @@ namespace noggit
           ret->registerModel<ImageMirrorNode>("Data//Image");
           ret->registerModel<ImageGaussianBlurNode>("Data//Image");
           ret->registerModel<ImageMaskRandomPointsNode>("Data//Image");
+          ret->registerModel<ImageBlendOpenGLNode>("Data//Image");
+          ret->registerModel<ImageSetRegionNode>("Data//Image");
+          ret->registerModel<ImageGetRegionNode>("Data//Image");
 
           // String
           ret->registerModel<StringEndsWithNode>("Data//String");
@@ -264,6 +278,15 @@ namespace noggit
           ret->registerModel<ListEraseNode>("Containers//List");
           ret->registerModel<ListReserveNode>("Containers//List");
           ret->registerModel<ListDeclareNode>("Containers//List");
+
+          // Actions
+          ret->registerModel<TerrainRaiseLowerNode>("World//Terrain//");
+          ret->registerModel<TerrainFlattenNode>("World//Terrain//");
+          ret->registerModel<TerrainBlurNode>("World//Terrain//");
+
+          ret->registerModel<TexturingTilesetNode>("World//Texturing//");
+          ret->registerModel<TexturingPaintTextureNode>("World//Texturing//");
+          ret->registerModel<TexturingSprayTextureNode>("World//Texturing//");
 
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);

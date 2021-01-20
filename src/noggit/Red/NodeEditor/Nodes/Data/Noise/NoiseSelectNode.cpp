@@ -36,6 +36,14 @@ void NoiseSelectNode::compute()
   module->SetEdgeFalloff(defaultPortData<DecimalData>(PortType::In, 3)->value());
 
   glm::vec2 bounds = defaultPortData<Vector2DData>(PortType::In, 4)->value();
+
+  if (bounds.x >= bounds.y)
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: bad bounds");
+    return;
+  }
+
   module->SetBounds(bounds.x, bounds.y);
 
   std::shared_ptr<noise::module::Module> noise_data;

@@ -30,21 +30,37 @@ void ImageInfoNode::compute()
   QImage image = static_cast<ImageData*>(_in_ports[0].in_value.lock().get())->value();
 
   auto size = image.size();
-  _out_ports[0].out_value = std::make_shared<Vector2DData>(glm::vec2(size.width(), size.height()));
-  Q_EMIT dataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<BooleanData>(image.hasAlphaChannel());
-  Q_EMIT dataUpdated(1);
+  if (_out_ports[0].connected)
+  {
+    _out_ports[0].out_value = std::make_shared<Vector2DData>(glm::vec2(size.width(), size.height()));
+    Q_EMIT dataUpdated(0);
+  }
 
-  _out_ports[2].out_value = std::make_shared<BooleanData>(image.isNull());
-  Q_EMIT dataUpdated(2);
+  if (_out_ports[1].connected)
+  {
+    _out_ports[1].out_value = std::make_shared<BooleanData>(image.hasAlphaChannel());
+    Q_EMIT dataUpdated(1);
+  }
 
-  _out_ports[3].out_value = std::make_shared<IntegerData>(image.depth());
-  Q_EMIT dataUpdated(3);
+  if (_out_ports[2].connected)
+  {
+    _out_ports[2].out_value = std::make_shared<BooleanData>(image.isNull());
+    Q_EMIT dataUpdated(2);
+  }
 
-  _out_ports[4].out_value = std::make_shared<BooleanData>(image.isGrayscale());
-  Q_EMIT dataUpdated(4);
+  if (_out_ports[3].connected)
+  {
+    _out_ports[3].out_value = std::make_shared<IntegerData>(image.depth());
+    Q_EMIT dataUpdated(3);
+  }
 
+  if (_out_ports[4].connected)
+  {
+    _out_ports[4].out_value = std::make_shared<BooleanData>(image.isGrayscale());
+    Q_EMIT dataUpdated(4);
+
+  }
 
 }
 

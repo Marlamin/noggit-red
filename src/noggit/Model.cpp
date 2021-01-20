@@ -793,7 +793,20 @@ void ModelRenderPass::init_uv_types(Model* m)
 
   if (m->_texture_unit_lookup.size() < texture_coord_combo_index + texture_count)
   {
-    throw std::out_of_range("model: texture_coord_combo_index out of range " + m->filename);
+    LogError << "model: texture_coord_combo_index out of range " << m->filename << std::endl;
+
+    for (int i = 0; i < texture_count; ++i)
+    {
+      switch (i)
+      {
+        case 0: tu_lookups[i] = texture_unit_lookup::t1; break;
+        case 1: tu_lookups[i] = texture_unit_lookup::t2; break;
+      }
+    }
+
+    return;
+
+    //throw std::out_of_range("model: texture_coord_combo_index out of range " + m->filename);
   }
 
   for (int i = 0; i < texture_count; ++i)

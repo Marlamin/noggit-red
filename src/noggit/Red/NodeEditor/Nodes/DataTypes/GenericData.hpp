@@ -10,6 +10,8 @@
 #include <external/libnoise/src/noise/noise.h>
 
 #include <noggit/ui/font_awesome.hpp>
+#include <noggit/MapChunk.h>
+#include <noggit/MapTile.h>
 
 #include <type_traits>
 #include <QString>
@@ -484,6 +486,9 @@ DECLARE_NODE_DATA_TYPE(list, List, std::vector<std::shared_ptr<NodeData>>*, NoDe
 DECLARE_NODE_DATA_TYPE(color, Color, glm::vec4, DefaultColorWidget);
 DECLARE_NODE_DATA_TYPE(image, Image, QImage, NoDefaultWidget);
 DECLARE_NODE_DATA_TYPE(noise, Noise, std::shared_ptr<noise::module::Module>, NoDefaultWidget);
+DECLARE_NODE_DATA_TYPE(chunk, Chunk, MapChunk*, NoDefaultWidget);
+DECLARE_NODE_DATA_TYPE(tile, Tile, MapTile*, NoDefaultWidget);
+
 
 
 

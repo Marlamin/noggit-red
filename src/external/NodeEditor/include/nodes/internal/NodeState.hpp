@@ -48,6 +48,9 @@ public:
   ConnectionPtrSet
   connections(PortType portType, PortIndex portIndex) const;
 
+  ConnectionPtrSet const&
+  connectionsRef(PortType portType, PortIndex portIndex) const;
+
   void
   setConnection(PortType portType,
                 PortIndex portIndex,

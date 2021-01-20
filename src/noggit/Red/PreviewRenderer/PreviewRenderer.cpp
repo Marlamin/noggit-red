@@ -29,8 +29,8 @@ PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderCont
   , _settings (new QSettings())
   , _width(width)
   , _height(height)
-  , _context(context)
 {
+  _context = context;
   _cache = {};
 
   opengl::context::save_current_context const context_save (::gl);

@@ -231,6 +231,7 @@ public:
   void set_editing_mode (editing_mode);
 
   noggit::NoggitRenderContext getRenderContext() { return _context; };
+  World* getWorld() { return _world.get(); };
 
 private:
   enum Modifier
@@ -355,8 +356,6 @@ private:
   opengl::texture* const _texBrush;
 
   noggit::Red::AssetBrowser::Ui::AssetBrowserWidget* _asset_browser;
-
-  noggit::NoggitRenderContext _context = noggit::NoggitRenderContext::MAP_VIEW;
 
   ::Ui::MapViewOverlay* _viewport_overlay_ui;
   ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;

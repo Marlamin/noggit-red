@@ -3,7 +3,9 @@
 #include "NodeEditor.hpp"
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/font_awesome.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Scene/Context.hpp>
 #include <noggit/Log.h>
+#include <noggit/MapView.h>
 
 #include <QFileDialog>
 #include <QTabWidget>
@@ -48,6 +50,10 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 
   ui->nodeArea->setTabsClosable(true);
   ui->nodeArea->setMovable(true);
+
+  // testing hack TODO: implement
+  gCurrentContext->setViewport(reinterpret_cast<ViewportManager::Viewport*>(parent));
+  gCurrentContext->setWorld(reinterpret_cast<MapView*>(parent)->getWorld());
 
   connect(ui->scriptsTree, &QTreeView::clicked
       ,[=] (const QModelIndex& index)

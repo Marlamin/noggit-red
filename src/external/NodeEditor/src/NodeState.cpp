@@ -52,6 +52,13 @@ connections(PortType portType, PortIndex portIndex) const
   return connections[portIndex];
 }
 
+NodeState::ConnectionPtrSet const&
+NodeState::
+connectionsRef(PortType portType, PortIndex portIndex) const
+{
+  return getEntries(portType)[portIndex];
+}
+
 
 void
 NodeState::

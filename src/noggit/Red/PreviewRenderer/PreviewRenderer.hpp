@@ -73,7 +73,6 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
     opengl::primitives::grid _grid;
 
     float _animtime = 0.f;
-    noggit::NoggitRenderContext _context;
 
     bool _destroying = false;
 

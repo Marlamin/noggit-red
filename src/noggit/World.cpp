@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/World.h>
+#include <noggit/World.inl>
 
 #include <math/frustum.hpp>
 #include <math/projection.hpp>
@@ -1454,56 +1455,7 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
   return adt->finishedLoading() && adt->GetVertex(x, z, V);
 }
 
-template<typename Fun>
-  bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, Fun&& fun)
-{
-  bool changed (false);
 
-  for (MapTile* tile : mapIndex.tiles_in_range (pos, radius))
-  {
-    if (!tile->finishedLoading())
-    {
-      continue;
-    }
-
-    for (MapChunk* chunk : tile->chunks_in_range (pos, radius))
-    {
-      if (fun (chunk))
-      {
-        changed = true;
-        mapIndex.setChanged (tile);
-      }
-    }
-  }
-
-  return changed;
-}
-template<typename Fun, typename Post>
-  bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, Fun&& fun, Post&& post)
-{
-  std::forward_list<MapChunk*> modified_chunks;
-
-  bool changed ( for_all_chunks_in_range
-                   ( pos, radius
-                   , [&] (MapChunk* chunk)
-                     {
-                       if (fun (chunk))
-                       {
-                         modified_chunks.emplace_front (chunk);
-                         return true;
-                       }
-                       return false;
-                     }
-                   )
-               );
-
-  for (MapChunk* chunk : modified_chunks)
-  {
-    post (chunk);
-  }
-
-  return changed;
-}
 
 void World::changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
 {
@@ -1677,62 +1629,6 @@ void World::setHoleADT(math::vector_3d const& pos, bool hole)
   for_all_chunks_on_tile(pos, [&](MapChunk* chunk) { chunk->setHole(pos, 1.0f, true, hole); });
 }
 
-
-template<typename Fun>
-  void World::for_all_chunks_on_tile (math::vector_3d const& pos, Fun&& fun)
-{
-  MapTile* tile (mapIndex.getTile (pos));
-
-  if (tile && tile->finishedLoading())
-  {
-    mapIndex.setChanged(tile);
-
-    for (size_t ty = 0; ty < 16; ++ty)
-    {
-      for (size_t tx = 0; tx < 16; ++tx)
-      {
-        fun(tile->getChunk(ty, tx));
-      }
-    }
-  }
-}
-
-template<typename Fun>
-  void World::for_chunk_at(math::vector_3d const& pos, Fun&& fun)
-{
-  MapTile* tile(mapIndex.getTile(pos));
-
-  if (tile && tile->finishedLoading())
-  {
-    mapIndex.setChanged(tile);
-    fun(tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
-  }
-}
-
-template<typename Fun>
-  auto World::for_maybe_chunk_at(math::vector_3d const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>
-{
-  MapTile* tile (mapIndex.getTile (pos));
-  if (tile && tile->finishedLoading())
-  {
-    return fun (tile->getChunk ((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE));
-  }
-  else
-  {
-    return boost::none;
-  }
-}
-
-template<typename Fun>
-  void World::for_tile_at(tile_index const& pos, Fun&& fun)
-  {
-    MapTile* tile(mapIndex.getTile(pos));
-    if (tile && tile->finishedLoading())
-    {
-      mapIndex.setChanged(tile);
-      fun(tile);
-    }
-  }
 
 void World::convert_alphamap(bool to_big_alpha)
 {

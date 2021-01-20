@@ -28,8 +28,8 @@ NoiseTurbulenceNode::NoiseTurbulenceNode()
 
   addPortDefault<IntegerData>(PortType::In, "Roughness<Integer>", true);
   auto roughness = static_cast<QSpinBox*>(_in_ports[3].default_widget);
-  power->setMinimum(0);
-  power->setValue(3);
+  roughness->setMinimum(1);
+  roughness->setValue(3);
 
   addPortDefault<IntegerData>(PortType::In, "Seed<Integer>", true);
 
@@ -43,7 +43,7 @@ void NoiseTurbulenceNode::compute()
 
   module->SetFrequency(defaultPortData<DecimalData>(PortType::In, 1)->value());
   module->SetPower(defaultPortData<DecimalData>(PortType::In, 2)->value());
-  module->SetRoughness(defaultPortData<IntegerData>(PortType::In, 3)->value());
+  module->SetRoughness(std::min(31, std::max(1, defaultPortData<IntegerData>(PortType::In, 3)->value())));
   module->SetSeed(defaultPortData<IntegerData>(PortType::In, 4)->value());
 
   std::shared_ptr<noise::module::Module> noise_data;

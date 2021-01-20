@@ -36,11 +36,14 @@ namespace noggit
             void makeCurrent();
             VariableMap* getVariableMap() { return &_variable_map; };
             World* getWorld() { return _world; };
-            ViewportManager::ViewportManager* getViewport() { return _viewport; };
+            ViewportManager::Viewport* getViewport() { return _viewport; };
+
+            void setWorld(World* world) { _world = world; };
+            void setViewport(ViewportManager::Viewport* viewport) { _viewport = viewport; };
 
         private:
             World* _world;
-            ViewportManager::ViewportManager* _viewport;
+            ViewportManager::Viewport* _viewport;
             tsl::robin_map<std::string, QJsonDocument> _scene_cache;
             NodeExecutionContext _context_type;
             VariableMap _variable_map;
