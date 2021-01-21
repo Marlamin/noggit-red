@@ -130,6 +130,8 @@ public:
   void setChanged(bool state) { _changed = state; };
   bool getChanged() { return _changed; };
 
+  void setLastSelected(Node* selected) { _last_selected = selected; Q_EMIT nodeSelected(*selected); };
+
 Q_SIGNALS:
 
   /**
@@ -166,6 +168,8 @@ Q_SIGNALS:
 
   void changed();
 
+  void nodeSelected(Node &n);
+
 protected:
 
   using SharedConnection = std::shared_ptr<Connection>;
@@ -178,6 +182,8 @@ protected:
   QString _name;
   QString _relative_path;
   bool _changed;
+
+  Node* _last_selected;
 
 private Q_SLOTS:
 

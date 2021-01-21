@@ -204,6 +204,8 @@ void
 NodeGraphicsObject::
 mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
+  static_cast<FlowScene*>(scene())->setLastSelected(&node());
+
   if (_locked)
     return;
 
