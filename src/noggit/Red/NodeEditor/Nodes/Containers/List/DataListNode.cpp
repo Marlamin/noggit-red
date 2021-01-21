@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 DataListNode::DataListNode()
 : ListNodeBase()
 {
-  setName("DataListNode");
-  setCaption("List[Integer]");
+  setName("List :: Create");
+  setCaption("List :: Create");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -83,5 +83,3 @@ void DataListNode::restore(const QJsonObject& json_obj)
 
   _type->setCurrentText(list_type);
 }
-
-

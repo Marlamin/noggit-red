@@ -15,8 +15,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ListAddNode::ListAddNode()
 : LogicNodeBase()
 {
-  setName("ListAddNode");
-  setCaption("Append");
+  setName("List :: Add");
+  setCaption("List :: Add");
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);
@@ -224,4 +224,3 @@ void ListAddNode::inputConnectionDeleted(const Connection& connection)
   }
 
 }
-

@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 GetTileChunksNode::GetTileChunksNode()
 : ContextLogicNodeBase()
 {
-  setName("GetTileChunksNode");
-  setCaption("Get Tile Chunks");
+  setName("Coordinates :: GetTileChunks");
+  setCaption("Coordinates :: GetTileChunks");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);

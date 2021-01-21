@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseInvertNode::NoiseInvertNode()
 : BaseNode()
 {
-  setName("NoiseInvertNode");
-  setCaption("Noise Invert");
+  setName("Noise :: Invert");
+  setCaption("Noise :: Invert");
   _validation_state = NodeValidationState::Valid;
 
   addPort<NoiseData>(PortType::In, "Noise", true);
@@ -41,4 +41,3 @@ NodeValidationState NoiseInvertNode::validate()
 
   return _validation_state;
 }
-

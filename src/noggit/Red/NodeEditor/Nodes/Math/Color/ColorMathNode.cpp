@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ColorMathNode::ColorMathNode()
 : BaseNode()
 {
-  setName("ColorMathNode");
-  setCaption("Color Math");
+  setName("Color :: Math");
+  setCaption("Color :: Math");
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);
@@ -127,4 +127,3 @@ void ColorMathNode::restore(const QJsonObject& json_obj)
   }
 
 }
-

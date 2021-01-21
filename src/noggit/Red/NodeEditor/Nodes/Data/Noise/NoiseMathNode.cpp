@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseMathNode::NoiseMathNode()
 : BaseNode()
 {
-  setName("NoiseMathNode");
-  setCaption("Noise Math");
+  setName("Noise :: Math");
+  setCaption("Noise :: Math");
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);
@@ -98,4 +98,3 @@ void NoiseMathNode::restore(const QJsonObject& json_obj)
 
   _operation->setCurrentIndex(json_obj["operation"].toInt());
 }
-

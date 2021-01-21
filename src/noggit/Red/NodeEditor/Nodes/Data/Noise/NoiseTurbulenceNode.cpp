@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseTurbulenceNode::NoiseTurbulenceNode()
 : BaseNode()
 {
-  setName("NoiseTurbulenceNode");
-  setCaption("Noise Turbulence");
+  setName("Noise :: Turbulence");
+  setCaption("Noise :: Turbulence");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<NoiseData>(PortType::In, "Noise", true);

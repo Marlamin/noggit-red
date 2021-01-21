@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 MatrixNode::MatrixNode()
 : BaseNode()
 {
-  setName("MatrixNode");
-  setCaption("Matrix");
+  setName("Matrix :: Create");
+  setCaption("Matrix :: Create");
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);
@@ -41,4 +41,3 @@ void MatrixNode::restore(const QJsonObject& json_obj)
   _operation->setCurrentIndex(json_obj["operation"].toInt());
   BaseNode::restore(json_obj);
 }
-

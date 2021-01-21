@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ReloadTileNode::ReloadTileNode()
 : ContextLogicNodeBase()
 {
-  setName("ReloadTileNode");
-  setCaption("Reload Tile");
+  setName("Tile :: Reload");
+  setCaption("Tile :: Reload");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -43,4 +43,3 @@ void ReloadTileNode::compute()
   Q_EMIT dataUpdated(0);
 
 }
-

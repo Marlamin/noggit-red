@@ -13,8 +13,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageSaveNode::ImageSaveNode()
 : LogicNodeBase()
 {
-  setName("ImageSaveNode");
-  setCaption("Image Save");
+  setName("Image :: Save");
+  setCaption("Image :: Save");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -73,5 +73,3 @@ void ImageSaveNode::restore(const QJsonObject& json_obj)
   BaseNode::restore(json_obj);
   _in_ports[2].data_type->from_json(_in_ports[2].default_widget, json_obj, "path");
 }
-
-

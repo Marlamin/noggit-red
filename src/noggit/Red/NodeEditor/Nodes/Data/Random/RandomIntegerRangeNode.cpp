@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 RandomIntegerRangeNode::RandomIntegerRangeNode()
 : BaseNode()
 {
-  setName("RandomIntegerRangeNode");
-  setCaption("Random Integer Range");
+  setName("Random :: IntegerRange");
+  setCaption("Random :: IntegerRange");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<IntegerData>(PortType::In, "Seed", true);
@@ -59,4 +59,3 @@ void RandomIntegerRangeNode::restore(const QJsonObject& json_obj)
   defaultWidgetFromJson(PortType::In, 1, json_obj, "min_inclusive");
   defaultWidgetFromJson(PortType::In, 2, json_obj, "max_exclusive");
 }
-

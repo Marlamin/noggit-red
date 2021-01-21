@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseSelectNode::NoiseSelectNode()
 : BaseNode()
 {
-  setName("NoiseSelectNode");
-  setCaption("Noise Select");
+  setName("Noise :: Select");
+  setCaption("Noise :: Select");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<NoiseData>(PortType::In, "Noise", true);

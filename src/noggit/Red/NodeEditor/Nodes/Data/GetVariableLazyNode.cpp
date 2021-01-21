@@ -100,8 +100,8 @@ void GetVariableLazyNodeBase::outputConnectionDeleted(const Connection& connecti
 GetVariableLazyNode::GetVariableLazyNode()
 : GetVariableLazyNodeBase()
 {
-  setName("GetVariableLazyNode");
-  setCaption("Get Variable");
+  setName("Data :: GetVariableLazy");
+  setCaption("Data :: GetVariableLazy");
 }
 
 VariableMap* GetVariableLazyNode::getVariableMap()
@@ -114,12 +114,11 @@ VariableMap* GetVariableLazyNode::getVariableMap()
 GetContextVariableLazyNode::GetContextVariableLazyNode()
 : GetVariableLazyNodeBase()
 {
-  setName("GetContextVariableLazyNode");
-  setCaption("Get Context Variable");
+  setName("Data :: GetContextVariableLazy");
+  setCaption("Data :: GetContextVariableLazy");
 }
 
 VariableMap* GetContextVariableLazyNode::getVariableMap()
 {
   return gCurrentContext->getVariableMap();
 }
-

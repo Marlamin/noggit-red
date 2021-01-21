@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseScaleBiasNode::NoiseScaleBiasNode()
 : BaseNode()
 {
-  setName("NoiseScaleBiasNode");
-  setCaption("Noise Scale Bias");
+  setName("Noise :: ScaleBias");
+  setCaption("Noise :: ScaleBias");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<NoiseData>(PortType::In, "Noise", true);
@@ -67,5 +67,3 @@ NodeValidationState NoiseScaleBiasNode::validate()
 
   return _validation_state;
 }
-
-

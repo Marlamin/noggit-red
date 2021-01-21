@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicWhileLoopNode::LogicWhileLoopNode()
 : LogicNodeBase()
 {
-  setName("LogicWhileLoopNode");
-  setCaption("Repeat While");
+  setName("Logic :: WhileLoop");
+  setCaption("Logic :: WhileLoop");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);

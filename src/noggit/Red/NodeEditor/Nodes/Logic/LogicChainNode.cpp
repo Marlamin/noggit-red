@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicChainNode::LogicChainNode()
 : LogicNodeBase()
 {
-  setName("LogicChainNode");
-  setCaption("Chain");
+  setName("Logic :: Chain");
+  setCaption("Logic :: Chain");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -127,4 +127,3 @@ void LogicChainNode::restorePostConnection(const QJsonObject& json_obj)
   }
 
 }
-

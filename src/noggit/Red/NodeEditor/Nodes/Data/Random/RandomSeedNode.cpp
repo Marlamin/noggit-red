@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 RandomSeedNode::RandomSeedNode()
 : LogicNodeBase()
 {
-  setName("RandomSeedNode");
-  setCaption("Random Seed");
+  setName("Random :: Seed");
+  setCaption("Random :: Seed");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -34,6 +34,3 @@ void RandomSeedNode::compute()
   _out_ports[1].out_value = std::make_shared<IntegerData>(uniform_dist(e1));
   Q_EMIT dataUpdated(1);
 }
-
-
-

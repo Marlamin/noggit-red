@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TexturingClearTexturesAdtAtPosNode::TexturingClearTexturesAdtAtPosNode()
 : ContextLogicNodeBase()
 {
-  setName("TexturingClearTexturesAdtAtPosNode");
-  setCaption("Clear Textures ADT at Pos");
+  setName("Texturing :: ClearTexturesADTatPos");
+  setCaption("Texturing :: ClearTexturesADTatPos");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -36,4 +36,3 @@ void TexturingClearTexturesAdtAtPosNode::compute()
   Q_EMIT dataUpdated(0);
 
 }
-

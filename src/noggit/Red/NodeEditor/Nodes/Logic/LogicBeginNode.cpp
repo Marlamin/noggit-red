@@ -9,8 +9,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicBeginNode::LogicBeginNode()
 : LogicNodeBase()
 {
-  setName("LogicBeginNode");
-  setCaption("Begin");
+  setName("Logic :: Begin");
+  setCaption("Logic :: Begin");
   setValidationState(NodeValidationState::Valid);
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);

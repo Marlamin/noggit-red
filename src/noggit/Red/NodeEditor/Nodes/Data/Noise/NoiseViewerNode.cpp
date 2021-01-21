@@ -14,8 +14,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseViewerNode::NoiseViewerNode()
 : BaseNode()
 {
-  setName("NoiseViewerNode");
-  setCaption("Noise Viewer");
+  setName("Noise :: Viewer");
+  setCaption("Noise :: Viewer");
   _validation_state = NodeValidationState::Valid;
 
   _image = new QLabel(&_embedded_widget);
@@ -82,4 +82,3 @@ NodeValidationState NoiseViewerNode::validate()
 
   return _validation_state;
 }
-

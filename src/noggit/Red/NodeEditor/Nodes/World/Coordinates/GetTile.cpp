@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 GetTileNode::GetTileNode()
 : ContextLogicNodeBase()
 {
-  setName("GetTileNode");
-  setCaption("Get Tile");
+  setName("Coordinates :: GetTile");
+  setCaption("Coordinates :: GetTile");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -55,5 +55,3 @@ void GetTileNode::compute()
 
 
 }
-
-

@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseTerraceNode::NoiseTerraceNode()
 : BaseNode()
 {
-  setName("NoiseTerraceNode");
-  setCaption("Noise Terrace");
+  setName("Noise :: Terrace");
+  setCaption("Noise :: Terrace");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<NoiseData>(PortType::In, "Noise", true);

@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TexturingSwapTextureAtPosNode::TexturingSwapTextureAtPosNode()
 : ContextLogicNodeBase()
 {
-  setName("TexturingSwapTextureAtPosNode");
-  setCaption("Swap Texture at Pos");
+  setName("Texturing :: SwapTextureAtPos");
+  setCaption("Texturing :: SwapTextureAtPos");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -45,5 +45,3 @@ void TexturingSwapTextureAtPosNode::compute()
   Q_EMIT dataUpdated(0);
 
 }
-
-

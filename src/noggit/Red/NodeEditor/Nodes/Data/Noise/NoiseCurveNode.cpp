@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseCurveNode::NoiseCurveNode()
 : BaseNode()
 {
-  setName("NoiseCurveNode");
-  setCaption("Noise Curve");
+  setName("Noise :: Curve");
+  setCaption("Noise :: Curve");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<NoiseData>(PortType::In, "Noise", true);

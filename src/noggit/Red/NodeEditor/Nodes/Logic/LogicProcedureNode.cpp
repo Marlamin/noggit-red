@@ -19,8 +19,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicProcedureNode::LogicProcedureNode()
 : LogicNodeBase()
 {
-  setName("LogicProcedureNode");
-  setCaption("Call Procedure");
+  setName("Logic :: Procedure");
+  setCaption("Logic :: Procedure");
   setValidationState(NodeValidationState::Valid);
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -284,7 +284,7 @@ void LogicProcedureNode::setProcedure(const QString& path)
 
     addPort<LogicData>(PortType::In, port.caption, true);
 
-    int port_idx = _in_ports.size() - 1; 
+    int port_idx = _in_ports.size() - 1;
     _in_ports[port_idx].data_type = port.data_type->instantiate();
     _in_ports[port_idx].data_type->set_parameter_type(port.data_type->type().parameter_type_id);
     emit portAdded(PortType::In, port_idx);
@@ -315,4 +315,3 @@ void LogicProcedureNode::setProcedure(const QString& path)
 
   emit visualsNeedUpdate();
 }
-

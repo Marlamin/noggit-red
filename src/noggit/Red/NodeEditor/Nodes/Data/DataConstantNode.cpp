@@ -10,7 +10,7 @@ using namespace noggit::Red::NodeEditor::Nodes;
 DataConstantNode::DataConstantNode()
 : BaseNode()
 {
-  setName("DataConstantNode");
+  setName("Data :: Constant");
   setCaption("Integer");
   _validation_state = NodeValidationState::Valid;
 
@@ -86,4 +86,3 @@ void DataConstantNode::restore(const QJsonObject& json_obj)
   _in_ports[0].data_type->from_json(_in_ports[0].default_widget, json_obj, "value");
 
 }
-

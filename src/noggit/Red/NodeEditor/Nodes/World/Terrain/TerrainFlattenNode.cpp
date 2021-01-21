@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TerrainFlattenNode::TerrainFlattenNode()
 : ContextLogicNodeBase()
 {
-  setName("TerrainFlattenNode");
-  setCaption("Terrain Flatten");
+  setName("Terrain :: Flatten");
+  setCaption("Terrain :: Flatten");
   _validation_state = NodeValidationState::Valid;
 
   _mode = new QComboBox(&_embedded_widget);
@@ -73,4 +73,3 @@ void TerrainFlattenNode::restore(const QJsonObject& json_obj)
   ContextLogicNodeBase::restore(json_obj);
   _mode->setCurrentIndex(json_obj["mode"].toInt());
 }
-

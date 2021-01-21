@@ -15,8 +15,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ListGetNode::ListGetNode()
 : LogicNodeBase()
 {
-  setName("ListGetNode");
-  setCaption("Get");
+  setName("List :: Get");
+  setCaption("List :: Get");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -167,4 +167,3 @@ void ListGetNode::inputConnectionDeleted(const Connection& connection)
   }
 
 }
-

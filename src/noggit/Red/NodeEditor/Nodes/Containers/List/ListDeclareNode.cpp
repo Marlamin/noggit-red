@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ListDeclareNode::ListDeclareNode()
 : ListNodeBase()
 {
-  setName("ListDeclareNode");
-  setCaption("List Declare");
+  setName("List :: Declare");
+  setCaption("List :: Declare");
   _validation_state = NodeValidationState::Valid;
 
   addPort<ListData>(PortType::In, "List[Integer]", true);
@@ -103,4 +103,3 @@ NodeValidationState ListDeclareNode::validate()
 
   return _validation_state;
 }
-

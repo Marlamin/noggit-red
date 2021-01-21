@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageToGrayscaleNode::ImageToGrayscaleNode()
 : LogicNodeBase()
 {
-  setName("ImageToGrayscaleNode");
-  setCaption("Image to Grayscale");
+  setName("Image :: ToGrayscale");
+  setCaption("Image :: ToGrayscale");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -58,4 +58,3 @@ NodeValidationState ImageToGrayscaleNode::validate()
 
    return LogicNodeBase::validate();
 }
-

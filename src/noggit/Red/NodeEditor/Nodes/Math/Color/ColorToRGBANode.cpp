@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ColorToRGBANode::ColorToRGBANode()
 : BaseNode()
 {
-  setName("ColorToRGBANode");
-  setCaption("Color To RGBA");
+  setName("Color :: ColorToRGBA");
+  setCaption("Color :: ColorToRGBA");
   _validation_state = NodeValidationState::Valid;
 
   addPort<ColorData>(PortType::In, "Color", true);
@@ -47,4 +47,3 @@ NodeValidationState ColorToRGBANode::validate()
 
   return _validation_state;
 }
-

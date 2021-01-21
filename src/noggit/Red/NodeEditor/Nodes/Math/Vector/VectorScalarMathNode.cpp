@@ -8,15 +8,15 @@ using namespace noggit::Red::NodeEditor::Nodes;
 
 Vector3DScalarMathNode::Vector3DScalarMathNode()
 {
-  setName("Vector3DScalarMathNode");
+  setName("Vector :: Vector3DScalarMath");
 }
 
 Vector2DScalarMathNode::Vector2DScalarMathNode()
 {
-  setName("Vector2DScalarMathNode");
+  setName("Vector :: Vector2DScalarMath");
 }
 
 Vector4DScalarMathNode::Vector4DScalarMathNode()
 {
-  setName("Vector4DScalarMathNode");
+  setName("Vector :: Vector4DScalarMath");
 }

@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TexturingSetAdtBaseTextureAtPosNode::TexturingSetAdtBaseTextureAtPosNode()
 : ContextLogicNodeBase()
 {
-  setName("TexturingSetAdtBaseTextureAtPosNode");
-  setCaption("Set ADT Base Texture at Pos");
+  setName("Texturing :: SetADTBaseTextureAtPos");
+  setCaption("Texturing :: SetADTBaseTextureAtPos");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -45,5 +45,3 @@ void TexturingSetAdtBaseTextureAtPosNode::compute()
   Q_EMIT dataUpdated(0);
 
 }
-
-

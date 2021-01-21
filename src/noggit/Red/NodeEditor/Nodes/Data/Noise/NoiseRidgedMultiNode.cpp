@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseRidgedMultiNode::NoiseRidgedMultiNode()
 : NoiseGeneratorBase()
 {
-  setName("NoiseRidgedMultiNode");
-  setCaption("Ridged Multi Noise");
+  setName("Noise :: RidgedMulti");
+  setCaption("Noise :: RidgedMulti");
   _validation_state = NodeValidationState::Valid;
 
   _quality = new QComboBox(&_embedded_widget);
@@ -85,4 +85,3 @@ void NoiseRidgedMultiNode::restore(const QJsonObject& json_obj)
 
   _quality->setCurrentIndex(json_obj["quality"].toInt());
 }
-

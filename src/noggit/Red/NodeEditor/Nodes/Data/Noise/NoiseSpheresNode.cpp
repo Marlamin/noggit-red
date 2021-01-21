@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseSpheresNode::NoiseSpheresNode()
 : NoiseGeneratorBase()
 {
-  setName("NoiseSpheresNode");
-  setCaption("Spheres Noise");
+  setName("Noise :: Spheres");
+  setCaption("Noise :: Spheres");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<DecimalData>(PortType::In, "Frequency<Decimal>", true);
@@ -37,4 +37,3 @@ void NoiseSpheresNode::compute()
 
   Q_EMIT dataUpdated(0);
 }
-

@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageGaussianBlurNode::ImageGaussianBlurNode()
 : LogicNodeBase()
 {
-  setName("ImageGaussianBlurNode");
-  setCaption("Image Gaussian Blur");
+  setName("Image :: GaussianBlur");
+  setCaption("Image :: GaussianBlur");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -77,4 +77,3 @@ void ImageGaussianBlurNode::restore(const QJsonObject& json_obj)
   defaultWidgetFromJson(PortType::In, 2, json_obj, "sigma");
 
 }
-

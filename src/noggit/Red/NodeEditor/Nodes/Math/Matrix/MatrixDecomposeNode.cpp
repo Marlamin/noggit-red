@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 MatrixDecomposeNode::MatrixDecomposeNode()
 : BaseNode()
 {
-  setName("MatrixDecomposeNode");
-  setCaption("Matrix Decompose");
+  setName("Matrix :: Decompose");
+  setCaption("Matrix :: Decompose");
   _validation_state = NodeValidationState::Valid;
 
   addPort<Matrix4x4Data>(PortType::In, "Matrix4x4", true);

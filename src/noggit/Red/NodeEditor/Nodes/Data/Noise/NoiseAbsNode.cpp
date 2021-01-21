@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseAbsNode::NoiseAbsNode()
 : BaseNode()
 {
-  setName("NoiseAbsNode");
-  setCaption("Noise Abs");
+  setName("Noise :: Abs");
+  setCaption("Noise :: Abs");
   _validation_state = NodeValidationState::Valid;
 
   addPort<NoiseData>(PortType::In, "Noise", true);

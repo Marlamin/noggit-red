@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseClampNode::NoiseClampNode()
 : BaseNode()
 {
-  setName("NoiseClampNode");
-  setCaption("Noise Clamp");
+  setName("Noise :: Clamp");
+  setCaption("Noise :: Clamp");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<NoiseData>(PortType::In, "Noise", true);
@@ -61,4 +61,3 @@ void NoiseClampNode::restore(const QJsonObject& json_obj)
 
   defaultWidgetFromJson(PortType::In, 1, json_obj, "bounds");
 }
-

@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 RandomIntegerNode::RandomIntegerNode()
 : BaseNode()
 {
-  setName("RandomIntegerNode");
-  setCaption("Random Integer");
+  setName("Random :: Integer");
+  setCaption("Random :: Integer");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<IntegerData>(PortType::In, "Seed", true);
@@ -45,4 +45,3 @@ void RandomIntegerNode::restore(const QJsonObject& json_obj)
 
   defaultWidgetFromJson(PortType::In, 0, json_obj, "seed");
 }
-

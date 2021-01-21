@@ -124,8 +124,8 @@ NodeValidationState GetVariableNodeBase::validate()
 GetVariableNode::GetVariableNode()
 : GetVariableNodeBase()
 {
-  setName("GetVariableNode");
-  setCaption("Get Variable");
+  setName("Data :: GetVariable");
+  setCaption("Data :: GetVariable");
 }
 
 VariableMap* GetVariableNode::getVariableMap()
@@ -138,12 +138,11 @@ VariableMap* GetVariableNode::getVariableMap()
 GetContextVariableNode::GetContextVariableNode()
 : GetVariableNodeBase()
 {
-  setName("GetContextVariableNode");
-  setCaption("Get Context Variable");
+  setName("Data :: GetContextVariable");
+  setCaption("Data :: GetContextVariable");
 }
 
 VariableMap* GetContextVariableNode::getVariableMap()
 {
   return gCurrentContext->getVariableMap();
 }
-

@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicReturnNode::LogicReturnNode()
 : LogicNodeBase()
 {
-  setName("LogicReturnNode");
-  setCaption("Return Data");
+  setName("Logic :: Return");
+  setCaption("Logic :: Return");
   setValidationState(NodeValidationState::Valid);
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -144,5 +144,3 @@ void LogicReturnNode::inputConnectionDeleted(const Connection& connection)
   }
 
 }
-
-

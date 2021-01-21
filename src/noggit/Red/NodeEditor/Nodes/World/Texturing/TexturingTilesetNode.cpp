@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TexturingTilesetNode::TexturingTilesetNode()
 : ContextNodeBase()
 {
-  setName("TexturingTilesetNode");
-  setCaption("Tileset");
+  setName("Texturing :: Tileset");
+  setCaption("Texturing :: Tileset");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<StringData>(PortType::Out, "Path<String>", true);
@@ -63,4 +63,3 @@ void TexturingTilesetNode::restore(const QJsonObject& json_obj)
 
   defaultWidgetFromJson(PortType::Out, 0, json_obj, "path");
 }
-

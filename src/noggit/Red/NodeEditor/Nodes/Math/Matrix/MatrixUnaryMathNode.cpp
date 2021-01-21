@@ -10,7 +10,7 @@ using namespace noggit::Red::NodeEditor::Nodes;
 MatrixUnaryMathNode::MatrixUnaryMathNode()
 : BaseNode()
 {
-  setName("MatrixUnaryMathNode");
+  setName("Matrix :: UnaryMath");
   setCaption("Invert");
   _validation_state = NodeValidationState::Valid;
 

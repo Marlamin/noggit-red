@@ -42,6 +42,8 @@
 #include <external/QtAdvancedDockingSystem/src/DockManager.h>
 #include <external/imguipiemenu/PieMenu.hpp>
 
+#include <noggit/ui/font_noggit.hpp>
+
 #include "revision.h"
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -236,6 +238,12 @@ void MapView::createGUI()
   overlay->setAttribute(Qt::WA_TranslucentBackground);
   overlay->setMouseTracking(true);
   overlay->setGeometry(0,0, width(), height());
+
+  _viewport_overlay_ui->gizmoVisibleButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_VISIBILITY));
+  _viewport_overlay_ui->gizmoModeButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_LOCAL));
+  _viewport_overlay_ui->gizmoRotateButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_ROTATE));
+  _viewport_overlay_ui->gizmoScaleButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_SCALE));
+  _viewport_overlay_ui->gizmoTranslateButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_TRANSLATE));
 
   connect(this, &MapView::resized
       ,[this, overlay]()

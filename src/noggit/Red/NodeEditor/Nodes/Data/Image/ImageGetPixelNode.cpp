@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageGetPixelNode::ImageGetPixelNode()
 : LogicNodeBase()
 {
-  setName("ImageGetPixelNode");
-  setCaption("Image Get Pixel");
+  setName("Image :: GetPixel");
+  setCaption("Image :: GetPixel");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -70,4 +70,3 @@ void ImageGetPixelNode::restore(const QJsonObject& json_obj)
 
   defaultWidgetFromJson(PortType::In, 2, json_obj, "pixel_xy");
 }
-

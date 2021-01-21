@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 GetChunkFromPosNode::GetChunkFromPosNode()
 : ContextLogicNodeBase()
 {
-  setName("GetChunkFromPosNode");
-  setCaption("Get Chunk From Pos");
+  setName("Coordinates :: GetChunkFromPos");
+  setCaption("Coordinates :: GetChunkFromPos");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);

@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageResizeNode::ImageResizeNode()
 : LogicNodeBase()
 {
-  setName("ImageResizeNode");
-  setCaption("Image Resize");
+  setName("Image :: Resize");
+  setCaption("Image :: Resize");
   _validation_state = NodeValidationState::Valid;
 
   _mode = new QComboBox(&_embedded_widget);
@@ -74,4 +74,3 @@ void ImageResizeNode::restore(const QJsonObject& json_obj)
   BaseNode::restore(json_obj);
   defaultWidgetFromJson(PortType::In, 2, json_obj, "size");
 }
-

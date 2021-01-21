@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicReturnNoDataNode::LogicReturnNoDataNode()
 : LogicNodeBase()
 {
-  setName("LogicReturnNoDataNode");
-  setCaption("Return");
+  setName("Logic :: ReturnNoData");
+  setCaption("Logic :: Return");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -35,7 +35,3 @@ NodeValidationState LogicReturnNoDataNode::validate()
 
   return _validation_state;
 }
-
-
-
-

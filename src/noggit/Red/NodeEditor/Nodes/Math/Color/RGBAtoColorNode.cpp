@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 RGBAtoColorNode::RGBAtoColorNode()
 : BaseNode()
 {
-  setName("RGBAtoColorNode");
-  setCaption("RGBA To Color");
+  setName("Color :: RGBAtoColor");
+  setCaption("Color :: RGBAToColor");
   _validation_state = NodeValidationState::Valid;
 }
 
@@ -40,4 +40,3 @@ NodeValidationState RGBAtoColorNode::validate()
 
   return _validation_state;
 }
-

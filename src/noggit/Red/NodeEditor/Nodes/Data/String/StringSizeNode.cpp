@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 StringSizeNode::StringSizeNode()
 : BaseNode()
 {
-  setName("StringSizeNode");
-  setCaption("String Size");
+  setName("String :: Size");
+  setCaption("String :: Size");
   _validation_state = NodeValidationState::Valid;
 
   addPort<StringData>(PortType::In, "String", true);

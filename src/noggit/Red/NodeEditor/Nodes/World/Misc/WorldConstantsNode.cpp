@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 WorldConstantsNode::WorldConstantsNode()
 : ContextNodeBase()
 {
-  setName("WorldConstantsNode");
-  setCaption("World Constants");
+  setName("Misc :: WorldConstants");
+  setCaption("Misc :: WorldConstants");
   _validation_state = NodeValidationState::Valid;
 
   addPort<DecimalData>(PortType::Out, "TileSize", true);
@@ -47,5 +47,3 @@ void WorldConstantsNode::compute()
   }
 
 }
-
-

@@ -42,7 +42,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_8">
          <property name="spacing">
-          <number>0</number>
+          <number>6</number>
          </property>
          <property name="sizeConstraint">
           <enum>QLayout::SetDefaultConstraint</enum>
@@ -71,7 +71,7 @@
             <string>Enable gizmo</string>
            </property>
            <property name="text">
-            <string>V</string>
+            <string/>
            </property>
            <property name="iconSize">
             <size>
@@ -111,7 +111,7 @@
             <string>Gizmo mode</string>
            </property>
            <property name="text">
-            <string>M</string>
+            <string/>
            </property>
            <property name="iconSize">
             <size>
@@ -151,7 +151,7 @@
             <string>Translate</string>
            </property>
            <property name="text">
-            <string>T</string>
+            <string/>
            </property>
            <property name="iconSize">
             <size>
@@ -194,7 +194,7 @@
             <string>Rotate</string>
            </property>
            <property name="text">
-            <string>R</string>
+            <string/>
            </property>
            <property name="iconSize">
             <size>
@@ -237,46 +237,6 @@
             <string>Scale</string>
            </property>
            <property name="text">
-            <string>S</string>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>26</width>
-             <height>26</height>
-            </size>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-           <attribute name="buttonGroup">
-            <string notr="true">buttonGroup</string>
-           </attribute>
-          </widget>
-         </item>
-         <item alignment="Qt::AlignLeft">
-          <widget class="QPushButton" name="gizmoCombinedButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Draw grid</string>
-           </property>
-           <property name="text">
             <string/>
            </property>
            <property name="iconSize">
@@ -287,9 +247,6 @@
            </property>
            <property name="checkable">
             <bool>true</bool>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
            </property>
            <attribute name="buttonGroup">
             <string notr="true">buttonGroup</string>
@@ -360,14 +317,20 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_7">
          <property name="spacing">
-          <number>0</number>
+          <number>6</number>
          </property>
          <item>
           <widget class="QPushButton" name="cameraXButton">
            <property name="minimumSize">
             <size>
-             <width>24</width>
-             <height>24</height>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="text">
@@ -379,8 +342,14 @@
           <widget class="QPushButton" name="cameraYButton">
            <property name="minimumSize">
             <size>
-             <width>24</width>
-             <height>24</height>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="text">
@@ -392,8 +361,14 @@
           <widget class="QPushButton" name="cameraZButton">
            <property name="minimumSize">
             <size>
-             <width>24</width>
-             <height>24</height>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="text">

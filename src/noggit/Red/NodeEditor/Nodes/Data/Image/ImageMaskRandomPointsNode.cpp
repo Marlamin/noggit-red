@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageMaskRandomPointsNode::ImageMaskRandomPointsNode()
 : LogicNodeBase()
 {
-  setName("ImageMaskRandomPointsNode");
-  setCaption("Image Mask Random Points");
+  setName("Image :: MaskRandomPoints");
+  setCaption("Image :: MaskRandomPoints");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -91,4 +91,3 @@ void ImageMaskRandomPointsNode::restore(const QJsonObject& json_obj)
   defaultWidgetFromJson(PortType::In, 2, json_obj, "seed");
   defaultWidgetFromJson(PortType::In, 3, json_obj, "density");
 }
-

@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseVoronoiNode::NoiseVoronoiNode()
 : NoiseGeneratorBase()
 {
-  setName("NoiseVoronoiNode");
-  setCaption("Voronoi Noise");
+  setName("Noise :: Voronoi");
+  setCaption("Noise :: Voronoi");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<DecimalData>(PortType::In, "Frequency<Decimal>", true);
@@ -53,5 +53,3 @@ void NoiseVoronoiNode::compute()
 
   Q_EMIT dataUpdated(0);
 }
-
-

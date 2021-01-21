@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseCylindersNode::NoiseCylindersNode()
 : NoiseGeneratorBase()
 {
-  setName("NoiseCylindersNode");
-  setCaption("Cylinders Noise");
+  setName("Noise :: Cylinders");
+  setCaption("Noise :: Cylinders");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<DecimalData>(PortType::In, "Frequency<Decimal>", true);

@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseBillowNode::NoiseBillowNode()
 : NoiseGeneratorBase()
 {
-  setName("NoiseBillowNode");
-  setCaption("Billow Noise");
+  setName("Noise :: Billow");
+  setCaption("Noise :: Billow");
   _validation_state = NodeValidationState::Valid;
 
   _quality = new QComboBox(&_embedded_widget);
@@ -95,4 +95,3 @@ void NoiseBillowNode::restore(const QJsonObject& json_obj)
 
   _quality->setCurrentIndex(json_obj["quality"].toInt());
 }
-

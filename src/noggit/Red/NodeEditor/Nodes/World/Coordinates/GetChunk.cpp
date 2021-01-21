@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 GetChunkNode::GetChunkNode()
 : ContextLogicNodeBase()
 {
-  setName("GetChunkNode");
-  setCaption("Get Chunk");
+  setName("Coordinates :: GetChunk");
+  setCaption("Coordinates :: GetChunk");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -47,4 +47,3 @@ void GetChunkNode::compute()
   Q_EMIT dataUpdated(1);
 
 }
-

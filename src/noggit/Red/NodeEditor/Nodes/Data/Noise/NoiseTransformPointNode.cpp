@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseTransformPointNode::NoiseTransformPointNode()
 : BaseNode()
 {
-  setName("NoiseTransformPointNode");
-  setCaption("Noise Transform Point");
+  setName("Noise :: TransformPoint");
+  setCaption("Noise :: TransformPoint");
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);

@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TerrainBlurNode::TerrainBlurNode()
 : ContextLogicNodeBase()
 {
-  setName("TerrainBlurNode");
-  setCaption("Terrain Blur");
+  setName("Terrain :: Blur");
+  setCaption("Terrain :: Blur");
   _validation_state = NodeValidationState::Valid;
 
   _mode = new QComboBox(&_embedded_widget);
@@ -67,4 +67,3 @@ void TerrainBlurNode::restore(const QJsonObject& json_obj)
   ContextLogicNodeBase::restore(json_obj);
   _mode->setCurrentIndex(json_obj["mode"].toInt());
 }
-

@@ -74,8 +74,8 @@ void DeleteVariableNodeBase::restore(const QJsonObject& json_obj)
 DeleteVariableNode::DeleteVariableNode()
 : DeleteVariableNodeBase()
 {
-  setName("DeleteVariableNode");
-  setCaption("Delete Variable");
+  setName("Data :: DeleteVariable");
+  setCaption("Data :: DeleteVariable");
 }
 
 VariableMap* DeleteVariableNode::getVariableMap()
@@ -88,12 +88,11 @@ VariableMap* DeleteVariableNode::getVariableMap()
 DeleteContextVariableNode::DeleteContextVariableNode()
 : DeleteVariableNodeBase()
 {
-  setName("DeleteContextVariableNode");
-  setCaption("Delete Context Variable");
+  setName("Data :: DeleteContextVariable");
+  setCaption("Data :: DeleteContextVariable");
 }
 
 VariableMap* DeleteContextVariableNode::getVariableMap()
 {
   return gCurrentContext->getVariableMap();
 }
-

@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageMirrorNode::ImageMirrorNode()
 : LogicNodeBase()
 {
-  setName("ImageMirrorNode");
-  setCaption("Image Mirror");
+  setName("Image :: Mirror");
+  setCaption("Image :: Mirror");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -67,4 +67,3 @@ void ImageMirrorNode::restore(const QJsonObject& json_obj)
   defaultWidgetFromJson(PortType::In, 2, json_obj, "mirror_u");
   defaultWidgetFromJson(PortType::In, 3, json_obj, "mirror_v");
 }
-

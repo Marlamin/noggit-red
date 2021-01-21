@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ShadingPickColorNode::ShadingPickColorNode()
 : ContextLogicNodeBase()
 {
-  setName("ShadingPickColorNode");
-  setCaption("Shading Pick Color");
+  setName("Shading :: PickColor");
+  setCaption("Shading :: PickColor");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -40,5 +40,3 @@ void ShadingPickColorNode::compute()
   Q_EMIT dataUpdated(1);
 
 }
-
-

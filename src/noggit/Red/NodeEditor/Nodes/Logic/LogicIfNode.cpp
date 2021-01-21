@@ -8,8 +8,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicIfNode::LogicIfNode()
 : LogicNodeBase()
 {
-  setName("LogicIfNode");
-  setCaption("Branch");
+  setName("Logic :: If");
+  setCaption("Logic :: If");
   setValidationState(NodeValidationState::Valid);
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -90,5 +90,3 @@ NodeValidationState LogicIfNode::validate()
 
   return _validation_state;
 }
-
-

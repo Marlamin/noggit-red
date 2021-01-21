@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseDisplaceNode::NoiseDisplaceNode()
 : BaseNode()
 {
-  setName("NoiseDisplaceNode");
-  setCaption("Noise Displace");
+  setName("Noise :: Displace");
+  setCaption("Noise :: Displace");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<NoiseData>(PortType::In, "Noise", true);

@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseCacheNode::NoiseCacheNode()
 : BaseNode()
 {
-  setName("NoiseCacheNode");
-  setCaption("Noise Cache");
+  setName("Noise :: Cache");
+  setCaption("Noise :: Cache");
   _validation_state = NodeValidationState::Valid;
 
   addPort<NoiseData>(PortType::In, "Noise", true);
@@ -41,4 +41,3 @@ NodeValidationState NoiseCacheNode::validate()
 
   return _validation_state;
 }
-

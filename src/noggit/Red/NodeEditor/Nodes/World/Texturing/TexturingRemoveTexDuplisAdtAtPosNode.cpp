@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TexturingRemoveTexDuplisAdtAtPosNode::TexturingRemoveTexDuplisAdtAtPosNode()
 : ContextLogicNodeBase()
 {
-  setName("TexturingRemoveTexDuplisAdtAtPosNode");
-  setCaption("Remove Texture Duplicates ADT at Pos");
+  setName("Texturing :: RemoveTexDuplisADTAtPos");
+  setCaption("Texturing :: RemoveTexDuplisADTAtPos");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -35,5 +35,3 @@ void TexturingRemoveTexDuplisAdtAtPosNode::compute()
   Q_EMIT dataUpdated(0);
 
 }
-
-

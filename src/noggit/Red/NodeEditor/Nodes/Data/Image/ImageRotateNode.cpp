@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageRotateNode::ImageRotateNode()
 : LogicNodeBase()
 {
-  setName("ImageRotateNode");
-  setCaption("Image Rotate");
+  setName("Image :: Rotate");
+  setCaption("Image :: Rotate");
   _validation_state = NodeValidationState::Valid;
 
   _mode = new QComboBox(&_embedded_widget);

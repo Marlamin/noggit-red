@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseToImageNode::NoiseToImageNode()
 : LogicNodeBase()
 {
-  setName("NoiseToImageNode");
-  setCaption("Noise To Image");
+  setName("Noise :: ToImage");
+  setCaption("Noise :: ToImage");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -99,4 +99,3 @@ void NoiseToImageNode::restore(const QJsonObject& json_obj)
   defaultWidgetFromJson(PortType::In, 4, json_obj, "bounds_upper");
   defaultWidgetFromJson(PortType::In, 5, json_obj, "seamless");
 }
-

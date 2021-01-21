@@ -10,7 +10,7 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicForLoopNode::LogicForLoopNode()
 : LogicNodeBase()
 {
-  setName("LogicForLoopNode");
+  setName("Logic :: ForLoop");
   setCaption("Repeat");
   _validation_state = NodeValidationState::Valid;
 
@@ -108,4 +108,3 @@ NodeValidationState LogicForLoopNode::validate()
 
   return _validation_state;
 }
-

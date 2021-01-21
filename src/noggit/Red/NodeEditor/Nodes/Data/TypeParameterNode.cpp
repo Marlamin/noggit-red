@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TypeParameterNode::TypeParameterNode()
 : BaseNode()
 {
-  setName("TypeParameterNode");
-  setCaption("Type Parameter");
+  setName("Data :: TypeParameter");
+  setCaption("Data :: TypeParameter");
   _validation_state = NodeValidationState::Valid;
 
   addPort<AnyData>(PortType::In, "Any", true);
@@ -39,4 +39,3 @@ NodeValidationState TypeParameterNode::validate()
 
   return _validation_state;
 }
-

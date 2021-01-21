@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 GetTileFromPosNode::GetTileFromPosNode()
 : ContextLogicNodeBase()
 {
-  setName("GetTileFromPosNode");
-  setCaption("Get Tile From Pos");
+  setName("Coordinates :: GetTileFromPos");
+  setCaption("Coordinates :: GetTileFromPos");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);

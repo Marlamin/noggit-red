@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 GetTilesInRangeNode::GetTilesInRangeNode()
 : ContextLogicNodeBase()
 {
-  setName("GetTilesInRangeNode");
-  setCaption("Get Tiles in Range");
+  setName("Coordinates :: GetTilesInRange");
+  setCaption("Coordinates :: GetTilesInRange");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -56,4 +56,3 @@ void GetTilesInRangeNode::compute()
   Q_EMIT dataUpdated(1);
 
 }
-

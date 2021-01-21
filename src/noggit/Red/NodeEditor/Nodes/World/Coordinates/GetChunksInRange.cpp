@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 GetChunksInRangeNode::GetChunksInRangeNode()
 : ContextLogicNodeBase()
 {
-  setName("GetChunksInRangeNode");
-  setCaption("Get Chunks in Range");
+  setName("Coordinates :: GetChunksInRange");
+  setCaption("Coordinates :: GetChunksInRange");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -60,4 +60,3 @@ void GetChunksInRangeNode::compute()
   Q_EMIT dataUpdated(1);
 
 }
-

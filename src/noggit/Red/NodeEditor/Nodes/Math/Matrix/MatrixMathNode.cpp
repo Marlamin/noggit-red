@@ -10,7 +10,7 @@ using namespace noggit::Red::NodeEditor::Nodes;
 MatrixMathNode::MatrixMathNode()
 : BaseNode()
 {
-  setName("MatrixMathNode");
+  setName("Matrix :: Math");
   setCaption("Multiply");
   _validation_state = NodeValidationState::Valid;
 
@@ -88,4 +88,3 @@ NodeValidationState MatrixMathNode::validate()
 
   return _validation_state;
 }
-

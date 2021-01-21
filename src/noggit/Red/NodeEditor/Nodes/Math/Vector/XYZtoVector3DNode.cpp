@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 XYZtoVector3DNode::XYZtoVector3DNode()
     : BaseNode()
 {
-  setName("XYZtoVector3DNode");
-  setCaption("XYZ To Vector3D");
+  setName("Vector :: XYZtoVector3D");
+  setCaption("Vector :: XYZtoVector3D");
   _validation_state = NodeValidationState::Valid;
 
   addPort<DecimalData>(PortType::In, "X<Decimal>", true);

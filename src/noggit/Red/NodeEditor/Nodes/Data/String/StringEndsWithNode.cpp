@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 StringEndsWithNode::StringEndsWithNode()
 : BaseNode()
 {
-  setName("StringEndsWithNode");
-  setCaption("String Ends With");
+  setName("String :: EndsWith");
+  setCaption("String :: EndsWith");
   _validation_state = NodeValidationState::Valid;
 
   addPort<StringData>(PortType::In, "String", true);

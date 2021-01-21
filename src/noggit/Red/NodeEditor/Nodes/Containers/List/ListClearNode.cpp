@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ListClearNode::ListClearNode()
 : LogicNodeBase()
 {
-  setName("ListSizeNode");
-  setCaption("List Size");
+  setName("List :: Clear");
+  setCaption("List :: Clear");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);

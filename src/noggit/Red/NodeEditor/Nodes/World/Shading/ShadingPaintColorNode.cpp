@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ShadingPaintColorNode::ShadingPaintColorNode()
 : ContextLogicNodeBase()
 {
-  setName("ShadingPaintColorNode");
-  setCaption("Shading Paint Color");
+  setName("Shading :: PaintColor");
+  setCaption("Shading :: PaintColor");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);

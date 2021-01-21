@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ListEraseNode::ListEraseNode()
     : LogicNodeBase()
 {
-  setName("ListEraseNode");
-  setCaption("List Erase");
+  setName("List :: Erase");
+  setCaption("List :: Erase");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -86,4 +86,3 @@ void ListEraseNode::restore(const QJsonObject& json_obj)
   BaseNode::restore(json_obj);
   _in_ports[2].data_type->from_json(_in_ports[2].default_widget, json_obj,  "index");
 }
-

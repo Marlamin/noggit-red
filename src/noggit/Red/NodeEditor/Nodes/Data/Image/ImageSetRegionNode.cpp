@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageSetRegionNode::ImageSetRegionNode()
 : LogicNodeBase()
 {
-  setName("ImageSetRegionNode");
-  setCaption("Image Set Region");
+  setName("Image :: SetRegion");
+  setCaption("Image :: SetRegion");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -90,4 +90,3 @@ void ImageSetRegionNode::restore(const QJsonObject& json_obj)
 
   defaultWidgetFromJson(PortType::In, 3, json_obj, "pos");
 }
-

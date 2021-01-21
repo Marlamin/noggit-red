@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageCreateNode::ImageCreateNode()
 : LogicNodeBase()
 {
-  setName("ImageCreateNode");
-  setCaption("Image Create");
+  setName("Image :: Create");
+  setCaption("Image :: Create");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -60,5 +60,3 @@ void ImageCreateNode::restore(const QJsonObject& json_obj)
   defaultWidgetFromJson(PortType::In, 2, json_obj, "height");
   defaultWidgetFromJson(PortType::In, 3, json_obj, "fill_color");
 }
-
-

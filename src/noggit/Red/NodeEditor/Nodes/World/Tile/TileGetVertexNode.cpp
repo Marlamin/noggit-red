@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TileGetVertexNode::TileGetVertexNode()
 : ContextLogicNodeBase()
 {
-  setName("TileGetVertexNode");
-  setCaption("Tile Get Vertex");
+  setName("Tile :: GetVertex");
+  setCaption("Tile :: GetVertex");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -55,6 +55,3 @@ NodeValidationState TileGetVertexNode::validate()
 
   return ContextLogicNodeBase::validate();
 }
-
-
-

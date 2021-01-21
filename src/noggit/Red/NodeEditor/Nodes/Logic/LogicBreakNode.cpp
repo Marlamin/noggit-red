@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicBreakNode::LogicBreakNode()
 : LogicNodeBase()
 {
-  setName("LogicBreakNode");
-  setCaption("Break");
+  setName("Logic :: Break");
+  setCaption("Logic :: Break");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -37,5 +37,3 @@ NodeValidationState LogicBreakNode::validate()
 
   return _validation_state;
 }
-
-

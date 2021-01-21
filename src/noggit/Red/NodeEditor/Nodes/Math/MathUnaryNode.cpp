@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 MathUnaryNode::MathUnaryNode()
 : BaseNode()
 {
-  setName("MathUnaryNode");
-  setCaption("Math Unary");
+  setName("Math :: Unary");
+  setCaption("Math :: Unary");
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);
@@ -112,4 +112,3 @@ NodeValidationState MathUnaryNode::validate()
 
   return _validation_state;
 }
-

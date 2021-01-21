@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ListSizeNode::ListSizeNode()
 : LogicNodeBase()
 {
-  setName("ListSizeNode");
-  setCaption("List Size");
+  setName("List :: Size");
+  setCaption("List :: Size");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -57,4 +57,3 @@ NodeValidationState ListSizeNode::validate()
 
   return _validation_state;
 }
-

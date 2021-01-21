@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageBlendOpenGLNode::ImageBlendOpenGLNode()
 : LogicNodeBase()
 {
-  setName("ImageBlendOpenGLNode");
-  setCaption("Image Blend OpenGL");
+  setName("Image :: BlendOpenGL");
+  setCaption("Image :: BlendOpenGL");
   _validation_state = NodeValidationState::Valid;
 
   _blend_func = new QComboBox(&_embedded_widget);
@@ -239,4 +239,3 @@ void ImageBlendOpenGLNode::restore(const QJsonObject& json_obj)
   _sfactor->setCurrentIndex(json_obj["s_factor"].toInt());
   _dfactor->setCurrentIndex(json_obj["d_factor"].toInt());
 }
-

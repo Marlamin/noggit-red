@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageInfoNode::ImageInfoNode()
 : BaseNode()
 {
-  setName("ImageInfoNode");
-  setCaption("Image Info");
+  setName("Image :: Info");
+  setCaption("Image :: Info");
   _validation_state = NodeValidationState::Valid;
 
   addPort<ImageData>(PortType::In, "Image", true);
@@ -76,4 +76,3 @@ NodeValidationState ImageInfoNode::validate()
 
   return _validation_state;
 }
-

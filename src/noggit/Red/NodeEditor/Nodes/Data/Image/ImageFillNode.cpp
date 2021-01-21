@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageFillNode::ImageFillNode()
 : LogicNodeBase()
 {
-  setName("ImageFillNode");
-  setCaption("Image Fill");
+  setName("Image :: Fill");
+  setCaption("Image :: Fill");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -62,4 +62,3 @@ void ImageFillNode::restore(const QJsonObject& json_obj)
 
   defaultWidgetFromJson(PortType::In, 2, json_obj, "color");
 }
-

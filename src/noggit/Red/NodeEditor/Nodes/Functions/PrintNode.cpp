@@ -9,7 +9,7 @@ using namespace noggit::Red::NodeEditor::Nodes;
 PrintNode::PrintNode()
 : LogicNodeBase()
 {
-  setName("PrintNode");
+  setName("Functions :: Print");
   setCaption("Print()");
   _validation_state = NodeValidationState::Valid;
 
@@ -76,5 +76,3 @@ NodeValidationState PrintNode::validate()
   return _validation_state;
 
 }
-
-

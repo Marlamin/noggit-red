@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseConstValueNode::NoiseConstValueNode()
 : NoiseGeneratorBase()
 {
-  setName("NoiseConstValueNode");
-  setCaption("Const Value Noise");
+  setName("Noise :: ConstValue");
+  setCaption("Noise :: ConstValue");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<DecimalData>(PortType::In, "Value<Decimal>", true);

@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageScaleNode::ImageScaleNode()
 : LogicNodeBase()
 {
-  setName("ImageScaleNode");
-  setCaption("Image Scale");
+  setName("Image :: Scale");
+  setCaption("Image :: Scale");
   _validation_state = NodeValidationState::Valid;
 
   _mode = new QComboBox(&_embedded_widget);
@@ -70,4 +70,3 @@ void ImageScaleNode::restore(const QJsonObject& json_obj)
   defaultWidgetFromJson(PortType::In, 2, json_obj, "scale_vec");
   _mode->setCurrentIndex(json_obj["mode"].toInt());
 }
-

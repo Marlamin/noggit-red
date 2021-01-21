@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ImageInvertNode::ImageInvertNode()
 : LogicNodeBase()
 {
-  setName("ImageInvertNode");
-  setCaption("Image Invert");
+  setName("Image :: Invert");
+  setCaption("Image :: Invert");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -46,5 +46,3 @@ NodeValidationState ImageInvertNode::validate()
 
    return LogicNodeBase::validate();
 }
-
-

@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ListReserveNode::ListReserveNode()
 : LogicNodeBase()
 {
-  setName("ListReserveNode");
-  setCaption("List Reserve");
+  setName("List :: Reserve");
+  setCaption("List :: Reserve");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);

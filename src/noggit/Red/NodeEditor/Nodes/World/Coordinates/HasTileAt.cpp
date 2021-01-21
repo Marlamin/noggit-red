@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 HasTileAtNode::HasTileAtNode()
 : ContextLogicNodeBase()
 {
-  setName("HasTileAtNode");
-  setCaption("Has Tile at");
+  setName("Coordinates :: HasTileAt");
+  setCaption("Coordinates :: HasTileAt");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);

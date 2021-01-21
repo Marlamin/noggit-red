@@ -10,7 +10,7 @@ using namespace noggit::Red::NodeEditor::Nodes;
 ConditionNode::ConditionNode()
 : BaseNode()
 {
-  setName("ConditionNode");
+  setName("Logic :: Condition");
   setCaption("Equal");
   _validation_state = NodeValidationState::Valid;
 
@@ -108,6 +108,3 @@ void ConditionNode::restore(const QJsonObject& json_obj)
   _second->setValue(json_obj["default_second"].toDouble());
   _operation->setCurrentIndex(json_obj["operation"].toInt());
 }
-
-
-

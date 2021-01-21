@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 XYtoVector2DNode::XYtoVector2DNode()
 : BaseNode()
 {
-  setName("XYtoVector2DNode");
-  setCaption("XY To Vector2D");
+  setName("Vector :: XYtoVector2D");
+  setCaption("Vector :: XYtoVector2D");
   _validation_state = NodeValidationState::Valid;
 
   addPort<DecimalData>(PortType::In, "X<Decimal>", true);

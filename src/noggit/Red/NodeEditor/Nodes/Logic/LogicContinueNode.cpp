@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LogicContinueNode::LogicContinueNode()
 : LogicNodeBase()
 {
-  setName("LogicContinueNode");
-  setCaption("Continue");
+  setName("Logic :: Continue");
+  setCaption("Logic :: Continue");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
@@ -37,5 +37,3 @@ NodeValidationState LogicContinueNode::validate()
 
   return _validation_state;
 }
-
-

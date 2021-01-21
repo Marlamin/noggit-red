@@ -13,8 +13,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 LoadImageNode::LoadImageNode()
 : LogicNodeBase()
 {
-  setName("LoadImageNode");
-  setCaption("Load Image");
+  setName("Load :: Image");
+  setCaption("Load :: Image");
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);

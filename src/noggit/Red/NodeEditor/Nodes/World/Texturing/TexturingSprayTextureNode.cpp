@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TexturingSprayTextureNode::TexturingSprayTextureNode()
 : ContextLogicNodeBase()
 {
-  setName("TexturingSprayTextureNode");
-  setCaption("Spray Texture");
+  setName("Texturing :: SprayTexture");
+  setCaption("Texturing :: SprayTexture");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -95,4 +95,3 @@ void TexturingSprayTextureNode::compute()
   Q_EMIT dataUpdated(0);
 
 }
-

@@ -13,8 +13,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 MatrixRotateQuaternionNode::MatrixRotateQuaternionNode()
 : BaseNode()
 {
-  setName("MatrixRotateQuaternionNode");
-  setCaption("Matrix Rotate Quaternion");
+  setName("Matrix :: RotateQuaternion");
+  setCaption("Matrix :: RotateQuaternion");
   _validation_state = NodeValidationState::Valid;
 
   addPort<Matrix4x4Data>(PortType::In, "Matrix4x4", true);
@@ -51,4 +51,3 @@ NodeValidationState MatrixRotateQuaternionNode::validate()
 
   return _validation_state;
 }
-

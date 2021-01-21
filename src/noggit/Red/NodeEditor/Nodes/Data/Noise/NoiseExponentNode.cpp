@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseExponentNode::NoiseExponentNode()
 : BaseNode()
 {
-  setName("NoiseExponentNode");
-  setCaption("Noise Exponent");
+  setName("Noise :: Exponent");
+  setCaption("Noise :: Exponent");
   _validation_state = NodeValidationState::Valid;
 
 

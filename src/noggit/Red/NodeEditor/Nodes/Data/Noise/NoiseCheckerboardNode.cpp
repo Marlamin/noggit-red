@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 NoiseCheckerboardNode::NoiseCheckerboardNode()
 : NoiseGeneratorBase()
 {
-  setName("NoiseCheckerboardNode");
-  setCaption("Checkerboard Noise");
+  setName("Noise :: Checkerboard");
+  setCaption("Noise :: Checkerboard");
   _validation_state = NodeValidationState::Valid;
 
   addPort<NoiseData>(PortType::Out, "Noise", true);
@@ -27,6 +27,3 @@ void NoiseCheckerboardNode::compute()
 
   Q_EMIT dataUpdated(0);
 }
-
-
-

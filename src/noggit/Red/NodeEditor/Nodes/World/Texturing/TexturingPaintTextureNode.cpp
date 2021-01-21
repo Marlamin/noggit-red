@@ -12,8 +12,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TexturingPaintTextureNode::TexturingPaintTextureNode()
 : ContextLogicNodeBase()
 {
-  setName("TexturingPaintTextureNode");
-  setCaption("Paint Texture");
+  setName("Texturing :: PaintTexture");
+  setCaption("Texturing :: PaintTexture");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);

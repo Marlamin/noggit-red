@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 MatrixTransformNode::MatrixTransformNode()
 : BaseNode()
 {
-  setName("MatrixTransformNode");
-  setCaption("Matrix Transform");
+  setName("Matrix :: Transform");
+  setCaption("Matrix :: Transform");
   _validation_state = NodeValidationState::Valid;
 
   _operation = new QComboBox(&_embedded_widget);
@@ -79,4 +79,3 @@ NodeValidationState MatrixTransformNode::validate()
 
   return _validation_state;
 }
-

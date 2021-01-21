@@ -118,8 +118,8 @@ NodeValidationState SetVariableNodeBase::validate()
 SetVariableNode::SetVariableNode()
 : SetVariableNodeBase()
 {
-  setName("SetVariableNode");
-  setCaption("Set Variable");
+  setName("Data :: SetVariable");
+  setCaption("Data :: SetVariable");
 }
 
 VariableMap* SetVariableNode::getVariableMap()
@@ -132,14 +132,11 @@ VariableMap* SetVariableNode::getVariableMap()
 SetContextVariableNode::SetContextVariableNode()
 : SetVariableNodeBase()
 {
-  setName("SetContextVariableNode");
-  setCaption("Set Context Variable");
+  setName("Data :: SetContextVariable");
+  setCaption("Data :: SetContextVariable");
 }
 
 VariableMap* SetContextVariableNode::getVariableMap()
 {
   return gCurrentContext->getVariableMap();
 }
-
-
-

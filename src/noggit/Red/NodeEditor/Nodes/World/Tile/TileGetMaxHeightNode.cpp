@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TileGetMaxHeightNode::TileGetMaxHeightNode()
 : ContextLogicNodeBase()
 {
-  setName("TileGetMaxHeightNode");
-  setCaption("Tile Get Max Height");
+  setName("Tile :: GetMaxHeight");
+  setCaption("Tile :: GetMaxHeight");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
@@ -48,4 +48,3 @@ NodeValidationState TileGetMaxHeightNode::validate()
 
   return ContextLogicNodeBase::validate();
 }
-
