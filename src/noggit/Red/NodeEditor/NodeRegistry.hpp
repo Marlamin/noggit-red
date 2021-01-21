@@ -115,6 +115,8 @@
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseTerraceNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/Noise/NoiseViewerNode.hpp>
 
+#include <noggit/Red/NodeEditor/Nodes/RewiringPointNode.hpp>
+
 #include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainRaiseLowerNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainFlattenNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainBlurNode.hpp>
@@ -153,6 +155,8 @@ namespace noggit
         static std::shared_ptr<DataModelRegistry> registerDataModels()
         {
           auto ret = std::make_shared<DataModelRegistry>();
+
+          ret->registerModel<RewiringPointNode>("");
 
           // Math
           ret->registerModel<MathNode>("Math");

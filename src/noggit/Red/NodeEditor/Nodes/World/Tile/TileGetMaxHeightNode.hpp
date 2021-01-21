@@ -23,7 +23,7 @@ namespace noggit
     public:
       TileGetMaxHeightNode();
       void compute() override;
-      NodeValidationState validate();
+      NodeValidationState validate() override;
     };
 
   }

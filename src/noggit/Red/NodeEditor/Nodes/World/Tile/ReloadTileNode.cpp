@@ -30,7 +30,7 @@ void ReloadTileNode::compute()
   glm::vec2 const& xy = defaultPortData<Vector2DData>(PortType::In, 1)->value();
 
 
-  if (!world->mapIndex.hasTile(tile_index(xy.x, xy.y)));
+  if (!world->mapIndex.hasTile(tile_index(xy.x, xy.y)))
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: tile index is out of range or tile does not exist.");

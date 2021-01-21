@@ -51,17 +51,3 @@ void TexturingSwapTextureAtPosRadiusNode::compute()
   Q_EMIT dataUpdated(0);
 
 }
-
-
-QJsonObject TexturingSwapTextureAtPosRadiusNode::save() const
-{
-  QJsonObject json_obj = ContextLogicNodeBase::save();
-
-  return json_obj;
-}
-
-void TexturingSwapTextureAtPosRadiusNode::restore(const QJsonObject& json_obj)
-{
-  ContextLogicNodeBase::restore(json_obj);
-}
-

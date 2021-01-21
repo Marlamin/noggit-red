@@ -35,7 +35,7 @@ void GetTileNode::compute()
   if (!tile)
   {
     setValidationState(NodeValidationState::Error);
-    setValidationMessage(("Error: tile coordinates are out of range or tile does not exist.");
+    setValidationMessage("Error: tile coordinates are out of range or tile does not exist.");
     return;
   }
 
@@ -50,7 +50,7 @@ void GetTileNode::compute()
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   Q_EMIT dataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<TileData>(tile));
+  _out_ports[1].out_value = std::make_shared<TileData>(tile);
   Q_EMIT dataUpdated(1);
 
 
