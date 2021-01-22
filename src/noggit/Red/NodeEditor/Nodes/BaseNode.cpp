@@ -313,7 +313,7 @@ void BaseNode::captionDoubleClicked()
   bool ok;
   QString text = QInputDialog::getText(&_embedded_widget, "Rename node",
                                        "Node name", QLineEdit::Normal,
-                                       _caption, &ok);
+                                       _caption, &ok, Qt::Dialog | Qt::FramelessWindowHint);
   if (ok && !text.isEmpty())
     setCaption(text);
 }

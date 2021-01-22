@@ -484,7 +484,6 @@ mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 
 }
 
-
 void
 NodeGraphicsObject::
 contextMenuEvent(QGraphicsSceneContextMenuEvent* event)

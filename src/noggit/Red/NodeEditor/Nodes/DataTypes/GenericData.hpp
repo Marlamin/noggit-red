@@ -71,7 +71,9 @@ public:
 
     QWidget* default_widget(QWidget* parent) override
     {
-      return D::generate(parent);
+      QWidget* widget = D::generate(parent);
+      widget->setAttribute(Qt::WA_NoSystemBackground);
+      return widget;
     }
 
     std::shared_ptr<NodeData> default_widget_data(QWidget* widget) override

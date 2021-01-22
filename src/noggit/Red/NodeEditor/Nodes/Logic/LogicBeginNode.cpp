@@ -212,7 +212,7 @@ void LogicBeginNode::portDoubleClicked(PortType port_type, PortIndex port_index)
   bool ok;
   QString text = QInputDialog::getText(&_embedded_widget, "Rename port",
                                        "Port name", QLineEdit::Normal,
-                                       _out_ports[port_index].caption, &ok);
+                                       _out_ports[port_index].caption, &ok, Qt::Dialog | Qt::FramelessWindowHint);
   if (ok && !text.isEmpty())
     _out_ports[port_index].caption = text;
 }
