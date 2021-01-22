@@ -13,6 +13,7 @@ LogicBreakNode::LogicBreakNode()
   setName("Logic :: Break");
   setCaption("Logic :: Break");
   _validation_state = NodeValidationState::Valid;
+  setInterpreterToken(NodeInterpreterTokens::BREAK);
 
   addPort<LogicData>(PortType::In, "Logic", true);
 }

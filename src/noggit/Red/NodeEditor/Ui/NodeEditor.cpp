@@ -4,6 +4,7 @@
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/font_awesome.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Scene/Context.hpp>
+#include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Log.h>
 #include <noggit/MapView.h>
 #include <external/NodeEditor/include/nodes/internal/NodeGraphicsObject.hpp>
@@ -131,72 +132,6 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
         delete tab_item;
     }
   );
-
-  connect(ui->nodeArea, &QTabWidget::currentChanged
-    , [this](int index)
-    {
-      if (_cur_tab_editor_connection)
-        disconnect(_cur_tab_editor_connection);
-
-      {
-        const QSignalBlocker _1(ui->activeNodeCaption);
-        const QSignalBlocker _2(ui->portNamesList);
-        ui->nodeNameLabel->setText("");
-        ui->activeNodeCaption->setText("");
-        ui->portNamesList->clear();
-      }
-
-      if (index < 0)
-        return;
-
-      QWidget* tab_item = ui->nodeArea->widget(index);
-
-      auto scene = static_cast<FlowView*>(tab_item->layout()->itemAt(0)->widget())->getScene();
-
-      _cur_tab_editor_connection = connect(scene, &FlowScene::nodeSelected
-        , [this](Node& node)
-        {
-          const QSignalBlocker _1(ui->activeNodeCaption);
-          const QSignalBlocker _2(ui->portNamesList);
-
-          auto model = node.nodeDataModel();
-          auto model_name = model->name();
-
-          ui->activeNodeCaption->setText(model->caption());
-          ui->nodeNameLabel->setText(model_name);
-          ui->portNamesList->clear();
-
-          if (model_name == "LogicBeginNode")
-          {
-            for (int i = 1; i < model->nPorts(PortType::Out); ++i)
-            {
-              QListWidgetItem* item = new QListWidgetItem(ui->portNamesList);
-              auto line_edit = new QLineEdit(ui->portNamesList);
-              line_edit->setText(model->portCaption(PortType::Out, i));
-              ui->portNamesList->setItemWidget(item, line_edit);
-            }
-
-          }
-          else if (model_name == "LogicReturnNode")
-          {
-            for (int i = 1; i < model->nPorts(PortType::In); ++i)
-            {
-              QListWidgetItem* item = new QListWidgetItem(ui->portNamesList);
-              auto line_edit = new QLineEdit(ui->portNamesList);
-              line_edit->setText(model->portCaption(PortType::In, i));
-              ui->portNamesList->setItemWidget(item, line_edit);
-            }
-          }
-          else
-          {
-
-          }
-
-        });
-
-    }
-  );
-
 
   connect(ui->searchButton, &QPushButton::clicked
       , [this]()

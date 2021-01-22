@@ -29,14 +29,13 @@ namespace noggit
             NodeValidationState validate() override;
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
+            void restorePostConnection(const QJsonObject& json_obj) override;
             std::vector<InNodePort>* getOutSignature() { return &_in_ports; };
 
         public Q_SLOTS:
             void inputConnectionCreated(Connection const& connection) override;
             void inputConnectionDeleted(Connection const& connection) override;
-
-        private:
-
+            void portDoubleClicked(PortType port_type, PortIndex port_index) override;
         };
 
     }

@@ -13,6 +13,7 @@ LogicForLoopNode::LogicForLoopNode()
   setName("Logic :: ForLoop");
   setCaption("Repeat");
   _validation_state = NodeValidationState::Valid;
+  setInterpreterToken(NodeInterpreterTokens::FOR);
 
   addPort<LogicData>(PortType::In, "Logic", true);
   addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, 0);

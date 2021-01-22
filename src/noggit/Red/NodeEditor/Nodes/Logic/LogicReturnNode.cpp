@@ -6,6 +6,8 @@
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <boost/format.hpp>
 
+#include <QInputDialog>
+
 using namespace noggit::Red::NodeEditor::Nodes;
 
 LogicReturnNode::LogicReturnNode()
@@ -14,6 +16,7 @@ LogicReturnNode::LogicReturnNode()
   setName("Logic :: Return");
   setCaption("Logic :: Return");
   setValidationState(NodeValidationState::Valid);
+  setInterpreterToken(NodeInterpreterTokens::RETURN);
 
   addPort<LogicData>(PortType::In, "Logic", true);
   auto label = new QLabel(&_embedded_widget);
@@ -37,6 +40,11 @@ QJsonObject LogicReturnNode::save() const
 {
   auto json_obj = BaseNode::save();
   json_obj["n_dynamic_ports"] = static_cast<int>(_in_ports.size() - 2); // 1st 2 ports are presumed to be static
+
+  for (int i = 1; i < _in_ports.size(); ++i)
+  {
+    json_obj[("port_caption_" + std::to_string(i)).c_str()] = _in_ports[i].caption;
+  }
 
   return json_obj;
 }
@@ -144,3 +152,25 @@ void LogicReturnNode::inputConnectionDeleted(const Connection& connection)
   }
 
 }
+
+void LogicReturnNode::portDoubleClicked(PortType port_type, PortIndex port_index)
+{
+  if (port_type == PortType::Out || !port_index || _in_ports[port_index].data_type->type().id == "any")
+    return;
+
+  bool ok;
+  QString text = QInputDialog::getText(&_embedded_widget, "Rename port",
+                                       "Port name", QLineEdit::Normal,
+                                       _in_ports[port_index].caption, &ok);
+  if (ok && !text.isEmpty())
+    _in_ports[port_index].caption = text;
+}
+
+void LogicReturnNode::restorePostConnection(const QJsonObject& json_obj)
+{
+  for (int i = 1; i < _in_ports.size(); ++i)
+  {
+    _in_ports[i].caption = json_obj[("port_caption_" + std::to_string(i)).c_str()].toString();
+  }
+}
+

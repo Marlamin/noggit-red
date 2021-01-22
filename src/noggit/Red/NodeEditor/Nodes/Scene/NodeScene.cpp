@@ -31,7 +31,7 @@ bool NodeScene::validate()
 
     if (model->isLogicNode())
     {
-      if (model->name() == "LogicBeginNode")
+      if (model->getInterpreterToken() == NodeInterpreterTokens::BEGIN)
       {
         if (_begin_node)
         {
@@ -42,7 +42,7 @@ bool NodeScene::validate()
         _begin_node = pair.second.get();
       }
 
-      if (model->name() == "LogicReturnNode")
+      if (model->getInterpreterToken() == NodeInterpreterTokens::RETURN)
       {
         if (_return_node)
         {

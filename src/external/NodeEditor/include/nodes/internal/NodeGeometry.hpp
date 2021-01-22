@@ -74,8 +74,14 @@ public:
 
 public:
 
+  QFontMetrics const& getFontMetrics() { return _fontMetrics; };
+  QFontMetrics const& getFontBoldMetrics() { return _boldFontMetrics; };
+
   QRectF
   entryBoundingRect() const;
+
+  QRectF
+  captionBoundingRect() const;
 
   QRectF
   boundingRect() const;
@@ -121,7 +127,6 @@ public:
   calculateNodePositionBetweenNodePorts(PortIndex targetPortIndex, PortType targetPort, Node* targetNode,
                                         PortIndex sourcePortIndex, PortType sourcePort, Node* sourceNode,
                                         Node& newNode);
-private:
 
   unsigned int
   captionHeight() const;

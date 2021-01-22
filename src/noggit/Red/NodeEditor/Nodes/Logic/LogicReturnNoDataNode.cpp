@@ -11,8 +11,9 @@ LogicReturnNoDataNode::LogicReturnNoDataNode()
 : LogicNodeBase()
 {
   setName("Logic :: ReturnNoData");
-  setCaption("Logic :: Return");
+  setCaption("Logic :: ReturnNoData");
   _validation_state = NodeValidationState::Valid;
+  setInterpreterToken(NodeInterpreterTokens::RETURN_NO_DATA);
 
   addPort<LogicData>(PortType::In, "Logic", true);
 }

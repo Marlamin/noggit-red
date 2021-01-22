@@ -154,6 +154,16 @@ public Q_SLOTS:
   {
   }
 
+  virtual void
+  captionDoubleClicked()
+  {
+  }
+
+  virtual void
+  portDoubleClicked(PortType port_type, PortIndex port_index)
+  {
+  }
+
 Q_SIGNALS:
 
   void

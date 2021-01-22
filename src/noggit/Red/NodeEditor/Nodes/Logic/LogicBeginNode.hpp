@@ -34,6 +34,7 @@ namespace noggit
         public Q_SLOTS:
             void outputConnectionCreated(Connection const& connection) override;
             void outputConnectionDeleted(Connection const& connection) override;
+            void portDoubleClicked(PortType port_type, PortIndex port_index) override;
 
         private:
             std::vector<QWidget*> _default_widgets;

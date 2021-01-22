@@ -263,6 +263,12 @@ removeNode(Node& node)
   // call signal
   nodeDeleted(node);
 
+  if (_last_selected == &node)
+  {
+    Q_EMIT nodeSelected(nullptr);
+    _last_selected = nullptr;
+  }
+
   for(auto portType: {PortType::In,PortType::Out})
   {
     auto nodeState = node.nodeState();
@@ -331,7 +337,7 @@ iterateOverNodeDataDependentOrder(std::function<void(NodeDataModel*)> const & vi
     {
       for (unsigned int i = 0; i < model.nPorts(PortType::In); ++i)
       {
-        auto connections = node.nodeState().connections(PortType::In, i);
+        auto& connections = node.nodeState().connectionsRef(PortType::In, i);
         if (!connections.empty())
         {
           return false;
@@ -359,7 +365,7 @@ iterateOverNodeDataDependentOrder(std::function<void(NodeDataModel*)> const & vi
     {
       for (size_t i = 0; i < model.nPorts(PortType::In); ++i)
       {
-        auto connections = node.nodeState().connections(PortType::In, i);
+        auto& connections = node.nodeState().connectionsRef(PortType::In, i);
 
         for (auto& conn : connections)
         {

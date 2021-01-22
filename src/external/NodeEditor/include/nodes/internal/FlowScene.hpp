@@ -130,7 +130,8 @@ public:
   void setChanged(bool state) { _changed = state; };
   bool getChanged() { return _changed; };
 
-  void setLastSelected(Node* selected) { _last_selected = selected; Q_EMIT nodeSelected(*selected); };
+  void setLastSelected(Node* selected) { _last_selected = selected; Q_EMIT nodeSelected(selected); };
+  Node* getLastSelected() { return _last_selected; };
 
 Q_SIGNALS:
 
@@ -168,7 +169,7 @@ Q_SIGNALS:
 
   void changed();
 
-  void nodeSelected(Node &n);
+  void nodeSelected(Node* n);
 
 protected:
 
@@ -183,7 +184,7 @@ protected:
   QString _relative_path;
   bool _changed;
 
-  Node* _last_selected;
+  Node* _last_selected = nullptr;
 
 private Q_SLOTS:
 

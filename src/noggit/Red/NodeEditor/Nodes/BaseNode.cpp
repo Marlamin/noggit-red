@@ -4,6 +4,7 @@
 #include <external/NodeEditor/include/nodes/Node>
 
 #include <QHBoxLayout>
+#include <QInputDialog>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 using QtNodes::Node;
@@ -204,7 +205,7 @@ void BaseNode::outputConnectionDeleted(const Connection& connection)
   auto port_index = connection.getPortIndex(PortType::Out);
   auto& port = _out_ports[port_index];
 
-  if (connection.getNode(PortType::Out)->nodeState().connections(PortType::Out, port_index).empty())
+  if (connection.getNode(PortType::Out)->nodeState().connectionsRef(PortType::Out, port_index).empty())
     port.connected = false;
 }
 
@@ -307,6 +308,15 @@ void BaseNode::defaultWidgetFromJson(PortType port_type, PortIndex port_index, c
   }
 }
 
+void BaseNode::captionDoubleClicked()
+{
+  bool ok;
+  QString text = QInputDialog::getText(&_embedded_widget, "Rename node",
+                                       "Node name", QLineEdit::Normal,
+                                       _caption, &ok);
+  if (ok && !text.isEmpty())
+    setCaption(text);
+}
 
 
 

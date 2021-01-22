@@ -40,7 +40,7 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
   {
     auto logic_node_model = static_cast<LogicNodeBase*>(model);
 
-    if (logic_node_model->name() == "LogicBreakNode" && static_cast<LogicBreakNode*>(model)->doBreak())
+    if (logic_node_model->getInterpreterToken() == NodeInterpreterTokens::BREAK && static_cast<LogicBreakNode*>(model)->doBreak())
     {
       auto break_node =  static_cast<LogicBreakNode*>(model);
       if (_loop_stack.empty())
@@ -57,7 +57,7 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
         markNodesComputed(current_loop_node, true);
       }
     }
-    else if (logic_node_model->name() == "LogicContinueNode" && static_cast<LogicContinueNode*>(model)->doContinue())
+    else if (logic_node_model->getInterpreterToken() == NodeInterpreterTokens::CONTINUE && static_cast<LogicContinueNode*>(model)->doContinue())
     {
       auto continue_node =  static_cast<LogicContinueNode*>(model);
       if (_loop_stack.empty())
@@ -75,7 +75,8 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
         loop_model->setComputed(false);
       }
     }
-    else if (logic_node_model->name() == "LogicReturnNoDataNode" || logic_node_model->name() == "LogicReturnNode")
+    else if (logic_node_model->getInterpreterToken() == NodeInterpreterTokens::RETURN_NO_DATA
+      || logic_node_model->getInterpreterToken() == NodeInterpreterTokens::RETURN)
     {
       _return = true;
       return true;
@@ -125,7 +126,7 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
           setCurrentLoop(connected_node);
           int it_index = logic_model->getIterationindex();
 
-          if (connected_model->name() == "LogicForLoopNode")
+          if (connected_model->getInterpreterToken() == NodeInterpreterTokens::FOR)
           {
             while (it_index >= 0 && it_index < logic_model->getNIteraitons() && !_return)
             {

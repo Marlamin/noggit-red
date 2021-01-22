@@ -5,6 +5,7 @@
 
 #include <QtWidgets/QtWidgets>
 #include <QtWidgets/QGraphicsEffect>
+#include <QInputDialog>
 
 #include "ConnectionGraphicsObject.hpp"
 #include "ConnectionState.hpp"
@@ -198,7 +199,6 @@ itemChange(GraphicsItemChange change, const QVariant &value)
 
   return QGraphicsItem::itemChange(change, value);
 }
-
 
 void
 NodeGraphicsObject::
@@ -413,6 +413,75 @@ mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
   QGraphicsItem::mouseDoubleClickEvent(event);
 
   _scene.nodeDoubleClicked(node());
+
+  auto model = _node.nodeDataModel();
+  auto geom = _node.nodeGeometry();
+
+  if (model->captionVisible())
+  {
+
+    auto rect = geom.captionBoundingRect();
+
+    QPointF position((geom.width() - rect.width()) / 2.0,
+                     (geom.spacing() + geom.entryHeight()) / 3.0);
+
+    rect.translate(position);
+
+    if (rect.contains(event->pos()))
+    {
+      model->captionDoubleClicked();
+      return;
+    }
+  }
+
+  for (int i = 0; i < model->nPorts(PortType::Out); ++i)
+  {
+    if (!model->portCaptionVisible(PortType::Out, i))
+      continue;
+
+    QPointF p = geom.portScenePosition(i, PortType::Out);
+    QString caption = model->portCaption(PortType::Out, i);
+
+    QFontMetrics const& metrics = geom.getFontMetrics();
+
+    auto rect = metrics.boundingRect(caption);
+
+    p.setY(p.y() + rect.height() / 4.0);
+    p.setX(geom.width() - 5.0 - rect.width());
+
+    rect.translate(p.toPoint());
+
+    if (QRectF(rect).contains(event->pos()))
+    {
+      model->portDoubleClicked(PortType::Out, i);
+      return;
+    }
+  }
+
+  for (int i = 0; i < model->nPorts(PortType::In); ++i)
+  {
+    if (!model->portCaptionVisible(PortType::In, i))
+      continue;
+
+    QPointF p = geom.portScenePosition(i, PortType::In);
+    QString caption = model->portCaption(PortType::In, i);
+
+    QFontMetrics const& metrics = geom.getFontMetrics();
+
+    auto rect = metrics.boundingRect(caption);
+
+    p.setY(p.y() + rect.height() / 4.0);
+    p.setX(5.0);
+
+    rect.translate(p.toPoint());
+
+    if (QRectF(rect).contains(event->pos()))
+    {
+      model->portDoubleClicked(PortType::In, i);
+      return;
+    }
+  }
+
 }
 
 
@@ -422,4 +491,5 @@ contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
   _scene.nodeContextMenu(node(), mapToScene(event->pos()));
 }
+
 

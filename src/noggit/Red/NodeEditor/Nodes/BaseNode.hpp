@@ -57,6 +57,18 @@ namespace noggit
             bool connected = false;
         };
 
+        enum NodeInterpreterTokens
+        {
+            NONE,
+            BEGIN,
+            RETURN,
+            RETURN_NO_DATA,
+            FOR,
+            WHILE,
+            BREAK,
+            CONTINUE
+        };
+
 
         class BaseNode : public NodeDataModel
         {
@@ -67,6 +79,9 @@ namespace noggit
             virtual ~BaseNode() {}
 
         public:
+
+            NodeInterpreterTokens getInterpreterToken() { return _token; };
+            void setInterpreterToken(NodeInterpreterTokens token) { _token = token; };
 
             unsigned int nPorts(PortType port_type) const override;
 
@@ -89,6 +104,8 @@ namespace noggit
             QString name() const override { return _name; }
 
             QString caption() const override { return _caption; };
+
+            void setCaption(QString const& caption){_caption = caption;};
 
             bool portCaptionVisible(PortType port_type, PortIndex port_index) const override;
 
@@ -117,10 +134,11 @@ namespace noggit
             void outputConnectionCreated(Connection const& connection) override;
             void outputConnectionDeleted(Connection const& connection) override;
 
+            void captionDoubleClicked() override;
+
         protected:
 
             void setName(QString const& name) {_name = name;};
-            void setCaption(QString const& caption){_caption = caption;};
 
             void addWidgetTop(QWidget* widget);
             void addWidgetBottom(QWidget* widget);
@@ -195,6 +213,8 @@ namespace noggit
             QString _validation_error = QString("Missing or incorrect inputs");
 
             bool _is_computed = false;
+
+            NodeInterpreterTokens _token = NodeInterpreterTokens::NONE;
         };
 
     }

@@ -32,7 +32,6 @@ namespace noggit
             QFileSystemModel* _model;
             QSortFilterProxyModel* _sort_model;
             PreviewRenderer* _preview_renderer;
-            QMetaObject::Connection _cur_tab_editor_connection;
         };
     }
 }

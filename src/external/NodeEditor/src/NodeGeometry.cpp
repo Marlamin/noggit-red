@@ -373,3 +373,12 @@ portWidth(PortType portType) const
 
   return width;
 }
+
+QRectF
+NodeGeometry::
+captionBoundingRect() const
+{
+  QString const &name = _dataModel->caption();;
+
+  return _boldFontMetrics.boundingRect(name);
+}

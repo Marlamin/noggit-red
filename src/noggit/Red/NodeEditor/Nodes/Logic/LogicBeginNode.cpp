@@ -4,6 +4,8 @@
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include "boost/format.hpp"
 
+#include <QInputDialog>
+
 using namespace noggit::Red::NodeEditor::Nodes;
 
 LogicBeginNode::LogicBeginNode()
@@ -12,6 +14,7 @@ LogicBeginNode::LogicBeginNode()
   setName("Logic :: Begin");
   setCaption("Logic :: Begin");
   setValidationState(NodeValidationState::Valid);
+  setInterpreterToken(NodeInterpreterTokens::BEGIN);
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
   auto label = new QLabel(&_embedded_widget);
@@ -76,6 +79,7 @@ QJsonObject LogicBeginNode::save() const
 
     auto port_name = "default_out_port_" + std::to_string(i);
     _out_ports[i].data_type->to_json(_out_ports[i].default_widget, json_obj, port_name);
+    json_obj[(port_name + "_caption").c_str()] = _out_ports[i].caption;
   }
 
   return json_obj;
@@ -91,8 +95,6 @@ void LogicBeginNode::restore(const QJsonObject& json_obj)
     addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, 2 + i);
     emit portAdded(PortType::Out, _out_ports.size() - 1);
   }
-
-
 
 }
 
@@ -180,6 +182,7 @@ void LogicBeginNode::restorePostConnection(const QJsonObject& json_obj)
 
     auto port_name = "default_out_port_" + std::to_string(i);
     _out_ports[i].data_type->from_json(_out_ports[i].default_widget, json_obj, port_name);
+    _out_ports[i].caption = json_obj[(port_name + "_caption").c_str()].toString();
 
   }
 
@@ -199,4 +202,17 @@ void LogicBeginNode::restorePostConnection(const QJsonObject& json_obj)
     }
 
   }
+}
+
+void LogicBeginNode::portDoubleClicked(PortType port_type, PortIndex port_index)
+{
+  if (port_type == PortType::In || !port_index || _out_ports[port_index].data_type->type().id == "any")
+    return;
+
+  bool ok;
+  QString text = QInputDialog::getText(&_embedded_widget, "Rename port",
+                                       "Port name", QLineEdit::Normal,
+                                       _out_ports[port_index].caption, &ok);
+  if (ok && !text.isEmpty())
+    _out_ports[port_index].caption = text;
 }

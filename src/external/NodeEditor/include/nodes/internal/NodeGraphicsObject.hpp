@@ -82,6 +82,9 @@ protected:
   mousePressEvent(QGraphicsSceneMouseEvent* event) override;
 
   void
+  mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+
+  void
   mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
 
   void
@@ -95,9 +98,6 @@ protected:
 
   void
   hoverMoveEvent(QGraphicsSceneHoverEvent *) override;
-
-  void
-  mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 
   void
   contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;

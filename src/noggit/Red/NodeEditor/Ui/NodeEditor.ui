@@ -354,50 +354,7 @@
                        <property name="title">
                         <string>Active Node:</string>
                        </property>
-                       <layout class="QVBoxLayout" name="verticalLayout_7">
-                        <item>
-                         <layout class="QHBoxLayout" name="horizontalLayout_4">
-                          <item>
-                           <widget class="QLabel" name="label_2">
-                            <property name="text">
-                             <string>Type:</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item>
-                           <widget class="QLabel" name="nodeNameLabel">
-                            <property name="text">
-                             <string/>
-                            </property>
-                           </widget>
-                          </item>
-                         </layout>
-                        </item>
-                        <item>
-                         <layout class="QHBoxLayout" name="horizontalLayout_3">
-                          <item>
-                           <widget class="QLabel" name="label_3">
-                            <property name="text">
-                             <string>Name:</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item>
-                           <widget class="QLineEdit" name="activeNodeCaption"/>
-                          </item>
-                         </layout>
-                        </item>
-                        <item>
-                         <widget class="QLabel" name="label_4">
-                          <property name="text">
-                           <string>Port Names:</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item>
-                         <widget class="QListWidget" name="portNamesList"/>
-                        </item>
-                       </layout>
+                       <layout class="QVBoxLayout" name="verticalLayout_7"/>
                       </widget>
                      </item>
                     </layout>

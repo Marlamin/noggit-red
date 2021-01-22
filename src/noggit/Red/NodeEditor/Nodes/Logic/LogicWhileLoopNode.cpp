@@ -13,6 +13,7 @@ LogicWhileLoopNode::LogicWhileLoopNode()
   setName("Logic :: WhileLoop");
   setCaption("Logic :: WhileLoop");
   _validation_state = NodeValidationState::Valid;
+  setInterpreterToken(NodeInterpreterTokens::WHILE);
 
   addPort<LogicData>(PortType::In, "Logic", true);
   addPort<BooleanData>(PortType::In, "Boolean", true);

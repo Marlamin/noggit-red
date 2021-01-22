@@ -13,6 +13,7 @@ LogicContinueNode::LogicContinueNode()
   setName("Logic :: Continue");
   setCaption("Logic :: Continue");
   _validation_state = NodeValidationState::Valid;
+  setInterpreterToken(NodeInterpreterTokens::CONTINUE);
 
   addPort<LogicData>(PortType::In, "Logic", true);
 }
