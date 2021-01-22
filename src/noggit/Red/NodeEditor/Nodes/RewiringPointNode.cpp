@@ -28,7 +28,7 @@ void RewiringPointNode::compute()
 
 NodeValidationState RewiringPointNode::validate()
 {
-  if (!_in_ports[0].in_value.lock().get())
+  if (!_in_ports[0].in_value.lock())
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: failed to evaluate input.");

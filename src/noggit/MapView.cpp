@@ -301,8 +301,6 @@ void MapView::createGUI()
           }
   );
 
-
-
   // create tool widgets
   _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
   terrainTool = new noggit::ui::terrain_tool(_terrain_tool_dock);

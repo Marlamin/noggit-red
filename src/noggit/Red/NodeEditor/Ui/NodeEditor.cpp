@@ -6,6 +6,10 @@
 #include <noggit/Red/NodeEditor/Nodes/Scene/Context.hpp>
 #include <noggit/Log.h>
 #include <noggit/MapView.h>
+#include <external/NodeEditor/include/nodes/internal/NodeGraphicsObject.hpp>
+#include <external/NodeEditor/include/nodes/Node>
+#include <external/NodeEditor/include/nodes/NodeDataModel>
+#include <external/NodeEditor/include/nodes/FlowScene>
 
 #include <QFileDialog>
 #include <QTabWidget>
@@ -18,6 +22,10 @@ using namespace noggit::Red::NodeEditor::Ui;
 using namespace noggit::Red::NodeEditor::Nodes;
 
 using QtNodes::FlowView;
+using QtNodes::FlowScene;
+using QtNodes::NodeGraphicsObject;
+using QtNodes::Node;
+using QtNodes::NodeDataModel;
 
 NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 : QMainWindow(parent, Qt::Window)
@@ -110,8 +118,6 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
             case QMessageBox::AcceptRole:
               scene->save();
               break;
-            case QMessageBox::RejectRole:
-              break;
             default:
               break;
           }
@@ -125,6 +131,72 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
         delete tab_item;
     }
   );
+
+  connect(ui->nodeArea, &QTabWidget::currentChanged
+    , [this](int index)
+    {
+      if (_cur_tab_editor_connection)
+        disconnect(_cur_tab_editor_connection);
+
+      {
+        const QSignalBlocker _1(ui->activeNodeCaption);
+        const QSignalBlocker _2(ui->portNamesList);
+        ui->nodeNameLabel->setText("");
+        ui->activeNodeCaption->setText("");
+        ui->portNamesList->clear();
+      }
+
+      if (index < 0)
+        return;
+
+      QWidget* tab_item = ui->nodeArea->widget(index);
+
+      auto scene = static_cast<FlowView*>(tab_item->layout()->itemAt(0)->widget())->getScene();
+
+      _cur_tab_editor_connection = connect(scene, &FlowScene::nodeSelected
+        , [this](Node& node)
+        {
+          const QSignalBlocker _1(ui->activeNodeCaption);
+          const QSignalBlocker _2(ui->portNamesList);
+
+          auto model = node.nodeDataModel();
+          auto model_name = model->name();
+
+          ui->activeNodeCaption->setText(model->caption());
+          ui->nodeNameLabel->setText(model_name);
+          ui->portNamesList->clear();
+
+          if (model_name == "LogicBeginNode")
+          {
+            for (int i = 1; i < model->nPorts(PortType::Out); ++i)
+            {
+              QListWidgetItem* item = new QListWidgetItem(ui->portNamesList);
+              auto line_edit = new QLineEdit(ui->portNamesList);
+              line_edit->setText(model->portCaption(PortType::Out, i));
+              ui->portNamesList->setItemWidget(item, line_edit);
+            }
+
+          }
+          else if (model_name == "LogicReturnNode")
+          {
+            for (int i = 1; i < model->nPorts(PortType::In); ++i)
+            {
+              QListWidgetItem* item = new QListWidgetItem(ui->portNamesList);
+              auto line_edit = new QLineEdit(ui->portNamesList);
+              line_edit->setText(model->portCaption(PortType::In, i));
+              ui->portNamesList->setItemWidget(item, line_edit);
+            }
+          }
+          else
+          {
+
+          }
+
+        });
+
+    }
+  );
+
 
   connect(ui->searchButton, &QPushButton::clicked
       , [this]()
@@ -148,10 +220,6 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
             auto tab = new QWidget();
 
 
-            ui->nodeArea->setCurrentIndex(
-                ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired)
-                                          , "New scene *"));
-
             auto node_view = new FlowView(scene, tab);
             auto layout = new QVBoxLayout(tab);
             layout->addWidget(node_view);
@@ -172,7 +240,12 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 
                       });
 
+            int tab_index = ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired)
+                  , "New scene *");
+            ui->nodeArea->setCurrentIndex(tab_index);
+
           });
+
 
   ui->clearButton->setIcon(noggit::ui::font_awesome_icon(ui::font_awesome::icons::eraser));
   connect(ui->clearButton, &QPushButton::clicked
@@ -263,6 +336,7 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
             LogDebug << "Time elapsed: " << QTime::fromMSecsSinceStartOfDay(time.elapsed()).toString(Qt::ISODateWithMs).toStdString() << std::endl;
 
           });
+
 }
 
 NodeEditorWidget::~NodeEditorWidget()
@@ -291,15 +365,18 @@ void NodeEditorWidget::loadScene(const QString& filepath)
   auto tab = new QWidget();
 
   scene->load(filepath);
-  ui->nodeArea->setCurrentIndex(
-      ui->nodeArea->addTab(tab,
-                           noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired), scene->getSceneName()));
 
   auto node_view = new FlowView(scene, tab);
   auto layout = new QVBoxLayout(tab);
   layout->addWidget(node_view);
   layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
+
+  int tab_index = ui->nodeArea->addTab(tab,
+                                   noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired),
+                                   scene->getSceneName());
+
+  ui->nodeArea->setCurrentIndex(tab_index);
 
   connect(node_view, &FlowView::changed,
           [=]
@@ -310,6 +387,7 @@ void NodeEditorWidget::loadScene(const QString& filepath)
               if (!text.endsWith(" *"))
               {
                 ui->nodeArea->setTabText(tab_idx, text + " *");
+
               }
 
           });
