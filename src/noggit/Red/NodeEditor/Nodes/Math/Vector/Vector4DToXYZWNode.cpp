@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 Vector4DToXYZWNode::Vector4DToXYZWNode()
     : BaseNode()
 {
-  setName("Vector :: 4DToXYZW");
-  setCaption("Vector :: 4DToXYZW");
+  setName("Vector :: Vector4DToXYZW");
+  setCaption("Vector :: Vector4DToXYZW");
   _validation_state = NodeValidationState::Valid;
 
   addPort<Vector4DData>(PortType::In, "Vector4D", true);

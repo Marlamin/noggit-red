@@ -13,7 +13,7 @@ using QtNodes::Node;
 RewiringPointNode::RewiringPointNode()
 : BaseNode()
 {
-  setName("RewiringPointNode");
+  setName("RewiringPoint");
   _validation_state = NodeValidationState::Valid;
 
   addPort<AnyData>(PortType::In, "", false);
@@ -92,4 +92,3 @@ void RewiringPointNode::restore(const QJsonObject& json_obj)
   _in_ports[0].data_type.reset(TypeFactory::create(type_id));
   _in_ports[0].data_type->set_parameter_type(param_type_id);
 }
-

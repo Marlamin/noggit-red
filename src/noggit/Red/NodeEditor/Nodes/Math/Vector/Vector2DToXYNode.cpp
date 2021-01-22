@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 Vector2DToXYNode::Vector2DToXYNode()
     : BaseNode()
 {
-  setName("Vector :: 2DToXY");
-  setCaption("Vector :: 2DToXY");
+  setName("Vector :: Vector2DToXY");
+  setCaption("Vector :: Vector2DToXY");
   _validation_state = NodeValidationState::Valid;
 
   addPort<Vector2DData>(PortType::In, "Vector2D", true);
