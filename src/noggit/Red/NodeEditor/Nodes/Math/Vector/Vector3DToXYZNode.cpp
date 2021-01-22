@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 Vector3DToXYZNode::Vector3DToXYZNode()
 : BaseNode()
 {
-  setName("Vector :: 3DToXYZ");
-  setCaption("Vector :: 3DToXYZ");
+  setName("Vector :: Vector3DToXYZ");
+  setCaption("Vector :: Vector3DToXYZ");
   _validation_state = NodeValidationState::Valid;
 
   addPort<Vector3DData>(PortType::In, "Vector3D", true);
