@@ -7,8 +7,8 @@
     <qresource prefix="/fonts">
         <file>font_awesome.otf</file>
         <file>noggit_font.ttf</file>
-        <file>OpenSans-Regular.ttf</file>
-        <file>OpenSans-SemiBold.ttf</file>
+        <file>segoeui.ttf</file>
+        <file>segoeuisb.ttf</file>
     </qresource>
     <qresource prefix="/">
         <file alias="icon">../media/noggit_icon.png</file>
