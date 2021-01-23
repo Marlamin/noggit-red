@@ -80,7 +80,7 @@ public:
     {
       auto value = D::value(widget);
 
-      if constexpr (std::is_same<decltype(value), nullptr_t>::value)
+      if constexpr (std::is_same<decltype(value), std::nullptr_t>::value)
       {
         auto data_ptr = std::make_shared<GenericData<Ty, type_id, type_name, C, D>>();
         data_ptr.reset();
@@ -110,7 +110,7 @@ private:
 template<typename T>
 struct toQStringGeneric
 {
-  static QString to_string(T const& value) { QString(std::to_string(value).c_str()); }
+  static QString to_string(T const& value) { return QString(std::to_string(value).c_str()); }
 };
 
 struct DefaultIntWidget
@@ -413,7 +413,7 @@ struct NoDefaultWidget
 {
     static QWidget* generate(QWidget* parent) { return new QLabel("", parent); }
 
-    static nullptr_t value(QWidget* widget)
+    static std::nullptr_t value(QWidget* widget)
     {
       return nullptr;
     }

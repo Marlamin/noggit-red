@@ -59,7 +59,7 @@ struct StringConverter
 template<typename T_from>
 struct BasicDataConverter
 {
-    static nullptr_t convert(T_from const& value) { return nullptr; }
+    static std::nullptr_t convert(T_from const& value) { return nullptr; }
 };
 
 // Color converters

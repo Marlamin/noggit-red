@@ -549,12 +549,12 @@ private:
     pGMI = (tGMI) GetProcAddress( hPsapi, "GetModuleInformation" );
     if ( (pEPM == nullptr) || (pGMFNE == nullptr) || (pGMBN == nullptr) || (pGMI == nullptr) )
     {
-      // we couldn´t find all functions
+      // we couldnï¿½t find all functions
       FreeLibrary(hPsapi);
       return FALSE;
     }
 
-    hMods = (HMODULE*) malloc(sizeof(HMODULE) * (TTBUFLEN / sizeof HMODULE));
+    hMods = (HMODULE*) malloc(sizeof(HMODULE) * (TTBUFLEN / sizeof(HMODULE)));
     tt = (char*) malloc(sizeof(char) * TTBUFLEN);
     tt2 = (char*) malloc(sizeof(char) * TTBUFLEN);
     if ( (hMods == nullptr) || (tt == nullptr) || (tt2 == nullptr) )
