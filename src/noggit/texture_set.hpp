@@ -78,6 +78,9 @@ public:
   std::vector<uint8_t> lod_texture_map();
 
   bool apply_alpha_changes();
+
+  std::array<boost::optional<Alphamap>, 3>* getAlphamaps() { return &alphamaps; };
+
 private:
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
 

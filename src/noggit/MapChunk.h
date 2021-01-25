@@ -132,6 +132,8 @@ private:
 
 public:
 
+  TextureSet* getTextureSet() { return texture_set.get(); };
+
   void draw ( math::frustum const& frustum
             , opengl::scoped::use_program& mcnk_shader
             , GLuint const& tex_coord_vbo

@@ -121,10 +121,46 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainRaiseLowerNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainFlattenNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainBlurNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainClearHeight.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainClearVertexSelection.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainDeselectVertices.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainFlattenVertices.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainMoveSelectedVertices.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainOrientVerticesNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Terrain/TerrainSelectVertices.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingTilesetNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingPaintTextureNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingSprayTextureNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingClearTexturesAdtAtPosNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingRemoveTexDuplisAdtAtPosNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingSetAdtBaseTextureAtPosNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingSwapTextureAtPosNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingSwapTextureAtPosRadiusNode.hpp>
+
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkGetAlphaLayer.hpp>
+
+#include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunk.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunkFromPos.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunksInRange.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetTile.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetTileChunks.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetTileFromPos.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetTilesInRange.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Coordinates/HasTileAt.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Coordinates/HasTileAtPos.hpp>
+
+#include <noggit/Red/NodeEditor/Nodes/World/LoadedTiles/FixAllGapsNode.hpp>
+
+#include <noggit/Red/NodeEditor/Nodes/World/Misc/WorldConstantsNode.hpp>
+
+#include <noggit/Red/NodeEditor/Nodes/World/Shading/ShadingPaintColorNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Shading/ShadingPickColorNode.hpp>
+
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/ReloadTileNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetMaxHeightNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetVertexNode.hpp>
+
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
@@ -289,10 +325,41 @@ namespace noggit
           ret->registerModel<TerrainRaiseLowerNode>("World//Terrain//");
           ret->registerModel<TerrainFlattenNode>("World//Terrain//");
           ret->registerModel<TerrainBlurNode>("World//Terrain//");
+          ret->registerModel<TerrainClearHeightNode>("World//Terrain//");
+          ret->registerModel<TerrainClearVertexSelectionNode>("World//Terrain//");
+          ret->registerModel<TerrainDeselectVerticesNode>("World//Terrain//");
+          ret->registerModel<TerrainFlattenVerticesNode>("World//Terrain//");
+          ret->registerModel<TerrainMoveSelectedVerticesNode>("World//Terrain//");
+          ret->registerModel<TerrainOrientVerticesNode>("World//Terrain//");
+          ret->registerModel<TerrainSelectVerticesNode>("World//Terrain//");
 
           ret->registerModel<TexturingTilesetNode>("World//Texturing//");
           ret->registerModel<TexturingPaintTextureNode>("World//Texturing//");
           ret->registerModel<TexturingSprayTextureNode>("World//Texturing//");
+          ret->registerModel<TexturingClearTexturesAdtAtPosNode>("World//Texturing//");
+          ret->registerModel<TexturingRemoveTexDuplisAdtAtPosNode>("World//Texturing//");
+          ret->registerModel<TexturingSetAdtBaseTextureAtPosNode>("World//Texturing//");
+          ret->registerModel<TexturingSwapTextureAtPosNode>("World//Texturing//");
+          ret->registerModel<TexturingSwapTextureAtPosRadiusNode>("World//Texturing//");
+
+          ret->registerModel<ShadingPaintColorNode>("World//Shading//");
+          ret->registerModel<ShadingPickColorNode>("World//Shading//");
+
+          ret->registerModel<WorldConstantsNode>("World//Misc//");
+
+          ret->registerModel<ChunkGetAlphaLayerNode>("World//Chunk//");
+
+          ret->registerModel<FixAllGapsNode>("World//Loaded Tiles//");
+
+          ret->registerModel<GetChunkNode>("World//Coordinates//");
+          ret->registerModel<GetChunkFromPosNode>("World//Coordinates//");
+          ret->registerModel<GetChunksInRangeNode>("World//Coordinates//");
+          ret->registerModel<GetTileNode>("World//Coordinates//");
+          ret->registerModel<GetTileChunksNode>("World//Coordinates//");
+          ret->registerModel<GetTileFromPosNode>("World//Coordinates//");
+          ret->registerModel<GetTilesInRangeNode>("World//Coordinates//");
+          ret->registerModel<HasTileAtNode>("World//Coordinates//");
+          ret->registerModel<HasTileAtPosNode>("World//Coordinates//");
 
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);
