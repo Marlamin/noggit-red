@@ -42,11 +42,11 @@ void MatrixDecomposeNode::compute()
   _out_ports[3].out_value = std::make_shared<Vector3DData>(skew);
   _out_ports[4].out_value = std::make_shared<Vector3DData>(perspective);
 
-  Q_EMIT dataUpdated(0);
-  Q_EMIT dataUpdated(1);
-  Q_EMIT dataUpdated(2);
-  Q_EMIT dataUpdated(3);
-  Q_EMIT dataUpdated(4);
+  _node->onDataUpdated(0);
+  _node->onDataUpdated(1);
+  _node->onDataUpdated(2);
+  _node->onDataUpdated(3);
+  _node->onDataUpdated(4);
 }
 
 NodeValidationState MatrixDecomposeNode::validate()

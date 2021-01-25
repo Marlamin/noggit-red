@@ -6,6 +6,7 @@
 #include <external/NodeEditor/include/nodes/NodeDataModel>
 #include <external/glm/glm.hpp>
 #include <external/glm/gtc/quaternion.hpp>
+#include <external/glm/gtx/string_cast.hpp>
 #include <external/qt-color-widgets/qt-color-widgets/color_selector.hpp>
 #include <external/libnoise/src/noise/noise.h>
 
@@ -62,7 +63,7 @@ public:
     Ty* value_ptr() { return &_value; };
 
     [[nodiscard]]
-    QString toQString() const { return C::to_string(_value); }
+    QString toQString() const override { return C::to_string(_value); }
 
     std::unique_ptr<NodeData> instantiate() override
     {
@@ -80,7 +81,7 @@ public:
     {
       auto value = D::value(widget);
 
-      if constexpr (std::is_same<decltype(value), std::nullptr_t>::value)
+      if constexpr (std::is_same<decltype(value), nullptr_t>::value)
       {
         auto data_ptr = std::make_shared<GenericData<Ty, type_id, type_name, C, D>>();
         data_ptr.reset();
@@ -111,6 +112,24 @@ template<typename T>
 struct toQStringGeneric
 {
   static QString to_string(T const& value) { return QString(std::to_string(value).c_str()); }
+};
+
+template<typename T>
+struct toQStringString
+{
+    static QString to_string(T const& value) { return QString(value.c_str()); }
+};
+
+template<typename T>
+struct toQStringGlm
+{
+    static QString to_string(T const& value) { return QString(glm::to_string(value).c_str()); }
+};
+
+template<typename T>
+struct toQStringNA
+{
+    static QString to_string(T const& value) { return QString("Passed"); }
 };
 
 struct DefaultIntWidget
@@ -413,7 +432,7 @@ struct NoDefaultWidget
 {
     static QWidget* generate(QWidget* parent) { return new QLabel("", parent); }
 
-    static std::nullptr_t value(QWidget* widget)
+    static nullptr_t value(QWidget* widget)
     {
       return nullptr;
     }
@@ -461,6 +480,16 @@ private:
                                                                                           \
   template<> TypeFactory::Creator_t* TypeFactory::Register<TYPE_NAME##Data>::creator = TypeFactory::Register<TYPE_NAME##Data>::init_creator(#TYPE_ID); \
 
+
+#define DECLARE_NODE_DATA_TYPE_EXT(TYPE_ID, TYPE_NAME, UNDERLYING_TYPE, DEFAULT_WIDGET_GEN, STRING_C)   \
+  constexpr char  TYPE_ID##_typeid[] = #TYPE_ID;                                          \
+  constexpr char  TYPE_ID##_typename[] = #TYPE_NAME;                                      \
+  using TYPE_NAME##Data = GenericData<UNDERLYING_TYPE,                                    \
+  TYPE_ID##_typeid, TYPE_ID##_typename, STRING_C <UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>; \
+                                                                                          \
+  template<> TypeFactory::Creator_t* TypeFactory::Register<TYPE_NAME##Data>::creator = TypeFactory::Register<TYPE_NAME##Data>::init_creator(#TYPE_ID); \
+
+
 DECLARE_NODE_DATA_TYPE(logic, Logic, bool, NoDefaultWidget)
 
 DECLARE_NODE_DATA_TYPE(int, Integer, int, DefaultIntWidget)
@@ -468,30 +497,27 @@ DECLARE_NODE_DATA_TYPE(uint, UnsignedInteger, unsigned int, DefaultUnsignedIntWi
 
 DECLARE_NODE_DATA_TYPE(double, Decimal, double, DefaultDecimalWidget)
 DECLARE_NODE_DATA_TYPE(bool, Boolean, bool, DefaultBooleanWidget)
-DECLARE_NODE_DATA_TYPE(string, String, std::string, DefaultStringWidget)
+DECLARE_NODE_DATA_TYPE_EXT(string, String, std::string, DefaultStringWidget, toQStringString)
 
 // GLM types
-DECLARE_NODE_DATA_TYPE(vec2, Vector2D, glm::vec2, DefaultVector2DWidget)
-DECLARE_NODE_DATA_TYPE(vec3, Vector3D, glm::vec3, DefaultVector3DWidget)
-DECLARE_NODE_DATA_TYPE(vec4, Vector4D, glm::vec4, DefaultVector4DWidget)
-DECLARE_NODE_DATA_TYPE(mat4, Matrix4x4, glm::mat4, NoDefaultWidget)
-DECLARE_NODE_DATA_TYPE(quat, Quaternion, glm::quat, NoDefaultWidget)
+DECLARE_NODE_DATA_TYPE_EXT(vec2, Vector2D, glm::vec2, DefaultVector2DWidget, toQStringGlm)
+DECLARE_NODE_DATA_TYPE_EXT(vec3, Vector3D, glm::vec3, DefaultVector3DWidget, toQStringGlm)
+DECLARE_NODE_DATA_TYPE_EXT(vec4, Vector4D, glm::vec4, DefaultVector4DWidget, toQStringGlm)
+DECLARE_NODE_DATA_TYPE_EXT(mat4, Matrix4x4, glm::mat4, NoDefaultWidget, toQStringGlm)
+DECLARE_NODE_DATA_TYPE_EXT(quat, Quaternion, glm::quat, NoDefaultWidget, toQStringGlm)
 
 // Polymorph types
-DECLARE_NODE_DATA_TYPE(any, Any, std::nullptr_t, NoDefaultWidget);
-DECLARE_NODE_DATA_TYPE(basic, Basic, std::nullptr_t, NoDefaultWidget);
-DECLARE_NODE_DATA_TYPE(undefined, Undefined, std::nullptr_t, NoDefaultWidget);
-DECLARE_NODE_DATA_TYPE(procedure, Procedure, std::string, DefaultProcedureWidget);
-DECLARE_NODE_DATA_TYPE(list, List, std::vector<std::shared_ptr<NodeData>>*, NoDefaultWidget);
+DECLARE_NODE_DATA_TYPE_EXT(any, Any, std::nullptr_t, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(basic, Basic, std::nullptr_t, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(undefined, Undefined, std::nullptr_t, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(procedure, Procedure, std::string, DefaultProcedureWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(list, List, std::vector<std::shared_ptr<NodeData>>*, NoDefaultWidget, toQStringNA);
 
 // Custom types
-DECLARE_NODE_DATA_TYPE(color, Color, glm::vec4, DefaultColorWidget);
-DECLARE_NODE_DATA_TYPE(image, Image, QImage, NoDefaultWidget);
-DECLARE_NODE_DATA_TYPE(noise, Noise, std::shared_ptr<noise::module::Module>, NoDefaultWidget);
-DECLARE_NODE_DATA_TYPE(chunk, Chunk, MapChunk*, NoDefaultWidget);
-DECLARE_NODE_DATA_TYPE(tile, Tile, MapTile*, NoDefaultWidget);
-
-
-
+DECLARE_NODE_DATA_TYPE_EXT(color, Color, glm::vec4, DefaultColorWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(image, Image, QImage, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(noise, Noise, std::shared_ptr<noise::module::Module>, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(chunk, Chunk, MapChunk*, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(tile, Tile, MapTile*, NoDefaultWidget, toQStringNA);
 
 #endif //NOGGIT_GENERICDATA_HPP

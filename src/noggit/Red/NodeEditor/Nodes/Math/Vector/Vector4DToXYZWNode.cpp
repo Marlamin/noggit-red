@@ -30,10 +30,10 @@ void Vector4DToXYZWNode::compute()
   _out_ports[2].out_value = std::make_shared<DecimalData>(vector.z);
   _out_ports[3].out_value = std::make_shared<DecimalData>(vector.w);
 
-  Q_EMIT dataUpdated(0);
-  Q_EMIT dataUpdated(1);
-  Q_EMIT dataUpdated(2);
-  Q_EMIT dataUpdated(3);
+  _node->onDataUpdated(0);
+  _node->onDataUpdated(1);
+  _node->onDataUpdated(2);
+  _node->onDataUpdated(3);
 }
 
 NodeValidationState Vector4DToXYZWNode::validate()

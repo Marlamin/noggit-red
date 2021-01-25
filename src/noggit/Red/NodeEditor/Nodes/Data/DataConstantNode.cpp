@@ -63,7 +63,7 @@ void DataConstantNode::compute()
   else
     _out_ports[0].out_value = _in_ports[0].data_type->default_widget_data(_in_ports[0].default_widget);
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }
 

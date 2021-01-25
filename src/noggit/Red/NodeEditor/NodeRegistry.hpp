@@ -62,6 +62,7 @@
 #include <noggit/Red/NodeEditor/Nodes/Data/DeleteVariableNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/String/StringEndsWithNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/String/StringSizeNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/String/StringConcatenateNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/Data/Random/RandomDecimalNode.hpp>
@@ -224,6 +225,7 @@ namespace noggit
           // String
           ret->registerModel<StringEndsWithNode>("Data//String");
           ret->registerModel<StringSizeNode>("Data//String");
+          ret->registerModel<StringConcatenateNode>("Data//String");
 
 
           // Random

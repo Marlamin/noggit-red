@@ -31,8 +31,8 @@ void HasTileAtNode::compute()
   glm::vec2 const& xy = defaultPortData<Vector3DData>(PortType::In, 1)->value();
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
   _out_ports[1].out_value = std::make_shared<BooleanData>(world->mapIndex.hasTile(tile_index(xy.x, xy.y)));
-  Q_EMIT dataUpdated(1);
+  _node->onDataUpdated(1);
 }

@@ -24,10 +24,18 @@ LogicBeginNode::LogicBeginNode()
   addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, 1);
 }
 
+void LogicBeginNode::reset()
+{
+  for (int i = 0; i < _out_ports.size(); ++i)
+  {
+    _out_ports[i].out_value.reset();
+  }
+}
+
 void LogicBeginNode::compute()
 {
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
   for (int i = 1; i < _out_ports.size(); ++i)
   {
@@ -41,7 +49,7 @@ void LogicBeginNode::compute()
       if (default_value)
       {
         _out_ports[i].out_value = default_value;
-        Q_EMIT dataUpdated(i);
+        _node->onDataUpdated(i);
       }
       else
       {
@@ -56,7 +64,7 @@ void LogicBeginNode::compute()
     }
     else
     {
-      Q_EMIT dataUpdated(i);
+      _node->onDataUpdated(i);
     }
 
   }

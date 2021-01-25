@@ -26,7 +26,7 @@ void XYtoVector2DNode::compute()
   double y = static_cast<DecimalData*>(_in_ports[1].in_value.lock().get())->value();
 
   _out_ports[0].out_value = std::make_shared<Vector2DData>(glm::vec2(x, y));
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 NodeValidationState XYtoVector2DNode::validate()

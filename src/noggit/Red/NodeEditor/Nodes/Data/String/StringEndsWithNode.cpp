@@ -27,7 +27,7 @@ void StringEndsWithNode::compute()
       QString::fromStdString(static_cast<StringData*>(_in_ports[0].in_value.lock().get())->value()).endsWith(
           defaultPortData<StringData>(PortType::In, 1)->value().c_str()));
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 NodeValidationState StringEndsWithNode::validate()

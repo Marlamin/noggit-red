@@ -53,13 +53,13 @@ void ImageMaskRandomPointsNode::compute()
   }
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
   auto list =  std::make_shared<ListData>(&_data);
   list->set_parameter_type(_out_ports[1].data_type->type().parameter_type_id);
   _out_ports[1].out_value = std::move(list);
 
-  Q_EMIT dataUpdated(1);
+  _node->onDataUpdated(1);
 }
 
 NodeValidationState ImageMaskRandomPointsNode::validate()

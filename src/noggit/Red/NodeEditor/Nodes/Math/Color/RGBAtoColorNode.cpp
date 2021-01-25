@@ -23,7 +23,7 @@ void RGBAtoColorNode::compute()
   double a = static_cast<DecimalData*>(_in_ports[3].in_value.lock().get())->value();
 
   _out_ports[0].out_value = std::make_shared<ColorData>(glm::vec4(r, g, b, a));
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 NodeValidationState RGBAtoColorNode::validate()

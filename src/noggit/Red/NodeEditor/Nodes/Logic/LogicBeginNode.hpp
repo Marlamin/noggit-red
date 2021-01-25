@@ -30,6 +30,7 @@ namespace noggit
             void restorePostConnection(const QJsonObject& json_obj) override;
             NodeValidationState validate() override;
             std::vector<OutNodePort>* getInSignature() { return &_out_ports; };
+            void reset();
 
         public Q_SLOTS:
             void outputConnectionCreated(Connection const& connection) override;

@@ -67,7 +67,7 @@ void NoiseViewerNode::compute()
   _image->setPixmap(QPixmap::fromImage(image));
 
   _out_ports[0].out_value = _in_ports[0].in_value.lock();
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }
 

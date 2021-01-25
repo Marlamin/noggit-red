@@ -111,7 +111,7 @@ void ListAddNode::compute()
   }
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }
 
@@ -127,7 +127,7 @@ NodeValidationState ListAddNode::validate()
     setValidationMessage("Error: Failed to evaluate list input.");
 
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
   }
 
   auto value = static_cast<UndefinedData*>(_in_ports[2].in_value.lock().get());
@@ -138,7 +138,7 @@ NodeValidationState ListAddNode::validate()
     setValidationMessage("Error: Failed to evaluate value input.");
 
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
   }
 
   return _validation_state;

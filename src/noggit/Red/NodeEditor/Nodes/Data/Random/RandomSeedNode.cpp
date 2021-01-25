@@ -29,8 +29,8 @@ void RandomSeedNode::compute()
   std::uniform_int_distribution<int> uniform_dist(std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
   std::srand(time(nullptr));
   _out_ports[1].out_value = std::make_shared<IntegerData>(uniform_dist(e1));
-  Q_EMIT dataUpdated(1);
+  _node->onDataUpdated(1);
 }

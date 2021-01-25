@@ -91,7 +91,7 @@ onTextEdited(QString const &string)
   {
     _number = std::make_shared<DecimalData>(number);
 
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
   }
   else
   {

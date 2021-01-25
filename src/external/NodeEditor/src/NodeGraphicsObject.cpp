@@ -6,6 +6,7 @@
 #include <QtWidgets/QtWidgets>
 #include <QtWidgets/QGraphicsEffect>
 #include <QInputDialog>
+#include <QTextStream>
 
 #include "ConnectionGraphicsObject.hpp"
 #include "ConnectionState.hpp"
@@ -210,6 +211,40 @@ mousePressEvent(QGraphicsSceneMouseEvent * event)
     return;
 
   QGraphicsObject::mousePressEvent(event);
+
+  // show debug menu
+  if (event->button() == Qt::RightButton)
+  {
+    NodeState const& nodeState = _node.nodeState();
+    auto model = _node.nodeDataModel();
+
+    QString message = QString();
+    QTextStream stream(&message);
+
+    stream << model->caption() << " Debug:<br>";
+
+    for (int i = 0; i < model->nPorts(PortType::Out); ++i)
+    {
+
+      auto data = model->outData(i);
+
+      if (!data)
+        continue;
+
+      stream << model->portCaption(PortType::Out, i);
+      stream << ": ";
+      stream << data->toQString();
+      stream << "<br>";
+    }
+
+    QMessageBox mb(QMessageBox::NoIcon, "Debug",
+                   message, QMessageBox::Ok, model->embeddedWidget(), Qt::Dialog | Qt::FramelessWindowHint);
+    mb.setTextInteractionFlags(Qt::TextSelectableByMouse);
+    mb.setTextFormat(Qt::RichText);
+    int dialogResult = mb.exec();
+
+    return;
+  }
 
   // deselect all other items after this one is selected
   if (!isSelected() &&

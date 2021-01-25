@@ -23,7 +23,7 @@ RewiringPointNode::RewiringPointNode()
 void RewiringPointNode::compute()
 {
   _out_ports[0].out_value = _in_ports[0].in_value.lock();
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 NodeValidationState RewiringPointNode::validate()

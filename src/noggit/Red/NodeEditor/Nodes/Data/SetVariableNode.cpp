@@ -51,7 +51,7 @@ void SetVariableNodeBase::compute()
   (*variables)[variable_name] = std::make_pair<std::string, std::shared_ptr<NodeData>>(_in_ports[2].data_type->type().id.toStdString(), _in_ports[2].in_value.lock());
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 QJsonObject SetVariableNodeBase::save() const

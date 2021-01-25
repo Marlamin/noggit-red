@@ -59,8 +59,8 @@ void DataListNode::compute()
   list->set_parameter_type(_out_ports[1].data_type->type().parameter_type_id);
   _out_ports[1].out_value = std::move(list);
 
-  Q_EMIT dataUpdated(0);
-  Q_EMIT dataUpdated(1);
+  _node->onDataUpdated(0);
+  _node->onDataUpdated(1);
 }
 
 QJsonObject DataListNode::save() const

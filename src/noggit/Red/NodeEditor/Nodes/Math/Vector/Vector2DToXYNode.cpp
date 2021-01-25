@@ -27,8 +27,8 @@ void Vector2DToXYNode::compute()
   _out_ports[0].out_value = std::make_shared<DecimalData>(vector.x);
   _out_ports[1].out_value = std::make_shared<DecimalData>(vector.y);
 
-  Q_EMIT dataUpdated(0);
-  Q_EMIT dataUpdated(1);
+  _node->onDataUpdated(0);
+  _node->onDataUpdated(1);
 }
 
 NodeValidationState Vector2DToXYNode::validate()

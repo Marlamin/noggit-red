@@ -23,7 +23,7 @@ void TypeParameterNode::compute()
   auto data = _in_ports[0].in_value.lock();
 
   _out_ports[0].out_value = std::make_shared<StringData>(data->type().parameter_type_id.toStdString());
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 NodeValidationState TypeParameterNode::validate()

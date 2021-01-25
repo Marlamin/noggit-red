@@ -27,7 +27,7 @@ void RandomDecimalNode::compute()
 
   _out_ports[0].out_value = std::make_shared<DecimalData>(rand.generateDouble());
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 QJsonObject RandomDecimalNode::save() const

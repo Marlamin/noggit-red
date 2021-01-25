@@ -39,6 +39,7 @@ public:
   virtual std::shared_ptr<NodeData> default_widget_data(QWidget* widget) = 0;
   virtual void to_json(QWidget* widget, QJsonObject& json_obj, const std::string& name) = 0;
   virtual void from_json(QWidget* widget, const QJsonObject& json_obj, const std::string& name) = 0;
+  virtual QString toQString() const = 0;
 
 protected:
   QString _parameter_type_id = "";

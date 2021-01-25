@@ -30,7 +30,7 @@ void MatrixRotateQuaternionNode::compute()
   glm::mat4 rot_matrix = glm::toMat4(quat);
 
   _out_ports[0].out_value = std::make_shared<Matrix4x4Data>(matrix * rot_matrix);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 NodeValidationState MatrixRotateQuaternionNode::validate()

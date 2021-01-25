@@ -33,10 +33,10 @@ void ImageTranslateNode::compute()
   _out_ports[1].out_value = std::make_shared<ImageData>(
       std::move(static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value().transformed(
           QTransform().translate(translate_vec.x, translate_vec.y), static_cast<Qt::TransformationMode>(_mode->currentIndex()))));
-  Q_EMIT dataUpdated(1);
+  _node->onDataUpdated(1);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 NodeValidationState ImageTranslateNode::validate()

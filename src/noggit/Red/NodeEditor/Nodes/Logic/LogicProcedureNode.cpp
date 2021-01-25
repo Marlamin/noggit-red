@@ -54,7 +54,7 @@ void LogicProcedureNode::compute()
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Scene loading failed.");
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
     return;
   }
 
@@ -68,7 +68,7 @@ void LogicProcedureNode::compute()
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: No entry point found. (Begin node missing)");
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
     delete _scene;
     _scene = nullptr;
     return;
@@ -128,7 +128,7 @@ void LogicProcedureNode::compute()
         _scene = nullptr;
 
         _out_ports[0].out_value = std::make_shared<LogicData>(false);
-        Q_EMIT dataUpdated(0);
+        _node->onDataUpdated(0);
         return;
 
         sig_index_ret++;
@@ -136,7 +136,7 @@ void LogicProcedureNode::compute()
 
       _out_ports[i].out_value = std::move(data_shared);
 
-      Q_EMIT dataUpdated(i);
+      _node->onDataUpdated(i);
     }
 
   }
@@ -145,7 +145,7 @@ void LogicProcedureNode::compute()
   _scene = nullptr;
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }
 
@@ -216,7 +216,7 @@ NodeValidationState LogicProcedureNode::validate()
     setValidationMessage("Error: Failed to evaluate logic input");
 
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
 
     return _validation_state;
   }
@@ -227,7 +227,7 @@ NodeValidationState LogicProcedureNode::validate()
     setValidationMessage("Error: No procedure selected.");
 
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
   }
 
   return _validation_state;

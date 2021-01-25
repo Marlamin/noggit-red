@@ -50,7 +50,7 @@ void MatrixTransformNode::compute()
   }
 
   _out_ports[0].out_value = std::make_shared<Matrix4x4Data>(matrix);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 QJsonObject MatrixTransformNode::save() const

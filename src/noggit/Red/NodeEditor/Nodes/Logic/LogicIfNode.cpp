@@ -53,8 +53,8 @@ void LogicIfNode::compute()
     setLogicBranchToExecute(1);
   }
 
-  Q_EMIT dataUpdated(0);
-  Q_EMIT dataUpdated(1);
+  _node->onDataUpdated(0);
+  _node->onDataUpdated(1);
 
   setValidationState(NodeValidationState::Warning);
   setValidationMessage(in_bool->value() ? "Debug: true" : "Debug: false");
@@ -72,8 +72,8 @@ NodeValidationState LogicIfNode::validate()
 
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
     _out_ports[1].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
-    Q_EMIT dataUpdated(1);
+    _node->onDataUpdated(0);
+    _node->onDataUpdated(1);
 
     return _validation_state;
   }

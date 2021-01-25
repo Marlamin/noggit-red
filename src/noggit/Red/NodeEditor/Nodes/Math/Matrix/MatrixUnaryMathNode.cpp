@@ -43,7 +43,7 @@ void MatrixUnaryMathNode::compute()
       break;
   }
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 QJsonObject MatrixUnaryMathNode::save() const

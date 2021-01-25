@@ -30,7 +30,7 @@ void XYZWtoVector4DNode::compute()
   double w = static_cast<DecimalData*>(_in_ports[3].in_value.lock().get())->value();
 
   _out_ports[0].out_value = std::make_shared<Vector4DData>(glm::vec4(x, y, z, w));
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 NodeValidationState XYZWtoVector4DNode::validate()

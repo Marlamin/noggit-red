@@ -36,11 +36,11 @@ void LogicWhileLoopNode::compute()
   {
     setIterationIndex(-1);
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
   }
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }
 
@@ -56,7 +56,7 @@ NodeValidationState LogicWhileLoopNode::validate()
     setValidationMessage("Error: Failed to evaluate logic input.");
 
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
   }
 
   auto in_bool = static_cast<BooleanData*>(_in_ports[1].in_value.lock().get());
@@ -67,7 +67,7 @@ NodeValidationState LogicWhileLoopNode::validate()
     setValidationMessage("Error: Failed to evaluate boolean input.");
 
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
   }
 
   if (!in_bool->value())

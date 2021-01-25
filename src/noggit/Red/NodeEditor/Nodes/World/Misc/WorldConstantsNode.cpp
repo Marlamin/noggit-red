@@ -43,7 +43,7 @@ void WorldConstantsNode::compute()
   for (int i = 0; i < _out_ports.size(); ++i)
   {
     if (_out_ports[i].connected)
-      Q_EMIT dataUpdated(i);
+      _node->onDataUpdated(i);
   }
 
 }

@@ -42,6 +42,6 @@ void TexturingSwapTextureAtPosNode::compute()
   world->overwriteTextureAtCurrentChunk({pos.x, pos.y, pos.z}, tex_from, tex_to);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }

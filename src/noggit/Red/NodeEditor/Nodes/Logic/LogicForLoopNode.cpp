@@ -53,10 +53,10 @@ void LogicForLoopNode::compute()
   }
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
   _out_ports[1].out_value = std::make_shared<IntegerData>(getIterationindex());
-  Q_EMIT dataUpdated(1);
+  _node->onDataUpdated(1);
 
   setIterationIndex(getIterationindex() + 1);
 
@@ -92,7 +92,7 @@ NodeValidationState LogicForLoopNode::validate()
     setValidationMessage("Error: Failed to evaluate logic input.");
 
     _out_ports[0].out_value = std::make_shared<LogicData>(false);
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
   }
 
   auto n_iterations_ptr = static_cast<IntegerData*>(_in_ports[1].in_value.lock().get());

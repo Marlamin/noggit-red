@@ -31,7 +31,7 @@ void LogicChainNode::compute()
   for (auto& port : _out_ports)
   {
     port.out_value = std::make_shared<LogicData>(true);
-    Q_EMIT dataUpdated(count);
+    _node->onDataUpdated(count);
     count++;
   }
 }

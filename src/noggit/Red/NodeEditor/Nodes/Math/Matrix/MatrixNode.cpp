@@ -24,7 +24,7 @@ MatrixNode::MatrixNode()
 void MatrixNode::compute()
 {
   _out_ports[0].out_value = std::make_shared<Matrix4x4Data>(_operation->currentIndex() ? glm::mat4(0.0) : glm::mat4(1.0));
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 QJsonObject MatrixNode::save() const

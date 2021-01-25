@@ -49,7 +49,7 @@ void GetVariableLazyNodeBase::compute()
   }
 
   _out_ports[0].out_value = it->second.second;
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }
 

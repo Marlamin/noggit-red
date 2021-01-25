@@ -56,9 +56,9 @@ void ImageGetRegionNode::compute()
   }
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
   _out_ports[1].out_value = std::make_shared<ImageData>(std::move(result));
-  Q_EMIT dataUpdated(1);
+  _node->onDataUpdated(1);
 
 }
 

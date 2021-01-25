@@ -1,6 +1,7 @@
 #include "LogicBranch.hpp"
 #include "noggit/Red/NodeEditor/Nodes/BaseNode.hpp"
 #include "noggit/Red/NodeEditor/Nodes/LogicNodeBase.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Logic/LogicBeginNode.hpp"
 #include "noggit/Red/NodeEditor/Nodes/Logic/LogicBreakNode.hpp"
 #include "noggit/Red/NodeEditor/Nodes/Logic/LogicContinueNode.hpp"
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
@@ -18,7 +19,9 @@ LogicBranch::LogicBranch(Node* logic_node)
 bool LogicBranch::execute()
 {
   _return = false;
-  return executeNode(_logic_node, nullptr);
+  bool status = executeNode(_logic_node, nullptr);
+  static_cast<LogicBeginNode*>(_logic_node->nodeDataModel())->reset();
+  return status;
 }
 
 bool LogicBranch::executeNode(Node* node, Node* source_node)

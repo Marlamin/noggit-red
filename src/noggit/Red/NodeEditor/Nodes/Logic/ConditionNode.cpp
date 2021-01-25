@@ -84,7 +84,7 @@ void ConditionNode::compute()
 
   setValidationMessage(("Debug: " + std::to_string(result)).c_str());
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 QJsonObject ConditionNode::save() const

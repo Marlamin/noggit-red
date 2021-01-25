@@ -29,7 +29,7 @@ void XYZtoVector3DNode::compute()
   double z = static_cast<DecimalData*>(_in_ports[2].in_value.lock().get())->value();
 
   _out_ports[0].out_value = std::make_shared<Vector3DData>(glm::vec3(x, y, z));
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 NodeValidationState XYZtoVector3DNode::validate()

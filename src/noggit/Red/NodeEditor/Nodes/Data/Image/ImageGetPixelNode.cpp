@@ -37,10 +37,10 @@ void ImageGetPixelNode::compute()
   QColor color = image.pixelColor(pixel_xy.x, pixel_xy.y);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
   _out_ports[1].out_value = std::make_shared<ColorData>(glm::vec4(color.redF(), color.greenF(), color.blueF(), color.alphaF()));
-  Q_EMIT dataUpdated(1);
+  _node->onDataUpdated(1);
 }
 
 NodeValidationState ImageGetPixelNode::validate()

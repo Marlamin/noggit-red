@@ -50,8 +50,6 @@ void MathNode::compute()
   double first = defaultPortData<DecimalData>(PortType::In, 0)->value();
   double second = defaultPortData<DecimalData>(PortType::In, 1)->value();
 
-  setValidationState(NodeValidationState::Warning);
-
   switch (_operation->currentIndex())
   {
     case 0: // Add
@@ -82,9 +80,7 @@ void MathNode::compute()
 
   _out_ports[0].out_value = std::make_shared<DecimalData>(result);
 
-  setValidationMessage(("Debug: " + std::to_string(result)).c_str());
-
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }
 

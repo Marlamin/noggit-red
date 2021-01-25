@@ -42,6 +42,6 @@ void TexturingSetAdtBaseTextureAtPosNode::compute()
   });
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }

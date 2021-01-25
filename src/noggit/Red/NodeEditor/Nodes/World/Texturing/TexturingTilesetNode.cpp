@@ -45,7 +45,7 @@ void TexturingTilesetNode::compute()
   std::string path = defaultPortData<StringData>(PortType::Out, 0)->value();
   _out_ports[0].out_value = std::make_shared<StringData>(path);
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 QJsonObject TexturingTilesetNode::save() const

@@ -3,6 +3,7 @@
 
 #include <external/NodeEditor/include/nodes/NodeDataModel>
 #include <external/NodeEditor/include/nodes/NodeData>
+#include <external/NodeEditor/include/nodes/Node>
 #include <external/NodeEditor/include/nodes/Connection>
 #include <boost/variant.hpp>
 
@@ -23,6 +24,7 @@
 using QtNodes::PortType;
 using QtNodes::PortIndex;
 using QtNodes::NodeData;
+using QtNodes::Node;
 using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;

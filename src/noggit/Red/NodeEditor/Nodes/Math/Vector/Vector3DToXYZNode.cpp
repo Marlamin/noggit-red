@@ -28,9 +28,9 @@ void Vector3DToXYZNode::compute()
   _out_ports[1].out_value = std::make_shared<DecimalData>(vector.y);
   _out_ports[2].out_value = std::make_shared<DecimalData>(vector.z);
 
-  Q_EMIT dataUpdated(0);
-  Q_EMIT dataUpdated(1);
-  Q_EMIT dataUpdated(3);
+  _node->onDataUpdated(0);
+  _node->onDataUpdated(1);
+  _node->onDataUpdated(3);
 }
 
 NodeValidationState Vector3DToXYZNode::validate()

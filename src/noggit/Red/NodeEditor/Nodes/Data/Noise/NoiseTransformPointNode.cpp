@@ -63,7 +63,7 @@ void NoiseTransformPointNode::compute()
   noise_data.reset(result);
   _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 QJsonObject NoiseTransformPointNode::save() const

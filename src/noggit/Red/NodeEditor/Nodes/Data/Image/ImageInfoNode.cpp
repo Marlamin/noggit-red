@@ -34,31 +34,31 @@ void ImageInfoNode::compute()
   if (_out_ports[0].connected)
   {
     _out_ports[0].out_value = std::make_shared<Vector2DData>(glm::vec2(size.width(), size.height()));
-    Q_EMIT dataUpdated(0);
+    _node->onDataUpdated(0);
   }
 
   if (_out_ports[1].connected)
   {
     _out_ports[1].out_value = std::make_shared<BooleanData>(image.hasAlphaChannel());
-    Q_EMIT dataUpdated(1);
+    _node->onDataUpdated(1);
   }
 
   if (_out_ports[2].connected)
   {
     _out_ports[2].out_value = std::make_shared<BooleanData>(image.isNull());
-    Q_EMIT dataUpdated(2);
+    _node->onDataUpdated(2);
   }
 
   if (_out_ports[3].connected)
   {
     _out_ports[3].out_value = std::make_shared<IntegerData>(image.depth());
-    Q_EMIT dataUpdated(3);
+    _node->onDataUpdated(3);
   }
 
   if (_out_ports[4].connected)
   {
     _out_ports[4].out_value = std::make_shared<BooleanData>(image.isGrayscale());
-    Q_EMIT dataUpdated(4);
+    _node->onDataUpdated(4);
 
   }
 

@@ -38,7 +38,7 @@ onTextEdited(QString const &string)
 {
   Q_UNUSED(string);
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 

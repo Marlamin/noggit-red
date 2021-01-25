@@ -32,7 +32,7 @@ void NoiseBlendNode::compute()
   noise_data.reset(module);
   _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }
 

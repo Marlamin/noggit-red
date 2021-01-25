@@ -36,8 +36,8 @@ Node(std::unique_ptr<NodeDataModel> && dataModel)
   _nodeDataModel->setNode(this);
 
   // propagate data: model => node
-  connect(_nodeDataModel.get(), &NodeDataModel::dataUpdated,
-          this, &Node::onDataUpdated);
+  //connect(_nodeDataModel.get(), &NodeDataModel::dataUpdated,
+          //this, &Node::onDataUpdated);
 
   connect(_nodeDataModel.get(), &NodeDataModel::portAdded,
           this, &Node::onPortAdded);

@@ -58,7 +58,7 @@ void MatrixMathNode::compute()
   }
 
   _out_ports[0].out_value = std::make_shared<Matrix4x4Data>(result);
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 
 }
 

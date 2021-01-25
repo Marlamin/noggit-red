@@ -108,5 +108,5 @@ setInData(std::shared_ptr<NodeData> nodeData, PortIndex)
     _label->setPixmap(QPixmap());
   }
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }

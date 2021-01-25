@@ -27,7 +27,7 @@ void RandomIntegerNode::compute()
 
   _out_ports[0].out_value = std::make_shared<IntegerData>(rand.generate());
 
-  Q_EMIT dataUpdated(0);
+  _node->onDataUpdated(0);
 }
 
 QJsonObject RandomIntegerNode::save() const
