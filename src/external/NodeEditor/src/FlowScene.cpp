@@ -125,7 +125,7 @@ createConnection(Node& nodeIn,
   connection->setGraphicsObject(std::move(cgo));
 
   // trigger data propagation
-  nodeOut.onDataUpdated(portIndexOut);
+  nodeOut.onDataUpdated(portIndexOut, true);
 
   _connections[connection->id()] = connection;
 

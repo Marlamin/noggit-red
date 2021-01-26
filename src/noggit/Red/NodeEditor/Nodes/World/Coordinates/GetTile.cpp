@@ -30,6 +30,7 @@ void GetTileNode::compute()
 
   glm::vec2 const& xy = defaultPortData<Vector3DData>(PortType::In, 1)->value();
 
+  world->mapIndex.loadTile(tile_index(xy.x, xy.y));
   MapTile* tile = world->mapIndex.getTile(tile_index(xy.x, xy.y));
 
   if (!tile)
@@ -41,7 +42,6 @@ void GetTileNode::compute()
 
   if (!tile->finishedLoading())
   {
-    world->mapIndex.loadTile(tile_index(xy.x, xy.y));
     tile->wait_until_loaded();
   }
 

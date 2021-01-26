@@ -88,6 +88,9 @@ QJsonObject MathNode::save() const
   QJsonObject json_obj = BaseNode::save();
 
   json_obj["operation"] = _operation->currentIndex();
+  json_obj["first_type"] = _first_type;
+  json_obj["second_type"] = _second_type;
+  json_obj["result_type"] = _result_type;
 
   return json_obj;
 }
@@ -97,6 +100,27 @@ void MathNode::restore(const QJsonObject& json_obj)
   BaseNode::restore(json_obj);
 
   _operation->setCurrentIndex(json_obj["operation"].toInt());
+  _first_type = json_obj["first_type"].toInt();
+  _second_type = json_obj["second_type"].toInt();
+  _result_type = json_obj["result_type"].toInt();
+
+  if (_first_type >= 0)
+  {
+    _in_ports[0].data_type.reset(TypeFactory::create(_types[_first_type].first.data()));
+    _in_ports[0].caption = _in_ports[0].data_type->type().name;
+  }
+
+  if (_second_type >= 0)
+  {
+    _in_ports[1].data_type.reset(TypeFactory::create(_types[_second_type].first.data()));
+    _in_ports[1].caption = _in_ports[1].data_type->type().name;
+  }
+
+  if (_result_type >= 0)
+  {
+    _out_ports[0].data_type.reset(TypeFactory::create(_types[_result_type].first.data()));
+    _out_ports[0].caption = _out_ports[0].data_type->type().name;
+  }
 
 }
 
@@ -104,7 +128,8 @@ NodeValidationState MathNode::validate()
 {
   setValidationState(NodeValidationState::Valid);
 
-  if (_out_ports[0].data_type->type().id == "undefined")
+  if (!_in_ports[0].connected || !_in_ports[1].connected
+      || _out_ports[0].data_type->type().id == "undefined")
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: result of operation is of undefined type.");
@@ -115,6 +140,34 @@ NodeValidationState MathNode::validate()
 
 }
 
+void MathNode::calculateResultType(PortIndex port_index, PortIndex other_port_index)
+{
+  int first_temp = std::find_if(_types.cbegin(), _types.cend(), [this, port_index] (std::pair<std::string_view, int> const& pair) -> bool
+                                {
+                                    return pair.first == _in_ports[port_index].data_type->type().id.toStdString();
+                                }
+  )->second;
+
+  int second_temp = std::find_if(_types.cbegin(), _types.cend(), [this, other_port_index] (std::pair<std::string_view, int> const& pair) -> bool
+                                 {
+                                     return pair.first == _in_ports[other_port_index].data_type->type().id.toStdString();
+                                 }
+  )->second;
+
+  if (port_index)
+  {
+    _second_type = first_temp;
+    _first_type = second_temp;
+  }
+  else
+  {
+    _second_type = second_temp;
+    _first_type = first_temp;
+  }
+
+  _result_type = std::max(_first_type, _second_type);
+}
+
 void MathNode::inputConnectionCreated(const Connection& connection)
 {
   BaseNode::inputConnectionCreated(connection);
@@ -123,62 +176,45 @@ void MathNode::inputConnectionCreated(const Connection& connection)
   PortIndex other_port_index = port_index ? 0 : 1;
 
   auto data_type = connection.dataType(PortType::Out);
-  _in_ports[port_index].data_type.reset(TypeFactory::create(data_type.id.toStdString()));
-  _in_ports[port_index].caption = data_type.name;
+
+  if (_in_ports[port_index].data_type->type().id != data_type.id)
+  {
+    _in_ports[port_index].data_type.reset(TypeFactory::create(data_type.id.toStdString()));
+    _in_ports[port_index].caption = data_type.name;
+  }
 
   if (_in_ports[other_port_index].connected)
   {
-    if (_out_ports[0].connected)
+
+    calculateResultType(port_index, other_port_index);
+
+    std::string_view result_type = std::find_if(_types.cbegin(), _types.cend(), [this] (std::pair<std::string_view, int> const& pair) -> bool
+    {
+        return pair.second == _result_type;
+
+    })->first;
+
+    if (_out_ports[0].connected && _out_ports[0].data_type->type().id != result_type.data())
     {
       for (auto& con : _node->nodeState().connections(PortType::Out, 0))
       {
         static_cast<NodeScene*>(_node->nodeGraphicsObject().scene())->deleteConnection(*con.second);
       }
+
+      _out_ports[0].data_type.reset(TypeFactory::create(result_type.data()));
+      _out_ports[0].caption = _out_ports[0].data_type->type().name;
     }
-
-    int first_temp = std::find_if(_types.cbegin(), _types.cend(), [this, port_index] (std::pair<std::string_view, int> const& pair) -> bool
-      {
-       return pair.first == _in_ports[port_index].data_type->type().id.toStdString();
-      }
-      )->second;
-
-    int second_temp = std::find_if(_types.cbegin(), _types.cend(), [this, other_port_index] (std::pair<std::string_view, int> const& pair) -> bool
-      {
-         return pair.first == _in_ports[other_port_index].data_type->type().id.toStdString();
-      }
-      )->second;
-
-    if (port_index)
-    {
-      _second_type = first_temp;
-      _first_type = second_temp;
-    }
-    else
-    {
-      _second_type = second_temp;
-      _first_type = first_temp;
-    }
-
-    LogDebug << _first_type << std::endl;
-    LogDebug << _second_type << std::endl;
-    LogDebug << std::endl;
-
-    _result_type = std::max(_first_type, _second_type);
-
-    std::string_view result_type = std::find_if(_types.cbegin(), _types.cend(), [this] (std::pair<std::string_view, int> const& pair) -> bool
-    {
-      return pair.second == _result_type;
-
-    })->first;
-
-    _out_ports[0].data_type.reset(TypeFactory::create(result_type.data()));
-    _out_ports[0].caption = _out_ports[0].data_type->type().name;
   }
 }
 
 void MathNode::inputConnectionDeleted(const Connection& connection)
 {
   PortIndex port_index = connection.getPortIndex(PortType::In);
+
+  if (port_index)
+    _second_type = -1;
+  else
+    _first_type = -1;
 
   _in_ports[port_index].data_type.reset(TypeFactory::create("basic"));
   _in_ports[port_index].caption = "Basic";

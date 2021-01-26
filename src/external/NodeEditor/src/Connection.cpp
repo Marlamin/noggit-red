@@ -426,7 +426,7 @@ setTypeConverter(TypeConverter converter)
 
 void
 Connection::
-propagateData(std::shared_ptr<NodeData> nodeData) const
+propagateData(std::shared_ptr<NodeData> nodeData, bool update_visuals) const
 {
   if (_inNode)
   {
@@ -435,7 +435,7 @@ propagateData(std::shared_ptr<NodeData> nodeData) const
       nodeData = _converter(nodeData);
     }
 
-    _inNode->propagateData(nodeData, _inPortIndex);
+    _inNode->propagateData(nodeData, _inPortIndex, update_visuals);
   }
 }
 

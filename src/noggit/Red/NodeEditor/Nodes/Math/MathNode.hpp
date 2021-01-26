@@ -45,6 +45,8 @@ namespace noggit
             template <typename T>
             void handleOperation(T first, T second);
 
+            void calculateResultType(PortIndex port_index, PortIndex other_port_index);
+
             QComboBox* _operation;
 
             static constexpr std::array<std::pair<std::string_view, int>, 4> _types {std::pair{"int"sv, 0},
@@ -52,9 +54,9 @@ namespace noggit
                                                                                      std::pair{"decimal"sv, 2},
                                                                                      std::pair{"string"sv, 3}};
 
-            int _first_type;
-            int _second_type;
-            int _result_type;
+            int _first_type = -1;
+            int _second_type = -1;
+            int _result_type = -1;
 
         };
 

@@ -124,7 +124,7 @@ public:
 public: // data propagation
 
   void
-  propagateData(std::shared_ptr<NodeData> nodeData) const;
+  propagateData(std::shared_ptr<NodeData> nodeData, bool update_visuals = false) const;
 
   void
   propagateEmptyData() const;

@@ -94,12 +94,13 @@ public Q_SLOTS: // data propagation
   /// Propagates incoming data to the underlying model.
   void
   propagateData(std::shared_ptr<NodeData> nodeData,
-                PortIndex inPortIndex) const;
+                PortIndex inPortIndex,
+                bool update_visuals = false) const;
 
   /// Fetches data from model's OUT #index port
   /// and propagates it to the connection
   void
-  onDataUpdated(PortIndex index);
+  onDataUpdated(PortIndex index, bool update_visuals = false);
 
   /// update the graphic part if the size of the embeddedwidget changes
   /// Port added to the end.

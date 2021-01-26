@@ -33,6 +33,7 @@ void GetTileFromPosNode::compute()
 
   math::vector_3d n_pos(pos.x, pos.y, pos.z);
 
+  world->mapIndex.loadTile(n_pos);
   MapTile* tile(world->mapIndex.getTile(n_pos));
 
   if (!tile)
@@ -44,7 +45,6 @@ void GetTileFromPosNode::compute()
 
   if (!tile->finishedLoading())
   {
-    world->mapIndex.loadTile(n_pos);
     tile->wait_until_loaded();
   }
 

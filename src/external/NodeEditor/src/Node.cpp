@@ -199,17 +199,19 @@ nodeDataModel() const
 void
 Node::
 propagateData(std::shared_ptr<NodeData> nodeData,
-              PortIndex inPortIndex) const
+              PortIndex inPortIndex,
+              bool update_visuals) const
 {
   _nodeDataModel->setInData(std::move(nodeData), inPortIndex);
 
-  //recalculateVisuals();
+  if (update_visuals)
+    recalculateVisuals();
 }
 
 
 void
 Node::
-onDataUpdated(PortIndex index)
+onDataUpdated(PortIndex index, bool update_visuals)
 {
   auto nodeData = _nodeDataModel->outData(index);
 
@@ -217,7 +219,7 @@ onDataUpdated(PortIndex index)
     _nodeState.connectionsRef(PortType::Out, index);
 
   for (auto const & c : connections)
-    c.second->propagateData(nodeData);
+    c.second->propagateData(nodeData, update_visuals);
 }
 
 void

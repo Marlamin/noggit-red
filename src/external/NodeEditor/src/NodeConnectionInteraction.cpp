@@ -211,7 +211,7 @@ NodeConnectionInteraction::
    if (outNode)
    {
       PortIndex outPortIndex = _connection->getPortIndex(PortType::Out);
-      outNode->onDataUpdated(outPortIndex);
+      outNode->onDataUpdated(outPortIndex, true);
    }
 
    return true;
