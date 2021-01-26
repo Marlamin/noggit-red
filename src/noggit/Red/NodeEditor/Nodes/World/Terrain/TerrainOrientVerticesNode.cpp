@@ -32,8 +32,8 @@ void TerrainOrientVerticesNode::compute()
 
   glm::vec3 const& pos = defaultPortData<Vector3DData>(PortType::In, 1)->value();
 
-  world->orientVertices({pos.x, pos.y, pos.z}, defaultPortData<DecimalData>(PortType::In, 2)->value(),
-                        defaultPortData<DecimalData>(PortType::In, 3)->value());
+  world->orientVertices({pos.x, pos.y, pos.z}, math::degrees(defaultPortData<DecimalData>(PortType::In, 2)->value()),
+                        math::degrees(defaultPortData<DecimalData>(PortType::In, 3)->value()));
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

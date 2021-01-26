@@ -21,7 +21,7 @@ DataConstantNode::DataConstantNode()
 
   _type = new QComboBox(&_embedded_widget);
   _type->addItems({"Integer",
-                   "Unsigned Integer",
+                   "UInteger",
                    "Decimal",
                    "String",
                    "Boolean",
@@ -46,6 +46,7 @@ DataConstantNode::DataConstantNode()
        _out_ports[0].data_type.reset(TypeFactory::create(type_id));
 
        addDefaultWidget(_in_ports[0].data_type->default_widget(&_embedded_widget), PortType::In, 0);
+       Q_EMIT visualsNeedUpdate();
 
      }
   );

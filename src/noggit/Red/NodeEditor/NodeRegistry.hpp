@@ -382,11 +382,6 @@ namespace noggit
           ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Integer);
           ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Boolean);
 
-          ret->REGISTER_TYPE_CONVERTER(Integer, Basic);
-          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Basic);
-          ret->REGISTER_TYPE_CONVERTER(Decimal, Basic);
-          ret->REGISTER_TYPE_CONVERTER(String, Basic);
-
           // Color
           ret->REGISTER_TYPE_CONVERTER(Integer, Color);
           ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Color);

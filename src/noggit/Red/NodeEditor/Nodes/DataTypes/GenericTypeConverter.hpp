@@ -56,12 +56,6 @@ struct StringConverter
     }
 };
 
-template<typename T_from>
-struct BasicDataConverter
-{
-    static std::nullptr_t convert(T_from const& value) { return nullptr; }
-};
-
 // Color converters
 
 template<typename T_from>
@@ -118,12 +112,6 @@ DECLARE_TYPE_CONVERTER(UnsignedInteger, Boolean, unsigned int, bool)
 DECLARE_TYPE_CONVERTER_EXT(Decimal, String, StringConverter<double>)
 DECLARE_TYPE_CONVERTER_EXT(Integer, String, StringConverter<int>)
 DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, String, StringConverter<unsigned int>)
-
-// Polymorph types
-DECLARE_TYPE_CONVERTER_EXT(Integer, Basic, BasicDataConverter<int>)
-DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, Basic, BasicDataConverter<unsigned int>)
-DECLARE_TYPE_CONVERTER_EXT(Decimal, Basic, BasicDataConverter<double>)
-DECLARE_TYPE_CONVERTER_EXT(String, Basic, BasicDataConverter<std::string>)
 
 // Custom types
 DECLARE_TYPE_CONVERTER_EXT(Integer, Color, ColorIntegerConverter<int>)

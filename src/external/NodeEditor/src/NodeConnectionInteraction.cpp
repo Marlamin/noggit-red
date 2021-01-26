@@ -129,6 +129,22 @@ NodeConnectionInteraction::
         return true;
       }
 
+      if (connectionDataType.id == "basic" && (candidateNodeDataType.id == "int"
+        || candidateNodeDataType.id == "uint"
+        || candidateNodeDataType.id == "double"
+        || candidateNodeDataType.id == "string"))
+      {
+        return true;
+      }
+
+     if (candidateNodeDataType.id == "basic" && (connectionDataType.id == "int"
+                                              || connectionDataType.id == "uint"
+                                              || connectionDataType.id == "double"
+                                              || connectionDataType.id == "string"))
+     {
+       return true;
+     }
+
       return (converter != nullptr);
    }
 

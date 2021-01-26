@@ -58,7 +58,7 @@ void ChunkGetAlphaLayerNode::compute()
 
   auto alphamaps = texture_set->getAlphamaps();
 
-  auto alpha_layer = alphamaps->at(layer).get();
+  auto alpha_layer = alphamaps->at(layer - 1).get();
 
   QImage image(64, 64, QImage::Format_RGBA8888);
 
@@ -66,8 +66,8 @@ void ChunkGetAlphaLayerNode::compute()
   {
     for (int j = 0; j < 64; ++j)
     {
-      int value = alpha_layer.getAlpha(64 * i + j);
-      image.setPixel(i, j, qRgb(value, value, value));
+      int value = alpha_layer.getAlpha(64 * j + i);
+      image.setPixelColor(i, j, QColor(value, value, value, 255));
     }
   }
 

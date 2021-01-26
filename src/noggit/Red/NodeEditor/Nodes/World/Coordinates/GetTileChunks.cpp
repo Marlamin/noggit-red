@@ -32,12 +32,13 @@ void GetTileChunksNode::compute()
 
   MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
 
-  _chunks.reserve(256);
+  _chunks.clear();
+  _chunks.resize(256);
   for (int i = 0; i < 16; ++i)
   {
     for (int j = 0; j < 16; ++j)
     {
-      _chunks.push_back(std::make_shared<ChunkData>(tile->getChunk(i, j)));
+      _chunks[i * 16 + j] = std::make_shared<ChunkData>(tile->getChunk(i, j));
     }
   }
 
