@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef NOGGIT_CHUNKGETALPHALAYER_HPP
-#define NOGGIT_CHUNKGETALPHALAYER_HPP
+#ifndef NOGGIT_CHUNKSETALPHALAYER_HPP
+#define NOGGIT_CHUNKSETALPHALAYER_HPP
 
 #include <noggit/Red/NodeEditor/Nodes/ContextLogicNodeBase.hpp>
 
@@ -16,12 +16,12 @@ namespace noggit
 {
   namespace Red::NodeEditor::Nodes
   {
-    class ChunkGetAlphaLayerNode : public ContextLogicNodeBase
+    class ChunkSetAlphaLayerNode : public ContextLogicNodeBase
     {
     Q_OBJECT
 
     public:
-      ChunkGetAlphaLayerNode();
+      ChunkSetAlphaLayerNode();
       void compute() override;
       NodeValidationState validate() override;
     };
@@ -30,4 +30,4 @@ namespace noggit
 
 }
 
-#endif //NOGGIT_CHUNKGETALPHALAYER_HPP
+#endif //NOGGIT_CHUNKSETALPHALAYER_HPP

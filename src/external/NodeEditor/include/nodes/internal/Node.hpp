@@ -85,6 +85,9 @@ public:
   NodeDataModel*
   nodeDataModel() const;
 
+  bool getIsDirty() { return _is_dirty; };
+  void setIsDirty(bool value) { _is_dirty = value; };
+
 Q_SIGNALS:
   void
   requestConnectionRemove(Connection& connection);
@@ -111,12 +114,10 @@ public Q_SLOTS: // data propagation
   void
   onPortRemoved(PortType port_type, PortIndex port_index);
 
-protected:
-
-    /// Recalculates the nodes images.
-    /// A data change can result in the node taking more space than before,
-    /// so this forces a recalculate + repaint on the affected node.
-    void recalculateVisuals() const;
+  /// Recalculates the nodes images.
+  /// A data change can result in the node taking more space than before,
+  /// so this forces a recalculate + repaint on the affected node.
+  void recalculateVisuals() const;
 
 private:
 
@@ -135,5 +136,7 @@ private:
   NodeGeometry _nodeGeometry;
 
   std::unique_ptr<NodeGraphicsObject> _nodeGraphicsObject;
+
+  bool _is_dirty = true;
 };
 }

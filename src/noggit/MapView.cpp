@@ -1850,7 +1850,7 @@ void MapView::paintGL()
 
     ImGui::End();
 
-    /* Example */
+    /* Example
     std::string sText;
 
     if(ImGui::IsMouseClicked( 1 ) )
@@ -1894,8 +1894,10 @@ void MapView::paintGL()
       EndPiePopup();
     }
 
-    ImGui::ShowDemoWindow();
-    ImGui::ShowStyleEditor();
+   */
+
+    //ImGui::ShowDemoWindow();
+    //ImGui::ShowStyleEditor();
 
     ImGui::Render();
 

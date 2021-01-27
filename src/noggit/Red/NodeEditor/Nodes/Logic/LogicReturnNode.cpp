@@ -19,13 +19,7 @@ LogicReturnNode::LogicReturnNode()
   setInterpreterToken(NodeInterpreterTokens::RETURN);
 
   addPort<LogicData>(PortType::In, "Logic", true);
-  auto label = new QLabel(&_embedded_widget);
-  label->setMinimumWidth(180);
-  addDefaultWidget(label, PortType::In, 0);
-
   addPort<AnyData>(PortType::In, "Any", true);
-  addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, 1);
-
 }
 
 void LogicReturnNode::compute()
@@ -163,7 +157,10 @@ void LogicReturnNode::portDoubleClicked(PortType port_type, PortIndex port_index
                                        "Port name", QLineEdit::Normal,
                                        _in_ports[port_index].caption, &ok, Qt::Dialog | Qt::FramelessWindowHint);
   if (ok && !text.isEmpty())
+  {
     _in_ports[port_index].caption = text;
+    Q_EMIT visualsNeedUpdate();
+  }
 }
 
 void LogicReturnNode::restorePostConnection(const QJsonObject& json_obj)

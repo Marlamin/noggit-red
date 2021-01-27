@@ -120,7 +120,7 @@ namespace noggit
 
             virtual bool isLogicNode() { return false; };
 
-            void setValidationMessage(QString const& message){_validation_error = message;};
+            void setValidationMessage(QString const& message){_validation_error = message; Q_EMIT visualsNeedUpdate();};
             void setValidationState(NodeValidationState state){_validation_state = state;};
 
             virtual void compute() = 0;

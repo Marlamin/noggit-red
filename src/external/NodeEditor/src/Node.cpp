@@ -302,11 +302,6 @@ onPortRemoved(PortType port_type, PortIndex port_index)
       _nodeState._outConnections.erase(_nodeState._outConnections.begin() + port_index);
   }
 
-  auto widget = _nodeDataModel->embeddedWidget();
-
-  if (widget)
-    widget->adjustSize();
-
   recalculateVisuals();
 }
 
@@ -316,8 +311,21 @@ Node::
 recalculateVisuals() const
 {
   //Recalculate the nodes visuals. A data change can result in the node taking more space than before, so this forces a recalculate+repaint on the affected node
+
+  auto widget = _nodeDataModel->embeddedWidget();
+
+  if (widget)
+  {
+    widget->setVisible(false);
+    widget->setVisible(true);
+    widget->adjustSize();
+    widget->repaint();
+    widget->update();
+  }
+
   _nodeGraphicsObject->setGeometryChanged();
   _nodeGeometry.recalculateSize();
   _nodeGraphicsObject->update(_nodeGeometry.boundingRect());
   _nodeGraphicsObject->moveConnections();
+  _nodeGraphicsObject->scene()->update();
 }

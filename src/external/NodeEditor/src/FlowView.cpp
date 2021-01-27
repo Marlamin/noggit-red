@@ -49,6 +49,7 @@ FlowView(QWidget *parent)
   setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 
   setCacheMode(QGraphicsView::CacheBackground);
+  setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
   //setViewport(new QGLWidget(QGLFormat(QGL::SampleBuffers)));
 }
@@ -420,6 +421,10 @@ mouseMoveEvent(QMouseEvent *event)
       setSceneRect(sceneRect().translated(difference.x(), difference.y()));
     }
   }
+
+  QWidget* viewport_obj = viewport();
+  viewport_obj->update();
+
 }
 
 
@@ -534,4 +539,9 @@ void FlowView::deleteScene()
 
   _scene->clearScene();
   delete _scene;
+}
+
+void FlowView::paintEvent(QPaintEvent *event)
+{
+  QGraphicsView::paintEvent(event);
 }

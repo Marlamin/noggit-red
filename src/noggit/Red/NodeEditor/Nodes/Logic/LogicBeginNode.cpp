@@ -222,5 +222,9 @@ void LogicBeginNode::portDoubleClicked(PortType port_type, PortIndex port_index)
                                        "Port name", QLineEdit::Normal,
                                        _out_ports[port_index].caption, &ok, Qt::Dialog | Qt::FramelessWindowHint);
   if (ok && !text.isEmpty())
+  {
     _out_ports[port_index].caption = text;
+    Q_EMIT visualsNeedUpdate();
+  }
+
 }

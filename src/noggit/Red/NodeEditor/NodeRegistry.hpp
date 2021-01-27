@@ -139,6 +139,7 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Texturing/TexturingSwapTextureAtPosRadiusNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkGetAlphaLayer.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetAlphaLayer.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunk.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunkFromPos.hpp>
@@ -348,6 +349,7 @@ namespace noggit
           ret->registerModel<WorldConstantsNode>("World//Misc//");
 
           ret->registerModel<ChunkGetAlphaLayerNode>("World//Chunk//");
+          ret->registerModel<ChunkSetAlphaLayerNode>("World//Chunk//");
 
           ret->registerModel<FixAllGapsNode>("World//Loaded Tiles//");
 

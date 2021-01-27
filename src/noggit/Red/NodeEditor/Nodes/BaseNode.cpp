@@ -315,7 +315,11 @@ void BaseNode::captionDoubleClicked()
                                        "Node name", QLineEdit::Normal,
                                        _caption, &ok, Qt::Dialog | Qt::FramelessWindowHint);
   if (ok && !text.isEmpty())
+  {
     setCaption(text);
+    Q_EMIT visualsNeedUpdate();
+  }
+
 }
 
 
