@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "ChunkClearHeight.hpp"
+#include "ChunkSwapTexture.hpp"
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
@@ -8,33 +8,45 @@
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
-ChunkClearHeightNode::ChunkClearHeightNode()
+ChunkSwapTextureNode::ChunkSwapTextureNode()
 : ContextLogicNodeBase()
 {
-  setName("Chunk :: ClearHeight");
-  setCaption("Chunk :: ClearHeight");
+  setName("Chunk :: SwapTexture");
+  setCaption("Chunk :: SwapTexture");
   _validation_state = NodeValidationState::Valid;
 
-  addPort<LogicData>(PortType::In, "Logic", true);
-  addPort<ChunkData>(PortType::In, "Chunk", true);
+  addPortDefault<LogicData>(PortType::In, "Logic", true);
+  addPortDefault<ChunkData>(PortType::In, "Chunk", true);
+  addPortDefault<StringData>(PortType::In, "TextureFrom<String>", true);
+  addPortDefault<StringData>(PortType::In, "TextureTo<String>", true);
+
   addPort<LogicData>(PortType::Out, "Logic", true);
 }
 
-void ChunkClearHeightNode::compute()
+void ChunkSwapTextureNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   MapChunk* chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
-  chunk->clearHeight();
+  auto tex_from = defaultPortData<StringData>(PortType::In, 2)->value();
+  auto tex_to = defaultPortData<StringData>(PortType::In, 3)->value();
+
+  if (tex_from.empty() || tex_to.empty())
+    return;
+
+  scoped_blp_texture_reference b_tex_from(tex_from, gCurrentContext->getViewport()->getRenderContext());
+  scoped_blp_texture_reference b_tex_to(tex_to, gCurrentContext->getViewport()->getRenderContext());
+
+  chunk->switchTexture(b_tex_from, b_tex_to);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
 }
 
-NodeValidationState ChunkClearHeightNode::validate()
+NodeValidationState ChunkSwapTextureNode::validate()
 {
   if (!static_cast<ChunkData*>(_in_ports[1].in_value.lock().get()))
   {

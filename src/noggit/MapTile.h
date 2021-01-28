@@ -60,6 +60,7 @@ public:
 
 	//! \brief Get the maximum height of terrain on this map tile.
 	float getMaxHeight();
+	float getMinHeight();
 
   void convert_alphamap(bool to_big_alpha);
 

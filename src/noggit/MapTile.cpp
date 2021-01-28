@@ -337,6 +337,19 @@ float MapTile::getMaxHeight()
 
 }
 
+float MapTile::getMinHeight()
+{
+  float minHeight = std::numeric_limits<float>::max();
+
+  for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
+  {
+    minHeight = std::min(mChunks[nextChunk / 16][nextChunk % 16]->vmin.y, minHeight);
+  }
+
+  return minHeight;
+
+}
+
 void MapTile::convert_alphamap(bool to_big_alpha)
 {
   mBigAlpha = true;

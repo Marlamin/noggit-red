@@ -355,6 +355,19 @@ bool TextureSet::eraseUnusedTextures()
   return false;
 }
 
+int TextureSet::texture_id(scoped_blp_texture_reference const& texture)
+{
+  for (int i = 0; i < nTextures; ++i)
+  {
+    if (textures[i] == texture)
+    {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
 int TextureSet::get_texture_index_or_add (scoped_blp_texture_reference texture, float target)
 {
   for (int i = 0; i < nTextures; ++i)

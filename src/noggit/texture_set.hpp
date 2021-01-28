@@ -73,6 +73,8 @@ public:
 
   scoped_blp_texture_reference texture(size_t id);
 
+  int texture_id(scoped_blp_texture_reference const& texture);
+
   void bind_alpha(std::size_t id);
 
   std::vector<uint8_t> lod_texture_map();
@@ -86,8 +88,9 @@ public:
   std::array<boost::optional<Alphamap>, 3>* getAlphamaps() { return &alphamaps; };
   boost::optional<tmp_edit_alpha_values>* getTempAlphamaps() { return &tmp_edit_values; };
 
-private:
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
+
+private:
 
   uint8_t sum_alpha(size_t offset) const;
 

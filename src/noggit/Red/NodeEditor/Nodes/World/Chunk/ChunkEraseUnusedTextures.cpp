@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "TileGetMaxHeightNode.hpp"
+#include "ChunkEraseUnusedTextures.hpp"
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
@@ -8,43 +8,42 @@
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
-TileGetMaxHeightNode::TileGetMaxHeightNode()
+ChunkEraseUnusedTexturesNode::ChunkEraseUnusedTexturesNode()
 : ContextLogicNodeBase()
 {
-  setName("Tile :: GetMaxHeight");
-  setCaption("Tile :: GetMaxHeight");
+  setName("Chunk :: EraseUnusedTextures");
+  setCaption("Chunk :: EraseUnusedTextures");
   _validation_state = NodeValidationState::Valid;
 
-  addPortDefault<LogicData>(PortType::In, "Logic", true);
-  addPortDefault<TileData>(PortType::In, "Tile", true);
+  addPort<LogicData>(PortType::In, "Logic", true);
+  addPort<ChunkData>(PortType::In, "Chunk", true);
 
   addPort<LogicData>(PortType::Out, "Logic", true);
-  addPort<DecimalData>(PortType::Out, "Height<Decimal>", true);
 }
 
-void TileGetMaxHeightNode::compute()
+void ChunkEraseUnusedTexturesNode::compute()
 {
+  World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
+  MapChunk* chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
+  chunk->texture_set->eraseUnusedTextures();
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<DecimalData>(tile->getMaxHeight());
-  _node->onDataUpdated(1);
-
 }
 
-NodeValidationState TileGetMaxHeightNode::validate()
+NodeValidationState ChunkEraseUnusedTexturesNode::validate()
 {
-  if (!static_cast<TileData*>(_in_ports[1].in_value.lock().get()))
+  if (!static_cast<ChunkData*>(_in_ports[1].in_value.lock().get()))
   {
     setValidationState(NodeValidationState::Error);
-    setValidationMessage("Error: failed to evaluate tile input.");
+    setValidationMessage("Error: failed to evaluate chunk input.");
     return _validation_state;
   }
 
   return ContextLogicNodeBase::validate();
 }
+

@@ -16,7 +16,7 @@ ChunkClearShadowsNode::ChunkClearShadowsNode()
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
-  addPort<ChunKData>(PortType::In, "Chunk", true);
+  addPort<ChunkData>(PortType::In, "Chunk", true);
 
   addPort<LogicData>(PortType::Out, "Logic", true);
 }

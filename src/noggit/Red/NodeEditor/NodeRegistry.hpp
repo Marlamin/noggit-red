@@ -151,6 +151,13 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkClearHeight.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkClearShadows.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetAreaID.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSwapTexture.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkEraseTextures.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkEraseUnusedTextures.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkCanPaintTexture.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkGetTextureByLayer.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkFindTextureNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkAddTextureNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunk.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunkFromPos.hpp>
@@ -170,8 +177,10 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Shading/ShadingPickColorNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/ReloadTileNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetMaxHeightNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetMinMaxHeight.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetVertexNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetAlphaLayer.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetAlphaLayerTexture.hpp>
 
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
@@ -368,7 +377,22 @@ namespace noggit
           ret->registerModel<ChunkSetHeightmapImageNode>("World//Chunk//");
           ret->registerModel<ChunkInfoNode>("World//Chunk//");
           ret->registerModel<ChunkClearHeightNode>("World//Chunk//");
+          ret->registerModel<ChunkClearShadowsNode>("World//Chunk//");
           ret->registerModel<ChunkSetAreaIDNode>("World//Chunk//");
+          ret->registerModel<ChunkSwapTextureNode>("World//Chunk//");
+          ret->registerModel<ChunkEraseTexturesNode>("World//Chunk//");
+          ret->registerModel<ChunkEraseUnusedTexturesNode>("World//Chunk//");
+          ret->registerModel<ChunkCanPaintTextureNode>("World//Chunk//");
+          ret->registerModel<ChunkGetTextureByLayerNode>("World//Chunk//");
+          ret->registerModel<ChunkFindTextureNode>("World//Chunk//");
+          ret->registerModel<ChunkAddTextureNode>("World//Chunk//");
+
+
+          ret->registerModel<ReloadTileNode>("World//Tile//");
+          ret->registerModel<TileGetMinMaxHeightNode>("World//Tile//");
+          ret->registerModel<TileGetVertexNode>("World//Tile//");
+          ret->registerModel<TileGetAlphaLayerNode>("World//Tile//");
+          ret->registerModel<TileGetAlphaLayerTextureNode>("World//Tile//");
 
           ret->registerModel<FixAllGapsNode>("World//Loaded Tiles//");
 
