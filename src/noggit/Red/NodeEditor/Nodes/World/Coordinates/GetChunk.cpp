@@ -47,3 +47,15 @@ void GetChunkNode::compute()
   _node->onDataUpdated(1);
 
 }
+
+NodeValidationState GetChunkNode::validate()
+{
+  if (!static_cast<TileData*>(_in_ports[1].in_value.lock().get()))
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: failed to evaluate tile input.");
+    return _validation_state;
+  }
+
+  return ContextLogicNodeBase::validate();
+}

@@ -1,9 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef NOGGIT_GETCHUNK_HPP
-#define NOGGIT_GETCHUNK_HPP
+#ifndef NOGGIT_CHUNKINFONODE_HPP
+#define NOGGIT_CHUNKINFONODE_HPP
 
-#include <noggit/Red/NodeEditor/Nodes/ContextLogicNodeBase.hpp>
+#include <noggit/Red/NodeEditor/Nodes/ContextNodeBase.hpp>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -16,12 +16,12 @@ namespace noggit
 {
   namespace Red::NodeEditor::Nodes
   {
-    class GetChunkNode : public ContextLogicNodeBase
+    class ChunkInfoNode : public ContextNodeBase
     {
     Q_OBJECT
 
     public:
-      GetChunkNode();
+      ChunkInfoNode();
       void compute() override;
       NodeValidationState validate() override;
     };
@@ -30,4 +30,4 @@ namespace noggit
 
 }
 
-#endif //NOGGIT_GETCHUNK_HPP
+#endif //NOGGIT_CHUNKINFONODE_HPP

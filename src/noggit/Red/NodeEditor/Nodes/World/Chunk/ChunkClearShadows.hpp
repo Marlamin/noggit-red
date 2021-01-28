@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#ifndef NOGGIT_GETCHUNK_HPP
-#define NOGGIT_GETCHUNK_HPP
+#ifndef NOGGIT_CHUNKCLEARSHADOWS_HPP
+#define NOGGIT_CHUNKCLEARSHADOWS_HPP
 
 #include <noggit/Red/NodeEditor/Nodes/ContextLogicNodeBase.hpp>
 
@@ -16,12 +16,12 @@ namespace noggit
 {
   namespace Red::NodeEditor::Nodes
   {
-    class GetChunkNode : public ContextLogicNodeBase
+    class ChunkClearShadowsNode : public ContextLogicNodeBase
     {
     Q_OBJECT
 
     public:
-      GetChunkNode();
+      ChunkClearShadowsNode();
       void compute() override;
       NodeValidationState validate() override;
     };
@@ -30,4 +30,4 @@ namespace noggit
 
 }
 
-#endif //NOGGIT_GETCHUNK_HPP
+#endif //NOGGIT_CHUNKCLEARSHADOWS_HPP

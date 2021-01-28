@@ -60,9 +60,12 @@
 #include <noggit/Red/NodeEditor/Nodes/Data/GetVariableLazyNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/SetVariableNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/DeleteVariableNode.hpp>
+
 #include <noggit/Red/NodeEditor/Nodes/Data/String/StringEndsWithNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/String/StringSizeNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/String/StringConcatenateNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Data/String/StringEqual.hpp>
+
 #include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/Data/Random/RandomDecimalNode.hpp>
@@ -140,6 +143,14 @@
 
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkGetAlphaLayer.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetAlphaLayer.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkGetHeightmap.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkGetHeightmapImage.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetHeightmap.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetHeightmapImage.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkInfoNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkClearHeight.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkClearShadows.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetAreaID.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunk.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunkFromPos.hpp>
@@ -263,6 +274,7 @@ namespace noggit
           ret->registerModel<StringEndsWithNode>("Data//String");
           ret->registerModel<StringSizeNode>("Data//String");
           ret->registerModel<StringConcatenateNode>("Data//String");
+          ret->registerModel<StringEqualNode>("Data//String");
 
 
           // Random
@@ -350,6 +362,13 @@ namespace noggit
 
           ret->registerModel<ChunkGetAlphaLayerNode>("World//Chunk//");
           ret->registerModel<ChunkSetAlphaLayerNode>("World//Chunk//");
+          ret->registerModel<ChunkGetHeightmapNode>("World//Chunk//");
+          ret->registerModel<ChunkSetHeightmapNode>("World//Chunk//");
+          ret->registerModel<ChunkGetHeightmapImageNode>("World//Chunk//");
+          ret->registerModel<ChunkSetHeightmapImageNode>("World//Chunk//");
+          ret->registerModel<ChunkInfoNode>("World//Chunk//");
+          ret->registerModel<ChunkClearHeightNode>("World//Chunk//");
+          ret->registerModel<ChunkSetAreaIDNode>("World//Chunk//");
 
           ret->registerModel<FixAllGapsNode>("World//Loaded Tiles//");
 

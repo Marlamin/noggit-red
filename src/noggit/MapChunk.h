@@ -196,6 +196,8 @@ public:
   bool GetVertex(float x, float z, math::vector_3d *V);
   float getHeight(int x, int z);
   float getMinHeight();
+  float getMaxHeight() { return vmin.y; };
+  math::vector_3d getCenter() { return vcenter; };
 
   void clearHeight();
 
@@ -206,4 +208,6 @@ public:
   bool fixGapLeft(const MapChunk* chunk);
   // fix the gaps with the chunk above
   bool fixGapAbove(const MapChunk* chunk);
+
+  math::vector_3d* getHeightmap() { return &mVertices[0]; };
 };
