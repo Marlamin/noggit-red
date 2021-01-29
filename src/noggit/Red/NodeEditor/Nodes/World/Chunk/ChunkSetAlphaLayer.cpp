@@ -57,7 +57,7 @@ void ChunkSetAlphaLayerNode::compute()
     return;
   }
 
-  if (layer < 0 || layer > 3 || layer >= texture_set->num())
+  if (layer < 1 || layer > 3 || layer >= texture_set->num())
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: layer is out of range.");
@@ -71,7 +71,7 @@ void ChunkSetAlphaLayerNode::compute()
   {
     for (int j = 0; j < 64; ++j)
     {
-      temp_alphamaps[layer][64 * j + i] = qGray(image->pixel(i, j)) / 255.0f;
+      temp_alphamaps[layer][64 * j + i] = static_cast<float>(qGray(image->pixel(i, j))) / 255.0f;
     }
   }
 

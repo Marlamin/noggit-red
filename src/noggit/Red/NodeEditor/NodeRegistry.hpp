@@ -181,6 +181,9 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetVertexNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetAlphaLayer.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetAlphaLayerTexture.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetHeightMapImage.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileSetHeightmapImage.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileSetAlphaLayer.hpp>
 
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
@@ -393,6 +396,9 @@ namespace noggit
           ret->registerModel<TileGetVertexNode>("World//Tile//");
           ret->registerModel<TileGetAlphaLayerNode>("World//Tile//");
           ret->registerModel<TileGetAlphaLayerTextureNode>("World//Tile//");
+          ret->registerModel<TileGetHeightmapImageNode>("World//Tile//");
+          ret->registerModel<TileSetHeightmapImageNode>("World//Tile//");
+          ret->registerModel<TileSetAlphaLayerNode>("World//Tile//");
 
           ret->registerModel<FixAllGapsNode>("World//Loaded Tiles//");
 

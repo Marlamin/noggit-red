@@ -196,14 +196,13 @@ void MathNode::inputConnectionCreated(const Connection& connection)
 
     if (_out_ports[0].connected && _out_ports[0].data_type->type().id != result_type.data())
     {
-      for (auto& con : _node->nodeState().connections(PortType::Out, 0))
+      for (auto &con : _node->nodeState().connections(PortType::Out, 0))
       {
         static_cast<NodeScene*>(_node->nodeGraphicsObject().scene())->deleteConnection(*con.second);
       }
-
-      _out_ports[0].data_type.reset(TypeFactory::create(result_type.data()));
-      _out_ports[0].caption = _out_ports[0].data_type->type().name;
     }
+    _out_ports[0].data_type.reset(TypeFactory::create(result_type.data()));
+    _out_ports[0].caption = _out_ports[0].data_type->type().name;
   }
 }
 

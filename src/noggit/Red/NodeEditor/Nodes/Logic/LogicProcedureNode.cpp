@@ -184,6 +184,7 @@ void LogicProcedureNode::restore(const QJsonObject& json_obj)
   for (int i = 0; i < json_obj["n_dynamic_in_ports"].toInt(); ++i)
   {
     addPort<LogicData>(PortType::In, json_obj[("in_port_" + std::to_string(i + 2) + "_caption").c_str()].toString(), true);
+    addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, _in_ports.size() - 1);
 
     std::unique_ptr<NodeData> type;
     type.reset(TypeFactory::create(json_obj[("in_port_" + std::to_string(i + 2)).c_str()].toString().toStdString()));
@@ -283,8 +284,9 @@ void LogicProcedureNode::setProcedure(const QString& path)
       continue;
 
     addPort<LogicData>(PortType::In, port.caption, true);
-
     int port_idx = _in_ports.size() - 1;
+    addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, port_idx);
+
     _in_ports[port_idx].data_type = port.data_type->instantiate();
     _in_ports[port_idx].data_type->set_parameter_type(port.data_type->type().parameter_type_id);
     emit portAdded(PortType::In, port_idx);

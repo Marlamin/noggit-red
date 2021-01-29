@@ -50,9 +50,9 @@ void TileGetAlphaLayerTextureNode::compute()
     {
       MapChunk* chunk = tile->getChunk(i, j);
 
-      unsigned layer = chunk->texture_set->texture_id(b_tex);
+      int layer = chunk->texture_set->texture_id(b_tex);
 
-      if (layer < 0)
+      if (layer <= 0)
         continue;
 
       chunk->texture_set->apply_alpha_changes();

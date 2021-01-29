@@ -255,7 +255,7 @@ setNodeToPort(Node& node,
 
   updated(*this);
   if (complete() && wasIncomplete) {
-    connectionCompleted(*this);
+    Q_EMIT connectionCompleted(*this);
   }
 }
 

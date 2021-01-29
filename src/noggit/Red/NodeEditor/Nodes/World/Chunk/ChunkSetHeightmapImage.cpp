@@ -77,12 +77,15 @@ void ChunkSetHeightmapImageNode::compute()
 
         case 1: // Add
           heightmap[idx].y += qGray(image_to_use->pixel(x, y)) / 255.0f * multiplier;
+          break;
 
         case 2: // Subtract
           heightmap[idx].y -= qGray(image_to_use->pixel(x, y)) / 255.0f * multiplier;
+          break;
 
         case 3: // Multiply
           heightmap[idx].y *= qGray(image_to_use->pixel(x, y)) / 255.0f * multiplier;
+          break;
       }
     }
 

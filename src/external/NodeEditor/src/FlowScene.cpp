@@ -131,6 +131,13 @@ createConnection(Node& nodeIn,
 
   connectionCreated(*connection);
 
+  connect(connection.get(),
+          &Connection::connectionCompleted,
+          this,
+          [this](Connection const& c) {
+              connectionCreated(c);
+          });
+
   _changed = true;
   Q_EMIT changed();
   return connection;

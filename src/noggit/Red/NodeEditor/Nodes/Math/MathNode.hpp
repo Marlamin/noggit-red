@@ -51,7 +51,7 @@ namespace noggit
 
             static constexpr std::array<std::pair<std::string_view, int>, 4> _types {std::pair{"int"sv, 0},
                                                                                      std::pair{"uint"sv, 1},
-                                                                                     std::pair{"decimal"sv, 2},
+                                                                                     std::pair{"double"sv, 2},
                                                                                      std::pair{"string"sv, 3}};
 
             int _first_type = -1;

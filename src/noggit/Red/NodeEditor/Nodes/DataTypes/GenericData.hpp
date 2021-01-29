@@ -494,7 +494,6 @@ DECLARE_NODE_DATA_TYPE(logic, Logic, bool, NoDefaultWidget)
 
 DECLARE_NODE_DATA_TYPE(int, Integer, int, DefaultIntWidget)
 DECLARE_NODE_DATA_TYPE(uint, UnsignedInteger, unsigned int, DefaultUnsignedIntWidget)
-
 DECLARE_NODE_DATA_TYPE(double, Decimal, double, DefaultDecimalWidget)
 DECLARE_NODE_DATA_TYPE(bool, Boolean, bool, DefaultBooleanWidget)
 DECLARE_NODE_DATA_TYPE_EXT(string, String, std::string, DefaultStringWidget, toQStringString)
