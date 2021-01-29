@@ -891,11 +891,16 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
   }
   if (changed && _uploaded)
   {
-    gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
-    _need_vao_update = true;
+    update_vertex_colors();
   }
 
   return changed;
+}
+
+void MapChunk::update_vertex_colors()
+{
+  gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
+  _need_vao_update = true;
 }
 
 math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)

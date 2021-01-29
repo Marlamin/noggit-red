@@ -210,4 +210,7 @@ public:
   bool fixGapAbove(const MapChunk* chunk);
 
   math::vector_3d* getHeightmap() { return &mVertices[0]; };
+  math::vector_3d* getVertexColors() { return &mccv[0]; };
+
+  void update_vertex_colors();
 };

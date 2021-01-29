@@ -158,6 +158,10 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkGetTextureByLayer.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkFindTextureNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkAddTextureNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkGetVertexColors.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkGetVertexColorsImage.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetVertexColors.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetVertexColorsImage.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunk.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunkFromPos.hpp>
@@ -389,6 +393,10 @@ namespace noggit
           ret->registerModel<ChunkGetTextureByLayerNode>("World//Chunk//");
           ret->registerModel<ChunkFindTextureNode>("World//Chunk//");
           ret->registerModel<ChunkAddTextureNode>("World//Chunk//");
+          ret->registerModel<ChunkGetVertexColorsNode>("World//Chunk//");
+          ret->registerModel<ChunkGetVertexColorsImageNode>("World//Chunk//");
+          ret->registerModel<ChunkSetVertexColorsNode>("World//Chunk//");
+          ret->registerModel<ChunkSetVertexColorsImageNode>("World//Chunk//");
 
 
           ret->registerModel<ReloadTileNode>("World//Tile//");
