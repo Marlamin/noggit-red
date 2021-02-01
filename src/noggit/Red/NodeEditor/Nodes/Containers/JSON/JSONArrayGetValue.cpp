@@ -110,13 +110,6 @@ NodeValidationState JSONArrayGetValueNode::validate()
     return _validation_state;
   }
 
-  if (!static_cast<UnsignedIntegerData*>(_in_ports[1].in_value.lock().get()))
-  {
-    setValidationState(NodeValidationState::Error);
-    setValidationMessage("Error: failed to evaluate index input.");
-    return _validation_state;
-  }
-
   return _validation_state;
 }
 
