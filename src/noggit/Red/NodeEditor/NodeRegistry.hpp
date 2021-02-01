@@ -56,6 +56,18 @@
 #include <noggit/Red/NodeEditor/Nodes/Containers/List/ListReserveNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Containers/List/ListDeclareNode.hpp>
 
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/CreateJSONObject.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/GetJSONValue.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/JSONObjectInfo.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/LoadJSONObject.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/SaveJSONObject.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/SetJSONValue.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/CreateJSONArray.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/JSONArrayGetValue.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/JSONArrayInfo.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/JSONArrayInsertValue.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Containers/JSON/JSONArrayPush.hpp>
+
 #include <noggit/Red/NodeEditor/Nodes/Data/GetVariableNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/GetVariableLazyNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/SetVariableNode.hpp>
@@ -350,6 +362,19 @@ namespace noggit
           ret->registerModel<ListReserveNode>("Containers//List");
           ret->registerModel<ListDeclareNode>("Containers//List");
 
+          // JSON
+          ret->registerModel<CreateJSONObjectNode>("Containers//JSON");
+          ret->registerModel<GetJSONValueNode>("Containers//JSON");
+          ret->registerModel<JSONObjectInfoNode>("Containers//JSON");
+          ret->registerModel<LoadJSONObjectNode>("Containers//JSON");
+          ret->registerModel<SaveJSONObjectNode>("Containers//JSON");
+          ret->registerModel<SetJSONValueNode>("Containers//JSON");
+          ret->registerModel<CreateJSONArrayNode>("Containers//JSON");
+          ret->registerModel<JSONArrayGetValueNode>("Containers//JSON");
+          ret->registerModel<JSONArrayInfoNode>("Containers//JSON");
+          ret->registerModel<JSONArrayInsertValueNode>("Containers//JSON");
+          ret->registerModel<JSONArrayPushNode>("Containers//JSON");
+
           // Actions
           ret->registerModel<TerrainRaiseLowerNode>("World//Terrain//");
           ret->registerModel<TerrainFlattenNode>("World//Terrain//");
@@ -448,6 +473,19 @@ namespace noggit
           ret->REGISTER_TYPE_CONVERTER(Color, String);
           ret->REGISTER_TYPE_CONVERTER(Color, Vector4D);
           ret->REGISTER_TYPE_CONVERTER(Vector4D, Color);
+
+          // Json
+          ret->REGISTER_TYPE_CONVERTER(Integer, JSONValue);
+          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, JSONValue);
+          ret->REGISTER_TYPE_CONVERTER(Decimal, JSONValue);
+          ret->REGISTER_TYPE_CONVERTER(String, JSONValue);
+          ret->REGISTER_TYPE_CONVERTER(Color, JSONValue);
+          ret->REGISTER_TYPE_CONVERTER(Vector2D, JSONValue);
+          ret->REGISTER_TYPE_CONVERTER(Vector3D, JSONValue);
+          ret->REGISTER_TYPE_CONVERTER(Vector4D, JSONValue);
+          ret->REGISTER_TYPE_CONVERTER(Matrix4x4, JSONValue);
+          ret->REGISTER_TYPE_CONVERTER(Quaternion, JSONValue);
+          ret->REGISTER_TYPE_CONVERTER(JSON, JSONValue);
 
           return ret;
         }

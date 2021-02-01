@@ -2,13 +2,21 @@
 #define NOGGIT_BASENODE_INL
 
 #include "BaseNode.hpp"
+#include "DataTypes/GenericData.hpp"
 
 template<typename T>
 void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
-                                                         const QString &caption,
-                                                         bool caption_visible,
-                                                         ConnectionPolicy out_policy)
+                                                              const QString &caption,
+                                                              bool caption_visible,
+                                                              ConnectionPolicy out_policy)
 {
+  // force one output for logic data
+  ConnectionPolicy new_out_policy = out_policy;
+  if constexpr (std::is_same<T, LogicData>::value)
+  {
+    new_out_policy = ConnectionPolicy::One;
+  }
+
   if (port_type == PortType::In)
   {
     auto& port = _in_ports.emplace_back(caption, caption_visible);
@@ -20,7 +28,7 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
     port.data_type = std::make_unique<T>();
 
     //assert(port.data_type->type().id == "logic" && out_policy == ConnectionPolicy::Many);
-    port.connection_policy = out_policy;
+    port.connection_policy = new_out_policy;
   }
   else
   {
@@ -31,11 +39,18 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
 
 template<typename T>
 void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
-                                                       PortIndex port_index,
-                                                       const QString &caption,
-                                                       bool caption_visible,
-                                                       ConnectionPolicy out_policy)
+                                                              PortIndex port_index,
+                                                              const QString &caption,
+                                                              bool caption_visible,
+                                                              ConnectionPolicy out_policy)
 {
+  // force one output for logic data
+  ConnectionPolicy new_out_policy = out_policy;
+  if constexpr (std::is_same<T, LogicData>::value)
+  {
+    new_out_policy = ConnectionPolicy::One;
+  }
+
   if (port_type == PortType::In)
   {
     auto port = _in_ports.emplace(_in_ports.begin() + port_index, caption, caption_visible);
@@ -47,7 +62,7 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
     port->data_type = std::make_unique<T>();
 
     assert(!(port->data_type->type().id == "logic" && out_policy == ConnectionPolicy::Many));
-    port->connection_policy = out_policy;
+    port->connection_policy = new_out_policy;
   }
   else
   {
@@ -57,8 +72,8 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
 
 template<typename T>
 void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDynamic(PortType port_type, PortIndex port_index,
-                                                              const QString& caption, bool caption_visible,
-                                                              ConnectionPolicy out_policy)
+                                                                     const QString& caption, bool caption_visible,
+                                                                     ConnectionPolicy out_policy)
 {
   addPort<T>(port_type, port_index, caption, caption_visible, out_policy);
   Q_EMIT portAdded(port_type, port_index);
@@ -66,9 +81,9 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDynamic(PortType port_type
 
 template<typename T>
 void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type,
-                                                              const QString &caption,
-                                                              bool caption_visible,
-                                                              ConnectionPolicy out_policy)
+                                                                    const QString &caption,
+                                                                    bool caption_visible,
+                                                                    ConnectionPolicy out_policy)
 {
   addPort<T>(port_type, caption, caption_visible, out_policy);
 
@@ -91,10 +106,10 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type
 
 template<typename T>
 void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type,
-                                                              PortIndex port_index,
-                                                              const QString &caption,
-                                                              bool caption_visible,
-                                                              ConnectionPolicy out_policy)
+                                                                     PortIndex port_index,
+                                                                     const QString &caption,
+                                                                     bool caption_visible,
+                                                                     ConnectionPolicy out_policy)
 {
   addPort<T>(port_type, port_index, caption, caption_visible, out_policy);
 
@@ -114,15 +129,16 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type
 
 template<typename T>
 void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefaultDynamic(PortType port_type, PortIndex port_index,
-                                                                     const QString& caption, bool caption_visible,
-                                                                     ConnectionPolicy out_policy)
+                                                                            const QString& caption, bool caption_visible,
+                                                                            ConnectionPolicy out_policy)
 {
   addPortDefault<T>(port_type, port_index, caption, caption_visible, out_policy);
   Q_EMIT portAdded(port_type, port_index);
 }
 
 template <typename T>
-std::shared_ptr<T> noggit::Red::NodeEditor::Nodes::BaseNode::defaultPortData(PortType port_type, PortIndex port_index)
+std::shared_ptr<T> noggit::Red::NodeEditor::Nodes::BaseNode::defaultPortData(PortType port_type,
+                                                                                    PortIndex port_index)
 {
   if (port_type == PortType::In)
   {

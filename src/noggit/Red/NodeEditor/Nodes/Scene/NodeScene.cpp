@@ -28,6 +28,7 @@ bool NodeScene::validate()
   {
     auto model = static_cast<BaseNode*>(pair.second.get()->nodeDataModel());
     model->setComputed(false);
+    model->setValidationState(NodeValidationState::Valid);
 
     if (model->isLogicNode())
     {

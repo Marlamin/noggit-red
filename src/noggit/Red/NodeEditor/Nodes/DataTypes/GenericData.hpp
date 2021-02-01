@@ -518,5 +518,8 @@ DECLARE_NODE_DATA_TYPE_EXT(image, Image, QImage, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(noise, Noise, std::shared_ptr<noise::module::Module>, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(chunk, Chunk, MapChunk*, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(tile, Tile, MapTile*, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(json, JSON, QJsonObject, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(json_array, JSONArray, QJsonArray, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(json_value, JSONValue, QJsonValue, NoDefaultWidget, toQStringNA);
 
 #endif //NOGGIT_GENERICDATA_HPP

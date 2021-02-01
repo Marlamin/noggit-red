@@ -80,6 +80,75 @@ struct ColorVector4DConverter
     static glm::vec4 convert(glm::vec4 const& value) { return value; };
 };
 
+// Json converters
+
+template <typename T_from>
+struct GenericJsonConverter
+{
+    static QJsonValue convert(T_from const& value) { return QJsonValue(value); }
+};
+
+struct StringJsonConverter
+{
+    static QJsonValue convert(std::string const& value) { return QJsonValue(value.c_str()); }
+};
+
+struct Vec2DJsonConverter
+{
+    static QJsonValue convert(glm::vec2 const& value)
+    {
+      QJsonArray array{value.x, value.y};
+      return QJsonValue(array);
+    }
+};
+
+struct Vec3DJsonConverter
+{
+    static QJsonValue convert(glm::vec3 const& value)
+    {
+      QJsonArray array{value.x, value.y, value.z};
+      return QJsonValue(array);
+    }
+};
+
+struct Vec4DJsonConverter
+{
+    static QJsonValue convert(glm::vec4 const& value)
+    {
+      QJsonArray array{value.x, value.y, value.z, value.w};
+      return QJsonValue(array);
+    }
+};
+
+struct QuaternionJsonConverter
+{
+    static QJsonValue convert(glm::quat const& value)
+    {
+      QJsonArray array{value.x, value.y, value.z, value.w};
+      return QJsonValue(array);
+    }
+};
+
+struct Matrix4x4JsonConverter
+{
+    static QJsonValue convert(glm::mat4 const& value)
+    {
+      QJsonArray array{value[0].x, value[0].y, value[0].z, value[0].w,
+                       value[1].x, value[1].y, value[1].z, value[1].w,
+                       value[2].x, value[2].y, value[2].z, value[2].w,
+                       value[3].x, value[3].y, value[3].z, value[3].w}; // TODO: verify if this is correct
+      return QJsonValue(array);
+    }
+};
+
+struct JSONObjtoJsonConverter
+{
+    static QJsonValue convert(QJsonObject const& value)
+    {
+      return QJsonValue(value);
+    }
+};
+
 
 
 #define DECLARE_TYPE_CONVERTER(DATA_FROM, DATA_TO, UTYPE_FROM, UTYPE_TO)  \
@@ -120,6 +189,19 @@ DECLARE_TYPE_CONVERTER_EXT(Decimal, Color, ColorIntegerConverter<double>)
 DECLARE_TYPE_CONVERTER_EXT(Color, String, ColorStringConverter)
 DECLARE_TYPE_CONVERTER_EXT(Color, Vector4D, ColorVector4DConverter)
 DECLARE_TYPE_CONVERTER_EXT(Vector4D, Color, ColorVector4DConverter)
+
+// JSON
+DECLARE_TYPE_CONVERTER_EXT(Integer, JSONValue, GenericJsonConverter<int>)
+DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, JSONValue, GenericJsonConverter<qint64>)
+DECLARE_TYPE_CONVERTER_EXT(Decimal, JSONValue, GenericJsonConverter<double>)
+DECLARE_TYPE_CONVERTER_EXT(String, JSONValue, StringJsonConverter)
+DECLARE_TYPE_CONVERTER_EXT(Color, JSONValue, Vec4DJsonConverter)
+DECLARE_TYPE_CONVERTER_EXT(Vector2D, JSONValue, Vec2DJsonConverter)
+DECLARE_TYPE_CONVERTER_EXT(Vector3D, JSONValue, Vec3DJsonConverter)
+DECLARE_TYPE_CONVERTER_EXT(Vector4D, JSONValue, Vec4DJsonConverter)
+DECLARE_TYPE_CONVERTER_EXT(Matrix4x4, JSONValue, Matrix4x4JsonConverter)
+DECLARE_TYPE_CONVERTER_EXT(Quaternion, JSONValue, QuaternionJsonConverter)
+DECLARE_TYPE_CONVERTER_EXT(JSON, JSONValue, JSONObjtoJsonConverter)
 
 
 #endif //NOGGIT_GENERICTYPECONVERTER_HPP
