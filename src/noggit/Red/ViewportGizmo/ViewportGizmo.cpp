@@ -103,17 +103,17 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
       if (selected.which() != eEntry_Object)
         continue;
 
-      auto obj = boost::get<selected_object_type>(selected);
+      obj_instance = boost::get<selected_object_type>(selected);
 
       obj_instance->recalcExtents();
       object_matrix = math::matrix_4x4(obj_instance->transformMatrixTransposed());
 
       glm::mat4 glm_transform_mat = glm::make_mat4(static_cast<float*>(delta_matrix));
 
-      math::vector_3d& pos = obj->pos;
-      math::vector_3d& rotation = obj->dir;
+      math::vector_3d& pos = obj_instance->pos;
+      math::vector_3d& rotation = obj_instance->dir;
       float wmo_scale = 0.f;
-      float& scale = obj->which() == eMODEL ? obj->scale : wmo_scale;
+      float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
 
       glm::vec3 new_scale;
       glm::quat new_orientation;
@@ -222,7 +222,7 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
       if (selected.which() != eEntry_Object)
         continue;
 
-      auto obj = boost::get<selected_object_type>(selected);
+      obj_instance = boost::get<selected_object_type>(selected);
 
       obj_instance->recalcExtents();
       object_matrix = math::matrix_4x4(obj_instance->transformMatrixTransposed());
@@ -233,7 +233,7 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
       math::vector_3d& pos = obj_instance->pos;
       math::vector_3d& rotation = obj_instance->dir;
       float wmo_scale = 0.f;
-      float& scale = obj->which() == eMODEL ? obj->scale : wmo_scale;
+      float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
 
       glm::vec3 new_scale;
       glm::quat new_orientation;
