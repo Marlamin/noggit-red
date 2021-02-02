@@ -575,13 +575,22 @@ void MapTile::saveTile(World* world)
     }
     else
     {
-      if (model.get().which() == eEntry_WMO)
+      if (model.get().which() == eEntry_Object)
       {
-        lObjectInstances.emplace_back(*boost::get<selected_wmo_type>(model.get()));
+        auto which = boost::get<selected_object_type>(model.get())->which();
+        if (which == eWMO)
+        {
+          lObjectInstances.emplace_back(*static_cast<WMOInstance*>(boost::get<selected_object_type>(model.get())));
+        }
+        else if (which == eMODEL)
+        {
+          lModelInstances.emplace_back(*static_cast<ModelInstance*>(boost::get<selected_object_type>(model.get())));
+        }
+
       }
       else
       {
-        lModelInstances.emplace_back(*boost::get<selected_model_type>(model.get()));
+
       }
     }
   }

@@ -11,41 +11,37 @@
 #include <opengl/scoped.hpp>
 
 WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggit::NoggitRenderContext context)
-  : wmo(filename, context)
-  , pos(math::vector_3d(d->pos[0], d->pos[1], d->pos[2]))
-  , dir(math::vector_3d(d->rot[0], d->rot[1], d->rot[2]))
+  : SceneObject(SceneObjectTypes::eWMO, context, filename)
+  , wmo(filename, context)
   , mUniqueID(d->uniqueID), mFlags(d->flags)
   , mUnknown(d->unknown), mNameset(d->nameSet)
   , _doodadset(d->doodadSet)
-  , _context(context)
 {
+  pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
+  dir = math::vector_3d(d->rot[0], d->rot[1], d->rot[2]);
+
   extents[0] = math::vector_3d(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
   extents[1] = math::vector_3d(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
 
-  update_transform_matrix();
+  updateTransformMatrix();
   change_doodadset(_doodadset);
 }
 
 WMOInstance::WMOInstance(std::string const& filename, noggit::NoggitRenderContext context)
-  : wmo(filename, context)
-  , pos(math::vector_3d(0.0f, 0.0f, 0.0f))
-  , dir(math::vector_3d(0.0f, 0.0f, 0.0f))
+  : SceneObject(SceneObjectTypes::eWMO, context, filename)
+  , wmo(filename, context)
   , mUniqueID(0)
   , mFlags(0)
   , mUnknown(0)
   , mNameset(0)
   , _doodadset(0)
-  , _context(context)
 {
   change_doodadset(_doodadset);
+  pos = math::vector_3d(0.0f, 0.0f, 0.0f);
+  dir = math::vector_3d(0.0f, 0.0f, 0.0f);
+  _context = context;
 }
 
-bool WMOInstance::is_a_duplicate_of(WMOInstance const& other)
-{
-  return wmo->filename == other.wmo->filename
-      && misc::vec3d_equals(pos, other.pos)
-      && misc::vec3d_equals(dir, other.dir);
-}
 
 void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
                        , math::matrix_4x4 const& model_view
@@ -70,7 +66,13 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
 
   const uint id = this->mUniqueID;
   bool const is_selected = selection.size() > 0 &&
-                           std::find_if(selection.begin(), selection.end(), [id](selection_type type) {return type.type() == typeid(selected_wmo_type) && boost::get<selected_wmo_type>(type)->mUniqueID == id; }) != selection.end();
+                           std::find_if(selection.begin(), selection.end(),
+                                        [id](selection_type type)
+                                        {
+                                          return type.type() == typeid(selected_object_type)
+                                          && boost::get<selected_object_type>(type)->which() == SceneObjectTypes::eWMO
+                                          && static_cast<WMOInstance*>(boost::get<selected_object_type>(type))->mUniqueID == id;
+                                        }) != selection.end();
 
   {
     wmo_shader.uniform("transform", _transform_mat_transposed);
@@ -110,23 +112,6 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
   }
 }
 
-void WMOInstance::update_transform_matrix()
-{
-  math::matrix_4x4 mat( math::matrix_4x4(math::matrix_4x4::translation, pos)
-                      * math::matrix_4x4
-                        ( math::matrix_4x4::rotation_yzx
-                        , { math::degrees(-dir.z)
-                          , math::degrees(dir.y - 90.0f)
-                          , math::degrees(dir.x)
-                          }
-                        )
-                      );
-
-  _transform_mat = mat;
-  _transform_mat_inverted = mat.inverted();
-  _transform_mat_transposed = mat.transposed();
-}
-
 void WMOInstance::intersect (math::ray const& ray, selection_result* results)
 {
   if (!ray.intersect_bounds (extents[0], extents[1]))
@@ -138,7 +123,7 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results)
 
   for (auto&& result : wmo->intersect(subray))
   {
-    results->emplace_back (result, selected_wmo_type (this));
+    results->emplace_back (result, this);
   }
 }
 
@@ -151,7 +136,7 @@ void WMOInstance::recalcExtents()
     return;
   }
 
-  update_transform_matrix();
+  updateTransformMatrix();
   update_doodads();
 
   std::vector<math::vector_3d> points;
@@ -187,10 +172,6 @@ void WMOInstance::recalcExtents()
   extents[1] = wmo_aabb.max;
 }
 
-bool WMOInstance::isInsideRect(math::vector_3d rect[2]) const
-{
-  return misc::rectOverlap(extents, rect);
-}
 
 void WMOInstance::change_doodadset(uint16_t doodad_set)
 {
@@ -222,12 +203,6 @@ void WMOInstance::update_doodads()
       doodad.update_transform_matrix_wmo(this);
     }
   }
-}
-
-void WMOInstance::resetDirection()
-{
-  dir = math::vector_3d(0.0f, dir.y, 0.0f);
-  recalcExtents();
 }
 
 std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads

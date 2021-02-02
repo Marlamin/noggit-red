@@ -343,12 +343,12 @@ namespace noggit
 
       connect( last_m2_from_wmv
              , &QPushButton::clicked
-             , [=]() { import_last_model_from_wmv(eEntry_Model); }
+             , [=]() { import_last_model_from_wmv(eMODEL); }
              );
 
       connect( last_wmo_from_wmv
              , &QPushButton::clicked
-             , [=]() { import_last_model_from_wmv(eEntry_WMO); }
+             , [=]() { import_last_model_from_wmv(eWMO); }
              );
 
       connect( helper_models_btn
@@ -370,14 +370,16 @@ namespace noggit
     {
       for (auto& instance : _model_instance_created)
       {
-        if (instance.which() == eEntry_Model)
+        auto obj = boost::get<selected_object_type>(instance);
+
+        if (obj->which() == eMODEL)
         {
-          ModelInstance* mi = boost::get<selected_model_type>(instance);
+          ModelInstance* mi = static_cast<ModelInstance*>(obj);
           delete mi;
         }
-        else if (instance.which() == eEntry_WMO)
+        else if (instance.which() == eWMO)
         {
-          WMOInstance* wi = boost::get<selected_wmo_type>(instance);
+          WMOInstance* wi = static_cast<WMOInstance*>(obj);
           delete wi;
         }
       }
@@ -405,16 +407,15 @@ namespace noggit
       {
         math::vector_3d pos;
 
-        if (selection.which() == eEntry_MapChunk)
+        if (selection.which() != eEntry_Object)
         {
           LogError << "Invalid selection" << std::endl;
           return;
         }
 
-        math::vector_3d model_pos = selection.which() == eEntry_Model
-          ? boost::get<selected_model_type>(selection)->pos
-          : boost::get<selected_wmo_type>(selection)->pos
-          ;
+        auto obj = boost::get<selected_object_type>(selection);
+
+        math::vector_3d model_pos = obj->pos;
 
         switch (pasteMode)
         {
@@ -424,10 +425,7 @@ namespace noggit
         case PASTE_ON_SELECTION:
           if (last_entry)
           {
-            math::vector_3d last_entry_pos = last_entry->which() == eEntry_Model
-              ? boost::get<selected_model_type>(last_entry.get())->pos
-              : boost::get<selected_wmo_type>(last_entry.get())->pos
-              ;
+            math::vector_3d last_entry_pos =  boost::get<selected_object_type>(last_entry.get())->pos;
 
             pos = last_entry_pos + model_pos;
           }
@@ -444,7 +442,7 @@ namespace noggit
           break;
         }
         
-        if (selection.which() == eEntry_Model)
+        if (obj->which() == eMODEL)
         {
           float scale(1.f);
           math::vector_3d rotation(0.f, 0.f, 0.f);
@@ -452,27 +450,27 @@ namespace noggit
           if (_copy_model_stats)
           {
             // copy rot size from original model. Dirty but woring
-            scale = boost::get<selected_model_type>(selection)->scale;
-            rotation = boost::get<selected_model_type>(selection)->dir;
+            scale = obj->scale;
+            rotation = obj->dir;
           }
 
-          world->addM2( boost::get<selected_model_type>(selection)->model->filename
+          world->addM2( obj->getFilename()
                       , pos
                       , scale
                       , rotation
                       , paste_params
                       );
         }
-        else if (selection.which() == eEntry_WMO)
+        else if (obj->which() == eWMO)
         {
           math::vector_3d rotation(0.f, 0.f, 0.f);
           if (_copy_model_stats)
           {
             // copy rot from original model. Dirty but working
-            rotation = boost::get<selected_wmo_type>(selection)->dir;
+            rotation = obj->dir;
           }
 
-          world->addWMO(boost::get<selected_wmo_type>(selection)->wmo->filename, pos, rotation);
+          world->addWMO(obj->getFilename(), pos, rotation);
         }        
       }
     }
@@ -499,13 +497,9 @@ namespace noggit
         ss << "Model: ";
 
         auto selectedObject = new_selection.front();
-        if (selectedObject.which() == eEntry_Model)
+        if (selectedObject.which() == eEntry_Object)
         {
-          ss << boost::get<selected_model_type>(selectedObject)->model->filename;
-        }
-        else if (selectedObject.which() == eEntry_WMO)
-        {
-          ss << boost::get<selected_wmo_type>(selectedObject)->wmo->filename;
+          ss << boost::get<selected_object_type>(selectedObject)->getFilename();
         }
         else
         {
@@ -570,9 +564,16 @@ namespace noggit
 
       for (auto& selection : current_selection)
       {
-        if (selection.which() == eEntry_Model)
+        if (selection.which() != eEntry_Object)
         {
-          auto original = boost::get<selected_model_type>(selection);
+          continue;
+        }
+
+        auto obj = boost::get<selected_object_type>(selection);
+
+        if (obj->which() == eMODEL)
+        {
+          auto original = static_cast<ModelInstance*>(obj);
           auto clone = new ModelInstance(original->model->filename, _map_view->getRenderContext());
           
           clone->scale = original->scale;
@@ -582,9 +583,9 @@ namespace noggit
           selected_model.push_back(clone);
           _model_instance_created.push_back(clone);
         }
-        else if (selection.which() == eEntry_WMO)
+        else if (obj->which() == eWMO)
         {
-          auto original = boost::get<selected_wmo_type>(selection);
+          auto original = static_cast<WMOInstance*>(obj);
           auto clone = new WMOInstance(original->wmo->filename, _map_view->getRenderContext());
           clone->dir = original->dir;
           clone->pos = pivot ? original->pos - pivot.get() : math::vector_3d();
@@ -606,21 +607,12 @@ namespace noggit
       std::ofstream stream(_settings->value("project/import_file", "import.txt").toString().toStdString(), std::ios_base::app);
       for (auto& selection : world->current_selection())
       {
-        if (selection.which() == eEntry_MapChunk)
+        if (selection.which() != eEntry_Object)
         {
           continue;
         }
 
-        std::string path;
-
-        if (selection.which() == eEntry_WMO)
-        {
-          path = boost::get<selected_wmo_type>(selection)->wmo->filename;
-        }
-        else if (selection.which() == eEntry_Model)
-        {
-          path = boost::get<selected_model_type>(selection)->model->filename;
-        }
+        std::string path = boost::get<selected_object_type>(selection)->getFilename();
 
         stream << path << std::endl;
       }
@@ -641,7 +633,7 @@ namespace noggit
         {
           getline(file, line);
           std::transform(line.begin(), line.end(), line.begin(), ::tolower);
-          std::regex regex( type == eEntry_Model
+          std::regex regex( type == eMODEL
                           ? "([a-z]+\\\\([a-z0-9_ ]+\\\\)*[a-z0-9_ ]+\\.)(mdx|m2)"
                           : "([a-z]+\\\\([a-z0-9_ ]+\\\\)*[a-z0-9_ ]+\\.)(wmo)"
                           );

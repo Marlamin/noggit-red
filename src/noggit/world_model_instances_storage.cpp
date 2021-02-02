@@ -37,7 +37,7 @@ namespace noggit
     if (existing_instance)
     {
       // instance already loaded
-      if (existing_instance.get()->is_a_duplicate_of(instance))
+      if (existing_instance.get()->isDuplicateOf(instance))
       {
         _instance_count_per_uid[uid]++;
         return uid;
@@ -83,7 +83,7 @@ namespace noggit
     if (existing_instance)
     {
       // instance already loaded
-      if (existing_instance.get()->is_a_duplicate_of(instance))
+      if (existing_instance.get()->isDuplicateOf(instance))
       {
         _instance_count_per_uid[uid]++;
 
@@ -142,18 +142,23 @@ namespace noggit
 
     for (auto& it : instances)
     {
-      if (it.which() == eEntry_Model)
+      if (it.which() != eEntry_Object)
+        continue;
+
+      auto obj = boost::get<selected_object_type>(it);
+
+      if (obj->which() == eMODEL)
       {
-        auto& instance = boost::get<selected_model_type>(it);
+        auto instance = static_cast<ModelInstance*>(obj);
         
         _world->updateTilesModel(instance, model_update::remove);
 
         _instance_count_per_uid.erase(instance->uid);
         _m2s.erase(instance->uid);
       }
-      else if (it.which() == eEntry_WMO)
+      else if (obj->which() == eWMO)
       {
-        auto& instance = boost::get<selected_wmo_type>(it);
+        auto instance = static_cast<WMOInstance*>(obj);
 
         _world->updateTilesWMO(instance, model_update::remove);
 
@@ -281,7 +286,7 @@ namespace noggit
       {
         assert(lhs->first != rhs->first);
 
-        if (lhs->second.is_a_duplicate_of(rhs->second))
+        if (lhs->second.isDuplicateOf(rhs->second))
         {
           _world->updateTilesWMO(&rhs->second, model_update::remove);
 
@@ -302,7 +307,7 @@ namespace noggit
       {
         assert(lhs->first != rhs->first);
 
-        if (lhs->second.is_a_duplicate_of(rhs->second))
+        if (lhs->second.isDuplicateOf(rhs->second))
         {
           _world->updateTilesModel(&rhs->second, model_update::remove);
 

@@ -1,0 +1,49 @@
+// This file is part of Noggit3, licensed under GNU General Public License (version 3).
+
+#include "SceneObject.hpp"
+#include <noggit/Misc.h>
+
+SceneObject::SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context, std::string filename)
+: _type(type)
+, _filename(filename)
+, _context(context)
+{
+
+}
+
+bool SceneObject::isInsideRect(math::vector_3d rect[2]) const
+{
+  return misc::rectOverlap(extents, rect);
+}
+
+bool SceneObject::isDuplicateOf(SceneObject const& other)
+{
+  return _filename == other._filename
+         && misc::vec3d_equals(pos, other.pos)
+         && misc::vec3d_equals(dir, other.dir)
+         && misc::float_equals(scale, other.scale);
+}
+
+void SceneObject::updateTransformMatrix()
+{
+  math::matrix_4x4 mat( math::matrix_4x4(math::matrix_4x4::translation, pos)
+                        * math::matrix_4x4
+                            ( math::matrix_4x4::rotation_yzx
+                                , { math::degrees(-dir.z)
+                                  , math::degrees(dir.y - 90.0f)
+                                  , math::degrees(dir.x)
+                              })
+
+                          * math::matrix_4x4 (math::matrix_4x4::scale, scale)
+  );
+
+  _transform_mat = mat;
+  _transform_mat_inverted = mat.inverted();
+  _transform_mat_transposed = mat.transposed();
+}
+
+void SceneObject::resetDirection()
+{
+  dir = math::vector_3d(0.0f, dir.y, 0.0f);
+  recalcExtents();
+}

@@ -35,20 +35,19 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
 
   int n_selected = selection.size();
 
-  if (!n_selected || (n_selected == 1 & selection[0].which() == eEntry_MapChunk))
+  if (!n_selected || (n_selected == 1 & selection[0].which() != eEntry_Object))
     return;
 
   if (n_selected == 1)
   {
-    gizmo_selection_type = selection[0].which() == eEntry_Model ? GizmoInternalMode::MODEL : GizmoInternalMode::WMO;
+    gizmo_selection_type = boost::get<selected_object_type>(selection[0])->which() == eMODEL ? GizmoInternalMode::MODEL : GizmoInternalMode::WMO;
   }
   else
   {
     gizmo_selection_type = GizmoInternalMode::MULTISELECTION;
   }
 
-  WMOInstance* wmo_instance;
-  ModelInstance* model_instance;
+  SceneObject* obj_instance;
 
   ImGuizmo::SetID(_gizmo_context);
 
@@ -72,18 +71,11 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
   switch (gizmo_selection_type)
   {
     case MODEL:
-    {
-      model_instance = boost::get<selected_model_type>(selection[0]);
-      model_instance->recalcExtents();
-      object_matrix = math::matrix_4x4(model_instance->transform_matrix_transposed());
-      ImGuizmo::Manipulate(model_view_trs, projection_trs, _gizmo_operation, _gizmo_mode, object_matrix, delta_matrix, nullptr);
-      break;
-    }
     case WMO:
     {
-      wmo_instance = boost::get<selected_wmo_type>(selection[0]);
-      wmo_instance->recalcExtents();
-      object_matrix = wmo_instance->transform_matrix_transposed();
+      obj_instance = boost::get<selected_object_type>(selection[0]);
+      obj_instance->recalcExtents();
+      object_matrix = obj_instance->transformMatrixTransposed();
       ImGuizmo::Manipulate(model_view_trs, projection_trs, _gizmo_operation, _gizmo_mode, object_matrix, delta_matrix, nullptr);
       break;
     }
@@ -108,28 +100,20 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
     for (auto& selected : selection)
     {
 
-      if (selected.which() == eEntry_MapChunk)
+      if (selected.which() != eEntry_Object)
         continue;
 
-      if (selected.which() == eEntry_Model)
-      {
-        model_instance = boost::get<selected_model_type>(selected);
-        model_instance->recalcExtents();
-        object_matrix = math::matrix_4x4(model_instance->transform_matrix_transposed());
-      }
-      else if (selected.which() == eEntry_WMO)
-      {
-        wmo_instance = boost::get<selected_wmo_type>(selected);
-        wmo_instance->recalcExtents();
-        object_matrix = wmo_instance->transform_matrix_transposed();
-      }
+      auto obj = boost::get<selected_object_type>(selected);
+
+      obj_instance->recalcExtents();
+      object_matrix = math::matrix_4x4(obj_instance->transformMatrixTransposed());
 
       glm::mat4 glm_transform_mat = glm::make_mat4(static_cast<float*>(delta_matrix));
 
-      math::vector_3d& pos = selected.which() == eEntry_Model ? model_instance->pos : wmo_instance->pos;
-      math::vector_3d& rotation = selected.which() == eEntry_Model ? model_instance->dir : wmo_instance->dir;
+      math::vector_3d& pos = obj->pos;
+      math::vector_3d& rotation = obj->dir;
       float wmo_scale = 0.f;
-      float& scale = selected.which() == eEntry_Model ? model_instance->scale : wmo_scale;
+      float& scale = obj->which() == eMODEL ? obj->scale : wmo_scale;
 
       glm::vec3 new_scale;
       glm::quat new_orientation;
@@ -223,14 +207,8 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
           break;
         }
 
-        if (gizmo_selection_type == GizmoInternalMode::MODEL)
-        {
-          model_instance->recalcExtents();
-        }
-        else
-        {
-          wmo_instance->recalcExtents();
-        }
+        obj_instance->recalcExtents();
+
 
         if (_world)
          _world->updateTilesEntry(selection[0], model_update::add);
@@ -241,28 +219,20 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
   {
     for (auto& selected : selection)
     {
-      if (selected.which() == eEntry_MapChunk)
+      if (selected.which() != eEntry_Object)
         continue;
 
-      if (selected.which() == eEntry_Model)
-      {
-        model_instance = boost::get<selected_model_type>(selected);
-        model_instance->recalcExtents();
-        object_matrix = math::matrix_4x4(model_instance->transform_matrix_transposed());
-      }
-      else if (selected.which() == eEntry_WMO)
-      {
-        wmo_instance = boost::get<selected_wmo_type>(selected);
-        wmo_instance->recalcExtents();
-        object_matrix = wmo_instance->transform_matrix_transposed();
-      }
+      auto obj = boost::get<selected_object_type>(selected);
+
+      obj_instance->recalcExtents();
+      object_matrix = math::matrix_4x4(obj_instance->transformMatrixTransposed());
+
 
       glm::mat4 glm_transform_mat = glm::make_mat4(static_cast<float*>(delta_matrix));
 
-      math::vector_3d& pos = gizmo_selection_type == GizmoInternalMode::MODEL ? model_instance->pos : wmo_instance->pos;
-      math::vector_3d& rotation = gizmo_selection_type == GizmoInternalMode::MODEL ? model_instance->dir : wmo_instance->dir;
-      float wmo_scale = 0.f;
-      float& scale = gizmo_selection_type == GizmoInternalMode::MODEL ? model_instance->scale : wmo_scale;
+      math::vector_3d& pos = obj_instance->pos;
+      math::vector_3d& rotation = obj_instance->dir;
+      float& scale = obj_instance->scale;
 
       glm::vec3 new_scale;
       glm::quat new_orientation;
@@ -307,14 +277,7 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
           break;
         }
 
-        if (gizmo_selection_type == GizmoInternalMode::MODEL)
-        {
-          model_instance->recalcExtents();
-        }
-        else
-        {
-          wmo_instance->recalcExtents();
-        }
+        obj_instance->recalcExtents();
 
         if (_world)
           _world->updateTilesEntry(selection[0], model_update::add);

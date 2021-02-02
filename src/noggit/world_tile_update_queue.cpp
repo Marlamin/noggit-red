@@ -33,7 +33,7 @@ namespace noggit
     virtual void apply(World* const world) override
     {
       instance->model->wait_until_loaded();
-      auto const& extents(instance->extents());
+      auto extents(instance->getExtents());
       tile_index start(extents[0]), end(extents[1]);
 
       for (int z = start.z; z <= end.z; ++z)

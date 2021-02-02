@@ -1398,7 +1398,7 @@ void Model::draw( math::matrix_4x4 const& model_view
 
   opengl::scoped::vao_binder const _(_vao);
 
-  m2_shader.uniform("transform", instance.transform_matrix_transposed());
+  m2_shader.uniform("transform", instance.transformMatrixTransposed());
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
@@ -1463,7 +1463,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
   {
     if (mi->is_visible(frustum, cull_distance, camera, display))
     {
-      transform_matrix.push_back(mi->transform_matrix_transposed());
+      transform_matrix.push_back(mi->transformMatrixTransposed());
     }    
   }
 

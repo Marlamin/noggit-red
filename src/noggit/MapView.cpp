@@ -150,16 +150,21 @@ void MapView::ResetSelectedObjectRotation()
 
   for (auto& selection : _world->current_selection())
   {
-    if (selection.which() == eEntry_WMO)
+    if (selection.which() != eEntry_Object)
+      continue;
+
+    auto obj = boost::get<selected_object_type>(selection);
+
+    if (obj->which() == eWMO)
     {
-      WMOInstance* wmo = boost::get<selected_wmo_type>(selection);
+      WMOInstance* wmo = static_cast<WMOInstance*>(obj);
       _world->updateTilesWMO(wmo, model_update::remove);
       wmo->resetDirection();
       _world->updateTilesWMO(wmo, model_update::add);
     }
-    else if (selection.which() == eEntry_Model)
+    else if (obj->which() == eMODEL)
     {
-      ModelInstance* m2 = boost::get<selected_model_type>(selection);
+      ModelInstance* m2 = static_cast<ModelInstance*>(obj);
       _world->updateTilesModel(m2, model_update::remove);
       m2->resetDirection();
       m2->recalcExtents();
@@ -665,8 +670,8 @@ void MapView::createGUI()
   assist_menu->addSeparator();
   assist_menu->addAction(createTextSeparator("Model"));
   assist_menu->addSeparator();
-  ADD_ACTION (assist_menu, "Last M2 from WMV", "Shift+V", [this] { objectEditor->import_last_model_from_wmv(eEntry_Model); });
-  ADD_ACTION (assist_menu, "Last WMO from WMV", "Alt+V", [this] { objectEditor->import_last_model_from_wmv(eEntry_WMO); });
+  ADD_ACTION (assist_menu, "Last M2 from WMV", "Shift+V", [this] { objectEditor->import_last_model_from_wmv(eMODEL); });
+  ADD_ACTION (assist_menu, "Last WMO from WMV", "Alt+V", [this] { objectEditor->import_last_model_from_wmv(eWMO); });
   ADD_ACTION_NS (assist_menu, "Helper models", [this] { objectEditor->helper_models_widget->show(); });
 
   assist_menu->addSeparator();
@@ -1073,12 +1078,12 @@ void MapView::createGUI()
             );
   addHotkey ( Qt::Key_V
             , MOD_shift
-            , [this] { objectEditor->import_last_model_from_wmv(eEntry_Model); }
+            , [this] { objectEditor->import_last_model_from_wmv(eMODEL); }
             , [this] { return terrainMode == editing_mode::object; }
             );
   addHotkey ( Qt::Key_V
             , MOD_alt
-            , [this] { objectEditor->import_last_model_from_wmv(eEntry_WMO); }
+            , [this] { objectEditor->import_last_model_from_wmv(eWMO); }
             , [this] { return terrainMode == editing_mode::object; }
             );
 
@@ -1232,13 +1237,18 @@ void MapView::createGUI()
                 {
                   for (auto& selection : _world->current_selection())
                   {
-                    if (selection.which() == eEntry_Model)
+                    if (selection.which() != eEntry_Object)
+                      continue;
+
+                    auto obj = boost::get<selected_object_type>(selection);
+
+                    if (obj->which() == eMODEL)
                     {
-                      boost::get<selected_model_type>(selection)->model->toggle_visibility();
+                      static_cast<ModelInstance*>(obj)->model->toggle_visibility();
                     }
-                    else if (selection.which() == eEntry_WMO)
+                    else if (obj->which() == eWMO)
                     {
-                      boost::get<selected_wmo_type>(selection)->wmo->toggle_visibility();
+                      static_cast<WMOInstance*>(obj)->wmo->toggle_visibility();
                     }
                   }
                 }
@@ -2386,24 +2396,29 @@ void MapView::tick (float dt)
   {
     switch (currentSelection.begin()->which())
     {
-    case eEntry_Model:
+    case eEntry_Object:
       {
-      auto instance(boost::get<selected_model_type>(*currentSelection.begin()));
-        _status_selection->setText
-          ( QString ("%1: %2")
-          . arg (instance->uid)
-          . arg (QString::fromStdString (instance->model->filename))
-          );
-        break;
-      }
-    case eEntry_WMO:
-      {
-      auto instance(boost::get<selected_wmo_type>(*currentSelection.begin()));
-        _status_selection->setText
-          ( QString ("%1: %2")
-          . arg (instance->mUniqueID)
-          . arg (QString::fromStdString (instance->wmo->filename))
-          );
+        auto obj = boost::get<selected_object_type>(*currentSelection.begin());
+
+        if (obj->which() == eMODEL)
+        {
+          auto instance(static_cast<ModelInstance*>(obj));
+          _status_selection->setText
+              ( QString ("%1: %2")
+                    . arg (instance->uid)
+                    . arg (QString::fromStdString (instance->model->filename))
+              );
+        }
+        else if (obj->which() == eWMO)
+        {
+          auto instance(static_cast<WMOInstance*>(obj));
+          _status_selection->setText
+              ( QString ("%1: %2")
+                    . arg (instance->mUniqueID)
+                    . arg (QString::fromStdString (instance->wmo->filename))
+              );
+        }
+
         break;
       }
     case eEntry_MapChunk:
@@ -2466,51 +2481,56 @@ void MapView::tick (float dt)
 
       switch (lastSelection.which())
       {
-      case eEntry_Model:
+      case eEntry_Object:
         {
-        auto instance(boost::get<selected_model_type>(lastSelection));
-          select_info << "filename: " << instance->model->filename
-                      << "\nunique ID: " << instance->uid
-                      << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
-                      << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
-                      << "\nscale: " << instance->scale
-                      << "\ntextures Used: " << instance->model->header.nTextures
-                      << "\nsize category: " << instance->size_cat;
+          auto obj = boost::get<selected_object_type>(lastSelection);
 
-          for (unsigned int j = 0; j < std::min(instance->model->header.nTextures, 6U); j++)
+          if (obj->which() == eMODEL)
           {
-            select_info << "\n " << (j + 1) << ": " << instance->model->_textures[j]->filename;
+            auto instance(static_cast<ModelInstance*>(obj));
+            select_info << "filename: " << instance->model->filename
+                        << "\nunique ID: " << instance->uid
+                        << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
+                        << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
+                        << "\nscale: " << instance->scale
+                        << "\ntextures Used: " << instance->model->header.nTextures
+                        << "\nsize category: " << instance->size_cat;
+
+            for (unsigned int j = 0; j < std::min(instance->model->header.nTextures, 6U); j++)
+            {
+              select_info << "\n " << (j + 1) << ": " << instance->model->_textures[j]->filename;
+            }
+            if (instance->model->header.nTextures > 25)
+            {
+              select_info << "\n and more.";
+            }
+
+            select_info << "\n";
           }
-          if (instance->model->header.nTextures > 25)
+          else if (obj->which() == eWMO)
           {
-            select_info << "\n and more.";
+            auto instance(static_cast<WMOInstance*>(obj));
+            select_info << "filename: " << instance->wmo->filename
+                        << "\nunique ID: " << instance->mUniqueID
+                        << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
+                        << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
+                        << "\ndoodad set: " << instance->doodadset()
+                        << "\ntextures used: " << instance->wmo->textures.size();
+
+
+            const unsigned int texture_count (std::min((unsigned int)(instance->wmo->textures.size()), 8U));
+            for (unsigned int j = 0; j < texture_count; j++)
+            {
+              select_info << "\n " << (j + 1) << ": " << instance->wmo->textures[j]->filename;
+            }
+            if (instance->wmo->textures.size() > 25)
+            {
+              select_info << "\n and more.";
+            }
+
+            select_info << "\n";
           }
 
-          select_info << "\n";
-          break;
-        }
-      case eEntry_WMO:
-        {
-        auto instance(boost::get<selected_wmo_type>(lastSelection));
-          select_info << "filename: " << instance->wmo->filename
-                      << "\nunique ID: " << instance->mUniqueID
-                      << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
-                      << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
-                      << "\ndoodad set: " << instance->doodadset()
-                      << "\ntextures used: " << instance->wmo->textures.size();
-
-
-          const unsigned int texture_count (std::min((unsigned int)(instance->wmo->textures.size()), 8U));
-          for (unsigned int j = 0; j < texture_count; j++)
-          {
-            select_info << "\n " << (j + 1) << ": " << instance->wmo->textures[j]->filename;
-          }
-          if (instance->wmo->textures.size() > 25)
-          {
-            select_info << "\n and more.";
-          }
-
-          select_info << "\n";
           break;
         }
       case eEntry_MapChunk:
@@ -2645,7 +2665,7 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
 
       if (_mod_shift_down)
       {
-        if (hit.which() == eEntry_Model || hit.which() == eEntry_WMO)
+        if (hit.which() == eEntry_Object)
         {
           if (!_world->is_selected(hit))
           {
@@ -2680,8 +2700,7 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
       _world->add_to_selection(hit);
     }
 
-    _cursor_pos = hit.which() == eEntry_Model ? boost::get<selected_model_type>(hit)->pos
-      : hit.which() == eEntry_WMO ? boost::get<selected_wmo_type>(hit)->pos
+    _cursor_pos = hit.which() == eEntry_Object ? boost::get<selected_object_type>(hit)->pos
       : hit.which() == eEntry_MapChunk ? boost::get<selected_chunk_type>(hit).position
       : throw std::logic_error("bad variant");
   }
@@ -3244,13 +3263,13 @@ void MapView::selectModel(std::string const& model)
   if (boost::ends_with (model, ".m2"))
   {
     ModelInstance mi(model, _context);
-    _world->set_current_selection(boost::get<selected_model_type>(&mi));
+    _world->set_current_selection(boost::get<selected_object_type>(&mi));
 
   }
   else if (boost::ends_with (model, ".wmo"))
   {
     WMOInstance wi(model, _context);
-    _world->set_current_selection(boost::get<selected_wmo_type>(&wi));
+    _world->set_current_selection(boost::get<selected_object_type>(&wi));
   }
 
   objectEditor->copy_current_selection(_world.get());
@@ -3261,9 +3280,14 @@ void MapView::change_selected_wmo_doodadset(int set)
 {
   for (auto& selection : _world->current_selection())
   {
-    if (selection.which() == eEntry_WMO)
+    if (selection.which() != eEntry_Object)
+      continue;
+
+    auto obj = boost::get<selected_object_type>(selection);
+
+    if (obj->which() == eWMO)
     {
-      auto wmo = boost::get<selected_wmo_type>(selection);
+      auto wmo = static_cast<WMOInstance*>(obj);
       wmo->change_doodadset(set);
       _world->updateTilesWMO(wmo, model_update::none);
     }

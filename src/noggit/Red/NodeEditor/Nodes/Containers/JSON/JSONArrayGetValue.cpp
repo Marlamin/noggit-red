@@ -98,7 +98,6 @@ void JSONArrayGetValueNode::compute()
   ERROR:
   setValidationState(NodeValidationState::Error);
   setValidationMessage("Error: type mismatch.");
-  return;
 }
 
 NodeValidationState JSONArrayGetValueNode::validate()

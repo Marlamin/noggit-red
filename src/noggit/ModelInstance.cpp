@@ -13,14 +13,14 @@
 #include <opengl/shader.hpp>
 
 ModelInstance::ModelInstance(std::string const& filename, noggit::NoggitRenderContext context)
-  : model (filename, context)
-  , _context(context)
+  : SceneObject(SceneObjectTypes::eMODEL, context, filename)
+  , model (filename, context)
 {
 }
 
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, noggit::NoggitRenderContext context)
-  : model (filename, context)
-  , _context(context)
+  : SceneObject(SceneObjectTypes::eMODEL, context, filename)
+  , model (filename, context)
 {
 	uid = d->uniqueID;
 	pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
@@ -38,13 +38,6 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, no
   }
 }
 
-bool ModelInstance::is_a_duplicate_of(ModelInstance const& other)
-{
-  return model->filename == other.model->filename
-      && misc::vec3d_equals(pos, other.pos)
-      && misc::vec3d_equals(dir, other.dir)
-      && misc::float_equals(scale, other.scale);
-}
 
 void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
                              , math::matrix_4x4 const& projection
@@ -58,7 +51,7 @@ void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
   {
     opengl::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
-      , transform_matrix_transposed()
+      , transformMatrixTransposed()
       , { 1.0f, 1.0f, 0.0f, 1.0f }
       , misc::transform_model_box_coords(model->header.collision_box_min)
       , misc::transform_model_box_coords(model->header.collision_box_max)
@@ -66,7 +59,7 @@ void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
 
     opengl::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
-      , transform_matrix_transposed()
+      , transformMatrixTransposed()
       , {1.0f, 1.0f, 1.0f, 1.0f}
       , misc::transform_model_box_coords(model->header.bounding_box_min)
       , misc::transform_model_box_coords(model->header.bounding_box_max)
@@ -76,36 +69,20 @@ void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
       , projection
       , math::matrix_4x4(math::matrix_4x4::unit)
       , {0.0f, 1.0f, 0.0f, 1.0f}
-      , _extents[0]
-      , _extents[1]
+      , extents[0]
+      , extents[1]
       );
   }
   else
   {
     opengl::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
-      , transform_matrix_transposed()
+      , transformMatrixTransposed()
       , {0.5f, 0.5f, 0.5f, 1.0f}
       , misc::transform_model_box_coords(model->header.bounding_box_min)
       , misc::transform_model_box_coords(model->header.bounding_box_max)
       );
   }
-}
-
-void ModelInstance::update_transform_matrix()
-{
-  math::matrix_4x4 mat (math::matrix_4x4 (math::matrix_4x4::translation, pos)
-          * math::matrix_4x4 (math::matrix_4x4::rotation_yzx
-                              , { math::degrees (-dir.z)
-                              , math::degrees (dir.y - 90.0f)
-                              , math::degrees (dir.x)
-                              }
-          )
-          * math::matrix_4x4 (math::matrix_4x4::scale, scale)
-          );
-
-  _transform_mat_inverted = mat.inverted();
-  _transform_mat_transposed = mat.transposed();
 }
 
 void ModelInstance::intersect ( math::matrix_4x4 const& model_view
@@ -128,20 +105,10 @@ void ModelInstance::intersect ( math::matrix_4x4 const& model_view
   {
     //! \todo why is only sc important? these are relative to subray,
     //! so should be inverted by model_matrix?
-    results->emplace_back (result * scale, selected_model_type (this));
+    results->emplace_back (result * scale, this);
   }
 }
 
-void ModelInstance::resetDirection(){
-  dir.x = 0;
-  //dir.y=0; only reset incline
-  dir.z = 0;
-}
-
-bool ModelInstance::isInsideRect(math::vector_3d rect[2]) const
-{
-  return misc::rectOverlap(_extents.data(), rect);
-}
 
 bool ModelInstance::is_visible( math::frustum const& frustum
                               , const float& cull_distance
@@ -196,12 +163,12 @@ void ModelInstance::recalcExtents()
 
   if (model->loading_failed())
   {
-    _extents[0] = _extents[1] = pos;
+    extents[0] = extents[1] = pos;
     _need_recalc_extents = false;
     return;
   }
 
-  update_transform_matrix();
+  updateTransformMatrix();
 
   math::aabb const relative_to_model
     ( math::min ( model->header.collision_box_min
@@ -222,8 +189,8 @@ void ModelInstance::recalcExtents()
 
   math::aabb const bounding_of_rotated_points (rotated_corners_in_world);
 
-  _extents[0] = bounding_of_rotated_points.min;
-  _extents[1] = bounding_of_rotated_points.max;
+  extents[0] = bounding_of_rotated_points.min;
+  extents[1] = bounding_of_rotated_points.max;
 
   size_cat = (bounding_of_rotated_points.max - bounding_of_rotated_points.min).length();
 
@@ -231,20 +198,19 @@ void ModelInstance::recalcExtents()
 }
 
 
-std::vector<math::vector_3d> const& ModelInstance::extents()
+math::vector_3d* ModelInstance::getExtents()
 {
   if (_need_recalc_extents && model->finishedLoading())
   {
     recalcExtents();
   }
 
-  return _extents;
+  return &extents[0];
 }
 
 
 wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f, noggit::NoggitRenderContext context)
   : ModelInstance(filename, context)
-  , _context(context)
 {
   float ff[4];
 
@@ -277,7 +243,7 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
     return;
   }  
 
-  world_pos = wmo->transform_matrix() * pos;
+  world_pos = wmo->transformMatrix() * pos;
 
   math::matrix_4x4 m2_mat
   (
@@ -288,7 +254,7 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
 
   math::matrix_4x4 mat
   (
-    wmo->transform_matrix()
+    wmo->transformMatrix()
     * m2_mat
   );
 

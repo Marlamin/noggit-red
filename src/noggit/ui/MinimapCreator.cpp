@@ -455,9 +455,14 @@ namespace noggit
 
                   for (auto& selection : world->current_selection())
                   {
-                    if (selection.which() == eEntry_Model)
+                    if (selection.which() != eEntry_Object)
+                      continue;
+
+                    auto obj = boost::get<selected_object_type>(selection);
+
+                    if (obj->which() == eMODEL)
                     {
-                      includeM2Model(boost::get<selected_model_type>(selection)->model->filename);
+                      includeM2Model(static_cast<ModelInstance*>(obj)->model->filename);
                     }
 
                   }
@@ -482,9 +487,14 @@ namespace noggit
 
                 for (auto& selection : world->current_selection())
                 {
-                  if (selection.which() == eEntry_Model)
+                  if (selection.which() != eEntry_Object)
+                    continue;
+
+                  auto obj = boost::get<selected_object_type>(selection);
+
+                  if (obj->which() == eMODEL)
                   {
-                    unincludeM2Model(boost::get<selected_model_type>(selection)->model->filename);
+                    unincludeM2Model(static_cast<ModelInstance*>(obj)->model->filename);
                   }
 
                 }
@@ -511,9 +521,14 @@ namespace noggit
 
                   for (auto& selection : world->current_selection())
                   {
-                    if (selection.which() == eEntry_Model)
+                    if (selection.which() != eEntry_Object)
+                      continue;
+
+                    auto obj = boost::get<selected_object_type>(selection);
+
+                    if(obj->which() == eMODEL)
                     {
-                      includeM2Instance(boost::get<selected_model_type>(selection)->uid);
+                      includeM2Instance(static_cast<ModelInstance*>(obj)->uid);
                     }
 
                   }
@@ -538,10 +553,14 @@ namespace noggit
 
                 for (auto& selection : world->current_selection())
                 {
+                  if (selection.which() != eEntry_Object)
+                    continue;
 
-                  if (selection.which() == eEntry_Model)
+                  auto obj = boost::get<selected_object_type>(selection);
+
+                  if (obj->which() == eMODEL)
                   {
-                    unincludeM2Instance(boost::get<selected_model_type>(selection)->uid);
+                    unincludeM2Instance(static_cast<ModelInstance*>(obj)->uid);
                   }
 
                 }
@@ -567,9 +586,15 @@ namespace noggit
 
                 for (auto& selection : world->current_selection())
                 {
-                  if (selection.which() == eEntry_WMO)
+                  if (selection.which() != eEntry_Object)
+                    continue;
+
+                  auto obj = boost::get<selected_object_type>(selection);
+
+
+                  if (obj->which() == eWMO)
                   {
-                    excludeWMOModel(boost::get<selected_wmo_type>(selection)->wmo->filename);
+                    excludeWMOModel(static_cast<WMOInstance*>(obj)->wmo->filename);
                   }
 
                 }
@@ -595,9 +620,14 @@ namespace noggit
                 for (auto& selection : world->current_selection())
                 {
 
-                  if (selection.which() == eEntry_WMO)
+                  if (selection.which() != eEntry_Object)
+                    continue;
+
+                  auto obj = boost::get<selected_object_type>(selection);
+
+                  if (obj->which() == eWMO)
                   {
-                    unexcludeWMOModel(boost::get<selected_wmo_type>(selection)->wmo->filename);
+                    unexcludeWMOModel(static_cast<WMOInstance*>(obj)->wmo->filename);
                   }
 
                 }
@@ -623,9 +653,14 @@ namespace noggit
 
                 for (auto& selection : world->current_selection())
                 {
-                  if (selection.which() == eEntry_WMO)
+                  if (selection.which() != eEntry_Object)
+                    continue;
+
+                  auto obj = boost::get<selected_object_type>(selection);
+
+                  if (obj->which() == eWMO)
                   {
-                    excludeWMOInstance(boost::get<selected_wmo_type>(selection)->mUniqueID);
+                    excludeWMOInstance(static_cast<WMOInstance*>(obj)->mUniqueID);
                   }
 
                 }
@@ -650,10 +685,14 @@ namespace noggit
 
                 for (auto& selection : world->current_selection())
                 {
+                  if (selection.which() != eEntry_Object)
+                    continue;
 
-                  if (selection.which() == eEntry_WMO)
+                  auto obj = boost::get<selected_object_type>(selection);
+
+                  if (obj->which() == eWMO)
                   {
-                    unexcludeWMOInstance(boost::get<selected_wmo_type>(selection)->mUniqueID);
+                    unexcludeWMOInstance(static_cast<WMOInstance*>(obj)->mUniqueID);
                   }
 
                 }

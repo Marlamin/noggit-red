@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <noggit/SceneObject.hpp>
 #include <math/ray.hpp>
 #include <math/vector_3d.hpp> // math::vector_3d
 #include <noggit/WMO.h>
@@ -13,14 +14,11 @@
 class MPQFile;
 struct ENTRY_MODF;
 
-class WMOInstance
+class WMOInstance : public SceneObject
 {
 public:
   scoped_wmo_reference wmo;
-  math::vector_3d pos;
-  math::vector_3d  extents[2];
   std::map<int, std::pair<math::vector_3d, math::vector_3d>> group_extents;
-  math::vector_3d  dir;
   unsigned int mUniqueID;
   uint16_t mFlags;
   uint16_t mUnknown;
@@ -32,15 +30,10 @@ public:
 private:
   void update_doodads();
 
-  noggit::NoggitRenderContext _context;
   uint16_t _doodadset;
 
   std::map<uint32_t, std::vector<wmo_doodad_instance>> _doodads_per_group;
   bool _need_doodadset_update = true;
-
-  math::matrix_4x4 _transform_mat = math::matrix_4x4::uninitialized;
-  math::matrix_4x4 _transform_mat_inverted = math::matrix_4x4::uninitialized;
-  math::matrix_4x4 _transform_mat_transposed = math::matrix_4x4::uninitialized;
 
 public:
   WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggit::NoggitRenderContext context);
@@ -51,10 +44,9 @@ public:
   WMOInstance& operator=(WMOInstance const& other) = default;
 
   WMOInstance (WMOInstance&& other)
-    : wmo (std::move (other.wmo))
-    , pos (other.pos)
+    : SceneObject(other._type, other._context, other._filename)
+    , wmo (std::move (other.wmo))
     , group_extents(other.group_extents)
-    , dir (other.dir)
     , mUniqueID (other.mUniqueID)
     , mFlags (other.mFlags)
     , mUnknown (other.mUnknown)
@@ -62,12 +54,15 @@ public:
     , _doodadset (other._doodadset)
     , _doodads_per_group(other._doodads_per_group)
     , _need_doodadset_update(other._need_doodadset_update)
-    , _transform_mat(other._transform_mat)
-    , _transform_mat_inverted(other._transform_mat_inverted)
-    , _transform_mat_transposed(other._transform_mat_transposed)
-    , _context(other._context)
   {
     std::swap (extents, other.extents);
+    pos = other.pos;
+    dir = other.dir;
+    _context = other._context;
+
+    _transform_mat = other._transform_mat;
+    _transform_mat_inverted = other._transform_mat_inverted;
+    _transform_mat_transposed = other._transform_mat_transposed;
   }
 
   WMOInstance& operator= (WMOInstance&& other)
@@ -88,15 +83,9 @@ public:
     std::swap(_transform_mat_inverted, other._transform_mat_inverted);
     std::swap(_transform_mat_transposed, other._transform_mat_transposed);
     std::swap(_context, other._context);
+    std::swap(_filename, other._filename);
     return *this;
   }
-  /*
-  bool operator==(WMOInstance&& other) const
-  {
-      return this->mUniqueID == other.mUniqueID;
-  }*/
-
-  bool is_a_duplicate_of(WMOInstance const& other);
 
   void draw ( opengl::scoped::use_program& wmo_shader
             , math::matrix_4x4 const& model_view
@@ -114,18 +103,9 @@ public:
             , display_mode display
             );
 
-  void update_transform_matrix();
-
-  math::matrix_4x4 transform_matrix() const { return _transform_mat; }
-  math::matrix_4x4 transform_matrix_inverted() const { return _transform_mat_inverted; }
-  math::matrix_4x4 transform_matrix_transposed() const { return _transform_mat_transposed; }
-
   void intersect (math::ray const&, selection_result*);
 
-  void recalcExtents();
-  void resetDirection();
-
-  bool isInsideRect(math::vector_3d rect[2]) const;
+  void recalcExtents() override;
 
   std::vector<wmo_doodad_instance*> get_visible_doodads( math::frustum const& frustum
                                                        , float const& cull_distance

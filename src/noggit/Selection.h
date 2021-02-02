@@ -9,8 +9,7 @@
 #include <string>
 #include <vector>
 
-class ModelInstance;
-class WMOInstance;
+class SceneObject;
 class MapChunk;
 
 struct selected_chunk_type
@@ -31,17 +30,14 @@ struct selected_chunk_type
   }
 };
 
-using selected_model_type = ModelInstance*;
-using selected_wmo_type = WMOInstance*;
-using selection_type = boost::variant < selected_model_type
-                                      , selected_wmo_type
+using selected_object_type = SceneObject*;
+using selection_type = boost::variant < selected_object_type
                                       , selected_chunk_type
                                       >;
 //! \note Keep in same order as variant!
 enum eSelectionEntryTypes
 {
-  eEntry_Model,
-  eEntry_WMO,
+  eEntry_Object,
   eEntry_MapChunk
 };
 

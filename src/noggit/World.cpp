@@ -131,14 +131,9 @@ void World::update_selection_pivot()
 
     for (auto const& entry : _current_selection)
     {
-      if (entry.which() == eEntry_Model)
+      if (entry.which() == eEntry_Object)
       {
-        pivot += boost::get<selected_model_type>(entry)->pos;
-        model_count++;
-      }
-      else if (entry.which() == eEntry_WMO)
-      {
-        pivot += boost::get<selected_wmo_type>(entry)->pos;
+        pivot += boost::get<selected_object_type>(entry)->pos;
         model_count++;
       }
     }
@@ -153,15 +148,21 @@ void World::update_selection_pivot()
 
 bool World::is_selected(selection_type selection) const
 {
-  if (selection.which() == eEntry_Model)
+  if (selection.which() != eEntry_Object)
+    return false;
+
+  auto which = boost::get<selected_object_type>(selection)->which();
+
+  if (which == eMODEL)
   {
-    uint uid = boost::get<selected_model_type>(selection)->uid;
+    uint uid = static_cast<ModelInstance*>(boost::get<selected_object_type>(selection))->uid;
     auto const& it = std::find_if(_current_selection.begin()
                                   , _current_selection.end()
                                   , [uid] (selection_type type)
     {
-      return type.type() == typeid(selected_model_type)
-        && boost::get<selected_model_type>(type)->uid == uid;
+      return type.type() == typeid(selected_object_type)
+        && boost::get<selected_object_type>(type)->which() == eMODEL
+        && static_cast<ModelInstance*>(boost::get<selected_object_type>(type))->uid == uid;
     }
     );
 
@@ -170,15 +171,16 @@ bool World::is_selected(selection_type selection) const
       return true;
     }
   }
-  else if (selection.which() == eEntry_WMO)
+  else if (which == eWMO)
   {
-    uint uid = boost::get<selected_wmo_type>(selection)->mUniqueID;
+    uint uid = static_cast<WMOInstance*>(boost::get<selected_object_type>(selection))->mUniqueID;
     auto const& it = std::find_if(_current_selection.begin()
                             , _current_selection.end()
                             , [uid] (selection_type type)
     {
-      return type.type() == typeid(selected_wmo_type)
-        && boost::get<selected_wmo_type>(type)->mUniqueID == uid;
+      return type.type() == typeid(selected_object_type)
+        && boost::get<selected_object_type>(type)->which() == eWMO
+        && static_cast<WMOInstance*>(boost::get<selected_object_type>(type))->mUniqueID == uid;
     }
     );
     if (it != _current_selection.end())
@@ -194,16 +196,21 @@ bool World::is_selected(std::uint32_t uid) const
 {
   for (selection_type const& entry : _current_selection)
   {
-    if (entry.which() == eEntry_WMO)
+    if (entry.which() != eEntry_Object)
+      continue;
+
+    auto obj = boost::get<selected_object_type>(entry);
+
+    if (obj->which() == eWMO)
     {
-      if (boost::get<selected_wmo_type>(entry)->mUniqueID == uid)
+      if (static_cast<WMOInstance*>(obj)->mUniqueID == uid)
       {
         return true;
       }
     }
-    else if (entry.which() == eEntry_Model)
+    else if (obj->which() == eMODEL)
     {
-      if (boost::get<selected_model_type>(entry)->uid == uid)
+      if (static_cast<ModelInstance*>(obj)->uid == uid)
       {
         return true;
       }
@@ -268,13 +275,18 @@ void World::remove_from_selection(std::uint32_t uid)
 {
   for (auto it = _current_selection.begin(); it != _current_selection.end(); ++it)
   {
-    if (it->which() == eEntry_Model && boost::get<selected_model_type>(*it)->uid == uid)
+    if (it->which() != eEntry_Object)
+      continue;
+
+    auto obj = boost::get<selected_object_type>(*it);
+
+    if (obj->which() == eMODEL && static_cast<ModelInstance*>(obj)->uid == uid)
     {
       _current_selection.erase(it);
       update_selection_pivot();
       return;
     }
-    else if (it->which() == eEntry_WMO && boost::get<selected_wmo_type>(*it)->mUniqueID == uid)
+    else if (obj->which() == eWMO && static_cast<WMOInstance*>(obj)->mUniqueID == uid)
     {
       _current_selection.erase(it);
       update_selection_pivot();
@@ -307,12 +319,7 @@ void World::snap_selected_models_to_the_ground()
       continue;
     }
 
-    bool entry_is_m2 = type == eEntry_Model;
-
-    math::vector_3d& pos = entry_is_m2
-      ? boost::get<selected_model_type>(entry)->pos
-      : boost::get<selected_wmo_type>(entry)->pos
-      ;
+    math::vector_3d& pos = boost::get<selected_object_type>(entry)->pos;
 
     selection_result hits;
 
@@ -341,14 +348,7 @@ void World::snap_selected_models_to_the_ground()
     // the ground can only be intersected once
     pos.y = boost::get<selected_chunk_type>(hits[0].second).position.y;
 
-    if (entry_is_m2)
-    {
-      boost::get<selected_model_type>(entry)->recalcExtents();
-    }
-    else
-    {
-      boost::get<selected_wmo_type>(entry)->recalcExtents();
-    }
+    boost::get<selected_object_type>(entry)->recalcExtents();
 
     updateTilesEntry(entry, model_update::add);
   }
@@ -360,9 +360,14 @@ void World::scale_selected_models(float v, m2_scaling_type type)
 {
   for (auto& entry : _current_selection)
   {
-    if (entry.which() == eEntry_Model)
+    if (entry.which() == eEntry_Object)
     {
-      ModelInstance* mi = boost::get<selected_model_type>(entry);
+      auto obj = boost::get<selected_object_type>(entry);
+
+      if (obj->which() != eMODEL)
+        continue;
+
+      ModelInstance* mi = static_cast<ModelInstance*>(obj);
 
       float scale = mi->scale;
 
@@ -403,12 +408,7 @@ void World::move_selected_models(float dx, float dy, float dz)
       continue;
     }
 
-    bool entry_is_m2 = type == eEntry_Model;
-
-    math::vector_3d& pos = entry_is_m2
-      ? boost::get<selected_model_type>(entry)->pos
-      : boost::get<selected_wmo_type>(entry)->pos
-      ;
+    math::vector_3d& pos = boost::get<selected_object_type>(entry)->pos;
 
     updateTilesEntry(entry, model_update::remove);
 
@@ -416,14 +416,7 @@ void World::move_selected_models(float dx, float dy, float dz)
     pos.y += dy;
     pos.z += dz;
 
-    if (entry_is_m2)
-    {
-      boost::get<selected_model_type>(entry)->recalcExtents();
-    }
-    else
-    {
-      boost::get<selected_wmo_type>(entry)->recalcExtents();
-    }
+    boost::get<selected_object_type>(entry)->recalcExtents();
 
     updateTilesEntry(entry, model_update::add);
   }
@@ -458,22 +451,11 @@ void World::set_selected_models_pos(math::vector_3d const& pos, bool change_heig
       continue;
     }
 
-    bool entry_is_m2 = type == eEntry_Model;
-
     updateTilesEntry(entry, model_update::remove);
 
-    if (entry_is_m2)
-    {
-      ModelInstance* mi = boost::get<selected_model_type>(entry);
-      mi->pos = pos;
-      mi->recalcExtents();
-    }
-    else
-    {
-      WMOInstance* wi = boost::get<selected_wmo_type>(entry);
-      wi->pos = pos;
-      wi->recalcExtents();
-    }
+    auto obj = boost::get<selected_object_type>(entry);
+    obj->pos = pos;
+    obj->recalcExtents();
 
     updateTilesEntry(entry, model_update::add);
   }
@@ -494,22 +476,15 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
       continue;
     }
 
-    bool entry_is_m2 = type == eEntry_Model;
-
     updateTilesEntry(entry, model_update::remove);
+
+    auto obj = boost::get<selected_object_type>(entry);
 
     if (use_pivot && has_multi_select)
     {
-      math::vector_3d& pos = entry_is_m2
-        ? boost::get<selected_model_type>(entry)->pos
-        : boost::get<selected_wmo_type>(entry)->pos
-        ;
 
-      math::vector_3d& dir = entry_is_m2
-        ? boost::get<selected_model_type>(entry)->dir
-        : boost::get<selected_wmo_type>(entry)->dir
-        ;
-
+      math::vector_3d& pos = obj->pos;
+      math::vector_3d& dir = obj->dir;
       math::vector_3d diff_pos = pos - _multi_select_pivot.get();
       math::vector_3d rot_result = math::matrix_4x4(math::matrix_4x4::rotation_xyz, {rx, ry, rz}) * diff_pos;
 
@@ -517,22 +492,11 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
     }
     else
     {
-      math::vector_3d& dir = entry_is_m2
-        ? boost::get<selected_model_type>(entry)->dir
-        : boost::get<selected_wmo_type>(entry)->dir
-        ;
-
+      math::vector_3d& dir = obj->dir;
       dir += dir_change;
     }
 
-    if (entry_is_m2)
-    {
-      boost::get<selected_model_type>(entry)->recalcExtents();
-    }
-    else
-    {
-      boost::get<selected_wmo_type>(entry)->recalcExtents();
-    }
+    obj->recalcExtents();
 
     updateTilesEntry(entry, model_update::add);
   }
@@ -550,25 +514,15 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
       continue;
     }
 
-    bool entry_is_m2 = type == eEntry_Model;
+    auto obj = boost::get<selected_object_type>(entry);
 
     updateTilesEntry(entry, model_update::remove);
 
-    math::vector_3d& dir = entry_is_m2
-      ? boost::get<selected_model_type>(entry)->dir
-      : boost::get<selected_wmo_type>(entry)->dir
-      ;
+    math::vector_3d& dir = obj->dir;
 
     dir = new_dir;
 
-    if (entry_is_m2)
-    {
-      boost::get<selected_model_type>(entry)->recalcExtents();
-    }
-    else
-    {
-      boost::get<selected_wmo_type>(entry)->recalcExtents();
-    }
+    obj->recalcExtents();
 
     updateTilesEntry(entry, model_update::add);
   }
@@ -1111,9 +1065,14 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     for (auto& selection : current_selection())
     {
-      if (selection.which() == eEntry_Model)
+      if (selection.which() == eEntry_Object)
       {
-        auto model = boost::get<selected_model_type>(selection);
+        auto obj = boost::get<selected_object_type>(selection);
+
+        if (obj->which() != eMODEL)
+          continue;
+
+        auto model = static_cast<ModelInstance*>(obj);
         if (model->is_visible(frustum, culldistance, camera_pos, display))
         {
           model->draw_box(model_view, projection, false); // make optional!
@@ -2307,14 +2266,16 @@ void World::reload_tile(tile_index const& tile)
 
 void World::updateTilesEntry(selection_type const& entry, model_update type)
 {
-  if (entry.which() == eEntry_WMO)
-  {
-    updateTilesWMO (boost::get<selected_wmo_type> (entry), type);
-  }
-  else if (entry.which() == eEntry_Model)
-  {
-    updateTilesModel (boost::get<selected_model_type> (entry), type);
-  }
+  if (entry.which() != eEntry_Object)
+    return;
+
+  auto obj = boost::get<selected_object_type>(entry);
+
+  if (obj->which() == eWMO)
+    updateTilesWMO (static_cast<WMOInstance*>(obj), type);
+  else if (obj->which() == eMODEL)
+    updateTilesModel (static_cast<ModelInstance*>(obj), type);
+
 }
 
 void World::updateTilesWMO(WMOInstance* wmo, model_update type)
@@ -2686,23 +2647,15 @@ void World::range_add_to_selection(math::vector_3d const& pos, float radius, boo
       {
         auto instance = _model_instance_storage.get_instance(uid);
 
-        if (instance.get().which() == eEntry_WMO)
+        if (instance.get().which() == eEntry_Object)
         {
-          auto wmo = boost::get<selected_wmo_type>(instance.get());
+          auto obj = boost::get<selected_object_type>(instance.get());
 
-          if ((wmo->pos - pos).length() <= radius && is_selected(wmo))
+          if ((obj->pos - pos).length() <= radius && is_selected(obj))
           {
-            remove_from_selection(wmo);
+            remove_from_selection(obj);
           }
 
-        } else
-        {
-          auto model = boost::get<selected_model_type>(instance.get());
-
-          if ((model->pos - pos).length() <= radius && is_selected(model))
-          {
-            remove_from_selection(model);
-          }
         }
       }
     }
@@ -2712,23 +2665,15 @@ void World::range_add_to_selection(math::vector_3d const& pos, float radius, boo
       {
         auto instance = _model_instance_storage.get_instance(uid);
 
-        if (instance.get().which() == eEntry_WMO)
+        if (instance.get().which() == eEntry_Object)
         {
-          auto wmo = boost::get<selected_wmo_type>(instance.get());
+          auto obj = boost::get<selected_object_type>(instance.get());
 
-          if ((wmo->pos - pos).length() <= radius && !is_selected(wmo))
+          if ((obj->pos - pos).length() <= radius && !is_selected(obj))
           {
-            add_to_selection(wmo);
+            add_to_selection(obj);
           }
 
-        } else
-        {
-          auto model = boost::get<selected_model_type>(instance.get());
-
-          if ((model->pos - pos).length() <= radius && !is_selected(model))
-          {
-            add_to_selection(model);
-          }
         }
       }
     }
@@ -2749,15 +2694,10 @@ float World::getMaxTileHeight(const tile_index& tile)
   {
     auto instance = _model_instance_storage.get_instance(uid);
 
-    if (instance.get().which() == eEntry_WMO)
+    if (instance.get().which() == eEntry_Object)
     {
-      auto wmo = boost::get<selected_wmo_type>(instance.get());
-      max_height = std::max(max_height, std::max(wmo->extents[0].y, wmo->extents[1].y));
-    }
-    else
-    {
-      auto model = boost::get<selected_model_type>(instance.get());
-      max_height = std::max(max_height, std::max(model->extents()[0].y, model->extents()[1].y));
+      auto obj = boost::get<selected_object_type>(instance.get());
+      max_height = std::max(max_height, std::max(obj->extents[0].y, obj->extents[1].y));
     }
   }
 

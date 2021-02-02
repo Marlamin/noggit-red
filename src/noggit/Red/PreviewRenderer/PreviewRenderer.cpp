@@ -430,8 +430,8 @@ std::vector<math::vector_3d> PreviewRenderer::calcSceneExtents()
   {
     for (int i = 0; i < 3; ++i)
     {
-      min[i] = std::min(instance.extents()[0][i], min[i]);
-      max[i] = std::max(instance.extents()[1][i], max[i]);
+      min[i] = std::min(instance.extents[0][i], min[i]);
+      max[i] = std::max(instance.extents[1][i], max[i]);
     }
   }
 

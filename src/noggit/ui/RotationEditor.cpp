@@ -221,32 +221,17 @@ namespace noggit
         {
           selection_type selection = entry.get();
 
-          if (selection.which() == eEntry_Model)
-          {
-            auto model = boost::get<selected_model_type>(selection);
-            _position_x->setValue(model->pos.x);
-            _position_y->setValue(model->pos.y);
-            _position_z->setValue(model->pos.z);
-            _rotation_x->setValue(model->dir.x);
-            _rotation_y->setValue(model->dir.y);
-            _rotation_z->setValue(model->dir.z);
-            _scale->setValue(model->scale);
+          auto obj = boost::get<selected_object_type>(selection);
 
-            _scale->setEnabled(true);
-          }
-          else // we know it's a wmo
-          {
-            auto wmo = boost::get<selected_wmo_type>(selection);
-            _position_x->setValue(wmo->pos.x);
-            _position_y->setValue(wmo->pos.y);
-            _position_z->setValue(wmo->pos.z);
-            _rotation_x->setValue(wmo->dir.x);
-            _rotation_y->setValue(wmo->dir.y);
-            _rotation_z->setValue(wmo->dir.z);
+          _scale->setEnabled(obj->which() != eWMO);
 
-            _scale->setValue(1.f);
-            _scale->setEnabled(false);
-          }
+          _position_x->setValue(obj->pos.x);
+          _position_y->setValue(obj->pos.y);
+          _position_z->setValue(obj->pos.z);
+          _rotation_x->setValue(obj->dir.x);
+          _rotation_y->setValue(obj->dir.y);
+          _rotation_z->setValue(obj->dir.z);
+          _scale->setValue(obj->scale);
 
           _rotation_x->setEnabled(true);
           _rotation_y->setEnabled(true);
