@@ -28,7 +28,8 @@ void HasTileAtNode::compute()
   gCurrentContext->getViewport()->makeCurrent();
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  glm::vec2 const& xy = defaultPortData<Vector3DData>(PortType::In, 1)->value();
+  auto xy_data = defaultPortData<Vector3DData>(PortType::In, 1);
+  glm::vec2 const& xy = xy_data->value();
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

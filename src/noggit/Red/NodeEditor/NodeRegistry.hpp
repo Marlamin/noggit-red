@@ -201,6 +201,8 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileSetHeightmapImage.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileSetAlphaLayer.hpp>
 
+#include <noggit/Red/NodeEditor/Nodes/World/Object/AddObjectInstance.hpp>
+
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
@@ -444,6 +446,8 @@ namespace noggit
           ret->registerModel<GetTilesInRangeNode>("World//Coordinates//");
           ret->registerModel<HasTileAtNode>("World//Coordinates//");
           ret->registerModel<HasTileAtPosNode>("World//Coordinates//");
+
+          ret->registerModel<AddObjectInstanceNode>("World//Object//");
 
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);

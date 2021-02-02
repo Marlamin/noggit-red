@@ -28,7 +28,7 @@ SaveJSONObjectNode::SaveJSONObjectNode()
 void SaveJSONObjectNode::compute()
 {
   QJsonObject* json_obj = defaultPortData<JSONData>(PortType::In, 2)->value_ptr();
-  std::string const& path = defaultPortData<StringData>(PortType::In, 1)->value();
+  std::string path = defaultPortData<StringData>(PortType::In, 1)->value();
 
   QJsonDocument json_doc = QJsonDocument(*json_obj);
 

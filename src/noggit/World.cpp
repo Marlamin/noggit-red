@@ -2200,6 +2200,54 @@ void World::addM2 ( std::string const& filename
   _models_by_filename[filename].push_back(_model_instance_storage.get_model_instance(uid).get());
 }
 
+ModelInstance* World::addM2AndGetInstance ( std::string const& filename
+    , math::vector_3d newPos
+    , float scale
+    , math::vector_3d rotation
+    , noggit::object_paste_params* paste_params
+)
+{
+  ModelInstance model_instance = ModelInstance(filename, _context);
+
+  model_instance.uid = mapIndex.newGUID();
+  model_instance.pos = newPos;
+  model_instance.scale = scale;
+  model_instance.dir = rotation;
+
+  if (_settings->value("model/random_rotation", false).toBool())
+  {
+    float min = paste_params->minRotation;
+    float max = paste_params->maxRotation;
+    model_instance.dir.y += misc::randfloat(min, max);
+  }
+
+  if (_settings->value ("model/random_tilt", false).toBool ())
+  {
+    float min = paste_params->minTilt;
+    float max = paste_params->maxTilt;
+    model_instance.dir.x += misc::randfloat(min, max);
+    model_instance.dir.z += misc::randfloat(min, max);
+  }
+
+  if (_settings->value ("model/random_size", false).toBool ())
+  {
+    float min = paste_params->minScale;
+    float max = paste_params->maxScale;
+    model_instance.scale = misc::randfloat(min, max);
+  }
+
+  // to ensure the tiles are updated correctly
+  model_instance.model->wait_until_loaded();
+  model_instance.recalcExtents();
+
+  std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
+
+  auto instance = _model_instance_storage.get_model_instance(uid).get();
+  _models_by_filename[filename].push_back(instance);
+
+  return instance;
+}
+
 void World::addWMO ( std::string const& filename
                    , math::vector_3d newPos
                    , math::vector_3d rotation
@@ -2217,6 +2265,27 @@ void World::addWMO ( std::string const& filename
 
   _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
 }
+
+WMOInstance* World::addWMOAndGetInstance ( std::string const& filename
+    , math::vector_3d newPos
+    , math::vector_3d rotation
+)
+{
+  WMOInstance wmo_instance(filename, _context);
+
+  wmo_instance.mUniqueID = mapIndex.newGUID();
+  wmo_instance.pos = newPos;
+  wmo_instance.dir = rotation;
+
+  // to ensure the tiles are updated correctly
+  wmo_instance.wmo->wait_until_loaded();
+  wmo_instance.recalcExtents();
+
+  std::uint32_t uid = _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
+
+  return _model_instance_storage.get_wmo_instance(uid).get();
+}
+
 
 std::uint32_t World::add_model_instance(ModelInstance model_instance, bool from_reloading)
 {

@@ -13,6 +13,7 @@
 #include <noggit/ui/font_awesome.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
+#include <noggit/SceneObject.hpp>
 
 #include <type_traits>
 #include <QString>
@@ -518,6 +519,7 @@ DECLARE_NODE_DATA_TYPE_EXT(image, Image, QImage, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(noise, Noise, std::shared_ptr<noise::module::Module>, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(chunk, Chunk, MapChunk*, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(tile, Tile, MapTile*, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(object, ObjectInstance, SceneObject*, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(json, JSON, QJsonObject, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(json_array, JSONArray, QJsonArray, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(json_value, JSONValue, QJsonValue, NoDefaultWidget, toQStringNA);

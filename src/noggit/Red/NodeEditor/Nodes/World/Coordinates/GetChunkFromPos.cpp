@@ -30,7 +30,8 @@ void GetChunkFromPosNode::compute()
   gCurrentContext->getViewport()->makeCurrent();
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  glm::vec3 const& pos = defaultPortData<Vector3DData>(PortType::In, 1)->value();
+  auto pos_data = defaultPortData<Vector3DData>(PortType::In, 1);
+  glm::vec3 const& pos = pos_data->value();
 
   math::vector_3d n_pos(pos.x, pos.y, pos.z);
 

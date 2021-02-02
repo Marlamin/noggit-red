@@ -28,7 +28,8 @@ void GetTileNode::compute()
   gCurrentContext->getViewport()->makeCurrent();
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  glm::vec2 const& xy = defaultPortData<Vector3DData>(PortType::In, 1)->value();
+  auto xy_data = defaultPortData<Vector3DData>(PortType::In, 1);
+  glm::vec2 const& xy = xy_data->value();
 
   world->mapIndex.loadTile(tile_index(xy.x, xy.y));
   MapTile* tile = world->mapIndex.getTile(tile_index(xy.x, xy.y));

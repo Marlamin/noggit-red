@@ -143,8 +143,18 @@ std::shared_ptr<T> noggit::Red::NodeEditor::Nodes::BaseNode::defaultPortData(Por
   if (port_type == PortType::In)
   {
     T* data_ptr = static_cast<T*>(_in_ports[port_index].in_value.lock().get());
-    auto ret = data_ptr ? _in_ports[port_index].in_value.lock() : _in_ports[port_index].data_type->default_widget_data(_in_ports[port_index].default_widget);
-    return std::static_pointer_cast<T>(ret);
+
+    if (data_ptr)
+    {
+      LogDebug << "FROM_DATA" << std::endl;
+      return std::static_pointer_cast<T>(_in_ports[port_index].in_value.lock());
+    }
+    else
+    {
+      LogDebug << "FROM_WIDGET" << std::endl;
+      return  std::static_pointer_cast<T>(_in_ports[port_index].data_type->default_widget_data(_in_ports[port_index].default_widget));
+    }
+
   }
   else if (port_type == PortType::Out)
   {

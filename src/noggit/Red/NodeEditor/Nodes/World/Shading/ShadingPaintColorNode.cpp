@@ -36,10 +36,13 @@ void ShadingPaintColorNode::compute()
   gCurrentContext->getViewport()->makeCurrent();
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  glm::vec3 const& pos = defaultPortData<Vector3DData>(PortType::In, 1)->value();
+  auto pos_data = defaultPortData<Vector3DData>(PortType::In, 1);
+  glm::vec3 const& pos = pos_data->value();
   double radius = std::max(0.0, defaultPortData<DecimalData>(PortType::In, 2)->value());
   double change = defaultPortData<DecimalData>(PortType::In, 3)->value();
-  glm::vec4 const& color = defaultPortData<ColorData>(PortType::In, 4)->value();
+
+  auto color_data = defaultPortData<ColorData>(PortType::In, 4);
+  glm::vec4 const& color = color_data->value();
   bool subtract = defaultPortData<BooleanData>(PortType::In, 5)->value();
 
   world->changeShader({pos.x, pos.y, pos.z}, {color.r, color.g, color.b, color.a}, change, radius, subtract);

@@ -126,4 +126,11 @@ void LogicChainNode::restorePostConnection(const QJsonObject& json_obj)
     }
   }
 
+  // add empty port of required
+  if (_out_ports[_out_ports.size() - 1].connected)
+  {
+    addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
+    emit portAdded(PortType::Out, _out_ports.size() - 1);
+  }
+
 }

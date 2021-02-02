@@ -27,7 +27,8 @@ void ReloadTileNode::compute()
   gCurrentContext->getViewport()->makeCurrent();
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  glm::vec2 const& xy = defaultPortData<Vector2DData>(PortType::In, 1)->value();
+  auto xy_data = defaultPortData<Vector2DData>(PortType::In, 1);
+  glm::vec2 const& xy = xy_data->value();
 
 
   if (!world->mapIndex.hasTile(tile_index(xy.x, xy.y)))

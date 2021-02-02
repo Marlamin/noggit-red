@@ -26,7 +26,7 @@ LoadJSONObjectNode::LoadJSONObjectNode()
 
 void LoadJSONObjectNode::compute()
 {
-  std::string const& path = defaultPortData<StringData>(PortType::In, 1)->value();
+  std::string path = defaultPortData<StringData>(PortType::In, 1)->value();
 
   QFile file(path.c_str());
 

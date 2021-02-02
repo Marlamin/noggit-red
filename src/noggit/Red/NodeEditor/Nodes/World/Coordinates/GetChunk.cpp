@@ -30,7 +30,9 @@ void GetChunkNode::compute()
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
-  glm::vec2 const& xy = defaultPortData<Vector2DData>(PortType::In, 2)->value();
+
+  auto xy_data = defaultPortData<Vector2DData>(PortType::In, 2);
+  glm::vec2 const& xy = xy_data->value();
 
   MapChunk* chunk;
   if (xy.x < 0 || xy.x > 15.4f || xy.y < 0 || xy.y > 15.4f || !(chunk = tile->getChunk(xy.x, xy.y)))

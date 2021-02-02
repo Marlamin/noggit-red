@@ -30,7 +30,9 @@ void TileGetVertexNode::compute()
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
-  glm::vec2 const& xy = defaultPortData<Vector2DData>(PortType::In, 2)->value();
+
+  auto xy_data = defaultPortData<Vector2DData>(PortType::In, 2);
+  glm::vec2 const& xy = xy_data->value();
 
   math::vector_3d n_pos(0.0f, 0.0f, 0.0f);
 

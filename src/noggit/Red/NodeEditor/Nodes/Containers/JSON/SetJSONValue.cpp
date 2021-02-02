@@ -24,7 +24,8 @@ SetJSONValueNode::SetJSONValueNode()
 
 void SetJSONValueNode::compute()
 {
-  std::string const& var_name = defaultPortData<StringData>(PortType::In,  2)->value();
+  auto var_name_data = defaultPortData<StringData>(PortType::In,  2);
+  std::string const& var_name = var_name_data->value();
   QJsonValue* json_val = defaultPortData<JSONValueData>(PortType::In,  3)->value_ptr();
   QJsonObject* json_obj = defaultPortData<JSONData>(PortType::In,  1)->value_ptr();
 

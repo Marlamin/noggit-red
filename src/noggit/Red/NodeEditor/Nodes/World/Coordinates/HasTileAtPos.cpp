@@ -28,7 +28,8 @@ void HasTileAtPosNode::compute()
   gCurrentContext->getViewport()->makeCurrent();
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  glm::vec3 const& pos = defaultPortData<Vector3DData>(PortType::In, 1)->value();
+  auto pos_data = defaultPortData<Vector3DData>(PortType::In, 1);
+  glm::vec3 const& pos = pos_data->value();
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

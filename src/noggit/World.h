@@ -258,6 +258,18 @@ public:
               , math::vector_3d newPos
               , math::vector_3d rotation
               );
+
+  ModelInstance* addM2AndGetInstance ( std::string const& filename
+      , math::vector_3d newPos
+      , float scale, math::vector_3d rotation
+      , noggit::object_paste_params*
+  );
+
+  WMOInstance* addWMOAndGetInstance ( std::string const& filename
+      , math::vector_3d newPos
+      , math::vector_3d rotation
+  );
+
   auto stamp(math::vector_3d const& pos, float dt, bool doAdd, QPixmap const* pixmap, float radiusOuter
   , float radiusInner, float rotation) -> void;
 

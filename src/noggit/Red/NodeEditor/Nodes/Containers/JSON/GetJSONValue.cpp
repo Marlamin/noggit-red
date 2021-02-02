@@ -29,7 +29,9 @@ GetJSONValueNode::GetJSONValueNode()
 void GetJSONValueNode::compute()
 {
   QJsonObject* json_obj = static_cast<JSONData*>(_in_ports[0].in_value.lock().get())->value_ptr();
-  std::string const& name = defaultPortData<StringData>(PortType::In, 1)->value();
+
+  auto name_data = defaultPortData<StringData>(PortType::In, 1);
+  std::string const& name = name_data->value();
   QJsonValueRef value = (*json_obj)[name.c_str()];
 
   if (value.isUndefined())
