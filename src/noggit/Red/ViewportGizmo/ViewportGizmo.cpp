@@ -232,7 +232,8 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
 
       math::vector_3d& pos = obj_instance->pos;
       math::vector_3d& rotation = obj_instance->dir;
-      float& scale = obj_instance->scale;
+      float wmo_scale = 0.f;
+      float& scale = obj->which() == eMODEL ? obj->scale : wmo_scale;
 
       glm::vec3 new_scale;
       glm::quat new_orientation;
