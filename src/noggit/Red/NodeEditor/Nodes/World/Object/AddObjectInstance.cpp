@@ -6,6 +6,8 @@
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/ui/ObjectEditor.h>
 
+#include <typeinfo>
+
 using namespace noggit::Red::NodeEditor::Nodes;
 
 AddObjectInstanceNode::AddObjectInstanceNode()

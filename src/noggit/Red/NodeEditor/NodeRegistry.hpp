@@ -200,8 +200,14 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetHeightMapImage.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileSetHeightmapImage.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileSetAlphaLayer.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetObjectsUIDs.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Object/AddObjectInstance.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Object/ObjectInstanceInfo.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Object/ObjectInstanceSetPosition.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Object/ObjectInstanceSetRotation.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Object/ObjectInstanceSetScale.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Object/GetObjectInstanceByUID.hpp>
 
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
@@ -434,6 +440,7 @@ namespace noggit
           ret->registerModel<TileGetHeightmapImageNode>("World//Tile//");
           ret->registerModel<TileSetHeightmapImageNode>("World//Tile//");
           ret->registerModel<TileSetAlphaLayerNode>("World//Tile//");
+          ret->registerModel<TileGetObjectUIDsNode>("World//Tile//");
 
           ret->registerModel<FixAllGapsNode>("World//Loaded Tiles//");
 
@@ -448,6 +455,11 @@ namespace noggit
           ret->registerModel<HasTileAtPosNode>("World//Coordinates//");
 
           ret->registerModel<AddObjectInstanceNode>("World//Object//");
+          ret->registerModel<ObjectInstanceInfoNode>("World//Object//");
+          ret->registerModel<ObjectInstanceSetPositionNode>("World//Object//");
+          ret->registerModel<ObjectInstanceSetRotationNode>("World//Object//");
+          ret->registerModel<ObjectInstanceSetScaleNode>("World//Object//");
+          ret->registerModel<GetObjectInstanceByUIDNode>("World//Object//");
 
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);

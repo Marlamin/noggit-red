@@ -11,7 +11,7 @@ using namespace noggit::Red::NodeEditor::Nodes;
 TerrainSelectVerticesNode::TerrainSelectVerticesNode()
 : ContextLogicNodeBase()
 {
-  setName("TerrainSelect :: Vertices");
+  setName("Terrain :: SelectVertices");
   setCaption("Terrain :: SelectVertices");
   _validation_state = NodeValidationState::Valid;
 

@@ -21,6 +21,9 @@
 #include <limits>
 #include <cstdint>
 #include <unordered_map>
+#include <array>
+#include <string_view>
+#include <algorithm>
 
 #include <QSpinBox>
 #include <QDoubleSpinBox>
@@ -39,10 +42,13 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeData;
 
 using namespace noggit::Red::NodeEditor::Nodes;
+using namespace std::literals;
 
 template<typename Ty, const char* type_id, const char* type_name, typename C, typename D>
 class GenericData : public NodeData
 {
+    typedef GenericData<Ty, type_id, type_name, C, D> ThisType;
+
     /* bypassing indirection overhead: passing by value if Ty fits into a machine word, passing by reference otherwise */
     typedef std::conditional_t<sizeof(Ty) <= sizeof(std::size_t), Ty, Ty const&> Type;
 public:
@@ -68,7 +74,7 @@ public:
 
     std::unique_ptr<NodeData> instantiate() override
     {
-      return std::make_unique<GenericData<Ty, type_id, type_name, C, D>>();
+      return std::make_unique<ThisType>();
     }
 
     QWidget* default_widget(QWidget* parent) override
@@ -84,13 +90,13 @@ public:
 
       if constexpr (std::is_same<decltype(value), nullptr_t>::value)
       {
-        auto data_ptr = std::make_shared<GenericData<Ty, type_id, type_name, C, D>>();
+        auto data_ptr = std::make_shared<ThisType>();
         data_ptr.reset();
         return data_ptr;
       }
       else
       {
-        return std::make_shared<GenericData<Ty, type_id, type_name, C, D>>(value);
+        return std::make_shared<ThisType>(value);
       }
 
     }
@@ -452,43 +458,18 @@ struct NoDefaultWidget
 
 };
 
-struct TypeFactory
-{
-    static NodeData* create(const std::string& id)
-    {
-      const Creators_t::const_iterator iter = static_creators().find(id);
-      return iter == static_creators().end() ? 0 : (*iter->second)();
-    }
-
-private:
-    typedef NodeData* Creator_t();
-    typedef std::map<std::string, Creator_t*> Creators_t;
-    static Creators_t& static_creators() { static Creators_t s_creators; return s_creators; }
-
-    template<typename T> struct Register
-    {
-        static NodeData* create() { return new T(); };
-        static Creator_t* init_creator(const std::string& id) { return static_creators()[id] = create; }
-        static Creator_t* creator;
-    };
-};
-
 #define DECLARE_NODE_DATA_TYPE(TYPE_ID, TYPE_NAME, UNDERLYING_TYPE, DEFAULT_WIDGET_GEN)   \
-  constexpr char  TYPE_ID##_typeid[] = #TYPE_ID;                                          \
-  constexpr char  TYPE_ID##_typename[] = #TYPE_NAME;                                      \
+  inline constexpr char  TYPE_ID##_typeid[] = #TYPE_ID;                                   \
+  inline constexpr char  TYPE_ID##_typename[] = #TYPE_NAME;                               \
   using TYPE_NAME##Data = GenericData<UNDERLYING_TYPE,                                    \
-  TYPE_ID##_typeid, TYPE_ID##_typename, toQStringGeneric<UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>; \
-                                                                                          \
-  template<> TypeFactory::Creator_t* TypeFactory::Register<TYPE_NAME##Data>::creator = TypeFactory::Register<TYPE_NAME##Data>::init_creator(#TYPE_ID); \
+  TYPE_ID##_typeid, TYPE_ID##_typename, toQStringGeneric<UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>;
 
 
 #define DECLARE_NODE_DATA_TYPE_EXT(TYPE_ID, TYPE_NAME, UNDERLYING_TYPE, DEFAULT_WIDGET_GEN, STRING_C)   \
-  constexpr char  TYPE_ID##_typeid[] = #TYPE_ID;                                          \
-  constexpr char  TYPE_ID##_typename[] = #TYPE_NAME;                                      \
-  using TYPE_NAME##Data = GenericData<UNDERLYING_TYPE,                                    \
-  TYPE_ID##_typeid, TYPE_ID##_typename, STRING_C <UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>; \
-                                                                                          \
-  template<> TypeFactory::Creator_t* TypeFactory::Register<TYPE_NAME##Data>::creator = TypeFactory::Register<TYPE_NAME##Data>::init_creator(#TYPE_ID); \
+  inline constexpr char  TYPE_ID##_typeid[] = #TYPE_ID;                                                 \
+  inline constexpr char  TYPE_ID##_typename[] = #TYPE_NAME;                                             \
+  using TYPE_NAME##Data = GenericData<UNDERLYING_TYPE,                                                  \
+  TYPE_ID##_typeid, TYPE_ID##_typename, STRING_C <UNDERLYING_TYPE>, DEFAULT_WIDGET_GEN>;
 
 
 DECLARE_NODE_DATA_TYPE(logic, Logic, bool, NoDefaultWidget)
@@ -523,5 +504,62 @@ DECLARE_NODE_DATA_TYPE_EXT(object, ObjectInstance, SceneObject*, NoDefaultWidget
 DECLARE_NODE_DATA_TYPE_EXT(json, JSON, QJsonObject, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(json_array, JSONArray, QJsonArray, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(json_value, JSONValue, QJsonValue, NoDefaultWidget, toQStringNA);
+
+#define CREATE_DATA_PAIR(TYPE_ID, TYPE_NAME) \
+std::pair{#TYPE_ID ##sv, &_create<TYPE_NAME##Data>}
+
+struct TypeFactory
+{
+
+    static NodeData* create(const std::string& id)
+    {
+
+      auto lambda = [&id](std::pair<std::string_view, NodeData*(*)()> const& pair) -> bool
+      {
+        return pair.first == id;
+      };
+
+      assert(std::find_if(_creators_map.begin(), _creators_map.end(), lambda) != _creators_map.end());
+
+      return std::find_if(_creators_map.begin(), _creators_map.end(), lambda)->second();
+    }
+
+private:
+
+    template <typename Ty>
+    static NodeData* _create()
+    {
+      return new Ty();
+    }
+
+    static constexpr std::array<std::pair<std::string_view, NodeData*(*)()>, 25> _creators_map = {
+                                                                                              CREATE_DATA_PAIR(logic, Logic),
+                                                                                              CREATE_DATA_PAIR(int, Integer),
+                                                                                              CREATE_DATA_PAIR(uint, UnsignedInteger),
+                                                                                              CREATE_DATA_PAIR(double, Decimal),
+                                                                                              CREATE_DATA_PAIR(bool, Boolean),
+                                                                                              CREATE_DATA_PAIR(string, String),
+                                                                                              CREATE_DATA_PAIR(vec2, Vector2D),
+                                                                                              CREATE_DATA_PAIR(vec3, Vector3D),
+                                                                                              CREATE_DATA_PAIR(vec4, Vector4D),
+                                                                                              CREATE_DATA_PAIR(mat4, Matrix4x4),
+                                                                                              CREATE_DATA_PAIR(quat, Quaternion),
+                                                                                              CREATE_DATA_PAIR(any, Any),
+                                                                                              CREATE_DATA_PAIR(basic, Basic),
+                                                                                              CREATE_DATA_PAIR(undefined, Undefined),
+                                                                                              CREATE_DATA_PAIR(procedure, Procedure),
+                                                                                              CREATE_DATA_PAIR(list, List),
+                                                                                              CREATE_DATA_PAIR(color, Color),
+                                                                                              CREATE_DATA_PAIR(image, Image),
+                                                                                              CREATE_DATA_PAIR(noise, Noise),
+                                                                                              CREATE_DATA_PAIR(chunk, Chunk),
+                                                                                              CREATE_DATA_PAIR(tile, Tile),
+                                                                                              CREATE_DATA_PAIR(object, ObjectInstance),
+                                                                                              CREATE_DATA_PAIR(json, JSON),
+                                                                                              CREATE_DATA_PAIR(json_array, JSONArray),
+                                                                                              CREATE_DATA_PAIR(json_value, JSONValue)
+                                                                                             };
+
+};
 
 #endif //NOGGIT_GENERICDATA_HPP

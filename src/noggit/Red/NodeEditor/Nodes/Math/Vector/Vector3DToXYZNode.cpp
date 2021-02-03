@@ -30,7 +30,7 @@ void Vector3DToXYZNode::compute()
 
   _node->onDataUpdated(0);
   _node->onDataUpdated(1);
-  _node->onDataUpdated(3);
+  _node->onDataUpdated(2);
 }
 
 NodeValidationState Vector3DToXYZNode::validate()

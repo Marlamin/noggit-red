@@ -5,6 +5,8 @@
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <external/glm/gtx/matrix_decompose.hpp>
+#include <external/glm/gtx/euler_angles.hpp>
+#include <external/glm/gtx/quaternion.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
@@ -21,6 +23,7 @@ MatrixDecomposeNode::MatrixDecomposeNode()
   addPort<QuaternionData>(PortType::Out, "Orientation<Quaternion>", true);
   addPort<Vector3DData>(PortType::Out, "Skew<Vector3D>", true);
   addPort<Vector3DData>(PortType::Out, "Perspective<Vector3D>", true);
+  addPort<Vector3DData>(PortType::Out, "Orientation<Vector3D>", true);
 }
 
 void MatrixDecomposeNode::compute()
@@ -36,17 +39,53 @@ void MatrixDecomposeNode::compute()
 
   glm::decompose(matrix, scale, orientation, translation, skew, perspective);
 
-  _out_ports[0].out_value = std::make_shared<Vector3DData>(translation);
-  _out_ports[1].out_value = std::make_shared<Vector3DData>(scale);
-  _out_ports[2].out_value = std::make_shared<QuaternionData>(orientation);
-  _out_ports[3].out_value = std::make_shared<Vector3DData>(skew);
-  _out_ports[4].out_value = std::make_shared<Vector3DData>(perspective);
+  if (_out_ports[0].connected)
+  {
+    _out_ports[0].out_value = std::make_shared<Vector3DData>(translation);
+    _node->onDataUpdated(0);
+  }
 
-  _node->onDataUpdated(0);
-  _node->onDataUpdated(1);
-  _node->onDataUpdated(2);
-  _node->onDataUpdated(3);
-  _node->onDataUpdated(4);
+  if (_out_ports[1].connected)
+  {
+    _out_ports[1].out_value = std::make_shared<Vector3DData>(scale);
+    _node->onDataUpdated(1);
+  }
+
+  if (_out_ports[2].connected)
+  {
+    _out_ports[2].out_value = std::make_shared<QuaternionData>(orientation);
+    _node->onDataUpdated(2);
+  }
+
+  if (_out_ports[3].connected)
+  {
+    _out_ports[3].out_value = std::make_shared<Vector3DData>(skew);
+    _node->onDataUpdated(3);
+  }
+
+  if (_out_ports[4].connected)
+  {
+    _out_ports[4].out_value = std::make_shared<Vector3DData>(perspective);
+    _node->onDataUpdated(4);
+  }
+
+  if (_out_ports[5].connected)
+  {
+
+    glm::mat4 rot_matrix = glm::toMat4(orientation);
+
+    float x;
+    float y;
+    float z;
+
+    extractEulerAngleYZX(matrix, z, y, x);
+
+    _out_ports[5].out_value = std::make_shared<Vector3DData>(glm::vec3(glm::degrees(x),
+                                                                       glm::degrees(y),
+                                                                       glm::degrees(z)));
+    _node->onDataUpdated(5);
+  }
+
 }
 
 NodeValidationState MatrixDecomposeNode::validate()

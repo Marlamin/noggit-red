@@ -34,26 +34,25 @@ void MatrixMathNode::compute()
 {
   glm::mat4 result;
 
+  glm::mat4 const& first = static_cast<Matrix4x4Data*>(_in_ports[0].in_value.lock().get())->value();
+  glm::mat4 const& second = static_cast<Matrix4x4Data*>(_in_ports[1].in_value.lock().get())->value();
+
   switch (_operation->currentIndex())
   {
     case 0: // Multiply
-      result = static_cast<Matrix4x4Data*>(_in_ports[0].in_value.lock().get())->value()
-               * static_cast<Matrix4x4Data*>(_in_ports[1].in_value.lock().get())->value();
+      result = first * second;
       break;
 
     case 1: // Add
-      result = static_cast<Matrix4x4Data*>(_in_ports[0].in_value.lock().get())->value()
-               + static_cast<Matrix4x4Data*>(_in_ports[1].in_value.lock().get())->value();
+      result = first + second;
       break;
 
     case 2: // Subtract
-      result = static_cast<Matrix4x4Data*>(_in_ports[0].in_value.lock().get())->value()
-               - static_cast<Matrix4x4Data*>(_in_ports[1].in_value.lock().get())->value();
+      result = first - second;
       break;
 
     case 3: // Divide
-      result = static_cast<Matrix4x4Data*>(_in_ports[0].in_value.lock().get())->value()
-               / static_cast<Matrix4x4Data*>(_in_ports[1].in_value.lock().get())->value();
+      result = first / second;
       break;
   }
 
