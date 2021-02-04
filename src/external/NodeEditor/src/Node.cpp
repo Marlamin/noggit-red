@@ -45,7 +45,7 @@ Node(std::unique_ptr<NodeDataModel> && dataModel)
           this, &Node::onPortRemoved);
 
   connect(_nodeDataModel.get(), &NodeDataModel::visualsNeedUpdate,
-          this, &Node::recalculateVisuals);
+          this, [this]{ recalculateVisuals(); _is_dirty = true; });
 }
 
 

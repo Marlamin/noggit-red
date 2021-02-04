@@ -544,4 +544,13 @@ void FlowView::deleteScene()
 void FlowView::paintEvent(QPaintEvent *event)
 {
   QGraphicsView::paintEvent(event);
+
+  for(auto& pair : _scene->nodes())
+  {
+    if (pair.second->getIsDirty())
+    {
+      pair.second->recalculateVisuals();
+      pair.second->setIsDirty(false);
+    }
+  }
 }
