@@ -41,7 +41,7 @@ void TileGetHeightmapImageNode::compute()
     return;
   }
 
-  QImage image(257, 257, QImage::Format_RGBA8888);
+  QImage image(257, 257, QImage::Format_RGBA64);
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 

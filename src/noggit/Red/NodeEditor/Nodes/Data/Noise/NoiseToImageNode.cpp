@@ -48,7 +48,7 @@ void NoiseToImageNode::compute()
 
   map_builder.Build();
 
-  QImage image = QImage(QSize(resolution.x, resolution.y),  QImage::Format_RGBA8888);
+  QImage image = QImage(QSize(resolution.x, resolution.y),  QImage::Format_RGBA64);
 
   for (int x = 0; x < static_cast<int>(resolution.x); ++x)
   {

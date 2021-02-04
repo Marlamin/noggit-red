@@ -53,6 +53,13 @@ void TileSetHeightmapImageNode::compute()
     image_to_use = &scaled;
   }
 
+  if (image->depth() != 64 && image->depth() != 32)
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: invalid image depth.");
+    return;
+  }
+
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
   for (int k = 0; k < 16; ++k)
@@ -75,24 +82,57 @@ void TileSetHeightmapImageNode::compute()
           bool const erp = plain % DSUM / SUM;
           unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
 
-          switch (_operation->currentIndex())
+          switch (image->depth())
           {
-            case 0: // Set
-              heightmap[idx].y = qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
-              break;
+            case 32:
+            {
+              switch (_operation->currentIndex())
+              {
+                case 0: // Set
+                  heightmap[idx].y = qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  break;
 
-            case 1: // Add
-              heightmap[idx].y += qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
-              break;
+                case 1: // Add
+                  heightmap[idx].y += qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  break;
 
-            case 2: // Subtract
-              heightmap[idx].y -= qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
-              break;
+                case 2: // Subtract
+                  heightmap[idx].y -= qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  break;
 
-            case 3: // Multiply
-              heightmap[idx].y *= qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                case 3: // Multiply
+                  heightmap[idx].y *= qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  break;
+              }
+
               break;
+            }
+
+            case 64:
+            {
+              switch (_operation->currentIndex())
+              {
+                case 0: // Set
+                  heightmap[idx].y = image_to_use->pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;
+                  break;
+
+                case 1: // Add
+                  heightmap[idx].y += image_to_use->pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  break;
+
+                case 2: // Subtract
+                  heightmap[idx].y -= image_to_use->pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  break;
+
+                case 3: // Multiply
+                  heightmap[idx].y *= image_to_use->pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  break;
+              }
+
+              break;
+            }
           }
+
         }
 
       chunk->updateVerticesData();

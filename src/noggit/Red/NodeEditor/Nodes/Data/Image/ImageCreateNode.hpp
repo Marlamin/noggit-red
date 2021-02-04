@@ -4,6 +4,7 @@
 #define NOGGIT_IMAGECREATENODE_HPP
 
 #include <noggit/Red/NodeEditor/Nodes/LogicNodeBase.hpp>
+#include <QComboBox>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -26,6 +27,9 @@ namespace noggit
             void compute() override;
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
+
+        private:
+            QComboBox* _image_format;
 
         };
 

@@ -205,7 +205,10 @@ propagateData(std::shared_ptr<NodeData> nodeData,
   _nodeDataModel->setInData(std::move(nodeData), inPortIndex);
 
   if (update_visuals)
+  {
     recalculateVisuals();
+  }
+
 }
 
 
@@ -247,6 +250,7 @@ onPortAdded(PortType port_type, PortIndex port_index)
     widget->adjustSize();
 
   recalculateVisuals();
+  _is_dirty = true;
 }
 
 
@@ -303,6 +307,7 @@ onPortRemoved(PortType port_type, PortIndex port_index)
   }
 
   recalculateVisuals();
+  _is_dirty = true;
 }
 
 
