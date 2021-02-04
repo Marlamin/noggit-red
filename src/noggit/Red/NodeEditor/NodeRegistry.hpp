@@ -209,6 +209,25 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Object/ObjectInstanceSetScale.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Object/GetObjectInstanceByUID.hpp>
 
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/AddObjectInstancesToSelectionRange.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/AddObjectInstanceToSelection.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/DeleteSelectedObjectInstances.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/DeselectObjectInstance.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/DeselectObjectInstanceByUID.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/GetLastSelectedObjectInstance.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/GetSelectedObjectInstances.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/IsObjectInstanceSelected.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/IsObjectInstanceSelectedUID.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/MoveSelectedObjectInstances.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/ResetSelection.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/RotateSelectedObjectInstances.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/ScaleSelectedObjectInstances.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/SelectionInfo.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/SetCurrentSelection.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/SetSelectedObjectInstancesPosition.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/SetSelectedObjectInstancesRotation.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Selection/SnapSelectedObjectInstancesToGround.hpp>
+
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
@@ -460,6 +479,25 @@ namespace noggit
           ret->registerModel<ObjectInstanceSetRotationNode>("World//Object//");
           ret->registerModel<ObjectInstanceSetScaleNode>("World//Object//");
           ret->registerModel<GetObjectInstanceByUIDNode>("World//Object//");
+
+          ret->registerModel<AddObjectInstancesToSelectionRangeNode>("World//Selection//");
+          ret->registerModel<AddObjectInstanceToSelectionNode>("World//Selection//");
+          ret->registerModel<DeleteSelectedObjectInstancesNode>("World//Selection//");
+          ret->registerModel<DeselectObjectInstanceNode>("World//Selection//");
+          ret->registerModel<DeselectObjectInstanceByUIDNode>("World//Selection//");
+          ret->registerModel<GetLastSelectedObjectInstanceNode>("World//Selection//");
+          ret->registerModel<GetSelectedObjectInstancesNode>("World//Selection//");
+          ret->registerModel<IsObjectInstanceSelectedNode>("World//Selection//");
+          ret->registerModel<IsObjectInstanceSelectedUIDNode>("World//Selection//");
+          ret->registerModel<MoveSelectedObjectInstancesNode>("World//Selection//");
+          ret->registerModel<ResetSelectionNode>("World//Selection//");
+          ret->registerModel<RotateSelectedObjectInstancesNode>("World//Selection//");
+          ret->registerModel<ScaleSelectedObjectInstancesNode>("World//Selection//");
+          ret->registerModel<SelectionInfoNode>("World//Selection//");
+          ret->registerModel<SetCurrentSelectionNode>("World//Selection//");
+          ret->registerModel<SetSelectedObjectInstancesPositionNode>("World//Selection//");
+          ret->registerModel<SetSelectedObjectInstancesRotationNode>("World//Selection//");
+          ret->registerModel<SnapSelectedObjectInstancesToGroundNode>("World//Selection//");
 
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);

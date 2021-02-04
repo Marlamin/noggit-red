@@ -1,40 +1,37 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "GetObjectInstanceByUID.hpp"
+#include "GetLastSelectedObjectInstance.hpp"
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
-GetObjectInstanceByUIDNode::GetObjectInstanceByUIDNode()
+GetLastSelectedObjectInstanceNode::GetLastSelectedObjectInstanceNode()
 : ContextLogicNodeBase()
 {
-  setName("Object:: GetObjectInstanceByUID");
-  setCaption("Object :: GetObjectInstanceByUID");
+  setName("Selection :: GetLastSelectedObjectInstanceNode");
+  setCaption("Selection :: GetLastSelectedObjectInstance");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
-  addPortDefault<UnsignedIntegerData>(PortType::In, "UID<UInteger>", true);
 
   addPort<LogicData>(PortType::Out, "Logic", true);
   addPort<ObjectInstanceData>(PortType::Out, "ObjectInstance", true);
 }
 
-void GetObjectInstanceByUIDNode::compute()
+void GetLastSelectedObjectInstanceNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
-  unsigned int uid = defaultPortData<UnsignedIntegerData>(PortType::In, 1)->value();
-
-  auto obj_optional = world->get_model(uid);
+  auto obj_optional = world->get_last_selected_model();
 
   if (!obj_optional)
   {
     setValidationState(NodeValidationState::Error);
-    setValidationMessage(("Error: object with provided UID +" + std::to_string(uid) + "was not found.").c_str());
+    setValidationMessage("Error: nothing was selected.");
     return;
   }
 
@@ -47,3 +44,4 @@ void GetObjectInstanceByUIDNode::compute()
   _node->onDataUpdated(1);
 
 }
+

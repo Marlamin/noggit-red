@@ -1,27 +1,27 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "GetObjectInstanceByUID.hpp"
+#include "IsObjectInstanceSelectedUID.hpp"
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
-GetObjectInstanceByUIDNode::GetObjectInstanceByUIDNode()
+IsObjectInstanceSelectedUIDNode::IsObjectInstanceSelectedUIDNode()
 : ContextLogicNodeBase()
 {
-  setName("Object:: GetObjectInstanceByUID");
-  setCaption("Object :: GetObjectInstanceByUID");
+  setName("Selection :: IsObjectInstanceSelectedUID");
+  setCaption("Selection ::  IsObjectInstanceSelectedUID");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);
   addPortDefault<UnsignedIntegerData>(PortType::In, "UID<UInteger>", true);
 
   addPort<LogicData>(PortType::Out, "Logic", true);
-  addPort<ObjectInstanceData>(PortType::Out, "ObjectInstance", true);
+  addPort<BooleanData>(PortType::Out, "Boolean", true);
 }
 
-void GetObjectInstanceByUIDNode::compute()
+void IsObjectInstanceSelectedUIDNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
@@ -29,21 +29,10 @@ void GetObjectInstanceByUIDNode::compute()
 
   unsigned int uid = defaultPortData<UnsignedIntegerData>(PortType::In, 1)->value();
 
-  auto obj_optional = world->get_model(uid);
-
-  if (!obj_optional)
-  {
-    setValidationState(NodeValidationState::Error);
-    setValidationMessage(("Error: object with provided UID +" + std::to_string(uid) + "was not found.").c_str());
-    return;
-  }
-
-  SceneObject* obj = boost::get<selected_object_type>(obj_optional.get());
-
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<ObjectInstanceData>(obj);
+  _out_ports[1].out_value = std::make_shared<BooleanData>(world->is_selected(uid));
   _node->onDataUpdated(1);
-
 }
+
