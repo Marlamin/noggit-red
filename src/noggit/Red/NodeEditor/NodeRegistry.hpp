@@ -230,6 +230,11 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Selection/SetSelectedObjectInstancesRotation.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Selection/SnapSelectedObjectInstancesToGround.hpp>
 
+#include <noggit/Red/NodeEditor/Nodes/World/Liquid/CropWaterAdtAtPos.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Liquid/GetWaterType.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Liquid/SetWaterType.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Liquid/PaintLiquid.hpp>
+
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
@@ -452,7 +457,6 @@ namespace noggit
           ret->registerModel<ChunkSetVertexColorsNode>("World//Chunk//");
           ret->registerModel<ChunkSetVertexColorsImageNode>("World//Chunk//");
 
-
           ret->registerModel<ReloadTileNode>("World//Tile//");
           ret->registerModel<TileGetMinMaxHeightNode>("World//Tile//");
           ret->registerModel<TileGetVertexNode>("World//Tile//");
@@ -502,6 +506,11 @@ namespace noggit
           ret->registerModel<SetSelectedObjectInstancesPositionNode>("World//Selection//");
           ret->registerModel<SetSelectedObjectInstancesRotationNode>("World//Selection//");
           ret->registerModel<SnapSelectedObjectInstancesToGroundNode>("World//Selection//");
+
+          ret->registerModel<PaintLiquidNode>("World//Liquid//");
+          ret->registerModel<SetWaterTypeNode>("World//Liquid//");
+          ret->registerModel<GetWaterTypeNode>("World//Liquid//");
+          ret->registerModel<CropWaterADTAtPosNode>("World//Liquid//");
 
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);
