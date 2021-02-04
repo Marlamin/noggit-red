@@ -201,6 +201,8 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileSetHeightmapImage.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileSetAlphaLayer.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetObjectsUIDs.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetVertexColorsImage.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileSetVertexColorsImage.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Object/AddObjectInstance.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Object/ObjectInstanceInfo.hpp>
@@ -460,6 +462,8 @@ namespace noggit
           ret->registerModel<TileSetHeightmapImageNode>("World//Tile//");
           ret->registerModel<TileSetAlphaLayerNode>("World//Tile//");
           ret->registerModel<TileGetObjectUIDsNode>("World//Tile//");
+          ret->registerModel<TileSetVertexColorsImageNode>("World//Tile//");
+          ret->registerModel<TileGetVertexColorsImageNode>("World//Tile//");
 
           ret->registerModel<FixAllGapsNode>("World//Loaded Tiles//");
 
