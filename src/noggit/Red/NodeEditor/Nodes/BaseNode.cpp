@@ -24,10 +24,11 @@ BaseNode::BaseNode()
 , _embedded_widget(QWidget())
 {
   _embedded_widget.setAttribute(Qt::WA_TranslucentBackground);
+  _embedded_widget.setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Expanding);
 
   auto layout = new QVBoxLayout(&_embedded_widget);
   layout->setContentsMargins(12, 12, 12, 12);
-  layout->setAlignment(Qt::AlignHCenter);
+  layout->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
   _embedded_widget_layout_top = new QVBoxLayout();
   layout->addLayout(_embedded_widget_layout_top);
