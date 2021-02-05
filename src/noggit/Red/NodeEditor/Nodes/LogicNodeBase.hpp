@@ -33,7 +33,7 @@ namespace noggit
 
             bool isIterable() { return _is_iterable; };
 
-            unsigned setNIterations(unsigned n_iterations) { _n_iterations = n_iterations; };
+            void setNIterations(unsigned n_iterations) { _n_iterations = n_iterations; };
             unsigned getNIteraitons() { return _n_iterations; };
             void setIterationIndex(unsigned index) { _iteration_index = index; };
 
