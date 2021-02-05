@@ -66,6 +66,7 @@ QJsonObject ImageGaussianBlurNode::save() const
   QJsonObject json_obj = BaseNode::save();
 
   defaultWidgetToJson(PortType::In, 2, json_obj, "sigma");
+  defaultWidgetToJson(PortType::In, 3, json_obj, "passes");
 
   return json_obj;
 }
@@ -75,5 +76,6 @@ void ImageGaussianBlurNode::restore(const QJsonObject& json_obj)
   BaseNode::restore(json_obj);
 
   defaultWidgetFromJson(PortType::In, 2, json_obj, "sigma");
+  defaultWidgetFromJson(PortType::In, 3, json_obj, "passes");
 
 }

@@ -2,6 +2,7 @@
 #define NOGGIT_GENERICDATA_HPP
 
 #include "noggit/Red/NodeEditor/Nodes/Widgets/ProcedureSelector.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Widgets/QUnsignedSpinBox.hpp"
 
 #include <external/NodeEditor/include/nodes/NodeDataModel>
 #include <external/glm/glm.hpp>
@@ -174,30 +175,30 @@ struct DefaultUnsignedIntWidget
 {
     static QWidget* generate(QWidget* parent)
     {
-      auto widget = new QSpinBox(parent);
-      widget->setRange(0, std::numeric_limits<std::int32_t>::max());
+      auto widget = new QUnsignedSpinBox(parent);
+      widget->setRange(0, std::numeric_limits<quint32>::max());
       return widget;
     }
 
-    static int value(QWidget* widget)
+    static unsigned int value(QWidget* widget)
     {
-      return static_cast<QSpinBox*>(widget)->value();
+      return static_cast<QUnsignedSpinBox*>(widget)->value();
     }
 
     static void setValue(QWidget* widget, QJsonValue& value)
     {
-      static_cast<QSpinBox*>(widget)->setValue(value.toInt());
+      static_cast<QUnsignedSpinBox*>(widget)->setValue(value.toString().toUInt());
     }
 
     static void toJson(QWidget* widget, QJsonObject& json_obj, const std::string& name)
     {
-      json_obj[name.c_str()] = static_cast<QSpinBox*>(widget)->value();
+      json_obj[name.c_str()] = QString::number(static_cast<QUnsignedSpinBox*>(widget)->value());
     }
 
     static void fromJson(QWidget* widget, const QJsonObject& json_obj, const std::string& name)
     {
-      int value = json_obj[name.c_str()].toInt();
-      static_cast<QSpinBox*>(widget)->setValue(value);
+      quint32 value = json_obj[name.c_str()].toString().toUInt();
+      static_cast<QUnsignedSpinBox*>(widget)->setValue(value);
     }
 };
 
@@ -330,7 +331,8 @@ struct DefaultVectorWidget
       for (int i = 0; i < SIZE; ++i)
       {
         auto axis = new QDoubleSpinBox(widget);
-        axis->setRange(std::numeric_limits<double>::min(), std::numeric_limits<double>::max());
+        axis->setRange(std::numeric_limits<double>::lowest(), std::numeric_limits<double>::max());
+        axis->setDecimals(7);
         layout->addWidget(axis);
       }
 
@@ -395,8 +397,8 @@ struct DefaultColorWidget
       widget->setDisplayMode(color_widgets::ColorPreview::SplitAlpha);
 
       // TODO: figure out what goes wrong here without this
-      widget->showDialog();
-      widget->closeDialog();
+      //widget->showDialog();
+      // widget->closeDialog();
 
       return widget;
     }
