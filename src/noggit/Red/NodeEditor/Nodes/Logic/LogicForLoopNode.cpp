@@ -11,20 +11,15 @@ LogicForLoopNode::LogicForLoopNode()
 : LogicNodeBase()
 {
   setName("Logic :: ForLoop");
-  setCaption("Repeat");
+  setCaption("Logic:: ForLoop");
   _validation_state = NodeValidationState::Valid;
   setInterpreterToken(NodeInterpreterTokens::FOR);
 
-  addPort<LogicData>(PortType::In, "Logic", true);
-  addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, 0);
-  addPort<IntegerData>(PortType::In, "Times", true);
-
-  _n_iterations_default = new QSpinBox(&_embedded_widget);
-  _n_iterations_default->setMinimum(0);
-  addDefaultWidget(_n_iterations_default, PortType::In, 1);
+  addPortDefault<LogicData>(PortType::In, "Logic", true);
+  addPortDefault<UnsignedIntegerData>(PortType::In, "Times", true);
 
   addPort<LogicData>(PortType::Out, "Logic", true, ConnectionPolicy::One);
-  addPort<IntegerData>(PortType::Out, "Index", true, ConnectionPolicy::Many);
+  addPort<UnsignedIntegerData>(PortType::Out, "Index", true, ConnectionPolicy::Many);
 
   setIsIterable(true);
 }
@@ -38,7 +33,7 @@ void LogicForLoopNode::compute()
 
   auto n_iterations_ptr = static_cast<IntegerData*>(_in_ports[1].in_value.lock().get());
 
-  int n_iterations = n_iterations_ptr ? n_iterations_ptr->value() : _n_iterations_default->value();
+  unsigned n_iterations = n_iterations_ptr ? n_iterations_ptr->value() : _n_iterations_default->value();
 
   if (!n_iterations)
   {
@@ -55,7 +50,7 @@ void LogicForLoopNode::compute()
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<IntegerData>(getIterationindex());
+  _out_ports[1].out_value = std::make_shared<UnsignedIntegerData>(getIterationindex());
   _node->onDataUpdated(1);
 
   setIterationIndex(getIterationindex() + 1);

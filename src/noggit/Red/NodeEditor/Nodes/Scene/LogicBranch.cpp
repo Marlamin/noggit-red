@@ -127,7 +127,7 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
         if (logic_model->isIterable()) // handle iteration nodes
         {
           setCurrentLoop(connected_node);
-          int it_index = logic_model->getIterationindex();
+          unsigned it_index = logic_model->getIterationindex();
 
           if (connected_model->getInterpreterToken() == NodeInterpreterTokens::FOR)
           {
