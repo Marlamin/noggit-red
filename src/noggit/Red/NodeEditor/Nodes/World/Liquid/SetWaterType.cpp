@@ -11,8 +11,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 SetWaterTypeNode::SetWaterTypeNode()
 : ContextLogicNodeBase()
 {
-  setName("Liquid :: SetWaterType");
-  setCaption("Liquid :: SetWaterType");
+  setName("Liquid :: SetLiquidTypeADTAtPos");
+  setCaption("Liquid :: SetLiquidTypeADTAtPos");
   _validation_state = NodeValidationState::Valid;
 
   _liquid_type = new QComboBox(&_embedded_widget);

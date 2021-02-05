@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 GetWaterTypeNode::GetWaterTypeNode()
 : ContextNodeBase()
 {
-  setName("Liquid :: GetWaterTypeNode");
-  setCaption("Liquid :: GetWaterType");
+  setName("Liquid :: GetLiquidTypeADTAtPos");
+  setCaption("Liquid :: GetLiquidTypeADTAtPos");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<Vector3DData>(PortType::In, "Pos<Vector3d>", true);

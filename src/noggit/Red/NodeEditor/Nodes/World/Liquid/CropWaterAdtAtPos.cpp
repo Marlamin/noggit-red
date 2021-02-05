@@ -10,8 +10,8 @@ using namespace noggit::Red::NodeEditor::Nodes;
 CropWaterADTAtPosNode::CropWaterADTAtPosNode()
 : ContextLogicNodeBase()
 {
-  setName("Liquid :: CropWaterADTAtPosNode");
-  setCaption("Liquid :: CropWaterADTAtPos");
+  setName("Liquid :: CropLiquidADTAtPos");
+  setCaption("Liquid :: CropLiquidADTAtPos");
   _validation_state = NodeValidationState::Valid;
 
   addPortDefault<LogicData>(PortType::In, "Logic", true);

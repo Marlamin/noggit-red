@@ -36,11 +36,30 @@ void NoiseToImageNode::compute()
   map_builder.SetSourceModule(*noise_module);
   map_builder.SetDestNoiseMap(noise_map);
 
-  glm::vec2 resolution = defaultPortData<Vector2DData>(PortType::In, 2)->value();
+  auto res_data = defaultPortData<Vector2DData>(PortType::In, 2);
+  glm::vec2 const& resolution = res_data->value();
+
+  if (!resolution.x || !resolution.y)
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: incorrect resolution.");
+    return;
+  }
+
   map_builder.SetDestSize(resolution.x, resolution.y);
 
-  glm::vec2 bounds_lower = defaultPortData<Vector2DData>(PortType::In, 3)->value();
-  glm::vec2 bounds_upper = defaultPortData<Vector2DData>(PortType::In, 4)->value();
+  auto bounds_lower_data = defaultPortData<Vector2DData>(PortType::In, 3);
+  glm::vec2 const& bounds_lower = bounds_lower_data->value();
+
+  auto bounds_upper_data = defaultPortData<Vector2DData>(PortType::In, 4);
+  glm::vec2 const& bounds_upper = bounds_upper_data->value();
+
+  if (bounds_lower.x >= bounds_upper.x || bounds_lower.y >= bounds_upper.y)
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: incorrect bounds.");
+    return;
+  }
 
   map_builder.SetBounds(bounds_lower.x, bounds_upper.x, bounds_lower.y, bounds_upper.y);
 
@@ -73,6 +92,7 @@ NodeValidationState NoiseToImageNode::validate()
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error failed to evaluate node input");
+    return _validation_state;
   }
 
   return LogicNodeBase::validate();

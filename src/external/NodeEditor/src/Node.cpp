@@ -1,6 +1,7 @@
 #include "Node.hpp"
 
 #include <QtCore/QObject>
+#include <QCoreApplication>
 
 #include <utility>
 #include <iostream>
@@ -45,7 +46,7 @@ Node(std::unique_ptr<NodeDataModel> && dataModel)
           this, &Node::onPortRemoved);
 
   connect(_nodeDataModel.get(), &NodeDataModel::visualsNeedUpdate,
-          this, [this]{ recalculateVisuals(); _is_dirty = true; });
+          this, [this]{ _is_dirty = true; });
 }
 
 
@@ -243,13 +244,6 @@ onPortAdded(PortType port_type, PortIndex port_index)
     _nodeState._outConnections.resize( nNewOut );
   }
 
-  //Recalculate the nodes visuals. A data change can result in the node taking more space than before, so this forces a recalculate+repaint on the affected node
-  auto widget = _nodeDataModel->embeddedWidget();
-
-  if (widget)
-    widget->adjustSize();
-
-  recalculateVisuals();
   _is_dirty = true;
 }
 
@@ -306,7 +300,6 @@ onPortRemoved(PortType port_type, PortIndex port_index)
       _nodeState._outConnections.erase(_nodeState._outConnections.begin() + port_index);
   }
 
-  recalculateVisuals();
   _is_dirty = true;
 }
 
@@ -316,18 +309,6 @@ Node::
 recalculateVisuals() const
 {
   //Recalculate the nodes visuals. A data change can result in the node taking more space than before, so this forces a recalculate+repaint on the affected node
-
-  auto widget = _nodeDataModel->embeddedWidget();
-
-  if (widget)
-  {
-    widget->setVisible(false);
-    widget->setVisible(true);
-    widget->adjustSize();
-    widget->repaint();
-    widget->update();
-  }
-
   _nodeGraphicsObject->setGeometryChanged();
   _nodeGeometry.recalculateSize();
   _nodeGraphicsObject->update(_nodeGeometry.boundingRect());

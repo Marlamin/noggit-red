@@ -174,6 +174,7 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkGetVertexColorsImage.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetVertexColors.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetVertexColorsImage.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkRecalculateNormals.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunk.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunkFromPos.hpp>
@@ -203,6 +204,7 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetObjectsUIDs.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileGetVertexColorsImage.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Tile/TileSetVertexColorsImage.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Tile/TileRecalculateNormals.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Object/AddObjectInstance.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Object/ObjectInstanceInfo.hpp>
@@ -456,6 +458,7 @@ namespace noggit
           ret->registerModel<ChunkGetVertexColorsImageNode>("World//Chunk//");
           ret->registerModel<ChunkSetVertexColorsNode>("World//Chunk//");
           ret->registerModel<ChunkSetVertexColorsImageNode>("World//Chunk//");
+          ret->registerModel<ChunkRecalculateNormalsNode>("World//Chunk//");
 
           ret->registerModel<ReloadTileNode>("World//Tile//");
           ret->registerModel<TileGetMinMaxHeightNode>("World//Tile//");
@@ -468,6 +471,7 @@ namespace noggit
           ret->registerModel<TileGetObjectUIDsNode>("World//Tile//");
           ret->registerModel<TileSetVertexColorsImageNode>("World//Tile//");
           ret->registerModel<TileGetVertexColorsImageNode>("World//Tile//");
+          ret->registerModel<TileRecalculateNormalsNode>("World//Tile//");
 
           ret->registerModel<FixAllGapsNode>("World//Loaded Tiles//");
 

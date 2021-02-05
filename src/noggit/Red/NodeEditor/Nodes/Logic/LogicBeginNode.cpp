@@ -136,7 +136,6 @@ void LogicBeginNode::outputConnectionCreated(const Connection& connection)
     emit portAdded(PortType::Out, _out_ports.size() - 1);
   }
 
-  _embedded_widget.adjustSize();
   emit visualsNeedUpdate();
 }
 

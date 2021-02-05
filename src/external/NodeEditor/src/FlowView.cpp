@@ -113,6 +113,7 @@ contextMenuEvent(QContextMenuEvent *event)
   }
 
   QMenu modelMenu;
+  modelMenu.setMinimumWidth(500);
 
   auto skipText = QStringLiteral("skip me");
 
@@ -543,7 +544,23 @@ void FlowView::deleteScene()
 
 void FlowView::paintEvent(QPaintEvent *event)
 {
-  QGraphicsView::paintEvent(event);
+  bool update_needed = false;
+  for(auto& pair : _scene->nodes())
+  {
+    if (pair.second->getIsDirty())
+    {
+      update_needed = true;
+      break;
+    }
+  }
+
+  if (!update_needed)
+  {
+    QGraphicsView::paintEvent(event);
+    return;
+  }
+
+  QCoreApplication::processEvents();
 
   for(auto& pair : _scene->nodes())
   {
@@ -553,4 +570,6 @@ void FlowView::paintEvent(QPaintEvent *event)
       pair.second->setIsDirty(false);
     }
   }
+
+  QGraphicsView::paintEvent(event);
 }
