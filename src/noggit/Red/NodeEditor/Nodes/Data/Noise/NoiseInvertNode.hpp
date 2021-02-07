@@ -4,6 +4,7 @@
 #define NOGGIT_NOISEINVERTNODE_HPP
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
+#include <external/libnoise/src/noise/noise.h>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -25,6 +26,9 @@ namespace noggit
             NoiseInvertNode();
             void compute() override;
             NodeValidationState validate() override;
+
+        private:
+            noise::module::Invert _module;
         };
 
     }

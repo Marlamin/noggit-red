@@ -43,7 +43,7 @@ NoiseViewerNode::NoiseViewerNode()
 }
 void NoiseViewerNode::compute()
 {
-  noise::module::Module* noise_module = static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value().get();
+  noise::module::Module* noise_module = static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value();
 
   utils::NoiseMap noise_map;
   utils::NoiseMapBuilderPlane map_builder;

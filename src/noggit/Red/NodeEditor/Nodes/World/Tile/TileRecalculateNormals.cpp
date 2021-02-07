@@ -15,7 +15,7 @@ TileRecalculateNormalsNode::TileRecalculateNormalsNode()
   _validation_state = NodeValidationState::Valid;
 
   addPort<LogicData>(PortType::In, "Logic", true);
-  addPort<TileData>(PortType::In, "Logic", true);
+  addPort<TileData>(PortType::In, "Tile", true);
 
   addPort<LogicData>(PortType::Out, "Logic", true);
 }

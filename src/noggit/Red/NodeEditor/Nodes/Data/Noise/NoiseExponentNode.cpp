@@ -25,15 +25,11 @@ NoiseExponentNode::NoiseExponentNode()
 
 void NoiseExponentNode::compute()
 {
-  auto module = new noise::module::Exponent();
-  module->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value().get());
+  _module.SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value());
 
-  module->SetExponent(defaultPortData<DecimalData>(PortType::In, 1)->value());
+  _module.SetExponent(defaultPortData<DecimalData>(PortType::In, 1)->value());
 
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(module);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
-
+  _out_ports[0].out_value = std::make_shared<NoiseData>(&_module);
   _node->onDataUpdated(0);
 }
 

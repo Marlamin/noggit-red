@@ -26,14 +26,7 @@ LogicForLoopNode::LogicForLoopNode()
 
 void LogicForLoopNode::compute()
 {
-  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
-
-  if(!logic->value())
-    return;
-
-  auto n_iterations_ptr = static_cast<IntegerData*>(_in_ports[1].in_value.lock().get());
-
-  unsigned n_iterations = n_iterations_ptr ? n_iterations_ptr->value() : _n_iterations_default->value();
+  unsigned n_iterations = defaultPortData<UnsignedIntegerData>(PortType::In, 1)->value();
 
   if (!n_iterations)
   {
@@ -63,7 +56,8 @@ QJsonObject LogicForLoopNode::save() const
 
   json_obj["name"] = name();
   json_obj["caption"] = caption();
-  json_obj["n_iterations"] = _n_iterations_default->value();
+
+  defaultWidgetToJson(PortType::In, 1, json_obj, "n_iterations");
 
   return json_obj;
 }
@@ -72,16 +66,12 @@ void LogicForLoopNode::restore(const QJsonObject& json_obj)
 {
   setName(json_obj["name"].toString());
   setCaption(json_obj["caption"].toString());
-  _n_iterations_default->setValue(json_obj["n_iterations"].toInt());
+  defaultWidgetFromJson(PortType::In, 1, json_obj, "n_iterations");
 }
 
 NodeValidationState LogicForLoopNode::validate()
 {
-  setValidationState(NodeValidationState::Valid);
-
-  auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
-
-  if (!logic)
+  if (!static_cast<LogicData*>(_in_ports[0].in_value.lock().get()))
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: Failed to evaluate logic input.");
@@ -90,9 +80,7 @@ NodeValidationState LogicForLoopNode::validate()
     _node->onDataUpdated(0);
   }
 
-  auto n_iterations_ptr = static_cast<IntegerData*>(_in_ports[1].in_value.lock().get());
-
-  int n_iterations = n_iterations_ptr ? n_iterations_ptr->value() : _n_iterations_default->value();
+  unsigned n_iterations = defaultPortData<UnsignedIntegerData>(PortType::In, 1)->value();
 
   if (!n_iterations)
   {
@@ -100,7 +88,7 @@ NodeValidationState LogicForLoopNode::validate()
   }
 
   setIterationIndex(0);
-  setNIterations(std::max(0, n_iterations));
+  setNIterations(std::max(0u, n_iterations));
 
   return _validation_state;
 }

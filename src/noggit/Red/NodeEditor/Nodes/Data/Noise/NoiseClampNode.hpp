@@ -4,6 +4,7 @@
 #define NOGGIT_NOISECLAMPNODE_HPP
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
+#include <external/libnoise/src/noise/noise.h>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -29,7 +30,7 @@ namespace noggit
             void restore(QJsonObject const& json_obj) override;
 
         private:
-
+            noise::module::Clamp _module;
         };
 
     }

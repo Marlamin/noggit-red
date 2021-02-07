@@ -4,6 +4,7 @@
 #define NOGGIT_NOISECONSTVALUENODE_HPP
 
 #include "NoiseGeneratorBase.hpp"
+#include <external/libnoise/src/noise/noise.h>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -24,6 +25,9 @@ namespace noggit
         public:
             NoiseConstValueNode();
             void compute() override;
+
+        private:
+            noise::module::Const _module;
         };
 
     }

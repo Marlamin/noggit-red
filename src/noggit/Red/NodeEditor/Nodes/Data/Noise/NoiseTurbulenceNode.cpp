@@ -38,18 +38,14 @@ NoiseTurbulenceNode::NoiseTurbulenceNode()
 
 void NoiseTurbulenceNode::compute()
 {
-  auto module = new noise::module::Turbulence();
-  module->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value().get());
+  _module.SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value());
 
-  module->SetFrequency(defaultPortData<DecimalData>(PortType::In, 1)->value());
-  module->SetPower(defaultPortData<DecimalData>(PortType::In, 2)->value());
-  module->SetRoughness(std::min(31, std::max(1, defaultPortData<IntegerData>(PortType::In, 3)->value())));
-  module->SetSeed(defaultPortData<IntegerData>(PortType::In, 4)->value());
+  _module.SetFrequency(defaultPortData<DecimalData>(PortType::In, 1)->value());
+  _module.SetPower(defaultPortData<DecimalData>(PortType::In, 2)->value());
+  _module.SetRoughness(std::min(31, std::max(1, defaultPortData<IntegerData>(PortType::In, 3)->value())));
+  _module.SetSeed(defaultPortData<IntegerData>(PortType::In, 4)->value());
 
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(module);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
-
+  _out_ports[0].out_value = std::make_shared<NoiseData>(&_module);
   _node->onDataUpdated(0);
 }
 

@@ -19,11 +19,6 @@ NoiseCheckerboardNode::NoiseCheckerboardNode()
 
 void NoiseCheckerboardNode::compute()
 {
-  auto module = new noise::module::Checkerboard();
-
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(module);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
-
+  _out_ports[0].out_value = std::make_shared<NoiseData>(&_module);
   _node->onDataUpdated(0);
 }

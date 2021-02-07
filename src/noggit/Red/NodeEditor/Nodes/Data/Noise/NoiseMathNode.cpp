@@ -26,47 +26,50 @@ NoiseMathNode::NoiseMathNode()
 
 void NoiseMathNode::compute()
 {
-  noise::module::Module* first = static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value().get();
-  noise::module::Module* second = static_cast<NoiseData*>(_in_ports[1].in_value.lock().get())->value().get();
+  noise::module::Module* first = static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value();
+  noise::module::Module* second = static_cast<NoiseData*>(_in_ports[1].in_value.lock().get())->value();
 
-  noise::module::Module* result = nullptr;
-
-  switch (_operation->currentIndex())
+  if (_last_module < 0 || _last_module != _operation->currentIndex())
   {
-    case 0: // Add
+    switch (_operation->currentIndex())
     {
-      result = new noise::module::Add();
-      break;
-    }
-    case 1: // Max
-    {
-      result = new noise::module::Max();
-      break;
-    }
-    case 2: // Min
-    {
-      result = new noise::module::Min();
-      break;
-    }
-    case 3: // Multiply
-    {
-      result = new noise::module::Multiply();
-      break;
-    }
-    case 4: // Power
-    {
-      result = new noise::module::Power();
-      break;
+      case 0: // Add
+      {
+        _module.reset(new noise::module::Add());
+        _last_module = 0;
+        break;
+      }
+      case 1: // Max
+      {
+        _module.reset(new noise::module::Max());
+        _last_module = 1;
+        break;
+      }
+      case 2: // Min
+      {
+        _module.reset(new noise::module::Min());
+        _last_module = 2;
+        break;
+      }
+      case 3: // Multiply
+      {
+        _module.reset(new noise::module::Multiply());
+        _last_module = 3;
+        break;
+      }
+      case 4: // Power
+      {
+        _module.reset(new noise::module::Power());
+        _last_module = 4;
+        break;
+      }
     }
   }
 
-  result->SetSourceModule(0, *first);
-  result->SetSourceModule(1, *second);
+  _module->SetSourceModule(0, *first);
+  _module->SetSourceModule(1, *second);
 
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(result);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
-
+  _out_ports[0].out_value = std::make_shared<NoiseData>(_module.get());
   _node->onDataUpdated(0);
 }
 

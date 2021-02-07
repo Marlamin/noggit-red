@@ -4,6 +4,7 @@
 #define NOGGIT_NOISECURVENODE_HPP
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
+#include <external/libnoise/src/noise/noise.h>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -25,6 +26,9 @@ namespace noggit
             NoiseCurveNode();
             NodeValidationState validate() override;
             void compute() override;
+
+        private:
+            noise::module::Curve _module;
         };
 
     }

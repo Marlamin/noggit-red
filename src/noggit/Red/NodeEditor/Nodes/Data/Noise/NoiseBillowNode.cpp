@@ -30,9 +30,9 @@ NoiseBillowNode::NoiseBillowNode()
   lacunarity->setValue(2.0);
 
   addPortDefault<UnsignedIntegerData>(PortType::In, "Octaves<UInteger>", true);
-  auto octaves = static_cast<QSpinBox*>(_in_ports[2].default_widget);
-  octaves->setMinimum(0.0);
-  octaves->setValue(6.0);
+  auto octaves = static_cast<QUnsignedSpinBox*>(_in_ports[2].default_widget);
+  octaves->setMinimum(1);
+  octaves->setValue(6);
   octaves->setMaximum(30);
 
   addPortDefault<DecimalData>(PortType::In, "Persistence<Decimal>", true);
@@ -47,35 +47,32 @@ NoiseBillowNode::NoiseBillowNode()
 
 void NoiseBillowNode::compute()
 {
-  auto module = new noise::module::Billow();
 
   double frequency = defaultPortData<DecimalData>(PortType::In, 0)->value();
   if (!checkBounds(frequency, 0.0, std::numeric_limits<double>::max(), "Frequency"))
     return;
-  module->SetFrequency(frequency);
+  _module.SetFrequency(frequency);
 
   double lacunarity = defaultPortData<DecimalData>(PortType::In, 1)->value();
   if (!checkBounds(lacunarity, 0.0, std::numeric_limits<double>::max(), "Lacunarity"))
     return;
-  module->SetLacunarity(lacunarity);
+  _module.SetLacunarity(lacunarity);
 
-  module->SetNoiseQuality(static_cast<noise::NoiseQuality>(_quality->currentIndex()));
+  _module.SetNoiseQuality(static_cast<noise::NoiseQuality>(_quality->currentIndex()));
 
   unsigned int octave_count = defaultPortData<UnsignedIntegerData>(PortType::In, 2)->value();
-  if (!checkBounds(octave_count, 0u, 30u, "Octaves"))
+  if (!checkBounds(octave_count, 1u, 30u, "Octaves"))
     return;
-  module->SetOctaveCount(octave_count);
+  _module.SetOctaveCount(octave_count);
 
   double persistence = defaultPortData<DecimalData>(PortType::In, 3)->value();
   if (!checkBounds(persistence, 0.0, std::numeric_limits<double>::max(), "Persistence"))
     return;
-  module->SetPersistence(persistence);
+  _module.SetPersistence(persistence);
 
-  module->SetSeed(defaultPortData<IntegerData>(PortType::In, 4)->value());
+  _module.SetSeed(defaultPortData<IntegerData>(PortType::In, 4)->value());
 
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(module);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
+  _out_ports[0].out_value = std::make_shared<NoiseData>(&_module);
 
   _node->onDataUpdated(0);
 }

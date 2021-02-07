@@ -4,6 +4,7 @@
 #define NOGGIT_NOISEBILLOWNODE_HPP
 
 #include "NoiseGeneratorBase.hpp"
+#include <external/libnoise/src/noise/noise.h>
 #include <QComboBox>
 
 using QtNodes::PortType;
@@ -30,6 +31,7 @@ namespace noggit
 
         private:
             QComboBox* _quality;
+            noise::module::Billow _module;
         };
 
     }

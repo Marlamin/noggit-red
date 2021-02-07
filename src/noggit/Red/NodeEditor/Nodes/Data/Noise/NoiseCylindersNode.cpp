@@ -24,16 +24,11 @@ NoiseCylindersNode::NoiseCylindersNode()
 
 void NoiseCylindersNode::compute()
 {
-  auto module = new noise::module::Cylinders();
-
   double frequency = defaultPortData<DecimalData>(PortType::In, 0)->value();
   if (!checkBounds(frequency, 0.0, std::numeric_limits<double>::max(), "Frequency"))
     return;
-  module->SetFrequency(frequency);
+  _module.SetFrequency(frequency);
 
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(module);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
-
+  _out_ports[0].out_value = std::make_shared<NoiseData>(&_module);
   _node->onDataUpdated(0);
 }

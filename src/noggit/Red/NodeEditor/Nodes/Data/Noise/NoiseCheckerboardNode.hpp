@@ -4,6 +4,7 @@
 #define NOGGIT_NOISECHECKERBOARDNODE_HPP
 
 #include "NoiseGeneratorBase.hpp"
+#include <external/libnoise/src/noise/noise.h>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -24,6 +25,9 @@ namespace noggit
         public:
             NoiseCheckerboardNode();
             void compute() override;
+
+        private:
+            noise::module::Checkerboard _module;
         };
 
     }

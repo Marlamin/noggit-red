@@ -26,43 +26,46 @@ NoiseTransformPointNode::NoiseTransformPointNode()
 
 void NoiseTransformPointNode::compute()
 {
-  noise::module::Module* result = nullptr;
 
-  switch (_operation->currentIndex())
+  if (_last_module < 0 || _last_module != _operation->currentIndex())
   {
-    case 0: // Translate
+    switch (_operation->currentIndex())
     {
-      auto module = new noise::module::TranslatePoint();
-      module->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value().get());
-      glm::vec3 vec = defaultPortData<Vector3DData>(PortType::In, 1)->value();
-      module->SetTranslation(vec.x, vec.y, vec.z);
-      result = module;
-      break;
+      case 0: // Translate
+      {
+        auto translate = new noise::module::TranslatePoint();
+        _module.reset(translate);
+        _last_module = 0;
+        translate->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value());
+        glm::vec3 vec = defaultPortData<Vector3DData>(PortType::In, 1)->value();
+        translate->SetTranslation(vec.x, vec.y, vec.z);
+        break;
+      }
+      case 1: // Rotate
+      {
+        auto rotate = new noise::module::RotatePoint();
+        _module.reset(rotate);
+        _last_module = 1;
+        rotate->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value());
+        glm::vec3 angles = defaultPortData<Vector3DData>(PortType::In, 1)->value();
+        rotate->SetAngles(angles.x, angles.y, angles.z);
+        break;
+      }
+      case 2: // Scale
+      {
+        auto scale_module = new noise::module::ScalePoint();
+        _module.reset(scale_module);
+        _last_module = 2;
+        scale_module->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value());
+        glm::vec3 scale = defaultPortData<Vector3DData>(PortType::In, 1)->value();
+        scale_module->SetScale(scale.x, scale.y, scale.z);
+        break;
+      }
     }
-    case 1: // Rotate
-    {
-      auto module = new noise::module::RotatePoint();
-      module->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value().get());
-      glm::vec3 angles = defaultPortData<Vector3DData>(PortType::In, 1)->value();
-      module->SetAngles(angles.x, angles.y, angles.z);
-      result = module;
-      break;
-    }
-    case 2: // Scale
-    {
-      auto module = new noise::module::ScalePoint();
-      module->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value().get());
-      glm::vec3 scale = defaultPortData<Vector3DData>(PortType::In, 1)->value();
-      module->SetScale(scale.x, scale.y, scale.z);
-      result = module;
-      break;
-    }
+
   }
 
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(result);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
-
+  _out_ports[0].out_value = std::make_shared<NoiseData>(_module.get());
   _node->onDataUpdated(0);
 }
 

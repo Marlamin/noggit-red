@@ -4,6 +4,7 @@
 #define NOGGIT_NOISERIDGEDMULTINODE_HPP
 
 #include "NoiseGeneratorBase.hpp"
+#include <external/libnoise/src/noise/noise.h>
 #include <QComboBox>
 
 using QtNodes::PortType;
@@ -29,7 +30,8 @@ namespace noggit
             void restore(QJsonObject const& json_obj) override;
 
         private:
-          QComboBox* _quality;
+            QComboBox* _quality;
+            noise::module::RidgedMulti _module;
         };
 
     }

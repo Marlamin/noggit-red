@@ -23,14 +23,11 @@ NoiseBlendNode::NoiseBlendNode()
 
 void NoiseBlendNode::compute()
 {
-  auto module = new noise::module::Blend();
-  module->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value().get());
-  module->SetSourceModule(1, *static_cast<NoiseData*>(_in_ports[1].in_value.lock().get())->value().get());
-  module->SetControlModule(*static_cast<NoiseData*>(_in_ports[2].in_value.lock().get())->value().get());
+  _module.SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value());
+  _module.SetSourceModule(1, *static_cast<NoiseData*>(_in_ports[1].in_value.lock().get())->value());
+  _module.SetControlModule(*static_cast<NoiseData*>(_in_ports[2].in_value.lock().get())->value());
 
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(module);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
+  _out_ports[0].out_value = std::make_shared<NoiseData>(&_module);
 
   _node->onDataUpdated(0);
 

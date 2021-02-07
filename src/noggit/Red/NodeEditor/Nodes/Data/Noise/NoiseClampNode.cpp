@@ -21,14 +21,22 @@ NoiseClampNode::NoiseClampNode()
 
 void NoiseClampNode::compute()
 {
-  auto module = new noise::module::Clamp();
-  module->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value().get());
-  glm::vec2 bounds = defaultPortData<Vector2DData>(PortType::In, 1)->value();
-  module->SetBounds(bounds.x, bounds.y);
+  _module.SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value());
 
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(module);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
+  auto bounds_data = defaultPortData<Vector2DData>(PortType::In, 1);
+
+  glm::vec2 const& bounds = bounds_data->value();
+
+  if (bounds.x >= bounds.y)
+  {
+    setValidationState(NodeValidationState::Error);
+    setValidationMessage("Error: incorrect bounds.");
+    return;
+  }
+
+  _module.SetBounds(bounds.x, bounds.y);
+
+  _out_ports[0].out_value = std::make_shared<NoiseData>(&_module);
 
   _node->onDataUpdated(0);
 }

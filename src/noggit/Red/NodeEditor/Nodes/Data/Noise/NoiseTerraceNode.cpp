@@ -24,8 +24,7 @@ NoiseTerraceNode::NoiseTerraceNode()
 
 void NoiseTerraceNode::compute()
 {
-  auto module = new noise::module::Terrace();
-  module->SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value().get());
+  _module.SetSourceModule(0, *static_cast<NoiseData*>(_in_ports[0].in_value.lock().get())->value());
 
   auto point_list = static_cast<ListData*>(_in_ports[1].in_value.lock().get())->value();
 
@@ -48,14 +47,11 @@ void NoiseTerraceNode::compute()
       return;
     }
 
-    module->AddControlPoint(value);
+    _module.AddControlPoint(value);
   }
-  module->InvertTerraces(defaultPortData<BooleanData>(PortType::In, 2)->value());
+  _module.InvertTerraces(defaultPortData<BooleanData>(PortType::In, 2)->value());
 
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(module);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
-
+  _out_ports[0].out_value = std::make_shared<NoiseData>(&_module);
   _node->onDataUpdated(0);
 
 }

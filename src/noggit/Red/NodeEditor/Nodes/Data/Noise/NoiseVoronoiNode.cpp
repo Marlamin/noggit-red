@@ -32,24 +32,19 @@ NoiseVoronoiNode::NoiseVoronoiNode()
 
 void NoiseVoronoiNode::compute()
 {
-  auto module = new noise::module::Voronoi();
-
   double frequency = defaultPortData<DecimalData>(PortType::In, 0)->value();
   if (!checkBounds(frequency, 0.0, std::numeric_limits<double>::max(), "Frequency"))
     return;
-  module->SetFrequency(frequency);
+  _module.SetFrequency(frequency);
 
   double displacement = defaultPortData<DecimalData>(PortType::In, 1)->value();
   if (!checkBounds(displacement, 0.0, std::numeric_limits<double>::max(), "Lacunarity"))
     return;
-  module->SetDisplacement(displacement);
+  _module.SetDisplacement(displacement);
 
-  module->SetSeed(defaultPortData<IntegerData>(PortType::In, 2)->value());
-  module->EnableDistance(defaultPortData<BooleanData>(PortType::In, 3)->value());
+  _module.SetSeed(defaultPortData<IntegerData>(PortType::In, 2)->value());
+  _module.EnableDistance(defaultPortData<BooleanData>(PortType::In, 3)->value());
 
-  std::shared_ptr<noise::module::Module> noise_data;
-  noise_data.reset(module);
-  _out_ports[0].out_value = std::make_shared<NoiseData>(noise_data);
-
+  _out_ports[0].out_value = std::make_shared<NoiseData>(&_module);
   _node->onDataUpdated(0);
 }

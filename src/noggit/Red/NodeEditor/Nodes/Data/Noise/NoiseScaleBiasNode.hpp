@@ -4,6 +4,7 @@
 #define NOGGIT_NOISESCALEBIASNODE_HPP
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
+#include <external/libnoise/src/noise/noise.h>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -27,6 +28,9 @@ namespace noggit
             NodeValidationState validate() override;
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
+
+        private:
+            noise::module::ScaleBias _module;
 
         };
 

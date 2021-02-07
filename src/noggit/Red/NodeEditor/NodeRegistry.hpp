@@ -237,6 +237,8 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Liquid/SetWaterType.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Liquid/PaintLiquid.hpp>
 
+#include <noggit/Red/NodeEditor/Nodes/World/Holes/SetHole.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Holes/SetHoleADTAtPos.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
@@ -515,6 +517,9 @@ namespace noggit
           ret->registerModel<SetWaterTypeNode>("World//Liquid//");
           ret->registerModel<GetWaterTypeNode>("World//Liquid//");
           ret->registerModel<CropWaterADTAtPosNode>("World//Liquid//");
+
+          ret->registerModel<SetHoleNode>("World//Holes//");
+          ret->registerModel<SetHoleADTAtPosNode>("World//Holes//");
 
 
           ret->REGISTER_TYPE_CONVERTER(Decimal, Integer);

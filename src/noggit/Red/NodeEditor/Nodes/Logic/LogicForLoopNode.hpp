@@ -28,9 +28,6 @@ namespace noggit
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
 
-        private:
-          QSpinBox* _n_iterations_default;
-
         };
 
     }

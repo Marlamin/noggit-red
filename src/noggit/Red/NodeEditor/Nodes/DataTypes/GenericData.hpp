@@ -499,7 +499,7 @@ DECLARE_NODE_DATA_TYPE_EXT(list, List, std::vector<std::shared_ptr<NodeData>>*, 
 // Custom types
 DECLARE_NODE_DATA_TYPE_EXT(color, Color, glm::vec4, DefaultColorWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(image, Image, QImage, NoDefaultWidget, toQStringNA);
-DECLARE_NODE_DATA_TYPE_EXT(noise, Noise, std::shared_ptr<noise::module::Module>, NoDefaultWidget, toQStringNA);
+DECLARE_NODE_DATA_TYPE_EXT(noise, Noise, noise::module::Module*, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(chunk, Chunk, MapChunk*, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(tile, Tile, MapTile*, NoDefaultWidget, toQStringNA);
 DECLARE_NODE_DATA_TYPE_EXT(object, ObjectInstance, SceneObject*, NoDefaultWidget, toQStringNA);

@@ -21,6 +21,8 @@
 //
 
 #include "module/exponent.h"
+#include <typeinfo>
+#include <iostream>
 
 using namespace noise::module;
 
@@ -33,7 +35,7 @@ Exponent::Exponent ():
 double Exponent::GetValue (double x, double y, double z) const
 {
   assert (m_pSourceModule[0] != NULL);
-
+  
   double value = m_pSourceModule[0]->GetValue (x, y, z);
   return (pow (fabs ((value + 1.0) / 2.0), m_exponent) * 2.0 - 1.0);
 }

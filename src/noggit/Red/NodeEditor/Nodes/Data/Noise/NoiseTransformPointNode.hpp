@@ -4,6 +4,7 @@
 #define NOGGIT_NOISEROTATEPOINTNODE_HPP
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
+#include <external/libnoise/src/noise/noise.h>
 #include <QComboBox>
 
 using QtNodes::PortType;
@@ -31,6 +32,8 @@ namespace noggit
 
         private:
             QComboBox* _operation;
+            int _last_module = -1;
+            std::unique_ptr<noise::module::Module> _module;
         };
 
     }
