@@ -160,8 +160,7 @@ namespace noggit
     std::map<std::pair<int, std::string>, T> _elements;
     std::unordered_map<std::pair<int, std::string>, std::size_t, pair_hash> _counts;
     std::function<std::string (std::string)> _normalize;
-    boost::mutex _mutex;
+    boost::mutex mutable _mutex;
   };
 
 }
-

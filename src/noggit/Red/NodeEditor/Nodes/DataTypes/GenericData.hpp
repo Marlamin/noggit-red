@@ -89,7 +89,7 @@ public:
     {
       auto value = D::value(widget);
 
-      if constexpr (std::is_same<decltype(value), nullptr_t>::value)
+      if constexpr (std::is_same<decltype(value), std::nullptr_t>::value)
       {
         auto data_ptr = std::make_shared<ThisType>();
         data_ptr.reset();
@@ -441,7 +441,7 @@ struct NoDefaultWidget
 {
     static QWidget* generate(QWidget* parent) { return new QLabel("", parent); }
 
-    static nullptr_t value(QWidget* widget)
+    static std::nullptr_t value(QWidget* widget)
     {
       return nullptr;
     }
