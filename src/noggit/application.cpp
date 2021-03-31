@@ -41,7 +41,7 @@
 #include <QStyleFactory>
 
 #include "revision.h"
-
+#include "Cli.hpp"
 
 class Noggit
 {
@@ -341,6 +341,12 @@ namespace
 
 int main(int argc, char *argv[])
 {
+  /* command-line mode */
+  if(argc > 1)
+  {
+    noggit::Cli{static_cast<std::size_t>(argc), argv}.exec();
+  }
+
   noggit::RegisterErrorHandlers();
   std::set_terminate (noggit_terminate_handler);
 

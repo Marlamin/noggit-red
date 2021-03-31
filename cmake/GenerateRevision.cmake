@@ -33,7 +33,7 @@ file (READ "${_noggit_revision_template_file}" _template_blob)
 file (READ "${CMAKE_CURRENT_LIST_FILE}" _self_blob)
 string (SHA256 _state_hash "${_dirty_marker}${_revision}${_template_blob}${_self_blob}")
 
-if (EXISTS ${_noggit_revision_output_file})
+if (EXISTS ${_noggit_revision_state_file})
   file (READ "${_noggit_revision_state_file}" _old_state_hash)
   if (_state_hash STREQUAL _old_state_hash)
     return()

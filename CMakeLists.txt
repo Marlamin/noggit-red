@@ -244,7 +244,7 @@ COLLECT_FILES(false imguipiemenu_sources src/external/imguipiemenu ".c;.cpp;")
 set ( util_sources
       src/util/exception_to_string.cpp
     )
-COLLECT_FILES(false noggit_root_headers src/noggit ".h;.hpp")
+COLLECT_FILES(false noggit_root_headers src/noggit ".h;.hpp;.inl")
 COLLECT_FILES(true noggit_ui_headers src/noggit/ui ".h;.hpp")
 COLLECT_FILES(false math_headers src/math ".h;.hpp")
 COLLECT_FILES(false opengl_headers src/opengl ".h;.hpp")
