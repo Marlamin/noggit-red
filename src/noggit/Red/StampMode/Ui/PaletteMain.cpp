@@ -22,15 +22,16 @@ PaletteMain::PaletteMain(MapView* parent)
   namespace fs = std::filesystem;
   using namespace noggit::Red::StampMode::Ui::Model;
 
-  for(auto& entry : fs::directory_iterator{"./samples"})
-  {
-    if(!entry.is_regular_file())
-      continue;
+  if(fs::exists("./samples"))
+    for(auto& entry : fs::directory_iterator{"./samples"})
+    {
+      if(!entry.is_regular_file())
+        continue;
 
-    auto item{new Item{entry.path().string().c_str()}};
-    item->setText(QString::fromStdString(entry.path().filename().string()));
-    _model.appendRow(item);
-  }
+      auto item{new Item{entry.path().string().c_str()}};
+      item->setText(QString::fromStdString(entry.path().filename().string()));
+      _model.appendRow(item);
+    }
 
   _view.setEditTriggers(QAbstractItemView::NoEditTriggers);
   _view.setViewMode(QListView::IconMode);

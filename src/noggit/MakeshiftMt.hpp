@@ -1,10 +1,12 @@
-#ifndef NOGGIT_SRC_NOGGIT_MAKESHIFTMT
-#define NOGGIT_SRC_NOGGIT_MAKESHIFTMT
+#ifndef NOGGIT_SRC_NOGGIT_MAKESHIFTMT_HPP
+#define NOGGIT_SRC_NOGGIT_MAKESHIFTMT_HPP
 
+#include <array>
+#include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <math/vector_3d.hpp>
-#include "TileWater.hpp"
 
 namespace noggit::Recovery
 {
@@ -12,20 +14,28 @@ namespace noggit::Recovery
   {
     public:
       explicit
-      MakeshiftMt( int x, int y, std::string const& file );
-      ~MakeshiftMt( void );
+      MakeshiftMt
+      (
+        std::string_view file,
+        std::vector<std::string_view> const& models,
+        std::vector<std::string_view> const& wmos
+      );
+      auto save ( std::size_t* uid )
+      -> std::pair<std::size_t, std::size_t>;
     private:
-      float _xBase;
-      float _yBase;
-      std::string _file;
-      int _flags;
-      std::vector<std::string> _textures;
-      std::vector<std::string> _models;
-      std::vector<std::string> _objects;
-      TileWater _liquids;
-      math::vector_3d* _minVals;
-      math::vector_3d* _maxVals;
+      std::string_view _file;
+      std::uint32_t _flags;
+      std::vector<std::string_view> const& _defectiveModelNames;
+      std::vector<std::string_view> const& _defectiveObjectNames;
+      std::vector<std::string> _modelNames;
+      std::vector<std::string> _objectNames;
+      std::vector<ENTRY_MDDF> _models;
+      std::vector<ENTRY_MODF> _objects;
+      std::vector<char> _mtex;
+      std::array<char, 2 * 2 * 9> _mfbo;
+      std::vector<char> _mh2o;
+      std::array<std::vector<char>, 256> _mcnks;
   };
 }
 
-#endif //NOGGIT_SRC_NOGGIT_MAKESHIFTMT
+#endif //NOGGIT_SRC_NOGGIT_MAKESHIFTMT_HPP

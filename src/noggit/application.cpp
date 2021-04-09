@@ -23,10 +23,13 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <string>
+#include <string_view>
 #include <vector>
 #include <QtCore/QSettings>
 #include <QtCore/QTimer>
@@ -39,9 +42,9 @@
 #include <QtWidgets/QMessageBox>
 #include <QSplashScreen>
 #include <QStyleFactory>
+#include "MakeshiftMt.hpp"
 
 #include "revision.h"
-#include "Cli.hpp"
 
 class Noggit
 {
@@ -344,7 +347,124 @@ int main(int argc, char *argv[])
   /* command-line mode */
   if(argc > 1)
   {
-    noggit::Cli{static_cast<std::size_t>(argc), argv}.exec();
+    try
+    {
+      try
+      {
+        [[likely]]
+        if
+        (
+          std::filesystem::path const root
+          {std::filesystem::canonical(argv[1])}
+          ;
+          std::filesystem::is_directory(root)
+        )
+        {
+          std::vector<std::string_view> models;
+          std::vector<std::string_view> wmos;
+
+          for(std::size_t i{2}; i < argc; ++i)
+          {
+            std::string_view const obj{argv[i]};
+
+            if(obj.ends_with(".m2") || obj.ends_with(".mdx"))
+              models.emplace_back(obj);
+            else if(obj.ends_with(".wmo"))
+              wmos.emplace_back(obj);
+            else
+            {
+              std::cerr << "E: Unknown object encountered with name '"
+              << obj << "'.\n";
+              throw true;
+            }
+
+            std::transform
+            (
+              argv[i],
+              argv[i] + std::strlen(argv[i]),
+              argv[i],
+              [ ]
+              ( char c )
+              constexpr
+              -> char
+              { return c == '/' ? '\\' : std::toupper(c); }
+            );
+          }
+
+          std::cout << "I: Argument acquisition succeeded.\n"
+          << "I: Map root '" << root.c_str() << "'.\n";
+
+          for(auto itr{models.cbegin()}; itr != models.cend(); ++itr)
+            std::cout << "I: Defective model '"
+            << std::distance(models.cbegin(), itr) + 1
+            << "' with relative path '" << *itr << "'.\n";
+
+          for(auto itr{wmos.cbegin()}; itr != wmos.cend(); ++itr)
+            std::cout << "I: Defective WMO '"
+            << std::distance(wmos.cbegin(), itr) + 1
+            << "' with relative path '" << *itr << "'.\n";
+
+          std::cout << "I: Repacking map...\n";
+          std::size_t nTotModels{}, nTotObjects{}, nTiles{}, uid{};
+
+          for(auto const& entry : std::filesystem::directory_iterator{root})
+            if
+            (
+              std::string_view const path{entry.path().c_str()}
+              ;
+                entry.is_regular_file()
+                &&
+                path.ends_with(".adt")
+            )
+            {
+              try
+              {
+                std::cout << "I: Reading tile '" << path << "'...\n";
+                noggit::Recovery::MakeshiftMt mt{path, models, wmos};
+                std::cout << "I: Writing tile '" << path << "'...\n";
+                auto const [nModels, nObjects]{mt.save(&uid)};
+                nTotModels += nModels;
+                nTotObjects += nObjects;
+                ++nTiles;
+              }
+              catch ( std::ios::failure const& e )
+              {
+                std::cerr << "E: File operation failed on '" << path
+                << "' due to '" << e.what()
+                << "'. This file is not going to be processed.\n";
+              }
+            }
+            else
+              std::cout << "I: Skipping unrecognized filesystem entity '"
+              << path << "'.\n";
+
+          if(nTiles)
+            std::cout << "I: Done repacking map of '" << nTiles
+            << "' tiles with '" << nTotModels << "' defective model and '"
+            << nTotObjects << "' defective object deletions in total.\n";
+          else
+            std::cout
+            << "I: No repacking took place since no tiles were found.\n";
+        }
+        else
+        {
+          std::cerr << "E: '" << root.c_str() << "' is not a directory.\n";
+          throw true;
+        }
+      }
+      catch ( std::filesystem::filesystem_error const& e )
+      {
+        std::cerr << "E: Failed to process path '" << e.path1().c_str()
+        << "' due to '" << e.what() << "'.\n";
+        throw;
+      }
+    }
+    catch ( ... )
+    {
+      return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
   }
 
   noggit::RegisterErrorHandlers();
