@@ -25,7 +25,6 @@
 #include <ctime>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <iterator>
 #include <list>
 #include <string>
@@ -42,6 +41,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QSplashScreen>
 #include <QStyleFactory>
+#include "IOStream.hpp"
 #include "MakeshiftMt.hpp"
 
 #include "revision.h"
@@ -373,8 +373,8 @@ int main(int argc, char *argv[])
               wmos.emplace_back(obj);
             else
             {
-              std::cerr << "E: Unknown object encountered with name '"
-              << obj << "'.\n";
+              CERR << TEXT("E: Unknown object encountered with name '")
+              << obj << TEXT("'.\n");
               throw true;
             }
 
@@ -391,21 +391,21 @@ int main(int argc, char *argv[])
             );
           }
 
-          std::cout << "I: Argument acquisition succeeded.\n"
-          << "I: Map root '" << root.c_str() << "'.\n";
+          COUT << TEXT("I: Argument acquisition succeeded.\n")
+          << TEXT("I: Map root '") << root.c_str() << TEXT("'.\n");
 
           for(auto itr{models.cbegin()}; itr != models.cend(); ++itr)
-            std::cout << "I: Defective model '"
+            COUT << TEXT("I: Defective model '")
             << std::distance(models.cbegin(), itr) + 1
-            << "' with relative path '" << *itr << "'.\n";
+            << TEXT("' with relative path '") << *itr << TEXT("'.\n");
 
           for(auto itr{wmos.cbegin()}; itr != wmos.cend(); ++itr)
-            std::cout << "I: Defective WMO '"
+            COUT << TEXT("I: Defective WMO '")
             << std::distance(wmos.cbegin(), itr) + 1
-            << "' with relative path '" << *itr << "'.\n";
+            << TEXT("' with relative path '") << *itr << TEXT("'.\n");
 
-          std::cout << "I: Repacking map...\n";
-          std::size_t nTotModels{}, nTotObjects{}, nTiles{}, uid{};
+          COUT << TEXT("I: Repacking map...\n");
+          std::size_t nTotModels{}, nTotObjects{}, nTiles{};
 
           for(auto const& entry : std::filesystem::directory_iterator{root})
             if
@@ -419,43 +419,47 @@ int main(int argc, char *argv[])
             {
               try
               {
-                std::cout << "I: Reading tile '" << path << "'...\n";
+                COUT << TEXT("I: Reading tile '") << path
+                << TEXT("'...\n");
                 noggit::Recovery::MakeshiftMt mt{path, models, wmos};
-                std::cout << "I: Writing tile '" << path << "'...\n";
-                auto const [nModels, nObjects]{mt.save(&uid)};
+                COUT << TEXT("I: Writing tile '") << path
+                << TEXT("'...\n");
+                auto const [nModels, nObjects]{mt.save()};
                 nTotModels += nModels;
                 nTotObjects += nObjects;
                 ++nTiles;
               }
               catch ( std::ios::failure const& e )
               {
-                std::cerr << "E: File operation failed on '" << path
-                << "' due to '" << e.what()
-                << "'. This file is not going to be processed.\n";
+                CERR << TEXT("E: File operation failed on '") << path
+                << TEXT("' due to '") << e.what()
+                << TEXT("'. This file is not going to be processed.\n");
               }
             }
             else
-              std::cout << "I: Skipping unrecognized filesystem entity '"
-              << path << "'.\n";
+              COUT << TEXT("I: Skipping unrecognized filesystem entity '")
+              << path << TEXT("'.\n");
 
           if(nTiles)
-            std::cout << "I: Done repacking map of '" << nTiles
-            << "' tiles with '" << nTotModels << "' defective model and '"
-            << nTotObjects << "' defective object deletions in total.\n";
+            COUT << TEXT("I: Done repacking map of '") << nTiles
+            << TEXT("' tiles with '") << nTotModels
+            << TEXT("' defective model and '") << nTotObjects
+            << TEXT("' defective object deletions in total.\n");
           else
-            std::cout
-            << "I: No repacking took place since no tiles were found.\n";
+            COUT
+            << TEXT("I: No repacking took place since no tiles were found.\n");
         }
         else
         {
-          std::cerr << "E: '" << root.c_str() << "' is not a directory.\n";
+          CERR << TEXT("E: '") << root.c_str()
+          << TEXT("' is not a directory.\n");
           throw true;
         }
       }
       catch ( std::filesystem::filesystem_error const& e )
       {
-        std::cerr << "E: Failed to process path '" << e.path1().c_str()
-        << "' due to '" << e.what() << "'.\n";
+        CERR << TEXT("E: Failed to process path '") << e.path1().c_str()
+        << TEXT("' due to '") << e.what() << TEXT("'.\n");
         throw;
       }
     }

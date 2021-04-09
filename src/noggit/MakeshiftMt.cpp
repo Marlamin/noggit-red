@@ -6,6 +6,7 @@
 #include "MPQ.h"
 #include "MakeshiftCommon.inl"
 #include "MakeshiftMt.hpp"
+#include "IOStream.hpp"
 
 using namespace noggit::Recovery;
 
@@ -129,7 +130,7 @@ MakeshiftMt::MakeshiftMt
   }
 }
 
-auto MakeshiftMt::save ( std::size_t* uid )
+auto MakeshiftMt::save ( )
 -> std::pair<std::size_t, std::size_t>
 {
   Buffer buf;
@@ -202,8 +203,10 @@ auto MakeshiftMt::save ( std::size_t* uid )
     _models.size() - modelNameMapping.size(),
     _objects.size() - objectNameMapping.size()
   };
-  std::cout << "I: Removed '" << result.first << "' defective models.\n";
-  std::cout << "I: Removed '" << result.second << "' defective objects.\n";
+  COUT << TEXT("I: Removed '") << result.first
+  << TEXT("' defective models.\n");
+  COUT << TEXT("I: Removed '") << result.second
+  << TEXT("' defective objects.\n");
   static constexpr
   auto writeNames
   {
@@ -248,10 +251,9 @@ auto MakeshiftMt::save ( std::size_t* uid )
       char const* magic,
       std::uint32_t* pos,
       std::unordered_map<Chunk const*, std::uint32_t> const& mapping,
-      Buffer* buf,
-      std::uint32_t minUid
+      Buffer* buf
     )
-    -> std::size_t
+    -> void
     {
       *pos = buf->getPos() - 0x14;
       buf->append(ChunkHeader(magic, mapping.size() * sizeof(Chunk)));
@@ -260,15 +262,12 @@ auto MakeshiftMt::save ( std::size_t* uid )
       {
         Chunk chunk{*entry.first};
         chunk.nameID = entry.second;
-        chunk.uniqueID = minUid++;
         buf->append(chunk);
       }
-
-      return minUid;
     }
   };
-  *uid = writeMapping("FDDM", &mhdr->mddf, modelNameMapping, &buf, *uid);
-  *uid = writeMapping("FDOM", &mhdr->modf, objectNameMapping, &buf, *uid);
+  writeMapping("FDDM", &mhdr->mddf, modelNameMapping, &buf);
+  writeMapping("FDOM", &mhdr->modf, objectNameMapping, &buf);
 
   if(!_mh2o.empty())
   {
