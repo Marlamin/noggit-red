@@ -41,9 +41,11 @@
 #include <QtWidgets/QMessageBox>
 #include <QSplashScreen>
 #include <QStyleFactory>
-#include "IOStream.hpp"
 #include "MakeshiftMt.hpp"
-
+#include <codecvt>
+#include <locale>
+#include <string>
+#include <type_traits>
 #include "revision.h"
 
 class Noggit
@@ -342,6 +344,34 @@ namespace
   };
 }
 
+/* I wonder if you would correctly guess the reason of this being here... */
+template < typename Char >
+requires (std::is_same_v<Char, wchar_t> || std::is_same_v<Char, char>)
+auto convert
+(
+  Char const* src,
+  std::string* dst
+)
+-> char const*
+{
+  if constexpr(std::is_same_v<Char, char>)
+  {
+    *dst = src;
+    return dst->c_str();
+  }
+
+  std::string mbc(MB_CUR_MAX, '\0');
+  dst->clear();
+
+  while(*src)
+  {
+    std::wctomb(mbc.data(), *src++);
+    dst->append(mbc.c_str());
+  }
+
+  return dst->c_str();
+}
+
 int main(int argc, char *argv[])
 {
   /* command-line mode */
@@ -351,6 +381,7 @@ int main(int argc, char *argv[])
     {
       try
       {
+        std::string rootStr;
         [[likely]]
         if
         (
@@ -362,6 +393,7 @@ int main(int argc, char *argv[])
         {
           std::vector<std::string_view> models;
           std::vector<std::string_view> wmos;
+          convert(root.c_str(), &rootStr);
 
           for(std::size_t i{2}; i < argc; ++i)
           {
@@ -373,8 +405,8 @@ int main(int argc, char *argv[])
               wmos.emplace_back(obj);
             else
             {
-              CERR << TEXT("E: Unknown object encountered with name '")
-              << obj << TEXT("'.\n");
+              std::cerr << "E: Unknown object encountered with name '" << obj
+              << "'.\n";
               throw true;
             }
 
@@ -391,26 +423,27 @@ int main(int argc, char *argv[])
             );
           }
 
-          COUT << TEXT("I: Argument acquisition succeeded.\n")
-          << TEXT("I: Map root '") << root.c_str() << TEXT("'.\n");
+          std::cout << "I: Argument acquisition succeeded.\nI: Map root '"
+          << rootStr << "'.\n";
 
           for(auto itr{models.cbegin()}; itr != models.cend(); ++itr)
-            COUT << TEXT("I: Defective model '")
+            std::cout << "I: Defective model '"
             << std::distance(models.cbegin(), itr) + 1
-            << TEXT("' with relative path '") << *itr << TEXT("'.\n");
+            << "' with relative path '" << *itr << "'.\n";
 
           for(auto itr{wmos.cbegin()}; itr != wmos.cend(); ++itr)
-            COUT << TEXT("I: Defective WMO '")
+            std::cout << "I: Defective WMO '"
             << std::distance(wmos.cbegin(), itr) + 1
-            << TEXT("' with relative path '") << *itr << TEXT("'.\n");
+            << "' with relative path '" << *itr << "'.\n";
 
-          COUT << TEXT("I: Repacking map...\n");
+          std::cout << "I: Repacking map...\n";
           std::size_t nTotModels{}, nTotObjects{}, nTiles{};
+          std::string buf;
 
           for(auto const& entry : std::filesystem::directory_iterator{root})
             if
             (
-              std::string_view const path{entry.path().c_str()}
+              std::string_view const path{convert(entry.path().c_str(), &buf)}
               ;
                 entry.is_regular_file()
                 &&
@@ -419,11 +452,9 @@ int main(int argc, char *argv[])
             {
               try
               {
-                COUT << TEXT("I: Reading tile '") << path
-                << TEXT("'...\n");
+                std::cout << "I: Reading tile '" << path << "'...\n";
                 noggit::Recovery::MakeshiftMt mt{path, models, wmos};
-                COUT << TEXT("I: Writing tile '") << path
-                << TEXT("'...\n");
+                std::cout << "I: Writing tile '" << path << "'...\n";
                 auto const [nModels, nObjects]{mt.save()};
                 nTotModels += nModels;
                 nTotObjects += nObjects;
@@ -431,35 +462,36 @@ int main(int argc, char *argv[])
               }
               catch ( std::ios::failure const& e )
               {
-                CERR << TEXT("E: File operation failed on '") << path
-                << TEXT("' due to '") << e.what()
-                << TEXT("'. This file is not going to be processed.\n");
+                std::cerr << "E: File operation failed on '" << path
+                << "' due to '" << e.what()
+                << "'. This file is not going to be processed.\n";
               }
             }
             else
-              COUT << TEXT("I: Skipping unrecognized filesystem entity '")
-              << path << TEXT("'.\n");
+              std::cout << "I: Skipping unrecognized filesystem entity '"
+              << path << "'.\n";
 
           if(nTiles)
-            COUT << TEXT("I: Done repacking map of '") << nTiles
-            << TEXT("' tiles with '") << nTotModels
-            << TEXT("' defective model and '") << nTotObjects
-            << TEXT("' defective object deletions in total.\n");
+            std::cout << "I: Done repacking map of '" << nTiles
+            << "' tiles with '" << nTotModels
+            << "' defective model and '" << nTotObjects
+            << "' defective object deletions in total.\n";
           else
-            COUT
-            << TEXT("I: No repacking took place since no tiles were found.\n");
+            std::cout
+            << "I: No repacking took place since no tiles were found.\n";
         }
         else
         {
-          CERR << TEXT("E: '") << root.c_str()
-          << TEXT("' is not a directory.\n");
+          std::cerr << "E: '" << rootStr << "' is not a directory.\n";
           throw true;
         }
       }
       catch ( std::filesystem::filesystem_error const& e )
       {
-        CERR << TEXT("E: Failed to process path '") << e.path1().c_str()
-        << TEXT("' due to '") << e.what() << TEXT("'.\n");
+        std::string buf;
+        std::cerr << "E: Failed to process path '"
+        << convert(e.path1().c_str(), &buf) << "' due to '" << e.what()
+        << "'.\n";
         throw;
       }
     }

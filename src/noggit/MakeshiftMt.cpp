@@ -6,7 +6,6 @@
 #include "MPQ.h"
 #include "MakeshiftCommon.inl"
 #include "MakeshiftMt.hpp"
-#include "IOStream.hpp"
 
 using namespace noggit::Recovery;
 
@@ -203,10 +202,8 @@ auto MakeshiftMt::save ( )
     _models.size() - modelNameMapping.size(),
     _objects.size() - objectNameMapping.size()
   };
-  COUT << TEXT("I: Removed '") << result.first
-  << TEXT("' defective models.\n");
-  COUT << TEXT("I: Removed '") << result.second
-  << TEXT("' defective objects.\n");
+  std::cout << "I: Removed '" << result.first << "' defective models.\n";
+  std::cout << "I: Removed '" << result.second << "' defective objects.\n";
   static constexpr
   auto writeNames
   {
