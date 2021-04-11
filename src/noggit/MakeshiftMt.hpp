@@ -26,11 +26,11 @@ namespace noggit::Recovery
       std::string_view _file;
       std::uint32_t _flags;
       std::vector<std::string_view> const& _defectiveModelNames;
-      std::vector<std::string_view> const& _defectiveObjectNames;
+      std::vector<std::string_view> const& _defectiveWmoNames;
       std::vector<std::string> _modelNames;
-      std::vector<std::string> _objectNames;
+      std::vector<std::string> _wmoNames;
       std::vector<ENTRY_MDDF> _models;
-      std::vector<ENTRY_MODF> _objects;
+      std::vector<ENTRY_MODF> _wmos;
       std::vector<char> _mtex;
       std::array<char, 2 * 2 * 9> _mfbo;
       std::vector<char> _mh2o;

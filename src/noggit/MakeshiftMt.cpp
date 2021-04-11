@@ -16,7 +16,7 @@ MakeshiftMt::MakeshiftMt
   std::vector<std::string_view> const& wmos
 )
 : _file{file}
-, _defectiveModelNames{models}, _defectiveObjectNames{wmos}
+, _defectiveModelNames{models}, _defectiveWmoNames{wmos}
 {
   std::uint32_t lMCNKOffsets[256];
   std::uint32_t fourcc;
@@ -78,7 +78,7 @@ MakeshiftMt::MakeshiftMt
 
     while(lCurPos < lEnd)
     {
-      _objectNames.emplace_back(lCurPos);
+      _wmoNames.emplace_back(lCurPos);
       lCurPos += std::strlen(lCurPos) + 1;
     }
   }
@@ -99,7 +99,7 @@ MakeshiftMt::MakeshiftMt
   ENTRY_MODF const* const modf_ptr{Buffer::Anchor<ENTRY_MODF const>{buf}};
 
   for(unsigned i{}; i < size / sizeof(ENTRY_MODF); ++i)
-    _objects.push_back(modf_ptr[i]);
+    _wmos.push_back(modf_ptr[i]);
 
   if(Header.mh2o)
   {
@@ -145,62 +145,63 @@ auto MakeshiftMt::save ( )
   mhdr->mtex = buf.getPos() - 0x14;
   buf.append(ChunkHeader("XETM", _mtex.size()));
   buf.append(_mtex.data(), _mtex.size());
-
-  struct FilenameOffset
-  {
-    FilenameOffset ( std::size_t nid )
-    : nid{nid}, pos{}
-    { }
-
-    std::size_t nid;
-    std::size_t pos;
-  };
-
-  std::unordered_map<std::string_view, FilenameOffset> modelNames;
-  std::unordered_map<std::string_view, FilenameOffset> objectNames;
+  bool doBreak{_file == "/home/p620/Projects/noggit-red/Project/world/maps/azeroth/azeroth_33_29.adt"};
+  std::vector<std::string_view> modelNames;
+  std::vector<std::string_view> wmoNames;
   std::unordered_map<ENTRY_MDDF const*, std::uint32_t> modelNameMapping;
-  std::unordered_map<ENTRY_MODF const*, std::uint32_t> objectNameMapping;
+  std::unordered_map<ENTRY_MODF const*, std::uint32_t> wmoNameMapping;
   static constexpr
   auto prepare
   {
     [ ]
     < typename Chunk >
     (
-      std::vector<Chunk> const& chunks,
+      std::vector<Chunk> const& instances,
       std::vector<std::string> const& names,
       std::vector<std::string_view> const& defectiveNames,
-      std::unordered_map<std::string_view, FilenameOffset>* targetNames,
-      std::unordered_map<Chunk const*, std::uint32_t>* targetNameMapping
+      std::vector<std::string_view>* targetNames,
+      std::unordered_map<Chunk const*, std::uint32_t>* targetInstances
     )
     -> void
     {
-      std::size_t nidCounter{};
+      std::unordered_map<std::uint32_t, std::uint32_t> nidMapping;
 
-      for(auto const& chunk : chunks)
+      for(auto const& instance : instances)
         if
         (
-          std::string_view const curName{names[chunk.nameID]}
-          ;
-            std::find(defectiveNames.cbegin(), defectiveNames.cend(), curName)
-            ==
-            defectiveNames.cend()
+          std::string_view const curName{names[instance.nameID]}
+          ; std::find(defectiveNames.cbegin(), defectiveNames.cend(), curName)
+            == defectiveNames.cend()
         )
-        {
-          auto const itr{targetNames->find(curName)};
-          targetNameMapping->emplace(&chunk, itr == targetNames->cend()
-          ? targetNames->emplace(curName, nidCounter++).first->second.nid
-          : itr->second.nid);
-        }
+          targetInstances->emplace
+          (
+            &instance,
+            nidMapping.find(instance.nameID) == nidMapping.cend()
+            ?
+              (
+                targetNames->push_back(curName)
+                , nidMapping.emplace
+                  (
+                    instance.nameID,
+                    std::distance
+                    (
+                      targetNames->cbegin(),
+                      targetNames->cend()
+                    ) - 1
+                  ).first->second
+              )
+            : nidMapping.at(instance.nameID)
+          );
     }
   };
   prepare(_models, _modelNames, _defectiveModelNames, &modelNames
   , &modelNameMapping);
-  prepare(_objects, _objectNames, _defectiveObjectNames, &objectNames
-  , &objectNameMapping);
+  prepare(_wmos, _wmoNames, _defectiveWmoNames, &wmoNames
+  , &wmoNameMapping);
   std::pair<std::size_t, std::size_t> const result
   {
     _models.size() - modelNameMapping.size(),
-    _objects.size() - objectNameMapping.size()
+    _wmos.size() - wmoNameMapping.size()
   };
   std::cout << "I: Removed '" << result.first << "' defective models.\n";
   std::cout << "I: Removed '" << result.second << "' defective objects.\n";
@@ -213,7 +214,7 @@ auto MakeshiftMt::save ( )
       char const* idsChunk,
       std::uint32_t* namesPos,
       std::uint32_t* idsPos,
-      std::unordered_map<std::string_view, FilenameOffset>* names,
+      std::vector<std::string_view> const& names,
       Buffer* buf
     )
     -> void
@@ -221,24 +222,23 @@ auto MakeshiftMt::save ( )
       *namesPos = buf->getPos() - 0x14;
       Buffer::Anchor<ChunkHeader> header{*buf};
       buf->append(ChunkHeader{namesChunk});
+      std::vector<std::uint32_t> offsets(names.size());
 
-      for(auto& entry : *names)
+      for(auto itr{names.cbegin()}; itr != names.cend(); ++itr)
       {
-        entry.second.pos = buf->getPos();
-        std::size_t const size{entry.first.length() + 1};
-        buf->append(entry.first.data(), size);
+        offsets[std::distance(names.cbegin(), itr)] = header->size;
+        std::size_t const size{itr->length() + 1};
+        buf->append(itr->data(), size);
         header->size += size;
       }
 
       *idsPos = buf->getPos() - 0x14;
-      buf->append(ChunkHeader(idsChunk, 4 * names->size()));
-
-      for(auto const& entry : *names)
-        buf->append(entry.second.nid);
+      buf->append(ChunkHeader(idsChunk, 4 * offsets.size()));
+      buf->append(offsets.data(), 4 * offsets.size());
     }
   };
-  writeNames("XDMM", "DIMM", &mhdr->mmdx, &mhdr->mmid, &modelNames, &buf);
-  writeNames("OMWM", "DIWM", &mhdr->mwmo, &mhdr->mwid, &objectNames, &buf);
+  writeNames("XDMM", "DIMM", &mhdr->mmdx, &mhdr->mmid, modelNames, &buf);
+  writeNames("OMWM", "DIWM", &mhdr->mwmo, &mhdr->mwid, wmoNames, &buf);
   static constexpr
   auto writeMapping
   {
@@ -255,7 +255,7 @@ auto MakeshiftMt::save ( )
       *pos = buf->getPos() - 0x14;
       buf->append(ChunkHeader(magic, mapping.size() * sizeof(Chunk)));
 
-      for(auto const& entry : mapping)
+      for(auto entry : mapping)
       {
         Chunk chunk{*entry.first};
         chunk.nameID = entry.second;
@@ -264,7 +264,7 @@ auto MakeshiftMt::save ( )
     }
   };
   writeMapping("FDDM", &mhdr->mddf, modelNameMapping, &buf);
-  writeMapping("FDOM", &mhdr->modf, objectNameMapping, &buf);
+  writeMapping("FDOM", &mhdr->modf, wmoNameMapping, &buf);
 
   if(!_mh2o.empty())
   {
