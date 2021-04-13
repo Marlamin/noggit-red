@@ -145,7 +145,6 @@ auto MakeshiftMt::save ( )
   mhdr->mtex = buf.getPos() - 0x14;
   buf.append(ChunkHeader("XETM", _mtex.size()));
   buf.append(_mtex.data(), _mtex.size());
-  bool doBreak{_file == "/home/p620/Projects/noggit-red/Project/world/maps/azeroth/azeroth_33_29.adt"};
   std::vector<std::string_view> modelNames;
   std::vector<std::string_view> wmoNames;
   std::unordered_map<ENTRY_MDDF const*, std::uint32_t> modelNameMapping;
@@ -183,11 +182,7 @@ auto MakeshiftMt::save ( )
                 , nidMapping.emplace
                   (
                     instance.nameID,
-                    std::distance
-                    (
-                      targetNames->cbegin(),
-                      targetNames->cend()
-                    ) - 1
+                    targetNames->size() - 1
                   ).first->second
               )
             : nidMapping.at(instance.nameID)
@@ -213,7 +208,7 @@ auto MakeshiftMt::save ( )
       char const* namesChunk,
       char const* idsChunk,
       std::uint32_t* namesPos,
-      std::uint32_t* idsPos,
+      Buffer::Anchor<std::uint32_t> idsPos,
       std::vector<std::string_view> const& names,
       Buffer* buf
     )
@@ -233,12 +228,29 @@ auto MakeshiftMt::save ( )
       }
 
       *idsPos = buf->getPos() - 0x14;
-      buf->append(ChunkHeader(idsChunk, 4 * offsets.size()));
-      buf->append(offsets.data(), 4 * offsets.size());
+      size_t const size{4 * offsets.size()};
+      buf->append(ChunkHeader(idsChunk, size));
+      buf->append(offsets.data(), size);
     }
   };
-  writeNames("XDMM", "DIMM", &mhdr->mmdx, &mhdr->mmid, modelNames, &buf);
-  writeNames("OMWM", "DIWM", &mhdr->mwmo, &mhdr->mwid, wmoNames, &buf);
+  writeNames
+  (
+    "XDMM",
+    "DIMM",
+    &mhdr->mmdx,
+    buf + Buffer::Offset<std::uint32_t>{0x24},
+    modelNames,
+    &buf
+  );
+  writeNames
+  (
+    "OMWM",
+    "DIWM",
+    &mhdr->mwmo,
+    buf + Buffer::Offset<std::uint32_t>{0x2C},
+    wmoNames,
+    &buf
+  );
   static constexpr
   auto writeMapping
   {

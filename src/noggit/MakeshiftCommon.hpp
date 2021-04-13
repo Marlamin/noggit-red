@@ -4,6 +4,7 @@
 #include <concepts>
 #include <cstdint>
 #include <string_view>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -40,6 +41,14 @@ namespace noggit::Recovery
           -> void = 0;
       };
 
+      template
+      <
+        typename Ty,
+        SeekMode mode = SeekMode::Absolute
+      >
+      struct Offset
+      { std::size_t offset; };
+
       template < typename This >
       class Anchor : protected CommonAnchor
       {
@@ -69,7 +78,18 @@ namespace noggit::Recovery
           operator This* ( );
           operator This const* ( ) const;
         protected:
-          friend class Buffer;
+          template
+          <
+            typename Ty,
+            Buffer::SeekMode mode
+          >
+          friend constexpr
+          auto operator +
+          (
+            Buffer& buf,
+            Buffer::Offset<Ty, mode> offset
+          )
+          -> Buffer::Anchor<Ty>;
 
           explicit constexpr
           Anchor
@@ -95,6 +115,9 @@ namespace noggit::Recovery
       template < typename Ty >
       auto read ( Ty* ptr )
       -> void;
+      template < typename Ty >
+      auto read ( Ty const* ptr )
+      -> void = delete;
       auto read
       (
         void* ptr,
@@ -122,6 +145,18 @@ namespace noggit::Recovery
     protected:
       template < typename Ty >
       friend class Anchor;
+      template
+      <
+        typename Ty,
+        Buffer::SeekMode mode
+      >
+      friend constexpr
+      auto operator +
+      (
+        Buffer& buf,
+        Buffer::Offset<Ty, mode> offset
+      )
+      -> Buffer::Anchor<Ty>;
 
       auto _tether
       (
@@ -143,6 +178,19 @@ namespace noggit::Recovery
       std::vector<char> _data;
       std::unordered_map<CommonAnchor*, std::size_t> _anchors;
   };
+
+  template
+  <
+    typename Ty,
+    Buffer::SeekMode mode
+  >
+  constexpr
+  auto operator +
+  (
+    Buffer& buf,
+    Buffer::Offset<Ty, mode> offset
+  )
+  -> Buffer::Anchor<Ty>;
 }
 
 #endif //NOGGIT_SRC_NOGGIT_MAKESHIFTCOMMON_HPP

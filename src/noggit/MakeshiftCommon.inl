@@ -79,7 +79,7 @@ namespace noggit::Recovery
   auto Buffer::Anchor<This>::_setPtr ( void* ptr )
   -> void
   {
-    _ptr = reinterpret_cast<This*>(ptr);
+    _ptr = reinterpret_cast<std::remove_cv_t<This>*>(ptr);
   }
 
   template < Buffer::SeekMode mode >
@@ -112,7 +112,36 @@ namespace noggit::Recovery
   template < typename Ty >
   constexpr
   Buffer::operator Anchor<Ty> ( )
-  { return Anchor<Ty>{reinterpret_cast<Ty*>(_data.data() + _pos), this}; }
+  { return *this + Offset<Ty>{_pos}; }
+
+  template
+  <
+    typename Ty,
+    Buffer::SeekMode mode
+  >
+  constexpr
+  auto operator +
+  (
+    Buffer& buf,
+    Buffer::Offset<Ty, mode> offset
+  )
+  -> Buffer::Anchor<Ty>
+  {
+    typedef std::remove_cv_t<Ty> NonCV;
+
+    if constexpr(mode == Buffer::SeekMode::Relative)
+      return Buffer::Anchor<Ty>
+      {
+        reinterpret_cast<NonCV*>(buf._data.data() + buf._pos + offset.offset),
+        &buf
+      };
+
+    return Buffer::Anchor<Ty>
+    {
+      reinterpret_cast<NonCV*>(buf._data.data() + offset.offset),
+      &buf
+    };
+  }
 }
 
 #endif //NOGGIT_SRC_NOGGIT_MAKESHIFTCOMMON_INL
