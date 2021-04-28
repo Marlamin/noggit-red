@@ -2,8 +2,6 @@
 
 #include <noggit/uid_storage.hpp>
 
-#include <boost/filesystem.hpp>
-
 #include <QtCore/QSettings>
 
 namespace

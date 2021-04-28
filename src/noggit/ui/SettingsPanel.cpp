@@ -231,6 +231,7 @@ namespace noggit
       ui->assetBrowserDefaultModel->setText(_settings->value("assetBrowser/default_model",
                                      "world/wmo/azeroth/human/buildings/human_farm/farm.wmo").toString());
       ui->assetBrowserMoveSensitivity->setValue(_settings->value("assetBrowser/move_sensitivity", 15.0f).toFloat());
+      ui->assetBrowserRenderAssetPreview->setChecked(_settings->value("assetBrowser/render_asset_preview", false).toBool());
 
 
 #ifdef USE_MYSQL_UID_STORAGE
@@ -298,6 +299,7 @@ namespace noggit
       _settings->setValue("assetBrowser/copy_to_clipboard", ui->assetBrowserCopyToClipboard->isChecked());
       _settings->setValue("assetBrowser/default_model", ui->assetBrowserDefaultModel->text());
       _settings->setValue("assetBrowser/move_sensitivity", ui->assetBrowserMoveSensitivity->value());
+      _settings->setValue("assetBrowser/render_asset_preview", ui->assetBrowserRenderAssetPreview->isChecked());
 
       _settings->sync();
     }

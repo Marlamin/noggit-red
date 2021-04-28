@@ -53,43 +53,7 @@ void ChunkSetHeightmapImageNode::compute()
     image_to_use = &scaled;
   }
 
-  math::vector_3d* heightmap = chunk->getHeightmap();
-
-  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
-
-  for (unsigned y = 0; y < SUM; ++y)
-    for (unsigned x = 0; x < SUM; ++x)
-    {
-      unsigned const plain {y * SUM + x};
-      bool const is_virtual {static_cast<bool>(plain % 2)};
-
-      if (is_virtual)
-        continue;
-
-      bool const erp = plain % DSUM / SUM;
-      unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
-
-      switch (_operation->currentIndex())
-      {
-        case 0: // Set
-          heightmap[idx].y = qGray(image_to_use->pixel(x, y)) / 255.0f * multiplier;
-          break;
-
-        case 1: // Add
-          heightmap[idx].y += qGray(image_to_use->pixel(x, y)) / 255.0f * multiplier;
-          break;
-
-        case 2: // Subtract
-          heightmap[idx].y -= qGray(image_to_use->pixel(x, y)) / 255.0f * multiplier;
-          break;
-
-        case 3: // Multiply
-          heightmap[idx].y *= qGray(image_to_use->pixel(x, y)) / 255.0f * multiplier;
-          break;
-      }
-    }
-
-  chunk->updateVerticesData();
+  chunk->setHeightmapImage(*image_to_use, static_cast<float>(multiplier), _operation->currentIndex());
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

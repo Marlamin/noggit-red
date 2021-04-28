@@ -3,7 +3,7 @@
 #ifndef NOGGIT_LISTSIZENODE_HPP
 #define NOGGIT_LISTSIZENODE_HPP
 
-#include "noggit/Red/NodeEditor/Nodes/LogicNodeBase.hpp"
+#include "noggit/Red/NodeEditor/Nodes/BaseNode.hpp"
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -17,7 +17,7 @@ namespace noggit
 {
     namespace Red::NodeEditor::Nodes
     {
-        class ListSizeNode : public LogicNodeBase
+        class ListSizeNode : public BaseNode
         {
         Q_OBJECT
 

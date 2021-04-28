@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>639</width>
-    <height>581</height>
+    <width>986</width>
+    <height>713</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -33,7 +33,47 @@
     <number>5</number>
    </property>
    <item>
+    <layout class="QVBoxLayout" name="verticalLayout_5">
+     <item>
+      <widget class="QWidget" name="leftToolbarHolder" native="true"/>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_9">
+       <item>
+        <widget class="QWidget" name="upperToolbarHolder" native="true"/>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <property name="spacing">
@@ -47,7 +87,7 @@
          <property name="sizeConstraint">
           <enum>QLayout::SetDefaultConstraint</enum>
          </property>
-         <item alignment="Qt::AlignLeft">
+         <item>
           <widget class="QPushButton" name="gizmoVisibleButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -87,7 +127,7 @@
            </property>
           </widget>
          </item>
-         <item alignment="Qt::AlignLeft">
+         <item>
           <widget class="QPushButton" name="gizmoModeButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -127,7 +167,7 @@
            </property>
           </widget>
          </item>
-         <item alignment="Qt::AlignLeft">
+         <item>
           <widget class="QPushButton" name="gizmoTranslateButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -170,7 +210,7 @@
            </attribute>
           </widget>
          </item>
-         <item alignment="Qt::AlignLeft">
+         <item>
           <widget class="QPushButton" name="gizmoRotateButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -213,7 +253,7 @@
            </attribute>
           </widget>
          </item>
-         <item alignment="Qt::AlignLeft">
+         <item>
           <widget class="QPushButton" name="gizmoScaleButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -319,63 +359,6 @@
          <property name="spacing">
           <number>6</number>
          </property>
-         <item>
-          <widget class="QPushButton" name="cameraXButton">
-           <property name="minimumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="cameraYButton">
-           <property name="minimumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Y</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="cameraZButton">
-           <property name="minimumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>32</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Z</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
        <item>

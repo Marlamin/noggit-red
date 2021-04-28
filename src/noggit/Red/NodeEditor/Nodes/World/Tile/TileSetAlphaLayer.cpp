@@ -31,7 +31,7 @@ void TileSetAlphaLayerNode::compute()
 
   MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
   QImage* image = defaultPortData<ImageData>(PortType::In, 2)->value_ptr();
-  QImage* image_to_process;
+  QImage* image_to_process = image;
 
   unsigned layer = defaultPortData<UnsignedIntegerData>(PortType::In, 3)->value();
 
@@ -56,34 +56,7 @@ void TileSetAlphaLayerNode::compute()
     image_to_process = &scaled;
   }
 
-  for (int k = 0; k < 16; ++k)
-  {
-    for (int l = 0; l < 16; ++l)
-    {
-      MapChunk* chunk = tile->getChunk(k, l);
-
-      if (layer >= chunk->texture_set->num())
-      {
-        setValidationState(NodeValidationState::Error);
-        setValidationMessage("Error: layer is out of range for some chunk.");
-        return;
-      }
-
-      chunk->texture_set->create_temporary_alphamaps_if_needed();
-      auto& temp_alphamaps = chunk->texture_set->getTempAlphamaps()->get();
-
-      for (int i = 0; i < 64; ++i)
-      {
-        for (int j = 0; j < 64; ++j)
-        {
-          temp_alphamaps[layer][64 * j + i] = static_cast<float>(qGray(image->pixel((k * 64) + i, (l * 64) + j))) / 255.0f;
-        }
-      }
-
-      chunk->texture_set->markDirty();
-
-    }
-  }
+  tile->setAlphaImage(*image_to_process, layer);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

@@ -47,33 +47,10 @@ void ChunkSetVertexColorsImageNode::compute()
     image_to_use = &scaled;
   }
 
-  math::vector_3d* colors = chunk->getVertexColors();
-
-  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
-
-  for (unsigned y = 0; y < SUM; ++y)
-    for (unsigned x = 0; x < SUM; ++x)
-    {
-      unsigned const plain{y * SUM + x};
-      bool const is_virtual{static_cast<bool>(plain % 2)};
-
-      if (is_virtual)
-        continue;
-
-      bool const erp = plain % DSUM / SUM;
-      unsigned const idx{(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
-
-      QColor color = image_to_use->pixelColor(x, y);
-      colors[idx].x = color.redF();
-      colors[idx].y = color.greenF();
-      colors[idx].z = color.blueF();
-    }
-
-  chunk->update_vertex_colors();
+  chunk->setVertexColorImage(*image_to_use);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
-
 }
 
 

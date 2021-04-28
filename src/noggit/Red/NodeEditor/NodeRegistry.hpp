@@ -175,6 +175,7 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetVertexColors.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkSetVertexColorsImage.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkRecalculateNormals.hpp>
+#include <noggit/Red/NodeEditor/Nodes/World/Chunk/ChunkAddDetailDoodads.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunk.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Coordinates/GetChunkFromPos.hpp>
@@ -461,6 +462,7 @@ namespace noggit
           ret->registerModel<ChunkSetVertexColorsNode>("World//Chunk//");
           ret->registerModel<ChunkSetVertexColorsImageNode>("World//Chunk//");
           ret->registerModel<ChunkRecalculateNormalsNode>("World//Chunk//");
+          ret->registerModel<ChunkAddDetailDoodads>("World//Chunk//");
 
           ret->registerModel<ReloadTileNode>("World//Tile//");
           ret->registerModel<TileGetMinMaxHeightNode>("World//Tile//");
@@ -562,6 +564,17 @@ namespace noggit
           ret->REGISTER_TYPE_CONVERTER(Matrix4x4, JSONValue);
           ret->REGISTER_TYPE_CONVERTER(Quaternion, JSONValue);
           ret->REGISTER_TYPE_CONVERTER(JSON, JSONValue);
+
+          // Vector
+          ret->REGISTER_TYPE_CONVERTER(Integer, Vector2D);
+          ret->REGISTER_TYPE_CONVERTER(Integer, Vector3D);
+          ret->REGISTER_TYPE_CONVERTER(Integer, Vector4D);
+          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Vector2D);
+          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Vector3D);
+          ret->REGISTER_TYPE_CONVERTER(UnsignedInteger, Vector4D);
+          ret->REGISTER_TYPE_CONVERTER(Decimal, Vector2D);
+          ret->REGISTER_TYPE_CONVERTER(Decimal, Vector3D);
+          ret->REGISTER_TYPE_CONVERTER(Decimal, Vector4D);
 
           return ret;
         }

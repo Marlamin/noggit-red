@@ -146,13 +146,9 @@ public:
       return &record;
     }
     /// Comparison
-    bool operator==( Iterator const &b)
+    bool operator==( Iterator const &b)  const
     {
       return record.offset == b.record.offset;
-    }
-    bool operator!=( Iterator const &b)
-    {
-      return record.offset != b.record.offset;
     }
   private:
     Record record;

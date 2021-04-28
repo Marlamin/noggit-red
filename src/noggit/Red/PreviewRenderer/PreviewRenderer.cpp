@@ -117,7 +117,7 @@ void PreviewRenderer::resetCamera(float x, float y, float z, float roll, float y
   _camera.position = (extents[0] + extents[1]) / 2.0f;
   radius = std::max((_camera.position - extents[0]).length(), (_camera.position - extents[1]).length());
 
-  float distance_factor = abs( aspect_ratio() * radius / sin(_camera.fov()._ / 2.f));
+  float distance_factor = abs( radius / sin(_camera.fov()._ / 2.f));
   _camera.move_forward_factor(-1.f, distance_factor);
 
 }

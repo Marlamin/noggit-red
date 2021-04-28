@@ -154,8 +154,8 @@ public:
 
   /// Fields
   static const size_t ID = 0;        // uint
-  static const size_t InternalID = 1;    // uint
-  static const size_t Filename = 2;    // string
+  static const size_t Filename = 1;    // string
+  static const size_t Flags = 2;   // uint
 };
 
 class LiquidTypeDB : public DBCFile

@@ -34,48 +34,18 @@ void TileGetHeightmapImageNode::compute()
   double min_height = defaultPortData<DecimalData>(PortType::In, 2)->value();
   double max_height = defaultPortData<DecimalData>(PortType::In, 3)->value();
 
-  if (min_height > max_height || std::fabs(std::fabs(max_height) - std::fabs(min_height)) < std::numeric_limits<double>::epsilon())
+  if (min_height > max_height || ((std::fabs(std::fabs(max_height) - std::fabs(min_height)) < std::numeric_limits<double>::epsilon()) && min_height > max_height))
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: incorrect precision bounds.");
     return;
   }
 
-  QImage image(257, 257, QImage::Format_RGBA64);
-
-  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
-
-  double const bias{min_height < .0 ? min_height : -min_height};
-  max_height += bias;
-
-  for (int k = 0; k < 16; ++k)
-  {
-    for (int l = 0; l < 16; ++l)
-    {
-      MapChunk* chunk = tile->getChunk(k, l);
-
-      math::vector_3d* heightmap = chunk->getHeightmap();
-
-      for (unsigned y = 0; y < SUM; ++y)
-      {
-        for (unsigned x = 0; x < SUM; ++x)
-        {
-          unsigned const plain {y * SUM + x};
-          bool const is_virtual {static_cast<bool>(plain % 2)};
-          bool const erp = plain % DSUM / SUM;
-          unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
-          float value = is_virtual ? (heightmap[idx].y + heightmap[idx + (erp ? SUM : 1)].y) / 2.f : heightmap[idx].y;
-          value = (value + bias) / max_height;
-          image.setPixelColor((k * 16) + x,  (l * 16) + y, QColor::fromRgbF(value, value, value, 1.0));
-        }
-      }
-    }
-  }
-
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<ImageData>(image.scaled(1024, 1024, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+  _out_ports[1].out_value = std::make_shared<ImageData>(tile->getHeightmapImage(static_cast<float>(min_height),
+                                                                                static_cast<float>(max_height)));
   _node->onDataUpdated(1);
 
 }

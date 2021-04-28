@@ -77,8 +77,6 @@ public:
 
   void bind_alpha(std::size_t id);
 
-  std::vector<uint8_t> lod_texture_map();
-
   bool apply_alpha_changes();
 
   void create_temporary_alphamaps_if_needed();
@@ -89,7 +87,9 @@ public:
   boost::optional<tmp_edit_alpha_values>* getTempAlphamaps() { return &tmp_edit_values; };
 
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
-
+  auto getDoodadMappingBase(void) -> std::uint16_t* { return _doodadMapping.data(); }
+  auto getDoodadStencilBase(void) -> std::uint8_t* { return _doodadStencil.data(); }
+  auto getEffectForLayer(std::size_t idx) const -> unsigned { return _layers_info[idx].effectID; }
 private:
 
   uint8_t sum_alpha(size_t offset) const;
@@ -97,7 +97,7 @@ private:
   void alphas_to_big_alpha(uint8_t* dest);
   void alphas_to_old_alpha(uint8_t* dest);
 
-  void update_lod_texture_map();
+  void update_lod_texture_map(); // todo: remove
 
   std::vector<scoped_blp_texture_reference> textures;
   std::array<boost::optional<Alphamap>, 3> alphamaps;
@@ -105,7 +105,8 @@ private:
   bool _need_amap_update = true;
   size_t nTextures;
 
-  std::vector<uint8_t> _lod_texture_map;
+  std::array<std::uint16_t, 8> _doodadMapping;
+  std::array<std::uint8_t, 8> _doodadStencil;
   bool _need_lod_texture_map_update = false;
 
   ENTRY_MCLY _layers_info[4];

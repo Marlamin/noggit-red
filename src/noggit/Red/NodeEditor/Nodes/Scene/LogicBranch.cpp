@@ -203,6 +203,7 @@ bool LogicBranch::executeNodeLeaves(Node* node, Node* source_node)
         return false;
 
       connected_model->compute();
+      connected_model->setComputed(true);
 
       if (connected_model->validationState() == NodeValidationState::Error)
         return false;

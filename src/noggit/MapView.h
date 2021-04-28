@@ -19,6 +19,7 @@
 #include <noggit/Red/ViewportGizmo/ViewportGizmo.hpp>
 #include <noggit/Red/ViewportManager/ViewportManager.hpp>
 #include <external/qtimgui/QtImGui.h>
+#include <external/QtAdvancedDockingSystem/src/DockManager.h>
 #include <opengl/texture.hpp>
 
 #include <boost/optional.hpp>
@@ -39,6 +40,7 @@
 #include <thread>
 
 #include <ui_MapViewOverlay.h>
+
 
 
 class World;
@@ -70,6 +72,7 @@ namespace noggit
     class hole_tool;
     struct main_window;
     struct tileset_chooser;
+    class ObjectPalette;
   }
 }
 
@@ -232,6 +235,10 @@ public:
 
   noggit::NoggitRenderContext getRenderContext() { return _context; };
   World* getWorld() { return _world.get(); };
+  QDockWidget* getAssetBrowser() {return _asset_browser_dock; };
+  noggit::ui::object_editor* getObjectEditor() { return objectEditor; };
+  QDockWidget* getObjectPalette() { return _object_palette_dock; };
+
 
 private:
   enum Modifier
@@ -306,6 +313,7 @@ private:
 
   noggit::bool_toggle_property _show_detail_info_window = {false};
   noggit::bool_toggle_property _show_minimap_window = {false};
+  noggit::bool_toggle_property _show_node_editor = {false};
   noggit::bool_toggle_property _show_minimap_borders = {true};
   noggit::bool_toggle_property _show_minimap_skies = {false};
   noggit::bool_toggle_property _show_keybindings_window = {false};
@@ -316,6 +324,7 @@ private:
   noggit::ui::minimap_widget* _minimap;
   QDockWidget* _minimap_dock;
   QDockWidget* _texture_palette_dock;
+  QDockWidget* _object_palette_dock;
 
   void move_camera_with_auto_height (math::vector_3d const&);
 
@@ -331,6 +340,7 @@ private:
   noggit::ui::detail_infos* guidetailInfos;
   noggit::ui::zone_id_browser* ZoneIDBrowser;
   noggit::ui::texture_palette_small* _texture_palette_small;
+  noggit::ui::ObjectPalette* _object_palette;
   QDockWidget* _areaid_editor_dock;
   noggit::ui::texture_picker* TexturePicker;
   noggit::ui::water* guiWater;
@@ -356,6 +366,9 @@ private:
   opengl::texture* const _texBrush;
 
   noggit::Red::AssetBrowser::Ui::AssetBrowserWidget* _asset_browser;
+
+  QDockWidget* _asset_browser_dock;
+  QDockWidget* _node_editor_dock;
 
   ::Ui::MapViewOverlay* _viewport_overlay_ui;
   ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;

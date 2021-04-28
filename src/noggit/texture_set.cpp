@@ -21,15 +21,8 @@ TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, M
   , _do_not_convert_alphamaps(do_not_convert_alphamaps)
   , _context(context)
 {
-  for (int i = 0; i < 64; ++i)
-  {
-    const size_t array_index(i / 4);
-    // it's a uint2 array so we need to read the bits as they come on the disk,
-    // this means reading the highest bits from the uint8 first
-    const size_t bit_index((3-((i) % 4)) * 2);
-
-    _lod_texture_map.push_back(((header.low_quality_texture_map[array_index]) >> (bit_index)) & 3);
-  }
+  std::copy(header.doodadMapping, header.doodadMapping + 8, _doodadMapping.begin());
+  std::copy(header.doodadStencil, header.doodadStencil + 8, _doodadStencil.begin());
 
   if (nTextures)
   {
@@ -192,8 +185,7 @@ void TextureSet::eraseTextures()
 
   nTextures = 0;
 
-  _lod_texture_map.resize(8 * 8);
-  memset(_lod_texture_map.data(), 0, 64 * sizeof(std::uint8_t));
+  std::fill(_doodadMapping.begin(), _doodadMapping.end(), 0);
 
   _need_amap_update = true;
   _need_lod_texture_map_update = true;
@@ -900,6 +892,7 @@ namespace
   }
 }
 
+/*
 std::vector<uint8_t> TextureSet::lod_texture_map()
 {
   // make sure all changes have been applied
@@ -912,6 +905,8 @@ std::vector<uint8_t> TextureSet::lod_texture_map()
 
   return _lod_texture_map;
 }
+ */
+
 
 void TextureSet::update_lod_texture_map()
 {
@@ -934,9 +929,11 @@ void TextureSet::update_lod_texture_map()
     }
   }
 
-  _lod_texture_map = lod;
+  //_lod_texture_map = lod;
   _need_lod_texture_map_update = false;
 }
+
+
 
 uint8_t TextureSet::sum_alpha(size_t offset) const
 {

@@ -4,6 +4,7 @@
 #include <noggit/ContextObject.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/font_noggit.hpp>
+#include <noggit/MapView.h>
 
 #include <QStandardItemModel>
 #include <QItemSelectionModel>
@@ -18,8 +19,9 @@
 using namespace noggit::Red::AssetBrowser::Ui;
 using namespace noggit::ui;
 
-AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
+AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
 : QMainWindow(parent, Qt::Window)
+, _map_view(map_view)
 {
   setWindowTitle("Asset Browser");
 
@@ -47,6 +49,11 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
       ,[this, overlay]()
       {
         overlay->setGeometry(0,0,ui->viewport->width(),ui->viewport->height());
+
+        if (ui->viewport->width() < 700  && !overlay->isHidden())
+          overlay->hide();
+        else if (ui->viewport->width() > 700 && overlay->isHidden())
+          overlay->setVisible(true);
       }
   );
 
@@ -79,27 +86,33 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
   _preview_renderer->setModelOffscreen("world/wmo/azeroth/buildings/human_farm/farm.wmo");
   _preview_renderer->renderToPixmap();
 
-
   connect(ui->listfileTree->selectionModel(), &QItemSelectionModel::selectionChanged
       ,[=] (const QItemSelection& selected, const QItemSelection& deselected)
-      {
-        for (auto index : selected.indexes())
         {
-          auto path = index.data(Qt::UserRole).toString();
-          if (path.endsWith(".m2") || path.endsWith(".wmo"))
-          {
-            ui->viewport->setModel(path.toStdString());
-          }
-        }
-      }
-  );
+            for (auto index : selected.indexes())
+            {
+              auto path = index.data(Qt::UserRole).toString();
+              if (path.endsWith(".m2") || path.endsWith(".wmo"))
+              {
+                auto str_path = path.toStdString();
+                ui->viewport->setModel(str_path);
+                _map_view->getObjectEditor()->copy(str_path);
+                _selected_path = str_path;
+              }
+            }
 
+        }
+
+  );
 
   connect(ui->viewport, &ModelViewer::model_set
       ,[=] (const std::string& filename)
       {
         viewport_overlay_ui->doodadSetSelector->insertItems(0, ui->viewport->getDoodadSetNames(filename));
-        viewport_overlay_ui->doodadSetSelector->setVisible(QString::fromStdString(filename).endsWith(".wmo"));
+
+        bool is_wmo = QString::fromStdString(filename).endsWith(".wmo");
+        viewport_overlay_ui->doodadSetSelector->setVisible(is_wmo);
+        viewport_overlay_ui->doodadSetLabel->setVisible(is_wmo);
       }
   );
 
@@ -109,6 +122,12 @@ AssetBrowserWidget::AssetBrowserWidget(QWidget *parent)
   connect(ui->listfileTree, &QTreeView::expanded
       ,[this] (const QModelIndex& index)
       {
+        QSettings settings;
+        bool render_preview = settings.value("assetBrowser/render_asset_preview").toBool();
+
+        if (!render_preview)
+          return;
+
         for (int i = 0; i != _sort_model->rowCount(index); ++i)
         {
           auto child = index.child(i, 0);
@@ -295,6 +314,7 @@ void AssetBrowserWidget::updateModelData()
 AssetBrowserWidget::~AssetBrowserWidget()
 {
   delete ui;
+  delete _preview_renderer;
 }
 
 void AssetBrowserWidget::keyPressEvent(QKeyEvent *event)

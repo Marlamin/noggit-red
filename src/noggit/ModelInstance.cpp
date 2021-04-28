@@ -132,6 +132,8 @@ bool ModelInstance::is_visible( math::frustum const& frustum
     dist = std::abs(get_pos().y - camera.y) - model->rad * scale;
   }
 
+  return frustum.intersectsSphere(get_pos(), model->rad * scale);
+
   if (dist >= cull_distance)
   {
     return false;

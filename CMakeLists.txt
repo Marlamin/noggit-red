@@ -42,6 +42,7 @@ MACRO(COLLECT_FILES recursive result dir_source ext_list)
   UNSET(globbing)
 ENDMACRO()
 
+
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -fcolor-diagnostics)
 
 # covered by CMAKE_CXX_STANDARD
@@ -343,6 +344,11 @@ TARGET_LINK_LIBRARIES (noggit
   noise-static
   noiseutils-static
 )
+
+if(APPLE)
+target_include_directories(noggit PRIVATE /usr/local/Cellar/llvm/12.0.0/include/c++/v1/)
+target_link_libraries(noggit /usr/local/Cellar/llvm/12.0.0/lib/libc++.1.0.dylib)
+endif()
 
 set (_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")
 set (_noggit_revision_template_file "${CMAKE_SOURCE_DIR}/cmake/revision.h.in")

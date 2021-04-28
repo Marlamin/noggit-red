@@ -50,72 +50,7 @@ void TileSetVertexColorsImageNode::compute()
     image_to_use = &scaled;
   }
 
-  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
-
-  for (int k = 0; k < 16; ++k)
-  {
-    for (int l = 0; l < 16; ++l)
-    {
-      MapChunk* chunk = tile->getChunk(k, l);
-
-      math::vector_3d* colors = chunk->getVertexColors();
-
-      for (unsigned y = 0; y < SUM; ++y)
-        for (unsigned x = 0; x < SUM; ++x)
-        {
-          unsigned const plain {y * SUM + x};
-          bool const is_virtual {static_cast<bool>(plain % 2)};
-
-          if (is_virtual)
-            continue;
-
-          bool const erp = plain % DSUM / SUM;
-          unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
-
-          switch (_operation->currentIndex())
-          {
-            case 0: // Set
-            {
-              auto color = image_to_use->pixelColor((k * 16) + x, (l * 16) + y);
-              colors[idx].x =  color.redF();
-              colors[idx].y =  color.blueF();
-              colors[idx].z =  color.greenF();
-              break;
-            }
-            case 1: // Add
-            {
-              auto color = image_to_use->pixelColor((k * 16) + x, (l * 16) + y);
-              colors[idx].x =  std::min(1.0, std::max(0.0, colors[idx].x + color.redF()));
-              colors[idx].y =  std::min(1.0, std::max(0.0, colors[idx].y + color.blueF()));
-              colors[idx].z =  std::min(1.0, std::max(0.0, colors[idx].z + color.greenF()));
-              break;
-            }
-
-            case 2: // Subtract
-            {
-              auto color = image_to_use->pixelColor((k * 16) + x, (l * 16) + y);
-              colors[idx].x =  std::min(1.0, std::max(0.0, colors[idx].x - color.redF()));
-              colors[idx].y =  std::min(1.0, std::max(0.0, colors[idx].y - color.blueF()));
-              colors[idx].z =  std::min(1.0, std::max(0.0, colors[idx].z - color.greenF()));
-              break;
-            }
-
-            case 3: // Multiply
-            {
-              auto color = image_to_use->pixelColor((k * 16) + x, (l * 16) + y);
-              colors[idx].x =  std::min(1.0, std::max(0.0, colors[idx].x * color.redF()));
-              colors[idx].y =  std::min(1.0, std::max(0.0, colors[idx].y * color.blueF()));
-              colors[idx].z =  std::min(1.0, std::max(0.0, colors[idx].z * color.greenF()));
-              break;
-            }
-          }
-
-        }
-
-      chunk->updateVerticesData();
-    }
-  }
-
+  tile->setVertexColorImage(*image_to_use, _operation->currentIndex());
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

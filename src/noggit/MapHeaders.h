@@ -128,9 +128,8 @@ struct MapChunkHeader {
   uint32_t areaid;
   uint32_t nMapObjRefs;
   uint32_t holes;
-  uint8_t low_quality_texture_map[0x10];
-  uint32_t predTex;
-  uint32_t nEffectDoodad;
+  std::uint16_t doodadMapping[8];
+  std::uint8_t doodadStencil[8];
   uint32_t ofsSndEmitters;
   uint32_t nSndEmitters;
   uint32_t ofsLiquid;

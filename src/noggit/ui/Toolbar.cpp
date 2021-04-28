@@ -12,6 +12,7 @@ namespace noggit
     {
       setContextMenuPolicy(Qt::PreventContextMenu);
       setAllowedAreas(Qt::LeftToolBarArea);
+      setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
       add_tool_icon (editing_mode::ground,       tr("Raise / Lower"),     font_noggit::TOOL_RAISE_LOWER);
       add_tool_icon (editing_mode::flatten_blur, tr("Flatten / Blur"),    font_noggit::TOOL_FLATTEN_BLUR);

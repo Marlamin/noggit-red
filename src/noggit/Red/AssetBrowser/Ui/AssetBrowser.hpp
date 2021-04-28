@@ -12,6 +12,7 @@
 #include <QRegularExpression>
 #include <QMainWindow>
 
+class MapView;
 
 namespace noggit
 {
@@ -21,8 +22,9 @@ namespace noggit
     {
       Q_OBJECT
     public:
-      AssetBrowserWidget(QWidget* parent = nullptr);
+      AssetBrowserWidget(MapView* map_view, QWidget* parent = nullptr);
       ~AssetBrowserWidget();
+      std::string const& getFilename() { return _selected_path; };
 
     signals:
         void gl_data_unloaded();
@@ -34,6 +36,8 @@ namespace noggit
       QSortFilterProxyModel* _sort_model;
       PreviewRenderer* _preview_renderer;
       QRegularExpression _wmo_group_and_lod_regex;
+      MapView* _map_view;
+      std::string _selected_path;
 
       void updateModelData();
       void recurseDirectory(Model::TreeManager& tree_mgr, const QString& s_dir, const QString& project_dir);

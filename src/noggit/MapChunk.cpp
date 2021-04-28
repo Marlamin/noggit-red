@@ -1238,21 +1238,17 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   lMCNK_header->ypos = mVertices[0].y;
 
-  memset(lMCNK_header->low_quality_texture_map, 0, 0x10);
-
-  if (texture_set)
+  if(texture_set)
   {
-    std::vector<uint8_t> lod_texture_map = texture_set->lod_texture_map();
-
-    for (int i = 0; i < lod_texture_map.size(); ++i)
-    {
-      const size_t array_index(i / 4);
-      // it's a uint2 array so we need to write the uint2 in the order they will be on disk,
-      // this means writing to the highest bits of the uint8 first
-      const size_t bit_index((3 - ((i) % 4)) * 2);
-
-      lMCNK_header->low_quality_texture_map[array_index] |= ((lod_texture_map[i] & 3) << bit_index);
-    }
+    std::copy(texture_set->getDoodadMappingBase(), texture_set->getDoodadMappingBase() + 8
+    , lMCNK_header->doodadMapping);
+    *reinterpret_cast<std::uint64_t*>(lMCNK_header->doodadStencil)
+    = *reinterpret_cast<std::uint64_t const*>(texture_set->getDoodadStencilBase());
+  }
+  else
+  {
+    std::fill(lMCNK_header->doodadMapping, lMCNK_header->doodadMapping + 8, 0);
+    *reinterpret_cast<std::uint64_t*>(lMCNK_header->doodadStencil) = 0;
   }
 
   lCurrentPosition += 8 + 0x80;
@@ -1616,6 +1612,90 @@ bool MapChunk::isBorderChunk(std::set<math::vector_3d*>& selected)
   return false;
 }
 
+QImage MapChunk::getHeightmapImage(float min_height, float max_height)
+{
+  math::vector_3d* heightmap = getHeightmap();
+
+  QImage image(17, 17, QImage::Format_RGBA64);
+
+  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
+
+  for (unsigned y = 0; y < SUM; ++y)
+    for (unsigned x = 0; x < SUM; ++x)
+    {
+      unsigned const plain {y * SUM + x};
+      bool const is_virtual {static_cast<bool>(plain % 2)};
+      bool const erp = plain % DSUM / SUM;
+      unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+      float value = is_virtual ? (heightmap[idx].y + heightmap[idx + (erp ? SUM : 1)].y) / 2.f : heightmap[idx].y;
+      value = std::min(1.0f, std::max(0.0f, ((value - min_height) / (max_height - min_height))));
+      image.setPixelColor(x, y, QColor::fromRgbF(value, value, value, 1.0));
+    }
+
+  return std::move(image);
+}
+
+QImage MapChunk::getAlphamapImage(unsigned layer)
+{
+  texture_set->apply_alpha_changes();
+  auto alphamaps = texture_set->getAlphamaps();
+
+  auto alpha_layer = alphamaps->at(layer - 1).get();
+
+  QImage image(64, 64, QImage::Format_RGBA8888);
+
+  for (int i = 0; i < 64; ++i)
+  {
+    for (int j = 0; j < 64; ++j)
+    {
+      int value = alpha_layer.getAlpha(64 * j + i);
+      image.setPixelColor(i, j, QColor(value, value, value, 255));
+    }
+  }
+
+  return std::move(image);
+}
+
+void MapChunk::setHeightmapImage(QImage const& image, float multiplier, int mode)
+{
+  math::vector_3d* heightmap = getHeightmap();
+
+  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
+
+  for (unsigned y = 0; y < SUM; ++y)
+    for (unsigned x = 0; x < SUM; ++x)
+    {
+      unsigned const plain {y * SUM + x};
+      bool const is_virtual {static_cast<bool>(plain % 2)};
+
+      if (is_virtual)
+        continue;
+
+      bool const erp = plain % DSUM / SUM;
+      unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+
+      switch (mode)
+      {
+        case 0: // Set
+          heightmap[idx].y = qGray(image.pixel(x, y)) / 255.0f * multiplier;
+          break;
+
+        case 1: // Add
+          heightmap[idx].y += qGray(image.pixel(x, y)) / 255.0f * multiplier;
+          break;
+
+        case 2: // Subtract
+          heightmap[idx].y -= qGray(image.pixel(x, y)) / 255.0f * multiplier;
+          break;
+
+        case 3: // Multiply
+          heightmap[idx].y *= qGray(image.pixel(x, y)) / 255.0f * multiplier;
+          break;
+      }
+    }
+  updateVerticesData();
+}
+
 ChunkWater* MapChunk::liquid_chunk() const
 {
   return mt->Water.getChunk(px, py);
@@ -1631,4 +1711,75 @@ void MapChunk::unload()
 
   _uploaded = false;
   _need_vao_update = true;
+}
+
+void MapChunk::setAlphamapImage(const QImage &image, unsigned int layer)
+{
+  if (!layer)
+    return;
+
+  texture_set->create_temporary_alphamaps_if_needed();
+  auto& temp_alphamaps = texture_set->getTempAlphamaps()->get();
+
+  for (int i = 0; i < 64; ++i)
+  {
+    for (int j = 0; j < 64; ++j)
+    {
+      temp_alphamaps[layer][64 * j + i] = static_cast<float>(qGray(image.pixel(i, j))) / 255.0f;
+    }
+  }
+
+  texture_set->markDirty();
+}
+
+QImage MapChunk::getVertexColorImage()
+{
+  math::vector_3d* colors = getVertexColors();
+
+  QImage image(17, 17, QImage::Format_RGBA8888);
+
+  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
+
+
+  for (unsigned y = 0; y < SUM; ++y)
+    for (unsigned x = 0; x < SUM; ++x)
+    {
+      unsigned const plain {y * SUM + x};
+      bool const is_virtual {static_cast<bool>(plain % 2)};
+      bool const erp = plain % DSUM / SUM;
+      unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+      float r = is_virtual ? (colors[idx].x + colors[idx + (erp ? SUM : 1)].x) / 2.f : colors[idx].x;
+      float g = is_virtual ? (colors[idx].y + colors[idx + (erp ? SUM : 1)].y) / 2.f : colors[idx].y;
+      float b = is_virtual ? (colors[idx].z + colors[idx + (erp ? SUM : 1)].z) / 2.f : colors[idx].z;
+      image.setPixelColor(x, y, QColor::fromRgbF(r, g, b, 1.0));
+    }
+
+  return std::move(image);
+}
+
+void MapChunk::setVertexColorImage(const QImage &image)
+{
+  math::vector_3d* colors = getVertexColors();
+
+  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
+
+  for (unsigned y = 0; y < SUM; ++y)
+    for (unsigned x = 0; x < SUM; ++x)
+    {
+      unsigned const plain{y * SUM + x};
+      bool const is_virtual{static_cast<bool>(plain % 2)};
+
+      if (is_virtual)
+        continue;
+
+      bool const erp = plain % DSUM / SUM;
+      unsigned const idx{(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+
+      QColor color = image.pixelColor(x, y);
+      colors[idx].x = color.redF();
+      colors[idx].y = color.greenF();
+      colors[idx].z = color.blueF();
+    }
+
+  update_vertex_colors();
 }

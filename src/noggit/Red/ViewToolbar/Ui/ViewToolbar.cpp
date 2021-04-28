@@ -11,6 +11,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
 {
   setContextMenuPolicy(Qt::PreventContextMenu);
   setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+  setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
   add_tool_icon(&mapView->_draw_models, tr("Doodads"), font_noggit::VISIBILITY_DOODADS);
   add_tool_icon(&mapView->_draw_wmo, tr("WMOs"), font_noggit::VISIBILITY_WMO);
@@ -36,9 +37,11 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   add_tool_icon(&mapView->_draw_models_with_box, tr("Models with box"), font_noggit::VISIBILITY_WITH_BOX);
   add_tool_icon(&mapView->_draw_hidden_models, tr("Hidden models"), font_noggit::VISIBILITY_HIDDEN_MODELS);
 
+  /*
   auto tablet_sensitivity = new QSlider(this);
   tablet_sensitivity->setOrientation(Qt::Horizontal);
   addWidget(tablet_sensitivity);
+   */
 }
 
 void ViewToolbar::add_tool_icon(noggit::bool_toggle_property* view_state, const QString& name, const font_noggit::icons& icon)

@@ -56,6 +56,42 @@ struct StringConverter
     }
 };
 
+// Vector converters
+
+template<typename T_from>
+struct IntegerVector4DConverter
+{
+    static glm::vec4 convert(T_from value) { double val = static_cast<double>(value); return glm::vec4(val, val, val, val); }
+};
+
+struct DecimalVector4DConverter
+{
+    static glm::vec4 convert(double value) { return glm::vec4(value, value, value, value); }
+};
+
+template<typename T_from>
+struct IntegerVector3DConverter
+{
+    static glm::vec3 convert(T_from value) { double val = static_cast<double>(value); return glm::vec3(val, val, val); }
+};
+
+struct DecimalVector3DConverter
+{
+    static glm::vec3 convert(double value) { return glm::vec3(value, value, value); }
+};
+
+template<typename T_from>
+struct IntegerVector2DConverter
+{
+    static glm::vec2 convert(T_from value) { double val = static_cast<double>(value); return glm::vec2(val, val); }
+};
+
+struct DecimalVector2DConverter
+{
+    static glm::vec2 convert(double value) { return glm::vec2(value, value); }
+};
+
+
 // Color converters
 
 template<typename T_from>
@@ -181,6 +217,17 @@ DECLARE_TYPE_CONVERTER(UnsignedInteger, Boolean, unsigned int, bool)
 DECLARE_TYPE_CONVERTER_EXT(Decimal, String, StringConverter<double>)
 DECLARE_TYPE_CONVERTER_EXT(Integer, String, StringConverter<int>)
 DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, String, StringConverter<unsigned int>)
+
+DECLARE_TYPE_CONVERTER_EXT(Integer, Vector3D, IntegerVector3DConverter<int>)
+DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, Vector3D, IntegerVector3DConverter<unsigned int>)
+DECLARE_TYPE_CONVERTER_EXT(Integer, Vector4D, IntegerVector4DConverter<int>)
+DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, Vector4D, IntegerVector4DConverter<unsigned int>)
+DECLARE_TYPE_CONVERTER_EXT(Integer, Vector2D, IntegerVector2DConverter<int>)
+DECLARE_TYPE_CONVERTER_EXT(UnsignedInteger, Vector2D, IntegerVector2DConverter<unsigned int>)
+
+DECLARE_TYPE_CONVERTER_EXT(Decimal, Vector3D, DecimalVector3DConverter)
+DECLARE_TYPE_CONVERTER_EXT(Decimal, Vector4D, DecimalVector4DConverter)
+DECLARE_TYPE_CONVERTER_EXT(Decimal, Vector2D, DecimalVector2DConverter)
 
 // Custom types
 DECLARE_TYPE_CONVERTER_EXT(Integer, Color, ColorIntegerConverter<int>)

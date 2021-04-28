@@ -10,6 +10,7 @@
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/checkbox.hpp>
+#include <noggit/Red/UiCommon/expanderwidget.h>
 #include <util/qt/overload.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>
@@ -70,8 +71,14 @@ namespace noggit
       radius_layout->addRow(_radius_spin);
       layout->addRow(radius_group);
 
-      QGroupBox *copyBox = new QGroupBox("Copy options", this);
-      auto copy_layout = new QFormLayout (copyBox);
+      auto *copyBox = new ExpanderWidget( this);
+      copyBox->setExpanderTitle("Copy options");
+
+      auto copyBox_content = new QWidget(this);
+      auto copy_layout = new QFormLayout (copyBox_content);
+      copy_layout->setAlignment(Qt::AlignTop);
+      copyBox->addPage(copyBox_content);
+      copyBox->setExpanded(false);
 
       auto rotation_group (new QGroupBox ("Random rotation", copyBox));
       auto tilt_group (new QGroupBox ("Random tilt", copyBox));
@@ -134,8 +141,13 @@ namespace noggit
 
       copy_layout->addRow(copyAttributesCheck);
 
-      QGroupBox *pasteBox = new QGroupBox("Paste Options", this);
-      auto paste_layout = new QGridLayout (pasteBox);
+      auto *pasteBox = new ExpanderWidget(this);
+      pasteBox->setExpanderTitle("Paste Options");
+      auto pasteBox_content = new QWidget(this);
+      auto paste_layout = new QGridLayout (pasteBox_content);
+      paste_layout->setAlignment(Qt::AlignTop);
+
+
       QRadioButton *terrainButton = new QRadioButton("Terrain");
       QRadioButton *selectionButton = new QRadioButton("Selection");
       QRadioButton *cameraButton = new QRadioButton("Camera");
@@ -148,6 +160,8 @@ namespace noggit
       paste_layout->addWidget(terrainButton, 0, 0);
       paste_layout->addWidget(selectionButton, 0, 1);
       paste_layout->addWidget(cameraButton, 1, 0);
+
+      pasteBox->addPage(pasteBox_content);
 
       auto object_movement_box (new QGroupBox("Single Selection Movement", this));
       auto object_movement_layout = new QFormLayout (object_movement_box);
@@ -181,29 +195,49 @@ namespace noggit
       multi_select_movement_layout->addRow(multi_select_movement_cb);
       multi_select_movement_layout->addRow(object_median_pivot_point);
 
+      auto *selectionOptionsBox = new ExpanderWidget( this);
+      selectionOptionsBox->setExpanderTitle("Selection Options");
+
+      auto selectionOptionsBox_content = new QWidget(this);
+      auto selectionOptions_layout = new QVBoxLayout(selectionOptionsBox_content);
+      selectionOptions_layout->setAlignment(Qt::AlignTop);
+      selectionOptionsBox->addPage(selectionOptionsBox_content);
+      selectionOptionsBox->setExpanded(false);
+
+      selectionOptions_layout->addWidget(object_movement_box);
+      selectionOptions_layout->addWidget(multi_select_movement_box);
+
       QPushButton *rotEditorButton = new QPushButton("Pos/Rotation Editor", this);
       QPushButton *visToggleButton = new QPushButton("Toggle Hidden Models Visibility", this);
       QPushButton *clearListButton = new QPushButton("Clear Hidden Models List", this);
 
-      QGroupBox *importBox = new QGroupBox(this);
-      new QGridLayout (importBox);
-      importBox->setTitle("Import");
+      auto importBox = new ExpanderWidget(this);
+      auto importBox_content = new QWidget(this);
+      auto importBox_content_layout = new QGridLayout (importBox_content);
+      importBox_content_layout->setAlignment(Qt::AlignTop);
+      importBox->setExpanderTitle("Import");
 
       QPushButton *toTxt = new QPushButton("To Text File", this);
       QPushButton *fromTxt = new QPushButton("From Text File", this);
       QPushButton *last_m2_from_wmv = new QPushButton("Last M2 from WMV", this);
       QPushButton *last_wmo_from_wmv = new QPushButton("Last WMO from WMV", this);
       QPushButton *helper_models_btn = new QPushButton("Helper Models", this);
-      importBox->layout()->addWidget(toTxt);
-      importBox->layout()->addWidget(fromTxt);
-      importBox->layout()->addWidget(last_m2_from_wmv);
-      importBox->layout()->addWidget(last_wmo_from_wmv);
-      importBox->layout()->addWidget(helper_models_btn);
+      QPushButton *asset_browser_btn = new QPushButton("Asset browser", this);
+      QPushButton *object_palette_btn = new QPushButton("Object palette", this);
+
+      importBox_content_layout->addWidget(toTxt);
+      importBox_content_layout->addWidget(fromTxt);
+      importBox_content_layout->addWidget(last_m2_from_wmv);
+      importBox_content_layout->addWidget(last_wmo_from_wmv);
+      importBox_content_layout->addWidget(helper_models_btn);
+      importBox_content_layout->addWidget(asset_browser_btn);
+      importBox_content_layout->addWidget(object_palette_btn);
+
+      importBox->addPage(importBox_content);
 
       layout->addRow(copyBox);
       layout->addRow(pasteBox);
-      layout->addRow(object_movement_box);
-      layout->addRow(multi_select_movement_box);
+      layout->addRow(selectionOptionsBox);
       layout->addRow(rotEditorButton);
       layout->addRow(visToggleButton);
       layout->addRow(clearListButton);
@@ -354,7 +388,17 @@ namespace noggit
       connect( helper_models_btn
              , &QPushButton::clicked
              , [=]() { helper_models_widget->show(); }
-             );    
+             );
+
+      connect( asset_browser_btn
+          , &QPushButton::clicked
+          , [=]() { mapView->getAssetBrowser()->setVisible(mapView->getAssetBrowser()->isHidden()); }
+      );
+
+      connect( object_palette_btn
+          , &QPushButton::clicked
+          , [=]() { mapView->getObjectPalette()->setVisible(mapView->getObjectPalette()->isHidden()); }
+      );
 
       setMinimumWidth(250);
       setMaximumWidth(250);

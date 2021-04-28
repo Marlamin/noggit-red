@@ -29,7 +29,6 @@ TileSetHeightmapImageNode::TileSetHeightmapImageNode()
 
 void TileSetHeightmapImageNode::compute()
 {
-  World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
@@ -47,7 +46,7 @@ void TileSetHeightmapImageNode::compute()
   }
 
   QImage scaled;
-  if (image->width() != 257)
+  if (image->width() != 257 || image->height() != 257)
   {
     scaled = image->scaled(257, 257, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     image_to_use = &scaled;
@@ -60,84 +59,7 @@ void TileSetHeightmapImageNode::compute()
     return;
   }
 
-  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
-
-  for (int k = 0; k < 16; ++k)
-  {
-    for (int l = 0; l < 16; ++l)
-    {
-      MapChunk* chunk = tile->getChunk(k, l);
-
-      math::vector_3d* heightmap = chunk->getHeightmap();
-
-      for (unsigned y = 0; y < SUM; ++y)
-        for (unsigned x = 0; x < SUM; ++x)
-        {
-          unsigned const plain {y * SUM + x};
-          bool const is_virtual {static_cast<bool>(plain % 2)};
-
-          if (is_virtual)
-            continue;
-
-          bool const erp = plain % DSUM / SUM;
-          unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
-
-          switch (image->depth())
-          {
-            case 32:
-            {
-              switch (_operation->currentIndex())
-              {
-                case 0: // Set
-                  heightmap[idx].y = qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
-                  break;
-
-                case 1: // Add
-                  heightmap[idx].y += qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
-                  break;
-
-                case 2: // Subtract
-                  heightmap[idx].y -= qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
-                  break;
-
-                case 3: // Multiply
-                  heightmap[idx].y *= qGray(image_to_use->pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
-                  break;
-              }
-
-              break;
-            }
-
-            case 64:
-            {
-              switch (_operation->currentIndex())
-              {
-                case 0: // Set
-                  heightmap[idx].y = image_to_use->pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;
-                  break;
-
-                case 1: // Add
-                  heightmap[idx].y += image_to_use->pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
-                  break;
-
-                case 2: // Subtract
-                  heightmap[idx].y -= image_to_use->pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
-                  break;
-
-                case 3: // Multiply
-                  heightmap[idx].y *= image_to_use->pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
-                  break;
-              }
-
-              break;
-            }
-          }
-
-        }
-
-      chunk->updateVerticesData();
-    }
-  }
+  tile->setHeightmapImage(*image_to_use, static_cast<float>(multiplier), _operation->currentIndex());
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

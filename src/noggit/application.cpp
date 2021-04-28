@@ -511,10 +511,6 @@ int main(int argc, char *argv[])
   qapp.setApplicationName ("Noggit");
   qapp.setOrganizationName ("Noggit");
 
-  QPixmap pixmap = QPixmap(":splash");
-  QSplashScreen splash(pixmap);
-  splash.show();
-
   Noggit app (argc, argv);
 
   return qapp.exec();

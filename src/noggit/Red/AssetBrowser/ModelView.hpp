@@ -43,6 +43,9 @@ namespace noggit
       void setActiveDoodadSet(std::string const& filename, std::string const& doodadset_name);
       std::string& getLastSelectedModel() { return _last_selected_model; };
 
+      bool hasHeightForWidth() const override { return true; };
+      int heightForWidth(int w) const override { return w; };
+
       ~ModelViewer() override;
 
 

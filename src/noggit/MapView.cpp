@@ -39,8 +39,8 @@
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/Red/PresetEditor/Ui/PresetEditor.hpp>
 #include <noggit/Red/NodeEditor/Ui/NodeEditor.hpp>
-#include <external/QtAdvancedDockingSystem/src/DockManager.h>
 #include <external/imguipiemenu/PieMenu.hpp>
+#include <noggit/ui/object_palette.hpp>
 
 #include <noggit/ui/font_noggit.hpp>
 
@@ -81,6 +81,8 @@ void MapView::set_editing_mode (editing_mode mode)
   TexturePalette->hide();
   TexturePicker->hide();
   _texture_palette_dock->hide();
+  _object_palette_dock->hide();
+  _asset_browser_dock->hide();
 
   MoveObj = false;
   _world->reset_selection();
@@ -103,6 +105,7 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
   {
     dock->hide();
   }
+  _asset_browser_dock->hide();
 
   switch (mode)
   {
@@ -126,6 +129,8 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
     break;
   case editing_mode::object:
     _object_editor_dock->setVisible(!ui_hidden);
+    _asset_browser_dock->setVisible(!ui_hidden);
+    _object_palette_dock->setVisible(!ui_hidden);
     break;
   case editing_mode::holes:
     _hole_tool_dock->setVisible(!ui_hidden);
@@ -221,21 +226,27 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 
 void MapView::createGUI()
 {
+  _asset_browser_dock = new QDockWidget("Asset browser", this);
+  _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this, this);
+  _asset_browser_dock->setWidget(_asset_browser);
 
-  ads::CDockWidget* asset_browser_dock = new ads::CDockWidget("Asset Browser");
-  _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this);
-  asset_browser_dock->setWidget(_asset_browser);
-  auto dock_area_bottom = _main_window->getDockManager()->addDockWidgetTab(ads::BottomDockWidgetArea, asset_browser_dock);
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _asset_browser_dock);
+  _asset_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
+  | QDockWidget::DockWidgetFloatable
+  | QDockWidget::DockWidgetClosable);
+  _asset_browser_dock->setAllowedAreas(Qt::BottomDockWidgetArea);
+  _asset_browser_dock->hide();
 
-  ads::CDockWidget* preset_editor_dock = new ads::CDockWidget("Preset Editor");
-  auto preset_editor = new noggit::Red::PresetEditor::Ui::PresetEditorWidget(this);
-  preset_editor_dock->setWidget(preset_editor);
-  _main_window->getDockManager()->addDockWidgetTabToArea(preset_editor_dock, dock_area_bottom);
+  auto _node_editor = new noggit::Red::NodeEditor::Ui::NodeEditorWidget(this);
+  _node_editor_dock = new QDockWidget("Node editor", this);
+  _node_editor_dock->setWidget(_node_editor);
 
-  ads::CDockWidget* node_editor_dock = new ads::CDockWidget("Node Editor");
-  auto node_editor = new noggit::Red::NodeEditor::Ui::NodeEditorWidget(this);
-  node_editor_dock->setWidget(node_editor);
-  _main_window->getDockManager()->addDockWidgetTabToArea(node_editor_dock, dock_area_bottom);
+  _main_window->addDockWidget(Qt::LeftDockWidgetArea, _node_editor_dock);
+  _node_editor_dock->setFeatures(QDockWidget::DockWidgetMovable
+                               | QDockWidget::DockWidgetFloatable
+                               | QDockWidget::DockWidgetClosable);
+  _node_editor_dock->hide();
+
 
   auto overlay = new QWidget(this);
   _viewport_overlay_ui = new ::Ui::MapViewOverlay();
@@ -449,6 +460,9 @@ void MapView::createGUI()
   _texture_palette_small = new noggit::ui::texture_palette_small (this);
   _texture_palette_small->hide();
 
+  _object_palette = new noggit::ui::ObjectPalette(this, this);
+  _object_palette->hide();
+
   connect(_texture_palette_small, &noggit::ui::texture_palette_small::selected
     , [=](std::string const& filename)
     {
@@ -551,6 +565,18 @@ void MapView::createGUI()
 
   _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_palette_dock);
 
+
+  _object_palette_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                     | QDockWidget::DockWidgetFloatable
+                                     | QDockWidget::DockWidgetClosable
+  );
+
+  _object_palette_dock->setWidget(_object_palette);
+  _object_palette_dock->setWindowTitle("Object Palette");
+  _object_palette_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
+
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _object_palette_dock);
+
   if (_settings->value("undock_small_texture_palette/enabled", 1).toBool())
   {
     _texture_palette_dock->setFloating(true);
@@ -562,11 +588,20 @@ void MapView::createGUI()
   // create toolbars
 
   _toolbar = new noggit::ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
-  _main_window->addToolBar(Qt::LeftToolBarArea, _toolbar);
+  _toolbar->setOrientation(Qt::Vertical);
+  auto right_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->leftToolbarHolder);
+  right_toolbar_layout->addWidget( _toolbar);
+  right_toolbar_layout->setDirection(QBoxLayout::LeftToRight);
+  right_toolbar_layout->setContentsMargins(0, 0, 0,0);
+
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
 
   _view_toolbar = new noggit::Red::ViewToolbar::Ui::ViewToolbar(this);
-  _main_window->addToolBar(Qt::TopToolBarArea, _view_toolbar);
+  auto top_toolbar_layout = new QHBoxLayout(_viewport_overlay_ui->upperToolbarHolder);
+  top_toolbar_layout->addWidget( _view_toolbar);
+  top_toolbar_layout->setContentsMargins(0, 0, 0, 0);
+
+
   connect (this, &QObject::destroyed, _view_toolbar, &QObject::deleteLater);
 
   auto file_menu (_main_window->_menuBar->addMenu ("Editor"));
@@ -807,6 +842,19 @@ void MapView::createGUI()
   ADD_TOGGLE_NS (view_menu, "Hidden models", _draw_hidden_models);
 
   view_menu->addSeparator();
+  view_menu->addAction(createTextSeparator("Tools"));
+  view_menu->addSeparator();
+
+  ADD_TOGGLE (view_menu, "Show Node Editor", "Shift+N", _show_node_editor);
+  connect ( &_show_node_editor, &noggit::bool_toggle_property::changed
+      , _node_editor_dock, [this]
+            {
+                if (!ui_hidden)
+                  _node_editor_dock->setVisible(_show_node_editor.get());
+            }
+  );
+
+  view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Minimap"));
   view_menu->addSeparator();
 
@@ -818,6 +866,8 @@ void MapView::createGUI()
                                _minimap_dock->setVisible(_show_minimap_window.get());
                            }
           );
+
+
   connect ( _minimap_dock, &QDockWidget::visibilityChanged
           , &_show_minimap_window, &noggit::bool_toggle_property::set
           );
@@ -855,7 +905,9 @@ void MapView::createGUI()
       objectEditor->modelImport,
       objectEditor->rotationEditor,
       objectEditor->helper_models_widget,
-      _texture_palette_small
+      _texture_palette_small,
+      _object_palette_dock,
+      _asset_browser_dock
     };
 
 
@@ -1407,6 +1459,7 @@ void MapView::on_exit_prompt()
   _minimap_tool_dock->hide();
   _minimap_dock->hide();
   _texture_palette_small->hide();
+  _object_palette_dock->hide();
   objectEditor->helper_models_widget->hide();
   objectEditor->modelImport->hide();
   objectEditor->rotationEditor->hide();
@@ -1441,6 +1494,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _minimap (new noggit::ui::minimap_widget (nullptr))
   , _minimap_dock (new QDockWidget ("Minimap", this))
   , _texture_palette_dock(new QDockWidget(this))
+  , _object_palette_dock(new QDockWidget(this))
   , _dockStamp{"Stamp Tool", this}
   , _modeStampTool{&_showStampPalette, &_cursorRotation, this}
   , _modeStampPaletteMain{this}
@@ -3233,6 +3287,8 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     case editing_mode::mccv:
       shaderTool->changeSpeed(relative_movement.dx() / XSENS);
       break;
+    default:
+      break;
     }
   }
 
@@ -3445,6 +3501,9 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
 
   case Qt::MiddleButton:
     MoveObj = false;
+    break;
+
+  default:
     break;
   }
 }

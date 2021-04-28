@@ -117,13 +117,15 @@ namespace math
 
     bool operator== (matrix_4x4 const& rhs)
     {
-      for (std::size_t i (0); i < 16; ++i)
-      {
-        if (_m[i] != rhs._m[i])
+      for (std::size_t i (0); i < 4; ++i)
+        for (std::size_t j (0); j < 4; ++j)
         {
-          return false;
+          if (_m[i][j] != rhs._m[i][j])
+          {
+            return false;
+          }
         }
-      }
+
       return true;
     }
 

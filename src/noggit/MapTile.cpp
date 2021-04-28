@@ -981,3 +981,323 @@ void MapTile::initEmptyChunks()
     mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, nullptr, mBigAlpha, _mode, _context, true, nextChunk);
   }
 }
+
+QImage MapTile::getHeightmapImage(float min_height, float max_height)
+{
+  QImage image(257, 257, QImage::Format_RGBA64);
+
+  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
+
+  for (int k = 0; k < 16; ++k)
+  {
+    for (int l = 0; l < 16; ++l)
+    {
+      MapChunk* chunk = getChunk(k, l);
+
+      math::vector_3d* heightmap = chunk->getHeightmap();
+
+      for (unsigned y = 0; y < SUM; ++y)
+      {
+        for (unsigned x = 0; x < SUM; ++x)
+        {
+          unsigned const plain {y * SUM + x};
+          bool const is_virtual {static_cast<bool>(plain % 2)};
+          bool const erp = plain % DSUM / SUM;
+          unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+          float value = is_virtual ? (heightmap[idx].y + heightmap[idx + (erp ? SUM : 1)].y) / 2.f : heightmap[idx].y;
+          value = std::min(1.0f, std::max(0.0f, ((value - min_height) / (max_height - min_height))));
+          image.setPixelColor((k * 16) + x,  (l * 16) + y, QColor::fromRgbF(value, value, value, 1.0));
+        }
+      }
+    }
+  }
+
+  return std::move(image);
+}
+
+QImage MapTile::getAlphamapImage(unsigned layer)
+{
+  QImage image(1024, 1024, QImage::Format_RGBA8888);
+  image.fill(Qt::black);
+
+  for (int i = 0; i < 16; ++i)
+  {
+    for (int j = 0; j < 16; ++j)
+    {
+      MapChunk* chunk = getChunk(i, j);
+
+      if (layer >= chunk->texture_set->num())
+        continue;
+
+      chunk->texture_set->apply_alpha_changes();
+      auto alphamaps = chunk->texture_set->getAlphamaps();
+
+      auto alpha_layer = alphamaps->at(layer - 1).get();
+
+      for (int k = 0; k < 64; ++k)
+      {
+        for (int l = 0; l < 64; ++l)
+        {
+          int value = alpha_layer.getAlpha(64 * l + k);
+          image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
+        }
+      }
+    }
+  }
+
+  return std::move(image);
+}
+
+QImage MapTile::getAlphamapImage(std::string const& filename)
+{
+  QImage image(1024, 1024, QImage::Format_RGBA8888);
+  image.fill(Qt::black);
+
+  for (int i = 0; i < 16; ++i)
+  {
+    for (int j = 0; j < 16; ++j)
+    {
+      MapChunk *chunk = getChunk(i, j);
+
+      unsigned layer = 0;
+
+      for (int k = 0; k < chunk->texture_set->num(); ++k)
+      {
+        if (chunk->texture_set->filename(0) == filename)
+          layer = k;
+      }
+
+      if (!layer)
+        continue;
+
+      chunk->texture_set->apply_alpha_changes();
+      auto alphamaps = chunk->texture_set->getAlphamaps();
+
+      auto alpha_layer = alphamaps->at(layer - 1).get();
+
+      for (int k = 0; k < 64; ++k)
+      {
+        for (int l = 0; l < 64; ++l)
+        {
+          int value = alpha_layer.getAlpha(64 * l + k);
+          image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
+        }
+      }
+    }
+  }
+
+  return std::move(image);
+}
+
+void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
+{
+  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
+
+  for (int k = 0; k < 16; ++k)
+  {
+    for (int l = 0; l < 16; ++l)
+    {
+      MapChunk* chunk = getChunk(k, l);
+
+      math::vector_3d* heightmap = chunk->getHeightmap();
+
+      for (unsigned y = 0; y < SUM; ++y)
+        for (unsigned x = 0; x < SUM; ++x)
+        {
+          unsigned const plain {y * SUM + x};
+          bool const is_virtual {static_cast<bool>(plain % 2)};
+
+          if (is_virtual)
+            continue;
+
+          bool const erp = plain % DSUM / SUM;
+          unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+
+          switch (image.depth())
+          {
+            case 32:
+            {
+              switch (mode)
+              {
+                case 0: // Set
+                  heightmap[idx].y = qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  break;
+
+                case 1: // Add
+                  heightmap[idx].y += qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  break;
+
+                case 2: // Subtract
+                  heightmap[idx].y -= qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  break;
+
+                case 3: // Multiply
+                  heightmap[idx].y *= qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  break;
+              }
+
+              break;
+            }
+
+            case 64:
+            {
+              switch (mode)
+              {
+                case 0: // Set
+                  heightmap[idx].y = image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;
+                  break;
+
+                case 1: // Add
+                  heightmap[idx].y += image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  break;
+
+                case 2: // Subtract
+                  heightmap[idx].y -= image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  break;
+
+                case 3: // Multiply
+                  heightmap[idx].y *= image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  break;
+              }
+
+              break;
+            }
+          }
+
+        }
+
+      chunk->updateVerticesData();
+    }
+  }
+}
+
+void MapTile::setAlphaImage(QImage const& image, unsigned layer)
+{
+  for (int k = 0; k < 16; ++k)
+  {
+    for (int l = 0; l < 16; ++l)
+    {
+      MapChunk* chunk = getChunk(k, l);
+
+      if (layer >= chunk->texture_set->num())
+        continue;
+
+      chunk->texture_set->create_temporary_alphamaps_if_needed();
+      auto& temp_alphamaps = chunk->texture_set->getTempAlphamaps()->get();
+
+      for (int i = 0; i < 64; ++i)
+      {
+        for (int j = 0; j < 64; ++j)
+        {
+          temp_alphamaps[layer][64 * j + i] = static_cast<float>(qGray(image.pixel((k * 64) + i, (l * 64) + j))) / 255.0f;
+        }
+      }
+
+      chunk->texture_set->markDirty();
+
+    }
+  }
+}
+
+QImage MapTile::getVertexColorsImage()
+{
+  QImage image(257, 257, QImage::Format_RGBA8888);
+
+  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
+
+  for (int k = 0; k < 16; ++k)
+  {
+    for (int l = 0; l < 16; ++l)
+    {
+      MapChunk* chunk = getChunk(k, l);
+
+      math::vector_3d* colors = chunk->getVertexColors();
+
+      for (unsigned y = 0; y < SUM; ++y)
+      {
+        for (unsigned x = 0; x < SUM; ++x)
+        {
+          unsigned const plain {y * SUM + x};
+          bool const is_virtual {static_cast<bool>(plain % 2)};
+          bool const erp = plain % DSUM / SUM;
+          unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+          float r = is_virtual ? (colors[idx].x + colors[idx + (erp ? SUM : 1)].x) / 2.f : colors[idx].x;
+          float g = is_virtual ? (colors[idx].y + colors[idx + (erp ? SUM : 1)].y) / 2.f : colors[idx].y;
+          float b = is_virtual ? (colors[idx].z + colors[idx + (erp ? SUM : 1)].z) / 2.f : colors[idx].z;
+          image.setPixelColor(x, y, QColor::fromRgbF(r, g, b, 1.0));
+        }
+      }
+    }
+  }
+
+  return std::move(image);
+}
+
+void MapTile::setVertexColorImage(QImage const& image, int mode)
+{
+  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
+
+  for (int k = 0; k < 16; ++k)
+  {
+    for (int l = 0; l < 16; ++l)
+    {
+      MapChunk* chunk = getChunk(k, l);
+
+      math::vector_3d* colors = chunk->getVertexColors();
+
+      for (unsigned y = 0; y < SUM; ++y)
+        for (unsigned x = 0; x < SUM; ++x)
+        {
+          unsigned const plain {y * SUM + x};
+          bool const is_virtual {static_cast<bool>(plain % 2)};
+
+          if (is_virtual)
+            continue;
+
+          bool const erp = plain % DSUM / SUM;
+          unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+
+          switch (mode)
+          {
+            case 0: // Set
+            {
+              auto color = image.pixelColor((k * 16) + x, (l * 16) + y);
+              colors[idx].x =  color.redF();
+              colors[idx].y =  color.blueF();
+              colors[idx].z =  color.greenF();
+              break;
+            }
+            case 1: // Add
+            {
+              auto color = image.pixelColor((k * 16) + x, (l * 16) + y);
+              colors[idx].x =  std::min(1.0, std::max(0.0, colors[idx].x + color.redF()));
+              colors[idx].y =  std::min(1.0, std::max(0.0, colors[idx].y + color.blueF()));
+              colors[idx].z =  std::min(1.0, std::max(0.0, colors[idx].z + color.greenF()));
+              break;
+            }
+
+            case 2: // Subtract
+            {
+              auto color = image.pixelColor((k * 16) + x, (l * 16) + y);
+              colors[idx].x =  std::min(1.0, std::max(0.0, colors[idx].x - color.redF()));
+              colors[idx].y =  std::min(1.0, std::max(0.0, colors[idx].y - color.blueF()));
+              colors[idx].z =  std::min(1.0, std::max(0.0, colors[idx].z - color.greenF()));
+              break;
+            }
+
+            case 3: // Multiply
+            {
+              auto color = image.pixelColor((k * 16) + x, (l * 16) + y);
+              colors[idx].x =  std::min(1.0, std::max(0.0, colors[idx].x * color.redF()));
+              colors[idx].y =  std::min(1.0, std::max(0.0, colors[idx].y * color.blueF()));
+              colors[idx].z =  std::min(1.0, std::max(0.0, colors[idx].z * color.greenF()));
+              break;
+            }
+          }
+
+        }
+
+      chunk->updateVerticesData();
+    }
+  }
+}

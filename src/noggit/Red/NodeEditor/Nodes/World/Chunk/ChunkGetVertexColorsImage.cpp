@@ -30,30 +30,11 @@ void ChunkGetVertexColorsImageNode::compute()
 
   MapChunk* chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
 
-  math::vector_3d* colors = chunk->getVertexColors();
-
-  QImage image(17, 17, QImage::Format_RGBA8888);
-
-  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
-
-
-  for (unsigned y = 0; y < SUM; ++y)
-    for (unsigned x = 0; x < SUM; ++x)
-    {
-      unsigned const plain {y * SUM + x};
-      bool const is_virtual {static_cast<bool>(plain % 2)};
-      bool const erp = plain % DSUM / SUM;
-      unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
-      float r = is_virtual ? (colors[idx].x + colors[idx + (erp ? SUM : 1)].x) / 2.f : colors[idx].x;
-      float g = is_virtual ? (colors[idx].y + colors[idx + (erp ? SUM : 1)].y) / 2.f : colors[idx].y;
-      float b = is_virtual ? (colors[idx].z + colors[idx + (erp ? SUM : 1)].z) / 2.f : colors[idx].z;
-      image.setPixelColor(x, y, QColor::fromRgbF(r, g, b, 1.0));
-    }
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<ImageData>(std::move(image));
+  _out_ports[1].out_value = std::make_shared<ImageData>(chunk->getVertexColorImage());
   _node->onDataUpdated(1);
 
 }

@@ -18,6 +18,7 @@
 
 #include <map>
 #include <memory>
+#include <QImage>
 
 class MPQFile;
 namespace math
@@ -93,6 +94,7 @@ public:
   MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha, tile_mode mode, noggit::NoggitRenderContext context
            , bool init_empty = false, int chunk_idx = 0);
 
+  auto getHoleMask(void) const -> unsigned { return static_cast<unsigned>(holes); }
   MapTile *mt;
   math::vector_3d vmin, vmax, vcenter;
   int px, py;
@@ -210,7 +212,15 @@ public:
   bool fixGapAbove(const MapChunk* chunk);
 
   math::vector_3d* getHeightmap() { return &mVertices[0]; };
+  auto getHeightmap(void) const -> math::vector_3d const* { return mVertices; }
   math::vector_3d* getVertexColors() { return &mccv[0]; };
 
   void update_vertex_colors();
+
+  QImage getHeightmapImage(float min_height, float max_height);
+  QImage getAlphamapImage(unsigned layer);
+  QImage getVertexColorImage();
+  void setHeightmapImage(QImage const& image, float multiplier, int mode);
+  void setAlphamapImage(QImage const& image, unsigned layer);
+  void setVertexColorImage(QImage const& image);
 };

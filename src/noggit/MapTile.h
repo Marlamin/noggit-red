@@ -132,6 +132,14 @@ public:
 
   void setFilename(const std::string& new_filename) {filename = new_filename;};
 
+  QImage getHeightmapImage(float min_height, float max_height);
+  QImage getAlphamapImage(unsigned layer);
+  QImage getAlphamapImage(std::string const& filename);
+  QImage getVertexColorsImage();
+  void setHeightmapImage(QImage const& image, float multiplier, int mode);
+  void setAlphaImage(QImage const& image, unsigned layer);
+  void setVertexColorImage(QImage const& image, int mode);
+
 private:
   tile_mode _mode;
   bool _tile_is_being_reloaded;
