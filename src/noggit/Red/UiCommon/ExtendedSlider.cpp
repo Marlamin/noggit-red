@@ -16,6 +16,7 @@ using namespace noggit::ui;
 
 ExtendedSlider::ExtendedSlider(QWidget* parent)
 : QWidget(parent)
+, _tablet_manager(TabletManager::instance())
 {
   _ui.setupUi(this);
 
@@ -26,6 +27,7 @@ ExtendedSlider::ExtendedSlider(QWidget* parent)
   auto tablet_enabled = new QCheckBox(_tablet_popup);
   tablet_enabled->setText("Use Tablet");
   layout->addWidget(tablet_enabled);
+  _ui.tabletControlMenuButton->setIcon(font_awesome_icon(font_awesome::icons::pen));
 
   connect(tablet_enabled, &QCheckBox::stateChanged,
           [=](int state)
@@ -37,14 +39,41 @@ ExtendedSlider::ExtendedSlider(QWidget* parent)
 
   layout->addWidget(new QLabel("Sensitivity:", _tablet_popup));
   auto sens_slider = new QSlider(_tablet_popup);
-  sens_slider->setRange(0, 100);
+  sens_slider->setRange(0, 1000);
+  sens_slider->setValue(300);
   sens_slider->setOrientation(Qt::Horizontal);
-  layout->addWidget(sens_slider);
+  sens_slider->setSingleStep(1);
+  sens_slider->setMinimumWidth(200);
+
+  auto sens_spin = new QDoubleSpinBox(_tablet_popup);
+  sens_spin->setRange(0, 1000);
+  sens_spin->setValue(300);
+  sens_spin->setDecimals(2);
+
+  auto sens_slider_panel = new QWidget(_tablet_popup);
+  auto sens_slider_panel_layout = new QHBoxLayout(sens_slider_panel);
+  sens_slider_panel_layout->addWidget(sens_slider);
+  sens_slider_panel_layout->addWidget(sens_spin);
+  layout->addWidget(sens_slider_panel);
+
+  _tablet_popup->updateGeometry();
+  _tablet_popup->adjustSize();
+  _tablet_popup->update();
+  _tablet_popup->repaint();
 
   connect(sens_slider, &QSlider::valueChanged,
           [=](int value)
           {
+            const QSignalBlocker blocker(sens_spin);
+            sens_spin->setValue(static_cast<double>(value));
             _tablet_sens_factor = value;
+          });
+
+  connect(sens_spin, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          [=](double value)
+          {
+              const QSignalBlocker blocker(sens_slider);
+              sens_slider->setValue(static_cast<int>(value));
           });
 
   _tablet_popup->setVisible(false);
@@ -68,25 +97,28 @@ ExtendedSlider::ExtendedSlider(QWidget* parent)
 
   _ui.slider->setRange(0, 100);
   connect(_ui.slider, &QSlider::valueChanged,
-          [=](int value)
+          [=](int v)
           {
             const QSignalBlocker blocker(_ui.doubleSpinBox);
 
             double spin_value = (_ui.doubleSpinBox->maximum() - _ui.doubleSpinBox->minimum())
-            * (_ui.slider->value() / (_ui.slider->maximum() - _ui.slider->minimum()));
+            * (v / static_cast<float>((_ui.slider->maximum() - _ui.slider->minimum())));
 
-            _ui.doubleSpinBox->setValue(value);
+            _ui.doubleSpinBox->setValue(spin_value);
+
+            emit valueChanged(value());
           });
 
   connect(_ui.doubleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
-          [=](double value)
+          [=](double v)
           {
               const QSignalBlocker blocker(_ui.slider);
 
               int slider_value = (_ui.slider->maximum() - _ui.slider->minimum())
                                   * (_ui.doubleSpinBox->value() / (_ui.doubleSpinBox->maximum() - _ui.doubleSpinBox->minimum()));
 
-              _ui.slider->setValue(value);
+              _ui.slider->setValue(slider_value);
+              emit valueChanged(value());
           });
 }
 
@@ -119,10 +151,15 @@ void ExtendedSlider::setSingleStep(double val)
   _ui.doubleSpinBox->setSingleStep(val);
 }
 
-
 double ExtendedSlider::value()
 {
-  // TODO: pressure stuff here
+
+  if (_is_tablet_supported && _is_tablet_affecting && _tablet_manager->isActive())
+  {
+    return std::min(_ui.doubleSpinBox->maximum(), _ui.doubleSpinBox->value()
+    + (_ui.doubleSpinBox->maximum() - _ui.doubleSpinBox->minimum()) * _tablet_manager->pressure() * (_tablet_sens_factor / 1000.0));
+  }
+
   return _ui.doubleSpinBox->value();
 }
 
@@ -140,4 +177,9 @@ void ExtendedSlider::setTabletSupportEnabled(bool state)
 void ExtendedSlider::setSliderRange(int min, int max)
 {
   _ui.slider->setRange(min, max);
+}
+
+void ExtendedSlider::setValue(double value)
+{
+  _ui.doubleSpinBox->setValue(value);
 }

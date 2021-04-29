@@ -18,6 +18,7 @@
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/Red/ViewportGizmo/ViewportGizmo.hpp>
 #include <noggit/Red/ViewportManager/ViewportManager.hpp>
+#include <noggit/TabletManager.hpp>
 #include <external/qtimgui/QtImGui.h>
 #include <external/QtAdvancedDockingSystem/src/DockManager.h>
 #include <opengl/texture.hpp>
@@ -120,6 +121,9 @@ public:
   noggit::bool_toggle_property _draw_fog = {false};
   noggit::bool_toggle_property _draw_hidden_models = {false};
 private:
+
+
+
   int _selected_area_id = -1;
   std::map<int, misc::random_color> _area_id_colors;
 
@@ -294,8 +298,7 @@ private:
 
   std::unique_ptr<World> _world;
 
-  float _tablet_pressure;
-  bool _tablet_active = false;
+  noggit::TabletManager* _tablet_manager;
 
   QLabel* _status_position;
   QLabel* _status_selection;

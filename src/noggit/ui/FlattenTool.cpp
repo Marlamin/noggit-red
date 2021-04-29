@@ -16,8 +16,6 @@ namespace noggit
   {
     flatten_blur_tool::flatten_blur_tool(QWidget* parent)
       : QWidget(parent)
-      , _radius(10.0f)
-      , _speed(2.0f)
       , _angle(45.0f)
       , _orientation(0.0f)
       , _flatten_type(eFlattenType_Linear)
@@ -25,7 +23,7 @@ namespace noggit
     {
       setMinimumWidth(250);
       setMaximumWidth(250);
-      auto layout (new QFormLayout (this));
+      auto layout (new QVBoxLayout (this));
 
       _type_button_box = new QButtonGroup (this);
       QRadioButton* radio_flat = new QRadioButton ("Flat");
@@ -47,38 +45,33 @@ namespace noggit
       flatten_type_layout->addWidget (radio_smooth, 1, 0);
       flatten_type_layout->addWidget (radio_origin, 1, 1);
 
-      layout->addRow (flatten_type_group);
+      flatten_type_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+      layout->addWidget (flatten_type_group);
 
       QGroupBox* settings_group(new QGroupBox("Settings"));
-      auto settings_layout = new QFormLayout(settings_group);
+      settings_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+      auto settings_layout = new QVBoxLayout(settings_group);
 
-      _radius_spin = new QDoubleSpinBox (this);
-      _radius_spin->setRange (0.0f, 1000.0f);
-      _radius_spin->setDecimals (2);
-      _radius_spin->setValue (_radius);
 
-      _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
+      _radius_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
+      _radius_slider->setPrefix("Radius:");
       _radius_slider->setRange (0, 1000);
-      _radius_slider->setSliderPosition (_radius);
+      _radius_slider->setDecimals (2);
+      _radius_slider->setValue (10.0f);
 
-      _speed_spin = new QDoubleSpinBox (this);
-      _speed_spin->setRange (0.0f, 10.0f);
-      _speed_spin->setDecimals (2);
-      _speed_spin->setValue (_speed);
+      _speed_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
+      _speed_slider->setPrefix("Speed:");
+      _speed_slider->setRange (0, 10);
+      _speed_slider->setSingleStep (1);
+      _speed_slider->setValue(2.0f);
 
-      _speed_slider = new QSlider (Qt::Orientation::Horizontal, this);
-      _speed_slider->setRange (0, 10 * 100);
-      _speed_slider->setSingleStep (50);
-      _speed_slider->setSliderPosition (_speed * 100);
+      settings_layout->addWidget(_radius_slider);
+      settings_layout->addWidget(_speed_slider);
 
-      settings_layout->addRow("Radius:", _radius_spin);
-      settings_layout->addRow(_radius_slider);
-      settings_layout->addRow("Speed:", _speed_spin);
-      settings_layout->addRow(_speed_slider);
-
-      layout->addRow(settings_group);
+      layout->addWidget(settings_group);
 
       QGroupBox* flatten_blur_group = new QGroupBox("Flatten/Blur", this);
+      flatten_blur_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
       auto flatten_blur_layout = new QGridLayout(flatten_blur_group);
 
       flatten_blur_layout->addWidget(_lock_up_checkbox = new QCheckBox(this), 0, 0);
@@ -91,14 +84,15 @@ namespace noggit
       _lock_down_checkbox->setText("Lower");
       _lock_down_checkbox->setToolTip("Lower the terrain when using the tool");
 
-      layout->addRow(flatten_blur_group);
+      layout->addWidget(flatten_blur_group);
 
       QGroupBox* flatten_only_group = new QGroupBox("Flatten only", this);
-      auto flatten_only_layout = new QFormLayout(flatten_only_group);
+      auto flatten_only_layout = new QVBoxLayout(flatten_only_group);
 
       _angle_group = new QGroupBox("Angled mode", this);
       _angle_group->setCheckable(true);
       _angle_group->setChecked(false);
+      _angle_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 
       QGridLayout* angle_layout(new QGridLayout(_angle_group));
 
@@ -116,7 +110,7 @@ namespace noggit
       _angle_slider->setMinimumHeight(80);
       angle_layout->addWidget(_angle_slider, 0, 1);
       
-      flatten_only_layout->addRow(_angle_group);
+      flatten_only_layout->addWidget(_angle_group);
 
       _lock_group = new QGroupBox("Lock mode", this);
       _lock_group->setCheckable(true);
@@ -136,51 +130,15 @@ namespace noggit
       _lock_h->setDecimals(3);
       _lock_h->setMinimumWidth(30);
 
-      flatten_only_layout->addRow(_lock_group);
-      layout->addRow(flatten_only_group);
+      flatten_only_layout->addWidget(_lock_group);
+      layout->addWidget(flatten_only_group);
 
-      connect ( _type_button_box, qOverload<int> (&QButtonGroup::buttonClicked)
+      connect ( _type_button_box, qOverload<int> (&QButtonGroup::idClicked)
               , [&] (int id)
                 {
                   _flatten_type = id;
                 }
               );
-
-      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
-                {
-                  _radius = v;
-                  QSignalBlocker const blocker(_radius_slider);
-                  _radius_slider->setSliderPosition ((int)std::round (v));
-                 }
-              );
-
-      connect ( _radius_slider, &QSlider::valueChanged
-              , [&] (int v)
-                {
-                  _radius = v;
-                   QSignalBlocker const blocker(_radius_spin);
-                   _radius_spin->setValue(v);
-                }
-              );
-
-      connect ( _speed_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-                , [&] (double v)
-                  {
-                    _speed = v;
-                    QSignalBlocker const blocker(_speed_slider);
-                    _speed_slider->setSliderPosition ((int)std::round (v * 100.0f));
-                  }
-                );
-
-      connect ( _speed_slider, &QSlider::valueChanged
-                , [&] (int v)
-                  {
-                    _speed = v / 100.0f;
-                    QSignalBlocker const blocker(_speed_spin);
-                    _speed_spin->setValue (_speed);
-                  }
-                );
 
       connect( _lock_up_checkbox, &QCheckBox::stateChanged
                , [&] (int state)
@@ -235,8 +193,8 @@ namespace noggit
     void flatten_blur_tool::flatten (World* world, math::vector_3d const& cursor_pos, float dt)
     {
       world->flattenTerrain ( cursor_pos
-                            , 1.f - pow (0.5f, dt *_speed)
-                            , _radius
+                            , 1.f - pow (0.5f, dt *_speed_slider->value())
+                            , _radius_slider->value()
                             , _flatten_type
                             , _flatten_mode
                             , use_ref_pos() ? _lock_pos : cursor_pos
@@ -248,8 +206,8 @@ namespace noggit
     void flatten_blur_tool::blur (World* world, math::vector_3d const& cursor_pos, float dt)
     {
       world->blurTerrain ( cursor_pos
-                         , 1.f - pow (0.5f, dt * _speed)
-                         , _radius
+                         , 1.f - pow (0.5f, dt * _speed_slider->value())
+                         , _radius_slider->value()
                          , _flatten_type
                          , _flatten_mode
                          );
@@ -296,17 +254,17 @@ namespace noggit
 
     void flatten_blur_tool::changeRadius(float change)
     {
-      _radius_spin->setValue (_radius + change);
+      _radius_slider->setValue (_radius_slider->value() + change);
     }
 
     void flatten_blur_tool::changeSpeed(float change)
     {
-      _speed_spin->setValue(_speed + change);
+      _speed_slider->setValue(_speed_slider->value() + change);
     }
 
     void flatten_blur_tool::setSpeed(float speed)
     {
-      _speed_spin->setValue(speed);
+      _speed_slider->setValue(speed);
     }
 
     void flatten_blur_tool::changeOrientation(float change)
@@ -343,7 +301,7 @@ namespace noggit
 
     void flatten_blur_tool::setRadius(float radius)
     {
-      _radius_spin->setValue(radius);
+      _radius_slider->setValue(radius);
     }
 
     QSize flatten_blur_tool::sizeHint() const

@@ -83,6 +83,7 @@ void MapView::set_editing_mode (editing_mode mode)
   _texture_palette_dock->hide();
   _object_palette_dock->hide();
   _asset_browser_dock->hide();
+  _viewport_overlay_ui->gizmoBar->hide();
 
   MoveObj = false;
   _world->reset_selection();
@@ -131,6 +132,7 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
     _object_editor_dock->setVisible(!ui_hidden);
     _asset_browser_dock->setVisible(!ui_hidden);
     _object_palette_dock->setVisible(!ui_hidden);
+    _viewport_overlay_ui->gizmoBar->setVisible(!ui_hidden);
     break;
   case editing_mode::holes:
     _hole_tool_dock->setVisible(!ui_hidden);
@@ -910,7 +912,8 @@ void MapView::createGUI()
       objectEditor->helper_models_widget,
       _texture_palette_small,
       _object_palette_dock,
-      _asset_browser_dock
+      _asset_browser_dock,
+      _viewport_overlay_ui->gizmoBar
     };
 
 
@@ -1503,6 +1506,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _modeStampPaletteMain{this}
   , _texBrush{new opengl::texture{}}
   , _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW)
+  , _tablet_manager(noggit::TabletManager::instance())
 {
   _context = noggit::NoggitRenderContext::MAP_VIEW;
   _transform_gizmo.setWorld(_world.get());
@@ -1586,8 +1590,6 @@ MapView::MapView( math::degrees camera_yaw0
   look = false;
   _display_mode = display_mode::in_3D;
 
-  _tablet_active = true;
-
   _startup_time.start();
   _update_every_event_loop.start (0);
   connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
@@ -1601,9 +1603,9 @@ MapView::MapView( math::degrees camera_yaw0
 
 void MapView::tabletEvent(QTabletEvent* event)
 {
-  _tablet_pressure = event->pressure();
-  event->setAccepted(true);
-    
+  _tablet_manager->setPressure(event->pressure());
+  _tablet_manager->setIsActive(true);
+  event->ignore();
 }
 
 auto MapView::setBrushTexture(QPixmap const* pixmap) -> void
@@ -2054,21 +2056,6 @@ void MapView::tick (float dt)
   else
   {
     update_cursor_pos();
-  }
-
-  if (_tablet_active && _settings->value ("tablet/enabled", false).toBool())
-  {
-    switch (terrainMode)
-    {
-    case editing_mode::ground:
-      terrainTool->setSpeed(_tablet_pressure * 10.0f);
-    case editing_mode::flatten_blur:
-      flattenTool->setSpeed(_tablet_pressure * 10.0f);
-      break;
-    case editing_mode::paint:
-      texturingTool->set_pressure(_tablet_pressure);
-      break;
-    }
   }
 
     math::degrees yaw (-_camera.yaw()._);
@@ -2542,10 +2529,7 @@ void MapView::tick (float dt)
              << std::setw (2) << (time % 60);
 
 
-    if (_tablet_active && _settings->value ("tablet/enabled", false).toBool())
-    {
-      timestrs << ", Pres: " << _tablet_pressure;
-    }
+    timestrs << ", Pres: " << _tablet_manager->pressure();
 
     _status_time->setText (QString::fromStdString (timestrs.str()));
   }
@@ -3401,6 +3385,11 @@ void MapView::change_selected_wmo_doodadset(int set)
 
 void MapView::mousePressEvent(QMouseEvent* event)
 {
+  if(event->source() == Qt::MouseEventNotSynthesized)
+  {
+    _tablet_manager->setIsActive(false);
+  }
+
   makeCurrent();
   opengl::context::scoped_setter const _(::gl, context());
 

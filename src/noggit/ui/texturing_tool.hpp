@@ -7,6 +7,7 @@
 #include <noggit/Brush.h>
 #include <noggit/TextureManager.h>
 #include <noggit/unsigned_int_property.hpp>
+#include <noggit/Red/UiCommon/ExtendedSlider.hpp>
 
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDial>
@@ -88,9 +89,6 @@ namespace noggit
       Brush _spray_brush;
 
       int _brush_level;
-      float _hardness;
-      float _pressure;
-
       bool _show_unpaintable_chunks;
 
       float _spray_size;
@@ -105,13 +103,10 @@ namespace noggit
 
     private:
       QSlider* _brush_level_slider;
-      QSlider* _hardness_slider;
-      QSlider* _radius_slider;
-      QSlider* _pressure_slider;
+      noggit::Red::UiCommon::ExtendedSlider* _hardness_slider;
+      noggit::Red::UiCommon::ExtendedSlider* _radius_slider;
+      noggit::Red::UiCommon::ExtendedSlider* _pressure_slider;
       QSpinBox* _brush_level_spin;
-      QDoubleSpinBox* _hardness_spin;
-      QDoubleSpinBox* _radius_spin;
-      QDoubleSpinBox* _pressure_spin;
 
       QCheckBox* _show_unpaintable_chunks_cb;
 

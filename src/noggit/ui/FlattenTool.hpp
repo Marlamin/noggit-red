@@ -3,6 +3,7 @@
 #pragma once
 
 #include <noggit/tool_enums.hpp>
+#include <noggit/Red/UiCommon/ExtendedSlider.hpp>
 #include <math/vector_3d.hpp>
 
 #include <QtWidgets/QButtonGroup>
@@ -42,7 +43,7 @@ namespace noggit
       void setSpeed(float speed);
       void setOrientation(float orientation);
 
-      float brushRadius() const { return _radius; }
+      float brushRadius() const { return _radius_slider->value(); }
       float angle() const { return _angle; }
       float orientation() const { return _orientation; }
       bool angled_mode() const { return _angle_group->isChecked(); }
@@ -53,8 +54,6 @@ namespace noggit
 
     private:
 
-      float _radius;
-      float _speed;
       float _angle;
       float _orientation;
 
@@ -65,10 +64,8 @@ namespace noggit
 
     private:
       QButtonGroup* _type_button_box;
-      QSlider* _radius_slider;
-      QSlider* _speed_slider;
-      QDoubleSpinBox* _radius_spin;
-      QDoubleSpinBox* _speed_spin;
+      noggit::Red::UiCommon::ExtendedSlider* _radius_slider;
+      noggit::Red::UiCommon::ExtendedSlider* _speed_slider;
 
       QGroupBox* _angle_group;
       QSlider* _angle_slider;

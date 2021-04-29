@@ -5,6 +5,7 @@
 #include <math/trig.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/tool_enums.hpp>
+#include <noggit/Red/UiCommon/ExtendedSlider.hpp>
 
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDial>
@@ -46,8 +47,8 @@ namespace noggit
       void changeAngle (float change);
       void setOrientRelativeTo (World*, math::vector_3d const& pos);
 
-      float brushRadius() const { return _radius; }
-      float innerRadius() const { return _inner_radius;  }
+      float brushRadius() const { return static_cast<float>(_radius_slider->value()); }
+      float innerRadius() const { return static_cast<float>(_inner_radius_slider->value());  }
 
       void storeCursorPos (math::vector_3d* cursor_pos) { _cursor_pos = cursor_pos; }
 
@@ -61,9 +62,6 @@ namespace noggit
     private:
       void updateVertexGroup();
 
-      float _radius;
-      float _speed;
-      float _inner_radius;
       math::degrees _vertex_angle;
       math::degrees _vertex_orientation;
 
@@ -78,12 +76,9 @@ namespace noggit
       QGroupBox* _speed_box;
       QGroupBox* _vertex_type_group;
 
-      QSlider* _radius_slider;
-      QSlider* _inner_radius_slider;
-      QSlider* _speed_slider;
-      QDoubleSpinBox* _radius_spin;
-      QDoubleSpinBox* _inner_radius_spin;
-      QDoubleSpinBox* _speed_spin;
+      noggit::Red::UiCommon::ExtendedSlider* _radius_slider;
+      noggit::Red::UiCommon::ExtendedSlider* _inner_radius_slider;
+      noggit::Red::UiCommon::ExtendedSlider* _speed_slider;
 
       QSlider* _angle_slider;
       QDial* _orientation_dial;

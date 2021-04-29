@@ -19,16 +19,18 @@ ExpanderWidget::ExpanderWidget(QWidget *parent, bool in_designer)
     m_button->setObjectName("__qt__passive_button");
     m_button->setText("Expander");
     m_button->setFlat(true);
-	m_button->setCheckable(true);
-	m_button->setChecked(true);
-	m_button->setIcon(m_expandedIcon);
+	//m_button->setCheckable(true);
+	//m_button->setChecked(true);
+    m_button->setIcon(m_expandedIcon);
     m_button->setStyleSheet("text-align: left; font-weight: bold; border: none;");
-	
     connect(m_button, SIGNAL(clicked()), this, SLOT(buttonPressed()));
 
     m_stackWidget = new QStackedWidget();
+    m_stackWidget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 
     m_layout = new QVBoxLayout();
+    m_layout->setContentsMargins(0, 0, 0, 0);
+    m_layout->setSpacing(0);
     m_layout->addWidget(m_button, 0, Qt::AlignTop);
     m_layout->addWidget(m_stackWidget);
     setLayout(m_layout);
@@ -39,13 +41,13 @@ void ExpanderWidget::buttonPressed()
     if(m_expanded)
     {
         m_expanded = false;
-		m_button->setIcon(m_collapsedIcon);
+		    m_button->setIcon(m_collapsedIcon);
         m_stackWidget->hide();
-	}
+	  }
     else
     {
         m_expanded = true;
-		m_button->setIcon(m_expandedIcon);
+		    m_button->setIcon(m_expandedIcon);
         m_stackWidget->show();
 	}
 

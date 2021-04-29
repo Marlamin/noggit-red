@@ -3,6 +3,7 @@
 #pragma once
 
 #include <math/vector_4d.hpp>
+#include <noggit/Red/UiCommon/ExtendedSlider.hpp>
 
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
@@ -33,19 +34,15 @@ namespace noggit
       void changeRadius(float change);
       void changeSpeed(float change);
 
-      float brushRadius() const { return _radius; }
+      float brushRadius() const { return _radius_slider->value(); }
 
       QSize sizeHint() const override;
 
     private:
-      float _radius;
-      float _speed;
       math::vector_4d& _color;
 
-      QSlider* _radius_slider;
-      QSlider* _speed_slider;
-      QDoubleSpinBox* _radius_spin;
-      QDoubleSpinBox* _speed_spin;
+      noggit::Red::UiCommon::ExtendedSlider* _radius_slider;
+      noggit::Red::UiCommon::ExtendedSlider* _speed_slider;
       QSpinBox* _spin_hue;
       QSpinBox* _spin_saturation;
       QSpinBox* _spin_value;

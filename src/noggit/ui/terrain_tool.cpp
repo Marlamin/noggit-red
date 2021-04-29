@@ -19,9 +19,6 @@ namespace noggit
     terrain_tool::terrain_tool(QWidget* parent)
       : QWidget(parent)
       , _edit_type (eTerrainType_Linear)
-      , _radius(15.0f)
-      , _speed(2.0f)
-      , _inner_radius(0.0f)
       , _vertex_angle (0.0f)
       , _vertex_orientation (0.0f)
       , _cursor_pos(nullptr)
@@ -30,6 +27,7 @@ namespace noggit
       setMinimumWidth(250);
       setMaximumWidth(250);
       auto layout (new QFormLayout (this));
+      layout->setAlignment(Qt::AlignTop);
 
       _type_button_group = new QButtonGroup (this);
       QRadioButton* radio_flat = new QRadioButton ("Flat");
@@ -65,43 +63,30 @@ namespace noggit
 
       layout->addRow (terrain_type_group);
 
-      _radius_spin = new QDoubleSpinBox (this);
-      _radius_spin->setRange (0.0f, 1000.0f);
-      _radius_spin->setDecimals (2);
-      _radius_spin->setValue (_radius);
-
-      _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
+      _radius_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
       _radius_slider->setRange (0, 1000);
-      _radius_slider->setSliderPosition ((int)std::round (_radius));
+      _radius_slider->setPrefix("Radius");
+      _radius_slider->setDecimals(2);
+      _radius_slider->setValue(15);
 
-      _inner_radius_spin = new QDoubleSpinBox (this);
-      _inner_radius_spin->setRange (0.0f, 1.0f);
-      _inner_radius_spin->setDecimals (2);
-      _inner_radius_spin->setValue (_inner_radius);
-      _inner_radius_spin->setSingleStep(0.05f);
-
-      _inner_radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
-      _inner_radius_slider->setRange (0, 100);
-      _inner_radius_slider->setSliderPosition ((int)std::round (_inner_radius * 100));
+      _inner_radius_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
+      _inner_radius_slider->setRange (0.0, 1.0);
+      _inner_radius_slider->setPrefix("Inner Radius");
+      _inner_radius_slider->setDecimals(2);
+      _inner_radius_slider->setSingleStep(0.05f);
+      _inner_radius_slider->setValue(0);
 
       QGroupBox* settings_group(new QGroupBox ("Settings"));
       QFormLayout* settings_layout (new QFormLayout (settings_group));
 
-      _speed_spin = new QDoubleSpinBox (this);
-      _speed_spin->setRange (0.0f, 10.0f);
-      _speed_spin->setDecimals (2);
-      _speed_spin->setValue (_speed);
-
-      _speed_slider = new QSlider (Qt::Orientation::Horizontal, this);
+      _speed_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
+      _speed_slider->setPrefix("Speed");
       _speed_slider->setRange (0, 10 * 100);
-      _speed_slider->setSingleStep (50);
-      _speed_slider->setSliderPosition (_speed * 100);
-      
-      settings_layout->addRow("Outer Radius:", _radius_spin);
+      _speed_slider->setSingleStep (1);
+      _speed_slider->setValue(2);
+
       settings_layout->addRow(_radius_slider);
-      settings_layout->addRow("Inner Radius:", _inner_radius_spin);
       settings_layout->addRow(_inner_radius_slider);
-      settings_layout->addRow("Speed:", _speed_spin);
       settings_layout->addRow(_speed_slider);
 
       layout->addRow(settings_group);
@@ -152,59 +137,6 @@ namespace noggit
                 }
               );
 
-      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
-                {
-                  _radius = v;
-                  QSignalBlocker const blocker(_radius_slider);
-                  _radius_slider->setSliderPosition ((int)std::round (v));
-                 }
-              );
-
-      connect ( _radius_slider, &QSlider::valueChanged
-              , [&] (int v)
-                {
-                  _radius = v;
-                   QSignalBlocker const blocker(_radius_spin);
-                   _radius_spin->setValue(v);
-                }
-              );
-
-      connect ( _inner_radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
-                {
-                  _inner_radius = v;
-                  QSignalBlocker const blocker(_inner_radius_slider);
-                  _inner_radius_slider->setSliderPosition ((int)std::round (v * 100));
-                 }
-              );
-
-      connect ( _inner_radius_slider, &QSlider::valueChanged
-              , [&] (int v)
-                {
-                  _inner_radius = v / 100.0f;
-                   QSignalBlocker const blocker(_inner_radius_spin);
-                   _inner_radius_spin->setValue(_inner_radius);
-                }
-              );
-
-      connect ( _speed_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-                , [&] (double v)
-                  {
-                    _speed = v;
-                    QSignalBlocker const blocker(_speed_slider);
-                    _speed_slider->setSliderPosition ((int)std::round (v * 100.0f));
-                  }
-                );
-
-      connect ( _speed_slider, &QSlider::valueChanged
-                , [&] (int v)
-                  {
-                    _speed = v / 100.0f;
-                    QSignalBlocker const blocker(_speed_spin);
-                    _speed_spin->setValue (_speed);
-                  }
-                );
 
       connect ( _vertex_button_group, qOverload<int> (&QButtonGroup::buttonClicked)
               , [&] (int id)
@@ -232,20 +164,22 @@ namespace noggit
     void terrain_tool::changeTerrain
       (World* world, math::vector_3d const& pos, float dt)
     {
+
+      float radius =  static_cast<float>(_radius_slider->value());
       if(_edit_type != eTerrainType_Vertex)
       {
-        world->changeTerrain(pos, dt*_speed, _radius, _edit_type, _inner_radius);
+        world->changeTerrain(pos, dt * _speed_slider->value(), radius, _edit_type, _inner_radius_slider->value());
       }
       else
       {
         // < 0 ==> control is pressed
         if (dt >= 0.0f)
         {
-          world->selectVertices(pos, _radius);
+          world->selectVertices(pos,  radius);
         }
         else
         {
-          if (world->deselectVertices(pos, _radius))
+          if (world->deselectVertices(pos,  radius))
           {
             _vertex_angle = math::degrees (0.0f);
             _vertex_orientation = math::degrees (0.0f);
@@ -257,7 +191,7 @@ namespace noggit
 
     void terrain_tool::moveVertices (World* world, float dt)
     {
-      world->moveVertices(dt * _speed);
+      world->moveVertices(dt * _speed_slider->value());
     }
 
     void terrain_tool::flattenVertices (World* world)
@@ -277,27 +211,27 @@ namespace noggit
 
     void terrain_tool::setRadius(float radius)
     {
-      _radius_spin->setValue(radius);
+      _radius_slider->setValue(radius);
     }
 
     void terrain_tool::changeRadius(float change)
     {
-      setRadius (_radius + change);
+      setRadius (_radius_slider->value() + change);
     }
 
     void terrain_tool::changeInnerRadius(float change)
     {
-      _inner_radius_spin->setValue(_inner_radius + change);
+      _inner_radius_slider->setValue(_inner_radius_slider->value() + change);
     }
 
     void terrain_tool::changeSpeed(float change)
     {
-      _speed_spin->setValue(_speed + change);
+      _speed_slider->setValue(_speed_slider->value() + change);
     }
 
     void terrain_tool::setSpeed(float speed)
     {
-      _speed_spin->setValue(speed);
+      _speed_slider->setValue(speed);
     }
 
     void terrain_tool::changeOrientation (float change)

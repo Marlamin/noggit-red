@@ -25,37 +25,25 @@ namespace noggit
   {
     shader_tool::shader_tool(math::vector_4d& color, QWidget* parent)
       : QWidget(parent)
-      , _radius(15.0f)
-      , _speed(1.0f)
       , _color(color)
     {
 
       auto layout (new QFormLayout(this));
 
-      _radius_spin = new QDoubleSpinBox (this);
-      _radius_spin->setRange (0.0f, 100.0f);
-      _radius_spin->setDecimals (2);
-      _radius_spin->setValue (_radius);
-
-      layout->addRow ("Radius:", _radius_spin);
-
-      _radius_slider = new QSlider (Qt::Orientation::Horizontal, this);
-      _radius_slider->setRange (0, 100);
-      _radius_slider->setSliderPosition (_radius);
+      _radius_slider = new noggit::Red::UiCommon::ExtendedSlider (this);
+      _radius_slider->setPrefix("Radius:");
+      _radius_slider->setRange(0, 100);
+      _radius_slider->setDecimals(2);
+      _radius_slider->setValue (15.0f);
 
       layout->addRow (_radius_slider);
 
-      _speed_spin = new QDoubleSpinBox (this);
-      _speed_spin->setRange (0.0f, 10.0f);
-      _speed_spin->setDecimals (2);
-      _speed_spin->setValue (_speed);
-
-      layout->addRow ("Speed:", _speed_spin);
-
-      _speed_slider = new QSlider (Qt::Orientation::Horizontal, this);
-      _speed_slider->setRange (0, 10 * 100);
-      _speed_slider->setSingleStep (50);
-      _speed_slider->setSliderPosition (_speed * 100);
+      _speed_slider = new noggit::Red::UiCommon::ExtendedSlider (this);
+      _speed_slider->setPrefix("Speed:");
+      _speed_slider->setRange (0, 10);
+      _speed_slider->setSingleStep (1);
+      _speed_slider->setDecimals(2);
+      _speed_slider->setValue (1.0f);
 
       layout->addRow(_speed_slider);
 
@@ -126,42 +114,7 @@ namespace noggit
                   _color_palette->setColorAt(_color_palette->colors().length() - 1, color_wheel->color());
                 }
               );
-     
-      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
-                {
-                  _radius = v;
-                  QSignalBlocker const blocker(_radius_slider);
-                  _radius_slider->setSliderPosition ((int)std::round (v));
-                }
-              );
 
-      connect ( _radius_slider, &QSlider::valueChanged
-              , [&] (int v)
-                {
-                  _radius = v;
-                  QSignalBlocker const blocker(_radius_spin);
-                  _radius_spin->setValue(v);
-                }
-              );
-
-      connect ( _speed_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
-                {
-                  _speed = v;
-                  QSignalBlocker const blocker(_speed_slider);
-                  _speed_slider->setSliderPosition ((int)std::round (v * 100.0f));
-                }
-              );
-
-      connect ( _speed_slider, &QSlider::valueChanged
-              , [&] (int v)
-                {
-                  _speed = v / 100.0f;
-                  QSignalBlocker const blocker(_speed_spin);
-                  _speed_spin->setValue (_speed);
-                }
-              );
 
       connect ( color_picker, &color_widgets::ColorSelector::colorChanged
               , [this] (QColor new_color)
@@ -184,17 +137,17 @@ namespace noggit
     void shader_tool::changeShader
       (World* world, math::vector_3d const& pos, float dt, bool add)
     {
-      world->changeShader (pos, _color, 2.0f*dt*_speed, _radius, add);
+      world->changeShader (pos, _color, 2.0f*dt*_speed_slider->value(), _radius_slider->value(), add);
     }
 
     void shader_tool::changeRadius(float change)
     {
-      _radius_spin->setValue (_radius + change);
+      _radius_slider->setValue (_radius_slider->value() + change);
     }
 
     void shader_tool::changeSpeed(float change)
     {
-      _speed_spin->setValue(_speed + change);
+      _speed_slider->setValue(_speed_slider->value() + change);
     }
 
     void shader_tool::pickColor(World* world, math::vector_3d const& pos)

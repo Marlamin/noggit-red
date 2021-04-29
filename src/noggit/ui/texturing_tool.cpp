@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/texturing_tool.hpp>
+#include <noggit/TabletManager.hpp>
 
 #include <noggit/Misc.h>
 #include <noggit/World.h>
@@ -13,6 +14,7 @@
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTabWidget>
+#include <noggit/Red/UiCommon/ExtendedSlider.hpp>
 
 namespace noggit
 {
@@ -25,8 +27,6 @@ namespace noggit
                                    )
       : QWidget(parent)
       , _brush_level(255)
-      , _hardness(0.5f)
-      , _pressure(0.9f)
       , _show_unpaintable_chunks(false)
       , _spray_size(1.0f)
       , _spray_pressure(2.0f)
@@ -50,49 +50,40 @@ namespace noggit
       auto tabs (new QTabWidget(this));
 
       auto tool_widget (new QWidget (this));
-      auto tool_layout (new QFormLayout (tool_widget));
+      auto tool_layout (new QVBoxLayout (tool_widget));
+      tool_layout->setAlignment(Qt::AlignTop);
 
       auto slider_layout (new QGridLayout);
-      tool_layout->addRow(slider_layout);
-      auto slider_layout_left (new QFormLayout(tool_widget));
+      tool_layout->addItem(slider_layout);
+      auto slider_layout_left (new QVBoxLayout(tool_widget));
       slider_layout->addLayout(slider_layout_left, 0, 0);
       auto slider_layout_right(new QVBoxLayout(tool_widget));
       slider_layout->addLayout(slider_layout_right, 0, 1);
 
-      _hardness_spin = new QDoubleSpinBox (tool_widget);
-      _hardness_spin->setRange (0.0f, 1.0f);
-      _hardness_spin->setDecimals (2);
-      _hardness_spin->setValue (_hardness);
-      _hardness_spin->setSingleStep(0.05f);
-      slider_layout_left->addRow("Hardness:", _hardness_spin);
+      slider_layout_left->addWidget(new QLabel("Hardness:", tool_widget));
+      _hardness_slider = new noggit::Red::UiCommon::ExtendedSlider(tool_widget);
+      _hardness_slider->setPrefix("");
+      _hardness_slider->setRange (0, 1);
+      _hardness_slider->setDecimals(2);
+      _hardness_slider->setSingleStep(0.05f);
+      _hardness_slider->setValue(0.5f);
+      slider_layout_left->addWidget(_hardness_slider);
 
-      _hardness_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
-      _hardness_slider->setRange (0, 100);
-      _hardness_slider->setSliderPosition (_hardness * 100);
-      slider_layout_left->addRow (_hardness_slider);
-
-      _radius_spin = new QDoubleSpinBox (tool_widget);
-      _radius_spin->setRange (0.0f, 100.0f);
-      _radius_spin->setDecimals (2);
-      _radius_spin->setValue (_texture_brush.getRadius());
-      slider_layout_left->addRow ("Radius:", _radius_spin);
-
-      _radius_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
+      slider_layout_left->addWidget(new QLabel("Radius:", tool_widget));
+      _radius_slider = new noggit::Red::UiCommon::ExtendedSlider(tool_widget);
+      _radius_slider->setPrefix("");
       _radius_slider->setRange (0, 100);
-      _radius_slider->setSliderPosition (_texture_brush.getRadius());
-      slider_layout_left->addRow (_radius_slider);
+      _radius_slider->setDecimals (2);
+      _radius_slider->setValue(_texture_brush.getRadius());
+      slider_layout_left->addWidget (_radius_slider);
 
-      _pressure_spin = new QDoubleSpinBox (tool_widget);
-      _pressure_spin->setRange (0.0f, 1.0);
-      _pressure_spin->setDecimals (2);
-      _pressure_spin->setValue (_pressure);
-      _pressure_spin->setSingleStep(0.05f);
-      slider_layout_left->addRow ("Pressure:", _pressure_spin);
-
-      _pressure_slider = new QSlider (Qt::Orientation::Horizontal, tool_widget);
-      _pressure_slider->setRange (0, 100);
-      _pressure_slider->setSliderPosition (std::round(_pressure * 100));
-      slider_layout_left->addRow (_pressure_slider);
+      slider_layout_left->addWidget(new QLabel("Pressure:", tool_widget));
+      _pressure_slider = new noggit::Red::UiCommon::ExtendedSlider(tool_widget);
+      _pressure_slider->setPrefix("");
+      _pressure_slider->setRange (0, 1.0f);
+      _pressure_slider->setDecimals (2);
+      _pressure_slider->setValue (0.9f);
+      slider_layout_left->addWidget (_pressure_slider);
 
       _brush_level_slider = new QSlider (Qt::Orientation::Vertical, tool_widget);
       _brush_level_slider->setRange (0, 255);
@@ -110,12 +101,13 @@ namespace noggit
 
       _show_unpaintable_chunks_cb = new QCheckBox("Show unpaintable chunks", tool_widget);
       _show_unpaintable_chunks_cb->setChecked(false);
-      tool_layout->addRow(_show_unpaintable_chunks_cb);
+      tool_layout->addWidget(_show_unpaintable_chunks_cb);
 
       // spray
       _spray_mode_group = new QGroupBox("Spray", tool_widget);
+      _spray_mode_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
       _spray_mode_group->setCheckable(true);
-      tool_layout->addRow (_spray_mode_group);
+      tool_layout->addWidget (_spray_mode_group);
 
       _spray_content = new QWidget(_spray_mode_group);
       auto spray_layout (new QFormLayout (_spray_content));
@@ -150,7 +142,7 @@ namespace noggit
       _texture_switcher->hide();
 
       auto quick_palette_btn (new QPushButton("Quick Palette", this));
-      tool_layout->addRow(quick_palette_btn);
+      tool_layout->addWidget(quick_palette_btn);
 
       auto anim_widget (new QWidget (this));
       auto anim_layout (new QFormLayout (anim_widget));
@@ -209,63 +201,6 @@ namespace noggit
                     case 1: _texturing_mode = texturing_mode::swap; break;
                     case 2: _texturing_mode = texturing_mode::anim; break;
                   }
-                }
-              );
-
-      connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
-                {
-                  QSignalBlocker const blocker (_radius_slider);
-                  set_radius(v);
-                  _radius_slider->setSliderPosition ((int)std::round (v));
-
-                }
-              );
-
-      connect ( _radius_slider, &QSlider::valueChanged
-              , [&] (int v)
-                {
-                  QSignalBlocker const blocker (_radius_spin);
-                  set_radius(v);
-                  _radius_spin->setValue(v);
-                }
-              );
-
-      connect ( _hardness_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
-                {
-                  QSignalBlocker const blocker (_hardness_slider);
-                  _hardness = v;
-                  _hardness_slider->setSliderPosition ((int)std::round (v * 100.0f));
-                  update_brush_hardness();
-                }
-              );
-
-      connect ( _hardness_slider, &QSlider::valueChanged
-              , [&] (int v)
-                {
-                  QSignalBlocker const blocker (_hardness_spin);
-                  _hardness = v * 0.01f;
-                  _hardness_spin->setValue(_hardness);
-                  update_brush_hardness();
-                }
-              );
-
-      connect ( _pressure_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
-              , [&] (double v)
-                {
-                  QSignalBlocker const blocker (_pressure_slider);
-                  _pressure = v;
-                  _pressure_slider->setSliderPosition ((int)std::round (v * 100.0f));
-                }
-              );
-
-      connect ( _pressure_slider, &QSlider::valueChanged
-              , [&] (int v)
-                {
-                  QSignalBlocker const blocker (_pressure_spin);
-                  _pressure = v * 0.01f;
-                  _pressure_spin->setValue(_pressure);
                 }
               );
 
@@ -346,6 +281,23 @@ namespace noggit
                 }
               );
 
+
+      connect ( _radius_slider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged
+          , [&] (double v)
+                {
+                    set_radius(static_cast<float>(_radius_slider->value()));
+                }
+      );
+
+
+      connect ( _hardness_slider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged
+          , [&] (double v)
+                {
+                    update_brush_hardness();
+                }
+      );
+
+
       _spray_content->hide();
       update_brush_hardness();
       update_spray_brush();
@@ -358,15 +310,15 @@ namespace noggit
 
     void texturing_tool::update_brush_hardness()
     {
-      _texture_brush.setHardness(_hardness);
-      _inner_brush.setHardness(_hardness);
-      _spray_brush.setHardness(_hardness);
+      _texture_brush.setHardness(static_cast<float>(_hardness_slider->value()));
+      _inner_brush.setHardness(static_cast<float>(_hardness_slider->value()));
+      _spray_brush.setHardness(static_cast<float>(_hardness_slider->value()));
     }
 
     void texturing_tool::set_radius(float radius)
     {
       _texture_brush.setRadius(radius);
-      _inner_brush.setRadius(radius * _hardness);
+      _inner_brush.setRadius(radius * static_cast<float>(_hardness_slider->value()));
     }
 
     void texturing_tool::update_spray_brush()
@@ -397,7 +349,7 @@ namespace noggit
     {
       if (_texturing_mode == texturing_mode::paint)
       {
-        _radius_spin->setValue(_texture_brush.getRadius() + change);
+        _radius_slider->setValue(static_cast<float>(_radius_slider->value()) + change);
       }
       else if (_texturing_mode == texturing_mode::swap)
       {
@@ -409,7 +361,7 @@ namespace noggit
     {
       if (_texturing_mode == texturing_mode::paint)
       {
-        _hardness_spin->setValue(_hardness + change);
+        _hardness_slider->setValue(static_cast<float>(_hardness_slider->value()) + change);
       }
     }
 
@@ -417,7 +369,7 @@ namespace noggit
     {
       if (_texturing_mode == texturing_mode::paint)
       {
-        _pressure_spin->setValue(_pressure + change);
+        _pressure_slider->setValue(static_cast<float>(_pressure_slider->value()) + change);
       }
     }
 
@@ -464,7 +416,7 @@ namespace noggit
     {
       if (_texturing_mode == texturing_mode::paint)
       {
-        _pressure_spin->setValue(pressure);
+        _pressure_slider->setValue(pressure);
       }
     }
 
@@ -473,7 +425,7 @@ namespace noggit
       // show only a dot when using the anim / swap mode
       switch (_texturing_mode)
       {
-        case texturing_mode::paint: return _texture_brush.getRadius();
+        case texturing_mode::paint: return static_cast<float>(_radius_slider->value());
         case texturing_mode::swap: return (_texture_switcher->brush_mode() ? _texture_switcher->radius() : 0.f);
         default: return 0.f;
       }
@@ -483,7 +435,7 @@ namespace noggit
     { 
       switch (_texturing_mode)
       {
-        case texturing_mode::paint: return _hardness;
+        case texturing_mode::paint: return static_cast<float>(_hardness_slider->value());
         default: return 0.f;
       }
     }
@@ -495,7 +447,13 @@ namespace noggit
 
     void texturing_tool::paint (World* world, math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture)
     {
-      float strength = 1.0f - pow(1.0f - _pressure, dt * 10.0f);
+      if (TabletManager::instance()->isActive())
+      {
+        set_radius(static_cast<float>(_radius_slider->value()));
+        update_brush_hardness();
+      }
+
+      float strength = 1.0f - pow(1.0f - _pressure_slider->value(), dt * 10.0f);
 
       if (_texturing_mode == texturing_mode::swap)
       {
@@ -516,7 +474,7 @@ namespace noggit
       {
         if (_spray_mode_group->isChecked())
         {
-          world->sprayTexture(pos, &_spray_brush, alpha_target(), strength, _texture_brush.getRadius(), _spray_pressure, texture);
+          world->sprayTexture(pos, &_spray_brush, alpha_target(), strength, static_cast<float>(_radius_slider->value()), _spray_pressure, texture);
 
           if (_inner_radius_cb->isChecked())
           {

@@ -56,7 +56,8 @@ namespace noggit
             , pasteMode(PASTE_ON_TERRAIN)
             , _map_view(mapView)
     {
-      auto layout = new QFormLayout (this);
+      auto layout = new QVBoxLayout (this);
+      layout->setAlignment(Qt::AlignTop);
 
       QGroupBox* radius_group = new QGroupBox("Radius");
       auto radius_layout = new QFormLayout(radius_group);
@@ -72,7 +73,7 @@ namespace noggit
 
       radius_layout->addRow (_radius_slider);
       radius_layout->addRow(_radius_spin);
-      layout->addRow(radius_group);
+      layout->addWidget(radius_group);
 
       auto *copyBox = new ExpanderWidget( this);
       copyBox->setExpanderTitle("Copy options");
@@ -260,14 +261,14 @@ namespace noggit
 
       importBox->addPage(importBox_content);
 
-      layout->addRow(copyBox);
-      layout->addRow(pasteBox);
-      layout->addRow(selectionOptionsBox);
-      layout->addRow(rotEditorButton);
-      layout->addRow(visToggleButton);
-      layout->addRow(clearListButton);
-      layout->addRow(importBox);
-      layout->addRow (_filename);
+      layout->addWidget(copyBox);
+      layout->addWidget(pasteBox);
+      layout->addWidget(selectionOptionsBox);
+      layout->addWidget(rotEditorButton);
+      layout->addWidget(visToggleButton);
+      layout->addWidget(clearListButton);
+      layout->addWidget(importBox);
+      layout->addWidget(_filename);
 
       rotationEditor->use_median_pivot_point = &_use_median_pivot_point;
 
