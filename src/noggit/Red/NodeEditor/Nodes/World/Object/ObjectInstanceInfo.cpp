@@ -42,7 +42,7 @@ void ObjectInstanceInfoNode::compute()
 
   if (_out_ports[1].connected)
   {
-    _out_ports[1].out_value = std::make_shared<Vector3DData>(glm::vec3(obj->dir.x, obj->dir.y, obj->dir.z));
+    _out_ports[1].out_value = std::make_shared<Vector3DData>(glm::vec3(obj->dir.x._, obj->dir.y._, obj->dir.z._));
     _node->onDataUpdated(1);
   }
 

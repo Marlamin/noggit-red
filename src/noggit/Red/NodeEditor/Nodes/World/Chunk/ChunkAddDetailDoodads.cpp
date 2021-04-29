@@ -330,7 +330,7 @@ void ChunkAddDetailDoodads::compute()
       filename = filename.replace(".mdx", ".m2", Qt::CaseInsensitive);
 
       world->addM2(filename.toStdString(), {chunk->xbase - inMinichunkCoords[0]
-          , 0, chunk->zbase - inMinichunkCoords[1]}, 1.0, {0.f, 0.f, .0f}, nullptr);
+          , 0, chunk->zbase - inMinichunkCoords[1]}, 1.0, {0_deg, 0_deg, 0_deg}, nullptr);
     }
   }
 

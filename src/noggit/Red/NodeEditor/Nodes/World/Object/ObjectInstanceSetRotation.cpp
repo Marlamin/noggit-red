@@ -31,9 +31,9 @@ void ObjectInstanceSetRotationNode::compute()
   auto rot_data = defaultPortData<Vector3DData>(PortType::In, 2);
   glm::vec3 const& rotation = rot_data->value();
 
-  obj->dir.x = rotation.x;
-  obj->dir.y = rotation.y;
-  obj->dir.z = rotation.z;
+  obj->dir.x = math::degrees(rotation.x);
+  obj->dir.y = math::degrees(rotation.y);
+  obj->dir.z = math::degrees(rotation.z);
 
   obj->recalcExtents();
 

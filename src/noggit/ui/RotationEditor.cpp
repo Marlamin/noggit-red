@@ -228,9 +228,9 @@ namespace noggit
           _position_x->setValue(obj->pos.x);
           _position_y->setValue(obj->pos.y);
           _position_z->setValue(obj->pos.z);
-          _rotation_x->setValue(obj->dir.x);
-          _rotation_y->setValue(obj->dir.y);
-          _rotation_z->setValue(obj->dir.z);
+          _rotation_x->setValue(obj->dir.x._);
+          _rotation_y->setValue(obj->dir.y._);
+          _rotation_z->setValue(obj->dir.z._);
           _scale->setValue(obj->scale);
 
           _rotation_x->setEnabled(true);

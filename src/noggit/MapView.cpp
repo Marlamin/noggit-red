@@ -403,6 +403,9 @@ void MapView::createGUI()
     , &_snap_multi_selection_to_ground
     , &_use_median_pivot_point
     , &_object_paste_params
+    , &_rotate_along_ground
+    , &_rotate_along_ground_smooth
+    , &_rotate_along_ground_random
     , _object_editor_dock
   );
   _object_editor_dock->setWidget(objectEditor);
@@ -592,14 +595,14 @@ void MapView::createGUI()
   auto right_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->leftToolbarHolder);
   right_toolbar_layout->addWidget( _toolbar);
   right_toolbar_layout->setDirection(QBoxLayout::LeftToRight);
-  right_toolbar_layout->setContentsMargins(0, 0, 0,0);
+  right_toolbar_layout->setContentsMargins(0, 5, 0,5);
 
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
 
   _view_toolbar = new noggit::Red::ViewToolbar::Ui::ViewToolbar(this);
   auto top_toolbar_layout = new QHBoxLayout(_viewport_overlay_ui->upperToolbarHolder);
   top_toolbar_layout->addWidget( _view_toolbar);
-  top_toolbar_layout->setContentsMargins(0, 0, 0, 0);
+  top_toolbar_layout->setContentsMargins(5, 0, 5, 0);
 
 
   connect (this, &QObject::destroyed, _view_toolbar, &QObject::deleteLater);
@@ -2150,6 +2153,7 @@ void MapView::tick (float dt)
         }
         else
         {
+          bool snapped = false;
           if (_world->has_multiple_model_selected())
           {
             _world->set_selected_models_pos(_cursor_pos, false);
@@ -2157,6 +2161,7 @@ void MapView::tick (float dt)
             if (_snap_multi_selection_to_ground.get())
             {
               snap_selected_models_to_the_ground();
+              snapped = true;
             }
           }
           else
@@ -2168,8 +2173,50 @@ void MapView::tick (float dt)
             else
             {
               _world->set_selected_models_pos(_cursor_pos, false);
+              snapped = true;
             }
           }
+
+          if (snapped && _rotate_along_ground.get())
+          {
+            _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
+            if (_rotate_along_ground_random.get())
+            {
+              float minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
+
+              if (_settings->value("model/random_rotation", false).toBool())
+              {
+                minY = _object_paste_params.minRotation;
+                maxY = _object_paste_params.maxRotation;
+              }
+
+              if (_settings->value("model/random_tilt", false).toBool())
+              {
+                minX = _object_paste_params.minTilt;
+                maxX = _object_paste_params.maxTilt;
+                minZ = minX;
+                maxZ = maxX;
+              }
+
+              _world->rotate_selected_models_randomly(
+                  minX,
+                  maxX,
+                  minY,
+                  maxY,
+                  minZ,
+                  maxZ);
+
+              if (_settings->value("model/random_size", false).toBool())
+              {
+                float min = _object_paste_params.minScale;
+                float max = _object_paste_params.maxScale;
+
+                _world->scale_selected_models(misc::randfloat(min, max), World::m2_scaling_type::set);
+              }
+            }
+          }
+
+
         }
 
         _rotation_editor_need_update = true;
@@ -2770,7 +2817,9 @@ void MapView::update_cursor_pos()
   {
     auto const& hit(results.front().second);
     // hit cannot be something else than a chunk
-    _cursor_pos = boost::get<selected_chunk_type>(hit).position;
+    auto const& chunkHit = boost::get<selected_chunk_type>(hit);
+    _cursor_pos = chunkHit.position;
+
   }
 }
 

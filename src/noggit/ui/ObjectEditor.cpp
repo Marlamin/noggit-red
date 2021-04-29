@@ -41,6 +41,9 @@ namespace noggit
                                  , bool_toggle_property* snap_multi_selection_to_ground
                                  , bool_toggle_property* use_median_pivot_point
                                  , object_paste_params* paste_params
+                                 , bool_toggle_property* rotate_along_ground
+                                 , bool_toggle_property* rotate_along_ground_smooth
+                                 , bool_toggle_property* rotate_along_ground_random
                                  , QWidget* parent
                                  )
             : QWidget(parent)
@@ -173,6 +176,28 @@ namespace noggit
                                              )
                               );
 
+
+      auto object_rotateground_cb(new checkbox("Rotate following cursor"
+          , rotate_along_ground
+          , this
+                                  )
+      );
+
+      auto object_rotategroundsmooth_cb(new checkbox("Smooth follow rotation"
+          , rotate_along_ground_smooth
+          , this
+                                        )
+      );
+
+      auto object_rotategroundrandom_cb(new checkbox("Random rot/tilt/scale\n on rotate"
+          , rotate_along_ground_random
+          , this
+                                        )
+      );
+
+      object_movement_layout->addRow(object_rotateground_cb);
+      object_movement_layout->addRow(object_rotategroundsmooth_cb);
+      object_movement_layout->addRow(object_rotategroundrandom_cb);
       object_movement_layout->addRow(object_movement_cb);
 
       // multi model selection
@@ -489,7 +514,7 @@ namespace noggit
         if (obj->which() == eMODEL)
         {
           float scale(1.f);
-          math::vector_3d rotation(0.f, 0.f, 0.f);
+          math::degrees::vec3 rotation(0_deg, 0_deg, 0_deg);
 
           if (_copy_model_stats)
           {
@@ -507,7 +532,7 @@ namespace noggit
         }
         else if (obj->which() == eWMO)
         {
-          math::vector_3d rotation(0.f, 0.f, 0.f);
+          math::degrees::vec3 rotation(0_deg, 0_deg, 0_deg);
           if (_copy_model_stats)
           {
             // copy rot from original model. Dirty but working

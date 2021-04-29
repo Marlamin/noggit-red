@@ -111,7 +111,7 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
       glm::mat4 glm_transform_mat = glm::make_mat4(static_cast<float*>(delta_matrix));
 
       math::vector_3d& pos = obj_instance->pos;
-      math::vector_3d& rotation = obj_instance->dir;
+      math::degrees::vec3& rotation = obj_instance->dir;
       float wmo_scale = 0.f;
       float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
 
@@ -148,12 +148,12 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
 
           if (!_use_multiselection_pivot)
           {
-            rotation += {rot_euler.x, rot_euler.y, rot_euler.z};
+            rotation += {math::degrees(rot_euler.x), math::degrees(rot_euler.y), math::degrees(rot_euler.z)};
           }
           else
           {
             //LogDebug << rot_euler.x << " " << rot_euler.y << " " << rot_euler.z << std::endl;
-            rotation.y += rot_euler.y;
+            rotation.y += math::degrees(rot_euler.y);
 
             // building model matrix
             glm::mat4 model_transform = glm::make_mat4(static_cast<float*>(object_matrix));
@@ -231,7 +231,7 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
       glm::mat4 glm_transform_mat = glm::make_mat4(static_cast<float*>(delta_matrix));
 
       math::vector_3d& pos = obj_instance->pos;
-      math::vector_3d& rotation = obj_instance->dir;
+      math::degrees::vec3& rotation = obj_instance->dir;
       float wmo_scale = 0.f;
       float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
 
@@ -264,7 +264,7 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
         case ImGuizmo::ROTATE:
         {
           auto rot_euler = glm::eulerAngles(new_orientation) * 57.2957795f;
-          rotation += {rot_euler.x, rot_euler.y, rot_euler.z};
+          rotation += {math::degrees(rot_euler.x), math::degrees(rot_euler.y), math::degrees(rot_euler.z)};
           break;
         }
         case ImGuizmo::SCALE:

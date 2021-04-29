@@ -49,7 +49,7 @@ public:
 public:
   math::vector_3d pos;
   math::vector_3d  extents[2];
-  math::vector_3d  dir;
+  math::degrees::vec3 dir;
   float scale = 1.f;
 
 

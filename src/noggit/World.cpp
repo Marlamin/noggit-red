@@ -236,6 +236,196 @@ boost::optional<selection_type> World::get_last_selected_model() const
     ? boost::optional<selection_type>() : boost::optional<selection_type> (*it);
 }
 
+math::vector_3d getBarycentricCoordinatesAt(
+    const math::vector_3d& a,
+    const math::vector_3d& b,
+    const math::vector_3d& c,
+    const math::vector_3d& point,
+    const math::vector_3d& normal)
+{
+  math::vector_3d bary;
+  // The area of a triangle is
+
+  double areaABC = normal * ((b - a) % (c - a));
+  double areaPBC = normal * ((b - point) % (c - point));
+  double areaPCA = normal * ((c - point) % (a - point));
+
+  bary.x = areaPBC / areaABC; // alpha
+  bary.y = areaPCA / areaABC; // beta
+  bary.z = 1.0f - bary.x - bary.y; // gamma
+
+  return bary;
+}
+
+void World::rotate_selected_models_randomly(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
+{
+  bool has_multi_select = has_multiple_model_selected();
+
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+
+    updateTilesEntry(entry, model_update::remove);
+
+    auto obj = boost::get<selected_object_type>(entry);
+
+    math::degrees::vec3& dir = obj->dir;
+
+    float rx = misc::randfloat(minX, maxX);
+    float ry = misc::randfloat(minY, maxY);
+    float rz = misc::randfloat(minZ, maxZ);
+
+    math::quaternion baseRotation = math::quaternion(math::radians(math::degrees(dir.z)), math::radians(math::degrees(-dir.y)), math::radians(math::degrees(dir.x)));
+    math::quaternion newRotation = math::quaternion(math::radians(math::degrees(rx)), math::radians(math::degrees(ry)), math::radians(math::degrees(rz)));
+
+    math::quaternion finalRotation = baseRotation % newRotation;
+    finalRotation.normalize();
+
+    dir = finalRotation.ToEulerAngles();
+    obj->recalcExtents();
+
+    updateTilesEntry(entry, model_update::add);
+  }
+}
+
+
+void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
+{
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.which();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    auto obj = boost::get<selected_object_type>(entry);
+
+
+    updateTilesEntry(entry, model_update::remove);
+
+    math::vector_3d rayPos = obj->pos;
+    math::degrees::vec3& dir = obj->dir;
+
+
+    selection_result results;
+    for_chunk_at(rayPos, [&](MapChunk* chunk)
+    {
+        {
+          math::ray intersect_ray(rayPos, math::vector_3d(0.f, -1.f, 0.f));
+          chunk->intersect(intersect_ray, &results);
+        }
+        // object is below ground
+        if (results.empty())
+        {
+          math::ray intersect_ray(rayPos, math::vector_3d(0.f, 1.f, 0.f));
+          chunk->intersect(intersect_ray, &results);
+        }
+    });
+
+    // We shouldn't end up with empty ever.
+    if (results.empty())
+    {
+      LogError << "rotate_selected_models_to_ground_normal ray intersection failed" << std::endl;
+      continue;
+    }
+
+
+// We hit the terrain, now we take the normal of this position and use it to get the rotation we want.
+    auto const& hitChunkInfo = boost::get<selected_chunk_type>(results.front().second);
+
+    math::quaternion q;
+    math::vector_3d varnormal;
+
+    // Surface Normal
+    auto &p0 = hitChunkInfo.chunk->mVertices[std::get<0>(hitChunkInfo.triangle)];
+    auto &p1 = hitChunkInfo.chunk->mVertices[std::get<1>(hitChunkInfo.triangle)];
+    auto &p2 = hitChunkInfo.chunk->mVertices[std::get<2>(hitChunkInfo.triangle)];
+
+    math::vector_3d v1 = p1 - p0;
+    math::vector_3d v2 = p2 - p0;
+
+    const auto tmpVec = v2 % v1;
+    varnormal.x = tmpVec.z;
+    varnormal.y = tmpVec.y;
+    varnormal.z = tmpVec.x;
+
+    // Smooth option, gradient the normal towards closest vertex
+    if (smoothNormals) // Vertex Normal
+    {
+      auto normalWeights = getBarycentricCoordinatesAt(p0, p1, p2, hitChunkInfo.position, varnormal);
+
+      const auto& vNormal0 = hitChunkInfo.chunk->mNormals[std::get<0>(hitChunkInfo.triangle)];
+      const auto& vNormal1 = hitChunkInfo.chunk->mNormals[std::get<1>(hitChunkInfo.triangle)];
+      const auto& vNormal2 = hitChunkInfo.chunk->mNormals[std::get<2>(hitChunkInfo.triangle)];
+
+      varnormal.x =
+          vNormal0.x * normalWeights.x +
+          vNormal1.x * normalWeights.y +
+          vNormal2.x * normalWeights.z;
+
+      varnormal.y =
+          vNormal0.y * normalWeights.x +
+          vNormal1.y * normalWeights.y +
+          vNormal2.y * normalWeights.z;
+
+      varnormal.z =
+          vNormal0.z * normalWeights.x +
+          vNormal1.z * normalWeights.y +
+          vNormal2.z * normalWeights.z;
+    }
+
+
+    math::vector_3d worldUp = math::vector_3d(0, 1, 0);
+    math::vector_3d a = worldUp % (varnormal);
+
+    q.x = a.x;
+    q.y = a.y;
+    q.z = a.z;
+
+    q.w = std::sqrt((worldUp.length_squared() * (varnormal.length_squared()))
+                    + (worldUp * varnormal));
+
+
+    q.normalize();
+
+    math::degrees::vec3 new_dir;
+    // To euler, because wow
+      /*
+      // roll (x-axis rotation)
+      double sinr_cosp = 2.0 * (q.w * q.x + q.y * q.z);
+      double cosr_cosp = 1.0 - 2.0 * (q.x * q.x + q.y * q.y);
+      new_dir.z = std::atan2(sinr_cosp, cosr_cosp) * 180.0f / math::constants::pi;
+
+      // pitch (y-axis rotation)
+      double sinp = 2.0 * (q.w * q.y - q.z * q.x);
+      if (std::abs(sinp) >= 1)
+        new_dir.y = std::copysign(math::constants::pi / 2, sinp) * 180.0f / math::constants::pi; // use 90 degrees if out of range
+      else
+        new_dir.y = std::asin(sinp) * 180.0f / math::constants::pi;
+
+      // yaw (z-axis rotation)
+      double siny_cosp = 2.0 * (q.w * q.z + q.x * q.y);
+      double cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z);
+      new_dir.x = std::atan2(siny_cosp, cosy_cosp) * 180.0f / math::constants::pi;
+     }*/
+
+    dir = q.ToEulerAngles();
+
+    boost::get<selected_object_type>(entry)->recalcExtents();
+
+    // yaw (z-axis rotation)
+    double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+    double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
+    updateTilesEntry(entry, model_update::add);
+  }
+}
+
 void World::set_current_selection(selection_type entry)
 {
   _current_selection.clear();
@@ -330,7 +520,7 @@ void World::snap_selected_models_to_the_ground()
         math::ray intersect_ray(pos, math::vector_3d(0.f, -1.f, 0.f));
         chunk->intersect(intersect_ray, &hits);
       }
-      // object is bellow ground
+      // object is below ground
       if (hits.empty())
       {
         math::ray intersect_ray(pos, math::vector_3d(0.f, 1.f, 0.f));
@@ -465,7 +655,7 @@ void World::set_selected_models_pos(math::vector_3d const& pos, bool change_heig
 
 void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
 {
-  math::vector_3d dir_change(rx._, ry._, rz._);
+  math::degrees::vec3 dir_change(rx, ry, rz);
   bool has_multi_select = has_multiple_model_selected();
 
   for (auto& entry : _current_selection)
@@ -484,7 +674,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
     {
 
       math::vector_3d& pos = obj->pos;
-      math::vector_3d& dir = obj->dir;
+      math::degrees::vec3& dir = obj->dir;
       math::vector_3d diff_pos = pos - _multi_select_pivot.get();
       math::vector_3d rot_result = math::matrix_4x4(math::matrix_4x4::rotation_xyz, {rx, ry, rz}) * diff_pos;
 
@@ -492,7 +682,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
     }
     else
     {
-      math::vector_3d& dir = obj->dir;
+      math::degrees::vec3& dir = obj->dir;
       dir += dir_change;
     }
 
@@ -504,7 +694,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
 
 void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
 {
-  math::vector_3d new_dir(rx._, ry._, rz._);
+  math::degrees::vec3 new_dir(rx, ry, rz);
 
   for (auto& entry : _current_selection)
   {
@@ -518,7 +708,7 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
 
     updateTilesEntry(entry, model_update::remove);
 
-    math::vector_3d& dir = obj->dir;
+    math::degrees::vec3& dir = obj->dir;
 
     dir = new_dir;
 
@@ -2158,7 +2348,7 @@ void World::unload_every_model_and_wmo_instance()
 void World::addM2 ( std::string const& filename
                   , math::vector_3d newPos
                   , float scale
-                  , math::vector_3d rotation
+                  , math::degrees::vec3 rotation
                   , noggit::object_paste_params* paste_params
                   )
 {
@@ -2173,15 +2363,15 @@ void World::addM2 ( std::string const& filename
   {
     float min = paste_params->minRotation;
     float max = paste_params->maxRotation;
-    model_instance.dir.y += misc::randfloat(min, max);
+    model_instance.dir.y += math::degrees(misc::randfloat(min, max));
   }
 
   if (_settings->value ("model/random_tilt", false).toBool ())
   {
     float min = paste_params->minTilt;
     float max = paste_params->maxTilt;
-    model_instance.dir.x += misc::randfloat(min, max);
-    model_instance.dir.z += misc::randfloat(min, max);
+    model_instance.dir.x += math::degrees(misc::randfloat(min, max));
+    model_instance.dir.z += math::degrees(misc::randfloat(min, max));
   }
 
   if (_settings->value ("model/random_size", false).toBool ())
@@ -2203,7 +2393,7 @@ void World::addM2 ( std::string const& filename
 ModelInstance* World::addM2AndGetInstance ( std::string const& filename
     , math::vector_3d newPos
     , float scale
-    , math::vector_3d rotation
+    , math::degrees::vec3 rotation
     , noggit::object_paste_params* paste_params
 )
 {
@@ -2218,15 +2408,15 @@ ModelInstance* World::addM2AndGetInstance ( std::string const& filename
   {
     float min = paste_params->minRotation;
     float max = paste_params->maxRotation;
-    model_instance.dir.y += misc::randfloat(min, max);
+    model_instance.dir.y += math::degrees(misc::randfloat(min, max));
   }
 
   if (_settings->value ("model/random_tilt", false).toBool ())
   {
     float min = paste_params->minTilt;
     float max = paste_params->maxTilt;
-    model_instance.dir.x += misc::randfloat(min, max);
-    model_instance.dir.z += misc::randfloat(min, max);
+    model_instance.dir.x += math::degrees(misc::randfloat(min, max));
+    model_instance.dir.z += math::degrees(misc::randfloat(min, max));
   }
 
   if (_settings->value ("model/random_size", false).toBool ())
@@ -2250,7 +2440,7 @@ ModelInstance* World::addM2AndGetInstance ( std::string const& filename
 
 void World::addWMO ( std::string const& filename
                    , math::vector_3d newPos
-                   , math::vector_3d rotation
+                   , math::degrees::vec3 rotation
                    )
 {
   WMOInstance wmo_instance(filename, _context);
@@ -2268,7 +2458,7 @@ void World::addWMO ( std::string const& filename
 
 WMOInstance* World::addWMOAndGetInstance ( std::string const& filename
     , math::vector_3d newPos
-    , math::vector_3d rotation
+    , math::degrees::vec3 rotation
 )
 {
   WMOInstance wmo_instance(filename, _context);

@@ -2,6 +2,7 @@
 
 #include "SceneObject.hpp"
 #include <noggit/Misc.h>
+#include <math/trig.hpp>
 
 SceneObject::SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context, std::string filename)
 : _type(type)
@@ -20,7 +21,7 @@ bool SceneObject::isDuplicateOf(SceneObject const& other)
 {
   return _filename == other._filename
          && misc::vec3d_equals(pos, other.pos)
-         && misc::vec3d_equals(dir, other.dir)
+         && misc::deg_vec3d_equals(dir, other.dir)
          && misc::float_equals(scale, other.scale);
 }
 
@@ -29,9 +30,9 @@ void SceneObject::updateTransformMatrix()
   math::matrix_4x4 mat( math::matrix_4x4(math::matrix_4x4::translation, pos)
                         * math::matrix_4x4
                             ( math::matrix_4x4::rotation_yzx
-                                , { math::degrees(-dir.z)
-                                  , math::degrees(dir.y - 90.0f)
-                                  , math::degrees(dir.x)
+                                , { -dir.z
+                                  , dir.y - 90.0_deg
+                                  , dir.x
                               })
 
                           * math::matrix_4x4 (math::matrix_4x4::scale, scale)
@@ -44,6 +45,6 @@ void SceneObject::updateTransformMatrix()
 
 void SceneObject::resetDirection()
 {
-  dir = math::vector_3d(0.0f, dir.y, 0.0f);
+  dir =  math::degrees::vec3(0_deg, dir.y, 0.0_deg);
   recalcExtents();
 }

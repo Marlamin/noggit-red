@@ -24,7 +24,10 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, no
 {
 	uid = d->uniqueID;
 	pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
-	dir = math::vector_3d(d->rot[0], d->rot[1], d->rot[2]);
+  dir = math::degrees::vec3( math::degrees(d->rot[0])
+      , math::degrees(d->rot[1])
+      , math::degrees(d->rot[2])
+  );
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	scale = d->scale / 1024.0f;
 
