@@ -354,6 +354,8 @@ public:
 
   math::vector_3d const& vertexCenter();
 
+  void initShaders();
+
   void recalc_norms (MapChunk*) const;
 
   bool need_model_updates = false;
@@ -403,4 +405,18 @@ private:
   boost::optional<liquid_render> _liquid_render_mini = boost::none;
 
   noggit::NoggitRenderContext _context;
+
+  bool _draw_lines_old = false;
+  bool _draw_hole_lines_old = false;
+  bool _draw_areaid_overlay_old = false;
+  bool _draw_terrain_height_contour_old = false;
+  bool _draw_wireframe_old = false;
+  int _wireframe_type_old = 0;
+  float _wireframe_radius_old = 1.5f;
+  float _wireframe_width_old = 1.f;
+  bool _draw_fog_old = false;
+  CursorType _cursor_type_old = CursorType::NONE;
+  bool _draw_selection_old = false;
+
+
 };

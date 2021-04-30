@@ -125,7 +125,6 @@ void PreviewRenderer::resetCamera(float x, float y, float z, float roll, float y
 
 void PreviewRenderer::draw()
 {
-
   float culldistance = 10000000;
 
   math::matrix_4x4 const mvp(model_view().transposed() * projection().transposed());
@@ -596,7 +595,7 @@ void PreviewRenderer::unload_shaders()
 
 void PreviewRenderer::unloadOpenglData(bool from_manager)
 {
-  if (_destroying || !context() || _offscreen_mode)
+  if (_offscreen_mode)
     return;
 
   LogDebug << "Changing context of Asset Browser / Preset Editor." << std::endl;

@@ -67,6 +67,8 @@ namespace noggit
       qreal _last_update = 0.f;
       float _move_sensitivity = 0.5f;
 
+      QMetaObject::Connection _gl_guard_connection;
+
       void tick(float dt) override;
       float aspect_ratio() const override;
 

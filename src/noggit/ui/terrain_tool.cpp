@@ -65,29 +65,30 @@ namespace noggit
 
       _radius_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
       _radius_slider->setRange (0, 1000);
-      _radius_slider->setPrefix("Radius");
+      _radius_slider->setPrefix("Radius:");
       _radius_slider->setDecimals(2);
       _radius_slider->setValue(15);
 
       _inner_radius_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
       _inner_radius_slider->setRange (0.0, 1.0);
-      _inner_radius_slider->setPrefix("Inner Radius");
+      _inner_radius_slider->setPrefix("Inner Radius:");
       _inner_radius_slider->setDecimals(2);
       _inner_radius_slider->setSingleStep(0.05f);
       _inner_radius_slider->setValue(0);
 
       QGroupBox* settings_group(new QGroupBox ("Settings"));
-      QFormLayout* settings_layout (new QFormLayout (settings_group));
+      auto settings_layout (new QVBoxLayout (settings_group));
+      settings_layout->setContentsMargins(0, 12, 0, 12);
 
       _speed_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
-      _speed_slider->setPrefix("Speed");
+      _speed_slider->setPrefix("Speed:");
       _speed_slider->setRange (0, 10 * 100);
       _speed_slider->setSingleStep (1);
       _speed_slider->setValue(2);
 
-      settings_layout->addRow(_radius_slider);
-      settings_layout->addRow(_inner_radius_slider);
-      settings_layout->addRow(_speed_slider);
+      settings_layout->addWidget(_radius_slider);
+      settings_layout->addWidget(_inner_radius_slider);
+      settings_layout->addWidget(_speed_slider);
 
       layout->addRow(settings_group);
 

@@ -35,6 +35,8 @@ ExtendedSlider::ExtendedSlider(QWidget* parent)
             _is_tablet_affecting = state;
             _ui.tabletControlMenuButton->setIcon(font_awesome_icon(
                 state ? font_awesome::icons::edit : font_awesome::icons::pen));
+
+            _ui.pressureBar->setVisible(state);
           });
 
   layout->addWidget(new QLabel("Sensitivity:", _tablet_popup));
@@ -96,6 +98,8 @@ ExtendedSlider::ExtendedSlider(QWidget* parent)
           });
 
   _ui.slider->setRange(0, 100);
+  _ui.pressureBar->setRange(0, 100);
+  _ui.pressureBar->setVisible(false);
   connect(_ui.slider, &QSlider::valueChanged,
           [=](int v)
           {
@@ -105,6 +109,7 @@ ExtendedSlider::ExtendedSlider(QWidget* parent)
             * (v / static_cast<float>((_ui.slider->maximum() - _ui.slider->minimum())));
 
             _ui.doubleSpinBox->setValue(spin_value);
+            _ui.pressureBar->setValue(v);
 
             emit valueChanged(value());
           });
@@ -118,7 +123,17 @@ ExtendedSlider::ExtendedSlider(QWidget* parent)
                                   * (_ui.doubleSpinBox->value() / (_ui.doubleSpinBox->maximum() - _ui.doubleSpinBox->minimum()));
 
               _ui.slider->setValue(slider_value);
+              _ui.pressureBar->setValue(slider_value);
               emit valueChanged(value());
+          });
+
+  connect(_tablet_manager, &noggit::TabletManager::pressureChanged,
+          [=](double pressure)
+          {
+              int p_value = (_ui.slider->maximum() - _ui.slider->minimum())
+                             * (value() / (_ui.doubleSpinBox->maximum() - _ui.doubleSpinBox->minimum()));
+
+              _ui.pressureBar->setValue(p_value);
           });
 }
 
@@ -177,6 +192,7 @@ void ExtendedSlider::setTabletSupportEnabled(bool state)
 void ExtendedSlider::setSliderRange(int min, int max)
 {
   _ui.slider->setRange(min, max);
+  _ui.pressureBar->setRange(min, max);
 }
 
 void ExtendedSlider::setValue(double value)

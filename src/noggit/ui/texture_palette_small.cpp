@@ -33,10 +33,9 @@ namespace noggit
       setViewMode(QListWidget::IconMode);
       setFlow(QListWidget::LeftToRight);
       setWrapping(false);
-      setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-      setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
       setSelectionMode(QAbstractItemView::SingleSelection);
       setAcceptDrops(false);
+      setMovement(Movement::Snap);
     }
 
     void PaletteList::mousePressEvent(QMouseEvent* event)
@@ -81,7 +80,7 @@ namespace noggit
     {
       setWindowTitle("Quick Access Texture Palette");
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
-      setMinimumSize(100, 100);
+      setMinimumSize(330, 100);
       setAcceptDrops(true);
 
       _texture_paths = std::unordered_set<std::string>();
@@ -98,7 +97,6 @@ namespace noggit
         }
       );
 
-
       QVBoxLayout* button_layout = new QVBoxLayout(this);
 
       _add_button = new QPushButton(this);
@@ -111,16 +109,15 @@ namespace noggit
       button_layout->addWidget(_remove_button);
       connect(_remove_button, &QAbstractButton::clicked, this, &texture_palette_small::removeSelectedTexture);
 
+      button_layout->addStretch();
+
       layout->addLayout(button_layout, 0, 1);
 
-      updateWidget();
 
     }
 
     void texture_palette_small::addTexture()
     {
-      if (_texture_paths.size() > 12)
-        return;
 
       std::string filename;
       if (noggit::ui::selected_texture::get())
@@ -135,9 +132,6 @@ namespace noggit
     void texture_palette_small::addTextureByFilename(const std::string& filename)
     {
 
-      if (_texture_paths.size() > 12)
-        return;
-
       QString display_name = QString(filename.c_str()).remove("tileset/");
 
       for (auto path : _texture_paths)
@@ -151,11 +145,8 @@ namespace noggit
       list_item->setToolTip(display_name);
       list_item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 
-      updateWidget();
       _texture_list->addItem(list_item);
 
-      if (_texture_paths.size() == 12)
-        _add_button->setDisabled(true);
     }
 
     void texture_palette_small::removeTexture(QString filename)
@@ -171,7 +162,6 @@ namespace noggit
           _texture_list->removeItemWidget(tileset);
           _add_button->setDisabled(false);
           delete tileset;
-          updateWidget();
           return;
         }
 
@@ -193,22 +183,15 @@ namespace noggit
             _texture_list->removeItemWidget(item);
             _add_button->setDisabled(false);
             delete item;
-            updateWidget();
             return;
           }
 
       }
     }
 
-    void texture_palette_small::updateWidget()
-    {
-      setFixedSize(QSize(std::max(static_cast<size_t>(170 * 3), 65 + (106 * _texture_paths.size())), 132));
-    }
-
     void texture_palette_small::dragEnterEvent(QDragEnterEvent* event)
     {
       if (event->mimeData()->hasText()
-        && _texture_paths.size() < 12
         && (_texture_paths.find(event->mimeData()->text().remove("tileset/").toStdString()) == _texture_paths.end())
         )
           event->accept();

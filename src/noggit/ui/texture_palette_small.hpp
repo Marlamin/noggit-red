@@ -51,8 +51,6 @@ namespace noggit
 
       void removeSelectedTexture();
 
-      void updateWidget();
-
       void dragEnterEvent(QDragEnterEvent* event) override;
       void dropEvent(QDropEvent* event) override;
 

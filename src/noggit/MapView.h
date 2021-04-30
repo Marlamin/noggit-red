@@ -375,11 +375,16 @@ private:
 
   QDockWidget* _asset_browser_dock;
   QDockWidget* _node_editor_dock;
+  QDockWidget* _texture_browser_dock;
+  QDockWidget* _texture_picker_dock;
+  QDockWidget* _detail_infos_dock;
 
   ::Ui::MapViewOverlay* _viewport_overlay_ui;
   ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
   ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
   noggit::bool_toggle_property _gizmo_on = {true};
+  QMetaObject::Connection _gl_guard_connection;
   bool _destroying = false;
+  bool _gl_initialized = false;
 
 };

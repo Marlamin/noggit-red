@@ -104,6 +104,8 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
     math::vector_3d _ambient_light;
     math::vector_3d _light_dir;
 
+    bool _gl_initialized = false;
+
   };
 
 }

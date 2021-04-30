@@ -270,9 +270,10 @@ Noggit::Noggit(int argc, char *argv[])
   format.setRenderableType(QSurfaceFormat::OpenGL);
   format.setVersion(3, 3);
   format.setProfile(QSurfaceFormat::CoreProfile);
-
+  format.setOption(QSurfaceFormat::ResetNotification, true);
   format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
   format.setSwapInterval(settings.value ("vsync", 0).toInt());
+
 
   if (doAntiAliasing)
   {

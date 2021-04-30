@@ -120,6 +120,8 @@ namespace noggit
           button_layout->addWidget(_remove_button);
           connect(_remove_button, &QAbstractButton::clicked, this, &ObjectPalette::removeSelectedTexture);
 
+          button_layout->addStretch();
+
           layout->addLayout(button_layout, 0, 1);
 
 

@@ -79,7 +79,7 @@
          <string/>
         </property>
         <property name="currentIndex">
-         <number>4</number>
+         <number>2</number>
         </property>
         <property name="tabBarAutoHide">
          <bool>false</bool>
@@ -251,7 +251,7 @@
         </widget>
         <widget class="QWidget" name="tab_6">
          <attribute name="title">
-          <string>Appearence</string>
+          <string>Appearance</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_22">
           <item>
@@ -1035,56 +1035,6 @@
                  </item>
                  <item>
                   <spacer name="horizontalSpacer_48">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <layout class="QHBoxLayout" name="horizontalLayout_58">
-                 <item>
-                  <spacer name="horizontalSpacer_49">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_40">
-                   <property name="minimumSize">
-                    <size>
-                     <width>200</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Tablet Support</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QCheckBox" name="tabletModeCheck">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <spacer name="horizontalSpacer_50">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
                    </property>

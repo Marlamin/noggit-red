@@ -202,7 +202,6 @@ namespace noggit
       ui->wmvLogPathField->setText(_settings->value("project/wmv_log_file").toString());
       ui->viewDistanceField->setValue(_settings->value("view_distance", 1000.f).toFloat());
       ui->farZField->setValue(_settings->value("farZ", 2048.f).toFloat());
-      ui->tabletModeCheck->setChecked(_settings->value("tablet/enabled", false).toBool());
       ui->_undock_tool_properties->setChecked(
           _settings->value("undock_tool_properties/enabled", true).toBool());
       ui->_undock_small_texture_palette->setChecked(
@@ -266,7 +265,6 @@ namespace noggit
       _settings->setValue("project/wmv_log_file", ui->wmvLogPathField->text());
       _settings->setValue("farZ", ui->farZField->value());
       _settings->setValue("view_distance", ui->viewDistanceField->value());
-      _settings->setValue("tablet/enabled", ui->tabletModeCheck->isChecked());
       _settings->setValue("undock_tool_properties/enabled", ui->_undock_tool_properties->isChecked());
       _settings->setValue("undock_small_texture_palette/enabled",
                           ui->_undock_small_texture_palette->isChecked());

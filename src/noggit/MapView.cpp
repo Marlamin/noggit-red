@@ -56,6 +56,7 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QWidgetAction>
+#include <QSurfaceFormat>
 
 #include <algorithm>
 #include <cmath>
@@ -73,13 +74,10 @@ static const float YSENS = 15.0f;
 
 void MapView::set_editing_mode (editing_mode mode)
 {
-  makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, context());
-
   objectEditor->modelImport->hide();
   objectEditor->rotationEditor->hide();
-  TexturePalette->hide();
-  TexturePicker->hide();
+  _texture_browser_dock->hide();
+  _texture_picker_dock->hide();
   _texture_palette_dock->hide();
   _object_palette_dock->hide();
   _asset_browser_dock->hide();
@@ -106,7 +104,6 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
   {
     dock->hide();
   }
-  _asset_browser_dock->hide();
 
   switch (mode)
   {
@@ -228,6 +225,33 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 
 void MapView::createGUI()
 {
+  _texture_browser_dock = new QDockWidget("Texture palette", this);
+  _texture_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                   | QDockWidget::DockWidgetFloatable
+                                   | QDockWidget::DockWidgetClosable);
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_browser_dock);
+  _texture_browser_dock->hide();
+  connect(this, &QObject::destroyed, _texture_browser_dock, &QObject::deleteLater);
+
+  _detail_infos_dock = new QDockWidget("Detail info", this);
+  _detail_infos_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                     | QDockWidget::DockWidgetFloatable
+                                     | QDockWidget::DockWidgetClosable);
+
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _detail_infos_dock);
+  _detail_infos_dock->setFloating(true);
+  _detail_infos_dock->hide();
+  connect(this, &QObject::destroyed, _detail_infos_dock, &QObject::deleteLater);
+
+  _texture_picker_dock = new QDockWidget("Texture picker", this);
+  _detail_infos_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                  | QDockWidget::DockWidgetFloatable
+                                  | QDockWidget::DockWidgetClosable);
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_picker_dock);
+  _texture_picker_dock->setFloating(true);
+  _texture_picker_dock->hide();
+  connect(this, &QObject::destroyed, _texture_picker_dock, &QObject::deleteLater);
+
   _asset_browser_dock = new QDockWidget("Asset browser", this);
   _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this, this);
   _asset_browser_dock->setWidget(_asset_browser);
@@ -239,6 +263,8 @@ void MapView::createGUI()
   _asset_browser_dock->setAllowedAreas(Qt::BottomDockWidgetArea);
   _asset_browser_dock->hide();
 
+  connect(this, &QObject::destroyed, _asset_browser_dock, &QObject::deleteLater);
+
   auto _node_editor = new noggit::Red::NodeEditor::Ui::NodeEditorWidget(this);
   _node_editor_dock = new QDockWidget("Node editor", this);
   _node_editor_dock->setWidget(_node_editor);
@@ -248,6 +274,8 @@ void MapView::createGUI()
                                | QDockWidget::DockWidgetFloatable
                                | QDockWidget::DockWidgetClosable);
   _node_editor_dock->hide();
+
+  connect(this, &QObject::destroyed, _node_editor_dock, &QObject::deleteLater);
 
 
   auto overlay = new QWidget(this);
@@ -419,8 +447,8 @@ void MapView::createGUI()
     connect(this, &QObject::destroyed, widget, &QObject::deleteLater);
   }
 
-
   TexturePalette = new noggit::ui::tileset_chooser(this);
+  _texture_browser_dock->setWidget(TexturePalette);
 
   connect( texturingTool->texture_swap_tool()->texture_display()
          , &noggit::ui::current_texture::texture_dropped
@@ -446,7 +474,7 @@ void MapView::createGUI()
   connect(texturingTool->_current_texture, &noggit::ui::current_texture::clicked
     , [=]
     {
-      TexturePalette->setVisible(!TexturePalette->isVisible());
+      _texture_browser_dock->setVisible(!_texture_browser_dock->isVisible());
     }
   );
   connect(TexturePalette, &noggit::ui::tileset_chooser::selected
@@ -463,7 +491,6 @@ void MapView::createGUI()
   connect(this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
 
   _texture_palette_small = new noggit::ui::texture_palette_small (this);
-  _texture_palette_small->hide();
 
   _object_palette = new noggit::ui::ObjectPalette(this, this);
   _object_palette->hide();
@@ -481,7 +508,7 @@ void MapView::createGUI()
   connect(this, &QObject::destroyed, _texture_palette_small, &QObject::deleteLater);
 
   guidetailInfos = new noggit::ui::detail_infos(this);
-  guidetailInfos->hide();
+  _detail_infos_dock->setWidget(guidetailInfos);
   connect(this, &QObject::destroyed, guidetailInfos, &QObject::deleteLater);
 
   _keybindings = new noggit::ui::help(this);
@@ -489,7 +516,7 @@ void MapView::createGUI()
   connect(this, &QObject::destroyed, _keybindings, &QObject::deleteLater);
 
   TexturePicker = new noggit::ui::texture_picker(texturingTool->_current_texture, this);
-  TexturePicker->hide();
+  _texture_picker_dock->setWidget(TexturePicker);
   connect(this, &QObject::destroyed, TexturePicker, &QObject::deleteLater);
 
   connect( TexturePicker
@@ -565,8 +592,7 @@ void MapView::createGUI()
 
   _texture_palette_dock->setWidget(_texture_palette_small);
   _texture_palette_dock->setWindowTitle("Quick Access Texture Palette");
-  _texture_palette_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
-  _texture_palette_dock->setSizePolicy(QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum));
+  _texture_palette_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);;
 
   _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_palette_dock);
 
@@ -859,6 +885,10 @@ void MapView::createGUI()
             }
   );
 
+  connect ( _node_editor_dock, &QDockWidget::visibilityChanged
+      , &_show_node_editor, &noggit::bool_toggle_property::set
+  );
+
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Minimap"));
   view_menu->addSeparator();
@@ -902,9 +932,9 @@ void MapView::createGUI()
 
     QWidget* widget_list[] =
     {
-      TexturePalette,
-      TexturePicker,
-      guidetailInfos,
+      _texture_browser_dock,
+      _texture_picker_dock,
+      _detail_infos_dock,
       _keybindings,
       _minimap_dock,
       objectEditor->modelImport,
@@ -913,7 +943,8 @@ void MapView::createGUI()
       _texture_palette_small,
       _object_palette_dock,
       _asset_browser_dock,
-      _viewport_overlay_ui->gizmoBar
+      overlay
+
     };
 
 
@@ -954,7 +985,7 @@ void MapView::createGUI()
           , guidetailInfos, [this]
                             {
                               if (!ui_hidden)
-                                guidetailInfos->setVisible(_show_detail_info_window.get());
+                                _detail_infos_dock->setVisible(_show_detail_info_window.get());
                             }
           );
   connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
@@ -962,17 +993,17 @@ void MapView::createGUI()
           );
   ADD_TOGGLE (view_menu, "Texture palette", Qt::Key_X, _show_texture_palette_window);
   connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
-          , TexturePalette, [this] 
-                            { 
-                              if (terrainMode == editing_mode::paint && !ui_hidden)
-                              {
-                                TexturePalette->setVisible(_show_texture_palette_window.get());
-                              }
-                              else
-                              {
-                                _show_texture_palette_window.set(false);
-                              }
-                            }
+          ,  [this]
+                  {
+                    if (terrainMode == editing_mode::paint && !ui_hidden)
+                    {
+                      _texture_browser_dock->setVisible(_show_texture_palette_window.get());
+                    }
+                    else
+                    {
+                      _show_texture_palette_window.set(false);
+                    }
+                  }
           );
   connect ( TexturePalette, &noggit::ui::widget::visibilityChanged
           , &_show_texture_palette_window, &noggit::bool_toggle_property::set
@@ -1456,6 +1487,8 @@ void MapView::createGUI()
   addHotkey(Qt::Key_Escape, MOD_none, [this] { _main_window->close(); });
 
   connect(_main_window, &noggit::ui::main_window::exit_prompt_opened, this, &MapView::on_exit_prompt);
+
+  set_editing_mode (editing_mode::ground);
 }
 
 void MapView::on_exit_prompt()
@@ -1469,9 +1502,9 @@ void MapView::on_exit_prompt()
   objectEditor->helper_models_widget->hide();
   objectEditor->modelImport->hide();
   objectEditor->rotationEditor->hide();
-  guidetailInfos->hide();
-  TexturePicker->hide();
-  TexturePalette->hide();
+  _detail_infos_dock->hide();
+  _texture_picker_dock->hide();
+  _texture_browser_dock->hide();
 }
 
 MapView::MapView( math::degrees camera_yaw0
@@ -1508,6 +1541,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW)
   , _tablet_manager(noggit::TabletManager::instance())
 {
+
   _context = noggit::NoggitRenderContext::MAP_VIEW;
   _transform_gizmo.setWorld(_world.get());
 
@@ -1665,16 +1699,15 @@ void MapView::on_uid_fix_fail()
 
 void MapView::initializeGL()
 {
+  _gl_guard_connection = connect(context(), &QOpenGLContext::aboutToBeDestroyed,
+                                 [this]()
+                                 {
+                                     unloadOpenglData();
+                                 });
 
   bool uid_warning = false;
 
   opengl::context::scoped_setter const _ (::gl, context());
-
-  connect(context(), &QOpenGLContext::aboutToBeDestroyed,
-          [this]()
-          {
-              unloadOpenglData();
-          });
 
   gl.viewport(0.0f, 0.0f, width(), height());
 
@@ -1703,8 +1736,6 @@ void MapView::initializeGL()
 
   _uid_fix = uid_fix_mode::none;
 
-  set_editing_mode (editing_mode::ground);
-
   if (!_from_bookmark)
   {
     move_camera_with_auto_height (_camera.position);
@@ -1727,6 +1758,10 @@ void MapView::initializeGL()
   emit resized();
 
   _last_opengl_context = context();
+
+  _world->initShaders();
+
+  _gl_initialized = true;
 }
 
 
@@ -1854,11 +1889,8 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
 void MapView::paintGL()
 {
-  if (!context()->isValid())
-    return;
-
-  if (_last_opengl_context != context())
-    return;
+  if (!_gl_initialized)
+    initializeGL();
 
   opengl::context::scoped_setter const _ (::gl, context());
 
@@ -1880,7 +1912,7 @@ void MapView::paintGL()
 
   _last_update = now;
 
-  makeCurrent();
+  bool test = context()->makeCurrent(context()->surface());
 
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -1997,7 +2029,8 @@ void MapView::resizeGL (int width, int height)
 MapView::~MapView()
 {
   makeCurrent();
-  _destroying = false;
+
+  _destroying = true;
 
   opengl::context::scoped_setter const _ (::gl, context());
   delete _texBrush;
@@ -2025,6 +2058,8 @@ MapView::~MapView()
   ModelManager::report();
   TextureManager::report();
   WMOManager::report();
+
+  disconnect(_gl_guard_connection);
 }
 
 void MapView::tick (float dt)
@@ -2292,6 +2327,7 @@ void MapView::tick (float dt)
           else if (_mod_ctrl_down && !ui_hidden)
           {
             // Pick texture
+            _texture_picker_dock->setVisible(true);
             TexturePicker->getTextures(selection);
           }
           else  if (_mod_shift_down && !!noggit::ui::selected_texture::get())
@@ -3646,8 +3682,6 @@ void MapView::addHotkey(Qt::Key key, size_t modifiers, std::function<void()> fun
 
 void MapView::unloadOpenglData(bool from_manager)
 {
-  if (_destroying || _world->mapIndex.loaded_tiles().empty() || !context())
-    return;
 
   LogDebug << "Changing context of MapView." << std::endl;
 
@@ -3673,6 +3707,9 @@ void MapView::unloadOpenglData(bool from_manager)
 
   if (!from_manager)
     noggit::Red::ViewportManager::ViewportManager::unloadOpenglData(this);
+
+  disconnect(_gl_guard_connection);
+  _gl_initialized = false;
 
   LogDebug << "Changed context of MapView." << std::endl;
 }

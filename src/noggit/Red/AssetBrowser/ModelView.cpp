@@ -36,11 +36,11 @@ ModelViewer::ModelViewer(QWidget* parent, noggit::NoggitRenderContext context)
 
 void ModelViewer::initializeGL()
 {
-  connect(context(), &QOpenGLContext::aboutToBeDestroyed,
-          [this]()
-          {
-              unloadOpenglData();
-          });
+  _gl_guard_connection = connect(context(), &QOpenGLContext::aboutToBeDestroyed,
+  [this]()
+  {
+      unloadOpenglData();
+  });
 
   opengl::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, width(), height());
@@ -285,4 +285,5 @@ void ModelViewer::setActiveDoodadSet(const std::string& filename, const std::str
 ModelViewer::~ModelViewer()
 {
   _destroying = true;
+  disconnect(_gl_guard_connection);
 }

@@ -87,6 +87,26 @@
      </item>
     </layout>
    </item>
+   <item>
+    <layout class="QHBoxLayout" name="_2">
+     <item>
+      <widget class="QProgressBar" name="pressureBar">
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>5</height>
+        </size>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="textVisible">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
   </layout>
  </widget>
  <resources/>
