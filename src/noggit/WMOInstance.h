@@ -19,7 +19,6 @@ class WMOInstance : public SceneObject
 public:
   scoped_wmo_reference wmo;
   std::map<int, std::pair<math::vector_3d, math::vector_3d>> group_extents;
-  unsigned int mUniqueID;
   uint16_t mFlags;
   uint16_t mUnknown;
   uint16_t mNameset; 
@@ -47,7 +46,6 @@ public:
     : SceneObject(other._type, other._context, other._filename)
     , wmo (std::move (other.wmo))
     , group_extents(other.group_extents)
-    , mUniqueID (other.mUniqueID)
     , mFlags (other.mFlags)
     , mUnknown (other.mUnknown)
     , mNameset (other.mNameset)
@@ -59,6 +57,7 @@ public:
     pos = other.pos;
     dir = other.dir;
     _context = other._context;
+    uid = other.uid;
 
     _transform_mat = other._transform_mat;
     _transform_mat_inverted = other._transform_mat_inverted;
@@ -72,7 +71,7 @@ public:
     std::swap(extents, other.extents);
     std::swap(group_extents, other.group_extents);
     std::swap(dir, other.dir);
-    std::swap(mUniqueID, other.mUniqueID);
+    std::swap(uid, other.uid);
     std::swap(mFlags, other.mFlags);
     std::swap(mUnknown, other.mUnknown);
     std::swap(mNameset, other.mNameset);

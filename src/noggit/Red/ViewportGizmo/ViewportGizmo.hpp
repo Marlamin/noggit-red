@@ -8,7 +8,10 @@
 #include <math/matrix_4x4.hpp>
 #include <noggit/World.h>
 
+
 #include <vector>
+
+class MapView;
 
 namespace noggit
 {
@@ -36,7 +39,8 @@ namespace noggit
         public:
             ViewportGizmo(GizmoContext gizmo_context, World* world = nullptr);
 
-            void handleTransformGizmo(std::vector<selection_type> const& selection
+            void handleTransformGizmo(MapView* map_view
+                , std::vector<selection_type> const& selection
                 , math::matrix_4x4 const& model_view
                 , math::matrix_4x4 const& projection);
 

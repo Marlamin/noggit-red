@@ -33,6 +33,7 @@
 namespace noggit
 {
   struct object_paste_params;
+  struct VertexSelectionCache;
 }
 
 class Brush;
@@ -89,6 +90,8 @@ public:
   explicit World(const std::string& name, int map_id, noggit::NoggitRenderContext context, bool create_empty = false);
 
   void setBasename(const std::string& name);
+
+  SceneObject* getObjectInstance(std::uint32_t uid);
 
   void initDisplay();
 
@@ -357,6 +360,9 @@ public:
   void initShaders();
 
   void recalc_norms (MapChunk*) const;
+
+  noggit::VertexSelectionCache getVertexSelectionCache();
+  void setVertexSelectionCache(noggit::VertexSelectionCache& cache);
 
   bool need_model_updates = false;
 

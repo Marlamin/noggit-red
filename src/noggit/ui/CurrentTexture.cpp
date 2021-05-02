@@ -91,7 +91,8 @@ namespace noggit
 
       QDrag* drag = new QDrag(this);
       drag->setMimeData(mimeData);
-      drag->setPixmap(*pixmap());
+      QPixmap pm = pixmap(Qt::ReturnByValueConstant());
+      drag->setPixmap(pm);
       drag->exec();
     }
 

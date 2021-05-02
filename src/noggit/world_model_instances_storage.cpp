@@ -3,6 +3,8 @@
 #include <noggit/world_model_instances_storage.hpp>
 
 #include <noggit/World.h>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 
 namespace noggit
 {
@@ -45,6 +47,8 @@ namespace noggit
     }
     else if(!unsafe_uid_is_used(uid))
     {
+      if (noggit::ActionManager::instance()->getCurrentAction())
+        noggit::ActionManager::instance()->getCurrentAction()->registerObjectAdded(&instance);
       _m2s.emplace(uid, instance);
       _instance_count_per_uid[uid] = 1;
       return uid;
@@ -60,7 +64,7 @@ namespace noggit
   
   std::uint32_t world_model_instances_storage::add_wmo_instance(WMOInstance instance, bool from_reloading)
   {
-    std::uint32_t uid = instance.mUniqueID;
+    std::uint32_t uid = instance.uid;
     std::uint32_t uid_after;
 
     {
@@ -73,11 +77,11 @@ namespace noggit
       _world->updateTilesWMO(&_wmos.at(uid_after), model_update::add);
     }
 
-    return instance.mUniqueID;
+    return instance.uid;
   }
   std::uint32_t world_model_instances_storage::unsafe_add_wmo_instance_no_world_upd(WMOInstance instance)
   {
-    std::uint32_t uid = instance.mUniqueID;
+    std::uint32_t uid = instance.uid;
     auto existing_instance = unsafe_get_wmo_instance(uid);
 
     if (existing_instance)
@@ -92,6 +96,8 @@ namespace noggit
     }
     else if (!unsafe_uid_is_used(uid))
     {
+      if (noggit::ActionManager::instance()->getCurrentAction())
+        noggit::ActionManager::instance()->getCurrentAction()->registerObjectAdded(&instance);
       _wmos.emplace(uid, instance);
       _instance_count_per_uid[uid] = 1;
       return uid;
@@ -99,7 +105,7 @@ namespace noggit
 
     // the uid is already used for another model/wmo, use a new one
     _uid_duplicates_found = true;
-    instance.mUniqueID = _world->mapIndex.newGUID();
+    instance.uid = _world->mapIndex.newGUID();
 
     return unsafe_add_wmo_instance_no_world_upd(std::move(instance));
   }
@@ -112,6 +118,8 @@ namespace noggit
     {
       if (tile_index(it->second.pos) == tile)
       {
+        if (noggit::ActionManager::instance()->getCurrentAction())
+          noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(&it->second);
         _world->updateTilesModel(&it->second, model_update::remove);
         _instance_count_per_uid.erase(it->first);
         it = _m2s.erase(it);
@@ -125,6 +133,8 @@ namespace noggit
     {
       if (tile_index(it->second.pos) == tile)
       {
+        if (noggit::ActionManager::instance()->getCurrentAction())
+          noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(&it->second);
         _world->updateTilesWMO(&it->second, model_update::remove);
         _instance_count_per_uid.erase(it->first);
         it = _wmos.erase(it);
@@ -147,6 +157,9 @@ namespace noggit
 
       auto obj = boost::get<selected_object_type>(it);
 
+      if (noggit::ActionManager::instance()->getCurrentAction())
+        noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(obj);
+
       if (obj->which() == eMODEL)
       {
         auto instance = static_cast<ModelInstance*>(obj);
@@ -162,8 +175,8 @@ namespace noggit
 
         _world->updateTilesWMO(instance, model_update::remove);
 
-        _instance_count_per_uid.erase(instance->mUniqueID);
-        _wmos.erase(instance->mUniqueID);
+        _instance_count_per_uid.erase(instance->uid);
+        _wmos.erase(instance->uid);
       }
     }
   }
@@ -171,6 +184,16 @@ namespace noggit
   void world_model_instances_storage::delete_instance(std::uint32_t uid)
   {
     std::unique_lock<std::mutex> const lock (_mutex);
+
+    if (noggit::ActionManager::instance()->getCurrentAction())
+    {
+      if (auto instance = get_instance(uid))
+      {
+        _world->updateTilesEntry(instance.get(), model_update::remove);
+        auto obj = boost::get<selected_object_type>(instance.get());
+        noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(obj);
+      }
+    }
 
     _instance_count_per_uid.erase(uid);
     _m2s.erase(uid);
@@ -290,7 +313,9 @@ namespace noggit
         {
           _world->updateTilesWMO(&rhs->second, model_update::remove);
 
-          _instance_count_per_uid.erase(rhs->second.mUniqueID);
+          _instance_count_per_uid.erase(rhs->second.uid);
+          if (noggit::ActionManager::instance()->getCurrentAction())
+            noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(&rhs->second);
           rhs = _wmos.erase(rhs);
           deleted_uids++;
         }
@@ -312,6 +337,9 @@ namespace noggit
           _world->updateTilesModel(&rhs->second, model_update::remove);
 
           _instance_count_per_uid.erase(rhs->second.uid);
+
+          if (noggit::ActionManager::instance()->getCurrentAction())
+            noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(&rhs->second);
           rhs = _m2s.erase(rhs);
           deleted_uids++;
         }

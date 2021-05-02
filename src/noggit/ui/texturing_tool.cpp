@@ -5,6 +5,7 @@
 
 #include <noggit/Misc.h>
 #include <noggit/World.h>
+#include <noggit/MapView.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/checkbox.hpp>
 #include <noggit/ui/CurrentTexture.h>
@@ -21,7 +22,7 @@ namespace noggit
   namespace ui
   {
     texturing_tool::texturing_tool ( const math::vector_3d* camera_pos
-                                   , World* world
+                                   , MapView* map_view
                                    , bool_toggle_property* show_quick_palette
                                    , QWidget* parent
                                    )
@@ -138,7 +139,7 @@ namespace noggit
       _spray_pressure_slider->setSliderPosition (std::round(_spray_pressure * 100));
       spray_layout->addRow (_spray_pressure_slider);
 
-      _texture_switcher = new texture_swapper(tool_widget, camera_pos, world);
+      _texture_switcher = new texture_swapper(tool_widget, camera_pos, map_view);
       _texture_switcher->hide();
 
       auto quick_palette_btn (new QPushButton("Quick Palette", this));

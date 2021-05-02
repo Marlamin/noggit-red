@@ -28,9 +28,6 @@ public:
 
   math::vector_3d light_color = { 1.f, 1.f, 1.f };
 
-  //! \todo  Get this out and do somehow else.
-  unsigned int uid;
-
   // used when flag 0x8 is set in wdt
   // longest side of an AABB transformed model's bounding box from the M2 header
   float size_cat;
@@ -46,7 +43,6 @@ public:
     : SceneObject(other._type, other._context, other._filename)
     , model (std::move (other.model))
     , light_color (other.light_color)
-    , uid (other.uid)
     , size_cat (other.size_cat)
     , _need_recalc_extents(other._need_recalc_extents)
   {
@@ -58,6 +54,7 @@ public:
     _transform_mat_transposed = other._transform_mat_transposed;
     _transform_mat_inverted =  other._transform_mat_inverted;
     _context = other._context;
+    uid = other.uid;
   }
 
   ModelInstance& operator= (ModelInstance&& other)

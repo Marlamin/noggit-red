@@ -166,7 +166,7 @@ namespace noggit
       transparency_toggle->addButton (ocean_button, ocean_opacity);
       transparency_toggle->addButton (custom_button, custom_opacity);
 
-      connect ( transparency_toggle, qOverload<int> (&QButtonGroup::buttonClicked)
+      connect ( transparency_toggle, qOverload<int> (&QButtonGroup::idClicked)
               , [&] (int id) { _opacity_mode = id; }
               );
 

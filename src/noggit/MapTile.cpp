@@ -845,7 +845,7 @@ void MapTile::saveTile(World* world)
     }
 
     lMODF_Data[lID].nameID = filename_to_offset_and_name->second.nameID;
-    lMODF_Data[lID].uniqueID = object.mUniqueID;
+    lMODF_Data[lID].uniqueID = object.uid;
     lMODF_Data[lID].pos[0] = object.pos.x;
     lMODF_Data[lID].pos[1] = object.pos.y;
     lMODF_Data[lID].pos[2] = object.pos.z;

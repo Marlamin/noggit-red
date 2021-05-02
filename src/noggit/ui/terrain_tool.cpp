@@ -130,7 +130,7 @@ namespace noggit
       layout->addRow(_vertex_type_group);
       _vertex_type_group->hide();
 
-      connect ( _type_button_group, qOverload<int> (&QButtonGroup::buttonClicked)
+      connect ( _type_button_group, qOverload<int> (&QButtonGroup::idClicked)
               , [&] (int id)
                 {
                   _edit_type = static_cast<eTerrainType> (id);
@@ -139,7 +139,7 @@ namespace noggit
               );
 
 
-      connect ( _vertex_button_group, qOverload<int> (&QButtonGroup::buttonClicked)
+      connect ( _vertex_button_group, qOverload<int> (&QButtonGroup::idClicked)
               , [&] (int id)
                 {
                   _vertex_mode = id;

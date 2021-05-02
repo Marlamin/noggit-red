@@ -222,7 +222,7 @@ namespace noggit
       multi_select_movement_layout->addRow(object_median_pivot_point);
 
       auto *selectionOptionsBox = new ExpanderWidget( this);
-      selectionOptionsBox->setExpanderTitle("Selection Options");
+      selectionOptionsBox->setExpanderTitle("Movement Options");
 
       auto selectionOptionsBox_content = new QWidget(this);
       auto selectionOptions_layout = new QVBoxLayout(selectionOptionsBox_content);
@@ -372,7 +372,7 @@ namespace noggit
           _use_median_pivot_point = b;
       });
 
-      connect ( pasteModeGroup, qOverload<int> (&QButtonGroup::buttonClicked)
+      connect ( pasteModeGroup, qOverload<int> (&QButtonGroup::idClicked)
               , [&] (int id)
                 {
                     pasteMode = id;

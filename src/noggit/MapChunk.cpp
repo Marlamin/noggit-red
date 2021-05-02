@@ -337,9 +337,9 @@ void MapChunk::upload()
   update_shadows();
 
   // fill vertex buffers
-  gl.bufferData<GL_ARRAY_BUFFER> (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (_vertices_vbo, sizeof(mVertices), mVertices, GL_DYNAMIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_DYNAMIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_DYNAMIC_DRAW);
 
   update_indices_buffer();
   _uploaded = true;
@@ -524,8 +524,7 @@ void MapChunk::clearHeight()
 
   if (_uploaded)
   {
-    gl.bufferData<GL_ARRAY_BUFFER>
-      (_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bufferSubData<GL_ARRAY_BUFFER>(_vertices_vbo, 0,sizeof(mVertices), mVertices);
 
     _need_vao_update = true;
   }
@@ -732,7 +731,7 @@ void MapChunk::updateVerticesData()
 
   if (_uploaded)
   {
-    gl.bufferData<GL_ARRAY_BUFFER>(_vertices_vbo, sizeof(mVertices), mVertices, GL_STATIC_DRAW);
+    gl.bufferSubData<GL_ARRAY_BUFFER>(_vertices_vbo, 0, sizeof(mVertices), mVertices);
     _need_vao_update = true;
   }
 }
@@ -778,7 +777,16 @@ void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)>
 
   if (_uploaded)
   {
-    gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_STATIC_DRAW);
+    gl.bufferSubData<GL_ARRAY_BUFFER> (_normals_vbo, 0, sizeof(mNormals), mNormals);
+    _need_vao_update = true;
+  }
+}
+
+void MapChunk::updateNormalsData()
+{
+  if (_uploaded)
+  {
+    gl.bufferSubData<GL_ARRAY_BUFFER> (_normals_vbo, 0, sizeof(mNormals), mNormals);
     _need_vao_update = true;
   }
 }
@@ -899,7 +907,7 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
 
 void MapChunk::update_vertex_colors()
 {
-  gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_STATIC_DRAW);
+  gl.bufferSubData<GL_ARRAY_BUFFER> (_mccv_vbo, 0, sizeof(mccv), mccv);
   _need_vao_update = true;
 }
 

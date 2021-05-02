@@ -53,7 +53,7 @@ namespace math
 
     friend std::ostream& operator<< (std::ostream& os, degrees const& v)
     {
-      return os << v << "°";
+      return os << std::to_string(v._) << "°";
     }
 
 

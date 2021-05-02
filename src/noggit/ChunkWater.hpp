@@ -54,6 +54,11 @@ public:
   int getType(size_t layer) const;
   bool hasData(size_t layer) const;
 
+  std::vector<liquid_layer>* getLayers() { return &_layers; };
+
+  // update every layer's render
+  void update_layers();
+
   void paintLiquid( math::vector_3d const& pos
                   , float radius
                   , int liquid_id
@@ -79,8 +84,6 @@ private:
 
   // remove empty layers
   void cleanup();
-  // update every layer's render
-  void update_layers();
 
   void copy_height_to_layer(liquid_layer& target, math::vector_3d const& pos, float radius);
 

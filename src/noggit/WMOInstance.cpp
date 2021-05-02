@@ -13,12 +13,13 @@
 WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggit::NoggitRenderContext context)
   : SceneObject(SceneObjectTypes::eWMO, context, filename)
   , wmo(filename, context)
-  , mUniqueID(d->uniqueID), mFlags(d->flags)
+  , mFlags(d->flags)
   , mUnknown(d->unknown), mNameset(d->nameSet)
   , _doodadset(d->doodadSet)
 {
   pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
   dir = math::degrees::vec3{math::degrees(d->rot[0]), math::degrees(d->rot[1]), math::degrees(d->rot[2])};
+  uid = d->uniqueID;
 
   extents[0] = math::vector_3d(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
   extents[1] = math::vector_3d(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
@@ -30,7 +31,6 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggi
 WMOInstance::WMOInstance(std::string const& filename, noggit::NoggitRenderContext context)
   : SceneObject(SceneObjectTypes::eWMO, context, filename)
   , wmo(filename, context)
-  , mUniqueID(0)
   , mFlags(0)
   , mUnknown(0)
   , mNameset(0)
@@ -39,6 +39,7 @@ WMOInstance::WMOInstance(std::string const& filename, noggit::NoggitRenderContex
   change_doodadset(_doodadset);
   pos = math::vector_3d(0.0f, 0.0f, 0.0f);
   dir = math::degrees::vec3(0_deg, 0_deg, 0_deg);
+  uid = 0;
   _context = context;
 }
 
@@ -64,14 +65,14 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
     return;
   }
 
-  const uint id = this->mUniqueID;
+  const uint id = this->uid;
   bool const is_selected = selection.size() > 0 &&
                            std::find_if(selection.begin(), selection.end(),
                                         [id](selection_type type)
                                         {
                                           return type.type() == typeid(selected_object_type)
                                           && boost::get<selected_object_type>(type)->which() == SceneObjectTypes::eWMO
-                                          && static_cast<WMOInstance*>(boost::get<selected_object_type>(type))->mUniqueID == id;
+                                          && static_cast<WMOInstance*>(boost::get<selected_object_type>(type))->uid == id;
                                         }) != selection.end();
 
   {

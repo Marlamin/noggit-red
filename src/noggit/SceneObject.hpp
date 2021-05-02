@@ -51,6 +51,7 @@ public:
   math::vector_3d  extents[2];
   math::degrees::vec3 dir;
   float scale = 1.f;
+  unsigned int uid;
 
 
 protected:

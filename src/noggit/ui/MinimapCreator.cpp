@@ -660,7 +660,7 @@ namespace noggit
 
                   if (obj->which() == eWMO)
                   {
-                    excludeWMOInstance(static_cast<WMOInstance*>(obj)->mUniqueID);
+                    excludeWMOInstance(static_cast<WMOInstance*>(obj)->uid);
                   }
 
                 }
@@ -692,7 +692,7 @@ namespace noggit
 
                   if (obj->which() == eWMO)
                   {
-                    unexcludeWMOInstance(static_cast<WMOInstance*>(obj)->mUniqueID);
+                    unexcludeWMOInstance(static_cast<WMOInstance*>(obj)->uid);
                   }
 
                 }

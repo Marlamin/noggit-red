@@ -40,26 +40,14 @@ private:
   tile_mode _mode;
 
   bool hasMCCV;
-
-  int holes;
-
-  unsigned int areaID;
-
-  void update_shadows();
-
-  uint8_t _shadow_map[64 * 64];
   opengl::texture shadow;
 
   std::vector<StripType> strip_with_holes;
   std::vector<StripType> strip_without_holes;
   std::map<int, std::vector<StripType>> strip_lods;
 
-  math::vector_3d mccv[mapbufsize];
-
   std::vector<uint8_t> compressed_shadow_map() const;
   bool has_shadows() const;
-
-  void initStrip();
 
   int indexNoLoD(int x, int y);
   int indexLoD(int x, int y);
@@ -107,10 +95,21 @@ public:
 
   std::unique_ptr<TextureSet> texture_set;
 
+  int holes;
+
+  unsigned int areaID;
+
   math::vector_3d mVertices[mapbufsize];
   math::vector_3d mNormals[mapbufsize];
+  math::vector_3d mccv[mapbufsize];
+
+  uint8_t _shadow_map[64 * 64];
+
+  void update_shadows();
 
   void unload();
+
+  void initStrip();
 
   bool is_visible ( const float& cull_distance
                   , const math::frustum& frustum
@@ -160,6 +159,7 @@ public:
 
   void updateVerticesData();
   void recalcNorms (std::function<boost::optional<float> (float, float)> height);
+  void updateNormalsData();
 
   //! \todo implement Action stack for these
   bool changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);

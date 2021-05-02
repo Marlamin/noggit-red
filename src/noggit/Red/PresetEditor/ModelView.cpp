@@ -103,7 +103,7 @@ void ModelViewer::paintGL()
     std::vector<selection_type> selection;
     selection.emplace_back(&_wmo_instances[0]);
 
-    _transform_gizmo.handleTransformGizmo(selection, mv, proj);
+    _transform_gizmo.handleTransformGizmo(nullptr, selection, mv, proj);
 
     //_world->update_selection_pivot();
 

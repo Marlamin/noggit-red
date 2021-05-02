@@ -60,7 +60,7 @@ namespace noggit
     wmo_instance_update(WMOInstance* wmo, model_update type)
       : start(wmo->extents[0])
       , end(wmo->extents[1])
-      , uid(wmo->mUniqueID)
+      , uid(wmo->uid)
       , update_type(type)
     {
 

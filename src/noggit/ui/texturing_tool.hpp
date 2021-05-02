@@ -17,6 +17,8 @@
 #include <QtWidgets/QWidget>
 
 class World;
+class MapView;
+
 namespace noggit
 {
   namespace ui
@@ -36,7 +38,7 @@ namespace noggit
     {
     public:
       texturing_tool ( const math::vector_3d* camera_pos
-                     , World* world
+                     , MapView* map_view
                      , bool_toggle_property* show_quick_palette
                      , QWidget* parent = nullptr
                      );

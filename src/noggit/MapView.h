@@ -209,6 +209,7 @@ private:
 signals:
   void uid_fix_failed();
   void resized();
+  void saved();
 public slots:
   void on_exit_prompt();
 

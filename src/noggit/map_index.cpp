@@ -7,6 +7,8 @@
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/World.h>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
 #endif
@@ -342,7 +344,9 @@ void MapIndex::setFlag(bool to, math::vector_3d const& pos, uint32_t flag)
     int cx = (pos.x - tile.x * TILESIZE) / CHUNKSIZE;
     int cz = (pos.z - tile.z * TILESIZE) / CHUNKSIZE;
 
-    getTile(tile)->getChunk(cx, cz)->setFlag(to, flag);
+    MapChunk* chunk = getTile(tile)->getChunk(cx, cz);
+    noggit::ActionManager::instance()->getCurrentAction()->registerChunkFlagChange(chunk);
+    chunk->setFlag(to, flag);
   }
 }
 
@@ -915,7 +919,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
   for (WMOInstance& instance : wmos)
   {
-    instance.mUniqueID = highestGUID++;
+    instance.uid = highestGUID++;
     // no need to check if the loading is finished since the extents are stored inside the adt
     // to avoid going outside of bound
     std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);

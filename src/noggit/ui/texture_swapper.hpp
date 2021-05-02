@@ -14,6 +14,7 @@
 #include <boost/optional.hpp>
 
 class World;
+class MapView;
 
 namespace noggit
 {
@@ -24,7 +25,7 @@ namespace noggit
     public:
       texture_swapper ( QWidget* parent
                       , const math::vector_3d* camera_pos
-                      , World*
+                      , MapView* map_view
                       );
 
       boost::optional<scoped_blp_texture_reference> const& texture_to_swap() const

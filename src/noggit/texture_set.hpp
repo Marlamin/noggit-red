@@ -90,6 +90,10 @@ public:
   auto getDoodadMappingBase(void) -> std::uint16_t* { return _doodadMapping.data(); }
   auto getDoodadStencilBase(void) -> std::uint8_t* { return _doodadStencil.data(); }
   auto getEffectForLayer(std::size_t idx) const -> unsigned { return _layers_info[idx].effectID; }
+  ENTRY_MCLY* getMCLYEntries() { return &_layers_info[0]; };
+  void setNTextures(size_t n) { nTextures = n; };
+  std::vector<scoped_blp_texture_reference>* getTextures() { return &textures; };
+
 private:
 
   uint8_t sum_alpha(size_t offset) const;

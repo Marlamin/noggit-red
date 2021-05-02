@@ -168,6 +168,14 @@ namespace opengl
     void drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices);
 
     QOpenGLContext* getCurrentContext();
+
+    void bufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const void* data);
+
+    template<GLenum target>
+    void bufferSubData(GLuint buffer, GLintptr offset, GLsizeiptr size, const void *data);
+
+    template<GLenum target, typename T>
+    void bufferSubData(GLuint buffer, GLintptr offset, const std::vector<T> &data);
   };
 }
 

@@ -365,11 +365,6 @@ namespace opengl
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
     return _current_context->functions()->glBindBuffer (target, buffer);
   }
-  void context::bufferData (GLenum target, GLsizeiptr size, GLvoid const* data, GLenum usage)
-  {
-    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
-    return _current_context->functions()->glBufferData (target, size, data, usage);
-  }
   GLvoid* context::mapBuffer (GLenum target, GLenum access)
   {
     verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
@@ -738,6 +733,31 @@ namespace opengl
     return bufferData(target, sizeof(T) * data.size(), data.data(), usage);
   }
 
+  void context::bufferData (GLenum target, GLsizeiptr size, GLvoid const* data, GLenum usage)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glBufferData (target, size, data, usage);
+  }
+  void context::bufferSubData (GLenum target, GLintptr offset, GLsizeiptr size, GLvoid const* data)
+  {
+    verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+    return _current_context->functions()->glBufferSubData (target, offset, size, data);
+  }
+
+  template<GLenum target>
+  void context::bufferSubData (GLuint buffer, GLintptr offset, GLsizeiptr size, GLvoid const* data)
+  {
+    scoped::buffer_binder<target> const _ (buffer);
+    return bufferSubData (target, offset, size, data);
+  }
+
+  template<GLenum target, typename T>
+  void context::bufferSubData(GLuint buffer, GLintptr offset, std::vector<T> const& data)
+  {
+    scoped::buffer_binder<target> const _(buffer);
+    return bufferSubData(target, offset, sizeof(T) * data.size(), data.data());
+  }
+
   template void context::bufferData<GL_ARRAY_BUFFER, float>(GLuint buffer, std::vector<float> const& data, GLenum usage);
   template void context::bufferData<GL_ARRAY_BUFFER, math::vector_2d>(GLuint buffer, std::vector<math::vector_2d> const& data, GLenum usage);
   template void context::bufferData<GL_ARRAY_BUFFER, math::vector_3d>(GLuint buffer, std::vector<math::vector_3d> const& data, GLenum usage);
@@ -745,6 +765,13 @@ namespace opengl
   template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint8_t>(GLuint buffer, std::vector<std::uint8_t> const& data, GLenum usage);
   template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(GLuint buffer, std::vector<std::uint16_t> const& data, GLenum usage);
   template void context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(GLuint buffer, std::vector<std::uint32_t> const& data, GLenum usage);
+
+  template void context::bufferSubData<GL_ARRAY_BUFFER, float>(GLuint buffer, GLintptr offset, std::vector<float> const& data);
+  template void context::bufferSubData<GL_ARRAY_BUFFER, math::vector_2d>(GLuint buffer, GLintptr offset, std::vector<math::vector_2d> const& data);
+  template void context::bufferSubData<GL_ARRAY_BUFFER, math::vector_3d>(GLuint buffer, GLintptr offset, std::vector<math::vector_3d> const& data);
+  template void context::bufferSubData<GL_ARRAY_BUFFER, math::vector_4d>(GLuint buffer, GLintptr offset, std::vector<math::vector_4d> const& data);
+  template void context::bufferSubData<GL_ARRAY_BUFFER>(GLuint buffer, GLintptr offset, GLsizeiptr size, GLvoid const* data);
+
 
   void context::drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices)
   {

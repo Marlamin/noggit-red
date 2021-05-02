@@ -72,7 +72,7 @@ void ObjectInstanceInfoNode::compute()
   {
     _out_ports[5].out_value = std::make_shared<UnsignedIntegerData>(obj->which() == eMODEL ?
         static_cast<ModelInstance*>(obj)->uid
-        : static_cast<WMOInstance*>(obj)->mUniqueID);
+        : static_cast<WMOInstance*>(obj)->uid);
 
     _node->onDataUpdated(5);
   }

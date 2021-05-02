@@ -5,7 +5,10 @@
 #include <math/vector_3d.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
+#include <noggit/MapView.h>
 #include <noggit/tool_enums.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 
 #include <util/qt/overload.hpp>
 
@@ -19,12 +22,12 @@ namespace noggit
   {
     texture_swapper::texture_swapper ( QWidget* parent
                                      , const math::vector_3d* camera_pos
-                                     , World* world
+                                     , MapView* map_view
                                      )
       : QWidget (parent)
       , _texture_to_swap()
       , _radius(15.f)
-      , _world(world)
+      , _world(map_view->getWorld())
     {
       setWindowTitle ("Swap");
       setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -61,7 +64,10 @@ namespace noggit
       _radius_slider->setSliderPosition (_radius);
       brush_layout->addRow (_radius_slider);      
       
-      connect(select, &QPushButton::clicked, [&]() {
+      connect(select, &QPushButton::clicked, [&, map_view]() {
+
+        map_view->context()->makeCurrent(map_view->context()->surface());
+        opengl::context::scoped_setter const _ (::gl, map_view->context());
         _texture_to_swap = selected_texture::get();
         if (_texture_to_swap)
         {
@@ -69,10 +75,12 @@ namespace noggit
         }
       });
 
-      connect(swap_adt, &QPushButton::clicked, [this, camera_pos, world]() {
+      connect(swap_adt, &QPushButton::clicked, [this, camera_pos, map_view]() {
         if (_texture_to_swap)
         {
-          world->swapTexture (*camera_pos, _texture_to_swap.get());
+          ActionManager::instance()->beginAction(map_view, ActionFlags::eCHUNKS_TEXTURE);
+          _world->swapTexture (*camera_pos, _texture_to_swap.get());
+          ActionManager::instance()->endAction();
         }
       });
 

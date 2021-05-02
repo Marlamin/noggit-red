@@ -1,12 +1,15 @@
 #include "ViewportGizmo.hpp"
 #include "noggit/ModelInstance.h"
 #include "noggit/WMOInstance.h"
+#include "noggit/ActionManager.hpp"
+#include "noggit/Action.hpp"
 #include "math/vector_3d.hpp"
 #include "external/glm/glm.hpp"
 #include <external/glm/gtx/matrix_decompose.hpp>
 #include <external/glm/gtc/type_ptr.hpp>
 #include <external/glm/gtc/quaternion.hpp>
 #include <external/glm/gtx/string_cast.hpp>
+#include <noggit/MapView.h>
 
 #include <limits>
 
@@ -18,7 +21,8 @@ ViewportGizmo::ViewportGizmo(noggit::Red::ViewportGizmo::GizmoContext gizmo_cont
 , _world(world)
 {}
 
-void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& selection
+void ViewportGizmo::handleTransformGizmo(MapView* map_view
+                                        , const std::vector<selection_type>& selection
                                         , math::matrix_4x4 const& model_view
                                         , math::matrix_4x4 const& projection)
 {
@@ -94,6 +98,9 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
     return;
   }
 
+  noggit::ActionManager::instance()->beginAction(map_view, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                                 noggit::ActionModalityControllers::eLMB);
+
   if (gizmo_selection_type == MULTISELECTION)
   {
 
@@ -104,6 +111,7 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
         continue;
 
       obj_instance = boost::get<selected_object_type>(selected);
+      noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj_instance);
 
       obj_instance->recalcExtents();
       object_matrix = math::matrix_4x4(obj_instance->transformMatrixTransposed());
@@ -131,11 +139,11 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
 
       new_orientation = glm::conjugate(new_orientation);
 
+      if (_world)
+        _world->updateTilesEntry(selection[0], model_update::remove);
+
       switch (_gizmo_operation)
       {
-        if (_world)
-          _world->updateTilesEntry(selection[0], model_update::remove);
-
         case ImGuizmo::TRANSLATE:
         {
           pos += {new_translation.x, new_translation.y, new_translation.z};
@@ -206,13 +214,11 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
           throw std::logic_error("Bounds are not supported by this gizmo.");
           break;
         }
-
-        obj_instance->recalcExtents();
-
-
-        if (_world)
-         _world->updateTilesEntry(selection[0], model_update::add);
       }
+      obj_instance->recalcExtents();
+
+      if (_world)
+        _world->updateTilesEntry(selection[0], model_update::add);
     }
   }
   else
@@ -223,6 +229,7 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
         continue;
 
       obj_instance = boost::get<selected_object_type>(selected);
+      noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj_instance);
 
       obj_instance->recalcExtents();
       object_matrix = math::matrix_4x4(obj_instance->transformMatrixTransposed());
@@ -251,10 +258,11 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
 
       new_orientation = glm::conjugate(new_orientation);
 
+      if (_world)
+        _world->updateTilesEntry(selection[0], model_update::remove);
+
       switch (_gizmo_operation)
       {
-        if (_world)
-          _world->updateTilesEntry(selection[0], model_update::remove);
 
         case ImGuizmo::TRANSLATE:
         {
@@ -275,14 +283,12 @@ void ViewportGizmo::handleTransformGizmo(const std::vector<selection_type>& sele
         case ImGuizmo::BOUNDS:
         {
           throw std::logic_error("Bounds are not supported by this gizmo.");
-          break;
         }
-
-        obj_instance->recalcExtents();
-
-        if (_world)
-          _world->updateTilesEntry(selection[0], model_update::add);
       }
+      obj_instance->recalcExtents();
+
+      if (_world)
+        _world->updateTilesEntry(selection[0], model_update::add);
     }
   }
 }
