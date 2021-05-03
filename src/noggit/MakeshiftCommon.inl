@@ -109,10 +109,10 @@ namespace noggit::Recovery
   -> void
   { append(&val, sizeof(Ty)); }
 
-  template < typename Ty >
+  /*template < typename Ty >
   constexpr
   Buffer::operator Anchor<Ty> ( )
-  { return *this + Offset<Ty>{_pos}; }
+  { return *this + Offset<Ty>{_pos}; }*/
 
   template
   <

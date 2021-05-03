@@ -4,6 +4,7 @@
 
 #include <math/constants.hpp>
 #include <math/vector_3d.hpp>
+#include <string>
 
 #include <cmath>
 
