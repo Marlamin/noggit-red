@@ -5,6 +5,8 @@
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/ui/ObjectEditor.h>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 
 #include <typeinfo>
 
@@ -68,6 +70,8 @@ void AddObjectInstanceNode::compute()
     setValidationMessage("Error: path is not a valid .m2 or .wmo file.");
     return;
   }
+
+  noggit::ActionManager::instance()->getCurrentAction()->registerObjectAdded(obj);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

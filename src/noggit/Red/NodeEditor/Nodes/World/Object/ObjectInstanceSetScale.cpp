@@ -4,6 +4,8 @@
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 

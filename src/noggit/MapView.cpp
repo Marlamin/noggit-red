@@ -2207,10 +2207,7 @@ void MapView::tick (float dt)
   if (MoveObj)
     action_modality |= noggit::ActionModalityControllers::eMMB;
 
-  // todo: middle mouse and scroll up and down
-
   noggit::ActionManager::instance()->endActionOnModalityMismatch(action_modality);
-
 
   // start unloading tiles
   _world->mapIndex.enterTile (tile_index (_camera.position));
@@ -3501,7 +3498,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       {
         noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
                                      noggit::ActionModalityControllers::eALT | noggit::ActionModalityControllers::eRMB);
-        terrainTool->changeOrientation (-relative_movement.dx() / XSENS * 2.f);
+        terrainTool->changeOrientation (-relative_movement.dx() / XSENS * 4.5f);
       }
       else
       {
@@ -3529,7 +3526,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
       noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
                                    noggit::ActionModalityControllers::eCTRL | noggit::ActionModalityControllers::eRMB);
-      terrainTool->changeAngle (-relative_movement.dy() / YSENS);
+      terrainTool->changeAngle (-relative_movement.dy() / YSENS * 2.f);
   }
 
 

@@ -4,7 +4,8 @@
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/tool_enums.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
@@ -38,7 +39,9 @@ void GetTileChunksNode::compute()
   {
     for (int j = 0; j < 16; ++j)
     {
-      _chunks[i * 16 + j] = std::make_shared<ChunkData>(tile->getChunk(i, j));
+      MapChunk* chunk = tile->getChunk(i, j);
+      _chunks[i * 16 + j] = std::make_shared<ChunkData>();
+      noggit::ActionManager::instance()->getCurrentAction()->registerAllChunkChanges(chunk);
     }
   }
 

@@ -4,6 +4,8 @@
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
@@ -39,6 +41,8 @@ void GetObjectInstanceByUIDNode::compute()
   }
 
   SceneObject* obj = boost::get<selected_object_type>(obj_optional.get());
+
+  noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

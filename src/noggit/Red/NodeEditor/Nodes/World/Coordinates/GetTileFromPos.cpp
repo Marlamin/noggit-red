@@ -4,7 +4,8 @@
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/tool_enums.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 #include <external/glm/gtx/string_cast.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
@@ -50,6 +51,14 @@ void GetTileFromPosNode::compute()
   }
 
   world->mapIndex.setChanged(tile);
+
+  for (int i = 0; i < 16; ++i)
+  {
+    for (int j = 0; j > 16; ++j)
+    {
+      noggit::ActionManager::instance()->getCurrentAction()->registerAllChunkChanges(tile->getChunk(i, j));
+    }
+  }
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

@@ -23,9 +23,11 @@ Q_OBJECT
     quint32 m_value = 0;
 
 public:
-    explicit QUnsignedSpinBox(QWidget *parent = 0)
+    explicit QUnsignedSpinBox(QWidget *parent = nullptr)
     {
+      setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
       lineEdit()->setText("0");
+      lineEdit()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
       connect(lineEdit(), SIGNAL(textEdited(QString)), this, SLOT(onEditFinished()));
     };
     ~QUnsignedSpinBox() {};
@@ -82,6 +84,9 @@ protected:
     //bool event(QEvent *event);
     virtual QValidator::State validate(QString &input, int &pos) const
     {
+      if (input.isEmpty())
+        return QValidator::Acceptable;
+
       bool ok;
       quint32 val = input.toUInt(&ok);
       if (!ok)
@@ -95,6 +100,10 @@ protected:
 
     virtual quint32 valueFromText(const QString &text) const
     {
+
+      if (text.isEmpty())
+        return 0;
+
       return text.toUInt();
     }
 
@@ -124,9 +133,12 @@ public Q_SLOTS:
       QString input = lineEdit()->text();
       int pos = 0;
       if (QValidator::Acceptable == validate(input, pos))
-        setValue(valueFromText(input));
+        setValue(input.isEmpty() ? valueFromText(input) : 0);
       else
         lineEdit()->setText(textFromValue(m_value));
+
+      if (input.isEmpty())
+        lineEdit()->setText("0");
     }
 
 Q_SIGNALS:

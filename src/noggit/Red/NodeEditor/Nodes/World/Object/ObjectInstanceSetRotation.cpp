@@ -4,6 +4,8 @@
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
@@ -28,6 +30,7 @@ void ObjectInstanceSetRotationNode::compute()
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   SceneObject* obj = defaultPortData<ObjectInstanceData>(PortType::In, 1)->value();
+  noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
   auto rot_data = defaultPortData<Vector3DData>(PortType::In, 2);
   glm::vec3 const& rotation = rot_data->value();
 

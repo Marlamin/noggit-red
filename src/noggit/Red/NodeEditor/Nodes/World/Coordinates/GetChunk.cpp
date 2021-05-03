@@ -4,7 +4,8 @@
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/tool_enums.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
@@ -41,6 +42,8 @@ void GetChunkNode::compute()
     setValidationMessage("Error: chunk coordinates are out of range.");
     return;
   }
+
+  noggit::ActionManager::instance()->getCurrentAction()->registerAllChunkChanges(chunk);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

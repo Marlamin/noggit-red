@@ -1,9 +1,13 @@
 #include "NodeScene.hpp"
 #include "LogicBranch.hpp"
 #include "noggit/Red/NodeEditor/Nodes/BaseNode.hpp"
+#include "noggit/Red/NodeEditor/Nodes/Scene/Context.hpp"
 
 #include <external/NodeEditor/include/nodes/Node>
 #include <noggit/Log.h>
+#include <noggit/MapView.h>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
@@ -13,10 +17,14 @@ bool NodeScene::execute()
   if (!validate())
     return false;
 
-  auto main_branch = LogicBranch(_begin_node);
-  return main_branch.execute();
 
+
+  noggit::ActionManager::instance()->beginAction(reinterpret_cast<MapView*>(gCurrentContext->getViewport()));
+  auto main_branch = LogicBranch(_begin_node);
+  bool result = main_branch.execute();
   _variables.clear();
+  noggit::ActionManager::instance()->endAction();
+  return result;
 }
 
 bool NodeScene::validate()

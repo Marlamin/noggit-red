@@ -4,7 +4,8 @@
 
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/tool_enums.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 
 using namespace noggit::Red::NodeEditor::Nodes;
 
@@ -49,6 +50,7 @@ void GetChunksInRangeNode::compute()
     for (MapChunk* chunk : tile->chunks_in_range({pos.x, pos.y, pos.z}, radius))
     {
       _chunks.push_back(std::make_shared<ChunkData>(chunk));
+      noggit::ActionManager::instance()->getCurrentAction()->registerAllChunkChanges(chunk);
     }
   }
 

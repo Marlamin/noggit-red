@@ -7,6 +7,7 @@
 #include <array>
 #include <string>
 #include <set>
+#include <external/tsl/robin_map.h>
 #include <boost/optional.hpp>
 #include <math/vector_2d.hpp>
 #include <noggit/TextureManager.h>
@@ -19,7 +20,6 @@
 
 class MapView;
 class MapChunk;
-class MapTile;
 
 namespace noggit
 {
@@ -95,6 +95,9 @@ namespace noggit
         int getFlags();
         void finish();
         void undo(bool redo = false);
+        unsigned handleObjectAdded(unsigned uid, bool redo);
+        unsigned handleObjectRemoved(unsigned uid, bool redo);
+        unsigned handleObjectTransformed(unsigned uid, bool redo);
 
         // Registrators
         void registerChunkTerrainChange(MapChunk* chunk);
@@ -109,6 +112,7 @@ namespace noggit
         void registerChunkLiquidChange(MapChunk* chunk);
         void registerVertexSelectionChange();
         void registerChunkShadowChange(MapChunk* chunk);
+        void registerAllChunkChanges(MapChunk* chunk);
 
 
     private:
@@ -121,10 +125,10 @@ namespace noggit
         std::vector<std::pair<MapChunk*, TextureChangeCache>> _chunk_texture_post;
         std::vector<std::pair<MapChunk*, std::array<float, 149 * 3>>> _chunk_vertex_color_pre;
         std::vector<std::pair<MapChunk*, std::array<float, 149 * 3>>> _chunk_vertex_color_post;
-        std::vector<std::pair<unsigned int, ObjectInstanceCache>> _transformed_objects_pre;
-        std::vector<std::pair<unsigned int, ObjectInstanceCache>> _transformed_objects_post;
-        std::vector<std::pair<unsigned int, ObjectInstanceCache>> _removed_objects_pre;
-        std::vector<std::pair<unsigned int, ObjectInstanceCache>> _added_objects_pre;
+        std::vector<std::pair<unsigned, ObjectInstanceCache>> _transformed_objects_pre;
+        std::vector<std::pair<unsigned, ObjectInstanceCache>> _transformed_objects_post;
+        std::vector<std::pair<unsigned, ObjectInstanceCache>> _removed_objects_pre;
+        std::vector<std::pair<unsigned, ObjectInstanceCache>> _added_objects_pre;
         std::vector<std::pair<MapChunk*, int>> _chunk_holes_pre;
         std::vector<std::pair<MapChunk*, int>> _chunk_holes_post;
         std::vector<std::pair<MapChunk*, int>> _chunk_area_id_pre;
@@ -141,6 +145,8 @@ namespace noggit
         std::vector<std::pair<MapChunk*, std::array<std::uint8_t, 64 * 64>>> _chunk_shadow_map_post;
 
         bool _vertex_selection_recorded = false;
+
+       tsl::robin_map<unsigned, std::vector<unsigned>> _object_operations;
 
     };
 }
