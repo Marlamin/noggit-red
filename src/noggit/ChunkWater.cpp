@@ -339,3 +339,11 @@ void ChunkWater::copy_height_to_layer(liquid_layer& target, math::vector_3d cons
     }
   }
 }
+
+void ChunkWater::unload()
+{
+  for (auto& layer : _layers)
+  {
+    layer.unload();
+  }
+}

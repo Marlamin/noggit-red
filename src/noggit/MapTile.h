@@ -87,6 +87,7 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , int animtime
             , display_mode display
+            , std::vector<int>& textures_bound
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawWater ( math::frustum const& frustum

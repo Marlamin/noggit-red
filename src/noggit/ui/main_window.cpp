@@ -14,6 +14,7 @@
 #include <noggit/Red/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <noggit/ui/font_awesome.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
+#include <noggit/Red/UiCommon/StackedWidget.hpp>
 
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
@@ -168,8 +169,6 @@ namespace noggit
                                  )
     {
       _map_creation_wizard->destroyFakeWorld();
-
-      _stack_widget->removeWidget(_map_view);
       _map_view =  (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix, from_bookmark));
       connect(_map_view, &MapView::uid_fix_failed, [this]() { prompt_uid_fix_failure(); });
 
@@ -204,7 +203,8 @@ namespace noggit
 
     void main_window::build_menu()
     {
-      _stack_widget = new QStackedWidget(this);
+      _stack_widget = new StackedWidget(this);
+      _stack_widget->setAutoResize(true);
 
       setCentralWidget(_stack_widget);
 
@@ -413,8 +413,9 @@ namespace noggit
       {
         case QMessageBox::AcceptRole:
           _stack_widget->setCurrentIndex(0);
-          _stack_widget->removeWidget(_map_view);
+          _stack_widget->removeLast();
           delete _map_view;
+          _map_view = nullptr;
           _minimap->world (nullptr);
 
           map_loaded = false;

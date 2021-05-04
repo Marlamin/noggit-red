@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <external/tsl/robin_map.h>
 
 namespace math
 {
@@ -53,6 +54,12 @@ namespace opengl
     program& operator= (program const&) = delete;
     program& operator= (program&&) = delete;
 
+    tsl::robin_map<std::string, GLuint> const* getUniforms() const { return &_uniforms; };
+    tsl::robin_map<std::string, GLuint> const* getAttributes() const { return &_attribs; };
+    tsl::robin_map<GLuint, GLint> const* getUniformsIntCache() const { return &_uniforms_int_cache; };
+    tsl::robin_map<GLuint, GLfloat> const* getUniformsFloatCache() const { return &_uniforms_float_cache; };
+    tsl::robin_map<GLuint, bool> const* getUniformsBoolCache() const { return &_uniforms_bool_cache; };
+
   private:
     inline GLuint uniform_location (std::string const& name) const;
     inline GLuint attrib_location (std::string const& name) const;
@@ -60,6 +67,13 @@ namespace opengl
     friend struct scoped::use_program;
 
     boost::optional<GLuint> _handle;
+
+    tsl::robin_map<std::string, GLuint> _uniforms;
+    tsl::robin_map<std::string, GLuint> _attribs;
+
+    tsl::robin_map<GLuint, GLint> _uniforms_int_cache;
+    tsl::robin_map<GLuint, GLfloat> _uniforms_float_cache;
+    tsl::robin_map<GLuint, bool> _uniforms_bool_cache;
   };
 
   namespace scoped
@@ -77,12 +91,17 @@ namespace opengl
       void uniform (std::string const& name, std::vector<int> const&);
       void uniform (std::string const& name, GLint);
       void uniform (std::string const& name, GLfloat);
+      void uniform (std::string const& name, bool);
       void uniform (std::string const& name, std::vector<math::vector_3d> const& value);
       void uniform (std::string const& name, math::vector_2d const&);
       void uniform (std::string const& name, math::vector_3d const&);
       void uniform (std::string const& name, math::vector_4d const&);
       void uniform (std::string const& name, math::matrix_4x4 const&);
       template<typename T> void uniform (std::string const&, T) = delete;
+
+      void uniform_cached (std::string const& name, GLint);
+      void uniform_cached (std::string const& name, GLfloat);
+      void uniform_cached (std::string const& name, bool);
 
       void sampler (std::string const& name, GLenum texture_slot, texture*);
 
@@ -99,9 +118,6 @@ namespace opengl
     private:
       GLuint uniform_location (std::string const& name);
       GLuint attrib_location (std::string const& name);
-    
-      std::unordered_map<std::string, GLuint> _uniforms;
-      std::unordered_map<std::string, GLuint> _attribs;
 
       program const& _program;
       std::set<GLuint> _enabled_vertex_attrib_arrays;

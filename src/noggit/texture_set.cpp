@@ -261,11 +261,14 @@ const std::string& TextureSet::filename(size_t id)
   return textures[id]->filename;
 }
 
-void TextureSet::bindTexture(size_t id, size_t activeTexture)
+void TextureSet::bindTexture(size_t id, size_t activeTexture,  std::vector<int>& textures_bound)
 {
-  opengl::texture::set_active_texture(activeTexture);
-
-  textures[id]->bind();
+  if (textures_bound[id] != textures[id]->id())
+  {
+    opengl::texture::set_active_texture(activeTexture);
+    textures[id]->bind();
+    textures_bound[id] = textures[id]->id();
+  }
 }
 
 math::vector_2d TextureSet::anim_uv_offset(int id, int animtime) const

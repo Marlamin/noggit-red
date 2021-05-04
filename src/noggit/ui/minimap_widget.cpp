@@ -2,6 +2,7 @@
 
 #include <noggit/ui/minimap_widget.hpp>
 
+
 #include <QPaintEvent>
 #include <QPainter>
 #include <QToolTip>
@@ -23,7 +24,7 @@ namespace noggit
       , _camera (nullptr)
       , _draw_skies (false)
     {
-      setSizePolicy (QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+      setSizePolicy (QSizePolicy::Preferred, QSizePolicy::Preferred);
       //setMouseTracking(true);
       setMaximumSize(QSize(1024, 1024));
       setMinimumSize(QSize(128, 128));

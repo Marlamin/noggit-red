@@ -18,6 +18,7 @@
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/Red/ViewportGizmo/ViewportGizmo.hpp>
 #include <noggit/Red/ViewportManager/ViewportManager.hpp>
+#include <noggit/Red/ToolPanel/ToolPanel.hpp>
 #include <noggit/TabletManager.hpp>
 #include <external/qtimgui/QtImGui.h>
 #include <external/QtAdvancedDockingSystem/src/DockManager.h>
@@ -39,9 +40,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <thread>
+#include <array>
 
 #include <ui_MapViewOverlay.h>
-
 
 
 class World;
@@ -340,32 +341,21 @@ private:
   void unloadOpenglData(bool from_manager = false) override;
 
   noggit::ui::help* _keybindings;
-
-  std::unordered_set<QDockWidget*> _tool_properties_docks;
-
   noggit::ui::tileset_chooser* TexturePalette;
   noggit::ui::detail_infos* guidetailInfos;
   noggit::ui::zone_id_browser* ZoneIDBrowser;
   noggit::ui::texture_palette_small* _texture_palette_small;
   noggit::ui::ObjectPalette* _object_palette;
-  QDockWidget* _areaid_editor_dock;
   noggit::ui::texture_picker* TexturePicker;
   noggit::ui::water* guiWater;
-  QDockWidget* _water_editor_dock;
   noggit::ui::object_editor* objectEditor;
-  QDockWidget* _object_editor_dock;
   noggit::ui::flatten_blur_tool* flattenTool;
-  QDockWidget* _flatten_blur_dock;
   noggit::ui::terrain_tool* terrainTool;
-  QDockWidget* _terrain_tool_dock;
   noggit::ui::shader_tool* shaderTool;
-  QDockWidget* _vertex_shading_dock;
   noggit::ui::texturing_tool* texturingTool;
-  QDockWidget* _texturing_dock;
   noggit::ui::hole_tool* holeTool;
-  QDockWidget* _hole_tool_dock;
   noggit::ui::MinimapCreator* minimapTool;
-  QDockWidget* _minimap_tool_dock;
+
   QDockWidget _dockStamp;
   noggit::Red::StampMode::Ui::Tool _modeStampTool;
   noggit::Red::StampMode::Ui::PaletteMain _modeStampPaletteMain;
@@ -380,12 +370,44 @@ private:
   QDockWidget* _texture_picker_dock;
   QDockWidget* _detail_infos_dock;
 
+  noggit::Red::ToolPanel* _tool_panel_dock;
+
   ::Ui::MapViewOverlay* _viewport_overlay_ui;
   ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
   ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
   noggit::bool_toggle_property _gizmo_on = {true};
   QMetaObject::Connection _gl_guard_connection;
-  bool _destroying = false;
   bool _gl_initialized = false;
+  bool _destroying = false;
 
+public:
+
+private:
+
+  void setupViewportOverlay();
+  void setupRaiseLowerUi();
+  void setupFlattenBlurUi();
+  void setupTexturePainterUi();
+  void setupHoleCutterUi();
+  void setupAreaDesignatorUi();
+  void setupFlagUi();
+  void setupWaterEditorUi();
+  void setupVertexPainterUi();
+  void setupObjectEditorUi();
+  void setupMinimapEditorUi();
+  void setupStampUi();
+  void setupNodeEditor();
+  void setupAssetBrowser();
+  void setupDetailInfos();
+  void setupToolbars();
+  void setupKeybindingsGui();
+  void setupMinimap();
+  void setupFileMenu();
+  void setupEditMenu();
+  void setupAssistMenu();
+  void setupViewMenu();
+  void setupHelpMenu();
+  void setupHotkeys();
+
+  QWidget* _overlay_widget;
 };

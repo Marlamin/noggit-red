@@ -97,6 +97,9 @@ void noggit::Action::undo(bool redo)
   || _flags & ActionFlags::eOBJECTS_REMOVED
   || _flags & ActionFlags::eOBJECTS_TRANSFORMED)
   {
+
+    tsl::robin_map<unsigned, std::vector<unsigned>> new_operation_map;
+
     for(auto& pair : _object_operations)
     {
       if (redo)
@@ -107,7 +110,7 @@ void noggit::Action::undo(bool redo)
           switch (token)
           {
             case ActionFlags::eOBJECTS_ADDED:
-              uid = handleObjectAdded(uid, redo);
+              uid = handleObjectAdded(pair.first, redo);
               break;
             case ActionFlags::eOBJECTS_REMOVED:
               uid = handleObjectRemoved(uid, redo);
@@ -115,8 +118,11 @@ void noggit::Action::undo(bool redo)
             case ActionFlags::eOBJECTS_TRANSFORMED:
               uid = handleObjectTransformed(uid, redo);
               break;
+            default:
+              break;
           }
         }
+        new_operation_map[uid] = pair.second;
       }
       else
       {
@@ -134,10 +140,14 @@ void noggit::Action::undo(bool redo)
             case ActionFlags::eOBJECTS_TRANSFORMED:
               uid = handleObjectTransformed(uid, redo);
               break;
+            default:
+              break;
           }
         }
+        new_operation_map[uid] = pair.second;
       }
     }
+    _object_operations = std::move(new_operation_map);
   }
   if (_flags & ActionFlags::eCHUNKS_HOLES)
   {

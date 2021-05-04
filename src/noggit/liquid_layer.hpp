@@ -66,6 +66,8 @@ public:
 
   void copy_subchunk_height(int x, int z, liquid_layer const& from);
 
+  void unload();
+
 private:
   void update_min_max();
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);

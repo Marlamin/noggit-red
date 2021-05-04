@@ -35,6 +35,8 @@ struct blp_texture : public opengl::texture, AsyncObject
   int width() const { return _width; }
   int height() const { return _height; }
 
+  unsigned int id() const { return _id; };
+
   void bind();
   void upload();
   void unload();

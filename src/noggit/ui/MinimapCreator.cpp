@@ -36,37 +36,13 @@ namespace noggit
         World* world,
         QWidget* parent ) : QWidget(parent)
     {
-      //setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-      auto layout = new QHBoxLayout(this);
-
-      // Left side
-
-      auto layout_left = new QFormLayout (this);
-      layout->addLayout(layout_left);
-
-      auto scroll_minimap = new QScrollArea(this);
-      scroll_minimap->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
-
-      _minimap_widget = new minimap_widget(this);
-      layout_left->addWidget(scroll_minimap);
-
-      scroll_minimap->setAlignment(Qt::AlignCenter);
-      scroll_minimap->setWidget(_minimap_widget);
-      scroll_minimap->setWidgetResizable(true);
-      scroll_minimap->setFixedSize(QSize(512, 512));
-
-      _minimap_widget->world(world);
-      _minimap_widget->draw_boundaries(true);
-      _minimap_widget->use_selection(&_render_settings.selected_tiles);
-      _minimap_widget->camera(mapView->getCamera());
-
-      // Right side
-      auto layout_right = new QFormLayout (this);
-      layout->addLayout(layout_right);
+      setMinimumWidth(250);
+      setMaximumWidth(250);
+      auto layout = new QVBoxLayout(this);
+      layout->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
 
       auto settings_tabs = new QTabWidget (this);
-      settings_tabs->setFixedWidth(300);
-      layout_right->addWidget(settings_tabs);
+      layout->addWidget(settings_tabs);
 
       // Generate
       auto generate_widget = new QWidget(this);
@@ -371,6 +347,26 @@ namespace noggit
       river_color_dark->setMinimumWidth(100);
 
       lighting_layout->addRow("River dark color:", river_color_dark);
+
+
+      // Minimap
+
+      auto scroll_minimap = new QScrollArea(this);
+      scroll_minimap->setFixedSize(226, 226);
+
+      _minimap_widget = new minimap_widget(this);
+      layout->addWidget(scroll_minimap);
+
+      scroll_minimap->setAlignment(Qt::AlignCenter);
+      scroll_minimap->setWidget(_minimap_widget);
+      scroll_minimap->setWidgetResizable(true);
+
+      _minimap_widget->world(world);
+      _minimap_widget->draw_boundaries(true);
+      _minimap_widget->use_selection(&_render_settings.selected_tiles);
+      _minimap_widget->camera(mapView->getCamera());
+
+      scroll_minimap->ensureWidgetVisible(_minimap_widget, 0, 0);
 
       loadFiltersFromJSON();
 
@@ -969,6 +965,7 @@ namespace noggit
       _m2_model_filter_include->addItem(item);
       auto entry_wgt = new MinimapM2ModelFilterEntry(this);
       entry_wgt->setFileName(filename);
+      entry_wgt->setToolTip(filename.c_str());
       entry_wgt->setSizeCategory(size_cat);
       item->setSizeHint(entry_wgt->minimumSizeHint());
       _m2_model_filter_include->setItemWidget(item, entry_wgt);
@@ -1058,6 +1055,7 @@ namespace noggit
       _wmo_model_filter_exclude->addItem(item);
       auto entry_wgt = new MinimapWMOModelFilterEntry(this);
       entry_wgt->setFileName(filename);
+      entry_wgt->setToolTip(filename.c_str());
       item->setSizeHint(entry_wgt->minimumSizeHint());
       _wmo_model_filter_exclude->setItemWidget(item, entry_wgt);
     }

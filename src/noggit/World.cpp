@@ -1011,7 +1011,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     m2_shader.uniform("model_view", model_view);
     m2_shader.uniform("projection", projection);
 
-    //m2_shader.uniform("draw_fog", 0);
+    m2_shader.uniform_cached("draw_fog", 0);
 
     m2_shader.uniform("light_dir", light_dir);
     m2_shader.uniform("diffuse_color", diffuse_color);
@@ -1086,73 +1086,39 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("model_view", model_view);
     mcnk_shader.uniform("projection", projection);
 
-    if (_draw_lines_old != draw_lines)
-    {
-      mcnk_shader.uniform ("draw_lines", (int)draw_lines);
-      _draw_lines_old = draw_lines;
-    }
+    mcnk_shader.uniform_cached("draw_lines", draw_lines);
+    mcnk_shader.uniform_cached("draw_hole_lines", draw_hole_lines);
+    mcnk_shader.uniform_cached("draw_areaid_overlay", draw_areaid_overlay);
+    mcnk_shader.uniform_cached("draw_terrain_height_contour", draw_contour);
 
-    if (_draw_hole_lines_old != draw_hole_lines)
-    {
-      mcnk_shader.uniform ("draw_hole_lines", (int)draw_hole_lines);
-      _draw_hole_lines_old = draw_hole_lines;
-    }
-
-    if (_draw_areaid_overlay_old != draw_hole_lines)
-    {
-      mcnk_shader.uniform("draw_areaid_overlay", (int)draw_areaid_overlay);
-      _draw_areaid_overlay_old = draw_areaid_overlay;
-    }
-
-    if (_draw_terrain_height_contour_old != draw_contour)
-    {
-      mcnk_shader.uniform ("draw_terrain_height_contour", (int)draw_contour);
-      _draw_terrain_height_contour_old = draw_contour;
-    }
 
     // the flag stays on if the last chunk drawn before leaving the editing tool has it
     if (!draw_chunk_flag_overlay)
     {
-      mcnk_shader.uniform ("draw_impassible_flag", 0);
+      mcnk_shader.uniform_cached("draw_impassible_flag", 0);
     }
 
-    if (_draw_wireframe_old != draw_wireframe)
-    {
-      mcnk_shader.uniform ("draw_wireframe", (int)draw_wireframe);
-      _draw_wireframe_old = draw_wireframe;
-    }
+    mcnk_shader.uniform_cached("draw_wireframe", draw_wireframe);
 
     int wireframe_type = _settings->value("wireframe/type", 0).toInt();
-    if (_wireframe_type_old != wireframe_type)
-    {
-      mcnk_shader.uniform ("wireframe_type", wireframe_type);
-      _wireframe_type_old = wireframe_type;
-    }
+
+    mcnk_shader.uniform_cached("wireframe_type", wireframe_type);
+
 
     float wireframe_radius =  _settings->value("wireframe/radius", 1.5f).toFloat();
-    if (_wireframe_radius_old != wireframe_radius)
-    {
-      mcnk_shader.uniform ("wireframe_radius", wireframe_radius);
-      _wireframe_radius_old = wireframe_radius;
-    }
+    mcnk_shader.uniform_cached("wireframe_radius", wireframe_radius);
+
 
     float wireframe_width =  _settings->value ("wireframe/width", 1.f).toFloat();
-    if (_wireframe_width_old != wireframe_width)
-    {
-      mcnk_shader.uniform ("wireframe_width", wireframe_width);
-      _wireframe_width_old = wireframe_width;
-    }
+    mcnk_shader.uniform_cached ("wireframe_width", wireframe_width);
+
 
     // !\ todo store the color somewhere ?
     QColor c = _settings->value("wireframe/color").value<QColor>();
     math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
     mcnk_shader.uniform ("wireframe_color", wireframe_color);
 
-    if (_draw_fog_old != draw_fog)
-    {
-      mcnk_shader.uniform ("draw_fog", (int)draw_fog);
-      _draw_fog_old = draw_fog;
-    }
+    mcnk_shader.uniform_cached ("draw_fog", draw_fog);
 
     mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
 
@@ -1162,35 +1128,21 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("diffuse_color", diffuse_color);
     mcnk_shader.uniform("ambient_color", ambient_color);
 
-
-    if (_cursor_type_old != cursor_type)
-    {
-      _cursor_type_old = cursor_type;
-      if (cursor_type != CursorType::NONE)
-      {
-        mcnk_shader.uniform("draw_cursor_circle", static_cast<int>(cursor_type));
-      }
-      else
-      {
-        mcnk_shader.uniform ("draw_cursor_circle", 0);
-      }
-    }
-
     if (cursor_type != CursorType::NONE)
     {
-        mcnk_shader.uniform ("cursor_position", cursor_pos);
-        mcnk_shader.uniform("cursorRotation", cursorRotation);
-        mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
-        mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
-        mcnk_shader.uniform ("cursor_color", cursor_color);
+      mcnk_shader.uniform_cached("draw_cursor_circle", static_cast<int>(cursor_type));
+      mcnk_shader.uniform ("cursor_position", cursor_pos);
+      mcnk_shader.uniform("cursorRotation", cursorRotation);
+      mcnk_shader.uniform_cached ("outer_cursor_radius", brush_radius);
+      mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
+      mcnk_shader.uniform ("cursor_color", cursor_color);
     }
     else
     {
-      mcnk_shader.uniform ("draw_cursor_circle", 0);
+      mcnk_shader.uniform_cached("draw_cursor_circle", 0);
     }
 
-
-
+    std::vector<int> textures_bound = { -1, -1, -1, -1 };
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
@@ -1199,7 +1151,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                       && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z);
       if (_draw_selection_old != draw_sel)
       {
-        mcnk_shader.uniform("draw_selection", int(draw_sel));
+        mcnk_shader.uniform_cached("draw_selection", draw_sel);
         _draw_selection_old = draw_sel;
       }
 
@@ -1216,6 +1168,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , area_id_colors
                  , animtime
                  , display
+                 , textures_bound
                  );
     }
 
@@ -1262,6 +1215,56 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   std::unordered_map<Model*, std::size_t> model_with_particles;
 
+  // WMOs / map objects
+  if (draw_wmo || mapIndex.hasAGlobalWMO())
+  {
+    {
+      opengl::scoped::use_program wmo_program {*_wmo_program.get()};
+
+      wmo_program.uniform("model_view", model_view);
+      wmo_program.uniform("projection", projection);
+
+      wmo_program.uniform_cached("draw_fog", draw_fog);
+
+      if (draw_fog)
+      {
+        wmo_program.uniform("fog_color", skies->color_set[FOG_COLOR]);
+        wmo_program.uniform("camera", camera_pos);
+      }
+
+      wmo_program.uniform("exterior_light_dir", light_dir);
+      wmo_program.uniform("exterior_diffuse_color", diffuse_color);
+      wmo_program.uniform("exterior_ambient_color", ambient_color);
+
+      _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
+      {
+        bool is_hidden = wmo.wmo->is_hidden();
+        if (draw_hidden_models || !is_hidden)
+        {
+          wmo.draw( wmo_program
+                  , model_view
+                  , projection
+                  , frustum
+                  , culldistance
+                  , camera_pos
+                  , is_hidden
+                  , draw_wmo_doodads
+                  , draw_fog
+                  , _liquid_render.get()
+                  , current_selection()
+                  , animtime
+                  , skies->hasSkies()
+                  , display
+                  );
+        }
+      });
+
+      gl.enable(GL_BLEND);
+      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      gl.enable(GL_CULL_FACE);
+    }
+  }
+
   // M2s / models
   if (draw_models || draw_doodads_wmo)
   {
@@ -1286,12 +1289,7 @@ void World::draw ( math::matrix_4x4 const& model_view
       m2_shader.uniform("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
       // !\ todo use light dbcs values
 
-      if (_draw_fog_old != draw_fog)
-      {
-        m2_shader.uniform("draw_fog", (int)draw_fog);
-        _draw_fog_old = draw_fog;
-      }
-
+      m2_shader.uniform_cached("draw_fog", draw_fog);
 
       m2_shader.uniform("light_dir", light_dir);
       m2_shader.uniform("diffuse_color", diffuse_color);
@@ -1304,19 +1302,19 @@ void World::draw ( math::matrix_4x4 const& model_view
           if (draw_hidden_models || !it.second[0]->model->is_hidden())
           {
             it.second[0]->model->draw( model_view
-                                     , it.second
-                                     , m2_shader
-                                     , frustum
-                                     , culldistance
-                                     , camera_pos
-                                     , false
-                                     , animtime
-                                     , draw_model_animations
-                                     , draw_models_with_box
-                                     , model_with_particles
-                                     , model_boxes_to_draw
-                                     , display
-                                     );
+              , it.second
+              , m2_shader
+              , frustum
+              , culldistance
+              , camera_pos
+              , false
+              , animtime
+              , draw_model_animations
+              , draw_models_with_box
+              , model_with_particles
+              , model_boxes_to_draw
+              , display
+            );
           }
         }
       }
@@ -1326,19 +1324,19 @@ void World::draw ( math::matrix_4x4 const& model_view
         for (auto& it : _wmo_doodads)
         {
           it.second[0]->model->draw( model_view
-                                   , it.second
-                                   , m2_shader
-                                   , frustum
-                                   , culldistance
-                                   , camera_pos
-                                   , false
-                                   , animtime
-                                   , draw_model_animations
-                                   , draw_models_with_box
-                                   , model_with_particles
-                                   , model_boxes_to_draw
-                                   , display
-                                   );
+            , it.second
+            , m2_shader
+            , frustum
+            , culldistance
+            , camera_pos
+            , false
+            , animtime
+            , draw_model_animations
+            , draw_models_with_box
+            , model_with_particles
+            , model_boxes_to_draw
+            , display
+          );
         }
       }
     }
@@ -1356,12 +1354,12 @@ void World::draw ( math::matrix_4x4 const& model_view
       for (auto& it : model_boxes_to_draw)
       {
         math::vector_4d color = it.first->is_hidden()
-                              ? math::vector_4d(0.f, 0.f, 1.f, 1.f)
-                              : ( it.first->use_fake_geometry()
-                                ? math::vector_4d(1.f, 0.f, 0.f, 1.f)
-                                : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f)
+                                ? math::vector_4d(0.f, 0.f, 1.f, 1.f)
+                                : ( it.first->use_fake_geometry()
+                                    ? math::vector_4d(1.f, 0.f, 0.f, 1.f)
+                                    : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f)
                                 )
-                              ;
+        ;
 
         m2_box_shader.uniform("color", color);
         it.first->draw_box(m2_box_shader, it.second);
@@ -1407,60 +1405,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     if (draw_wmo || mapIndex.hasAGlobalWMO())
     {
       water_shader.uniform("use_transform", 1);
-    }
-  }
-
-  // WMOs / map objects
-  if (draw_wmo || mapIndex.hasAGlobalWMO())
-  {
-    {
-      opengl::scoped::use_program wmo_program {*_wmo_program.get()};
-
-      wmo_program.uniform("model_view", model_view);
-      wmo_program.uniform("projection", projection);
-
-      if (_draw_fog_old != draw_fog)
-      {
-        wmo_program.uniform("draw_fog", (int)draw_fog);
-        _draw_fog_old = draw_fog;
-      }
-
-      if (draw_fog)
-      {
-        wmo_program.uniform("fog_color", skies->color_set[FOG_COLOR]);
-        wmo_program.uniform("camera", camera_pos);
-      }
-
-      wmo_program.uniform("exterior_light_dir", light_dir);
-      wmo_program.uniform("exterior_diffuse_color", diffuse_color);
-      wmo_program.uniform("exterior_ambient_color", ambient_color);
-
-      _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
-      {
-        bool is_hidden = wmo.wmo->is_hidden();
-        if (draw_hidden_models || !is_hidden)
-        {
-          wmo.draw( wmo_program
-                  , model_view
-                  , projection
-                  , frustum
-                  , culldistance
-                  , camera_pos
-                  , is_hidden
-                  , draw_wmo_doodads
-                  , draw_fog
-                  , _liquid_render.get()
-                  , current_selection()
-                  , animtime
-                  , skies->hasSkies()
-                  , display
-                  );
-        }
-      });
-
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      gl.enable(GL_CULL_FACE);
     }
   }
 
@@ -2082,11 +2026,12 @@ void World::drawMinimap ( MapTile *tile
     mcnk_shader.uniform("tex_anim_2", math::vector_2d());
     mcnk_shader.uniform("tex_anim_3", math::vector_2d());
 
+    std::vector<int> textures_bound = { -1, -1, -1, -1 };
     std::map<int, misc::random_color> area_id_colors;
 
     tile->draw(frustum, mcnk_shader, detailtexcoords, culldistance, camera_pos, true, false,
                false, false, false, area_id_colors, animtime,
-               display_mode::in_2D
+               display_mode::in_2D, textures_bound
     );
 
     if (mTile)
@@ -2095,7 +2040,7 @@ void World::drawMinimap ( MapTile *tile
 
       mTile->draw(frustum, mcnk_shader, detailtexcoords, culldistance, camera_pos, true, false,
                  false, false, false, area_id_colors, animtime,
-                 display_mode::in_2D
+                 display_mode::in_2D, textures_bound
       );
     }
 
@@ -3214,6 +3159,7 @@ void World::unload_shaders()
   _cursor_render.unload();
   _sphere_render.unload();
   _square_render.unload();
+  _horizon_render.reset();
 
   _liquid_render = boost::none;
   _liquid_render_mini = boost::none;
@@ -3227,6 +3173,7 @@ void World::unload_shaders()
   alphatexcoords = 0;
 
   _global_vbos_initialized = false;
+  _display_initialized = false;
 }
 
 noggit::VertexSelectionCache World::getVertexSelectionCache()

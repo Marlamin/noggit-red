@@ -40,6 +40,9 @@ namespace noggit
       , _lock_pos(math::vector_3d(0.0f, 0.0f, 0.0f))
       , tile(0, 0)
     {
+      setMinimumWidth(250);
+      setMaximumWidth(250);
+
       auto layout (new QFormLayout (this));
 
       auto brush_group(new QGroupBox("Brush", this));
@@ -227,7 +230,6 @@ namespace noggit
               );
 
       updateData();
-      setMinimumWidth(250);
 
     }
 

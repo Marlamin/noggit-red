@@ -73,6 +73,8 @@ public:
                   , float opacity_factor
                   );
 
+  void unload();
+
 
   float xbase, zbase;
 

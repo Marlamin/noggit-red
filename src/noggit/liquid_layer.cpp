@@ -423,18 +423,29 @@ void liquid_layer::upload()
   _uploaded = true;
 }
 
+void liquid_layer::unload()
+{
+  _index_buffer.unload();
+  _buffers.unload();
+  _vertex_array.unload();
+
+  _uploaded = false;
+  _need_buffer_update = true;
+  _vao_need_update = true;
+}
+
 // todo: update only buffer that needs to be updated
 void liquid_layer::update_buffers()
 {
   for (int i = 0; i < lod_count; ++i)
   {
     opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (_index_buffer[i]);
-    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _indices_by_lod[i].size() * sizeof (uint16_t), _indices_by_lod[i].data(), GL_STATIC_DRAW);
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _indices_by_lod[i].size() * sizeof (uint16_t), _indices_by_lod[i].data(), GL_DYNAMIC_DRAW);
   }
 
-  gl.bufferData<GL_ARRAY_BUFFER>(_vertices_vbo, sizeof(*_vertices.data()) * _vertices.size(), _vertices.data(), GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER>(_depth_vbo, sizeof(*_depth.data()) * _depth.size(), _depth.data(), GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER>(_tex_coord_vbo, sizeof(*_tex_coords.data()) * _tex_coords.size(), _tex_coords.data(), GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER>(_vertices_vbo, sizeof(*_vertices.data()) * _vertices.size(), _vertices.data(), GL_DYNAMIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER>(_depth_vbo, sizeof(*_depth.data()) * _depth.size(), _depth.data(), GL_DYNAMIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER>(_tex_coord_vbo, sizeof(*_tex_coords.data()) * _tex_coords.size(), _tex_coords.data(), GL_DYNAMIC_DRAW);
 
   _need_buffer_update = false;
   _vao_need_update = true;

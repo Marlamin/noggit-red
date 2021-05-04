@@ -61,6 +61,9 @@
 #include <QWidgetAction>
 #include <QSurfaceFormat>
 #include <QMessageBox>
+#include <QAbstractScrollArea>
+#include <QScrollArea>
+#include <QScrollBar>
 
 #include <algorithm>
 #include <cmath>
@@ -72,6 +75,9 @@
 #include <vector>
 #include <thread>
 
+/* Some ugly macros we use */
+// TODO: make those methods instead???
+
 #define DESTRUCTIVE_ACTION(ACTION_CODE)                                                                                \
 QMessageBox::StandardButton reply;                                                                                     \
 reply = QMessageBox::question(this, "Destructive action", "This action cannot be undone. Current change history will be lost. Continue?", \
@@ -81,21 +87,87 @@ if (reply == QMessageBox::Yes)                                                  
 noggit::ActionManager::instance()->purge();                                                                            \
 ACTION_CODE                                                                                                            \
 }                                                                                                                      \
-                                                                                                                       \
+
+
+#define ADD_ACTION_NS(menu, name, on_action)                      \
+  {                                                               \
+    auto action (menu->addAction (name));                         \
+    connect (action, &QAction::triggered, on_action);             \
+  }
+
+
+#define ADD_TOGGLE(menu_, name_, shortcut_, property_)            \
+  do                                                              \
+  {                                                               \
+    QAction* action (new QAction (name_, this));                  \
+    action->setShortcut (QKeySequence (shortcut_));               \
+    action->setCheckable (true);                                  \
+    action->setChecked (property_.get());                         \
+    menu_->addAction (action);                                    \
+    connect ( action, &QAction::toggled                           \
+            , &property_, &noggit::bool_toggle_property::set      \
+            );                                                    \
+    connect ( &property_, &noggit::bool_toggle_property::changed  \
+            , action, &QAction::setChecked                        \
+            );                                                    \
+  }                                                               \
+  while (false)
+
+
+#define ADD_TOGGLE_NS(menu_, name_, property_)                    \
+  do                                                              \
+  {                                                               \
+    QAction* action (new QAction (name_, this));                  \
+    action->setCheckable (true);                                  \
+    action->setChecked (property_.get());                         \
+    menu_->addAction (action);                                    \
+    connect ( action, &QAction::toggled                           \
+            , &property_, &noggit::bool_toggle_property::set      \
+            );                                                    \
+    connect ( &property_, &noggit::bool_toggle_property::changed  \
+            , action, &QAction::setChecked                        \
+            );                                                    \
+  }                                                               \
+  while (false)
+
+
+#define ADD_ACTION(menu, name, shortcut, on_action)               \
+  {                                                               \
+    auto action (menu->addAction (name));                         \
+    action->setShortcut (QKeySequence (shortcut));                \
+    auto callback = on_action;                                    \
+    connect (action, &QAction::triggered, [this, callback]()      \
+    {                                                             \
+       if (noggit::ActionManager::instance()->getCurrentAction()) \
+        return;                                                   \
+       callback();                                                \
+                                                                  \
+    });                                                           \
+  }
+
 
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
 
 void MapView::set_editing_mode (editing_mode mode)
 {
-  objectEditor->modelImport->hide();
-  objectEditor->rotationEditor->hide();
-  _texture_browser_dock->hide();
-  _texture_picker_dock->hide();
-  _texture_palette_dock->hide();
-  _object_palette_dock->hide();
-  _asset_browser_dock->hide();
-  _viewport_overlay_ui->gizmoBar->hide();
+
+  {
+    QSignalBlocker const asset_browser_blocker(_asset_browser_dock);
+    QSignalBlocker const tex_browser_blocker(_texture_browser_dock);
+    QSignalBlocker const texture_palette_blocker(_texture_palette_dock);
+    QSignalBlocker const object_palette_blocker(_object_palette_dock);
+
+    objectEditor->modelImport->hide();
+    objectEditor->rotationEditor->hide();
+    _texture_browser_dock->hide();
+    _texture_picker_dock->hide();
+    _texture_palette_dock->hide();
+    _object_palette_dock->hide();
+    _asset_browser_dock->hide();
+    _viewport_overlay_ui->gizmoBar->hide();
+  }
+
 
   MoveObj = false;
   _world->reset_selection();
@@ -114,42 +186,19 @@ void MapView::set_editing_mode (editing_mode mode)
 
 void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
 {
-  for (auto dock : _tool_properties_docks)
-  {
-    dock->hide();
-  }
+  _tool_panel_dock->setCurrentIndex(static_cast<int>(mode));
 
   switch (mode)
   {
-  case editing_mode::ground:
-    _terrain_tool_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::flatten_blur:
-    _flatten_blur_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::paint:
-    _texturing_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::areaid:
-    _areaid_editor_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::water:
-    _water_editor_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::mccv:
-    _vertex_shading_dock->setVisible(!ui_hidden);
-    break;
+
   case editing_mode::object:
-    _object_editor_dock->setVisible(!ui_hidden);
-    _asset_browser_dock->setVisible(!ui_hidden);
-    _object_palette_dock->setVisible(!ui_hidden);
+    _asset_browser_dock->setVisible(!ui_hidden && _settings->value("map_view/asset_browser", false).toBool());
+    _object_palette_dock->setVisible(!ui_hidden && _settings->value("map_view/object_palette", false).toBool());
     _viewport_overlay_ui->gizmoBar->setVisible(!ui_hidden);
     break;
-  case editing_mode::holes:
-    _hole_tool_dock->setVisible(!ui_hidden);
-    break;
-  case editing_mode::minimap:
-    _minimap_tool_dock->setVisible(!ui_hidden);
+  case editing_mode::paint:
+    _texture_browser_dock->setVisible(!ui_hidden && _settings->value("map_view/texture_browser", false).toBool());
+    _texture_palette_dock->setVisible(!ui_hidden && _settings->value("map_view/texture_palette", false).toBool());
     break;
   case editing_mode::stamp:
     _dockStamp.setVisible(!ui_hidden);
@@ -238,68 +287,14 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
   return separator;
 }
 
-
-void MapView::createGUI()
+void MapView::setupViewportOverlay()
 {
-  _texture_browser_dock = new QDockWidget("Texture palette", this);
-  _texture_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
-                                   | QDockWidget::DockWidgetFloatable
-                                   | QDockWidget::DockWidgetClosable);
-  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_browser_dock);
-  _texture_browser_dock->hide();
-  connect(this, &QObject::destroyed, _texture_browser_dock, &QObject::deleteLater);
-
-  _detail_infos_dock = new QDockWidget("Detail info", this);
-  _detail_infos_dock->setFeatures(QDockWidget::DockWidgetMovable
-                                     | QDockWidget::DockWidgetFloatable
-                                     | QDockWidget::DockWidgetClosable);
-
-  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _detail_infos_dock);
-  _detail_infos_dock->setFloating(true);
-  _detail_infos_dock->hide();
-  connect(this, &QObject::destroyed, _detail_infos_dock, &QObject::deleteLater);
-
-  _texture_picker_dock = new QDockWidget("Texture picker", this);
-  _detail_infos_dock->setFeatures(QDockWidget::DockWidgetMovable
-                                  | QDockWidget::DockWidgetFloatable
-                                  | QDockWidget::DockWidgetClosable);
-  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_picker_dock);
-  _texture_picker_dock->setFloating(true);
-  _texture_picker_dock->hide();
-  connect(this, &QObject::destroyed, _texture_picker_dock, &QObject::deleteLater);
-
-  _asset_browser_dock = new QDockWidget("Asset browser", this);
-  _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this, this);
-  _asset_browser_dock->setWidget(_asset_browser);
-
-  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _asset_browser_dock);
-  _asset_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
-  | QDockWidget::DockWidgetFloatable
-  | QDockWidget::DockWidgetClosable);
-  _asset_browser_dock->setAllowedAreas(Qt::BottomDockWidgetArea);
-  _asset_browser_dock->hide();
-
-  connect(this, &QObject::destroyed, _asset_browser_dock, &QObject::deleteLater);
-
-  auto _node_editor = new noggit::Red::NodeEditor::Ui::NodeEditorWidget(this);
-  _node_editor_dock = new QDockWidget("Node editor", this);
-  _node_editor_dock->setWidget(_node_editor);
-
-  _main_window->addDockWidget(Qt::LeftDockWidgetArea, _node_editor_dock);
-  _node_editor_dock->setFeatures(QDockWidget::DockWidgetMovable
-                               | QDockWidget::DockWidgetFloatable
-                               | QDockWidget::DockWidgetClosable);
-  _node_editor_dock->hide();
-
-  connect(this, &QObject::destroyed, _node_editor_dock, &QObject::deleteLater);
-
-
-  auto overlay = new QWidget(this);
+  _overlay_widget = new QWidget(this);
   _viewport_overlay_ui = new ::Ui::MapViewOverlay();
-  _viewport_overlay_ui->setupUi(overlay);
-  overlay->setAttribute(Qt::WA_TranslucentBackground);
-  overlay->setMouseTracking(true);
-  overlay->setGeometry(0,0, width(), height());
+  _viewport_overlay_ui->setupUi(_overlay_widget);
+  _overlay_widget->setAttribute(Qt::WA_TranslucentBackground);
+  _overlay_widget->setMouseTracking(true);
+  _overlay_widget->setGeometry(0,0, width(), height());
 
   _viewport_overlay_ui->gizmoVisibleButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_VISIBILITY));
   _viewport_overlay_ui->gizmoModeButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_LOCAL));
@@ -308,143 +303,350 @@ void MapView::createGUI()
   _viewport_overlay_ui->gizmoTranslateButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_TRANSLATE));
 
   connect(this, &MapView::resized
-      ,[this, overlay]()
+    ,[this]()
           {
-              overlay->setGeometry(0, 0, width(), height());
+            _overlay_widget->setGeometry(0, 0, width(), height());
           }
   );
 
   connect(_viewport_overlay_ui->gizmoVisibleButton, &QPushButton::clicked
-      ,[this]()
-      {
-          _gizmo_on.set(_viewport_overlay_ui->gizmoVisibleButton->isChecked());
-      }
+    ,[this]()
+          {
+            _gizmo_on.set(_viewport_overlay_ui->gizmoVisibleButton->isChecked());
+          }
   );
 
   connect(&_gizmo_on, &noggit::bool_toggle_property::changed
-      ,[this](bool state)
-      {
-         _viewport_overlay_ui->gizmoVisibleButton->setChecked(state);
-      }
+    ,[this](bool state)
+          {
+            _viewport_overlay_ui->gizmoVisibleButton->setChecked(state);
+          }
   );
 
   connect(_viewport_overlay_ui->gizmoModeButton, &QPushButton::clicked
-      ,[this]()
-      {
-          if (_viewport_overlay_ui->gizmoVisibleButton->isChecked())
+    ,[this]()
           {
-            _gizmo_mode = ImGuizmo::MODE::WORLD;
+            if (_viewport_overlay_ui->gizmoVisibleButton->isChecked())
+            {
+              _gizmo_mode = ImGuizmo::MODE::WORLD;
+            }
+            else
+            {
+              _gizmo_mode = ImGuizmo::MODE::LOCAL;
+            }
           }
-          else
-          {
-            _gizmo_mode = ImGuizmo::MODE::LOCAL;
-          }
-      }
   );
 
   connect(_viewport_overlay_ui->gizmoTranslateButton, &QPushButton::clicked
-      ,[this]()
+    ,[this]()
           {
-              _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
+            _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
           }
   );
 
   connect(_viewport_overlay_ui->gizmoRotateButton, &QPushButton::clicked
-      ,[this]()
+    ,[this]()
           {
-              _gizmo_operation = ImGuizmo::OPERATION::ROTATE;
+            _gizmo_operation = ImGuizmo::OPERATION::ROTATE;
           }
   );
 
   connect(_viewport_overlay_ui->gizmoScaleButton, &QPushButton::clicked
-      ,[this]()
+    ,[this]()
           {
-              _gizmo_operation = ImGuizmo::OPERATION::SCALE;
+            _gizmo_operation = ImGuizmo::OPERATION::SCALE;
           }
   );
+}
 
-  // create tool widgets
-  _terrain_tool_dock = new QDockWidget("Raise / Lower", this);
-  terrainTool = new noggit::ui::terrain_tool(_terrain_tool_dock);
-  _terrain_tool_dock->setWidget(terrainTool);
-  _tool_properties_docks.insert(_terrain_tool_dock);
+void MapView::setupRaiseLowerUi()
+{
+  terrainTool = new noggit::ui::terrain_tool(this);
+  _tool_panel_dock->registerTool("Raise | Lower", terrainTool);
 
   connect(terrainTool
     , &noggit::ui::terrain_tool::updateVertices
     , [this](int vertex_mode, math::degrees const& angle, math::degrees const& orientation)
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
+          {
+            makeCurrent();
+            opengl::context::scoped_setter const _(::gl, context());
 
-      _world->orientVertices(vertex_mode == eVertexMode_Mouse
-        ? _cursor_pos
-        : _world->vertexCenter()
-        , angle
-        , orientation
-      );
-    }
+            // TODO: IMPORTANT action stack here with timer
+
+            _world->orientVertices(vertex_mode == eVertexMode_Mouse
+                                   ? _cursor_pos
+                                   : _world->vertexCenter()
+              , angle
+              , orientation
+            );
+          }
   );
 
-  _flatten_blur_dock = new QDockWidget("Flatten / Blur", this);
-  flattenTool = new noggit::ui::flatten_blur_tool(_flatten_blur_dock);
-  _flatten_blur_dock->setWidget(flattenTool);
-  _tool_properties_docks.insert(_flatten_blur_dock);
+  terrainTool->storeCursorPos(&_cursor_pos);
 
-  _texturing_dock = new QDockWidget("Texture Painter", this);
-  texturingTool = new noggit::ui::texturing_tool(&_camera.position, this, &_show_texture_palette_small_window, _texturing_dock);
-  _texturing_dock->setWidget(texturingTool);
-  _tool_properties_docks.insert(_texturing_dock);
+}
 
-  _hole_tool_dock = new QDockWidget("Hole Cutter", this);
-  holeTool = new noggit::ui::hole_tool(_hole_tool_dock);
-  _hole_tool_dock->setWidget(holeTool);
-  _tool_properties_docks.insert(_hole_tool_dock);
+void MapView::setupFlattenBlurUi()
+{
+  flattenTool = new noggit::ui::flatten_blur_tool(this);
+  _tool_panel_dock->registerTool("Flatten | Blur", flattenTool);
+}
 
-  _areaid_editor_dock = new QDockWidget("Area Designator", this);
-  ZoneIDBrowser = new noggit::ui::zone_id_browser(_areaid_editor_dock);
-  _areaid_editor_dock->setWidget(ZoneIDBrowser);
-  _tool_properties_docks.insert(_areaid_editor_dock);
+void MapView::setupTexturePainterUi()
+{
+  /* Tool */
+  texturingTool = new noggit::ui::texturing_tool(&_camera.position, this, &_show_texture_palette_small_window, this);
+  _tool_panel_dock->registerTool("Texture Painter", texturingTool);
 
-  _water_editor_dock = new QDockWidget("Water Editor", this);
-  guiWater = new noggit::ui::water(&_displayed_water_layer, &_display_all_water_layers, _water_editor_dock);
-  _water_editor_dock->setWidget(guiWater);
-  _tool_properties_docks.insert(_water_editor_dock);
+  // Connects
+  connect( texturingTool->texture_swap_tool()->texture_display()
+    , &noggit::ui::current_texture::texture_dropped
+    , [=] (std::string const& filename)
+           {
+             makeCurrent();
+             opengl::context::scoped_setter const _(::gl, context());
 
+             texturingTool->texture_swap_tool()->set_texture(filename);
+           }
+  );
+
+  connect( texturingTool->_current_texture
+    , &noggit::ui::current_texture::texture_dropped
+    , [=] (std::string const& filename)
+           {
+             makeCurrent();
+             opengl::context::scoped_setter const _(::gl, context());
+
+             noggit::ui::selected_texture::set({filename, _context});
+           }
+  );
+
+  connect(texturingTool->_current_texture, &noggit::ui::current_texture::clicked
+    , [=]
+          {
+            _texture_browser_dock->setVisible(!_texture_browser_dock->isVisible());
+          }
+  );
+
+  /* Additional tools */
+
+  /* Texture Browser */
+
+  // Dock
+  _texture_browser_dock = new QDockWidget("Texture palette", this);
+  _texture_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                     | QDockWidget::DockWidgetFloatable
+                                     | QDockWidget::DockWidgetClosable);
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_browser_dock);
+  _texture_browser_dock->hide();
+
+  connect(_texture_browser_dock, &QDockWidget::visibilityChanged,
+          [=](bool visible)
+          {
+            if (ui_hidden)
+              return;
+
+            _settings->setValue ("map_view/texture_browser", visible);
+            _settings->sync();
+          });
+
+  connect(this, &QObject::destroyed, _texture_browser_dock, &QObject::deleteLater);
+  // End Dock
+
+  TexturePalette = new noggit::ui::tileset_chooser(this);
+  _texture_browser_dock->setWidget(TexturePalette);
+  connect(this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
+
+  connect(TexturePalette, &noggit::ui::tileset_chooser::selected
+    , [=](std::string const& filename)
+          {
+            makeCurrent();
+            opengl::context::scoped_setter const _(::gl, context());
+
+            noggit::ui::selected_texture::set({filename, _context});
+            texturingTool->_current_texture->set_texture(filename);
+          }
+  );
+
+  connect ( TexturePalette, &noggit::ui::widget::visibilityChanged
+    , &_show_texture_palette_window, &noggit::bool_toggle_property::set
+  );
+
+  connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
+    ,  [this]
+            {
+              if (terrainMode == editing_mode::paint && !ui_hidden)
+              {
+                _texture_browser_dock->setVisible(_show_texture_palette_window.get());
+              }
+              else
+              {
+                _show_texture_palette_window.set(false);
+              }
+            }
+  );
+
+
+  /* Texture Palette Small */
+  _texture_palette_small = new noggit::ui::texture_palette_small(this);
+
+  // Dock
+  _texture_palette_dock = new QDockWidget("Texture Palette", this);
+  _texture_palette_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                     | QDockWidget::DockWidgetFloatable
+                                     | QDockWidget::DockWidgetClosable
+  );
+
+  _texture_palette_dock->setWidget(_texture_palette_small);
+  _texture_palette_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);;
+
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_palette_dock);
+  // End Dock
+
+  connect(_texture_palette_dock, &QDockWidget::visibilityChanged,
+          [=](bool visible)
+          {
+            if (ui_hidden)
+              return;
+
+            _settings->setValue ("map_view/texture_palette", visible);
+            _settings->sync();
+          });
+
+  connect(_texture_palette_small, &noggit::ui::texture_palette_small::selected
+    , [=](std::string const& filename)
+          {
+            makeCurrent();
+            opengl::context::scoped_setter const _(::gl, context());
+
+            noggit::ui::selected_texture::set({filename, _context});
+            texturingTool->_current_texture->set_texture(filename);
+          }
+  );
+  connect(this, &QObject::destroyed, _texture_palette_small, &QObject::deleteLater);
+
+  connect(&_show_texture_palette_small_window, &noggit::bool_toggle_property::changed
+    , _texture_palette_dock, [this]
+          {
+            if (terrainMode == editing_mode::paint && !ui_hidden)
+            {
+              _texture_palette_dock->setVisible(_show_texture_palette_small_window.get());
+            }
+            else
+            {
+              _show_texture_palette_small_window.set(false);
+            }
+          }
+  );
+  connect(_texture_palette_dock, &QDockWidget::visibilityChanged
+    , &_show_texture_palette_small_window, &noggit::bool_toggle_property::set
+  );
+
+
+
+  /* Texture Picker */
+
+  // Dock
+  _texture_picker_dock = new QDockWidget("Texture picker", this);
+  _texture_picker_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                  | QDockWidget::DockWidgetFloatable
+                                  | QDockWidget::DockWidgetClosable);
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_picker_dock);
+  _texture_picker_dock->setFloating(true);
+  _texture_picker_dock->hide();
+  connect(this, &QObject::destroyed, _texture_picker_dock, &QObject::deleteLater);
+  // End Dock
+
+  TexturePicker = new noggit::ui::texture_picker(texturingTool->_current_texture, this);
+  _texture_picker_dock->setWidget(TexturePicker);
+  connect(this, &QObject::destroyed, TexturePicker, &QObject::deleteLater);
+
+  connect( TexturePicker
+    , &noggit::ui::texture_picker::set_texture
+    , [=] (scoped_blp_texture_reference texture)
+           {
+             makeCurrent();
+             opengl::context::scoped_setter const _(::gl, context());
+             noggit::ui::selected_texture::set(std::move(texture));
+           }
+  );
+  connect(TexturePicker, &noggit::ui::texture_picker::shift_left
+    , [=]
+          {
+            makeCurrent();
+            opengl::context::scoped_setter const _(::gl, context());
+            TexturePicker->shiftSelectedTextureLeft();
+          }
+  );
+  connect(TexturePicker, &noggit::ui::texture_picker::shift_right
+    , [=]
+          {
+            makeCurrent();
+            opengl::context::scoped_setter const _(::gl, context());
+            TexturePicker->shiftSelectedTextureRight();
+          }
+  );
+
+}
+
+void MapView::setupHoleCutterUi()
+{
+  holeTool = new noggit::ui::hole_tool(this);
+  _tool_panel_dock->registerTool("Hole Cutter", holeTool);
+}
+
+void MapView::setupAreaDesignatorUi()
+{
+  ZoneIDBrowser = new noggit::ui::zone_id_browser(this);
+  _tool_panel_dock->registerTool("Area Designator", ZoneIDBrowser);
+
+  ZoneIDBrowser->setMapID(_world->getMapID());
+  connect(ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
+    , [this](int area_id) { changeZoneIDValue(area_id); }
+  );
+}
+
+void MapView::setupFlagUi()
+{
+  auto placeholder = new QWidget(this);
+  _tool_panel_dock->registerTool("Flag", placeholder);
+}
+
+void MapView::setupWaterEditorUi()
+{
+  guiWater = new noggit::ui::water(&_displayed_water_layer, &_display_all_water_layers, this);
+  _tool_panel_dock->registerTool("Water Editor", guiWater);
 
   connect(guiWater, &noggit::ui::water::regenerate_water_opacity
     , [this](float factor)
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-      noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_WATER);
-      _world->autoGenWaterTrans(_camera.position, factor);
-      noggit::ActionManager::instance()->endAction();
-    }
+          {
+            makeCurrent();
+            opengl::context::scoped_setter const _(::gl, context());
+            noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_WATER);
+            _world->autoGenWaterTrans(_camera.position, factor);
+            noggit::ActionManager::instance()->endAction();
+          }
   );
 
   connect(guiWater, &noggit::ui::water::crop_water
     , [this]
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-      noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_WATER);
-      _world->CropWaterADT(_camera.position);
-      noggit::ActionManager::instance()->endAction();
-    }
+          {
+            makeCurrent();
+            opengl::context::scoped_setter const _(::gl, context());
+            noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_WATER);
+            _world->CropWaterADT(_camera.position);
+            noggit::ActionManager::instance()->endAction();
+          }
   );
-
-  _vertex_shading_dock = new QDockWidget("Vertex Painter", this);
-  shaderTool = new noggit::ui::shader_tool(shader_color, _vertex_shading_dock);
-  _vertex_shading_dock->setWidget(shaderTool);
-  _tool_properties_docks.insert(_vertex_shading_dock);
-
-  _minimap_tool_dock = new QDockWidget("Minimap Editor", this);
-  _minimap_tool_dock->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
-  minimapTool = new noggit::ui::MinimapCreator(this, _world.get(), _minimap_tool_dock);
-  _minimap_tool_dock->setWidget(minimapTool);
-  _tool_properties_docks.insert(_minimap_tool_dock);
-
-  _object_editor_dock = new QDockWidget("Object Editor", this);
+}
+void MapView::setupVertexPainterUi()
+{
+  shaderTool = new noggit::ui::shader_tool(shader_color, this);
+  _tool_panel_dock->registerTool("Vertex Painter", shaderTool);
+}
+void MapView::setupObjectEditorUi()
+{
+  /* Tool */
   objectEditor = new noggit::ui::object_editor(this
     , _world.get()
     , &_move_model_to_cursor_position
@@ -454,283 +656,194 @@ void MapView::createGUI()
     , &_rotate_along_ground
     , &_rotate_along_ground_smooth
     , &_rotate_along_ground_random
-    , _object_editor_dock
+    , this
   );
-  _object_editor_dock->setWidget(objectEditor);
-  _tool_properties_docks.insert(_object_editor_dock);
+  _tool_panel_dock->registerTool("Object Editor", objectEditor);
 
+  /* Additional tools */
 
-  for (auto widget : _tool_properties_docks)
-  {
-    connect(this, &QObject::destroyed, widget, &QObject::deleteLater);
-  }
-
-  TexturePalette = new noggit::ui::tileset_chooser(this);
-  _texture_browser_dock->setWidget(TexturePalette);
-
-  connect( texturingTool->texture_swap_tool()->texture_display()
-         , &noggit::ui::current_texture::texture_dropped
-         , [=] (std::string const& filename)
-           {
-             makeCurrent();
-             opengl::context::scoped_setter const _(::gl, context());
-
-             texturingTool->texture_swap_tool()->set_texture(filename);
-           }
-         );
-
-  connect( texturingTool->_current_texture
-         , &noggit::ui::current_texture::texture_dropped
-         , [=] (std::string const& filename)
-           {
-             makeCurrent();
-             opengl::context::scoped_setter const _(::gl, context());
-
-             noggit::ui::selected_texture::set({filename, _context});
-           }
-         );
-  connect(texturingTool->_current_texture, &noggit::ui::current_texture::clicked
-    , [=]
-    {
-      _texture_browser_dock->setVisible(!_texture_browser_dock->isVisible());
-    }
-  );
-  connect(TexturePalette, &noggit::ui::tileset_chooser::selected
-    , [=](std::string const& filename)
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-
-      noggit::ui::selected_texture::set({filename, _context});
-      texturingTool->_current_texture->set_texture(filename);
-    }
-  );
-
-  connect(this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
-
-  _texture_palette_small = new noggit::ui::texture_palette_small (this);
-
+  /* Object Palette */
   _object_palette = new noggit::ui::ObjectPalette(this, this);
   _object_palette->hide();
 
-  connect(_texture_palette_small, &noggit::ui::texture_palette_small::selected
-    , [=](std::string const& filename)
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-
-      noggit::ui::selected_texture::set({filename, _context});
-      texturingTool->_current_texture->set_texture(filename);
-    }
+  // Dock
+  _object_palette_dock = new QDockWidget("Object Palette", this);
+  _object_palette_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                    | QDockWidget::DockWidgetFloatable
+                                    | QDockWidget::DockWidgetClosable
   );
-  connect(this, &QObject::destroyed, _texture_palette_small, &QObject::deleteLater);
+
+  _object_palette_dock->setWidget(_object_palette);
+  _object_palette_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _object_palette_dock);
+  connect(this, &QObject::destroyed, _texture_palette_dock, &QObject::deleteLater);
+  // End Dock
+
+  connect(_object_palette_dock, &QDockWidget::visibilityChanged,
+          [=](bool visible)
+          {
+            if (ui_hidden)
+              return;
+
+            _settings->setValue ("map_view/object_palette", visible);
+            _settings->sync();
+          });
+
+}
+void MapView::setupMinimapEditorUi()
+{
+  minimapTool = new noggit::ui::MinimapCreator(this, _world.get(), this);
+  _tool_panel_dock->registerTool("Minimap Editor", minimapTool);
+}
+void MapView::setupStampUi()
+{
+
+}
+
+void MapView::setupNodeEditor()
+{
+  auto _node_editor = new noggit::Red::NodeEditor::Ui::NodeEditorWidget(this);
+  _node_editor_dock = new QDockWidget("Node editor", this);
+  _node_editor_dock->setWidget(_node_editor);
+
+  _main_window->addDockWidget(Qt::LeftDockWidgetArea, _node_editor_dock);
+  _node_editor_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                 | QDockWidget::DockWidgetFloatable
+                                 | QDockWidget::DockWidgetClosable);
+
+  _node_editor_dock->setVisible(_settings->value ("map_view/node_editor", false).toBool());
+
+  connect(_node_editor_dock, &QDockWidget::visibilityChanged,
+          [=](bool visible)
+          {
+            if (ui_hidden)
+              return;
+
+            _settings->setValue ("map_view/node_editor", visible);
+            _settings->sync();
+          });
+
+  connect(this, &QObject::destroyed, _node_editor_dock, &QObject::deleteLater);
+
+  connect ( &_show_node_editor, &noggit::bool_toggle_property::changed
+    , _node_editor_dock, [this]
+            {
+              if (!ui_hidden)
+                _node_editor_dock->setVisible(_show_node_editor.get());
+            }
+  );
+
+  connect ( _node_editor_dock, &QDockWidget::visibilityChanged
+    , &_show_node_editor, &noggit::bool_toggle_property::set
+  );
+
+}
+
+void MapView::setupAssetBrowser()
+{
+  _asset_browser_dock = new QDockWidget("Asset browser", this);
+  _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this, this);
+  _asset_browser_dock->setWidget(_asset_browser);
+
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _asset_browser_dock);
+  _asset_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                   | QDockWidget::DockWidgetFloatable
+                                   | QDockWidget::DockWidgetClosable);
+  _asset_browser_dock->setAllowedAreas(Qt::BottomDockWidgetArea);
+
+  _asset_browser_dock->hide();
+
+  connect(_asset_browser_dock, &QDockWidget::visibilityChanged,
+          [=](bool visible)
+          {
+            if (ui_hidden)
+              return;
+
+            _settings->setValue ("map_view/asset_browser", visible);
+            _settings->sync();
+          });
+
+  connect(this, &QObject::destroyed, _asset_browser_dock, &QObject::deleteLater);
+}
+
+void MapView::setupDetailInfos()
+{
+
+  // Dock
+  _detail_infos_dock = new QDockWidget("Detail info", this);
+  _detail_infos_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                  | QDockWidget::DockWidgetFloatable
+                                  | QDockWidget::DockWidgetClosable);
+
+  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _detail_infos_dock);
+  _detail_infos_dock->setFloating(true);
+  _detail_infos_dock->hide();
+  connect(this, &QObject::destroyed, _detail_infos_dock, &QObject::deleteLater);
+  // End Dock
 
   guidetailInfos = new noggit::ui::detail_infos(this);
   _detail_infos_dock->setWidget(guidetailInfos);
   connect(this, &QObject::destroyed, guidetailInfos, &QObject::deleteLater);
 
-  _keybindings = new noggit::ui::help(this);
-  _keybindings->hide(); 
-  connect(this, &QObject::destroyed, _keybindings, &QObject::deleteLater);
 
-  TexturePicker = new noggit::ui::texture_picker(texturingTool->_current_texture, this);
-  _texture_picker_dock->setWidget(TexturePicker);
-  connect(this, &QObject::destroyed, TexturePicker, &QObject::deleteLater);
-
-  connect( TexturePicker
-         , &noggit::ui::texture_picker::set_texture
-         , [=] (scoped_blp_texture_reference texture)
-           {
-             makeCurrent();
-             opengl::context::scoped_setter const _(::gl, context());
-             noggit::ui::selected_texture::set(std::move(texture));
-           }
-         );
-  connect(TexturePicker, &noggit::ui::texture_picker::shift_left
-    , [=]
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-      TexturePicker->shiftSelectedTextureLeft();
-    }
-  );
-  connect(TexturePicker, &noggit::ui::texture_picker::shift_right
-    , [=]
-    {
-      makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
-      TexturePicker->shiftSelectedTextureRight();
-    }
+  connect ( &_show_detail_info_window, &noggit::bool_toggle_property::changed
+    , guidetailInfos, [this]
+            {
+              if (!ui_hidden)
+                _detail_infos_dock->setVisible(_show_detail_info_window.get());
+            }
   );
 
-  ZoneIDBrowser->setMapID(_world->getMapID());
-  connect(ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
-    , [this](int area_id) { changeZoneIDValue(area_id); }
+  connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
+    , &_show_detail_info_window, &noggit::bool_toggle_property::set
   );
+}
 
-  terrainTool->storeCursorPos(&_cursor_pos);
-
-
-  for (auto dock : _tool_properties_docks)
-  {
-    _main_window->addDockWidget(Qt::RightDockWidgetArea, dock);
-    dock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    dock->setAllowedAreas(Qt::RightDockWidgetArea);
-
-    connect(dock, &QDockWidget::topLevelChanged
-      , this
-      , [=] 
-      { 
-        dock->adjustSize();
-
-        for (auto dock_ : _tool_properties_docks)
-        {
-          if (dock->isFloating() != dock_->isFloating())
-            dock_->setFloating(dock->isFloating());
-        }
-      }
-    );
-  }
-
-  if (_settings->value("undock_tool_properties/enabled", 1).toBool())
-  {
-    for (auto dock : _tool_properties_docks)
-    {
-      dock->setFloating(true);
-      dock->move(_main_window->geometry().topRight().x() - dock->rect().width() - 20, _main_window->geometry().topRight().y() + 80);
-    }
-  }
-
-  // create quick access texture palette dock
-
-  _texture_palette_dock->setFeatures(QDockWidget::DockWidgetMovable
-    | QDockWidget::DockWidgetFloatable
-    | QDockWidget::DockWidgetClosable
-  );
-
-  _texture_palette_dock->setWidget(_texture_palette_small);
-  _texture_palette_dock->setWindowTitle("Quick Access Texture Palette");
-  _texture_palette_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);;
-
-  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_palette_dock);
-
-
-  _object_palette_dock->setFeatures(QDockWidget::DockWidgetMovable
-                                     | QDockWidget::DockWidgetFloatable
-                                     | QDockWidget::DockWidgetClosable
-  );
-
-  _object_palette_dock->setWidget(_object_palette);
-  _object_palette_dock->setWindowTitle("Object Palette");
-  _object_palette_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
-
-  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _object_palette_dock);
-
-  if (_settings->value("undock_small_texture_palette/enabled", 1).toBool())
-  {
-    _texture_palette_dock->setFloating(true);
-    _texture_palette_dock->move(_main_window->geometry().bottomLeft().x() + 50, _main_window->geometry().bottomLeft().y() - 200);
-  }
-
-  connect(this, &QObject::destroyed, _texture_palette_dock, &QObject::deleteLater);
-   
-  // create toolbars
-
+void MapView::setupToolbars()
+{
   _toolbar = new noggit::ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
   _toolbar->setOrientation(Qt::Vertical);
   auto right_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->leftToolbarHolder);
   right_toolbar_layout->addWidget( _toolbar);
   right_toolbar_layout->setDirection(QBoxLayout::LeftToRight);
   right_toolbar_layout->setContentsMargins(0, 5, 0,5);
-
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
 
   _view_toolbar = new noggit::Red::ViewToolbar::Ui::ViewToolbar(this);
   auto top_toolbar_layout = new QHBoxLayout(_viewport_overlay_ui->upperToolbarHolder);
   top_toolbar_layout->addWidget( _view_toolbar);
   top_toolbar_layout->setContentsMargins(5, 0, 5, 0);
-
-
   connect (this, &QObject::destroyed, _view_toolbar, &QObject::deleteLater);
+}
 
+void MapView::setupKeybindingsGui()
+{
+  _keybindings = new noggit::ui::help(this);
+  _keybindings->hide();
+  connect(this, &QObject::destroyed, _keybindings, &QObject::deleteLater);
+
+  connect ( &_show_keybindings_window, &noggit::bool_toggle_property::changed
+    , _keybindings, &QWidget::setVisible
+  );
+
+  connect ( _keybindings, &noggit::ui::widget::visibilityChanged
+    , &_show_keybindings_window, &noggit::bool_toggle_property::set
+  );
+}
+
+void MapView::setupFileMenu()
+{
   auto file_menu (_main_window->_menuBar->addMenu ("Editor"));
   connect (this, &QObject::destroyed, file_menu, &QObject::deleteLater);
-
-  auto edit_menu (_main_window->_menuBar->addMenu ("Edit"));
-  connect (this, &QObject::destroyed, edit_menu, &QObject::deleteLater);
-
-  auto assist_menu (_main_window->_menuBar->addMenu ("Assist"));
-  connect (this, &QObject::destroyed, assist_menu, &QObject::deleteLater);
-
-  auto view_menu (_main_window->_menuBar->addMenu ("View"));
-  connect (this, &QObject::destroyed, view_menu, &QObject::deleteLater);
-
-  auto help_menu (_main_window->_menuBar->addMenu ("Help"));
-  connect (this, &QObject::destroyed, help_menu, &QObject::deleteLater);
-
-#define ADD_ACTION(menu, name, shortcut, on_action)               \
-  {                                                               \
-    auto action (menu->addAction (name));                         \
-    action->setShortcut (QKeySequence (shortcut));                \
-    auto callback = on_action;                                    \
-    connect (action, &QAction::triggered, [this, callback]()      \
-    {                                                             \
-       if (noggit::ActionManager::instance()->getCurrentAction()) \
-        return;                                                   \
-       callback();                                                \
-                                                                  \
-    });                                                           \
-  }
-
-#define ADD_ACTION_NS(menu, name, on_action)                      \
-  {                                                               \
-    auto action (menu->addAction (name));                         \
-    connect (action, &QAction::triggered, on_action);             \
-  }
-
-#define ADD_TOGGLE(menu_, name_, shortcut_, property_)            \
-  do                                                              \
-  {                                                               \
-    QAction* action (new QAction (name_, this));                  \
-    action->setShortcut (QKeySequence (shortcut_));               \
-    action->setCheckable (true);                                  \
-    action->setChecked (property_.get());                         \
-    menu_->addAction (action);                                    \
-    connect ( action, &QAction::toggled                           \
-            , &property_, &noggit::bool_toggle_property::set      \
-            );                                                    \
-    connect ( &property_, &noggit::bool_toggle_property::changed  \
-            , action, &QAction::setChecked                        \
-            );                                                    \
-  }                                                               \
-  while (false)
-
-#define ADD_TOGGLE_NS(menu_, name_, property_)                    \
-  do                                                              \
-  {                                                               \
-    QAction* action (new QAction (name_, this));                  \
-    action->setCheckable (true);                                  \
-    action->setChecked (property_.get());                         \
-    menu_->addAction (action);                                    \
-    connect ( action, &QAction::toggled                           \
-            , &property_, &noggit::bool_toggle_property::set      \
-            );                                                    \
-    connect ( &property_, &noggit::bool_toggle_property::changed  \
-            , action, &QAction::setChecked                        \
-            );                                                    \
-  }                                                               \
-  while (false)
-
-
 
   ADD_ACTION (file_menu, "Save current tile", "Ctrl+Shift+S", [this] { save(save_mode::current); emit saved();});
   ADD_ACTION (file_menu, "Save changed tiles", QKeySequence::Save, [this] { save(save_mode::changed); emit saved(); });
   ADD_ACTION (file_menu, "Save all tiles", "Ctrl+Shift+A", [this] { save(save_mode::all); emit saved(); });
-  
+
   ADD_ACTION ( file_menu
-             , "Reload tile"
-             , "Shift+J"
-             , [this]
+  , "Reload tile"
+  , "Shift+J"
+  , [this]
                {
                  makeCurrent();
                  opengl::context::scoped_setter const _ (::gl, context());
@@ -738,12 +851,49 @@ void MapView::createGUI()
                  _rotation_editor_need_update = true;
                  emit saved();
                }
-             );
+  );
 
   file_menu->addSeparator();
   ADD_ACTION_NS (file_menu, "Force uid check on next opening", [this] { _force_uid_check = true; });
   file_menu->addSeparator();
 
+  ADD_ACTION ( file_menu
+  , "Add bookmark"
+  , Qt::Key_F5
+  , [this]
+               {
+                 std::ofstream f ("bookmarks.txt", std::ios_base::app);
+                 f << _world->getMapID() << " "
+                   << _camera.position.x << " "
+                   << _camera.position.y << " "
+                   << _camera.position.z << " "
+                   << _camera.yaw()._ << " "
+                   << _camera.pitch()._ << " "
+                   << _world->getAreaID (_camera.position) << std::endl;
+               }
+  );
+
+  ADD_ACTION (file_menu, "Save minimaps", "Ctrl+Shift+P", [this] { saving_minimap = true; });
+
+  ADD_ACTION ( file_menu
+  , "Write coordinates to port.txt"
+  , Qt::Key_G
+  , [this]
+               {
+                 std::ofstream f("ports.txt", std::ios_base::app);
+                 f << "Map: " << gAreaDB.getAreaName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
+                 f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID() << std::endl;
+                 f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
+                 f.close();
+               }
+  );
+
+}
+
+void MapView::setupEditMenu()
+{
+  auto edit_menu (_main_window->_menuBar->addMenu ("Edit"));
+  connect (this, &QObject::destroyed, edit_menu, &QObject::deleteLater);
 
   edit_menu->addSeparator();
   edit_menu->addAction(createTextSeparator("Selected object"));
@@ -764,11 +914,11 @@ void MapView::createGUI()
               });
   ADD_ACTION (edit_menu, "Set to ground", Qt::Key_PageDown,
               [this] {
-                        noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED);
-                        snap_selected_models_to_the_ground();
-                        noggit::ActionManager::instance()->endAction();
+                noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                snap_selected_models_to_the_ground();
+                noggit::ActionManager::instance()->endAction();
 
-                      });
+              });
 
 
   edit_menu->addSeparator();
@@ -781,7 +931,12 @@ void MapView::createGUI()
   edit_menu->addSeparator();
   ADD_ACTION (edit_menu, "Undo", "Ctrl+Z", [this] { noggit::ActionManager::instance()->undo(); });
   ADD_ACTION (edit_menu, "Redo", "Ctrl+Shift+Z", [this] { noggit::ActionManager::instance()->redo(); });
+}
 
+void MapView::setupAssistMenu()
+{
+  auto assist_menu (_main_window->_menuBar->addMenu ("Assist"));
+  connect (this, &QObject::destroyed, assist_menu, &QObject::deleteLater);
 
   assist_menu->addSeparator();
   assist_menu->addAction(createTextSeparator("Model"));
@@ -794,8 +949,8 @@ void MapView::createGUI()
   assist_menu->addAction(createTextSeparator("Current ADT"));
   assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
-                , "Set Area ID"
-                , [this]
+  , "Set Area ID"
+  , [this]
                   {
                     if (_selected_area_id != -1)
                     {
@@ -804,10 +959,10 @@ void MapView::createGUI()
                       noggit::ActionManager::instance()->endAction();
                     }
                   }
-                );
+  );
   ADD_ACTION_NS ( assist_menu
-                , "Clear height map"
-                , [this]
+  , "Clear height map"
+  , [this]
                   {
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
@@ -815,10 +970,10 @@ void MapView::createGUI()
                     _world->clearHeight(_camera.position);
                     noggit::ActionManager::instance()->endAction();
                   }
-                );
+  );
   ADD_ACTION_NS ( assist_menu
-                , "Remove texture duplicates"
-                , [this]
+  , "Remove texture duplicates"
+  , [this]
                   {
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
@@ -826,10 +981,10 @@ void MapView::createGUI()
                     _world->removeTexDuplicateOnADT(_camera.position);
                     noggit::ActionManager::instance()->endAction();
                   }
-                );
+  );
   ADD_ACTION_NS ( assist_menu
-                , "Clear textures"
-                , [this]
+  , "Clear textures"
+  , [this]
                   {
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
@@ -837,10 +992,10 @@ void MapView::createGUI()
                     _world->clearTextures(_camera.position);
                     noggit::ActionManager::instance()->endAction();
                   }
-                );
+  );
   ADD_ACTION_NS ( assist_menu
-                , "Clear textures + set base"
-                , [this]
+  , "Clear textures + set base"
+  , [this]
                   {
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
@@ -848,10 +1003,10 @@ void MapView::createGUI()
                     _world->setBaseTexture(_camera.position);
                     noggit::ActionManager::instance()->endAction();
                   }
-                );
-    ADD_ACTION_NS ( assist_menu
-                , "Clear shadows"
-                , [this]
+  );
+  ADD_ACTION_NS ( assist_menu
+  , "Clear shadows"
+  , [this]
                   {
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
@@ -859,10 +1014,10 @@ void MapView::createGUI()
                     _world->clear_shadows(_camera.position);
                     noggit::ActionManager::instance()->endAction();
                   }
-                );
+  );
   ADD_ACTION_NS ( assist_menu
-                , "Clear models"
-                , [this]
+  , "Clear models"
+  , [this]
                   {
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
@@ -871,26 +1026,26 @@ void MapView::createGUI()
                     noggit::ActionManager::instance()->endAction();
                     _rotation_editor_need_update = true;
                   }
-                );
+  );
   ADD_ACTION_NS ( assist_menu
-                , "Clear duplicate models"
-                , [this]
+  , "Clear duplicate models"
+  , [this]
                   {
                     DESTRUCTIVE_ACTION
-                    (
-                      makeCurrent();
-                      opengl::context::scoped_setter const _(::gl, context());
-                      _world->delete_duplicate_model_and_wmo_instances();
+                      (
+                        makeCurrent();
+                    opengl::context::scoped_setter const _(::gl, context());
+                    _world->delete_duplicate_model_and_wmo_instances();
                     )
                   }
-                );
+  );
 
   assist_menu->addSeparator();
   assist_menu->addAction(createTextSeparator("Loaded ADTs"));
   assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
-                , "Fix gaps"
-                , [this]
+  , "Fix gaps"
+  , [this]
                   {
                     makeCurrent();
                     opengl::context::scoped_setter const _ (::gl, context());
@@ -898,36 +1053,43 @@ void MapView::createGUI()
                     _world->fixAllGaps();
                     noggit::ActionManager::instance()->endAction();
                   }
-                );
+  );
 
   assist_menu->addSeparator();
   assist_menu->addAction(createTextSeparator("Global"));
   assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
-                , "Map to big alpha"
-                , [this]
+  , "Map to big alpha"
+  , [this]
                   {
                     DESTRUCTIVE_ACTION
-                    (
-                      makeCurrent();
-                      opengl::context::scoped_setter const _ (::gl, context());
-                      _world->convert_alphamap(true);
+                      (
+                        makeCurrent();
+                    opengl::context::scoped_setter const _ (::gl, context());
+                    _world->convert_alphamap(true);
                     )
 
                   }
-                );
+  );
   ADD_ACTION_NS ( assist_menu
-                , "Map to old alpha"
-                , [this]
+  , "Map to old alpha"
+  , [this]
                   {
                     DESTRUCTIVE_ACTION
-                    (
-                      makeCurrent();
-                      opengl::context::scoped_setter const _(::gl, context());
-                      _world->convert_alphamap(false);
+                      (
+                        makeCurrent();
+                    opengl::context::scoped_setter const _(::gl, context());
+                    _world->convert_alphamap(false);
                     )
                   }
-                );
+  );
+
+}
+
+void MapView::setupViewMenu()
+{
+  auto view_menu (_main_window->_menuBar->addMenu ("View"));
+  connect (this, &QObject::destroyed, view_menu, &QObject::deleteLater);
 
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Drawing"));
@@ -953,76 +1115,43 @@ void MapView::createGUI()
   view_menu->addSeparator();
 
   ADD_TOGGLE (view_menu, "Show Node Editor", "Shift+N", _show_node_editor);
-  connect ( &_show_node_editor, &noggit::bool_toggle_property::changed
-      , _node_editor_dock, [this]
-            {
-                if (!ui_hidden)
-                  _node_editor_dock->setVisible(_show_node_editor.get());
-            }
-  );
-
-  connect ( _node_editor_dock, &QDockWidget::visibilityChanged
-      , &_show_node_editor, &noggit::bool_toggle_property::set
-  );
 
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Minimap"));
   view_menu->addSeparator();
 
   ADD_TOGGLE (view_menu, "Show", Qt::Key_M, _show_minimap_window);
-  connect ( &_show_minimap_window, &noggit::bool_toggle_property::changed
-          , _minimap_dock, [this]
-                           {
-                             if (!ui_hidden)
-                               _minimap_dock->setVisible(_show_minimap_window.get());
-                           }
-          );
 
-
-  connect ( _minimap_dock, &QDockWidget::visibilityChanged
-          , &_show_minimap_window, &noggit::bool_toggle_property::set
-          );
 
   ADD_TOGGLE_NS(view_menu, "Show ADT borders", _show_minimap_borders);
-  connect ( &_show_minimap_borders, &noggit::bool_toggle_property::changed
-          , [this]
-            {
-              _minimap->draw_boundaries(_show_minimap_borders.get());
-            }
-          );
 
   ADD_TOGGLE_NS(view_menu, "Show light zones", _show_minimap_skies);
-  connect ( &_show_minimap_skies, &noggit::bool_toggle_property::changed
-          , [this]
-            {
-              _minimap->draw_skies(_show_minimap_skies.get());
-            }
-          );
+
 
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Windows"));
   view_menu->addSeparator();
 
+  auto hide_widgets = [=]
+  {
 
-  auto hide_widgets = [=] {
+    QWidget *widget_list[] =
+      {
+        _texture_browser_dock,
+        _texture_picker_dock,
+        _detail_infos_dock,
+        _keybindings,
+        _minimap_dock,
+        objectEditor->modelImport,
+        objectEditor->rotationEditor,
+        objectEditor->helper_models_widget,
+        _texture_palette_small,
+        _object_palette_dock,
+        _asset_browser_dock,
+        _overlay_widget,
+        _tool_panel_dock
 
-    QWidget* widget_list[] =
-    {
-      _texture_browser_dock,
-      _texture_picker_dock,
-      _detail_infos_dock,
-      _keybindings,
-      _minimap_dock,
-      objectEditor->modelImport,
-      objectEditor->rotationEditor,
-      objectEditor->helper_models_widget,
-      _texture_palette_small,
-      _object_palette_dock,
-      _asset_browser_dock,
-      overlay
-
-    };
-
+      };
 
     if (_main_window->displayed_widgets.empty())
     {
@@ -1048,7 +1177,7 @@ void MapView::createGUI()
     _view_toolbar->setVisible(ui_hidden);
 
     ui_hidden = !ui_hidden;
-    
+
     setToolPropertyWidgetVisibility(terrainMode);
 
   };
@@ -1057,99 +1186,65 @@ void MapView::createGUI()
 
 
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
-  connect ( &_show_detail_info_window, &noggit::bool_toggle_property::changed
-          , guidetailInfos, [this]
-                            {
-                              if (!ui_hidden)
-                                _detail_infos_dock->setVisible(_show_detail_info_window.get());
-                            }
-          );
-  connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
-          , &_show_detail_info_window, &noggit::bool_toggle_property::set
-          );
+
   ADD_TOGGLE (view_menu, "Texture palette", Qt::Key_X, _show_texture_palette_window);
-  connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
-          ,  [this]
-                  {
-                    if (terrainMode == editing_mode::paint && !ui_hidden)
-                    {
-                      _texture_browser_dock->setVisible(_show_texture_palette_window.get());
-                    }
-                    else
-                    {
-                      _show_texture_palette_window.set(false);
-                    }
-                  }
-          );
-  connect ( TexturePalette, &noggit::ui::widget::visibilityChanged
-          , &_show_texture_palette_window, &noggit::bool_toggle_property::set
-          );
+
 
   ADD_TOGGLE_NS(view_menu, "Small texture palette", _show_texture_palette_small_window);
 
   addHotkey( Qt::Key_H
-           , MOD_none
-           , [this] { _show_texture_palette_small_window.toggle(); }
-           , [this] { return terrainMode == editing_mode::paint; }
-           );
-
-  connect(&_show_texture_palette_small_window, &noggit::bool_toggle_property::changed
-    , _texture_palette_dock, [this]
-    {
-      if (terrainMode == editing_mode::paint && !ui_hidden)
-      {
-        _texture_palette_dock->setVisible(_show_texture_palette_small_window.get());
-      }
-      else
-      {
-        _show_texture_palette_small_window.set(false);
-      }
-    }
-  );
-  connect(_texture_palette_dock, &QDockWidget::visibilityChanged
-    , &_show_texture_palette_small_window, &noggit::bool_toggle_property::set
+    , MOD_none
+    , [this] { _show_texture_palette_small_window.toggle(); }
+    , [this] { return terrainMode == editing_mode::paint; }
   );
 
-  addHotkey ( Qt::Key_F1
-            , MOD_shift
-            , [this]
-              {
-                if (alloff)
-                {
-                  alloff_models = _draw_models.get();
-                  alloff_doodads = _draw_wmo_doodads.get();
-                  alloff_contour = _draw_contour.get();
-                  alloff_wmo = _draw_wmo.get();
-                  alloff_fog = _draw_fog.get();
-                  alloff_terrain = _draw_terrain.get();
+  ADD_ACTION (view_menu, "Increase time speed", Qt::Key_N, [this] { mTimespeed += 90.0f; });
+  ADD_ACTION (view_menu, "Decrease time speed", Qt::Key_B, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
+  ADD_ACTION (view_menu, "Pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
+  ADD_ACTION (view_menu, "Invert mouse", "I", [this] { mousedir *= -1.f; });
+  ADD_ACTION (view_menu, "Decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
+  ADD_ACTION (view_menu, "Increase camera speed", Qt::Key_P, [this] { _camera.move_speed *= 2.0f; });
+  ADD_ACTION ( view_menu
+  , "Turn camera around 180°"
+  , "Shift+R"
+  , [this]
+               {
+                 _camera.add_to_yaw(math::degrees(180.f));
+                 _camera_moved_since_last_draw = true;
+                 _minimap->update();
+               }
+  );
 
-                  _draw_models.set (false);
-                  _draw_wmo_doodads.set (false);
-                  _draw_contour.set (true);
-                  _draw_wmo.set (false);
-                  _draw_terrain.set (true);
-                  _draw_fog.set (false);
-                }
-                else
-                {
-                  _draw_models.set (alloff_models);
-                  _draw_wmo_doodads.set (alloff_doodads);
-                  _draw_contour.set (alloff_contour);
-                  _draw_wmo.set (alloff_wmo);
-                  _draw_terrain.set (alloff_terrain);
-                  _draw_fog.set (alloff_fog);
-                }
-                alloff = !alloff;
-              }
-            );
+  ADD_ACTION ( view_menu
+  , "Toggle tile mode"
+  , Qt::Key_U
+  , [this]
+               {
+                 if (noggit::ActionManager::instance()->getCurrentAction())
+                   return;
+
+                 if (_display_mode == display_mode::in_2D)
+                 {
+                   _display_mode = display_mode::in_3D;
+                   set_editing_mode (saveterrainMode);
+                 }
+                 else
+                 {
+                   _display_mode = display_mode::in_2D;
+                   saveterrainMode = terrainMode;
+                   set_editing_mode (editing_mode::paint);
+                 }
+               }
+  );
+
+}
+
+void MapView::setupHelpMenu()
+{
+  auto help_menu (_main_window->_menuBar->addMenu ("Help"));
+  connect (this, &QObject::destroyed, help_menu, &QObject::deleteLater);
 
   ADD_TOGGLE (help_menu, "Key Bindings", "Ctrl+F1", _show_keybindings_window);
-  connect ( &_show_keybindings_window, &noggit::bool_toggle_property::changed
-          , _keybindings, &QWidget::setVisible
-          );
-  connect ( _keybindings, &noggit::ui::widget::visibilityChanged
-          , &_show_keybindings_window, &noggit::bool_toggle_property::set
-          );
 
 #if defined(_WIN32) || defined(WIN32)
   ADD_ACTION_NS ( help_menu
@@ -1194,232 +1289,197 @@ void MapView::createGUI()
                 );
 #endif
 
-  ADD_ACTION ( file_menu
-             , "Add bookmark"
-             , Qt::Key_F5
-             , [this]
-               {
-                 std::ofstream f ("bookmarks.txt", std::ios_base::app);
-                 f << _world->getMapID() << " "
-                   << _camera.position.x << " "
-                   << _camera.position.y << " "
-                   << _camera.position.z << " "
-                   << _camera.yaw()._ << " "
-                   << _camera.pitch()._ << " "
-                   << _world->getAreaID (_camera.position) << std::endl;
-               }
-             );
+}
 
-  ADD_ACTION (view_menu, "Increase time speed", Qt::Key_N, [this] { mTimespeed += 90.0f; });
-  ADD_ACTION (view_menu, "Decrease time speed", Qt::Key_B, [this] { mTimespeed = std::max (0.0f, mTimespeed - 90.0f); });
-  ADD_ACTION (view_menu, "Pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
+void MapView::setupHotkeys()
+{
+
+  addHotkey ( Qt::Key_F1
+    , MOD_shift
+    , [this]
+              {
+                if (alloff)
+                {
+                  alloff_models = _draw_models.get();
+                  alloff_doodads = _draw_wmo_doodads.get();
+                  alloff_contour = _draw_contour.get();
+                  alloff_wmo = _draw_wmo.get();
+                  alloff_fog = _draw_fog.get();
+                  alloff_terrain = _draw_terrain.get();
+
+                  _draw_models.set (false);
+                  _draw_wmo_doodads.set (false);
+                  _draw_contour.set (true);
+                  _draw_wmo.set (false);
+                  _draw_terrain.set (true);
+                  _draw_fog.set (false);
+                }
+                else
+                {
+                  _draw_models.set (alloff_models);
+                  _draw_wmo_doodads.set (alloff_doodads);
+                  _draw_contour.set (alloff_contour);
+                  _draw_wmo.set (alloff_wmo);
+                  _draw_terrain.set (alloff_terrain);
+                  _draw_fog.set (alloff_fog);
+                }
+                alloff = !alloff;
+              }
+  );
 
   addHotkey ( Qt::Key_C
-            , MOD_ctrl
-            , [this]
+    , MOD_ctrl
+    , [this]
               {
                 objectEditor->copy_current_selection(_world.get());
               }
-            , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
   addHotkey ( Qt::Key_C
-            , MOD_none
-            , [this]
+    , MOD_none
+    , [this]
               {
                 objectEditor->copy_current_selection(_world.get());
               }
-            , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_V
-            , MOD_ctrl
-            ,
-            [this]
-            {
-              noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eOBJECTS_ADDED);
-              objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
-              noggit::ActionManager::instance()->endAction();
-            }
-            , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , MOD_ctrl
+    ,
+              [this]
+              {
+                noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eOBJECTS_ADDED);
+                objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
+                noggit::ActionManager::instance()->endAction();
+              }
+    , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
   addHotkey ( Qt::Key_V
-            , MOD_none
-            , [this]
-            {
-              noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eOBJECTS_ADDED);
-              objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
-              noggit::ActionManager::instance()->endAction();
-            }
-            , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , MOD_none
+    , [this]
+              {
+                noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eOBJECTS_ADDED);
+                objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
+                noggit::ActionManager::instance()->endAction();
+              }
+    , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
   addHotkey ( Qt::Key_V
-            , MOD_shift
-            , [this] { objectEditor->import_last_model_from_wmv(eMODEL); }
-            , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , MOD_shift
+    , [this] { objectEditor->import_last_model_from_wmv(eMODEL); }
+    , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
   addHotkey ( Qt::Key_V
-            , MOD_alt
-            , [this] { objectEditor->import_last_model_from_wmv(eWMO); }
-            , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , MOD_alt
+    , [this] { objectEditor->import_last_model_from_wmv(eWMO); }
+    , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_C
-            , MOD_none
-            , [this] { _world->clearVertexSelection(); }
-            , [this] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , MOD_none
+    , [this] { _world->clearVertexSelection(); }
+    , [this] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey( Qt::Key_B
-	         , MOD_ctrl
-	         , [this] 
+    , MOD_ctrl
+    , [this]
              {
                noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eOBJECTS_ADDED);
                objectEditor->copy_current_selection(_world.get());
-	             objectEditor->pasteObject(_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
+               objectEditor->pasteObject(_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
                noggit::ActionManager::instance()->endAction();
              }
-           , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-           );
-
-  ADD_ACTION (view_menu, "Invert mouse", "I", [this] { mousedir *= -1.f; });
-
-  ADD_ACTION (view_menu, "Decrease camera speed", Qt::Key_O, [this] { _camera.move_speed *= 0.5f; });
-  ADD_ACTION (view_menu, "Increase camera speed", Qt::Key_P, [this] { _camera.move_speed *= 2.0f; });
-
-  ADD_ACTION (file_menu, "Save minimaps", "Ctrl+Shift+P", [this] { saving_minimap = true; });
-
-  ADD_ACTION ( view_menu
-             , "Turn camera around 180°"
-             , "Shift+R"
-             , [this]
-               {
-                 _camera.add_to_yaw(math::degrees(180.f));
-                 _camera_moved_since_last_draw = true;
-                 _minimap->update();
-               }
-             );
-
-  ADD_ACTION ( file_menu
-             , "Write coordinates to port.txt"
-             , Qt::Key_G
-             , [this]
-               {
-                 std::ofstream f("ports.txt", std::ios_base::app);
-                 f << "Map: " << gAreaDB.getAreaName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
-                 f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID() << std::endl;
-                 f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
-                 f.close();
-               }
-             );
+    , [this] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_Y
-            , MOD_none
-            , [this] { terrainTool->nextType(); }
-            , [this] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , MOD_none
+    , [this] { terrainTool->nextType(); }
+    , [this] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_Y
-            , MOD_none
-            , [this] { flattenTool->nextFlattenType(); }
-            , [this] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
-
-  ADD_ACTION ( view_menu
-             , "Toggle tile mode"
-             , Qt::Key_U
-             , [this]
-               {
-                 if (noggit::ActionManager::instance()->getCurrentAction())
-                   return;
-
-                 if (_display_mode == display_mode::in_2D)
-                 {
-                   _display_mode = display_mode::in_3D;
-                   set_editing_mode (saveterrainMode);
-                 }
-                 else
-                 {
-                   _display_mode = display_mode::in_2D;
-                   saveterrainMode = terrainMode;
-                   set_editing_mode (editing_mode::paint);
-                 }
-               }
-             );
+    , MOD_none
+    , [this] { flattenTool->nextFlattenType(); }
+    , [this] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_T
-            , MOD_none
-            , [&]
+    , MOD_none
+    , [&]
               {
                 flattenTool->toggleFlattenAngle();
               }
-            , [&] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_T
-            , MOD_space
-            , [&]
+    , MOD_space
+    , [&]
               {
                 flattenTool->nextFlattenMode();
               }
-            , [&] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_T
-            , MOD_none
-            , [&]
+    , MOD_none
+    , [&]
               {
                 texturingTool->toggle_tool();
               }
-            , [&] { return terrainMode == editing_mode::paint && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::paint && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_T
-            , MOD_none
-            , [&]
+    , MOD_none
+    , [&]
               {
                 noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_HOLES);
                 _world->setHoleADT (_camera.position, false);
                 noggit::ActionManager::instance()->endAction();
               }
-            , [&]
-                {
-                  return terrainMode == editing_mode::holes && !noggit::ActionManager::instance()->getCurrentAction();
-                }
-            );
+    , [&]
+              {
+                return terrainMode == editing_mode::holes && !noggit::ActionManager::instance()->getCurrentAction();
+              }
+  );
 
   addHotkey ( Qt::Key_T
-            , MOD_alt
-            , [&]
+    , MOD_alt
+    , [&]
               {
                 noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_HOLES);
                 _world->setHoleADT (_camera.position, true);
                 noggit::ActionManager::instance()->endAction();
               }
-            , [&] { return terrainMode == editing_mode::holes && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::holes && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_T
-            , MOD_none
-            , [&]
+    , MOD_none
+    , [&]
               {
                 guiWater->toggle_angled_mode();
               }
-            , [&] { return terrainMode == editing_mode::water && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::water && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_T
-            , MOD_none
-            , [&]
+    , MOD_none
+    , [&]
               {
                 objectEditor->togglePasteMode();
               }
-            , [&] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
 
   addHotkey ( Qt::Key_H
-            , MOD_none
-            , [&]
+    , MOD_none
+    , [&]
               {
                 if (_world->has_selection())
                 {
@@ -1441,83 +1501,83 @@ void MapView::createGUI()
                   }
                 }
               }
-            , [&] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
-
-  addHotkey ( Qt::Key_H
-            , MOD_space
-            , [&]
-              {
-                _draw_hidden_models.toggle();
-              }
-            , [&] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
-
-  addHotkey(Qt::Key_R
-	  , MOD_space
-	  , [&]
-  {
-	  texturingTool->toggle_brush_level_min_max();
-  }
-  , [&] { return terrainMode == editing_mode::paint && !noggit::ActionManager::instance()->getCurrentAction(); }
+    , [&] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
   );
 
   addHotkey ( Qt::Key_H
-            , MOD_shift
-            , [&]
+    , MOD_space
+    , [&]
+              {
+                _draw_hidden_models.toggle();
+              }
+    , [&] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
+
+  addHotkey(Qt::Key_R
+    , MOD_space
+    , [&]
+            {
+              texturingTool->toggle_brush_level_min_max();
+            }
+    , [&] { return terrainMode == editing_mode::paint && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
+
+  addHotkey ( Qt::Key_H
+    , MOD_shift
+    , [&]
               {
                 ModelManager::clear_hidden_models();
                 WMOManager::clear_hidden_wmos();
               }
-            , [&] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey ( Qt::Key_F
-            , MOD_space
-            , [&]
+    , MOD_space
+    , [&]
               {
                 noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
                 terrainTool->flattenVertices (_world.get());
                 noggit::ActionManager::instance()->endAction();
 
               }
-            , [&] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
   addHotkey ( Qt::Key_F
-            , MOD_space
-            , [&]
+    , MOD_space
+    , [&]
               {
                 flattenTool->toggleFlattenLock();
               }
-            , [&] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
   addHotkey ( Qt::Key_F
-            , MOD_none
-            , [&]
+    , MOD_none
+    , [&]
               {
                 flattenTool->lockPos (_cursor_pos);
               }
-            , [&] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
   addHotkey ( Qt::Key_F
-            , MOD_space
-            , [&]
+    , MOD_space
+    , [&]
               {
                 guiWater->toggle_lock();
               }
-          , [&] { return terrainMode == editing_mode::water && !noggit::ActionManager::instance()->getCurrentAction(); }
-          );
+    , [&] { return terrainMode == editing_mode::water && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
   addHotkey( Qt::Key_F
-            , MOD_none
-            , [&]
-              {
-                guiWater->lockPos(_cursor_pos);
-              }
-          , [&] { return terrainMode == editing_mode::water && !noggit::ActionManager::instance()->getCurrentAction(); }
-          );
+    , MOD_none
+    , [&]
+             {
+               guiWater->lockPos(_cursor_pos);
+             }
+    , [&] { return terrainMode == editing_mode::water && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
   addHotkey ( Qt::Key_F
-            , MOD_none
-            , [&]
+    , MOD_none
+    , [&]
               {
 
                 noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED);
@@ -1525,40 +1585,40 @@ void MapView::createGUI()
                 _rotation_editor_need_update = true;
                 noggit::ActionManager::instance()->endAction();
               }
-            , [&] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [&] { return terrainMode == editing_mode::object && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey (Qt::Key_Plus, MOD_alt, [this] { terrainTool->changeRadius(0.01f); }
-  , [this] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); });
+    , [this] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); });
 
   addHotkey (Qt::Key_Plus, MOD_alt, [this] { flattenTool->changeRadius(0.01f); }
-  , [this] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); });
+    , [this] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); });
 
   addHotkey ( Qt::Key_Plus
-            , MOD_alt
-            , [&]
+    , MOD_alt
+    , [&]
               {
                 texturingTool->change_radius(0.1f);
               }
-            , [this] { return terrainMode == editing_mode::paint && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [this] { return terrainMode == editing_mode::paint && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey (Qt::Key_Plus, MOD_shift, [this] { _world->fogdistance += 60.0f; });
 
   addHotkey (Qt::Key_Minus, MOD_alt, [this] { terrainTool->changeRadius(-0.01f); }
-  , [this] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); });
+    , [this] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); });
 
   addHotkey (Qt::Key_Minus, MOD_alt, [this] { flattenTool->changeRadius(-0.01f); }
-  , [this] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); });
+    , [this] { return terrainMode == editing_mode::flatten_blur && !noggit::ActionManager::instance()->getCurrentAction(); });
 
   addHotkey ( Qt::Key_Minus
-            , MOD_alt
-            , [&]
+    , MOD_alt
+    , [&]
               {
                 texturingTool->change_radius(-0.1f);
               }
-            , [this] { return terrainMode == editing_mode::paint && !noggit::ActionManager::instance()->getCurrentAction(); }
-            );
+    , [this] { return terrainMode == editing_mode::paint && !noggit::ActionManager::instance()->getCurrentAction(); }
+  );
 
   addHotkey (Qt::Key_Minus, MOD_shift, [this] { _world->fogdistance -= 60.0f; });
 
@@ -1573,23 +1633,23 @@ void MapView::createGUI()
   addHotkey (Qt::Key_5, MOD_alt, [this] { texturingTool->set_brush_level(255.0f); });
 
   addHotkey(Qt::Key_1, MOD_none, [this] { set_editing_mode(editing_mode::ground); }
-  , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
+    , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
   addHotkey (Qt::Key_2, MOD_none, [this] { set_editing_mode (editing_mode::flatten_blur); }
-  , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
+    , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
   addHotkey (Qt::Key_3, MOD_none, [this] { set_editing_mode (editing_mode::paint); }
-  , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
+    , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
   addHotkey (Qt::Key_4, MOD_none, [this] { set_editing_mode (editing_mode::holes); }
-  , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
+    , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
   addHotkey (Qt::Key_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); }
-  , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
+    , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
   addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); }
-  , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
+    , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
   addHotkey (Qt::Key_7, MOD_none, [this] { set_editing_mode (editing_mode::water); }
-  , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
+    , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
   addHotkey (Qt::Key_8, MOD_none, [this] { set_editing_mode (editing_mode::mccv); }
-  , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
+    , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
   addHotkey (Qt::Key_9, MOD_none, [this] { set_editing_mode (editing_mode::object); }
-  , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
+    , [this] { return !_mod_num_down && !noggit::ActionManager::instance()->getCurrentAction();  });
 
   addHotkey(Qt::Key_0, MOD_ctrl, [this] { change_selected_wmo_doodadset(0); });
   addHotkey(Qt::Key_1, MOD_ctrl, [this] { change_selected_wmo_doodadset(1); });
@@ -1603,6 +1663,107 @@ void MapView::createGUI()
   addHotkey(Qt::Key_9, MOD_ctrl, [this] { change_selected_wmo_doodadset(9); });
 
   addHotkey(Qt::Key_Escape, MOD_none, [this] { _main_window->close(); });
+}
+
+void MapView::setupMinimap()
+{
+  _minimap = new noggit::ui::minimap_widget(this);
+  _minimap_dock = new QDockWidget("Minimap", this);
+
+  _minimap->world (_world.get());
+  _minimap->camera (&_camera);
+  _minimap->draw_boundaries (_show_minimap_borders.get());
+  _minimap->draw_skies (_show_minimap_skies.get());
+
+  connect ( _minimap, &noggit::ui::minimap_widget::map_clicked
+    , [this] (math::vector_3d const& pos)
+            {
+              move_camera_with_auto_height (pos);
+            }
+  );
+
+  _minimap_dock->setFeatures ( QDockWidget::DockWidgetMovable
+                               | QDockWidget::DockWidgetFloatable
+                               | QDockWidget::DockWidgetClosable
+  );
+  _minimap_dock->setWidget(_minimap);
+  _main_window->addDockWidget (Qt::RightDockWidgetArea, _minimap_dock);
+  _minimap_dock->setVisible (false);
+  _minimap_dock->setFloating(true);
+  _minimap_dock->move(_main_window->rect().center() - _minimap->rect().center());
+
+
+  connect(this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
+  connect(this, &QObject::destroyed, _minimap, &QObject::deleteLater);
+
+  connect ( &_show_minimap_window, &noggit::bool_toggle_property::changed
+    , _minimap_dock, [this]
+            {
+              if (!ui_hidden)
+                _minimap_dock->setVisible(_show_minimap_window.get());
+            }
+  );
+
+
+  connect ( _minimap_dock, &QDockWidget::visibilityChanged
+    , &_show_minimap_window, &noggit::bool_toggle_property::set
+  );
+
+  connect ( &_show_minimap_borders, &noggit::bool_toggle_property::changed
+    , [this]
+            {
+              _minimap->draw_boundaries(_show_minimap_borders.get());
+            }
+  );
+
+  connect ( &_show_minimap_skies, &noggit::bool_toggle_property::changed
+    , [this]
+            {
+              _minimap->draw_skies(_show_minimap_skies.get());
+            }
+  );
+
+}
+
+void MapView::createGUI()
+{
+  
+  // Combined dock
+  _tool_panel_dock = new noggit::Red::ToolPanel(this);
+  _tool_panel_dock->setFeatures(QDockWidget::DockWidgetMovable
+                                | QDockWidget::DockWidgetFloatable);
+  _tool_panel_dock->setAllowedAreas(Qt::RightDockWidgetArea);
+
+  connect(this, &QObject::destroyed, _tool_panel_dock, &QObject::deleteLater);
+  _main_window->addDockWidget(Qt::RightDockWidgetArea, _tool_panel_dock);
+
+  setupRaiseLowerUi();
+  setupFlattenBlurUi();
+  setupTexturePainterUi();
+  setupHoleCutterUi();
+  setupAreaDesignatorUi();
+  setupFlagUi();
+  setupWaterEditorUi();
+  setupVertexPainterUi();
+  setupObjectEditorUi();
+  setupMinimapEditorUi();
+  setupStampUi();
+  // End combined dock
+
+  setupViewportOverlay();
+  setupNodeEditor();
+  setupAssetBrowser();
+  setupDetailInfos();
+  setupToolbars();
+  setupKeybindingsGui();
+
+  setupMinimap();
+  setupFileMenu();
+  setupEditMenu();
+  setupViewMenu();
+  setupAssistMenu();
+  setupHelpMenu();
+  setupHotkeys();
 
   connect(_main_window, &noggit::ui::main_window::exit_prompt_opened, this, &MapView::on_exit_prompt);
 
@@ -1613,7 +1774,6 @@ void MapView::on_exit_prompt()
 {
   // hide all popups
   _keybindings->hide();
-  _minimap_tool_dock->hide();
   _minimap_dock->hide();
   _texture_palette_small->hide();
   _object_palette_dock->hide();
@@ -1648,10 +1808,6 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_area (new QLabel (this))
   , _status_time (new QLabel (this))
   , _status_fps (new QLabel (this))
-  , _minimap (new noggit::ui::minimap_widget (nullptr))
-  , _minimap_dock (new QDockWidget ("Minimap", this))
-  , _texture_palette_dock(new QDockWidget(this))
-  , _object_palette_dock(new QDockWidget(this))
   , _dockStamp{"Stamp Tool", this}
   , _modeStampTool{&_showStampPalette, &_cursorRotation, this}
   , _modeStampPaletteMain{this}
@@ -1659,6 +1815,11 @@ MapView::MapView( math::degrees camera_yaw0
   , _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW)
   , _tablet_manager(noggit::TabletManager::instance())
 {
+  setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
+  setFocusPolicy (Qt::StrongFocus);
+  setMouseTracking (true);
+  setMinimumHeight(200);
+  setMaximumHeight(10000);
 
   _context = noggit::NoggitRenderContext::MAP_VIEW;
   _transform_gizmo.setWorld(_world.get());
@@ -1702,36 +1863,7 @@ MapView::MapView( math::degrees camera_yaw0
           , [=] { _main_window->statusBar()->removeWidget (_status_fps); }
           );
 
-  _minimap->world (_world.get());
-  _minimap->camera (&_camera);
-  _minimap->draw_boundaries (_show_minimap_borders.get());
-  _minimap->draw_skies (_show_minimap_skies.get());
 
-  connect ( _minimap, &noggit::ui::minimap_widget::map_clicked
-          , [this] (math::vector_3d const& pos)
-            {
-              move_camera_with_auto_height (pos);
-            }
-          );
-
-  _minimap_dock->setFeatures ( QDockWidget::DockWidgetMovable
-                             | QDockWidget::DockWidgetFloatable
-                             | QDockWidget::DockWidgetClosable
-                             );
-  _minimap_dock->setWidget(_minimap);
-  _main_window->addDockWidget (Qt::RightDockWidgetArea, _minimap_dock);
-  _minimap_dock->setVisible (false);
-  _minimap_dock->setFloating(true);
-  _minimap_dock->move(_main_window->rect().center() - _minimap->rect().center());
-
-
-  connect(this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
-  connect(this, &QObject::destroyed, _minimap, &QObject::deleteLater);
-
-  setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
-
-  setFocusPolicy (Qt::StrongFocus);
-  setMouseTracking (true);
 
   moving = strafing = updown = lookat = turn = 0.0f;
 
@@ -1745,7 +1877,6 @@ MapView::MapView( math::degrees camera_yaw0
   _startup_time.start();
   _update_every_event_loop.start (0);
   connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
-  _tool_properties_docks.insert(&_dockStamp);
   _dockStamp.setWidget(&_modeStampTool);
   connect(&_showStampPalette, &noggit::bool_toggle_property::changed, &_modeStampPaletteMain, &QWidget::show);
   connect(&_modeStampPaletteMain, &noggit::Red::StampMode::Ui::PaletteMain::itemSelected, &_modeStampTool, &noggit::Red::StampMode::Ui::Tool::setPixmap);
@@ -2225,6 +2356,8 @@ void MapView::tick (float dt)
       case editing_mode::object:
         update_cursor_pos();
         break;
+      default:
+        break;
     }    
   }
   else
@@ -2626,6 +2759,8 @@ void MapView::tick (float dt)
               else if(_mod_ctrl_down)
                 _modeStampTool.stamp(_world.get(), _cursor_pos, dt, false);
             }
+          default:
+            break;
         }
       }
     }
@@ -2992,6 +3127,9 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
         case editing_mode::minimap:
           radius = minimapTool->brushRadius();
           break;
+
+        default:
+          break;
       }
 
       if (_mod_shift_down)
@@ -3134,10 +3272,12 @@ void MapView::draw_map()
   case editing_mode::minimap:
     radius = minimapTool->brushRadius();
     break;
-    case editing_mode::stamp:
-      radius = _modeStampTool.getOuterRadius();
-      inner_radius = _modeStampTool.getInnerRadius() / radius;
-      break;
+  case editing_mode::stamp:
+    radius = _modeStampTool.getOuterRadius();
+    inner_radius = _modeStampTool.getInnerRadius() / radius;
+    break;
+  default:
+    break;
   }
 
   //! \note Select terrain below mouse, if no item selected or the item is map.
@@ -3312,6 +3452,8 @@ void MapView::keyPressEvent (QKeyEvent *event)
         shaderTool->addColorToPalette();
         break;
       }
+      default:
+        break;
     }
   }
   if (event->key() == Qt::Key_Minus)
@@ -3526,7 +3668,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
       noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
                                    noggit::ActionModalityControllers::eCTRL | noggit::ActionModalityControllers::eRMB);
-      terrainTool->changeAngle (-relative_movement.dy() / YSENS * 2.f);
+      terrainTool->changeAngle (-relative_movement.dy() / YSENS * 4.f);
   }
 
 
@@ -3568,6 +3710,8 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       break;
     case editing_mode::minimap:
       minimapTool->changeRadius(relative_movement.dx() / XSENS);
+      break;
+    default:
       break;
     }
   }
@@ -3681,7 +3825,9 @@ void MapView::mousePressEvent(QMouseEvent* event)
     {
       shaderTool->pickColor(_world.get(), _cursor_pos);
     }
+    break;
 
+  default:
     break;
   }
 
@@ -3879,6 +4025,7 @@ void MapView::save(save_mode mode)
     case save_mode::all:     _world->mapIndex.saveall(_world.get()); break;
     }    
 
+    noggit::ActionManager::instance()->purge();
     AsyncLoader::instance().reset_object_fail();
 
 
@@ -3920,6 +4067,7 @@ void MapView::unloadOpenglData(bool from_manager)
       for (int j = 0; j < 16; ++j)
       {
         tile->getChunk(i, j)->unload();
+        tile->Water.getChunk(i, j)->unload();
       }
     }
   }

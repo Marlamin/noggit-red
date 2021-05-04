@@ -56,6 +56,9 @@ namespace noggit
             , pasteMode(PASTE_ON_TERRAIN)
             , _map_view(mapView)
     {
+      setMinimumWidth(250);
+      setMaximumWidth(250);
+
       auto layout = new QVBoxLayout (this);
       layout->setAlignment(Qt::AlignTop);
 
@@ -77,12 +80,12 @@ namespace noggit
 
       auto *copyBox = new ExpanderWidget( this);
       copyBox->setExpanderTitle("Copy options");
+      copyBox->setExpanded(_settings->value ("object_editor/copy_options", false).toBool());
 
       auto copyBox_content = new QWidget(this);
       auto copy_layout = new QFormLayout (copyBox_content);
       copy_layout->setAlignment(Qt::AlignTop);
       copyBox->addPage(copyBox_content);
-      copyBox->setExpanded(false);
 
       auto rotation_group (new QGroupBox ("Random rotation", copyBox));
       auto tilt_group (new QGroupBox ("Random tilt", copyBox));
@@ -147,6 +150,7 @@ namespace noggit
 
       auto *pasteBox = new ExpanderWidget(this);
       pasteBox->setExpanderTitle("Paste Options");
+      pasteBox->setExpanded(_settings->value ("object_editor/paste_options", false).toBool());
       auto pasteBox_content = new QWidget(this);
       auto paste_layout = new QGridLayout (pasteBox_content);
       paste_layout->setAlignment(Qt::AlignTop);
@@ -223,6 +227,7 @@ namespace noggit
 
       auto *selectionOptionsBox = new ExpanderWidget( this);
       selectionOptionsBox->setExpanderTitle("Movement Options");
+      selectionOptionsBox->setExpanded(_settings->value ("object_editor/movement_options", false).toBool());
 
       auto selectionOptionsBox_content = new QWidget(this);
       auto selectionOptions_layout = new QVBoxLayout(selectionOptionsBox_content);
@@ -242,6 +247,7 @@ namespace noggit
       auto importBox_content_layout = new QGridLayout (importBox_content);
       importBox_content_layout->setAlignment(Qt::AlignTop);
       importBox->setExpanderTitle("Import");
+      importBox->setExpanded(_settings->value ("object_editor/import_box", false).toBool());
 
       QPushButton *toTxt = new QPushButton("To Text File", this);
       QPushButton *fromTxt = new QPushButton("From Text File", this);
@@ -289,6 +295,31 @@ namespace noggit
         _settings->setValue ("model/random_size", s);
         _settings->sync();
       });
+
+      connect (importBox, &ExpanderWidget::expanderChanged, [&] (bool flag)
+      {
+        _settings->setValue ("object_editor/import_box", flag);
+        _settings->sync();
+      });
+
+      connect (copyBox, &ExpanderWidget::expanderChanged, [&] (bool flag)
+      {
+        _settings->setValue ("object_editor/copy_options", flag);
+        _settings->sync();
+      });
+
+      connect (selectionOptionsBox, &ExpanderWidget::expanderChanged, [&] (bool flag)
+      {
+        _settings->setValue ("object_editor/movement_options", flag);
+        _settings->sync();
+      });
+
+      connect (pasteBox, &ExpanderWidget::expanderChanged, [&] (bool flag)
+      {
+        _settings->setValue ("object_editor/paste_options", flag);
+        _settings->sync();
+      });
+
 
       rotRangeStart->setValue(paste_params->minRotation);
       rotRangeEnd->setValue(paste_params->maxRotation);
@@ -425,9 +456,6 @@ namespace noggit
           , &QPushButton::clicked
           , [=]() { mapView->getObjectPalette()->setVisible(mapView->getObjectPalette()->isHidden()); }
       );
-
-      setMinimumWidth(250);
-      setMaximumWidth(250);
 
       auto mv_pos = mapView->pos();
       auto mv_size = mapView->size();

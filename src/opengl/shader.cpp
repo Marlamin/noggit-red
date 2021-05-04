@@ -8,6 +8,7 @@
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 #include <opengl/texture.hpp>
+#include <noggit/Misc.h>
 
 #include <boost/filesystem/string_file.hpp>
 
@@ -168,6 +169,43 @@ namespace opengl
     {
       gl.uniform1f (uniform_location (name), value);
     }
+    void use_program::uniform (std::string const& name, bool value)
+    {
+      gl.uniform1i (uniform_location (name), static_cast<int>(value));
+    }
+    void use_program::uniform_cached(std::string const& name, GLint value)
+    {
+      GLuint loc = uniform_location(name);
+      auto cache = _program.getUniformsIntCache();
+      auto it  = cache->find(loc);
+      if (it == cache->end() || it->second != value)
+      {
+        (*const_cast<tsl::robin_map<GLuint, GLint>*>(cache))[loc] = value;
+        gl.uniform1i(loc, value);
+      }
+    }
+    void use_program::uniform_cached(std::string const& name, GLfloat value)
+    {
+      GLuint loc = uniform_location(name);
+      auto cache = _program.getUniformsFloatCache();
+      auto it  = cache->find(loc);
+      if (it == cache->end() || !misc::float_equals(it->second, value))
+      {
+        (*const_cast<tsl::robin_map<GLuint, GLfloat>*>(cache))[loc] = value;
+        gl.uniform1f(loc, value);
+      }
+    }
+    void use_program::uniform_cached(std::string const& name, bool value)
+    {
+      GLuint loc = uniform_location(name);
+      auto cache = _program.getUniformsBoolCache();
+      auto it  = cache->find(loc);
+      if (it == cache->end() || it->second != value)
+      {
+        (*const_cast<tsl::robin_map<GLuint, bool>*>(cache))[loc] = value;
+        gl.uniform1i(loc, static_cast<int>(value));
+      }
+    }
     void use_program::uniform (std::string const& name, std::vector<int> const& value)
     {
       gl.uniform1iv (uniform_location(name), value.size(), value.data());
@@ -268,25 +306,27 @@ namespace opengl
 
     GLuint use_program::uniform_location (std::string const& name)
     {
-      auto it = _uniforms.find (name);
-      if (it != _uniforms.end())
+      auto uniforms = _program.getUniforms();
+      auto it  = uniforms->find(name);
+      if (it != uniforms->end())
       {
         return it->second;
       }
 
-      GLuint loc = _program.uniform_location (name);
+      GLuint loc = _program.uniform_location(name);
       if (loc == -1)
       {
         throw std::invalid_argument ("uniform " + name + " does not exist in shader\n");
       }
-      _uniforms[name] = loc;      
+      (*const_cast<tsl::robin_map<std::string, GLuint>*>(uniforms))[name] = loc;
       return loc;
     }
 
     GLuint use_program::attrib_location (std::string const& name)
     {
-      auto it = _attribs.find (name);
-      if (it != _attribs.end())
+      auto attribs = _program.getAttributes();
+      auto it = attribs->find (name);
+      if (it != attribs->end())
       {
         return it->second;
       }
@@ -297,7 +337,7 @@ namespace opengl
         {
           throw std::invalid_argument ("attribute " + name + " does not exist in shader\n");
         }
-        _attribs[name] = loc;
+        (*const_cast<tsl::robin_map<std::string, GLuint>*>(attribs))[name] = loc;
         return loc;
       }
     }
