@@ -8,7 +8,7 @@
 #include <QtWidgets/QLineEdit>
 
 class QUnsignedSpinBoxPrivate;
-class Q_WIDGETS_EXPORT QUnsignedSpinBox : public QAbstractSpinBox
+class QUnsignedSpinBox : public QAbstractSpinBox
 {
 Q_OBJECT
 

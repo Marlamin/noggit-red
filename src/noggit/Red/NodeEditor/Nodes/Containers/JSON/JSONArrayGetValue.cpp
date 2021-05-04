@@ -42,7 +42,7 @@ void JSONArrayGetValueNode::compute()
   if (_out_ports[0].connected)
   {
     if (!value.isString())
-      goto ERROR;
+      goto _ERROR;
 
     _out_ports[0].out_value = std::make_shared<StringData>(value.toString().toStdString());
     _node->onDataUpdated(0);
@@ -51,7 +51,7 @@ void JSONArrayGetValueNode::compute()
   if (_out_ports[1].connected)
   {
     if (!value.isBool())
-      goto ERROR;
+      goto _ERROR;
 
     _out_ports[1].out_value = std::make_shared<BooleanData>(value.toBool());
     _node->onDataUpdated(1);
@@ -60,7 +60,7 @@ void JSONArrayGetValueNode::compute()
   if (_out_ports[2].connected)
   {
     if (!value.isDouble())
-      goto ERROR;
+      goto _ERROR;
 
     _out_ports[2].out_value = std::make_shared<DecimalData>(value.toDouble());
     _node->onDataUpdated(2);
@@ -69,7 +69,7 @@ void JSONArrayGetValueNode::compute()
   if (_out_ports[3].connected)
   {
     if (!value.isDouble())
-      goto ERROR;
+      goto _ERROR;
 
     _out_ports[3].out_value = std::make_shared<DecimalData>(value.toInt());
     _node->onDataUpdated(3);
@@ -78,7 +78,7 @@ void JSONArrayGetValueNode::compute()
   if (_out_ports[4].connected)
   {
     if (!value.isObject())
-      goto ERROR;
+      goto _ERROR;
 
     _out_ports[4].out_value = std::make_shared<JSONData>(value.toObject());
     _node->onDataUpdated(4);
@@ -87,7 +87,7 @@ void JSONArrayGetValueNode::compute()
   if (_out_ports[5].connected)
   {
     if (!value.isArray())
-      goto ERROR;
+      goto _ERROR;
 
     _out_ports[5].out_value = std::make_shared<JSONArrayData>(value.toArray());
     _node->onDataUpdated(5);
@@ -95,7 +95,7 @@ void JSONArrayGetValueNode::compute()
 
   return;
 
-  ERROR:
+  _ERROR:
   setValidationState(NodeValidationState::Error);
   setValidationMessage("Error: type mismatch.");
 }

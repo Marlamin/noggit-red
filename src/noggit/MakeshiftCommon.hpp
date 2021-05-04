@@ -139,9 +139,15 @@ namespace noggit::Recovery
       -> std::size_t;
       auto getData ( ) const
       -> std::vector<char> const&;
+      /*template < typename Ty >
+      constexpr
+      operator Anchor<Ty> ( );*/
       template < typename Ty >
       constexpr
-      operator Anchor<Ty> ( );
+      operator Anchor<Ty>()
+      {
+          return *this + Offset<Ty>{_pos};
+      }
     protected:
       template < typename Ty >
       friend class Anchor;
