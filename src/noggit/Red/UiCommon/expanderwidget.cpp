@@ -12,8 +12,8 @@ ExpanderWidget::ExpanderWidget(QWidget *parent, bool in_designer)
 	m_in_designer = in_designer;
 	m_expanded = true;
 
-	m_collapsedIcon=noggit::ui::font_awesome_icon(noggit::ui::font_awesome::arrowright);
-	m_expandedIcon=noggit::ui::font_awesome_icon(noggit::ui::font_awesome::arrowdown);
+	m_collapsedIcon=noggit::ui::font_awesome_icon(noggit::ui::font_awesome::caretright);
+	m_expandedIcon=noggit::ui::font_awesome_icon(noggit::ui::font_awesome::caretdown);
 
     m_button = new QPushButton();
     m_button->setObjectName("__qt__passive_button");
