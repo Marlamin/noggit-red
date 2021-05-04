@@ -12,17 +12,21 @@
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QVBoxLayout>
 
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
+
 namespace noggit
 {
   namespace ui
   {
-    terrain_tool::terrain_tool(QWidget* parent)
+    terrain_tool::terrain_tool(MapView* map_view, QWidget* parent)
       : QWidget(parent)
       , _edit_type (eTerrainType_Linear)
       , _vertex_angle (0.0f)
       , _vertex_orientation (0.0f)
       , _cursor_pos(nullptr)
       , _vertex_mode(eVertexMode_Center)
+      , _map_view(map_view)
     {
       setMinimumWidth(250);
       setMaximumWidth(250);
@@ -93,6 +97,7 @@ namespace noggit
       layout->addRow(settings_group);
 
       _vertex_type_group = new QGroupBox ("Vertex edit");
+      _vertex_type_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
       QVBoxLayout* vertex_layout (new QVBoxLayout (_vertex_type_group));
 
       _vertex_button_group = new QButtonGroup (this);
@@ -149,16 +154,37 @@ namespace noggit
       connect ( _angle_slider, &QSlider::valueChanged
               , [this] (int v)
                   {
-                    setAngle (v);
+                    if (noggit::ActionManager::instance()->getCurrentAction())
+                    {
+                      setAngle(v);
+                    }
+                    else
+                    {
+                      noggit::ActionManager::instance()->beginAction(_map_view);
+                      setAngle(v);
+                      noggit::ActionManager::instance()->endAction();
+                    }
+
                   }
                 );
 
       connect ( _orientation_dial, &QDial::valueChanged
               , [this] (int v)
                   {
-                    setOrientation (v + 90.0f);
+                    if (noggit::ActionManager::instance()->getCurrentAction())
+                    {
+                      setOrientation(v + 90.0f);
+                    }
+                    else
+                    {
+                      noggit::ActionManager::instance()->beginAction(_map_view);
+                      setOrientation(v + 90.0f);
+                      noggit::ActionManager::instance()->endAction();
+                    }
+
                   }
                 );
+
 
     }
 

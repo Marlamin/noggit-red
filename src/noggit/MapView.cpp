@@ -361,7 +361,7 @@ void MapView::setupViewportOverlay()
 
 void MapView::setupRaiseLowerUi()
 {
-  terrainTool = new noggit::ui::terrain_tool(this);
+  terrainTool = new noggit::ui::terrain_tool(this, this);
   _tool_panel_dock->registerTool("Raise | Lower", terrainTool);
 
   connect(terrainTool
@@ -370,8 +370,6 @@ void MapView::setupRaiseLowerUi()
           {
             makeCurrent();
             opengl::context::scoped_setter const _(::gl, context());
-
-            // TODO: IMPORTANT action stack here with timer
 
             _world->orientVertices(vertex_mode == eVertexMode_Mouse
                                    ? _cursor_pos
@@ -1378,7 +1376,12 @@ void MapView::setupHotkeys()
 
   addHotkey ( Qt::Key_C
     , MOD_none
-    , [this] { _world->clearVertexSelection(); }
+    , [this]
+    {
+      noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eVERTEX_SELECTION);
+      _world->clearVertexSelection();
+      noggit::ActionManager::instance()->endAction();
+    }
     , [this] { return terrainMode == editing_mode::ground && !noggit::ActionManager::instance()->getCurrentAction(); }
   );
 

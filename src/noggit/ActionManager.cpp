@@ -81,6 +81,9 @@ void ActionManager::endAction()
 
 void ActionManager::endActionOnModalityMismatch(unsigned modality_controls)
 {
+  if (!modality_controls)
+    return;
+
   if (!_cur_action)
     return;
 

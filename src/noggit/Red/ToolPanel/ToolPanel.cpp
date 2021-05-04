@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "ToolPanel.hpp"
-#include <QScrollArea>
 #include <QScrollBar>
 
 using namespace noggit::Red;
@@ -22,9 +21,7 @@ void ToolPanel::setCurrentIndex(int index)
   setWindowTitle(_titles.at(index));
 
   auto widget_min_width = _ui.toolPanelStack->currentWidget()->minimumWidth();
-  setFixedWidth(_ui.scrollArea->verticalScrollBar()->isVisible()
-  ? widget_min_width + _ui.scrollArea->verticalScrollBar()->width()
-  : widget_min_width);
+  setFixedWidth(widget_min_width + 15);
 }
 
 void ToolPanel::registerTool(QString const& title, QWidget* widget)

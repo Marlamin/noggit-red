@@ -15,6 +15,7 @@
 #include <QtWidgets/QWidget>
 
 class World;
+class MapView;
 
 namespace noggit
 {
@@ -25,7 +26,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      terrain_tool(QWidget* parent = nullptr);
+      terrain_tool(MapView* map_view, QWidget* parent = nullptr);
 
       void changeTerrain (World*, math::vector_3d const& pos, float dt);
 
@@ -82,6 +83,7 @@ namespace noggit
 
       QSlider* _angle_slider;
       QDial* _orientation_dial;
+      MapView* _map_view;
     };
   }
 }

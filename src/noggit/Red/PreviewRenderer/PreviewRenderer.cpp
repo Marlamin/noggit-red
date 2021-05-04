@@ -132,7 +132,7 @@ void PreviewRenderer::draw()
 
   if (!_m2_program)
   {
-    setModel("world/wmo/azeroth/buildings/human_farm/farm.wmo");
+    //setModel("world/wmo/azeroth/buildings/human_farm/farm.wmo");
     _m2_program.reset
         ( new opengl::program
               { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs") }
