@@ -165,7 +165,7 @@ void MapView::set_editing_mode (editing_mode mode)
     _texture_palette_dock->hide();
     _object_palette_dock->hide();
     _asset_browser_dock->hide();
-    _viewport_overlay_ui->gizmoBar->hide();
+    //_viewport_overlay_ui->gizmoBar->hide();
   }
 
 
@@ -179,7 +179,7 @@ void MapView::set_editing_mode (editing_mode mode)
   }
 
   terrainMode = mode;
-  _toolbar->check_tool (mode);
+  //_toolbar->check_tool (mode);
   _cursorType = terrainMode == editing_mode::stamp ? CursorType::STAMP : CursorType::CIRCLE;
   this->activateWindow();
 }
@@ -194,7 +194,7 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
   case editing_mode::object:
     _asset_browser_dock->setVisible(!ui_hidden && _settings->value("map_view/asset_browser", false).toBool());
     _object_palette_dock->setVisible(!ui_hidden && _settings->value("map_view/object_palette", false).toBool());
-    _viewport_overlay_ui->gizmoBar->setVisible(!ui_hidden);
+    //_viewport_overlay_ui->gizmoBar->setVisible(!ui_hidden);
     break;
   case editing_mode::paint:
     _texture_browser_dock->setVisible(!ui_hidden && _settings->value("map_view/texture_browser", false).toBool());
@@ -289,6 +289,7 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
 
 void MapView::setupViewportOverlay()
 {
+  return;
   _overlay_widget = new QWidget(this);
   _viewport_overlay_ui = new ::Ui::MapViewOverlay();
   _viewport_overlay_ui->setupUi(_overlay_widget);
@@ -800,6 +801,7 @@ void MapView::setupDetailInfos()
 
 void MapView::setupToolbars()
 {
+  return;
   _toolbar = new noggit::ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
   _toolbar->setOrientation(Qt::Vertical);
   auto right_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->leftToolbarHolder);
@@ -1147,7 +1149,7 @@ void MapView::setupViewMenu()
         _texture_palette_small,
         _object_palette_dock,
         _asset_browser_dock,
-        _overlay_widget,
+        //_overlay_widget,
         _tool_panel_dock
 
       };
@@ -1172,8 +1174,8 @@ void MapView::setupViewMenu()
 
 
     _main_window->statusBar()->setVisible(ui_hidden);
-    _toolbar->setVisible(ui_hidden);
-    _view_toolbar->setVisible(ui_hidden);
+    //_toolbar->setVisible(ui_hidden);
+    //_view_toolbar->setVisible(ui_hidden);
 
     ui_hidden = !ui_hidden;
 
@@ -2289,7 +2291,7 @@ MapView::~MapView()
 
   opengl::context::scoped_setter const _ (::gl, context());
   delete _texBrush;
-  delete _viewport_overlay_ui;
+  //delete _viewport_overlay_ui;
 
   // when the uid fix fail the UI isn't created
   if (!_uid_fix_failed)
