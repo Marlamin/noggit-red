@@ -2152,7 +2152,13 @@ void MapView::paintGL()
   {
     initializeGL();
   }
-  _gl_initialized = true;
+
+  if (_last_opengl_context != context())
+  {
+    _gl_initialized = false;
+    return;
+  }
+
 
   opengl::context::scoped_setter const _ (::gl, context());
 
