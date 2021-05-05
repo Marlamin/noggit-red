@@ -657,17 +657,17 @@ void MapChunk::draw ( math::frustum const& frustum
   opengl::texture::set_active_texture(5);
   shadow.bind();
 
-  mcnk_shader.uniform_cached("layer_count", (int)texture_set->num());
-  mcnk_shader.uniform_cached("cant_paint", (int)cantPaint);
+  mcnk_shader.uniform("layer_count", (int)texture_set->num());
+  mcnk_shader.uniform("cant_paint", (int)cantPaint);
 
   if (draw_chunk_flag_overlay)
   {
-    mcnk_shader.uniform_cached ("draw_impassible_flag", (int)header_flags.flags.impass);
+    mcnk_shader.uniform ("draw_impassible_flag", (int)header_flags.flags.impass);
   }
 
   if (draw_areaid_overlay)
   {
-    mcnk_shader.uniform_cached("areaid_color", (math::vector_4d)area_id_colors[areaID]);
+    mcnk_shader.uniform("areaid_color", (math::vector_4d)area_id_colors[areaID]);
   }
 
   gl.bindVertexArray(_vao);

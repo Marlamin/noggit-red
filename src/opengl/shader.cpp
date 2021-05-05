@@ -306,6 +306,8 @@ namespace opengl
 
     GLuint use_program::uniform_location (std::string const& name)
     {
+      return _program.uniform_location(name);
+
       auto uniforms = _program.getUniforms();
       auto it  = uniforms->find(name);
       if (it != uniforms->end())
