@@ -38,7 +38,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   // Hole lines always on
   add_tool_icon(&mapView->_draw_models_with_box, tr("Models with box"), font_noggit::VISIBILITY_WITH_BOX);
   add_tool_icon(&mapView->_draw_hidden_models, tr("Hidden models"), font_noggit::VISIBILITY_HIDDEN_MODELS);
-
+  addSeparator();
   /*
   auto tablet_sensitivity = new QSlider(this);
   tablet_sensitivity->setOrientation(Qt::Horizontal);
@@ -47,6 +47,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
 
   auto undo_stack_btn = new QPushButton(this);
   undo_stack_btn->setIcon(font_awesome_icon(font_awesome::undo));
+  undo_stack_btn->setToolTip("History");
   addWidget(undo_stack_btn);
 
 
