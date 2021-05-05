@@ -1011,7 +1011,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     m2_shader.uniform("model_view", model_view);
     m2_shader.uniform("projection", projection);
 
-    m2_shader.uniform("draw_fog", 0);
+    m2_shader.uniform_cached("draw_fog", 0);
 
     m2_shader.uniform("light_dir", light_dir);
     m2_shader.uniform("diffuse_color", diffuse_color);
@@ -1086,31 +1086,31 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("model_view", model_view);
     mcnk_shader.uniform("projection", projection);
 
-    mcnk_shader.uniform("draw_lines", draw_lines);
-    mcnk_shader.uniform("draw_hole_lines", draw_hole_lines);
-    mcnk_shader.uniform("draw_areaid_overlay", draw_areaid_overlay);
-    mcnk_shader.uniform("draw_terrain_height_contour", draw_contour);
+    mcnk_shader.uniform_cached("draw_lines", draw_lines);
+    mcnk_shader.uniform_cached("draw_hole_lines", draw_hole_lines);
+    mcnk_shader.uniform_cached("draw_areaid_overlay", draw_areaid_overlay);
+    mcnk_shader.uniform_cached("draw_terrain_height_contour", draw_contour);
 
 
     // the flag stays on if the last chunk drawn before leaving the editing tool has it
     if (!draw_chunk_flag_overlay)
     {
-      mcnk_shader.uniform("draw_impassible_flag", 0);
+      mcnk_shader.uniform_cached("draw_impassible_flag", 0);
     }
 
-    mcnk_shader.uniform("draw_wireframe", draw_wireframe);
+    mcnk_shader.uniform_cached("draw_wireframe", draw_wireframe);
 
     int wireframe_type = _settings->value("wireframe/type", 0).toInt();
 
-    mcnk_shader.uniform("wireframe_type", wireframe_type);
+    mcnk_shader.uniform_cached("wireframe_type", wireframe_type);
 
 
     float wireframe_radius =  _settings->value("wireframe/radius", 1.5f).toFloat();
-    mcnk_shader.uniform("wireframe_radius", wireframe_radius);
+    mcnk_shader.uniform_cached("wireframe_radius", wireframe_radius);
 
 
     float wireframe_width =  _settings->value ("wireframe/width", 1.f).toFloat();
-    mcnk_shader.uniform ("wireframe_width", wireframe_width);
+    mcnk_shader.uniform_cached ("wireframe_width", wireframe_width);
 
 
     // !\ todo store the color somewhere ?
@@ -1118,7 +1118,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
     mcnk_shader.uniform ("wireframe_color", wireframe_color);
 
-    mcnk_shader.uniform ("draw_fog", draw_fog);
+    mcnk_shader.uniform_cached ("draw_fog", draw_fog);
 
     mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
 
@@ -1130,16 +1130,16 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     if (cursor_type != CursorType::NONE)
     {
-      mcnk_shader.uniform("draw_cursor_circle", static_cast<int>(cursor_type));
+      mcnk_shader.uniform_cached("draw_cursor_circle", static_cast<int>(cursor_type));
       mcnk_shader.uniform ("cursor_position", cursor_pos);
       mcnk_shader.uniform("cursorRotation", cursorRotation);
-      mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
+      mcnk_shader.uniform_cached ("outer_cursor_radius", brush_radius);
       mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
       mcnk_shader.uniform ("cursor_color", cursor_color);
     }
     else
     {
-      mcnk_shader.uniform("draw_cursor_circle", 0);
+      mcnk_shader.uniform_cached("draw_cursor_circle", 0);
     }
 
     std::vector<int> textures_bound = { -1, -1, -1, -1 };
@@ -1151,7 +1151,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                       && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z);
       if (_draw_selection_old != draw_sel)
       {
-        mcnk_shader.uniform("draw_selection", draw_sel);
+        mcnk_shader.uniform_cached("draw_selection", draw_sel);
         _draw_selection_old = draw_sel;
       }
 
@@ -1224,7 +1224,7 @@ void World::draw ( math::matrix_4x4 const& model_view
       wmo_program.uniform("model_view", model_view);
       wmo_program.uniform("projection", projection);
 
-      wmo_program.uniform("draw_fog", draw_fog);
+      wmo_program.uniform_cached("draw_fog", draw_fog);
 
       if (draw_fog)
       {
@@ -1289,7 +1289,7 @@ void World::draw ( math::matrix_4x4 const& model_view
       m2_shader.uniform("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
       // !\ todo use light dbcs values
 
-      m2_shader.uniform("draw_fog", draw_fog);
+      m2_shader.uniform_cached("draw_fog", draw_fog);
 
       m2_shader.uniform("light_dir", light_dir);
       m2_shader.uniform("diffuse_color", diffuse_color);
