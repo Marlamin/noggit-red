@@ -1148,13 +1148,13 @@ void World::draw ( math::matrix_4x4 const& model_view
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
 
-      bool draw_sel = terrainMode == editing_mode::minimap
-                      && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z);
-      if (_draw_selection_old != draw_sel)
+      if (terrainMode == editing_mode::minimap
+          && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z))
       {
         mcnk_shader.uniform_cached("draw_selection", draw_sel);
         _draw_selection_old = draw_sel;
       }
+
 
       tile->draw ( frustum
                  , mcnk_shader
