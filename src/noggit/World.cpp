@@ -1151,8 +1151,11 @@ void World::draw ( math::matrix_4x4 const& model_view
       if (terrainMode == editing_mode::minimap
           && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z))
       {
-        mcnk_shader.uniform_cached("draw_selection", draw_sel);
-        _draw_selection_old = draw_sel;
+        mcnk_shader.uniform("draw_selection", 1);
+      }
+      else
+      {
+        mcnk_shader.uniform("draw_selection", 0);
       }
 
 
