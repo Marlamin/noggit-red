@@ -2143,7 +2143,10 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 void MapView::paintGL()
 {
   if (!_gl_initialized)
+  {
     initializeGL();
+  }
+  _gl_initialized = true;
 
   opengl::context::scoped_setter const _ (::gl, context());
 
