@@ -762,6 +762,12 @@ void MapView::setupAssetBrowser()
             _settings->sync();
           });
 
+    connect(_asset_browser_dock, &QDockWidget::topLevelChanged,
+          [=](bool is_floating)
+          {
+            unloadOpenglData();
+          });
+
   connect(this, &QObject::destroyed, _asset_browser_dock, &QObject::deleteLater);
 }
 

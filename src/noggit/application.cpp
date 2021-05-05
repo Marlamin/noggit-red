@@ -508,6 +508,7 @@ int main(int argc, char *argv[])
   std::set_terminate (noggit_terminate_handler);
 
   QApplication::setStyle(QStyleFactory::create("Fusion"));
+  //QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
   QApplication qapp (argc, argv);
   qapp.setApplicationName ("Noggit");
   qapp.setOrganizationName ("Noggit");
