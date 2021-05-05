@@ -2168,7 +2168,7 @@ void MapView::paintGL()
 
   _last_update = now;
 
-  bool test = context()->makeCurrent(context()->surface());
+  makeCurrent();
 
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
