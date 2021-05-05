@@ -2,6 +2,7 @@
 
 #include "ActionManager.hpp"
 #include <noggit/MapView.h>
+#include <cmath>
 
 using namespace noggit;
 
@@ -14,6 +15,26 @@ Action* ActionManager::getCurrentAction() const
 {
   return _cur_action;
 }
+
+void ActionManager::setCurrentAction(unsigned index)
+{
+  int index_diff = index - _undo_index;
+
+  if (!index_diff)
+    return;
+
+  if (index_diff > 0)
+  {
+    for (int i = 0; i < index_diff; ++i)
+      undo();
+  }
+  else
+  {
+    for (int i = 0; i < std::abs(index_diff); ++i)
+      redo();
+  }
+}
+
 
 void ActionManager::setLimit(unsigned limit)
 {
@@ -32,6 +53,8 @@ void ActionManager::purge()
     delete action;
   }
   _action_stack.clear();
+  _undo_index = 0;
+  emit purged();
 }
 
 Action* ActionManager::beginAction(MapView* map_view
@@ -48,6 +71,7 @@ Action* ActionManager::beginAction(MapView* map_view
     {
       delete _action_stack.back();
       _action_stack.pop_back();
+      emit popBack();
     }
     _undo_index = 0;
   }
@@ -58,6 +82,7 @@ Action* ActionManager::beginAction(MapView* map_view
     Action* old_action = _action_stack.front();
     delete old_action;
     _action_stack.pop_front();
+    emit popFront();
   }
 
   auto action = new Action(map_view);
@@ -76,21 +101,26 @@ void ActionManager::endAction()
   assert(_cur_action && "ActionStack Error: endAction() called with no action running.");
 
   _cur_action->finish();
+  emit addedAction(_cur_action);
   _cur_action = nullptr;
+  emit currentActionChanged(_undo_index);
 }
 
 void ActionManager::endActionOnModalityMismatch(unsigned modality_controls)
 {
-  if (!modality_controls)
-    return;
 
   if (!_cur_action)
+    return;
+
+  if (!_cur_action->getModalityControllers())
     return;
 
   if ((modality_controls & _cur_action->getModalityControllers()) != _cur_action->getModalityControllers())
   {
     _cur_action->finish();
+    emit addedAction(_cur_action);
     _cur_action = nullptr;
+    emit currentActionChanged(_undo_index);
   }
 }
 
@@ -110,6 +140,7 @@ void ActionManager::undo()
   action->undo();
 
   _undo_index++;
+  emit currentActionChanged(_undo_index);
 }
 
 void ActionManager::redo()
@@ -128,6 +159,7 @@ void ActionManager::redo()
   action->undo(true);
 
   _undo_index--;
+  emit currentActionChanged(_undo_index);
 }
 
 ActionManager::~ActionManager()

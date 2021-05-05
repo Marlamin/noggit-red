@@ -526,6 +526,7 @@ void MapView::setupTexturePainterUi()
   connect(&_show_texture_palette_small_window, &noggit::bool_toggle_property::changed
     , _texture_palette_dock, [this]
           {
+            QSignalBlocker const blocker(_show_texture_palette_small_window);
             if (terrainMode == editing_mode::paint && !ui_hidden)
             {
               _texture_palette_dock->setVisible(_show_texture_palette_small_window.get());

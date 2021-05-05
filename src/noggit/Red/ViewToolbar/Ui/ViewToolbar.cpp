@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/Red/ViewToolbar/Ui/ViewToolbar.hpp>
+#include <noggit/Red/ActionHistoryNavigator/ActionHistoryNavigator.hpp>
+#include <noggit/ui/font_awesome.hpp>
 #include <QSlider>
 
 using namespace noggit::ui;
@@ -42,6 +44,44 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   tablet_sensitivity->setOrientation(Qt::Horizontal);
   addWidget(tablet_sensitivity);
    */
+
+  auto undo_stack_btn = new QPushButton(this);
+  undo_stack_btn->setIcon(font_awesome_icon(font_awesome::undo));
+  addWidget(undo_stack_btn);
+
+
+  auto undo_stack_popup = new QWidget(this);
+  undo_stack_popup->setMinimumWidth(160);
+  undo_stack_popup->setMinimumHeight(300);
+  auto layout = new QVBoxLayout(undo_stack_popup);
+  auto action_navigator = new noggit::Red::ActionHistoryNavigator(undo_stack_popup);
+  action_navigator->setMinimumWidth(160);
+  action_navigator->setMinimumHeight(300);
+  layout->addWidget(undo_stack_popup);
+
+  undo_stack_popup->updateGeometry();
+  undo_stack_popup->adjustSize();
+  undo_stack_popup->update();
+  undo_stack_popup->repaint();
+  undo_stack_popup->setVisible(false);
+
+  connect(undo_stack_btn, &QPushButton::clicked,
+          [=]()
+          {
+            QPoint new_pos = mapToGlobal(
+              QPoint(undo_stack_btn->pos().x(),
+                     undo_stack_btn->pos().y() + 30));
+
+            undo_stack_popup->setGeometry(new_pos.x(),
+                                       new_pos.y(),
+                                       undo_stack_popup->width(),
+                                       undo_stack_popup->height());
+
+            undo_stack_popup->setWindowFlags(Qt::Popup);
+            undo_stack_popup->show();
+          });
+
+
 }
 
 void ViewToolbar::add_tool_icon(noggit::bool_toggle_property* view_state, const QString& name, const font_noggit::icons& icon)

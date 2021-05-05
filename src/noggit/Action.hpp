@@ -81,7 +81,7 @@ namespace noggit
       math::vector_3d vertex_center;
     };
 
-    class Action : QObject
+    class Action : public QObject
     {
     Q_OBJECT
     public:

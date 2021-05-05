@@ -29,6 +29,8 @@ namespace noggit
         [[nodiscard]]
         Action* getCurrentAction() const;
 
+        void setCurrentAction(unsigned index);
+
         Action* beginAction(MapView* map_view
                             , int flags = ActionFlags::eNO_FLAG
                             , int modality_controls = ActionModalityControllers::eNONE);
@@ -47,6 +49,13 @@ namespace noggit
         void redo();
 
         ~ActionManager() override;
+
+    signals:
+      void popBack();
+      void popFront();
+      void addedAction(Action* action);
+      void purged();
+      void currentActionChanged(unsigned index);
 
 
     private:
