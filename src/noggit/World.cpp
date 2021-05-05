@@ -911,10 +911,6 @@ void World::initShaders()
     mcnk_shader.uniform("draw_shadows", 1);
     mcnk_shader.uniform("shadow_map", 5);
 
-    mcnk_shader.uniform("tex_anim_0", math::vector_2d());
-    mcnk_shader.uniform("tex_anim_1", math::vector_2d());
-    mcnk_shader.uniform("tex_anim_2", math::vector_2d());
-    mcnk_shader.uniform("tex_anim_3", math::vector_2d());
     mcnk_shader.uniform ("fog_start", 0.5f);
     mcnk_shader.uniform ("fog_end", fogdistance);
 
@@ -1141,6 +1137,11 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       mcnk_shader.uniform_cached("draw_cursor_circle", 0);
     }
+
+    mcnk_shader.uniform("tex_anim_0", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_1", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_2", math::vector_2d());
+    mcnk_shader.uniform("tex_anim_3", math::vector_2d());
 
     std::vector<int> textures_bound = { -1, -1, -1, -1 };
 
