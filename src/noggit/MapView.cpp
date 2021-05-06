@@ -2020,6 +2020,15 @@ void MapView::initializeGL()
 
   _world->initShaders();
 
+  try
+  {
+    gl.pointSize(1.0f);
+  }
+  catch
+  {
+    return;
+  }
+
   _gl_initialized = true;
 }
 
@@ -2158,7 +2167,6 @@ void MapView::paintGL()
     _gl_initialized = false;
     return;
   }
-
 
   opengl::context::scoped_setter const _ (::gl, context());
 
