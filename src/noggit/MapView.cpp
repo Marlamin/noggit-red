@@ -2024,7 +2024,7 @@ void MapView::initializeGL()
   {
     gl.pointSize(1.0f);
   }
-  catch
+  catch(...)
   {
     return;
   }
