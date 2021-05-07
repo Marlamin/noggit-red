@@ -37,7 +37,7 @@ namespace noggit
           setWrapping(true);
           setSelectionMode(QAbstractItemView::SingleSelection);
           setAcceptDrops(false);
-          setMovement(Movement::Snap);
+          setMovement(Movement::Static);
         }
 
         void ObjectList::mousePressEvent(QMouseEvent* event)

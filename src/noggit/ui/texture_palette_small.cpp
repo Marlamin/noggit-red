@@ -35,7 +35,7 @@ namespace noggit
       setWrapping(false);
       setSelectionMode(QAbstractItemView::SingleSelection);
       setAcceptDrops(false);
-      setMovement(Movement::Snap);
+      setMovement(Movement::Static);
     }
 
     void PaletteList::mousePressEvent(QMouseEvent* event)

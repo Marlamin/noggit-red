@@ -879,7 +879,7 @@ void RibbonEmitter::setup(int anim, int time, int animtime)
     first.len += dlen;
   }
 
-  // kill stuff from the end
+  // kill stuff from the end TODO: occasional crashes here
   float l = 0;
   bool erasemode = false;
   for (std::list<RibbonSegment>::iterator it = segs.begin(); it != segs.end();) {

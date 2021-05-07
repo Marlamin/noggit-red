@@ -39,6 +39,7 @@
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/Red/PresetEditor/Ui/PresetEditor.hpp>
 #include <noggit/Red/NodeEditor/Ui/NodeEditor.hpp>
+#include <noggit/Red/UiCommon/ImageBrowser.hpp>
 #include <external/imguipiemenu/PieMenu.hpp>
 #include <noggit/ui/object_palette.hpp>
 
@@ -1737,7 +1738,9 @@ void MapView::setupMinimap()
 
 void MapView::createGUI()
 {
-  
+  auto image_browser = new noggit::Red::ImageBrowser();
+  image_browser->show();
+
   // Combined dock
   _tool_panel_dock = new noggit::Red::ToolPanel(this);
   _tool_panel_dock->setFeatures(QDockWidget::DockWidgetMovable
@@ -2019,15 +2022,6 @@ void MapView::initializeGL()
   _last_opengl_context = context();
 
   _world->initShaders();
-
-  try
-  {
-    gl.pointSize(1.0f);
-  }
-  catch(...)
-  {
-    return;
-  }
 
   _gl_initialized = true;
 }
