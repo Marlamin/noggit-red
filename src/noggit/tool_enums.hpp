@@ -12,6 +12,7 @@ enum eTerrainType
   eTerrainType_Quadra,
   eTerrainType_Gaussian,
   eTerrainType_Vertex,
+  eTerrainType_Script,
   eTerrainType_Count,
 };
 

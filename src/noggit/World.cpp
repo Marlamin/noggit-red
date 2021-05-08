@@ -39,6 +39,7 @@
 #include <QByteArray>
 #include <QPixmap>
 #include <QImage>
+#include <QTransform>
 
 #include <algorithm>
 #include <cassert>
@@ -51,6 +52,7 @@
 #include <string>
 #include <unordered_set>
 #include <utility>
+#include <limits>
 
 
 bool World::IsEditableWorld(int pMapId)
@@ -1712,16 +1714,78 @@ math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
   return color;
 }
 
-auto World::stamp(math::vector_3d const& pos, float dt, bool doAdd, QPixmap const* pixmap, float radiusOuter
-, float radiusInner, float rotation) -> void
+auto World::stamp(math::vector_3d const& pos, float dt, QPixmap const* pixmap, float radiusOuter
+, float radiusInner, float rotation, int brushType, bool sculpt) -> void
 {
-  QMatrix matrix;
-  matrix.rotate(rotation);
+  QTransform matrix;
+  matrix.rotateRadians(rotation);
   int const k{static_cast<int>(std::floor(radiusOuter)) * 2};
   QImage const img{pixmap->transformed(matrix).scaled(k, k).toImage()};
-  for_all_chunks_in_range(pos, radiusOuter, [=](MapChunk* chunk) -> bool { chunk->stamp(pos, dt, doAdd, img
-  , radiusOuter, radiusInner, rotation); return true; }, [this](MapChunk* chunk) -> void { recalc_norms(chunk); });
+
+  for_all_chunks_in_range(pos, radiusOuter,
+                          [=](MapChunk* chunk) -> bool
+                          {
+                            auto action = noggit::ActionManager::instance()->getCurrentAction();
+                            action->registerChunkTerrainChange(chunk);
+                            action->setBlockCursor(!sculpt);
+                            chunk->stamp(pos, dt, img, radiusOuter, radiusInner, rotation, brushType, sculpt); return true;
+                          }
+                          , [this](MapChunk* chunk) -> void
+                          {
+                            recalc_norms(chunk);
+
+                            // check if coord axis > 0
+                            // if true, get chunk by coord axis - 1
+                            // else, check if tile coord axis > 0
+                            // if true, get tile by tile coord axis - 1,  get last chunk by axis
+                            auto get_neighbor =
+                              [this, chunk](int px, int py) -> MapChunk*
+                              {
+                                MapChunk* neighbor{};
+
+                                int new_chunk_x = px + chunk->px;
+                                int new_chunk_z = py + chunk->py;
+
+                                if (new_chunk_x < 0 || new_chunk_z < 0 || new_chunk_x == 16 || new_chunk_z == 16)
+                                {
+                                  tile_index index(chunk->mt->index.x + px, chunk->mt->index.z + py);
+                                  if (index.x != std::numeric_limits<std::size_t>::max()
+                                  && index.z != std::numeric_limits<std::size_t>::max()
+                                  && index.x != 64
+                                  && index.z != 64)
+                                  {
+                                    MapTile* neighbor_tile = mapIndex.getTile(index);
+
+                                    if (!neighbor_tile)
+                                      return nullptr;
+
+                                    neighbor = neighbor_tile->getChunk((new_chunk_x + 16) % 16,
+                                                                       (new_chunk_z + 16) % 16);
+                                  }
+                                }
+                                else
+                                {
+                                  neighbor = chunk->mt->getChunk(new_chunk_x, new_chunk_z);
+                                }
+
+                                return neighbor;
+                              };
+
+                            if (auto neighbor = get_neighbor(-1, 0); neighbor)
+                              chunk->fixGapLeft(neighbor);
+
+                            if (auto neighbor = get_neighbor(0, -1); neighbor)
+                              chunk->fixGapAbove(neighbor);
+
+                            if (auto neighbor = get_neighbor(1, 0); neighbor)
+                              neighbor->fixGapLeft(chunk);
+
+                            if (auto neighbor = get_neighbor(0, 1); neighbor)
+                              neighbor->fixGapAbove(chunk);
+
+                          });
 }
+
 
 void World::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
 {

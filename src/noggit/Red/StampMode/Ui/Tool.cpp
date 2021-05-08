@@ -116,5 +116,5 @@ auto Tool::stamp(World* world, math::vector_3d const& pos, float dt, bool doAdd)
   if(!_curPixmap)
     return;
   
-  world->stamp(pos, dt, doAdd, _curPixmap, _radiusOuter, _radiusInner, _rotation);
+ // world->stamp(pos, dt, doAdd, _curPixmap, _radiusOuter, _radiusInner, _rotation);
 }

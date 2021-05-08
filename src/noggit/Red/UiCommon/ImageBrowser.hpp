@@ -20,8 +20,11 @@ namespace noggit::Red
 
   class ImageBrowser : public QWidget
   {
+    Q_OBJECT
   public:
     ImageBrowser(QWidget* parent = nullptr);
+
+    void keyPressEvent(QKeyEvent* event) override;
 
   signals:
     void imageSelected(QString name);

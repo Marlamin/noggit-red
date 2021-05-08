@@ -42,6 +42,7 @@
 #include <noggit/Red/UiCommon/ImageBrowser.hpp>
 #include <external/imguipiemenu/PieMenu.hpp>
 #include <noggit/ui/object_palette.hpp>
+#include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
 
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
@@ -1738,9 +1739,6 @@ void MapView::setupMinimap()
 
 void MapView::createGUI()
 {
-  auto image_browser = new noggit::Red::ImageBrowser();
-  image_browser->show();
-
   // Combined dock
   _tool_panel_dock = new noggit::Red::ToolPanel(this);
   _tool_panel_dock->setFeatures(QDockWidget::DockWidgetMovable
@@ -2367,47 +2365,52 @@ void MapView::tick (float dt)
 
   dt = std::min(dt, 1.0f);
 
-  if (_locked_cursor_mode.get())
+  auto cur_action = noggit::ActionManager::instance()->getCurrentAction();
+
+  if ((cur_action && !cur_action->getBlockCursor()) || !cur_action)
   {
-    switch (terrainMode)
+    if (_locked_cursor_mode.get())
     {
-      case editing_mode::areaid:
-      case editing_mode::flags:
-      case editing_mode::holes:
-      case editing_mode::object:
-        update_cursor_pos();
-        break;
-      default:
-        break;
-    }    
+      switch (terrainMode)
+      {
+        case editing_mode::areaid:
+        case editing_mode::flags:
+        case editing_mode::holes:
+        case editing_mode::object:
+          update_cursor_pos();
+          break;
+        default:
+          break;
+      }
+    }
+    else
+    {
+      update_cursor_pos();
+    }
   }
-  else
+
+  math::degrees yaw (-_camera.yaw()._);
+
+  math::vector_3d dir(1.0f, 0.0f, 0.0f);
+  math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
+  math::vector_3d dirRight(0.0f, 0.0f, 1.0f);
+  math::rotate(0.0f, 0.0f, &dir.x, &dir.y, _camera.pitch());
+  math::rotate(0.0f, 0.0f, &dir.x, &dir.z, yaw);
+
+  if (_mod_ctrl_down)
   {
-    update_cursor_pos();
+    dirUp.x = 0.0f;
+    dirUp.y = 1.0f;
+    math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, _camera.pitch());
+    math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, _camera.pitch());
+    math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, yaw);
+    math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z,yaw);
   }
-
-    math::degrees yaw (-_camera.yaw()._);
-
-    math::vector_3d dir(1.0f, 0.0f, 0.0f);
-    math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
-    math::vector_3d dirRight(0.0f, 0.0f, 1.0f);
-    math::rotate(0.0f, 0.0f, &dir.x, &dir.y, _camera.pitch());
-    math::rotate(0.0f, 0.0f, &dir.x, &dir.z, yaw);
-
-    if (_mod_ctrl_down)
-    {
-      dirUp.x = 0.0f;
-      dirUp.y = 1.0f;
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.y, _camera.pitch());
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.y, _camera.pitch());
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, yaw);
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z,yaw);
-    }
-    else if(!_mod_shift_down)
-    {
-      math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, yaw);
-      math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, yaw);
-    }
+  else if(!_mod_shift_down)
+  {
+    math::rotate(0.0f, 0.0f, &dirUp.x, &dirUp.z, yaw);
+    math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, yaw);
+  }
 
   auto currentSelection = _world->current_selection();
   if (_world->has_selection())
@@ -2600,13 +2603,16 @@ void MapView::tick (float dt)
       if (leftMouse && selection.which() == eEntry_MapChunk)
       {
         bool underMap = _world->isUnderMap(_cursor_pos);
+        auto cur_action = noggit::ActionManager::instance()->getCurrentAction();
 
         switch (terrainMode)
         {
         case editing_mode::ground:
           if (_display_mode == display_mode::in_3D && !underMap)
           {
-            if (_mod_shift_down)
+            auto mask_selector = terrainTool->getImageMaskSelector();
+
+            if (_mod_shift_down && (!mask_selector->isEnabled() || mask_selector->getBrushMode()))
             {
               noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
                                                              noggit::ActionModalityControllers::eSHIFT
@@ -2614,7 +2620,7 @@ void MapView::tick (float dt)
 
               terrainTool->changeTerrain(_world.get(), _cursor_pos, 7.5f * dt);
             }
-            else if (_mod_ctrl_down)
+            else if (_mod_ctrl_down && (!mask_selector->isEnabled() || mask_selector->getBrushMode()))
             {
               noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
                                                              noggit::ActionModalityControllers::eCTRL
@@ -3190,9 +3196,15 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
       _world->add_to_selection(hit);
     }
 
-    _cursor_pos = hit.which() == eEntry_Object ? boost::get<selected_object_type>(hit)->pos
-      : hit.which() == eEntry_MapChunk ? boost::get<selected_chunk_type>(hit).position
-      : throw std::logic_error("bad variant");
+    auto action = noggit::ActionManager::instance()->getCurrentAction();
+
+    if (!action || (!action->getBlockCursor()) || !_locked_cursor_mode.get())
+    {
+      _cursor_pos = hit.which() == eEntry_Object ? boost::get<selected_object_type>(hit)->pos
+                                                 : hit.which() == eEntry_MapChunk ? boost::get<selected_chunk_type>(hit).position
+                                                                                  : throw std::logic_error("bad variant");
+    }
+
   }
 
   _rotation_editor_need_update = true;
@@ -3763,6 +3775,23 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     if (terrainMode == editing_mode::object || terrainMode == editing_mode::minimap)
     {
       doSelection(false, true); // Required for radius selection in Object mode
+    }
+  }
+
+  if (leftMouse && _mod_shift_down)
+  {
+    if (terrainMode == editing_mode::ground && _display_mode == display_mode::in_3D)
+    {
+      auto image_mask_selector = terrainTool->getImageMaskSelector();
+      if (terrainTool->_edit_type != eTerrainType_Vertex && terrainTool->_edit_type != eTerrainType_Script &&
+        image_mask_selector->isEnabled() && !image_mask_selector->getBrushMode())
+      {
+        noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                       noggit::ActionModalityControllers::eSHIFT
+                                                       | noggit::ActionModalityControllers::eLMB);
+
+        terrainTool->changeTerrain(_world.get(), _cursor_pos, relative_movement.dx() / 30.0f);
+      }
     }
   }
 

@@ -14,12 +14,15 @@
 
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
+#include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
+
+#include <cmath>
 
 namespace noggit
 {
   namespace ui
   {
-    terrain_tool::terrain_tool(MapView* map_view, QWidget* parent)
+    terrain_tool::terrain_tool(MapView* map_view, QWidget* parent, bool stamp)
       : QWidget(parent)
       , _edit_type (eTerrainType_Linear)
       , _vertex_angle (0.0f)
@@ -30,18 +33,23 @@ namespace noggit
     {
       setMinimumWidth(250);
       setMaximumWidth(250);
-      auto layout (new QFormLayout (this));
+      auto layout (new QVBoxLayout (this));
       layout->setAlignment(Qt::AlignTop);
 
       _type_button_group = new QButtonGroup (this);
-      QRadioButton* radio_flat = new QRadioButton ("Flat");
-      QRadioButton* radio_linear = new QRadioButton ("Linear");
-      QRadioButton* radio_smooth = new QRadioButton ("Smooth");
-      QRadioButton* radio_polynomial = new QRadioButton ("Polynomial");
-      QRadioButton* radio_trigo = new QRadioButton ("Trigonom");
-      QRadioButton* radio_quadra = new QRadioButton ("Quadratic");
-      QRadioButton* radio_gauss = new QRadioButton ("Gaussian");
-      QRadioButton* radio_vertex = new QRadioButton ("Vertex");
+      QRadioButton* radio_flat = new QRadioButton ("Flat", this);
+      QRadioButton* radio_linear = new QRadioButton ("Linear", this);
+      QRadioButton* radio_smooth = new QRadioButton ("Smooth", this);
+      QRadioButton* radio_polynomial = new QRadioButton ("Polynomial", this);
+      QRadioButton* radio_trigo = new QRadioButton ("Trigonom", this);
+      QRadioButton* radio_quadra = new QRadioButton ("Quadratic", this);
+      QRadioButton* radio_gauss = new QRadioButton ("Gaussian", this);
+
+      QRadioButton* radio_vertex;
+      if (!stamp)
+        radio_vertex = new QRadioButton ("Vertex", this);
+
+      QRadioButton* radio_script = new QRadioButton ("Script", this);
 
       _type_button_group->addButton (radio_flat, (int)eTerrainType_Flat);
       _type_button_group->addButton (radio_linear, (int)eTerrainType_Linear);
@@ -50,11 +58,15 @@ namespace noggit
       _type_button_group->addButton (radio_trigo, (int)eTerrainType_Trigo);
       _type_button_group->addButton (radio_quadra, (int)eTerrainType_Quadra);
       _type_button_group->addButton (radio_gauss, (int)eTerrainType_Gaussian);
-      _type_button_group->addButton (radio_vertex, (int)eTerrainType_Vertex);
+
+      if (!stamp)
+        _type_button_group->addButton (radio_vertex, (int)eTerrainType_Vertex);
+
+      _type_button_group->addButton (radio_script, (int)eTerrainType_Script);
 
       radio_linear->toggle();
 
-      QGroupBox* terrain_type_group (new QGroupBox ("Type"));
+      QGroupBox* terrain_type_group (new QGroupBox ("Type", this));
       QGridLayout* terrain_type_layout (new QGridLayout (terrain_type_group));
       terrain_type_layout->addWidget (radio_flat, 0, 0);
       terrain_type_layout->addWidget (radio_linear, 0, 1);
@@ -63,9 +75,18 @@ namespace noggit
       terrain_type_layout->addWidget (radio_trigo, 2, 0);
       terrain_type_layout->addWidget (radio_quadra, 2, 1);
       terrain_type_layout->addWidget (radio_gauss, 3, 0);
-      terrain_type_layout->addWidget (radio_vertex, 3, 1);
 
-      layout->addRow (terrain_type_group);
+      if (!stamp)
+      {
+        terrain_type_layout->addWidget (radio_vertex, 3, 1);
+        terrain_type_layout->addWidget (radio_script, 4, 0);
+      }
+      else
+      {
+        terrain_type_layout->addWidget (radio_script, 3, 1);
+      }
+
+      layout->addWidget(terrain_type_group);
 
       _radius_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
       _radius_slider->setRange (0, 1000);
@@ -80,7 +101,7 @@ namespace noggit
       _inner_radius_slider->setSingleStep(0.05f);
       _inner_radius_slider->setValue(0);
 
-      QGroupBox* settings_group(new QGroupBox ("Settings"));
+      QGroupBox* settings_group(new QGroupBox ("Settings", this));
       auto settings_layout (new QVBoxLayout (settings_group));
       settings_layout->setContentsMargins(0, 12, 0, 12);
 
@@ -94,9 +115,12 @@ namespace noggit
       settings_layout->addWidget(_inner_radius_slider);
       settings_layout->addWidget(_speed_slider);
 
-      layout->addRow(settings_group);
+      layout->addWidget(settings_group);
 
-      _vertex_type_group = new QGroupBox ("Vertex edit");
+      _image_mask_group = new noggit::Red::ImageMaskSelector(map_view, this);
+      layout->addWidget(_image_mask_group);
+
+      _vertex_type_group = new QGroupBox ("Vertex edit", this);
       _vertex_type_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
       QVBoxLayout* vertex_layout (new QVBoxLayout (_vertex_type_group));
 
@@ -132,7 +156,7 @@ namespace noggit
 
       vertex_layout->addItem (vertex_angle_layout);
 
-      layout->addRow(_vertex_type_group);
+      layout->addWidget(_vertex_type_group);
       _vertex_type_group->hide();
 
       connect ( _type_button_group, qOverload<int> (&QButtonGroup::idClicked)
@@ -195,7 +219,16 @@ namespace noggit
       float radius =  static_cast<float>(_radius_slider->value());
       if(_edit_type != eTerrainType_Vertex)
       {
-        world->changeTerrain(pos, dt * _speed_slider->value(), radius, _edit_type, _inner_radius_slider->value());
+        if (_image_mask_group->isEnabled())
+        {
+          world->stamp(pos, dt * _speed_slider->value(), _image_mask_group->getPixmap(), radius,
+                       _inner_radius_slider->value(), _image_mask_group->getRotation() / 360.0f * M_PI, _edit_type, _image_mask_group->getBrushMode());
+        }
+        else
+        {
+          world->changeTerrain(pos, dt * _speed_slider->value(), radius, _edit_type, _inner_radius_slider->value());
+        }
+
       }
       else
       {
@@ -316,14 +349,8 @@ namespace noggit
 
     void terrain_tool::updateVertexGroup()
     {
-      if (_edit_type != eTerrainType_Vertex)
-      {
-        _vertex_type_group->hide();
-      }
-      else
-      {
-        _vertex_type_group->show();
-      }
+      _vertex_type_group->setVisible(_edit_type == eTerrainType_Vertex);
+      _image_mask_group->setVisible(_edit_type != eTerrainType_Vertex && _edit_type != eTerrainType_Script);
     }
 
     QSize terrain_tool::sizeHint() const

@@ -169,8 +169,9 @@ public:
                    , std::function<boost::optional<float> (float, float)> height
                    );
 
-  auto stamp(math::vector_3d const& pos, float dt, bool doAdd, QImage const& pixmap, float radiusOuter
-  , float radiusInner, float rotation) -> void;
+  bool changeTerrainProcessVertex(math::vector_3d const& pos, math::vector_3d const& vertex, float& dt, float radiusOuter, float radiusInner, int brushType);
+  auto stamp(math::vector_3d const& pos, float dt, QImage const& pixmap, float radiusOuter
+  , float radiusInner, float rotation, int brushType, bool sculpt) -> void;
   void selectVertex(math::vector_3d const& pos, float radius, std::set<math::vector_3d*>& vertices);
   void fixVertices(std::set<math::vector_3d*>& selected);
   // for the vertex tool

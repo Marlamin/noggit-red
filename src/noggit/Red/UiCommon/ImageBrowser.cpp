@@ -7,6 +7,7 @@
 #include <QImage>
 #include <QPixmap>
 #include <QDir>
+#include <QKeyEvent>
 
 using namespace  noggit::Red;
 
@@ -43,6 +44,9 @@ ImageBrowser::ImageBrowser(QWidget* parent)
   _model->setNameFilterDisables(false);
 
   _dir_proxy_model = new QSortFilterProxyModel(this);
+  _dir_proxy_model->setFilterCaseSensitivity(Qt::CaseInsensitive);
+  //_dir_proxy_model->setFilterRole(Qt::UserRole);
+  _dir_proxy_model->setRecursiveFilteringEnabled(true);
   _dir_proxy_model->setSourceModel(_model);
 
   _ui.treeView->setModel(_dir_proxy_model);
@@ -50,12 +54,50 @@ ImageBrowser::ImageBrowser(QWidget* parent)
   _ui.treeView->hideColumn(1);
   _ui.treeView->hideColumn(2);
   _ui.treeView->hideColumn(3);
+  _ui.treeView->setIconSize(QSize(64, 64));
 
 
   connect(_ui.treeView, &QTreeView::clicked,
           [=](const QModelIndex &index)
           {
            auto path = _model->fileInfo(_dir_proxy_model->mapToSource(index)).absoluteFilePath();
+            _ui.treeView->setRootIndex(_dir_proxy_model->mapFromSource(_model->index(samples_path)));
           });
 
+  connect(_ui.searchButton, &QPushButton::clicked
+    ,[this, samples_path]()
+          {
+            _dir_proxy_model->setFilterFixedString(_ui.searchField->text());
+            _ui.treeView->setRootIndex(_dir_proxy_model->mapFromSource(_model->index(samples_path)));
+          }
+
+  );
+
+  connect(_ui.treeView->selectionModel(), &QItemSelectionModel::selectionChanged
+    ,[=] (const QItemSelection& selected, const QItemSelection& deselected)
+          {
+            for (auto index : selected.indexes())
+            {
+              auto path = _model->filePath(_dir_proxy_model->mapToSource(index));;
+              if (path.endsWith(".png"))
+              {
+               emit imageSelected(path);
+              }
+              break;
+            }
+
+          }
+
+  );
+
+}
+
+void ImageBrowser::keyPressEvent(QKeyEvent* event)
+{
+  if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+  {
+    _dir_proxy_model->setFilterFixedString(_ui.searchField->text());
+    auto samples_path = QDir::cleanPath(QCoreApplication::applicationDirPath() + QDir::separator() + "samples");
+    _ui.treeView->setRootIndex(_dir_proxy_model->mapFromSource(_model->index(samples_path)));
+  }
 }

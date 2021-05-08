@@ -19,6 +19,11 @@ class MapView;
 
 namespace noggit
 {
+  namespace Red
+  {
+    class ImageMaskSelector;
+  }
+
   namespace ui
   {
     class terrain_tool : public QWidget
@@ -26,7 +31,7 @@ namespace noggit
       Q_OBJECT
 
     public:
-      terrain_tool(MapView* map_view, QWidget* parent = nullptr);
+      terrain_tool(MapView* map_view, QWidget* parent = nullptr, bool stamp = false);
 
       void changeTerrain (World*, math::vector_3d const& pos, float dt);
 
@@ -53,6 +58,8 @@ namespace noggit
 
       void storeCursorPos (math::vector_3d* cursor_pos) { _cursor_pos = cursor_pos; }
 
+      noggit::Red::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
+
       QSize sizeHint() const override;
 
       eTerrainType _edit_type;
@@ -76,6 +83,7 @@ namespace noggit
       QButtonGroup* _vertex_button_group;
       QGroupBox* _speed_box;
       QGroupBox* _vertex_type_group;
+      noggit::Red::ImageMaskSelector* _image_mask_group;
 
       noggit::Red::UiCommon::ExtendedSlider* _radius_slider;
       noggit::Red::UiCommon::ExtendedSlider* _inner_radius_slider;

@@ -14,6 +14,8 @@
 #include <noggit/texture_set.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/TexturingGUI.h>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Action.hpp>
 #include <opengl/scoped.hpp>
 
 #include <algorithm>
@@ -1065,26 +1067,119 @@ bool MapChunk::blurTerrain ( math::vector_3d const& pos
   return changed;
 }
 
-auto MapChunk::stamp(math::vector_3d const& pos, float dt, bool doAdd, QImage const& img, float radiusOuter
-, float radiusInner, float rotation) -> void
+bool MapChunk::changeTerrainProcessVertex(math::vector_3d const& pos, math::vector_3d const& vertex, float& dt,
+                                          float radiusOuter, float radiusInner, int brushType)
 {
-  bool changed{false};
+  float dist, xdiff, zdiff;
+  bool changed = false;
 
-  for(int i{}; i < mapbufsize; ++i)
+  xdiff = vertex.x - pos.x;
+  zdiff = vertex.z - pos.z;
+
+  if (brushType == eTerrainType_Quadra)
   {
-    /*if(std::abs(misc::dist(mVertices[i].x, mVertices[i].z, pos.x, pos.z) / radiusOuter) > 1.f)
-      continue;*/
+    if ((std::abs(xdiff) < std::abs(radiusOuter / 2)) && (std::abs(zdiff) < std::abs(radiusOuter / 2)))
+    {
+      dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
+      dt = dt * (1.0f - dist * radiusInner / radiusOuter);
+      changed = true;
+    }
+  }
+  else
+  {
+    dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
+    if (dist < radiusOuter)
+    {
+      changed = true;
 
-    if(std::abs(pos.x - mVertices[i].x) > radiusOuter || std::abs(pos.z - mVertices[i].z) > radiusOuter)
-      continue;
+      switch (brushType)
+      {
+        case eTerrainType_Flat:
+          break;
+        case eTerrainType_Linear:
+          dt = dt * (1.0f - dist * (1.0f - radiusInner) / radiusOuter);
+          break;
+        case eTerrainType_Smooth:
+          dt = dt / (1.0f + dist / radiusOuter);
+          break;
+        case eTerrainType_Polynom:
+          dt = dt * ((dist / radiusOuter)*(dist / radiusOuter) + dist / radiusOuter + 1.0f);
+          break;
+        case eTerrainType_Trigo:
+          dt = dt * cos(dist / radiusOuter);
+          break;
+        case eTerrainType_Gaussian:
+          dt = dist < radiusOuter * radiusInner ? dt * std::exp(-(std::pow(radiusOuter * radiusInner / radiusOuter, 2) / (2 * std::pow(0.39f, 2)))) : dt * std::exp(-(std::pow(dist / radiusOuter, 2) / (2 * std::pow(0.39f, 2))));
 
-    math::vector_3d const diff{mVertices[i] - pos};
-    mVertices[i].y += (doAdd ? .5f : -.5f) * ((img.pixel(std::floor(diff.x + radiusOuter)
-    , std::floor(diff.z + radiusOuter)) & 0xFF) / 255.f);
-    changed = true;
+          break;
+        default:
+          LogError << "Invalid terrain edit type (" << brushType << ")" << std::endl;
+          changed = false;
+          break;
+      }
+    }
   }
 
-  if(changed)
+  return changed;
+}
+
+auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const& img, float radiusOuter
+, float radiusInner, float rotation, int brushType, bool sculpt) -> void
+{
+  bool changed = false;
+
+  if (sculpt)
+  {
+    for(int i{}; i < mapbufsize; ++i)
+    {
+      if(std::abs(pos.x - mVertices[i].x) > radiusOuter || std::abs(pos.z - mVertices[i].z) > radiusOuter)
+        continue;
+
+      float delta = dt;
+      if (changeTerrainProcessVertex(pos, mVertices[i], delta, radiusOuter, radiusInner, brushType))
+        changed = true;
+
+      math::vector_3d const diff{mVertices[i] - pos};
+
+      int pixel_x = std::floor(diff.x + radiusOuter);
+      int pixel_y = std::floor(diff.z + radiusOuter);
+
+      auto color = pixel_x < img.width() && pixel_y < img.height() ? img.pixelColor(pixel_x, pixel_y) : QColor(Qt::black);
+
+      mVertices[i].y += delta * (color.redF() + color.greenF() + color.blueF() / 3.0f);
+    }
+  }
+  else
+  {
+    auto cur_action = noggit::ActionManager::instance()->getCurrentAction();
+    float* original_heightmap = cur_action->getChunkTerrainOriginalData(this);
+
+    if (!original_heightmap)
+      return;
+
+    for(int i{}; i < mapbufsize; ++i)
+    {
+      if(std::abs(pos.x - mVertices[i].x) > radiusOuter || std::abs(pos.z - mVertices[i].z) > radiusOuter)
+        continue;
+
+      float delta = cur_action->getDelta() + dt / 1000.0f;
+      cur_action->setDelta(delta);
+
+      if (changeTerrainProcessVertex(pos, mVertices[i], delta, radiusOuter, radiusInner, brushType))
+        changed = true;
+
+      math::vector_3d const diff{math::vector_3d{original_heightmap[i * 3], original_heightmap[i * 3 + 1], original_heightmap[i * 3 + 2]} - pos};
+
+      int pixel_x = std::floor(diff.x + radiusOuter);
+      int pixel_y = std::floor(diff.z + radiusOuter);
+
+      auto color = pixel_x < img.width() && pixel_y < img.height() ? img.pixelColor(pixel_x, pixel_y) : QColor(Qt::black);
+
+      mVertices[i].y = original_heightmap[i * 3 + 1] + (delta * (color.redF() + color.greenF() + color.blueF() / 3.0f));
+    }
+  }
+
+  if (changed)
     updateVerticesData();
 }
 
