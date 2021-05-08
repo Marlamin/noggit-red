@@ -3,6 +3,7 @@
 #include <noggit/Misc.h>
 #include <noggit/Particle.h>
 #include <opengl/context.hpp>
+#include <opengl/context.inl>
 #include <opengl/shader.hpp>
 
 #include <list>

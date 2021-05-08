@@ -7,6 +7,7 @@
 #include <noggit/multimap_with_normalized_key.hpp>
 #include <opengl/texture.hpp>
 #include <opengl/context.hpp>
+#include <opengl/context.inl>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 

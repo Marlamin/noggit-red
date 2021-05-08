@@ -3,6 +3,7 @@
 #pragma once
 
 #include <opengl/types.hpp>
+#include <boost/config/detail/suffix.hpp>
 
 #include <QtGui/QOpenGLFunctions_3_3_Core>
 
@@ -45,137 +46,137 @@ namespace opengl
     QOpenGLContext* _current_context = nullptr;
     QOpenGLFunctions_3_3_Core* _3_3_core_func = nullptr;
 
-    void enable (GLenum);
-    void disable (GLenum);
-    GLboolean isEnabled (GLenum);
+    BOOST_FORCEINLINE void enable (GLenum);
+    BOOST_FORCEINLINE void disable (GLenum);
+    BOOST_FORCEINLINE GLboolean isEnabled (GLenum);
 
-    void viewport (GLint x, GLint y, GLsizei width, GLsizei height);
+    BOOST_FORCEINLINE void viewport (GLint x, GLint y, GLsizei width, GLsizei height);
 
-    void depthFunc (GLenum);
-    void depthMask (GLboolean);
-    void blendFunc (GLenum, GLenum);
+    BOOST_FORCEINLINE void depthFunc (GLenum);
+    BOOST_FORCEINLINE void depthMask (GLboolean);
+    BOOST_FORCEINLINE void blendFunc (GLenum, GLenum);
 
-    void clear (GLenum);
-    void clearColor (GLfloat, GLfloat, GLfloat, GLfloat);
+    BOOST_FORCEINLINE void clear (GLenum);
+    BOOST_FORCEINLINE void clearColor (GLfloat, GLfloat, GLfloat, GLfloat);
 
-    void readBuffer (GLenum);
-    void readPixels (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* data);
+    BOOST_FORCEINLINE void readBuffer (GLenum);
+    BOOST_FORCEINLINE void readPixels (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* data);
 
-    void lineWidth (GLfloat);
+    BOOST_FORCEINLINE void lineWidth (GLfloat);
 
-    void pointParameterf (GLenum pname, GLfloat param);
-    void pointParameteri (GLenum pname, GLint param);
-    void pointParameterfv (GLenum pname, GLfloat const* param);
-    void pointParameteriv (GLenum pname, GLint const* param);
-    void pointSize (GLfloat);
+    BOOST_FORCEINLINE void pointParameterf (GLenum pname, GLfloat param);
+    BOOST_FORCEINLINE void pointParameteri (GLenum pname, GLint param);
+    BOOST_FORCEINLINE void pointParameterfv (GLenum pname, GLfloat const* param);
+    BOOST_FORCEINLINE void pointParameteriv (GLenum pname, GLint const* param);
+    BOOST_FORCEINLINE void pointSize (GLfloat);
 
-    void hint (GLenum, GLenum);
-    void polygonMode (GLenum face, GLenum mode);
+    BOOST_FORCEINLINE void hint (GLenum, GLenum);
+    BOOST_FORCEINLINE void polygonMode (GLenum face, GLenum mode);
 
-    void genTextures (GLuint, GLuint*);
-    void deleteTextures (GLuint, GLuint*);
-    void bindTexture (GLenum target, GLuint);
-    void texImage2D (GLenum target, GLint level, GLint internal_format, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, GLvoid const* data);
-    void compressedTexImage2D (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLvoid const* data);
-    void generateMipmap (GLenum);
-    void activeTexture (GLenum);
+    BOOST_FORCEINLINE void genTextures (GLuint, GLuint*);
+    BOOST_FORCEINLINE void deleteTextures (GLuint, GLuint*);
+    BOOST_FORCEINLINE void bindTexture (GLenum target, GLuint);
+    BOOST_FORCEINLINE void texImage2D (GLenum target, GLint level, GLint internal_format, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, GLvoid const* data);
+    BOOST_FORCEINLINE void compressedTexImage2D (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLvoid const* data);
+    BOOST_FORCEINLINE void generateMipmap (GLenum);
+    BOOST_FORCEINLINE void activeTexture (GLenum);
 
-    void texParameteri (GLenum target, GLenum pname, GLint param);
-    void texParameterf (GLenum target, GLenum pname, GLfloat param);
-    void texParameteriv (GLenum target, GLenum pname, GLint const* params);
-    void texParameterfv (GLenum target, GLenum pname, GLfloat const* params);
+    BOOST_FORCEINLINE void texParameteri (GLenum target, GLenum pname, GLint param);
+    BOOST_FORCEINLINE void texParameterf (GLenum target, GLenum pname, GLfloat param);
+    BOOST_FORCEINLINE void texParameteriv (GLenum target, GLenum pname, GLint const* params);
+    BOOST_FORCEINLINE void texParameterfv (GLenum target, GLenum pname, GLfloat const* params);
 
-    void genVertexArrays (GLuint, GLuint*);
-    void deleteVertexArray (GLuint, GLuint*);
-    void bindVertexArray (GLenum);
+    BOOST_FORCEINLINE void genVertexArrays (GLuint, GLuint*);
+    BOOST_FORCEINLINE void deleteVertexArray (GLuint, GLuint*);
+    BOOST_FORCEINLINE void bindVertexArray (GLenum);
 
-    void genBuffers (GLuint, GLuint*);
-    void deleteBuffers (GLuint, GLuint*);
-    void bindBuffer (GLenum, GLuint);
-    void bufferData (GLenum target, GLsizeiptr size, GLvoid const* data, GLenum usage);
-    GLvoid* mapBuffer (GLenum target, GLenum access);
-    GLboolean unmapBuffer (GLenum);
-    void drawElements (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices);
-    void drawElementsInstanced (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices, GLsizei instancecount);
-    void drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLvoid const* indices);
+    BOOST_FORCEINLINE void genBuffers (GLuint, GLuint*);
+    BOOST_FORCEINLINE void deleteBuffers (GLuint, GLuint*);
+    BOOST_FORCEINLINE void bindBuffer (GLenum, GLuint);
+    BOOST_FORCEINLINE void bufferData (GLenum target, GLsizeiptr size, GLvoid const* data, GLenum usage);
+    BOOST_FORCEINLINE GLvoid* mapBuffer (GLenum target, GLenum access);
+    BOOST_FORCEINLINE GLboolean unmapBuffer (GLenum);
+    BOOST_FORCEINLINE void drawElements (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices);
+    BOOST_FORCEINLINE void drawElementsInstanced (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices, GLsizei instancecount);
+    BOOST_FORCEINLINE void drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLvoid const* indices);
 
-    void genPrograms (GLsizei programs, GLuint*);
-    void deletePrograms (GLsizei programs, GLuint*);
-    void bindProgram (GLenum, GLuint);
-    void programString (GLenum target, GLenum format, GLsizei len, GLvoid const* pointer);
-    void getProgramiv (GLuint program, GLenum pname, GLint* params);
-    void programLocalParameter4f (GLenum, GLuint, GLfloat, GLfloat, GLfloat, GLfloat);
+    BOOST_FORCEINLINE void genPrograms (GLsizei programs, GLuint*);
+    BOOST_FORCEINLINE void deletePrograms (GLsizei programs, GLuint*);
+    BOOST_FORCEINLINE void bindProgram (GLenum, GLuint);
+    BOOST_FORCEINLINE void programString (GLenum target, GLenum format, GLsizei len, GLvoid const* pointer);
+    BOOST_FORCEINLINE void getProgramiv (GLuint program, GLenum pname, GLint* params);
+    BOOST_FORCEINLINE void programLocalParameter4f (GLenum, GLuint, GLfloat, GLfloat, GLfloat, GLfloat);
 
-    void getBooleanv (GLenum, GLboolean*);
-    void getDoublev (GLenum, GLdouble*);
-    void getFloatv (GLenum, GLfloat*);
-    void getIntegerv (GLenum, GLint*);
+    BOOST_FORCEINLINE void getBooleanv (GLenum, GLboolean*);
+    BOOST_FORCEINLINE void getDoublev (GLenum, GLdouble*);
+    BOOST_FORCEINLINE void getFloatv (GLenum, GLfloat*);
+    BOOST_FORCEINLINE void getIntegerv (GLenum, GLint*);
 
-    GLubyte const* getString (GLenum);
+    BOOST_FORCEINLINE GLubyte const* getString (GLenum);
 
-    GLuint createShader (GLenum shader_type);
-    void deleteShader (GLuint shader);
-    void shaderSource (GLuint shader, GLsizei count, GLchar const** string, GLint const* length);
-    void compile_shader (GLuint shader);
-    GLint get_shader (GLuint shader, GLenum pname);
+    BOOST_FORCEINLINE GLuint createShader (GLenum shader_type);
+    BOOST_FORCEINLINE void deleteShader (GLuint shader);
+    BOOST_FORCEINLINE void shaderSource (GLuint shader, GLsizei count, GLchar const** string, GLint const* length);
+    BOOST_FORCEINLINE void compile_shader (GLuint shader);
+    BOOST_FORCEINLINE GLint get_shader (GLuint shader, GLenum pname);
 
-    GLuint createProgram();
-    void deleteProgram (GLuint program);
-    void attachShader (GLuint program, GLuint shader);
-    void detachShader (GLuint program, GLuint shader);
-    void link_program (GLuint program);
-    void useProgram (GLuint program);
-    void validate_program (GLuint program);
-    GLint get_program (GLuint program, GLenum pname);
-    std::string get_program_info_log(GLuint program);
+    BOOST_FORCEINLINE GLuint createProgram();
+    BOOST_FORCEINLINE void deleteProgram (GLuint program);
+    BOOST_FORCEINLINE void attachShader (GLuint program, GLuint shader);
+    BOOST_FORCEINLINE void detachShader (GLuint program, GLuint shader);
+    BOOST_FORCEINLINE void link_program (GLuint program);
+    BOOST_FORCEINLINE void useProgram (GLuint program);
+    BOOST_FORCEINLINE void validate_program (GLuint program);
+    BOOST_FORCEINLINE GLint get_program (GLuint program, GLenum pname);
+    BOOST_FORCEINLINE std::string get_program_info_log(GLuint program);
 
-    GLint getAttribLocation (GLuint program, GLchar const* name);
-    void vertexAttribPointer (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLvoid const* pointer);
-    void vertexAttribDivisor (GLuint index, GLuint divisor);
-    void enableVertexAttribArray (GLuint index);
-    void disableVertexAttribArray (GLuint index);
+    BOOST_FORCEINLINE GLint getAttribLocation (GLuint program, GLchar const* name);
+    BOOST_FORCEINLINE void vertexAttribPointer (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLvoid const* pointer);
+    BOOST_FORCEINLINE void vertexAttribDivisor (GLuint index, GLuint divisor);
+    BOOST_FORCEINLINE void enableVertexAttribArray (GLuint index);
+    BOOST_FORCEINLINE void disableVertexAttribArray (GLuint index);
 
-    GLint getUniformLocation (GLuint program, GLchar const* name);
-    void uniform1i (GLint location, GLint value);
-    void uniform1f (GLint location, GLfloat value);
-    void uniform1iv (GLint location, GLsizei count, GLint const* value);
-    void uniform2fv (GLint location, GLsizei count, GLfloat const* value);
-    void uniform3fv (GLint location, GLsizei count, GLfloat const* value);
-    void uniform4fv (GLint location, GLsizei count, GLfloat const* value);
-    void uniformMatrix4fv (GLint location, GLsizei count, GLboolean transpose, GLfloat const* value);
+    BOOST_FORCEINLINE GLint getUniformLocation (GLuint program, GLchar const* name);
+    BOOST_FORCEINLINE void uniform1i (GLint location, GLint value);
+    BOOST_FORCEINLINE void uniform1f (GLint location, GLfloat value);
+    BOOST_FORCEINLINE void uniform1iv (GLint location, GLsizei count, GLint const* value);
+    BOOST_FORCEINLINE void uniform2fv (GLint location, GLsizei count, GLfloat const* value);
+    BOOST_FORCEINLINE void uniform3fv (GLint location, GLsizei count, GLfloat const* value);
+    BOOST_FORCEINLINE void uniform4fv (GLint location, GLsizei count, GLfloat const* value);
+    BOOST_FORCEINLINE void uniformMatrix4fv (GLint location, GLsizei count, GLboolean transpose, GLfloat const* value);
 
-    void clearStencil (GLint);
-    void stencilFunc (GLenum func, GLint ref, GLuint mask);
-    void stencilOp (GLenum sfail, GLenum dpfail, GLenum dppass);
-    void colorMask (GLboolean r, GLboolean g, GLboolean b, GLboolean a);
+    BOOST_FORCEINLINE void clearStencil (GLint);
+    BOOST_FORCEINLINE void stencilFunc (GLenum func, GLint ref, GLuint mask);
+    BOOST_FORCEINLINE void stencilOp (GLenum sfail, GLenum dpfail, GLenum dppass);
+    BOOST_FORCEINLINE void colorMask (GLboolean r, GLboolean g, GLboolean b, GLboolean a);
 
-    void polygonOffset (GLfloat factor, GLfloat units);
+    BOOST_FORCEINLINE void polygonOffset (GLfloat factor, GLfloat units);
 
-    void genFramebuffers (GLsizei n, GLuint *ids);
-    void bindFramebuffer (GLenum target, GLuint framebuffer);
-    void framebufferTexture2D (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+    BOOST_FORCEINLINE void genFramebuffers (GLsizei n, GLuint *ids);
+    BOOST_FORCEINLINE void bindFramebuffer (GLenum target, GLuint framebuffer);
+    BOOST_FORCEINLINE void framebufferTexture2D (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
 
-    void genRenderbuffers (GLsizei n, GLuint *renderbuffers);
-    void bindRenderbuffer (GLenum target, GLuint renderbuffer);
-    void renderbufferStorage (GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
-    void framebufferRenderbuffer (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+    BOOST_FORCEINLINE void genRenderbuffers (GLsizei n, GLuint *renderbuffers);
+    BOOST_FORCEINLINE void bindRenderbuffer (GLenum target, GLuint renderbuffer);
+    BOOST_FORCEINLINE void renderbufferStorage (GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
+    BOOST_FORCEINLINE void framebufferRenderbuffer (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
 
     template<GLenum target>
-      void bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
+    BOOST_FORCEINLINE void bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
     template<GLenum target, typename T>
-      void bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage);
+    BOOST_FORCEINLINE void bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage);
 
-    void drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices);
+    BOOST_FORCEINLINE void drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices);
 
     QOpenGLContext* getCurrentContext();
 
-    void bufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const void* data);
+    BOOST_FORCEINLINE void bufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const void* data);
 
     template<GLenum target>
-    void bufferSubData(GLuint buffer, GLintptr offset, GLsizeiptr size, const void *data);
+    BOOST_FORCEINLINE void bufferSubData(GLuint buffer, GLintptr offset, GLsizeiptr size, const void *data);
 
     template<GLenum target, typename T>
-    void bufferSubData(GLuint buffer, GLintptr offset, const std::vector<T> &data);
+    BOOST_FORCEINLINE void bufferSubData(GLuint buffer, GLintptr offset, const std::vector<T> &data);
   };
 }
 

@@ -7,6 +7,7 @@
 #include <noggit/map_index.hpp>
 #include <noggit/World.h>
 #include <opengl/context.hpp>
+#include <opengl/context.inl>
 
 #include <sstream>
 

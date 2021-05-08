@@ -4,9 +4,10 @@
 #include <math/matrix_4x4.hpp>
 #include <math/vector_4d.hpp>
 #include <noggit/Misc.h>
-#include <opengl/context.hpp>
-#include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/context.hpp>
+#include <opengl/context.inl>
+#include <opengl/primitives.hpp>
 #include <opengl/types.hpp>
 
 #include <array>

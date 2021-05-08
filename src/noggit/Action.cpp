@@ -494,6 +494,37 @@ void noggit::Action::finish()
 
 }
 
+float* noggit::Action::getChunkTerrainOriginalData(MapChunk* chunk)
+{
+  for (auto& pair : _chunk_terrain_pre)
+  {
+    if (pair.first == chunk)
+      return pair.second.data();
+  }
+  return nullptr;
+}
+
+void noggit::Action::setDelta(float delta)
+{
+  _delta = delta;
+}
+
+float noggit::Action::getDelta() const
+{
+  return _delta;
+}
+
+void noggit::Action::setBlockCursor(bool state)
+{
+  _block_cursor = state;
+}
+
+bool noggit::Action::getBlockCursor() const
+{
+  return _block_cursor;
+
+}
+
 
 /* ============ */
 /* Registrators */

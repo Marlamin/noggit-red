@@ -4,8 +4,9 @@
 #include <math/vector_2d.hpp>
 #include <math/vector_3d.hpp>
 #include <math/vector_4d.hpp>
-#include <opengl/context.hpp>
 #include <opengl/scoped.hpp>
+#include <opengl/context.hpp>
+#include <opengl/context.inl>
 #include <opengl/shader.hpp>
 #include <opengl/texture.hpp>
 #include <noggit/Misc.h>

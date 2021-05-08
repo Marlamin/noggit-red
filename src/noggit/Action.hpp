@@ -98,6 +98,12 @@ namespace noggit
         unsigned handleObjectAdded(unsigned uid, bool redo);
         unsigned handleObjectRemoved(unsigned uid, bool redo);
         unsigned handleObjectTransformed(unsigned uid, bool redo);
+        void setDelta(float delta);
+        float getDelta() const;
+        void setBlockCursor(bool state);
+        bool getBlockCursor() const;
+
+        float* getChunkTerrainOriginalData(MapChunk* chunk);
 
         // Registrators
         void registerChunkTerrainChange(MapChunk* chunk);
@@ -116,6 +122,8 @@ namespace noggit
 
 
     private:
+        float _delta = 0.f;
+        bool _block_cursor = false;
         unsigned _flags;
         unsigned _modality_controls = ActionModalityControllers::eNONE;
         MapView* _map_view;
@@ -146,7 +154,7 @@ namespace noggit
 
         bool _vertex_selection_recorded = false;
 
-       tsl::robin_map<unsigned, std::vector<unsigned>> _object_operations;
+        tsl::robin_map<unsigned, std::vector<unsigned>> _object_operations;
 
     };
 }

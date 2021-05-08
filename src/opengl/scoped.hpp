@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include <opengl/context.hpp>
 #include <opengl/texture.hpp>
 
 #include <boost/optional.hpp>
+#include <opengl/context.hpp>
+#include <opengl/context.inl>
 
 #include <stdexcept>
 

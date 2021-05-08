@@ -13,6 +13,7 @@
 #include <noggit/liquid_layer.hpp>
 #include <noggit/ui/main_window.hpp>
 #include <opengl/context.hpp>
+#include <opengl/context.inl>
 #include <util/exception_to_string.hpp>
 
 #include <boost/filesystem.hpp>

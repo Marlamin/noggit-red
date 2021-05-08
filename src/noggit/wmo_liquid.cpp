@@ -5,6 +5,7 @@
 #include <noggit/World.h>
 #include <noggit/wmo_liquid.hpp>
 #include <opengl/context.hpp>
+#include <opengl/context.inl>
 #include <opengl/shader.hpp>
 
 #include <boost/filesystem.hpp>
