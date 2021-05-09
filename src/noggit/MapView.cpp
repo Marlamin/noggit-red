@@ -182,7 +182,6 @@ void MapView::set_editing_mode (editing_mode mode)
 
   terrainMode = mode;
   _toolbar->check_tool (mode);
-  _cursorType = terrainMode == editing_mode::stamp ? CursorType::STAMP : CursorType::CIRCLE;
   this->activateWindow();
 }
 
@@ -3284,11 +3283,17 @@ void MapView::draw_map()
   math::vector_3d ref_pos;
   bool angled_mode = false, use_ref_pos = false;
 
+  _cursorType = CursorType::CIRCLE;
+
   switch (terrainMode)
   {
   case editing_mode::ground:
     radius = terrainTool->brushRadius();
     inner_radius = terrainTool->innerRadius();
+
+    if((terrainTool->_edit_type != eTerrainType_Vertex || terrainTool->_edit_type != eTerrainType_Script) && terrainTool->getImageMaskSelector()->isEnabled())
+      _cursorType = CursorType::STAMP;
+
     break;
   case editing_mode::flatten_blur:
     radius = flattenTool->brushRadius();

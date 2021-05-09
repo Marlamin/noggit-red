@@ -1086,8 +1086,6 @@ bool MapChunk::changeTerrainProcessVertex(math::vector_3d const& pos, math::vect
 auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const& img, float radiusOuter
 , float radiusInner, float rotation, int brushType, bool sculpt) -> void
 {
-  bool changed = false;
-
   if (sculpt)
   {
     for(int i{}; i < mapbufsize; ++i)
@@ -1096,8 +1094,7 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const& img, fl
         continue;
 
       float delta = dt;
-      if (changeTerrainProcessVertex(pos, mVertices[i], delta, radiusOuter, radiusInner, brushType))
-        changed = true;
+      changeTerrainProcessVertex(pos, mVertices[i], delta, radiusOuter, radiusInner, brushType);
 
       math::vector_3d const diff{mVertices[i] - pos};
 
@@ -1124,22 +1121,20 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const& img, fl
 
       float delta = cur_action->getDelta();
 
-      if (changeTerrainProcessVertex(pos, mVertices[i], delta, radiusOuter, radiusInner, brushType))
-        changed = true;
+      changeTerrainProcessVertex(pos, mVertices[i], delta, radiusOuter, radiusInner, brushType);
 
       math::vector_3d const diff{math::vector_3d{original_heightmap[i * 3], original_heightmap[i * 3 + 1], original_heightmap[i * 3 + 2]} - pos};
 
       int pixel_x = std::floor(diff.x + radiusOuter);
       int pixel_y = std::floor(diff.z + radiusOuter);
 
-      auto color = pixel_x < img.width() && pixel_y < img.height() ? img.pixelColor(pixel_x, pixel_y) : QColor(Qt::black);
+      auto color = img.pixelColor(pixel_x, pixel_y);
 
       mVertices[i].y = original_heightmap[i * 3 + 1] + (delta * (color.redF() + color.greenF() + color.blueF() / 3.0f));
     }
   }
 
-  if (changed)
-    updateVerticesData();
+  updateVerticesData();
 }
 
 void MapChunk::eraseTextures()

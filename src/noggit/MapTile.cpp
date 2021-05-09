@@ -556,9 +556,9 @@ std::vector<MapChunk*> MapTile::chunks_in_rect (math::vector_3d const& pos, floa
       math::vector_2d l_chunk{chunk->xbase, chunk->zbase};
       math::vector_2d r_chunk{chunk->xbase + CHUNKSIZE, chunk->zbase + CHUNKSIZE};
 
-      if ((l_rect.x  <  r_chunk.x)  &&  (r_rect.x   >  l_chunk.x) && (l_rect.y  <  r_chunk.y)  && (r_rect.y  >  l_chunk.y))
+      if ((l_rect.x  <  r_chunk.x)  &&  (r_rect.x   >=  l_chunk.x) && (l_rect.y  <  r_chunk.y)  && (r_rect.y  >=  l_chunk.y))
       {
-        chunks.emplace_back (mChunks[ty][tx].get());
+        chunks.emplace_back (chunk);
       }
     }
   }

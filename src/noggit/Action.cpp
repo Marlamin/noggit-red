@@ -6,6 +6,7 @@
 #include <noggit/texture_set.hpp>
 #include <noggit/ContextObject.hpp>
 #include <boost/range/adaptor/reversed.hpp>
+#include <noggit/Log.h>
 #include <cstring>
 
 
@@ -544,6 +545,7 @@ void noggit::Action::registerChunkTerrainChange(MapChunk* chunk)
   std::memcpy(data.data(), &chunk->mVertices, 145 * 3 * sizeof(float));
   std::memcpy(data.data() + 145 * 3, &chunk->mNormals, 145 * 3 * sizeof(float));
   _chunk_terrain_pre.emplace_back(std::make_pair(chunk, data));
+  //LogDebug << "Chunk: " << chunk->px << "_" << chunk->py << "on tile: " << chunk->mt->index.x << "_" << chunk->mt->index.z << std::endl;
 }
 
 void noggit::Action::registerChunkTextureChange(MapChunk* chunk)

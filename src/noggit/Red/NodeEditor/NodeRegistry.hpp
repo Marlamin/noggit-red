@@ -19,7 +19,6 @@
 #include <noggit/Red/NodeEditor/Nodes/Logic/LogicContinueNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Logic/LogicReturnNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Logic/LogicReturnNoDataNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Functions/PrintNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Logic/LogicForLoopNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Logic/LogicWhileLoopNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Logic/LogicChainNode.hpp>
@@ -27,6 +26,7 @@
 
 #ifndef DO_NOT_BUILD_NODES
 
+#include <noggit/Red/NodeEditor/Nodes/Functions/PrintNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Math/MathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Math/MathUnaryNode.hpp>
 
@@ -290,9 +290,9 @@ namespace noggit
           ret->registerModel<LogicReturnNode>("Logic//Flow");
           ret->registerModel<LogicReturnNoDataNode>("Logic//Flow");
           ret->registerModel<LogicProcedureNode>("Logic//Flow");
-          ret->registerModel<PrintNode>("Functions//Generic");
 
 #ifndef DO_NOT_BUILD_NODES
+          ret->registerModel<PrintNode>("Functions//Generic");
           ret->registerModel<RewiringPointNode>("");
 
           // Math

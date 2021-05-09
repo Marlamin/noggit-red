@@ -840,8 +840,20 @@ void opengl::context::framebufferRenderbuffer (GLenum target, GLenum attachment,
 template<GLenum target>
 void opengl::context::bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage)
 {
+  GLuint old;
+  gl.getIntegerv ( target == GL_ARRAY_BUFFER ? GL_ARRAY_BUFFER_BINDING
+  : target == GL_DRAW_INDIRECT_BUFFER ? GL_DRAW_INDIRECT_BUFFER_BINDING
+  : target == GL_ELEMENT_ARRAY_BUFFER ? GL_ELEMENT_ARRAY_BUFFER_BINDING
+  : target == GL_PIXEL_PACK_BUFFER ? GL_PIXEL_PACK_BUFFER_BINDING
+  : target == GL_PIXEL_UNPACK_BUFFER ? GL_PIXEL_UNPACK_BUFFER_BINDING
+  : target == GL_TRANSFORM_FEEDBACK_BUFFER ? GL_TRANSFORM_FEEDBACK_BUFFER_BINDING
+  : target == GL_UNIFORM_BUFFER ? GL_UNIFORM_BUFFER_BINDING
+  : throw std::logic_error ("bad bind target")
+    , reinterpret_cast<GLint*> (&old)
+  );
   gl.bindBuffer (target, buffer);
-  return bufferData (target, size, data, usage);
+  bufferData (target, size, data, usage);
+  gl.bindBuffer (target, old);
 }
 template void opengl::context::bufferData<GL_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
 template void opengl::context::bufferData<GL_ELEMENT_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
@@ -849,8 +861,21 @@ template void opengl::context::bufferData<GL_ELEMENT_ARRAY_BUFFER> (GLuint buffe
 template<GLenum target, typename T>
 void opengl::context::bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage)
 {
+  GLuint old;
+  gl.getIntegerv ( target == GL_ARRAY_BUFFER ? GL_ARRAY_BUFFER_BINDING
+  : target == GL_DRAW_INDIRECT_BUFFER ? GL_DRAW_INDIRECT_BUFFER_BINDING
+  : target == GL_ELEMENT_ARRAY_BUFFER ? GL_ELEMENT_ARRAY_BUFFER_BINDING
+  : target == GL_PIXEL_PACK_BUFFER ? GL_PIXEL_PACK_BUFFER_BINDING
+  : target == GL_PIXEL_UNPACK_BUFFER ? GL_PIXEL_UNPACK_BUFFER_BINDING
+  : target == GL_TRANSFORM_FEEDBACK_BUFFER ? GL_TRANSFORM_FEEDBACK_BUFFER_BINDING
+  : target == GL_UNIFORM_BUFFER ? GL_UNIFORM_BUFFER_BINDING
+  : throw std::logic_error ("bad bind target")
+    , reinterpret_cast<GLint*> (&old)
+  );
+
   gl.bindBuffer (target, buffer);
-  return bufferData(target, sizeof(T) * data.size(), data.data(), usage);
+  bufferData(target, sizeof(T) * data.size(), data.data(), usage);
+  gl.bindBuffer (target, old);
 }
 
 void opengl::context::bufferData (GLenum target, GLsizeiptr size, GLvoid const* data, GLenum usage)
@@ -871,15 +896,40 @@ void opengl::context::bufferSubData (GLenum target, GLintptr offset, GLsizeiptr 
 template<GLenum target>
 void opengl::context::bufferSubData (GLuint buffer, GLintptr offset, GLsizeiptr size, GLvoid const* data)
 {
+  GLuint old;
+  gl.getIntegerv ( target == GL_ARRAY_BUFFER ? GL_ARRAY_BUFFER_BINDING
+  : target == GL_DRAW_INDIRECT_BUFFER ? GL_DRAW_INDIRECT_BUFFER_BINDING
+  : target == GL_ELEMENT_ARRAY_BUFFER ? GL_ELEMENT_ARRAY_BUFFER_BINDING
+  : target == GL_PIXEL_PACK_BUFFER ? GL_PIXEL_PACK_BUFFER_BINDING
+  : target == GL_PIXEL_UNPACK_BUFFER ? GL_PIXEL_UNPACK_BUFFER_BINDING
+  : target == GL_TRANSFORM_FEEDBACK_BUFFER ? GL_TRANSFORM_FEEDBACK_BUFFER_BINDING
+  : target == GL_UNIFORM_BUFFER ? GL_UNIFORM_BUFFER_BINDING
+  : throw std::logic_error ("bad bind target")
+    , reinterpret_cast<GLint*> (&old)
+  );
+
   gl.bindBuffer (target, buffer);
-  return bufferSubData (target, offset, size, data);
+  bufferSubData (target, offset, size, data);
+  gl.bindBuffer (target, old);
 }
 
 template<GLenum target, typename T>
 void opengl::context::bufferSubData(GLuint buffer, GLintptr offset, std::vector<T> const& data)
 {
+  GLuint old;
+  gl.getIntegerv ( target == GL_ARRAY_BUFFER ? GL_ARRAY_BUFFER_BINDING
+                   : target == GL_DRAW_INDIRECT_BUFFER ? GL_DRAW_INDIRECT_BUFFER_BINDING
+                   : target == GL_ELEMENT_ARRAY_BUFFER ? GL_ELEMENT_ARRAY_BUFFER_BINDING
+                   : target == GL_PIXEL_PACK_BUFFER ? GL_PIXEL_PACK_BUFFER_BINDING
+                   : target == GL_PIXEL_UNPACK_BUFFER ? GL_PIXEL_UNPACK_BUFFER_BINDING
+                   : target == GL_TRANSFORM_FEEDBACK_BUFFER ? GL_TRANSFORM_FEEDBACK_BUFFER_BINDING
+                   : target == GL_UNIFORM_BUFFER ? GL_UNIFORM_BUFFER_BINDING
+                   : throw std::logic_error ("bad bind target")
+    , reinterpret_cast<GLint*> (&old)
+  );
   gl.bindBuffer (target, buffer);
-  return bufferSubData(target, offset, sizeof(T) * data.size(), data.data());
+  bufferSubData(target, offset, sizeof(T) * data.size(), data.data());
+  gl.bindBuffer (target, old);
 }
 
 template void opengl::context::bufferData<GL_ARRAY_BUFFER, float>(GLuint buffer, std::vector<float> const& data, GLenum usage);
@@ -899,8 +949,11 @@ template void opengl::context::bufferSubData<GL_ARRAY_BUFFER>(GLuint buffer, GLi
 
 void opengl::context::drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices)
 {
+  GLuint old;
+  gl.getIntegerv (GL_ELEMENT_ARRAY_BUFFER, reinterpret_cast<GLint*>(&old));
   gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-  return drawElements (mode, count, type, indices);
+  drawElements (mode, count, type, indices);
+  gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, old);
 }
 
 #endif //NOGGIT_CONTEXT_INL

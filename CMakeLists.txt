@@ -24,24 +24,95 @@ macro (add_compiler_flag_if_supported _VAR _FLAG)
   endif()
 endmacro()
 
-MACRO(COLLECT_FILES recursive result dir_source ext_list)
-  LIST(APPEND globbing ${ext_list})
-  SET(directory ${PROJECT_SOURCE_DIR}/${dir_source})
-  LIST(TRANSFORM globbing PREPEND ${directory}/*)
+function(
+        collect_files
+        output
+        base_dir
+        do_recurse
+        globbing_exprs
+        exclude_dirs
+)
+  if("${do_recurse}")
+    set(glob GLOB_RECURSE)
+  else()
+    set(glob GLOB)
+  endif()
 
-  IF(${recursive})
-    FILE(GLOB_RECURSE files RELATIVE ${directory} CONFIGURE_DEPENDS ${globbing})
-  ELSE()
-    FILE(GLOB files RELATIVE ${directory} CONFIGURE_DEPENDS ${globbing})
-  ENDIF()
+  set(base_dir "${CMAKE_SOURCE_DIR}/${base_dir}")
+  list(
+          TRANSFORM
+          globbing_exprs
+          PREPEND "${base_dir}/"
+  )
+  file(
+          ${glob}
+          files
+          CONFIGURE_DEPENDS
+          ${globbing_exprs}
+  )
 
-  LIST(TRANSFORM files PREPEND ${dir_source}/)
-  SET(${result} ${files})
-  UNSET(files)
-  UNSET(directory)
-  UNSET(globbing)
-ENDMACRO()
+  foreach(
+          file
+          IN LISTS files
+  )
+    set(match FALSE)
 
+    foreach(
+            dir
+            IN LISTS exclude_dirs
+    )
+      if("${file}" MATCHES "/${dir}/")
+        set(match TRUE)
+      endif()
+    endforeach()
+
+    if(NOT ${match})
+      list(
+              APPEND
+              result
+              "${file}"
+      )
+    endif()
+  endforeach()
+
+  set(
+          ${output} "${result}"
+          PARENT_SCOPE
+  )
+endfunction()
+
+function(
+        contains_filter
+        output
+        files
+        regex
+)
+  foreach(
+          file
+          IN LISTS files
+  )
+    file(
+            STRINGS
+            "${file}"
+            contents
+            REGEX "${regex}"
+    )
+
+    if("${contents}")
+      list(
+              APPEND
+              result
+              "${file}"
+      )
+      MESSAGE("Moced: ${file}")
+    endif()
+  endforeach()
+
+  set(
+          ${output} "${result}"
+          PARENT_SCOPE
+  )
+endfunction()
 
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -fcolor-diagnostics)
 
@@ -204,7 +275,7 @@ OPTION(NOGGIT_BUILD_NODE_DATAMODELS "Build node data models? (turn of for faster
 IF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
   MESSAGE( STATUS "Not building Node data models. Do not attempt to use Node Editor. Do not enable this for deployment!" )
   ADD_DEFINITIONS( -DDO_NOT_BUILD_NODES )
-ENDIF( NOGGIT_BUILD_NODE_DATAMODELS )
+ENDIF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
 
 OPTION(NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
 
@@ -240,26 +311,42 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguipiemenu" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/libnoise/src" )
 include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
-COLLECT_FILES(false noggit_root_sources src/noggit .cpp)
-COLLECT_FILES(true noggit_ui_sources src/noggit/ui .cpp)
-COLLECT_FILES(false math_sources src/math .cpp)
-COLLECT_FILES(false opengl_sources src/opengl .cpp)
-COLLECT_FILES(true red_sources src/noggit/Red .cpp)
-COLLECT_FILES(true png_blp_sources src/external/PNG2BLP ".c;.cpp;")
-COLLECT_FILES(false imguizmo_sources src/external/imguizmo ".c;.cpp;")
-COLLECT_FILES(false imguipiemenu_sources src/external/imguipiemenu ".c;.cpp;")
+
+collect_files(noggit_root_sources src/noggit false "*.cpp" "")
+collect_files(noggit_ui_sources src/noggit/ui true "*.cpp" "")
+collect_files(math_sources src/math false "*.cpp" "")
+collect_files(opengl_sources src/opengl false "*.cpp" "")
+
+IF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
+  collect_files(red_sources src/noggit/Red true "*.cpp" "NodeEditor/Nodes/Containers;NodeEditor/Nodes/Data;NodeEditor/Nodes/Functions;NodeEditor/Nodes/Math;NodeEditor/Nodes/World")
+ELSE()
+  collect_files(red_sources src/noggit/Red true "*.cpp" "")
+ENDIF()
+
+collect_files(png_blp_sources src/external/PNG2BLP true "*.c;*.cpp;" "")
+collect_files(imguizmo_sources src/external/imguizmo false "*.c;*.cpp;" "")
+collect_files(imguipiemenu_sources src/external/imguipiemenu false "*.c;*.cpp;" "")
+
 set ( util_sources
       src/util/exception_to_string.cpp
     )
-COLLECT_FILES(false noggit_root_headers src/noggit ".h;.hpp;.inl")
-COLLECT_FILES(true noggit_ui_headers src/noggit/ui ".h;.hpp")
-COLLECT_FILES(false math_headers src/math ".h;.hpp")
-COLLECT_FILES(false opengl_headers src/opengl ".h;.hpp")
-COLLECT_FILES(false shaders src/glsl .glsl)
-COLLECT_FILES(true red_headers src/noggit/Red ".hpp;.inl")
-COLLECT_FILES(true png_blp_headers src/external/PNG2BLP ".h;.hpp;")
-COLLECT_FILES(false imguizmo_headers src/external/imguizmo ".h;.hpp;")
-COLLECT_FILES(false imguipiemenu_headers src/external/imguipiemenu ".h;.hpp;")
+
+collect_files(noggit_root_headers src/noggit false "*.h;*.hpp;*.inl" "")
+collect_files(noggit_ui_headers src/noggit/ui true "*.h;*.hpp" "")
+collect_files(math_headers src/math false "*.h;*.hpp" "")
+collect_files(opengl_headers src/opengl false "*.h;*.hpp" "")
+collect_files(shaders src/glsl false "*.glsl" "")
+
+IF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
+  collect_files(red_headers src/noggit/Red true "*.h;*.hpp" "NodeEditor/Nodes/Containers;NodeEditor/Nodes/Data;NodeEditor/Nodes/Functions;NodeEditor/Nodes/Math;NodeEditor/Nodes/World")
+ELSE()
+  collect_files(red_headers src/noggit/Red true "*.h;*.hpp" "")
+ENDIF()
+
+collect_files(png_blp_headers src/external/PNG2BLP true "*.h;*.hpp" "")
+collect_files(imguizmo_headers src/external/imguizmo false "*.h;*.hpp" "")
+collect_files(imguipiemenu_headers src/external/imguipiemenu false "*.h;*.hpp" "")
+
 
 IF(WIN32)
   set ( os_sources
@@ -268,20 +355,11 @@ IF(WIN32)
         include/win/StackWalker.h)
 ENDIF(WIN32)
 
-COLLECT_FILES(true headers_to_moc src/noggit ".h;.hpp")
+#collect_files(headers_to_moc src/noggit true "*.h;*.hpp" "")
 # here we need only those which contain qt meta identifiers
-FOREACH(file IN LISTS headers_to_moc)
-  SET(file_full ${file})
-  STRING(PREPEND file_full ${PROJECT_SOURCE_DIR}/)
-  FILE(STRINGS ${file_full} contents NEWLINE_CONSUME REGEX "Q_OBJECT[\t ;]*\n")
+#contains_filter(result "${headers_to_moc}" "[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]")
 
-  IF("${contents}" STREQUAL "")
-    LIST(REMOVE_ITEM headers_to_moc ${file})
-  ENDIF()
-ENDFOREACH()
-
-UNSET(file_full)
-qt5_wrap_cpp (moced ${headers_to_moc})
+#qt5_wrap_cpp (moced ${result})
 source_group("noggit"  FILES ${noggit_root_sources} ${noggit_root_headers})
 source_group("noggit\\ui"  FILES ${noggit_ui_sources} ${noggit_ui_headers})
 source_group("opengl"  FILES ${opengl_sources} ${opengl_headers})
@@ -294,9 +372,9 @@ source_group("noggit/Red" FILES ${red_headers} ${red_sources})
 source_group("png_blp" FILES ${png_blp_headers} ${png_blp_sources})
 source_group("imguizmo" FILES ${imguizmo_headers} ${imguizmo_sources})
 
-COLLECT_FILES(false resource_files resources .qrc)
+collect_files(resource_files resources false "*.qrc" "")
 qt5_add_resources (compiled_resource_files ${resource_files})
-COLLECT_FILES(true ui_files src .ui)
+collect_files(ui_files src true "*.ui" "")
 qt5_wrap_ui(compiled_ui_files ${ui_files})
 
 ADD_EXECUTABLE ( noggit
@@ -350,6 +428,8 @@ TARGET_LINK_LIBRARIES (noggit
   noise-static
   noiseutils-static
 )
+
+set_property(TARGET noggit PROPERTY AUTOMOC ON)
 
 if(APPLE)
 target_include_directories(noggit PRIVATE /usr/local/Cellar/llvm/12.0.0/include/c++/v1/)
