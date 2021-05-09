@@ -63,6 +63,7 @@ private:
   bool _uploaded = false;
   bool _need_indice_buffer_update = true;
   bool _need_vao_update = true;
+  bool _need_lod_update = true;
 
   void upload();
   void update_indices_buffer();
@@ -118,11 +119,10 @@ public:
                   ) const;
 private:
   // return true if the lod level changed
-  bool update_visibility ( const float& cull_distance
-                         , const math::frustum& frustum
-                         , const math::vector_3d& camera
-                         , display_mode display
-                         );
+  void update_visibility ( const float& cull_distance
+    , const math::frustum& frustum
+    , const math::vector_3d& camera
+    , display_mode display);
 
   bool _is_visible = true; // visible by default
   bool _need_visibility_update = true;

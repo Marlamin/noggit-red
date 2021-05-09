@@ -288,6 +288,15 @@ QWidgetAction* MapView::createTextSeparator(const QString& text)
   return separator;
 }
 
+void MapView::enterEvent(QEvent* event)
+{
+  // check if noggit is the currently active windows
+  if (static_cast<QApplication*>(QApplication::instance())->applicationState() & Qt::ApplicationActive)
+  {
+    activateWindow();
+  }
+}
+
 void MapView::setupViewportOverlay()
 {
   _overlay_widget = new QWidget(this);
@@ -1966,6 +1975,7 @@ void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
   _camera.position.y += 50.0f;
 
   _minimap->update();
+  _camera_moved_since_last_draw = true;
 }
 
 void MapView::on_uid_fix_fail()
@@ -4133,7 +4143,7 @@ void MapView::save(save_mode mode)
     QMessageBox::warning
       ( nullptr
       , "Map NOT saved"
-      , "The map wasn NOT saved, don't forget to save before leaving"
+      , "The map was NOT saved, don't forget to save before leaving"
       , QMessageBox::Ok
       );
   }

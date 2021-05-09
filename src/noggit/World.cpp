@@ -1184,7 +1184,10 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   if (terrainMode == editing_mode::object && has_multiple_model_selected())
   {
-    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, 0.3f);
+    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
+
+    float dist = (camera_pos - _multi_select_pivot.get()).length();
+    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, std::min(2.f, std::max(0.15f, dist * 0.02f)));
   }
 
   if (use_ref_pos)
