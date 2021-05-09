@@ -53,3 +53,18 @@ ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
 
 }
 
+void ImageMaskSelector::setRotation(int value)
+{
+  int orientation = _ui.dial->value() + value;
+
+  while (orientation >= 360)
+  {
+    orientation -= 360;
+  }
+  while (orientation < 0)
+  {
+    orientation += 360;
+  }
+  _ui.dial->setSliderPosition (orientation);
+}
+

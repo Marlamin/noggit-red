@@ -11,6 +11,22 @@
 #include <external/NodeEditor/include/nodes/NodeStyle>
 #include <external/NodeEditor/include/nodes/TypeConverter>
 
+// Mandatory nodes
+#include <noggit/Red/NodeEditor/Nodes/Logic/ConditionNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicIfNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicBeginNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicBreakNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicContinueNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicReturnNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicReturnNoDataNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Functions/PrintNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicForLoopNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicWhileLoopNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicChainNode.hpp>
+#include <noggit/Red/NodeEditor/Nodes/Logic/LogicProcedureNode.hpp>
+
+#ifndef DO_NOT_BUILD_NODES
+
 #include <noggit/Red/NodeEditor/Nodes/Math/MathNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Math/MathUnaryNode.hpp>
 
@@ -33,18 +49,6 @@
 #include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixTransformNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Math/Matrix/MatrixRotateQuaternionNode.hpp>
 
-#include <noggit/Red/NodeEditor/Nodes/Logic/ConditionNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Logic/LogicIfNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Logic/LogicBeginNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Logic/LogicBreakNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Logic/LogicContinueNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Logic/LogicReturnNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Logic/LogicReturnNoDataNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Functions/PrintNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Logic/LogicForLoopNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Logic/LogicWhileLoopNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Logic/LogicChainNode.hpp>
-#include <noggit/Red/NodeEditor/Nodes/Logic/LogicProcedureNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Data/DataConstantNode.hpp>
 
 #include <noggit/Red/NodeEditor/Nodes/Containers/List/DataListNode.hpp>
@@ -241,6 +245,8 @@
 #include <noggit/Red/NodeEditor/Nodes/World/Holes/SetHole.hpp>
 #include <noggit/Red/NodeEditor/Nodes/World/Holes/SetHoleADTAtPos.hpp>
 
+#endif
+
 #include <noggit/Red/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Red/NodeEditor/Nodes/DataTypes/GenericTypeConverter.hpp>
 #include <noggit/Red/NodeEditor/Nodes/Scene/NodeScene.hpp>
@@ -272,6 +278,21 @@ namespace noggit
         {
           auto ret = std::make_shared<DataModelRegistry>();
 
+          // Logic (this nodes are necessary to build)
+          ret->registerModel<ConditionNode>("Logic");
+          ret->registerModel<LogicBeginNode>("Logic//Flow");
+          ret->registerModel<LogicIfNode>("Logic//Flow");
+          ret->registerModel<LogicForLoopNode>("Logic//Flow");
+          ret->registerModel<LogicWhileLoopNode>("Logic//Flow");
+          ret->registerModel<LogicBreakNode>("Logic//Flow");
+          ret->registerModel<LogicContinueNode>("Logic//Flow");
+          ret->registerModel<LogicChainNode>("Logic//Flow");
+          ret->registerModel<LogicReturnNode>("Logic//Flow");
+          ret->registerModel<LogicReturnNoDataNode>("Logic//Flow");
+          ret->registerModel<LogicProcedureNode>("Logic//Flow");
+          ret->registerModel<PrintNode>("Functions//Generic");
+
+#ifndef DO_NOT_BUILD_NODES
           ret->registerModel<RewiringPointNode>("");
 
           // Math
@@ -376,20 +397,6 @@ namespace noggit
           ret->registerModel<NoiseDisplaceNode>("Data//Noise//Transform");
           ret->registerModel<NoiseTransformPointNode>("Data//Noise//Transform");
           ret->registerModel<NoiseTurbulenceNode>("Data//Noise//Transform");
-
-          // Logic
-          ret->registerModel<ConditionNode>("Logic");
-          ret->registerModel<LogicBeginNode>("Logic//Flow");
-          ret->registerModel<LogicIfNode>("Logic//Flow");
-          ret->registerModel<LogicForLoopNode>("Logic//Flow");
-          ret->registerModel<LogicWhileLoopNode>("Logic//Flow");
-          ret->registerModel<LogicBreakNode>("Logic//Flow");
-          ret->registerModel<LogicContinueNode>("Logic//Flow");
-          ret->registerModel<LogicChainNode>("Logic//Flow");
-          ret->registerModel<LogicReturnNode>("Logic//Flow");
-          ret->registerModel<LogicReturnNoDataNode>("Logic//Flow");
-          ret->registerModel<LogicProcedureNode>("Logic//Flow");
-          ret->registerModel<PrintNode>("Functions//Generic");
 
           // List
           ret->registerModel<DataListNode>("Containers//List");
@@ -575,6 +582,8 @@ namespace noggit
           ret->REGISTER_TYPE_CONVERTER(Decimal, Vector2D);
           ret->REGISTER_TYPE_CONVERTER(Decimal, Vector3D);
           ret->REGISTER_TYPE_CONVERTER(Decimal, Vector4D);
+
+#endif
 
           return ret;
         }

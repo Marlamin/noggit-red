@@ -796,51 +796,11 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
 
   for (int i = 0; i < mapbufsize; ++i)
   {
-    xdiff = mVertices[i].x - pos.x;
-    zdiff = mVertices[i].z - pos.z;
-    if (BrushType == eTerrainType_Quadra)
+    float dt = change;
+    if (changeTerrainProcessVertex(pos, mVertices[i], dt, radius, inner_radius, BrushType))
     {
-      if ((std::abs(xdiff) < std::abs(radius / 2)) && (std::abs(zdiff) < std::abs(radius / 2)))
-      {
-        dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
-        mVertices[i].y += change * (1.0f - dist * inner_radius / radius);
-        changed = true;
-      }
-    }
-    else
-    {
-      dist = std::sqrt(xdiff*xdiff + zdiff*zdiff);
-      if (dist < radius)
-      {
-        changed = true;
-
-        switch (BrushType)
-        {
-          case eTerrainType_Flat:
-            mVertices[i].y += change;
-            break;
-          case eTerrainType_Linear:
-            mVertices[i].y += change * (1.0f - dist * (1.0f - inner_radius) / radius);
-            break;
-          case eTerrainType_Smooth:
-            mVertices[i].y += change / (1.0f + dist / radius);
-            break;
-          case eTerrainType_Polynom:
-            mVertices[i].y += change*((dist / radius)*(dist / radius) + dist / radius + 1.0f);
-            break;
-          case eTerrainType_Trigo:
-            mVertices[i].y += change*cos(dist / radius);
-            break;
-          case eTerrainType_Gaussian:
-            mVertices[i].y += dist < radius * inner_radius ? change * std::exp(-(std::pow(radius * inner_radius / radius, 2) / (2 * std::pow(0.39f, 2)))) : change * std::exp(-(std::pow(dist / radius, 2) / (2 * std::pow(0.39f, 2))));
-
-            break;
-          default:
-            LogError << "Invalid terrain edit type (" << BrushType << ")" << std::endl;
-            changed = false;
-            break;
-        }
-      }
+      changed = true;
+      mVertices[i].y += dt;
     }
   }
   if (changed)
@@ -1159,12 +1119,8 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const& img, fl
 
     for(int i{}; i < mapbufsize; ++i)
     {
-      float const dist(misc::dist(mVertices[i], pos));
-
-      if (dist >= radiusOuter)
-      {
+      if(std::abs(pos.x - mVertices[i].x) > radiusOuter || std::abs(pos.z - mVertices[i].z) > radiusOuter)
         continue;
-      }
 
       float delta = cur_action->getDelta();
 

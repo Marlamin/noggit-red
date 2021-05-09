@@ -3711,26 +3711,47 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   {
     if (terrainMode == editing_mode::ground)
     {
-      noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                  noggit::ActionModalityControllers::eSHIFT | noggit::ActionModalityControllers::eRMB);
-      terrainTool->moveVertices (_world.get(), -relative_movement.dy() / YSENS);
+      if (terrainTool->_edit_type == eTerrainType_Vertex)
+      {
+        noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                       noggit::ActionModalityControllers::eSHIFT | noggit::ActionModalityControllers::eRMB);
+        terrainTool->moveVertices (_world.get(), -relative_movement.dy() / YSENS);
+      }
     }
   }
 
   if (rightMouse && _mod_ctrl_down)
   {
-      noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                   noggit::ActionModalityControllers::eCTRL | noggit::ActionModalityControllers::eRMB);
-      terrainTool->changeAngle (-relative_movement.dy() / YSENS * 4.f);
+    if (terrainMode == editing_mode::ground)
+    {
+      if (terrainTool->_edit_type == eTerrainType_Vertex)
+      {
+        noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                       noggit::ActionModalityControllers::eCTRL |
+                                                       noggit::ActionModalityControllers::eRMB);
+        terrainTool->changeAngle(-relative_movement.dy() / YSENS * 4.f);
+      }
+    }
   }
 
 
   if (rightMouse && _mod_space_down)
   {
-    noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                                   noggit::ActionModalityControllers::eRMB
-                                                   | noggit::ActionModalityControllers::eSPACE);
-    terrainTool->setOrientRelativeTo (_world.get(), _cursor_pos);
+    if (terrainMode == editing_mode::ground)
+    {
+      if (terrainTool->_edit_type == eTerrainType_Vertex)
+      {
+        noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                       noggit::ActionModalityControllers::eRMB
+                                                       | noggit::ActionModalityControllers::eSPACE);
+        terrainTool->setOrientRelativeTo(_world.get(), _cursor_pos);
+      }
+      else if (terrainTool->getImageMaskSelector()->isEnabled())
+      {
+        terrainTool->getImageMaskSelector()->setRotation(-relative_movement.dx() / XSENS * 4.5f);
+      }
+
+    }
   }
 
   if (leftMouse && _mod_alt_down)

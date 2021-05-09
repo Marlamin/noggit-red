@@ -19,6 +19,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <limits>
 
 
 enum class uid_fix_status
@@ -146,6 +147,25 @@ public:
         {
           return hasTile(index) && misc::getShortestDist
             (pos.x, pos.z, index.x * TILESIZE, index.z * TILESIZE, TILESIZE) <= radius;
+        }
+      );
+  }
+
+  auto tiles_in_rect (math::vector_3d const& pos, float radius)
+  {
+    math::vector_2d l_chunk{pos.x - radius, pos.z - radius};
+    math::vector_2d r_chunk{pos.x + radius, pos.z + radius};
+
+    return tiles<true>
+      ( [this, pos, radius, l_chunk, r_chunk] (tile_index const& index, MapTile*)
+        {
+          if (!hasTile(index) || radius < std::numeric_limits<float>::epsilon())
+            return false;
+
+          math::vector_2d l_tile{index.x * TILESIZE, index.z * TILESIZE};
+          math::vector_2d r_tile{index.x * TILESIZE + TILESIZE, index.z * TILESIZE + TILESIZE};
+
+          return ((l_chunk.x  <  r_tile.x)  &&  (r_chunk.x   >  l_tile.x) && (l_chunk.y  <  r_tile.y)  && (r_chunk.y  >  l_tile.y));
         }
       );
   }

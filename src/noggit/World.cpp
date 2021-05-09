@@ -1726,7 +1726,7 @@ auto World::stamp(math::vector_3d const& pos, float dt, QPixmap const* pixmap, f
   float delta = action->getDelta() + dt;
   action->setDelta(delta);
 
-  for_all_chunks_in_range(pos, radiusOuter,
+  for_all_chunks_in_rect(pos, radiusOuter,
                           [=](MapChunk* chunk) -> bool
                           {
                             auto action = noggit::ActionManager::instance()->getCurrentAction();

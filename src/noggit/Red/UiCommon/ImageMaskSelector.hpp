@@ -19,7 +19,7 @@ namespace noggit::Red
 
     bool isEnabled() { return _ui.groupBox->isChecked(); };
     int getRotation() { return _ui.dial->value(); };
-    void setRotation(int value) { _ui.dial->setValue(value); };
+    void setRotation(int value);
     int getBrushMode() { return  _ui.brushMode->checkedId(); };
     void setBrushMode(int mode) { _ui.sculptRadio->setChecked(mode); };
     QPixmap* getPixmap() { return &_pixmap; };

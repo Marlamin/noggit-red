@@ -68,6 +68,7 @@ public:
   MapChunk* getChunk(unsigned int x, unsigned int z);
   //! \todo map_index style iterators
   std::vector<MapChunk*> chunks_in_range (math::vector_3d const& pos, float radius) const;
+  std::vector<MapChunk*> chunks_in_rect (math::vector_3d const& pos, float radius) const;
 
   const tile_index index;
   float xbase, zbase;

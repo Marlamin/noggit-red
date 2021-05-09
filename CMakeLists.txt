@@ -200,6 +200,12 @@ add_subdirectory (src/external/libnoise)
 # Add the found include directories to our include list.
 include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/include/")
 
+OPTION(NOGGIT_BUILD_NODE_DATAMODELS "Build node data models? (turn of for faster compiling)" ON)
+IF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
+  MESSAGE( STATUS "Not building Node data models. Do not attempt to use Node Editor. Do not enable this for deployment!" )
+  ADD_DEFINITIONS( -DDO_NOT_BUILD_NODES )
+ENDIF( NOGGIT_BUILD_NODE_DATAMODELS )
+
 OPTION(NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
 
 # Log to console for easier debugging.

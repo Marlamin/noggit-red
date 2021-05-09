@@ -224,6 +224,20 @@ public:
                                  , Fun&& /* MapChunk* -> bool changed */
                                  , Post&& /* MapChunk* -> void; called for all changed chunks */
                                  );
+
+  template<typename Fun>
+  bool for_all_chunks_in_rect ( math::vector_3d const& pos
+    , float radius
+    , Fun&& /* MapChunk* -> bool changed */
+  );
+
+  template<typename Fun, typename Post>
+  bool for_all_chunks_in_rect ( math::vector_3d const& pos
+    , float radius
+    , Fun&& /* MapChunk* -> bool changed */
+    , Post&& /* MapChunk* -> void; called for all changed chunks */
+  );
+
   template<typename Fun>
     void for_all_chunks_on_tile (math::vector_3d const& pos, Fun&&);
 

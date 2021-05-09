@@ -113,4 +113,57 @@ bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, F
   return changed;
 }
 
+
+template<typename Fun>
+bool World::for_all_chunks_in_rect (math::vector_3d const& pos, float radius, Fun&& fun)
+{
+  bool changed (false);
+
+  for (MapTile* tile : mapIndex.tiles_in_rect (pos, radius))
+  {
+    if (!tile->finishedLoading())
+    {
+      continue;
+    }
+
+    for (MapChunk* chunk : tile->chunks_in_rect (pos, radius))
+    {
+      if (fun (chunk))
+      {
+        changed = true;
+        mapIndex.setChanged (tile);
+      }
+    }
+  }
+
+  return changed;
+}
+
+template<typename Fun, typename Post>
+bool World::for_all_chunks_in_rect (math::vector_3d const& pos, float radius, Fun&& fun, Post&& post)
+{
+  std::forward_list<MapChunk*> modified_chunks;
+
+  bool changed ( for_all_chunks_in_rect
+                   ( pos, radius
+                     , [&] (MapChunk* chunk)
+                     {
+                       if (fun (chunk))
+                       {
+                         modified_chunks.emplace_front (chunk);
+                         return true;
+                       }
+                       return false;
+                     }
+                   )
+  );
+
+  for (MapChunk* chunk : modified_chunks)
+  {
+    post (chunk);
+  }
+
+  return changed;
+}
+
 #endif //NOGGIT_WORLD_INL
