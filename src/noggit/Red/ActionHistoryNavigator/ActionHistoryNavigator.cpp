@@ -106,8 +106,21 @@ void ActionHistoryNavigator::purge()
 
 void ActionHistoryNavigator::changeCurrentAction(unsigned index)
 {
-  QSignalBlocker const _active_action_button_group(_action_stack);
-  static_cast<QRadioButton*>(static_cast<QHBoxLayout*>(_action_stack->itemWidget(
-    _action_stack->item(_action_stack->count() - 1))->layout())->itemAt(0)->widget())->setChecked(true);
-  _action_stack->setCurrentItem(_action_stack->item(_action_stack->count() - 1 - index));
+  QSignalBlocker const _(_action_stack);
+
+  int idx = _action_stack->count() - 1 - index;
+  if (idx >= 0)
+  {
+    static_cast<QRadioButton*>(static_cast<QHBoxLayout*>(_action_stack->itemWidget(
+      _action_stack->item(idx))->layout())->itemAt(0)->widget())->setChecked(true);
+  }
+  else
+  {
+    _active_action_button_group->setExclusive(false);
+    static_cast<QRadioButton*>(static_cast<QHBoxLayout*>(_action_stack->itemWidget(
+      _action_stack->item(0))->layout())->itemAt(0)->widget())->setChecked(false);
+    _active_action_button_group->setExclusive(true);
+  }
+
+  //_action_stack->setCurrentItem(_action_stack->item(_action_stack->count() - 1 - index));
 }

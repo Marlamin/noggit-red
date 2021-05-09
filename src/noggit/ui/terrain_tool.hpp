@@ -44,6 +44,7 @@ namespace noggit
       void setOrientation (float orientation);
       void setAngle (float angle);
       void setSpeed (float speed);
+      float getSpeed () { return _speed_slider->value(); };
 
       // vertex edit only functions
       void moveVertices (World*, float dt);

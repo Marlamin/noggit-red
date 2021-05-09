@@ -37,7 +37,7 @@ namespace noggit
       , _overbright_prop(false)
       , _texturing_mode(texturing_mode::paint)
     {
-      auto layout (new QFormLayout (this));
+      auto layout (new QVBoxLayout (this));
 
       _texture_brush.init();
       _inner_brush.init();
@@ -45,7 +45,7 @@ namespace noggit
 
       _current_texture = new current_texture(true, this);
       _current_texture->resize(QSize(225, 225));
-      layout->addRow (_current_texture);
+      layout->addWidget (_current_texture);
       layout->setAlignment(_current_texture, Qt::AlignHCenter);
 
       auto tabs (new QTabWidget(this));
@@ -180,7 +180,7 @@ namespace noggit
       tabs->addTab(_texture_switcher, "Swap");
       tabs->addTab(anim_widget, "Anim");
       
-      layout->addRow(tabs);
+      layout->addWidget(tabs);
 
       connect ( _anim_group, &QGroupBox::toggled
               , [&](bool b)

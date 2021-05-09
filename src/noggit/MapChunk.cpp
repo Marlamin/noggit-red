@@ -1159,11 +1159,14 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const& img, fl
 
     for(int i{}; i < mapbufsize; ++i)
     {
-      if(std::abs(pos.x - mVertices[i].x) > radiusOuter || std::abs(pos.z - mVertices[i].z) > radiusOuter)
-        continue;
+      float const dist(misc::dist(mVertices[i], pos));
 
-      float delta = cur_action->getDelta() + dt / 1000.0f;
-      cur_action->setDelta(delta);
+      if (dist >= radiusOuter)
+      {
+        continue;
+      }
+
+      float delta = cur_action->getDelta();
 
       if (changeTerrainProcessVertex(pos, mVertices[i], delta, radiusOuter, radiusInner, brushType))
         changed = true;

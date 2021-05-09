@@ -55,8 +55,8 @@ void noggit::Action::undo(bool redo)
   {
     for (auto& pair : redo ? _chunk_terrain_post : _chunk_terrain_pre)
     {
-      std::memcpy(&pair.first->mVertices, pair.second.data(), 149 * 3 * sizeof(float));
-      std::memcpy(&pair.first->mNormals, pair.second.data() + 149 * 3, 149 * 3 * sizeof(float));
+      std::memcpy(&pair.first->mVertices, pair.second.data(), 145 * 3 * sizeof(float));
+      std::memcpy(&pair.first->mNormals, pair.second.data() + 145 * 3, 145 * 3 * sizeof(float));
       pair.first->updateVerticesData();
       pair.first->updateNormalsData();
     }
@@ -89,7 +89,7 @@ void noggit::Action::undo(bool redo)
   {
     for (auto& pair : redo ? _chunk_vertex_color_post : _chunk_vertex_color_pre)
     {
-      std::memcpy(&pair.first->mccv, pair.second.data(), 149 * 3 * sizeof(float));
+      std::memcpy(&pair.first->mccv, pair.second.data(), 145 * 3 * sizeof(float));
       pair.first->update_vertex_colors();
     }
   }
@@ -359,8 +359,8 @@ void noggit::Action::finish()
       auto& post =_chunk_terrain_post.at(i);
       auto& pre = _chunk_terrain_pre.at(i);
       post.first = pre.first;
-      std::memcpy(post.second.data(), &post.first->mVertices, 149 * 3 * sizeof(float));
-      std::memcpy(post.second.data() + 149 * 3, &post.first->mNormals,149 * 3 * sizeof(float));
+      std::memcpy(post.second.data(), &post.first->mVertices, 145 * 3 * sizeof(float));
+      std::memcpy(post.second.data() + 145 * 3, &post.first->mNormals,145 * 3 * sizeof(float));
     }
   }
   if (_flags & ActionFlags::eCHUNKS_TEXTURE)
@@ -396,7 +396,7 @@ void noggit::Action::finish()
       auto& post =_chunk_vertex_color_post.at(i);
       auto& pre = _chunk_vertex_color_pre.at(i);
       post.first = pre.first;
-      std::memcpy(post.second.data(), &post.first->mccv, 149 * 3 * sizeof(float));
+      std::memcpy(post.second.data(), &post.first->mccv, 145 * 3 * sizeof(float));
     }
   }
   if (_flags & ActionFlags::eOBJECTS_TRANSFORMED)
@@ -540,9 +540,9 @@ void noggit::Action::registerChunkTerrainChange(MapChunk* chunk)
       return;
   }
 
-  std::array<float, 149 * 3 * 2> data{};
-  std::memcpy(data.data(), &chunk->mVertices, 149 * 3 * sizeof(float));
-  std::memcpy(data.data() + 149 * 3, &chunk->mNormals, 149 * 3 * sizeof(float));
+  std::array<float, 145 * 3 * 2> data{};
+  std::memcpy(data.data(), &chunk->mVertices, 145 * 3 * sizeof(float));
+  std::memcpy(data.data() + 145 * 3, &chunk->mNormals, 145 * 3 * sizeof(float));
   _chunk_terrain_pre.emplace_back(std::make_pair(chunk, data));
 }
 
@@ -582,8 +582,8 @@ void noggit::Action::registerChunkVertexColorChange(MapChunk* chunk)
       return;
   }
 
-  std::array<float, 149 * 3> data{};
-  std::memcpy(data.data(), &chunk->mccv, 149 * 3 * sizeof(float));
+  std::array<float, 145 * 3> data{};
+  std::memcpy(data.data(), &chunk->mccv, 145 * 3 * sizeof(float));
   _chunk_vertex_color_pre.emplace_back(std::make_pair(chunk, data));
 }
 

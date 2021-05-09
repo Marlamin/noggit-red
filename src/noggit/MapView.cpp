@@ -927,6 +927,26 @@ void MapView::setupEditMenu()
 
               });
 
+  ADD_ACTION (edit_menu, "Bagor", "Shift+Ctrl+U",
+              [this]
+              {
+                makeCurrent();
+                opengl::context::scoped_setter const _ (::gl, context());
+
+                if (terrainMode == editing_mode::ground && _display_mode == display_mode::in_3D)
+                {
+                  auto image_mask_selector = terrainTool->getImageMaskSelector();
+                  if (terrainTool->_edit_type != eTerrainType_Vertex && terrainTool->_edit_type != eTerrainType_Script &&
+                      image_mask_selector->isEnabled() && !image_mask_selector->getBrushMode())
+                  {
+                    noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
+                    terrainTool->changeTerrain(_world.get(), _cursor_pos, terrainTool->getSpeed());
+                    noggit::ActionManager::instance()->endAction();
+                  }
+                }
+
+              });
+
 
   edit_menu->addSeparator();
   edit_menu->addAction(createTextSeparator("Options"));

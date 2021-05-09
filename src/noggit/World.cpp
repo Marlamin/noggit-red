@@ -1719,8 +1719,12 @@ auto World::stamp(math::vector_3d const& pos, float dt, QPixmap const* pixmap, f
 {
   QTransform matrix;
   matrix.rotateRadians(rotation);
-  int const k{static_cast<int>(std::floor(radiusOuter)) * 2};
+  int const k{static_cast<int>(std::ceil(radiusOuter)) * 2};
   QImage const img{pixmap->transformed(matrix).scaled(k, k).toImage()};
+
+  auto action = noggit::ActionManager::instance()->getCurrentAction();
+  float delta = action->getDelta() + dt;
+  action->setDelta(delta);
 
   for_all_chunks_in_range(pos, radiusOuter,
                           [=](MapChunk* chunk) -> bool

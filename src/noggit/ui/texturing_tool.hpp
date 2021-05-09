@@ -8,6 +8,7 @@
 #include <noggit/TextureManager.h>
 #include <noggit/unsigned_int_property.hpp>
 #include <noggit/Red/UiCommon/ExtendedSlider.hpp>
+#include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
 
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDial>
@@ -123,6 +124,8 @@ namespace noggit
       QGroupBox* _anim_group;
 
       texture_swapper* _texture_switcher;
+
+      noggit::Red::ImageMaskSelector* _image_mask_selector;
     };
   }
 }

@@ -127,12 +127,12 @@ namespace noggit
         unsigned _flags;
         unsigned _modality_controls = ActionModalityControllers::eNONE;
         MapView* _map_view;
-        std::vector<std::pair<MapChunk*, std::array<float, 149 * 3 * 2>>> _chunk_terrain_pre;
-        std::vector<std::pair<MapChunk*, std::array<float, 149 * 3 * 2>>> _chunk_terrain_post;
+        std::vector<std::pair<MapChunk*, std::array<float, 145 * 3 * 2>>> _chunk_terrain_pre;
+        std::vector<std::pair<MapChunk*, std::array<float, 145 * 3 * 2>>> _chunk_terrain_post;
         std::vector<std::pair<MapChunk*, TextureChangeCache>> _chunk_texture_pre;
         std::vector<std::pair<MapChunk*, TextureChangeCache>> _chunk_texture_post;
-        std::vector<std::pair<MapChunk*, std::array<float, 149 * 3>>> _chunk_vertex_color_pre;
-        std::vector<std::pair<MapChunk*, std::array<float, 149 * 3>>> _chunk_vertex_color_post;
+        std::vector<std::pair<MapChunk*, std::array<float, 145 * 3>>> _chunk_vertex_color_pre;
+        std::vector<std::pair<MapChunk*, std::array<float, 145 * 3>>> _chunk_vertex_color_post;
         std::vector<std::pair<unsigned, ObjectInstanceCache>> _transformed_objects_pre;
         std::vector<std::pair<unsigned, ObjectInstanceCache>> _transformed_objects_post;
         std::vector<std::pair<unsigned, ObjectInstanceCache>> _removed_objects_pre;
