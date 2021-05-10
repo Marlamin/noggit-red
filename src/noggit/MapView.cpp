@@ -57,25 +57,24 @@
 #include <QtGui/QMouseEvent>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMenuBar>
-#include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QWidgetAction>
 #include <QSurfaceFormat>
 #include <QMessageBox>
 #include <QAbstractScrollArea>
-#include <QScrollArea>
 #include <QScrollBar>
+#include <QDateTime>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
-#include <map>
-#include <string>
+
 #include <vector>
-#include <thread>
+#include <random>
+
 
 /* Some ugly macros we use */
 // TODO: make those methods instead???
@@ -179,6 +178,13 @@ void MapView::set_editing_mode (editing_mode mode)
         {
           terrainTool->updateMaskImage();
         }
+        break;
+      case editing_mode::paint:
+        if (texturingTool->getTexturingMode() == noggit::ui::texturing_mode::paint && texturingTool->getImageMaskSelector()->isEnabled())
+        {
+          texturingTool->updateMaskImage();
+        }
+        break;
       default:
         break;
     }
@@ -948,27 +954,6 @@ void MapView::setupEditMenu()
                 noggit::ActionManager::instance()->endAction();
 
               });
-
-  ADD_ACTION (edit_menu, "Bagor", "Shift+Ctrl+U",
-              [this]
-              {
-                makeCurrent();
-                opengl::context::scoped_setter const _ (::gl, context());
-
-                if (terrainMode == editing_mode::ground && _display_mode == display_mode::in_3D)
-                {
-                  auto image_mask_selector = terrainTool->getImageMaskSelector();
-                  if (terrainTool->_edit_type != eTerrainType_Vertex && terrainTool->_edit_type != eTerrainType_Script &&
-                      image_mask_selector->isEnabled() && !image_mask_selector->getBrushMode())
-                  {
-                    noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
-                    terrainTool->changeTerrain(_world.get(), _cursor_pos, terrainTool->getSpeed());
-                    noggit::ActionManager::instance()->endAction();
-                  }
-                }
-
-              });
-
 
   edit_menu->addSeparator();
   edit_menu->addAction(createTextSeparator("Options"));
@@ -2656,17 +2641,21 @@ void MapView::tick (float dt)
 
             if (_mod_shift_down && (!mask_selector->isEnabled() || mask_selector->getBrushMode()))
             {
-              noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
+              auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
                                                              noggit::ActionModalityControllers::eSHIFT
                                                              | noggit::ActionModalityControllers::eLMB);
+
+              action->setPostCallback(&MapView::randomizeTerrainRotation);
 
               terrainTool->changeTerrain(_world.get(), _cursor_pos, 7.5f * dt);
             }
             else if (_mod_ctrl_down && (!mask_selector->isEnabled() || mask_selector->getBrushMode()))
             {
-              noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
+              auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
                                                              noggit::ActionModalityControllers::eCTRL
                                                              | noggit::ActionModalityControllers::eLMB);
+
+              action->setPostCallback(&MapView::randomizeTerrainRotation);
 
               terrainTool->changeTerrain(_world.get(), _cursor_pos, -7.5f * dt);
             }
@@ -2703,6 +2692,7 @@ void MapView::tick (float dt)
                                                              | noggit::ActionModalityControllers::eCTRL
                                                              | noggit::ActionModalityControllers::eALT
                                                              | noggit::ActionModalityControllers::eLMB);
+
               _world->eraseTextures(_cursor_pos);
             }
           }
@@ -2716,9 +2706,25 @@ void MapView::tick (float dt)
           {
             if ((_display_mode == display_mode::in_3D && !underMap) || _display_mode == display_mode::in_2D)
             {
-              noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE,
-                                                             noggit::ActionModalityControllers::eSHIFT
+              auto image_mask_selector = texturingTool->getImageMaskSelector();
+
+              if (noggit::ActionManager::instance()->getCurrentAction()
+              && texturingTool->getTexturingMode() == noggit::ui::texturing_mode::paint
+              && image_mask_selector->isEnabled()
+              && !image_mask_selector->getBrushMode())
+                break;
+
+              auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE,
+                                             noggit::ActionModalityControllers::eSHIFT
                                                              | noggit::ActionModalityControllers::eLMB);
+
+              action->setPostCallback(&MapView::randomizeTexturingRotation);
+
+              if (texturingTool->getTexturingMode() == noggit::ui::texturing_mode::paint
+                  && image_mask_selector->isEnabled()
+                  && !image_mask_selector->getBrushMode())
+                action->setBlockCursor(true);
+
               texturingTool->paint(_world.get(), _cursor_pos, dt, *noggit::ui::selected_texture::get());
             }
           }
@@ -3313,10 +3319,8 @@ void MapView::draw_map()
   case editing_mode::ground:
     radius = terrainTool->brushRadius();
     inner_radius = terrainTool->innerRadius();
-
     if((terrainTool->_edit_type != eTerrainType_Vertex || terrainTool->_edit_type != eTerrainType_Script) && terrainTool->getImageMaskSelector()->isEnabled())
       _cursorType = CursorType::STAMP;
-
     break;
   case editing_mode::flatten_blur:
     radius = flattenTool->brushRadius();
@@ -3329,6 +3333,8 @@ void MapView::draw_map()
   case editing_mode::paint:
     radius = texturingTool->brush_radius();
     inner_radius = texturingTool->hardness();
+    if(texturingTool->getTexturingMode() == noggit::ui::texturing_mode::paint && texturingTool->getImageMaskSelector()->isEnabled())
+      _cursorType = CursorType::STAMP;
     break;
   case editing_mode::water:
     radius = guiWater->brushRadius();
@@ -3776,10 +3782,22 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       }
       else if (terrainTool->getImageMaskSelector()->isEnabled())
       {
-        auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eNO_FLAG,
+        auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
                                                        noggit::ActionModalityControllers::eRMB
                                                        | noggit::ActionModalityControllers::eSPACE);
         terrainTool->getImageMaskSelector()->setRotation(-relative_movement.dx() / XSENS * 10.f);
+        action->setBlockCursor(true);
+      }
+
+    }
+    if (terrainMode == editing_mode::paint)
+    {
+      if (texturingTool->getImageMaskSelector()->isEnabled())
+      {
+        auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
+                                                                     noggit::ActionModalityControllers::eRMB
+                                                                     | noggit::ActionModalityControllers::eSPACE);
+        texturingTool->getImageMaskSelector()->setRotation(-relative_movement.dx() / XSENS * 10.f);
         action->setBlockCursor(true);
 
       }
@@ -3860,9 +3878,11 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       if (terrainTool->_edit_type != eTerrainType_Vertex && terrainTool->_edit_type != eTerrainType_Script &&
         image_mask_selector->isEnabled() && !image_mask_selector->getBrushMode())
       {
-        noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
+        auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
                                                        noggit::ActionModalityControllers::eSHIFT
                                                        | noggit::ActionModalityControllers::eLMB);
+
+        action->setPostCallback(&MapView::randomizeTerrainRotation);
 
         terrainTool->changeTerrain(_world.get(), _cursor_pos, relative_movement.dx() / 30.0f);
       }
@@ -4170,6 +4190,32 @@ void MapView::save(save_mode mode)
 void MapView::addHotkey(Qt::Key key, size_t modifiers, std::function<void()> function, std::function<bool()> condition)
 {
   hotkeys.emplace_front (key, modifiers, function, condition);
+}
+
+void MapView::randomizeTerrainRotation()
+{
+  auto image_mask_selector = terrainTool->getImageMaskSelector();
+  if (!image_mask_selector->getRandomizeRotation())
+    return;
+
+  unsigned int ms = static_cast<unsigned>(QDateTime::currentMSecsSinceEpoch());
+  std::mt19937 gen(ms);
+  std::uniform_int_distribution<> uid(0, 360);
+
+  image_mask_selector->setRotation(uid(gen));
+}
+
+void randomizeTexturingRotation()
+{
+  auto image_mask_selector = texturingTool->getImageMaskSelector();
+  if (!image_mask_selector->getRandomizeRotation())
+    return;
+
+  unsigned int ms = static_cast<unsigned>(QDateTime::currentMSecsSinceEpoch());
+  std::mt19937 gen(ms);
+  std::uniform_int_distribution<> uid(0, 360);
+
+  image_mask_selector->setRotation(uid(gen));
 }
 
 void MapView::unloadOpenglData(bool from_manager)

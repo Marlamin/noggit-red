@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>219</width>
-    <height>313</height>
+    <height>345</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -101,6 +101,17 @@
          <string/>
         </property>
        </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="randomizeRotation">
+          <property name="text">
+           <string>Randomize rotation</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item alignment="Qt::AlignHCenter|Qt::AlignTop">
        <widget class="QDial" name="dial">

@@ -64,25 +64,28 @@ Action* ActionManager::beginAction(MapView* map_view
   if (_cur_action)
     return _cur_action;
 
-  // clean canceled actions
-  if (_undo_index)
+  if (!(flags & eDO_NOT_WRITE_HISTORY))
   {
-    for (int i = 0; i < _undo_index; ++i)
+    // clean canceled actions
+    if (_undo_index)
     {
-      delete _action_stack.back();
-      _action_stack.pop_back();
-      emit popBack();
+      for (int i = 0; i < _undo_index; ++i)
+      {
+        delete _action_stack.back();
+        _action_stack.pop_back();
+        emit popBack();
+      }
+      _undo_index = 0;
     }
-    _undo_index = 0;
-  }
 
-  // prevent undo stack overflow
-  if (_action_stack.size() == _limit)
-  {
-    Action* old_action = _action_stack.front();
-    delete old_action;
-    _action_stack.pop_front();
-    emit popFront();
+    // prevent undo stack overflow
+    if (_action_stack.size() == _limit)
+    {
+      Action* old_action = _action_stack.front();
+      delete old_action;
+      _action_stack.pop_front();
+      emit popFront();
+    }
   }
 
   auto action = new Action(map_view);
@@ -101,14 +104,20 @@ void ActionManager::endAction()
   assert(_cur_action && "ActionStack Error: endAction() called with no action running.");
 
   _cur_action->finish();
-  emit addedAction(_cur_action);
+  if (!(_cur_action->getFlags() & eDO_NOT_WRITE_HISTORY))
+  {
+    emit addedAction(_cur_action);
+  }
+  else
+  {
+    _action_stack.pop_back();
+  }
   _cur_action = nullptr;
   emit currentActionChanged(_undo_index);
 }
 
 void ActionManager::endActionOnModalityMismatch(unsigned modality_controls)
 {
-
   if (!_cur_action)
     return;
 
@@ -118,7 +127,14 @@ void ActionManager::endActionOnModalityMismatch(unsigned modality_controls)
   if ((modality_controls & _cur_action->getModalityControllers()) != _cur_action->getModalityControllers())
   {
     _cur_action->finish();
-    emit addedAction(_cur_action);
+    if (!(_cur_action->getFlags() & eDO_NOT_WRITE_HISTORY))
+    {
+      emit addedAction(_cur_action);
+    }
+    else
+    {
+      _action_stack.pop_back();
+    }
     _cur_action = nullptr;
     emit currentActionChanged(_undo_index);
   }

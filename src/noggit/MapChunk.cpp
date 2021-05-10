@@ -1102,7 +1102,7 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const* img, fl
 
       auto color = img->pixelColor(pixel_x, pixel_y);
 
-      mVertices[i].y += delta * (color.redF() + color.greenF() + color.blueF() / 3.0f);
+      mVertices[i].y += delta * ((color.redF() + color.greenF() + color.blueF()) / 3.0f);
     }
   }
   else
@@ -1129,7 +1129,7 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const* img, fl
 
       auto color = img->pixelColor(pixel_x, pixel_y);
 
-      mVertices[i].y = original_heightmap[i * 3 + 1] + (delta * (color.redF() + color.greenF() + color.blueF() / 3.0f));
+      mVertices[i].y = original_heightmap[i * 3 + 1] + (delta * ((color.redF() + color.greenF() + color.blueF()) / 3.0f));
     }
   }
 
@@ -1159,6 +1159,11 @@ void MapChunk::switchTexture(scoped_blp_texture_reference const& oldTexture, sco
 bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
   return texture_set->paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, std::move (texture));
+}
+
+bool MapChunk::stampTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint)
+{
+  return texture_set->stampTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, std::move (texture), img, paint);
 }
 
 bool MapChunk::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)

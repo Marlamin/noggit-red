@@ -36,6 +36,7 @@ namespace noggit
       , _anim_rotation_prop(4)
       , _overbright_prop(false)
       , _texturing_mode(texturing_mode::paint)
+      , _map_view(map_view)
     {
       auto layout (new QVBoxLayout (this));
 
@@ -141,6 +142,11 @@ namespace noggit
 
       _texture_switcher = new texture_swapper(tool_widget, camera_pos, map_view);
       _texture_switcher->hide();
+
+      _image_mask_group = new noggit::Red::ImageMaskSelector(map_view, this);
+      _image_mask_group->setContinuousActionName("Paint");
+      _mask_image = _image_mask_group->getPixmap()->toImage();
+      tool_layout->addWidget(_image_mask_group);
 
       auto quick_palette_btn (new QPushButton("Quick Palette", this));
       tool_layout->addWidget(quick_palette_btn);
@@ -298,6 +304,11 @@ namespace noggit
                 }
       );
 
+      connect (_image_mask_group, &noggit::Red::ImageMaskSelector::rotationUpdated, this, &texturing_tool::updateMaskImage);
+      connect (_radius_slider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged, this, &texturing_tool::updateMaskImage);
+      connect(_image_mask_group, &noggit::Red::ImageMaskSelector::pixmapUpdated, this, &texturing_tool::updateMaskImage);
+
+
 
       _spray_content->hide();
       update_brush_hardness();
@@ -307,6 +318,16 @@ namespace noggit
 
       setMinimumWidth(250);
       setMaximumWidth(250);
+    }
+
+    void texturing_tool::updateMaskImage()
+    {
+      QPixmap* pixmap = _image_mask_group->getPixmap();
+      QTransform matrix;
+      matrix.rotateRadians(_image_mask_group->getRotation() / 360.0f * M_PI);
+      int const k{static_cast<int>(std::ceil(_radius_slider->value())) * 2};
+      _mask_image = pixmap->toImage().transformed(matrix).scaled(k, k);
+      _map_view->setBrushTexture(&_mask_image);
     }
 
     void texturing_tool::update_brush_hardness()
@@ -479,12 +500,27 @@ namespace noggit
 
           if (_inner_radius_cb->isChecked())
           {
-            world->paintTexture(pos, &_inner_brush, alpha_target(), strength, texture);
+            if (!_image_mask_group->isEnabled())
+            {
+              world->paintTexture(pos, &_inner_brush, alpha_target(), strength, texture);
+            }
+            else
+            {
+              world->stampTexture(pos, &_inner_brush, alpha_target(), strength, texture, &_mask_image, _image_mask_group->getBrushMode());
+            }
           }
         }
         else
         {
-          world->paintTexture(pos, &_texture_brush, alpha_target(), strength, texture);
+          if (!_image_mask_group->isEnabled())
+          {
+            world->paintTexture(pos, &_texture_brush, alpha_target(), strength, texture);
+          }
+          else
+          {
+            world->stampTexture(pos, &_texture_brush, alpha_target(), strength, texture, &_mask_image, _image_mask_group->getBrushMode());
+          }
+
         }
       }
       else if (_texturing_mode == texturing_mode::anim)

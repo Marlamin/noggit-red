@@ -24,6 +24,8 @@ namespace noggit::Red
     int getBrushMode() { return  _ui.brushMode->checkedId(); };
     void setBrushMode(int mode) { _ui.sculptRadio->setChecked(mode); };
     QPixmap* getPixmap() { return &_pixmap; };
+    void setContinuousActionName(QString const& name);
+    bool getRandomizeRotation() { return _ui.randomizeRotation->isChecked();};
 
   signals:
     void pixmapUpdated(QPixmap* pixmap);

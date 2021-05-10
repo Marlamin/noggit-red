@@ -493,6 +493,8 @@ void noggit::Action::finish()
     }
   }
 
+  if (_post)
+    (_map_view->*_post)();
 }
 
 float* noggit::Action::getChunkTerrainOriginalData(MapChunk* chunk)
@@ -524,6 +526,11 @@ bool noggit::Action::getBlockCursor() const
 {
   return _block_cursor;
 
+}
+
+void noggit::Action::setPostCallback(auto(MapView::*method)()->void)
+{
+  _post = method;
 }
 
 

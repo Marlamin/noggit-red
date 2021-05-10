@@ -70,7 +70,7 @@ namespace noggit
 
       float alpha_target() const
       {
-        return static_cast<float>(_brush_level) / 255.f;
+        return static_cast<float>(_brush_level);
       }
 
       current_texture* _current_texture;
@@ -78,6 +78,11 @@ namespace noggit
       texture_swapper* const texture_swap_tool() { return _texture_switcher; }
 
       QSize sizeHint() const override;
+
+      noggit::Red::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
+      QImage* getMaskImage() { return &_mask_image; }
+      texturing_mode getTexturingMode() { return _texturing_mode; };
+      void updateMaskImage();
 
     private:
       void change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture);
@@ -125,7 +130,9 @@ namespace noggit
 
       texture_swapper* _texture_switcher;
 
-      noggit::Red::ImageMaskSelector* _image_mask_selector;
+      noggit::Red::ImageMaskSelector* _image_mask_group;
+      QImage _mask_image;
+      MapView* _map_view;
     };
   }
 }

@@ -34,6 +34,7 @@ namespace noggit
         Action* beginAction(MapView* map_view
                             , int flags = ActionFlags::eNO_FLAG
                             , int modality_controls = ActionModalityControllers::eNONE);
+
         void endAction();
 
         void endActionOnModalityMismatch(unsigned modality_controls);

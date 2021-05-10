@@ -74,6 +74,11 @@ void ImageMaskSelector::setRotation(int value)
   {
     orientation += 360;
   }
-  _ui.dial->setSliderPosition (orientation);
+  _ui.dial->setSliderPosition(orientation);
+}
+
+void ImageMaskSelector::setContinuousActionName(QString const& name)
+{
+  _ui.sculptRadio->setText(name);
 }
 

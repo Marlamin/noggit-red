@@ -38,7 +38,8 @@ namespace noggit
         eOBJECTS_TRANSFORMED = 0x100,
         eCHUNKS_FLAGS        = 0x200,
         eVERTEX_SELECTION    = 0x400,
-        eCHUNK_SHADOWS       = 0x800
+        eCHUNK_SHADOWS       = 0x800,
+        eDO_NOT_WRITE_HISTORY= 0x1000
     };
 
     enum ActionModalityControllers
@@ -102,6 +103,7 @@ namespace noggit
         float getDelta() const;
         void setBlockCursor(bool state);
         bool getBlockCursor() const;
+        void setPostCallback(auto(MapView::*method)()->void);
 
         float* getChunkTerrainOriginalData(MapChunk* chunk);
 
@@ -155,6 +157,8 @@ namespace noggit
         bool _vertex_selection_recorded = false;
 
         tsl::robin_map<unsigned, std::vector<unsigned>> _object_operations;
+
+        auto(MapView::*_post)()->void = nullptr;
 
     };
 }

@@ -236,6 +236,8 @@ public:
   auto populateImageModel(QStandardItemModel* model) const -> void;
   auto setBrushTexture(QImage const* img) -> void;
   noggit::camera* getCamera() { return &_camera; };
+  void randomizeTerrainRotation();
+  void randomizeTexturingRotation();
 
   void set_editing_mode (editing_mode);
 

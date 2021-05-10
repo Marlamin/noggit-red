@@ -45,6 +45,7 @@ public:
   void swap_layers(int layer_1, int layer_2);
   void replace_texture(scoped_blp_texture_reference const& texture_to_replace, scoped_blp_texture_reference replacement_texture);
   bool paintTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool stampTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* image, bool paint);
   bool replace_texture( float xbase
                       , float zbase
                       , float x

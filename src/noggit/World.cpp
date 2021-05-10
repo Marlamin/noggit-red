@@ -1872,6 +1872,18 @@ bool World::paintTexture(math::vector_3d const& pos, Brush* brush, float strengt
     );
 }
 
+bool World::stampTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint)
+{
+  return for_all_chunks_in_rect
+    ( pos, brush->getRadius()
+      , [&] (MapChunk* chunk)
+      {
+        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+        return chunk->stampTexture(pos, brush, strength, pressure, texture, img, paint);
+      }
+    );
+}
+
 bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture)
 {
   bool succ = false;
