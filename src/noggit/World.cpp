@@ -1702,6 +1702,18 @@ void World::changeShader(math::vector_3d const& pos, math::vector_4d const& colo
     );
 }
 
+void World::stampShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint)
+{
+  for_all_chunks_in_rect
+    ( pos, radius
+      , [&] (MapChunk* chunk)
+      {
+        noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(chunk);
+        return chunk->stampMCCV(pos, color, change, radius, editMode, img, paint);
+      }
+    );
+}
+
 math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
 {
   math::vector_3d color = math::vector_3d(1.0f, 1.0f, 1.0f);

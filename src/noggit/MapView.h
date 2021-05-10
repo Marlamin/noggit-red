@@ -238,6 +238,7 @@ public:
   noggit::camera* getCamera() { return &_camera; };
   void randomizeTerrainRotation();
   void randomizeTexturingRotation();
+  void randomizeShaderRotation();
 
   void set_editing_mode (editing_mode);
 

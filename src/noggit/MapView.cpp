@@ -185,6 +185,12 @@ void MapView::set_editing_mode (editing_mode mode)
           texturingTool->updateMaskImage();
         }
         break;
+      case editing_mode::mccv:
+        if (shaderTool->getImageMaskSelector()->isEnabled())
+        {
+          shaderTool->updateMaskImage();
+        }
+        break;
       default:
         break;
     }
@@ -670,7 +676,7 @@ void MapView::setupWaterEditorUi()
 }
 void MapView::setupVertexPainterUi()
 {
-  shaderTool = new noggit::ui::shader_tool(shader_color, this);
+  shaderTool = new noggit::ui::shader_tool(shader_color, this, this);
   _tool_panel_dock->registerTool("Vertex Painter", shaderTool);
 }
 void MapView::setupObjectEditorUi()
@@ -2812,16 +2818,45 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_VERTEX_COLOR,
+
+              auto image_mask_selector = shaderTool->getImageMaskSelector();
+
+              if (noggit::ActionManager::instance()->getCurrentAction()
+                  && image_mask_selector->isEnabled()
+                  && !image_mask_selector->getBrushMode())
+                break;
+
+              auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_VERTEX_COLOR,
                                                              noggit::ActionModalityControllers::eSHIFT
                                                              | noggit::ActionModalityControllers::eLMB);
+
+              action->setPostCallback(&MapView::randomizeShaderRotation);
+
+              if (image_mask_selector->isEnabled() && !image_mask_selector->getBrushMode())
+                action->setBlockCursor(true);
+
               shaderTool->changeShader(_world.get(), _cursor_pos, dt, true);
             }
             if (_mod_ctrl_down)
             {
-              noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_VERTEX_COLOR,
+
+              auto image_mask_selector = shaderTool->getImageMaskSelector();
+
+              if (noggit::ActionManager::instance()->getCurrentAction()
+                  && image_mask_selector->isEnabled()
+                  && !image_mask_selector->getBrushMode())
+                break;
+
+
+              auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_VERTEX_COLOR,
                                                              noggit::ActionModalityControllers::eCTRL
                                                              | noggit::ActionModalityControllers::eLMB);
+
+              action->setPostCallback(&MapView::randomizeShaderRotation);
+
+              if (image_mask_selector->isEnabled() && !image_mask_selector->getBrushMode())
+                action->setBlockCursor(true);
+
               shaderTool->changeShader(_world.get(), _cursor_pos, dt, false);
             }
           }
@@ -3346,6 +3381,8 @@ void MapView::draw_map()
     break;
   case editing_mode::mccv:
     radius = shaderTool->brushRadius();
+      if(shaderTool->getImageMaskSelector()->isEnabled())
+        _cursorType = CursorType::STAMP;
     break;
   case editing_mode::areaid:
     radius = ZoneIDBrowser->brushRadius();
@@ -3790,7 +3827,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       }
 
     }
-    if (terrainMode == editing_mode::paint)
+    else if (terrainMode == editing_mode::paint)
     {
       if (texturingTool->getImageMaskSelector()->isEnabled())
       {
@@ -3798,6 +3835,19 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
                                                                      noggit::ActionModalityControllers::eRMB
                                                                      | noggit::ActionModalityControllers::eSPACE);
         texturingTool->getImageMaskSelector()->setRotation(-relative_movement.dx() / XSENS * 10.f);
+        action->setBlockCursor(true);
+
+      }
+
+    }
+    else if (terrainMode == editing_mode::mccv)
+    {
+      if (shaderTool->getImageMaskSelector()->isEnabled())
+      {
+        auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
+                                                                     noggit::ActionModalityControllers::eRMB
+                                                                     | noggit::ActionModalityControllers::eSPACE);
+        shaderTool->getImageMaskSelector()->setRotation(-relative_movement.dx() / XSENS * 10.f);
         action->setBlockCursor(true);
 
       }
@@ -4205,9 +4255,22 @@ void MapView::randomizeTerrainRotation()
   image_mask_selector->setRotation(uid(gen));
 }
 
-void randomizeTexturingRotation()
+void MapView::randomizeTexturingRotation()
 {
   auto image_mask_selector = texturingTool->getImageMaskSelector();
+  if (!image_mask_selector->getRandomizeRotation())
+    return;
+
+  unsigned int ms = static_cast<unsigned>(QDateTime::currentMSecsSinceEpoch());
+  std::mt19937 gen(ms);
+  std::uniform_int_distribution<> uid(0, 360);
+
+  image_mask_selector->setRotation(uid(gen));
+}
+
+void MapView::randomizeShaderRotation()
+{
+  auto image_mask_selector = shaderTool->getImageMaskSelector();
   if (!image_mask_selector->getRandomizeRotation())
     return;
 

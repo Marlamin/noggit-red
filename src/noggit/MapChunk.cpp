@@ -862,6 +862,69 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
   return changed;
 }
 
+bool MapChunk::stampMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint)
+{
+  float dist;
+  bool changed = false;
+
+  if (!hasMCCV)
+  {
+    for (int i = 0; i < mapbufsize; ++i)
+    {
+      mccv[i].x = 1.0f; // set default shaders
+      mccv[i].y = 1.0f;
+      mccv[i].z = 1.0f;
+    }
+
+    changed = true;
+    header_flags.flags.has_mccv = 1;
+    hasMCCV = true;
+  }
+
+  for (int i = 0; i < mapbufsize; ++i)
+  {
+    dist = misc::dist(mVertices[i], pos);
+
+    if(std::abs(pos.x - mVertices[i].x) > radius || std::abs(pos.z - mVertices[i].z) > radius)
+      continue;
+
+    math::vector_3d const diff{mVertices[i] - pos};
+
+    int pixel_x = std::floor(diff.x + radius);
+    int pixel_y = std::floor(diff.z + radius);
+
+    auto mask_color = img->pixelColor(pixel_x, pixel_y);
+    float image_factor = (mask_color.redF() + mask_color.greenF() + mask_color.blueF()) / 3.0f;
+
+    float edit = image_factor * (paint ? ((change * (1.0f - dist / radius))) : (change * 20.f));
+    if (editMode)
+    {
+      mccv[i].x += (color.x / 0.5f - mccv[i].x)* edit;
+      mccv[i].y += (color.y / 0.5f - mccv[i].y)* edit;
+      mccv[i].z += (color.z / 0.5f - mccv[i].z)* edit;
+    }
+    else
+    {
+      mccv[i].x += (1.0f - mccv[i].x) * edit;
+      mccv[i].y += (1.0f - mccv[i].y) * edit;
+      mccv[i].z += (1.0f - mccv[i].z) * edit;
+    }
+
+    mccv[i].x = std::min(std::max(mccv[i].x, 0.0f), 2.0f);
+    mccv[i].y = std::min(std::max(mccv[i].y, 0.0f), 2.0f);
+    mccv[i].z = std::min(std::max(mccv[i].z, 0.0f), 2.0f);
+
+    changed = true;
+
+  }
+  if (changed && _uploaded)
+  {
+    update_vertex_colors();
+  }
+
+  return changed;
+}
+
 void MapChunk::update_vertex_colors()
 {
   gl.bufferSubData<GL_ARRAY_BUFFER> (_mccv_vbo, 0, sizeof(mccv), mccv);

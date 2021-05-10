@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/World.h>
+#include <noggit/MapView.h>
 #include <noggit/ui/shader_tool.hpp>
 #include <util/qt/overload.hpp>
 #include <noggit/ui/font_awesome.hpp>
@@ -23,9 +24,10 @@ namespace noggit
 {
   namespace ui
   {
-    shader_tool::shader_tool(math::vector_4d& color, QWidget* parent)
+    shader_tool::shader_tool(math::vector_4d& color, MapView* map_view, QWidget* parent)
       : QWidget(parent)
       , _color(color)
+      , _map_view(map_view)
     {
 
       auto layout (new QFormLayout(this));
@@ -83,6 +85,11 @@ namespace noggit
       _slide_value->setRange(0, 255);
       layout->addRow(_slide_value);
 
+      _image_mask_group = new noggit::Red::ImageMaskSelector(map_view, this);
+      _image_mask_group->setContinuousActionName("Paint");
+      _mask_image = _image_mask_group->getPixmap()->toImage();
+      layout->addRow(_image_mask_group);
+
       _color_palette = new color_widgets::ColorListWidget(this);
       _color_palette->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
       layout->addRow(_color_palette);
@@ -130,6 +137,10 @@ namespace noggit
 
       connect (color_wheel, &color_widgets::ColorWheel::colorChanged, color_picker, &color_widgets::ColorSelector::setColor);
 
+      connect (_image_mask_group, &noggit::Red::ImageMaskSelector::rotationUpdated, this, &shader_tool::updateMaskImage);
+      connect (_radius_slider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged, this, &shader_tool::updateMaskImage);
+      connect(_image_mask_group, &noggit::Red::ImageMaskSelector::pixmapUpdated, this, &shader_tool::updateMaskImage);
+
       setMinimumWidth(250);
       setMaximumWidth(250);
     }
@@ -137,7 +148,15 @@ namespace noggit
     void shader_tool::changeShader
       (World* world, math::vector_3d const& pos, float dt, bool add)
     {
-      world->changeShader (pos, _color, 2.0f*dt*_speed_slider->value(), _radius_slider->value(), add);
+      if (!_image_mask_group->isEnabled())
+      {
+        world->changeShader (pos, _color, 2.0f*dt*_speed_slider->value(), _radius_slider->value(), add);
+      }
+      else
+      {
+        world->stampShader (pos, _color, 2.0f*dt*_speed_slider->value(), _radius_slider->value(), add, &_mask_image, _image_mask_group->getBrushMode());
+      }
+
     }
 
     void shader_tool::changeRadius(float change)
@@ -213,5 +232,16 @@ namespace noggit
       return QSize(215, height());
     }
 
+    void shader_tool::updateMaskImage()
+    {
+      QPixmap* pixmap = _image_mask_group->getPixmap();
+      QTransform matrix;
+      matrix.rotateRadians(_image_mask_group->getRotation() / 360.0f * M_PI);
+      int const k{static_cast<int>(std::ceil(_radius_slider->value())) * 2};
+      _mask_image = pixmap->toImage().transformed(matrix).scaled(k, k);
+      _map_view->setBrushTexture(&_mask_image);
+    }
+
   }
+
 }

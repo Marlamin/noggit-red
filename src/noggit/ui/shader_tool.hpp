@@ -4,6 +4,7 @@
 
 #include <math/vector_4d.hpp>
 #include <noggit/Red/UiCommon/ExtendedSlider.hpp>
+#include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
 
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
@@ -16,6 +17,7 @@
 #include <qt-color-widgets/color_list_widget.hpp>
 
 class World;
+class MapView;
 
 namespace noggit
 {
@@ -25,7 +27,7 @@ namespace noggit
     {
       Q_OBJECT
     public:
-      shader_tool(math::vector_4d& color, QWidget* parent = nullptr);
+      shader_tool(math::vector_4d& color, MapView* map_view, QWidget* parent = nullptr);
 
       void changeShader (World*, math::vector_3d const& pos, float dt, bool add);
       void pickColor(World* world, math::vector_3d const& pos);
@@ -37,6 +39,11 @@ namespace noggit
       float brushRadius() const { return _radius_slider->value(); }
 
       QSize sizeHint() const override;
+
+      noggit::Red::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
+      QImage* getMaskImage() { return &_mask_image; }
+      void updateMaskImage();
+
 
     private:
       math::vector_4d& _color;
@@ -53,6 +60,10 @@ namespace noggit
       color_widgets::GradientSlider* _slide_saturation;
       color_widgets::GradientSlider* _slide_value;
       color_widgets::ColorListWidget* _color_palette;
+
+      noggit::Red::ImageMaskSelector* _image_mask_group;
+      QImage _mask_image;
+      MapView* _map_view;
 
     public Q_SLOTS:
       void set_hsv();
