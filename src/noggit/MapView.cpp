@@ -170,6 +170,19 @@ void MapView::set_editing_mode (editing_mode mode)
     _viewport_overlay_ui->gizmoBar->hide();
   }
 
+  if (context() && context()->isValid())
+  {
+    switch (mode)
+    {
+      case editing_mode::ground:
+        if (terrainTool->_edit_type != eTerrainType_Vertex || terrainTool->_edit_type != eTerrainType_Script && terrainTool->getImageMaskSelector()->isEnabled())
+        {
+          terrainTool->updateMaskImage();
+        }
+      default:
+        break;
+    }
+  }
 
   MoveObj = false;
   _world->reset_selection();
@@ -489,6 +502,7 @@ void MapView::setupTexturePainterUi()
               }
               else
               {
+                QSignalBlocker const _ (_show_texture_palette_window);
                 _show_texture_palette_window.set(false);
               }
             }
@@ -1224,7 +1238,6 @@ void MapView::setupViewMenu()
 
   ADD_TOGGLE (view_menu, "Texture palette", Qt::Key_X, _show_texture_palette_window);
 
-
   ADD_TOGGLE_NS(view_menu, "Small texture palette", _show_texture_palette_small_window);
 
   addHotkey( Qt::Key_H
@@ -1930,16 +1943,16 @@ void MapView::tabletEvent(QTabletEvent* event)
   event->ignore();
 }
 
-auto MapView::setBrushTexture(QPixmap const* pixmap) -> void
+auto MapView::setBrushTexture(QImage const* img) -> void
 {
-  auto img{pixmap->toImage()};
-  int const height{img.height()};
-  int const width{img.width()};
+  int const height{img->height()};
+  int const width{img->width()};
+
   std::vector<std::uint32_t> tex(height * width);
 
   for(int i{}; i < height; ++i)
     for(int j{}; j < width; ++j)
-      tex[i * width + j] = img.pixel(j, i);
+      tex[i * width + j] = img->pixel(j, i);
 
   makeCurrent();
   opengl::context::scoped_setter const _{gl, context()};
@@ -3763,7 +3776,12 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       }
       else if (terrainTool->getImageMaskSelector()->isEnabled())
       {
-        terrainTool->getImageMaskSelector()->setRotation(-relative_movement.dx() / XSENS * 4.5f);
+        auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eNO_FLAG,
+                                                       noggit::ActionModalityControllers::eRMB
+                                                       | noggit::ActionModalityControllers::eSPACE);
+        terrainTool->getImageMaskSelector()->setRotation(-relative_movement.dx() / XSENS * 10.f);
+        action->setBlockCursor(true);
+
       }
 
     }

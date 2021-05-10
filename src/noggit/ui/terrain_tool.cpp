@@ -4,6 +4,7 @@
 
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.h>
+#include <noggit/MapView.h>
 #include <util/qt/overload.hpp>
 
 #include <QtWidgets/QFormLayout>
@@ -118,6 +119,7 @@ namespace noggit
       layout->addWidget(settings_group);
 
       _image_mask_group = new noggit::Red::ImageMaskSelector(map_view, this);
+      _mask_image = _image_mask_group->getPixmap()->toImage();
       layout->addWidget(_image_mask_group);
 
       _vertex_type_group = new QGroupBox ("Vertex edit", this);
@@ -209,7 +211,21 @@ namespace noggit
                   }
                 );
 
+      connect (_image_mask_group, &noggit::Red::ImageMaskSelector::rotationUpdated, this, &terrain_tool::updateMaskImage);
+      connect (_radius_slider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged, this, &terrain_tool::updateMaskImage);
+      connect(_image_mask_group, &noggit::Red::ImageMaskSelector::pixmapUpdated, this, &terrain_tool::updateMaskImage);
 
+
+    }
+
+    void terrain_tool::updateMaskImage()
+    {
+      QPixmap* pixmap = _image_mask_group->getPixmap();
+      QTransform matrix;
+      matrix.rotateRadians(_image_mask_group->getRotation() / 360.0f * M_PI);
+      int const k{static_cast<int>(std::ceil(_radius_slider->value())) * 2};
+      _mask_image = pixmap->toImage().transformed(matrix).scaled(k, k);
+      _map_view->setBrushTexture(&_mask_image);
     }
 
     void terrain_tool::changeTerrain
@@ -221,8 +237,8 @@ namespace noggit
       {
         if (_image_mask_group->isEnabled())
         {
-          world->stamp(pos, dt * _speed_slider->value(), _image_mask_group->getPixmap(), radius,
-                       _inner_radius_slider->value(), _image_mask_group->getRotation() / 360.0f * M_PI, _edit_type, _image_mask_group->getBrushMode());
+          world->stamp(pos, dt * _speed_slider->value(), &_mask_image, radius,
+                       _inner_radius_slider->value(),  _edit_type, _image_mask_group->getBrushMode());
         }
         else
         {

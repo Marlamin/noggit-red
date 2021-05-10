@@ -234,7 +234,7 @@ public:
   void saveMinimap(MinimapRenderSettings* settings);
   void initMinimapSave() { saving_minimap = true; };
   auto populateImageModel(QStandardItemModel* model) const -> void;
-  auto setBrushTexture(QPixmap const* pixmap) -> void;
+  auto setBrushTexture(QImage const* img) -> void;
   noggit::camera* getCamera() { return &_camera; };
 
   void set_editing_mode (editing_mode);

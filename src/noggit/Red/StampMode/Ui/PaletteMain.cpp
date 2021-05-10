@@ -44,7 +44,7 @@ PaletteMain::PaletteMain(MapView* parent)
   connect(&_view, &QAbstractItemView::clicked, [this, parent](QModelIndex const& index) -> void
   {
     QPixmap const* pixmap{index.data(Qt::UserRole).value<QPixmap const*>()};
-    parent->setBrushTexture(pixmap);
+    //parent->setBrushTexture(pixmap);
     emit itemSelected(pixmap);
   });
   _layout.addWidget(&_view);

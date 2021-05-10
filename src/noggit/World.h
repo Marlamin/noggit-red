@@ -291,8 +291,8 @@ public:
       , math::degrees::vec3 rotation
   );
 
-  auto stamp(math::vector_3d const& pos, float dt, QPixmap const* pixmap, float radiusOuter
-  , float radiusInner, float rotation, int BrushType, bool sculpt) -> void;
+  auto stamp(math::vector_3d const& pos, float dt, QImage const* img, float radiusOuter
+  , float radiusInner, int BrushType, bool sculpt) -> void;
 
   // add a m2 instance to the world (needs to be positioned already), return the uid
   std::uint32_t add_model_instance(ModelInstance model_instance, bool from_reloading);

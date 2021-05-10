@@ -1717,13 +1717,9 @@ math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
   return color;
 }
 
-auto World::stamp(math::vector_3d const& pos, float dt, QPixmap const* pixmap, float radiusOuter
-, float radiusInner, float rotation, int brushType, bool sculpt) -> void
+auto World::stamp(math::vector_3d const& pos, float dt, QImage const* img, float radiusOuter
+, float radiusInner, int brushType, bool sculpt) -> void
 {
-  QTransform matrix;
-  matrix.rotateRadians(rotation);
-  int const k{static_cast<int>(std::ceil(radiusOuter)) * 2};
-  QImage const img{pixmap->transformed(matrix).scaled(k, k).toImage()};
 
   auto action = noggit::ActionManager::instance()->getCurrentAction();
   float delta = action->getDelta() + dt;
@@ -1735,7 +1731,7 @@ auto World::stamp(math::vector_3d const& pos, float dt, QPixmap const* pixmap, f
                             auto action = noggit::ActionManager::instance()->getCurrentAction();
                             action->registerChunkTerrainChange(chunk);
                             action->setBlockCursor(!sculpt);
-                            chunk->stamp(pos, dt, img, radiusOuter, radiusInner, rotation, brushType, sculpt); return true;
+                            chunk->stamp(pos, dt, img, radiusOuter, radiusInner, brushType, sculpt); return true;
                           }
                           , [this](MapChunk* chunk) -> void
                           {

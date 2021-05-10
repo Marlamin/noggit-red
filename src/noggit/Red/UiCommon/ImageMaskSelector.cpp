@@ -2,6 +2,7 @@
 
 #include "ImageMaskSelector.hpp"
 #include <noggit/MapView.h>
+#include <noggit/ui/terrain_tool.hpp>
 
 using namespace noggit::Red;
 
@@ -40,12 +41,20 @@ ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
           });
 
   connect(_image_browser, &ImageBrowser::imageSelected,
-          [=](QString name)
+          [this, parent](QString name)
           {
             _pixmap = QPixmap(name);
+
             _ui.curImageLabel->setPixmap(_pixmap.scaled(128, 128));
             _ui.curImageLabel->setToolTip(name);
-            _map_view->setBrushTexture(&_pixmap);
+
+            emit pixmapUpdated(&_pixmap);
+          });
+
+  connect(_ui.dial, &QDial::valueChanged,
+          [=](int value)
+          {
+            emit rotationUpdated(value);
           });
 
   _ui.brushMode->setId(_ui.stampRadio, 0);

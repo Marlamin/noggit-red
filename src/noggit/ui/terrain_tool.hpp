@@ -13,6 +13,7 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
+#include <QImage>
 
 class World;
 class MapView;
@@ -61,12 +62,17 @@ namespace noggit
 
       noggit::Red::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
 
+      QImage* getMaskImage() { return &_mask_image; };
+
       QSize sizeHint() const override;
 
       eTerrainType _edit_type;
 
     signals:
       void updateVertices(int vertex_mode, math::degrees const& angle, math::degrees const& orientation);
+
+    public slots:
+      void updateMaskImage();
 
     private:
       void updateVertexGroup();
@@ -93,6 +99,8 @@ namespace noggit
       QSlider* _angle_slider;
       QDial* _orientation_dial;
       MapView* _map_view;
+
+      QImage _mask_image;
     };
   }
 }

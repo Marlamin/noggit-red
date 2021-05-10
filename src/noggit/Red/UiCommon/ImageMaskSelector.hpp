@@ -4,6 +4,7 @@
 #define NOGGIT_IMAGEMASKSELECTOR_HPP
 
 #include <QWidget>
+#include <QPixmap>
 #include <ui_ImageMaskSelector.h>
 #include <noggit/Red/UiCommon/ImageBrowser.hpp>
 
@@ -23,6 +24,10 @@ namespace noggit::Red
     int getBrushMode() { return  _ui.brushMode->checkedId(); };
     void setBrushMode(int mode) { _ui.sculptRadio->setChecked(mode); };
     QPixmap* getPixmap() { return &_pixmap; };
+
+  signals:
+    void pixmapUpdated(QPixmap* pixmap);
+    void rotationUpdated(int value);
 
   private:
     Ui::imageMaskSelector _ui;
