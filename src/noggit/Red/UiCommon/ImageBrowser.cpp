@@ -11,6 +11,12 @@
 
 using namespace  noggit::Red;
 
+ImageBrowserFilesystemModel::ImageBrowserFilesystemModel(QObject* parent)
+: QFileSystemModel(parent)
+{
+  connect(this, &QFileSystemModel::directoryLoaded, this, &ImageBrowserFilesystemModel::onDirectoryLoaded);
+}
+
 QVariant ImageBrowserFilesystemModel::data(const QModelIndex& index, int role) const
 {
   if( role == Qt::DecorationRole )
@@ -24,6 +30,22 @@ QVariant ImageBrowserFilesystemModel::data(const QModelIndex& index, int role) c
     }
   }
   return QFileSystemModel::data(index, role);
+}
+
+void ImageBrowserFilesystemModel::onDirectoryLoaded(const QString& path)
+{
+  QModelIndex parent = index(path);
+
+  for (int i = 0; i < rowCount(parent); i++)
+  {
+    QModelIndex child = index(i, 0, parent);
+
+    if (!fileInfo(child).isDir())
+      continue;
+
+    if (canFetchMore(child))
+      fetchMore( child );
+  }
 }
 
 
@@ -45,7 +67,8 @@ ImageBrowser::ImageBrowser(QWidget* parent)
 
   _dir_proxy_model = new QSortFilterProxyModel(this);
   _dir_proxy_model->setFilterCaseSensitivity(Qt::CaseInsensitive);
-  //_dir_proxy_model->setFilterRole(Qt::UserRole);
+  _dir_proxy_model->setDynamicSortFilter(true);
+  _dir_proxy_model->setFilterRole(QFileSystemModel::FileNameRole);
   _dir_proxy_model->setRecursiveFilteringEnabled(true);
   _dir_proxy_model->setSourceModel(_model);
 
@@ -55,6 +78,7 @@ ImageBrowser::ImageBrowser(QWidget* parent)
   _ui.treeView->hideColumn(2);
   _ui.treeView->hideColumn(3);
   _ui.treeView->setIconSize(QSize(64, 64));
+  _ui.treeView->expandRecursively(_dir_proxy_model->mapFromSource(_model->index(samples_path)));
 
 
   connect(_ui.treeView, &QTreeView::clicked,

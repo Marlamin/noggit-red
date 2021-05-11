@@ -12,10 +12,14 @@ namespace noggit::Red
 {
   class ImageBrowserFilesystemModel : public QFileSystemModel
   {
+    Q_OBJECT
   public:
-    ImageBrowserFilesystemModel(QObject* parent = nullptr) : QFileSystemModel(parent) {};
+    ImageBrowserFilesystemModel(QObject* parent = nullptr);
 
     QVariant data(const QModelIndex& index, int role) const override;
+
+  public slots:
+    void onDirectoryLoaded(const QString& path);
   };
 
   class ImageBrowser : public QWidget
