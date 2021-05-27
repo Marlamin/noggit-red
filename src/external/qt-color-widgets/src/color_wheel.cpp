@@ -365,8 +365,9 @@ void ColorWheel::mouseMoveEvent(QMouseEvent *ev)
         p->hue = p->line_to_point(ev->pos()).angle()/360.0;
         p->render_inner_selector();
 
-        Q_EMIT colorSelected(color());
-        Q_EMIT colorChanged(color());
+        auto color_selected = color();
+        Q_EMIT colorSelected(color_selected);
+        Q_EMIT colorChanged(color_selected);
         update();
     }
     else if(p->mouse_status == DragSquare)
@@ -397,9 +398,9 @@ void ColorWheel::mouseMoveEvent(QMouseEvent *ev)
             if ( slice_h > 0 )
                 p->sat = qBound(0.0, (pt.y()-ymin)/slice_h, 1.0);
         }
-
-        Q_EMIT colorSelected(color());
-        Q_EMIT colorChanged(color());
+        auto color_selected = color();
+        Q_EMIT colorSelected(color_selected);
+        Q_EMIT colorChanged(color_selected);
         update();
     }
 }

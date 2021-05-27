@@ -19,6 +19,7 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggi
 {
   pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
   dir = math::degrees::vec3{math::degrees(d->rot[0]), math::degrees(d->rot[1]), math::degrees(d->rot[2])};
+
   uid = d->uniqueID;
 
   extents[0] = math::vector_3d(d->extents[0][0], d->extents[0][1], d->extents[0][2]);

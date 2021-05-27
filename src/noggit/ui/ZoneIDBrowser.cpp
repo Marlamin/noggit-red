@@ -25,7 +25,7 @@ namespace noggit
       auto layout = new QFormLayout(this);
 
       _radius_spin = new QDoubleSpinBox (this);
-      _radius_spin->setRange (0.0f, 250.0f);
+      _radius_spin->setRange (0.0f, 1000.0f);
       _radius_spin->setDecimals (2);
       _radius_spin->setValue (_radius);
 
@@ -125,6 +125,11 @@ namespace noggit
     void zone_id_browser::changeRadius(float change)
     {
       _radius_spin->setValue (_radius + change);
+    }
+
+    void zone_id_browser::setRadius(float radius)
+    {
+      _radius_spin->setValue(radius);
     }
 
     QTreeWidgetItem* zone_id_browser::create_or_get_tree_widget_item(int area_id)

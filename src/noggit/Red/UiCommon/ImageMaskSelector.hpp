@@ -22,10 +22,11 @@ namespace noggit::Red
     int getRotation() { return _ui.dial->value(); };
     void setRotation(int value);
     int getBrushMode() { return  _ui.brushMode->checkedId(); };
-    void setBrushMode(int mode) { _ui.sculptRadio->setChecked(mode); };
+    void setBrushMode(int mode) { if (mode) _ui.sculptRadio->setChecked(true); else _ui.stampRadio->setChecked(true); };
     QPixmap* getPixmap() { return &_pixmap; };
     void setContinuousActionName(QString const& name);
     bool getRandomizeRotation() { return _ui.randomizeRotation->isChecked();};
+    void setBrushModeVisible(bool state) { _ui.sculptRadio->setVisible(state); _ui.stampRadio->setVisible(state);};
 
   signals:
     void pixmapUpdated(QPixmap* pixmap);

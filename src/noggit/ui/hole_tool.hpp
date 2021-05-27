@@ -25,6 +25,8 @@ namespace noggit
 
       float brushRadius() const { return _radius; }
 
+      void setRadius(float radius);
+
     private:
 
       QSlider* _radius_slider;

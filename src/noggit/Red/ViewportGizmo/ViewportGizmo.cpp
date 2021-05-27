@@ -140,7 +140,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       new_orientation = glm::conjugate(new_orientation);
 
       if (_world)
-        _world->updateTilesEntry(selection[0], model_update::remove);
+        _world->updateTilesEntry(selected, model_update::remove);
 
       switch (_gizmo_operation)
       {
@@ -218,7 +218,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance->recalcExtents();
 
       if (_world)
-        _world->updateTilesEntry(selection[0], model_update::add);
+        _world->updateTilesEntry(selected, model_update::add);
     }
   }
   else
@@ -259,7 +259,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       new_orientation = glm::conjugate(new_orientation);
 
       if (_world)
-        _world->updateTilesEntry(selection[0], model_update::remove);
+        _world->updateTilesEntry(selected, model_update::remove);
 
       switch (_gizmo_operation)
       {
@@ -288,7 +288,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance->recalcExtents();
 
       if (_world)
-        _world->updateTilesEntry(selection[0], model_update::add);
+        _world->updateTilesEntry(selected, model_update::add);
     }
   }
 }

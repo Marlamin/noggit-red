@@ -104,6 +104,8 @@ namespace noggit
         void setBlockCursor(bool state);
         bool getBlockCursor() const;
         void setPostCallback(auto(MapView::*method)()->void);
+        bool getTag() { return _tag; };
+        void setTag(bool tag) { _tag = tag; };
 
         float* getChunkTerrainOriginalData(MapChunk* chunk);
 
@@ -124,6 +126,7 @@ namespace noggit
 
 
     private:
+        bool _tag = false;
         float _delta = 0.f;
         bool _block_cursor = false;
         unsigned _flags;

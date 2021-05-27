@@ -42,6 +42,7 @@ namespace noggit
       void changeSpeed(float change);
 
       void setRadius (float radius);
+      void setInnerRadius (float radius);
       void setOrientation (float orientation);
       void setAngle (float angle);
       void setSpeed (float speed);

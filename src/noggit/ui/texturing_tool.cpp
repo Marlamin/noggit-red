@@ -38,6 +38,7 @@ namespace noggit
       , _texturing_mode(texturing_mode::paint)
       , _map_view(map_view)
     {
+      setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
       auto layout (new QVBoxLayout (this));
 
       _texture_brush.init();
@@ -74,7 +75,7 @@ namespace noggit
       slider_layout_left->addWidget(new QLabel("Radius:", tool_widget));
       _radius_slider = new noggit::Red::UiCommon::ExtendedSlider(tool_widget);
       _radius_slider->setPrefix("");
-      _radius_slider->setRange (0, 100);
+      _radius_slider->setRange (0, 1000);
       _radius_slider->setDecimals (2);
       _radius_slider->setValue(_texture_brush.getRadius());
       slider_layout_left->addWidget (_radius_slider);
@@ -145,6 +146,7 @@ namespace noggit
 
       _image_mask_group = new noggit::Red::ImageMaskSelector(map_view, this);
       _image_mask_group->setContinuousActionName("Paint");
+      _image_mask_group->setBrushModeVisible(parent == map_view);
       _mask_image = _image_mask_group->getPixmap()->toImage();
       tool_layout->addWidget(_image_mask_group);
 
@@ -284,6 +286,9 @@ namespace noggit
       connect ( quick_palette_btn, &QPushButton::pressed
               , [=] ()
                 {
+                  if (!show_quick_palette)
+                    return;
+
                   show_quick_palette->set(true);
                 }
               );
@@ -324,7 +329,7 @@ namespace noggit
     {
       QPixmap* pixmap = _image_mask_group->getPixmap();
       QTransform matrix;
-      matrix.rotateRadians(_image_mask_group->getRotation() / 360.0f * M_PI);
+      matrix.rotateRadians(_image_mask_group->getRotation() * M_PI / 180.f);
       int const k{static_cast<int>(std::ceil(_radius_slider->value())) * 2};
       _mask_image = pixmap->toImage().transformed(matrix).scaled(k, k);
       _map_view->setBrushTexture(&_mask_image);
@@ -365,6 +370,17 @@ namespace noggit
       {
         _anim_group->setChecked(!_anim_group->isChecked());
       }
+    }
+
+    void texturing_tool::setRadius(float radius)
+    {
+      _radius_slider->setValue(radius);
+      _texture_switcher->change_radius(radius - _texture_switcher->radius());
+    }
+
+    void texturing_tool::setHardness(float hardness)
+    {
+      _hardness_slider->setValue(hardness);
     }
 
     void texturing_tool::change_radius(float change)

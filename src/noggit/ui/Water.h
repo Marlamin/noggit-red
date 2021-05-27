@@ -37,6 +37,7 @@ namespace noggit
       void paintLiquid (World*, math::vector_3d const& pos, bool add);
 
       void changeRadius(float change);
+      void setRadius(float radius);
       void changeOrientation(float change);
       void changeAngle(float change);
       void change_height(float change);

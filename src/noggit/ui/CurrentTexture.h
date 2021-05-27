@@ -44,6 +44,9 @@ namespace noggit
         void texture_dropped(std::string const& filename);
     public:
       current_texture(bool accept_drop, QWidget* parent = nullptr);
+
+      std::string const& filename() { return _filename; };
+
       void set_texture (std::string const& texture);
 
       void mouseMoveEvent(QMouseEvent* event) override;

@@ -14,7 +14,7 @@ namespace noggit
       auto layout = new QFormLayout(this);
 
       _radius_spin = new QDoubleSpinBox (this);
-      _radius_spin->setRange (0.0f, 250.0f);
+      _radius_spin->setRange (0.0f, 1000.0f);
       _radius_spin->setDecimals (2);
       _radius_spin->setValue (_radius);
 
@@ -51,6 +51,11 @@ namespace noggit
     void hole_tool::changeRadius(float change)
     {
       _radius_spin->setValue (_radius + change);
+    }
+
+    void hole_tool::setRadius(float radius)
+    {
+      _radius_spin->setValue(radius);
     }
   }
 }

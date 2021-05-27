@@ -25,7 +25,7 @@ ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
   _ui.curImageLabel->setToolTip("No image");
 
   connect(_ui.curImageLabel, &noggit::ui::clickable_label::clicked,
-          [=]()
+          [this]()
           {
             QPoint new_pos = mapToGlobal(
               QPoint(_ui.curImageLabel->pos().x() - _image_browser->width() - 80,

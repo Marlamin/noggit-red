@@ -24,17 +24,17 @@ namespace noggit
 {
   namespace ui
   {
-    shader_tool::shader_tool(math::vector_4d& color, MapView* map_view, QWidget* parent)
+    shader_tool::shader_tool(MapView* map_view, QWidget* parent)
       : QWidget(parent)
-      , _color(color)
       , _map_view(map_view)
+      , _color(1.f, 1.f, 1.f, 1.f)
     {
 
       auto layout (new QFormLayout(this));
 
       _radius_slider = new noggit::Red::UiCommon::ExtendedSlider (this);
       _radius_slider->setPrefix("Radius:");
-      _radius_slider->setRange(0, 100);
+      _radius_slider->setRange(0, 1000);
       _radius_slider->setDecimals(2);
       _radius_slider->setValue (15.0f);
 
@@ -51,13 +51,13 @@ namespace noggit
 
       color_picker = new color_widgets::ColorSelector (this);
       color_picker->setDisplayMode (color_widgets::ColorSelector::NoAlpha);
-      color_picker->setColor (QColor::fromRgbF (color.x, color.y, color.z, color.w));
+      color_picker->setColor (QColor::fromRgbF (_color.x, _color.y, _color.z, _color.w));
       color_picker->setMinimumHeight(25);
 
       layout->addRow("Color:", color_picker);
 
       color_wheel = new color_widgets::ColorWheel(this);
-      color_wheel->setColor (QColor::fromRgbF (color.x, color.y, color.z, color.w));
+      color_wheel->setColor (QColor::fromRgbF (_color.x, _color.y, _color.z, _color.w));
       color_wheel->setMinimumSize(QSize(200, 200));
       layout->addRow(color_wheel);
 
@@ -87,6 +87,7 @@ namespace noggit
 
       _image_mask_group = new noggit::Red::ImageMaskSelector(map_view, this);
       _image_mask_group->setContinuousActionName("Paint");
+      _image_mask_group->setBrushModeVisible(parent == map_view);
       _mask_image = _image_mask_group->getPixmap()->toImage();
       layout->addRow(_image_mask_group);
 
@@ -103,16 +104,16 @@ namespace noggit
       QObject::connect(_slide_value, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
       QObject::connect(_slide_hue, &color_widgets::HueSlider::valueChanged, this, &shader_tool::set_hsv);
 
-      QObject::connect(color_wheel, &color_widgets::ColorWheel::colorSelected, this, &shader_tool::update_color_widgets);
-      QObject::connect(color_picker, &color_widgets::ColorSelector::colorChanged, this, &shader_tool::update_color_widgets);
-
       QObject::connect(_slide_saturation, SIGNAL(valueChanged(int)), _spin_saturation, SLOT(setValue(int)));
       QObject::connect(_slide_value, SIGNAL(valueChanged(int)), _spin_value, SLOT(setValue(int)));
       QObject::connect(_slide_hue, SIGNAL(valueChanged(int)), _spin_hue, SLOT(setValue(int)));
-      
+
       QObject::connect(_spin_saturation, SIGNAL(valueChanged(int)), _slide_saturation, SLOT(setValue(int)));
       QObject::connect(_spin_hue, SIGNAL(valueChanged(int)), _slide_hue, SLOT(setValue(int)));
       QObject::connect(_spin_value, SIGNAL(valueChanged(int)), _slide_value, SLOT(setValue(int)));
+
+      QObject::connect(color_wheel, &color_widgets::ColorWheel::colorSelected, this, &shader_tool::update_color_widgets);
+      QObject::connect(color_picker, &color_widgets::ColorSelector::colorChanged, this, &shader_tool::update_color_widgets);
 
 
       connect ( _color_palette, &color_widgets::ColorListWidget::color_added
@@ -121,7 +122,6 @@ namespace noggit
                   _color_palette->setColorAt(_color_palette->colors().length() - 1, color_wheel->color());
                 }
               );
-
 
       connect ( color_picker, &color_widgets::ColorSelector::colorChanged
               , [this] (QColor new_color)
@@ -135,7 +135,14 @@ namespace noggit
                 }
               );
 
-      connect (color_wheel, &color_widgets::ColorWheel::colorChanged, color_picker, &color_widgets::ColorSelector::setColor);
+
+      connect (color_wheel, &color_widgets::ColorWheel::colorChanged,
+               [this](QColor color)
+               {
+                color_picker->setColor(color);
+
+               });
+
 
       connect (_image_mask_group, &noggit::Red::ImageMaskSelector::rotationUpdated, this, &shader_tool::updateMaskImage);
       connect (_radius_slider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged, this, &shader_tool::updateMaskImage);
@@ -164,9 +171,19 @@ namespace noggit
       _radius_slider->setValue (_radius_slider->value() + change);
     }
 
+    void shader_tool::setRadius(float radius)
+    {
+      _radius_slider->setValue(radius);
+    }
+
     void shader_tool::changeSpeed(float change)
     {
       _speed_slider->setValue(_speed_slider->value() + change);
+    }
+
+    void shader_tool::setSpeed(float speed)
+    {
+      _speed_slider->setValue(speed);
     }
 
     void shader_tool::pickColor(World* world, math::vector_3d const& pos)
@@ -236,7 +253,7 @@ namespace noggit
     {
       QPixmap* pixmap = _image_mask_group->getPixmap();
       QTransform matrix;
-      matrix.rotateRadians(_image_mask_group->getRotation() / 360.0f * M_PI);
+      matrix.rotateRadians(_image_mask_group->getRotation() / 360.0f * 2.0f * M_PI);
       int const k{static_cast<int>(std::ceil(_radius_slider->value())) * 2};
       _mask_image = pixmap->toImage().transformed(matrix).scaled(k, k);
       _map_view->setBrushTexture(&_mask_image);

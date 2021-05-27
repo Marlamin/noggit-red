@@ -49,7 +49,7 @@ namespace noggit
       auto brush_layout (new QFormLayout (brush_group));
 
       _radius_spin = new QDoubleSpinBox (this);
-      _radius_spin->setRange (0.f, 250.f);
+      _radius_spin->setRange (0.f, 1000.f);
       connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [&] (float f) { _radius = f; }
               );
@@ -258,6 +258,11 @@ namespace noggit
     void water::changeRadius(float change)
     {
       _radius_spin->setValue(_radius + change);
+    }
+
+    void water::setRadius(float radius)
+    {
+      _radius_spin->setValue(radius);
     }
 
     void water::changeOrientation(float change)

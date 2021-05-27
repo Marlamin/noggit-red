@@ -27,14 +27,16 @@ namespace noggit
     {
       Q_OBJECT
     public:
-      shader_tool(math::vector_4d& color, MapView* map_view, QWidget* parent = nullptr);
+      shader_tool(MapView* map_view, QWidget* parent = nullptr);
 
       void changeShader (World*, math::vector_3d const& pos, float dt, bool add);
       void pickColor(World* world, math::vector_3d const& pos);
       void addColorToPalette();
 
       void changeRadius(float change);
+      void setRadius(float radius);
       void changeSpeed(float change);
+      void setSpeed(float speed);
 
       float brushRadius() const { return _radius_slider->value(); }
 
@@ -44,9 +46,11 @@ namespace noggit
       QImage* getMaskImage() { return &_mask_image; }
       void updateMaskImage();
 
+      math::vector_4d& shaderColor() { return _color; };
+
 
     private:
-      math::vector_4d& _color;
+      math::vector_4d _color;
 
       noggit::Red::UiCommon::ExtendedSlider* _radius_slider;
       noggit::Red::UiCommon::ExtendedSlider* _speed_slider;

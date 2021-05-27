@@ -114,7 +114,7 @@ void ActionHistoryNavigator::changeCurrentAction(unsigned index)
     static_cast<QRadioButton*>(static_cast<QHBoxLayout*>(_action_stack->itemWidget(
       _action_stack->item(idx))->layout())->itemAt(0)->widget())->setChecked(true);
   }
-  else
+  else if (_action_stack->count())
   {
     _active_action_button_group->setExclusive(false);
     static_cast<QRadioButton*>(static_cast<QHBoxLayout*>(_action_stack->itemWidget(

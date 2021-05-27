@@ -121,6 +121,7 @@ namespace noggit
       _image_mask_group = new noggit::Red::ImageMaskSelector(map_view, this);
       _mask_image = _image_mask_group->getPixmap()->toImage();
       layout->addWidget(_image_mask_group);
+      _image_mask_group->setBrushModeVisible(!stamp);
 
       _vertex_type_group = new QGroupBox ("Vertex edit", this);
       _vertex_type_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
@@ -222,7 +223,7 @@ namespace noggit
     {
       QPixmap* pixmap = _image_mask_group->getPixmap();
       QTransform matrix;
-      matrix.rotateRadians(_image_mask_group->getRotation() / 360.0f * M_PI);
+      matrix.rotateRadians(_image_mask_group->getRotation() / 360.0f * 2.0f * M_PI);
       int const k{static_cast<int>(std::ceil(_radius_slider->value())) * 2};
       _mask_image = pixmap->toImage().transformed(matrix).scaled(k, k);
       _map_view->setBrushTexture(&_mask_image);
@@ -288,6 +289,11 @@ namespace noggit
     void terrain_tool::setRadius(float radius)
     {
       _radius_slider->setValue(radius);
+    }
+
+    void terrain_tool::setInnerRadius(float radius)
+    {
+      _inner_radius_slider->setValue(radius);
     }
 
     void terrain_tool::changeRadius(float change)

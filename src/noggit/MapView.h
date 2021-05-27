@@ -55,6 +55,11 @@ namespace noggit
     class ViewToolbar;
   }
 
+  namespace Red
+  {
+    class BrushStack;
+  }
+
 
   class camera;
   namespace ui
@@ -216,7 +221,6 @@ public slots:
 
 public:
   math::vector_4d cursor_color;
-  math::vector_4d shader_color;
 
   MapView ( math::degrees ah0
           , math::degrees av0
@@ -239,6 +243,7 @@ public:
   void randomizeTerrainRotation();
   void randomizeTexturingRotation();
   void randomizeShaderRotation();
+  void randomizeStampRotation();
 
   void set_editing_mode (editing_mode);
 
@@ -359,11 +364,8 @@ private:
   noggit::ui::texturing_tool* texturingTool;
   noggit::ui::hole_tool* holeTool;
   noggit::ui::MinimapCreator* minimapTool;
+  noggit::Red::BrushStack* stampTool;
 
-  QDockWidget _dockStamp;
-  noggit::Red::StampMode::Ui::Tool _modeStampTool;
-  noggit::Red::StampMode::Ui::PaletteMain _modeStampPaletteMain;
-  std::unordered_map<std::string, QPixmap> _images;
   opengl::texture* const _texBrush;
 
   noggit::Red::AssetBrowser::Ui::AssetBrowserWidget* _asset_browser;

@@ -875,9 +875,10 @@ void MapTile::saveTile(World* world)
     lMODF_Data[lID].pos[0] = object.pos.x;
     lMODF_Data[lID].pos[1] = object.pos.y;
     lMODF_Data[lID].pos[2] = object.pos.z;
-    lMDDF_Data[lID].rot[0] = object.dir.x._;
-    lMDDF_Data[lID].rot[1] = object.dir.y._;
-    lMDDF_Data[lID].rot[2] = object.dir.z._;
+
+    lMODF_Data[lID].rot[0] = object.dir.x._;
+    lMODF_Data[lID].rot[1] = object.dir.y._;
+    lMODF_Data[lID].rot[2] = object.dir.z._;
 
     lMODF_Data[lID].extents[0][0] = object.extents[0].x;
     lMODF_Data[lID].extents[0][1] = object.extents[0].y;

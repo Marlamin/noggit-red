@@ -132,7 +132,8 @@ void ColorPreview::setColor(const QColor &c)
 {
     p->col = c;
     update();
-    Q_EMIT colorChanged(c);
+    auto color = c; // TODO: this is here to avoid crash. why though? dead reference?
+    Q_EMIT colorChanged(color);
 }
 
 void ColorPreview::setComparisonColor(const QColor &c)

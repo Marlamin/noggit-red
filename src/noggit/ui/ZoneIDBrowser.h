@@ -23,6 +23,7 @@ namespace noggit
       void setMapID(int id);
       void setZoneID(int id);
       void changeRadius(float change);
+      void setRadius(float radius);
 
       float brushRadius() const { return _radius; }
 

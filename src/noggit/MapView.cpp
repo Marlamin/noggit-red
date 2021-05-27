@@ -40,6 +40,7 @@
 #include <noggit/Red/PresetEditor/Ui/PresetEditor.hpp>
 #include <noggit/Red/NodeEditor/Ui/NodeEditor.hpp>
 #include <noggit/Red/UiCommon/ImageBrowser.hpp>
+#include <noggit/Red/BrushStack/BrushStack.hpp>
 #include <external/imguipiemenu/PieMenu.hpp>
 #include <noggit/ui/object_palette.hpp>
 #include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
@@ -225,9 +226,6 @@ void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
   case editing_mode::paint:
     _texture_browser_dock->setVisible(!ui_hidden && _settings->value("map_view/texture_browser", false).toBool());
     _texture_palette_dock->setVisible(!ui_hidden && _settings->value("map_view/texture_palette", false).toBool());
-    break;
-  case editing_mode::stamp:
-    _dockStamp.setVisible(!ui_hidden);
     break;
   default:
     break;
@@ -508,7 +506,7 @@ void MapView::setupTexturePainterUi()
   connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
     ,  [this]
             {
-              if (terrainMode == editing_mode::paint && !ui_hidden)
+              if ((terrainMode == editing_mode::paint || terrainMode == editing_mode::stamp)  && !ui_hidden)
               {
                 _texture_browser_dock->setVisible(_show_texture_palette_window.get());
               }
@@ -676,7 +674,7 @@ void MapView::setupWaterEditorUi()
 }
 void MapView::setupVertexPainterUi()
 {
-  shaderTool = new noggit::ui::shader_tool(shader_color, this, this);
+  shaderTool = new noggit::ui::shader_tool(this, this);
   _tool_panel_dock->registerTool("Vertex Painter", shaderTool);
 }
 void MapView::setupObjectEditorUi()
@@ -732,7 +730,8 @@ void MapView::setupMinimapEditorUi()
 }
 void MapView::setupStampUi()
 {
-
+  stampTool = new noggit::Red::BrushStack(this, this);
+  _tool_panel_dock->registerTool("Stamp", stampTool);
 }
 
 void MapView::setupNodeEditor()
@@ -1842,7 +1841,6 @@ MapView::MapView( math::degrees camera_yaw0
   , _from_bookmark (from_bookmark)
   , _settings (new QSettings (this))
   , cursor_color (1.f, 1.f, 1.f, 1.f)
-  , shader_color (1.f, 1.f, 1.f, 1.f)
   , _cursorType{CursorType::CIRCLE}
   , _main_window (main_window)
   , _world (std::move (world))
@@ -1851,9 +1849,6 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_area (new QLabel (this))
   , _status_time (new QLabel (this))
   , _status_fps (new QLabel (this))
-  , _dockStamp{"Stamp Tool", this}
-  , _modeStampTool{&_showStampPalette, &_cursorRotation, this}
-  , _modeStampPaletteMain{this}
   , _texBrush{new opengl::texture{}}
   , _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW)
   , _tablet_manager(noggit::TabletManager::instance())
@@ -1920,10 +1915,6 @@ MapView::MapView( math::degrees camera_yaw0
   _startup_time.start();
   _update_every_event_loop.start (0);
   connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
-  _dockStamp.setWidget(&_modeStampTool);
-  connect(&_showStampPalette, &noggit::bool_toggle_property::changed, &_modeStampPaletteMain, &QWidget::show);
-  connect(&_modeStampPaletteMain, &noggit::Red::StampMode::Ui::PaletteMain::itemSelected, &_modeStampTool, &noggit::Red::StampMode::Ui::Tool::setPixmap);
-
   createGUI();
 }
 
@@ -2813,6 +2804,19 @@ void MapView::tick (float dt)
             }
           }
           break;
+        case editing_mode::stamp:
+          if (_display_mode == display_mode::in_3D && (_mod_shift_down || _mod_ctrl_down || _mod_alt_down) && stampTool->getBrushMode())
+          {
+            auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eNO_FLAG,
+                                                           noggit::ActionModalityControllers::eSHIFT
+                                                           | noggit::ActionModalityControllers::eLMB);
+
+            if (!stampTool->getBrushMode())
+              action->setBlockCursor(true);
+
+            stampTool->execute(_cursor_pos, _world.get(), dt, _mod_shift_down, _mod_alt_down, _mod_ctrl_down, underMap);
+          }
+          break;
         case editing_mode::mccv:
           if (!underMap)
           {
@@ -2861,14 +2865,6 @@ void MapView::tick (float dt)
             }
           }
           break;
-          case editing_mode::stamp:
-            if(!underMap)
-            {
-              if(_mod_shift_down)
-                _modeStampTool.stamp(_world.get(), _cursor_pos, dt, true);
-              else if(_mod_ctrl_down)
-                _modeStampTool.stamp(_world.get(), _cursor_pos, dt, false);
-            }
           default:
             break;
         }
@@ -3396,10 +3392,6 @@ void MapView::draw_map()
   case editing_mode::minimap:
     radius = minimapTool->brushRadius();
     break;
-  case editing_mode::stamp:
-    radius = _modeStampTool.getOuterRadius();
-    inner_radius = _modeStampTool.getInnerRadius() / radius;
-    break;
   default:
     break;
   }
@@ -3415,7 +3407,7 @@ void MapView::draw_map()
                , projection().transposed()
                , _cursor_pos
                , _cursorRotation
-               , terrainMode == editing_mode::mccv ? shader_color : cursor_color
+               , terrainMode == editing_mode::mccv ? shaderTool->shaderColor() : cursor_color
                , _cursorType
                , radius
                , texturingTool->show_unpaintable_chunks()
@@ -3772,9 +3764,13 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       }
 
     }
-    if (terrainMode == editing_mode::paint)
+    else if (terrainMode == editing_mode::paint)
     {
       texturingTool->change_hardness(relative_movement.dx() / 300.0f);
+    }
+    else if (terrainMode == editing_mode::stamp)
+    {
+      stampTool->changeInnerRadius(relative_movement.dx() / 300.0f);
     }
   }
 
@@ -3853,6 +3849,15 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       }
 
     }
+    else if (terrainMode == editing_mode::stamp)
+    {
+
+      auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
+                                                                   noggit::ActionModalityControllers::eRMB
+                                                                   | noggit::ActionModalityControllers::eSPACE);
+      stampTool->changeRotation(-relative_movement.dx() / XSENS * 10.f);
+      action->setBlockCursor(true);
+    }
   }
 
   if (leftMouse && _mod_alt_down)
@@ -3886,6 +3891,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     case editing_mode::minimap:
       minimapTool->changeRadius(relative_movement.dx() / XSENS);
       break;
+    case editing_mode::stamp:
+      stampTool->changeRadius(relative_movement.dx() / XSENS);
+      break;
     default:
       break;
     }
@@ -3906,6 +3914,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       break;
     case editing_mode::mccv:
       shaderTool->changeSpeed(relative_movement.dx() / XSENS);
+      break;
+    case editing_mode::stamp:
+      stampTool->changeSpeed(relative_movement.dx() / XSENS);
       break;
     default:
       break;
@@ -3937,6 +3948,18 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
         terrainTool->changeTerrain(_world.get(), _cursor_pos, relative_movement.dx() / 30.0f);
       }
     }
+    else if (terrainMode == editing_mode::stamp && _display_mode == display_mode::in_3D && !stampTool->getBrushMode())
+    {
+      auto action = noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eNO_FLAG,
+                                                                   noggit::ActionModalityControllers::eSHIFT
+                                                                   | noggit::ActionModalityControllers::eLMB);
+
+      action->setPostCallback(&MapView::randomizeStampRotation);
+      action->setBlockCursor(true);
+
+      stampTool->execute(_cursor_pos, _world.get(), relative_movement.dx() / 30.0f, _mod_shift_down, _mod_alt_down, _mod_ctrl_down, false);
+    }
+
   }
 
   if (_display_mode == display_mode::in_2D && leftMouse && _mod_alt_down && _mod_shift_down)
@@ -4279,6 +4302,18 @@ void MapView::randomizeShaderRotation()
   std::uniform_int_distribution<> uid(0, 360);
 
   image_mask_selector->setRotation(uid(gen));
+}
+
+void MapView::randomizeStampRotation()
+{
+  if (!stampTool->getRandomizeRotation())
+    return;
+
+  unsigned int ms = static_cast<unsigned>(QDateTime::currentMSecsSinceEpoch());
+  std::mt19937 gen(ms);
+  std::uniform_int_distribution<> uid(0, 360);
+
+  stampTool->changeRotation(uid(gen));
 }
 
 void MapView::unloadOpenglData(bool from_manager)

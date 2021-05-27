@@ -231,7 +231,7 @@ includePlattform("prefind")
 FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
-find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions)
+find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network REQUIRED)
 
 
 if (USE_SQL)
