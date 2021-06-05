@@ -17,7 +17,8 @@
 #include <noggit/Action.hpp>
 #include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
 
-#include <cmath>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace noggit
 {
