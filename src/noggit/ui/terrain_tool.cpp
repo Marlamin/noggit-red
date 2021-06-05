@@ -16,7 +16,8 @@
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
 
-#include <cmath>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 namespace noggit
 {

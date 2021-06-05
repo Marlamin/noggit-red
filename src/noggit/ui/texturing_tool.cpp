@@ -17,6 +17,9 @@
 #include <QtWidgets/QTabWidget>
 #include <noggit/Red/UiCommon/ExtendedSlider.hpp>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 namespace noggit
 {
   namespace ui
