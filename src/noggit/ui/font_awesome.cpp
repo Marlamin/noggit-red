@@ -14,6 +14,7 @@ namespace noggit
 {
   namespace ui
   {
+
     font_awesome_icon_engine::font_awesome_icon_engine (const QString& text)
       : QIconEngine()
       ,_text (text)

@@ -46,18 +46,22 @@ BrushStackItem::BrushStackItem(QWidget* parent)
   _is_radius_affecting = new QCheckBox("Inherit radius", _settings_popup);
   _is_radius_affecting->setChecked(true);
   _settings_popup_layout->addWidget(_is_radius_affecting);
+  connect(_is_radius_affecting, &QCheckBox::clicked, [=](bool checked) { emit settingsChanged(this); });
 
   _is_inner_radius_affecting = new QCheckBox("Inherit inner radius", _settings_popup);
   _is_inner_radius_affecting->setChecked(true);
   _settings_popup_layout->addWidget(_is_inner_radius_affecting);
+  connect(_is_inner_radius_affecting, &QCheckBox::clicked, [=](bool checked) { emit settingsChanged(this); });
 
   _is_mask_rotation_affecting = new QCheckBox("Inherit rotation", _settings_popup);
   _is_mask_rotation_affecting->setChecked(true);
   _settings_popup_layout->addWidget(_is_mask_rotation_affecting);
+  connect(_is_mask_rotation_affecting, &QCheckBox::clicked, [=](bool checked) { emit settingsChanged(this); });
 
   _is_speed_affecting = new QCheckBox("Inherit speed", _settings_popup);
   _is_mask_rotation_affecting->setChecked(true);
   _settings_popup_layout->addWidget(_is_speed_affecting);
+  connect(_is_speed_affecting, &QCheckBox::clicked, [=](bool checked) { emit settingsChanged(this); });
 
   _settings_popup->updateGeometry();
   _settings_popup->adjustSize();
@@ -155,6 +159,161 @@ void BrushStackItem::setBrushMode(bool sculpt)
   }
 }
 
+QJsonObject BrushStackItem::toJSON()
+{
+  switch(_tool_widget.which())
+  {
+    case eRaiseLower:
+    {
+      return boost::get<noggit::ui::terrain_tool*>(_tool_widget)->toJSON();
+    }
+    case eFlattenBlur:
+    {
+      return boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->toJSON();
+    }
+    case eTexturing:
+    {
+      return boost::get<noggit::ui::texturing_tool*>(_tool_widget)->toJSON();
+    }
+    case eShader:
+    {
+      return boost::get<noggit::ui::shader_tool*>(_tool_widget)->toJSON();
+    }
+  }
+}
+
+void BrushStackItem::fromJSON(QJsonObject const& json)
+{
+  switch(_tool_widget.which())
+  {
+    case eRaiseLower:
+    {
+      return boost::get<noggit::ui::terrain_tool*>(_tool_widget)->fromJSON(json);
+    }
+    case eFlattenBlur:
+    {
+      return boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->fromJSON(json);
+    }
+    case eTexturing:
+    {
+      return boost::get<noggit::ui::texturing_tool*>(_tool_widget)->fromJSON(json);
+    }
+    case eShader:
+    {
+      return boost::get<noggit::ui::shader_tool*>(_tool_widget)->fromJSON(json);
+    }
+  }
+}
+
+void BrushStackItem::syncSliders(double radius, double inner_radius, double speed, int rot, int brushMode)
+{
+  switch(_tool_widget.which())
+  {
+      case eRaiseLower:
+      {
+        auto rad_slider = boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getRadiusSlider();
+        rad_slider->setEnabled(!_is_radius_affecting->isChecked());
+
+        if (_is_radius_affecting->isChecked())
+          rad_slider->setValue(radius);
+
+        auto inner_rad_slider = boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getInnerRadiusSlider();
+        inner_rad_slider->setEnabled(!_is_inner_radius_affecting->isChecked());
+
+        if (_is_inner_radius_affecting->isChecked())
+          inner_rad_slider->setValue(inner_radius);
+
+        auto speed_slider = boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getSpeedSlider();
+        speed_slider->setEnabled(!_is_speed_affecting->isChecked());
+
+        if (_is_speed_affecting->isChecked())
+          speed_slider->setValue(speed);
+
+        auto rot_dial = boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getMaskOrientationDial();
+        rot_dial->setEnabled(!_is_mask_rotation_affecting->isChecked());
+
+        if (_is_mask_rotation_affecting->isChecked())
+          rot_dial->setValue(rot);
+
+        boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
+
+        break;
+
+      }
+      case eFlattenBlur:
+      {
+        auto rad_slider = boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->getRadiusSlider();
+        rad_slider->setEnabled(!_is_radius_affecting->isChecked());
+
+        if (_is_radius_affecting->isChecked())
+          rad_slider->setValue(radius);
+
+        auto speed_slider = boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->getSpeedSlider();
+        speed_slider->setEnabled(!_is_speed_affecting->isChecked());
+
+        if (_is_speed_affecting->isChecked())
+          speed_slider->setValue(speed);
+
+        break;
+      }
+      case eTexturing:
+      {
+        auto rad_slider = boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getRadiusSlider();
+        rad_slider->setEnabled(!_is_radius_affecting->isChecked());
+
+        if (_is_radius_affecting->isChecked())
+          rad_slider->setValue(radius);
+
+        auto inner_rad_slider = boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getInnerRadiusSlider();
+        inner_rad_slider->setEnabled(!_is_inner_radius_affecting->isChecked());
+
+        if (_is_inner_radius_affecting->isChecked())
+          inner_rad_slider->setValue(inner_radius);
+
+        auto speed_slider = boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getSpeedSlider();
+        speed_slider->setEnabled(!_is_speed_affecting->isChecked());
+
+        if (_is_speed_affecting->isChecked())
+          speed_slider->setValue(speed);
+
+        auto rot_dial = boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getMaskOrientationDial();
+        rot_dial->setEnabled(!_is_mask_rotation_affecting->isChecked());
+
+        if (_is_mask_rotation_affecting->isChecked())
+          rot_dial->setValue(rot);
+
+
+        boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
+
+        break;
+      }
+      case eShader:
+      {
+        auto rad_slider = boost::get<noggit::ui::shader_tool*>(_tool_widget)->getRadiusSlider();
+        rad_slider->setEnabled(!_is_radius_affecting->isChecked());
+
+        if (_is_radius_affecting->isChecked())
+          rad_slider->setValue(radius);
+
+        auto speed_slider = boost::get<noggit::ui::shader_tool*>(_tool_widget)->getSpeedSlider();
+        speed_slider->setEnabled(!_is_speed_affecting->isChecked());
+
+        if (_is_speed_affecting->isChecked())
+          speed_slider->setValue(speed);
+
+        auto rot_dial = boost::get<noggit::ui::shader_tool*>(_tool_widget)->getMaskOrientationDial();
+        rot_dial->setEnabled(!_is_mask_rotation_affecting->isChecked());
+
+        if (_is_mask_rotation_affecting->isChecked())
+          rot_dial->setValue(rot);
+
+        boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
+
+        break;
+      }
+    }
+}
+
 void BrushStackItem::setRadius(float radius)
 {
   switch(_tool_widget.which())
@@ -211,13 +370,13 @@ void BrushStackItem::setMaskRotation(int rot)
   switch(_tool_widget.which())
   {
     case eRaiseLower:
-      boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setRotation(rot);
+      boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
       break;
     case eTexturing:
-      boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setRotation(rot);
+      boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
       break;
     case eShader:
-      boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setRotation(rot);
+      boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
       break;
   }
 }

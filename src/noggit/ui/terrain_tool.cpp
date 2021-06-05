@@ -15,7 +15,6 @@
 
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
-#include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
 
 #include <cmath>
 
@@ -378,6 +377,40 @@ namespace noggit
     QSize terrain_tool::sizeHint() const
     {
       return QSize(250, height());
+    }
+
+    QJsonObject terrain_tool::toJSON()
+    {
+      QJsonObject json;
+
+      json["brush_action_type"] = "TERRAIN";
+
+      json["radius"] = _radius_slider->rawValue();
+      json["inner_radius"] = _inner_radius_slider->rawValue();
+      json["speed"] = _speed_slider->rawValue();
+      json["edit_type"] = static_cast<int>(_edit_type);
+
+      json["mask_enabled"] = _image_mask_group->isEnabled();
+      json["brush_mode"] = _image_mask_group->getBrushMode();
+      json["randomize_rot"] = _image_mask_group->getRandomizeRotation();
+      json["mask_rot"] = _image_mask_group->getRotation();
+      json["mask_image"] = _image_mask_group->getImageMaskPath();
+
+      return json;
+    }
+
+    void terrain_tool::fromJSON(QJsonObject const& json)
+    {
+      _radius_slider->setValue(json["radius"].toDouble());
+      _inner_radius_slider->setValue(json["inner_radius"].toDouble());
+      _speed_slider->setValue(json["speed"].toDouble());
+      _edit_type = static_cast<eTerrainType>(json["edit_type"].toInt());
+
+      _image_mask_group->setEnabled(json["mask_enabled"].toBool());
+      _image_mask_group->setBrushMode(json["brush_mode"].toInt());
+      _image_mask_group->setRandomizeRotation(json["randomize_rot"].toBool());
+      _image_mask_group->setRotationRaw(json["mask_rot"].toInt());
+      _image_mask_group->setImageMask(json["mask_image"].toString());
     }
   }
 }

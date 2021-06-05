@@ -4,10 +4,14 @@
 #define NOGGIT_BRUSHSTACK_HPP
 
 #include <ui_BrushStack.h>
+#include "BrushStackItem.hpp"
 
 #include <QWidget>
 #include <QComboBox>
+#include <QButtonGroup>
 #include <math/vector_3d.hpp>
+
+#include <QJsonObject>
 
 
 class MapView;
@@ -33,11 +37,19 @@ namespace noggit::Red
     bool getBrushMode() { return _ui.sculptRadio->isChecked(); };
     bool getRandomizeRotation() { return _ui.randomizeRotation->isChecked(); };
 
+    QJsonObject toJSON();
+    void fromJSON(QJsonObject const& json);
+
   private:
+
+    void addAction(BrushStackItem* brush_stack_item);
+
     Ui::brushStack _ui;
     QWidget* _add_popup;
     QComboBox* _add_operation_combo;
     MapView* _map_view;
+    QButtonGroup* _active_item_button_group;
+    BrushStackItem* _active_item = nullptr;
 
   };
 }

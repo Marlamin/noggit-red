@@ -43,12 +43,7 @@ ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
   connect(_image_browser, &ImageBrowser::imageSelected,
           [this, parent](QString name)
           {
-            _pixmap = QPixmap(name);
-
-            _ui.curImageLabel->setPixmap(_pixmap.scaled(128, 128));
-            _ui.curImageLabel->setToolTip(name);
-
-            emit pixmapUpdated(&_pixmap);
+            setImageMask(name);
           });
 
   connect(_ui.dial, &QDial::valueChanged,
@@ -60,6 +55,18 @@ ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
   _ui.brushMode->setId(_ui.stampRadio, 0);
   _ui.brushMode->setId(_ui.sculptRadio, 1);
 
+}
+
+void ImageMaskSelector::setImageMask(QString const& path)
+{
+  _pixmap = QPixmap(path);
+
+  _ui.curImageLabel->setPixmap(_pixmap.scaled(128, 128));
+  _ui.curImageLabel->setToolTip(path);
+
+  _image_path = path;
+
+  emit pixmapUpdated(&_pixmap);
 }
 
 void ImageMaskSelector::setRotation(int value)

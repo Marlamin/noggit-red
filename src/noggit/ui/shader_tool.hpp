@@ -16,6 +16,8 @@
 #include <qt-color-widgets/gradient_slider.hpp>
 #include <qt-color-widgets/color_list_widget.hpp>
 
+#include <QJsonObject>
+
 class World;
 class MapView;
 
@@ -48,6 +50,12 @@ namespace noggit
 
       math::vector_4d& shaderColor() { return _color; };
 
+      noggit::Red::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
+      noggit::Red::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
+      QDial* getMaskOrientationDial() { return _image_mask_group->getMaskOrientationDial(); };
+
+      QJsonObject toJSON();
+      void fromJSON(QJsonObject const& json);
 
     private:
       math::vector_4d _color;

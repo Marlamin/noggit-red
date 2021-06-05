@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "BrushStack.hpp"
-#include "BrushStackItem.hpp"
 #include <noggit/MapView.h>
 
 #include <QPushButton>
+#include <QJsonArray>
 
 using namespace noggit::Red;
 
@@ -17,6 +17,10 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
   layout()->setAlignment(Qt::AlignTop);
   setMinimumWidth(250);
   setMaximumWidth(250);
+
+  _ui.radiusSlider->setTabletSupportEnabled(false);
+  _ui.innerRadiusSlider->setTabletSupportEnabled(false);
+  _ui.speedSlider->setTabletSupportEnabled(false);
 
   _add_popup = new QWidget(this);
   auto _add_popup_layout = new QVBoxLayout(_add_popup);
@@ -31,6 +35,8 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
   auto okay_button = new QPushButton(_add_popup);
   okay_button->setText("Okay");
   _add_popup_layout->addWidget(okay_button);
+
+  _active_item_button_group = new QButtonGroup(this);
 
 
   connect(okay_button, &QPushButton::clicked,
@@ -51,12 +57,11 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
                 brush_stack_item->setTool(new noggit::ui::texturing_tool(&_map_view->getCamera()->position, _map_view, nullptr, this));
                 break;
               case eTools::eShader:
-              {
                 brush_stack_item->setTool(new noggit::ui::shader_tool(_map_view, this));
                 break;
-              }
             }
 
+            addAction(brush_stack_item);
           });
 
   _add_popup->updateGeometry();
@@ -84,7 +89,18 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
   connect(_ui.clearBrushesButton, &QPushButton::clicked,
           [=]()
           {
-            //_ui.brushList->clear();
+            for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
+            {
+              auto item = _ui.brushList->layout()->itemAt(i);
+              _ui.brushList->layout()->removeItem(item);
+
+              _active_item_button_group->removeButton(static_cast<BrushStackItem*>(item->widget())->getActiveButton());
+
+              item->widget()->deleteLater();
+              delete item;
+            }
+
+            _active_item = nullptr;
           });
 
   connect(_ui.radiusSlider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged,
@@ -165,6 +181,50 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
 
 }
 
+void BrushStack::addAction(BrushStackItem* brush_stack_item)
+{
+  _active_item_button_group->addButton(brush_stack_item->getActiveButton());
+  brush_stack_item->syncSliders(_ui.radiusSlider->value(), _ui.innerRadiusSlider->value(), _ui.speedSlider->value(), _ui.brushRotation->value(), _ui.sculptRadio->isChecked());
+
+  _active_item = brush_stack_item;
+  brush_stack_item->getActiveButton()->setChecked(true);
+
+  connect(brush_stack_item, &BrushStackItem::settingsChanged,
+          [this](BrushStackItem* item)
+          {
+            item->syncSliders(_ui.radiusSlider->value(), _ui.innerRadiusSlider->value(), _ui.speedSlider->value(), _ui.brushRotation->value(), _ui.sculptRadio->isChecked());
+          });
+
+  connect(brush_stack_item, &BrushStackItem::activated,
+          [this](BrushStackItem* item)
+          {
+            _active_item = item;
+          });
+
+  connect(brush_stack_item, &BrushStackItem::requestDelete,
+          [this](BrushStackItem* item)
+          {
+            if (_active_item == item)
+              _active_item = nullptr;
+
+            for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
+            {
+              auto l_item = _ui.brushList->layout()->itemAt(i);
+
+              if (l_item->widget() != item)
+                continue;
+
+              _active_item_button_group->removeButton(static_cast<BrushStackItem*>(l_item->widget())->getActiveButton());
+              _ui.brushList->layout()->removeItem(l_item);
+
+              l_item->widget()->deleteLater();
+              delete l_item;
+            }
+
+          });
+
+}
+
 void BrushStack::execute(math::vector_3d const& cursor_pos, World* world, float dt, bool mod_shift_down, bool mod_alt_down, bool mod_ctrl_down, bool is_under_map)
 {
   for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
@@ -216,4 +276,74 @@ void BrushStack::changeRotation(int change)
     orientation += 360;
   }
   _ui.brushRotation->setSliderPosition(orientation);
+}
+
+QJsonObject BrushStack::toJSON()
+{
+  QJsonObject json;
+  QJsonArray array;
+
+  for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
+  {
+    array.append(reinterpret_cast<BrushStackItem*>(_ui.brushList->layout()->itemAt(i)->widget())->toJSON());
+  }
+
+  json["actions"] = array;
+
+  return json;
+}
+
+void BrushStack::fromJSON(const QJsonObject& json)
+{
+  if (!json.contains("actions"))
+  {
+    LogError << "Attempted loaded malformed brush." << std::endl;
+    return;
+  }
+
+  QJsonArray array = json["actions"].toArray();
+
+  for (int i = 0; i < array.count(); ++i)
+  {
+    QJsonObject obj = array[i].toObject();
+
+    if (!obj.contains("brush_action_type"))
+    {
+      LogError << "Attempted loaded malformed brush." << std::endl;
+      continue;
+    }
+
+    QString type = obj["brush_action_type"].toString();
+
+    auto brush_stack_item = new BrushStackItem(this);
+    _ui.brushList->layout()->addWidget(brush_stack_item);
+
+    if (type == "TERRAIN")
+    {
+      brush_stack_item->setTool(new noggit::ui::terrain_tool(_map_view, this, true));
+    }
+    else if (type == "FLATTEN_BLUR")
+    {
+      brush_stack_item->setTool(new noggit::ui::flatten_blur_tool(this));
+    }
+    else if (type == "TEXTURING")
+    {
+      brush_stack_item->setTool(new noggit::ui::texturing_tool(&_map_view->getCamera()->position, _map_view, nullptr, this));
+    }
+    else if (type == "SHADER")
+    {
+      brush_stack_item->setTool(new noggit::ui::shader_tool(_map_view, this));
+    }
+    else
+    {
+      brush_stack_item->deleteLater();
+      LogError << "Attempted loaded malformed brush." << std::endl;
+      continue;
+    }
+
+    brush_stack_item->fromJSON(obj);
+    addAction(brush_stack_item);
+
+  }
+
 }

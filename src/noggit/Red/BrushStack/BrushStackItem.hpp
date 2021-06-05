@@ -7,6 +7,7 @@
 #include <QIcon>
 #include <QCheckBox>
 #include <QToolButton>
+#include <QJsonObject>
 #include <ui_BrushStackItem.h>
 #include <boost/variant.hpp>
 #include <boost/optional.hpp>
@@ -57,15 +58,23 @@ namespace noggit::Red
     void setMaskRotation(int rot);
     void setBrushMode(bool sculpt);
     void execute(math::vector_3d const& cursor_pos, World* world, float dt, bool mod_shift_down, bool mod_alt_down, bool mod_ctrl_down, bool is_under_map);
+    void syncSliders(double radius, double inner_radius, double speed, int rot, int brushMode);
 
     bool isRadiusAffecting() { return _is_radius_affecting->isChecked(); };
     bool isInnerRadiusAffecting() { return _is_inner_radius_affecting->isChecked(); };
     bool isMaskRotationAffecting() { return _is_mask_rotation_affecting->isChecked(); };
     bool isSpeedAffecting() { return _is_speed_affecting->isChecked(); };
+    QToolButton* getActiveButton() { return _ui.brushNameLabel; };
+
+
+
+    QJsonObject toJSON();
+    void fromJSON(QJsonObject const& json);
 
   signals:
     void requestDelete(BrushStackItem* item);
     void activated(BrushStackItem* item);
+    void settingsChanged(BrushStackItem* item);
 
   private:
     Ui::brushStackItem _ui;
@@ -84,7 +93,6 @@ namespace noggit::Red
     boost::optional<scoped_blp_texture_reference> _selected_texture;
     noggit::ui::tileset_chooser* _texture_palette = nullptr;
     bool _is_texture_dirty = false;
-    int _selected_area_id = 0;
 
   };
 }

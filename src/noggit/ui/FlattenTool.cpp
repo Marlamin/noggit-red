@@ -308,5 +308,52 @@ namespace noggit
     {
       return QSize(250, height());
     }
+
+    QJsonObject flatten_blur_tool::toJSON()
+    {
+      QJsonObject json;
+
+      json["brush_action_type"] = "FLATTEN_BLUR";
+
+      json["speed"] = _speed_slider->rawValue();
+      json["radius"] = _radius_slider->rawValue();
+
+      int flag = 0;
+      flag |= _flatten_mode.raise ? 0x1 : 0x0;
+      flag |= _flatten_mode.lower ? 0x2 : 0x0;
+
+      json["flatten_mode"] = flag;
+      json["flatten_type"] = _flatten_type;
+      json["angle"] = _angle_slider->value();
+      json["use_angle"] = _angle_group->isChecked();
+      json["orientation"] = _orientation_dial->value();
+      json["use_angle"] = _angle_group->isChecked();
+      json["use_lock"] = _lock_group->isChecked();
+      json["lock_x"] = _lock_x->value();
+      json["lock_z"] = _lock_z->value();
+      json["lock_h"] = _lock_h->value();
+
+      return json;
+    }
+
+    void flatten_blur_tool::fromJSON(const QJsonObject& json)
+    {
+      _speed_slider->setValue(json["speed"].toDouble());
+      _radius_slider->setValue(json["radius"].toDouble());
+
+      int flag = json["flatten_mode"].toInt();
+      _flatten_mode.raise = flag & 0x1;
+      _flatten_mode.lower = flag & 0x2;
+
+      _flatten_type = json["flatten_type"].toInt();
+      _angle_slider->setValue(json["angle"].toDouble());
+      _angle_group->setChecked(json["use_angle"].toBool());
+      _orientation_dial->setValue(json["orientation"].toDouble());
+      _angle_group->setChecked(json["use_angle"].toBool());
+      _lock_group->setChecked(json["use_lock"].toBool());
+      _lock_x->setValue(json["lock_x"].toDouble());
+      _lock_z->setValue(json["lock_z"].toDouble());
+      _lock_h->setValue(json["lock_h"].toDouble());
+    }
   }
 }

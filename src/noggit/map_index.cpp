@@ -895,6 +895,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
   {
     instance.uid = highestGUID++;
     instance.model->wait_until_loaded();
+    instance.recalcExtents();
 
     loading_error |= instance.model->loading_failed();
 
@@ -920,6 +921,8 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
   for (WMOInstance& instance : wmos)
   {
     instance.uid = highestGUID++;
+    instance.wmo->wait_until_loaded();
+    instance.recalcExtents();
     // no need to check if the loading is finished since the extents are stored inside the adt
     // to avoid going outside of bound
     std::size_t sx = std::max((std::size_t)(instance.extents[0].x / TILESIZE), (std::size_t)0);

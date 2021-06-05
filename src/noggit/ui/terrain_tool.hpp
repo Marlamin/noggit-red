@@ -6,6 +6,7 @@
 #include <math/vector_3d.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/Red/UiCommon/ExtendedSlider.hpp>
+#include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
 
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDial>
@@ -14,16 +15,13 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 #include <QImage>
+#include <QJsonObject>
 
 class World;
 class MapView;
 
 namespace noggit
 {
-  namespace Red
-  {
-    class ImageMaskSelector;
-  }
 
   namespace ui
   {
@@ -48,6 +46,11 @@ namespace noggit
       void setSpeed (float speed);
       float getSpeed () { return _speed_slider->value(); };
 
+      noggit::Red::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
+      noggit::Red::UiCommon::ExtendedSlider* getInnerRadiusSlider() { return _inner_radius_slider; };
+      noggit::Red::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
+      QDial* getMaskOrientationDial() { return _image_mask_group->getMaskOrientationDial(); };
+
       // vertex edit only functions
       void moveVertices (World*, float dt);
       void flattenVertices (World*);
@@ -68,6 +71,9 @@ namespace noggit
       QSize sizeHint() const override;
 
       eTerrainType _edit_type;
+
+      QJsonObject toJSON();
+      void fromJSON(QJsonObject const& json);
 
     signals:
       void updateVertices(int vertex_mode, math::degrees const& angle, math::degrees const& orientation);

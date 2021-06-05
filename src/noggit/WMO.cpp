@@ -1233,8 +1233,8 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
   bool exterior_lit = header.flags.exterior_lit | header.flags.exterior;
   int has_mocv = header.flags.has_vertex_color | header.flags.use_mocv2_for_texture_blending;
 
-  wmo_shader.uniform("use_vertex_color", has_mocv);
-  wmo_shader.uniform("exterior_lit", (int)exterior_lit);
+  wmo_shader.uniform_cached("use_vertex_color", has_mocv);
+  wmo_shader.uniform_cached("exterior_lit", (int)exterior_lit);
 
   opengl::scoped::vao_binder const _ (_vao);
 
@@ -1277,11 +1277,11 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
         break;
     }    
 
-    wmo_shader.uniform("shader_id", (int)mat.shader);
+    wmo_shader.uniform_cached("shader_id", (int)mat.shader);
 
-    wmo_shader.uniform("alpha_test", alpha_test);
-    wmo_shader.uniform("unfogged", (int)mat.flags.unfogged);
-    wmo_shader.uniform("unlit", (int)mat.flags.unlit);
+    wmo_shader.uniform_cached("alpha_test", alpha_test);
+    wmo_shader.uniform_cached("unfogged", (int)mat.flags.unfogged);
+    wmo_shader.uniform_cached("unlit", (int)mat.flags.unlit);
 
     if (mat.flags.unculled)
     {

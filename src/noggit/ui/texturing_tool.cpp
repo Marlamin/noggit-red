@@ -50,7 +50,7 @@ namespace noggit
       layout->addWidget (_current_texture);
       layout->setAlignment(_current_texture, Qt::AlignHCenter);
 
-      auto tabs (new QTabWidget(this));
+      tabs = new QTabWidget(this);
 
       auto tool_widget (new QWidget (this));
       auto tool_layout (new QVBoxLayout (tool_widget));
@@ -576,6 +576,78 @@ namespace noggit
     QSize texturing_tool::sizeHint() const
     {
       return QSize(215, height());
+    }
+
+    QJsonObject texturing_tool::toJSON()
+    {
+      QJsonObject json;
+
+      json["brush_action_type"] = "TEXTURING";
+
+      json["current_texture"] = QString(_current_texture->filename().c_str());
+      json["hardness"] = _hardness_slider->rawValue();
+      json["pressure"] = _pressure_slider->rawValue();
+      json["radius"] = _radius_slider->rawValue();
+      json["brush_level"] = _brush_level_spin->value();
+      json["texturing_mode"] = static_cast<int>(_texturing_mode);
+      json["show_unpaintable_chunks"] = _show_unpaintable_chunks_cb->isChecked();
+
+      json["anim"] = _anim_prop.get();
+      json["anim_speed"] = static_cast<int>(_anim_speed_prop.get());
+      json["anim_rot"] = static_cast<int>(_anim_rotation_prop.get());
+      json["overbright"] = _overbright_prop.get();
+
+      json["mask_enabled"] = _image_mask_group->isEnabled();
+      json["brush_mode"] = _image_mask_group->getBrushMode();
+      json["randomize_rot"] = _image_mask_group->getRandomizeRotation();
+      json["mask_rot"] = _image_mask_group->getRotation();
+      json["mask_image"] = _image_mask_group->getImageMaskPath();
+
+      json["spray"] = _spray_mode_group->isChecked();
+      json["inner_radius_cb"] = _inner_radius_cb->isChecked();
+      json["spray_size"] = _spray_size_spin->value();
+      json["spray_pressure"] = _spray_pressure_spin->value();
+
+      if (_texture_switcher->texture_to_swap().is_initialized())
+        json["texture_to_swap"] = _texture_switcher->texture_to_swap().get()->filename.c_str();
+      else
+        json["texture_to_swap"] = "";
+
+      return json;
+    }
+
+    void texturing_tool::fromJSON(QJsonObject const& json)
+    {
+      _current_texture->set_texture(json["current_texture"].toString().toStdString());
+      _hardness_slider->setValue(json["hardness"].toDouble());
+      _pressure_slider->setValue(json["pressure"].toDouble());
+      _radius_slider->setValue(json["radius"].toDouble());
+      _brush_level_spin->setValue(json["brush_level"].toInt());
+
+      tabs->setCurrentIndex(json["texturing_mode"].toInt());
+      _show_unpaintable_chunks_cb->setChecked(json["show_unpaintable_chunks"].toBool());
+
+      _anim_prop.set(json["anim"].toBool());
+      _anim_speed_prop.set(json["anim_speed"].toInt());
+      _anim_rotation_prop.set(json["anim_rot"].toInt());
+      _overbright_prop.set(json["overbright"].toBool());
+
+      _image_mask_group->setEnabled(json["mask_enabled"].toBool());
+      _image_mask_group->setBrushMode(json["brush_mode"].toInt());
+      _image_mask_group->setRandomizeRotation(json["randomize_rot"].toBool());
+      _image_mask_group->setRotationRaw(json["mask_rot"].toInt());
+      _image_mask_group->setImageMask(json["mask_image"].toString());
+
+      _spray_mode_group->setChecked(json["spray"].toBool());
+      _inner_radius_cb->setChecked(json["inner_radius_cb"].toBool());
+      _spray_size_spin->setValue(json["spray_size"].toDouble());
+      _spray_pressure_spin->setValue(json["spray_pressure"].toDouble());
+
+      auto tex_to_swap_path = json["texture_to_swap"].toString();
+
+      if (!tex_to_swap_path.isEmpty())
+        _texture_switcher->set_texture(tex_to_swap_path.toStdString());
+
     }
   }
 }

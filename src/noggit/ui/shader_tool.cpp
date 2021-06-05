@@ -259,6 +259,40 @@ namespace noggit
       _map_view->setBrushTexture(&_mask_image);
     }
 
+    QJsonObject shader_tool::toJSON()
+    {
+      QJsonObject json;
+
+      json["brush_action_type"] = "SHADER";
+
+      json["radius"] = _radius_slider->rawValue();
+      json["speed"] = _speed_slider->rawValue();
+      json["color_r"] = color_picker->color().redF();
+      json["color_g"] = color_picker->color().greenF();
+      json["color_b"] = color_picker->color().blueF();
+
+      json["mask_enabled"] = _image_mask_group->isEnabled();
+      json["brush_mode"] = _image_mask_group->getBrushMode();
+      json["randomize_rot"] = _image_mask_group->getRandomizeRotation();
+      json["mask_rot"] = _image_mask_group->getRotation();
+      json["mask_image"] = _image_mask_group->getImageMaskPath();
+
+      return json;
+    }
+
+    void shader_tool::fromJSON(QJsonObject const& json)
+    {
+      _radius_slider->setValue(json["radius"].toDouble());
+      _speed_slider->setValue(json["speed"].toDouble());
+      color_picker->setColor(QColor(color_picker->color().redF(), color_picker->color().greenF(), color_picker->color().blueF()));
+
+      _image_mask_group->setEnabled(json["mask_enabled"].toBool());
+      _image_mask_group->setBrushMode(json["brush_mode"].toInt());
+      _image_mask_group->setRandomizeRotation(json["randomize_rot"].toBool());
+      _image_mask_group->setRotationRaw(json["mask_rot"].toInt());
+      _image_mask_group->setImageMask(json["mask_image"].toString());
+    }
+
   }
 
 }

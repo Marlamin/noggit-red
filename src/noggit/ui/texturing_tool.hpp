@@ -16,6 +16,7 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
+#include <QJsonObject>
 
 class World;
 class MapView;
@@ -63,6 +64,11 @@ namespace noggit
       void change_spray_size (float change);
       void change_spray_pressure (float change);
 
+      noggit::Red::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
+      noggit::Red::UiCommon::ExtendedSlider* getInnerRadiusSlider() { return _hardness_slider; };
+      noggit::Red::UiCommon::ExtendedSlider* getSpeedSlider() { return _pressure_slider; };
+      QDial* getMaskOrientationDial() { return _image_mask_group->getMaskOrientationDial(); };
+
       void paint (World* world, math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture);      
 
       Brush const& texture_brush() const
@@ -85,6 +91,9 @@ namespace noggit
       QImage* getMaskImage() { return &_mask_image; }
       texturing_mode getTexturingMode() { return _texturing_mode; };
       void updateMaskImage();
+
+      QJsonObject toJSON();
+      void fromJSON(QJsonObject const& json);
 
     private:
       void change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture);
@@ -133,6 +142,9 @@ namespace noggit
       texture_swapper* _texture_switcher;
 
       noggit::Red::ImageMaskSelector* _image_mask_group;
+
+      QTabWidget* tabs;
+
       QImage _mask_image;
       MapView* _map_view;
     };

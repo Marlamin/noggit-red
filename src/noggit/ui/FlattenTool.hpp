@@ -14,6 +14,8 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 
+#include <QJsonObject>
+
 class World;
 namespace noggit
 {
@@ -50,10 +52,15 @@ namespace noggit
       bool use_ref_pos() const  { return _lock_group->isChecked(); }
       math::vector_3d ref_pos() const { return _lock_pos; }
 
+      noggit::Red::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
+      noggit::Red::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
+
       QSize sizeHint() const override;
 
-    private:
+      QJsonObject toJSON();
+      void fromJSON(QJsonObject const& json);
 
+    private:
       float _angle;
       float _orientation;
 

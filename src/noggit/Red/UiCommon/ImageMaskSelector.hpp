@@ -21,12 +21,17 @@ namespace noggit::Red
     bool isEnabled() { return _ui.groupBox->isChecked(); };
     int getRotation() { return _ui.dial->value(); };
     void setRotation(int value);
+    void setRotationRaw(int value) { _ui.dial->setValue(value); };
     int getBrushMode() { return  _ui.brushMode->checkedId(); };
     void setBrushMode(int mode) { if (mode) _ui.sculptRadio->setChecked(true); else _ui.stampRadio->setChecked(true); };
     QPixmap* getPixmap() { return &_pixmap; };
     void setContinuousActionName(QString const& name);
     bool getRandomizeRotation() { return _ui.randomizeRotation->isChecked();};
+    void setRandomizeRotation(bool state) { _ui.randomizeRotation->setChecked(state);};
     void setBrushModeVisible(bool state) { _ui.sculptRadio->setVisible(state); _ui.stampRadio->setVisible(state);};
+    QDial* getMaskOrientationDial() { return _ui.dial; };
+    void setImageMask(QString const& path);
+    QString const& getImageMaskPath() { return _image_path; };
 
   signals:
     void pixmapUpdated(QPixmap* pixmap);
@@ -37,6 +42,7 @@ namespace noggit::Red
     ImageBrowser* _image_browser;
     QPixmap _pixmap;
     MapView* _map_view;
+    QString _image_path;
 
   };
 }

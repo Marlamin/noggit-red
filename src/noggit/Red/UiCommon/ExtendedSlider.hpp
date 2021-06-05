@@ -26,6 +26,7 @@ namespace noggit
           void setSliderRange(int min, int max);
           void setValue(double value);
           double value();
+          double rawValue();
 
           void setTabletSupportEnabled(bool state);
 

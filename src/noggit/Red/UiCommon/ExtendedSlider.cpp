@@ -178,6 +178,11 @@ double ExtendedSlider::value()
   return _ui.doubleSpinBox->value();
 }
 
+double ExtendedSlider::rawValue()
+{
+  return _ui.doubleSpinBox->value();
+}
+
 void ExtendedSlider::setPrefix(const QString& prefix)
 {
   _ui.label->setText(prefix);

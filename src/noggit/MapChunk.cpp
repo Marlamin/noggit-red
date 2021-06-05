@@ -665,7 +665,7 @@ void MapChunk::draw ( math::frustum const& frustum
 
   if (draw_areaid_overlay)
   {
-    mcnk_shader.uniform_cached("areaid_color", (math::vector_4d)area_id_colors[areaID]);
+    mcnk_shader.uniform("areaid_color", (math::vector_4d)area_id_colors[areaID]);
   }
 
   gl.bindVertexArray(_vao);
