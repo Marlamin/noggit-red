@@ -434,3 +434,36 @@ void BrushStackItem::execute(math::vector_3d const& cursor_pos, World* world, fl
         boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, false);
   }
 }
+
+bool BrushStackItem::isMaskEnabled()
+{
+  switch(_tool_widget.which())
+  {
+    case eRaiseLower:
+      return boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
+    case eFlattenBlur:
+      return false;
+    case eTexturing:
+      return boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
+    case eShader:
+      return boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
+  }
+}
+
+void BrushStackItem::updateMask()
+{
+  switch(_tool_widget.which())
+  {
+    case eRaiseLower:
+      boost::get<noggit::ui::terrain_tool*>(_tool_widget)->updateMaskImage();
+      break;
+    case eFlattenBlur:
+      break;
+    case eTexturing:
+      boost::get<noggit::ui::texturing_tool*>(_tool_widget)->updateMaskImage();
+      break;
+    case eShader:
+      boost::get<noggit::ui::shader_tool*>(_tool_widget)->updateMaskImage();
+      break;
+  }
+}

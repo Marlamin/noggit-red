@@ -66,6 +66,9 @@ namespace noggit::Red
     bool isSpeedAffecting() { return _is_speed_affecting->isChecked(); };
     QToolButton* getActiveButton() { return _ui.brushNameLabel; };
 
+    bool isMaskEnabled();
+    void updateMask();
+
 
 
     QJsonObject toJSON();

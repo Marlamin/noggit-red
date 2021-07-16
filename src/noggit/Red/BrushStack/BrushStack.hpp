@@ -36,6 +36,7 @@ namespace noggit::Red
     float getSpeed();
     bool getBrushMode() { return _ui.sculptRadio->isChecked(); };
     bool getRandomizeRotation() { return _ui.randomizeRotation->isChecked(); };
+    BrushStackItem* getActiveBrushItem() { return _active_item; };
 
     QJsonObject toJSON();
     void fromJSON(QJsonObject const& json);

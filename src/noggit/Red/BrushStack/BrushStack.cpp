@@ -199,6 +199,9 @@ void BrushStack::addAction(BrushStackItem* brush_stack_item)
           [this](BrushStackItem* item)
           {
             _active_item = item;
+
+            if(item)
+              item->updateMask();
           });
 
   connect(brush_stack_item, &BrushStackItem::requestDelete,
@@ -220,6 +223,9 @@ void BrushStack::addAction(BrushStackItem* brush_stack_item)
               l_item->widget()->deleteLater();
               delete l_item;
             }
+
+            if(item)
+              item->updateMask();
 
           });
 

@@ -192,6 +192,12 @@ void MapView::set_editing_mode (editing_mode mode)
           shaderTool->updateMaskImage();
         }
         break;
+      case editing_mode::stamp:
+        if (stampTool->getActiveBrushItem() && stampTool->getActiveBrushItem()->isEnabled())
+        {
+          stampTool->getActiveBrushItem()->updateMask();
+        }
+        break;
       default:
         break;
     }
@@ -3365,6 +3371,12 @@ void MapView::draw_map()
     radius = texturingTool->brush_radius();
     inner_radius = texturingTool->hardness();
     if(texturingTool->getTexturingMode() == noggit::ui::texturing_mode::paint && texturingTool->getImageMaskSelector()->isEnabled())
+      _cursorType = CursorType::STAMP;
+    break;
+  case editing_mode::stamp:
+    radius = stampTool->getRadius();
+    inner_radius = stampTool->getInnerRadius();
+    if(stampTool->getActiveBrushItem() && stampTool->getActiveBrushItem()->isEnabled())
       _cursorType = CursorType::STAMP;
     break;
   case editing_mode::water:
