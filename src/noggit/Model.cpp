@@ -1373,6 +1373,7 @@ void Model::draw( math::matrix_4x4 const& model_view
                 , bool // draw_particles
                 , bool // all_boxes
                 , display_mode display
+                , bool no_cull
                 )
 {
   if (!finishedLoading() || loading_failed())
@@ -1380,7 +1381,7 @@ void Model::draw( math::matrix_4x4 const& model_view
     return;
   }
 
-  if (!instance.is_visible(frustum, cull_distance, camera, display))
+  if (!instance.is_visible(frustum, cull_distance, camera, display) && !no_cull)
   {
     return;
   }
@@ -1439,6 +1440,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
                  , std::unordered_map<Model*, std::size_t>& models_with_particles
                  , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
                  , display_mode display
+                 , bool no_cull
                  )
 {
   if (!finishedLoading() || loading_failed())
@@ -1461,7 +1463,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
 
   for (ModelInstance* mi : instances)
   {
-    if (mi->is_visible(frustum, cull_distance, camera, display))
+    if (no_cull || mi->is_visible(frustum, cull_distance, camera, display))
     {
       transform_matrix.push_back(mi->transformMatrixTransposed());
     }    

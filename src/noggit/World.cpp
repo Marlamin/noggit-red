@@ -2215,8 +2215,8 @@ void World::drawMinimap ( MapTile *tile
 
         it.second[0]->model->wait_until_loaded();
         it.second[0]->model->draw(model_view, settings->use_filters ? instances : it.second, m2_shader, frustum,
-                                  culldistance, camera_pos, false,animtime, false,
-                                  false, model_with_particles,model_boxes_to_draw, display_mode::in_2D
+                                  100000.0f, camera_pos, false,animtime, false,
+                                  false, model_with_particles,model_boxes_to_draw, display_mode::in_2D, true
         );
       }
 
@@ -2296,7 +2296,7 @@ void World::drawMinimap ( MapTile *tile
 
           wmo.wmo->wait_until_loaded();
           wmo.draw(wmo_program, model_view, projection, frustum,
-                   culldistance, camera_pos, false, false,
+                   100000.0f, camera_pos, false, false,
                    false, _liquid_render_mini.get(), current_selection(),
                    animtime, skies->hasSkies(), display_mode::in_2D
           );

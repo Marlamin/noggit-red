@@ -224,6 +224,7 @@ public:
            , bool draw_particles
            , bool all_boxes
            , display_mode display
+           , bool no_cull = false
            );
   void draw ( math::matrix_4x4 const& model_view
             , std::vector<ModelInstance*> instances
@@ -238,6 +239,7 @@ public:
             , std::unordered_map<Model*, std::size_t>& models_with_particles
             , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
             , display_mode display
+            , bool no_cull = false
             );
   void draw_particles( math::matrix_4x4 const& model_view
                      , opengl::scoped::use_program& particles_shader
