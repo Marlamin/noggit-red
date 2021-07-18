@@ -43,6 +43,7 @@ namespace noggit
     {
       setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
       auto layout (new QVBoxLayout (this));
+      layout->setAlignment(Qt::AlignTop);
 
       _texture_brush.init();
       _inner_brush.init();
@@ -56,6 +57,7 @@ namespace noggit
       tabs = new QTabWidget(this);
 
       auto tool_widget (new QWidget (this));
+      tool_widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
       auto tool_layout (new QVBoxLayout (tool_widget));
       tool_layout->setAlignment(Qt::AlignTop);
 
@@ -151,10 +153,13 @@ namespace noggit
       _image_mask_group->setContinuousActionName("Paint");
       _image_mask_group->setBrushModeVisible(parent == map_view);
       _mask_image = _image_mask_group->getPixmap()->toImage();
+      _image_mask_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
       tool_layout->addWidget(_image_mask_group);
+      tool_layout->setAlignment(_image_mask_group, Qt::AlignTop);
 
       auto quick_palette_btn (new QPushButton("Quick Palette", this));
       tool_layout->addWidget(quick_palette_btn);
+      tool_layout->setAlignment(quick_palette_btn, Qt::AlignTop);
 
       auto anim_widget (new QWidget (this));
       auto anim_layout (new QFormLayout (anim_widget));
@@ -190,6 +195,7 @@ namespace noggit
       tabs->addTab(tool_widget, "Paint");
       tabs->addTab(_texture_switcher, "Swap");
       tabs->addTab(anim_widget, "Anim");
+      tabs->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
       
       layout->addWidget(tabs);
 

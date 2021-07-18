@@ -28,7 +28,7 @@ void Model::finishLoading()
 {
   MPQFile f(filename);
 
-  if (f.isEof())
+  if (f.isEof() || !f.getSize())
   {
     LogError << "Error loading file \"" << filename << "\". Aborting to load model." << std::endl;
     finished = true;

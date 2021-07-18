@@ -90,6 +90,7 @@ namespace noggit
       _image_mask_group = new noggit::Red::ImageMaskSelector(map_view, this);
       _image_mask_group->setContinuousActionName("Paint");
       _image_mask_group->setBrushModeVisible(parent == map_view);
+      _image_mask_group->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum));
       _mask_image = _image_mask_group->getPixmap()->toImage();
       layout->addRow(_image_mask_group);
 
@@ -98,7 +99,7 @@ namespace noggit
       layout->addRow(_color_palette);
 
       auto info_label (new QLabel("Drag&Drop colors to select.", this));
-      info_label->setAlignment(Qt::AlignCenter);
+      info_label->setAlignment(Qt::AlignCenter | Qt::AlignTop);
 
       layout->addRow(info_label);
 

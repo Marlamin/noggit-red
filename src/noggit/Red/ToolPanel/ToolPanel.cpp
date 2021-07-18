@@ -12,6 +12,7 @@ ToolPanel::ToolPanel(QWidget* parent)
   _ui.setupUi(body);
   setWidget(body);
   setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+  layout()->setAlignment(Qt::AlignTop);
   setFixedWidth(250 + 15);
 }
 
@@ -22,6 +23,7 @@ void ToolPanel::setCurrentIndex(int index)
 
   auto widget_min_width = _ui.toolPanelStack->currentWidget()->minimumWidth();
   setFixedWidth(widget_min_width + 15);
+
 }
 
 void ToolPanel::registerTool(QString const& title, QWidget* widget)
