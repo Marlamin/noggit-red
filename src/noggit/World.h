@@ -272,6 +272,28 @@ public:
   void setHole(math::vector_3d const& pos, float radius, bool big, bool hole);
   void setHoleADT(math::vector_3d const& pos, bool hole);
 
+  void exportADTAlphamap(math::vector_3d const& pos);
+  void exportADTAlphamap(math::vector_3d const& pos, std::string const& filename);
+  void exportADTHeightmap(math::vector_3d const& pos, float min_height, float max_height);
+  void exportADTVertexColorMap(math::vector_3d const& pos);
+  void exportAllADTsAlphamap();
+  void exportAllADTsAlphamap(std::string const& filename);
+  void exportAllADTsHeightmap();
+  void exportAllADTsVertexColorMap();
+
+  void importADTAlphamap(math::vector_3d const& pos, QImage const& image, unsigned layer);
+  void importADTAlphamap(math::vector_3d const& pos);
+  void importADTHeightmap(math::vector_3d const& pos, QImage const& image, float multiplier, unsigned mode);
+  void importADTHeightmap(math::vector_3d const& pos, float multiplier, unsigned mode);
+  void importADTVertexColorMap(math::vector_3d const& pos, int mode);
+  void importADTVertexColorMap(math::vector_3d const& pos, QImage const& image, int mode);
+
+  void importAllADTsAlphamaps();
+  void importAllADTsHeightmaps(float multiplier, unsigned mode);
+  void importAllADTVertexColorMaps(unsigned mode);
+
+
+
   void addM2 ( std::string const& filename
              , math::vector_3d newPos
              , float scale, math::degrees::vec3 rotation

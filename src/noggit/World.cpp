@@ -2766,6 +2766,310 @@ void World::clearTextures(math::vector_3d const& pos)
   });
 }
 
+
+void World::exportADTAlphamap(math::vector_3d const& pos)
+{
+  for_tile_at ( pos
+    , [&] (MapTile* tile)
+    {
+      QString path = _settings->value("project/path").toString();
+      if (!(path.endsWith('\\') || path.endsWith('/')))
+      {
+        path += "/";
+      }
+
+      QDir dir(path + "/world/maps/" + basename.c_str());
+      if (!dir.exists())
+        dir.mkpath(".");
+
+      for (int i = 1; i < 4; ++i)
+      {
+        QImage img = tile->getAlphamapImage(i);
+        img.save(path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+        + "_" + std::to_string(tile->index.x).c_str() + "_" + std::to_string(tile->index.z).c_str()
+        + "_layer" + std::to_string(i).c_str() + ".png", "PNG");
+      }
+
+    }
+  );
+}
+
+void World::exportADTAlphamap(math::vector_3d const& pos, std::string const& filename)
+{
+  for_tile_at ( pos
+    , [&] (MapTile* tile)
+    {
+      QString path = _settings->value("project/path").toString();
+      if (!(path.endsWith('\\') || path.endsWith('/')))
+      {
+        path += "/";
+      }
+
+      QDir dir(path + "/world/maps/" + basename.c_str());
+      if (!dir.exists())
+        dir.mkpath(".");
+
+      QString tex(filename.c_str());
+      QImage img = tile->getAlphamapImage(filename);
+      img.save(path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+               + "_" + std::to_string(tile->index.x).c_str() + "_" + std::to_string(tile->index.z).c_str()
+               + "_" + tex.replace("/", "-") + ".png", "PNG");
+
+    }
+  );
+}
+
+void World::exportADTHeightmap(math::vector_3d const& pos, float min_height, float max_height)
+{
+  for_tile_at ( pos
+    , [&] (MapTile* tile)
+                {
+                  QString path = _settings->value("project/path").toString();
+                  if (!(path.endsWith('\\') || path.endsWith('/')))
+                  {
+                    path += "/";
+                  }
+
+                  QDir dir(path + "/world/maps/" + basename.c_str());
+                  if (!dir.exists())
+                    dir.mkpath(".");
+
+                  QImage img = tile->getHeightmapImage(min_height, max_height);
+                  img.save(path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                           + "_" + std::to_string(tile->index.x).c_str() + "_" + std::to_string(tile->index.z).c_str()
+                           + "_height.png", "PNG");
+
+
+                }
+  );
+}
+
+void World::exportADTVertexColorMap(math::vector_3d const& pos)
+{
+  for_tile_at ( pos
+    , [&] (MapTile* tile)
+                {
+                  QString path = _settings->value("project/path").toString();
+                  if (!(path.endsWith('\\') || path.endsWith('/')))
+                  {
+                    path += "/";
+                  }
+
+                  QDir dir(path + "/world/maps/" + basename.c_str());
+                  if (!dir.exists())
+                    dir.mkpath(".");
+
+                  QImage img = tile->getVertexColorsImage();
+                  img.save(path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                           + "_" + std::to_string(tile->index.x).c_str() + "_" + std::to_string(tile->index.z).c_str()
+                           + "_vcol.png", "PNG");
+
+
+                }
+  );
+}
+
+void World::importADTAlphamap(math::vector_3d const& pos, QImage const& image, unsigned layer)
+{
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk)
+  {
+    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+  });
+
+  if (image.width() != 1024 || image.height() != 1024)
+  {
+    QImage scaled = image.scaled(1024, 1024, Qt::AspectRatioMode::IgnoreAspectRatio);
+
+    for_tile_at ( pos
+      , [&] (MapTile* tile)
+                  {
+                    tile->setAlphaImage(scaled, layer);
+                  }
+    );
+
+  }
+  else
+  {
+    for_tile_at ( pos
+      , [&] (MapTile* tile)
+      {
+        tile->setAlphaImage(image, layer);
+      }
+    );
+  }
+
+}
+
+void World::importADTAlphamap(math::vector_3d const& pos)
+{
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk)
+  {
+    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+  });
+
+  QString path = _settings->value("project/path").toString();
+  if (!(path.endsWith('\\') || path.endsWith('/')))
+  {
+    path += "/";
+  }
+
+  for_tile_at ( pos
+    , [&] (MapTile* tile)
+    {
+      for (int i = 1; i < 4; ++i)
+      {
+        QString filename = path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                       + "_" + std::to_string(tile->index.x).c_str() + "_" + std::to_string(tile->index.z).c_str()
+                       + "_layer" +  std::to_string(i).c_str() + ".png";
+
+        if(!QFileInfo::exists(filename))
+          continue;
+
+        QImage img;
+        img.load(filename, "PNG");
+
+        if (img.width() != 1024 || img.height() != 1024)
+          img = img.scaled(1024, 1024, Qt::AspectRatioMode::IgnoreAspectRatio);
+
+        tile->setAlphaImage(img, i);
+      }
+
+    }
+  );
+}
+
+void World::importADTHeightmap(math::vector_3d const& pos, QImage const& image, float multiplier, unsigned mode)
+{
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk)
+  {
+    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+  });
+
+  if (image.width() != 257 || image.height() != 257)
+  {
+    QImage scaled = image.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+
+    for_tile_at ( pos
+      , [&] (MapTile* tile)
+      {
+        tile->setHeightmapImage(scaled, multiplier, mode);
+      }
+    );
+
+  }
+  else
+  {
+    for_tile_at ( pos
+      , [&] (MapTile* tile)
+      {
+        tile->setHeightmapImage(image, multiplier, mode);
+      }
+    );
+  }
+}
+
+void World::importADTHeightmap(math::vector_3d const& pos, float multiplier, unsigned mode)
+{
+  for_tile_at ( pos
+    , [&] (MapTile* tile)
+    {
+
+      QString path = _settings->value("project/path").toString();
+      if (!(path.endsWith('\\') || path.endsWith('/')))
+      {
+        path += "/";
+      }
+
+      QString filename = path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                         + "_" + std::to_string(tile->index.x).c_str() + "_" + std::to_string(tile->index.z).c_str()
+                         + "_height" + ".png";
+
+      if(!QFileInfo::exists(filename))
+        return;
+
+      for_all_chunks_on_tile(pos, [](MapChunk* chunk)
+      {
+        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+      });
+
+      QImage img;
+      img.load(filename, "PNG");
+
+      if (img.width() != 257 || img.height() != 257)
+        img = img.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+
+      tile->setHeightmapImage(img, multiplier, mode);
+
+    }
+  );
+}
+
+void World::importADTVertexColorMap(math::vector_3d const& pos, int mode)
+{
+  for_tile_at ( pos
+    , [&] (MapTile* tile)
+      {
+
+        QString path = _settings->value("project/path").toString();
+        if (!(path.endsWith('\\') || path.endsWith('/')))
+        {
+          path += "/";
+        }
+
+        QString filename = path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                           + "_" + std::to_string(tile->index.x).c_str() + "_" + std::to_string(tile->index.z).c_str()
+                           + "_vcol" + ".png";
+
+        if(!QFileInfo::exists(filename))
+          return;
+
+        for_all_chunks_on_tile(pos, [](MapChunk* chunk)
+        {
+          noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(chunk);
+        });
+
+        QImage img;
+        img.load(filename, "PNG");
+
+        if (img.width() != 257 || img.height() != 257)
+          img = img.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+
+        tile->setVertexColorImage(img, mode);
+
+      }
+  );
+}
+
+void World::importADTVertexColorMap(math::vector_3d const& pos, QImage const& image, int mode)
+{
+  for_all_chunks_on_tile(pos, [](MapChunk* chunk)
+  {
+    noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(chunk);
+  });
+
+  if (image.width() != 257 || image.height() != 257)
+  {
+    QImage scaled = image.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+
+    for_tile_at ( pos
+      , [&] (MapTile* tile)
+        {
+          tile->setVertexColorImage(scaled, mode);
+        }
+    );
+
+  }
+  else
+  {
+    for_tile_at ( pos
+      , [&] (MapTile* tile)
+        {
+          tile->setVertexColorImage(image, mode);
+        }
+    );
+  }
+}
+
 void World::setBaseTexture(math::vector_3d const& pos)
 {
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -3288,3 +3592,398 @@ void World::setVertexSelectionCache(noggit::VertexSelectionCache& cache)
   _vertex_center_updated = false;
   _vertex_border_updated = false;
 }
+
+void World::exportAllADTsAlphamap()
+{
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+
+        QString path = _settings->value("project/path").toString();
+        if (!(path.endsWith('\\') || path.endsWith('/')))
+        {
+          path += "/";
+        }
+
+        QDir dir(path + "/world/maps/" + basename.c_str());
+        if (!dir.exists())
+          dir.mkpath(".");
+
+        for (int i = 1; i < 4; ++i)
+        {
+          QImage img = mTile->getAlphamapImage(i);
+          img.save(path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                   + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
+                   + "_layer" + std::to_string(i).c_str() + ".png", "PNG");
+        }
+
+        if (unload)
+        {
+          mapIndex.unloadTile(tile);
+        }
+      }
+    }
+  }
+}
+
+void World::exportAllADTsAlphamap(const std::string& filename)
+{
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+
+        bool found = false;
+
+        for (int i = 0; i < 16; ++i)
+        {
+          for (int j = 0; j < 16; ++j)
+          {
+            auto chunk = mTile->getChunk(i, j);
+
+            for (int k = 1; k < chunk->texture_set->num(); ++k)
+            {
+              if (chunk->texture_set->filename(k) == filename)
+              {
+                found = true;
+                break;
+              }
+            }
+          }
+        }
+
+        if (!found)
+          continue;
+
+        QString path = _settings->value("project/path").toString();
+        if (!(path.endsWith('\\') || path.endsWith('/')))
+        {
+          path += "/";
+        }
+
+        QDir dir(path + "/world/maps/" + basename.c_str());
+        if (!dir.exists())
+          dir.mkpath(".");
+
+        QString tex(filename.c_str());
+        QImage img = mTile->getAlphamapImage(filename);
+        img.save(path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                 + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
+                 + "_" + tex.replace("/", "-") + ".png", "PNG");
+
+        if (unload)
+        {
+          mapIndex.unloadTile(tile);
+        }
+      }
+    }
+  }
+}
+
+void World::exportAllADTsHeightmap()
+{
+  float min_height = std::numeric_limits<float>::max();
+  float max_height = std::numeric_limits<float>::lowest();
+
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+
+        float max = mTile->getMaxHeight();
+        float min = mTile->getMinHeight();
+
+        if (max_height < max)
+          max_height = max;
+
+        if (min_height > min)
+          min_height = min;
+
+        if (unload)
+        {
+          mapIndex.unloadTile(tile);
+        }
+      }
+    }
+  }
+
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+
+        QString path = _settings->value("project/path").toString();
+        if (!(path.endsWith('\\') || path.endsWith('/')))
+        {
+          path += "/";
+        }
+
+        QDir dir(path + "/world/maps/" + basename.c_str());
+        if (!dir.exists())
+          dir.mkpath(".");
+
+        QImage img = mTile->getHeightmapImage(min_height, max_height);
+        img.save(path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                 + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
+                 + "_height.png", "PNG");
+
+        if (unload)
+        {
+          mapIndex.unloadTile(tile);
+        }
+      }
+    }
+  }
+}
+
+void World::exportAllADTsVertexColorMap()
+{
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+
+        QString path = _settings->value("project/path").toString();
+        if (!(path.endsWith('\\') || path.endsWith('/')))
+        {
+          path += "/";
+        }
+
+        QDir dir(path + "/world/maps/" + basename.c_str());
+        if (!dir.exists())
+          dir.mkpath(".");
+
+        QImage img = mTile->getVertexColorsImage();
+        img.save(path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                 + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
+                 + "_vcol.png", "PNG");
+
+        if (unload)
+        {
+          mapIndex.unloadTile(tile);
+        }
+      }
+    }
+  }
+}
+
+void World::importAllADTsAlphamaps()
+{
+
+  QString path = _settings->value("project/path").toString();
+  if (!(path.endsWith('\\') || path.endsWith('/')))
+  {
+    path += "/";
+  }
+
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+
+        for (int i = 1; i < 4; ++i)
+        {
+          QString filename = path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                  + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
+                  + "_layer" + std::to_string(i).c_str() + ".png";
+
+          if(!QFileInfo::exists(filename))
+            continue;
+
+          for (int i = 0; i < 16; ++i)
+            for (int j = 0; j < 16; ++j)
+              noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(mTile->getChunk(i, j));
+
+          QImage img;
+          img.load(filename, "PNG");
+
+          if (img.width() != 1024 || img.height() != 1024)
+          {
+            QImage scaled = img.scaled(1024, 1024, Qt::IgnoreAspectRatio);
+            mTile->setAlphaImage(scaled, i);
+          }
+          else
+          {
+            mTile->setAlphaImage(img, i);
+          }
+
+        }
+
+        mTile->saveTile(this);
+        mapIndex.markOnDisc (tile, true);
+        mapIndex.unsetChanged(tile);
+
+        if (unload)
+        {
+          mapIndex.unloadTile(tile);
+        }
+      }
+    }
+  }
+}
+
+void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
+{
+  QString path = _settings->value("project/path").toString();
+  if (!(path.endsWith('\\') || path.endsWith('/')))
+  {
+    path += "/";
+  }
+
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+
+        QString filename = path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                           + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
+                           + "_height.png";
+
+        if(!QFileInfo::exists(filename))
+          continue;
+
+        for (int i = 0; i < 16; ++i)
+          for (int j = 0; j < 16; ++j)
+            noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(mTile->getChunk(i, j));
+
+        QImage img;
+        img.load(filename, "PNG");
+
+        if (img.width() != 257 || img.height() != 257)
+        {
+          QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
+          mTile->setHeightmapImage(scaled, multiplier, mode);
+        }
+        else
+        {
+          mTile->setHeightmapImage(img, multiplier, mode);
+        }
+
+        mTile->saveTile(this);
+        mapIndex.markOnDisc (tile, true);
+        mapIndex.unsetChanged(tile);
+
+        if (unload)
+        {
+          mapIndex.unloadTile(tile);
+        }
+      }
+    }
+  }
+}
+
+void World::importAllADTVertexColorMaps(unsigned int mode)
+{
+  QString path = _settings->value("project/path").toString();
+  if (!(path.endsWith('\\') || path.endsWith('/')))
+  {
+    path += "/";
+  }
+
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+
+        QString filename = path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                           + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
+                           + "_vcol.png";
+
+        if(!QFileInfo::exists(filename))
+          continue;
+
+        for (int i = 0; i < 16; ++i)
+          for (int j = 0; j < 16; ++j)
+            noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(mTile->getChunk(i, j));
+
+        QImage img;
+        img.load(filename, "PNG");
+
+        if (img.width() != 257 || img.height() != 257)
+        {
+          QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
+          mTile->setVertexColorImage(scaled, mode);
+        }
+        else
+        {
+          mTile->setVertexColorImage(img, mode);
+        }
+
+        mTile->saveTile(this);
+        mapIndex.markOnDisc (tile, true);
+        mapIndex.unsetChanged(tile);
+
+        if (unload)
+        {
+          mapIndex.unloadTile(tile);
+        }
+      }
+    }
+  }
+}
+

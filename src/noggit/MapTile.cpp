@@ -1090,7 +1090,7 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
 
       for (int k = 0; k < chunk->texture_set->num(); ++k)
       {
-        if (chunk->texture_set->filename(0) == filename)
+        if (chunk->texture_set->filename(k) == filename)
           layer = k;
       }
 
@@ -1216,11 +1216,12 @@ void MapTile::setAlphaImage(QImage const& image, unsigned layer)
       {
         for (int j = 0; j < 64; ++j)
         {
-          temp_alphamaps[layer][64 * j + i] = static_cast<float>(qGray(image.pixel((k * 64) + i, (l * 64) + j))) / 255.0f;
+          temp_alphamaps[layer][64 * j + i] = static_cast<float>(qGray(image.pixel((k * 64) + i, (l * 64) + j)));
         }
       }
 
       chunk->texture_set->markDirty();
+      chunk->texture_set->apply_alpha_changes();
 
     }
   }
@@ -1229,6 +1230,7 @@ void MapTile::setAlphaImage(QImage const& image, unsigned layer)
 QImage MapTile::getVertexColorsImage()
 {
   QImage image(257, 257, QImage::Format_RGBA8888);
+  image.fill(QColor(127, 127, 127, 255));
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
@@ -1237,6 +1239,9 @@ QImage MapTile::getVertexColorsImage()
     for (int l = 0; l < 16; ++l)
     {
       MapChunk* chunk = getChunk(k, l);
+
+      if (!chunk->header_flags.flags.has_mccv)
+        continue;
 
       math::vector_3d* colors = chunk->getVertexColors();
 
@@ -1248,10 +1253,10 @@ QImage MapTile::getVertexColorsImage()
           bool const is_virtual {static_cast<bool>(plain % 2)};
           bool const erp = plain % DSUM / SUM;
           unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
-          float r = is_virtual ? (colors[idx].x + colors[idx + (erp ? SUM : 1)].x) / 2.f : colors[idx].x;
-          float g = is_virtual ? (colors[idx].y + colors[idx + (erp ? SUM : 1)].y) / 2.f : colors[idx].y;
-          float b = is_virtual ? (colors[idx].z + colors[idx + (erp ? SUM : 1)].z) / 2.f : colors[idx].z;
-          image.setPixelColor(x, y, QColor::fromRgbF(r, g, b, 1.0));
+          float r = is_virtual ? (colors[idx].x + colors[idx + (erp ? SUM : 1)].x) / 4.f : colors[idx].x / 2.f;
+          float g = is_virtual ? (colors[idx].y + colors[idx + (erp ? SUM : 1)].y) / 4.f : colors[idx].y / 2.f;
+          float b = is_virtual ? (colors[idx].z + colors[idx + (erp ? SUM : 1)].z) / 4.f : colors[idx].z / 2.f;
+          image.setPixelColor((k * 16) + x,  (l * 16) + y, QColor::fromRgbF(r, g, b, 1.0));
         }
       }
     }
@@ -1289,42 +1294,42 @@ void MapTile::setVertexColorImage(QImage const& image, int mode)
             case 0: // Set
             {
               auto color = image.pixelColor((k * 16) + x, (l * 16) + y);
-              colors[idx].x =  color.redF();
-              colors[idx].y =  color.blueF();
-              colors[idx].z =  color.greenF();
+              colors[idx].x =  color.redF() * 2.f;
+              colors[idx].y =  color.greenF() * 2.f;
+              colors[idx].z =  color.blueF() * 2.f;
               break;
             }
             case 1: // Add
             {
               auto color = image.pixelColor((k * 16) + x, (l * 16) + y);
-              colors[idx].x =  std::min(1.0, std::max(0.0, colors[idx].x + color.redF()));
-              colors[idx].y =  std::min(1.0, std::max(0.0, colors[idx].y + color.blueF()));
-              colors[idx].z =  std::min(1.0, std::max(0.0, colors[idx].z + color.greenF()));
+              colors[idx].x =  std::min(2.0, std::max(0.0, colors[idx].x + color.redF() * 2.f));
+              colors[idx].y =  std::min(2.0, std::max(0.0, colors[idx].y + color.greenF() * 2.f));
+              colors[idx].z =  std::min(2.0, std::max(0.0, colors[idx].z + color.blueF() * 2.f));
               break;
             }
 
             case 2: // Subtract
             {
               auto color = image.pixelColor((k * 16) + x, (l * 16) + y);
-              colors[idx].x =  std::min(1.0, std::max(0.0, colors[idx].x - color.redF()));
-              colors[idx].y =  std::min(1.0, std::max(0.0, colors[idx].y - color.blueF()));
-              colors[idx].z =  std::min(1.0, std::max(0.0, colors[idx].z - color.greenF()));
+              colors[idx].x =  std::min(2.0, std::max(0.0, colors[idx].x - color.redF() * 2.f));
+              colors[idx].y =  std::min(2.0, std::max(0.0, colors[idx].y - color.greenF() * 2.f));
+              colors[idx].z =  std::min(2.0, std::max(0.0, colors[idx].z - color.blueF() * 2.f));
               break;
             }
 
             case 3: // Multiply
             {
               auto color = image.pixelColor((k * 16) + x, (l * 16) + y);
-              colors[idx].x =  std::min(1.0, std::max(0.0, colors[idx].x * color.redF()));
-              colors[idx].y =  std::min(1.0, std::max(0.0, colors[idx].y * color.blueF()));
-              colors[idx].z =  std::min(1.0, std::max(0.0, colors[idx].z * color.greenF()));
+              colors[idx].x =  std::min(2.0, std::max(0.0, colors[idx].x * color.redF() * 2.f));
+              colors[idx].y =  std::min(2.0, std::max(0.0, colors[idx].y * color.greenF() * 2.f));
+              colors[idx].z =  std::min(2.0, std::max(0.0, colors[idx].z * color.blueF() * 2.f));
               break;
             }
           }
 
         }
 
-      chunk->updateVerticesData();
+      chunk->update_vertex_colors();
     }
   }
 }

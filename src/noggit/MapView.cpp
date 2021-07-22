@@ -66,6 +66,8 @@
 #include <QAbstractScrollArea>
 #include <QScrollBar>
 #include <QDateTime>
+#include <QCursor>
+#include <QFileDialog>
 
 #include <algorithm>
 #include <cmath>
@@ -1005,7 +1007,10 @@ void MapView::setupAssistMenu()
                     }
                   }
   );
-  ADD_ACTION_NS ( assist_menu
+
+  auto cleanup_menu (assist_menu->addMenu ("Clean up"));
+
+  ADD_ACTION_NS ( cleanup_menu
   , "Clear height map"
   , [this]
                   {
@@ -1016,7 +1021,7 @@ void MapView::setupAssistMenu()
                     noggit::ActionManager::instance()->endAction();
                   }
   );
-  ADD_ACTION_NS ( assist_menu
+  ADD_ACTION_NS ( cleanup_menu
   , "Remove texture duplicates"
   , [this]
                   {
@@ -1027,7 +1032,7 @@ void MapView::setupAssistMenu()
                     noggit::ActionManager::instance()->endAction();
                   }
   );
-  ADD_ACTION_NS ( assist_menu
+  ADD_ACTION_NS ( cleanup_menu
   , "Clear textures"
   , [this]
                   {
@@ -1038,7 +1043,7 @@ void MapView::setupAssistMenu()
                     noggit::ActionManager::instance()->endAction();
                   }
   );
-  ADD_ACTION_NS ( assist_menu
+  ADD_ACTION_NS ( cleanup_menu
   , "Clear textures + set base"
   , [this]
                   {
@@ -1049,7 +1054,7 @@ void MapView::setupAssistMenu()
                     noggit::ActionManager::instance()->endAction();
                   }
   );
-  ADD_ACTION_NS ( assist_menu
+  ADD_ACTION_NS ( cleanup_menu
   , "Clear shadows"
   , [this]
                   {
@@ -1060,7 +1065,7 @@ void MapView::setupAssistMenu()
                     noggit::ActionManager::instance()->endAction();
                   }
   );
-  ADD_ACTION_NS ( assist_menu
+  ADD_ACTION_NS ( cleanup_menu
   , "Clear models"
   , [this]
                   {
@@ -1072,7 +1077,7 @@ void MapView::setupAssistMenu()
                     _rotation_editor_need_update = true;
                   }
   );
-  ADD_ACTION_NS ( assist_menu
+  ADD_ACTION_NS ( cleanup_menu
   , "Clear duplicate models"
   , [this]
                   {
@@ -1085,19 +1090,335 @@ void MapView::setupAssistMenu()
                   }
   );
 
+  auto cur_adt_export_menu(assist_menu->addMenu("Export"));
+  ADD_ACTION_NS ( cur_adt_export_menu
+  , "Export alphamaps"
+  , [this]
+  {
+    makeCurrent();
+    opengl::context::scoped_setter const _(::gl, context());
+    _world->exportADTAlphamap(_camera.position);
+  }
+  );
+
+  ADD_ACTION_NS ( cur_adt_export_menu
+  , "Export alphamaps (current texture)"
+  , [this]
+  {
+    makeCurrent();
+    opengl::context::scoped_setter const _(::gl, context());
+
+    if (!!noggit::ui::selected_texture::get())
+    {
+      _world->exportADTAlphamap(_camera.position, noggit::ui::selected_texture::get()->get()->filename);
+    }
+
+  }
+  );
+
+  ADD_ACTION_NS ( cur_adt_export_menu
+  , "Export vertex color map"
+  , [this]
+                  {
+                    makeCurrent();
+                    opengl::context::scoped_setter const _(::gl, context());
+
+                    _world->exportADTVertexColorMap(_camera.position);
+                  }
+  );
+
+  QDialog* heightmap_export_params = new QDialog(this);
+  heightmap_export_params->setWindowFlags(Qt::Popup);
+  heightmap_export_params->setWindowTitle("Heightmap Exporter");
+  QVBoxLayout* heightmap_export_params_layout = new QVBoxLayout(heightmap_export_params);
+
+  heightmap_export_params_layout->addWidget(new QLabel("Min:", heightmap_export_params));
+  QDoubleSpinBox* heightmap_export_min = new QDoubleSpinBox(heightmap_export_params);
+  heightmap_export_min->setRange(-10000000, 10000000);
+  heightmap_export_params_layout->addWidget(heightmap_export_min);
+
+  heightmap_export_params_layout->addWidget(new QLabel("Max:", heightmap_export_params));
+  QDoubleSpinBox* heightmap_export_max = new QDoubleSpinBox(heightmap_export_params);
+  heightmap_export_max->setRange(-10000000, 10000000);
+  heightmap_export_max->setValue(100.0);
+  heightmap_export_params_layout->addWidget(heightmap_export_max);
+
+  QPushButton* heightmap_export_okay = new QPushButton("Okay", heightmap_export_params);
+  heightmap_export_params_layout->addWidget(heightmap_export_okay);
+
+  connect(heightmap_export_min, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          [=](double value)
+          {
+            if (!(heightmap_export_max->value() > value))
+              heightmap_export_max->setValue(value + 1.0);
+
+          });
+
+  connect(heightmap_export_max, qOverload<double>(&QDoubleSpinBox::valueChanged),
+          [=](double value)
+          {
+            if (!(heightmap_export_min->value() < value))
+              heightmap_export_min->setValue(value - 1.0);
+
+          });
+
+  connect(heightmap_export_okay, &QPushButton::clicked
+    ,[=]()
+    {
+      heightmap_export_params->accept();
+
+    });
+
+
+
+  ADD_ACTION_NS ( cur_adt_export_menu
+  , "Export heightmap"
+  , [=]
+              {
+                QPoint new_pos = QCursor::pos();
+
+                heightmap_export_params->setGeometry(new_pos.x(),
+                new_pos.y(),
+                heightmap_export_params->width(),
+                heightmap_export_params->height());
+
+                if (heightmap_export_params->exec() == QDialog::Accepted)
+                {
+                  makeCurrent();
+                  opengl::context::scoped_setter const _(::gl, context());
+
+                  _world->exportADTHeightmap(_camera.position, heightmap_export_min->value(), heightmap_export_max->value());
+                }
+
+              }
+  );
+
+  auto cur_adt_import_menu(assist_menu->addMenu("Import"));
+
+
+  QDialog* adt_import_params = new QDialog(this);
+  adt_import_params->setWindowFlags(Qt::Popup);
+  adt_import_params->setWindowTitle("Alphamap Importer");
+  QVBoxLayout* adt_import_params_layout = new QVBoxLayout(adt_import_params);
+
+  adt_import_params_layout->addWidget(new QLabel("Layer:", adt_import_params));
+  QSpinBox* adt_import_params_layer = new QSpinBox(adt_import_params);
+  adt_import_params_layer->setRange(1, 3);
+  adt_import_params_layout->addWidget(adt_import_params_layer);
+
+  QPushButton* adt_import_params_okay = new QPushButton("Okay", adt_import_params);
+  adt_import_params_layout->addWidget(adt_import_params_okay);
+
+  connect(adt_import_params_okay, &QPushButton::clicked
+    ,[=]()
+    {
+      adt_import_params->accept();
+
+    });
+
+  ADD_ACTION_NS ( cur_adt_import_menu
+  , "Import alphamap (file)"
+  , [=]
+                  {
+                    QPoint new_pos = QCursor::pos();
+
+                    adt_import_params->setGeometry(new_pos.x(),
+                                                   new_pos.y(),
+                                                   heightmap_export_params->width(),
+                                                   heightmap_export_params->height());
+
+                    if (adt_import_params->exec() == QDialog::Accepted)
+                    {
+                      makeCurrent();
+                      opengl::context::scoped_setter const _(::gl, context());
+
+                      QString filepath = QFileDialog::getOpenFileName(
+                        this,
+                        tr("Open alphamap"),
+                        "",
+                        "PNG file (*.png);;"
+                      );
+
+                      if(!QFileInfo::exists(filepath))
+                        return;
+
+                      QImage img;
+                      img.load(filepath, "PNG");
+
+                      noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+                      _world->importADTAlphamap(_camera.position, img, adt_import_params_layer->value());
+                      noggit::ActionManager::instance()->endAction();
+                    }
+
+                  }
+  );
+
+  ADD_ACTION_NS ( cur_adt_import_menu
+  , "Import alphamap"
+  , [=]
+    {
+
+        makeCurrent();
+        opengl::context::scoped_setter const _(::gl, context());
+
+        noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+        _world->importADTAlphamap(_camera.position);
+        noggit::ActionManager::instance()->endAction();
+    }
+  );
+
+  QDialog* adt_import_height_params = new QDialog(this);
+  adt_import_height_params->setWindowFlags(Qt::Popup);
+  adt_import_height_params->setWindowTitle("Alphamap Importer");
+  QVBoxLayout* adt_import_height_params_layout = new QVBoxLayout(adt_import_height_params);
+
+  adt_import_height_params_layout->addWidget(new QLabel("Multiplier:", adt_import_height_params));
+  QDoubleSpinBox* adt_import_height_params_multiplier = new QDoubleSpinBox(adt_import_height_params);
+  adt_import_height_params_multiplier->setRange(0, 100000000);
+  adt_import_height_params_layout->addWidget(adt_import_height_params_multiplier);
+
+  adt_import_height_params_layout->addWidget(new QLabel("Mode:", adt_import_height_params));
+  QComboBox* adt_import_height_params_mode = new QComboBox(adt_import_height_params);
+  adt_import_height_params_layout->addWidget(adt_import_height_params_mode);
+  adt_import_height_params_mode->addItems({"Set", "Add", "Subtract", "Multiply"});
+
+  QPushButton* adt_import_height_params_okay = new QPushButton("Okay", adt_import_height_params);
+  adt_import_height_params_layout->addWidget(adt_import_height_params_okay);
+
+  connect(adt_import_height_params_okay, &QPushButton::clicked
+    ,[=]()
+          {
+            adt_import_height_params->accept();
+
+          });
+
+  ADD_ACTION_NS ( cur_adt_import_menu
+  , "Import heightmap (file)"
+  , [=]
+      {
+        if (adt_import_height_params->exec() == QDialog::Accepted)
+        {
+          makeCurrent();
+          opengl::context::scoped_setter const _(::gl, context());
+
+          QString filepath = QFileDialog::getOpenFileName(
+            this,
+            tr("Open heightmap (257x257)"),
+            "",
+            "PNG file (*.png);;"
+          );
+
+          if(!QFileInfo::exists(filepath))
+            return;
+
+          QImage img;
+          img.load(filepath, "PNG");
+
+          noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
+          _world->importADTHeightmap(_camera.position, img, adt_import_height_params_multiplier->value(),
+                                     adt_import_height_params_mode->currentIndex());
+          noggit::ActionManager::instance()->endAction();
+        }
+      }
+  );
+
+  ADD_ACTION_NS ( cur_adt_import_menu
+  , "Import heightmap"
+  , [=]
+      {
+        if (adt_import_height_params->exec() == QDialog::Accepted)
+        {
+          makeCurrent();
+          opengl::context::scoped_setter const _(::gl, context());
+
+          noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
+          _world->importADTHeightmap(_camera.position, adt_import_height_params_multiplier->value(),
+                                     adt_import_height_params_mode->currentIndex());
+          noggit::ActionManager::instance()->endAction();
+        }
+      }
+  );
+
+  QDialog* adt_import_vcol_params = new QDialog(this);
+  adt_import_vcol_params->setWindowFlags(Qt::Popup);
+  adt_import_vcol_params->setWindowTitle("Alphamap Importer");
+  QVBoxLayout* adt_import_vcol_params_layout = new QVBoxLayout(adt_import_vcol_params);
+
+  adt_import_vcol_params_layout->addWidget(new QLabel("Mode:", adt_import_vcol_params));
+  QComboBox* adt_import_vcol_params_mode = new QComboBox(adt_import_vcol_params);
+  adt_import_vcol_params_layout->addWidget(adt_import_vcol_params_mode);
+  adt_import_vcol_params_mode->addItems({"Set", "Add", "Subtract", "Multiply"});
+
+  QPushButton* adt_import_vcol_params_okay = new QPushButton("Okay", adt_import_vcol_params);
+  adt_import_vcol_params_layout->addWidget(adt_import_vcol_params_okay);
+
+  connect(adt_import_vcol_params_okay, &QPushButton::clicked
+    ,[=]()
+          {
+            adt_import_vcol_params->accept();
+
+          });
+
+
+  ADD_ACTION_NS ( cur_adt_import_menu
+  , "Import vertex color map (file)"
+  , [=]
+    {
+      if (adt_import_vcol_params->exec() == QDialog::Accepted)
+      {
+        makeCurrent();
+        opengl::context::scoped_setter const _(::gl, context());
+
+        QString filepath = QFileDialog::getOpenFileName(
+          this,
+          tr("Open vertex color map (257x257)"),
+          "",
+          "PNG file (*.png);;"
+        );
+
+        if(!QFileInfo::exists(filepath))
+          return;
+
+        QImage img;
+        img.load(filepath, "PNG");
+
+        noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
+        _world->importADTVertexColorMap(_camera.position, img, adt_import_vcol_params_mode->currentIndex());
+        noggit::ActionManager::instance()->endAction();
+      }
+    }
+  );
+
+  ADD_ACTION_NS ( cur_adt_import_menu
+  , "Import vertex color map"
+  , [=]
+      {
+        if (adt_import_vcol_params->exec() == QDialog::Accepted)
+        {
+          makeCurrent();
+          opengl::context::scoped_setter const _(::gl, context());
+
+          noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
+          _world->importADTVertexColorMap(_camera.position, adt_import_vcol_params_mode->currentIndex());
+          noggit::ActionManager::instance()->endAction();
+        }
+      }
+  );
+
+
   assist_menu->addSeparator();
   assist_menu->addAction(createTextSeparator("Loaded ADTs"));
   assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
   , "Fix gaps"
   , [this]
-                  {
-                    makeCurrent();
-                    opengl::context::scoped_setter const _ (::gl, context());
-                    noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
-                    _world->fixAllGaps();
-                    noggit::ActionManager::instance()->endAction();
-                  }
+      {
+        makeCurrent();
+        opengl::context::scoped_setter const _ (::gl, context());
+        noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
+        _world->fixAllGaps();
+        noggit::ActionManager::instance()->endAction();
+      }
   );
 
   assist_menu->addSeparator();
@@ -1106,27 +1427,143 @@ void MapView::setupAssistMenu()
   ADD_ACTION_NS ( assist_menu
   , "Map to big alpha"
   , [this]
-                  {
-                    DESTRUCTIVE_ACTION
-                      (
-                        makeCurrent();
-                    opengl::context::scoped_setter const _ (::gl, context());
-                    _world->convert_alphamap(true);
-                    )
+    {
+      DESTRUCTIVE_ACTION
+      (
+        makeCurrent();
+        opengl::context::scoped_setter const _ (::gl, context());
+        _world->convert_alphamap(true);
+      )
 
-                  }
+    }
   );
   ADD_ACTION_NS ( assist_menu
   , "Map to old alpha"
   , [this]
-                  {
-                    DESTRUCTIVE_ACTION
-                      (
-                        makeCurrent();
-                    opengl::context::scoped_setter const _(::gl, context());
-                    _world->convert_alphamap(false);
-                    )
-                  }
+    {
+      DESTRUCTIVE_ACTION
+      (
+        makeCurrent();
+        opengl::context::scoped_setter const _(::gl, context());
+        _world->convert_alphamap(false);
+      )
+    }
+  );
+
+  auto all_adts_export_menu(assist_menu->addMenu("Export"));
+
+  ADD_ACTION_NS ( all_adts_export_menu
+  , "Export alphamaps"
+  , [this]
+    {
+      DESTRUCTIVE_ACTION
+      (
+        makeCurrent();
+        opengl::context::scoped_setter const _(::gl, context());
+        _world->exportAllADTsAlphamap();
+      )
+    }
+  );
+
+  ADD_ACTION_NS ( all_adts_export_menu
+  , "Export alphamaps (current texture)"
+  , [this]
+  {
+    DESTRUCTIVE_ACTION
+    (
+      makeCurrent();
+      opengl::context::scoped_setter const _(::gl, context());
+
+      if (!!noggit::ui::selected_texture::get())
+      {
+        _world->exportAllADTsAlphamap(noggit::ui::selected_texture::get()->get()->filename);
+      }
+    )
+  }
+  );
+
+  ADD_ACTION_NS ( all_adts_export_menu
+  , "Export heightmap"
+  , [this]
+    {
+      DESTRUCTIVE_ACTION
+      (
+        makeCurrent();
+        opengl::context::scoped_setter const _(::gl, context());
+
+        _world->exportAllADTsHeightmap();
+      )
+    }
+  );
+
+  ADD_ACTION_NS ( all_adts_export_menu
+  , "Export vertex color map"
+  , [this]
+    {
+      DESTRUCTIVE_ACTION
+      (
+        makeCurrent();
+        opengl::context::scoped_setter const _(::gl, context());
+
+        _world->exportAllADTsVertexColorMap();
+      )
+    }
+  );
+
+  auto all_adts_import_menu(assist_menu->addMenu("Import"));
+
+  ADD_ACTION_NS ( all_adts_import_menu
+  , "Import alphamaps"
+  , [this]
+  {
+    DESTRUCTIVE_ACTION
+    (
+        makeCurrent();
+        opengl::context::scoped_setter const _(::gl, context());
+        noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+        _world->importAllADTsAlphamaps();
+        noggit::ActionManager::instance()->endAction();
+
+    )
+  }
+  );
+
+  ADD_ACTION_NS ( all_adts_import_menu
+  , "Import heightmaps"
+  , [=]
+    {
+      if (adt_import_height_params->exec() == QDialog::Accepted)
+      {
+        DESTRUCTIVE_ACTION
+        (
+            makeCurrent();
+            opengl::context::scoped_setter const _(::gl, context());
+            noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+            _world->importAllADTsHeightmaps(adt_import_height_params_multiplier->value(), adt_import_height_params_mode->currentIndex());
+            noggit::ActionManager::instance()->endAction();
+        )
+
+      }
+    }
+  );
+
+  ADD_ACTION_NS ( all_adts_import_menu
+  , "Import vertex color maps"
+  , [=]
+  {
+    if (adt_import_vcol_params->exec() == QDialog::Accepted)
+    {
+      DESTRUCTIVE_ACTION
+      (
+          makeCurrent();
+          opengl::context::scoped_setter const _(::gl, context());
+          noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+          _world->importAllADTVertexColorMaps(adt_import_vcol_params_mode->currentIndex());
+          noggit::ActionManager::instance()->endAction();
+      )
+
+    }
+  }
   );
 
 }

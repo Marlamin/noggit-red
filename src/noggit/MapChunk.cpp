@@ -1867,9 +1867,9 @@ QImage MapChunk::getVertexColorImage()
       bool const is_virtual {static_cast<bool>(plain % 2)};
       bool const erp = plain % DSUM / SUM;
       unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
-      float r = is_virtual ? (colors[idx].x + colors[idx + (erp ? SUM : 1)].x) / 2.f : colors[idx].x;
-      float g = is_virtual ? (colors[idx].y + colors[idx + (erp ? SUM : 1)].y) / 2.f : colors[idx].y;
-      float b = is_virtual ? (colors[idx].z + colors[idx + (erp ? SUM : 1)].z) / 2.f : colors[idx].z;
+      float r = is_virtual ? (colors[idx].x + colors[idx + (erp ? SUM : 1)].x) / 4.f : colors[idx].x / 2.f;
+      float g = is_virtual ? (colors[idx].y + colors[idx + (erp ? SUM : 1)].y) / 4.f : colors[idx].y / 2.f;
+      float b = is_virtual ? (colors[idx].z + colors[idx + (erp ? SUM : 1)].z) / 4.f : colors[idx].z / 2.f;
       image.setPixelColor(x, y, QColor::fromRgbF(r, g, b, 1.0));
     }
 
@@ -1895,9 +1895,9 @@ void MapChunk::setVertexColorImage(const QImage &image)
       unsigned const idx{(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
 
       QColor color = image.pixelColor(x, y);
-      colors[idx].x = color.redF();
-      colors[idx].y = color.greenF();
-      colors[idx].z = color.blueF();
+      colors[idx].x = color.redF() * 2.f;
+      colors[idx].y = color.greenF() * 2.f;
+      colors[idx].z = color.blueF() * 2.f;
     }
 
   update_vertex_colors();
