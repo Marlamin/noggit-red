@@ -1008,6 +1008,20 @@ void MapView::setupAssistMenu()
                   }
   );
 
+  ADD_ACTION_NS ( assist_menu
+  , "Ensure 4 texture layers"
+  , [=]
+    {
+      makeCurrent();
+      opengl::context::scoped_setter const _(::gl, context());
+
+      noggit::ActionManager::instance()->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+      _world->ensureAllTilesetsADT(_camera.position);
+      noggit::ActionManager::instance()->endAction();
+
+    }
+  );
+
   auto cleanup_menu (assist_menu->addMenu ("Clean up"));
 
   ADD_ACTION_NS ( cleanup_menu
@@ -1448,6 +1462,21 @@ void MapView::setupAssistMenu()
         _world->convert_alphamap(false);
       )
     }
+  );
+
+
+  ADD_ACTION_NS ( assist_menu
+  , "Ensure 4 texture layers"
+  , [=]
+      {
+        DESTRUCTIVE_ACTION
+        (
+          makeCurrent();
+          opengl::context::scoped_setter const _(::gl, context());
+          _world->ensureAllTilesetsAllADTs();
+        )
+
+      }
   );
 
   auto all_adts_export_menu(assist_menu->addMenu("Export"));

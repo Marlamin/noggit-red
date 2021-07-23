@@ -292,6 +292,9 @@ public:
   void importAllADTsHeightmaps(float multiplier, unsigned mode);
   void importAllADTVertexColorMaps(unsigned mode);
 
+  void ensureAllTilesetsADT(math::vector_3d const& pos);
+  void ensureAllTilesetsAllADTs();
+
 
 
   void addM2 ( std::string const& filename

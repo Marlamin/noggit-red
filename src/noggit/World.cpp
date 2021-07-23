@@ -3040,6 +3040,30 @@ void World::importADTVertexColorMap(math::vector_3d const& pos, int mode)
   );
 }
 
+void World::ensureAllTilesetsADT(math::vector_3d const& pos)
+{
+
+  static QStringList textures {"tileset/generic/black.blp",
+                               "tileset/generic/red.blp",
+                               "tileset/generic/green.blp",
+                               "tileset/generic/blue.blp",};
+
+  for_all_chunks_on_tile(pos, [=](MapChunk* chunk)
+  {
+    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+
+    for (int i = 0; i < 4; ++i)
+    {
+      if (chunk->texture_set->num() <= i)
+      {
+        scoped_blp_texture_reference tex {textures[i].toStdString(), noggit::NoggitRenderContext::MAP_VIEW};
+        chunk->texture_set->addTexture(tex);
+      }
+    }
+
+  });
+}
+
 void World::importADTVertexColorMap(math::vector_3d const& pos, QImage const& image, int mode)
 {
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -3839,10 +3863,6 @@ void World::importAllADTsAlphamaps()
           if(!QFileInfo::exists(filename))
             continue;
 
-          for (int i = 0; i < 16; ++i)
-            for (int j = 0; j < 16; ++j)
-              noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(mTile->getChunk(i, j));
-
           QImage img;
           img.load(filename, "PNG");
 
@@ -3899,10 +3919,6 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
         if(!QFileInfo::exists(filename))
           continue;
 
-        for (int i = 0; i < 16; ++i)
-          for (int j = 0; j < 16; ++j)
-            noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(mTile->getChunk(i, j));
-
         QImage img;
         img.load(filename, "PNG");
 
@@ -3957,10 +3973,6 @@ void World::importAllADTVertexColorMaps(unsigned int mode)
         if(!QFileInfo::exists(filename))
           continue;
 
-        for (int i = 0; i < 16; ++i)
-          for (int j = 0; j < 16; ++j)
-            noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(mTile->getChunk(i, j));
-
         QImage img;
         img.load(filename, "PNG");
 
@@ -3972,6 +3984,57 @@ void World::importAllADTVertexColorMaps(unsigned int mode)
         else
         {
           mTile->setVertexColorImage(img, mode);
+        }
+
+        mTile->saveTile(this);
+        mapIndex.markOnDisc (tile, true);
+        mapIndex.unsetChanged(tile);
+
+        if (unload)
+        {
+          mapIndex.unloadTile(tile);
+        }
+      }
+    }
+  }
+}
+
+void World::ensureAllTilesetsAllADTs()
+{
+  static QStringList textures {"tileset/generic/black.blp",
+                               "tileset/generic/red.blp",
+                               "tileset/generic/green.blp",
+                               "tileset/generic/blue.blp",};
+
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+
+        for (int i = 0; i < 16; ++i)
+        {
+          for (int j = 0; j < 16; ++j)
+          {
+            auto chunk = mTile->getChunk(i, j);
+
+            for (int i = 0; i < 4; ++i)
+            {
+              if (chunk->texture_set->num() <= i)
+              {
+                scoped_blp_texture_reference tex {textures[i].toStdString(), noggit::NoggitRenderContext::MAP_VIEW};
+                chunk->texture_set->addTexture(tex);
+              }
+            }
+
+          }
         }
 
         mTile->saveTile(this);
