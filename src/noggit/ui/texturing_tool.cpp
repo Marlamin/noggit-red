@@ -295,10 +295,7 @@ namespace noggit
       connect ( quick_palette_btn, &QPushButton::pressed
               , [=] ()
                 {
-                  if (!show_quick_palette)
-                    return;
-
-                  show_quick_palette->set(true);
+                  show_quick_palette->set(!show_quick_palette);
                 }
               );
 

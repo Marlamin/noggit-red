@@ -7,6 +7,7 @@
 #include <noggit/Sky.h>
 #include <noggit/World.h>
 #include <opengl/shader.hpp>
+#include <external/glm/glm.hpp>
 
 #include <algorithm>
 #include <string>
@@ -198,29 +199,45 @@ Skies::Skies(unsigned int mapid, noggit::NoggitRenderContext context)
   std::sort(skies.begin(), skies.end());
 }
 
-void Skies::findSkyWeights(math::vector_3d pos)
+Sky* Skies::findSkyWeights(math::vector_3d pos)
 {
-  int maxsky = skies.size() - 1;
-  skies[maxsky].weight = 1.0f;
-  cs = maxsky;
-  for (int i = maxsky - 1; i >= 0; i--) {
-    Sky &s = skies[i];
-    float dist = (pos - s.pos).length();
-    if (dist < s.r1) {
-      // we're in a sky, zero out the rest
-      s.weight = 1.0f;
-      cs = i;
-      for (size_t j = i + 1; j<skies.size(); j++) skies[j].weight = 0.0f;
+  Sky* default_sky;
+
+  for (auto& sky : skies)
+  {
+    if (sky.pos == math::vector_3d(0, 0, 0))
+    {
+      default_sky = &sky;
+      break;
     }
-    else if (dist < s.r2) {
-      // we're in an outer area, scale down the other weights
-      float r = (dist - s.r1) / (s.r2 - s.r1);
-      s.weight = 1.0f - r;
-      for (size_t j = i + 1; j<skies.size(); j++) skies[j].weight *= r;
-    }
-    else s.weight = 0.0f;
   }
-  // weights are all normalized at this point :D
+
+  std::sort(skies.begin(), skies.end(), [=](Sky& a, Sky& b)
+  {
+    return (pos - a.pos).length() > (pos - b.pos).length();
+  });
+
+  for (auto& sky : skies)
+  {
+    float distance_to_light = (pos - sky.pos).length();
+
+    if (default_sky == &sky || distance_to_light > sky.r2)
+    {
+      sky.weight = 0.f;
+      continue;
+    }
+
+    float length_of_falloff = sky.r2 - sky.r1;
+    sky.weight = (sky.r2 - distance_to_light) / length_of_falloff;
+
+    if (distance_to_light <= sky.r1)
+    {
+      sky.weight = 1.0f;
+    }
+
+  }
+
+  return default_sky;
 }
 
 void Skies::update_sky_colors(math::vector_3d pos, int time)
@@ -230,17 +247,17 @@ void Skies::update_sky_colors(math::vector_3d pos, int time)
     return;
   }  
 
-  findSkyWeights(pos);
+  Sky* default_sky = findSkyWeights(pos);
 
   for (int i = 0; i < NUM_SkyColorNames; ++i)
   {
-    color_set[i] = math::vector_3d(1, 1, 1);
+    color_set[i] = default_sky->colorFor(i, time);
   }
 
-  _river_shallow_alpha = 0.f;
-  _river_deep_alpha = 0.f;
-  _ocean_shallow_alpha = 0.f;
-  _ocean_deep_alpha = 0.f;
+  _river_shallow_alpha = default_sky->river_shallow_alpha();
+  _river_deep_alpha = default_sky->river_deep_alpha();
+  _ocean_shallow_alpha = default_sky->ocean_shallow_alpha();
+  _ocean_deep_alpha = default_sky->ocean_deep_alpha();
 
   // interpolation
   for (size_t j = 0; j<skies.size(); j++) 
@@ -257,18 +274,19 @@ void Skies::update_sky_colors(math::vector_3d pos, int time)
           LogDebug << "Sky " << j << " " << i << " is out of bounds!" << std::endl;
           continue;
         }
-        color_set[i] += sky.colorFor(i, time) * sky.weight;
+        auto original_col = reinterpret_cast<glm::vec3*>(&color_set[i]._data[0]);
+        auto timed_color = sky.colorFor(i, time);
+        auto new_col = reinterpret_cast<glm::vec3*>(&timed_color._data[0]);
+        glm::vec3 final_color = glm::mix(*original_col, *new_col, sky.weight);
+
+        color_set[i] = *reinterpret_cast<math::vector_3d*>(&final_color);
       }
 
-      _river_shallow_alpha += sky.weight * sky.river_shallow_alpha();
-      _river_deep_alpha += sky.weight * sky.river_deep_alpha();
-      _ocean_shallow_alpha += sky.weight * sky.ocean_shallow_alpha();
-      _ocean_deep_alpha += sky.weight * sky.ocean_deep_alpha();
+      _river_shallow_alpha = (_river_shallow_alpha * (1.0f - sky.weight)) + (sky.river_shallow_alpha() * sky.weight);
+      _river_deep_alpha = (_river_deep_alpha * (1.0f - sky.weight)) + (sky.river_deep_alpha() * sky.weight);
+      _ocean_shallow_alpha = (_ocean_shallow_alpha * (1.0f - sky.weight)) + (sky.ocean_shallow_alpha() * sky.weight);
+      _ocean_deep_alpha = (_ocean_deep_alpha * (1.0f - sky.weight)) + (sky.ocean_deep_alpha() * sky.weight);
     }
-  }
-  for (int i = 0; i<NUM_SkyColorNames; ++i)
-  {
-    color_set[i] -= math::vector_3d(1.f, 1.f, 1.f);
   }
 
   _last_pos = pos;

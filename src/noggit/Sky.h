@@ -135,7 +135,7 @@ public:
 
   explicit Skies(unsigned int mapid, noggit::NoggitRenderContext context);
 
-  void findSkyWeights(math::vector_3d pos);
+  Sky* findSkyWeights(math::vector_3d pos);
   void update_sky_colors(math::vector_3d pos, int time);
 
   bool draw ( math::matrix_4x4 const& model_view
