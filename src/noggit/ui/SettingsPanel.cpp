@@ -212,7 +212,7 @@ namespace noggit
       ui->_adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
       ui->_adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
       ui->_uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
-      ui->_systemWindowFrame->setChecked(_settings->value("systemWindowFrame", false).toBool());
+      ui->_systemWindowFrame->setChecked(_settings->value("systemWindowFrame", true).toBool());
       ui->_nativeMenubar->setChecked(_settings->value("nativeMenubar", true).toBool());
       ui->_additional_file_loading_log->setChecked(
           _settings->value("additional_file_loading_log", false).toBool());
