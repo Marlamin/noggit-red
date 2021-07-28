@@ -231,7 +231,7 @@ includePlattform("prefind")
 FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
-find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network REQUIRED)
+find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml REQUIRED)
 
 
 if (USE_SQL)
@@ -309,6 +309,7 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/zlib" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguizmo" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguipiemenu" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/libnoise/src" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/qtgradienteditor" )
 include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 
@@ -326,6 +327,7 @@ ENDIF()
 collect_files(png_blp_sources src/external/PNG2BLP true "*.c;*.cpp;" "")
 collect_files(imguizmo_sources src/external/imguizmo false "*.c;*.cpp;" "")
 collect_files(imguipiemenu_sources src/external/imguipiemenu false "*.c;*.cpp;" "")
+collect_files(gradienteditor_sources src/external/qtgradienteditor false "*.c;*.cpp;" "")
 
 set ( util_sources
       src/util/exception_to_string.cpp
@@ -346,6 +348,7 @@ ENDIF()
 collect_files(png_blp_headers src/external/PNG2BLP true "*.h;*.hpp" "")
 collect_files(imguizmo_headers src/external/imguizmo false "*.h;*.hpp" "")
 collect_files(imguipiemenu_headers src/external/imguipiemenu false "*.h;*.hpp" "")
+collect_files(gradienteditor_headers src/external/qtgradienteditor false "*.h;*.hpp" "")
 
 
 IF(WIN32)
@@ -371,6 +374,7 @@ source_group("glsl"  FILES ${shaders})
 source_group("noggit/Red" FILES ${red_headers} ${red_sources})
 source_group("png_blp" FILES ${png_blp_headers} ${png_blp_sources})
 source_group("imguizmo" FILES ${imguizmo_headers} ${imguizmo_sources})
+source_group("gradient_editor" FILES ${gradienteditor_headers} ${gradienteditor_sources})
 
 collect_files(resource_files resources false "*.qrc" "")
 qt5_add_resources (compiled_resource_files ${resource_files})
@@ -392,6 +396,7 @@ ADD_EXECUTABLE ( noggit
                   ${png_blp_sources}
                   ${imguizmo_sources}
                   ${imguipiemenu_sources}
+                  ${gradienteditor_sources}
                   ${noggit_root_headers}
                   ${noggit_ui_headers}
                   ${opengl_headers}
@@ -405,6 +410,7 @@ ADD_EXECUTABLE ( noggit
                   ${red_headers}
                   ${imguizmo_headers}
                   ${imguipiemenu_headers}
+                  ${gradienteditor_headers}
                   ${compiled_resource_files}
                   ${compiled_ui_files}
                   ${shaders}
@@ -420,6 +426,7 @@ TARGET_LINK_LIBRARIES (noggit
   Qt5::Widgets
   Qt5::OpenGL
   Qt5::OpenGLExtensions
+  Qt5::Xml
   ColorWidgets-qt5
   FramelessHelper
   qt_imgui_widgets

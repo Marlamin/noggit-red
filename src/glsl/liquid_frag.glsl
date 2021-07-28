@@ -7,12 +7,18 @@ uniform vec4 ocean_color_dark;
 uniform vec4 river_color_light;
 uniform vec4 river_color_dark;
 
+uniform vec3 fog_color;
+uniform float fog_start;
+uniform float fog_end;
+
 uniform int type;
 uniform float animtime;
 uniform vec2 param;
+uniform bool draw_fog;
 
 in float depth_;
 in vec2 tex_coord_;
+in float dist_from_camera_;
 
 out vec4 out_color;
 
@@ -40,5 +46,24 @@ void main()
               
     //clamp shouldn't be needed
     out_color = vec4 (clamp(texel + lerp, 0.0, 1.0).rgb, lerp.a);
-  }  
+  }
+
+  if (draw_fog)
+  {
+    float start = fog_end * fog_start;
+
+    vec3 fogParams;
+    fogParams.x = -(1.0 / (fog_end - start));
+    fogParams.y = (1.0 / (fog_end - start)) * fog_end;
+    fogParams.z = 1.0;
+
+    float f1 = (dist_from_camera_ * fogParams.x) + fogParams.y;
+    float f2 = max(f1, 0.0);
+    float f3 = pow(f2, fogParams.z);
+    float f4 = min(f3, 1.0);
+
+    float fogFactor = 1.0 - f4;
+
+    out_color.rgb = mix(out_color.rgb, fog_color.rgb, fogFactor);
+  }
 }

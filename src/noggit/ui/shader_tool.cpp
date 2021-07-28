@@ -11,6 +11,7 @@
 #include <qt-color-widgets/hue_slider.hpp>
 #include <qt-color-widgets/gradient_slider.hpp>
 #include <qt-color-widgets/color_list_widget.hpp>
+#include <external/qtgradienteditor/qtgradienteditor.h>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
@@ -102,6 +103,7 @@ namespace noggit
       info_label->setAlignment(Qt::AlignCenter | Qt::AlignTop);
 
       layout->addRow(info_label);
+      layout->addRow(new QtGradientEditor(this));
 
       QObject::connect(_slide_saturation, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
       QObject::connect(_slide_value, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);

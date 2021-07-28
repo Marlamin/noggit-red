@@ -34,37 +34,56 @@ out vec4 out_color;
 
 vec3 lighting(vec3 material)
 {
-  vec3 light_color = vec3(1.);
+  vec3 ambient_term;
+  vec3 diffuse_term;
   vec3 vertex_color = use_vertex_color ? f_vertex_color.rgb : vec3(0.);
 
   if(unlit)
   {
-    light_color = vertex_color + (exterior_lit ? exterior_ambient_color : ambient_color);
+    ambient_term = vec3(0.0);
+    diffuse_term = vec3(0.0);
   }
   else if(exterior_lit)
   {
-    vec3 ambient = exterior_ambient_color + vertex_color.rgb;
-
-    light_color = vec3(clamp (exterior_diffuse_color * max(dot(f_normal, exterior_light_dir), 0.0), 0.0, 1.0)) + ambient;
+    ambient_term = exterior_ambient_color;
+    diffuse_term = exterior_diffuse_color;
   }
   else
   {
-    light_color = ambient_color + vertex_color.rgb;
-  }  
+    ambient_term = ambient_color;
+    diffuse_term = vec3(0.0);
+  }
 
-  return material * light_color;
+  // apply world lighting
+  vec3 currColor;
+  vec3 lDiffuse = vec3(0.0, 0.0, 0.0);
+  vec3 accumlatedLight = vec3(1.0, 1.0, 1.0);
+
+  if(!unlit)
+  {
+    float nDotL = clamp(dot(normalize(f_normal), -normalize(exterior_light_dir)), 0.0, 1.0);
+
+    vec3 ambientColor = ambient_term + vertex_color;
+
+    vec3 skyColor = (ambientColor * 1.10000002);
+    vec3 groundColor = (ambientColor * 0.699999988);
+
+    currColor = mix(groundColor, skyColor, 0.5 + (0.5 * nDotL));
+    lDiffuse = diffuse_term * nDotL;
+  }
+  else
+  {
+    currColor = ambient_color + vertex_color;
+    accumlatedLight = vec3(0.0f, 0.0f, 0.0f);
+  }
+
+  return clamp(material.rgb * (currColor + lDiffuse), 0.0, 1.0);
 }
 
 void main()
 {
   float dist_from_camera = distance(camera, f_position);
   bool fog = draw_fog && !unfogged;
-
-  if(fog && dist_from_camera >= fog_end)
-  {
-    out_color = vec4(fog_color, 1.);
-    return;
-  }
 
   vec4 tex = texture(tex1, f_texcoord);
   vec4 tex_2 = texture(tex2, f_texcoord_2);
@@ -104,12 +123,23 @@ void main()
     out_color = vec4(lighting(tex.rgb), 1.);
   }
 
-  if(fog && (dist_from_camera >= fog_end * fog_start))
+  if(fog)
   {
     float start = fog_end * fog_start;
-    float alpha = (dist_from_camera - start) / (fog_end - start);
 
-    out_color.rgb = mix(out_color.rgb, fog_color, alpha);
+    vec3 fogParams;
+    fogParams.x = -(1.0 / (fog_end - start));
+    fogParams.y = (1.0 / (fog_end - start)) * fog_end;
+    fogParams.z = 1.0;
+
+    float f1 = (dist_from_camera * fogParams.x) + fogParams.y;
+    float f2 = max(f1, 0.0);
+    float f3 = pow(f2, fogParams.z);
+    float f4 = min(f3, 1.0);
+
+    float fogFactor = 1.0 - f4;
+
+    out_color.rgb = mix(out_color.rgb, fog_color.rgb, fogFactor);
   }
 
   if(out_color.a < alpha_test)

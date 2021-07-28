@@ -15,19 +15,10 @@
 #include <vector>
 
 
-/*
-It seems that lighting info is also stored in lights.lit, so I
-wonder what the heck is in Dnc.db. Maybe just light directions and/or
-sun/moon positions...?
-*/
 struct OutdoorLightStats
 {
-  int time; // converted from hour:min to the 2880 half-minute ticks thing used in the other Sky thing
-
-  float dayIntensity, nightIntensity, ambientIntensity, fogIntensity, fogDepth;
-  math::vector_3d dayColor, nightColor, ambientColor, fogColor, dayDir, nightDir;
-
-  void init(MPQFile* f);
+  float nightIntensity;
+  math::vector_3d dayDir;
 
   void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
 };
@@ -51,6 +42,14 @@ struct SkyColor
   SkyColor(int t, int col);
 };
 
+struct SkyFloatParam
+{
+  SkyFloatParam(int t, float val);
+
+  float value;
+  int time;
+};
+
 class Sky 
 {
 public:
@@ -62,11 +61,14 @@ public:
   explicit Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context);
 
   std::vector<SkyColor> colorRows[36];
+  std::vector<SkyFloatParam> floatParams[6];
   int mmin[36];
+  int mmin_float[6];
 
   char name[32];
 
   math::vector_3d colorFor(int r, int t) const;
+  float floatParamFor(int r, int t) const;
 
   float weight;
   bool global;
@@ -96,23 +98,34 @@ enum SkyColorNames
 {
   LIGHT_GLOBAL_DIFFUSE,
   LIGHT_GLOBAL_AMBIENT,
-  SKY_COLOR_0,
-  SKY_COLOR_1,
-  SKY_COLOR_2,
-  SKY_COLOR_3,
-  SKY_COLOR_4,
-  FOG_COLOR,
-  SKY_UNKNOWN_1,
-  SUN_COLOR,
-  SUN_HALO_COLOR,
-  SKY_UNKNOWN_2,
-  CLOUD_COLOR,
+  SKY_COLOR_0, // top
+  SKY_COLOR_1, // middle
+  SKY_COLOR_2, // middle to horizon
+  SKY_COLOR_3, // above horizon
+  SKY_COLOR_4, // horizon
+  FOG_COLOR, // fog and WDL mountains
+  SHADOW_OPACITY,
+  SUN_COLOR, // sun, specular light, sunrays
+  SUN_HALO_COLOR, // bigger sun halo
+  CLOUD_EDGE_COLOR, // cloud edge
+  CLOUD_COLOR, // cloud body
   SKY_UNKNOWN_3,
-  OCEAN_COLOR_LIGHT,
-  OCEAN_COLOR_DARK,
-  RIVER_COLOR_LIGHT,
-  RIVER_COLOR_DARK,
-  NUM_SkyColorNames,
+  OCEAN_COLOR_LIGHT, // shallow ocean
+  OCEAN_COLOR_DARK, // deep ocean
+  RIVER_COLOR_LIGHT, // shallow river
+  RIVER_COLOR_DARK, // deep river
+  NUM_SkyColorNames
+};
+
+enum SkyFloatParamsNames
+{
+  FOG_DISTANCE,
+  FOG_MULTIPLIER,
+  CELESTIAL_FLOW,
+  CLOUD_DENSITY,
+  UNK_1,
+  UNK_2,
+  NUM_SkyFloatParamsNames
 };
 
 class Skies 
@@ -129,6 +142,10 @@ private:
   float _river_deep_alpha;
   float _ocean_shallow_alpha;
   float _ocean_deep_alpha;
+
+  float _fog_distance;
+  float _fog_multiplier;
+
 public:
   std::vector<Sky> skies;
   std::vector<math::vector_3d> color_set = std::vector<math::vector_3d>(NUM_SkyColorNames);
@@ -154,6 +171,9 @@ public:
   float river_deep_alpha() const { return _river_deep_alpha; }
   float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
   float ocean_deep_alpha() const { return _ocean_deep_alpha; }
+
+  float fog_distance_end() const { return _fog_distance / 36.f; };
+  float fog_distance_start() const { return _fog_multiplier; };
 
   void unload();
 

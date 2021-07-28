@@ -991,15 +991,15 @@ void World::draw ( math::matrix_4x4 const& model_view
   int daytime = static_cast<int>(time) % 2880;
 
   skies->update_sky_colors(camera_pos, daytime);
-  outdoorLightStats = ol->getLightStats(daytime);
+  outdoorLightStats = ol->getLightStats(static_cast<int>(time));
 
   math::vector_3d light_dir = outdoorLightStats.dayDir;
-  light_dir = {-light_dir.y, -light_dir.z, -light_dir.x};
+  light_dir = {-light_dir.x, light_dir.z, -light_dir.y};
   // todo: figure out why I need to use a different light vector for the terrain
-  math::vector_3d terrain_light_dir = {-light_dir.z, light_dir.y, -light_dir.x};
+  math::vector_3d terrain_light_dir = outdoorLightStats.dayDir;
 
-  math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE] * outdoorLightStats.dayIntensity);
-  math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT] * outdoorLightStats.ambientIntensity);
+  math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE]);
+  math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT]);
 
   // only draw the sky in 3D
   if(display == display_mode::in_3D)
@@ -1010,6 +1010,8 @@ void World::draw ( math::matrix_4x4 const& model_view
     m2_shader.uniform("projection", projection);
 
     m2_shader.uniform_cached("draw_fog", 0);
+    m2_shader.uniform("fog_end", skies->fog_distance_end());
+    m2_shader.uniform("fog_start", skies->fog_distance_start());
 
     m2_shader.uniform("light_dir", light_dir);
     m2_shader.uniform("diffuse_color", diffuse_color);
@@ -1050,6 +1052,8 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     if (!hadSky)
     {
+      m2_shader.uniform("diffuse_color", math::vector_3d{0.0f, 0.0f, 0.0f});
+      m2_shader.uniform("ambient_color",  math::vector_3d{1.f, 1.f, 1.f});
       skies->draw( model_view
                  , projection
                  , camera_pos
@@ -1117,6 +1121,8 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform ("wireframe_color", wireframe_color);
 
     mcnk_shader.uniform_cached ("draw_fog", draw_fog);
+    mcnk_shader.uniform("fog_end", skies->fog_distance_end());
+    mcnk_shader.uniform("fog_start", skies->fog_distance_start());
 
     mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
 
@@ -1238,6 +1244,8 @@ void World::draw ( math::matrix_4x4 const& model_view
       if (draw_fog)
       {
         wmo_program.uniform("fog_color", skies->color_set[FOG_COLOR]);
+        wmo_program.uniform("fog_end", skies->fog_distance_end());
+        wmo_program.uniform("fog_start", skies->fog_distance_start());
         wmo_program.uniform("camera", camera_pos);
       }
 
@@ -1299,6 +1307,8 @@ void World::draw ( math::matrix_4x4 const& model_view
       // !\ todo use light dbcs values
 
       m2_shader.uniform_cached("draw_fog", draw_fog);
+      m2_shader.uniform("fog_end", skies->fog_distance_end());
+      m2_shader.uniform("fog_start", skies->fog_distance_start());
 
       m2_shader.uniform("light_dir", light_dir);
       m2_shader.uniform("diffuse_color", diffuse_color);
@@ -1400,6 +1410,16 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     water_shader.uniform("model_view", model_view);
     water_shader.uniform("projection", projection);
+    water_shader.uniform("camera", camera_pos);
+
+    water_shader.uniform_cached("draw_fog", draw_fog);
+
+    if (draw_fog)
+    {
+      water_shader.uniform("fog_color", skies->color_set[FOG_COLOR]);
+      water_shader.uniform("fog_start", skies->fog_distance_start());
+      water_shader.uniform("fog_end", skies->fog_distance_end());
+    }
 
     math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], skies->ocean_shallow_alpha());
     math::vector_4d ocean_color_dark(skies->color_set[OCEAN_COLOR_DARK], skies->ocean_deep_alpha());
@@ -2079,12 +2099,16 @@ void World::drawMinimap ( MapTile *tile
 
   int daytime = static_cast<int>(time) % 2880;
 
-  outdoorLightStats = ol->getLightStats(daytime);
+  skies->update_sky_colors(camera_pos, daytime);
+  outdoorLightStats = ol->getLightStats(static_cast<int>(time) * 60);
 
   math::vector_3d light_dir = outdoorLightStats.dayDir;
-  light_dir = {-light_dir.y, -light_dir.z, -light_dir.x};
+  light_dir = {-light_dir.x, light_dir.z, -light_dir.y};
   // todo: figure out why I need to use a different light vector for the terrain
-  math::vector_3d terrain_light_dir = {-light_dir.z, light_dir.y, -light_dir.x};
+  math::vector_3d terrain_light_dir = outdoorLightStats.dayDir;
+
+  math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE]);
+  math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT]);
 
   culldistance = 100000.0f;
 

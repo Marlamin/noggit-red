@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <string>
+#include <array>
 
 const float skymul = 36.0f;
 
@@ -20,6 +21,12 @@ SkyColor::SkyColor(int t, int col)
   color.z = ((col & 0x0000ff)) / 255.0f;
   color.y = ((col & 0x00ff00) >> 8) / 255.0f;
   color.x = ((col & 0xff0000) >> 16) / 255.0f;
+}
+
+SkyFloatParam::SkyFloatParam(int t, float val)
+: time(t)
+, value(val)
+{
 }
 
 Sky::Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context)
@@ -34,10 +41,15 @@ Sky::Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context)
     mmin[i] = -2;
   }
 
+  for (int i = 0; i < 6; ++i)
+  {
+    mmin_float[i] = -2;
+  }
+
   global = (pos.x == 0.0f && pos.y == 0.0f && pos.z == 0.0f);
 
   int light_param_0 = data->getInt(LightDB::DataIDs);
-  int light_int_start = light_param_0 * NUM_SkyColorNames - 17; // cromons light fix ;) Thanks
+  int light_int_start = light_param_0 * NUM_SkyColorNames - 17;
 
   for (int i = 0; i < NUM_SkyColorNames; ++i)
   {
@@ -82,6 +94,51 @@ Sky::Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context)
     }
   }
 
+  int light_float_start = light_param_0 * NUM_SkyFloatParamsNames - 5;
+
+  for (int i = 0; i < NUM_SkyFloatParamsNames; ++i)
+  {
+    try
+    {
+      DBCFile::Record rec = gLightFloatBandDB.getByID(light_float_start + i);
+      int entries = rec.getInt(LightFloatBandDB::Entries);
+
+      if (entries == 0)
+      {
+        mmin_float[i] = -1;
+      }
+      else
+      {
+        mmin_float[i] = rec.getInt(LightFloatBandDB::Times);
+        for (int l = 0; l < entries; l++)
+        {
+          SkyFloatParam sc(rec.getInt(LightFloatBandDB::Times + l), rec.getFloat(LightFloatBandDB::Values + l));
+          floatParams[i].push_back(sc);
+        }
+      }
+    }
+    catch (...)
+    {
+      LogError << "When trying to intialize sky " << data->getInt(LightDB::ID) << ", there was an error with getting an entry in a DBC (" << i << "). Sorry." << std::endl;
+      DBCFile::Record rec = gLightFloatBandDB.getByID(i);
+      int entries = rec.getInt(LightFloatBandDB::Entries);
+
+      if (entries == 0)
+      {
+        mmin_float[i] = -1;
+      }
+      else
+      {
+        mmin_float[i] = rec.getInt(LightFloatBandDB::Times);
+        for (int l = 0; l < entries; l++)
+        {
+          SkyFloatParam sc(rec.getInt(LightFloatBandDB::Times + l), rec.getFloat(LightFloatBandDB::Values + l));
+          floatParams[i].push_back(sc);
+        }
+      }
+    }
+  }
+
   try
   {
     DBCFile::Record light_param = gLightParamsDB.getByID(light_param_0);
@@ -101,6 +158,53 @@ Sky::Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context)
   {
     LogError << "When trying to get the skybox for the entry " << light_param_0 << " in LightParams.dbc. Sad." << std::endl;
   }
+}
+
+float Sky::floatParamFor(int r, int t) const
+{
+  if (mmin_float[r]<0)
+  {
+    return 0.0;
+  }
+  float c1, c2;
+  int t1, t2;
+  size_t last = floatParams[r].size() - 1;
+
+  if (t<mmin_float[r])
+  {
+    // reverse interpolate
+    c1 = floatParams[r][last].value;
+    c2 = floatParams[r][0].value;
+    t1 = floatParams[r][last].time;
+    t2 = floatParams[r][0].time + 2880;
+    t += 2880;
+  }
+  else
+  {
+    for (size_t i = last; true; i--)
+    { //! \todo iterator this.
+      if (floatParams[r][i].time <= t)
+      {
+        c1 = floatParams[r][i].value;
+        t1 = floatParams[r][i].time;
+
+        if (i == last)
+        {
+          c2 = floatParams[r][0].value;
+          t2 = floatParams[r][0].time + 2880;
+        }
+        else
+        {
+          c2 = floatParams[r][i + 1].value;
+          t2 = floatParams[r][i + 1].time;
+        }
+        break;
+      }
+    }
+  }
+
+  float tt = static_cast<float>(t - t1) / static_cast<float>(t2 - t1);
+  return c1*(1.0f - tt) + c2*tt;
 }
 
 math::vector_3d Sky::colorFor(int r, int t) const
@@ -154,9 +258,9 @@ const float rad = 400.0f;
 
 //...............................top....med....medh........horiz..........bottom
 const math::degrees angles[] = { math::degrees (90.0f)
-                               , math::degrees (30.0f)
-                               , math::degrees (15.0f)
-                               , math::degrees (5.0f)
+                               , math::degrees (18.0f)
+                               , math::degrees (10.0f)
+                               , math::degrees (3.0f)
                                , math::degrees (0.0f)
                                , math::degrees (-30.0f)
                                , math::degrees (-90.0f)
@@ -170,6 +274,7 @@ Skies::Skies(unsigned int mapid, noggit::NoggitRenderContext context)
   : stars (ModelInstance("Environments\\Stars\\Stars.mdx", context))
   , _context(context)
 {
+  bool has_global = false;
   for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i)
   {
     if (mapid == i->getUInt(LightDB::Map))
@@ -177,14 +282,17 @@ Skies::Skies(unsigned int mapid, noggit::NoggitRenderContext context)
       Sky s(i, _context);
       skies.push_back(s);
       numSkies++;
+
+      if (s.pos == math::vector_3d(0, 0, 0))
+        has_global = true;
     }
   }
 
-  if (numSkies == 0)
+  if (!has_global)
   {
     for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i)
     {
-      if (0 == i->getUInt(LightDB::Map))
+      if (1 == i->getUInt(LightDB::ID))
       {
         Sky s(i, _context);
         skies.push_back(s);
@@ -201,7 +309,7 @@ Skies::Skies(unsigned int mapid, noggit::NoggitRenderContext context)
 
 Sky* Skies::findSkyWeights(math::vector_3d pos)
 {
-  Sky* default_sky;
+  Sky* default_sky = nullptr;
 
   for (auto& sky : skies)
   {
@@ -249,15 +357,39 @@ void Skies::update_sky_colors(math::vector_3d pos, int time)
 
   Sky* default_sky = findSkyWeights(pos);
 
-  for (int i = 0; i < NUM_SkyColorNames; ++i)
+  if (default_sky)
   {
-    color_set[i] = default_sky->colorFor(i, time);
+    for (int i = 0; i < NUM_SkyColorNames; ++i)
+    {
+      color_set[i] = default_sky->colorFor(i, time);
+    }
+
+    _fog_distance = default_sky->floatParamFor(0, time);
+    _fog_multiplier = default_sky->floatParamFor(1, time);
+
+    _river_shallow_alpha = default_sky->river_shallow_alpha();
+    _river_deep_alpha = default_sky->river_deep_alpha();
+    _ocean_shallow_alpha = default_sky->ocean_shallow_alpha();
+    _ocean_deep_alpha = default_sky->ocean_deep_alpha();
+
+  }
+  else
+  {
+    for (int i = 0; i < NUM_SkyColorNames; ++i)
+    {
+      color_set[i] = math::vector_3d(1, 1, 1);
+    }
+
+    _fog_multiplier = 0.f;
+    _fog_distance = 0.f;
+
+    _river_shallow_alpha = 0.f;
+    _river_deep_alpha = 0.f;
+    _ocean_shallow_alpha = 0.f;
+    _ocean_deep_alpha = 0.f;
+
   }
 
-  _river_shallow_alpha = default_sky->river_shallow_alpha();
-  _river_deep_alpha = default_sky->river_deep_alpha();
-  _ocean_shallow_alpha = default_sky->ocean_shallow_alpha();
-  _ocean_deep_alpha = default_sky->ocean_deep_alpha();
 
   // interpolation
   for (size_t j = 0; j<skies.size(); j++) 
@@ -281,6 +413,9 @@ void Skies::update_sky_colors(math::vector_3d pos, int time)
 
         color_set[i] = *reinterpret_cast<math::vector_3d*>(&final_color);
       }
+
+      _fog_distance = (_fog_distance * (1.0f - sky.weight)) + (sky.floatParamFor(0, time) * sky.weight);
+      _fog_multiplier = (_fog_multiplier * (1.0f - sky.weight)) + (sky.floatParamFor(1, time) * sky.weight);
 
       _river_shallow_alpha = (_river_shallow_alpha * (1.0f - sky.weight)) + (sky.river_shallow_alpha() * sky.weight);
       _river_deep_alpha = (_river_deep_alpha * (1.0f - sky.weight)) + (sky.river_deep_alpha() * sky.weight);
@@ -339,10 +474,13 @@ bool Skies::draw( math::matrix_4x4 const& model_view
     }
   }
 
+  bool has_skybox = false;
   for (Sky& sky : skies)
   {
     if (sky.weight > 0.f && sky.skybox)
     {
+      has_skybox = true;
+
       auto& model = sky.skybox.get();
       model.model->trans = sky.weight;
       model.pos = camera_pos;
@@ -353,7 +491,7 @@ bool Skies::draw( math::matrix_4x4 const& model_view
     }
   }
   // if it's night, draw the stars
-  if (light_stats.nightIntensity > 0)
+  if (light_stats.nightIntensity > 0 && !has_skybox)
   {
     stars.model->trans = light_stats.nightIntensity;
     stars.pos = camera_pos;
@@ -498,114 +636,69 @@ void Skies::update_color_buffer()
   _need_vao_update = true;
 }
 
-//! \todo  figure out what dnc.db is _really_ used for
-
-void OutdoorLightStats::init(MPQFile* f)
-{
-  float h, m;
-
-  f->seekRelative(4);
-  f->read(&h, 4);
-  f->seekRelative(4);
-  f->read(&m, 4);
-  f->seekRelative(4);
-  f->read(&dayIntensity, 4);
-
-  f->seekRelative(4);
-  f->read(&dayColor.x, 4);
-  f->seekRelative(4);
-  f->read(&dayColor.y, 4);
-  f->seekRelative(4);
-  f->read(&dayColor.z, 4);
-
-  f->seekRelative(4);
-  f->read(&dayDir.x, 4);
-  f->seekRelative(4);
-  f->read(&dayDir.y, 4);
-  f->seekRelative(4);
-  f->read(&dayDir.z, 4);
-
-  f->seekRelative(4);
-  f->read(&nightIntensity, 4);
-
-  f->seekRelative(4);
-  f->read(&nightColor.x, 4);
-  f->seekRelative(4);
-  f->read(&nightColor.y, 4);
-  f->seekRelative(4);
-  f->read(&nightColor.z, 4);
-
-  f->seekRelative(4);
-  f->read(&nightDir.x, 4);
-  f->seekRelative(4);
-  f->read(&nightDir.y, 4);
-  f->seekRelative(4);
-  f->read(&nightDir.z, 4);
-
-  f->seekRelative(4);
-  f->read(&ambientIntensity, 4);
-
-  f->seekRelative(4);
-  f->read(&ambientColor.x, 4);
-  f->seekRelative(4);
-  f->read(&ambientColor.y, 4);
-  f->seekRelative(4);
-  f->read(&ambientColor.z, 4);
-
-  f->seekRelative(4);
-  f->read(&fogDepth, 4);
-  f->seekRelative(4);
-  f->read(&fogIntensity, 4);
-
-  f->seekRelative(4);
-  f->read(&fogColor.x, 4);
-  f->seekRelative(4);
-  f->read(&fogColor.y, 4);
-  f->seekRelative(4);
-  f->read(&fogColor.z, 4);
-
-  time = (int)((h * 60 + m) * 2);
-}
 
 void OutdoorLightStats::interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r)
 {
-  float ir = 1.0f - r;
-  time = 0; // unused
+  static constexpr unsigned DayNight_SecondsPerDay = 86400;
 
-  dayIntensity = a->dayIntensity * ir + b->dayIntensity * r;
-  nightIntensity = a->nightIntensity * ir + b->nightIntensity * r;
-  ambientIntensity = a->ambientIntensity * ir + b->ambientIntensity * r;
-  fogIntensity = a->fogIntensity * ir + b->fogIntensity * r;
-  fogDepth = a->fogDepth * ir + b->fogDepth * r;
-  dayColor = a->dayColor * ir + b->dayColor * r;
-  nightColor = a->nightColor * ir + b->nightColor * r;
-  ambientColor = a->ambientColor * ir + b->ambientColor * r;
-  fogColor = a->fogColor * ir + b->fogColor * r;
-  dayDir = a->dayDir * ir + b->dayDir * r;
-  nightDir = a->nightDir * ir + b->nightDir * r;
+  float progressDayAndNight = r / DayNight_SecondsPerDay;
+
+  float phiValue = 0;
+  const float thetaValue = 3.926991f;
+  const float phiTable[4] =
+    {
+      2.2165682f,
+      1.9198623f,
+      2.2165682f,
+      1.9198623f
+    };
+
+  unsigned currentPhiIndex = static_cast<unsigned>(progressDayAndNight / 0.25f);
+  unsigned nextPhiIndex = 0;
+
+  if (currentPhiIndex < 3)
+    nextPhiIndex = currentPhiIndex + 1;
+
+  // Lerp between the current value of phi and the next value of phi
+  {
+    float transitionProgress = (progressDayAndNight / 0.25f) - currentPhiIndex;
+
+    float currentPhiValue = phiTable[currentPhiIndex];
+    float nextPhiValue = phiTable[nextPhiIndex];
+
+    phiValue = glm::mix(currentPhiValue, nextPhiValue, transitionProgress);
+  }
+
+  // Convert from Spherical Position to Cartesian coordinates
+  float sinPhi = glm::sin(phiValue);
+  float cosPhi = glm::cos(phiValue);
+
+  float sinTheta = glm::sin(thetaValue);
+  float cosTheta = glm::cos(thetaValue);
+
+  dayDir.x = sinPhi * cosTheta;
+  dayDir.y = sinPhi * sinTheta;
+  dayDir.z = cosPhi;
+
+  float ir = 1.0f - progressDayAndNight;
+  nightIntensity = a->nightIntensity * ir + b->nightIntensity * progressDayAndNight;
 }
 
 OutdoorLighting::OutdoorLighting(const std::string& fname)
 {
-  MPQFile f(fname);
-  unsigned int n, d;
 
-  f.seekRelative(4);
-  f.read(&n, 4); // it's the same thing twice? :|
+  static constexpr std::array<int, 24> night_hours =
+    {1, 1, 1, 1, 1, 1,
+     0, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 0, 0,
+     0, 0, 0, 0, 1, 1};
 
-  f.seekRelative(4);
-  f.read(&d, 4); // d is now the final offset
-  f.seek(8 + n * 8);
-
-  while (f.getPos() < d) 
+  for (int i = 0; i < 24; ++i)
   {
     OutdoorLightStats ols;
-    ols.init(&f);
-
+    ols.nightIntensity = night_hours[i];
     lightStats.push_back(ols);
   }
-
-  f.close();
 }
 
 OutdoorLightStats OutdoorLighting::getLightStats(int time)
@@ -613,17 +706,31 @@ OutdoorLightStats OutdoorLighting::getLightStats(int time)
   // ASSUME: only 24 light info records, one for each whole hour
   //! \todo  generalize this if the data file changes in the future
 
+  int normalized_time ((static_cast<int>(time) % 2880) / 2);
+
+  static constexpr unsigned DayNight_SecondsPerDay = 86400;
+
+  long progressDayAndNight = (static_cast<float>(normalized_time) * 120);
+
+  while (progressDayAndNight < 0 || progressDayAndNight > DayNight_SecondsPerDay)
+  {
+    if (progressDayAndNight > DayNight_SecondsPerDay)
+      progressDayAndNight -= DayNight_SecondsPerDay;
+
+    if (progressDayAndNight < 0)
+      progressDayAndNight += DayNight_SecondsPerDay;
+  }
+
   OutdoorLightStats out;
 
   OutdoorLightStats *a, *b;
-  int ta = time / 120;
+  int ta = normalized_time / 60;
   int tb = (ta + 1) % 24;
-  float r = (time - (ta * 120)) / 120.0f;
 
   a = &lightStats[ta];
   b = &lightStats[tb];
 
-  out.interpolate(a, b, r);
+  out.interpolate(a, b, progressDayAndNight);
 
   return out;
 }

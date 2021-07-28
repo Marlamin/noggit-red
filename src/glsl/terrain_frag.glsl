@@ -97,19 +97,30 @@ void main()
 {
   float dist_from_camera = distance(camera, vary_position);
 
-  if(draw_fog && dist_from_camera >= fog_end)
-  {
-    out_color = fog_color;
-    return;
-  } 
   vec3 fw = fwidth(vary_position.xyz);
 
   out_color = texture_blend();
+
   out_color.rgb *= vary_mccv;
 
-  // diffuse + ambient lighting
-  out_color.rgb *= vec3(clamp (diffuse_color * max(dot(vary_normal, light_dir), 0.0), 0.0, 1.0)) + ambient_color;
+  // apply world lighting
+  vec3 currColor;
+  vec3 lDiffuse = vec3(0.0, 0.0, 0.0);
+  vec3 accumlatedLight = vec3(1.0, 1.0, 1.0);
 
+  float nDotL = clamp(dot(normalize(vary_normal), -normalize(light_dir)), 0.0, 1.0);
+
+  vec3 ambientColor = ambient_color;
+
+  vec3 skyColor = (ambientColor * 1.10000002);
+  vec3 groundColor = (ambientColor * 0.699999988);
+
+  currColor = mix(groundColor, skyColor, 0.5 + (0.5 * nDotL));
+  lDiffuse = diffuse_color * nDotL;
+
+  out_color.rgb = clamp(out_color.rgb * (currColor + lDiffuse), 0.0, 1.0);
+
+  // apply overlays
   if(cant_paint)
   {
     out_color *= vec4(1.0, 0.0, 0.0, 1.0);
@@ -164,11 +175,23 @@ void main()
     out_color.rgb = mix(out_color.rgb, color.rgb, color.a);
   }
 
-  if(draw_fog && dist_from_camera >= fog_end * fog_start)
+  if(draw_fog)
   {
     float start = fog_end * fog_start;
-    float alpha = (dist_from_camera - start) / (fog_end - start);
-    out_color.rgb = mix(out_color.rgb, fog_color.rgb, alpha);
+
+    vec3 fogParams;
+    fogParams.x = -(1.0 / (fog_end - start));
+    fogParams.y = (1.0 / (fog_end - start)) * fog_end;
+    fogParams.z = 1.0;
+
+    float f1 = (dist_from_camera * fogParams.x) + fogParams.y;
+    float f2 = max(f1, 0.0);
+    float f3 = pow(f2, fogParams.z);
+    float f4 = min(f3, 1.0);
+
+    float fogFactor = 1.0 - f4;
+
+    out_color.rgb = mix(out_color.rgb, fog_color.rgb, fogFactor);
   }
 
   if(draw_wireframe && !lines_drawn)
