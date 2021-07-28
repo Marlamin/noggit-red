@@ -148,6 +148,7 @@ Sky::Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context)
     _river_deep_alpha = light_param.getFloat(LightParamsDB::water_deep_alpha);
     _ocean_shallow_alpha = light_param.getFloat(LightParamsDB::ocean_shallow_alpha);
     _ocean_deep_alpha = light_param.getFloat(LightParamsDB::ocean_deep_alpha);
+    _glow = light_param.getFloat(LightParamsDB::glow);
 
     if (skybox_id)
     {
@@ -204,7 +205,7 @@ float Sky::floatParamFor(int r, int t) const
   }
 
   float tt = static_cast<float>(t - t1) / static_cast<float>(t2 - t1);
-  return c1*(1.0f - tt) + c2*tt;
+  return c1 + ((c2 - c1) * tt);
 }
 
 math::vector_3d Sky::colorFor(int r, int t) const
@@ -371,10 +372,13 @@ void Skies::update_sky_colors(math::vector_3d pos, int time)
     _river_deep_alpha = default_sky->river_deep_alpha();
     _ocean_shallow_alpha = default_sky->ocean_shallow_alpha();
     _ocean_deep_alpha = default_sky->ocean_deep_alpha();
+    _glow = default_sky->glow();
 
   }
   else
   {
+    LogError << "Failed to load default light. Something went seriously wrong. Potentially corrupt Light.dbc" << std::endl;
+
     for (int i = 0; i < NUM_SkyColorNames; ++i)
     {
       color_set[i] = math::vector_3d(1, 1, 1);
@@ -387,9 +391,9 @@ void Skies::update_sky_colors(math::vector_3d pos, int time)
     _river_deep_alpha = 0.f;
     _ocean_shallow_alpha = 0.f;
     _ocean_deep_alpha = 0.f;
+    _glow = 0.0f;
 
   }
-
 
   // interpolation
   for (size_t j = 0; j<skies.size(); j++) 
@@ -421,7 +425,24 @@ void Skies::update_sky_colors(math::vector_3d pos, int time)
       _river_deep_alpha = (_river_deep_alpha * (1.0f - sky.weight)) + (sky.river_deep_alpha() * sky.weight);
       _ocean_shallow_alpha = (_ocean_shallow_alpha * (1.0f - sky.weight)) + (sky.ocean_shallow_alpha() * sky.weight);
       _ocean_deep_alpha = (_ocean_deep_alpha * (1.0f - sky.weight)) + (sky.ocean_deep_alpha() * sky.weight);
+
+      _glow = (_glow * (1.0f - sky.weight)) + (sky.glow() * sky.weight);
     }
+
+  }
+
+  float fogEnd = _fog_distance / 36.f;
+  float fogStart = _fog_multiplier * fogEnd;
+  float fogRange = fogEnd - fogStart;
+
+  float fogFarClip = 500.f; // Max fog farclip possible
+
+  if (fogRange <= fogFarClip)
+  {
+    _fog_rate = ((1.0f - (fogRange / fogFarClip)) * 5.5f) + 1.5f;
+  } else
+  {
+    _fog_rate = 1.5f;
   }
 
   _last_pos = pos;
@@ -487,7 +508,7 @@ bool Skies::draw( math::matrix_4x4 const& model_view
       model.scale = 0.1f;
       model.recalcExtents();
 
-      model.model->draw(model_view, model, m2_shader, frustum, cull_distance, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
+      model.model->draw(model_view, model, m2_shader, frustum, 1000000, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
     }
   }
   // if it's night, draw the stars
@@ -498,7 +519,7 @@ bool Skies::draw( math::matrix_4x4 const& model_view
     stars.scale = 0.1f;
     stars.recalcExtents();
 
-    stars.model->draw(model_view, stars, m2_shader, frustum, cull_distance, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
+    stars.model->draw(model_view, stars, m2_shader, frustum, 1000000, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
   }
 
   return true;

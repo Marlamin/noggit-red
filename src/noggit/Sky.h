@@ -84,12 +84,15 @@ public:
   float river_deep_alpha() const { return _river_deep_alpha; }
   float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
   float ocean_deep_alpha() const { return _ocean_deep_alpha; }
+  float glow() const { return _glow; }
 
 private:
   float _river_shallow_alpha;
   float _river_deep_alpha;
   float _ocean_shallow_alpha;
   float _ocean_deep_alpha;
+
+  float _glow;
 
   noggit::NoggitRenderContext _context;
 };
@@ -142,6 +145,8 @@ private:
   float _river_deep_alpha;
   float _ocean_shallow_alpha;
   float _ocean_deep_alpha;
+  float _glow;
+  float _fog_rate;
 
   float _fog_distance;
   float _fog_multiplier;
@@ -174,6 +179,10 @@ public:
 
   float fog_distance_end() const { return _fog_distance / 36.f; };
   float fog_distance_start() const { return _fog_multiplier; };
+
+  float glow() const { return _glow; };
+
+  float fogRate() const { return _fog_rate; }
 
   void unload();
 

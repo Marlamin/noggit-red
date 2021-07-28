@@ -36,6 +36,7 @@ uniform bool draw_fog;
 uniform vec4 fog_color;
 uniform float fog_start;
 uniform float fog_end;
+uniform float fog_rate;
 
 uniform int draw_cursor_circle;
 uniform vec3 cursor_position;
@@ -182,7 +183,7 @@ void main()
     vec3 fogParams;
     fogParams.x = -(1.0 / (fog_end - start));
     fogParams.y = (1.0 / (fog_end - start)) * fog_end;
-    fogParams.z = 1.0;
+    fogParams.z = fog_rate;
 
     float f1 = (dist_from_camera * fogParams.x) + fogParams.y;
     float f2 = max(f1, 0.0);

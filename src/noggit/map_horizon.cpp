@@ -328,10 +328,14 @@ void map_horizon::render::draw( math::matrix_4x4 const& model_view
         for (size_t i (0); i < 16; ++i)
         {
           // do not draw over visible chunks
+
+          /* TODO: when this optimization is turned off, we end up with inconsistent rendering between chunks and horizon batches.
+           * Potentially it is caused by inconsistent coordinate space in visibility checking or chunk update system.
           if (index->tileLoaded({y, x}) && index->getTile({y, x})->getChunk(j, i)->is_visible(cull_distance, frustum, camera, display))
           {
-            continue;
+            //continue;
           }
+          */
 
           indices.push_back (inner_index (batch, j, i));
           indices.push_back (outer_index (batch, j, i));

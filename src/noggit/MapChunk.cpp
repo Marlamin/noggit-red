@@ -544,6 +544,7 @@ bool MapChunk::is_visible ( const float& cull_distance
 
   return frustum.intersects (_intersect_points)
       && dist < cull_distance;
+
 }
 
 

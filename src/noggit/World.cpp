@@ -1121,8 +1121,13 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform ("wireframe_color", wireframe_color);
 
     mcnk_shader.uniform_cached ("draw_fog", draw_fog);
-    mcnk_shader.uniform("fog_end", skies->fog_distance_end());
-    mcnk_shader.uniform("fog_start", skies->fog_distance_start());
+
+    if (draw_fog)
+    {
+      mcnk_shader.uniform("fog_end", skies->fog_distance_end());
+      mcnk_shader.uniform("fog_start", skies->fog_distance_start());
+      mcnk_shader.uniform("fog_rate", skies->fogRate());
+    }
 
     mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
 
