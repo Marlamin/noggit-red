@@ -353,10 +353,14 @@ void map_horizon::render::draw( math::matrix_4x4 const& model_view
     }
   }
 
-  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(_index_buffer, indices, GL_STATIC_DRAW);
-
-  if (!_map_horizon_program)
+  if (_map_horizon_program)
   {
+    gl.bufferSubData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(_index_buffer, 0, indices);
+  }
+  else
+  {
+    gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(_index_buffer, indices, GL_DYNAMIC_DRAW);
+
     _map_horizon_program.reset
       ( new opengl::program
           { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("horizon_vs") }

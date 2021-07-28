@@ -3048,11 +3048,13 @@ void MapView::tick (float dt)
         _rotation_editor_need_update = true;
       }
 
+      /* TODO: Numpad for action system
       if (keyx != 0.f || keyy != 0.f || keyz != 0.f)
       {
         _world->move_selected_models(keyx * numpad_moveratio, keyy * numpad_moveratio, keyz * numpad_moveratio);
         _rotation_editor_need_update = true;
       }
+       */
 
       if (look)
       {
