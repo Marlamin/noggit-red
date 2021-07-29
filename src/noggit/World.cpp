@@ -2468,7 +2468,7 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
       blp.load(reinterpret_cast<const void*>(bytes.constData()), bytes.size());
 
       uint32_t file_size;
-      void* blp_image = blp.createBlpUncompressedInMemory(true, file_size);
+      void* blp_image = blp.createBlpDxtInMemory(true, FORMAT_DXT5, file_size);
 
       QFile file(dir.filePath(tex_name.c_str()));
       file.open(QIODevice::WriteOnly);
