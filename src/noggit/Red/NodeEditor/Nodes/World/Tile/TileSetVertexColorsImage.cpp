@@ -44,9 +44,9 @@ void TileSetVertexColorsImageNode::compute()
   }
 
   QImage scaled;
-  if (image->width() != 272)
+  if (image->width() != 257)
   {
-    scaled = image->scaled(272, 272, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    scaled = image->scaled(257, 257, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     image_to_use = &scaled;
   }
 

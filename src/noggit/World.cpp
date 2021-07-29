@@ -3004,9 +3004,9 @@ void World::importADTHeightmap(math::vector_3d const& pos, QImage const& image, 
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
   });
 
-  if (image.width() != 272 || image.height() != 272)
+  if (image.width() != 257 || image.height() != 257)
   {
-    QImage scaled = image.scaled(272, 272, Qt::AspectRatioMode::IgnoreAspectRatio);
+    QImage scaled = image.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
 
     for_tile_at ( pos
       , [&] (MapTile* tile)
@@ -3054,8 +3054,8 @@ void World::importADTHeightmap(math::vector_3d const& pos, float multiplier, uns
       QImage img;
       img.load(filename, "PNG");
 
-      if (img.width() != 272 || img.height() != 272)
-        img = img.scaled(272, 272, Qt::AspectRatioMode::IgnoreAspectRatio);
+      if (img.width() != 257 || img.height() != 257)
+        img = img.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
 
       tile->setHeightmapImage(img, multiplier, mode);
 
@@ -3090,8 +3090,8 @@ void World::importADTVertexColorMap(math::vector_3d const& pos, int mode)
         QImage img;
         img.load(filename, "PNG");
 
-        if (img.width() != 272 || img.height() != 272)
-          img = img.scaled(272, 272, Qt::AspectRatioMode::IgnoreAspectRatio);
+        if (img.width() != 257 || img.height() != 257)
+          img = img.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
 
         tile->setVertexColorImage(img, mode);
 
@@ -3130,9 +3130,9 @@ void World::importADTVertexColorMap(math::vector_3d const& pos, QImage const& im
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(chunk);
   });
 
-  if (image.width() != 272 || image.height() != 272)
+  if (image.width() != 257 || image.height() != 257)
   {
-    QImage scaled = image.scaled(272, 272, Qt::AspectRatioMode::IgnoreAspectRatio);
+    QImage scaled = image.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
 
     for_tile_at ( pos
       , [&] (MapTile* tile)
@@ -3981,9 +3981,9 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
         QImage img;
         img.load(filename, "PNG");
 
-        if (img.width() != 272 || img.height() != 272)
+        if (img.width() != 257 || img.height() != 257)
         {
-          QImage scaled = img.scaled(272, 272, Qt::IgnoreAspectRatio);
+          QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
           mTile->setHeightmapImage(scaled, multiplier, mode);
         }
         else
@@ -4035,9 +4035,9 @@ void World::importAllADTVertexColorMaps(unsigned int mode)
         QImage img;
         img.load(filename, "PNG");
 
-        if (img.width() != 272 || img.height() != 272)
+        if (img.width() != 257 || img.height() != 257)
         {
-          QImage scaled = img.scaled(272, 272, Qt::IgnoreAspectRatio);
+          QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
           mTile->setVertexColorImage(scaled, mode);
         }
         else
