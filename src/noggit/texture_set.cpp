@@ -427,7 +427,7 @@ bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush*
 
       float image_factor;
 
-      if (pixel_x >= 0 && pixel_x < 1024 && pixel_y >= 0 && pixel_y < 1024)
+      if (pixel_x >= 0 && pixel_x < image->width() && pixel_y >= 0 && pixel_y < image->height())
       {
         auto color = image->pixelColor(pixel_x, pixel_y);
         image_factor = (color.redF() + color.greenF() + color.blueF()) / 3.0f;

@@ -895,7 +895,7 @@ bool MapChunk::stampMCCV(math::vector_3d const& pos, math::vector_4d const& colo
     int pixel_y =  std::round(((diff.z + radius) / (2.f * radius)) * img->height());
 
     float image_factor;
-    if (pixel_x >= 0 && pixel_x < 257 && pixel_y >= 0 && pixel_y < 257)
+    if (pixel_x >= 0 && pixel_x < img->width() && pixel_y >= 0 && pixel_y < img->height())
     {
       auto mask_color = img->pixelColor(pixel_x, pixel_y);
       image_factor = (mask_color.redF() + mask_color.greenF() + mask_color.blueF()) / 3.0f;
@@ -1174,7 +1174,7 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const* img, fl
 
       float image_factor;
 
-      if (pixel_x >= 0 && pixel_x < 257 && pixel_y >= 0 && pixel_y < 257)
+      if (pixel_x >= 0 && pixel_x < img->width() && pixel_y >= 0 && pixel_y < img->height())
       {
         auto color = img->pixelColor(pixel_x, pixel_y);
         image_factor = (color.redF() + color.greenF() + color.blueF()) / 3.0f;
@@ -1212,7 +1212,7 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const* img, fl
 
       float image_factor;
 
-      if (pixel_x >= 0 && pixel_x < 257 && pixel_y >= 0 && pixel_y < 257)
+      if (pixel_x >= 0 && pixel_x < img->width() && pixel_y >= 0 && pixel_y < img->height())
       {
         auto color = img->pixelColor(pixel_x, pixel_y);
         image_factor = (color.redF() + color.greenF() + color.blueF()) / 3.0f;
