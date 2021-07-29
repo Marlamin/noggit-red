@@ -7,6 +7,7 @@
 #include <array>
 #include <string>
 #include <set>
+#include <algorithm>
 #include <external/tsl/robin_map.h>
 #include <boost/optional.hpp>
 #include <math/vector_2d.hpp>
@@ -107,6 +108,9 @@ namespace noggit
         bool getTag() { return _tag; };
         void setTag(bool tag) { _tag = tag; };
 
+        bool checkAdressTag(std::uintptr_t address) { return std::find(_address_tag.begin(), _address_tag.end(), address) != _address_tag.end(); };
+        void tagAdress(std::uintptr_t address) { _address_tag.push_back(address); }
+
         float* getChunkTerrainOriginalData(MapChunk* chunk);
 
         // Registrators
@@ -127,6 +131,8 @@ namespace noggit
 
     private:
         bool _tag = false;
+        std::vector<std::uintptr_t> _address_tag;
+
         float _delta = 0.f;
         bool _block_cursor = false;
         unsigned _flags;

@@ -1127,9 +1127,8 @@ void World::draw ( math::matrix_4x4 const& model_view
       mcnk_shader.uniform("fog_end", skies->fog_distance_end());
       mcnk_shader.uniform("fog_start", skies->fog_distance_start());
       mcnk_shader.uniform("fog_rate", skies->fogRate());
+      mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
     }
-
-    mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
 
     mcnk_shader.uniform ("camera", camera_pos);
 
@@ -1568,6 +1567,14 @@ void World::draw ( math::matrix_4x4 const& model_view
       tile->drawMFBO(mfbo_shader);
     }
   }
+
+  skies->drawLightingSphereHandles(model_view
+                                  , projection
+                                  , camera_pos
+                                  , frustum
+                                  , culldistance
+                                  , false);
+
 }
 
 selection_result World::intersect ( math::matrix_4x4 const& model_view
@@ -2820,6 +2827,29 @@ void World::exportADTAlphamap(math::vector_3d const& pos)
       }
 
     }
+  );
+}
+
+void World::exportADTNormalmap(math::vector_3d const& pos)
+{
+  for_tile_at ( pos
+    , [&] (MapTile* tile)
+      {
+        QString path = _settings->value("project/path").toString();
+        if (!(path.endsWith('\\') || path.endsWith('/')))
+        {
+          path += "/";
+        }
+
+        QDir dir(path + "/world/maps/" + basename.c_str());
+        if (!dir.exists())
+          dir.mkpath(".");
+
+        QImage img = tile->getNormalmapImage();
+        img.save(path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
+                 + "_" + std::to_string(tile->index.x).c_str() + "_" + std::to_string(tile->index.z).c_str()
+                 + "_normal.png", "PNG");
+      }
   );
 }
 

@@ -216,7 +216,7 @@ public:
   bool fixGapAbove(const MapChunk* chunk);
 
   math::vector_3d* getHeightmap() { return &mVertices[0]; };
-  auto getHeightmap(void) const -> math::vector_3d const* { return mVertices; }
+  math::vector_3d const* getNormals() const { return &mNormals[0]; }
   math::vector_3d* getVertexColors() { return &mccv[0]; };
 
   void update_vertex_colors();

@@ -41,6 +41,7 @@
 #include <noggit/Red/NodeEditor/Ui/NodeEditor.hpp>
 #include <noggit/Red/UiCommon/ImageBrowser.hpp>
 #include <noggit/Red/BrushStack/BrushStack.hpp>
+#include <noggit/Red/LightEditor/LightEditor.hpp>
 #include <external/imguipiemenu/PieMenu.hpp>
 #include <noggit/ui/object_palette.hpp>
 #include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
@@ -742,6 +743,12 @@ void MapView::setupStampUi()
   _tool_panel_dock->registerTool("Stamp", stampTool);
 }
 
+void MapView::setupLightEditorUi()
+{
+  lightEditor = new noggit::Red::LightEditor(this, this);
+  _tool_panel_dock->registerTool("Light Editor", lightEditor);
+}
+
 void MapView::setupNodeEditor()
 {
   auto _node_editor = new noggit::Red::NodeEditor::Ui::NodeEditorWidget(this);
@@ -1206,6 +1213,17 @@ void MapView::setupAssistMenu()
 
               }
   );
+
+  ADD_ACTION_NS ( cur_adt_export_menu
+  , "Export normalmap"
+  , [this]
+      {
+        makeCurrent();
+        opengl::context::scoped_setter const _(::gl, context());
+        _world->exportADTNormalmap(_camera.position);
+      }
+  );
+
 
   auto cur_adt_import_menu(assist_menu->addMenu("Import"));
 
@@ -2265,6 +2283,7 @@ void MapView::createGUI()
   // End combined dock
 
   setupViewportOverlay();
+  setupLightEditorUi();
   setupNodeEditor();
   setupAssetBrowser();
   setupDetailInfos();

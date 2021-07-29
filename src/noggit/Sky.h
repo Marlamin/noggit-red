@@ -9,6 +9,7 @@
 #include <noggit/ContextObject.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
+#include <opengl/primitives.hpp>
 
 #include <memory>
 #include <string>
@@ -85,6 +86,7 @@ public:
   float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
   float ocean_deep_alpha() const { return _ocean_deep_alpha; }
   float glow() const { return _glow; }
+  bool selected() const { return _selected; }
 
 private:
   float _river_shallow_alpha;
@@ -93,6 +95,7 @@ private:
   float _ocean_deep_alpha;
 
   float _glow;
+  bool _selected;
 
   noggit::NoggitRenderContext _context;
 };
@@ -170,6 +173,23 @@ public:
             , bool draw_particles
             , OutdoorLightStats const& light_stats
             );
+
+  void drawLightingSpheres (math::matrix_4x4 const& model_view
+                          , math::matrix_4x4 const& projection
+                          , math::vector_3d const& camera_pos
+                          , math::frustum const& frustum
+                          , const float& cull_distance
+                          );
+
+  void drawLightingSphereHandles (math::matrix_4x4 const& model_view
+                                , math::matrix_4x4 const& projection
+                                , math::vector_3d const& camera_pos
+                                , math::frustum const& frustum
+                                , const float& cull_distance
+                                , bool draw_spheres
+  );
+
+
   bool hasSkies() { return numSkies > 0; }
 
   float river_shallow_alpha() const { return _river_shallow_alpha; }
@@ -207,4 +227,6 @@ private:
   std::unique_ptr<opengl::program> _program;
 
   noggit::NoggitRenderContext _context;
+
+  opengl::primitives::sphere _sphere_render;
 };

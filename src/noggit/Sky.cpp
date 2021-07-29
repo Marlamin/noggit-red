@@ -31,6 +31,7 @@ SkyFloatParam::SkyFloatParam(int t, float val)
 
 Sky::Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context)
 : _context(context)
+, _selected(false)
 {
   pos = math::vector_3d(data->getFloat(LightDB::PositionX) / skymul, data->getFloat(LightDB::PositionY) / skymul, data->getFloat(LightDB::PositionZ) / skymul);
   r1 = data->getFloat(LightDB::RadiusInner) / skymul;
@@ -525,11 +526,58 @@ bool Skies::draw( math::matrix_4x4 const& model_view
   return true;
 }
 
+void Skies::drawLightingSpheres (math::matrix_4x4 const& model_view
+  , math::matrix_4x4 const& projection
+  , math::vector_3d const& camera_pos
+  , math::frustum const& frustum
+  , const float& cull_distance
+)
+{
+  for (Sky& sky : skies)
+  {
+    if ((sky.pos - camera_pos).length() - sky.r2 <= cull_distance) // TODO: frustum cull here
+    {
+      math::vector_3d diffuse = color_set[LIGHT_GLOBAL_DIFFUSE];
+      math::vector_3d ambient = color_set[LIGHT_GLOBAL_AMBIENT];
+      _sphere_render.draw(model_view * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
+      _sphere_render.draw(model_view * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
+    }
+  }
+}
+
+void Skies::drawLightingSphereHandles (math::matrix_4x4 const& model_view
+  , math::matrix_4x4 const& projection
+  , math::vector_3d const& camera_pos
+  , math::frustum const& frustum
+  , const float& cull_distance
+  , bool draw_spheres)
+{
+  for (Sky& sky : skies)
+  {
+    if ((sky.pos - camera_pos).length() - sky.r2 <= cull_distance) // TODO: frustum cull here
+    {
+
+      _sphere_render.draw(model_view * projection, sky.pos, {1.f, 0.f, 0.f, 1.f}, 5.f);
+
+      if (sky.selected())
+      {
+        math::vector_3d diffuse = color_set[LIGHT_GLOBAL_DIFFUSE];
+        math::vector_3d ambient = color_set[LIGHT_GLOBAL_AMBIENT];
+
+        _sphere_render.draw(model_view * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
+        _sphere_render.draw(model_view * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
+      }
+    }
+  }
+}
+
+
 void Skies::unload()
 {
   _program.reset();
   _vertex_array.unload();
   _buffers.unload();
+  _sphere_render.unload();
 
   _uploaded = false;
   _need_vao_update = true;

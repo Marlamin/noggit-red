@@ -58,6 +58,7 @@ namespace noggit
   namespace Red
   {
     class BrushStack;
+    class LightEditor;
   }
 
 
@@ -365,6 +366,7 @@ private:
   noggit::ui::hole_tool* holeTool;
   noggit::ui::MinimapCreator* minimapTool;
   noggit::Red::BrushStack* stampTool;
+  noggit::Red::LightEditor* lightEditor;
 
   opengl::texture* const _texBrush;
 
@@ -402,6 +404,7 @@ private:
   void setupObjectEditorUi();
   void setupMinimapEditorUi();
   void setupStampUi();
+  void setupLightEditorUi();
   void setupNodeEditor();
   void setupAssetBrowser();
   void setupDetailInfos();

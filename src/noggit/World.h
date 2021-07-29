@@ -273,6 +273,7 @@ public:
   void setHoleADT(math::vector_3d const& pos, bool hole);
 
   void exportADTAlphamap(math::vector_3d const& pos);
+  void exportADTNormalmap(math::vector_3d const& pos);
   void exportADTAlphamap(math::vector_3d const& pos, std::string const& filename);
   void exportADTHeightmap(math::vector_3d const& pos, float min_height, float max_height);
   void exportADTVertexColorMap(math::vector_3d const& pos);

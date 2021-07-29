@@ -178,21 +178,23 @@ void main()
 
   if(draw_fog)
   {
-    float start = fog_end * fog_start;
+    float start = fog_end * fog_start; // 0
 
     vec3 fogParams;
-    fogParams.x = -(1.0 / (fog_end - start));
-    fogParams.y = (1.0 / (fog_end - start)) * fog_end;
-    fogParams.z = fog_rate;
+    fogParams.x = -(1.0 / (fog_end - start)); // - 1 / 338
+    fogParams.y = (1.0 / (fog_end - start)) * fog_end; // 1 / 338 * 338
+    fogParams.z = fog_rate; // 2.7
 
-    float f1 = (dist_from_camera * fogParams.x) + fogParams.y;
+    float f1 = (dist_from_camera * fogParams.x) + fogParams.y; // 1.0029
     float f2 = max(f1, 0.0);
     float f3 = pow(f2, fogParams.z);
     float f4 = min(f3, 1.0);
 
     float fogFactor = 1.0 - f4;
 
-    out_color.rgb = mix(out_color.rgb, fog_color.rgb, fogFactor);
+    float alpha = clamp((dist_from_camera - start) / (fog_end - start), 0.0, 1.0);
+
+    out_color.rgb = mix(out_color.rgb, fog_color.rgb, alpha);
   }
 
   if(draw_wireframe && !lines_drawn)

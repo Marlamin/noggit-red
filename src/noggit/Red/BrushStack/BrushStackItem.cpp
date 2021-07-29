@@ -383,6 +383,8 @@ void BrushStackItem::setMaskRotation(int rot)
 
 void BrushStackItem::execute(math::vector_3d const& cursor_pos, World* world, float dt, bool mod_shift_down, bool mod_alt_down, bool mod_ctrl_down, bool is_under_map)
 {
+  auto action = noggit::ActionManager::instance()->getCurrentAction();
+
   switch(_tool_widget.which())
   {
     case eRaiseLower:
@@ -410,16 +412,14 @@ void BrushStackItem::execute(math::vector_3d const& cursor_pos, World* world, fl
         world->eraseTextures(cursor_pos);
       else if (mod_shift_down && _selected_texture.is_initialized())
       {
-        if (!boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->getBrushMode())
+        auto tool = boost::get<noggit::ui::texturing_tool*>(_tool_widget);
+        if (tool->getImageMaskSelector()->isEnabled() && !tool->getImageMaskSelector()->getBrushMode())
         {
-
-          auto action = noggit::ActionManager::instance()->getCurrentAction();
-
-          if (action->getTag())
+          if (action->checkAdressTag(reinterpret_cast<std::uintptr_t>(tool)))
             break;
 
-          boost::get<noggit::ui::texturing_tool*>(_tool_widget)->paint(world, cursor_pos, 1000.f, _selected_texture.get());
-          action->setTag(true);
+          tool->paint(world, cursor_pos, 1000.f, _selected_texture.get());
+          action->tagAdress(reinterpret_cast<std::uintptr_t>(tool));
         }
         else
         {
@@ -428,10 +428,27 @@ void BrushStackItem::execute(math::vector_3d const& cursor_pos, World* world, fl
       }
       break;
     case eShader:
-      if (mod_shift_down)
-        boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, true);
-      else if (mod_ctrl_down)
-        boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, false);
+
+      auto tool = boost::get<noggit::ui::texturing_tool*>(_tool_widget);
+      if (tool->getImageMaskSelector()->isEnabled() && !tool->getImageMaskSelector()->getBrushMode())
+      {
+        if (action->checkAdressTag(reinterpret_cast<std::uintptr_t>(tool)))
+          break;
+
+        if (mod_shift_down)
+          boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, 1000.f, true);
+        else if (mod_ctrl_down)
+          boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, 1000.f, false);
+
+        action->tagAdress(reinterpret_cast<std::uintptr_t>(tool));
+      }
+      else
+      {
+        if (mod_shift_down)
+          boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, true);
+        else if (mod_ctrl_down)
+          boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, false);
+      }
   }
 }
 

@@ -138,6 +138,7 @@ public:
   QImage getAlphamapImage(unsigned layer);
   QImage getAlphamapImage(std::string const& filename);
   QImage getVertexColorsImage();
+  QImage getNormalmapImage();
   void setHeightmapImage(QImage const& image, float multiplier, int mode);
   void setAlphaImage(QImage const& image, unsigned layer);
   void setVertexColorImage(QImage const& image, int mode);
