@@ -88,6 +88,10 @@ namespace noggit
       _slide_value->setRange(0, 255);
       layout->addRow(_slide_value);
 
+      _use_image_colors = new QCheckBox(this);
+      _use_image_colors->setChecked(true);
+      layout->addRow("Use image colors", _use_image_colors);
+
       _image_mask_group = new noggit::Red::ImageMaskSelector(map_view, this);
       _image_mask_group->setContinuousActionName("Paint");
       _image_mask_group->setBrushModeVisible(parent == map_view);
@@ -103,7 +107,6 @@ namespace noggit
       info_label->setAlignment(Qt::AlignCenter | Qt::AlignTop);
 
       layout->addRow(info_label);
-      layout->addRow(new QtGradientEditor(this));
 
       QObject::connect(_slide_saturation, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
       QObject::connect(_slide_value, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
@@ -166,7 +169,7 @@ namespace noggit
       }
       else
       {
-        world->stampShader (pos, _color, 2.0f*dt*_speed_slider->value(), _radius_slider->value(), add, &_mask_image, _image_mask_group->getBrushMode());
+        world->stampShader (pos, _color, 2.0f*dt*_speed_slider->value(), _radius_slider->value(), add, &_mask_image, _image_mask_group->getBrushMode(), _use_image_colors->isChecked());
       }
 
     }
@@ -281,6 +284,8 @@ namespace noggit
       json["mask_rot"] = _image_mask_group->getRotation();
       json["mask_image"] = _image_mask_group->getImageMaskPath();
 
+      json["use_image_colors"] = _use_image_colors->isChecked();
+
       return json;
     }
 
@@ -295,6 +300,8 @@ namespace noggit
       _image_mask_group->setRandomizeRotation(json["randomize_rot"].toBool());
       _image_mask_group->setRotationRaw(json["mask_rot"].toInt());
       _image_mask_group->setImageMask(json["mask_image"].toString());
+
+      _use_image_colors->setChecked(json["use_image_colors"].toBool());
     }
 
   }

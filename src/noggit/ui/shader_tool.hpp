@@ -66,6 +66,8 @@ namespace noggit
       QSpinBox* _spin_saturation;
       QSpinBox* _spin_value;
 
+      QCheckBox* _use_image_colors;
+
       color_widgets::ColorSelector* color_picker;
       color_widgets::ColorWheel* color_wheel;
       color_widgets::HueSlider* _slide_hue;

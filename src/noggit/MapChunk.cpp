@@ -863,7 +863,7 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
   return changed;
 }
 
-bool MapChunk::stampMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint)
+bool MapChunk::stampMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
 {
   float dist;
   bool changed = false;
@@ -894,34 +894,57 @@ bool MapChunk::stampMCCV(math::vector_3d const& pos, math::vector_4d const& colo
     int pixel_x = std::round(((diff.x + radius) / (2.f * radius)) * img->width());
     int pixel_y =  std::round(((diff.z + radius) / (2.f * radius)) * img->height());
 
-    float image_factor;
-    if (pixel_x >= 0 && pixel_x < img->width() && pixel_y >= 0 && pixel_y < img->height())
+    if (use_image_colors)
     {
-      auto mask_color = img->pixelColor(pixel_x, pixel_y);
-      image_factor = (mask_color.redF() + mask_color.greenF() + mask_color.blueF()) / 3.0f;
+      QColor image_color;
+      if (pixel_x >= 0 && pixel_x < img->width() && pixel_y >= 0 && pixel_y < img->height())
+      {
+        image_color = img->pixelColor(pixel_x, pixel_y);
+      }
+      else
+      {
+        image_color = QColor(Qt::black);
+      }
+
+      mccv[i].x = image_color.redF() / 0.5f;
+      mccv[i].y = image_color.greenF() / 0.5f;
+      mccv[i].z = image_color.blueF() / 0.5f;
+
+      mccv[i].x = std::min(std::max(mccv[i].x, 0.0f), 2.0f);
+      mccv[i].y = std::min(std::max(mccv[i].y, 0.0f), 2.0f);
+      mccv[i].z = std::min(std::max(mccv[i].z, 0.0f), 2.0f);
     }
     else
     {
-      image_factor = 0.f;
-    }
+      float image_factor;
+      if (pixel_x >= 0 && pixel_x < img->width() && pixel_y >= 0 && pixel_y < img->height())
+      {
+        auto mask_color = img->pixelColor(pixel_x, pixel_y);
+        image_factor = (mask_color.redF() + mask_color.greenF() + mask_color.blueF()) / 3.0f;
+      }
+      else
+      {
+        image_factor = 0.f;
+      }
 
-    float edit = image_factor * (paint ? ((change * (1.0f - dist / radius))) : (change * 20.f));
-    if (editMode)
-    {
-      mccv[i].x += (color.x / 0.5f - mccv[i].x)* edit;
-      mccv[i].y += (color.y / 0.5f - mccv[i].y)* edit;
-      mccv[i].z += (color.z / 0.5f - mccv[i].z)* edit;
-    }
-    else
-    {
-      mccv[i].x += (1.0f - mccv[i].x) * edit;
-      mccv[i].y += (1.0f - mccv[i].y) * edit;
-      mccv[i].z += (1.0f - mccv[i].z) * edit;
-    }
+      float edit = image_factor * (paint ? ((change * (1.0f - dist / radius))) : (change * 20.f));
+      if (editMode)
+      {
+        mccv[i].x += (color.x / 0.5f - mccv[i].x)* edit;
+        mccv[i].y += (color.y / 0.5f - mccv[i].y)* edit;
+        mccv[i].z += (color.z / 0.5f - mccv[i].z)* edit;
+      }
+      else
+      {
+        mccv[i].x += (1.0f - mccv[i].x) * edit;
+        mccv[i].y += (1.0f - mccv[i].y) * edit;
+        mccv[i].z += (1.0f - mccv[i].z) * edit;
+      }
 
-    mccv[i].x = std::min(std::max(mccv[i].x, 0.0f), 2.0f);
-    mccv[i].y = std::min(std::max(mccv[i].y, 0.0f), 2.0f);
-    mccv[i].z = std::min(std::max(mccv[i].z, 0.0f), 2.0f);
+      mccv[i].x = std::min(std::max(mccv[i].x, 0.0f), 2.0f);
+      mccv[i].y = std::min(std::max(mccv[i].y, 0.0f), 2.0f);
+      mccv[i].z = std::min(std::max(mccv[i].z, 0.0f), 2.0f);
+    }
 
     changed = true;
 

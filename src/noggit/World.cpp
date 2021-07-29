@@ -1734,14 +1734,14 @@ void World::changeShader(math::vector_3d const& pos, math::vector_4d const& colo
     );
 }
 
-void World::stampShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint)
+void World::stampShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
 {
   for_all_chunks_in_rect
     ( pos, radius
       , [&] (MapChunk* chunk)
       {
         noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(chunk);
-        return chunk->stampMCCV(pos, color, change, radius, editMode, img, paint);
+        return chunk->stampMCCV(pos, color, change, radius, editMode, img, paint, use_image_colors);
       }
     );
 }
