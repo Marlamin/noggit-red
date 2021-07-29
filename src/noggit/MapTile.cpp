@@ -1011,7 +1011,7 @@ void MapTile::initEmptyChunks()
 
 QImage MapTile::getHeightmapImage(float min_height, float max_height)
 {
-  QImage image(257, 257, QImage::Format_RGBA64);
+  QImage image(272, 272, QImage::Format_RGBA64);
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
@@ -1044,7 +1044,7 @@ QImage MapTile::getHeightmapImage(float min_height, float max_height)
 
 QImage MapTile::getNormalmapImage()
 {
-  QImage image(257, 257, QImage::Format_RGBA64);
+  QImage image(272, 272, QImage::Format_RGBA64);
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
@@ -1268,7 +1268,7 @@ void MapTile::setAlphaImage(QImage const& image, unsigned layer)
 
 QImage MapTile::getVertexColorsImage()
 {
-  QImage image(257, 257, QImage::Format_RGBA8888);
+  QImage image(272, 272, QImage::Format_RGBA8888);
   image.fill(QColor(127, 127, 127, 255));
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
