@@ -402,11 +402,6 @@ bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush*
 
   radius = brush->getRadius();
 
-  if (misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE) > radius)
-  {
-    return changed;
-  }
-
   create_temporary_alphamaps_if_needed();
   auto& amaps = tmp_edit_values.get();
 
@@ -427,12 +422,20 @@ bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush*
 
       math::vector_3d const diff{math::vector_3d{xPos + TEXDETAILSIZE / 2.0f, 0.f, zPos + TEXDETAILSIZE / 2.0f} - math::vector_3d{x, 0.f, z}};
 
-      int pixel_x = std::floor(diff.x + radius);
-      int pixel_y = std::floor(diff.z + radius);
+      int pixel_x = std::round(((diff.x + radius) / (2.f * radius)) * image->width());
+      int pixel_y =  std::round(((diff.z + radius) / (2.f * radius)) * image->height());
 
-      auto color = image->pixelColor(pixel_x, pixel_y);
-      float image_factor = (color.redF() + color.greenF() + color.blueF()) / 3.0f;
+      float image_factor;
 
+      if (pixel_x >= 0 && pixel_x < 1024 && pixel_y >= 0 && pixel_y < 1024)
+      {
+        auto color = image->pixelColor(pixel_x, pixel_y);
+        image_factor = (color.redF() + color.greenF() + color.blueF()) / 3.0f;
+      }
+      else
+      {
+        image_factor = 0;
+      }
 
       std::size_t offset = i + 64 * j;
       // use double for more precision
@@ -446,7 +449,7 @@ bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush*
 
       double current_alpha = alpha_values[tex_layer];
       double sum_other_alphas = (total - current_alpha);
-      double alpha_change = image_factor * (strength - current_alpha) * pressure * brush->getValue(dist);
+      double alpha_change = image_factor * (strength - current_alpha) * pressure;
 
       // alpha too low, set it to 0 directly
       if (alpha_change < 0. && current_alpha + alpha_change < 1.)

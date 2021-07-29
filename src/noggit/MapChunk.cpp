@@ -891,11 +891,19 @@ bool MapChunk::stampMCCV(math::vector_3d const& pos, math::vector_4d const& colo
 
     math::vector_3d const diff{mVertices[i] - pos};
 
-    int pixel_x = std::floor(diff.x + radius);
-    int pixel_y = std::floor(diff.z + radius);
+    int pixel_x = std::round(((diff.x + radius) / (2.f * radius)) * img->width());
+    int pixel_y =  std::round(((diff.z + radius) / (2.f * radius)) * img->height());
 
-    auto mask_color = img->pixelColor(pixel_x, pixel_y);
-    float image_factor = (mask_color.redF() + mask_color.greenF() + mask_color.blueF()) / 3.0f;
+    float image_factor;
+    if (pixel_x >= 0 && pixel_x < 257 && pixel_y >= 0 && pixel_y < 257)
+    {
+      auto mask_color = img->pixelColor(pixel_x, pixel_y);
+      image_factor = (mask_color.redF() + mask_color.greenF() + mask_color.blueF()) / 3.0f;
+    }
+    else
+    {
+      image_factor = 0.f;
+    }
 
     float edit = image_factor * (paint ? ((change * (1.0f - dist / radius))) : (change * 20.f));
     if (editMode)
@@ -1161,12 +1169,22 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const* img, fl
 
       math::vector_3d const diff{mVertices[i] - pos};
 
-      int pixel_x = std::floor(diff.x + radiusOuter);
-      int pixel_y = std::floor(diff.z + radiusOuter);
+      int pixel_x = std::round(((diff.x + radiusOuter) / (2.f * radiusOuter)) * img->width());
+      int pixel_y =  std::round(((diff.z + radiusOuter) / (2.f * radiusOuter)) * img->height());
 
-      auto color = img->pixelColor(pixel_x, pixel_y);
+      float image_factor;
 
-      mVertices[i].y += delta * ((color.redF() + color.greenF() + color.blueF()) / 3.0f);
+      if (pixel_x >= 0 && pixel_x < 257 && pixel_y >= 0 && pixel_y < 257)
+      {
+        auto color = img->pixelColor(pixel_x, pixel_y);
+        image_factor = (color.redF() + color.greenF() + color.blueF()) / 3.0f;
+      }
+      else
+      {
+        image_factor = 0;
+      }
+
+      mVertices[i].y += delta * image_factor;
     }
   }
   else
@@ -1188,12 +1206,23 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const* img, fl
 
       math::vector_3d const diff{math::vector_3d{original_heightmap[i * 3], original_heightmap[i * 3 + 1], original_heightmap[i * 3 + 2]} - pos};
 
-      int pixel_x = std::floor(diff.x + radiusOuter);
-      int pixel_y = std::floor(diff.z + radiusOuter);
 
-      auto color = img->pixelColor(pixel_x, pixel_y);
+      int pixel_x = std::round(((diff.x + radiusOuter) / (2.f * radiusOuter)) * img->width());
+      int pixel_y =  std::round(((diff.z + radiusOuter) / (2.f * radiusOuter)) * img->height());
 
-      mVertices[i].y = original_heightmap[i * 3 + 1] + (delta * ((color.redF() + color.greenF() + color.blueF()) / 3.0f));
+      float image_factor;
+
+      if (pixel_x >= 0 && pixel_x < 257 && pixel_y >= 0 && pixel_y < 257)
+      {
+        auto color = img->pixelColor(pixel_x, pixel_y);
+        image_factor = (color.redF() + color.greenF() + color.blueF()) / 3.0f;
+      }
+      else
+      {
+        image_factor = 0;
+      }
+
+      mVertices[i].y = original_heightmap[i * 3 + 1] + (delta * image_factor);
     }
   }
 

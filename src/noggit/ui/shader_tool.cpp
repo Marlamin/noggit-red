@@ -259,8 +259,7 @@ namespace noggit
       QPixmap* pixmap = _image_mask_group->getPixmap();
       QTransform matrix;
       matrix.rotateRadians(_image_mask_group->getRotation() / 360.0f * 2.0f * M_PI);
-      int const k{static_cast<int>(std::ceil(_radius_slider->value())) * 2};
-      _mask_image = pixmap->toImage().transformed(matrix).scaled(k, k);
+      _mask_image = pixmap->toImage().transformed(matrix, Qt::SmoothTransformation);
       _map_view->setBrushTexture(&_mask_image);
     }
 

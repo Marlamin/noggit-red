@@ -59,7 +59,7 @@ ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
 
 void ImageMaskSelector::setImageMask(QString const& path)
 {
-  _pixmap = QPixmap(path);
+  _pixmap = QPixmap(path, "PNG");
 
   _ui.curImageLabel->setPixmap(_pixmap.scaled(128, 128));
   _ui.curImageLabel->setToolTip(path);
