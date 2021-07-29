@@ -143,6 +143,23 @@ void BrushStackItem::setTool(operation_type tool)
 
 }
 
+QWidget* BrushStackItem::getTool()
+{
+  switch(_tool_widget.which())
+  {
+    case eRaiseLower:
+      return boost::get<noggit::ui::terrain_tool*>(_tool_widget);
+    case eFlattenBlur:
+      return boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget);
+    case eTexturing:
+      return boost::get<noggit::ui::texturing_tool*>(_tool_widget);
+    case eShader:
+      return boost::get<noggit::ui::shader_tool*>(_tool_widget);
+  }
+
+  return nullptr;
+}
+
 void BrushStackItem::setBrushMode(bool sculpt)
 {
   switch(_tool_widget.which())
@@ -228,12 +245,8 @@ void BrushStackItem::syncSliders(double radius, double inner_radius, double spee
 
         if (_is_speed_affecting->isChecked())
           speed_slider->setValue(speed);
-
-        auto rot_dial = boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getMaskOrientationDial();
-        rot_dial->setEnabled(!_is_mask_rotation_affecting->isChecked());
-
-        if (_is_mask_rotation_affecting->isChecked())
-          rot_dial->setValue(rot);
+        
+        boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
 
         boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
 
@@ -276,11 +289,7 @@ void BrushStackItem::syncSliders(double radius, double inner_radius, double spee
         if (_is_speed_affecting->isChecked())
           speed_slider->setValue(speed);
 
-        auto rot_dial = boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getMaskOrientationDial();
-        rot_dial->setEnabled(!_is_mask_rotation_affecting->isChecked());
-
-        if (_is_mask_rotation_affecting->isChecked())
-          rot_dial->setValue(rot);
+        boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
 
 
         boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
@@ -301,11 +310,7 @@ void BrushStackItem::syncSliders(double radius, double inner_radius, double spee
         if (_is_speed_affecting->isChecked())
           speed_slider->setValue(speed);
 
-        auto rot_dial = boost::get<noggit::ui::shader_tool*>(_tool_widget)->getMaskOrientationDial();
-        rot_dial->setEnabled(!_is_mask_rotation_affecting->isChecked());
-
-        if (_is_mask_rotation_affecting->isChecked())
-          rot_dial->setValue(rot);
+        boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
 
         boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
 

@@ -89,11 +89,9 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
   connect(_ui.clearBrushesButton, &QPushButton::clicked,
           [=]()
           {
-            for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
+            QLayoutItem* item;
+            while( (item = _ui.brushList->layout()->takeAt(0)) != nullptr)
             {
-              auto item = _ui.brushList->layout()->itemAt(i);
-              _ui.brushList->layout()->removeItem(item);
-
               _active_item_button_group->removeButton(static_cast<BrushStackItem*>(item->widget())->getActiveButton());
 
               item->widget()->deleteLater();
@@ -235,7 +233,12 @@ void BrushStack::execute(math::vector_3d const& cursor_pos, World* world, float 
 {
   for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
   {
-    reinterpret_cast<BrushStackItem*>(_ui.brushList->layout()->itemAt(i)->widget())->execute(cursor_pos, world, dt, mod_shift_down, mod_alt_down, mod_ctrl_down, is_under_map);
+    auto item = reinterpret_cast<BrushStackItem*>(_ui.brushList->layout()->itemAt(i)->widget());
+
+    if (!item->isAffecting())
+      continue;
+
+    item->execute(cursor_pos, world, dt, mod_shift_down, mod_alt_down, mod_ctrl_down, is_under_map);
   }
 }
 
@@ -343,7 +346,7 @@ void BrushStack::fromJSON(const QJsonObject& json)
     else
     {
       brush_stack_item->deleteLater();
-      LogError << "Attempted loaded malformed brush." << std::endl;
+      LogError << "Attempted loading malformed brush." << std::endl;
       continue;
     }
 

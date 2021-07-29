@@ -18,16 +18,16 @@ ToolPanel::ToolPanel(QWidget* parent)
 
 void ToolPanel::setCurrentIndex(int index)
 {
-  _ui.toolPanelStack->setCurrentIndex(index);
-  setWindowTitle(_titles.at(index));
+  for (auto& widget : _widgets)
+    widget->setVisible(false);
 
-  auto widget_min_width = _ui.toolPanelStack->currentWidget()->minimumWidth();
-  setFixedWidth(widget_min_width + 15);
-
+  _widgets.at(index)->setVisible(true);
+  _ui.scrollAreaWidgetContents->adjustSize();
 }
 
 void ToolPanel::registerTool(QString const& title, QWidget* widget)
 {
-  _ui.toolPanelStack->addWidget(widget);
+  _widgets.push_back(widget);
+  _ui.scrollAreaWidgetContents->layout()->addWidget(widget);
   _titles.emplace_back(title);
 }

@@ -26,6 +26,7 @@ namespace noggit
     private:
       Ui::toolPanel _ui;
       std::vector<QString> _titles;
+      std::vector<QWidget*> _widgets;
 
     };
   }

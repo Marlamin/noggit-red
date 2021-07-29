@@ -225,7 +225,10 @@ namespace noggit
       QTransform matrix;
       matrix.rotateRadians(_image_mask_group->getRotation() / 360.0f * 2.0f * M_PI);
       _mask_image = pixmap->toImage().transformed(matrix, Qt::SmoothTransformation);
-      _map_view->setBrushTexture(&_mask_image);
+
+      if (_map_view->get_editing_mode() != editing_mode::stamp
+        || (_map_view->getActiveStampModeItem() && _map_view->getActiveStampModeItem() == this))
+        _map_view->setBrushTexture(&_mask_image);
     }
 
     void terrain_tool::changeTerrain

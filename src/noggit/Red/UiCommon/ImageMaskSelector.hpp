@@ -32,6 +32,7 @@ namespace noggit::Red
     QDial* getMaskOrientationDial() { return _ui.dial; };
     void setImageMask(QString const& path);
     QString const& getImageMaskPath() { return _image_path; };
+    void enableControls(bool state) {_ui.dial->setEnabled(!state); _ui.randomizeRotation->setEnabled(!state); };
 
   signals:
     void pixmapUpdated(QPixmap* pixmap);

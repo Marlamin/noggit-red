@@ -2418,6 +2418,7 @@ void MapView::tabletEvent(QTabletEvent* event)
 
 auto MapView::setBrushTexture(QImage const* img) -> void
 {
+
   int const height{img->height()};
   int const width{img->width()};
 
@@ -3863,7 +3864,7 @@ void MapView::draw_map()
   case editing_mode::stamp:
     radius = stampTool->getRadius();
     inner_radius = stampTool->getInnerRadius();
-    if(stampTool->getActiveBrushItem() && stampTool->getActiveBrushItem()->isEnabled())
+    if(stampTool->getActiveBrushItem() && stampTool->getActiveBrushItem()->isMaskEnabled())
       _cursorType = CursorType::STAMP;
     break;
   case editing_mode::water:
@@ -4848,4 +4849,13 @@ void MapView::unloadOpenglData(bool from_manager)
   _gl_initialized = false;
 
   LogDebug << "Changed context of MapView." << std::endl;
+}
+
+QWidget* MapView::getActiveStampModeItem()
+{
+  auto item = stampTool->getActiveBrushItem();
+  if (item)
+    return item->getTool();
+  else
+    return nullptr;
 }

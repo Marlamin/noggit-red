@@ -247,6 +247,9 @@ public:
   void randomizeStampRotation();
 
   void set_editing_mode (editing_mode);
+  editing_mode get_editing_mode() { return terrainMode; };
+
+  QWidget* getActiveStampModeItem();
 
   noggit::NoggitRenderContext getRenderContext() { return _context; };
   World* getWorld() { return _world.get(); };

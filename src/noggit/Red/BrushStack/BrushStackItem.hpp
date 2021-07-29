@@ -52,6 +52,7 @@ namespace noggit::Red
     BrushStackItem(QWidget* parent = nullptr);
 
     void setTool(operation_type tool);
+    QWidget* getTool();
     void setRadius(float radius);
     void setInnerRadius(float inner_radius);
     void setSpeed(float speed);
@@ -65,6 +66,8 @@ namespace noggit::Red
     bool isMaskRotationAffecting() { return _is_mask_rotation_affecting->isChecked(); };
     bool isSpeedAffecting() { return _is_speed_affecting->isChecked(); };
     QToolButton* getActiveButton() { return _ui.brushNameLabel; };
+
+    bool isAffecting() const { return _ui.contentWidget->isEnabled(); };
 
     bool isMaskEnabled();
     void updateMask();

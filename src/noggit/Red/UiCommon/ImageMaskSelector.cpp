@@ -27,14 +27,20 @@ ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
   connect(_ui.curImageLabel, &noggit::ui::clickable_label::clicked,
           [this]()
           {
+
             QPoint new_pos = mapToGlobal(
               QPoint(_ui.curImageLabel->pos().x() - _image_browser->width() - 80,
                      _ui.curImageLabel->pos().y()));
 
+            int y = new_pos.y();
+
+            if (y + _image_browser->height() > _map_view->height())
+              y -= y + _image_browser->height() - _map_view->height();
+
             _image_browser->setGeometry(new_pos.x(),
-                                       new_pos.y(),
-                                        _image_browser->width(),
-                                        _image_browser->height());
+                                        y,
+                                    _image_browser->width(),
+                                    _image_browser->height());
 
             _image_browser->setWindowFlags(Qt::Popup);
             _image_browser->show();
