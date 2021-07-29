@@ -429,7 +429,7 @@ void BrushStackItem::execute(math::vector_3d const& cursor_pos, World* world, fl
       break;
     case eShader:
 
-      auto tool = boost::get<noggit::ui::texturing_tool*>(_tool_widget);
+      auto tool = boost::get<noggit::ui::shader_tool*>(_tool_widget);
       if (tool->getImageMaskSelector()->isEnabled() && !tool->getImageMaskSelector()->getBrushMode())
       {
         if (action->checkAdressTag(reinterpret_cast<std::uintptr_t>(tool)))
