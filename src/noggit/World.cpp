@@ -1568,12 +1568,15 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
   }
 
+  /*
   skies->drawLightingSphereHandles(model_view
                                   , projection
                                   , camera_pos
                                   , frustum
                                   , culldistance
                                   , false);
+
+                                  */
 
 }
 
