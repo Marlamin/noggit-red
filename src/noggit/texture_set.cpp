@@ -9,7 +9,7 @@
 #include <noggit/texture_set.hpp>
 
 #include <algorithm>    // std::min
-#include <iostream>     // std::cout
+#include <array>
 #include <boost/format.hpp>
 
 #include <boost/utility/in_place_factory.hpp>
@@ -1198,7 +1198,7 @@ void TextureSet::bind_alpha(std::size_t id)
     {
       if (tmp_edit_values)
       {
-        std::vector<float> amap(3 * 64 * 64);
+        std::array<float, 3 * 64 * 64> amap{};
         auto& tmp_amaps = tmp_edit_values.get();
 
         for (int i = 0; i < 64 * 64; ++i)
@@ -1213,7 +1213,7 @@ void TextureSet::bind_alpha(std::size_t id)
       }
       else
       {
-        std::vector<uint8_t> amap(3 * 64 * 64);
+        std::array<uint8_t, 3 * 64 * 64> amap{};
         uint8_t const* alpha_ptr[3];
 
         for (int i = 0; i < nTextures - 1; ++i)
