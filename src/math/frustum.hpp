@@ -7,7 +7,6 @@
 #include <math/matrix_4x4.hpp>
 
 #include <array>
-#include <vector>
 
 namespace math
 {
@@ -32,7 +31,7 @@ namespace math
         : _normal (vec.xyz())
         , _distance (vec.w)
       {
-        normalize();
+        //normalize();
       }
 
       void normalize()
@@ -62,7 +61,7 @@ namespace math
     frustum (matrix_4x4 const& matrix);
 
     bool contains (const vector_3d& point) const;
-    bool intersects (const std::vector<vector_3d>& intersect_points) const;
+    bool intersects (const std::array<vector_3d, 8>& intersect_points) const;
     bool intersects ( const vector_3d& v1
                     , const vector_3d& v2
                     ) const;

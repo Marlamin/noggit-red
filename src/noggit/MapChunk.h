@@ -52,8 +52,6 @@ private:
   int indexNoLoD(int x, int y);
   int indexLoD(int x, int y);
 
-  std::vector<math::vector_3d> _intersect_points;
-
   void update_intersect_points();
 
   boost::optional<int> get_lod_level( math::vector_3d const& camera_pos

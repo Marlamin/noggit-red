@@ -2,7 +2,8 @@
 
 #include <math/frustum.hpp>
 
-#include <vector>
+#include <array>
+#include <external/glm/glm.hpp>
 
 namespace math
 {
@@ -33,7 +34,7 @@ namespace math
     return true;
   }
 
-  bool frustum::intersects (const std::vector<vector_3d>& intersect_points) const
+  bool frustum::intersects (const std::array<vector_3d, 8>& intersect_points) const
   {
     for (auto const& plane : _planes)
     {
@@ -52,23 +53,59 @@ namespace math
     }
 
     return true;
+
   }
 
   bool frustum::intersects ( const vector_3d& v1
                            , const vector_3d& v2
                            ) const
   {
-    std::vector<vector_3d> points;
-    points.emplace_back (v1.x, v1.y, v1.z);
-    points.emplace_back (v1.x, v1.y, v2.z);
-    points.emplace_back (v1.x, v2.y, v1.z);
-    points.emplace_back (v1.x, v2.y, v2.z);
-    points.emplace_back (v2.x, v1.y, v1.z);
-    points.emplace_back (v2.x, v1.y, v2.z);
-    points.emplace_back (v2.x, v2.y, v1.z);
-    points.emplace_back (v2.x, v2.y, v2.z);
+    for (auto const& plane : _planes)
+    {
 
-    return intersects (points);
+      glm::vec3 vmin;
+      vector_3d normal = plane.normal();
+
+      // X axis 
+      if (normal.x > 0)
+      {
+        vmin.x = v1.x;
+      }
+      else
+      {
+        vmin.x = v2.x;
+      }
+
+      // Y axis 
+      if (normal.y > 0)
+      {
+        vmin.y = v1.y;
+      }
+      else
+      {
+        vmin.y = v2.y;
+      }
+
+      // Z axis 
+      if (normal.z > 0)
+      {
+        vmin.z = v1.z;
+      }
+      else
+      {
+        vmin.z = v2.z;
+      }
+
+      auto plane_normal = reinterpret_cast<glm::vec3*>(&normal._data);
+
+      if (dot(*plane_normal, vmin) + plane.distance() <= 0)
+      {
+        return false;
+      }
+
+    }
+
+    return true;
   }
 
 

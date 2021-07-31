@@ -342,10 +342,15 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
 
   for (auto& group : groups)
   {
+
+
+    /*
     if (!group.is_visible(transform_matrix, frustum, cull_distance, camera, display))
     {
       continue;
     }
+
+     */
 
     group.draw ( wmo_shader
                , frustum
@@ -1138,7 +1143,7 @@ void WMOGroup::load_mocv(MPQFile& f, uint32_t size)
 void WMOGroup::fix_vertex_color_alpha()
 {
   int interior_batchs_start = 0;
-  
+
   if (header.transparency_batches_count > 0)
   {
     interior_batchs_start = _batches[header.transparency_batches_count - 1].vertex_end + 1;
@@ -1200,7 +1205,7 @@ bool WMOGroup::is_visible( math::matrix_4x4 const& transform
 {
   math::vector_3d pos = transform * center;
 
-  if (!frustum.intersectsSphere(pos, rad))
+  if (!frustum.intersects(pos + BoundingBoxMin, pos + BoundingBoxMax))
   {
     return false;
   }

@@ -155,7 +155,7 @@ bool ModelInstance::is_visible( math::frustum const& frustum
     return false;
   }
   
-  return frustum.intersectsSphere(get_pos(), model->rad * scale);
+  return frustum.intersects(extents[1], extents[0]);
 }
 
 void ModelInstance::recalcExtents()

@@ -79,6 +79,11 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
   {
     wmo_shader.uniform("transform", _transform_mat_transposed);
 
+    if (!frustum.intersects(extents[1], extents[0]))
+    {
+      return;
+    }
+
     wmo->draw ( wmo_shader
               , model_view
               , projection

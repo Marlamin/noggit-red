@@ -75,11 +75,9 @@ public:
 
   void unload();
 
-
   float xbase, zbase;
 
 private:
-  std::vector<math::vector_3d> _intersect_points;
 
   math::vector_3d vmin, vmax, vcenter;
   bool _use_mclq_green_lava;

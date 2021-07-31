@@ -317,9 +317,6 @@ void MapChunk::update_intersect_points()
   // update the center of the chunk and visibility when the vertices changed
   vcenter = (vmin + vmax) * 0.5f;
   _need_visibility_update = true;
-
-  _intersect_points.clear();
-  _intersect_points = misc::intersection_points(vmin, vmax);
 }
 
 void MapChunk::upload()
@@ -542,8 +539,7 @@ bool MapChunk::is_visible ( const float& cull_distance
              ? (camera - vcenter).length() - chunk_radius
              : std::abs(camera.y - vmax.y);
 
-  return frustum.intersects (_intersect_points)
-      && dist < cull_distance;
+  return frustum.intersects(vmax, vmin) && dist < cull_distance;
 
 }
 
