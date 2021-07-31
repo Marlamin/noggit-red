@@ -15,20 +15,20 @@ namespace opengl
   context::scoped_setter::scoped_setter (context& context_, QOpenGLContext* current_context)
     : _context (context_)
     , _old_context (_context._current_context)
-    , _old_core_func (context_._3_3_core_func)
+    , _old_core_func (context_._4_1_core_func)
   {
     _context._current_context = current_context;
-    _context._3_3_core_func = current_context->versionFunctions<QOpenGLFunctions_3_3_Core>();
+    _context._4_1_core_func = current_context->versionFunctions<QOpenGLFunctions_4_1_Core>();
 
-    if (!_context._3_3_core_func)
+    if (!_context._4_1_core_func)
     {
-      throw std::runtime_error("Noggit requires OpenGL 3.3 core functions");
+      throw std::runtime_error("Noggit requires OpenGL 4.1 core functions");
     }
   }
   context::scoped_setter::~scoped_setter()
   {
     _context._current_context = _old_context;
-    _context._3_3_core_func = _old_core_func;
+    _context._4_1_core_func = _old_core_func;
   }
   context::save_current_context::save_current_context (context& context_)
     : _is_current ( context_._current_context

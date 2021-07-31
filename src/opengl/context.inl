@@ -11,6 +11,7 @@
 
 #include <QtOpenGLExtensions/QOpenGLExtensions>
 #include <QtGui/QOpenGLFunctions>
+#include <QOpenGLExtensions>
 #include <boost/current_function.hpp>
 
 
@@ -199,7 +200,7 @@ void opengl::context::readBuffer (GLenum target)
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glReadBuffer (target);
+  return _4_1_core_func->glReadBuffer (target);
 }
 void opengl::context::readPixels (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* data)
 {
@@ -222,35 +223,35 @@ void opengl::context::pointParameterf (GLenum pname, GLfloat param)
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glPointParameterf (pname, param);
+  return _4_1_core_func->glPointParameterf (pname, param);
 }
 void opengl::context::pointParameteri (GLenum pname, GLint param)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glPointParameteri (pname, param);
+  return _4_1_core_func->glPointParameteri (pname, param);
 }
 void opengl::context::pointParameterfv (GLenum pname, GLfloat const* param)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glPointParameterfv (pname, param);
+  return _4_1_core_func->glPointParameterfv (pname, param);
 }
 void opengl::context::pointParameteriv (GLenum pname, GLint const* param)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glPointParameteriv (pname, param);
+  return _4_1_core_func->glPointParameteriv (pname, param);
 }
 void opengl::context::pointSize (GLfloat size)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glPointSize (size);
+  return _4_1_core_func->glPointSize (size);
 }
 
 void opengl::context::hint (GLenum target, GLenum mode)
@@ -265,7 +266,7 @@ void opengl::context::polygonMode (GLenum face, GLenum mode)
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glPolygonMode (face, mode);
+  return _4_1_core_func->glPolygonMode (face, mode);
 }
 
 void opengl::context::genTextures (GLuint count, GLuint* textures)
@@ -352,21 +353,21 @@ void opengl::context::genVertexArrays (GLuint count, GLuint* arrays)
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glGenVertexArrays(count, arrays);
+  return _4_1_core_func->glGenVertexArrays(count, arrays);
 }
 void opengl::context::deleteVertexArray (GLuint count, GLuint* arrays)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glDeleteVertexArrays(count, arrays);
+  return _4_1_core_func->glDeleteVertexArrays(count, arrays);
 }
 void opengl::context::bindVertexArray (GLenum array)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glBindVertexArray(array);
+  return _4_1_core_func->glBindVertexArray(array);
 }
 void opengl::context::genBuffers (GLuint count, GLuint* buffers)
 {
@@ -394,14 +395,14 @@ GLvoid* opengl::context::mapBuffer (GLenum target, GLenum access)
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glMapBuffer (target, access);
+  return _4_1_core_func->glMapBuffer (target, access);
 }
 GLboolean opengl::context::unmapBuffer (GLenum target)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glUnmapBuffer (target);
+  return _4_1_core_func->glUnmapBuffer (target);
 }
 void opengl::context::drawElements (GLenum mode, GLsizei count, GLenum type, GLvoid const* indices)
 {
@@ -415,14 +416,14 @@ void opengl::context::drawElementsInstanced (GLenum mode, GLsizei count, GLenum 
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glDrawElementsInstanced (mode, count, type, indices, instancecount);
+  return _4_1_core_func->glDrawElementsInstanced (mode, count, type, indices, instancecount);
 }
 void opengl::context::drawRangeElements (GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, GLvoid const* indices)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glDrawRangeElements (mode, start, end, count, type, indices);
+  return _4_1_core_func->glDrawRangeElements (mode, start, end, count, type, indices);
 }
 
 void opengl::context::genPrograms (GLsizei count, GLuint* programs)
@@ -479,7 +480,7 @@ void opengl::context::getDoublev (GLenum target, GLdouble* value)
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glGetDoublev (target, value);
+  return _4_1_core_func->glGetDoublev (target, value);
 }
 void opengl::context::getFloatv (GLenum target, GLfloat* value)
 {
@@ -669,7 +670,7 @@ void opengl::context::vertexAttribDivisor (GLuint index, GLuint divisor)
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  return _3_3_core_func->glVertexAttribDivisor(index, divisor);
+  return _4_1_core_func->glVertexAttribDivisor(index, divisor);
 }
 void opengl::context::enableVertexAttribArray (GLuint index)
 {

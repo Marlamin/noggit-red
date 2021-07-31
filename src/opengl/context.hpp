@@ -5,7 +5,7 @@
 #include <opengl/types.hpp>
 #include <boost/config/detail/suffix.hpp>
 
-#include <QtGui/QOpenGLFunctions_3_3_Core>
+#include <QtGui/QOpenGLFunctions_4_1_Core>
 
 namespace opengl
 {
@@ -24,7 +24,7 @@ namespace opengl
     private:
       context& _context;
       QOpenGLContext* _old_context;
-      QOpenGLFunctions_3_3_Core* _old_core_func;
+      QOpenGLFunctions_4_1_Core* _old_core_func;
     };
 
     struct save_current_context
@@ -44,7 +44,7 @@ namespace opengl
     };
 
     QOpenGLContext* _current_context = nullptr;
-    QOpenGLFunctions_3_3_Core* _3_3_core_func = nullptr;
+    QOpenGLFunctions_4_1_Core* _4_1_core_func = nullptr;
 
     BOOST_FORCEINLINE void enable (GLenum);
     BOOST_FORCEINLINE void disable (GLenum);
