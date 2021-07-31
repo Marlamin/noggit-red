@@ -124,6 +124,9 @@ bool ModelInstance::is_visible( math::frustum const& frustum
     recalcExtents();
   }
 
+  if (!frustum.intersects(extents[1], extents[0]))
+    return false;
+
   float dist;
   
   if (display == display_mode::in_3D)
@@ -134,8 +137,6 @@ bool ModelInstance::is_visible( math::frustum const& frustum
   {
     dist = std::abs(get_pos().y - camera.y) - model->rad * scale;
   }
-
-  //return frustum.intersectsSphere(get_pos(), model->rad * scale);
 
   if (dist >= cull_distance)
   {
@@ -155,7 +156,7 @@ bool ModelInstance::is_visible( math::frustum const& frustum
     return false;
   }
   
-  return frustum.intersects(extents[1], extents[0]);
+  return true;
 }
 
 void ModelInstance::recalcExtents()
