@@ -2,19 +2,23 @@
 #version 330 core
 
 uniform sampler2D tex;
-uniform vec4 ocean_color_light;
-uniform vec4 ocean_color_dark;
-uniform vec4 river_color_light;
-uniform vec4 river_color_dark;
 
-uniform vec3 fog_color;
-uniform float fog_start;
-uniform float fog_end;
+layout (std140) uniform lighting
+{
+  vec4 DiffuseColor_FogStart;
+  vec4 AmbientColor_FogEnd;
+  vec4 FogColor_FogOn;
+  vec4 LightDir_FogRate;
+  vec4 OceanColorLight;
+  vec4 OceanColorDark;
+  vec4 RiverColorLight;
+  vec4 RiverColorDark;
+};
+
 
 uniform int type;
 uniform float animtime;
 uniform vec2 param;
-uniform bool draw_fog;
 
 in float depth_;
 in vec2 tex_coord_;
@@ -40,22 +44,22 @@ void main()
     vec2 uv = rot2(tex_coord_ * param.x, param.y);
     vec4 texel = texture(tex, uv);
     vec4 lerp = (type == 1)
-              ? mix (ocean_color_light, ocean_color_dark, depth_) 
-              : mix (river_color_light, river_color_dark, depth_)
+              ? mix (OceanColorLight, OceanColorDark, depth_) 
+              : mix (RiverColorLight, RiverColorDark, depth_)
               ;
               
     //clamp shouldn't be needed
     out_color = vec4 (clamp(texel + lerp, 0.0, 1.0).rgb, lerp.a);
   }
 
-  if (draw_fog)
+  if (FogColor_FogOn.w != 0)
   {
-    float start = fog_end * fog_start;
+    float start = AmbientColor_FogEnd.w * DiffuseColor_FogStart.w;
 
     vec3 fogParams;
-    fogParams.x = -(1.0 / (fog_end - start));
-    fogParams.y = (1.0 / (fog_end - start)) * fog_end;
-    fogParams.z = 1.0;
+    fogParams.x = -(1.0 / (AmbientColor_FogEnd.w - start));
+    fogParams.y = (1.0 / (AmbientColor_FogEnd.w - start)) * AmbientColor_FogEnd.w;
+    fogParams.z = LightDir_FogRate.w;
 
     float f1 = (dist_from_camera_ * fogParams.x) + fogParams.y;
     float f2 = max(f1, 0.0);
@@ -64,6 +68,6 @@ void main()
 
     float fogFactor = 1.0 - f4;
 
-    out_color.rgb = mix(out_color.rgb, fog_color.rgb, fogFactor);
+    out_color.rgb = mix(out_color.rgb, FogColor_FogOn.rgb, fogFactor);
   }
 }

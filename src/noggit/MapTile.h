@@ -17,6 +17,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <array>
 
 namespace math
 {
@@ -88,7 +89,7 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , int animtime
             , display_mode display
-            , std::vector<int>& textures_bound
+            , std::array<int, 4>& textures_bound
             );
   void intersect (math::ray const&, selection_result*) const;
   void drawWater ( math::frustum const& frustum

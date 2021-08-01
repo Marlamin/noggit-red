@@ -18,6 +18,7 @@
 
 #include <map>
 #include <memory>
+#include <array>
 #include <QImage>
 
 class MPQFile;
@@ -146,7 +147,7 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , int animtime
             , display_mode display
-            , std::vector<int>& textures_bound
+            , std::array<int, 4>& textures_bound
             );
   //! \todo only this function should be public, all others should be called from it
 

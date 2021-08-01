@@ -20,6 +20,7 @@
 #include <noggit/ContextObject.hpp>
 #include <opengl/primitives.hpp>
 #include <opengl/shader.fwd.hpp>
+#include <opengl/types.hpp>
 
 #include <boost/optional/optional.hpp>
 
@@ -408,8 +409,15 @@ public:
 
   bool need_model_updates = false;
 
+  opengl::TerrainParamsUniformBlock* getTerrainParamsUniformBlock() { return &_terrain_params_ubo_data; };
+  void updateTerrainParamsUniformBlock();
+  void markTerrainParamsUniformBlockDirty() { _need_terrain_params_ubo_update = true; };
+
 private:
   void update_models_by_filename();
+
+  void updateMVPUniformBlock(const math::matrix_4x4& model_view, const math::matrix_4x4& projection);
+  void updateLightingUniformBlock(bool draw_fog, math::vector_3d const& camera_pos);
 
   std::set<MapChunk*>& vertexBorderChunks();
 
@@ -454,17 +462,15 @@ private:
 
   noggit::NoggitRenderContext _context;
 
-  bool _draw_lines_old = false;
-  bool _draw_hole_lines_old = false;
-  bool _draw_areaid_overlay_old = false;
-  bool _draw_terrain_height_contour_old = false;
-  bool _draw_wireframe_old = false;
-  int _wireframe_type_old = 0;
-  float _wireframe_radius_old = 1.5f;
-  float _wireframe_width_old = 1.f;
-  bool _draw_fog_old = false;
-  CursorType _cursor_type_old = CursorType::NONE;
-  bool _draw_selection_old = false;
+  opengl::scoped::deferred_upload_buffers<3> _buffers;
+  GLuint const& _mvp_ubo = _buffers[0];
+  GLuint const& _lighting_ubo = _buffers[1];
+  GLuint const& _terrain_params_ubo = _buffers[2];
 
+  opengl::MVPUniformBlock _mvp_ubo_data;
+  opengl::LightingUniformBlock _lighting_ubo_data;
+  opengl::TerrainParamsUniformBlock _terrain_params_ubo_data;
+
+  bool _need_terrain_params_ubo_update = false;
 
 };

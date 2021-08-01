@@ -14,6 +14,8 @@ namespace math
   struct matrix_4x4
   {
   public:
+    matrix_4x4 () {}
+
     static struct uninitialized_t {} uninitialized;
     matrix_4x4 (uninitialized_t) {}
 

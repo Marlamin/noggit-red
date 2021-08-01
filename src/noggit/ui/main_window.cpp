@@ -162,7 +162,7 @@ namespace noggit
 
       QSettings settings;
 
-      if (!settings.value("systemWindowFrame", false).toBool())
+      if (!settings.value("systemWindowFrame", true).toBool())
       {
         QWidget *widget = new QWidget(this);
         Ui::TitleBar* titleBarWidget = setupFramelessWindow(widget, this, minimumSize(), maximumSize(), true);
@@ -266,6 +266,7 @@ namespace noggit
       _map_creation_wizard->destroyFakeWorld();
       _map_view =  (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix, from_bookmark));
       connect(_map_view, &MapView::uid_fix_failed, [this]() { prompt_uid_fix_failure(); });
+      connect(_settings, &settings::saved, [this]() { if (_map_view) _map_view->onSettingsSave(); });
 
       _stack_widget->addWidget(_map_view);
       _stack_widget->setCurrentIndex(1);

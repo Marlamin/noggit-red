@@ -34,7 +34,6 @@
 #include <noggit/ui/texture_palette_small.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
 #include <opengl/scoped.hpp>
-#include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
 #include <noggit/Red/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/Red/PresetEditor/Ui/PresetEditor.hpp>
@@ -44,7 +43,8 @@
 #include <noggit/Red/LightEditor/LightEditor.hpp>
 #include <external/imguipiemenu/PieMenu.hpp>
 #include <noggit/ui/object_palette.hpp>
-#include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
+#include <opengl/types.hpp>
+
 
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
@@ -136,6 +136,52 @@ ACTION_CODE                                                                     
   while (false)
 
 
+#define ADD_TOGGLE_POST(menu_, name_, shortcut_, property_, post_)\
+  do                                                              \
+  {                                                               \
+    QAction* action (new QAction (name_, this));                  \
+    action->setShortcut (QKeySequence (shortcut_));               \
+    action->setCheckable (true);                                  \
+    action->setChecked (property_.get());                         \
+    menu_->addAction (action);                                    \
+    connect ( action, &QAction::toggled                           \
+            , &property_, &noggit::bool_toggle_property::set      \
+            );                                                    \
+    connect ( &property_, &noggit::bool_toggle_property::changed  \
+            , action, &QAction::setChecked                        \
+            );                                                    \
+    connect ( action, &QAction::toggled, post_);                  \
+    connect ( &property_, &noggit::bool_toggle_property::changed, \
+    post_);                                                       \
+  }                                                               \
+  while (false)
+
+
+
+#define ADD_TOGGLE_NS_POST(menu_, name_, property_, code_)        \
+  do                                                              \
+  {                                                               \
+    QAction* action (new QAction (name_, this));                  \
+    action->setCheckable (true);                                  \
+    action->setChecked (property_.get());                         \
+    menu_->addAction (action);                                    \
+    connect ( action, &QAction::toggled                           \
+            , &property_, &noggit::bool_toggle_property::set      \
+            );                                                    \
+    connect ( &property_, &noggit::bool_toggle_property::changed  \
+            , action, &QAction::setChecked                        \
+            );                                                    \
+      connect ( action, &QAction::toggled                         \
+            ,  code_                                              \
+            );                                                    \
+    connect ( &property_, &noggit::bool_toggle_property::changed  \
+            , code_                                               \
+            );                                                    \
+  }                                                               \
+  while (false)
+
+
+
 #define ADD_ACTION(menu, name, shortcut, on_action)               \
   {                                                               \
     auto action (menu->addAction (name));                         \
@@ -175,6 +221,8 @@ void MapView::set_editing_mode (editing_mode mode)
 
   if (context() && context()->isValid())
   {
+    _world->getTerrainParamsUniformBlock()->draw_areaid_overlay = false;
+
     switch (mode)
     {
       case editing_mode::ground:
@@ -201,6 +249,9 @@ void MapView::set_editing_mode (editing_mode mode)
           stampTool->getActiveBrushItem()->updateMask();
         }
         break;
+      case editing_mode::areaid:
+        _world->getTerrainParamsUniformBlock()->draw_areaid_overlay = true;
+        break;
       default:
         break;
     }
@@ -218,6 +269,8 @@ void MapView::set_editing_mode (editing_mode mode)
   terrainMode = mode;
   _toolbar->check_tool (mode);
   this->activateWindow();
+
+  _world->markTerrainParamsUniformBlockDirty();
 }
 
 void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
@@ -1628,13 +1681,39 @@ void MapView::setupViewMenu()
   ADD_TOGGLE (view_menu, "Terrain", Qt::Key_F3, _draw_terrain);
   ADD_TOGGLE (view_menu, "Water", Qt::Key_F4, _draw_water);
   ADD_TOGGLE (view_menu, "WMOs", Qt::Key_F6, _draw_wmo);
-  ADD_TOGGLE (view_menu, "Lines", Qt::Key_F7, _draw_lines);
-  ADD_TOGGLE (view_menu, "Contours", Qt::Key_F9, _draw_contour);
-  ADD_TOGGLE (view_menu, "Wireframe", Qt::Key_F10, _draw_wireframe);
+
+  ADD_TOGGLE_POST (view_menu, "Lines", Qt::Key_F7, _draw_lines,
+                   [=]
+                   {
+                     _world->getTerrainParamsUniformBlock()->draw_lines = _draw_lines.get();
+                     _world->markTerrainParamsUniformBlockDirty();
+                   });
+
+  ADD_TOGGLE_POST (view_menu, "Contours", Qt::Key_F9, _draw_contour,
+                   [=]
+                   {
+                     _world->getTerrainParamsUniformBlock()->draw_terrain_height_contour = _draw_contour.get();
+                     _world->markTerrainParamsUniformBlockDirty();
+                   });
+
+  ADD_TOGGLE_POST (view_menu, "Wireframe", Qt::Key_F10, _draw_wireframe,
+                   [=]
+                   {
+                     _world->getTerrainParamsUniformBlock()->draw_wireframe = _draw_wireframe.get();
+                     _world->markTerrainParamsUniformBlockDirty();
+                   });
+
   ADD_TOGGLE (view_menu, "Toggle Animation", Qt::Key_F11, _draw_model_animations);
   ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
   ADD_TOGGLE_NS (view_menu, "Flight Bounds", _draw_mfbo);
-  ADD_TOGGLE (view_menu, "Hole lines", "Shift+F7", _draw_hole_lines);
+
+  ADD_TOGGLE_POST (view_menu, "Hole lines", "Shift+F7", _draw_hole_lines,
+                   [=]
+                   {
+                     _world->getTerrainParamsUniformBlock()->draw_hole_lines = _draw_hole_lines.get();
+                     _world->markTerrainParamsUniformBlockDirty();
+                   });
+
   ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Hidden models", _draw_hidden_models);
@@ -2391,8 +2470,6 @@ MapView::MapView( math::degrees camera_yaw0
           , _main_window
           , [=] { _main_window->statusBar()->removeWidget (_status_fps); }
           );
-
-
 
   moving = strafing = updown = lookat = turn = 0.0f;
 
@@ -4858,4 +4935,18 @@ QWidget* MapView::getActiveStampModeItem()
     return item->getTool();
   else
     return nullptr;
+}
+
+void MapView::onSettingsSave()
+{
+  opengl::TerrainParamsUniformBlock* params = _world->getTerrainParamsUniformBlock();
+  params->wireframe_type = _settings->value("wireframe/type", 0).toInt();
+  params->wireframe_radius = _settings->value("wireframe/radius", 1.5f).toFloat();
+  params->wireframe_width = _settings->value ("wireframe/width", 1.f).toFloat();
+
+  QColor c = _settings->value("wireframe/color").value<QColor>();
+  math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
+  params->wireframe_color = wireframe_color;
+
+  _world->markTerrainParamsUniformBlockDirty();
 }

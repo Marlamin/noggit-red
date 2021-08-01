@@ -13,8 +13,12 @@ out vec2 f_texcoord;
 out vec2 f_texcoord_2;
 out vec4 f_vertex_color;
 
-uniform mat4 model_view;
-uniform mat4 projection;
+layout (std140) uniform matrices
+{
+  mat4 model_view;
+  mat4 projection;
+};
+
 uniform mat4 transform;
 
 uniform int shader_id;

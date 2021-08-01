@@ -3,9 +3,13 @@
 
 in vec4 position;
 
-uniform mat4 model_view_projection;
+layout (std140) uniform matrices
+{
+  mat4 model_view;
+  mat4 projection;
+};
 
 void main()
 {
-  gl_Position = model_view_projection * position;
+  gl_Position = (model_view * projection) * position;
 }

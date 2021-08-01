@@ -260,7 +260,7 @@ const std::string& TextureSet::filename(size_t id)
   return textures[id]->filename;
 }
 
-void TextureSet::bindTexture(size_t id, size_t activeTexture,  std::vector<int>& textures_bound)
+void TextureSet::bindTexture(size_t id, size_t activeTexture,  std::array<int, 4>& textures_bound)
 {
   if (textures_bound[id] != textures[id]->id())
   {

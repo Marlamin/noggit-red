@@ -4,8 +4,11 @@
 in mat4 transform;
 in vec4 position;
 
-uniform mat4 model_view;
-uniform mat4 projection;
+layout (std140) uniform matrices
+{
+  mat4 model_view;
+  mat4 projection;
+};
 
 void main()
 {

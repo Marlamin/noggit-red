@@ -8,22 +8,26 @@ in vec3 norm;
 
 out vec4 out_color;
 
+layout (std140) uniform lighting
+{
+    vec4 DiffuseColor_FogStart;
+    vec4 AmbientColor_FogEnd;
+    vec4 FogColor_FogOn;
+    vec4 LightDir_FogRate;
+    vec4 OceanColorLight;
+    vec4 OceanColorDark;
+    vec4 RiverColorLight;
+    vec4 RiverColorDark;
+};
+
 uniform vec4 mesh_color;
 
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 
-uniform vec4 fog_color;
-uniform float fog_start;
-uniform float fog_end;
-uniform int draw_fog;
 uniform int fog_mode;
 uniform int unfogged;
 uniform int unlit;
-
-uniform vec3 light_dir;
-uniform vec3 diffuse_color;
-uniform vec3 ambient_color;
 
 uniform float alpha_test;
 uniform int pixel_shader;
@@ -162,32 +166,32 @@ void main()
 
   if(unlit == 0)
   {
-      float nDotL = clamp(dot(normalize(norm), -normalize(light_dir)), 0.0, 1.0);
+      float nDotL = clamp(dot(normalize(norm), -normalize(vec3(-LightDir_FogRate.x, LightDir_FogRate.z, -LightDir_FogRate.y))), 0.0, 1.0);
 
-      vec3 ambientColor = ambient_color;
+      vec3 ambientColor = AmbientColor_FogEnd.xyz;
 
       vec3 skyColor = (ambientColor * 1.10000002);
       vec3 groundColor = (ambientColor * 0.699999988);
 
       currColor = mix(groundColor, skyColor, 0.5 + (0.5 * nDotL));
-      lDiffuse = diffuse_color * nDotL;
+      lDiffuse = DiffuseColor_FogStart.xyz * nDotL;
   }
   else
   {
-      currColor = ambient_color;
+      currColor = AmbientColor_FogEnd.xyz;
       accumlatedLight = vec3(0.0f, 0.0f, 0.0f);
   }
 
   color.rgb = clamp(color.rgb * (currColor + lDiffuse), 0.0, 1.0);
 
-  if(draw_fog == 1 && unfogged == 0)
+  if(FogColor_FogOn.w != 0 && unfogged == 0)
   {
-    float start = fog_end * fog_start;
+    float start = AmbientColor_FogEnd.w * DiffuseColor_FogStart.w;
 
     vec3 fogParams;
-    fogParams.x = -(1.0 / (fog_end - start));
-    fogParams.y = (1.0 / (fog_end - start)) * fog_end;
-    fogParams.z = 1.0;
+    fogParams.x = -(1.0 / (AmbientColor_FogEnd.w - start));
+    fogParams.y = (1.0 / (AmbientColor_FogEnd.w - start)) * AmbientColor_FogEnd.w;
+    fogParams.z = LightDir_FogRate.w;
 
     float f1 = (camera_dist * fogParams.x) + fogParams.y;
     float f2 = max(f1, 0.0);
@@ -201,7 +205,7 @@ void main()
     // see https://wowdev.wiki/M2/Rendering#Fog_Modes
     if(fog_mode == 1)
     {
-      fog = fog_color.rgb;
+      fog = FogColor_FogOn.rgb;
     }
     else if(fog_mode == 2)
     {
@@ -216,7 +220,7 @@ void main()
       fog = vec3(0.5);
     }
 
-    color.rgb = mix(color.rgb, fog.rgb, fogFactor);
+    color.rgb = mix(color.rgb, FogColor_FogOn.rgb, fogFactor);
   }
 
   out_color = color;

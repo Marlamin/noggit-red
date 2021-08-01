@@ -1,23 +1,28 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #version 330 core
 
+layout (std140) uniform lighting
+{
+  vec4 DiffuseColor_FogStart;
+  vec4 AmbientColor_FogEnd;
+  vec4 FogColor_FogOn;
+  vec4 LightDir_FogRate;
+  vec4 OceanColorLight;
+  vec4 OceanColorDark;
+  vec4 RiverColorLight;
+  vec4 RiverColorDark;
+};
+
 uniform sampler2D tex1;
 uniform sampler2D tex2;
 
 uniform bool use_vertex_color;
 
-uniform bool draw_fog;
 uniform bool unfogged;
-uniform float fog_start;
-uniform float fog_end;
-uniform vec3 fog_color;
 uniform vec3 camera;
 
 uniform bool unlit;
 uniform bool exterior_lit;
-uniform vec3 exterior_light_dir;
-uniform vec3 exterior_diffuse_color;
-uniform vec3 exterior_ambient_color;
 uniform vec3 ambient_color;
 
 uniform float alpha_test;
@@ -32,7 +37,7 @@ in vec4 f_vertex_color;
 
 out vec4 out_color;
 
-vec3 lighting(vec3 material)
+vec3 apply_lighting(vec3 material)
 {
   vec3 ambient_term;
   vec3 diffuse_term;
@@ -45,8 +50,8 @@ vec3 lighting(vec3 material)
   }
   else if(exterior_lit)
   {
-    ambient_term = exterior_ambient_color;
-    diffuse_term = exterior_diffuse_color;
+    ambient_term = AmbientColor_FogEnd.xyz;
+    diffuse_term = DiffuseColor_FogStart.xyz;
   }
   else
   {
@@ -61,7 +66,7 @@ vec3 lighting(vec3 material)
 
   if(!unlit)
   {
-    float nDotL = clamp(dot(normalize(f_normal), -normalize(exterior_light_dir)), 0.0, 1.0);
+    float nDotL = clamp(dot(normalize(f_normal), -normalize(vec3(-LightDir_FogRate.x, LightDir_FogRate.z, -LightDir_FogRate.y))), 0.0, 1.0);
 
     vec3 ambientColor = ambient_term + vertex_color;
 
@@ -83,7 +88,7 @@ vec3 lighting(vec3 material)
 void main()
 {
   float dist_from_camera = distance(camera, f_position);
-  bool fog = draw_fog && !unfogged;
+  bool fog = FogColor_FogOn.w != 0 && !unfogged;
 
   vec4 tex = texture(tex1, f_texcoord);
   vec4 tex_2 = texture(tex2, f_texcoord_2);
@@ -106,31 +111,31 @@ void main()
   if(shader_id == 3) // Env
   {
     vec3 env = tex_2.rgb * tex.rgb;
-    out_color = vec4(lighting(tex.rgb) + env, 1.);
+    out_color = vec4(apply_lighting(tex.rgb) + env, 1.);
   }
   else if(shader_id == 5) // EnvMetal
   {
     vec3 env = tex_2.rgb * tex.rgb * tex.a;
-    out_color = vec4(lighting(tex.rgb) + env, 1.);
+    out_color = vec4(apply_lighting(tex.rgb) + env, 1.);
   }
   else if(shader_id == 6) // TwoLayerDiffuse
   {
     vec3 layer2 = mix(tex.rgb, tex_2.rgb, tex_2.a);
-    out_color = vec4(lighting(mix(layer2, tex.rgb, vertex_color.a)), 1.);
+    out_color = vec4(apply_lighting(mix(layer2, tex.rgb, vertex_color.a)), 1.);
   }
   else // default shader, used for shader_id 0,1,2,4 (Diffuse, Specular, Metal, Opaque)
   {
-    out_color = vec4(lighting(tex.rgb), 1.);
+    out_color = vec4(apply_lighting(tex.rgb), 1.);
   }
 
   if(fog)
   {
-    float start = fog_end * fog_start;
+    float start = AmbientColor_FogEnd.w * DiffuseColor_FogStart.w;
 
     vec3 fogParams;
-    fogParams.x = -(1.0 / (fog_end - start));
-    fogParams.y = (1.0 / (fog_end - start)) * fog_end;
-    fogParams.z = 1.0;
+    fogParams.x = -(1.0 / (AmbientColor_FogEnd.w - start));
+    fogParams.y = (1.0 / (AmbientColor_FogEnd.w - start)) * AmbientColor_FogEnd.w;
+    fogParams.z = LightDir_FogRate.w;
 
     float f1 = (dist_from_camera * fogParams.x) + fogParams.y;
     float f2 = max(f1, 0.0);
@@ -139,7 +144,7 @@ void main()
 
     float fogFactor = 1.0 - f4;
 
-    out_color.rgb = mix(out_color.rgb, fog_color.rgb, fogFactor);
+    out_color.rgb = mix(out_color.rgb, FogColor_FogOn.rgb, fogFactor);
   }
 
   if(out_color.a < alpha_test)

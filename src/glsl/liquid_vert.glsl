@@ -7,8 +7,12 @@ in float depth;
 
 uniform vec3 camera;
 
-uniform mat4 model_view;
-uniform mat4 projection;
+layout (std140) uniform matrices
+{
+  mat4 model_view;
+  mat4 projection;
+};
+
 uniform mat4 transform;
 
 uniform int use_transform = int(0);

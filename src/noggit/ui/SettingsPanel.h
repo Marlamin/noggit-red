@@ -15,12 +15,16 @@ namespace noggit
   {
     class settings : public QMainWindow
     {
+      Q_OBJECT
       QSettings* _settings;
       Ui::SettingsPanel* ui;
     public:
       settings(QWidget* parent = nullptr);
       void discard_changes();
       void save_changes();
+
+    signals:
+      void saved();
     };
   }
 }

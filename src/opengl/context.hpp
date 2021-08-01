@@ -93,6 +93,7 @@ namespace opengl
     BOOST_FORCEINLINE void genBuffers (GLuint, GLuint*);
     BOOST_FORCEINLINE void deleteBuffers (GLuint, GLuint*);
     BOOST_FORCEINLINE void bindBuffer (GLenum, GLuint);
+    BOOST_FORCEINLINE void bindBufferRange (GLenum, GLuint, GLuint, GLintptr, GLsizeiptr);
     BOOST_FORCEINLINE void bufferData (GLenum target, GLsizeiptr size, GLvoid const* data, GLenum usage);
     BOOST_FORCEINLINE GLvoid* mapBuffer (GLenum target, GLenum access);
     BOOST_FORCEINLINE GLboolean unmapBuffer (GLenum);
@@ -137,6 +138,10 @@ namespace opengl
     BOOST_FORCEINLINE void disableVertexAttribArray (GLuint index);
 
     BOOST_FORCEINLINE GLint getUniformLocation (GLuint program, GLchar const* name);
+    BOOST_FORCEINLINE GLint getUniformBlockIndex (GLuint program, GLchar const* name);
+
+    BOOST_FORCEINLINE void uniformBlockBinding (GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding);
+
     BOOST_FORCEINLINE void uniform1i (GLint location, GLint value);
     BOOST_FORCEINLINE void uniform1f (GLint location, GLfloat value);
     BOOST_FORCEINLINE void uniform1iv (GLint location, GLsizei count, GLint const* value);

@@ -130,10 +130,13 @@ namespace opengl
     }
   }
 
-  //! \todo _cache lookups?
   GLuint program::uniform_location (std::string const& name) const
   {
     return gl.getUniformLocation (*_handle, name.c_str());
+  }
+  GLuint program::uniform_block_location (std::string const& name) const
+  {
+    return gl.getUniformBlockIndex(*_handle, name.c_str());
   }
   GLuint program::attrib_location (std::string const& name) const
   {
@@ -164,19 +167,34 @@ namespace opengl
 
     void use_program::uniform (std::string const& name, GLint value)
     {
-      gl.uniform1i (uniform_location (name), value);
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
+      gl.uniform1i (loc, value);
     }
     void use_program::uniform (std::string const& name, GLfloat value)
     {
-      gl.uniform1f (uniform_location (name), value);
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
+      gl.uniform1f (loc, value);
     }
     void use_program::uniform (std::string const& name, bool value)
     {
-      gl.uniform1i (uniform_location (name), static_cast<int>(value));
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
+      gl.uniform1i (loc, static_cast<int>(value));
     }
     void use_program::uniform_cached(std::string const& name, GLint value)
     {
-      GLuint loc = uniform_location(name);
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
       auto cache = _program.getUniformsIntCache();
       auto it  = cache->find(loc);
       if (it == cache->end() || it->second != value)
@@ -187,7 +205,10 @@ namespace opengl
     }
     void use_program::uniform_cached(std::string const& name, GLfloat value)
     {
-      GLuint loc = uniform_location(name);
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
       auto cache = _program.getUniformsFloatCache();
       auto it  = cache->find(loc);
       if (it == cache->end() || !misc::float_equals(it->second, value))
@@ -198,7 +219,10 @@ namespace opengl
     }
     void use_program::uniform_cached(std::string const& name, bool value)
     {
-      GLuint loc = uniform_location(name);
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
       auto cache = _program.getUniformsBoolCache();
       auto it  = cache->find(loc);
       if (it == cache->end() || it->second != value)
@@ -207,29 +231,58 @@ namespace opengl
         gl.uniform1i(loc, static_cast<int>(value));
       }
     }
+
+    void use_program::bind_uniform_block(std::string const& name, unsigned target)
+    {
+      gl.uniformBlockBinding(_program._handle.get(), uniform_block_location(name), target);
+    }
     void use_program::uniform (std::string const& name, std::vector<int> const& value)
     {
-      gl.uniform1iv (uniform_location(name), value.size(), value.data());
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
+      gl.uniform1iv (loc, value.size(), value.data());
     }
     void use_program::uniform (std::string const& name, std::vector<math::vector_3d> const& value)
     {
-      gl.uniform3fv (uniform_location(name), value.size(), reinterpret_cast<const GLfloat*>(value.data()));
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
+      gl.uniform3fv (loc, value.size(), reinterpret_cast<const GLfloat*>(value.data()));
     }
     void use_program::uniform (std::string const& name, math::vector_2d const& value)
     {
-      gl.uniform2fv (uniform_location (name), 1, value);
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
+      gl.uniform2fv (loc, 1, value);
     }
     void use_program::uniform (std::string const& name, math::vector_3d const& value)
     {
-      gl.uniform3fv (uniform_location (name), 1, value);
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
+      gl.uniform3fv (loc, 1, value);
     }
     void use_program::uniform (std::string const& name, math::vector_4d const& value)
     {
-      gl.uniform4fv (uniform_location (name), 1, value);
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
+      gl.uniform4fv (loc, 1, value);
     }
     void use_program::uniform (std::string const& name, math::matrix_4x4 const& value)
     {
-      gl.uniformMatrix4fv (uniform_location (name), 1, GL_FALSE, value);
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
+      gl.uniformMatrix4fv (loc, 1, GL_FALSE, value);
     }
 
     void use_program::sampler (std::string const& name, GLenum texture_slot, texture* tex)
@@ -317,7 +370,25 @@ namespace opengl
       GLuint loc = _program.uniform_location(name);
       if (loc == -1)
       {
-        throw std::invalid_argument ("uniform " + name + " does not exist in shader\n");
+        LogError <<  "uniform " + name + " does not exist in shader\n" << std::endl;
+      }
+      (*const_cast<tsl::robin_map<std::string, GLuint>*>(uniforms))[name] = loc;
+      return loc;
+    }
+
+    GLuint use_program::uniform_block_location (std::string const& name)
+    {
+      auto uniforms = _program.getUniforms();
+      auto it  = uniforms->find(name);
+      if (it != uniforms->end())
+      {
+        return it->second;
+      }
+
+      GLuint loc = _program.uniform_block_location(name);
+      if (loc == -1)
+      {
+        throw std::invalid_argument ("uniform block " + name + " does not exist in shader\n");
       }
       (*const_cast<tsl::robin_map<std::string, GLuint>*>(uniforms))[name] = loc;
       return loc;

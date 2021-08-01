@@ -211,34 +211,34 @@ void PreviewRenderer::draw()
       opengl::scoped::use_program water_shader {_liquid_render->shader_program()};
       water_shader.uniform("animtime", _animtime / 2880.f);
 
-      water_shader.uniform("model_view", model_view().transposed());
-      water_shader.uniform("projection", projection().transposed());
+      //water_shader.uniform("model_view", model_view().transposed());
+      //water_shader.uniform("projection", projection().transposed());
 
       math::vector_4d ocean_color_light(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
       math::vector_4d ocean_color_dark(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
       math::vector_4d river_color_light(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
       math::vector_4d river_color_dark(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
 
-      water_shader.uniform("ocean_color_light", ocean_color_light);
-      water_shader.uniform("ocean_color_dark", ocean_color_dark);
-      water_shader.uniform("river_color_light", river_color_light);
-      water_shader.uniform("river_color_dark", river_color_dark);
-      water_shader.uniform("use_transform", 1);
+      //water_shader.uniform("ocean_color_light", ocean_color_light);
+      //water_shader.uniform("ocean_color_dark", ocean_color_dark);
+      //water_shader.uniform("river_color_light", river_color_light);
+      //water_shader.uniform("river_color_dark", river_color_dark);
+      //water_shader.uniform("use_transform", 1);
     }
 
     {
       opengl::scoped::use_program wmo_program{*_wmo_program.get()};
 
-      wmo_program.uniform("model_view", model_view().transposed());
-      wmo_program.uniform("projection", projection().transposed());
+      //wmo_program.uniform("model_view", model_view().transposed());
+      //wmo_program.uniform("projection", projection().transposed());
       wmo_program.uniform("tex1", 0);
       wmo_program.uniform("tex2", 1);
 
-      wmo_program.uniform("draw_fog", 0);
+      //wmo_program.uniform("draw_fog", 0);
 
-      wmo_program.uniform("exterior_light_dir", _light_dir);
-      wmo_program.uniform("exterior_diffuse_color", _diffuse_light);
-      wmo_program.uniform("exterior_ambient_color", _ambient_light);
+      //wmo_program.uniform("exterior_light_dir", _light_dir);
+      //wmo_program.uniform("exterior_diffuse_color", _diffuse_light);
+      //wmo_program.uniform("exterior_ambient_color", _ambient_light);
 
      for (auto& wmo_instance : _wmo_instances)
      {
@@ -274,21 +274,22 @@ void PreviewRenderer::draw()
 
     opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
-    m2_shader.uniform("model_view", model_view().transposed());
-    m2_shader.uniform("projection", projection().transposed());
+    //m2_shader.uniform("model_view", model_view().transposed());
+    //m2_shader.uniform("projection", projection().transposed());
     m2_shader.uniform("tex1", 0);
     m2_shader.uniform("tex2", 1);
-    m2_shader.uniform("draw_fog", 0);
+    //m2_shader.uniform("draw_fog", 0);
 
-    m2_shader.uniform("light_dir", _light_dir);
-    m2_shader.uniform("diffuse_color", _diffuse_light);
-    m2_shader.uniform("ambient_color", _ambient_light);
+    //m2_shader.uniform("light_dir", _light_dir);
+    //m2_shader.uniform("diffuse_color", _diffuse_light);
+    //m2_shader.uniform("ambient_color", _ambient_light);
 
     for (auto& model_instance : _model_instances)
     {
+      std::vector<ModelInstance*> instance{&model_instance};
       model_instance.model->draw(
           model_view().transposed()
-          , std::vector<ModelInstance*>{&model_instance}
+          , instance
           , m2_shader
           , frustum
           , culldistance

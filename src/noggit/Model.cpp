@@ -1428,7 +1428,7 @@ void Model::draw( math::matrix_4x4 const& model_view
 }
 
 void Model::draw ( math::matrix_4x4 const& model_view
-                 , std::vector<ModelInstance*> instances
+                 , std::vector<ModelInstance*>& instances
                  , opengl::scoped::use_program& m2_shader
                  , math::frustum const& frustum
                  , const float& cull_distance
@@ -1459,17 +1459,19 @@ void Model::draw ( math::matrix_4x4 const& model_view
     animcalc = true;
   }
 
-  std::vector<math::matrix_4x4> transform_matrix;
+  static std::array<math::matrix_4x4, 10000> transform_matrix;
+  int n_visible_instances = 0;
 
   for (ModelInstance* mi : instances)
   {
     if (no_cull || mi->is_visible(frustum, cull_distance, camera, display))
     {
-      transform_matrix.push_back(mi->transformMatrixTransposed());
+      transform_matrix[n_visible_instances] = (mi->transformMatrixTransposed());
+      n_visible_instances++;
     }    
   }
 
-  if (transform_matrix.empty())
+  if (!n_visible_instances)
   {
     return;
   }
@@ -1477,18 +1479,18 @@ void Model::draw ( math::matrix_4x4 const& model_view
   // store the model count to draw the bounding boxes later
   if (all_boxes || _hidden)
   {
-    model_boxes_to_draw.emplace(this, transform_matrix.size());    
+    model_boxes_to_draw.emplace(this, n_visible_instances);
   }
   if (draw_particles && (!_particles.empty() || !_ribbons.empty()))
   {
-    models_with_particles.emplace(this, transform_matrix.size());
+    models_with_particles.emplace(this, n_visible_instances);
   }  
 
   opengl::scoped::vao_binder const _ (_vao);
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
-    gl.bufferData(GL_ARRAY_BUFFER, transform_matrix.size() * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
+    gl.bufferData(GL_ARRAY_BUFFER, n_visible_instances * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
     m2_shader.attrib("transform", 0, 1);
   }
   
@@ -1508,7 +1510,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
   {
     if (p.prepare_draw(m2_shader, this))
     {
-      gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(p.index_start * sizeof(GLushort)), transform_matrix.size());
+      gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(p.index_start * sizeof(GLushort)), n_visible_instances);
       p.after_draw();
     }
   }

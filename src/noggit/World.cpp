@@ -888,22 +888,48 @@ void World::initShaders()
               }
         );
   }
+
+
   {
     opengl::scoped::use_program m2_shader {*_m2_program.get()};
     m2_shader.uniform("tex1", 0);
     m2_shader.uniform("tex2", 1);
+
+    _buffers.upload();
+
+    m2_shader.bind_uniform_block("matrices", 0);
+    gl.bindBuffer(GL_UNIFORM_BUFFER, _mvp_ubo);
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::MVPUniformBlock), NULL, GL_DYNAMIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::MVP, _mvp_ubo, 0, sizeof(opengl::MVPUniformBlock));
+    gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    m2_shader.bind_uniform_block("lighting", 1);
+    gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::LightingUniformBlock), NULL, GL_DYNAMIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::LIGHTING, _lighting_ubo, 0, sizeof(opengl::LightingUniformBlock));
+    gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
   }
 
   {
     opengl::scoped::use_program wmo_program {*_wmo_program.get()};
     wmo_program.uniform("tex1", 0);
     wmo_program.uniform("tex2", 1);
-    wmo_program.uniform("fog_end", fogdistance);
-    wmo_program.uniform("fog_start", 0.5f);
+    wmo_program.bind_uniform_block("matrices", 0);
+    wmo_program.bind_uniform_block("lighting", 1);
   }
 
   {
     opengl::scoped::use_program mcnk_shader {*_mcnk_program.get()};
+
+    mcnk_shader.bind_uniform_block("matrices", 0);
+    mcnk_shader.bind_uniform_block("lighting", 1);
+    mcnk_shader.bind_uniform_block("overlay_params", 2);
+
+    gl.bindBuffer(GL_UNIFORM_BUFFER, _terrain_params_ubo);
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::TerrainParamsUniformBlock), NULL, GL_STATIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::TERRAIN_OVERLAYS, _terrain_params_ubo, 0, sizeof(opengl::TerrainParamsUniformBlock));
+    gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
+
     mcnk_shader.uniform("alphamap", 0);
     mcnk_shader.uniform("tex0", 1);
     mcnk_shader.uniform("tex1", 2);
@@ -912,23 +938,17 @@ void World::initShaders()
     mcnk_shader.uniform("stampBrush", 6);
     mcnk_shader.uniform("draw_shadows", 1);
     mcnk_shader.uniform("shadow_map", 5);
-
-    mcnk_shader.uniform ("fog_start", 0.5f);
-    mcnk_shader.uniform ("fog_end", fogdistance);
-
-    mcnk_shader.uniform ("wireframe_type", 0);
-    mcnk_shader.uniform ("wireframe_width", 1.0f);
-    mcnk_shader.uniform ("wireframe_radius", 1.5f);
   }
 
   {
     opengl::scoped::use_program m2_shader_instanced {*_m2_instanced_program.get()};
+    m2_shader_instanced.bind_uniform_block("matrices", 0);
+    m2_shader_instanced.bind_uniform_block("lighting", 1);
     m2_shader_instanced.uniform("tex1", 0);
     m2_shader_instanced.uniform("tex2", 1);
-    m2_shader_instanced.uniform("fog_end", fogdistance);
-    m2_shader_instanced.uniform("fog_start", 0.5f);
   }
 
+  /*
   {
     opengl::scoped::use_program particles_shader {*_m2_particles_program.get()};
     particles_shader.uniform("tex", 0);
@@ -937,6 +957,24 @@ void World::initShaders()
   {
     opengl::scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
     ribbon_shader.uniform("tex", 0);
+  }
+
+   */
+
+  {
+    opengl::scoped::use_program liquid_render {_liquid_render.get().shader_program()};
+    liquid_render.bind_uniform_block("matrices", 0);
+    liquid_render.bind_uniform_block("lighting", 1);
+  }
+
+  {
+    opengl::scoped::use_program mfbo_shader {*_mfbo_program.get()};
+    mfbo_shader.bind_uniform_block("matrices", 0);
+  }
+
+  {
+    opengl::scoped::use_program m2_box_shader {*_m2_box_program.get()};
+    m2_box_shader.bind_uniform_block("matrices", 0);
   }
 
 }
@@ -986,36 +1024,21 @@ void World::draw ( math::matrix_4x4 const& model_view
   math::matrix_4x4 const mvp(model_view * projection);
   math::frustum const frustum (mvp);
 
+  if (camera_moved)
+    updateMVPUniformBlock(model_view, projection);
+
   gl.disable(GL_DEPTH_TEST);
 
-  int daytime = static_cast<int>(time) % 2880;
+  updateLightingUniformBlock(draw_fog, camera_pos);
 
-  skies->update_sky_colors(camera_pos, daytime);
-  outdoorLightStats = ol->getLightStats(static_cast<int>(time));
+  if (_need_terrain_params_ubo_update)
+    updateTerrainParamsUniformBlock();
 
-  math::vector_3d light_dir = outdoorLightStats.dayDir;
-  light_dir = {-light_dir.x, light_dir.z, -light_dir.y};
-  // todo: figure out why I need to use a different light vector for the terrain
-  math::vector_3d terrain_light_dir = outdoorLightStats.dayDir;
-
-  math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE]);
-  math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT]);
 
   // only draw the sky in 3D
   if(display == display_mode::in_3D)
   {
     opengl::scoped::use_program m2_shader {*_m2_program.get()};
-
-    m2_shader.uniform("model_view", model_view);
-    m2_shader.uniform("projection", projection);
-
-    m2_shader.uniform_cached("draw_fog", 0);
-    m2_shader.uniform("fog_end", skies->fog_distance_end());
-    m2_shader.uniform("fog_start", skies->fog_distance_start());
-
-    m2_shader.uniform("light_dir", light_dir);
-    m2_shader.uniform("diffuse_color", diffuse_color);
-    m2_shader.uniform("ambient_color", ambient_color);
 
     bool hadSky = false;
 
@@ -1052,8 +1075,6 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     if (!hadSky)
     {
-      m2_shader.uniform("diffuse_color", math::vector_3d{0.0f, 0.0f, 0.0f});
-      m2_shader.uniform("ambient_color",  math::vector_3d{1.f, 1.f, 1.f});
       skies->draw( model_view
                  , projection
                  , camera_pos
@@ -1085,56 +1106,14 @@ void World::draw ( math::matrix_4x4 const& model_view
   {
     opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
-    mcnk_shader.uniform("model_view", model_view);
-    mcnk_shader.uniform("projection", projection);
-
-    mcnk_shader.uniform_cached("draw_lines", draw_lines);
-    mcnk_shader.uniform_cached("draw_hole_lines", draw_hole_lines);
-    mcnk_shader.uniform_cached("draw_areaid_overlay", draw_areaid_overlay);
-    mcnk_shader.uniform_cached("draw_terrain_height_contour", draw_contour);
-
-
     // the flag stays on if the last chunk drawn before leaving the editing tool has it
     if (!draw_chunk_flag_overlay)
     {
       mcnk_shader.uniform_cached("draw_impassible_flag", 0);
     }
 
-    mcnk_shader.uniform_cached("draw_wireframe", draw_wireframe);
-
-    int wireframe_type = _settings->value("wireframe/type", 0).toInt();
-
-    mcnk_shader.uniform_cached("wireframe_type", wireframe_type);
-
-
-    float wireframe_radius =  _settings->value("wireframe/radius", 1.5f).toFloat();
-    mcnk_shader.uniform_cached("wireframe_radius", wireframe_radius);
-
-
-    float wireframe_width =  _settings->value ("wireframe/width", 1.f).toFloat();
-    mcnk_shader.uniform_cached ("wireframe_width", wireframe_width);
-
-
-    // !\ todo store the color somewhere ?
-    QColor c = _settings->value("wireframe/color").value<QColor>();
-    math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
-    mcnk_shader.uniform ("wireframe_color", wireframe_color);
-
-    mcnk_shader.uniform_cached ("draw_fog", draw_fog);
-
-    if (draw_fog)
-    {
-      mcnk_shader.uniform("fog_end", skies->fog_distance_end());
-      mcnk_shader.uniform("fog_start", skies->fog_distance_start());
-      mcnk_shader.uniform("fog_rate", skies->fogRate());
-      mcnk_shader.uniform ("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
-    }
-
     mcnk_shader.uniform ("camera", camera_pos);
 
-    mcnk_shader.uniform("light_dir", terrain_light_dir);
-    mcnk_shader.uniform("diffuse_color", diffuse_color);
-    mcnk_shader.uniform("ambient_color", ambient_color);
 
     if (cursor_type != CursorType::NONE)
     {
@@ -1155,7 +1134,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     mcnk_shader.uniform("tex_anim_2", math::vector_2d());
     mcnk_shader.uniform("tex_anim_3", math::vector_2d());
 
-    std::vector<int> textures_bound = { -1, -1, -1, -1 };
+    std::array<int, 4> textures_bound = { -1, -1, -1, -1 };
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
@@ -1218,20 +1197,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     _sphere_render.draw(mvp, vertexCenter(), cursor_color, 2.f);
   }
 
-  std::unordered_map<std::string, std::vector<ModelInstance*>> _wmo_doodads;
-
-  bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
-  if (draw_doodads_wmo)
-  {
-    _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
-    {
-      for (auto& doodad : wmo.get_visible_doodads(frustum, culldistance, camera_pos, draw_hidden_models, display))
-      {
-        _wmo_doodads[doodad->model->filename].push_back(doodad);
-      }
-    });
-  }
-
   std::unordered_map<Model*, std::size_t> model_with_particles;
 
   // WMOs / map objects
@@ -1240,22 +1205,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       opengl::scoped::use_program wmo_program {*_wmo_program.get()};
 
-      wmo_program.uniform("model_view", model_view);
-      wmo_program.uniform("projection", projection);
-
-      wmo_program.uniform_cached("draw_fog", draw_fog);
-
-      if (draw_fog)
-      {
-        wmo_program.uniform("fog_color", skies->color_set[FOG_COLOR]);
-        wmo_program.uniform("fog_end", skies->fog_distance_end());
-        wmo_program.uniform("fog_start", skies->fog_distance_start());
-        wmo_program.uniform("camera", camera_pos);
-      }
-
-      wmo_program.uniform("exterior_light_dir", light_dir);
-      wmo_program.uniform("exterior_diffuse_color", diffuse_color);
-      wmo_program.uniform("exterior_ambient_color", ambient_color);
+      wmo_program.uniform("camera", camera_pos);
 
       _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
       {
@@ -1286,6 +1236,8 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
   }
 
+  bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
+
   // M2s / models
   if (draw_models || draw_doodads_wmo)
   {
@@ -1302,24 +1254,11 @@ void World::draw ( math::matrix_4x4 const& model_view
     std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 
     {
-      opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
-
-      m2_shader.uniform("model_view", model_view);
-      m2_shader.uniform("projection", projection);
-
-      m2_shader.uniform("fog_color", math::vector_4d(skies->color_set[FOG_COLOR], 1));
-      // !\ todo use light dbcs values
-
-      m2_shader.uniform_cached("draw_fog", draw_fog);
-      m2_shader.uniform("fog_end", skies->fog_distance_end());
-      m2_shader.uniform("fog_start", skies->fog_distance_start());
-
-      m2_shader.uniform("light_dir", light_dir);
-      m2_shader.uniform("diffuse_color", diffuse_color);
-      m2_shader.uniform("ambient_color", ambient_color);
-
       if (draw_models)
       {
+
+        opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
+
         for (auto& it : _models_by_filename)
         {
           if (draw_hidden_models || !it.second[0]->model->is_hidden())
@@ -1340,36 +1279,48 @@ void World::draw ( math::matrix_4x4 const& model_view
             );
           }
         }
+
+        /*
+        if (draw_doodads_wmo)
+        {
+          _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
+            {
+              auto doodads = wmo.get_doodads(draw_hidden_models);
+
+              if (!doodads)
+                return;
+
+              for (auto& pair : *doodads)
+              {
+                for (auto& doodad : pair.second)
+                {
+                  doodad->model->draw( model_view
+                    , m2_shader
+                    , frustum
+                    , culldistance
+                    , camera_pos
+                    , false
+                    , animtime
+                    , draw_model_animations
+                    , draw_models_with_box
+                    , model_with_particles
+                    , model_boxes_to_draw
+                    , display
+                  );
+                }
+
+              }
+            });
+        }
+
+         */
       }
 
-      if (draw_doodads_wmo)
-      {
-        for (auto& it : _wmo_doodads)
-        {
-          it.second[0]->model->draw( model_view
-            , it.second
-            , m2_shader
-            , frustum
-            , culldistance
-            , camera_pos
-            , false
-            , animtime
-            , draw_model_animations
-            , draw_models_with_box
-            , model_with_particles
-            , model_boxes_to_draw
-            , display
-          );
-        }
-      }
     }
 
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
       opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
-
-      m2_box_shader.uniform ("model_view", model_view);
-      m2_box_shader.uniform ("projection", projection);
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -1412,35 +1363,15 @@ void World::draw ( math::matrix_4x4 const& model_view
     opengl::scoped::use_program water_shader {_liquid_render->shader_program()};
     water_shader.uniform("animtime", static_cast<float>(animtime) / 2880.f);
 
-    water_shader.uniform("model_view", model_view);
-    water_shader.uniform("projection", projection);
     water_shader.uniform("camera", camera_pos);
 
-    water_shader.uniform_cached("draw_fog", draw_fog);
-
-    if (draw_fog)
-    {
-      water_shader.uniform("fog_color", skies->color_set[FOG_COLOR]);
-      water_shader.uniform("fog_start", skies->fog_distance_start());
-      water_shader.uniform("fog_end", skies->fog_distance_end());
-    }
-
-    math::vector_4d ocean_color_light(skies->color_set[OCEAN_COLOR_LIGHT], skies->ocean_shallow_alpha());
-    math::vector_4d ocean_color_dark(skies->color_set[OCEAN_COLOR_DARK], skies->ocean_deep_alpha());
-    math::vector_4d river_color_light(skies->color_set[RIVER_COLOR_LIGHT], skies->river_shallow_alpha());
-    math::vector_4d river_color_dark(skies->color_set[RIVER_COLOR_DARK], skies->river_deep_alpha());
-
-    water_shader.uniform("ocean_color_light", ocean_color_light);
-    water_shader.uniform("ocean_color_dark", ocean_color_dark);
-    water_shader.uniform("river_color_light", river_color_light);
-    water_shader.uniform("river_color_dark", river_color_dark);
 
     if (draw_wmo || mapIndex.hasAGlobalWMO())
     {
       water_shader.uniform("use_transform", 1);
     }
   }
-
+  /*
   // model particles
   if (draw_model_animations && !model_with_particles.empty())
   {
@@ -1458,6 +1389,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
   }
 
+
   if (draw_model_animations && !model_with_particles.empty())
   {
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
@@ -1474,6 +1406,8 @@ void World::draw ( math::matrix_4x4 const& model_view
       it.first->draw_ribbons(ribbon_shader, it.second);
     }
   }
+
+   */
 
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1559,8 +1493,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
     opengl::scoped::use_program mfbo_shader {*_mfbo_program.get()};
-
-    mfbo_shader.uniform("model_view_projection", model_view * projection);
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
@@ -2160,7 +2092,7 @@ void World::drawMinimap ( MapTile *tile
     mcnk_shader.uniform("tex_anim_2", math::vector_2d());
     mcnk_shader.uniform("tex_anim_3", math::vector_2d());
 
-    std::vector<int> textures_bound = { -1, -1, -1, -1 };
+    std::array<int, 4> textures_bound = { -1, -1, -1, -1 };
     std::map<int, misc::random_color> area_id_colors;
 
     tile->draw(frustum, mcnk_shader, detailtexcoords, culldistance, camera_pos, true, false,
@@ -3657,6 +3589,8 @@ void World::unload_shaders()
   detailtexcoords = 0;
   alphatexcoords = 0;
 
+  _buffers.unload();
+
   _global_vbos_initialized = false;
   _display_initialized = false;
 }
@@ -4110,5 +4044,46 @@ void World::ensureAllTilesetsAllADTs()
       }
     }
   }
+}
+
+void World::updateMVPUniformBlock(const math::matrix_4x4& model_view, const math::matrix_4x4& projection)
+{
+  _mvp_ubo_data.model_view = model_view;
+  _mvp_ubo_data.projection = projection;
+
+  gl.bindBuffer(GL_UNIFORM_BUFFER, _mvp_ubo);
+  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::MVPUniformBlock), &_mvp_ubo_data);
+
+}
+
+void World::updateLightingUniformBlock(bool draw_fog, math::vector_3d const& camera_pos)
+{
+  int daytime = static_cast<int>(time) % 2880;
+
+  skies->update_sky_colors(camera_pos, daytime);
+  outdoorLightStats = ol->getLightStats(static_cast<int>(time));
+
+  math::vector_3d diffuse = skies->color_set[LIGHT_GLOBAL_DIFFUSE];
+  math::vector_3d ambient = skies->color_set[LIGHT_GLOBAL_AMBIENT];
+  math::vector_3d fog_color = skies->color_set[FOG_COLOR];
+
+  _lighting_ubo_data.DiffuseColor_FogStart = {diffuse, skies->fog_distance_start()};
+  _lighting_ubo_data.AmbientColor_FogEnd = {ambient, skies->fog_distance_end()};
+  _lighting_ubo_data.FogColor_FogOn = {fog_color, static_cast<float>(draw_fog)};
+  _lighting_ubo_data.LightDir_FogRate = {outdoorLightStats.dayDir.x, outdoorLightStats.dayDir.y, outdoorLightStats.dayDir.z, skies->fogRate()};
+  _lighting_ubo_data.OceanColorLight = {skies->color_set[OCEAN_COLOR_LIGHT], skies->ocean_shallow_alpha()};
+  _lighting_ubo_data.OceanColorDark = {skies->color_set[OCEAN_COLOR_DARK], skies->ocean_deep_alpha()};
+  _lighting_ubo_data.RiverColorLight = {skies->color_set[RIVER_COLOR_LIGHT], skies->river_shallow_alpha()};
+  _lighting_ubo_data.RiverColorDark = {skies->color_set[RIVER_COLOR_DARK], skies->river_deep_alpha()};
+
+  gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
+  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::LightingUniformBlock), &_lighting_ubo_data);
+}
+
+void World::updateTerrainParamsUniformBlock()
+{
+  gl.bindBuffer(GL_UNIFORM_BUFFER, _terrain_params_ubo);
+  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::TerrainParamsUniformBlock), &_terrain_params_ubo_data);
+  _need_terrain_params_ubo_update = false;
 }
 

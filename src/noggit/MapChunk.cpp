@@ -601,7 +601,7 @@ void MapChunk::draw ( math::frustum const& frustum
                     , std::map<int, misc::random_color>& area_id_colors
                     , int animtime
                     , display_mode display
-                    , std::vector<int>& textures_bound
+                    , std::array<int, 4>& textures_bound
                     )
 {
 
@@ -629,10 +629,10 @@ void MapChunk::draw ( math::frustum const& frustum
     update_vao(mcnk_shader, tex_coord_vbo);
   }
 
-  bool cantPaint = noggit::ui::selected_texture::get()
-                 && !canPaintTexture(*noggit::ui::selected_texture::get())
-                 && show_unpaintable_chunks
-                 && draw_paintability_overlay;
+  bool cantPaint = show_unpaintable_chunks
+                    && draw_paintability_overlay
+                    && noggit::ui::selected_texture::get()
+                    && !canPaintTexture(*noggit::ui::selected_texture::get());
 
   if (texture_set->num())
   {

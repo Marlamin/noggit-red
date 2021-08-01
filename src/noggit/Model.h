@@ -227,7 +227,7 @@ public:
            , bool no_cull = false
            );
   void draw ( math::matrix_4x4 const& model_view
-            , std::vector<ModelInstance*> instances
+            , std::vector<ModelInstance*>& instances
             , opengl::scoped::use_program& m2_shader
             , math::frustum const& frustum
             , const float& cull_distance

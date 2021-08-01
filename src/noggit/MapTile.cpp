@@ -375,7 +375,7 @@ void MapTile::draw ( math::frustum const& frustum
                    , std::map<int, misc::random_color>& area_id_colors
                    , int animtime
                    , display_mode display
-                   , std::vector<int>& textures_bound
+                   , std::array<int, 4>& textures_bound
                    )
 {
   if (!finished)

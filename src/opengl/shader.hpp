@@ -62,6 +62,7 @@ namespace opengl
 
   private:
     inline GLuint uniform_location (std::string const& name) const;
+    inline GLuint uniform_block_location (std::string const& name) const;
     inline GLuint attrib_location (std::string const& name) const;
 
     friend struct scoped::use_program;
@@ -88,6 +89,7 @@ namespace opengl
       use_program& operator= (use_program const&) = delete;
       use_program& operator= (use_program&&) = delete;
 
+      void bind_uniform_block(std::string const& name, unsigned);
       void uniform (std::string const& name, std::vector<int> const&);
       void uniform (std::string const& name, GLint);
       void uniform (std::string const& name, GLfloat);
@@ -117,6 +119,7 @@ namespace opengl
 
     private:
       GLuint uniform_location (std::string const& name);
+      GLuint uniform_block_location (std::string const& name);
       GLuint attrib_location (std::string const& name);
 
       program const& _program;

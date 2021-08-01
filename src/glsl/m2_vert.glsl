@@ -17,8 +17,11 @@ out vec2 uv2;
 out float camera_dist;
 out vec3 norm;
 
-uniform mat4 model_view;
-uniform mat4 projection;
+layout (std140) uniform matrices
+{
+  mat4 model_view;
+  mat4 projection;
+};
 
 uniform int tex_unit_lookup_1;
 uniform int tex_unit_lookup_2;

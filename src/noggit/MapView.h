@@ -245,6 +245,7 @@ public:
   void randomizeTexturingRotation();
   void randomizeShaderRotation();
   void randomizeStampRotation();
+  void onSettingsSave();
 
   void set_editing_mode (editing_mode);
   editing_mode get_editing_mode() { return terrainMode; };

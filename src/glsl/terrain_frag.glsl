@@ -1,6 +1,32 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #version 330 core
 
+layout (std140) uniform lighting
+{
+  vec4 DiffuseColor_FogStart;
+  vec4 AmbientColor_FogEnd;
+  vec4 FogColor_FogOn;
+  vec4 LightDir_FogRate;
+  vec4 OceanColorLight;
+  vec4 OceanColorDark;
+  vec4 RiverColorLight;
+  vec4 RiverColorDark;
+};
+
+layout (std140) uniform overlay_params
+{
+  int draw_shadows;
+  int draw_lines;
+  int draw_hole_lines;
+  int draw_areaid_overlay;
+  int draw_terrain_height_contour;
+  int draw_wireframe;
+  int wireframe_type;
+  float wireframe_radius;
+  float wireframe_width;
+  vec4 wireframe_color;
+};
+
 uniform sampler2D shadow_map;
 uniform sampler2D tex0;
 uniform sampler2D tex1;
@@ -15,28 +41,13 @@ uniform sampler2D alphamap;
 uniform int layer_count;
 uniform bool has_mccv;
 uniform bool cant_paint;
-uniform bool draw_areaid_overlay;
+
 uniform vec4 areaid_color;
 uniform bool draw_impassible_flag;
-uniform bool draw_terrain_height_contour;
-uniform bool draw_lines;
-uniform bool draw_hole_lines;
-uniform bool draw_selection;
-uniform bool draw_shadows;
 
-uniform bool draw_wireframe;
-uniform int wireframe_type;
-uniform float wireframe_radius;
-uniform float wireframe_width;
-uniform vec4 wireframe_color;
-uniform bool rainbow_wireframe;
+uniform bool draw_selection;
 
 uniform vec3 camera;
-uniform bool draw_fog;
-uniform vec4 fog_color;
-uniform float fog_start;
-uniform float fog_end;
-uniform float fog_rate;
 
 uniform int draw_cursor_circle;
 uniform vec3 cursor_position;
@@ -44,10 +55,6 @@ uniform float cursorRotation;
 uniform float outer_cursor_radius;
 uniform float inner_cursor_ratio;
 uniform vec4 cursor_color;
-
-uniform vec3 light_dir;
-uniform vec3 diffuse_color;
-uniform vec3 ambient_color;
 
 in vec3 vary_position;
 in vec2 vary_texcoord;
@@ -64,9 +71,6 @@ const float PI = 3.14159265358979323846;
 
 vec4 texture_blend() 
 {
-  if(layer_count == 0)
-    return vec4 (1.0, 1.0, 1.0, 1.0);
-
   vec3 alpha = texture(alphamap, vary_texcoord / 8.0).rgb;
   float a0 = alpha.r;  
   float a1 = alpha.g;
@@ -77,7 +81,7 @@ vec4 texture_blend()
   vec3 t2 = texture(tex2, vary_texcoord + tex_anim_2).rgb;
   vec3 t3 = texture(tex3, vary_texcoord + tex_anim_3).rgb;
 
-  return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0);
+  return mix(vec4 (1.0, 1.0, 1.0, 1.0), vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0), int(layer_count > 0));
 }
 
 float contour_alpha(float unit_size, float pos, float line_width)
@@ -109,15 +113,13 @@ void main()
   vec3 lDiffuse = vec3(0.0, 0.0, 0.0);
   vec3 accumlatedLight = vec3(1.0, 1.0, 1.0);
 
-  float nDotL = clamp(dot(normalize(vary_normal), -normalize(light_dir)), 0.0, 1.0);
+  float nDotL = clamp(dot(normalize(vary_normal), -normalize(LightDir_FogRate.xyz)), 0.0, 1.0);
 
-  vec3 ambientColor = ambient_color;
-
-  vec3 skyColor = (ambientColor * 1.10000002);
-  vec3 groundColor = (ambientColor * 0.699999988);
+  vec3 skyColor = (AmbientColor_FogEnd.xyz * 1.10000002);
+  vec3 groundColor = (AmbientColor_FogEnd.xyz * 0.699999988);
 
   currColor = mix(groundColor, skyColor, 0.5 + (0.5 * nDotL));
-  lDiffuse = diffuse_color * nDotL;
+  lDiffuse = DiffuseColor_FogStart.xyz * nDotL;
 
   out_color.rgb = clamp(out_color.rgb * (currColor + lDiffuse), 0.0, 1.0);
 
@@ -127,7 +129,7 @@ void main()
     out_color *= vec4(1.0, 0.0, 0.0, 1.0);
   }
   
-  if(draw_areaid_overlay)
+  if(draw_areaid_overlay != 0)
   {
     out_color = out_color * 0.3 + areaid_color;
   }
@@ -142,19 +144,19 @@ void main()
    out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
   }
 
-  if (draw_shadows)
+  if (draw_shadows != 0)
   {
     float shadow_alpha = texture(shadow_map, vary_texcoord / 8.0).r;
     out_color = vec4 (out_color.rgb * (1.0 - shadow_alpha), 1.0);
   }
 
-  if (draw_terrain_height_contour)
+  if (draw_terrain_height_contour != 0)
   {
     out_color = vec4(out_color.rgb * contour_alpha(4.0, vary_position.y+0.1, fw.y), 1.0);
   }
 
   bool lines_drawn = false;
-  if(draw_lines)
+  if(draw_lines != 0)
   {
     vec4 color = vec4(0.0, 0.0, 0.0, 0.0);
 
@@ -166,7 +168,7 @@ void main()
       color.a = contour_alpha(CHUNKSIZE, vary_position.xz, fw.xz);
       color.r = color.a > 0.0 ? 0.8 : 0.0;
     }
-    if(draw_hole_lines && color.a == 0.0)
+    if(draw_hole_lines != 0 && color.a == 0.0)
     {
       color.a = contour_alpha(HOLESIZE, vary_position.xz, fw.xz * 0.75);
       color.b = 0.8;
@@ -176,14 +178,14 @@ void main()
     out_color.rgb = mix(out_color.rgb, color.rgb, color.a);
   }
 
-  if(draw_fog)
+  if(FogColor_FogOn.w != 0)
   {
-    float start = fog_end * fog_start; // 0
+    float start = AmbientColor_FogEnd.w * DiffuseColor_FogStart.w; // 0
 
     vec3 fogParams;
-    fogParams.x = -(1.0 / (fog_end - start)); // - 1 / 338
-    fogParams.y = (1.0 / (fog_end - start)) * fog_end; // 1 / 338 * 338
-    fogParams.z = fog_rate; // 2.7
+    fogParams.x = -(1.0 / (AmbientColor_FogEnd.w - start)); // - 1 / 338
+    fogParams.y = (1.0 / (AmbientColor_FogEnd.w - start)) * AmbientColor_FogEnd.w; // 1 / 338 * 338
+    fogParams.z = LightDir_FogRate.w; // 2.7
 
     float f1 = (dist_from_camera * fogParams.x) + fogParams.y; // 1.0029
     float f2 = max(f1, 0.0);
@@ -192,12 +194,12 @@ void main()
 
     float fogFactor = 1.0 - f4;
 
-    float alpha = clamp((dist_from_camera - start) / (fog_end - start), 0.0, 1.0);
+    float alpha = clamp((dist_from_camera - start) / (AmbientColor_FogEnd.w - start), 0.0, 1.0);
 
-    out_color.rgb = mix(out_color.rgb, fog_color.rgb, alpha);
+    out_color.rgb = mix(out_color.rgb, FogColor_FogOn.rgb, alpha);
   }
 
-  if(draw_wireframe && !lines_drawn)
+  if(draw_wireframe != 0 && !lines_drawn)
   {
     // true by default => type 0
 	  bool draw_wire = true;

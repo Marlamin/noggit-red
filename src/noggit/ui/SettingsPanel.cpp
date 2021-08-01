@@ -300,6 +300,8 @@ namespace noggit
       _settings->setValue("assetBrowser/render_asset_preview", ui->assetBrowserRenderAssetPreview->isChecked());
 
       _settings->sync();
+
+      emit saved();
     }
   }
 }

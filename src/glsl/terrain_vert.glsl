@@ -6,8 +6,11 @@ in vec3 normal;
 in vec3 mccv;
 in vec2 texcoord;
 
-uniform mat4 model_view;
-uniform mat4 projection;
+layout (std140) uniform matrices
+{
+  mat4 model_view;
+  mat4 projection;
+};
 
 out vec3 vary_position;
 out vec2 vary_texcoord;

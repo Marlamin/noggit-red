@@ -231,7 +231,7 @@ namespace noggit
 
     boost::optional<scoped_blp_texture_reference> selected_texture::get()
     {
-      return selected_texture::texture;
+      return selected_texture::texture; // TODO: something performance-hungry is going on here
     }
 
     void selected_texture::set (scoped_blp_texture_reference t)

@@ -112,4 +112,6 @@ public:
                                                        , bool draw_hidden_models
                                                        , display_mode display
                                                        );
+
+  std::map<uint32_t, std::vector<wmo_doodad_instance>>* get_doodads(bool draw_hidden_models);
 };

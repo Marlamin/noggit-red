@@ -11,7 +11,6 @@
 
 #include <QtOpenGLExtensions/QOpenGLExtensions>
 #include <QtGui/QOpenGLFunctions>
-#include <QOpenGLExtensions>
 #include <boost/current_function.hpp>
 
 
@@ -390,6 +389,13 @@ void opengl::context::bindBuffer (GLenum target, GLuint buffer)
 #endif
   return _current_context->functions()->glBindBuffer (target, buffer);
 }
+void opengl::context::bindBufferRange (GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glBindBufferRange (target, index, buffer, offset, size);
+}
 GLvoid* opengl::context::mapBuffer (GLenum target, GLenum access)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
@@ -692,12 +698,29 @@ GLint opengl::context::getUniformLocation (GLuint program, GLchar const* name)
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
-  auto val (_current_context->functions()->glGetUniformLocation (program, name));
+  return (_current_context->functions()->glGetUniformLocation (program, name));
+}
+
+GLint opengl::context::getUniformBlockIndex (GLuint program, GLchar const* name)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+
+  auto val (_4_1_core_func->glGetUniformBlockIndex(program, name));
   if (val == -1)
   {
-    throw std::logic_error ("unknown uniform " + std::string (name));
+    throw std::logic_error ("unknown uniform block " + std::string (name));
   }
   return val;
+}
+
+void opengl::context::uniformBlockBinding (GLuint program, GLuint uniformBlockIndex, GLuint uniformBlockBinding)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glUniformBlockBinding(program, uniformBlockIndex, uniformBlockBinding);
 }
 
 void opengl::context::uniform1i (GLint location, GLint value)
