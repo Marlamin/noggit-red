@@ -439,8 +439,8 @@ TARGET_LINK_LIBRARIES (noggit
 set_property(TARGET noggit PROPERTY AUTOMOC ON)
 
 if(APPLE)
-target_include_directories(noggit PRIVATE /usr/local/Cellar/llvm/12.0.0/include/c++/v1/)
-target_link_libraries(noggit /usr/local/Cellar/llvm/12.0.0/lib/libc++.1.0.dylib)
+target_include_directories(noggit PRIVATE /usr/local/Cellar/llvm/12.0.1/include/c++/v1/)
+target_link_libraries(noggit /usr/local/Cellar/llvm/12.0.1/lib/libc++.1.0.dylib)
 endif()
 
 set (_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")

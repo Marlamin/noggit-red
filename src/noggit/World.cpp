@@ -1109,7 +1109,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     // the flag stays on if the last chunk drawn before leaving the editing tool has it
     if (!draw_chunk_flag_overlay)
     {
-      mcnk_shader.uniform_cached("draw_impassible_flag", 0);
+      mcnk_shader.uniform("draw_impassible_flag", 0);
     }
 
     mcnk_shader.uniform ("camera", camera_pos);
@@ -1117,16 +1117,16 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     if (cursor_type != CursorType::NONE)
     {
-      mcnk_shader.uniform_cached("draw_cursor_circle", static_cast<int>(cursor_type));
+      mcnk_shader.uniform("draw_cursor_circle", static_cast<int>(cursor_type));
       mcnk_shader.uniform ("cursor_position", cursor_pos);
       mcnk_shader.uniform("cursorRotation", cursorRotation);
-      mcnk_shader.uniform_cached ("outer_cursor_radius", brush_radius);
+      mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
       mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
       mcnk_shader.uniform ("cursor_color", cursor_color);
     }
     else
     {
-      mcnk_shader.uniform_cached("draw_cursor_circle", 0);
+      mcnk_shader.uniform("draw_cursor_circle", 0);
     }
 
     mcnk_shader.uniform("tex_anim_0", math::vector_2d());
@@ -1557,7 +1557,7 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
     }
   }
 
-  return results;
+  return std::move(results);
 }
 
 void World::update_models_emitters(float dt)

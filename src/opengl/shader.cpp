@@ -173,6 +173,10 @@ namespace opengl
 
       gl.uniform1i (loc, value);
     }
+    void use_program::uniform (GLint pos, GLint value)
+    {
+      gl.uniform1i (pos, value);
+    }
     void use_program::uniform (std::string const& name, GLfloat value)
     {
       GLuint loc = uniform_location (name);
@@ -181,6 +185,10 @@ namespace opengl
 
       gl.uniform1f (loc, value);
     }
+    void use_program::uniform (GLint pos, GLfloat value)
+    {
+      gl.uniform1f (pos, value);
+    }
     void use_program::uniform (std::string const& name, bool value)
     {
       GLuint loc = uniform_location (name);
@@ -188,6 +196,10 @@ namespace opengl
         return;
 
       gl.uniform1i (loc, static_cast<int>(value));
+    }
+    void use_program::uniform (GLint pos, bool value)
+    {
+      gl.uniform1i (pos, static_cast<int>(value));
     }
     void use_program::uniform_cached(std::string const& name, GLint value)
     {
@@ -244,6 +256,10 @@ namespace opengl
 
       gl.uniform1iv (loc, value.size(), value.data());
     }
+    void use_program::uniform (GLint pos, std::vector<int> const& value)
+    {
+      gl.uniform1iv (pos, value.size(), value.data());
+    }
     void use_program::uniform (std::string const& name, std::vector<math::vector_3d> const& value)
     {
       GLuint loc = uniform_location (name);
@@ -251,6 +267,10 @@ namespace opengl
         return;
 
       gl.uniform3fv (loc, value.size(), reinterpret_cast<const GLfloat*>(value.data()));
+    }
+    void use_program::uniform (GLint pos, std::vector<math::vector_3d> const& value)
+    {
+      gl.uniform3fv (pos, value.size(), reinterpret_cast<const GLfloat*>(value.data()));
     }
     void use_program::uniform (std::string const& name, math::vector_2d const& value)
     {
@@ -260,6 +280,10 @@ namespace opengl
 
       gl.uniform2fv (loc, 1, value);
     }
+    void use_program::uniform (GLint pos, math::vector_2d const& value)
+    {
+      gl.uniform2fv (pos, 1, value);
+    }
     void use_program::uniform (std::string const& name, math::vector_3d const& value)
     {
       GLuint loc = uniform_location (name);
@@ -267,6 +291,10 @@ namespace opengl
         return;
 
       gl.uniform3fv (loc, 1, value);
+    }
+    void use_program::uniform (GLint pos, math::vector_3d const& value)
+    {
+      gl.uniform3fv (pos, 1, value);
     }
     void use_program::uniform (std::string const& name, math::vector_4d const& value)
     {
@@ -276,6 +304,10 @@ namespace opengl
 
       gl.uniform4fv (loc, 1, value);
     }
+    void use_program::uniform (GLint pos, math::vector_4d const& value)
+    {
+      gl.uniform4fv (pos, 1, value);
+    }
     void use_program::uniform (std::string const& name, math::matrix_4x4 const& value)
     {
       GLuint loc = uniform_location (name);
@@ -283,6 +315,10 @@ namespace opengl
         return;
 
       gl.uniformMatrix4fv (loc, 1, GL_FALSE, value);
+    }
+    void use_program::uniform (GLint pos, math::matrix_4x4 const& value)
+    {
+      gl.uniformMatrix4fv(pos, 1, GL_FALSE, value);
     }
 
     void use_program::sampler (std::string const& name, GLenum texture_slot, texture* tex)

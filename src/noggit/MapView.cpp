@@ -2428,6 +2428,7 @@ MapView::MapView( math::degrees camera_yaw0
   setMouseTracking (true);
   setMinimumHeight(200);
   setMaximumHeight(10000);
+  setAttribute(Qt::WA_OpaquePaintEvent, true);
 
   _context = noggit::NoggitRenderContext::MAP_VIEW;
   _transform_gizmo.setWorld(_world.get());
@@ -2482,7 +2483,7 @@ MapView::MapView( math::degrees camera_yaw0
 
   _startup_time.start();
   _update_every_event_loop.start (0);
-  connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
+  connect(&_update_every_event_loop, &QTimer::timeout,this, QOverload<>::of(&QOpenGLWidget::update));
   createGUI();
 }
 
@@ -3774,7 +3775,7 @@ selection_result MapView::intersect_result(bool terrain_only)
               }
             );
 
-  return results;
+  return std::move(results);
 }
 
 void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)

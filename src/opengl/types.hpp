@@ -48,4 +48,5 @@ namespace opengl
     float wireframe_width;
     math::vector_4d wireframe_color;
   };
+
 }

@@ -91,14 +91,23 @@ namespace opengl
 
       void bind_uniform_block(std::string const& name, unsigned);
       void uniform (std::string const& name, std::vector<int> const&);
+      void uniform (GLint pos, std::vector<int> const&);
       void uniform (std::string const& name, GLint);
+      void uniform (GLint pos, GLint);
       void uniform (std::string const& name, GLfloat);
+      void uniform (GLint pos, GLfloat);
       void uniform (std::string const& name, bool);
+      void uniform (GLint pos, bool);
       void uniform (std::string const& name, std::vector<math::vector_3d> const& value);
+      void uniform (GLint pos, std::vector<math::vector_3d> const& value);
       void uniform (std::string const& name, math::vector_2d const&);
+      void uniform (GLint pos, math::vector_2d const&);
       void uniform (std::string const& name, math::vector_3d const&);
+      void uniform (GLint pos, math::vector_3d const&);
       void uniform (std::string const& name, math::vector_4d const&);
+      void uniform (GLint pos, math::vector_4d const&);
       void uniform (std::string const& name, math::matrix_4x4 const&);
+      void uniform (GLint pos, math::matrix_4x4 const&);
       template<typename T> void uniform (std::string const&, T) = delete;
 
       void uniform_cached (std::string const& name, GLint);

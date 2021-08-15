@@ -42,7 +42,6 @@
 #include <QtWidgets/QMessageBox>
 #include <QSplashScreen>
 #include <QStyleFactory>
-#include "MakeshiftMt.hpp"
 #include <codecvt>
 #include <locale>
 #include <string>
@@ -272,8 +271,9 @@ Noggit::Noggit(int argc, char *argv[])
   format.setVersion(4, 1);
   format.setProfile(QSurfaceFormat::CoreProfile);
   //format.setOption(QSurfaceFormat::ResetNotification, true);
-  format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+  format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
   format.setSwapInterval(settings.value ("vsync", 0).toInt());
+  format.setRenderableType(QSurfaceFormat::OpenGL);
 
 
   if (doAntiAliasing)
@@ -376,135 +376,6 @@ auto convert
 
 int main(int argc, char *argv[])
 {
-  /* command-line mode */
-  if(argc > 1)
-  {
-    try
-    {
-      try
-      {
-        std::string rootStr;
-        [[likely]]
-        if
-        (
-          std::filesystem::path const root
-          {std::filesystem::canonical(argv[1])}
-          ;
-          std::filesystem::is_directory(root)
-        )
-        {
-          std::vector<std::string_view> models;
-          std::vector<std::string_view> wmos;
-          convert(root.c_str(), &rootStr);
-
-          for(std::size_t i{2}; i < argc; ++i)
-          {
-            std::string_view const obj{argv[i]};
-
-            if(obj.ends_with(".m2") || obj.ends_with(".mdx"))
-              models.emplace_back(obj);
-            else if(obj.ends_with(".wmo"))
-              wmos.emplace_back(obj);
-            else
-            {
-              std::cerr << "E: Unknown object encountered with name '" << obj
-              << "'.\n";
-              throw true;
-            }
-
-            std::transform
-            (
-              argv[i],
-              argv[i] + std::strlen(argv[i]),
-              argv[i],
-              [ ]
-              ( char c )
-              constexpr
-              -> char
-              { return c == '/' ? '\\' : std::toupper(c); }
-            );
-          }
-
-          std::cout << "I: Argument acquisition succeeded.\nI: Map root '"
-          << rootStr << "'.\n";
-
-          for(auto itr{models.cbegin()}; itr != models.cend(); ++itr)
-            std::cout << "I: Defective model '"
-            << std::distance(models.cbegin(), itr) + 1
-            << "' with relative path '" << *itr << "'.\n";
-
-          for(auto itr{wmos.cbegin()}; itr != wmos.cend(); ++itr)
-            std::cout << "I: Defective WMO '"
-            << std::distance(wmos.cbegin(), itr) + 1
-            << "' with relative path '" << *itr << "'.\n";
-
-          std::cout << "I: Repacking map...\n";
-          std::size_t nTotModels{}, nTotObjects{}, nTiles{};
-          std::string buf;
-
-          for(auto const& entry : std::filesystem::directory_iterator{root})
-            if
-            (
-              std::string_view const path{convert(entry.path().c_str(), &buf)}
-              ;
-                entry.is_regular_file()
-                &&
-                path.ends_with(".adt")
-            )
-            {
-              try
-              {
-                std::cout << "I: Reading tile '" << path << "'...\n";
-                noggit::Recovery::MakeshiftMt mt{path, models, wmos};
-                std::cout << "I: Writing tile '" << path << "'...\n";
-                auto const [nModels, nObjects]{mt.save()};
-                nTotModels += nModels;
-                nTotObjects += nObjects;
-                ++nTiles;
-              }
-              catch ( std::ios::failure const& e )
-              {
-                std::cerr << "E: File operation failed on '" << path
-                << "' due to '" << e.what()
-                << "'. This file is not going to be processed.\n";
-              }
-            }
-            else
-              std::cout << "I: Skipping unrecognized filesystem entity '"
-              << path << "'.\n";
-
-          if(nTiles)
-            std::cout << "I: Done repacking map of '" << nTiles
-            << "' tiles with '" << nTotModels
-            << "' defective model and '" << nTotObjects
-            << "' defective object deletions in total.\n";
-          else
-            std::cout
-            << "I: No repacking took place since no tiles were found.\n";
-        }
-        else
-        {
-          std::cerr << "E: '" << rootStr << "' is not a directory.\n";
-          throw true;
-        }
-      }
-      catch ( std::filesystem::filesystem_error const& e )
-      {
-        std::string buf;
-        std::cerr << "E: Failed to process path '"
-        << convert(e.path1().c_str(), &buf) << "' due to '" << e.what()
-        << "'.\n";
-        throw;
-      }
-    }
-    catch ( ... )
-    {
-      return EXIT_FAILURE;
-    }
-
-    return EXIT_SUCCESS;
-  }
-
   noggit::RegisterErrorHandlers();
   std::set_terminate (noggit_terminate_handler);
 
