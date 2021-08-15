@@ -42,6 +42,7 @@
 #include <noggit/Red/BrushStack/BrushStack.hpp>
 #include <noggit/Red/LightEditor/LightEditor.hpp>
 #include <external/imguipiemenu/PieMenu.hpp>
+#include <external/tracy/Tracy.hpp>
 #include <noggit/ui/object_palette.hpp>
 #include <opengl/types.hpp>
 
@@ -2429,6 +2430,7 @@ MapView::MapView( math::degrees camera_yaw0
   setMinimumHeight(200);
   setMaximumHeight(10000);
   setAttribute(Qt::WA_OpaquePaintEvent, true);
+  setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
 
   _context = noggit::NoggitRenderContext::MAP_VIEW;
   _transform_gizmo.setWorld(_world.get());
@@ -2483,7 +2485,7 @@ MapView::MapView( math::degrees camera_yaw0
 
   _startup_time.start();
   _update_every_event_loop.start (0);
-  connect(&_update_every_event_loop, &QTimer::timeout,this, QOverload<>::of(&QOpenGLWidget::update));
+  connect(&_update_every_event_loop, &QTimer::timeout,[=]{ _needs_redraw = true; update(); });
   createGUI();
 }
 
@@ -2614,6 +2616,7 @@ void MapView::initializeGL()
   _last_opengl_context = context();
 
   _world->initShaders();
+  onSettingsSave();
 
   _gl_initialized = true;
 }
@@ -2743,6 +2746,13 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
 void MapView::paintGL()
 {
+  if (!_needs_redraw)
+    return;
+  else
+    _needs_redraw = false;
+
+  ZoneScoped;
+
   if (!_gl_initialized)
   {
     initializeGL();
@@ -2879,6 +2889,7 @@ void MapView::paintGL()
     );
   }
 
+  FrameMark
 }
 
 void MapView::resizeGL (int width, int height)
@@ -2887,6 +2898,7 @@ void MapView::resizeGL (int width, int height)
   gl.viewport(0.0f, 0.0f, width, height);
   emit resized();
   _camera_moved_since_last_draw = true;
+  _needs_redraw = true;
 }
 
 
@@ -3910,6 +3922,7 @@ math::matrix_4x4 MapView::projection() const
 
 void MapView::draw_map()
 {
+  ZoneScoped;
   //! \ todo: make the current tool return the radius
   float radius = 0.0f, inner_radius = 0.0f, angle = 0.0f, orientation = 0.0f;
   math::vector_3d ref_pos;

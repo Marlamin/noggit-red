@@ -17,6 +17,7 @@
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
 #include <opengl/scoped.hpp>
+#include <external/tracy/Tracy.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -583,9 +584,10 @@ void MapChunk::update_visibility ( const float& cull_distance
 
   _is_visible = is_visible(cull_distance, frustum, camera, display);
   _need_visibility_update = false;
-  _need_lod_update |= lod != _lod_level;
+  //_need_lod_update |= lod != _lod_level;
 
-  _lod_level = lod;
+  _lod_level = boost::none;
+ // _lod_level = lod;
 }
 
 void MapChunk::draw ( math::frustum const& frustum
@@ -604,19 +606,23 @@ void MapChunk::draw ( math::frustum const& frustum
                     , std::array<int, 4>& textures_bound
                     )
 {
+  ZoneScopedN("MapChunk::draw()");
 
   if (need_visibility_update || _need_visibility_update)
   {
+    ZoneScopedN("MapChunk::draw() : Culling");
     update_visibility(cull_distance, frustum, camera, display);
   }
 
   if (!_is_visible)
   {
+    ZoneScopedN("MapChunk::draw() : Culled");
     return;
   }
 
   if (!_uploaded)
   {
+    ZoneScopedN("MapChunk::draw() : Uploading");
     upload();
     // force lod update on upload
     _need_lod_update = true;
@@ -626,6 +632,7 @@ void MapChunk::draw ( math::frustum const& frustum
   // todo update lod too
   if (_need_vao_update)
   {
+    ZoneScopedN("MapChunk::draw() : Updating VAO");
     update_vao(mcnk_shader, tex_coord_vbo);
   }
 
@@ -634,62 +641,82 @@ void MapChunk::draw ( math::frustum const& frustum
                     && noggit::ui::selected_texture::get()
                     && !canPaintTexture(*noggit::ui::selected_texture::get());
 
-  if (texture_set->num())
   {
-    texture_set->bind_alpha(0);
+    ZoneScopedN("MapChunk::draw() : Binding textures");
+
+    if (texture_set->num())
+    {
+
+      texture_set->bind_alpha(0);
+
+      for (int i = 0; i < texture_set->num(); ++i)
+      {
+        texture_set->bindTexture(i, i + 1, textures_bound);
+
+        if (texture_set->is_animated(i))
+        {
+          mcnk_shader.uniform("tex_anim_"+ std::to_string(i), texture_set->anim_uv_offset(i, animtime));
+        }
+      }
+    }
+
+    opengl::texture::set_active_texture(5);
+    shadow.bind();
+  }
+
+  {
+    ZoneScopedN("MapChunk::draw() : Setting uniforms");
+
+    mcnk_shader.uniform("layer_count", (int)texture_set->num());
+    mcnk_shader.uniform("cant_paint", (int)cantPaint);
+
+    if (draw_chunk_flag_overlay)
+    {
+      mcnk_shader.uniform ("draw_impassible_flag", (int)header_flags.flags.impass);
+    }
+
+    if (draw_areaid_overlay)
+    {
+      mcnk_shader.uniform("areaid_color", (math::vector_4d)area_id_colors[areaID]);
+    }
+  }
+
+  {
+    ZoneScopedN("MapChunk::draw() : VAO/Buffer bindings");
+
+    gl.bindVertexArray(_vao);
+
+    if (_need_indice_buffer_update)
+    {
+      update_indices_buffer();
+      _need_lod_update = true;
+    }
+
+    if (_need_lod_update)
+    {
+      gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, !_lod_level ? _indices_buffer : lod_indices[*_lod_level]);
+      _lod_level_indice_count = !_lod_level ? strip_with_holes.size() : strip_lods[*_lod_level].size();
+      _need_lod_update = false;
+    }
+  }
+
+  {
+    ZoneScopedN("MapChunk::draw() : Draw call");
+    gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, nullptr);
+  }
+
+  {
+    ZoneScopedN("MapChunk::draw() : Defaulting tex anim uniforms");
 
     for (int i = 0; i < texture_set->num(); ++i)
     {
-      texture_set->bindTexture(i, i + 1, textures_bound);
-
       if (texture_set->is_animated(i))
       {
-        mcnk_shader.uniform("tex_anim_"+ std::to_string(i), texture_set->anim_uv_offset(i, animtime));
+        mcnk_shader.uniform("tex_anim_" + std::to_string(i), math::vector_2d());
       }
     }
   }
 
-  opengl::texture::set_active_texture(5);
-  shadow.bind();
-
-  mcnk_shader.uniform("layer_count", (int)texture_set->num());
-  mcnk_shader.uniform("cant_paint", (int)cantPaint);
-
-  if (draw_chunk_flag_overlay)
-  {
-    mcnk_shader.uniform ("draw_impassible_flag", (int)header_flags.flags.impass);
-  }
-
-  if (draw_areaid_overlay)
-  {
-    mcnk_shader.uniform("areaid_color", (math::vector_4d)area_id_colors[areaID]);
-  }
-
-  gl.bindVertexArray(_vao);
-
-  if (_need_indice_buffer_update)
-  {
-    update_indices_buffer();
-    _need_lod_update = true;
-  }
-
-  if (_need_lod_update)
-  {
-    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, !_lod_level ? _indices_buffer : lod_indices[*_lod_level]);
-    _lod_level_indice_count = !_lod_level ? strip_with_holes.size() : strip_lods[*_lod_level].size();
-    _need_lod_update = false;
-  }
-
-  gl.drawElements(GL_TRIANGLES, _lod_level_indice_count, GL_UNSIGNED_SHORT, nullptr);
-
-
-  for (int i = 0; i < texture_set->num(); ++i)
-  {
-    if (texture_set->is_animated(i))
-    {
-      mcnk_shader.uniform("tex_anim_" + std::to_string(i), math::vector_2d());
-    }
-  }
 }
 
 void MapChunk::intersect (math::ray const& ray, selection_result* results)

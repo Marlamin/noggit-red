@@ -391,6 +391,7 @@ private:
   QMetaObject::Connection _gl_guard_connection;
   bool _gl_initialized = false;
   bool _destroying = false;
+  bool _needs_redraw = false;
 
 public:
 

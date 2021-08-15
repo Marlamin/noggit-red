@@ -46,7 +46,11 @@ namespace opengl
     int wireframe_type;
     float wireframe_radius;
     float wireframe_width;
+    int pad0;
+    int pad1;
+    int pad2;
     math::vector_4d wireframe_color;
+
   };
 
 }

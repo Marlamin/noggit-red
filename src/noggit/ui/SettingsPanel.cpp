@@ -286,7 +286,7 @@ namespace noggit
       _settings->setValue ("project/mysql/db", _mysql_db_field->text());
 #endif
 
-      _settings->setValue("wireframe/type", ui->_wireframe_type_group->checkedId());
+      _settings->setValue("wireframe/type", ui->radio_wire_cursor->isChecked());
       _settings->setValue("wireframe/radius", ui->_wireframe_radius->value());
       _settings->setValue("wireframe/width", ui->_wireframe_width->value());
       _settings->setValue("wireframe/color", ui->_wireframe_color->color());

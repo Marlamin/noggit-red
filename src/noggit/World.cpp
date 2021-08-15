@@ -27,6 +27,7 @@
 #include <noggit/ActionManager.hpp>
 
 #include <external/PNG2BLP/Png2Blp.h>
+#include <external/tracy/Tracy.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/range/adaptor/map.hpp>
@@ -1021,6 +1022,8 @@ void World::draw ( math::matrix_4x4 const& model_view
                  )
 {
 
+  ZoneScoped;
+
   math::matrix_4x4 const mvp(model_view * projection);
   math::frustum const frustum (mvp);
 
@@ -1038,6 +1041,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   // only draw the sky in 3D
   if(display == display_mode::in_3D)
   {
+    ZoneScopedN("World::draw() : Draw skies");
     opengl::scoped::use_program m2_shader {*_m2_program.get()};
 
     bool hadSky = false;
@@ -1093,6 +1097,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   // Draw verylowres heightmap
   if (draw_fog && draw_terrain)
   {
+    ZoneScopedN("World::draw() : Draw horizon");
     _horizon_render->draw (model_view, projection, &mapIndex, skies->color_set[FOG_COLOR], culldistance, frustum, camera_pos, display);
   }
 
@@ -1104,6 +1109,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   // height map w/ a zillion texture passes
   if (draw_terrain)
   {
+    ZoneScopedN("World::draw() : Draw terrain");
     opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
     // the flag stays on if the last chunk drawn before leaving the editing tool has it

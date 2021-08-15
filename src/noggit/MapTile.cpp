@@ -14,6 +14,7 @@
 #include <noggit/texture_set.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
+#include <external/tracy/Tracy.hpp>
 
 #include <QtCore/QSettings>
 
@@ -378,6 +379,8 @@ void MapTile::draw ( math::frustum const& frustum
                    , std::array<int, 4>& textures_bound
                    )
 {
+  ZoneScopedN("MapTile::draw()");
+
   if (!finished)
   {
     return;

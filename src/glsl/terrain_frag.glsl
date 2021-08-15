@@ -24,6 +24,9 @@ layout (std140) uniform overlay_params
   int wireframe_type;
   float wireframe_radius;
   float wireframe_width;
+  int pad0;
+  int pad1;
+  int pad2;
   vec4 wireframe_color;
 };
 
@@ -203,8 +206,8 @@ void main()
   {
     // true by default => type 0
 	  bool draw_wire = true;
-    float real_wireframe_radius = max(outer_cursor_radius * wireframe_radius, 2.0 * UNITSIZE); 
-	
+      float real_wireframe_radius = max(outer_cursor_radius * wireframe_radius, 2.0 * UNITSIZE);
+
 	  if(wireframe_type == 1)
 	  {
 		  draw_wire = (length(vary_position.xz - cursor_position.xz) < real_wireframe_radius);
@@ -221,7 +224,7 @@ void main()
                       );        
 
 		  alpha = max(alpha, 1.0 - smoothstep(0.0, d, diff));
-      out_color.rgb = mix(out_color.rgb, wireframe_color.rgb, wireframe_color.a*alpha);
+          out_color.rgb = mix(out_color.rgb, wireframe_color.rgb, wireframe_color.a *alpha);
 	  }
   }
 

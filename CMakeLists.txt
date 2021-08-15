@@ -277,6 +277,12 @@ IF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
   ADD_DEFINITIONS( -DDO_NOT_BUILD_NODES )
 ENDIF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
 
+OPTION(NOGGIT_ENABLE_TRACY_PROFILER "Enable tracy profiler" ON)
+IF(NOGGIT_ENABLE_TRACY_PROFILER)
+  MESSAGE( STATUS "Tracy profiler enabled." )
+  ADD_DEFINITIONS( -DTRACY_ENABLE )
+ENDIF(NOGGIT_ENABLE_TRACY_PROFILER)
+
 OPTION(NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
 
 # Log to console for easier debugging.
@@ -310,6 +316,7 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguizmo" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguipiemenu" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/libnoise/src" )
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/qtgradienteditor" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/tracy" )
 include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 
@@ -328,6 +335,7 @@ collect_files(png_blp_sources src/external/PNG2BLP true "*.c;*.cpp;" "")
 collect_files(imguizmo_sources src/external/imguizmo false "*.c;*.cpp;" "")
 collect_files(imguipiemenu_sources src/external/imguipiemenu false "*.c;*.cpp;" "")
 collect_files(gradienteditor_sources src/external/qtgradienteditor false "*.c;*.cpp;" "")
+collect_files(tracy_sources src/external/tracy false "*.c;*.cpp;" "")
 
 set ( util_sources
       src/util/exception_to_string.cpp
@@ -349,6 +357,7 @@ collect_files(png_blp_headers src/external/PNG2BLP true "*.h;*.hpp" "")
 collect_files(imguizmo_headers src/external/imguizmo false "*.h;*.hpp" "")
 collect_files(imguipiemenu_headers src/external/imguipiemenu false "*.h;*.hpp" "")
 collect_files(gradienteditor_headers src/external/qtgradienteditor false "*.h;*.hpp" "")
+collect_files(tracy_headers src/external/tracy false "*.h;*.hpp" "")
 
 
 IF(WIN32)
@@ -397,6 +406,7 @@ ADD_EXECUTABLE ( noggit
                   ${imguizmo_sources}
                   ${imguipiemenu_sources}
                   ${gradienteditor_sources}
+                  ${tracy_sources}
                   ${noggit_root_headers}
                   ${noggit_ui_headers}
                   ${opengl_headers}
@@ -411,6 +421,7 @@ ADD_EXECUTABLE ( noggit
                   ${imguizmo_headers}
                   ${imguipiemenu_headers}
                   ${gradienteditor_headers}
+                  ${tracy_headers}
                   ${compiled_resource_files}
                   ${compiled_ui_files}
                   ${shaders}
