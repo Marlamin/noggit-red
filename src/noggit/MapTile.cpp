@@ -409,20 +409,22 @@ void MapTile::draw ( math::frustum const& frustum
   }
 }
 
-void MapTile::intersect (math::ray const& ray, selection_result* results) const
+bool MapTile::intersect (math::ray const& ray, selection_result* results) const
 {
   if (!finished)
   {
-    return;
+    return false;
   }
 
   for (size_t j (0); j < 16; ++j)
   {
     for (size_t i (0); i < 16; ++i)
     {
-      mChunks[j][i]->intersect (ray, results);
+      if (mChunks[j][i]->intersect (ray, results))
+        return true;
     }
   }
+  return false;
 }
 
 

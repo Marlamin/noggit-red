@@ -58,6 +58,7 @@
 
 bool World::IsEditableWorld(int pMapId)
 {
+  ZoneScoped;
   std::string lMapName;
   try
   {
@@ -129,6 +130,7 @@ World::World(const std::string& name, int map_id, noggit::NoggitRenderContext co
 
 void World::update_selection_pivot()
 {
+  ZoneScoped;
   if (has_multiple_model_selected())
   {
     math::vector_3d pivot;
@@ -153,6 +155,7 @@ void World::update_selection_pivot()
 
 bool World::is_selected(selection_type selection) const
 {
+  ZoneScoped;
   if (selection.which() != eEntry_Object)
     return false;
 
@@ -199,6 +202,7 @@ bool World::is_selected(selection_type selection) const
 
 bool World::is_selected(std::uint32_t uid) const
 {
+  ZoneScoped;
   for (selection_type const& entry : _current_selection)
   {
     if (entry.which() != eEntry_Object)
@@ -227,6 +231,7 @@ bool World::is_selected(std::uint32_t uid) const
 
 boost::optional<selection_type> World::get_last_selected_model() const
 {
+  ZoneScoped;
   auto const it
     ( std::find_if ( _current_selection.rbegin()
                    , _current_selection.rend()
@@ -264,6 +269,7 @@ math::vector_3d getBarycentricCoordinatesAt(
 
 void World::rotate_selected_models_randomly(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
 {
+  ZoneScoped;
   bool has_multi_select = has_multiple_model_selected();
 
   for (auto& entry : _current_selection)
@@ -302,6 +308,7 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
 
 void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 {
+  ZoneScoped;
   for (auto& entry : _current_selection)
   {
     auto type = entry.which();
@@ -434,6 +441,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 
 void World::set_current_selection(selection_type entry)
 {
+  ZoneScoped;
   _current_selection.clear();
   _current_selection.push_back(entry);
   _multi_select_pivot = boost::none;
@@ -443,6 +451,7 @@ void World::set_current_selection(selection_type entry)
 
 void World::add_to_selection(selection_type entry)
 {
+  ZoneScoped;
   if (entry.which() != eEntry_MapChunk)
   {
     _selected_model_count++;
@@ -454,6 +463,7 @@ void World::add_to_selection(selection_type entry)
 
 void World::remove_from_selection(selection_type entry)
 {
+  ZoneScoped;
   std::vector<selection_type>::iterator position = std::find(_current_selection.begin(), _current_selection.end(), entry);
   if (position != _current_selection.end())
   {
@@ -469,6 +479,7 @@ void World::remove_from_selection(selection_type entry)
 
 void World::remove_from_selection(std::uint32_t uid)
 {
+  ZoneScoped;
   for (auto it = _current_selection.begin(); it != _current_selection.end(); ++it)
   {
     if (it->which() != eEntry_Object)
@@ -493,6 +504,7 @@ void World::remove_from_selection(std::uint32_t uid)
 
 void World::reset_selection()
 {
+  ZoneScoped;
   _current_selection.clear();
   _multi_select_pivot = boost::none;
   _selected_model_count = 0;
@@ -500,6 +512,7 @@ void World::reset_selection()
 
 void World::delete_selected_models()
 {
+  ZoneScoped;
   _model_instance_storage.delete_instances(_current_selection);
   need_model_updates = true;
   reset_selection();
@@ -507,6 +520,7 @@ void World::delete_selected_models()
 
 void World::snap_selected_models_to_the_ground()
 {
+  ZoneScoped;
   for (auto& entry : _current_selection)
   {
     auto type = entry.which();
@@ -556,6 +570,7 @@ void World::snap_selected_models_to_the_ground()
 
 void World::scale_selected_models(float v, m2_scaling_type type)
 {
+  ZoneScoped;
   for (auto& entry : _current_selection)
   {
     if (entry.which() == eEntry_Object)
@@ -600,6 +615,7 @@ void World::scale_selected_models(float v, m2_scaling_type type)
 
 void World::move_selected_models(float dx, float dy, float dz)
 {
+  ZoneScoped;
   for (auto& entry : _current_selection)
   {
     auto type = entry.which();
@@ -628,6 +644,7 @@ void World::move_selected_models(float dx, float dy, float dz)
 
 void World::set_selected_models_pos(math::vector_3d const& pos, bool change_height)
 {
+  ZoneScoped;
   // move models relative to the pivot when several are selected
   if (has_multiple_model_selected())
   {
@@ -668,6 +685,7 @@ void World::set_selected_models_pos(math::vector_3d const& pos, bool change_heig
 
 void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
 {
+  ZoneScoped;
   math::degrees::vec3 dir_change(rx, ry, rz);
   bool has_multi_select = has_multiple_model_selected();
 
@@ -708,6 +726,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
 
 void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
 {
+  ZoneScoped;
   math::degrees::vec3 new_dir(rx, ry, rz);
 
   for (auto& entry : _current_selection)
@@ -735,6 +754,7 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
 
 void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
 {
+  ZoneScoped;
   if (!*pDetailTexCoords && !*pAlphaTexCoords)
   {
     math::vector_2d temp[mapbufsize], *vt;
@@ -781,6 +801,7 @@ void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
 
 void World::initDisplay()
 {
+  ZoneScoped;
   mapIndex.setAdt(false);
 
   if (mapIndex.hasAGlobalWMO())
@@ -937,7 +958,6 @@ void World::initShaders()
     mcnk_shader.uniform("tex2", 3);
     mcnk_shader.uniform("tex3", 4);
     mcnk_shader.uniform("stampBrush", 6);
-    mcnk_shader.uniform("draw_shadows", 1);
     mcnk_shader.uniform("shadow_map", 5);
   }
 
@@ -1086,7 +1106,6 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , frustum
                  , culldistance
                  , animtime
-                 , draw_model_animations
                  , outdoorLightStats
                  );
     }
@@ -1179,6 +1198,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   if (terrainMode == editing_mode::object && has_multiple_model_selected())
   {
+    ZoneScopedN("World::draw() : Draw pivot point");
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
 
     float dist = (camera_pos - _multi_select_pivot.get()).length();
@@ -1187,11 +1207,13 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   if (use_ref_pos)
   {
+    ZoneScopedN("World::draw() : Draw ref pos");
     _sphere_render.draw(mvp, ref_pos, cursor_color, 0.3f);
   }
 
   if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex)
   {
+    ZoneScopedN("World::draw() : Draw vertex points");
     float size = (vertexCenter() - camera_pos).length();
     gl.pointSize(std::max(0.001f, 10.0f - (1.25f * size / CHUNKSIZE)));
 
@@ -1208,6 +1230,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())
   {
+    ZoneScopedN("World::draw() : Draw WMOs");
     {
       opengl::scoped::use_program wmo_program {*_wmo_program.get()};
 
@@ -1247,6 +1270,8 @@ void World::draw ( math::matrix_4x4 const& model_view
   // M2s / models
   if (draw_models || draw_doodads_wmo)
   {
+    ZoneScopedN("World::draw() : Draw M2s");
+
     if (draw_model_animations)
     {
       ModelManager::resetAnim();
@@ -1275,11 +1300,9 @@ void World::draw ( math::matrix_4x4 const& model_view
               , frustum
               , culldistance
               , camera_pos
-              , false
               , animtime
               , draw_model_animations
               , draw_models_with_box
-              , model_with_particles
               , model_boxes_to_draw
               , display
             );
@@ -1420,6 +1443,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   if (draw_water)
   {
+    ZoneScopedN("World::draw() : Draw water");
     _liquid_render->force_texture_update();
 
     // draw the water on both sides
@@ -1449,6 +1473,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   if (angled_mode || use_ref_pos)
   {
+    ZoneScopedN("World::draw() : Draw angles");
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
     opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
@@ -1495,6 +1520,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   // draw last because of the transparency
   if (draw_mfbo)
   {
+    ZoneScopedN("World::draw() : Draw flight bounds");
     // don't write on the depth buffer
     opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
@@ -1528,13 +1554,16 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
                                   , bool draw_hidden_models
                                   )
 {
+  ZoneScopedN("World::intersect()");
   selection_result results;
 
   if (draw_terrain)
   {
+    ZoneScopedN("World::intersect() : intersect terrain");
     for (auto&& tile : mapIndex.loaded_tiles())
     {
-      tile->intersect (ray, &results);
+      if (tile->intersect(ray, &results))
+        break;
     }
   }
 
@@ -1542,6 +1571,7 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
   {
     if (draw_models)
     {
+      ZoneScopedN("World::intersect() : intersect M2s");
       _model_instance_storage.for_each_m2_instance([&] (ModelInstance& model_instance)
       {
         if (draw_hidden_models || !model_instance.model->is_hidden())
@@ -1553,6 +1583,7 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
 
     if (draw_wmo)
     {
+      ZoneScopedN("World::intersect() : intersect WMOs");
       _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo_instance)
       {
         if (draw_hidden_models || !wmo_instance.wmo->is_hidden())
@@ -1568,6 +1599,7 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
 
 void World::update_models_emitters(float dt)
 {
+  ZoneScoped;
   while (dt > 0.1f)
   {
     ModelManager::updateEmitters(0.1f);
@@ -1578,11 +1610,13 @@ void World::update_models_emitters(float dt)
 
 unsigned int World::getAreaID (math::vector_3d const& pos)
 {
+  ZoneScoped;
   return for_maybe_chunk_at (pos, [&] (MapChunk* chunk) { return chunk->getAreaID(); }).get_value_or (-1);
 }
 
 void World::clearHeight(math::vector_3d const& pos)
 {
+  ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
@@ -1595,12 +1629,14 @@ void World::clearHeight(math::vector_3d const& pos)
 
 void World::clearAllModelsOnADT(tile_index const& tile)
 {
+  ZoneScoped;
   _model_instance_storage.delete_instances_from_tile(tile);
   update_models_by_filename();
 }
 
 void World::CropWaterADT(const tile_index& pos)
 {
+  ZoneScoped;
   for_tile_at(pos, [](MapTile* tile)
   {
     for (int i = 0; i < 16; ++i)
@@ -1613,6 +1649,7 @@ void World::CropWaterADT(const tile_index& pos)
 
 void World::setAreaID(math::vector_3d const& pos, int id, bool adt, float radius)
 {
+  ZoneScoped;
   if (adt)
   {
     for_all_chunks_on_tile(pos, [&](MapChunk* chunk)
@@ -1649,6 +1686,7 @@ void World::setAreaID(math::vector_3d const& pos, int id, bool adt, float radius
 
 bool World::GetVertex(float x, float z, math::vector_3d *V) const
 {
+  ZoneScoped;
   tile_index tile({x, 0, z});
 
   if (!mapIndex.tileLoaded(tile))
@@ -1665,6 +1703,7 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
 
 void World::changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
 {
+  ZoneScoped;
   for_all_chunks_in_range
     ( pos, radius
     , [&] (MapChunk* chunk)
@@ -1677,6 +1716,7 @@ void World::changeShader(math::vector_3d const& pos, math::vector_4d const& colo
 
 void World::stampShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
 {
+  ZoneScoped;
   for_all_chunks_in_rect
     ( pos, radius
       , [&] (MapChunk* chunk)
@@ -1689,6 +1729,7 @@ void World::stampShader(math::vector_3d const& pos, math::vector_4d const& color
 
 math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
 {
+  ZoneScoped;
   math::vector_3d color = math::vector_3d(1.0f, 1.0f, 1.0f);
   for_all_chunks_in_range
   (pos, 0.1f
@@ -1705,7 +1746,7 @@ math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
 auto World::stamp(math::vector_3d const& pos, float dt, QImage const* img, float radiusOuter
 , float radiusInner, int brushType, bool sculpt) -> void
 {
-
+  ZoneScoped;
   auto action = noggit::ActionManager::instance()->getCurrentAction();
   float delta = action->getDelta() + dt;
   action->setDelta(delta);
@@ -1777,6 +1818,7 @@ auto World::stamp(math::vector_3d const& pos, float dt, QImage const* img, float
 
 void World::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
 {
+  ZoneScoped;
   for_all_chunks_in_range
     ( pos, radius
     , [&] (MapChunk* chunk)
@@ -1793,6 +1835,7 @@ void World::changeTerrain(math::vector_3d const& pos, float change, float radius
 
 void World::flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const math::vector_3d& origin, math::degrees angle, math::degrees orientation)
 {
+  ZoneScoped;
   for_all_chunks_in_range
     ( pos, radius
     , [&] (MapChunk* chunk)
@@ -1809,6 +1852,7 @@ void World::flattenTerrain(math::vector_3d const& pos, float remain, float radiu
 
 void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode)
 {
+  ZoneScoped;
   for_all_chunks_in_range
     ( pos, radius
     , [&] (MapChunk* chunk)
@@ -1836,6 +1880,7 @@ void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, 
 
 void World::recalc_norms (MapChunk* chunk) const
 {
+  ZoneScoped;
   chunk->recalcNorms ( [this] (float x, float z) -> boost::optional<float>
                        {
                          math::vector_3d vec;
@@ -1847,6 +1892,7 @@ void World::recalc_norms (MapChunk* chunk) const
 
 bool World::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
+  ZoneScoped;
   return for_all_chunks_in_range
     ( pos, brush->getRadius()
     , [&] (MapChunk* chunk)
@@ -1859,6 +1905,7 @@ bool World::paintTexture(math::vector_3d const& pos, Brush* brush, float strengt
 
 bool World::stampTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint)
 {
+  ZoneScoped;
   return for_all_chunks_in_rect
     ( pos, brush->getRadius()
       , [&] (MapChunk* chunk)
@@ -1871,6 +1918,7 @@ bool World::stampTexture(math::vector_3d const& pos, Brush *brush, float strengt
 
 bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture)
 {
+  ZoneScoped;
   bool succ = false;
   float inc = brush->getRadius() / 4.0f;
 
@@ -1890,6 +1938,7 @@ bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strengt
 
 bool World::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
 {
+  ZoneScoped;
   return for_all_chunks_in_range
     ( pos, radius
       , [&](MapChunk* chunk)
@@ -1902,6 +1951,7 @@ bool World::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_
 
 void World::eraseTextures(math::vector_3d const& pos)
 {
+  ZoneScoped;
   for_chunk_at(pos, [](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
@@ -1911,6 +1961,7 @@ void World::eraseTextures(math::vector_3d const& pos)
 
 void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
 {
+  ZoneScoped;
   for_chunk_at(pos, [&](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
@@ -1920,6 +1971,7 @@ void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_bl
 
 void World::setHole(math::vector_3d const& pos, float radius, bool big, bool hole)
 {
+  ZoneScoped;
   for_all_chunks_in_range
       ( pos, radius
         , [&](MapChunk* chunk)
@@ -1933,6 +1985,8 @@ void World::setHole(math::vector_3d const& pos, float radius, bool big, bool hol
 
 void World::setHoleADT(math::vector_3d const& pos, bool hole)
 {
+  ZoneScoped;
+
   for_all_chunks_on_tile(pos, [&](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkHoleChange(chunk);
@@ -1943,6 +1997,8 @@ void World::setHoleADT(math::vector_3d const& pos, bool hole)
 
 void World::convert_alphamap(bool to_big_alpha)
 {
+  ZoneScoped;
+
   if (to_big_alpha == mapIndex.hasBigAlpha())
   {
     return;
@@ -1985,6 +2041,8 @@ void World::drawMinimap ( MapTile *tile
     , MinimapRenderSettings* settings
 )
 {
+  ZoneScoped;
+
   if (!_display_initialized)
   {
     initDisplay();
@@ -2090,7 +2148,6 @@ void World::drawMinimap ( MapTile *tile
     mcnk_shader.uniform("tex2", 3);
     mcnk_shader.uniform("tex3", 4);
 
-    mcnk_shader.uniform("draw_shadows", static_cast<int>(settings->draw_shadows));
     mcnk_shader.uniform("shadow_map", 5);
 
     mcnk_shader.uniform("tex_anim_0", math::vector_2d());
@@ -2192,9 +2249,8 @@ void World::drawMinimap ( MapTile *tile
 
         it.second[0]->model->wait_until_loaded();
         it.second[0]->model->draw(model_view, settings->use_filters ? instances : it.second, m2_shader, frustum,
-                                  100000.0f, camera_pos, false,animtime, false,
-                                  false, model_with_particles,model_boxes_to_draw, display_mode::in_2D, true
-        );
+                                  100000.0f, camera_pos, false,animtime,
+                                  false, model_boxes_to_draw, display_mode::in_2D, true);
       }
 
     }
@@ -2321,6 +2377,7 @@ void World::drawMinimap ( MapTile *tile
 
 bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* settings)
 {
+  ZoneScoped;
   // Setup framebuffer
   QOpenGLFramebufferObjectFormat fmt;
   fmt.setSamples(1);
@@ -2472,6 +2529,7 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
 
 void World::deleteModelInstance(int pUniqueID)
 {
+  ZoneScoped;
   auto instance = _model_instance_storage.get_model_instance(pUniqueID);
 
   if (instance)
@@ -2484,6 +2542,7 @@ void World::deleteModelInstance(int pUniqueID)
 
 void World::deleteWMOInstance(int pUniqueID)
 {
+  ZoneScoped;
   auto instance = _model_instance_storage.get_wmo_instance(pUniqueID);
 
   if (instance)
@@ -2496,11 +2555,13 @@ void World::deleteWMOInstance(int pUniqueID)
 
 bool World::uid_duplicates_found() const
 {
+  ZoneScoped;
   return _model_instance_storage.uid_duplicates_found();
 }
 
 void World::delete_duplicate_model_and_wmo_instances()
 {
+  ZoneScoped;
   reset_selection();
 
   _model_instance_storage.clear_duplicates();
@@ -2509,6 +2570,7 @@ void World::delete_duplicate_model_and_wmo_instances()
 
 void World::unload_every_model_and_wmo_instance()
 {
+  ZoneScoped;
   reset_selection();
 
   _model_instance_storage.clear();
@@ -2523,6 +2585,7 @@ void World::addM2 ( std::string const& filename
                   , noggit::object_paste_params* paste_params
                   )
 {
+  ZoneScoped;
   ModelInstance model_instance = ModelInstance(filename, _context);
 
   model_instance.uid = mapIndex.newGUID();
@@ -2571,6 +2634,7 @@ ModelInstance* World::addM2AndGetInstance ( std::string const& filename
     , noggit::object_paste_params* paste_params
 )
 {
+  ZoneScoped;
   ModelInstance model_instance = ModelInstance(filename, _context);
 
   model_instance.uid = mapIndex.newGUID();
@@ -2620,6 +2684,7 @@ void World::addWMO ( std::string const& filename
                    , math::degrees::vec3 rotation
                    )
 {
+  ZoneScoped;
   WMOInstance wmo_instance(filename, _context);
 
   wmo_instance.uid = mapIndex.newGUID();
@@ -2638,6 +2703,7 @@ WMOInstance* World::addWMOAndGetInstance ( std::string const& filename
     , math::degrees::vec3 rotation
 )
 {
+  ZoneScoped;
   WMOInstance wmo_instance(filename, _context);
 
   wmo_instance.uid = mapIndex.newGUID();
@@ -2656,21 +2722,25 @@ WMOInstance* World::addWMOAndGetInstance ( std::string const& filename
 
 std::uint32_t World::add_model_instance(ModelInstance model_instance, bool from_reloading)
 {
+  ZoneScoped;
   return _model_instance_storage.add_model_instance(std::move(model_instance), from_reloading);
 }
 
 std::uint32_t World::add_wmo_instance(WMOInstance wmo_instance, bool from_reloading)
 {
+  ZoneScoped;
   return _model_instance_storage.add_wmo_instance(std::move(wmo_instance), from_reloading);
 }
 
 boost::optional<selection_type> World::get_model(std::uint32_t uid)
 {
+  ZoneScoped;
   return _model_instance_storage.get_instance(uid);
 }
 
 void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
 {
+  ZoneScoped;
   // todo: manage instances properly
   // don't unload anything during the uid fix all,
   // otherwise models spanning several adts will be unloaded too soon
@@ -2696,12 +2766,14 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
 
 void World::reload_tile(tile_index const& tile)
 {
+  ZoneScoped;
   reset_selection();
   mapIndex.reloadTile(tile);
 }
 
 void World::updateTilesEntry(selection_type const& entry, model_update type)
 {
+  ZoneScoped;
   if (entry.which() != eEntry_Object)
     return;
 
@@ -2716,26 +2788,31 @@ void World::updateTilesEntry(selection_type const& entry, model_update type)
 
 void World::updateTilesWMO(WMOInstance* wmo, model_update type)
 {
+  ZoneScoped;
   _tile_update_queue.queue_update(wmo, type);
 }
 
 void World::updateTilesModel(ModelInstance* m2, model_update type)
 {
+  ZoneScoped;
   _tile_update_queue.queue_update(m2, type);
 }
 
 void World::wait_for_all_tile_updates()
 {
+  ZoneScoped;
   _tile_update_queue.wait_for_all_update();
 }
 
 unsigned int World::getMapID()
 {
+  ZoneScoped;
   return mapIndex._map_id;
 }
 
 void World::clearTextures(math::vector_3d const& pos)
 {
+  ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
@@ -2746,6 +2823,7 @@ void World::clearTextures(math::vector_3d const& pos)
 
 void World::exportADTAlphamap(math::vector_3d const& pos)
 {
+  ZoneScoped;
   for_tile_at ( pos
     , [&] (MapTile* tile)
     {
@@ -2773,6 +2851,7 @@ void World::exportADTAlphamap(math::vector_3d const& pos)
 
 void World::exportADTNormalmap(math::vector_3d const& pos)
 {
+  ZoneScoped;
   for_tile_at ( pos
     , [&] (MapTile* tile)
       {
@@ -2796,6 +2875,7 @@ void World::exportADTNormalmap(math::vector_3d const& pos)
 
 void World::exportADTAlphamap(math::vector_3d const& pos, std::string const& filename)
 {
+  ZoneScoped;
   for_tile_at ( pos
     , [&] (MapTile* tile)
     {
@@ -2821,6 +2901,7 @@ void World::exportADTAlphamap(math::vector_3d const& pos, std::string const& fil
 
 void World::exportADTHeightmap(math::vector_3d const& pos, float min_height, float max_height)
 {
+  ZoneScoped;
   for_tile_at ( pos
     , [&] (MapTile* tile)
                 {
@@ -2846,6 +2927,7 @@ void World::exportADTHeightmap(math::vector_3d const& pos, float min_height, flo
 
 void World::exportADTVertexColorMap(math::vector_3d const& pos)
 {
+  ZoneScoped;
   for_tile_at ( pos
     , [&] (MapTile* tile)
                 {
@@ -2871,6 +2953,7 @@ void World::exportADTVertexColorMap(math::vector_3d const& pos)
 
 void World::importADTAlphamap(math::vector_3d const& pos, QImage const& image, unsigned layer)
 {
+  ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
@@ -2902,6 +2985,7 @@ void World::importADTAlphamap(math::vector_3d const& pos, QImage const& image, u
 
 void World::importADTAlphamap(math::vector_3d const& pos)
 {
+  ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
@@ -2940,6 +3024,7 @@ void World::importADTAlphamap(math::vector_3d const& pos)
 
 void World::importADTHeightmap(math::vector_3d const& pos, QImage const& image, float multiplier, unsigned mode)
 {
+  ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
@@ -2970,6 +3055,7 @@ void World::importADTHeightmap(math::vector_3d const& pos, QImage const& image, 
 
 void World::importADTHeightmap(math::vector_3d const& pos, float multiplier, unsigned mode)
 {
+  ZoneScoped;
   for_tile_at ( pos
     , [&] (MapTile* tile)
     {
@@ -3006,6 +3092,7 @@ void World::importADTHeightmap(math::vector_3d const& pos, float multiplier, uns
 
 void World::importADTVertexColorMap(math::vector_3d const& pos, int mode)
 {
+  ZoneScoped;
   for_tile_at ( pos
     , [&] (MapTile* tile)
       {
@@ -3042,7 +3129,7 @@ void World::importADTVertexColorMap(math::vector_3d const& pos, int mode)
 
 void World::ensureAllTilesetsADT(math::vector_3d const& pos)
 {
-
+  ZoneScoped;
   static QStringList textures {"tileset/generic/black.blp",
                                "tileset/generic/red.blp",
                                "tileset/generic/green.blp",
@@ -3066,6 +3153,7 @@ void World::ensureAllTilesetsADT(math::vector_3d const& pos)
 
 void World::importADTVertexColorMap(math::vector_3d const& pos, QImage const& image, int mode)
 {
+  ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(chunk);
@@ -3096,6 +3184,7 @@ void World::importADTVertexColorMap(math::vector_3d const& pos, QImage const& im
 
 void World::setBaseTexture(math::vector_3d const& pos)
 {
+  ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
@@ -3109,6 +3198,7 @@ void World::setBaseTexture(math::vector_3d const& pos)
 
 void World::clear_shadows(math::vector_3d const& pos)
 {
+  ZoneScoped;
   for_all_chunks_on_tile(pos, [] (MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkShadowChange(chunk);
@@ -3118,6 +3208,7 @@ void World::clear_shadows(math::vector_3d const& pos)
 
 void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex)
 {
+  ZoneScoped;
   if (!!noggit::ui::selected_texture::get())
   {
     for_all_chunks_on_tile(pos, [&](MapChunk* chunk)
@@ -3130,6 +3221,7 @@ void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference
 
 void World::removeTexDuplicateOnADT(math::vector_3d const& pos)
 {
+  ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
@@ -3139,6 +3231,7 @@ void World::removeTexDuplicateOnADT(math::vector_3d const& pos)
 
 void World::change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add)
 {
+  ZoneScoped;
   for_chunk_at(pos, [&] (MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
@@ -3159,6 +3252,7 @@ void World::paintLiquid( math::vector_3d const& pos
                        , float opacity_factor
                        )
 {
+  ZoneScoped;
   for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk)
   {
     noggit::ActionManager::instance()->getCurrentAction()->registerChunkLiquidChange(chunk);
@@ -3169,6 +3263,7 @@ void World::paintLiquid( math::vector_3d const& pos
 
 void World::setWaterType(const tile_index& pos, int type, int layer)
 {
+  ZoneScoped;
   for_tile_at ( pos
               , [&] (MapTile* tile)
                 {
@@ -3183,6 +3278,7 @@ void World::setWaterType(const tile_index& pos, int type, int layer)
 
 int World::getWaterType(const tile_index& tile, int layer)
 {
+  ZoneScoped;
   if (mapIndex.tileLoaded(tile))
   {
     return mapIndex.getTile(tile)->Water.getType (layer);
@@ -3195,6 +3291,7 @@ int World::getWaterType(const tile_index& tile, int layer)
 
 void World::autoGenWaterTrans(const tile_index& pos, float factor)
 {
+  ZoneScoped;
   for_tile_at(pos, [&](MapTile* tile)
   {
     for (int i = 0; i < 16; ++i)
@@ -3208,6 +3305,7 @@ void World::autoGenWaterTrans(const tile_index& pos, float factor)
 
 void World::fixAllGaps()
 {
+  ZoneScoped;
   std::vector<MapChunk*> chunks;
 
   for (MapTile* tile : mapIndex.loaded_tiles())
@@ -3288,6 +3386,7 @@ void World::fixAllGaps()
 
 bool World::isUnderMap(math::vector_3d const& pos)
 {
+  ZoneScoped;
   tile_index const tile (pos);
 
   if (mapIndex.tileLoaded(tile))
@@ -3304,6 +3403,7 @@ bool World::isUnderMap(math::vector_3d const& pos)
 
 void World::selectVertices(math::vector_3d const& pos, float radius)
 {
+  ZoneScoped;
   noggit::ActionManager::instance()->getCurrentAction()->registerVertexSelectionChange();
 
   _vertex_center_updated = false;
@@ -3320,6 +3420,7 @@ void World::selectVertices(math::vector_3d const& pos, float radius)
 
 bool World::deselectVertices(math::vector_3d const& pos, float radius)
 {
+  ZoneScoped;
   noggit::ActionManager::instance()->getCurrentAction()->registerVertexSelectionChange();
 
   _vertex_center_updated = false;
@@ -3344,6 +3445,7 @@ bool World::deselectVertices(math::vector_3d const& pos, float radius)
 
 void World::moveVertices(float h)
 {
+  ZoneScoped;
   noggit::Action* cur_action = noggit::ActionManager::instance()->getCurrentAction();
 
   assert(cur_action && "moveVertices called without an action running.");
@@ -3363,6 +3465,7 @@ void World::moveVertices(float h)
 
 void World::updateSelectedVertices()
 {
+  ZoneScoped;
   for (MapTile* tile : _vertex_tiles)
   {
     mapIndex.setChanged(tile);
@@ -3386,6 +3489,7 @@ void World::orientVertices ( math::vector_3d const& ref_pos
                            , math::degrees vertex_orientation
                            )
 {
+  ZoneScoped;
   noggit::Action* cur_action = noggit::ActionManager::instance()->getCurrentAction();
 
   assert(cur_action && "orientVertices called without an action running.");
@@ -3402,6 +3506,7 @@ void World::orientVertices ( math::vector_3d const& ref_pos
 
 void World::flattenVertices (float height)
 {
+  ZoneScoped;
   for (math::vector_3d* v : _vertices_selected)
   {
     v->y = height;
@@ -3411,6 +3516,7 @@ void World::flattenVertices (float height)
 
 void World::clearVertexSelection()
 {
+  ZoneScoped;
   noggit::ActionManager::instance()->getCurrentAction()->registerVertexSelectionChange();
   _vertex_border_updated = false;
   _vertex_center_updated = false;
@@ -3421,6 +3527,7 @@ void World::clearVertexSelection()
 
 void World::updateVertexCenter()
 {
+  ZoneScoped;
   _vertex_center_updated = true;
   _vertex_center = { 0,0,0 };
   float f = 1.0f / _vertices_selected.size();
@@ -3432,6 +3539,7 @@ void World::updateVertexCenter()
 
 math::vector_3d const& World::vertexCenter()
 {
+  ZoneScoped;
   if (!_vertex_center_updated)
   {
     updateVertexCenter();
@@ -3442,6 +3550,7 @@ math::vector_3d const& World::vertexCenter()
 
 std::set<MapChunk*>& World::vertexBorderChunks()
 {
+  ZoneScoped;
   if (!_vertex_border_updated)
   {
     _vertex_border_updated = true;
@@ -3460,6 +3569,7 @@ std::set<MapChunk*>& World::vertexBorderChunks()
 
 void World::update_models_by_filename()
 {
+  ZoneScoped;
   _models_by_filename.clear();
 
   _model_instance_storage.for_each_m2_instance([&] (ModelInstance& model_instance)
@@ -3474,6 +3584,7 @@ void World::update_models_by_filename()
 
 void World::range_add_to_selection(math::vector_3d const& pos, float radius, bool remove)
 {
+  ZoneScoped;
   for_tile_at(pos, [this, pos, radius, remove](MapTile* tile)
   {
     std::vector<uint32_t>* uids = tile->get_uids();
@@ -3520,7 +3631,7 @@ void World::range_add_to_selection(math::vector_3d const& pos, float radius, boo
 
 float World::getMaxTileHeight(const tile_index& tile)
 {
-
+  ZoneScoped;
   MapTile* m_tile = mapIndex.getTile(tile);
 
   float max_height = m_tile->getMaxHeight();
@@ -3544,6 +3655,7 @@ float World::getMaxTileHeight(const tile_index& tile)
 
 SceneObject* World::getObjectInstance(std::uint32_t uid)
 {
+  ZoneScoped;
   auto instance = _model_instance_storage.get_instance(uid);
 
   if (!instance)
@@ -3559,12 +3671,14 @@ SceneObject* World::getObjectInstance(std::uint32_t uid)
 
 void World::setBasename(const std::string &name)
 {
+  ZoneScoped;
   basename = name;
   mapIndex.set_basename(name);
 }
 
 void World::unload_shaders()
 {
+  ZoneScoped;
   _mcnk_program.reset();
   _mfbo_program.reset();
   _m2_program.reset();
@@ -3603,12 +3717,14 @@ void World::unload_shaders()
 
 noggit::VertexSelectionCache World::getVertexSelectionCache()
 {
+  ZoneScoped;
   return std::move(noggit::VertexSelectionCache{_vertex_tiles, _vertex_chunks, _vertex_border_chunks,
                                                 _vertices_selected, _vertex_center});
 }
 
 void World::setVertexSelectionCache(noggit::VertexSelectionCache& cache)
 {
+  ZoneScoped;
   _vertex_tiles = cache.vertex_tiles;
   _vertex_chunks = cache.vertex_chunks;
   _vertex_border_chunks = cache.vertex_border_chunks;
@@ -3621,6 +3737,7 @@ void World::setVertexSelectionCache(noggit::VertexSelectionCache& cache)
 
 void World::exportAllADTsAlphamap()
 {
+  ZoneScoped;
   for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
@@ -3663,6 +3780,7 @@ void World::exportAllADTsAlphamap()
 
 void World::exportAllADTsAlphamap(const std::string& filename)
 {
+  ZoneScoped;
   for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
@@ -3725,6 +3843,7 @@ void World::exportAllADTsAlphamap(const std::string& filename)
 
 void World::exportAllADTsHeightmap()
 {
+  ZoneScoped;
   float min_height = std::numeric_limits<float>::max();
   float max_height = std::numeric_limits<float>::lowest();
 
@@ -3797,6 +3916,7 @@ void World::exportAllADTsHeightmap()
 
 void World::exportAllADTsVertexColorMap()
 {
+  ZoneScoped;
   for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
@@ -3836,7 +3956,7 @@ void World::exportAllADTsVertexColorMap()
 
 void World::importAllADTsAlphamaps()
 {
-
+  ZoneScoped;
   QString path = _settings->value("project/path").toString();
   if (!(path.endsWith('\\') || path.endsWith('/')))
   {
@@ -3895,6 +4015,7 @@ void World::importAllADTsAlphamaps()
 
 void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
 {
+  ZoneScoped;
   QString path = _settings->value("project/path").toString();
   if (!(path.endsWith('\\') || path.endsWith('/')))
   {
@@ -3949,6 +4070,7 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
 
 void World::importAllADTVertexColorMaps(unsigned int mode)
 {
+  ZoneScoped;
   QString path = _settings->value("project/path").toString();
   if (!(path.endsWith('\\') || path.endsWith('/')))
   {
@@ -4003,6 +4125,7 @@ void World::importAllADTVertexColorMaps(unsigned int mode)
 
 void World::ensureAllTilesetsAllADTs()
 {
+  ZoneScoped;
   static QStringList textures {"tileset/generic/black.blp",
                                "tileset/generic/red.blp",
                                "tileset/generic/green.blp",
@@ -4054,6 +4177,8 @@ void World::ensureAllTilesetsAllADTs()
 
 void World::updateMVPUniformBlock(const math::matrix_4x4& model_view, const math::matrix_4x4& projection)
 {
+  ZoneScoped;
+
   _mvp_ubo_data.model_view = model_view;
   _mvp_ubo_data.projection = projection;
 
@@ -4064,6 +4189,8 @@ void World::updateMVPUniformBlock(const math::matrix_4x4& model_view, const math
 
 void World::updateLightingUniformBlock(bool draw_fog, math::vector_3d const& camera_pos)
 {
+  ZoneScoped;
+
   int daytime = static_cast<int>(time) % 2880;
 
   skies->update_sky_colors(camera_pos, daytime);
@@ -4088,6 +4215,7 @@ void World::updateLightingUniformBlock(bool draw_fog, math::vector_3d const& cam
 
 void World::updateTerrainParamsUniformBlock()
 {
+  ZoneScoped;
   gl.bindBuffer(GL_UNIFORM_BUFFER, _terrain_params_ubo);
   gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::TerrainParamsUniformBlock), &_terrain_params_ubo_data);
   _need_terrain_params_ubo_update = false;

@@ -221,8 +221,6 @@ public:
            , const float& cull_distance
            , const math::vector_3d& camera
            , int animtime
-           , bool draw_particles
-           , bool all_boxes
            , display_mode display
            , bool no_cull = false
            );
@@ -234,9 +232,7 @@ public:
             , const math::vector_3d& camera
             , bool draw_fog
             , int animtime
-            , bool draw_particles
             , bool all_boxes
-            , std::unordered_map<Model*, std::size_t>& models_with_particles
             , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
             , display_mode display
             , bool no_cull = false

@@ -264,7 +264,6 @@ void PreviewRenderer::draw()
   }
 
   // draw M2
-  std::unordered_map<Model*, std::size_t> model_with_particles;
   std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 
   if (_draw_models.get() && !(_model_instances.empty() && _wmo_doodads.empty()))
@@ -296,9 +295,7 @@ void PreviewRenderer::draw()
           , _camera.position
           , false
           , _animtime
-          , _draw_particles.get()
           , _draw_boxes.get()
-          , model_with_particles
           , model_boxes_to_draw
           , display_mode::in_3D
       );
@@ -315,9 +312,7 @@ void PreviewRenderer::draw()
           , _camera.position
           , false
           , _animtime
-          , _draw_particles.get()
           , _draw_boxes.get()
-          , model_with_particles
           , model_boxes_to_draw
           , display_mode::in_3D
       );
@@ -353,6 +348,8 @@ void PreviewRenderer::draw()
   gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
   // model particles
+
+  /*
   if (_draw_animated.get() && !model_with_particles.empty())
   {
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
@@ -387,6 +384,8 @@ void PreviewRenderer::draw()
       it.first->draw_ribbons(ribbon_shader, it.second);
     }
   }
+
+  */
 
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

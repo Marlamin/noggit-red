@@ -719,11 +719,11 @@ void MapChunk::draw ( math::frustum const& frustum
 
 }
 
-void MapChunk::intersect (math::ray const& ray, selection_result* results)
+bool MapChunk::intersect (math::ray const& ray, selection_result* results)
 {
   if (!ray.intersect_bounds (vmin, vmax))
   {
-    return;
+    return false;
   }
 
   for (int i (0); i < strip_without_holes.size(); i += 3)
@@ -736,8 +736,11 @@ void MapChunk::intersect (math::ray const& ray, selection_result* results)
     {
       results->emplace_back
           (*distance, selected_chunk_type (this, std::make_tuple(strip_without_holes[i], strip_without_holes[i + 1], strip_without_holes[i + 2]), ray.position (*distance)));
+      return true;
     }
   }
+
+  return false;
 }
 
 void MapChunk::updateVerticesData()

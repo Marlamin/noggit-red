@@ -1370,8 +1370,6 @@ void Model::draw( math::matrix_4x4 const& model_view
                 , const float& cull_distance
                 , const math::vector_3d& camera
                 , int animtime
-                , bool // draw_particles
-                , bool // all_boxes
                 , display_mode display
                 , bool no_cull
                 )
@@ -1435,9 +1433,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
                  , const math::vector_3d& camera
                  , bool // draw_fog
                  , int animtime
-                 , bool draw_particles
                  , bool all_boxes
-                 , std::unordered_map<Model*, std::size_t>& models_with_particles
                  , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
                  , display_mode display
                  , bool no_cull
@@ -1459,7 +1455,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
     animcalc = true;
   }
 
-  static std::array<math::matrix_4x4, 10000> transform_matrix;
+  static std::array<math::matrix_4x4, 10000> transform_matrix; // TODO: ugly hardcoded cap for performance reasons, use settings, exception on overflow
   int n_visible_instances = 0;
 
   for (ModelInstance* mi : instances)
@@ -1481,10 +1477,13 @@ void Model::draw ( math::matrix_4x4 const& model_view
   {
     model_boxes_to_draw.emplace(this, n_visible_instances);
   }
+
+  /*
   if (draw_particles && (!_particles.empty() || !_ribbons.empty()))
   {
     models_with_particles.emplace(this, n_visible_instances);
-  }  
+  }
+   */
 
   opengl::scoped::vao_binder const _ (_vao);
 

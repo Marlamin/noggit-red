@@ -91,7 +91,7 @@ public:
             , display_mode display
             , std::array<int, 4>& textures_bound
             );
-  void intersect (math::ray const&, selection_result*) const;
+  bool intersect (math::ray const&, selection_result*) const;
   void drawWater ( math::frustum const& frustum
                  , const float& cull_distance
                  , const math::vector_3d& camera

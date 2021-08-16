@@ -459,7 +459,6 @@ bool Skies::draw( math::matrix_4x4 const& model_view
                 , math::frustum const& frustum
                 , const float& cull_distance
                 , int animtime
-                , bool draw_particles
                 , OutdoorLightStats const& light_stats
                 )
 {
@@ -509,7 +508,7 @@ bool Skies::draw( math::matrix_4x4 const& model_view
       model.scale = 0.1f;
       model.recalcExtents();
 
-      model.model->draw(model_view, model, m2_shader, frustum, 1000000, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
+      model.model->draw(model_view, model, m2_shader, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
     }
   }
   // if it's night, draw the stars
@@ -520,7 +519,7 @@ bool Skies::draw( math::matrix_4x4 const& model_view
     stars.scale = 0.1f;
     stars.recalcExtents();
 
-    stars.model->draw(model_view, stars, m2_shader, frustum, 1000000, camera_pos, animtime, draw_particles, false, display_mode::in_3D);
+    stars.model->draw(model_view, stars, m2_shader, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
   }
 
   return true;

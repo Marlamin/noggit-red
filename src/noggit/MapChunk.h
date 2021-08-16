@@ -151,7 +151,7 @@ public:
             );
   //! \todo only this function should be public, all others should be called from it
 
-  void intersect (math::ray const&, selection_result*);
+  bool intersect (math::ray const&, selection_result*);
   bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
   bool stampMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors);
   math::vector_3d pickMCCV(math::vector_3d const& pos);

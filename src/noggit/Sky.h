@@ -170,7 +170,6 @@ public:
             , math::frustum const& frustum
             , const float& cull_distance
             , int animtime
-            , bool draw_particles
             , OutdoorLightStats const& light_stats
             );
 
