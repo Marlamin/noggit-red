@@ -77,7 +77,31 @@ namespace opengl
     BOOST_FORCEINLINE void deleteTextures (GLuint, GLuint*);
     BOOST_FORCEINLINE void bindTexture (GLenum target, GLuint);
     BOOST_FORCEINLINE void texImage2D (GLenum target, GLint level, GLint internal_format, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, GLvoid const* data);
+    BOOST_FORCEINLINE void texImage3D (GLenum target, GLint level, GLint internal_format, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, GLvoid const* data);
+    BOOST_FORCEINLINE void texSubImage3D (GLenum target,
+                                          GLint level,
+                                          GLint xoffset,
+                                          GLint yoffset,
+                                          GLint zoffset,
+                                          GLsizei width,
+                                          GLsizei height,
+                                          GLsizei depth,
+                                          GLenum format,
+                                          GLenum type,
+                                          const void * pixels);
+    BOOST_FORCEINLINE void compressedTexSubImage3D (GLenum target,
+                                                      GLint level,
+                                                      GLint xoffset,
+                                                      GLint yoffset,
+                                                      GLint zoffset,
+                                                      GLsizei width,
+                                                      GLsizei height,
+                                                      GLsizei depth,
+                                                      GLenum format,
+                                                      GLsizei imageSize,
+                                                      const void * data);
     BOOST_FORCEINLINE void compressedTexImage2D (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLvoid const* data);
+    BOOST_FORCEINLINE void compressedTexImage3D (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, 	GLsizei depth, GLint border, GLsizei imageSize, GLvoid const* data);
     BOOST_FORCEINLINE void generateMipmap (GLenum);
     BOOST_FORCEINLINE void activeTexture (GLenum);
 

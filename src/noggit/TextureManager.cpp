@@ -10,6 +10,7 @@
 #include <algorithm>
 
 decltype (TextureManager::_) TextureManager::_;
+decltype (TextureManager::_tex_arrays) TextureManager::_tex_arrays;
 
 void TextureManager::report()
 {
@@ -31,6 +32,95 @@ void TextureManager::unload_all(noggit::NoggitRenderContext context)
       }
       , context
   );
+}
+
+TexArrayParams& TextureManager::get_tex_array(int width, int height, int mip_level,
+                                              noggit::NoggitRenderContext context)
+{
+  TexArrayParams& array_params = _tex_arrays[context][std::make_tuple(-1, width, height, mip_level)];
+
+  GLint n_layers = 0;
+  gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
+
+  int index_x = array_params.n_used / n_layers;
+
+  if (array_params.arrays.size() <= index_x)
+  {
+    GLuint array;
+
+    gl.genTextures(1, &array);
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, array);
+
+    array_params.arrays.emplace_back(array);
+
+    GLint n_layers = 0;
+    gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
+
+    int width_ = width;
+    int height_ = height;
+
+    for (int i = 0; i < mip_level; ++i)
+    {
+      gl.texImage3D(GL_TEXTURE_2D_ARRAY, i, GL_RGBA8, width_, height_, n_layers, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                    nullptr);
+
+      width_ = std::max(width_ >> 1, 1);
+      height_ = std::max(height_ >> 1, 1);
+    }
+
+    gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, mip_level - 1);
+    gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  }
+  else
+  {
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, array_params.arrays[index_x]);
+  }
+
+  return array_params;
+}
+
+TexArrayParams& TextureManager::get_tex_array(GLint compression, int width, int height, int mip_level,
+                              std::map<int, std::vector<uint8_t>>& comp_data, noggit::NoggitRenderContext context)
+{
+
+  TexArrayParams& array_params = _tex_arrays[context][std::make_tuple(compression, width, height, mip_level)];
+
+  GLint n_layers = 0;
+  gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
+
+  int index_x = array_params.n_used / n_layers;
+
+  if (array_params.arrays.size() <= index_x)
+  {
+    GLuint array;
+
+    gl.genTextures(1, &array);
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, array);
+
+    array_params.arrays.emplace_back(array);
+
+    int width_ = width;
+    int height_ = height;
+
+    for (int i = 0; i < mip_level; ++i)
+    {
+      gl.compressedTexImage3D(GL_TEXTURE_2D_ARRAY, i, compression, width_, height_, n_layers, 0, comp_data[i].size() * n_layers, nullptr);
+
+      width_ = std::max(width_ >> 1, 1);
+      height_ = std::max(height_ >> 1, 1);
+    }
+
+    gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, mip_level - 1);
+    gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  }
+  else
+  {
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, array_params.arrays[index_x]);
+  }
+
+  return array_params;
 }
 
 #include <cstdint>
@@ -67,6 +157,8 @@ void blp_texture::bind()
   {
     upload();
   }
+
+  gl.bindTexture(GL_TEXTURE_2D_ARRAY, _texture_array);
 }
 
 void blp_texture::upload()
@@ -78,27 +170,56 @@ void blp_texture::upload()
 
   int width = _width, height = _height;
 
+  GLint n_layers;
+  gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
+
   if (!_compression_format)
   {
+    auto& params = TextureManager::get_tex_array( _width, _height, _data.size(), _context);
+
+    int index_x = params.n_used / n_layers;
+    int index_y = params.n_used % n_layers;
+
+    _texture_array = params.arrays[index_x];
+    _array_index = index_y;
+
     for (int i = 0; i < _data.size(); ++i)
     {
       gl.texImage2D(GL_TEXTURE_2D, i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());
+      gl.texSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, index_y, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());
 
       width = std::max(width >> 1, 1);
       height = std::max(height >> 1, 1);
     }
+
+    params.n_used++;
+
+    //LogDebug << "Mip level: " << std::to_string(_data.size()) << std::endl;
 
     _data.clear();
   }
   else
   {
+    auto& params = TextureManager::get_tex_array(_compression_format.get(), _width, _height, _compressed_data.size(), _compressed_data, _context);
+
+    int index_x = params.n_used / n_layers;
+    int index_y = params.n_used % n_layers;
+
+    _texture_array = params.arrays[index_x];
+    _array_index = index_y;
+
     for (int i = 0; i < _compressed_data.size(); ++i)
     {
       gl.compressedTexImage2D(GL_TEXTURE_2D, i, _compression_format.get(), width, height, 0, _compressed_data[i].size(), _compressed_data[i].data());
+      gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, index_y, width, height, 1, _compression_format.get(), _compressed_data[i].size(), _compressed_data[i].data());
 
       width = std::max(width >> 1, 1);
       height = std::max(height >> 1, 1);
     }
+
+    params.n_used++;
+
+    //LogDebug << "Mip level (compressed): " << std::to_string(_compressed_data.size()) << std::endl;
 
     gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _compressed_data.size() - 1);
     _compressed_data.clear();

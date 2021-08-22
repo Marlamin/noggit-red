@@ -268,6 +268,7 @@ void TextureSet::bindTexture(size_t id, size_t activeTexture,  std::array<int, 4
     textures[id]->bind();
     textures_bound[id] = textures[id]->id();
   }
+
 }
 
 math::vector_2d TextureSet::anim_uv_offset(int id, int animtime) const

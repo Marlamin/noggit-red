@@ -296,12 +296,60 @@ void opengl::context::texImage2D (GLenum target, GLint level, GLint internal_for
 #endif
   return _current_context->functions()->glTexImage2D (target, level, internal_format, width, height, border, format, type, data);
 }
+void opengl::context::texImage3D (GLenum target, GLint level, GLint internal_format, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, GLvoid const* data)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glTexImage3D (target, level, internal_format, width, height, depth, border, format, type, data);
+}
+void opengl::context::texSubImage3D (GLenum target,
+                                    GLint level,
+                                    GLint xoffset,
+                                    GLint yoffset,
+                                    GLint zoffset,
+                                    GLsizei width,
+                                    GLsizei height,
+                                    GLsizei depth,
+                                    GLenum format,
+                                    GLenum type,
+                                    const void * pixels)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glTexSubImage3D (target, level, xoffset,yoffset ,zoffset, width, height, depth, format, type, pixels);
+}
+void opengl::context::compressedTexSubImage3D (GLenum target,
+                                                  GLint level,
+                                                  GLint xoffset,
+                                                  GLint yoffset,
+                                                  GLint zoffset,
+                                                  GLsizei width,
+                                                  GLsizei height,
+                                                  GLsizei depth,
+                                                  GLenum format,
+                                                  GLsizei imageSize,
+                                                  const void * data)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glCompressedTexSubImage3D (target, level, xoffset,yoffset ,zoffset, width, height, depth, format, imageSize, data);
+}
 void opengl::context::compressedTexImage2D (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, GLvoid const* data)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
   return _current_context->functions()->glCompressedTexImage2D (target, level, internalformat, width, height, border, imageSize, data);
+}
+void opengl::context::compressedTexImage3D (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLsizei imageSize, GLvoid const* data)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glCompressedTexImage3D (target, level, internalformat, width, height, depth, border, imageSize, data);
 }
 void opengl::context::generateMipmap (GLenum target)
 {

@@ -31,10 +31,14 @@ layout (std140) uniform overlay_params
 };
 
 uniform sampler2D shadow_map;
-uniform sampler2D tex0;
-uniform sampler2D tex1;
-uniform sampler2D tex2;
-uniform sampler2D tex3;
+uniform sampler2DArray tex0;
+uniform sampler2DArray tex1;
+uniform sampler2DArray tex2;
+uniform sampler2DArray tex3;
+uniform int tex_temp_0;
+uniform int tex_temp_1;
+uniform int tex_temp_2;
+uniform int tex_temp_3;
 uniform sampler2D stampBrush;
 uniform vec2 tex_anim_0;
 uniform vec2 tex_anim_1;
@@ -79,10 +83,10 @@ vec4 texture_blend()
   float a1 = alpha.g;
   float a2 = alpha.b;
 
-  vec3 t0 = texture(tex0, vary_texcoord + tex_anim_0).rgb;
-  vec3 t1 = texture(tex1, vary_texcoord + tex_anim_1).rgb;
-  vec3 t2 = texture(tex2, vary_texcoord + tex_anim_2).rgb;
-  vec3 t3 = texture(tex3, vary_texcoord + tex_anim_3).rgb;
+  vec3 t0 = texture(tex0, vec3(vary_texcoord + tex_anim_0, tex_temp_0)).rgb;
+  vec3 t1 = texture(tex1, vec3(vary_texcoord + tex_anim_1, tex_temp_1)).rgb;
+  vec3 t2 = texture(tex2, vec3(vary_texcoord + tex_anim_2, tex_temp_2)).rgb;
+  vec3 t3 = texture(tex3, vec3(vary_texcoord + tex_anim_3, tex_temp_3)).rgb;
 
   return mix(vec4 (1.0, 1.0, 1.0, 1.0), vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0), int(layer_count > 0));
 }

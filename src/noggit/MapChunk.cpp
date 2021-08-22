@@ -652,6 +652,7 @@ void MapChunk::draw ( math::frustum const& frustum
       for (int i = 0; i < texture_set->num(); ++i)
       {
         texture_set->bindTexture(i, i + 1, textures_bound);
+        mcnk_shader.uniform("tex_temp_" + std::to_string(i), (*texture_set->getTextures())[i]->array_index());
 
         if (texture_set->is_animated(i))
         {

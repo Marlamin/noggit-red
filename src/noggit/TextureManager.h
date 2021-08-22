@@ -18,9 +18,26 @@
 #include <boost/optional.hpp>
 
 #include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
+#include <array>
+#include <tuple>
 
+
+struct tuple_hash
+{
+  template <class T1, class T2, class T3, class T4>
+  std::size_t operator() (const std::tuple<T1,T2,T3, T4> &p) const
+  {
+    auto h1 = std::hash<T1>{}(std::get<0>(p));
+    auto h2 = std::hash<T2>{}(std::get<1>(p));
+    auto h3 = std::hash<T3>{}(std::get<2>(p));
+    auto h4 = std::hash<T4>{}(std::get<3>(p));
+
+    return h1 ^ h2 ^ h3 ^ h4; // use hash combine here
+  }
+};
 
 struct BLPHeader;
 
@@ -41,6 +58,8 @@ struct blp_texture : public opengl::texture, AsyncObject
   void bind();
   void upload();
   void unload();
+  GLuint texture_array() { return _texture_array; };
+  int array_index() { return _array_index; };
 
   noggit::NoggitRenderContext getContext() { return _context; };
 
@@ -61,6 +80,14 @@ private:
   std::map<int, std::vector<uint32_t>> _data;
   std::map<int, std::vector<uint8_t>> _compressed_data;
   boost::optional<GLint> _compression_format;
+  int _array_index = -1;
+  GLuint _texture_array = 0;
+};
+
+struct TexArrayParams
+{
+  std::vector<GLuint> arrays;
+  int n_used = 0;
 };
 
 class TextureManager
@@ -68,10 +95,14 @@ class TextureManager
 public:
   static void report();
   static void unload_all(noggit::NoggitRenderContext context);
+  static TexArrayParams& get_tex_array(int width, int height, int mip_level, noggit::NoggitRenderContext context);
+  static TexArrayParams& get_tex_array(GLint compression, int width, int height, int mip_level, std::map<int, std::vector<uint8_t>>& comp_data, noggit::NoggitRenderContext context);
 
 private:
   friend struct scoped_blp_texture_reference;
   static noggit::async_object_multimap_with_normalized_key<blp_texture> _;
+  static std::array<std::unordered_map<std::tuple<GLint, int, int, int>, TexArrayParams, tuple_hash>, 7> _tex_arrays;
+
 };
 
 struct scoped_blp_texture_reference
