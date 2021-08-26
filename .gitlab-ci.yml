@@ -9,13 +9,14 @@
 # see https://hub.docker.com/_/gcc/
 
 image: gcc
+image: rabits/qt:5.15-desktop
 
 build:
   stage: build
   # instead of calling g++ directly you can also use some build toolkit like make
   # install the necessary build tools when needed
   before_script:
-     - apt update && apt -y install make autoconf cmake qt5 boost
+     - apt update && apt -y install make autoconf cmake
   script:
     - mkdir build
     - cd build
