@@ -1,5 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#version 330 core
+#version 410 core
 
 layout (std140) uniform lighting
 {
@@ -30,29 +30,27 @@ layout (std140) uniform overlay_params
   vec4 wireframe_color;
 };
 
-uniform sampler2D shadow_map;
-uniform sampler2DArray tex0;
-uniform sampler2DArray tex1;
-uniform sampler2DArray tex2;
-uniform sampler2DArray tex3;
-uniform int tex_temp_0;
-uniform int tex_temp_1;
-uniform int tex_temp_2;
-uniform int tex_temp_3;
-uniform sampler2D stampBrush;
-uniform vec2 tex_anim_0;
-uniform vec2 tex_anim_1;
-uniform vec2 tex_anim_2;
-uniform vec2 tex_anim_3;
-uniform sampler2D alphamap;
-uniform int layer_count;
-uniform bool has_mccv;
-uniform bool cant_paint;
+struct ChunkInstanceData
+{
+  ivec4 ChunkTextureSamplers;
+  ivec4 ChunkTextureArrayIDs;
+  ivec4 ChunkHoles_DrawImpass_TexLayerCount_CantPaint;
+  vec4  ChunkTexAnim_0_1;
+  vec4  ChunkTexAnim_2_3;
+  vec4  AreaIDColor_DrawSelection;
+  vec4  ChunkXYZBase_Pad1;
+  vec4 pad2;
+};
 
-uniform vec4 areaid_color;
-uniform bool draw_impassible_flag;
+layout (std140) uniform chunk_instances
+{
+  ChunkInstanceData instances[256];
+};
 
-uniform bool draw_selection;
+uniform sampler2DArray shadowmap;
+uniform sampler2DArray alphamap;
+uniform sampler2D stamp_brush;
+uniform sampler2DArray textures[11];
 
 uniform vec3 camera;
 
@@ -67,6 +65,7 @@ in vec3 vary_position;
 in vec2 vary_texcoord;
 in vec3 vary_normal;
 in vec3 vary_mccv;
+flat in int instanceID;
 
 out vec4 out_color;
 
@@ -76,19 +75,78 @@ const float HOLESIZE  = CHUNKSIZE * 0.25;
 const float UNITSIZE = HOLESIZE * 0.5;
 const float PI = 3.14159265358979323846;
 
-vec4 texture_blend() 
+
+vec3 get_tex_color(vec2 tex_coord, int tex_sampler, int array_index)
 {
-  vec3 alpha = texture(alphamap, vary_texcoord / 8.0).rgb;
-  float a0 = alpha.r;  
+  if (tex_sampler == 0)
+  {
+    return texture(textures[0], vec3(tex_coord, array_index)).rgb;
+  }
+  else if (tex_sampler == 1)
+  {
+    return texture(textures[1], vec3(tex_coord, array_index)).rgb;
+  }
+  else if (tex_sampler == 2)
+  {
+    return texture(textures[2], vec3(tex_coord, array_index)).rgb;
+  }
+  else if (tex_sampler == 3)
+  {
+    return texture(textures[3], vec3(tex_coord, array_index)).rgb;
+  }
+  else if (tex_sampler == 4)
+  {
+    return texture(textures[4], vec3(tex_coord, array_index)).rgb;
+  }
+  else if (tex_sampler == 5)
+  {
+    return texture(textures[5], vec3(tex_coord, array_index)).rgb;
+  }
+  else if (tex_sampler == 6)
+  {
+    return texture(textures[6], vec3(tex_coord, array_index)).rgb;
+  }
+  else if (tex_sampler == 7)
+  {
+    return texture(textures[7], vec3(tex_coord, array_index)).rgb;
+  }
+  else if (tex_sampler == 8)
+  {
+    return texture(textures[8], vec3(tex_coord, array_index)).rgb;
+  }
+  else if (tex_sampler == 9)
+  {
+    return texture(textures[9], vec3(tex_coord, array_index)).rgb;
+  }
+  else if (tex_sampler == 10)
+  {
+    return texture(textures[10], vec3(tex_coord, array_index)).rgb;
+  }
+
+  return vec3(0);
+}
+
+vec4 texture_blend()
+{
+  vec3 alpha = texture(alphamap, vec3(vary_texcoord / 8.0, instanceID)).rgb;
+  float a0 = alpha.r;
   float a1 = alpha.g;
   float a2 = alpha.b;
 
-  vec3 t0 = texture(tex0, vec3(vary_texcoord + tex_anim_0, tex_temp_0)).rgb;
-  vec3 t1 = texture(tex1, vec3(vary_texcoord + tex_anim_1, tex_temp_1)).rgb;
-  vec3 t2 = texture(tex2, vec3(vary_texcoord + tex_anim_2, tex_temp_2)).rgb;
-  vec3 t3 = texture(tex3, vec3(vary_texcoord + tex_anim_3, tex_temp_3)).rgb;
+  /*
+  vec3 t0 = get_tex_color(vary_texcoord + instances[instanceID].ChunkTexAnim_0_1.rg, 0);
+  vec3 t1 = get_tex_color(vary_texcoord + instances[instanceID].ChunkTexAnim_0_1.ba, 1);
+  vec3 t2 = get_tex_color(vary_texcoord + instances[instanceID].ChunkTexAnim_2_3.rg, 2);
+  vec3 t3 = get_tex_color(vary_texcoord + instances[instanceID].ChunkTexAnim_2_3.ba, 3);
+  */
 
-  return mix(vec4 (1.0, 1.0, 1.0, 1.0), vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0), int(layer_count > 0));
+  vec3 t0 = get_tex_color(vary_texcoord, instances[instanceID].ChunkTextureSamplers.x, instances[instanceID].ChunkTextureArrayIDs.x);
+  vec3 t1 = get_tex_color(vary_texcoord, instances[instanceID].ChunkTextureSamplers.y, instances[instanceID].ChunkTextureArrayIDs.y);
+  vec3 t2 = get_tex_color(vary_texcoord, instances[instanceID].ChunkTextureSamplers.z, instances[instanceID].ChunkTextureArrayIDs.z);
+  vec3 t3 = get_tex_color(vary_texcoord, instances[instanceID].ChunkTextureSamplers.w, instances[instanceID].ChunkTextureArrayIDs.w);
+
+  return mix(vec4 (1.0, 1.0, 1.0, 1.0), vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0)
+    , int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
 }
 
 float contour_alpha(float unit_size, float pos, float line_width)
@@ -131,29 +189,29 @@ void main()
   out_color.rgb = clamp(out_color.rgb * (currColor + lDiffuse), 0.0, 1.0);
 
   // apply overlays
-  if(cant_paint)
+  if(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.a != 0) // can't paint
   {
     out_color *= vec4(1.0, 0.0, 0.0, 1.0);
   }
-  
+
   if(draw_areaid_overlay != 0)
   {
-    out_color = out_color * 0.3 + areaid_color;
+    out_color.rgb = out_color.rgb * 0.3 + instances[instanceID].AreaIDColor_DrawSelection.rgb;
   }
 
-  if(draw_impassible_flag)
+  if(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.g != 0) // draw impass
   {
     out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
   }
 
-  if(draw_selection)
+  if(instances[instanceID].AreaIDColor_DrawSelection.a != 0) // draw selection
   {
    out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
   }
 
   if (draw_shadows != 0)
   {
-    float shadow_alpha = texture(shadow_map, vary_texcoord / 8.0).r;
+    float shadow_alpha = texture(shadowmap, vec3(vary_texcoord / 8.0, instanceID)).r;
     out_color = vec4 (out_color.rgb * (1.0 - shadow_alpha), 1.0);
   }
 
@@ -180,10 +238,11 @@ void main()
       color.a = contour_alpha(HOLESIZE, vary_position.xz, fw.xz * 0.75);
       color.b = 0.8;
     }
-    
+
     lines_drawn = color.a > 0.0;
     out_color.rgb = mix(out_color.rgb, color.rgb, color.a);
   }
+
 
   if(FogColor_FogOn.w != 0)
   {
@@ -216,7 +275,7 @@ void main()
 	  {
 		  draw_wire = (length(vary_position.xz - cursor_position.xz) < real_wireframe_radius);
 	  }
-	
+
 	  if(draw_wire)
 	  {
 		  float alpha = contour_alpha(UNITSIZE, vary_position.xz, fw.xz * wireframe_width);
@@ -225,7 +284,7 @@ void main()
 		  float d = length(fw.xz) * wireframe_width;
 		  float diff = min( min(abs(xmod - zmod), abs(xmod - UNITSIZE + zmod))
                       , min(abs(zmod - xmod), abs(zmod + UNITSIZE - zmod))
-                      );        
+                      );
 
 		  alpha = max(alpha, 1.0 - smoothstep(0.0, d, diff));
           out_color.rgb = mix(out_color.rgb, wireframe_color.rgb, wireframe_color.a *alpha);
@@ -253,7 +312,7 @@ void main()
     /*out_color.rgb = mix(out_color.rgb, texture(stampBrush, rotatedTexcoord).rgb
     , 1.0 * (int(length(vary_position.xz - cursor_position.xz) / outer_cursor_radius < 1.0))
     * (1.0 - length(vary_position.xz - cursor_position.xz) / outer_cursor_radius));*/
-    out_color.rgb = mix(out_color.rgb, cursor_color.rgb, texture(stampBrush, rotatedTexcoord).r
+    out_color.rgb = mix(out_color.rgb, cursor_color.rgb, texture(stamp_brush, rotatedTexcoord).r
     * int(abs(vary_position.x - cursor_position.x) <= outer_cursor_radius
     && abs(vary_position.z - cursor_position.z) <= outer_cursor_radius));
     /*vec2 posRel = vary_position.xz - cursor_position.xz;
@@ -268,4 +327,5 @@ void main()
     && diff_z < inner_radius && (inner_radius - diff_x <= d || inner_radius - diff_z <= d))));
     out_color.rgb = mix(cursor_color.rgb, out_color.rgb, alpha);*/
   }
+
 }

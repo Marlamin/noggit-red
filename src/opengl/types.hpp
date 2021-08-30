@@ -14,7 +14,8 @@ namespace opengl
   {
     MVP,
     LIGHTING,
-    TERRAIN_OVERLAYS
+    TERRAIN_OVERLAYS,
+    CHUNK_INSTANCE_DATA
   };
 
   struct MVPUniformBlock
@@ -51,6 +52,18 @@ namespace opengl
     int pad2;
     math::vector_4d wireframe_color;
 
+  };
+
+  struct ChunkInstanceDataUniformBlock
+  {
+    int ChunkTextureSamplers[4];
+    int ChunkTextureArrayIDs[4];
+    int ChunkHoles_DrawImpass_TexLayerCount_CantPaint[4];
+    math::vector_4d  ChunkTexAnim_0_1;
+    math::vector_4d  ChunkTexAnim_2_3;
+    math::vector_4d  AreaIDColor_DrawSelection;
+    math::vector_4d pad1;
+    math::vector_4d pad2;
   };
 
 }

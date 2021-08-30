@@ -2510,7 +2510,7 @@ auto MapView::setBrushTexture(QImage const* img) -> void
 
   makeCurrent();
   opengl::context::scoped_setter const _{gl, context()};
-  opengl::texture::set_active_texture(6);
+  opengl::texture::set_active_texture(5);
   _texBrush->bind();
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.data());
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -4921,6 +4921,8 @@ void MapView::unloadOpenglData(bool from_manager)
 
   for (MapTile* tile : _world->mapIndex.loaded_tiles())
   {
+    tile->unload();
+
     for (int i = 0; i < 16; ++i)
     {
       for (int j = 0; j < 16; ++j)

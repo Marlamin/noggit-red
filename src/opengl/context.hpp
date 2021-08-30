@@ -77,6 +77,15 @@ namespace opengl
     BOOST_FORCEINLINE void deleteTextures (GLuint, GLuint*);
     BOOST_FORCEINLINE void bindTexture (GLenum target, GLuint);
     BOOST_FORCEINLINE void texImage2D (GLenum target, GLint level, GLint internal_format, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, GLvoid const* data);
+    BOOST_FORCEINLINE void texSubImage2D(GLenum target,
+                                         GLint level,
+                                         GLint xoffset,
+                                         GLint yoffset,
+                                         GLsizei width,
+                                         GLsizei height,
+                                         GLenum format,
+                                         GLenum type,
+                                         const void * pixels);
     BOOST_FORCEINLINE void texImage3D (GLenum target, GLint level, GLint internal_format, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, GLvoid const* data);
     BOOST_FORCEINLINE void texSubImage3D (GLenum target,
                                           GLint level,
@@ -169,6 +178,7 @@ namespace opengl
     BOOST_FORCEINLINE void uniform1i (GLint location, GLint value);
     BOOST_FORCEINLINE void uniform1f (GLint location, GLfloat value);
     BOOST_FORCEINLINE void uniform1iv (GLint location, GLsizei count, GLint const* value);
+    BOOST_FORCEINLINE void uniform2iv (GLint location, GLsizei count, GLint const* value);
     BOOST_FORCEINLINE void uniform2fv (GLint location, GLsizei count, GLfloat const* value);
     BOOST_FORCEINLINE void uniform3fv (GLint location, GLsizei count, GLfloat const* value);
     BOOST_FORCEINLINE void uniform4fv (GLint location, GLsizei count, GLfloat const* value);

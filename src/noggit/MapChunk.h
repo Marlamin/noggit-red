@@ -35,47 +35,30 @@ class QPixmap;
 using StripType = uint16_t;
 static const int mapbufsize = 9 * 9 + 8 * 8; // chunk size
 
+enum ChunkUpdateFlags
+{
+  VERTEX   = 0x1,
+  SHADOW   = 0x2,
+  MCCV     = 0x4,
+  ALPHAMAP = 0x8,
+  NORMALS  = 0x10,
+  HOLES    = 0x20,
+  AREA_ID  = 0x40,
+  FLAGS    = 0x80
+};
+
 class MapChunk
 {
 private:
   tile_mode _mode;
 
   bool hasMCCV;
-  opengl::texture shadow;
-
-  std::vector<StripType> strip_with_holes;
-  std::vector<StripType> strip_without_holes;
-  std::map<int, std::vector<StripType>> strip_lods;
 
   std::vector<uint8_t> compressed_shadow_map() const;
   bool has_shadows() const;
 
-  int indexNoLoD(int x, int y);
-  int indexLoD(int x, int y);
-
   void update_intersect_points();
 
-  boost::optional<int> get_lod_level( math::vector_3d const& camera_pos
-                                    , display_mode display
-                                    ) const;
-
-  bool _uploaded = false;
-  bool _need_indice_buffer_update = true;
-  bool _need_vao_update = true;
-  bool _need_lod_update = true;
-
-  void upload();
-  void update_indices_buffer();
-  void update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const& tex_coord_vbo);
-
-  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
-  GLuint const& _vao = _vertex_array[0];
-  opengl::scoped::deferred_upload_buffers<4> _buffers;
-  GLuint const& _vertices_vbo = _buffers[0];
-  GLuint const& _normals_vbo = _buffers[1];
-  GLuint const& _indices_buffer = _buffers[2];
-  GLuint const& _mccv_vbo = _buffers[3];
-  opengl::scoped::deferred_upload_buffers<4> lod_indices;
 
 public:
   MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha, tile_mode mode, noggit::NoggitRenderContext context
@@ -109,24 +92,12 @@ public:
 
   void unload();
 
-  void initStrip();
+  static int indexNoLoD(int x, int y);
+  static int indexLoD(int x, int y);
 
-  bool is_visible ( const float& cull_distance
-                  , const math::frustum& frustum
-                  , const math::vector_3d& camera
-                  , display_mode display
-                  ) const;
 private:
-  // return true if the lod level changed
-  void update_visibility ( const float& cull_distance
-    , const math::frustum& frustum
-    , const math::vector_3d& camera
-    , display_mode display);
 
-  bool _is_visible = true; // visible by default
-  bool _need_visibility_update = true;
-  boost::optional<int> _lod_level = boost::none; // none = no lod
-  size_t _lod_level_indice_count = 0;
+  unsigned _chunk_update_flags;
 
   noggit::NoggitRenderContext _context;
 
@@ -136,7 +107,6 @@ public:
 
   void draw ( math::frustum const& frustum
             , opengl::scoped::use_program& mcnk_shader
-            , GLuint const& tex_coord_vbo
             , const float& cull_distance
             , const math::vector_3d& camera
             , bool need_visibility_update
@@ -189,7 +159,6 @@ public:
 
   void clear_shadows();
 
-  //! \todo implement Action stack for these
   bool isHole(int i, int j);
   void setHole(math::vector_3d const& pos, float radius, bool big, bool add);
 
@@ -226,4 +195,8 @@ public:
   void setHeightmapImage(QImage const& image, float multiplier, int mode);
   void setAlphamapImage(QImage const& image, unsigned layer);
   void setVertexColorImage(QImage const& image);
+
+  void registerChunkUpdate(unsigned flags);
+  void endChunkUpdates() { _chunk_update_flags = 0; }
+  unsigned getUpdateFlags() { return _chunk_update_flags; }
 };

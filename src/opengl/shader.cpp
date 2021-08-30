@@ -268,6 +268,14 @@ namespace opengl
 
       gl.uniform3fv (loc, value.size(), reinterpret_cast<const GLfloat*>(value.data()));
     }
+    void use_program::uniform_chunk_textures (std::string const& name, std::array<std::array<std::array<int, 2>, 4>, 256> const& value)
+    {
+      GLuint loc = uniform_location (name);
+      if (loc < 0)
+        return;
+
+      gl.uniform2iv (loc, 256 * 4, reinterpret_cast<const GLint*>(value.data()));
+    }
     void use_program::uniform (GLint pos, std::vector<math::vector_3d> const& value)
     {
       gl.uniform3fv (pos, value.size(), reinterpret_cast<const GLfloat*>(value.data()));

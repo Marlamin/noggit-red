@@ -202,6 +202,43 @@ namespace opengl
       return _vertex_arrays[i];
     }
 
+    // textures
+    template<std::size_t count>
+    bool deferred_upload_textures<count>::texture_generated() const
+    {
+      return _texture_generated;
+    }
+
+    template<std::size_t count>
+    void deferred_upload_textures<count>::upload()
+    {
+      gl.genTextures(count, _textures);
+      _texture_generated = true;
+    }
+
+    template<std::size_t count>
+    void deferred_upload_textures<count>::unload()
+    {
+      gl.deleteTextures(count, _textures);
+      _texture_generated = false;
+    }
+
+    template<std::size_t count>
+    deferred_upload_textures<count>::~deferred_upload_textures()
+    {
+      if (_texture_generated)
+      {
+        gl.deleteTextures(count, _textures);
+      }
+    }
+
+    template<std::size_t count>
+    GLuint const& deferred_upload_textures<count>::operator[] (std::size_t i) const
+    {
+      return _textures[i];
+    }
+    //
+
     template<std::size_t count>
       vertex_arrays<count>::vertex_arrays()
     {

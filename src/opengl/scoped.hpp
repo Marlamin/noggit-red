@@ -147,6 +147,27 @@ namespace opengl
     };
 
     template<std::size_t count>
+    class deferred_upload_textures
+    {
+    public:
+      deferred_upload_textures() = default;
+      ~deferred_upload_textures();
+      deferred_upload_textures (deferred_upload_textures const&) = delete;
+      deferred_upload_textures (deferred_upload_textures&&) = delete;
+      deferred_upload_textures& operator= (deferred_upload_textures const&) = delete;
+      deferred_upload_textures& operator= (deferred_upload_textures&&) = delete;
+
+      void upload();
+      void unload();
+      bool texture_generated() const;
+      GLuint const& operator[] (std::size_t i) const;
+
+    private:
+      bool _texture_generated = false;
+      GLuint _textures[count];
+    };
+
+    template<std::size_t count>
       class vertex_arrays
     {
     public:

@@ -110,6 +110,8 @@ namespace opengl
       void uniform (GLint pos, math::matrix_4x4 const&);
       template<typename T> void uniform (std::string const&, T) = delete;
 
+      void uniform_chunk_textures (std::string const& name, std::array<std::array<std::array<int, 2>, 4>, 256> const& value);
+
       void uniform_cached (std::string const& name, GLint);
       void uniform_cached (std::string const& name, GLfloat);
       void uniform_cached (std::string const& name, bool);

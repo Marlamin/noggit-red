@@ -110,8 +110,6 @@ World::World(const std::string& name, int map_id, noggit::NoggitRenderContext co
   , horizon(name, &mapIndex)
   , mWmoFilename("")
   , mWmoEntry(ENTRY_MODF())
-  , detailtexcoords(0)
-  , alphatexcoords(0)
   , ol(nullptr)
   , animtime(0)
   , time(1450)
@@ -373,9 +371,12 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     {
       auto normalWeights = getBarycentricCoordinatesAt(p0, p1, p2, hitChunkInfo.position, varnormal);
 
-      const auto& vNormal0 = hitChunkInfo.chunk->mNormals[std::get<0>(hitChunkInfo.triangle)];
-      const auto& vNormal1 = hitChunkInfo.chunk->mNormals[std::get<1>(hitChunkInfo.triangle)];
-      const auto& vNormal2 = hitChunkInfo.chunk->mNormals[std::get<2>(hitChunkInfo.triangle)];
+      auto& tile_buffer = hitChunkInfo.chunk->mt->getChunkHeightmapBuffer();
+      int chunk_start = (hitChunkInfo.chunk->px * 16 + hitChunkInfo.chunk->py) * mapbufsize * 4;
+
+      const auto& vNormal0 = *reinterpret_cast<math::vector_3d*>(&tile_buffer[chunk_start + std::get<0>(hitChunkInfo.triangle) * 4]);
+      const auto& vNormal1 = *reinterpret_cast<math::vector_3d*>(&tile_buffer[chunk_start + std::get<1>(hitChunkInfo.triangle) * 4]);
+      const auto& vNormal2 = *reinterpret_cast<math::vector_3d*>(&tile_buffer[chunk_start + std::get<2>(hitChunkInfo.triangle) * 4]);
 
       varnormal.x =
           vNormal0.x * normalWeights.x +
@@ -752,52 +753,6 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
   }
 }
 
-void World::initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords)
-{
-  ZoneScoped;
-  if (!*pDetailTexCoords && !*pAlphaTexCoords)
-  {
-    math::vector_2d temp[mapbufsize], *vt;
-    float tx, ty;
-
-    // init texture coordinates for detail map:
-    vt = temp;
-    const float detail_half = 0.5f * detail_size / 8.0f;
-    for (int j = 0; j<17; ++j) {
-      for (int i = 0; i<((j % 2) ? 8 : 9); ++i) {
-        tx = detail_size / 8.0f * i;
-        ty = detail_size / 8.0f * j * 0.5f;
-        if (j % 2) {
-          // offset by half
-          tx += detail_half;
-        }
-        *vt++ = math::vector_2d(tx, ty);
-      }
-    }
-
-    gl.genBuffers(1, pDetailTexCoords);
-    gl.bufferData<GL_ARRAY_BUFFER> (*pDetailTexCoords, sizeof(temp), temp, GL_STATIC_DRAW);
-
-    // init texture coordinates for alpha map:
-    vt = temp;
-
-    const float alpha_half = TEXDETAILSIZE / MINICHUNKSIZE;
-    for (int j = 0; j<17; ++j) {
-      for (int i = 0; i<((j % 2) ? 8 : 9); ++i) {
-        tx = alpha_half * i *2.0f;
-        ty = alpha_half * j;
-        if (j % 2) {
-          // offset by half
-          tx += alpha_half;
-        }
-        *vt++ = math::vector_2d(tx, ty);
-      }
-    }
-
-    gl.genBuffers(1, pAlphaTexCoords);
-    gl.bufferData<GL_ARRAY_BUFFER> (*pAlphaTexCoords, sizeof(temp), temp, GL_STATIC_DRAW);
-  }
-}
 
 void World::initDisplay()
 {
@@ -828,11 +783,6 @@ void World::initShaders()
     _display_initialized = true;
   }
 
-  if (!_global_vbos_initialized)
-  {
-    initGlobalVBOs(&detailtexcoords, &alphatexcoords);
-    _global_vbos_initialized = true;
-  }
 
   if (!_m2_program)
   {
@@ -911,13 +861,13 @@ void World::initShaders()
         );
   }
 
-
   {
     opengl::scoped::use_program m2_shader {*_m2_program.get()};
     m2_shader.uniform("tex1", 0);
     m2_shader.uniform("tex2", 1);
 
     _buffers.upload();
+    _vertex_arrays.upload();
 
     m2_shader.bind_uniform_block("matrices", 0);
     gl.bindBuffer(GL_UNIFORM_BUFFER, _mvp_ubo);
@@ -943,22 +893,32 @@ void World::initShaders()
   {
     opengl::scoped::use_program mcnk_shader {*_mcnk_program.get()};
 
+    if (!_global_vbos_initialized)
+    {
+      setupChunkBuffers();
+      setupChunkVAO(mcnk_shader);
+      _global_vbos_initialized = true;
+    }
+
     mcnk_shader.bind_uniform_block("matrices", 0);
     mcnk_shader.bind_uniform_block("lighting", 1);
     mcnk_shader.bind_uniform_block("overlay_params", 2);
+    mcnk_shader.bind_uniform_block("chunk_instances", 3);
 
     gl.bindBuffer(GL_UNIFORM_BUFFER, _terrain_params_ubo);
     gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::TerrainParamsUniformBlock), NULL, GL_STATIC_DRAW);
     gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::TERRAIN_OVERLAYS, _terrain_params_ubo, 0, sizeof(opengl::TerrainParamsUniformBlock));
     gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
 
-    mcnk_shader.uniform("alphamap", 0);
-    mcnk_shader.uniform("tex0", 1);
-    mcnk_shader.uniform("tex1", 2);
-    mcnk_shader.uniform("tex2", 3);
-    mcnk_shader.uniform("tex3", 4);
-    mcnk_shader.uniform("stampBrush", 6);
-    mcnk_shader.uniform("shadow_map", 5);
+    mcnk_shader.uniform("heightmap", 0);
+    mcnk_shader.uniform("mccv", 1);
+    mcnk_shader.uniform("shadowmap", 2);
+    mcnk_shader.uniform("alphamap", 3);
+    mcnk_shader.uniform("stamp_brush", 4);
+
+    std::vector<int> samplers {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    mcnk_shader.uniform("textures", samplers);
+
   }
 
   {
@@ -1131,14 +1091,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     ZoneScopedN("World::draw() : Draw terrain");
     opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
-    // the flag stays on if the last chunk drawn before leaving the editing tool has it
-    if (!draw_chunk_flag_overlay)
-    {
-      mcnk_shader.uniform("draw_impassible_flag", 0);
-    }
-
     mcnk_shader.uniform ("camera", camera_pos);
-
 
     if (cursor_type != CursorType::NONE)
     {
@@ -1154,10 +1107,6 @@ void World::draw ( math::matrix_4x4 const& model_view
       mcnk_shader.uniform("draw_cursor_circle", 0);
     }
 
-    mcnk_shader.uniform("tex_anim_0", math::vector_2d());
-    mcnk_shader.uniform("tex_anim_1", math::vector_2d());
-    mcnk_shader.uniform("tex_anim_2", math::vector_2d());
-    mcnk_shader.uniform("tex_anim_3", math::vector_2d());
 
     std::array<int, 4> textures_bound = { -1, -1, -1, -1 };
 
@@ -1167,17 +1116,19 @@ void World::draw ( math::matrix_4x4 const& model_view
       if (terrainMode == editing_mode::minimap
           && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z))
       {
-        mcnk_shader.uniform("draw_selection", 1);
+        //mcnk_shader.uniform("draw_selection", 1);
       }
       else
       {
-        mcnk_shader.uniform("draw_selection", 0);
+      //  mcnk_shader.uniform("draw_selection", 0);
       }
+
+      gl.bindVertexArray(_mapchunk_vao);
+      gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mapchunk_index);
 
 
       tile->draw ( frustum
                  , mcnk_shader
-                 , detailtexcoords
                  , culldistance
                  , camera_pos
                  , camera_moved
@@ -1879,9 +1830,9 @@ void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, 
 }
 
 void World::recalc_norms (MapChunk* chunk) const
-{
-  ZoneScoped;
-  chunk->recalcNorms ( [this] (float x, float z) -> boost::optional<float>
+  {
+    ZoneScoped;
+    chunk->recalcNorms ( [this] (float x, float z) -> boost::optional<float>
                        {
                          math::vector_3d vec;
                          auto res (GetVertex (x, z, &vec));
@@ -2043,6 +1994,8 @@ void World::drawMinimap ( MapTile *tile
 {
   ZoneScoped;
 
+  /*
+
   if (!_display_initialized)
   {
     initDisplay();
@@ -2051,7 +2004,7 @@ void World::drawMinimap ( MapTile *tile
 
   if (!_global_vbos_initialized)
   {
-    initGlobalVBOs(&detailtexcoords, &alphatexcoords);
+    //initGlobalVBOs(&detailtexcoords, &alphatexcoords);
     _global_vbos_initialized = true;
   }
 
@@ -2373,6 +2326,7 @@ void World::drawMinimap ( MapTile *tile
   {
     mapIndex.unloadTile(m_tile);
   }
+   */
 }
 
 bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* settings)
@@ -3479,7 +3433,7 @@ void World::updateSelectedVertices()
 
   for (MapChunk* chunk : _vertex_chunks)
   {
-    chunk->updateVerticesData();
+    chunk->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
     recalc_norms (chunk);
   }
 }
@@ -3703,13 +3657,8 @@ void World::unload_shaders()
 
   skies->unload();
 
-  gl.deleteBuffers(1, &detailtexcoords);
-  gl.deleteBuffers(1, &alphatexcoords);
-
-  detailtexcoords = 0;
-  alphatexcoords = 0;
-
   _buffers.unload();
+  _vertex_arrays.unload();
 
   _global_vbos_initialized = false;
   _display_initialized = false;
@@ -4219,5 +4168,106 @@ void World::updateTerrainParamsUniformBlock()
   gl.bindBuffer(GL_UNIFORM_BUFFER, _terrain_params_ubo);
   gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::TerrainParamsUniformBlock), &_terrain_params_ubo_data);
   _need_terrain_params_ubo_update = false;
+}
+
+void World::setupChunkVAO(opengl::scoped::use_program& mcnk_shader)
+{
+  ZoneScoped;
+  opengl::scoped::vao_binder const _ (_mapchunk_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mapchunk_texcoord);
+    mcnk_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mapchunk_vertex);
+    mcnk_shader.attrib("position", 2, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+}
+
+void World::setupChunkBuffers()
+{
+  ZoneScoped;
+
+  // vertices
+
+  math::vector_2d vertices[mapbufsize];
+  math::vector_2d *ttv = vertices;
+
+  for (int j = 0; j < 17; ++j)
+  {
+    bool is_lod = j % 2;
+    for (int i = 0; i < (is_lod ? 8 : 9); ++i)
+    {
+      float xpos, zpos;
+      xpos = i * UNITSIZE;
+      zpos = j * 0.5f * UNITSIZE;
+
+      if (is_lod)
+      {
+        xpos += UNITSIZE*0.5f;
+      }
+
+      math::vector_2d v = math::vector_2d(xpos, zpos);
+      *ttv++ = v;
+    }
+  }
+
+  gl.bufferData<GL_ARRAY_BUFFER>(_mapchunk_vertex, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  // indices
+  std::uint16_t indices[768];
+  int flat_index = 0;
+
+  for (int x = 0; x<8; ++x)
+  {
+    for (int y = 0; y<8; ++y)
+    {
+      indices[flat_index++] = MapChunk::indexLoD(y, x); //9
+      indices[flat_index++] = MapChunk::indexNoLoD(y, x); //0
+      indices[flat_index++] = MapChunk::indexNoLoD(y + 1, x); //17
+      indices[flat_index++] = MapChunk::indexLoD(y, x); //9
+      indices[flat_index++] = MapChunk::indexNoLoD(y + 1, x); //17
+      indices[flat_index++] = MapChunk::indexNoLoD(y + 1, x + 1); //18
+      indices[flat_index++] = MapChunk::indexLoD(y, x); //9
+      indices[flat_index++] = MapChunk::indexNoLoD(y + 1, x + 1); //18
+      indices[flat_index++] = MapChunk::indexNoLoD(y, x + 1); //1
+      indices[flat_index++] = MapChunk::indexLoD(y, x); //9
+      indices[flat_index++] = MapChunk::indexNoLoD(y, x + 1); //1
+      indices[flat_index++] = MapChunk::indexNoLoD(y, x); //0
+    }
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_mapchunk_index);
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, 768 * sizeof(std::uint16_t), indices, GL_STATIC_DRAW);
+  }
+
+  // tex coords
+  math::vector_2d temp[mapbufsize], *vt;
+  float tx, ty;
+
+  // init texture coordinates for detail map:
+  vt = temp;
+  const float detail_half = 0.5f * detail_size / 8.0f;
+  for (int j = 0; j < 17; ++j)
+  {
+    bool is_lod = j % 2;
+
+    for (int i = 0; i< (is_lod ? 8 : 9); ++i)
+    {
+      tx = detail_size / 8.0f * i;
+      ty = detail_size / 8.0f * j * 0.5f;
+
+      if (is_lod)
+        tx += detail_half;
+
+      *vt++ = math::vector_2d(tx, ty);
+    }
+  }
+
+  gl.bufferData<GL_ARRAY_BUFFER> (_mapchunk_texcoord, sizeof(temp), temp, GL_STATIC_DRAW);
+
 }
 

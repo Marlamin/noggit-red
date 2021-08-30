@@ -31,6 +31,10 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
   , mt(maintile)
   , use_big_alphamap(bigAlpha)
   , _context(context)
+  , _chunk_update_flags(ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
+                        | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
+                        | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
+                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
 {
 
   if (init_empty)
@@ -52,10 +56,16 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
 
     texture_set = nullptr;
 
+    auto& tile_buffer = mt->getChunkHeightmapBuffer();
+    int chunk_start = (px * 16 + py) * mapbufsize * 4;
+
     // Generate normals
     for (int i = 0; i < mapbufsize; ++i)
     {
-      mNormals[i] = {0.0f, 1.0f, 0.0f};
+      int pixel_start = chunk_start + i * 4;
+      tile_buffer[pixel_start] = 0.0f;
+      tile_buffer[pixel_start + 1] = 1.0f;
+      tile_buffer[pixel_start + 2] = 0.0f;
     }
 
     // Clear shadows
@@ -143,7 +153,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
     vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
   }
 
-  texture_set = std::make_unique<TextureSet>(header, f, base, maintile, bigAlpha,
+  texture_set = std::make_unique<TextureSet>(this, f, base, maintile, bigAlpha,
      !!header_flags.flags.do_not_fix_alpha_map, mode == tile_mode::uid_fix_all, _context);
 
   // - MCVT ----------------------------------------------
@@ -192,12 +202,17 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
 
     assert(fourcc == 'MCNR');
 
+    auto& tile_buffer = mt->getChunkHeightmapBuffer();
+    int chunk_start = (px * 16 + py) * mapbufsize * 4;
+
     char nor[3];
-    math::vector_3d *ttn = mNormals;
-    for (int i = 0; i< mapbufsize; ++i)
+    for (int i = 0; i < mapbufsize; ++i)
     {
       f->read(nor, 3);
-      *ttn++ = math::vector_3d(nor[0] / 127.0f, nor[2] / 127.0f, nor[1] / 127.0f);
+      int pixel_start = chunk_start + i * 4;
+      tile_buffer[pixel_start] = nor[0] / 127.0f;
+      tile_buffer[pixel_start + 1] = nor[1] / 127.0f;
+      tile_buffer[pixel_start + 2] = nor[2] / 127.0f;
     }
   }
   // - MCSH ----------------------------------------------
@@ -294,12 +309,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
     header_flags.value &= ~(0xF << 2);
   }
 
-  // no need to create indexes when applying the uid fix
-  if (_mode == tile_mode::edit)
-  {
-    initStrip();
-  }
-
   vcenter = (vmin + vmax) * 0.5f;
 }
 
@@ -317,77 +326,8 @@ void MapChunk::update_intersect_points()
 {
   // update the center of the chunk and visibility when the vertices changed
   vcenter = (vmin + vmax) * 0.5f;
-  _need_visibility_update = true;
 }
 
-void MapChunk::upload()
-{
-  // uid fix adt should never/can't be rendered
-  // add the check here once to avoid checks all over the place
-  // editing requires rendering anyway
-  if (_mode == tile_mode::uid_fix_all)
-  {
-    throw std::logic_error("Trying to render an ADT/chunk that is supposed to be used for the uid fix all only");
-  }
-
-  _vertex_array.upload();
-  _buffers.upload();
-  lod_indices.upload();
-
-  update_shadows();
-
-  // fill vertex buffers
-  gl.bufferData<GL_ARRAY_BUFFER> (_vertices_vbo, sizeof(mVertices), mVertices, GL_DYNAMIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (_normals_vbo, sizeof(mNormals), mNormals, GL_DYNAMIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER> (_mccv_vbo, sizeof(mccv), mccv, GL_DYNAMIC_DRAW);
-
-  update_indices_buffer();
-  _uploaded = true;
-}
-
-void MapChunk::update_indices_buffer()
-{
-  {
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_indices_buffer);
-    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_with_holes.size() * sizeof (StripType), strip_with_holes.data(), GL_STATIC_DRAW);
-  }
-
-  for (int lod_level = 0; lod_level < 4; ++lod_level)
-  {
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (lod_indices[lod_level]);
-    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, strip_lods[lod_level].size() * sizeof (StripType), strip_lods[lod_level].data(), GL_STATIC_DRAW);
-  }
-
-  _need_indice_buffer_update = false;
-}
-
-boost::optional<int> MapChunk::get_lod_level(math::vector_3d const& camera_pos, display_mode display) const
-{
-  float dist = display == display_mode::in_2D
-             ? std::abs(camera_pos.y - vcenter.y)
-             : (camera_pos - vcenter).length();
-
-  if (dist < 500.f)
-  {
-    return boost::none;
-  }
-  else if (dist < 1000.f)
-  {
-    return 0;
-  }
-  else if (dist < 2000.f)
-  {
-    return 1;
-  }
-  else if (dist < 4000.f)
-  {
-    return 2;
-  }
-  else
-  {
-    return 3;
-  }
-}
 
 std::vector<uint8_t> MapChunk::compressed_shadow_map() const
 {
@@ -415,65 +355,6 @@ bool MapChunk::has_shadows() const
   }
 
   return false;
-}
-
-void MapChunk::initStrip()
-{
-  strip_with_holes.clear();
-  strip_without_holes.clear();
-  strip_lods.clear();
-
-  for (int x = 0; x<8; ++x)
-  {
-    for (int y = 0; y<8; ++y)
-    {
-      strip_without_holes.emplace_back (indexLoD(y, x)); //9
-      strip_without_holes.emplace_back (indexNoLoD(y, x)); //0
-      strip_without_holes.emplace_back (indexNoLoD(y + 1, x)); //17
-      strip_without_holes.emplace_back (indexLoD(y, x)); //9
-      strip_without_holes.emplace_back (indexNoLoD(y + 1, x)); //17
-      strip_without_holes.emplace_back (indexNoLoD(y + 1, x + 1)); //18
-      strip_without_holes.emplace_back (indexLoD(y, x)); //9
-      strip_without_holes.emplace_back (indexNoLoD(y + 1, x + 1)); //18
-      strip_without_holes.emplace_back (indexNoLoD(y, x + 1)); //1
-      strip_without_holes.emplace_back (indexLoD(y, x)); //9
-      strip_without_holes.emplace_back (indexNoLoD(y, x + 1)); //1
-      strip_without_holes.emplace_back (indexNoLoD(y, x)); //0
-
-      if (isHole(x / 2, y / 2))
-        continue;
-
-      // todo: better hole check ?
-      for (int lod_level = 0; lod_level < 4; ++lod_level)
-      {
-        int n = 1 << lod_level;
-        if ((x % n) == 0 && (y % n) == 0)
-        {
-          strip_lods[lod_level].emplace_back (indexNoLoD(y, x)); //0
-          strip_lods[lod_level].emplace_back (indexNoLoD(y + n, x)); //17
-          strip_lods[lod_level].emplace_back (indexNoLoD(y + n, x + n)); //18
-          strip_lods[lod_level].emplace_back (indexNoLoD(y + n, x + n)); //18
-          strip_lods[lod_level].emplace_back (indexNoLoD(y, x + n)); //1
-          strip_lods[lod_level].emplace_back (indexNoLoD(y, x)); //0
-        }
-      }
-
-      strip_with_holes.emplace_back (indexLoD(y, x)); //9
-      strip_with_holes.emplace_back (indexNoLoD(y, x)); //0
-      strip_with_holes.emplace_back (indexNoLoD(y + 1, x)); //17
-      strip_with_holes.emplace_back (indexLoD(y, x)); //9
-      strip_with_holes.emplace_back (indexNoLoD(y + 1, x)); //17
-      strip_with_holes.emplace_back (indexNoLoD(y + 1, x + 1)); //18
-      strip_with_holes.emplace_back (indexLoD(y, x)); //9
-      strip_with_holes.emplace_back (indexNoLoD(y + 1, x + 1)); //18
-      strip_with_holes.emplace_back (indexNoLoD(y, x + 1)); //1
-      strip_with_holes.emplace_back (indexLoD(y, x)); //9
-      strip_with_holes.emplace_back (indexNoLoD(y, x + 1)); //1
-      strip_with_holes.emplace_back (indexNoLoD(y, x)); //0
-    }
-  }
-
-  _need_indice_buffer_update = true;
 }
 
 bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
@@ -522,77 +403,12 @@ void MapChunk::clearHeight()
 
   update_intersect_points();
 
-  if (_uploaded)
-  {
-    gl.bufferSubData<GL_ARRAY_BUFFER>(_vertices_vbo, 0,sizeof(mVertices), mVertices);
-  }
+  registerChunkUpdate(ChunkUpdateFlags::VERTEX);
 }
 
-bool MapChunk::is_visible ( const float& cull_distance
-                          , const math::frustum& frustum
-                          , const math::vector_3d& camera
-                          , display_mode display
-                          ) const
-{
-  static const float chunk_radius = std::sqrt (CHUNKSIZE * CHUNKSIZE / 2.0f); //was (vmax - vmin).length() * 0.5f;
-
-  float dist = display == display_mode::in_3D
-             ? (camera - vcenter).length() - chunk_radius
-             : std::abs(camera.y - vmax.y);
-
-  return frustum.intersects(vmax, vmin) && dist < cull_distance;
-
-}
-
-
-void MapChunk::update_vao(opengl::scoped::use_program& mcnk_shader, GLuint const& tex_coord_vbo)
-{
-  opengl::scoped::vao_binder const _ (_vao);
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
-    mcnk_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_normals_vbo);
-    mcnk_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mccv_vbo);
-    mcnk_shader.attrib("mccv", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(tex_coord_vbo);
-    mcnk_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  _need_vao_update = false;
-  _need_indice_buffer_update = true;
-}
-
-void MapChunk::update_visibility ( const float& cull_distance
-                                 , const math::frustum& frustum
-                                 , const math::vector_3d& camera
-                                 , display_mode display
-                                 )
-{
-
-  auto lod = get_lod_level(camera, display);
-
-  _is_visible = is_visible(cull_distance, frustum, camera, display);
-  _need_visibility_update = false;
-  //_need_lod_update |= lod != _lod_level;
-
-  _lod_level = boost::none;
- // _lod_level = lod;
-}
 
 void MapChunk::draw ( math::frustum const& frustum
                     , opengl::scoped::use_program& mcnk_shader
-                    , GLuint const& tex_coord_vbo
                     , const float& cull_distance
                     , const math::vector_3d& camera
                     , bool need_visibility_update
@@ -608,34 +424,7 @@ void MapChunk::draw ( math::frustum const& frustum
 {
   ZoneScopedN("MapChunk::draw()");
 
-  if (need_visibility_update || _need_visibility_update)
-  {
-    ZoneScopedN("MapChunk::draw() : Culling");
-    update_visibility(cull_distance, frustum, camera, display);
-  }
-
-  if (!_is_visible)
-  {
-    ZoneScopedN("MapChunk::draw() : Culled");
-    return;
-  }
-
-  if (!_uploaded)
-  {
-    ZoneScopedN("MapChunk::draw() : Uploading");
-    upload();
-    // force lod update on upload
-    _need_lod_update = true;
-    update_visibility(cull_distance, frustum, camera, display);
-  }
-
-  // todo update lod too
-  if (_need_vao_update)
-  {
-    ZoneScopedN("MapChunk::draw() : Updating VAO");
-    update_vao(mcnk_shader, tex_coord_vbo);
-  }
-
+/*
   bool cantPaint = show_unpaintable_chunks
                     && draw_paintability_overlay
                     && noggit::ui::selected_texture::get()
@@ -651,8 +440,8 @@ void MapChunk::draw ( math::frustum const& frustum
 
       for (int i = 0; i < texture_set->num(); ++i)
       {
-        texture_set->bindTexture(i, i + 1, textures_bound);
-        mcnk_shader.uniform("tex_temp_" + std::to_string(i), (*texture_set->getTextures())[i]->array_index());
+        //texture_set->bindTexture(i, i + 1, textures_bound);
+        //mcnk_shader.uniform("tex_temp_" + std::to_string(i), (*texture_set->getTextures())[i]->array_index());
 
         if (texture_set->is_animated(i))
         {
@@ -685,20 +474,7 @@ void MapChunk::draw ( math::frustum const& frustum
   {
     ZoneScopedN("MapChunk::draw() : VAO/Buffer bindings");
 
-    gl.bindVertexArray(_vao);
 
-    if (_need_indice_buffer_update)
-    {
-      update_indices_buffer();
-      _need_lod_update = true;
-    }
-
-    if (_need_lod_update)
-    {
-      gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, !_lod_level ? _indices_buffer : lod_indices[*_lod_level]);
-      _lod_level_indice_count = !_lod_level ? strip_with_holes.size() : strip_lods[*_lod_level].size();
-      _need_lod_update = false;
-    }
   }
 
   {
@@ -718,6 +494,8 @@ void MapChunk::draw ( math::frustum const& frustum
     }
   }
 
+  */
+
 }
 
 bool MapChunk::intersect (math::ray const& ray, selection_result* results)
@@ -727,16 +505,69 @@ bool MapChunk::intersect (math::ray const& ray, selection_result* results)
     return false;
   }
 
-  for (int i (0); i < strip_without_holes.size(); i += 3)
+  static constexpr std::array<std::uint16_t, 768> indices =
   {
-    if ( auto distance = ray.intersect_triangle ( mVertices[strip_without_holes[i + 0]]
-                                                , mVertices[strip_without_holes[i + 1]]
-                                                , mVertices[strip_without_holes[i + 2]]
+    9, 0, 17, 9, 17, 18, 9, 18, 1, 9, 1, 0, 26, 17, 34, 26,
+    34, 35, 26, 35, 18, 26, 18, 17, 43, 34, 51, 43, 51, 52, 43, 52,
+    35, 43, 35, 34, 60, 51, 68, 60, 68, 69, 60, 69, 52, 60, 52, 51,
+    77, 68, 85, 77, 85, 86, 77, 86, 69, 77, 69, 68, 94, 85, 102, 94,
+    102, 103, 94, 103, 86, 94, 86, 85, 111, 102, 119, 111, 119, 120, 111, 120,
+    103, 111, 103, 102, 128, 119, 136, 128, 136, 137, 128, 137, 120, 128, 120, 119,
+    10, 1, 18, 10, 18, 19, 10, 19, 2, 10, 2, 1, 27, 18, 35, 27,
+    35, 36, 27, 36, 19, 27, 19, 18, 44, 35, 52, 44, 52, 53, 44, 53,
+    36, 44, 36, 35, 61, 52, 69, 61, 69, 70, 61, 70, 53, 61, 53, 52,
+    78, 69, 86, 78, 86, 87, 78, 87, 70, 78, 70, 69, 95, 86, 103, 95,
+    103, 104, 95, 104, 87, 95, 87, 86, 112, 103, 120, 112, 120, 121, 112, 121,
+    104, 112, 104, 103, 129, 120, 137, 129, 137, 138, 129, 138, 121, 129, 121, 120,
+    11, 2, 19, 11, 19, 20, 11, 20, 3, 11, 3, 2, 28, 19, 36, 28,
+    36, 37, 28, 37, 20, 28, 20, 19, 45, 36, 53, 45, 53, 54, 45, 54,
+    37, 45, 37, 36, 62, 53, 70, 62, 70, 71, 62, 71, 54, 62, 54, 53,
+    79, 70, 87, 79, 87, 88, 79, 88, 71, 79, 71, 70, 96, 87, 104, 96,
+    104, 105, 96, 105, 88, 96, 88, 87, 113, 104, 121, 113, 121, 122, 113, 122,
+    105, 113, 105, 104, 130, 121, 138, 130, 138, 139, 130, 139, 122, 130, 122, 121,
+    12, 3, 20, 12, 20, 21, 12, 21, 4, 12, 4, 3, 29, 20, 37, 29,
+    37, 38, 29, 38, 21, 29, 21, 20, 46, 37, 54, 46, 54, 55, 46, 55,
+    38, 46, 38, 37, 63, 54, 71, 63, 71, 72, 63, 72, 55, 63, 55, 54,
+    80, 71, 88, 80, 88, 89, 80, 89, 72, 80, 72, 71, 97, 88, 105, 97,
+    105, 106, 97, 106, 89, 97, 89, 88, 114, 105, 122, 114, 122, 123, 114, 123,
+    106, 114, 106, 105, 131, 122, 139, 131, 139, 140, 131, 140, 123, 131, 123, 122,
+    13, 4, 21, 13, 21, 22, 13, 22, 5, 13, 5, 4, 30, 21, 38, 30,
+    38, 39, 30, 39, 22, 30, 22, 21, 47, 38, 55, 47, 55, 56, 47, 56,
+    39, 47, 39, 38, 64, 55, 72, 64, 72, 73, 64, 73, 56, 64, 56, 55,
+    81, 72, 89, 81, 89, 90, 81, 90, 73, 81, 73, 72, 98, 89, 106, 98,
+    106, 107, 98, 107, 90, 98, 90, 89, 115, 106, 123, 115, 123, 124, 115, 124,
+    107, 115, 107, 106, 132, 123, 140, 132, 140, 141, 132, 141, 124, 132, 124, 123,
+    14, 5, 22, 14, 22, 23, 14, 23, 6, 14, 6, 5, 31, 22, 39, 31,
+    39, 40, 31, 40, 23, 31, 23, 22, 48, 39, 56, 48, 56, 57, 48, 57,
+    40, 48, 40, 39, 65, 56, 73, 65, 73, 74, 65, 74, 57, 65, 57, 56,
+    82, 73, 90, 82, 90, 91, 82, 91, 74, 82, 74, 73, 99, 90, 107, 99,
+    107, 108, 99, 108, 91, 99, 91, 90, 116, 107, 124, 116, 124, 125, 116, 125,
+    108, 116, 108, 107, 133, 124, 141, 133, 141, 142, 133, 142, 125, 133, 125, 124,
+    15, 6, 23, 15, 23, 24, 15, 24, 7, 15, 7, 6, 32, 23, 40, 32,
+    40, 41, 32, 41, 24, 32, 24, 23, 49, 40, 57, 49, 57, 58, 49, 58,
+    41, 49, 41, 40, 66, 57, 74, 66, 74, 75, 66, 75, 58, 66, 58, 57,
+    83, 74, 91, 83, 91, 92, 83, 92, 75, 83, 75, 74, 100, 91, 108, 100,
+    108, 109, 100, 109, 92, 100, 92, 91, 117, 108, 125, 117, 125, 126, 117, 126,
+    109, 117, 109, 108, 134, 125, 142, 134, 142, 143, 134, 143, 126, 134, 126, 125,
+    16, 7, 24, 16, 24, 25, 16, 25, 8, 16, 8, 7, 33, 24, 41, 33,
+    41, 42, 33, 42, 25, 33, 25, 24, 50, 41, 58, 50, 58, 59, 50, 59,
+    42, 50, 42, 41, 67, 58, 75, 67, 75, 76, 67, 76, 59, 67, 59, 58,
+    84, 75, 92, 84, 92, 93, 84, 93, 76, 84, 76, 75, 101, 92, 109, 101,
+    109, 110, 101, 110, 93, 101, 93, 92, 118, 109, 126, 118, 126, 127, 118, 127,
+    110, 118, 110, 109, 135, 126, 143, 135, 143, 144, 135, 144, 127, 135, 127, 126
+  };
+
+  for (int i (0); i < indices.size(); i += 3)
+  {
+    if ( auto distance = ray.intersect_triangle ( mVertices[indices[i + 0]]
+                                                , mVertices[indices[i + 1]]
+                                                , mVertices[indices[i + 2]]
                                                 )
        )
     {
       results->emplace_back
-          (*distance, selected_chunk_type (this, std::make_tuple(strip_without_holes[i], strip_without_holes[i + 1], strip_without_holes[i + 2]), ray.position (*distance)));
+          (*distance, selected_chunk_type (this, std::make_tuple(indices[i], indices[i + 1],
+                                                                 indices[i + 2]), ray.position (*distance)));
       return true;
     }
   }
@@ -746,45 +577,137 @@ bool MapChunk::intersect (math::ray const& ray, selection_result* results)
 
 void MapChunk::updateVerticesData()
 {
+  // This method assumes tile's heightmap texture is currently bound to the active tex unit
+
+  if (!(_chunk_update_flags & ChunkUpdateFlags::VERTEX))
+    return;
+
   vmin.y = std::numeric_limits<float>::max();
   vmax.y = std::numeric_limits<float>::lowest();
+
+  auto& tile_buffer = mt->getChunkHeightmapBuffer();
+
+  int chunk_start = (px * 16 + py) * mapbufsize * 4;
 
   for (int i(0); i < mapbufsize; ++i)
   {
     vmin.y = std::min(vmin.y, mVertices[i].y);
     vmax.y = std::max(vmax.y, mVertices[i].y);
+    tile_buffer[chunk_start + i * 4 + 3] = mVertices[i].y;
   }
 
   update_intersect_points();
-
-  if (_uploaded)
-  {
-    gl.bufferSubData<GL_ARRAY_BUFFER>(_vertices_vbo, 0, sizeof(mVertices), mVertices);
-  }
 }
 
 void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)> height)
 {
+  // This method assumes tile's heightmap texture is currently bound to the active tex unit
+
+  // 0 - up_left
+  // 1 - up_right
+  // 2 - down_left
+  // 3 - down_right
+
   auto point
   (
-    [&] (math::vector_3d& v, float xdiff, float zdiff)
+    [this, height](int i, unsigned dir)
     {
-      return math::vector_3d
-             ( v.x + xdiff
-             , height (v.x + xdiff, v.z + zdiff).get_value_or (v.y)
-             , v.z + zdiff
-             );
+      constexpr float half_unit = UNITSIZE / 2.f;
+      static constexpr std::array xdiff{-half_unit, half_unit, half_unit, -half_unit};
+      static constexpr std::array zdiff{-half_unit, -half_unit, half_unit, half_unit};
+
+      static constexpr std::array idiff{-9, -8, 9, 8};
+
+      if ((i >= 1 && i <= 7 && dir < 2 && !py)
+        || (i >= 137 && i <= 143 && (dir == 2 || dir == 3) && py == 15)
+        || (!i && (dir < 2 && !py || (!dir || dir == 3) && !px))
+        || (i == 8 && ((dir == 1 || dir == 2) && px == 15) || dir < 2 && !py)
+        || (i == 136 && ((dir == 3 || dir == 2) && py == 15) || (!dir || dir == 3) && !px)
+        || (i == 144 && ((dir == 3 || dir == 2) && py == 15) || ((dir == 1 || dir == 2) && px == 15))
+        || (!(i % 17) && (!dir || dir == 3) && !px)
+        || (!(i % 25) && (dir == 1 || dir == 2) && px == 15))
+      {
+        return math::vector_3d
+          ( mVertices[i].x + xdiff[dir]
+            , height(mVertices[i].x + xdiff[dir], mVertices[i].z + zdiff[dir]).get_value_or(mVertices[i].y)
+            , mVertices[i].z + zdiff[dir]
+          );
+      }
+
+      switch (dir)
+      {
+        case 0:
+        {
+          if (!i)
+            return mt->getChunk(px - 1, py - 1)->mVertices[135];
+          else if (i == 136)
+            return mt->getChunk(px - 1, py)->mVertices[135];
+          else if (i == 8)
+            return mt->getChunk(px, py - 1)->mVertices[135];
+          else if (i >= 1 && i <= 7)
+            return mt->getChunk(px, py - 1)->mVertices[127 + i];
+          else if (!(i % 17))
+            return mt->getChunk(px - 1, py)->mVertices[i - 1];
+          break;
+        }
+        case 1:
+        {
+          if (!i)
+            return mt->getChunk(px, py - 1)->mVertices[128];
+          else if (i == 144)
+            return mt->getChunk(px + 1, py)->mVertices[128];
+          else if (i == 8)
+            return mt->getChunk(px + 1, py - 1)->mVertices[128];
+          else if (i >= 1 && i <= 7)
+            return mt->getChunk(px, py - 1)->mVertices[128 + i];
+          else if (!(i % 17 % 8) && i % 17 != 16 && i % 17)
+            return mt->getChunk(px + 1, py)->mVertices[i - 8];
+          break;
+        }
+        case 2:
+        {
+          if (i == 136)
+            return mt->getChunk(px, py + 1)->mVertices[9];
+          else if (i == 144)
+            return mt->getChunk(px + 1, py + 1)->mVertices[9];
+          else if (i == 8)
+            return mt->getChunk(px + 1, py)->mVertices[9];
+          else if (!(i % 17 % 8) && i % 17 != 16 && i && i % 17)
+            return mt->getChunk(px + 1, py)->mVertices[i + 9];
+          else if (i >= 137 && i <= 143)
+            return mt->getChunk(px, py + 1)->mVertices[i - 127];
+
+          break;
+        }
+        case 3:
+        {
+          if (!i)
+            return mt->getChunk(px - 1, py)->mVertices[16];
+          else if (i == 136)
+            return mt->getChunk(px - 1, py + 1)->mVertices[16];
+          else if (i == 144)
+            return mt->getChunk(px, py + 1)->mVertices[16];
+          else if (!(i % 17))
+            return mt->getChunk(px - 1, py)->mVertices[i + 16];
+          else if (i >= 137 && i <= 143)
+            return mt->getChunk(px, py + 1)->mVertices[i - 128];
+          break;
+        }
+      }
+
+      return mVertices[i + idiff[dir]];
     }
   );
 
-  float const half_unit = UNITSIZE / 2.f;
+  auto& tile_buffer = mt->getChunkHeightmapBuffer();
+  int chunk_start = (px * 16 + py) * mapbufsize * 4;
 
-  for (int i = 0; i<mapbufsize; ++i)
+  for (int i = 0; i < mapbufsize; ++i)
   {
-    math::vector_3d const P1 (point(mVertices[i], -half_unit, -half_unit));
-    math::vector_3d const P2 (point(mVertices[i],  half_unit, -half_unit));
-    math::vector_3d const P3 (point(mVertices[i],  half_unit,  half_unit));
-    math::vector_3d const P4 (point(mVertices[i], -half_unit,  half_unit));
+    math::vector_3d const P1 (point(i, 0));
+    math::vector_3d const P2 (point(i, 1));
+    math::vector_3d const P3 (point(i, 2));
+    math::vector_3d const P4 (point(i, 3));
 
     math::vector_3d const N1 ((P2 - mVertices[i]) % (P1 - mVertices[i]));
     math::vector_3d const N2 ((P3 - mVertices[i]) % (P2 - mVertices[i]));
@@ -799,21 +722,21 @@ void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)>
     Norm.z = std::floor(Norm.z * 127) / 127;
 
     //! \todo: find out why recalculating normals without changing the terrain result in slightly different normals
-    mNormals[i] = {-Norm.z, Norm.y, -Norm.x};
+
+    int pixel_start = chunk_start + i * 4;
+    tile_buffer[pixel_start] = -Norm.z;
+    tile_buffer[pixel_start + 1] = Norm.y;
+    tile_buffer[pixel_start + 2] = -Norm.x;
+
   }
 
-  if (_uploaded)
-  {
-    gl.bufferSubData<GL_ARRAY_BUFFER> (_normals_vbo, 0, sizeof(mNormals), mNormals);
-  }
+  registerChunkUpdate(ChunkUpdateFlags::NORMALS);
+
 }
 
 void MapChunk::updateNormalsData()
 {
-  if (_uploaded)
-  {
-    gl.bufferSubData<GL_ARRAY_BUFFER> (_normals_vbo, 0, sizeof(mNormals), mNormals);
-  }
+  //gl.texSubImage2D(GL_TEXTURE_2D, 0, 0, px * 16 + py, mapbufsize, 1, GL_RGB, GL_FLOAT, mNormals);
 }
 
 bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
@@ -832,7 +755,7 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
   }
   if (changed)
   {
-    updateVerticesData();
+    registerChunkUpdate(ChunkUpdateFlags::VERTEX);
   }
   return changed;
 }
@@ -882,9 +805,9 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
       changed = true;
     }
   }
-  if (changed && _uploaded)
+  if (changed)
   {
-    update_vertex_colors();
+    registerChunkUpdate(ChunkUpdateFlags::MCCV);
   }
 
   return changed;
@@ -976,9 +899,9 @@ bool MapChunk::stampMCCV(math::vector_3d const& pos, math::vector_4d const& colo
     changed = true;
 
   }
-  if (changed && _uploaded)
+  if (changed)
   {
-    update_vertex_colors();
+    registerChunkUpdate(ChunkUpdateFlags::MCCV);
   }
 
   return changed;
@@ -986,7 +909,9 @@ bool MapChunk::stampMCCV(math::vector_3d const& pos, math::vector_4d const& colo
 
 void MapChunk::update_vertex_colors()
 {
-  gl.bufferSubData<GL_ARRAY_BUFFER> (_mccv_vbo, 0, sizeof(mccv), mccv);
+  if (_chunk_update_flags & ChunkUpdateFlags::MCCV)
+
+    gl.texSubImage2D(GL_TEXTURE_2D, 0, 0, px * 16 + py, mapbufsize, 1, GL_RGB, GL_FLOAT, mccv);
 }
 
 math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)
@@ -1069,7 +994,7 @@ bool MapChunk::flattenTerrain ( math::vector_3d const& pos
 
   if (changed)
   {
-    updateVerticesData();
+    registerChunkUpdate(ChunkUpdateFlags::VERTEX);
   }
 
   return changed;
@@ -1142,7 +1067,7 @@ bool MapChunk::blurTerrain ( math::vector_3d const& pos
 
   if (changed)
   {
-    updateVerticesData();
+    registerChunkUpdate(ChunkUpdateFlags::VERTEX);
   }
 
   return changed;
@@ -1276,7 +1201,7 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const* img, fl
     }
   }
 
-  updateVerticesData();
+  registerChunkUpdate(ChunkUpdateFlags::VERTEX);
 }
 
 void MapChunk::eraseTextures()
@@ -1321,22 +1246,15 @@ bool MapChunk::canPaintTexture(scoped_blp_texture_reference texture)
 
 void MapChunk::update_shadows()
 {
-  shadow.bind();
-  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RED, 64, 64, 0, GL_RED, GL_UNSIGNED_BYTE, _shadow_map);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  if (_chunk_update_flags & ChunkUpdateFlags::SHADOW)
+    gl.texSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, px * 16 + py, 64, 64, 1, GL_RED, GL_UNSIGNED_BYTE, _shadow_map);
 }
 
 void MapChunk::clear_shadows()
 {
   memset(_shadow_map, 0, 64 * 64);
 
-  if (_uploaded)
-  {
-    update_shadows();
-  }
+  registerChunkUpdate(ChunkUpdateFlags::SHADOW);
 }
 
 bool MapChunk::isHole(int i, int j)
@@ -1365,16 +1283,16 @@ void MapChunk::setHole(math::vector_3d const& pos, float radius, bool big, bool 
 
       }
     }
-
-
   }
 
-  initStrip();
+  registerChunkUpdate(ChunkUpdateFlags::HOLES);
 }
 
 void MapChunk::setAreaID(int ID)
 {
   areaID = ID;
+
+  registerChunkUpdate(ChunkUpdateFlags::AREA_ID);
 }
 
 int MapChunk::getAreaID()
@@ -1393,6 +1311,8 @@ void MapChunk::setFlag(bool changeto, uint32_t flag)
   {
     header_flags.value &= ~flag;
   }
+
+  registerChunkUpdate(ChunkUpdateFlags::FLAGS);
 }
 
 void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::vector<WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances)
@@ -1504,11 +1424,16 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   char * lNormals = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
+  auto& tile_buffer = mt->getChunkHeightmapBuffer();
+  int chunk_start = (px * 16 + py) * mapbufsize * 4;
+
   for (int i = 0; i < mapbufsize; ++i)
   {
-    lNormals[i * 3 + 0] = static_cast<char>(mNormals[i].x * 127);
-    lNormals[i * 3 + 1] = static_cast<char>(mNormals[i].z * 127);
-    lNormals[i * 3 + 2] = static_cast<char>(mNormals[i].y * 127);
+    int pixel_start = chunk_start + i * 4;
+
+    lNormals[i * 3 + 0] = static_cast<char>(tile_buffer[pixel_start] * 127);
+    lNormals[i * 3 + 1] = static_cast<char>(tile_buffer[pixel_start + 1] * 127);
+    lNormals[i * 3 + 2] = static_cast<char>(tile_buffer[pixel_start + 2] * 127);
   }
 
   lCurrentPosition += 8 + lMCNR_Size;
@@ -1715,7 +1640,7 @@ bool MapChunk::fixGapLeft(const MapChunk* chunk)
 
   if (changed)
   {
-    updateVerticesData();
+    registerChunkUpdate(ChunkUpdateFlags::VERTEX);
   }
 
   return changed;
@@ -1740,7 +1665,7 @@ bool MapChunk::fixGapAbove(const MapChunk* chunk)
 
   if (changed)
   {
-    updateVerticesData();
+    registerChunkUpdate(ChunkUpdateFlags::VERTEX);
   }
 
   return changed;
@@ -1892,7 +1817,7 @@ void MapChunk::setHeightmapImage(QImage const& image, float multiplier, int mode
           break;
       }
     }
-  updateVerticesData();
+  registerChunkUpdate(ChunkUpdateFlags::VERTEX);
 }
 
 ChunkWater* MapChunk::liquid_chunk() const
@@ -1902,14 +1827,10 @@ ChunkWater* MapChunk::liquid_chunk() const
 
 void MapChunk::unload()
 {
-  _vertex_array.unload();
-  _buffers.unload();
-  lod_indices.unload();
-
-  shadow.unload();
-
-  _uploaded = false;
-  _need_vao_update = true;
+  _chunk_update_flags = ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
+                        | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
+                        | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
+                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS;
 }
 
 void MapChunk::setAlphamapImage(const QImage &image, unsigned int layer)
@@ -1980,5 +1901,13 @@ void MapChunk::setVertexColorImage(const QImage &image)
       colors[idx].z = color.blueF() * 2.f;
     }
 
-  update_vertex_colors();
+  registerChunkUpdate(ChunkUpdateFlags::MCCV);
 }
+
+void MapChunk::registerChunkUpdate(unsigned flags)
+{
+  _chunk_update_flags |= flags;
+  mt->registerChunkUpdate(flags);
+}
+
+

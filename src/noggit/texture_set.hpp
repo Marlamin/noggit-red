@@ -12,6 +12,7 @@
 
 class Brush;
 class MapTile;
+class MapChunk;
 
 struct tmp_edit_alpha_values
 {
@@ -29,7 +30,7 @@ class TextureSet
 {
 public:
   TextureSet() = delete;
-  TextureSet(MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile
+  TextureSet(MapChunk* chunk, MPQFile* f, size_t base, MapTile* tile
              , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
              , noggit::NoggitRenderContext context);
 
@@ -76,13 +77,13 @@ public:
 
   int texture_id(scoped_blp_texture_reference const& texture);
 
-  void bind_alpha(std::size_t id);
+  void uploadAlphamapData();
 
   bool apply_alpha_changes();
 
   void create_temporary_alphamaps_if_needed();
 
-  void markDirty() { _need_amap_update = true; _need_lod_texture_map_update = true; };
+  void markDirty();
 
   std::array<boost::optional<Alphamap>, 3>* getAlphamaps() { return &alphamaps; };
   boost::optional<tmp_edit_alpha_values>* getTempAlphamaps() { return &tmp_edit_values; };
@@ -102,12 +103,13 @@ private:
   void alphas_to_big_alpha(uint8_t* dest);
   void alphas_to_old_alpha(uint8_t* dest);
 
-  void update_lod_texture_map(); // todo: remove
+  void update_lod_texture_map(); // todo: remove. WHAT?
+
+  MapChunk* _chunk;
+  MapTile* _tile;
 
   std::vector<scoped_blp_texture_reference> textures;
   std::array<boost::optional<Alphamap>, 3> alphamaps;
-  opengl::texture amap_gl_tex;
-  bool _need_amap_update = true;
   size_t nTextures;
 
   std::array<std::uint16_t, 8> _doodadMapping;

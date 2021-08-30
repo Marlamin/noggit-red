@@ -163,6 +163,11 @@ void blp_texture::bind()
 
 void blp_texture::upload()
 {
+  if (!finished)
+  {
+    return;
+  }
+
   if (_uploaded)
   {
     return;

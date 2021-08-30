@@ -14,13 +14,17 @@
 
 #include <boost/utility/in_place_factory.hpp>
 
-TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, MapTile* tile
+TextureSet::TextureSet (MapChunk* chunk, MPQFile* f, size_t base, MapTile* tile
                         , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
                         , noggit::NoggitRenderContext context)
-  : nTextures(header.nLayers)
+  : nTextures(chunk->header.nLayers)
   , _do_not_convert_alphamaps(do_not_convert_alphamaps)
   , _context(context)
+  , _chunk(chunk)
 {
+
+  auto& header = chunk->header;
+
   std::copy(header.doodadMapping, header.doodadMapping + 8, _doodadMapping.begin());
   std::copy(header.doodadStencil, header.doodadStencil + 8, _doodadStencil.begin());
 
@@ -52,7 +56,7 @@ TextureSet::TextureSet (MapChunkHeader const& header, MPQFile* f, size_t base, M
       convertToBigAlpha();
     }
 
-    _need_amap_update = true;
+    _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   }
 }
 
@@ -79,7 +83,7 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
     }
   }
 
-  _need_amap_update = true;
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true;
 
   return texLevel;
@@ -159,7 +163,7 @@ void TextureSet::swap_layers(int layer_1, int layer_2)
       alphamaps[a2]->setAlpha(alpha);
     }
 
-    _need_amap_update = true;
+    _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
     _need_lod_texture_map_update = true;
   }
 }
@@ -186,7 +190,7 @@ void TextureSet::eraseTextures()
 
   std::fill(_doodadMapping.begin(), _doodadMapping.end(), 0);
 
-  _need_amap_update = true;
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true;
 
   tmp_edit_values = boost::none;
@@ -233,7 +237,7 @@ void TextureSet::eraseTexture(size_t id)
     tmp_edit_values.get()[nTextures].fill(0.f);
   }
 
-  _need_amap_update = true;
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true;
 }
 
@@ -342,7 +346,7 @@ bool TextureSet::eraseUnusedTextures()
       }
     }
 
-    _need_amap_update = true;
+    _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
     _need_lod_texture_map_update = true;
     return true;
   }
@@ -556,7 +560,7 @@ bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush*
   // cleanup
   eraseUnusedTextures();
 
-  _need_amap_update = true;
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true;
 
   return true;
@@ -667,7 +671,7 @@ bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush*
   // cleanup
   eraseUnusedTextures();
 
-  _need_amap_update = true;
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true;
 
   return true;
@@ -824,7 +828,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   // cleanup
   eraseUnusedTextures();
 
-  _need_amap_update = true;
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true;
 
   return true;
@@ -912,7 +916,7 @@ bool TextureSet::replace_texture( float xbase
 
   if (changed)
   {
-    _need_amap_update = true;
+    _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
     _need_lod_texture_map_update = true;
   }
 
@@ -1138,7 +1142,7 @@ void TextureSet::convertToOldAlpha()
     alphamaps[k]->setAlpha(tab + k * 4096);
   }
 
-  _need_amap_update = true;
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
 }
 
 void TextureSet::merge_layers(size_t id1, size_t id2)
@@ -1164,7 +1168,7 @@ void TextureSet::merge_layers(size_t id1, size_t id2)
   }
 
   eraseTexture(id2);
-  _need_amap_update = true;
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true;
 }
 
@@ -1188,62 +1192,52 @@ bool TextureSet::removeDuplicate()
   return changed;
 }
 
-void TextureSet::bind_alpha(std::size_t id)
+void TextureSet::uploadAlphamapData()
 {
-  opengl::texture::set_active_texture(id);
-  amap_gl_tex.bind();
+  // This method assumes tile's alphamap storage is currently bound to the current texture unit
 
-  if (_need_amap_update)
+  if (!(_chunk->getUpdateFlags() & ChunkUpdateFlags::ALPHAMAP) || !nTextures)
+    return;
+
+  static std::array<float, 3 * 64 * 64> amap{};
+
+  if (tmp_edit_values)
   {
-    if (nTextures)
+    auto& tmp_amaps = tmp_edit_values.get();
+
+    for (int i = 0; i < 64 * 64; ++i)
     {
-      if (tmp_edit_values)
+      for (int alpha_id = 0; alpha_id < 3; ++alpha_id)
       {
-        std::array<float, 3 * 64 * 64> amap{};
-        auto& tmp_amaps = tmp_edit_values.get();
-
-        for (int i = 0; i < 64 * 64; ++i)
-        {
-          for (int alpha_id = 0; alpha_id < 3; ++alpha_id)
-          {
-            amap[i * 3 + alpha_id] = tmp_amaps[alpha_id + 1][i] / 255.f;
-          }
-        }
-
-        gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 64, 0, GL_RGB, GL_FLOAT, amap.data());
+        amap[i * 3 + alpha_id] = (alpha_id < nTextures - 1) ? tmp_amaps[alpha_id + 1][i] / 255.f : 0.f;
       }
-      else
+    }
+  }
+  else
+  {
+    uint8_t const* alpha_ptr[3];
+
+    for (int i = 0; i < nTextures - 1; ++i)
+    {
+      alpha_ptr[i] = alphamaps[i]->getAlpha();
+    }
+
+    for (int i = 0; i < 64 * 64; ++i)
+    {
+      for (int alpha_id = 0; alpha_id < 3; ++alpha_id)
       {
-        std::array<uint8_t, 3 * 64 * 64> amap{};
-        uint8_t const* alpha_ptr[3];
-
-        for (int i = 0; i < nTextures - 1; ++i)
-        {
-          alpha_ptr[i] = alphamaps[i]->getAlpha();
-        }
-
-        for (int i = 0; i < 64 * 64; ++i)
-        {
-          for (int alpha_id = 0; alpha_id < 3; ++alpha_id)
-          {
-            amap[i * 3 + alpha_id] = (alpha_id < nTextures - 1)
-                                   ? *(alpha_ptr[alpha_id]++)
-                                   : 0
-                                   ;
-          }
-        }
-
-        gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGB, 64, 64, 0, GL_RGB, GL_UNSIGNED_BYTE, amap.data());
+        amap[i * 3 + alpha_id] = (alpha_id < nTextures - 1)
+                               ? *(alpha_ptr[alpha_id]++) / 255.0f
+                               : 0.f
+                               ;
       }
     }
 
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    _need_amap_update = false;
   }
+
+  gl.texSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, _chunk->px * 16 + _chunk->py,
+                   64, 64, 1, GL_RGB, GL_FLOAT, amap.data());
+
 }
 
 namespace
@@ -1359,7 +1353,7 @@ bool TextureSet::apply_alpha_changes()
     alphamaps[alpha_layer]->setAlpha(values.data());
   }
 
-  _need_amap_update = true;
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true;
 
   tmp_edit_values = boost::none;
@@ -1392,4 +1386,10 @@ void TextureSet::create_temporary_alphamaps_if_needed()
 
     values[0][i] = base_alpha;
   }
+}
+
+void TextureSet::markDirty()
+{
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
+  _need_lod_texture_map_update = true; 
 }

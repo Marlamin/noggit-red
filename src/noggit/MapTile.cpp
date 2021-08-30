@@ -50,6 +50,10 @@ MapTile::MapTile( int pX
   , _load_models(pLoadModels)
   , _world(world)
   , _context(context)
+  , _chunk_update_flags(ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
+                        | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
+                        | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
+                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
 {
 }
 
@@ -307,7 +311,20 @@ void MapTile::finishLoading()
   for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
   {
     theFile.seek(lMCNKOffsets[nextChunk]);
-    mChunks[nextChunk / 16][nextChunk % 16] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha, _mode, _context);
+
+    unsigned x = nextChunk / 16;
+    unsigned z = nextChunk % 16;
+
+    mChunks[x][z] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha, _mode, _context);
+
+    auto& chunk = mChunks[x][z];
+    auto& chunk_render_instance = _chunk_instance_data[nextChunk];
+
+    chunk_render_instance.ChunkHoles_DrawImpass_TexLayerCount_CantPaint[0] = chunk->holes;
+    chunk_render_instance.ChunkHoles_DrawImpass_TexLayerCount_CantPaint[1] = 0;
+    chunk_render_instance.ChunkHoles_DrawImpass_TexLayerCount_CantPaint[2] = chunk->texture_set->num();
+    chunk_render_instance.ChunkHoles_DrawImpass_TexLayerCount_CantPaint[3] = 0;
+    chunk_render_instance.AreaIDColor_DrawSelection[3] = 0;
   }
 
   theFile.close();
@@ -365,7 +382,6 @@ void MapTile::convert_alphamap(bool to_big_alpha)
 
 void MapTile::draw ( math::frustum const& frustum
                    , opengl::scoped::use_program& mcnk_shader
-                   , GLuint const& tex_coord_vbo
                    , const float& cull_distance
                    , const math::vector_3d& camera
                    , bool need_visibility_update
@@ -386,27 +402,186 @@ void MapTile::draw ( math::frustum const& frustum
     return;
   }
 
-  for (int j = 0; j<16; ++j)
+  if (!_uploaded)
   {
-    for (int i = 0; i<16; ++i)
-    {
-      mChunks[j][i]->draw ( frustum
-                          , mcnk_shader
-                          , tex_coord_vbo
-                          , cull_distance
-                          , camera
-                          , need_visibility_update
-                          , show_unpaintable_chunks
-                          , draw_paintability_overlay
-                          , draw_chunk_flag_overlay
-                          , draw_areaid_overlay
-                          , area_id_colors
-                          , animtime
-                          , display
-                          , textures_bound
-                          );
-    }
+    uploadTextures();
+    _buffers.upload();
+
+    gl.bindBuffer(GL_UNIFORM_BUFFER, _chunk_instance_data_ubo);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_INSTANCE_DATA,
+                       _chunk_instance_data_ubo, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256);
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256, NULL, GL_DYNAMIC_DRAW);
+
+    _samplers = std::vector{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+
+    _uploaded = true;
   }
+
+
+  gl.bindBuffer(GL_UNIFORM_BUFFER, _chunk_instance_data_ubo);
+  gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_INSTANCE_DATA,
+                     _chunk_instance_data_ubo, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256);
+
+
+  bool alphamap_bound = false;
+  bool heightmap_bound = false;
+  bool shadowmap_bound = false;
+  bool mccv_bound = false;
+
+  bool texture_not_loaded = false;
+  if (_chunk_update_flags)
+  {
+    for (int j = 0; j < 16; ++j)
+    {
+      for (int i = 0; i < 16; ++i)
+      {
+        auto& chunk = mChunks[j][i];
+        _chunk_instance_data[i * 16 + j].pad1 = {chunk->xbase, chunk->ybase, chunk->zbase, 1.0};
+
+        unsigned flags = chunk->getUpdateFlags();
+
+        if (!flags)
+          continue;
+
+        if (flags & ChunkUpdateFlags::ALPHAMAP)
+        {
+          std::fill(_samplers.begin(), _samplers.end(), -1);
+
+          gl.activeTexture(GL_TEXTURE0 + 3);
+          gl.bindTexture(GL_TEXTURE_2D_ARRAY, _alphamap_tex);
+          alphamap_bound = true;
+          chunk->texture_set->uploadAlphamapData();
+
+          _chunk_instance_data[i * 16 + j].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[2] = chunk->texture_set->num();
+
+          auto& chunk_textures = (*chunk->texture_set->getTextures());
+          for (int k = 0; k < chunk->texture_set->num(); ++k)
+          {
+
+            chunk_textures[k]->upload();
+
+            if (!chunk_textures[k]->is_uploaded())
+            {
+              texture_not_loaded = true;
+              continue;
+            }
+
+            GLuint tex_array = (*chunk->texture_set->getTextures())[k]->texture_array();
+            int tex_index = (*chunk->texture_set->getTextures())[k]->array_index();
+
+            int sampler_id = -1;
+            for (int n = 0; n < 11; ++n)
+            {
+              if (_samplers[n] == tex_array)
+              {
+                sampler_id = n;
+                break;
+              }
+              else if (_samplers[n] < 0)
+              {
+                _samplers[n] = tex_array;
+                sampler_id = n;
+                break;
+              }
+            }
+            if (sampler_id < 0)
+              throw std::logic_error("Not enough allowed texture units! :(");
+
+            _chunk_instance_data[i * 16 + j].ChunkTextureSamplers[k] = sampler_id;
+            _chunk_instance_data[i * 16 + j].ChunkTextureArrayIDs[k] = tex_index;
+          }
+        }
+
+        if (flags & ChunkUpdateFlags::VERTEX || flags & ChunkUpdateFlags::NORMALS)
+        {
+          heightmap_bound = true;
+          if (flags & ChunkUpdateFlags::VERTEX)
+          {
+            chunk->updateVerticesData();
+          }
+
+          gl.activeTexture(GL_TEXTURE0 + 0);
+          gl.bindTexture(GL_TEXTURE_2D, _height_tex);
+          gl.texSubImage2D(GL_TEXTURE_2D, 0, 0, i * 16 + j, mapbufsize, 1, GL_RGBA, GL_FLOAT, _chunk_heightmap_buffer.data() + (i * 16 + j) * mapbufsize * 4);
+        }
+
+        if (flags & ChunkUpdateFlags::MCCV)
+        {
+          mccv_bound = true;
+          gl.activeTexture(GL_TEXTURE0 + 1);
+          gl.bindTexture(GL_TEXTURE_2D, _mccv_tex);
+          chunk->update_vertex_colors();
+        }
+
+        if (flags & ChunkUpdateFlags::SHADOW)
+        {
+          shadowmap_bound = true;
+          gl.activeTexture(GL_TEXTURE0 + 2);
+          gl.bindTexture(GL_TEXTURE_2D_ARRAY, _shadowmap_tex);
+          chunk->update_shadows();
+        }
+
+
+        if (flags & ChunkUpdateFlags::HOLES)
+        {
+          _chunk_instance_data[i * 16 + j].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[0] = chunk->holes;
+        }
+
+        if (!texture_not_loaded)
+          chunk->endChunkUpdates();
+
+        _chunk_instance_data[i * 16 + j].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[1] = 0;
+        _chunk_instance_data[i * 16 + j].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[3] = 0;
+        _chunk_instance_data[i * 16 + j].AreaIDColor_DrawSelection[3] = 0;
+      }
+
+    }
+
+    if (!texture_not_loaded)
+      endChunkUpdates();
+
+    gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256, &_chunk_instance_data);
+  }
+
+  if (!alphamap_bound)
+  {
+    gl.activeTexture(GL_TEXTURE0 + 3);
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, _alphamap_tex);
+  }
+
+  if (!shadowmap_bound)
+  {
+    gl.activeTexture(GL_TEXTURE0 + 2);
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, _shadowmap_tex);
+  }
+
+  if (!mccv_bound)
+  {
+    gl.activeTexture(GL_TEXTURE0 + 1);
+    gl.bindTexture(GL_TEXTURE_2D, _mccv_tex);
+  }
+
+  if (!heightmap_bound)
+  {
+    gl.activeTexture(GL_TEXTURE0 + 0);
+    gl.bindTexture(GL_TEXTURE_2D, _height_tex);
+  }
+
+  for (int i = 0; i < 11; ++i)
+  {
+    gl.activeTexture(GL_TEXTURE0 + 5 + i);
+
+    if (_samplers[i] < 0)
+    {
+      gl.bindTexture(GL_TEXTURE_2D_ARRAY, 0);
+      continue;
+    }
+
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, _samplers[i]);
+  }
+
+  gl.drawElementsInstanced(GL_TRIANGLES, 768, GL_UNSIGNED_SHORT, nullptr, 256);
+
 }
 
 bool MapTile::intersect (math::ray const& ray, selection_result* results) const
@@ -1237,7 +1412,7 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
 
         }
 
-      chunk->updateVerticesData();
+      registerChunkUpdate(ChunkUpdateFlags::VERTEX);
     }
   }
 }
@@ -1373,7 +1548,82 @@ void MapTile::setVertexColorImage(QImage const& image, int mode)
 
         }
 
-      chunk->update_vertex_colors();
+      chunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
     }
   }
+}
+
+void MapTile::unload()
+{
+  if (_uploaded)
+  {
+    _chunk_texture_arrays.unload();
+    _buffers.unload();
+    _uploaded = false;
+  }
+
+  if (_mfbo_buffer_are_setup)
+  {
+    _mfbo_vaos.unload();
+    _mfbo_vbos.unload();
+
+    _mfbo_buffer_are_setup = false;
+  }
+
+  _chunk_update_flags = ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
+                        | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
+                        | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
+                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS;
+}
+
+void MapTile::uploadTextures()
+{
+  _chunk_texture_arrays.upload();
+  gl.activeTexture(GL_TEXTURE0 + 0);
+  gl.bindTexture(GL_TEXTURE_2D, _height_tex);
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, mapbufsize, 256, 0, GL_RGBA, GL_FLOAT,nullptr);
+
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  //gl.texParameteri(GL_TEXTURE_1D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  //gl.texParameteri(GL_TEXTURE_1D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  //gl.texParameteri(GL_TEXTURE_1D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  //const GLint swizzleMask[] = {GL_RED, GL_RED, GL_RED, GL_ONE};
+  //gl.texParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+  gl.bindTexture(GL_TEXTURE_2D, 0);
+
+  gl.activeTexture(GL_TEXTURE0 + 2);
+  gl.bindTexture(GL_TEXTURE_2D, _mccv_tex);
+  gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, mapbufsize, 256, 0, GL_RGB, GL_FLOAT, nullptr);
+
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  //gl.texParameteri(GL_TEXTURE_1D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+ //gl.texParameteri(GL_TEXTURE_1D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  //gl.texParameteri(GL_TEXTURE_1D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+  gl.bindTexture(GL_TEXTURE_2D, 0);
+
+  gl.activeTexture(GL_TEXTURE0 + 4);
+  gl.bindTexture(GL_TEXTURE_2D_ARRAY, _alphamap_tex);
+  gl.texImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB, 64, 64, 256, 0, GL_RGB, GL_FLOAT,nullptr);
+
+  gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  gl.bindTexture(GL_TEXTURE_2D_ARRAY, 0);
+
+
+  gl.activeTexture(GL_TEXTURE0 + 3);
+  gl.bindTexture(GL_TEXTURE_2D_ARRAY, _shadowmap_tex);
+  gl.texImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RED, 64, 64, 256, 0, GL_RED, GL_UNSIGNED_BYTE,nullptr);
+
+  gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  gl.bindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }

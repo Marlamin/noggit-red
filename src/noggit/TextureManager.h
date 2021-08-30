@@ -58,6 +58,7 @@ struct blp_texture : public opengl::texture, AsyncObject
   void bind();
   void upload();
   void unload();
+  bool is_uploaded() { return _uploaded; };
   GLuint texture_array() { return _texture_array; };
   int array_index() { return _array_index; };
 

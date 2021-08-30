@@ -65,10 +65,6 @@ public:
   std::string mWmoFilename;
   ENTRY_MODF mWmoEntry;
 
-  // Vertex Buffer Objects for coordinates used for drawing.
-  GLuint detailtexcoords;
-  GLuint alphatexcoords;
-
   // The lighting used.
   std::unique_ptr<OutdoorLighting> ol;
 
@@ -153,8 +149,6 @@ public:
                              , bool draw_models
                              , bool draw_hidden_models
                              );
-
-  void initGlobalVBOs(GLuint* pDetailTexCoords, GLuint* pAlphaTexCoords);
 
 private:
   // Information about the currently selected model / WMO / triangle.
@@ -421,6 +415,9 @@ private:
 
   std::set<MapChunk*>& vertexBorderChunks();
 
+  void setupChunkVAO(opengl::scoped::use_program& mcnk_shader);
+  void setupChunkBuffers();
+
   std::set<MapTile*> _vertex_tiles;
   std::set<MapChunk*> _vertex_chunks;
   std::set<MapChunk*> _vertex_border_chunks;
@@ -462,7 +459,7 @@ private:
 
   noggit::NoggitRenderContext _context;
 
-  opengl::scoped::deferred_upload_buffers<3> _buffers;
+  opengl::scoped::deferred_upload_buffers<6> _buffers;
   GLuint const& _mvp_ubo = _buffers[0];
   GLuint const& _lighting_ubo = _buffers[1];
   GLuint const& _terrain_params_ubo = _buffers[2];
@@ -470,6 +467,13 @@ private:
   opengl::MVPUniformBlock _mvp_ubo_data;
   opengl::LightingUniformBlock _lighting_ubo_data;
   opengl::TerrainParamsUniformBlock _terrain_params_ubo_data;
+
+  GLuint const& _mapchunk_vertex = _buffers[3];
+  GLuint const& _mapchunk_index = _buffers[4];
+  GLuint const& _mapchunk_texcoord = _buffers[5];
+
+  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_arrays;
+  GLuint const& _mapchunk_vao = _vertex_arrays[0];
 
   bool _need_terrain_params_ubo_update = false;
 

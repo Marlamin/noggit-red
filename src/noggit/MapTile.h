@@ -78,7 +78,6 @@ public:
 
   void draw ( math::frustum const& frustum
             , opengl::scoped::use_program& mcnk_shader
-            , GLuint const& tex_coord_vbo
             , const float& cull_distance
             , const math::vector_3d& camera
             , bool need_visibility_update
@@ -143,10 +142,21 @@ public:
   void setHeightmapImage(QImage const& image, float multiplier, int mode);
   void setAlphaImage(QImage const& image, unsigned layer);
   void setVertexColorImage(QImage const& image, int mode);
+  void registerChunkUpdate(unsigned flags) { _chunk_update_flags |= flags; };
+  void endChunkUpdates() { _chunk_update_flags = 0; };
+  std::array<float, 145 * 256 * 4>& getChunkHeightmapBuffer() { return _chunk_heightmap_buffer; };
+
+  void unload();
+
+  GLuint getAlphamapTextureHandle() { return _alphamap_tex; };
 
 private:
+
+  void uploadTextures();
+
   tile_mode _mode;
   bool _tile_is_being_reloaded;
+  bool _uploaded = false;
 
   // MFBO:
   math::vector_3d mMinimumValues[3 * 3];
@@ -160,6 +170,22 @@ private:
   GLuint const& _mfbo_bottom_vbo = _mfbo_vbos[0];
   GLuint const& _mfbo_top_vbo = _mfbo_vbos[1];
   GLuint const& _mfbo_indices = _mfbo_vbos[2];
+
+  opengl::scoped::deferred_upload_textures<4> _chunk_texture_arrays;
+  GLuint const& _height_tex = _chunk_texture_arrays[0];
+  GLuint const& _mccv_tex = _chunk_texture_arrays[1];
+  GLuint const& _shadowmap_tex = _chunk_texture_arrays[2];
+  GLuint const& _alphamap_tex = _chunk_texture_arrays[3];
+
+  opengl::scoped::deferred_upload_buffers<1> _buffers;
+
+  GLuint const& _chunk_instance_data_ubo = _buffers[0];
+  opengl::ChunkInstanceDataUniformBlock _chunk_instance_data[256];
+  std::array<float, 145 * 256 * 4> _chunk_heightmap_buffer;
+
+  unsigned _chunk_update_flags;
+
+  std::vector<int> _samplers;
 
   // MHDR:
   int mFlags;

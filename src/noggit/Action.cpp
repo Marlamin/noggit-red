@@ -57,9 +57,14 @@ void noggit::Action::undo(bool redo)
     for (auto& pair : redo ? _chunk_terrain_post : _chunk_terrain_pre)
     {
       std::memcpy(&pair.first->mVertices, pair.second.data(), 145 * 3 * sizeof(float));
-      std::memcpy(&pair.first->mNormals, pair.second.data() + 145 * 3, 145 * 3 * sizeof(float));
-      pair.first->updateVerticesData();
-      pair.first->updateNormalsData();
+
+      pair.first->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+
+    }
+    for (auto& pair : redo ? _chunk_terrain_post : _chunk_terrain_pre)
+    {
+      _map_view->getWorld()->recalc_norms(pair.first);
+      pair.first->registerChunkUpdate(ChunkUpdateFlags::NORMALS);
     }
     _map_view->getWorld()->updateVertexCenter();
   }
@@ -91,7 +96,7 @@ void noggit::Action::undo(bool redo)
     for (auto& pair : redo ? _chunk_vertex_color_post : _chunk_vertex_color_pre)
     {
       std::memcpy(&pair.first->mccv, pair.second.data(), 145 * 3 * sizeof(float));
-      pair.first->update_vertex_colors();
+      pair.first->registerChunkUpdate(ChunkUpdateFlags::MCCV);;
     }
   }
   if (_flags & ActionFlags::eOBJECTS_ADDED
@@ -155,7 +160,7 @@ void noggit::Action::undo(bool redo)
     for (auto& pair : redo ? _chunk_holes_post : _chunk_holes_pre)
     {
       pair.first->holes = pair.second;
-      pair.first->initStrip();
+      pair.first->registerChunkUpdate(ChunkUpdateFlags::HOLES);
     }
   }
   if (_flags & ActionFlags::eCHUNKS_AREAID)
@@ -163,6 +168,7 @@ void noggit::Action::undo(bool redo)
     for (auto& pair : redo ? _chunk_area_id_post : _chunk_area_id_pre)
     {
       pair.first->areaID = pair.second;
+      pair.first->registerChunkUpdate(ChunkUpdateFlags::AREA_ID);
     }
   }
   if (_flags & ActionFlags::eCHUNKS_FLAGS)
@@ -170,6 +176,7 @@ void noggit::Action::undo(bool redo)
     for (auto& pair : redo ? _chunk_flags_post : _chunk_flags_pre)
     {
       pair.first->header_flags = pair.second;
+      pair.first->registerChunkUpdate(ChunkUpdateFlags::FLAGS);
     }
   }
   if (_flags & ActionFlags::eCHUNKS_WATER)
@@ -361,7 +368,6 @@ void noggit::Action::finish()
       auto& pre = _chunk_terrain_pre.at(i);
       post.first = pre.first;
       std::memcpy(post.second.data(), &post.first->mVertices, 145 * 3 * sizeof(float));
-      std::memcpy(post.second.data() + 145 * 3, &post.first->mNormals,145 * 3 * sizeof(float));
     }
   }
   if (_flags & ActionFlags::eCHUNKS_TEXTURE)
@@ -548,9 +554,8 @@ void noggit::Action::registerChunkTerrainChange(MapChunk* chunk)
       return;
   }
 
-  std::array<float, 145 * 3 * 2> data{};
+  std::array<float, 145 * 3> data{};
   std::memcpy(data.data(), &chunk->mVertices, 145 * 3 * sizeof(float));
-  std::memcpy(data.data() + 145 * 3, &chunk->mNormals, 145 * 3 * sizeof(float));
   _chunk_terrain_pre.emplace_back(std::make_pair(chunk, data));
   //LogDebug << "Chunk: " << chunk->px << "_" << chunk->py << "on tile: " << chunk->mt->index.x << "_" << chunk->mt->index.z << std::endl;
 }

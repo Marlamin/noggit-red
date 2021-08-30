@@ -296,6 +296,21 @@ void opengl::context::texImage2D (GLenum target, GLint level, GLint internal_for
 #endif
   return _current_context->functions()->glTexImage2D (target, level, internal_format, width, height, border, format, type, data);
 }
+void opengl::context::texSubImage2D(GLenum target,
+                                    GLint level,
+                                    GLint xoffset,
+                                    GLint yoffset,
+                                    GLsizei width,
+                                    GLsizei height,
+                                    GLenum format,
+                                    GLenum type,
+                                    const void * pixels)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _current_context->functions()->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+}
 void opengl::context::texImage3D (GLenum target, GLint level, GLint internal_format, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, GLvoid const* data)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
@@ -792,6 +807,12 @@ void opengl::context::uniform1iv (GLint location, GLsizei count, GLint const* va
   return _current_context->functions()->glUniform1iv(location, count, value);
 }
 
+void opengl::context::uniform2iv (GLint location, GLsizei count, GLint const* value)
+{
+  verify_context_and_check_for_gl_errors const _(_current_context, BOOST_CURRENT_FUNCTION);
+  return _current_context->functions()->glUniform2iv(location, count, value);
+}
+
 void opengl::context::uniform2fv (GLint location, GLsizei count, GLfloat const* value)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
@@ -913,6 +934,8 @@ template<GLenum target>
 void opengl::context::bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage)
 {
   GLuint old;
+
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   gl.getIntegerv ( target == GL_ARRAY_BUFFER ? GL_ARRAY_BUFFER_BINDING
   : target == GL_DRAW_INDIRECT_BUFFER ? GL_DRAW_INDIRECT_BUFFER_BINDING
   : target == GL_ELEMENT_ARRAY_BUFFER ? GL_ELEMENT_ARRAY_BUFFER_BINDING
@@ -923,6 +946,8 @@ void opengl::context::bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* 
   : throw std::logic_error ("bad bind target")
     , reinterpret_cast<GLint*> (&old)
   );
+#endif
+
   gl.bindBuffer (target, buffer);
   bufferData (target, size, data, usage);
   gl.bindBuffer (target, old);
@@ -934,6 +959,8 @@ template<GLenum target, typename T>
 void opengl::context::bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage)
 {
   GLuint old;
+
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   gl.getIntegerv ( target == GL_ARRAY_BUFFER ? GL_ARRAY_BUFFER_BINDING
   : target == GL_DRAW_INDIRECT_BUFFER ? GL_DRAW_INDIRECT_BUFFER_BINDING
   : target == GL_ELEMENT_ARRAY_BUFFER ? GL_ELEMENT_ARRAY_BUFFER_BINDING
@@ -944,6 +971,7 @@ void opengl::context::bufferData(GLuint buffer, std::vector<T> const& data, GLen
   : throw std::logic_error ("bad bind target")
     , reinterpret_cast<GLint*> (&old)
   );
+#endif
 
   gl.bindBuffer (target, buffer);
   bufferData(target, sizeof(T) * data.size(), data.data(), usage);
