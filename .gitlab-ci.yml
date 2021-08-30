@@ -12,10 +12,9 @@ image: havric/noggit-red-build:latest
 
 build:
   stage: build
-  before_script:
+  #before_script:
      #install dependencies
-     - apt update && apt -y install wget make autoconf cmake libboost-all-dev
-
+     #- apt update
   script:
     - mkdir build
     - cd build
