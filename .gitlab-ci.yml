@@ -18,7 +18,7 @@ build:
   script:
     - mkdir build
     - cd build
-    - cmake CMAKE_PREFIX_PATH..
+    - cmake ..
     - make
   artifacts:
     paths:
