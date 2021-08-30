@@ -12,9 +12,8 @@ image: havric/noggit-red-build:latest
 
 build:
   stage: build
-  #before_script:
-     #install dependencies
-     #- apt update
+  before_script:
+     - apt update
   script:
     - mkdir build
     - cd build
