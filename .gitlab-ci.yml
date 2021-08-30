@@ -13,7 +13,7 @@ image: havric/noggit-red-build:latest
 build:
   stage: build
   before_script:
-     - apt update
+     - apt update && apt install -y cmake
   script:
     - mkdir build
     - cd build
