@@ -13,7 +13,7 @@ image: havric/noggit-red-build:latest
 build:
   stage: build
   before_script:
-     - apt install -y libxmu-dev libxi-dev
+     - apt install -y libxmu-dev libxi-dev libgl1-mesa-dev
      #- sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test && sudo apt-get update && sudo apt-get install -y gcc-6 g++-6 && sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 20 --slave /usr/bin/g++ g++ /usr/bin/g++-6
   script:
     - mkdir build
