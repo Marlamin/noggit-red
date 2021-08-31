@@ -16,10 +16,10 @@ build:
     - gcc -dumpversion
     - g++ --version
     - cmake -version
-    #- mkdir build
-    #- cd build
-    #- cmake ..
-    #- make
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make
   artifacts:
     paths:
       - build
