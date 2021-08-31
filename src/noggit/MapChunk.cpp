@@ -630,6 +630,28 @@ math::vector_3d MapChunk::getNeighborVertex(int i, unsigned dir)
 
   static constexpr std::array idiff{-9, -8, 9, 8};
 
+  float vertex_x = mVertices[i].x + xdiff[dir];
+  float vertex_z = mVertices[i].z + zdiff[dir];
+
+  tile_index tile({vertex_x, 0, vertex_z});
+  math::vector_3d result{};
+
+  if (tile.x == mt->index.x && tile.z == mt->index.z)
+  {
+    mt->getVertexInternal(vertex_x, vertex_z, &result);
+  }
+  else if (mt->_world->mapIndex.tileLoaded(tile))
+  {
+    mt->_world->mapIndex.getTile(tile)->getVertexInternal(vertex_x, vertex_z, &result);
+  }
+  else
+  {
+    result = {vertex_x, mVertices[i].y,  vertex_z};
+  }
+
+  return result;
+
+  /*
   if ((i >= 1 && i <= 7 && dir < 2 && !py)
       || (i >= 137 && i <= 143 && (dir == 2 || dir == 3) && py == 15)
       || (!i && (dir < 2 && !py || (!dir || dir == 3) && !px))
@@ -718,6 +740,8 @@ math::vector_3d MapChunk::getNeighborVertex(int i, unsigned dir)
   }
 
   return mVertices[i + idiff[dir]];
+
+  */
 }
 
 void MapChunk::recalcNorms()

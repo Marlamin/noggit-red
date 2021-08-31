@@ -36,16 +36,74 @@ out vec3 vary_normal;
 out vec3 vary_mccv;
 flat out int instanceID;
 
+bool isHoleVertex(uint vertexId, uint hole)
+{
+  if (hole == 0)
+  {
+    return false;
+  }
+
+  uint blockRow = vertexId / 34;
+  uint blockVertexId = vertexId % 34;
+  uint shiftedHole = hole >> (blockRow * 4);
+
+
+  if ((shiftedHole & 0x1u) != 0)
+  {
+    if (blockVertexId == 9 || blockVertexId == 10 || blockVertexId == 26 || blockVertexId == 27)
+    {
+      return true;
+    }
+  }
+
+  if ((shiftedHole & 0x2u) != 0)
+  {
+    if (blockVertexId == 11 || blockVertexId == 12 || blockVertexId == 28 || blockVertexId == 29)
+    {
+      return true;
+    }
+  }
+
+  if ((shiftedHole & 0x4u) != 0)
+  {
+    if (blockVertexId == 13 || blockVertexId == 14 || blockVertexId == 30 || blockVertexId == 31)
+    {
+      return true;
+    }
+  }
+
+  if ((shiftedHole & 0x8u) != 0)
+  {
+    if (blockVertexId == 15 || blockVertexId == 16 || blockVertexId == 32 || blockVertexId == 33)
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+float makeNaN(float nonneg)
+{
+  return sqrt(-nonneg-1.0);
+}
+
 void main()
 {
   vec4 normal_pos = texelFetch(heightmap, ivec2(gl_VertexID, gl_InstanceID), 0);
   vec3 pos_base = instances[gl_InstanceID].ChunkXYZBase_Pad1.xyz;
   vec3 pos = vec3(position.x + pos_base.x, pos_base.y + normal_pos.a, position.y + pos_base.z);
 
-  gl_Position = projection * model_view * vec4(pos, 1.0);
+  bool is_hole = isHoleVertex(gl_VertexID, instances[gl_InstanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.r);
+
+  float NaN = makeNaN(1);
+
+  gl_Position = projection * model_view * (is_hole ? vec4(NaN, NaN, NaN, 1.0) : vec4(pos, 1.0));
+
   vary_normal = normal_pos.rgb;
   vary_position = pos;
   vary_texcoord = texcoord;
   vary_mccv = texelFetch(mccv, ivec2(gl_VertexID, gl_InstanceID), 0).rgb;
   instanceID = gl_InstanceID;
+
 }

@@ -3884,47 +3884,53 @@ void MapView::update_cursor_pos()
 {
   static bool buffer_switch = false;
 
-  float mx = _last_mouse_pos.x(), mz = _last_mouse_pos.y();
-
-  //gl.readBuffer(GL_FRONT);
-  gl.bindBuffer(GL_PIXEL_PACK_BUFFER, _buffers[static_cast<unsigned>(buffer_switch)]);
-
-  gl.readPixels(mx, height() - mz - 1, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, 0);
-
-  gl.bindBuffer(GL_PIXEL_PACK_BUFFER, _buffers[static_cast<unsigned>(!buffer_switch)]);
-  GLushort* ptr = static_cast<GLushort*>(gl.mapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
-
-  buffer_switch = !buffer_switch;
-
-  if(ptr)
+  if (terrainMode != editing_mode::holes)
   {
-    glm::vec4 viewport = glm::vec4(0, 0, width(), height());
-    glm::vec3 wincoord = glm::vec3(mx, height() - mz - 1, static_cast<float>(*ptr) / std::numeric_limits<unsigned short>::max());
+    float mx = _last_mouse_pos.x(), mz = _last_mouse_pos.y();
 
-    math::matrix_4x4 model_view_ = model_view().transposed();
-    math::matrix_4x4 projection_ = projection().transposed();
+    //gl.readBuffer(GL_FRONT);
+    gl.bindBuffer(GL_PIXEL_PACK_BUFFER, _buffers[static_cast<unsigned>(buffer_switch)]);
 
-    glm::vec3 objcoord = glm::unProject(wincoord, glm::make_mat4(reinterpret_cast<float*>(&model_view_)),
-                                        glm::make_mat4(reinterpret_cast<float*>(&projection_)), viewport);
+    gl.readPixels(mx, height() - mz - 1, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, 0);
 
+    gl.bindBuffer(GL_PIXEL_PACK_BUFFER, _buffers[static_cast<unsigned>(!buffer_switch)]);
+    GLushort* ptr = static_cast<GLushort*>(gl.mapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
 
-    tile_index tile({objcoord.x, objcoord.y, objcoord.z});
+    buffer_switch = !buffer_switch;
 
-    if (!_world->mapIndex.tileLoaded(tile))
+    if(ptr)
     {
+      glm::vec4 viewport = glm::vec4(0, 0, width(), height());
+      glm::vec3 wincoord = glm::vec3(mx, height() - mz - 1, static_cast<float>(*ptr) / std::numeric_limits<unsigned short>::max());
+
+      math::matrix_4x4 model_view_ = model_view().transposed();
+      math::matrix_4x4 projection_ = projection().transposed();
+
+      glm::vec3 objcoord = glm::unProject(wincoord, glm::make_mat4(reinterpret_cast<float*>(&model_view_)),
+                                          glm::make_mat4(reinterpret_cast<float*>(&projection_)), viewport);
+
+
+      tile_index tile({objcoord.x, objcoord.y, objcoord.z});
+
+      if (!_world->mapIndex.tileLoaded(tile))
+      {
+        gl.unmapBuffer(GL_PIXEL_PACK_BUFFER);
+        gl.bindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        return;
+      }
+
+      _cursor_pos = {objcoord.x, objcoord.y, objcoord.z};
+
       gl.unmapBuffer(GL_PIXEL_PACK_BUFFER);
-      gl.bindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-      return;
     }
 
-    _cursor_pos = {objcoord.x, objcoord.y, objcoord.z};
+    gl.bindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 
-    gl.unmapBuffer(GL_PIXEL_PACK_BUFFER);
+    return;
   }
 
-  gl.bindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+  // use raycasting for holes
 
-  return;
   selection_result results (intersect_result (true));
 
   if (!results.empty())
