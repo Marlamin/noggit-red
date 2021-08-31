@@ -164,6 +164,7 @@ float contour_alpha(float unit_size, vec2 pos, vec2 line_width)
 
 void main()
 {
+
   float dist_from_camera = distance(camera, vary_position);
 
   vec3 fw = fwidth(vary_position.xyz);
