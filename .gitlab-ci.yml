@@ -13,6 +13,9 @@ image: havric/noggit-red-build:latest
 build:
   stage: build
   script:
+    - gcc -dumpversion
+    - g++ --version
+    - cmake -version
     - mkdir build
     - cd build
     - cmake ..
