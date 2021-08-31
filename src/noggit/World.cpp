@@ -1511,6 +1511,7 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
   if (draw_terrain)
   {
     ZoneScopedN("World::intersect() : intersect terrain");
+
     for (auto&& tile : mapIndex.loaded_tiles())
     {
       if (tile->intersect(ray, &results))
@@ -1647,7 +1648,7 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
 
   MapTile* adt = mapIndex.getTile(tile);
 
-  return adt->finishedLoading() && adt->GetVertex(x, z, V);
+  return adt->GetVertex(x, z, V);
 }
 
 
@@ -1830,15 +1831,9 @@ void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, 
 }
 
 void World::recalc_norms (MapChunk* chunk) const
-  {
+{
     ZoneScoped;
-    chunk->recalcNorms ( [this] (float x, float z) -> boost::optional<float>
-                       {
-                         math::vector_3d vec;
-                         auto res (GetVertex (x, z, &vec));
-                         return boost::make_optional (res, vec.y);
-                       }
-                     );
+    chunk->recalcNorms();
 }
 
 bool World::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)

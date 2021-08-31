@@ -105,6 +105,7 @@ public:
   void drawMFBO (opengl::scoped::use_program&);
 
   bool GetVertex(float x, float z, math::vector_3d *V);
+  void getVertexInternal(float x, float z, math::vector_3d* v);
 
   void saveTile(World*);
 	void CropWater();

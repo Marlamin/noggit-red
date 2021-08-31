@@ -129,8 +129,9 @@ public:
   ChunkWater* liquid_chunk() const;
 
   void updateVerticesData();
-  void recalcNorms (std::function<boost::optional<float> (float, float)> height);
+  void recalcNorms();
   void updateNormalsData();
+  math::vector_3d getNeighborVertex(int i, unsigned dir);
 
   //! \todo implement Action stack for these
   bool changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
@@ -168,6 +169,7 @@ public:
   void setAreaID(int ID);
 
   bool GetVertex(float x, float z, math::vector_3d *V);
+  void getVertexInternal(float x, float z, math::vector_3d * v);
   float getHeight(int x, int z);
   float getMinHeight();
   float getMaxHeight() { return vmin.y; };

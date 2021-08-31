@@ -953,6 +953,7 @@ void opengl::context::bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* 
   gl.bindBuffer (target, old);
 }
 template void opengl::context::bufferData<GL_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
+template void opengl::context::bufferData<GL_PIXEL_PACK_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
 template void opengl::context::bufferData<GL_ELEMENT_ARRAY_BUFFER> (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);
 
 template<GLenum target, typename T>

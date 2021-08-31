@@ -125,6 +125,9 @@ void PreviewRenderer::resetCamera(float x, float y, float z, float roll, float y
 
 void PreviewRenderer::draw()
 {
+
+  return;
+  
   float culldistance = 10000000;
 
   math::matrix_4x4 const mvp(model_view().transposed() * projection().transposed());

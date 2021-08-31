@@ -373,6 +373,19 @@ bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
   return true;
 }
 
+void MapChunk::getVertexInternal(float x, float z, math::vector_3d* v)
+{
+  float xdiff, zdiff;
+
+  xdiff = x - xbase;
+  zdiff = z - zbase;
+
+  const int row = static_cast<int>(zdiff / (UNITSIZE * 0.5f) + 0.5f);
+  const int column = static_cast<int>((xdiff - UNITSIZE * 0.5f * (row % 2)) / UNITSIZE + 0.5f);
+
+  *v = mVertices[17 * (row / 2) + ((row % 2) ? 9 : 0) + column];
+}
+
 float MapChunk::getHeight(int x, int z)
 {
   if (x > 9 || z > 9 || x < 0 || z < 0) return 0.0f;
@@ -599,115 +612,130 @@ void MapChunk::updateVerticesData()
   update_intersect_points();
 }
 
-void MapChunk::recalcNorms (std::function<boost::optional<float> (float, float)> height)
+math::vector_3d MapChunk::getNeighborVertex(int i, unsigned dir)
 {
-  // This method assumes tile's heightmap texture is currently bound to the active tex unit
-
+  // i - vertex index
   // 0 - up_left
   // 1 - up_right
   // 2 - down_left
   // 3 - down_right
 
-  auto point
-  (
-    [this, height](int i, unsigned dir)
+  // Returns a neighboring vertex,
+  // if one does not exist,
+  // returns a virtual vertex with the height that equals to the height of MapChunks's vertex i.
+
+  constexpr float half_unit = UNITSIZE / 2.f;
+  static constexpr std::array xdiff{-half_unit, half_unit, half_unit, -half_unit};
+  static constexpr std::array zdiff{-half_unit, -half_unit, half_unit, half_unit};
+
+  static constexpr std::array idiff{-9, -8, 9, 8};
+
+  if ((i >= 1 && i <= 7 && dir < 2 && !py)
+      || (i >= 137 && i <= 143 && (dir == 2 || dir == 3) && py == 15)
+      || (!i && (dir < 2 && !py || (!dir || dir == 3) && !px))
+      || (i == 8 && ((dir == 1 || dir == 2) && px == 15) || dir < 2 && !py)
+      || (i == 136 && ((dir == 3 || dir == 2) && py == 15) || (!dir || dir == 3) && !px)
+      || (i == 144 && ((dir == 3 || dir == 2) && py == 15) || ((dir == 1 || dir == 2) && px == 15))
+      || (!(i % 17) && (!dir || dir == 3) && !px)
+      || (!(i % 25) && (dir == 1 || dir == 2) && px == 15))
+  {
+    float vertex_x = mVertices[i].x + xdiff[dir];
+    float vertex_z = mVertices[i].z + zdiff[dir];
+
+    tile_index tile({vertex_x, 0, vertex_z});
+
+    if (!mt->_world->mapIndex.tileLoaded(tile))
     {
-      constexpr float half_unit = UNITSIZE / 2.f;
-      static constexpr std::array xdiff{-half_unit, half_unit, half_unit, -half_unit};
-      static constexpr std::array zdiff{-half_unit, -half_unit, half_unit, half_unit};
-
-      static constexpr std::array idiff{-9, -8, 9, 8};
-
-      if ((i >= 1 && i <= 7 && dir < 2 && !py)
-        || (i >= 137 && i <= 143 && (dir == 2 || dir == 3) && py == 15)
-        || (!i && (dir < 2 && !py || (!dir || dir == 3) && !px))
-        || (i == 8 && ((dir == 1 || dir == 2) && px == 15) || dir < 2 && !py)
-        || (i == 136 && ((dir == 3 || dir == 2) && py == 15) || (!dir || dir == 3) && !px)
-        || (i == 144 && ((dir == 3 || dir == 2) && py == 15) || ((dir == 1 || dir == 2) && px == 15))
-        || (!(i % 17) && (!dir || dir == 3) && !px)
-        || (!(i % 25) && (dir == 1 || dir == 2) && px == 15))
-      {
-        return math::vector_3d
-          ( mVertices[i].x + xdiff[dir]
-            , height(mVertices[i].x + xdiff[dir], mVertices[i].z + zdiff[dir]).get_value_or(mVertices[i].y)
-            , mVertices[i].z + zdiff[dir]
-          );
-      }
-
-      switch (dir)
-      {
-        case 0:
-        {
-          if (!i)
-            return mt->getChunk(px - 1, py - 1)->mVertices[135];
-          else if (i == 136)
-            return mt->getChunk(px - 1, py)->mVertices[135];
-          else if (i == 8)
-            return mt->getChunk(px, py - 1)->mVertices[135];
-          else if (i >= 1 && i <= 7)
-            return mt->getChunk(px, py - 1)->mVertices[127 + i];
-          else if (!(i % 17))
-            return mt->getChunk(px - 1, py)->mVertices[i - 1];
-          break;
-        }
-        case 1:
-        {
-          if (!i)
-            return mt->getChunk(px, py - 1)->mVertices[128];
-          else if (i == 144)
-            return mt->getChunk(px + 1, py)->mVertices[128];
-          else if (i == 8)
-            return mt->getChunk(px + 1, py - 1)->mVertices[128];
-          else if (i >= 1 && i <= 7)
-            return mt->getChunk(px, py - 1)->mVertices[128 + i];
-          else if (!(i % 17 % 8) && i % 17 != 16 && i % 17)
-            return mt->getChunk(px + 1, py)->mVertices[i - 8];
-          break;
-        }
-        case 2:
-        {
-          if (i == 136)
-            return mt->getChunk(px, py + 1)->mVertices[9];
-          else if (i == 144)
-            return mt->getChunk(px + 1, py + 1)->mVertices[9];
-          else if (i == 8)
-            return mt->getChunk(px + 1, py)->mVertices[9];
-          else if (!(i % 17 % 8) && i % 17 != 16 && i && i % 17)
-            return mt->getChunk(px + 1, py)->mVertices[i + 9];
-          else if (i >= 137 && i <= 143)
-            return mt->getChunk(px, py + 1)->mVertices[i - 127];
-
-          break;
-        }
-        case 3:
-        {
-          if (!i)
-            return mt->getChunk(px - 1, py)->mVertices[16];
-          else if (i == 136)
-            return mt->getChunk(px - 1, py + 1)->mVertices[16];
-          else if (i == 144)
-            return mt->getChunk(px, py + 1)->mVertices[16];
-          else if (!(i % 17))
-            return mt->getChunk(px - 1, py)->mVertices[i + 16];
-          else if (i >= 137 && i <= 143)
-            return mt->getChunk(px, py + 1)->mVertices[i - 128];
-          break;
-        }
-      }
-
-      return mVertices[i + idiff[dir]];
+      return math::vector_3d( mVertices[i].x + xdiff[dir], mVertices[i].y, mVertices[i].z + zdiff[dir]);
     }
-  );
+
+    math::vector_3d vertex{};
+    mt->_world->mapIndex.getTile(tile)->getVertexInternal(mVertices[i].x + xdiff[dir], mVertices[i].z + zdiff[dir], &vertex);
+
+    return math::vector_3d( mVertices[i].x + xdiff[dir], vertex.y, mVertices[i].z + zdiff[dir]);
+
+  }
+
+  switch (dir)
+  {
+    case 0:
+    {
+      if (!i)
+        return mt->getChunk(px - 1, py - 1)->mVertices[135];
+      else if (i == 136)
+        return mt->getChunk(px - 1, py)->mVertices[135];
+      else if (i == 8)
+        return mt->getChunk(px, py - 1)->mVertices[135];
+      else if (i >= 1 && i <= 7)
+        return mt->getChunk(px, py - 1)->mVertices[127 + i];
+      else if (!(i % 17))
+        return mt->getChunk(px - 1, py)->mVertices[i - 1];
+      break;
+    }
+    case 1:
+    {
+      if (!i)
+        return mt->getChunk(px, py - 1)->mVertices[128];
+      else if (i == 144)
+        return mt->getChunk(px + 1, py)->mVertices[128];
+      else if (i == 8)
+        return mt->getChunk(px + 1, py - 1)->mVertices[128];
+      else if (i >= 1 && i <= 7)
+        return mt->getChunk(px, py - 1)->mVertices[128 + i];
+      else if (!(i % 17 % 8) && i % 17 != 16 && i % 17)
+        return mt->getChunk(px + 1, py)->mVertices[i - 8];
+      break;
+    }
+    case 2:
+    {
+      if (i == 136)
+        return mt->getChunk(px, py + 1)->mVertices[9];
+      else if (i == 144)
+        return mt->getChunk(px + 1, py + 1)->mVertices[9];
+      else if (i == 8)
+        return mt->getChunk(px + 1, py)->mVertices[9];
+      else if (!(i % 17 % 8) && i % 17 != 16 && i && i % 17)
+        return mt->getChunk(px + 1, py)->mVertices[i + 9];
+      else if (i >= 137 && i <= 143)
+        return mt->getChunk(px, py + 1)->mVertices[i - 127];
+
+      break;
+    }
+    case 3:
+    {
+      if (!i)
+        return mt->getChunk(px - 1, py)->mVertices[16];
+      else if (i == 136)
+        return mt->getChunk(px - 1, py + 1)->mVertices[16];
+      else if (i == 144)
+        return mt->getChunk(px, py + 1)->mVertices[16];
+      else if (!(i % 17))
+        return mt->getChunk(px - 1, py)->mVertices[i + 16];
+      else if (i >= 137 && i <= 143)
+        return mt->getChunk(px, py + 1)->mVertices[i - 128];
+      break;
+    }
+  }
+
+  return mVertices[i + idiff[dir]];
+}
+
+void MapChunk::recalcNorms()
+{
+  // 0 - up_left
+  // 1 - up_right
+  // 2 - down_left
+  // 3 - down_right
 
   auto& tile_buffer = mt->getChunkHeightmapBuffer();
   int chunk_start = (px * 16 + py) * mapbufsize * 4;
 
   for (int i = 0; i < mapbufsize; ++i)
   {
-    math::vector_3d const P1 (point(i, 0));
-    math::vector_3d const P2 (point(i, 1));
-    math::vector_3d const P3 (point(i, 2));
-    math::vector_3d const P4 (point(i, 3));
+    math::vector_3d const P1 (getNeighborVertex(i, 0)); // up_left
+    math::vector_3d const P2 (getNeighborVertex(i, 1)); // up_right
+    math::vector_3d const P3 (getNeighborVertex(i, 2)); // down_left
+    math::vector_3d const P4 (getNeighborVertex(i, 3)); // down_right
 
     math::vector_3d const N1 ((P2 - mVertices[i]) % (P1 - mVertices[i]));
     math::vector_3d const N2 ((P3 - mVertices[i]) % (P2 - mVertices[i]));

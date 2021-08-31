@@ -23,6 +23,7 @@
 #include <external/qtimgui/QtImGui.h>
 #include <external/QtAdvancedDockingSystem/src/DockManager.h>
 #include <opengl/texture.hpp>
+#include <opengl/scoped.hpp>
 
 #include <boost/optional.hpp>
 
@@ -392,6 +393,8 @@ private:
   bool _gl_initialized = false;
   bool _destroying = false;
   bool _needs_redraw = false;
+
+  opengl::scoped::deferred_upload_buffers<2> _buffers;
 
 public:
 

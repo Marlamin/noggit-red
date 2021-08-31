@@ -445,8 +445,6 @@ void MapTile::draw ( math::frustum const& frustum
 
         if (flags & ChunkUpdateFlags::ALPHAMAP)
         {
-          std::fill(_samplers.begin(), _samplers.end(), -1);
-
           gl.activeTexture(GL_TEXTURE0 + 3);
           gl.bindTexture(GL_TEXTURE_2D_ARRAY, _alphamap_tex);
           alphamap_bound = true;
@@ -752,6 +750,14 @@ bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
   int ycol = (int)((z - zbase) / CHUNKSIZE);
 
   return xcol >= 0 && xcol <= 15 && ycol >= 0 && ycol <= 15 && mChunks[ycol][xcol]->GetVertex(x, z, V);
+}
+
+void MapTile::getVertexInternal(float x, float z, math::vector_3d* v)
+{
+  int xcol = (int)((x - xbase) / CHUNKSIZE);
+  int ycol = (int)((z - zbase) / CHUNKSIZE);
+
+  mChunks[ycol][xcol]->getVertexInternal(x, z, v);
 }
 
 /// --- Only saving related below this line. --------------------------

@@ -44,7 +44,9 @@
 #include <external/imguipiemenu/PieMenu.hpp>
 #include <external/tracy/Tracy.hpp>
 #include <noggit/ui/object_palette.hpp>
+#include <external/glm/gtc/type_ptr.hpp>
 #include <opengl/types.hpp>
+#include <limits>
 
 
 #include <noggit/ActionManager.hpp>
@@ -2618,6 +2620,11 @@ void MapView::initializeGL()
   _world->initShaders();
   onSettingsSave();
 
+  _buffers.upload();
+
+  gl.bufferData<GL_PIXEL_PACK_BUFFER>(_buffers[0], 4, nullptr, GL_DYNAMIC_READ);
+  gl.bufferData<GL_PIXEL_PACK_BUFFER>(_buffers[1], 4, nullptr, GL_DYNAMIC_READ);
+
   _gl_initialized = true;
 }
 
@@ -2776,6 +2783,12 @@ void MapView::paintGL()
 
   _last_frame_durations.emplace_back (now - _last_update);
 
+  makeCurrent();
+
+  gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  draw_map();
+
   if (!saving_minimap)
   {
     tick (now - _last_update);
@@ -2783,12 +2796,6 @@ void MapView::paintGL()
   }
 
   _last_update = now;
-
-  makeCurrent();
-
-  gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-  draw_map();
 
   if (saving_minimap)
   {
@@ -3875,6 +3882,49 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
 
 void MapView::update_cursor_pos()
 {
+  static bool buffer_switch = false;
+
+  float mx = _last_mouse_pos.x(), mz = _last_mouse_pos.y();
+
+  //gl.readBuffer(GL_FRONT);
+  gl.bindBuffer(GL_PIXEL_PACK_BUFFER, _buffers[static_cast<unsigned>(buffer_switch)]);
+
+  gl.readPixels(mx, height() - mz - 1, 1, 1, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, 0);
+
+  gl.bindBuffer(GL_PIXEL_PACK_BUFFER, _buffers[static_cast<unsigned>(!buffer_switch)]);
+  GLushort* ptr = static_cast<GLushort*>(gl.mapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY));
+
+  buffer_switch = !buffer_switch;
+
+  if(ptr)
+  {
+    glm::vec4 viewport = glm::vec4(0, 0, width(), height());
+    glm::vec3 wincoord = glm::vec3(mx, height() - mz - 1, static_cast<float>(*ptr) / std::numeric_limits<unsigned short>::max());
+
+    math::matrix_4x4 model_view_ = model_view().transposed();
+    math::matrix_4x4 projection_ = projection().transposed();
+
+    glm::vec3 objcoord = glm::unProject(wincoord, glm::make_mat4(reinterpret_cast<float*>(&model_view_)),
+                                        glm::make_mat4(reinterpret_cast<float*>(&projection_)), viewport);
+
+
+    tile_index tile({objcoord.x, objcoord.y, objcoord.z});
+
+    if (!_world->mapIndex.tileLoaded(tile))
+    {
+      gl.unmapBuffer(GL_PIXEL_PACK_BUFFER);
+      gl.bindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+      return;
+    }
+
+    _cursor_pos = {objcoord.x, objcoord.y, objcoord.z};
+
+    gl.unmapBuffer(GL_PIXEL_PACK_BUFFER);
+  }
+
+  gl.bindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+  return;
   selection_result results (intersect_result (true));
 
   if (!results.empty())
@@ -4937,6 +4987,8 @@ void MapView::unloadOpenglData(bool from_manager)
 
   if (!from_manager)
     noggit::Red::ViewportManager::ViewportManager::unloadOpenglData(this);
+
+  _buffers.unload();
 
   disconnect(_gl_guard_connection);
   _gl_initialized = false;

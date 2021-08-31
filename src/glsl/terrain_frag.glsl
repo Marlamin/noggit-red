@@ -145,8 +145,7 @@ vec4 texture_blend()
   vec3 t2 = get_tex_color(vary_texcoord, instances[instanceID].ChunkTextureSamplers.z, instances[instanceID].ChunkTextureArrayIDs.z);
   vec3 t3 = get_tex_color(vary_texcoord, instances[instanceID].ChunkTextureSamplers.w, instances[instanceID].ChunkTextureArrayIDs.w);
 
-  return mix(vec4 (1.0, 1.0, 1.0, 1.0), vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0)
-    , int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
+  return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0);
 }
 
 float contour_alpha(float unit_size, float pos, float line_width)
@@ -169,7 +168,7 @@ void main()
 
   vec3 fw = fwidth(vary_position.xyz);
 
-  out_color = texture_blend();
+  out_color = mix(vec4(1.0, 1.0, 1.0, 1.0), texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
 
   out_color.rgb *= vary_mccv;
 
