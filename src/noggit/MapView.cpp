@@ -48,6 +48,8 @@
 #include <opengl/types.hpp>
 #include <limits>
 
+#include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/scripting/script_settings.hpp>
 
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
@@ -742,6 +744,13 @@ void MapView::setupVertexPainterUi()
   shaderTool = new noggit::ui::shader_tool(this, this);
   _tool_panel_dock->registerTool("Vertex Painter", shaderTool);
 }
+
+void MapView::setupScriptingUi()
+{
+  scriptingTool = new noggit::scripting::scripting_tool(this, this, _settings);
+  _tool_panel_dock->registerTool("Scripting", scriptingTool);
+}
+
 void MapView::setupObjectEditorUi()
 {
   /* Tool */
@@ -2362,10 +2371,11 @@ void MapView::createGUI()
   setupObjectEditorUi();
   setupMinimapEditorUi();
   setupStampUi();
+  setupLightEditorUi();
+  setupScriptingUi();
   // End combined dock
 
   setupViewportOverlay();
-  setupLightEditorUi();
   setupNodeEditor();
   setupAssetBrowser();
   setupDetailInfos();
@@ -3215,6 +3225,11 @@ void MapView::tick (float dt)
 
     for (auto& selection : currentSelection)
     {
+      if (selection.which() == eEntry_MapChunk && terrainMode == editing_mode::scripting)
+      {
+        scriptingTool->sendBrushEvent(_cursor_pos, 7.5f * dt);
+      }
+
       if (leftMouse && selection.which() == eEntry_MapChunk)
       {
         bool underMap = _world->isUnderMap(_cursor_pos);
@@ -4038,6 +4053,10 @@ void MapView::draw_map()
     break;
   case editing_mode::minimap:
     radius = minimapTool->brushRadius();
+    break;
+  case editing_mode::scripting:
+    radius = scriptingTool->get_settings()->brushRadius();
+    inner_radius = scriptingTool->get_settings()->innerRadius();
     break;
   default:
     break;

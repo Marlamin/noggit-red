@@ -1051,7 +1051,7 @@ template void opengl::context::bufferSubData<GL_ARRAY_BUFFER>(GLuint buffer, GLi
 void opengl::context::drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices)
 {
   GLuint old;
-  gl.getIntegerv (GL_ELEMENT_ARRAY_BUFFER, reinterpret_cast<GLint*>(&old));
+  gl.getIntegerv (GL_ELEMENT_ARRAY_BUFFER_BINDING, reinterpret_cast<GLint*>(&old));
   gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, index_buffer);
   drawElements (mode, count, type, indices);
   gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, old);

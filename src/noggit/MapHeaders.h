@@ -150,6 +150,20 @@ struct MCCV
   uint32_t  effectID;
 };
 
+struct MCLYFlags
+{
+  uint32_t animation_rotation : 3;        // each tick is 45°
+  uint32_t animation_speed : 3;
+  uint32_t animation_enabled : 1;
+  uint32_t overbright : 1;                // This will make the texture way brighter. Used for lava to make it "glow".
+  uint32_t use_alpha_map : 1;             // set for every layer after the first
+  uint32_t alpha_map_compressed : 1;      // see MCAL chunk description
+  uint32_t use_cube_map_reflection : 1;   // This makes the layer behave like its a reflection of the skybox. See below
+  uint32_t unknown_0x800 : 1;             // WoD?+ if either of 0x800 or 0x1000 is set, texture effects' texture_scale is applied
+  uint32_t unknown_0x1000 : 1;            // WoD?+ see 0x800
+  uint32_t : 19;
+};
+
 struct ENTRY_MCLY
 {
   uint32_t  textureID;

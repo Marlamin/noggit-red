@@ -15,11 +15,11 @@ struct ChunkInstanceData
   ivec4 ChunkTextureSamplers;
   ivec4 ChunkTextureArrayIDs;
   ivec4 ChunkHoles_DrawImpass_TexLayerCount_CantPaint;
-  vec4  ChunkTexAnim_0_1;
-  vec4  ChunkTexAnim_2_3;
-  vec4  AreaIDColor_DrawSelection;
+  ivec4 ChunkTexDoAnim;
+  ivec4 ChunkTexAnimSpeed;
+  ivec4 AreaIDColor_Pad2_DrawSelection;
   vec4  ChunkXYZBase_Pad1;
-  vec4 pad2;
+  ivec4 ChunkTexAnimDir;
 };
 
 layout (std140) uniform chunk_instances
@@ -29,11 +29,17 @@ layout (std140) uniform chunk_instances
 
 uniform sampler2D heightmap;
 uniform sampler2D mccv;
+uniform int base_instance;
+uniform int animtime;
 
 out vec3 vary_position;
 out vec2 vary_texcoord;
-out vec3 vary_normal;
+out vec2 vary_t0_uv;
+out vec2 vary_t1_uv;
+out vec2 vary_t2_uv;
+out vec2 vary_t3_uv;
 out vec3 vary_mccv;
+out vec3 vary_normal;
 flat out int instanceID;
 
 bool isHoleVertex(uint vertexId, uint hole)
@@ -88,13 +94,26 @@ float makeNaN(float nonneg)
   return sqrt(-nonneg-1.0);
 }
 
+vec2 animUVOffset(int do_animate, int spd, int dir)
+{
+  const float texanimxtab[8] = float[8]( 0, 1, 1, 1, 0, -1, -1, -1 );
+  const float texanimytab[8] = float[8]( 1, 1, 0, -1, -1, -1, 0, 1 );
+  float fdx = -texanimxtab[dir];
+  float fdy = texanimytab[dir];
+  int animspd = int(200 * 8.0);
+  float f = float((int(animtime*(spd / 7.0f))) % animspd) / float(animspd);
+
+  return vec2(f * fdx, f * fdy);
+}
+
 void main()
 {
-  vec4 normal_pos = texelFetch(heightmap, ivec2(gl_VertexID, gl_InstanceID), 0);
-  vec3 pos_base = instances[gl_InstanceID].ChunkXYZBase_Pad1.xyz;
+  instanceID = base_instance + gl_InstanceID;
+  vec4 normal_pos = texelFetch(heightmap, ivec2(gl_VertexID, instanceID), 0);
+  vec3 pos_base = instances[instanceID].ChunkXYZBase_Pad1.xyz;
   vec3 pos = vec3(position.x + pos_base.x, pos_base.y + normal_pos.a, position.y + pos_base.z);
 
-  bool is_hole = isHoleVertex(gl_VertexID, instances[gl_InstanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.r);
+  bool is_hole = isHoleVertex(gl_VertexID, instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.r);
 
   float NaN = makeNaN(1);
 
@@ -102,8 +121,20 @@ void main()
 
   vary_normal = normal_pos.rgb;
   vary_position = pos;
+  vary_mccv = texelFetch(mccv, ivec2(gl_VertexID, instanceID), 0).rgb;
+
+  vary_t0_uv = texcoord + animUVOffset(instances[instanceID].ChunkTexDoAnim.r,
+    instances[instanceID].ChunkTexAnimSpeed.r, instances[instanceID].ChunkTexAnimDir.r);
+
+  vary_t1_uv = texcoord + animUVOffset(instances[instanceID].ChunkTexDoAnim.g,
+    instances[instanceID].ChunkTexAnimSpeed.g, instances[instanceID].ChunkTexAnimDir.g);
+
+  vary_t2_uv = texcoord + animUVOffset(instances[instanceID].ChunkTexDoAnim.b,
+    instances[instanceID].ChunkTexAnimSpeed.b, instances[instanceID].ChunkTexAnimDir.b);
+
+  vary_t3_uv = texcoord + animUVOffset(instances[instanceID].ChunkTexDoAnim.a,
+    instances[instanceID].ChunkTexAnimSpeed.a, instances[instanceID].ChunkTexAnimDir.a);
+
   vary_texcoord = texcoord;
-  vary_mccv = texelFetch(mccv, ivec2(gl_VertexID, gl_InstanceID), 0).rgb;
-  instanceID = gl_InstanceID;
 
 }

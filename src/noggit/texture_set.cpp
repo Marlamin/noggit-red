@@ -944,19 +944,13 @@ void TextureSet::change_texture_flag(scoped_blp_texture_reference const& tex, st
   {
     if (textures[i] == tex)
     {
-      if (add)
-      {
-        // override the current speed/rotation
-        if (flag & 0x3F)
-        {
-          _layers_info[i].flags &= ~0x3F;
-        }
-        _layers_info[i].flags |= flag;
-      }
-      else
-      {
-        _layers_info[i].flags &= ~flag;
-      }
+      auto flag_view = reinterpret_cast<MCLYFlags*>(&_layers_info[i].flags);
+      auto flag_view_new = reinterpret_cast<MCLYFlags*>(&flag);
+
+      flag_view->animation_speed = flag_view_new->animation_speed;
+      flag_view->animation_rotation = flag_view_new->animation_rotation;
+      flag_view->animation_enabled = flag_view_new->animation_enabled;
+
 
       if (flag & FLAG_GLOW)
       {
@@ -970,6 +964,8 @@ void TextureSet::change_texture_flag(scoped_blp_texture_reference const& tex, st
       break;
     }
   }
+
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::FLAGS);
 }
 
 std::vector<std::vector<uint8_t>> TextureSet::save_alpha(bool big_alphamap)
@@ -1255,25 +1251,10 @@ namespace
   }
 }
 
-/*
-std::vector<uint8_t> TextureSet::lod_texture_map()
-{
-  // make sure all changes have been applied
-  apply_alpha_changes();
-
-  if (_need_lod_texture_map_update)
-  {
-    update_lod_texture_map();
-  }
-
-  return _lod_texture_map;
-}
- */
-
 
 void TextureSet::update_lod_texture_map()
 {
-  std::vector<std::uint8_t> lod;
+  std::array<std::uint16_t, 8> lod;
 
   for (std::size_t z = 0; z < 8; ++z)
   {
@@ -1288,11 +1269,11 @@ void TextureSet::update_lod_texture_map()
           ++dominant_square_count[max_element_index (current_layer_values (nTextures, alphamaps.data(), pz, px))];
         }
       }
-      lod.push_back (max_element_index (dominant_square_count));
+      //lod.push_back (max_element_index (dominant_square_count));
     }
   }
 
-  //_lod_texture_map = lod;
+  _doodadMapping = lod;
   _need_lod_texture_map_update = false;
 }
 
@@ -1392,4 +1373,23 @@ void TextureSet::markDirty()
 {
   _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true; 
+}
+
+void TextureSet::setEffect(size_t id, int value)
+{
+  _layers_info[id].effectID = value;
+  _chunk->registerChunkUpdate(ChunkUpdateFlags::FLAGS);
+}
+
+std::array<std::uint16_t, 8> TextureSet::lod_texture_map()
+{
+  // make sure all changes have been applied
+  apply_alpha_changes();
+
+  if (_need_lod_texture_map_update)
+  {
+    update_lod_texture_map();
+  }
+
+  return _doodadMapping;
 }

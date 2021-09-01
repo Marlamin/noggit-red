@@ -26,6 +26,7 @@ namespace noggit
       add_tool_icon (editing_mode::minimap,      tr("Minimap Editor"),    font_noggit::TOOL_MINIMAP_EDITOR);
       add_tool_icon(editing_mode::stamp,         tr("Stamp Mode"),        font_noggit::TOOL_STAMP);
       add_tool_icon(editing_mode::light,         tr("Light Editor"),      font_noggit::TOOL_STAMP);
+      add_tool_icon (editing_mode::scripting,    tr("Scripting"),   font_noggit::INFO);
     }
 
     void toolbar::add_tool_icon(editing_mode mode, const QString& name, const font_noggit::icons& icon)

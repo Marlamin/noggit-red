@@ -555,8 +555,9 @@ namespace noggit
 
     void texturing_tool::change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture)
     {
-      
-      std::size_t flag = 0;
+      std::uint32_t flag = 0;
+
+      auto flag_view = reinterpret_cast<MCLYFlags*>(&flag);
 
       flag |= FLAG_ANIMATE;
 
@@ -564,13 +565,9 @@ namespace noggit
       if (add)
       {
         // the qdial in inverted compared to the anim rotation
-        flag |= (_anim_rotation_prop.get() + 4) % 8;
-        flag |= _anim_speed_prop.get() << 3;
+        flag_view->animation_rotation = (_anim_rotation_prop.get() + 4) % 8;
+        flag_view->animation_speed = _anim_speed_prop.get();
       }
-      else
-      {
-        flag |= 0xF;
-      }      
 
       // the texture's flag glow is set if the property is true, removed otherwise
       if (_overbright_prop.get())

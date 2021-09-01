@@ -322,6 +322,7 @@ include_directories(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 collect_files(noggit_root_sources src/noggit false "*.cpp" "")
 collect_files(noggit_ui_sources src/noggit/ui true "*.cpp" "")
+collect_files(noggit_scripting_sources src/noggit/scripting true "*.cpp" "")
 collect_files(math_sources src/math false "*.cpp" "")
 collect_files(opengl_sources src/opengl false "*.cpp" "")
 
@@ -343,6 +344,7 @@ set ( util_sources
 
 collect_files(noggit_root_headers src/noggit false "*.h;*.hpp;*.inl" "")
 collect_files(noggit_ui_headers src/noggit/ui true "*.h;*.hpp" "")
+collect_files(noggit_scripting_headers src/noggit/scripting true "*.h;*.hpp" "")
 collect_files(math_headers src/math false "*.h;*.hpp" "")
 collect_files(opengl_headers src/opengl false "*.h;*.hpp" "")
 collect_files(shaders src/glsl false "*.glsl" "")
@@ -374,6 +376,7 @@ ENDIF(WIN32)
 #qt5_wrap_cpp (moced ${result})
 source_group("noggit"  FILES ${noggit_root_sources} ${noggit_root_headers})
 source_group("noggit\\ui"  FILES ${noggit_ui_sources} ${noggit_ui_headers})
+source_group("noggit\\scripting"  FILES ${noggit_scripting_sources} ${noggit_scripting_headers})
 source_group("opengl"  FILES ${opengl_sources} ${opengl_headers})
 source_group("math"  FILES ${math_sources} ${math_headers})
 source_group("external"  FILES ${external_sources} ${external_headers})
@@ -395,6 +398,7 @@ ADD_EXECUTABLE ( noggit
                   MACOSX_BUNDLE
                   ${noggit_root_sources}
                   ${noggit_ui_sources}
+                  ${noggit_scripting_sources}
                   ${opengl_sources}
                   ${math_sources}
                   ${external_sources}
@@ -409,6 +413,7 @@ ADD_EXECUTABLE ( noggit
                   ${tracy_sources}
                   ${noggit_root_headers}
                   ${noggit_ui_headers}
+                  ${noggit_scripting_headers}
                   ${opengl_headers}
                   ${math_headers}
                   ${external_headers}
@@ -531,3 +536,79 @@ add_executable (math-matrix_4x4.test test/math/matrix_4x4.cpp)
 target_compile_definitions (math-matrix_4x4.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
 target_link_libraries (math-matrix_4x4.test Boost::unit_test_framework noggit::math)
 add_test (NAME math-matrix_4x4 COMMAND $<TARGET_FILE:math-matrix_4x4.test>)
+
+include (FetchContent)
+
+# Dependency: json.hpp
+FetchContent_Declare (json
+        GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
+        GIT_TAG v3.9.1
+        )
+FetchContent_GetProperties (json)
+if (NOT json_POPULATED)
+  message (STATUS "Installing json.hpp...")
+  FetchContent_Populate (json)
+endif()
+add_subdirectory (${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+# Dependency: lodepng
+FetchContent_Declare (lodepng
+        GIT_REPOSITORY https://github.com/lvandeve/lodepng.git
+        GIT_TAG 7fdcc96a5e5864eee72911c3ca79b1d9f0d12292
+        )
+FetchContent_GetProperties (lodepng)
+if (NOT lodepng_POPULATED)
+  message (STATUS "Installing lodepng...")
+  FetchContent_Populate (lodepng)
+endif()
+add_library (lodepng "${lodepng_SOURCE_DIR}/lodepng.cpp")
+target_include_directories (lodepng SYSTEM PUBLIC ${lodepng_SOURCE_DIR})
+
+# Dependency: FastNoise2
+FetchContent_Declare (fastnoise2
+        GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
+        GIT_TAG v0.0.1-heightmap
+        PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/deps/patch_fastnoise2.cmake"
+        UPDATE_DISCONNECTED true
+        )
+FetchContent_GetProperties (fastnoise2)
+if (NOT fastnoise2_POPULATED)
+  message (STATUS "Installing FastNoise2... (big repo, large download)")
+  FetchContent_Populate (fastnoise2)
+endif()
+
+set(FASTNOISE2_NOISETOOL OFF)
+set(FASTNOISE2_TESTS:BOOL OFF)
+
+if (FASTNOISE2_NOISETOOL)
+  add_subdirectory (${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR})
+else()
+  add_subdirectory (${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
+# Dependency: Lua
+find_package (Lua REQUIRED)
+add_library (Lua-Lua INTERFACE)
+add_library (Lua::Lua ALIAS Lua-Lua)
+target_link_libraries (Lua-Lua INTERFACE ${LUA_LIBRARIES})
+target_include_directories (Lua-Lua INTERFACE ${LUA_INCLUDE_DIR})
+
+# Dependency: sol2
+FetchContent_Declare (sol2
+        GIT_REPOSITORY https://github.com/tswow/sol2
+        GIT_TAG b9c83d5ecf6bc9503dc66779f2395dc32dffb1e5
+        )
+FetchContent_MakeAvailable (sol2)
+# sol2::sol2 neither links lua nor sets include directories as system so will clobber us with
+# loads of warnings, sadly. It also wants to be install(EXPORT)ed which is not what we want.
+add_library (sane-sol2 INTERFACE)
+add_library (sol2::sane ALIAS sane-sol2)
+target_link_libraries (sane-sol2 INTERFACE Lua::Lua)
+target_include_directories (sane-sol2 SYSTEM INTERFACE "${sol2_SOURCE_DIR}/include")
+
+target_link_libraries (noggit
+        lodepng
+        FastNoise
+        nlohmann_json::nlohmann_json
+        sol2::sane
+        )

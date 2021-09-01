@@ -150,6 +150,8 @@ public:
                              , bool draw_hidden_models
                              );
 
+  MapChunk* getChunkAt(math::vector_3d const& pos);
+
 private:
   // Information about the currently selected model / WMO / triangle.
   int _selected_model_count = 0;
@@ -176,6 +178,7 @@ public:
   void reset_selection();
   void delete_selected_models();
   void range_add_to_selection(math::vector_3d const& pos, float radius, bool remove);
+  noggit::world_model_instances_storage& getModelInstanceStorage() { return _model_instance_storage; };
 
   enum class m2_scaling_type
   {
@@ -328,6 +331,7 @@ public:
   void reload_tile(tile_index const& tile);
 
   void updateTilesEntry(selection_type const& entry, model_update type);
+  void updateTilesEntry(SceneObject* entry, model_update type);
   void updateTilesWMO(WMOInstance* wmo, model_update type);
   void updateTilesModel(ModelInstance* m2, model_update type);
   void wait_for_all_tile_updates();
@@ -378,7 +382,6 @@ public:
 
   bool deselectVertices(math::vector_3d const& pos, float radius);
   void selectVertices(math::vector_3d const& pos, float radius);
-
   void moveVertices(float h);
   void orientVertices ( math::vector_3d const& ref_pos
                       , math::degrees vertex_angle
@@ -389,6 +392,8 @@ public:
   void updateSelectedVertices();
   void updateVertexCenter();
   void clearVertexSelection();
+
+  void deleteObjects(std::vector<selection_type> const& types);
 
   float getMaxTileHeight(const tile_index& tile);
 

@@ -88,7 +88,7 @@ public:
             , std::map<int, misc::random_color>& area_id_colors
             , int animtime
             , display_mode display
-            , std::array<int, 4>& textures_bound
+            , bool is_selected
             );
   bool intersect (math::ray const&, selection_result*) const;
   void drawWater ( math::frustum const& frustum
@@ -158,6 +158,9 @@ private:
   tile_mode _mode;
   bool _tile_is_being_reloaded;
   bool _uploaded = false;
+  bool _selected = false;
+  bool _split_drawcall = false;
+  bool _requires_sampler_reset = true;
 
   // MFBO:
   math::vector_3d mMinimumValues[3 * 3];

@@ -85,6 +85,10 @@ public:
 
   void markDirty();
 
+  void setEffect(size_t id, int value);
+
+  std::array<std::uint16_t, 8> lod_texture_map();
+
   std::array<boost::optional<Alphamap>, 3>* getAlphamaps() { return &alphamaps; };
   boost::optional<tmp_edit_alpha_values>* getTempAlphamaps() { return &tmp_edit_values; };
 

@@ -59,11 +59,11 @@ namespace opengl
     int ChunkTextureSamplers[4];
     int ChunkTextureArrayIDs[4];
     int ChunkHoles_DrawImpass_TexLayerCount_CantPaint[4];
-    math::vector_4d  ChunkTexAnim_0_1;
-    math::vector_4d  ChunkTexAnim_2_3;
-    math::vector_4d  AreaIDColor_DrawSelection;
-    math::vector_4d pad1;
-    math::vector_4d pad2;
+    int ChunkTexDoAnim[4];
+    int ChunkTexAnimSpeed[4];
+    int AreaIDColor_Pad2_DrawSelection[4];
+    math::vector_4d ChunkXYZBase_Pad1;
+    int ChunkTexAnimDir[4];
   };
 
 }

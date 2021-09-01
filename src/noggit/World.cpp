@@ -775,6 +775,16 @@ void World::initDisplay()
   ol = std::make_unique<OutdoorLighting> ("World\\dnc.db");
 }
 
+MapChunk* World::getChunkAt(math::vector_3d const& pos)
+{
+  MapTile* tile(mapIndex.getTile(pos));
+  if (tile && tile->finishedLoading())
+  {
+    return tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE, (pos.z - tile->zbase) / CHUNKSIZE);
+  }
+  return nullptr;
+}
+
 void World::initShaders()
 {
   if (!_display_initialized)
@@ -915,6 +925,7 @@ void World::initShaders()
     mcnk_shader.uniform("shadowmap", 2);
     mcnk_shader.uniform("alphamap", 3);
     mcnk_shader.uniform("stamp_brush", 4);
+    mcnk_shader.uniform("base_instance", 0);
 
     std::vector<int> samplers {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     mcnk_shader.uniform("textures", samplers);
@@ -1092,6 +1103,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
     mcnk_shader.uniform ("camera", camera_pos);
+    mcnk_shader.uniform ("animtime", static_cast<int>(animtime));
 
     if (cursor_type != CursorType::NONE)
     {
@@ -1108,24 +1120,12 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
 
 
-    std::array<int, 4> textures_bound = { -1, -1, -1, -1 };
+    //std::array<int, 4> textures_bound = { -1, -1, -1, -1 };
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
-
-      if (terrainMode == editing_mode::minimap
-          && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z))
-      {
-        //mcnk_shader.uniform("draw_selection", 1);
-      }
-      else
-      {
-      //  mcnk_shader.uniform("draw_selection", 0);
-      }
-
       gl.bindVertexArray(_mapchunk_vao);
       gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mapchunk_index);
-
 
       tile->draw ( frustum
                  , mcnk_shader
@@ -1139,7 +1139,8 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , area_id_colors
                  , animtime
                  , display
-                 , textures_bound
+                 , terrainMode == editing_mode::minimap
+                   && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z)
                  );
     }
 
@@ -2720,6 +2721,13 @@ void World::reload_tile(tile_index const& tile)
   mapIndex.reloadTile(tile);
 }
 
+void World::deleteObjects(std::vector<selection_type> const& types)
+{
+  ZoneScoped;
+  _model_instance_storage.delete_instances(types);
+  need_model_updates = true;
+}
+
 void World::updateTilesEntry(selection_type const& entry, model_update type)
 {
   ZoneScoped;
@@ -2732,6 +2740,17 @@ void World::updateTilesEntry(selection_type const& entry, model_update type)
     updateTilesWMO (static_cast<WMOInstance*>(obj), type);
   else if (obj->which() == eMODEL)
     updateTilesModel (static_cast<ModelInstance*>(obj), type);
+
+}
+
+
+void World::updateTilesEntry(SceneObject* entry, model_update type)
+{
+  ZoneScoped;
+  if (entry->which() == eWMO)
+    updateTilesWMO (static_cast<WMOInstance*>(entry), type);
+  else if (entry->which() == eMODEL)
+    updateTilesModel (static_cast<ModelInstance*>(entry), type);
 
 }
 

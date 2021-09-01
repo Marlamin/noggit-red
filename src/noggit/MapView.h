@@ -62,6 +62,10 @@ namespace noggit
     class LightEditor;
   }
 
+  namespace scripting
+  {
+    class scripting_tool;
+  }
 
   class camera;
   namespace ui
@@ -95,12 +99,21 @@ enum class save_mode
 class MapView : public noggit::Red::ViewportManager::Viewport
 {
   Q_OBJECT
-private:
+public:
   bool _mod_alt_down = false;
   bool _mod_ctrl_down = false;
   bool _mod_shift_down = false;
   bool _mod_space_down = false;
   bool _mod_num_down = false;
+
+  bool  leftMouse = false;
+  bool  leftClicked = false;
+  bool  rightMouse = false;
+
+  std::unique_ptr<World> _world;
+  noggit::camera _camera;
+
+private:
 
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
@@ -110,7 +123,6 @@ private:
   bool look, freelook;
   bool ui_hidden = false;
 
-  noggit::camera _camera;
   bool _camera_moved_since_last_draw = true;
 
 public:
@@ -171,10 +183,6 @@ private:
   std::vector<selection_type> lastSelected;
 
   bool _rotation_editor_need_update = false;
-
-  bool  leftMouse = false;
-  bool  leftClicked = false;
-  bool  rightMouse = false;
 
   bool mmap_render_success = false;
   int mmap_render_index = 0;
@@ -313,8 +321,6 @@ private:
   math::vector_4d normalized_device_coords (int x, int y) const;
   float aspect_ratio() const;
 
-  std::unique_ptr<World> _world;
-
   noggit::TabletManager* _tablet_manager;
 
   QLabel* _status_position;
@@ -372,6 +378,7 @@ private:
   noggit::ui::MinimapCreator* minimapTool;
   noggit::Red::BrushStack* stampTool;
   noggit::Red::LightEditor* lightEditor;
+  noggit::scripting::scripting_tool* scriptingTool;
 
   opengl::texture* const _texBrush;
 
@@ -413,6 +420,7 @@ private:
   void setupMinimapEditorUi();
   void setupStampUi();
   void setupLightEditorUi();
+  void setupScriptingUi();
   void setupNodeEditor();
   void setupAssetBrowser();
   void setupDetailInfos();

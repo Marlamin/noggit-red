@@ -35,11 +35,11 @@ struct ChunkInstanceData
   ivec4 ChunkTextureSamplers;
   ivec4 ChunkTextureArrayIDs;
   ivec4 ChunkHoles_DrawImpass_TexLayerCount_CantPaint;
-  vec4  ChunkTexAnim_0_1;
-  vec4  ChunkTexAnim_2_3;
-  vec4  AreaIDColor_DrawSelection;
+  ivec4 ChunkTexDoAnim;
+  ivec4 ChunkTexAnimSpeed;
+  ivec4 AreaIDColor_Pad2_DrawSelection;
   vec4  ChunkXYZBase_Pad1;
-  vec4 pad2;
+  ivec4 ChunkTexAnimDir;
 };
 
 layout (std140) uniform chunk_instances
@@ -51,7 +51,6 @@ uniform sampler2DArray shadowmap;
 uniform sampler2DArray alphamap;
 uniform sampler2D stamp_brush;
 uniform sampler2DArray textures[11];
-
 uniform vec3 camera;
 
 uniform int draw_cursor_circle;
@@ -63,6 +62,10 @@ uniform vec4 cursor_color;
 
 in vec3 vary_position;
 in vec2 vary_texcoord;
+in vec2 vary_t0_uv;
+in vec2 vary_t1_uv;
+in vec2 vary_t2_uv;
+in vec2 vary_t3_uv;
 in vec3 vary_normal;
 in vec3 vary_mccv;
 flat in int instanceID;
@@ -75,6 +78,14 @@ const float HOLESIZE  = CHUNKSIZE * 0.25;
 const float UNITSIZE = HOLESIZE * 0.5;
 const float PI = 3.14159265358979323846;
 
+vec3 random_color(float areaID)
+{
+  float r = fract(sin(dot(vec2(areaID), vec2(12.9898, 78.233))) * 43758.5453);
+  float g = fract(sin(dot(vec2(areaID), vec2(11.5591, 70.233))) * 43569.5451);
+  float b = fract(sin(dot(vec2(areaID), vec2(13.1234, 76.234))) * 43765.5452);
+
+  return vec3(r, g, b);
+}
 
 vec3 get_tex_color(vec2 tex_coord, int tex_sampler, int array_index)
 {
@@ -133,17 +144,13 @@ vec4 texture_blend()
   float a1 = alpha.g;
   float a2 = alpha.b;
 
-  /*
-  vec3 t0 = get_tex_color(vary_texcoord + instances[instanceID].ChunkTexAnim_0_1.rg, 0);
-  vec3 t1 = get_tex_color(vary_texcoord + instances[instanceID].ChunkTexAnim_0_1.ba, 1);
-  vec3 t2 = get_tex_color(vary_texcoord + instances[instanceID].ChunkTexAnim_2_3.rg, 2);
-  vec3 t3 = get_tex_color(vary_texcoord + instances[instanceID].ChunkTexAnim_2_3.ba, 3);
-  */
+  vec3 t0 = get_tex_color(vary_t0_uv, instances[instanceID].ChunkTextureSamplers.x, instances[instanceID].ChunkTextureArrayIDs.x);
 
-  vec3 t0 = get_tex_color(vary_texcoord, instances[instanceID].ChunkTextureSamplers.x, instances[instanceID].ChunkTextureArrayIDs.x);
-  vec3 t1 = get_tex_color(vary_texcoord, instances[instanceID].ChunkTextureSamplers.y, instances[instanceID].ChunkTextureArrayIDs.y);
-  vec3 t2 = get_tex_color(vary_texcoord, instances[instanceID].ChunkTextureSamplers.z, instances[instanceID].ChunkTextureArrayIDs.z);
-  vec3 t3 = get_tex_color(vary_texcoord, instances[instanceID].ChunkTextureSamplers.w, instances[instanceID].ChunkTextureArrayIDs.w);
+  vec3 t1 = get_tex_color(vary_t1_uv, instances[instanceID].ChunkTextureSamplers.y, instances[instanceID].ChunkTextureArrayIDs.y);
+
+  vec3 t2 = get_tex_color(vary_t2_uv, instances[instanceID].ChunkTextureSamplers.z, instances[instanceID].ChunkTextureArrayIDs.z);
+
+  vec3 t3 = get_tex_color(vary_t3_uv, instances[instanceID].ChunkTextureSamplers.w, instances[instanceID].ChunkTextureArrayIDs.w);
 
   return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0);
 }
@@ -196,7 +203,7 @@ void main()
 
   if(draw_areaid_overlay != 0)
   {
-    out_color.rgb = out_color.rgb * 0.3 + instances[instanceID].AreaIDColor_DrawSelection.rgb;
+    out_color.rgb = out_color.rgb * 0.3 + random_color(instances[instanceID].AreaIDColor_Pad2_DrawSelection.r);
   }
 
   if(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.g != 0) // draw impass
@@ -204,7 +211,7 @@ void main()
     out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
   }
 
-  if(instances[instanceID].AreaIDColor_DrawSelection.a != 0) // draw selection
+  if(instances[instanceID].AreaIDColor_Pad2_DrawSelection.a != 0) // draw selection
   {
    out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
   }

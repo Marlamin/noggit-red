@@ -79,6 +79,7 @@ public:
   std::unique_ptr<TextureSet> texture_set;
 
   int holes;
+  bool currently_paintable = true;
 
   unsigned int areaID;
 
@@ -127,6 +128,8 @@ public:
   math::vector_3d pickMCCV(math::vector_3d const& pos);
 
   ChunkWater* liquid_chunk() const;
+
+  bool hasColors() const { return hasMCCV; };
 
   void updateVerticesData();
   void recalcNorms();
