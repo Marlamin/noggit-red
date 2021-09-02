@@ -609,6 +609,8 @@ void MapChunk::updateVerticesData()
     tile_buffer[chunk_start + i * 4 + 3] = mVertices[i].y;
   }
 
+  mt->recalcExtents(vmin.y, vmax.y);
+
   update_intersect_points();
 }
 

@@ -31,6 +31,7 @@ uniform sampler2D heightmap;
 uniform sampler2D mccv;
 uniform int base_instance;
 uniform int animtime;
+uniform int lod_level;
 
 out vec3 vary_position;
 out vec2 vary_texcoord;
@@ -53,36 +54,77 @@ bool isHoleVertex(uint vertexId, uint hole)
   uint blockVertexId = vertexId % 34;
   uint shiftedHole = hole >> (blockRow * 4);
 
-
-  if ((shiftedHole & 0x1u) != 0)
+  switch(lod_level)
   {
-    if (blockVertexId == 9 || blockVertexId == 10 || blockVertexId == 26 || blockVertexId == 27)
+    case 0:
     {
-      return true;
+      if ((shiftedHole & 0x1u) != 0)
+      {
+        if (blockVertexId == 9 || blockVertexId == 10 || blockVertexId == 26 || blockVertexId == 27)
+        {
+          return true;
+        }
+      }
+
+      if ((shiftedHole & 0x2u) != 0)
+      {
+        if (blockVertexId == 11 || blockVertexId == 12 || blockVertexId == 28 || blockVertexId == 29)
+        {
+          return true;
+        }
+      }
+
+      if ((shiftedHole & 0x4u) != 0)
+      {
+        if (blockVertexId == 13 || blockVertexId == 14 || blockVertexId == 30 || blockVertexId == 31)
+        {
+          return true;
+        }
+      }
+
+      if ((shiftedHole & 0x8u) != 0)
+      {
+        if (blockVertexId == 15 || blockVertexId == 16 || blockVertexId == 32 || blockVertexId == 33)
+        {
+          return true;
+        }
+      }
+      break;
     }
-  }
-
-  if ((shiftedHole & 0x2u) != 0)
-  {
-    if (blockVertexId == 11 || blockVertexId == 12 || blockVertexId == 28 || blockVertexId == 29)
+    case 1:
     {
-      return true;
-    }
-  }
+      if ((shiftedHole & 0x1u) != 0)
+      {
+        if (vertexId == 18 || vertexId == 20 || vertexId == 22 || vertexId == 24)
+        {
+          return true;
+        }
+      }
 
-  if ((shiftedHole & 0x4u) != 0)
-  {
-    if (blockVertexId == 13 || blockVertexId == 14 || blockVertexId == 30 || blockVertexId == 31)
-    {
-      return true;
-    }
-  }
+      if ((shiftedHole & 0x2u) != 0)
+      {
+        if (vertexId == 52 || vertexId == 54 || vertexId == 56 || vertexId == 58)
+        {
+          return true;
+        }
+      }
 
-  if ((shiftedHole & 0x8u) != 0)
-  {
-    if (blockVertexId == 15 || blockVertexId == 16 || blockVertexId == 32 || blockVertexId == 33)
-    {
-      return true;
+      if ((shiftedHole & 0x4u) != 0)
+      {
+        if (vertexId == 86 || vertexId == 88 || vertexId == 90 || vertexId == 92)
+        {
+          return true;
+        }
+      }
+
+      if ((shiftedHole & 0x8u) != 0)
+      {
+        if (vertexId == 120 || vertexId == 122 || vertexId == 124 || vertexId == 126)
+        {
+          return true;
+        }
+      }
+      break;
     }
   }
 

@@ -27,6 +27,7 @@
 #include <utility>
 #include <vector>
 #include <limits>
+#include <cstdint>
 
 
 MapTile::MapTile( int pX
@@ -56,6 +57,8 @@ MapTile::MapTile( int pX
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
                         | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
+  , _extents{math::vector_3d{xbase, std::numeric_limits<float>::max(), zbase},
+             math::vector_3d{xbase + TILESIZE, std::numeric_limits<float>::lowest(), zbase + TILESIZE}}
 {
 }
 
@@ -347,28 +350,12 @@ bool MapTile::isTile(int pX, int pZ)
 
 float MapTile::getMaxHeight()
 {
-  float maxHeight = std::numeric_limits<float>::min();
-
-  for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
-  {
-    maxHeight = std::max(mChunks[nextChunk / 16][nextChunk % 16]->vmax.y, maxHeight);
-  }
-
-  return maxHeight;
-
+  return _extents[1].y;
 }
 
 float MapTile::getMinHeight()
 {
-  float minHeight = std::numeric_limits<float>::max();
-
-  for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
-  {
-    minHeight = std::min(mChunks[nextChunk / 16][nextChunk % 16]->vmin.y, minHeight);
-  }
-
-  return minHeight;
-
+  return _extents[0].y;
 }
 
 void MapTile::convert_alphamap(bool to_big_alpha)
@@ -652,6 +639,13 @@ void MapTile::draw ( math::frustum const& frustum
     gl.bindTexture(GL_TEXTURE_2D, _height_tex);
   }
 
+  float tile_center_x = xbase + TILESIZE / 2.0f;
+  float tile_center_z = zbase + TILESIZE / 2.0f;
+
+  bool is_lod = misc::dist(tile_center_x, tile_center_z, camera.x, camera.z) > TILESIZE;
+  mcnk_shader.uniform("lod_level", int(is_lod));
+
+
   if (!_split_drawcall)
   [[likely]]
   {
@@ -668,7 +662,15 @@ void MapTile::draw ( math::frustum const& frustum
       gl.bindTexture(GL_TEXTURE_2D_ARRAY, _samplers[i]);
     }
 
-    gl.drawElementsInstanced(GL_TRIANGLES, 768, GL_UNSIGNED_SHORT, nullptr, 256);
+    if (is_lod)
+    {
+      gl.drawElementsInstanced(GL_TRIANGLES, 192, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(768 * sizeof(std::uint16_t)), 256);
+    }
+    else
+    {
+      gl.drawElementsInstanced(GL_TRIANGLES, 768, GL_UNSIGNED_SHORT, nullptr, 256);
+    }
+
   }
   else
   [[unlikely]]
@@ -743,7 +745,15 @@ void MapTile::draw ( math::frustum const& frustum
       }
 
       mcnk_shader.uniform("base_instance", static_cast<int>(chunk_index_start));
-      gl.drawElementsInstanced(GL_TRIANGLES, 768, GL_UNSIGNED_SHORT, nullptr, n_chunks);
+
+      if (is_lod)
+      {
+        gl.drawElementsInstanced(GL_TRIANGLES, 192, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(768), n_chunks);
+      }
+      else
+      {
+        gl.drawElementsInstanced(GL_TRIANGLES, 768, GL_UNSIGNED_SHORT, nullptr, n_chunks);
+      }
 
       cur_sampler_set++;
 
@@ -1808,4 +1818,10 @@ void MapTile::uploadTextures()
   gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   gl.bindTexture(GL_TEXTURE_2D_ARRAY, 0);
+}
+
+void MapTile::recalcExtents(float min, float max)
+{
+  _extents[0].y = std::min(_extents[0].y, min);
+  _extents[1].y = std::max(_extents[1].y, max);
 }

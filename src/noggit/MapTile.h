@@ -146,6 +146,9 @@ public:
   void registerChunkUpdate(unsigned flags) { _chunk_update_flags |= flags; };
   void endChunkUpdates() { _chunk_update_flags = 0; };
   std::array<float, 145 * 256 * 4>& getChunkHeightmapBuffer() { return _chunk_heightmap_buffer; };
+  unsigned getChunkUpdateFlags() { return _chunk_update_flags; }
+  void recalcExtents(float min, float max);
+  std::array<math::vector_3d, 2>& getExtents() { return _extents; };
 
   void unload();
 
@@ -161,6 +164,8 @@ private:
   bool _selected = false;
   bool _split_drawcall = false;
   bool _requires_sampler_reset = true;
+
+  std::array<math::vector_3d, 2> _extents;
 
   // MFBO:
   math::vector_3d mMinimumValues[3 * 3];
