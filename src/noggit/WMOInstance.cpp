@@ -104,8 +104,8 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
 
   if (force_box || is_selected)
   {
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //gl.enable(GL_BLEND);
+    //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f)
         : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);

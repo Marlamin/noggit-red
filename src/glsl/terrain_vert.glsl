@@ -95,7 +95,7 @@ bool isHoleVertex(uint vertexId, uint hole)
     {
       if ((shiftedHole & 0x1u) != 0)
       {
-        if (vertexId == 18 || vertexId == 20 || vertexId == 22 || vertexId == 24)
+        if (vertexId == 18 || vertexId == 52 || vertexId == 86 || vertexId == 120)
         {
           return true;
         }
@@ -103,7 +103,7 @@ bool isHoleVertex(uint vertexId, uint hole)
 
       if ((shiftedHole & 0x2u) != 0)
       {
-        if (vertexId == 52 || vertexId == 54 || vertexId == 56 || vertexId == 58)
+        if (vertexId == 20 || vertexId == 54 || vertexId == 88 || vertexId == 122)
         {
           return true;
         }
@@ -111,7 +111,7 @@ bool isHoleVertex(uint vertexId, uint hole)
 
       if ((shiftedHole & 0x4u) != 0)
       {
-        if (vertexId == 86 || vertexId == 88 || vertexId == 90 || vertexId == 92)
+        if (vertexId == 22 || vertexId == 56 || vertexId == 90 || vertexId == 124)
         {
           return true;
         }
@@ -119,7 +119,7 @@ bool isHoleVertex(uint vertexId, uint hole)
 
       if ((shiftedHole & 0x8u) != 0)
       {
-        if (vertexId == 120 || vertexId == 122 || vertexId == 124 || vertexId == 126)
+        if (vertexId == 24 || vertexId == 58 || vertexId == 92 || vertexId == 126)
         {
           return true;
         }

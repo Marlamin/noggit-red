@@ -1095,13 +1095,15 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   gl.enable(GL_DEPTH_TEST);
   gl.depthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
-  gl.enable(GL_BLEND);
+  //gl.disable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   //gl.disable(GL_CULL_FACE);
 
   // height map w/ a zillion texture passes
   if (draw_terrain)
   {
+    gl.disable(GL_BLEND);
+
     ZoneScopedN("World::draw() : Draw terrain");
     opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
@@ -1217,10 +1219,6 @@ void World::draw ( math::matrix_4x4 const& model_view
                   );
         }
       });
-
-      gl.enable(GL_BLEND);
-      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      gl.enable(GL_CULL_FACE);
     }
   }
 
@@ -1230,6 +1228,8 @@ void World::draw ( math::matrix_4x4 const& model_view
   if (draw_models || draw_doodads_wmo)
   {
     ZoneScopedN("World::draw() : Draw M2s");
+
+    gl.enable(GL_BLEND);
 
     if (draw_model_animations)
     {
@@ -1306,8 +1306,11 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     }
 
+    gl.disable(GL_BLEND);
+
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
+
       opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
@@ -1430,6 +1433,8 @@ void World::draw ( math::matrix_4x4 const& model_view
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
+  gl.disable(GL_BLEND);
+
   if (angled_mode || use_ref_pos)
   {
     ZoneScopedN("World::draw() : Draw angles");
@@ -1475,6 +1480,8 @@ void World::draw ( math::matrix_4x4 const& model_view
       }
     }
   }
+
+  gl.enable(GL_BLEND);
 
   // draw last because of the transparency
   if (draw_mfbo)

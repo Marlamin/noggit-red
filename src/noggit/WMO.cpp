@@ -369,8 +369,8 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
 
   if (boundingbox)
   {
-    opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
+    //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (auto& group : groups)
     {
@@ -1346,10 +1346,12 @@ void WMOGroup::drawLiquid ( math::matrix_4x4 const& transform
   //! \todo  culling for liquid boundingbox or something
   if (lq) 
   { 
-    gl.disable(GL_BLEND);
+    gl.enable(GL_BLEND);
     gl.depthMask(GL_TRUE);
 
     lq->draw ( transform, render, animtime);
+
+    gl.disable(GL_BLEND);
   }
 }
 
