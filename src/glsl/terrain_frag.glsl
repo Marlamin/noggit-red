@@ -87,54 +87,54 @@ vec3 random_color(float areaID)
   return vec3(r, g, b);
 }
 
-vec3 get_tex_color(vec2 tex_coord, int tex_sampler, int array_index)
+vec4 get_tex_color(vec2 tex_coord, int tex_sampler, int array_index)
 {
   if (tex_sampler == 0)
   {
-    return texture(textures[0], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[0], vec3(tex_coord, array_index)).rgba;
   }
   else if (tex_sampler == 1)
   {
-    return texture(textures[1], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[1], vec3(tex_coord, array_index)).rgba;
   }
   else if (tex_sampler == 2)
   {
-    return texture(textures[2], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[2], vec3(tex_coord, array_index)).rgba;
   }
   else if (tex_sampler == 3)
   {
-    return texture(textures[3], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[3], vec3(tex_coord, array_index)).rgba;
   }
   else if (tex_sampler == 4)
   {
-    return texture(textures[4], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[4], vec3(tex_coord, array_index)).rgba;
   }
   else if (tex_sampler == 5)
   {
-    return texture(textures[5], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[5], vec3(tex_coord, array_index)).rgba;
   }
   else if (tex_sampler == 6)
   {
-    return texture(textures[6], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[6], vec3(tex_coord, array_index)).rgba;
   }
   else if (tex_sampler == 7)
   {
-    return texture(textures[7], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[7], vec3(tex_coord, array_index)).rgba;
   }
   else if (tex_sampler == 8)
   {
-    return texture(textures[8], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[8], vec3(tex_coord, array_index)).rgba;
   }
   else if (tex_sampler == 9)
   {
-    return texture(textures[9], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[9], vec3(tex_coord, array_index)).rgba;
   }
   else if (tex_sampler == 10)
   {
-    return texture(textures[10], vec3(tex_coord, array_index)).rgb;
+    return texture(textures[10], vec3(tex_coord, array_index)).rgba;
   }
 
-  return vec3(0);
+  return vec4(0);
 }
 
 vec4 texture_blend()
@@ -144,15 +144,19 @@ vec4 texture_blend()
   float a1 = alpha.g;
   float a2 = alpha.b;
 
-  vec3 t0 = get_tex_color(vary_t0_uv, instances[instanceID].ChunkTextureSamplers.x, instances[instanceID].ChunkTextureArrayIDs.x);
+  vec4 t0 = get_tex_color(vary_t0_uv, instances[instanceID].ChunkTextureSamplers.x, abs(instances[instanceID].ChunkTextureArrayIDs.x));
+  t0.a = mix(t0.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.x < 0));
 
-  vec3 t1 = get_tex_color(vary_t1_uv, instances[instanceID].ChunkTextureSamplers.y, instances[instanceID].ChunkTextureArrayIDs.y);
+  vec4 t1 = get_tex_color(vary_t1_uv, instances[instanceID].ChunkTextureSamplers.y, abs(instances[instanceID].ChunkTextureArrayIDs.y));
+  t1.a = mix(t1.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.y < 0));
 
-  vec3 t2 = get_tex_color(vary_t2_uv, instances[instanceID].ChunkTextureSamplers.z, instances[instanceID].ChunkTextureArrayIDs.z);
+  vec4 t2 = get_tex_color(vary_t2_uv, instances[instanceID].ChunkTextureSamplers.z, abs(instances[instanceID].ChunkTextureArrayIDs.z));
+  t2.a = mix(t2.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.z < 0));
 
-  vec3 t3 = get_tex_color(vary_t3_uv, instances[instanceID].ChunkTextureSamplers.w, instances[instanceID].ChunkTextureArrayIDs.w);
+  vec4 t3 = get_tex_color(vary_t3_uv, instances[instanceID].ChunkTextureSamplers.w, abs(instances[instanceID].ChunkTextureArrayIDs.w));
+  t3.a = mix(t3.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.w < 0));
 
-  return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2, 1.0);
+  return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2);
 }
 
 float contour_alpha(float unit_size, float pos, float line_width)
@@ -171,21 +175,17 @@ float contour_alpha(float unit_size, vec2 pos, vec2 line_width)
 
 void main()
 {
-
   float dist_from_camera = distance(camera, vary_position);
 
   vec3 fw = fwidth(vary_position.xyz);
 
-  out_color = mix(vec4(1.0, 1.0, 1.0, 1.0), texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
-
-  out_color.rgb *= vary_mccv;
-
-  // apply world lighting
+  // calc world lighting
   vec3 currColor;
   vec3 lDiffuse = vec3(0.0, 0.0, 0.0);
   vec3 accumlatedLight = vec3(1.0, 1.0, 1.0);
 
-  float nDotL = clamp(dot(normalize(vary_normal), -normalize(LightDir_FogRate.xyz)), 0.0, 1.0);
+  vec3 normalized_normal = normalize(vary_normal);
+  float nDotL = clamp(dot(normalized_normal, -normalize(LightDir_FogRate.xyz)), 0.0, 1.0);
 
   vec3 skyColor = (AmbientColor_FogEnd.xyz * 1.10000002);
   vec3 groundColor = (AmbientColor_FogEnd.xyz * 0.699999988);
@@ -193,7 +193,20 @@ void main()
   currColor = mix(groundColor, skyColor, 0.5 + (0.5 * nDotL));
   lDiffuse = DiffuseColor_FogStart.xyz * nDotL;
 
-  out_color.rgb = clamp(out_color.rgb * (currColor + lDiffuse), 0.0, 1.0);
+  vec3 reflection = normalize(normalized_normal - (-LightDir_FogRate.xyz));
+  float specularFactor = clamp(dot(reflection, normalize(camera - vary_position)), 0.0, 1.0);
+
+  // blend textures
+  out_color = mix(vec4(1.0, 1.0, 1.0, 1.0), texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
+
+  vec3 spc = out_color.a * out_color.rgb * pow(specularFactor, 8);
+  out_color.a = 1.0;
+
+  // apply vertex color
+  out_color.rgb *= vary_mccv;
+
+  // apply world lighting
+  out_color.rgb = clamp(out_color.rgb * (currColor + lDiffuse + spc), 0.0, 1.0);
 
   // apply overlays
   if(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.a != 0) // can't paint

@@ -933,7 +933,7 @@ void opengl::context::framebufferRenderbuffer (GLenum target, GLenum attachment,
 template<GLenum target>
 void opengl::context::bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage)
 {
-  GLuint old;
+  GLuint old = 0;
 
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   gl.getIntegerv ( target == GL_ARRAY_BUFFER ? GL_ARRAY_BUFFER_BINDING
@@ -959,7 +959,7 @@ template void opengl::context::bufferData<GL_ELEMENT_ARRAY_BUFFER> (GLuint buffe
 template<GLenum target, typename T>
 void opengl::context::bufferData(GLuint buffer, std::vector<T> const& data, GLenum usage)
 {
-  GLuint old;
+  GLuint old = 0;
 
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
   gl.getIntegerv ( target == GL_ARRAY_BUFFER ? GL_ARRAY_BUFFER_BINDING
@@ -1017,7 +1017,7 @@ void opengl::context::bufferSubData (GLuint buffer, GLintptr offset, GLsizeiptr 
 template<GLenum target, typename T>
 void opengl::context::bufferSubData(GLuint buffer, GLintptr offset, std::vector<T> const& data)
 {
-  GLuint old;
+  GLuint old = 0;
   gl.getIntegerv ( target == GL_ARRAY_BUFFER ? GL_ARRAY_BUFFER_BINDING
                    : target == GL_DRAW_INDIRECT_BUFFER ? GL_DRAW_INDIRECT_BUFFER_BINDING
                    : target == GL_ELEMENT_ARRAY_BUFFER ? GL_ELEMENT_ARRAY_BUFFER_BINDING
@@ -1050,7 +1050,7 @@ template void opengl::context::bufferSubData<GL_ARRAY_BUFFER>(GLuint buffer, GLi
 
 void opengl::context::drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices)
 {
-  GLuint old;
+  GLuint old = 0;
   gl.getIntegerv (GL_ELEMENT_ARRAY_BUFFER_BINDING, reinterpret_cast<GLint*>(&old));
   gl.bindBuffer (GL_ELEMENT_ARRAY_BUFFER, index_buffer);
   drawElements (mode, count, type, indices);

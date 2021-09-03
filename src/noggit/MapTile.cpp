@@ -527,7 +527,7 @@ void MapTile::draw ( math::frustum const& frustum
             }
 
             _chunk_instance_data[i * 16 + j].ChunkTextureSamplers[k] = sampler_id;
-            _chunk_instance_data[i * 16 + j].ChunkTextureArrayIDs[k] = tex_index;
+            _chunk_instance_data[i * 16 + j].ChunkTextureArrayIDs[k] = (*chunk->texture_set->getTextures())[k]->is_specular() ? tex_index : -tex_index;
           }
         }
 

@@ -9,8 +9,6 @@
 #include <noggit/WMOInstance.h>
 #include <noggit/ui/ObjectEditor.h>
 
-#include <util/visit.hpp>
-
 #include <sol/sol.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
@@ -19,7 +17,7 @@ namespace noggit
 {
   namespace scripting
   {
-    model::model (script_context * ctx, SceneObject* object)
+    model::model (script_context* ctx, SceneObject* object)
       : script_object(ctx)
       , _object (object)
     {}
@@ -27,7 +25,7 @@ namespace noggit
 
     math::vector_3d model::get_pos()
     {
-      return _object->pos;;
+      return _object->pos;
     }
 
     void model::set_pos(math::vector_3d& pos)

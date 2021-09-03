@@ -61,6 +61,7 @@ struct blp_texture : public opengl::texture, AsyncObject
   bool is_uploaded() { return _uploaded; };
   GLuint texture_array() { return _texture_array; };
   int array_index() { return _array_index; };
+  bool is_specular() { return _is_specular; };
 
   noggit::NoggitRenderContext getContext() { return _context; };
 
@@ -76,6 +77,8 @@ private:
   int _height;
 
   noggit::NoggitRenderContext _context;
+
+  bool _is_specular = false;
 
 private:
   std::map<int, std::vector<uint32_t>> _data;

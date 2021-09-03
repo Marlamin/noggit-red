@@ -367,7 +367,21 @@ void blp_texture::finishLoading()
     LogError << "file not found: '" << filename << "'" << std::endl;
   }
 
-  MPQFile f(exists ? filename : "textures/shanecube.blp");
+  std::string spec_filename;
+  bool has_specular = false;
+
+  if (filename.starts_with("tileset/"))
+  {
+    spec_filename = filename.substr(0, filename.find_last_of(".")) + "_s.blp";
+    has_specular = MPQFile::exists(spec_filename);
+
+    if (has_specular)
+    {
+      _is_specular = true;
+    }
+  }
+
+  MPQFile f(exists ? (has_specular ? spec_filename : filename) : "textures/shanecube.blp");
   if (f.isEof())
   {
     finished = true;
