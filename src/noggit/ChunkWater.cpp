@@ -1,17 +1,20 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ChunkWater.hpp>
+#include <noggit/TileWater.hpp>
 #include <noggit/liquid_layer.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
 
-ChunkWater::ChunkWater(float x, float z, bool use_mclq_green_lava)
+ChunkWater::ChunkWater(MapChunk* chunk, TileWater* water_tile, float x, float z, bool use_mclq_green_lava)
   : xbase(x)
   , zbase(z)
   , vmin(x, 0.f, z)
   , vmax(x + CHUNKSIZE, 0.f, z + CHUNKSIZE)
   , _use_mclq_green_lava(use_mclq_green_lava)
+  , _chunk(chunk)
+  , _water_tile(water_tile)
 {
 }
 
@@ -41,10 +44,10 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
 
     switch (mclq_liquid_type)
     {
-      case 1:_layers.emplace_back(pos, liquid, 2); break;
-      case 3:_layers.emplace_back(pos, liquid, 4); break;
-      case 4:_layers.emplace_back(pos, liquid, 1); break;
-      case 6:_layers.emplace_back(pos, liquid, (_use_mclq_green_lava ? 15 : 3)); break;
+      case 1:_layers.emplace_back(this, pos, liquid, 2); break;
+      case 3:_layers.emplace_back(this, pos, liquid, 4); break;
+      case 4:_layers.emplace_back(this, pos, liquid, 1); break;
+      case 6:_layers.emplace_back(this, pos, liquid, (_use_mclq_green_lava ? 15 : 3)); break;
       default:
         LogError << "Invalid/unhandled MCLQ liquid type" << std::endl;
         break;
@@ -90,7 +93,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     }
 
     math::vector_3d pos(xbase, 0.0f, zbase);
-    _layers.emplace_back(f, basePos, pos, info, infoMask);
+    _layers.emplace_back(this, f, basePos, pos, info, infoMask);
   }
 
   update_layers();
@@ -253,7 +256,7 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
 
     if (!layer_found)
     {
-      liquid_layer layer(math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
+      liquid_layer layer(this, math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
       copy_height_to_layer(layer, pos, radius);
       _layers.push_back(layer);
     }
@@ -292,7 +295,7 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
   }
   else
   {
-    liquid_layer layer(math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
+    liquid_layer layer(this, math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
     layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
     _layers.push_back(layer);
   }

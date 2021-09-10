@@ -194,7 +194,7 @@ void main()
   lDiffuse = DiffuseColor_FogStart.xyz * nDotL;
 
   vec3 reflection = normalize(normalized_normal - (-LightDir_FogRate.xyz));
-  float specularFactor = clamp(dot(reflection, normalize(camera - vary_position)), 0.0, 1.0);
+  float specularFactor = max(dot(reflection, normalize(camera - vary_position)), 0.0);
 
   // blend textures
   out_color = mix(vec4(1.0, 1.0, 1.0, 1.0), texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));

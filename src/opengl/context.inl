@@ -12,6 +12,7 @@
 #include <QtOpenGLExtensions/QOpenGLExtensions>
 #include <QtGui/QOpenGLFunctions>
 #include <boost/current_function.hpp>
+#include <memory>
 
 
 namespace

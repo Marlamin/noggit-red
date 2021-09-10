@@ -14,12 +14,13 @@
 class MPQFile;
 class sExtendableArray;
 class MapChunk;
+class TileWater;
 
 class ChunkWater
 {
 public:
   ChunkWater() = delete;
-  explicit ChunkWater(float x, float z, bool use_mclq_green_lava);
+  explicit ChunkWater(MapChunk* chunk, TileWater* water_tile, float x, float z, bool use_mclq_green_lava);
 
   ChunkWater (ChunkWater const&) = delete;
   ChunkWater (ChunkWater&&) = delete;
@@ -75,6 +76,9 @@ public:
 
   void unload();
 
+  MapChunk* getChunk() { return _chunk; };
+  TileWater* getWaterTile() { return _water_tile; };
+
   float xbase, zbase;
 
 private:
@@ -91,4 +95,6 @@ private:
   MH2O_Render Render;
 
   std::vector<liquid_layer> _layers;
+  MapChunk* _chunk;
+  TileWater* _water_tile;
 };

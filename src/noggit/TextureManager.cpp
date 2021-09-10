@@ -32,6 +32,14 @@ void TextureManager::unload_all(noggit::NoggitRenderContext context)
       }
       , context
   );
+
+  // cleanup texture arrays
+  auto& arrays_for_context = _tex_arrays[context];
+
+  for (auto& pair : arrays_for_context)
+  {
+    gl.deleteTextures(pair.second.arrays.size(), pair.second.arrays.data());
+  }
 }
 
 TexArrayParams& TextureManager::get_tex_array(int width, int height, int mip_level,
@@ -159,6 +167,39 @@ void blp_texture::bind()
   }
 
   gl.bindTexture(GL_TEXTURE_2D_ARRAY, _texture_array);
+}
+
+void blp_texture::uploadToArray(unsigned layer)
+{
+  int width = _width, height = _height;
+
+  if (!_compression_format)
+  {
+
+    for (int i = 0; i < _data.size(); ++i)
+    {
+      gl.texSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, layer, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());
+
+      width = std::max(width >> 1, 1);
+      height = std::max(height >> 1, 1);
+    }
+  }
+  else
+  {
+    for (int i = 0; i < _compressed_data.size(); ++i)
+    {
+      gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, layer, width, height, 1, _compression_format.get(), _compressed_data[i].size(), _compressed_data[i].data());
+
+      width = std::max(width >> 1, 1);
+      height = std::max(height >> 1, 1);
+    }
+
+    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _compressed_data.size() - 1);
+    _compressed_data.clear();
+  }
+
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void blp_texture::upload()

@@ -468,7 +468,7 @@ set (_noggit_revision_script_file "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cm
 include_directories ("${_noggit_revision_output_dir}")
 
 find_package (Git)
-if (GIT_FOUND)
+if (FALSE) # GIT_FOUND
   add_custom_target (update_git_revision
     ALL
     DEPENDS "${_noggit_revision_template_file}"

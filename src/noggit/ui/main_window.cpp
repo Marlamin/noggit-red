@@ -67,6 +67,7 @@ namespace noggit
       , _null_widget (new QWidget (this))
     {
 
+    /*
       auto socket = new QTcpSocket(this);
       socket->connectToHost("178.162.136.62", 5000);
       socket->waitForConnected();
@@ -144,6 +145,8 @@ namespace noggit
           });
 
       }
+
+      */
 
       std::stringstream title;
       title << "Noggit - " << STRPRODUCTVER;

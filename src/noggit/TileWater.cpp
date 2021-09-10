@@ -5,17 +5,25 @@
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/TileWater.hpp>
+#include <noggit/liquid_layer.hpp>
+#include <stdexcept>
+#include <noggit/World.h>
+#include <noggit/LiquidTextureManager.hpp>
 
 TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase, bool use_mclq_green_lava)
   : tile(pTile)
   , xbase(pXbase)
   , zbase(pZbase)
 {
+  // by default we allocate space only for one liquid layer
+  _chunk_instances.reserve(256);
+  _chunk_layer_refs.reserve(256);
+
   for (int z = 0; z < 16; ++z)
   {
     for (int x = 0; x < 16; ++x)
     {
-      chunks[z][x] = std::make_unique<ChunkWater> (xbase + CHUNKSIZE * x, zbase + CHUNKSIZE * z, use_mclq_green_lava);
+      chunks[z][x] = std::make_unique<ChunkWater> (tile->getChunk(z, x), this, xbase + CHUNKSIZE * x, zbase + CHUNKSIZE * z, use_mclq_green_lava);
     }
   }
 }
@@ -152,4 +160,66 @@ int TileWater::getType(size_t layer)
     }
   }
   return 0;
+}
+
+void TileWater::registerChunkLayer(liquid_layer* layer)
+{
+  if (_chunk_layer_refs.capacity() == _chunk_layer_refs.size())
+  {
+    _chunk_layer_refs.reserve(_chunk_layer_refs.capacity() + 256);
+  }
+
+  if (_chunk_instances.capacity() == _chunk_instances.size())
+  {
+    _chunk_instances.reserve(_chunk_instances.capacity() + 256);
+  }
+
+  _chunk_layer_refs.emplace_back(layer);
+
+  opengl::LiquidChunkInstanceDataUniformBlock chunk_instance{};
+  MapChunk* chunk = layer->getChunk()->getChunk();
+  chunk_instance.BaseHeight_ChunkXY_Pad1[1] = chunk->mt->xbase + (chunk->px * CHUNKSIZE);
+  chunk_instance.BaseHeight_ChunkXY_Pad1[2] = chunk->mt->zbase + (chunk->py * CHUNKSIZE);
+
+  _chunk_instances.push_back(chunk_instance);
+
+}
+
+void TileWater::unregisterChunkLayer(liquid_layer* layer)
+{
+  auto it = std::find(_chunk_layer_refs.begin(), _chunk_layer_refs.end(), layer);
+
+  if (it != _chunk_layer_refs.end())
+  {
+
+    int index = it - _chunk_layer_refs.begin();
+    _chunk_layer_refs.erase(it);
+    _chunk_instances.erase(_chunk_instances.begin() + index);
+  }
+  else
+  {
+    throw std::logic_error("Tried unregistering already freed liquid chunk");
+  }
+
+}
+
+void TileWater::updateChunkLayer(liquid_layer* layer)
+{
+  auto it = std::find(_chunk_layer_refs.begin(), _chunk_layer_refs.end(), layer);
+
+  if (it != _chunk_layer_refs.end())
+  {
+    int index = it - _chunk_layer_refs.begin();
+
+    opengl::LiquidChunkInstanceDataUniformBlock& instance = _chunk_instances[index];
+    auto const& texture_frames = tile->getWorld()->getLiquidTextureManager()->getTextureFrames();
+    std::tuple<GLuint, math::vector_2d, int> const& lq_layer_texture_params = texture_frames.at(layer->liquidID());
+
+    instance.TextureArray_Pad3[0] = std::get<0>(lq_layer_texture_params);
+
+  }
+  else
+  {
+    throw std::logic_error("Tried updating non-existing liquid chunk");
+  }
 }

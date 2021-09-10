@@ -20,13 +20,14 @@ namespace
   }
 }
 
-liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid_id)
+liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, float height, int liquid_id)
   : _liquid_id(liquid_id)
   , _liquid_vertex_format(0)
   , _minimum(height)
   , _maximum(height)
   , _subchunks(0)
   , pos(base)
+  , _chunk(chunk)
 {
   for (int z = 0; z < 9; ++z)
   {
@@ -42,14 +43,16 @@ liquid_layer::liquid_layer(math::vector_3d const& base, float height, int liquid
   }
 
   changeLiquidID(_liquid_id);
+  chunk->getWaterTile()->registerChunkLayer(this);
 }
 
-liquid_layer::liquid_layer(math::vector_3d const& base, mclq& liquid, int liquid_id)
+liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, mclq& liquid, int liquid_id)
   : _liquid_id(liquid_id)
   , _minimum(liquid.min_height)
   , _maximum(liquid.max_height)
   , _subchunks(0)
   , pos(base)
+  , _chunk(chunk)
 {
   changeLiquidID(_liquid_id);
 
@@ -85,15 +88,18 @@ liquid_layer::liquid_layer(math::vector_3d const& base, mclq& liquid, int liquid
                             );
     }
   }
+
+  chunk->getWaterTile()->registerChunkLayer(this);
 }
 
-liquid_layer::liquid_layer(MPQFile &f, std::size_t base_pos, math::vector_3d const& base, MH2O_Information const& info, std::uint64_t infomask)
+liquid_layer::liquid_layer(ChunkWater* chunk, MPQFile &f, std::size_t base_pos, math::vector_3d const& base, MH2O_Information const& info, std::uint64_t infomask)
   : _liquid_id(info.liquid_id)
   , _liquid_vertex_format(info.liquid_vertex_format)
   , _minimum(info.minHeight)
   , _maximum(info.maxHeight)
   , _subchunks(0)
   , pos(base)
+  , _chunk(chunk)
 {
   int offset = 0;
   for (int z = 0; z < info.height; ++z)
@@ -164,6 +170,8 @@ liquid_layer::liquid_layer(MPQFile &f, std::size_t base_pos, math::vector_3d con
       }
     }
   }
+
+  chunk->getWaterTile()->registerChunkLayer(this);
 }
 
 liquid_layer::liquid_layer(liquid_layer&& other)
@@ -178,8 +186,10 @@ liquid_layer::liquid_layer(liquid_layer&& other)
   , _indices_by_lod(other._indices_by_lod)
   , _need_buffer_update(true)
   , pos(other.pos)
+  , _chunk(other._chunk)
 {
   changeLiquidID(_liquid_id);
+  _chunk->getWaterTile()->registerChunkLayer(this);
 }
 
 liquid_layer::liquid_layer(liquid_layer const& other)
@@ -194,8 +204,10 @@ liquid_layer::liquid_layer(liquid_layer const& other)
   , _indices_by_lod(other._indices_by_lod)
   , _need_buffer_update(true)
   , pos(other.pos)
+  , _chunk(other._chunk)
 {
   changeLiquidID(_liquid_id);
+  _chunk->getWaterTile()->registerChunkLayer(this);
 }
 
 liquid_layer& liquid_layer::operator= (liquid_layer&& other)
@@ -210,6 +222,7 @@ liquid_layer& liquid_layer::operator= (liquid_layer&& other)
   std::swap(_tex_coords, other._tex_coords);
   std::swap(pos, other.pos);
   std::swap(_indices_by_lod, other._indices_by_lod);
+  std::swap(_chunk, other._chunk);
 
   _need_buffer_update = true;
   other._need_buffer_update = true;
@@ -232,6 +245,7 @@ liquid_layer& liquid_layer::operator=(liquid_layer const& other)
   _tex_coords = other._tex_coords;
   pos = other.pos;
   _indices_by_lod = other._indices_by_lod;
+  _chunk = other._chunk;
   _need_buffer_update = true;
 
   return *this;
@@ -704,4 +718,9 @@ void liquid_layer::set_lod_level(int lod_level)
 {
   _current_lod_level = lod_level;
   _current_lod_indices_count = _indices_by_lod[lod_level].size();
+}
+
+liquid_layer::~liquid_layer()
+{
+  _chunk->getWaterTile()->unregisterChunkLayer(this);
 }

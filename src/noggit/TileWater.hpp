@@ -7,10 +7,14 @@
 #include <noggit/MPQ.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/tool_enums.hpp>
+#include <opengl/context.hpp>
+#include <opengl/types.hpp>
 
 #include <memory>
+#include <vector>
 
 class MapTile;
+class liquid_layer;
 class sExtendableArray;
 
 class TileWater
@@ -41,10 +45,16 @@ public:
   void setType(int type, size_t layer);
   int getType(size_t layer);
 
+  void registerChunkLayer(liquid_layer* layer);
+  void unregisterChunkLayer(liquid_layer* layer);
+  void updateChunkLayer(liquid_layer* layer);
+
 private:
 
   MapTile *tile;
   std::unique_ptr<ChunkWater> chunks[16][16];
+  std::vector<opengl::LiquidChunkInstanceDataUniformBlock> _chunk_instances;
+  std::vector<liquid_layer*> _chunk_layer_refs;
 
   float xbase;
   float zbase;

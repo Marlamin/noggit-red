@@ -124,6 +124,7 @@ World::World(const std::string& name, int map_id, noggit::NoggitRenderContext co
   , _settings (new QSettings())
   , _view_distance(_settings->value ("view_distance", 1000.f).toFloat())
   , _context(context)
+  , _liquid_texture_manager(context)
 {
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
 }
@@ -872,6 +873,8 @@ void World::initShaders()
               }
         );
   }
+
+  _liquid_texture_manager.upload();
 
   {
     opengl::scoped::use_program m2_shader {*_m2_program.get()};
@@ -3682,6 +3685,7 @@ void World::unload_shaders()
 
   _liquid_render = boost::none;
   _liquid_render_mini = boost::none;
+  _liquid_texture_manager.unload();
 
   skies->unload();
 
@@ -4365,6 +4369,45 @@ void World::setupChunkBuffers()
   }
 
   gl.bufferData<GL_ARRAY_BUFFER> (_mapchunk_texcoord, sizeof(temp), temp, GL_STATIC_DRAW);
+
+}
+
+void World::setupLiquidChunkVAO(opengl::scoped::use_program& water_shader)
+{
+  ZoneScoped;
+  opengl::scoped::vao_binder const _ (_liquid_chunk_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_liquid_chunk_vertex);
+    water_shader.attrib("position", 2, GL_FLOAT, GL_FALSE, 0, 0);
+  }
+}
+
+void World::setupLiquidChunkBuffers()
+{
+  ZoneScoped;
+
+  // vertices
+  math::vector_2d vertices[768 / 2];
+  math::vector_2d* vt = vertices;
+
+  for (int z = 0; z < 8; ++z)
+  {
+    for (int x = 0; x < 8; ++x)
+    {
+      // first triangle
+      *vt++ = math::vector_2d(UNITSIZE * x, UNITSIZE * z);
+      *vt++ = math::vector_2d(UNITSIZE * x, UNITSIZE * (z + 1));
+      *vt++ = math::vector_2d(UNITSIZE * (x + 1), UNITSIZE * z);
+
+      // second triangle
+      *vt++ = math::vector_2d(UNITSIZE * (x + 1), UNITSIZE * z);
+      *vt++ = math::vector_2d(UNITSIZE * x, UNITSIZE * (z + 1));
+      *vt++ = math::vector_2d(UNITSIZE * (x + 1), UNITSIZE * (z + 1));
+    }
+  }
+
+  gl.bufferData<GL_ARRAY_BUFFER> (_liquid_chunk_vertex, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 }
 

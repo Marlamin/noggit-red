@@ -66,4 +66,10 @@ namespace opengl
     int ChunkTexAnimDir[4];
   };
 
+struct LiquidChunkInstanceDataUniformBlock
+{
+    unsigned TextureArray_Pad3[4];
+    float ChunkXY_Animation[4];
+};
+
 }

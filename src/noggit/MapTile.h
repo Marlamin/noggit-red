@@ -153,6 +153,7 @@ public:
   void unload();
 
   GLuint getAlphamapTextureHandle() { return _alphamap_tex; };
+  World* getWorld() { return _world; };
 
 private:
 
@@ -208,7 +209,6 @@ private:
   std::vector<uint32_t> uids;
 
   std::unique_ptr<MapChunk> mChunks[16][16];
-  std::vector<TileWater*> chunksLiquids; //map chunks liquids for old style water render!!! (Not MH2O)
 
   bool _load_models;
   World* _world;

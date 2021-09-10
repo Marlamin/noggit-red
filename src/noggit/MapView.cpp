@@ -2522,7 +2522,7 @@ auto MapView::setBrushTexture(QImage const* img) -> void
 
   makeCurrent();
   opengl::context::scoped_setter const _{gl, context()};
-  opengl::texture::set_active_texture(5);
+  opengl::texture::set_active_texture(4);
   _texBrush->bind();
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.data());
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -3899,7 +3899,7 @@ void MapView::update_cursor_pos()
 {
   static bool buffer_switch = false;
 
-  if (terrainMode != editing_mode::holes)
+  if (false && terrainMode != editing_mode::holes) // figure out why this does not work on every hardware.
   {
     float mx = _last_mouse_pos.x(), mz = _last_mouse_pos.y();
 

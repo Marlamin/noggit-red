@@ -21,6 +21,7 @@
 #include <opengl/primitives.hpp>
 #include <opengl/shader.fwd.hpp>
 #include <opengl/types.hpp>
+#include <noggit/LiquidTextureManager.hpp>
 
 #include <boost/optional/optional.hpp>
 
@@ -412,6 +413,8 @@ public:
   void updateTerrainParamsUniformBlock();
   void markTerrainParamsUniformBlockDirty() { _need_terrain_params_ubo_update = true; };
 
+  LiquidTextureManager* getLiquidTextureManager() { return &_liquid_texture_manager; };
+
 private:
   void update_models_by_filename();
 
@@ -421,7 +424,9 @@ private:
   std::set<MapChunk*>& vertexBorderChunks();
 
   void setupChunkVAO(opengl::scoped::use_program& mcnk_shader);
+  void setupLiquidChunkVAO(opengl::scoped::use_program& water_shader);
   void setupChunkBuffers();
+  void setupLiquidChunkBuffers();
 
   std::set<MapTile*> _vertex_tiles;
   std::set<MapChunk*> _vertex_chunks;
@@ -464,7 +469,7 @@ private:
 
   noggit::NoggitRenderContext _context;
 
-  opengl::scoped::deferred_upload_buffers<6> _buffers;
+  opengl::scoped::deferred_upload_buffers<7> _buffers;
   GLuint const& _mvp_ubo = _buffers[0];
   GLuint const& _lighting_ubo = _buffers[1];
   GLuint const& _terrain_params_ubo = _buffers[2];
@@ -477,9 +482,14 @@ private:
   GLuint const& _mapchunk_index = _buffers[4];
   GLuint const& _mapchunk_texcoord = _buffers[5];
 
-  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_arrays;
-  GLuint const& _mapchunk_vao = _vertex_arrays[0];
+  GLuint const& _liquid_chunk_vertex = _buffers[6];
 
+  opengl::scoped::deferred_upload_vertex_arrays<2> _vertex_arrays;
+  GLuint const& _mapchunk_vao = _vertex_arrays[0];
+  GLuint const& _liquid_chunk_vao = _vertex_arrays[1];
+
+  LiquidTextureManager _liquid_texture_manager;
+ 
   bool _need_terrain_params_ubo_update = false;
 
 };

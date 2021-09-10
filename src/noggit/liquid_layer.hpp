@@ -9,6 +9,7 @@
 
 class MapChunk;
 class sExtendableArray;
+class ChunkWater;
 
 
 // handle liquids like oceans, lakes, rivers, slime, magma
@@ -16,12 +17,13 @@ class liquid_layer
 {
 public:
   liquid_layer() = delete;
-  liquid_layer(math::vector_3d const& base, float height, int liquid_id);
-  liquid_layer(math::vector_3d const& base, mclq& liquid, int liquid_id);
-  liquid_layer(MPQFile &f, std::size_t base_pos, math::vector_3d const& base, MH2O_Information const& info, std::uint64_t infomask);
+  liquid_layer(ChunkWater* chunk, math::vector_3d const& base, float height, int liquid_id);
+  liquid_layer(ChunkWater* chunk, math::vector_3d const& base, mclq& liquid, int liquid_id);
+  liquid_layer(ChunkWater* chunk, MPQFile &f, std::size_t base_pos, math::vector_3d const& base, MH2O_Information const& info, std::uint64_t infomask);
 
   liquid_layer(liquid_layer const& other);
-  liquid_layer (liquid_layer&&);
+  liquid_layer(liquid_layer&&);
+  ~liquid_layer();
 
   liquid_layer& operator=(liquid_layer&&);
   liquid_layer& operator=(liquid_layer const& other);
@@ -68,6 +70,8 @@ public:
 
   void unload();
 
+  ChunkWater* getChunk() { return _chunk; };
+
 private:
   void update_min_max();
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
@@ -107,4 +111,5 @@ private:
 
 private:
   math::vector_3d pos;
+  ChunkWater* _chunk;
 };

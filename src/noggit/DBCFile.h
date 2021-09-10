@@ -36,29 +36,29 @@ public:
   class Record
   {
   public:
-     float& getFloat(size_t field) 
+     const float& getFloat(size_t field) const
     {
       assert(field < file.fieldCount);
       return *reinterpret_cast<float*>(offset + field * 4);
     }
-     unsigned int& getUInt(size_t field) 
+    const unsigned int& getUInt(size_t field) const
     {
       assert(field < file.fieldCount);
       return *reinterpret_cast<unsigned int*>(offset + field * 4);
     }
-     int& getInt(size_t field) 
+    const int& getInt(size_t field) const
     {
       assert(field < file.fieldCount);
       return *reinterpret_cast<int*>(offset + field * 4);
     }
-     char *getString(size_t field) 
+    const char *getString(size_t field) const
     {
       assert(field < file.fieldCount);
       size_t stringOffset = getUInt(field);
       assert(stringOffset < file.stringSize);
       return file.stringTable.data() + stringOffset;
     }
-     char *getLocalizedString(size_t field, int locale = -1) 
+    const char *getLocalizedString(size_t field, int locale = -1) const
     {
       int loc = locale;
       if (locale == -1)
