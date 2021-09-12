@@ -171,6 +171,8 @@ void blp_texture::bind()
 
 void blp_texture::uploadToArray(unsigned layer)
 {
+  finishLoading();
+
   int width = _width, height = _height;
 
   if (!_compression_format)
@@ -183,6 +185,9 @@ void blp_texture::uploadToArray(unsigned layer)
       width = std::max(width >> 1, 1);
       height = std::max(height >> 1, 1);
     }
+
+    _data.clear();
+
   }
   else
   {
@@ -194,12 +199,8 @@ void blp_texture::uploadToArray(unsigned layer)
       height = std::max(height >> 1, 1);
     }
 
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _compressed_data.size() - 1);
     _compressed_data.clear();
   }
-
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void blp_texture::upload()
