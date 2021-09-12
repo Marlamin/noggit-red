@@ -227,6 +227,9 @@ void MapView::set_editing_mode (editing_mode mode)
   if (context() && context()->isValid())
   {
     _world->getTerrainParamsUniformBlock()->draw_areaid_overlay = false;
+    _world->getTerrainParamsUniformBlock()->draw_impass_overlay = false;
+    _world->getTerrainParamsUniformBlock()->draw_paintability_overlay = false;
+    _world->getTerrainParamsUniformBlock()->draw_selection_overlay = false;
 
     switch (mode)
     {
@@ -240,6 +243,10 @@ void MapView::set_editing_mode (editing_mode mode)
         if (texturingTool->getTexturingMode() == noggit::ui::texturing_mode::paint && texturingTool->getImageMaskSelector()->isEnabled())
         {
           texturingTool->updateMaskImage();
+        }
+        if (texturingTool->show_unpaintable_chunks())
+        {
+          _world->getTerrainParamsUniformBlock()->draw_paintability_overlay = true;
         }
         break;
       case editing_mode::mccv:
@@ -256,6 +263,12 @@ void MapView::set_editing_mode (editing_mode mode)
         break;
       case editing_mode::areaid:
         _world->getTerrainParamsUniformBlock()->draw_areaid_overlay = true;
+        break;
+      case editing_mode::flags:
+        _world->getTerrainParamsUniformBlock()->draw_impass_overlay = true;
+        break;
+      case editing_mode::minimap:
+        _world->getTerrainParamsUniformBlock()->draw_selection_overlay = true;
         break;
       default:
         break;

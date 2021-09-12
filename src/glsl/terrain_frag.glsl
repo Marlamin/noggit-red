@@ -24,9 +24,9 @@ layout (std140) uniform overlay_params
   int wireframe_type;
   float wireframe_radius;
   float wireframe_width;
-  int pad0;
-  int pad1;
-  int pad2;
+  int draw_impass_overlay;
+  int draw_paintability_overlay;
+  int draw_selection_overlay;
   vec4 wireframe_color;
 };
 
@@ -209,7 +209,7 @@ void main()
   out_color.rgb = clamp(out_color.rgb * (currColor + lDiffuse + spc), 0.0, 1.0);
 
   // apply overlays
-  if(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.a != 0) // can't paint
+  if(draw_paintability_overlay != 0 && instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.a != 0)
   {
     out_color *= vec4(1.0, 0.0, 0.0, 1.0);
   }
@@ -219,12 +219,12 @@ void main()
     out_color.rgb = out_color.rgb * 0.3 + random_color(instances[instanceID].AreaIDColor_Pad2_DrawSelection.r);
   }
 
-  if(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.g != 0) // draw impass
+  if(draw_impass_overlay != 0 && instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.g != 0)
   {
     out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
   }
 
-  if(instances[instanceID].AreaIDColor_Pad2_DrawSelection.a != 0) // draw selection
+  if(draw_selection_overlay != 0 && instances[instanceID].AreaIDColor_Pad2_DrawSelection.a != 0)
   {
    out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
   }

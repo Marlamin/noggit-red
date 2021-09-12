@@ -111,6 +111,12 @@ namespace noggit
       _show_unpaintable_chunks_cb->setChecked(false);
       tool_layout->addWidget(_show_unpaintable_chunks_cb);
 
+      connect(_show_unpaintable_chunks_cb, &QCheckBox::toggled, [=](bool checked)
+      {
+        _map_view->getWorld()->getTerrainParamsUniformBlock()->draw_paintability_overlay = checked;
+        _map_view->getWorld()->markTerrainParamsUniformBlockDirty();
+      });
+
       // spray
       _spray_mode_group = new QGroupBox("Spray", tool_widget);
       _spray_mode_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);

@@ -874,7 +874,7 @@ void World::initShaders()
         );
   }
 
-  _liquid_texture_manager.upload();
+  //_liquid_texture_manager.upload();
 
   {
     opengl::scoped::use_program m2_shader {*_m2_program.get()};

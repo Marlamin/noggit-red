@@ -178,8 +178,8 @@ void TileWater::registerChunkLayer(liquid_layer* layer)
 
   opengl::LiquidChunkInstanceDataUniformBlock chunk_instance{};
   MapChunk* chunk = layer->getChunk()->getChunk();
-  chunk_instance.BaseHeight_ChunkXY_Pad1[1] = chunk->mt->xbase + (chunk->px * CHUNKSIZE);
-  chunk_instance.BaseHeight_ChunkXY_Pad1[2] = chunk->mt->zbase + (chunk->py * CHUNKSIZE);
+  //chunk_instance.BaseHeight_ChunkXY_Pad1[1] = chunk->mt->xbase + (chunk->px * CHUNKSIZE);
+  //chunk_instance.BaseHeight_ChunkXY_Pad1[2] = chunk->mt->zbase + (chunk->py * CHUNKSIZE);
 
   _chunk_instances.push_back(chunk_instance);
 
