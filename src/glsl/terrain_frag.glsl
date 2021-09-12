@@ -197,7 +197,7 @@ void main()
   float specularFactor = max(dot(reflection, normalize(camera - vary_position)), 0.0);
 
   // blend textures
-  out_color = mix(vec4(1.0, 1.0, 1.0, 1.0), texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
+  out_color = mix(vec4(1.0, 1.0, 1.0, 0.0), texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
 
   vec3 spc = out_color.a * out_color.rgb * pow(specularFactor, 8);
   out_color.a = 1.0;
