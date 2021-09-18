@@ -85,6 +85,7 @@ private:
   noggit::NoggitRenderContext _context;
 
   bool _is_specular = false;
+  bool _is_tileset = false;
 
 private:
   std::map<int, std::vector<uint32_t>> _data;

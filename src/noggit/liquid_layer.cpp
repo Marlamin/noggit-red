@@ -33,9 +33,11 @@ liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, float
   {
     for (int x = 0; x < 9; ++x)
     {
-      _tex_coords.emplace_back(default_uv(x, z));
-      _depth.emplace_back(1.0f);
-      _vertices.emplace_back( pos.x + UNITSIZE * x
+       unsigned v_index = z * 9 + x;
+      _tex_coords[v_index] = default_uv(x, z);
+      _depth[v_index] = 1.0f;
+      _vertices[v_index] = math::vector_3d(
+                            pos.x + UNITSIZE * x
                             , height
                             , pos.z + UNITSIZE * z
                             );
@@ -43,7 +45,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, float
   }
 
   changeLiquidID(_liquid_id);
-  chunk->getWaterTile()->registerChunkLayer(this);
+  
 }
 
 liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, mclq& liquid, int liquid_id)
@@ -68,20 +70,22 @@ liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, mclq&
   {
     for (int x = 0; x < 9; ++x)
     {
-      mclq_vertex const& v = liquid.vertices[z * 9 + x];
+      const unsigned v_index = z * 9 + x;
+      mclq_vertex const& v = liquid.vertices[v_index];
 
       if (_liquid_vertex_format == 1)
       {
-        _depth.emplace_back(1.0f);
-        _tex_coords.emplace_back(static_cast<float>(v.magma.x) / 255.f, static_cast<float>(v.magma.y) / 255.f);
+        _depth[v_index] = 1.0f;
+        _tex_coords[v_index] = math::vector_2d(static_cast<float>(v.magma.x) / 255.f, static_cast<float>(v.magma.y) / 255.f);
       }
       else
       {
-        _depth.emplace_back(static_cast<float>(v.water.depth) / 255.f);
-        _tex_coords.emplace_back(default_uv(x, z));
+        _depth[v_index] = static_cast<float>(v.water.depth) / 255.f;
+        _tex_coords[v_index] = default_uv(x, z);
       }
 
-      _vertices.emplace_back( pos.x + UNITSIZE * x
+      _vertices[v_index] = math::vector_3d(
+                            pos.x + UNITSIZE * x
                             // sometimes there's garbage data on unused tiles that mess things up
                             , std::max(std::min(v.height, _maximum), _minimum)
                             , pos.z + UNITSIZE * z
@@ -89,7 +93,6 @@ liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, mclq&
     }
   }
 
-  chunk->getWaterTile()->registerChunkLayer(this);
 }
 
 liquid_layer::liquid_layer(ChunkWater* chunk, MPQFile &f, std::size_t base_pos, math::vector_3d const& base, MH2O_Information const& info, std::uint64_t infomask)
@@ -116,9 +119,11 @@ liquid_layer::liquid_layer(ChunkWater* chunk, MPQFile &f, std::size_t base_pos, 
   {
     for (int x = 0; x < 9; ++x)
     {
-      _tex_coords.emplace_back(default_uv(x, z));
-      _depth.emplace_back(1.0f);
-      _vertices.emplace_back(pos.x + UNITSIZE * x
+      const unsigned v_index = z * 9 + x;
+      _tex_coords[v_index] = default_uv(x, z);
+      _depth[v_index] = 1.0f;
+      _vertices[v_index] = math::vector_3d(
+          pos.x + UNITSIZE * x
         , _minimum
         , pos.z + UNITSIZE * z
       );
@@ -171,7 +176,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, MPQFile &f, std::size_t base_pos, 
     }
   }
 
-  chunk->getWaterTile()->registerChunkLayer(this);
+  
 }
 
 liquid_layer::liquid_layer(liquid_layer&& other)
@@ -189,7 +194,6 @@ liquid_layer::liquid_layer(liquid_layer&& other)
   , _chunk(other._chunk)
 {
   changeLiquidID(_liquid_id);
-  _chunk->getWaterTile()->registerChunkLayer(this);
 }
 
 liquid_layer::liquid_layer(liquid_layer const& other)
@@ -207,7 +211,6 @@ liquid_layer::liquid_layer(liquid_layer const& other)
   , _chunk(other._chunk)
 {
   changeLiquidID(_liquid_id);
-  _chunk->getWaterTile()->registerChunkLayer(this);
 }
 
 liquid_layer& liquid_layer::operator= (liquid_layer&& other)
@@ -390,6 +393,8 @@ void liquid_layer::changeLiquidID(int id)
   catch (...)
   {
   }
+
+  registerUpdate(ll_TYPE);
 }
 
 void liquid_layer::update_indices()
@@ -564,6 +569,8 @@ void liquid_layer::crop(MapChunk* chunk)
     }
   }
 
+  registerUpdate(ll_HEIGHT);
+
   update_min_max();
 }
 
@@ -576,6 +583,8 @@ void liquid_layer::update_opacity(MapChunk* chunk, float factor)
       update_vertex_opacity(x, z, chunk, factor);
     }
   }
+
+  registerUpdate(ll_DEPTH);
 }
 
 bool liquid_layer::hasSubchunk(int x, int z, int size) const
@@ -596,6 +605,7 @@ bool liquid_layer::hasSubchunk(int x, int z, int size) const
 void liquid_layer::setSubchunk(int x, int z, bool water)
 {
   misc::set_bit(_subchunks, x, z, water);
+  registerUpdate(ll_HEIGHT);
 }
 
 void liquid_layer::paintLiquid( math::vector_3d const& cursor_pos
@@ -649,6 +659,8 @@ void liquid_layer::paintLiquid( math::vector_3d const& cursor_pos
     id++;
   }
 
+  registerUpdate(ll_HEIGHT || ll_DEPTH);
+
   update_min_max();
 }
 
@@ -695,12 +707,14 @@ void liquid_layer::copy_subchunk_height(int x, int z, liquid_layer const& from)
   }
 
   setSubchunk(x, z, true);
+  registerUpdate(ll_HEIGHT);
 }
 
 void liquid_layer::update_vertex_opacity(int x, int z, MapChunk* chunk, float factor)
 {
   float diff = _vertices[z * 9 + x].y - chunk->mVertices[z * 17 + x].y;
   _depth[z * 9 + x] = diff < 0.0f ? 0.0f : (std::min(1.0f, std::max(0.0f, (diff + 1.0f) * factor)));
+  registerUpdate(ll_DEPTH);
 }
 
 int liquid_layer::get_lod_level(math::vector_3d const& camera_pos) const
@@ -720,7 +734,13 @@ void liquid_layer::set_lod_level(int lod_level)
   _current_lod_indices_count = _indices_by_lod[lod_level].size();
 }
 
+void liquid_layer::registerUpdate(unsigned flags)
+{
+  _update_flags |= flags;
+  _chunk->getWaterTile()->registerChunkLayerUpdate(flags);
+}
+
 liquid_layer::~liquid_layer()
 {
-  _chunk->getWaterTile()->unregisterChunkLayer(this);
+  _update_flags = _update_flags;
 }

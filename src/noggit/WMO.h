@@ -266,7 +266,6 @@ public:
             , const math::vector_3d& camera
             , bool draw_doodads
             , bool draw_fog
-            , liquid_render& render
             , int animtime
             , bool world_has_skies
             , display_mode display

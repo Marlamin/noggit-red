@@ -54,7 +54,6 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
                        , bool force_box
                        , bool draw_doodads
                        , bool draw_fog
-                       , liquid_render& render
                        , std::vector<selection_type> selection
                        , int animtime
                        , bool world_has_skies
@@ -95,7 +94,6 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
               , camera
               , draw_doodads
               , draw_fog
-              , render
               , animtime
               , world_has_skies
               , display

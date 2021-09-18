@@ -6,15 +6,25 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/liquid_render.hpp>
 #include <opengl/scoped.hpp>
+#include <array>
 
 class MapChunk;
 class sExtendableArray;
 class ChunkWater;
 
+enum LiquidLayerUpdateFlags
+{
+  ll_HEIGHT = 0x1,
+  ll_DEPTH = 0x2,
+  ll_UV = 0x4,
+  ll_TYPE = 0x8,
+  ll_FLAGS = 0x10
+};
 
 // handle liquids like oceans, lakes, rivers, slime, magma
 class liquid_layer
 {
+
 public:
   liquid_layer() = delete;
   liquid_layer(ChunkWater* chunk, math::vector_3d const& base, float height, int liquid_id);
@@ -42,6 +52,9 @@ public:
   void crop(MapChunk* chunk);
   void update_opacity(MapChunk* chunk, float factor);
 
+  std::array<math::vector_3d, 9 * 9>& getVertices() { return _vertices; };
+  std::array<float, 9 * 9>& getDepth() { return _depth; };
+  std::array<math::vector_2d, 9 * 9>& getTexCoords() { return _tex_coords; };
 
   float min() const { return _minimum; }
   float max() const { return _maximum; }
@@ -49,6 +62,8 @@ public:
 
   bool hasSubchunk(int x, int z, int size = 1) const;
   void setSubchunk(int x, int z, bool water);
+
+  std::uint64_t getSubchunks() { return _subchunks; };
 
   bool empty() const { return !_subchunks; }
   bool full() const { return _subchunks == std::uint64_t(-1); }
@@ -69,7 +84,9 @@ public:
   void copy_subchunk_height(int x, int z, liquid_layer const& from);
 
   void unload();
-
+  void registerUpdate(unsigned flags);
+  void doneUpdate() { _update_flags = 0; };
+  unsigned getUpdateFlags() { return _update_flags; };
   ChunkWater* getChunk() { return _chunk; };
 
 private:
@@ -95,10 +112,12 @@ private:
   int _liquid_vertex_format;
   float _minimum;
   float _maximum;
+
   std::uint64_t _subchunks;
-  std::vector<math::vector_3d> _vertices;
-  std::vector<float> _depth;
-  std::vector<math::vector_2d> _tex_coords;
+  std::array<math::vector_3d, 9 * 9> _vertices;
+  std::array<float, 9 * 9> _depth;
+  std::array<math::vector_2d, 9 * 9> _tex_coords;
+
   std::map<int, std::vector<std::uint16_t>> _indices_by_lod;
 
   bool _need_buffer_update = true;
@@ -112,4 +131,5 @@ private:
 private:
   math::vector_3d pos;
   ChunkWater* _chunk;
+  unsigned _update_flags = ll_HEIGHT || ll_DEPTH || ll_UV || ll_FLAGS || ll_TYPE;;
 };

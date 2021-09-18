@@ -655,7 +655,12 @@ void MapView::setupTexturePainterUi()
     , &_show_texture_palette_small_window, &noggit::bool_toggle_property::set
   );
 
-
+  connect(texturingTool->_current_texture, &noggit::ui::current_texture::texture_updated
+          , [=]()
+      {
+       _world->notifyTileRendererOnSelectedTextureChange();
+      }
+  );
 
   /* Texture Picker */
 

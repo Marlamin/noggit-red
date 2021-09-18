@@ -248,7 +248,7 @@ void PreviewRenderer::draw()
        wmo_instance.draw(
            wmo_program, model_view().transposed(), projection().transposed(), frustum, culldistance,
            math::vector_3d(0.0f, 0.0f, 0.0f), _draw_boxes.get(), _draw_models.get() // doodads
-           , false, _liquid_render.get(), std::vector<selection_type>(), 0, false, display_mode::in_3D
+           , false, std::vector<selection_type>(), 0, false, display_mode::in_3D
        );
 
        gl.enable(GL_BLEND);

@@ -295,7 +295,7 @@ public:
   void ensureAllTilesetsADT(math::vector_3d const& pos);
   void ensureAllTilesetsAllADTs();
 
-
+  void notifyTileRendererOnSelectedTextureChange();
 
   void addM2 ( std::string const& filename
              , math::vector_3d newPos
@@ -453,6 +453,7 @@ private:
   std::unique_ptr<opengl::program> _m2_ribbons_program;
   std::unique_ptr<opengl::program> _m2_box_program;
   std::unique_ptr<opengl::program> _wmo_program;
+  std::unique_ptr<opengl::program> _liquid_program;
 
   // Minimap programs. Ugly, but those can't be shared between contexts, so we compile twice
   std::unique_ptr<opengl::program> _mcnk_program_mini;
@@ -463,9 +464,6 @@ private:
   noggit::cursor_render _cursor_render;
   opengl::primitives::sphere _sphere_render;
   opengl::primitives::square _square_render;
-
-  boost::optional<liquid_render> _liquid_render = boost::none;
-  boost::optional<liquid_render> _liquid_render_mini = boost::none;
 
   noggit::NoggitRenderContext _context;
 

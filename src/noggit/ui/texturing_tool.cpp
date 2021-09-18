@@ -97,7 +97,7 @@ namespace noggit
       _brush_level_slider->setRange (0, 255);
       _brush_level_slider->setSliderPosition (_brush_level);
 
-      _brush_level_slider->setAccessibleName("texturing_brush_level_slider");
+      _brush_level_slider->setObjectName("texturing_brush_level_slider");
 
       slider_layout_right->addWidget(_brush_level_slider, 0, Qt::AlignHCenter);
 

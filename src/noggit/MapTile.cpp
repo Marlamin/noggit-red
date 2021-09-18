@@ -426,15 +426,15 @@ void MapTile::draw ( math::frustum const& frustum
 
   // figure out if we need to update based on paintability
   bool need_paintability_update = false;
-  if (draw_paintability_overlay && show_unpaintable_chunks)
+  if (_requires_paintability_recalc && draw_paintability_overlay && show_unpaintable_chunks)
   [[unlikely]]
   {
+    auto cur_tex = noggit::ui::selected_texture::get();
     for (int j = 0; j < 16; ++j)
     {
       for (int i = 0; i < 16; ++i)
       {
         auto& chunk = mChunks[j][i];
-        auto cur_tex = noggit::ui::selected_texture::get();
         bool cant_paint = cur_tex && !chunk->canPaintTexture(*cur_tex);
 
         if (chunk->currently_paintable != !cant_paint)
@@ -445,6 +445,8 @@ void MapTile::draw ( math::frustum const& frustum
         }
       }
     }
+
+    _requires_paintability_recalc = false;
   }
 
   // run chunk updates. running this when splitdraw call detected unused sampler configuration as well.
@@ -851,11 +853,11 @@ void MapTile::drawWater ( math::frustum const& frustum
                         , const float& cull_distance
                         , const math::vector_3d& camera
                         , bool camera_moved
-                        , liquid_render& render
                         , opengl::scoped::use_program& water_shader
                         , int animtime
                         , int layer
                         , display_mode display
+                        , LiquidTextureManager* tex_manager
                         )
 {
   if (!Water.hasData(0))
@@ -867,11 +869,11 @@ void MapTile::drawWater ( math::frustum const& frustum
              , cull_distance
              , camera
              , camera_moved
-             , render
              , water_shader
              , animtime
              , layer
              , display
+             , tex_manager
              );
 }
 

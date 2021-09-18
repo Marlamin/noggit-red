@@ -44,6 +44,8 @@ namespace noggit
       _filename = texture;
       _need_update = true;
       update_texture_if_needed();
+
+      emit texture_updated();
     }
 
     void current_texture::update_texture_if_needed()

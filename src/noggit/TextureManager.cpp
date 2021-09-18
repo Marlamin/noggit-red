@@ -322,8 +322,14 @@ void blp_texture::loadFromUncompressedData(BLPHeader const* lHeader, char const*
         {
           unsigned int k = pal[*c++];
           k = ((k & 0x00FF0000) >> 16) | ((k & 0x0000FF00)) | ((k & 0x000000FF) << 16);
+
           int alpha = 0xFF;
-          if (hasalpha)
+
+          if (_is_tileset && !_is_specular)
+          {
+            alpha = 0x00;
+          }
+          else if (hasalpha)
           {
             if (alphabits == 8)
             {
@@ -414,6 +420,8 @@ void blp_texture::finishLoading()
 
   if (filename.starts_with("tileset/"))
   {
+    _is_tileset = true;
+
     spec_filename = filename.substr(0, filename.find_last_of(".")) + "_s.blp";
     has_specular = MPQFile::exists(spec_filename);
 

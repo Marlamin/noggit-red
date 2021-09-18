@@ -860,10 +860,7 @@ void World::initShaders()
               }
         );
   }
-  if (!_liquid_render)
-  {
-    _liquid_render.emplace(_context);
-  }
+
   if (!_wmo_program)
   {
     _wmo_program.reset
@@ -872,6 +869,16 @@ void World::initShaders()
                   , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs") }
               }
         );
+  }
+
+  if (!_liquid_program)
+  {
+    _liquid_program.reset(
+    new opengl::program
+        { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("liquid_vs") }
+        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("liquid_fs") }
+        }
+    );
   }
 
   _liquid_texture_manager.upload();
@@ -959,9 +966,19 @@ void World::initShaders()
    */
 
   {
-    opengl::scoped::use_program liquid_render {_liquid_render.get().shader_program()};
+    opengl::scoped::use_program liquid_render {*_liquid_program.get()};
+
+    setupLiquidChunkBuffers();
+    setupLiquidChunkVAO(liquid_render);
+
+    static std::vector<int> samplers {2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+
     liquid_render.bind_uniform_block("matrices", 0);
     liquid_render.bind_uniform_block("lighting", 1);
+    liquid_render.bind_uniform_block("liquid_layers_params", 4);
+    liquid_render.uniform("vertex_data", 0);
+    liquid_render.uniform("texture_samplers", samplers);
+
   }
 
   {
@@ -1214,7 +1231,6 @@ void World::draw ( math::matrix_4x4 const& model_view
                   , is_hidden
                   , draw_wmo_doodads
                   , draw_fog
-                  , _liquid_render.get()
                   , current_selection()
                   , animtime
                   , skies->hasSkies()
@@ -1354,7 +1370,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   // set anim time only once per frame
   {
-    opengl::scoped::use_program water_shader {_liquid_render->shader_program()};
+    opengl::scoped::use_program water_shader {*_liquid_program.get()};
     water_shader.uniform("animtime", static_cast<float>(animtime) / 2880.f);
 
     water_shader.uniform("camera", camera_pos);
@@ -1409,12 +1425,13 @@ void World::draw ( math::matrix_4x4 const& model_view
   if (draw_water)
   {
     ZoneScopedN("World::draw() : Draw water");
-    _liquid_render->force_texture_update();
 
     // draw the water on both sides
     opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
 
-    opengl::scoped::use_program water_shader{ _liquid_render->shader_program() };
+    opengl::scoped::use_program water_shader{ *_liquid_program.get()};
+
+    gl.bindVertexArray(_liquid_chunk_vao);
 
     water_shader.uniform ("use_transform", 0);
 
@@ -1424,16 +1441,15 @@ void World::draw ( math::matrix_4x4 const& model_view
                       , culldistance
                       , camera_pos
                       , camera_moved
-                      , _liquid_render.get()
                       , water_shader
                       , animtime
                       , water_layer
                       , display
+                      , &_liquid_texture_manager
                       );
     }
 
     gl.bindVertexArray(0);
-    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
   gl.disable(GL_BLEND);
@@ -3672,6 +3688,7 @@ void World::unload_shaders()
   _m2_ribbons_program.reset();
   _m2_box_program.reset();
   _wmo_program.reset();
+  _liquid_program.reset();
 
   _mcnk_program_mini.reset();
   _m2_program_mini.reset();
@@ -3683,8 +3700,6 @@ void World::unload_shaders()
   _square_render.unload();
   _horizon_render.reset();
 
-  _liquid_render = boost::none;
-  _liquid_render_mini = boost::none;
   _liquid_texture_manager.unload();
 
   skies->unload();
@@ -4409,5 +4424,13 @@ void World::setupLiquidChunkBuffers()
 
   gl.bufferData<GL_ARRAY_BUFFER> (_liquid_chunk_vertex, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+}
+
+void World::notifyTileRendererOnSelectedTextureChange()
+{
+  for (MapTile* tile : mapIndex.loaded_tiles())
+  {
+    tile->notifyTileRendererOnSelectedTextureChange();
+  }
 }
 

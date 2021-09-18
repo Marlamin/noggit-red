@@ -42,6 +42,10 @@ namespace noggit
 
       signals:
         void texture_dropped(std::string const& filename);
+
+        void texture_updated();
+
+
     public:
       current_texture(bool accept_drop, QWidget* parent = nullptr);
 

@@ -95,7 +95,6 @@ public:
             , bool force_box
             , bool draw_doodads
             , bool draw_fog
-            , liquid_render& render
             , std::vector<selection_type> selection
             , int animtime
             , bool world_has_skies

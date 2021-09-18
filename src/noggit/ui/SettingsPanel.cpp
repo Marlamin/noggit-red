@@ -169,7 +169,14 @@ namespace noggit
                 if (file.open(QFile::ReadOnly))
                 {
                   QString style_sheet = QLatin1String(file.readAll());
-                  qApp->setStyleSheet(style_sheet);;
+                  QString style_sheet_fixed = style_sheet.replace("@rpath", QCoreApplication::applicationDirPath());
+
+                  if (style_sheet_fixed.endsWith("/"))
+                    style_sheet_fixed.chop(1);
+                  else if (style_sheet_fixed.endsWith("\\"))
+                    style_sheet_fixed.chop(2);
+
+                  qApp->setStyleSheet(style_sheet_fixed);
                 }
               }
       );

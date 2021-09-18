@@ -15,7 +15,8 @@ namespace opengl
     MVP,
     LIGHTING,
     TERRAIN_OVERLAYS,
-    CHUNK_INSTANCE_DATA
+    CHUNK_INSTANCE_DATA,
+    CHUNK_LIQUID_INSTANCE_INDEX
   };
 
   struct MVPUniformBlock
@@ -47,9 +48,9 @@ namespace opengl
     int wireframe_type;
     float wireframe_radius;
     float wireframe_width;
-    int draw_impass_overlay;
-    int draw_paintability_overlay;
-    int draw_selection_overlay;
+    int draw_impass_overlay = false;
+    int draw_paintability_overlay = false;
+    int draw_selection_overlay = false;
     math::vector_4d wireframe_color;
 
   };
@@ -66,10 +67,17 @@ namespace opengl
     int ChunkTexAnimDir[4];
   };
 
-struct LiquidChunkInstanceDataUniformBlock
-{
-    unsigned TextureArray_Pad3[4];
-    float ChunkXY_Animation[4];
-};
+  struct LiquidChunkInstanceDataUniformBlock
+  {
+    unsigned texture_array;
+    unsigned type;
+    float xbase;
+    float zbase;
+    float anim_u;
+    float anim_v;
+    unsigned subchunks_1;
+    unsigned subchunks_2;
+  };
+
 
 }

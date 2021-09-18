@@ -55,7 +55,7 @@ void LiquidTextureManager::upload()
 
     // init 2D texture array
     // loading a texture is required to get its dimensions and format
-    blp_texture tex(boost::str(boost::format(filename) % i), _context);
+    blp_texture tex(boost::str(boost::format(filename) % 1), _context);
     tex.finishLoading();
 
     int width_ = tex.width();
@@ -95,7 +95,7 @@ void LiquidTextureManager::upload()
 
     for (int j = 0; j < N_FRAMES; ++j)
     {
-      blp_texture tex_frame(boost::str(boost::format(filename) % j), _context);
+      blp_texture tex_frame(boost::str(boost::format(filename) % (j + 1)), _context);
       tex_frame.finishLoading();
 
       // error checking

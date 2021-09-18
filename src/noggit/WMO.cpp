@@ -332,7 +332,6 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , const math::vector_3d& camera
                , bool // draw_doodads
                , bool draw_fog
-               , liquid_render& render
                , int animtime
                , bool world_has_skies
                , display_mode display
@@ -360,11 +359,14 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , world_has_skies
                );
 
+    /*
     group.drawLiquid ( transform_matrix_transposed
                      , render
                      , draw_fog
                      , animtime
                      );
+
+                     */
   }
 
   if (boundingbox)

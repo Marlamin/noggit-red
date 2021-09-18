@@ -44,10 +44,23 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
 
     switch (mclq_liquid_type)
     {
-      case 1:_layers.emplace_back(this, pos, liquid, 2); break;
-      case 3:_layers.emplace_back(this, pos, liquid, 4); break;
-      case 4:_layers.emplace_back(this, pos, liquid, 1); break;
-      case 6:_layers.emplace_back(this, pos, liquid, (_use_mclq_green_lava ? 15 : 3)); break;
+      case 1:
+        _layers.emplace_back(this, pos, liquid, 2);
+        _water_tile->markBuffersDirty();
+        break;
+      case 3:
+        _layers.emplace_back(this, pos, liquid, 4);
+        _water_tile->markBuffersDirty();
+        break;
+      case 4:
+        _layers.emplace_back(this, pos, liquid, 1);
+        _water_tile->markBuffersDirty();
+        break;
+      case 6:
+        _layers.emplace_back(this, pos, liquid, (_use_mclq_green_lava ? 15 : 3));
+        _water_tile->markBuffersDirty();
+
+        break;
       default:
         LogError << "Invalid/unhandled MCLQ liquid type" << std::endl;
         break;
@@ -94,6 +107,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
 
     math::vector_3d pos(xbase, 0.0f, zbase);
     _layers.emplace_back(this, f, basePos, pos, info, infoMask);
+    _water_tile->markBuffersDirty();
   }
 
   update_layers();
@@ -259,6 +273,8 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
       liquid_layer layer(this, math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
       copy_height_to_layer(layer, pos, radius);
       _layers.push_back(layer);
+      _water_tile->markBuffersDirty();
+
     }
   }
 
@@ -292,12 +308,14 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
     layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
     layer.changeLiquidID(liquid_id);
     _layers.push_back(layer);
+    _water_tile->markBuffersDirty();
   }
   else
   {
     liquid_layer layer(this, math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
     layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
     _layers.push_back(layer);
+    _water_tile->markBuffersDirty();
   }
 
   update_layers();
@@ -309,6 +327,7 @@ void ChunkWater::cleanup()
   {
     if (_layers[i].empty())
     {
+      _water_tile->unregisterChunkLayer(&*(_layers.begin() + i));
       _layers.erase(_layers.begin() + i);
     }
   }

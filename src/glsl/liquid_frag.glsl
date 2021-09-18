@@ -1,7 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#version 330 core
-
-uniform sampler2D tex;
+#version 410 core
 
 layout (std140) uniform lighting
 {
@@ -16,15 +14,84 @@ layout (std140) uniform lighting
 };
 
 
-uniform int type;
 uniform float animtime;
-uniform vec2 param;
+uniform sampler2DArray texture_samplers[14] ;
 
 in float depth_;
 in vec2 tex_coord_;
 in float dist_from_camera_;
+flat in uint tex_array;
+flat in uint type;
+flat in vec2 anim_uv;
 
 out vec4 out_color;
+
+int get_texture_frame()
+{
+  return int(animtime / 60) % 30;
+}
+
+vec4 get_tex_color(vec2 tex_coord, uint tex_sampler, int array_index)
+{
+  if (tex_sampler == 0)
+  {
+    return texture(texture_samplers[0], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 1)
+  {
+    return texture(texture_samplers[1], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 2)
+  {
+    return texture(texture_samplers[2], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 3)
+  {
+    return texture(texture_samplers[3], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 4)
+  {
+    return texture(texture_samplers[4], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 5)
+  {
+    return texture(texture_samplers[5], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 6)
+  {
+    return texture(texture_samplers[6], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 7)
+  {
+    return texture(texture_samplers[7], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 8)
+  {
+    return texture(texture_samplers[8], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 9)
+  {
+    return texture(texture_samplers[9], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 10)
+  {
+    return texture(texture_samplers[10], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 11)
+  {
+    return texture(texture_samplers[11], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 12)
+  {
+    return texture(texture_samplers[12], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 13)
+  {
+    return texture(texture_samplers[13], vec3(tex_coord, array_index)).rgba;
+  }
+
+  return vec4(0);
+}
 
 vec2 rot2(vec2 p, float degree)
 {
@@ -37,12 +104,12 @@ void main()
   // lava || slime
   if(type == 2 || type == 3)
   {
-    out_color = texture(tex, tex_coord_ + vec2(param.x*animtime, param.y*animtime));
+    out_color = get_tex_color(tex_coord_ + vec2(anim_uv.x*animtime, anim_uv.y*animtime), tex_array, get_texture_frame());
   }
   else
   {
-    vec2 uv = rot2(tex_coord_ * param.x, param.y);
-    vec4 texel = texture(tex, uv);
+    vec2 uv = rot2(tex_coord_ * anim_uv.x, anim_uv.y);
+    vec4 texel = get_tex_color(uv, tex_array, get_texture_frame());
     vec4 lerp = (type == 1)
               ? mix (OceanColorLight, OceanColorDark, depth_) 
               : mix (RiverColorLight, RiverColorDark, depth_)
@@ -70,4 +137,6 @@ void main()
 
     out_color.rgb = mix(out_color.rgb, FogColor_FogOn.rgb, fogFactor);
   }
+
+  out_color = vec4(0, 0, 0, 1);
 }

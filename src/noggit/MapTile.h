@@ -95,11 +95,11 @@ public:
                  , const float& cull_distance
                  , const math::vector_3d& camera
                  , bool camera_moved
-                 , liquid_render& render
                  , opengl::scoped::use_program& water_shader
                  , int animtime
                  , int layer
                  , display_mode display
+                 , LiquidTextureManager* tex_manager
                  );
 
   void drawMFBO (opengl::scoped::use_program&);
@@ -155,6 +155,8 @@ public:
   GLuint getAlphamapTextureHandle() { return _alphamap_tex; };
   World* getWorld() { return _world; };
 
+  void notifyTileRendererOnSelectedTextureChange() { _requires_paintability_recalc = true; }
+
 private:
 
   void uploadTextures();
@@ -165,6 +167,7 @@ private:
   bool _selected = false;
   bool _split_drawcall = false;
   bool _requires_sampler_reset = true;
+  bool _requires_paintability_recalc = true;
 
   std::array<math::vector_3d, 2> _extents;
 

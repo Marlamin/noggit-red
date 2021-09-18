@@ -91,6 +91,7 @@ namespace opengl
 
       void bind_uniform_block(std::string const& name, unsigned);
       void uniform (std::string const& name, std::vector<int> const&);
+      void uniform (std::string const& name, int const* data, std::size_t size);
       void uniform (GLint pos, std::vector<int> const&);
       void uniform (std::string const& name, GLint);
       void uniform (GLint pos, GLint);

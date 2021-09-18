@@ -207,6 +207,8 @@ namespace opengl
 
     BOOST_FORCEINLINE void drawElements (GLenum mode, GLuint index_buffer, GLsizei count, GLenum type, GLvoid const* indices);
 
+    BOOST_FORCEINLINE void drawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei instancecount);
+
     QOpenGLContext* getCurrentContext();
 
     BOOST_FORCEINLINE void bufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const void* data);
