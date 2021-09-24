@@ -272,7 +272,7 @@ Noggit::Noggit(int argc, char *argv[])
   format.setProfile(QSurfaceFormat::CoreProfile);
   //format.setOption(QSurfaceFormat::ResetNotification, true);
   format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
-  format.setSwapInterval(settings.value ("vsync", 0).toInt());
+  format.setSwapInterval(0);
   format.setRenderableType(QSurfaceFormat::OpenGL);
   format.setDepthBufferSize(16);
   format.setSamples(0);

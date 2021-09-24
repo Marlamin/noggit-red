@@ -86,6 +86,15 @@ namespace opengl
                                          GLenum format,
                                          GLenum type,
                                          const void * pixels);
+    BOOST_FORCEINLINE void compressedTexSubImage2D( GLenum target,
+                                                    GLint level,
+                                                    GLint xoffset,
+                                                    GLint yoffset,
+                                                    GLsizei width,
+                                                    GLsizei height,
+                                                    GLenum format,
+                                                    GLsizei imageSize,
+                                                    const void * data);
     BOOST_FORCEINLINE void texImage3D (GLenum target, GLint level, GLint internal_format, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, GLvoid const* data);
     BOOST_FORCEINLINE void texSubImage3D (GLenum target,
                                           GLint level,

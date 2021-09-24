@@ -15,6 +15,7 @@ layout (std140) uniform lighting
 
 
 uniform float animtime;
+uniform int tex_frame;
 uniform sampler2DArray texture_samplers[14] ;
 
 in float depth_;
@@ -28,7 +29,7 @@ out vec4 out_color;
 
 int get_texture_frame()
 {
-  return int(animtime / 60) % 30;
+  return int(ceil(animtime / 60)) % 30;
 }
 
 vec4 get_tex_color(vec2 tex_coord, uint tex_sampler, int array_index)
@@ -104,17 +105,18 @@ void main()
   // lava || slime
   if(type == 2 || type == 3)
   {
-    out_color = get_tex_color(tex_coord_ + vec2(anim_uv.x*animtime, anim_uv.y*animtime), tex_array, get_texture_frame());
+    out_color = get_tex_color(tex_coord_ + vec2(anim_uv.x*animtime / 2880.0, anim_uv.y*animtime / 2880.0), tex_array, tex_frame);
   }
   else
   {
     vec2 uv = rot2(tex_coord_ * anim_uv.x, anim_uv.y);
-    vec4 texel = get_tex_color(uv, tex_array, get_texture_frame());
+
+    vec4 texel = get_tex_color(uv, tex_array, tex_frame);
     vec4 lerp = (type == 1)
-              ? mix (OceanColorLight, OceanColorDark, depth_) 
+              ? mix (OceanColorLight, OceanColorDark, depth_)
               : mix (RiverColorLight, RiverColorDark, depth_)
               ;
-              
+
     //clamp shouldn't be needed
     out_color = vec4 (clamp(texel + lerp, 0.0, 1.0).rgb, lerp.a);
   }
@@ -137,6 +139,4 @@ void main()
 
     out_color.rgb = mix(out_color.rgb, FogColor_FogOn.rgb, fogFactor);
   }
-
-  out_color = vec4(0, 0, 0, 1);
 }

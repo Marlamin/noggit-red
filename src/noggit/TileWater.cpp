@@ -16,13 +16,7 @@ TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase, bool use_mclq_g
   : tile(pTile)
   , xbase(pXbase)
   , zbase(pZbase)
-  , _update_flags(ll_HEIGHT || ll_DEPTH || ll_UV || ll_FLAGS || ll_TYPE)
 {
-  // by default we allocate space only for one liquid layer
-  _chunk_instance_indices.reserve(256);
-  _chunk_layer_ptrs.reserve(256);
-  _chunk_data.reserve(256);
-
   for (int z = 0; z < 16; ++z)
   {
     for (int x = 0; x < 16; ++x)
@@ -67,19 +61,18 @@ void TileWater::draw ( math::frustum const& frustum
 
   updateLayerData(tex_manager);
 
-  std::size_t n_render_blocks = _liquid_vertex_data_textures.size();
+  std::size_t n_render_blocks = _render_layers.size();
 
-  for (std::size_t i = 0; i < n_render_blocks; ++i)
+  for (auto& render_layer : _render_layers)
   {
-    std::size_t chunk_index = i % 256;
 
-    gl.bindBuffer(GL_UNIFORM_BUFFER,  _liquid_parameters_buffers[i]);
-    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_LIQUID_INSTANCE_INDEX, _liquid_vertex_data_textures[i], 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock));
+    gl.bindBuffer(GL_UNIFORM_BUFFER, render_layer.chunk_data_buf);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_LIQUID_INSTANCE_INDEX, render_layer.chunk_data_buf, 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock));
 
     gl.activeTexture(GL_TEXTURE0);
-    gl.bindTexture(GL_TEXTURE_2D_ARRAY, _liquid_vertex_data_textures[i]);
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, render_layer.vertex_data_tex);
 
-    if (_chunk_layer_texture_samplers[i].size() > N_SAMPLERS)
+    if (render_layer.texture_samplers.size() > N_SAMPLERS)
     [[unlikely]] // multi draw-call mode
     {
       // TODO:
@@ -88,9 +81,9 @@ void TileWater::draw ( math::frustum const& frustum
     {
       std::fill(samplers_upload_buf.begin(), samplers_upload_buf.end(), -1);
 
-      for (std::size_t j = 0; j < _chunk_layer_texture_samplers[i].size(); ++j)
+      for (std::size_t j = 0; j < render_layer.texture_samplers.size(); ++j)
       {
-        samplers_upload_buf[j] = _chunk_layer_texture_samplers[i][j];
+        samplers_upload_buf[j] = render_layer.texture_samplers[j];
       }
 
       for (std::size_t j = 0; j < N_SAMPLERS; ++j)
@@ -102,8 +95,7 @@ void TileWater::draw ( math::frustum const& frustum
         gl.bindTexture(GL_TEXTURE_2D_ARRAY, samplers_upload_buf[j]);
       }
 
-      gl.drawArraysInstanced(GL_TRIANGLES, 0, 8 * 8 * 6, std::min(static_cast<unsigned>(_n_chunk_instances - (i * 256)),
-                                                                  256u));
+      gl.drawArraysInstanced(GL_TRIANGLES, 0, 8 * 8 * 6, render_layer.n_used_chunks);
     }
 
   }
@@ -203,10 +195,6 @@ int TileWater::getType(size_t layer)
   return 0;
 }
 
-void TileWater::registerChunkLayerUpdate(unsigned flags)
-{
-  _update_flags |= flags;
-}
 
 void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
 {
@@ -215,207 +203,180 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
   // create opengl resources if needed
   if (_need_buffer_update)
   {
-    // alloc or realloc index texture
-    /*
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    gl.bindTexture(GL_TEXTURE_2D, _liquid_chunk_index_texture);
-    gl.texImage2D(GL_TEXTURE_2D, 0, GL_R32UI, 9, 9, 0, GL_R, GL_UNSIGNED_INT, nullptr);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    */
 
-    _chunk_layer_ptrs.clear();
-    _chunk_data.clear();
-    _chunk_layer_ptrs.reserve(256);
-    _chunk_data.reserve(256);
-    _n_chunk_instances = 0;
-
-    for (std::size_t z = 0; z < 16; ++z)
+    for (int i = _render_layers.size() - 1; i >= 0; --i)
     {
-      for (std::size_t x = 0; x < 16; ++x)
+      auto& layer_params = _render_layers[i];
+
+      if (layer_params.remove_tag)
       {
-        for (auto& layer : *chunks[z][x]->getLayers())
-        {
-          _chunk_layer_ptrs.emplace_back(&layer);
-          _chunk_data.emplace_back();
-          _n_chunk_instances++;
-        }
-      }
-    }
-
-    // grow
-    while (_liquid_vertex_data_textures.size() * 256 < _n_chunk_instances)
-    {
-      GLuint& data_tex = _liquid_vertex_data_textures.emplace_back();
-      gl.genTextures(1, &data_tex);
-      gl.bindTexture(GL_TEXTURE_2D_ARRAY, data_tex);
-      gl.texImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA32F, 9, 9, 256, 0, GL_RGBA, GL_FLOAT, nullptr);
-      gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 0);
-
-      GLuint& buf = _liquid_parameters_buffers.emplace_back();
-      gl.genBuffers(1, &buf);
-      gl.bindBuffer(GL_UNIFORM_BUFFER, buf);
-      gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::LiquidChunkInstanceDataUniformBlock) * 256, NULL, GL_DYNAMIC_DRAW);
-      gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_LIQUID_INSTANCE_INDEX, buf, 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock));
-
-      _chunk_layer_texture_samplers.emplace_back();
-    }
-
-    // shrink
-    while (_liquid_vertex_data_textures.size() * 256 > _n_chunk_instances && _liquid_vertex_data_textures.size() * 256 - _n_chunk_instances % 256 >= 256)
-    {
-      GLuint data_tex = _liquid_vertex_data_textures.back();
-      gl.deleteTextures(1, &data_tex);
-      _liquid_vertex_data_textures.pop_back();
-
-      GLuint params_buf = _liquid_parameters_buffers.back();
-      gl.deleteBuffers(1, &params_buf);
-      _liquid_parameters_buffers.pop_back();
-
-      _chunk_layer_texture_samplers.pop_back();
-    }
-
-    // vertex data
-    unsigned cur_buf_index = 0;
-    for (std::size_t i = 0; i < _chunk_layer_ptrs.size(); ++i)
-    {
-      unsigned tex_index = i % 256;
-
-      if (!tex_index)
-      {
-        gl.bindTexture(GL_TEXTURE_2D_ARRAY, _liquid_vertex_data_textures[cur_buf_index]);
-        gl.bindBuffer(GL_UNIFORM_BUFFER, _liquid_parameters_buffers[cur_buf_index]);
-        cur_buf_index++;
+        gl.deleteBuffers(1, &layer_params.chunk_data_buf);
+        gl.deleteTextures(1, &layer_params.vertex_data_tex);
+        _render_layers.erase(_render_layers.begin() + i);
+        continue;
       }
 
-      prepareBufferData(i);
-      gl.texSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, tex_index, 9, 9, 1, GL_RGBA, GL_FLOAT, &_chunk_data[i]);
-
-      // per layer chunk params
-      liquid_layer* layer = _chunk_layer_ptrs[i];
-      std::tuple<GLuint, math::vector_2d, int> const& tex_profile = tex_frames.at(layer->liquidID());
-      opengl::LiquidChunkInstanceDataUniformBlock params_data{};
-      params_data.xbase = layer->getChunk()->xbase;
-      params_data.zbase = layer->getChunk()->zbase;
-
-      GLuint tex_array = std::get<0>(tex_profile);
-      std::vector<int>& samplers_array = _chunk_layer_texture_samplers[cur_buf_index - 1];
-      auto it = std::find(samplers_array.begin(), samplers_array.end(), tex_array);
-
-      unsigned sampler_index = 0;
-
-      if (it != samplers_array.end())
+      if (!layer_params.upload_tag)
       {
-        sampler_index = std::distance(samplers_array.begin(), it);
+        gl.genTextures(1, &layer_params.vertex_data_tex);
+        gl.bindTexture(GL_TEXTURE_2D_ARRAY, layer_params.vertex_data_tex);
+        gl.texImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA32F, 9, 9, 256, 0, GL_RGBA, GL_FLOAT, nullptr);
+        gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 0);
+
+        gl.genBuffers(1, &layer_params.chunk_data_buf);
+        gl.bindBuffer(GL_UNIFORM_BUFFER, layer_params.chunk_data_buf);
+        gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::LiquidChunkInstanceDataUniformBlock) * 256, NULL, GL_DYNAMIC_DRAW);
+        gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_LIQUID_INSTANCE_INDEX, layer_params.chunk_data_buf, 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock));
+
+        layer_params.upload_tag = true;
       }
       else
       {
-        sampler_index = samplers_array.size();
-        samplers_array.emplace_back(std::get<0>(tex_profile));
+        gl.bindTexture(GL_TEXTURE_2D_ARRAY, layer_params.vertex_data_tex);
+        gl.bindBuffer(GL_UNIFORM_BUFFER, layer_params.chunk_data_buf);
       }
 
-      params_data.texture_array = sampler_index;
-      params_data.type = std::get<2>(tex_profile);
+      if (layer_params.update_tag)
+      {
+        // fill layer data
 
-      math::vector_2d anim = std::get<1>(tex_profile);
-      params_data.anim_u = anim.x;
-      params_data.anim_v = anim.y;
+        std::size_t chunk_counter = 0;
+        for (std::size_t z = 0; z < 16; ++z)
+        {
+          for (std::size_t x = 0; x < 16; ++x)
+          {
+            ChunkWater* chunk = chunks[z][x].get();
 
-      std::uint64_t subchunks = layer->getSubchunks();
+            if (i >= chunk->getLayers()->size())
+              continue;
 
-      params_data.subchunks_1 = subchunks & 0xFF'FF'FF'FFull << 32;
-      params_data.subchunks_2 = subchunks & 0xFF'FF'FF'FF;
+            liquid_layer& layer = (*chunk->getLayers())[i];
 
-      gl.bufferSubData(GL_UNIFORM_BUFFER, tex_index * sizeof(opengl::LiquidChunkInstanceDataUniformBlock), sizeof(opengl::LiquidChunkInstanceDataUniformBlock), &params_data);
+            // fill per-chunk data
+            std::tuple<GLuint, math::vector_2d, int> const& tex_profile = tex_frames.at(layer.liquidID());
+            opengl::LiquidChunkInstanceDataUniformBlock& params_data = layer_params.chunk_data[chunk_counter];
 
+            params_data.xbase = layer.getChunk()->xbase;
+            params_data.zbase = layer.getChunk()->zbase;
+
+            GLuint tex_array = std::get<0>(tex_profile);
+            auto it = std::find(layer_params.texture_samplers.begin(), layer_params.texture_samplers.end(), tex_array);
+
+            unsigned sampler_index = 0;
+
+            if (it != layer_params.texture_samplers.end())
+            {
+              sampler_index = std::distance(layer_params.texture_samplers.begin(), it);
+            }
+            else
+            {
+              sampler_index = layer_params.texture_samplers.size();
+              layer_params.texture_samplers.emplace_back(std::get<0>(tex_profile));
+            }
+
+            params_data.texture_array = sampler_index;
+            params_data.type = std::get<2>(tex_profile);
+
+            math::vector_2d anim = std::get<1>(tex_profile);
+            params_data.anim_u = anim.x;
+            params_data.anim_v = anim.y;
+
+            std::uint64_t subchunks = layer.getSubchunks();
+
+            params_data.subchunks_1 = subchunks & 0xFF'FF'FF'FF;
+            params_data.subchunks_2 = subchunks >> 32;
+
+            // fill vertex data
+            auto& vertices = layer.getVertices();
+            auto& tex_coords = layer.getTexCoords();
+            auto& depth = layer.getDepth();
+
+            for (int z_v = 0; z_v < 9; ++z_v)
+            {
+              for (int x_v = 0; x_v < 9; ++x_v)
+              {
+                const unsigned v_index = z_v * 9 + x_v;
+                math::vector_2d& tex_coord = tex_coords[v_index];
+                layer_params.vertex_data[chunk_counter][v_index] = math::vector_4d(vertices[v_index].y, depth[v_index], tex_coord.x, tex_coord.y);
+              }
+            }
+
+            chunk_counter++;
+          }
+        }
+
+        assert(chunk_counter == layer_params.n_used_chunks);
+
+        // update opengl textures and buffers
+        gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock) * 256, layer_params.chunk_data.data());
+        gl.texSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, 9, 9, 256, GL_RGBA, GL_FLOAT, layer_params.vertex_data.data());
+
+        layer_params.update_tag = false;
+      }
     }
+
     _need_buffer_update = false;
   }
 }
 
 void TileWater::upload()
 {
-  _buffers.upload();
-  gl.genTextures(1, &_liquid_chunk_index_texture);
   _loaded = true;
 }
 
 void TileWater::unload()
 {
-  _buffers.unload();
-
-  gl.deleteTextures(_liquid_vertex_data_textures.size(), _liquid_vertex_data_textures.data());
-  gl.deleteBuffers(_liquid_parameters_buffers.size(), _liquid_parameters_buffers.data());
-  _liquid_vertex_data_textures.clear();
-  _liquid_parameters_buffers.clear();
-  _liquid_vertex_data_textures.clear();
-
-  gl.deleteTextures(1, &_liquid_chunk_index_texture);
-
-  //gl.deleteTextures(0, &_liquid_vertex_data);
-  _update_flags = ll_HEIGHT || ll_DEPTH || ll_UV || ll_FLAGS || ll_TYPE;
-
   _loaded = false;
   _need_buffer_update = true;
+
+  for (int i = _render_layers.size() - 1; i >= 0; --i)
+  {
+    auto& layer_params = _render_layers[i];
+
+    gl.deleteTextures(1, &layer_params.vertex_data_tex);
+    gl.deleteBuffers(1, &layer_params.chunk_data_buf);
+
+    layer_params.upload_tag = true;
+    layer_params.update_tag = true;
+  }
 }
 
-void TileWater::registerChunkLayer(liquid_layer* layer)
-{
-  _chunk_layer_ptrs.emplace_back(layer);
-  _chunk_instance_indices.emplace_back(_n_layer_chunks);
-  _chunk_data.emplace_back();
-  _chunk_layer_texture_samplers.clear();
 
-  _n_layer_chunks++;
+void TileWater::registerNewChunk(std::size_t layer)
+{
   _need_buffer_update = true;
+
+  if (layer >= _render_layers.size())
+  {
+    auto& layer_params = _render_layers.emplace_back();
+    layer_params.n_used_chunks++;
+    layer_params.update_tag = true;
+  }
+  else
+  {
+    auto& layer_params = _render_layers[layer];
+    layer_params.n_used_chunks++;
+    layer_params.update_tag = true;
+  }
 }
 
-void TileWater::unregisterChunkLayer(liquid_layer* layer)
+void TileWater::unregisterChunk(std::size_t layer)
 {
-  auto it = std::find(_chunk_layer_ptrs.begin(), _chunk_layer_ptrs.end(), layer);
+  _need_buffer_update = true;
 
-  if (it != _chunk_layer_ptrs.end())
-  {
-    int index = it - _chunk_layer_ptrs.begin();
+  auto& layer_params = _render_layers[layer];
+  layer_params.n_used_chunks--;
 
-    _chunk_instance_indices.erase(_chunk_instance_indices.begin() + index);
-    _chunk_data.erase(_chunk_data.begin() + index);
-    _chunk_layer_ptrs.erase(it);
-    _n_layer_chunks--;
-
-    // shrink the container
-    if (_chunk_layer_ptrs.capacity() > _chunk_layer_ptrs.size() && _chunk_layer_ptrs.capacity() - _chunk_layer_ptrs.size() >= 256)
-    {
-      _chunk_instance_indices.resize(_chunk_layer_ptrs.size());
-      _chunk_layer_ptrs.resize(_chunk_layer_ptrs.size());
-      _chunk_data.resize(_chunk_data.size());
-    }
-
-    _need_buffer_update = true;
-    _chunk_layer_texture_samplers.clear();
-
-  }
+  if (!layer_params.n_used_chunks)
+    _render_layers.erase(_render_layers.begin() + layer);
 
 }
 
-void TileWater::prepareBufferData(std::size_t layer_index)
+void TileWater::updateLayer(std::size_t layer)
 {
-  liquid_layer* layer = _chunk_layer_ptrs[layer_index];
-  std::array<math::vector_4d, 9 * 9>& chunk_layer_data = _chunk_data.at(layer_index);
+  _need_buffer_update = true;
 
-  auto& vertices = layer->getVertices();
-  auto& tex_coords = layer->getTexCoords();
-  auto& depth = layer->getDepth();
-
-  for (int z = 0; z < 9; ++z)
-  {
-    for (int x = 0; x < 9; ++x)
-    {
-      const unsigned v_index = z * 9 + x;
-      math::vector_2d& tex_coord = tex_coords[v_index];
-      chunk_layer_data[v_index] = math::vector_4d(vertices[v_index].y, depth[v_index], tex_coord.x, tex_coord.y);
-    }
-  }
+  auto& layer_params = _render_layers[layer];
+  layer_params.update_tag = true;
 }

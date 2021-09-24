@@ -45,20 +45,20 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
     switch (mclq_liquid_type)
     {
       case 1:
+        _water_tile->registerNewChunk(_layers.size());
         _layers.emplace_back(this, pos, liquid, 2);
-        _water_tile->markBuffersDirty();
         break;
       case 3:
+        _water_tile->registerNewChunk(_layers.size());
         _layers.emplace_back(this, pos, liquid, 4);
-        _water_tile->markBuffersDirty();
         break;
       case 4:
+        _water_tile->registerNewChunk(_layers.size());
         _layers.emplace_back(this, pos, liquid, 1);
-        _water_tile->markBuffersDirty();
         break;
       case 6:
+        _water_tile->registerNewChunk(_layers.size());
         _layers.emplace_back(this, pos, liquid, (_use_mclq_green_lava ? 15 : 3));
-        _water_tile->markBuffersDirty();
 
         break;
       default:
@@ -106,8 +106,8 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
     }
 
     math::vector_3d pos(xbase, 0.0f, zbase);
+    _water_tile->registerNewChunk(_layers.size());
     _layers.emplace_back(this, f, basePos, pos, info, infoMask);
-    _water_tile->markBuffersDirty();
   }
 
   update_layers();
@@ -177,6 +177,7 @@ void ChunkWater::setType(int type, size_t layer)
   {
     _layers[layer].changeLiquidID(type);
   }
+  _water_tile->updateLayer(layer);
 }
 
 void ChunkWater::draw ( math::frustum const& frustum
@@ -225,11 +226,14 @@ bool ChunkWater::is_visible ( const float& cull_distance
 
 void ChunkWater::update_layers()
 {
+  std::size_t count = 0;
   for (liquid_layer& layer : _layers)
   {
-    layer.update_indices();
     vmin.y = std::min (vmin.y, layer.min());
     vmax.y = std::max (vmax.y, layer.max());
+
+    _water_tile->updateLayer(count);
+    count++;
   }
 
   vcenter = (vmin + vmax) * 0.5f;
@@ -272,9 +276,8 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
     {
       liquid_layer layer(this, math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
       copy_height_to_layer(layer, pos, radius);
+      _water_tile->registerNewChunk(_layers.size());
       _layers.push_back(layer);
-      _water_tile->markBuffersDirty();
-
     }
   }
 
@@ -307,15 +310,15 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
     layer.clear(); // remove the liquid to not override the other layer
     layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
     layer.changeLiquidID(liquid_id);
+    _water_tile->registerNewChunk(_layers.size());
     _layers.push_back(layer);
-    _water_tile->markBuffersDirty();
   }
   else
   {
     liquid_layer layer(this, math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
     layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
+    _water_tile->registerNewChunk(_layers.size());
     _layers.push_back(layer);
-    _water_tile->markBuffersDirty();
   }
 
   update_layers();
@@ -327,8 +330,8 @@ void ChunkWater::cleanup()
   {
     if (_layers[i].empty())
     {
-      _water_tile->unregisterChunkLayer(&*(_layers.begin() + i));
       _layers.erase(_layers.begin() + i);
+      _water_tile->unregisterChunk(i);
     }
   }
 }

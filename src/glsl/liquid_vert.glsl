@@ -19,6 +19,14 @@ struct LiquidChunkInstanceDataUniformBlock
   float anim_v;
   uint subchunks_1;
   uint subchunks_2;
+  uint _pad0;
+  uint _pad1;
+  uint _pad2;
+  uint _pad3;
+  uint _pad4;
+  uint _pad5;
+  uint _pad6;
+  uint _pad7;
 };
 
 layout (std140) uniform matrices
@@ -47,7 +55,7 @@ flat out vec2 anim_uv;
 
 bool hasSubchunk(uint x, uint z, uint subchunks_first, uint subchunks_second)
 {
-  return bool((subchunks_second >> (z * 8 + x - 32 * uint(z < 4))) & 1u);
+  return bool(((subchunks_second * uint(z >= 4) + subchunks_first * uint(z < 4)) >> (z * 8 + x - 32 * uint(z >= 4))) & 1u);
 }
 
 float makeNaN(float nonneg)
@@ -79,8 +87,6 @@ void main()
     float NaN = makeNaN(1);
     final_pos = vec4(NaN, NaN, NaN, NaN);
   }
-
-  final_pos = vec4(position.x + params.xbase, 0, position.y + params.zbase, 1.0);
 
   depth_ = v_data.g;
   tex_coord_ = v_data.ba;

@@ -736,11 +736,9 @@ void liquid_layer::set_lod_level(int lod_level)
 
 void liquid_layer::registerUpdate(unsigned flags)
 {
-  _update_flags |= flags;
-  _chunk->getWaterTile()->registerChunkLayerUpdate(flags);
+
 }
 
 liquid_layer::~liquid_layer()
 {
-  _update_flags = _update_flags;
 }
