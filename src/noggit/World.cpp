@@ -1370,9 +1370,8 @@ void World::draw ( math::matrix_4x4 const& model_view
   // set anim time only once per frame
   {
     opengl::scoped::use_program water_shader {*_liquid_program.get()};
-    water_shader.uniform("tex_frame", static_cast<int> (animtime / 60) % 30);
-
     water_shader.uniform("camera", camera_pos);
+    water_shader.uniform("animtime", animtime);
 
 
     if (draw_wmo || mapIndex.hasAGlobalWMO())

@@ -55,12 +55,6 @@ void TileWater::draw ( math::frustum const& frustum
   constexpr int N_SAMPLERS = 14;
   static std::vector<int> samplers_upload_buf {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
-  if (!_loaded)
-  [[unlikely]]
-  {
-    upload();
-  }
-
   updateLayerData(tex_manager);
 
   std::size_t n_render_blocks = _render_layers.size();
@@ -200,7 +194,7 @@ int TileWater::getType(size_t layer)
 
 void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
 {
-  tsl::robin_map<unsigned, std::tuple<GLuint, math::vector_2d, int>> const& tex_frames = tex_manager->getTextureFrames();
+  tsl::robin_map<unsigned, std::tuple<GLuint, math::vector_2d, int, unsigned>> const& tex_frames = tex_manager->getTextureFrames();
 
   // create opengl resources if needed
   if (_need_buffer_update)
@@ -240,7 +234,7 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
           auto& layer_params = _render_layers[layer_counter];
 
           // fill per-chunk data
-          std::tuple<GLuint, math::vector_2d, int> const& tex_profile = tex_frames.at(layer.liquidID());
+          std::tuple<GLuint, math::vector_2d, int, unsigned> const& tex_profile = tex_frames.at(layer.liquidID());
           opengl::LiquidChunkInstanceDataUniformBlock& params_data = layer_params.chunk_data[n_chunks];
 
           params_data.xbase = layer.getChunk()->xbase;
@@ -263,6 +257,7 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
 
           params_data.texture_array = sampler_index;
           params_data.type = std::get<2>(tex_profile);
+          params_data.n_texture_frames = std::get<3>(tex_profile);
 
           math::vector_2d anim = std::get<1>(tex_profile);
           params_data.anim_u = anim.x;
@@ -329,26 +324,11 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
   }
 }
 
-void TileWater::upload()
-{
-  _loaded = true;
-}
 
 void TileWater::unload()
 {
-  _loaded = false;
   _need_buffer_update = true;
-
-  for (int i = _render_layers.size() - 1; i >= 0; --i)
-  {
-    auto& layer_params = _render_layers[i];
-
-    gl.deleteTextures(1, &layer_params.vertex_data_tex);
-    gl.deleteBuffers(1, &layer_params.chunk_data_buf);
-
-    layer_params.upload_tag = true;
-    layer_params.update_tag = true;
-  }
+  _render_layers.clear();
 }
 
 

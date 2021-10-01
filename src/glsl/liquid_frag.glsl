@@ -13,9 +13,7 @@ layout (std140) uniform lighting
   vec4 RiverColorDark;
 };
 
-
 uniform float animtime;
-uniform int tex_frame;
 uniform sampler2DArray texture_samplers[14] ;
 
 in float depth_;
@@ -24,13 +22,9 @@ in float dist_from_camera_;
 flat in uint tex_array;
 flat in uint type;
 flat in vec2 anim_uv;
+flat in int tex_frame;
 
 out vec4 out_color;
-
-int get_texture_frame()
-{
-  return int(ceil(animtime / 60)) % 30;
-}
 
 vec4 get_tex_color(vec2 tex_coord, uint tex_sampler, int array_index)
 {

@@ -89,8 +89,15 @@ void LiquidTextureManager::upload()
       }
     }
 
+    unsigned n_frames = 30;
     for (int j = 0; j < N_FRAMES; ++j)
     {
+      if (!MPQFile::exists(boost::str(boost::format(filename) % (j + 1))))
+      {
+        n_frames = j;
+        break;
+      }
+
       blp_texture tex_frame(boost::str(boost::format(filename) % (j + 1)), _context);
       tex_frame.finishLoading();
 
@@ -117,7 +124,7 @@ void LiquidTextureManager::upload()
     gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    _texture_frames_map[liquid_type_id] = std::make_tuple(array, anim, type);
+    _texture_frames_map[liquid_type_id] = std::make_tuple(array, anim, type, n_frames);
   }
 
   _uploaded = true;

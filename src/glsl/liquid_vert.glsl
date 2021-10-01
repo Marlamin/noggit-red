@@ -19,7 +19,7 @@ struct LiquidChunkInstanceDataUniformBlock
   float anim_v;
   uint subchunks_1;
   uint subchunks_2;
-  uint _pad0;
+  uint n_tex_frames;
   uint _pad1;
   uint _pad2;
   uint _pad3;
@@ -46,12 +46,15 @@ uniform mat4 transform;
 
 uniform int use_transform = int(0);
 
+uniform float animtime;
+
 out float depth_;
 out vec2 tex_coord_;
 out float dist_from_camera_;
 flat out uint tex_array;
 flat out uint type;
 flat out vec2 anim_uv;
+flat out int tex_frame;
 
 bool hasSubchunk(uint x, uint z, uint subchunks_first, uint subchunks_second)
 {
@@ -61,6 +64,11 @@ bool hasSubchunk(uint x, uint z, uint subchunks_first, uint subchunks_second)
 float makeNaN(float nonneg)
 {
   return sqrt(-nonneg-1.0);
+}
+
+int get_texture_frame(int n_frames)
+{
+  return int(ceil(animtime / 60)) % n_frames;
 }
 
 void main()
@@ -93,6 +101,7 @@ void main()
   dist_from_camera_ = distance(camera, final_pos.xyz);
   tex_array = params.texture_array;
   type = params.type;
+  tex_frame = get_texture_frame(int(params.n_tex_frames));
   anim_uv = vec2(params.anim_u, params.anim_v);
 
   if(use_transform == 1)

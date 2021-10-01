@@ -31,9 +31,6 @@ struct LiquidLayerDrawCallData
   std::vector<int> texture_samplers;
   GLuint chunk_data_buf = 0;
   GLuint vertex_data_tex = 0;
-  bool update_tag = true;
-  bool remove_tag = false;
-  bool upload_tag = false;
 };
 
 class TileWater
@@ -75,8 +72,6 @@ public:
 
   void unload();
 
-  void upload();
-
   bool isVisible(const math::frustum& frustum) const;
 
 private:
@@ -89,7 +84,6 @@ private:
   std::vector<LiquidLayerDrawCallData> _render_layers;
 
   bool _need_buffer_update = false;
-  bool _loaded = false;
 
   float xbase;
   float zbase;

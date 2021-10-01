@@ -77,7 +77,7 @@ namespace opengl
     float anim_v;
     unsigned subchunks_1;
     unsigned subchunks_2;
-    unsigned _pad0;
+    unsigned n_texture_frames;
     unsigned _pad1;
     unsigned _pad2;
     unsigned _pad3;
