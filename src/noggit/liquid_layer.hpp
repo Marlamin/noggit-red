@@ -4,7 +4,7 @@
 
 #include <math/trig.hpp>
 #include <noggit/MapHeaders.h>
-#include <noggit/liquid_render.hpp>
+#include <noggit/MPQ.h>
 #include <opengl/scoped.hpp>
 #include <array>
 
@@ -33,20 +33,12 @@ public:
 
   liquid_layer(liquid_layer const& other);
   liquid_layer(liquid_layer&&);
-  ~liquid_layer();
 
   liquid_layer& operator=(liquid_layer&&);
   liquid_layer& operator=(liquid_layer const& other);
 
   void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
 
-  void draw ( liquid_render& render
-            , opengl::scoped::use_program& water_shader
-            , math::vector_3d const& camera
-            , bool camera_moved
-            , int animtime
-            );
-  void update_indices();
   void changeLiquidID(int id);
 
   void crop(MapChunk* chunk);
@@ -83,10 +75,6 @@ public:
 
   void copy_subchunk_height(int x, int z, liquid_layer const& from);
 
-  void unload();
-  void registerUpdate(unsigned flags);
-  void doneUpdate() { _update_flags = 0; };
-  unsigned getUpdateFlags() { return _update_flags; };
   ChunkWater* getChunk() { return _chunk; };
 
 private:
@@ -94,19 +82,6 @@ private:
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
   int get_lod_level(math::vector_3d const& camera_pos) const;
   void set_lod_level(int lod_level);
-
-  static int const lod_count = 4;
-
-  int _current_lod_level = -1;
-  int _current_lod_indices_count = 0;
-
-  opengl::scoped::deferred_upload_buffers<lod_count> _index_buffer;
-  opengl::scoped::deferred_upload_buffers<3> _buffers;
-  GLuint const& _vertices_vbo = _buffers[0];
-  GLuint const& _depth_vbo = _buffers[1];
-  GLuint const& _tex_coord_vbo = _buffers[2];
-  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
-  GLuint const& _vao = _vertex_array[0];
 
   int _liquid_id;
   int _liquid_vertex_format;
@@ -120,16 +95,8 @@ private:
 
   std::map<int, std::vector<std::uint16_t>> _indices_by_lod;
 
-  bool _need_buffer_update = true;
-  bool _vao_need_update = true;
-  bool _uploaded = false;
-
-  void upload();
-  void update_buffers();
-  void update_vao(opengl::scoped::use_program& water_shader);
 
 private:
   math::vector_3d pos;
   ChunkWater* _chunk;
-  unsigned _update_flags = ll_HEIGHT || ll_DEPTH || ll_UV || ll_FLAGS || ll_TYPE;;
 };

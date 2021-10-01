@@ -57,8 +57,8 @@ MapTile::MapTile( int pX
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
                         | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
-  , _extents{math::vector_3d{xbase, std::numeric_limits<float>::max(), zbase},
-             math::vector_3d{xbase + TILESIZE, std::numeric_limits<float>::lowest(), zbase + TILESIZE}}
+  , _extents{math::vector_3d{pX * TILESIZE, std::numeric_limits<float>::max(), pZ * TILESIZE},
+             math::vector_3d{pX * TILESIZE + TILESIZE, std::numeric_limits<float>::lowest(), pZ * TILESIZE + TILESIZE}}
 {
 }
 
@@ -860,7 +860,7 @@ void MapTile::drawWater ( math::frustum const& frustum
                         , LiquidTextureManager* tex_manager
                         )
 {
-  if (!Water.hasData(0))
+  if (!Water.hasData(0) || !Water.isVisible(frustum))
   {
     return; //no need to draw water on tile without water =)
   }

@@ -1144,7 +1144,6 @@ void World::draw ( math::matrix_4x4 const& model_view
       mcnk_shader.uniform("draw_cursor_circle", 0);
     }
 
-
     //std::array<int, 4> textures_bound = { -1, -1, -1, -1 };
 
     gl.bindVertexArray(_mapchunk_vao);

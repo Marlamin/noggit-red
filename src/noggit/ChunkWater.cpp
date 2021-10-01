@@ -180,35 +180,6 @@ void ChunkWater::setType(int type, size_t layer)
   _water_tile->updateLayer(layer);
 }
 
-void ChunkWater::draw ( math::frustum const& frustum
-                      , const float& cull_distance
-                      , const math::vector_3d& camera
-                      , bool camera_moved
-                      , liquid_render& render
-                      , opengl::scoped::use_program& water_shader
-                      , int animtime
-                      , int layer
-                      , display_mode display
-                      )
-{
-  if (!is_visible (cull_distance, frustum, camera, display))
-  {
-    return;
-  }
-
-  if (layer == -1)
-  {
-    for (liquid_layer& lq_layer : _layers)
-    {
-      lq_layer.draw (render, water_shader, camera, camera_moved, animtime);
-    }
-  }
-  else if (layer < _layers.size())
-  {
-    _layers[layer].draw (render, water_shader, camera, camera_moved, animtime);
-  }
-}
-
 bool ChunkWater::is_visible ( const float& cull_distance
                             , const math::frustum& frustum
                             , const math::vector_3d& camera
@@ -227,10 +198,16 @@ bool ChunkWater::is_visible ( const float& cull_distance
 void ChunkWater::update_layers()
 {
   std::size_t count = 0;
+
+  auto& extents = _water_tile->getExtents();
+
   for (liquid_layer& layer : _layers)
   {
     vmin.y = std::min (vmin.y, layer.min());
     vmax.y = std::max (vmax.y, layer.max());
+
+    extents[0].y = std::min(extents[0].y, vmin.y);
+    extents[1].y = std::max(extents[1].y, vmax.y);
 
     _water_tile->updateLayer(count);
     count++;
@@ -361,10 +338,3 @@ void ChunkWater::copy_height_to_layer(liquid_layer& target, math::vector_3d cons
   }
 }
 
-void ChunkWater::unload()
-{
-  for (auto& layer : _layers)
-  {
-    layer.unload();
-  }
-}

@@ -65,8 +65,6 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
     std::unique_ptr<opengl::program> _m2_box_program;
     std::unique_ptr<opengl::program> _wmo_program;
 
-    boost::optional<liquid_render> _liquid_render = boost::none;
-
     std::vector<ModelInstance> _model_instances;
     std::vector<WMOInstance> _wmo_instances;
 

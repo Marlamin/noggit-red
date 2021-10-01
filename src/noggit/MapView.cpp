@@ -5015,13 +5015,13 @@ void MapView::unloadOpenglData(bool from_manager)
   for (MapTile* tile : _world->mapIndex.loaded_tiles())
   {
     tile->unload();
+    tile->Water.unload();
 
     for (int i = 0; i < 16; ++i)
     {
       for (int j = 0; j < 16; ++j)
       {
         tile->getChunk(i, j)->unload();
-        tile->Water.getChunk(i, j)->unload();
       }
     }
   }

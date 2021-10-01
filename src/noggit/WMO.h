@@ -118,11 +118,14 @@ public:
            , bool world_has_skies
            );
 
+  /*
   void drawLiquid ( math::matrix_4x4 const& transform
                   , liquid_render& render
                   , bool draw_fog
                   , int animtime
                   );
+
+  */
 
   void setupFog (bool draw_fog, std::function<void (bool)> setup_fog);
 

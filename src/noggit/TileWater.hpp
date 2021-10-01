@@ -71,15 +71,20 @@ public:
 
   void updateLayerData(LiquidTextureManager* tex_manager);
 
+  std::array<math::vector_3d, 2>& getExtents() { return _extents; };
+
   void unload();
 
   void upload();
+
+  bool isVisible(const math::frustum& frustum) const;
 
 private:
 
   MapTile *tile;
 
   std::unique_ptr<ChunkWater> chunks[16][16];
+  std::array<math::vector_3d, 2> _extents;
 
   std::vector<LiquidLayerDrawCallData> _render_layers;
 

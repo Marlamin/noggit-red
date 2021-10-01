@@ -193,12 +193,6 @@ void PreviewRenderer::draw()
   }
 
 
-
-  if (!_liquid_render)
-  {
-    _liquid_render.emplace(_context);
-  }
-
   gl.enable(GL_DEPTH_TEST);
   gl.depthFunc(GL_LEQUAL);
   gl.enable(GL_BLEND);
@@ -209,7 +203,7 @@ void PreviewRenderer::draw()
 
   if (_draw_wmo.get() && !_wmo_instances.empty())
   {
-    // set anim time only once per frame
+    /* set anim time only once per frame
     {
       opengl::scoped::use_program water_shader {_liquid_render->shader_program()};
       water_shader.uniform("animtime", _animtime / 2880.f);
@@ -228,6 +222,8 @@ void PreviewRenderer::draw()
       //water_shader.uniform("river_color_dark", river_color_dark);
       //water_shader.uniform("use_transform", 1);
     }
+
+     */
 
     {
       opengl::scoped::use_program wmo_program{*_wmo_program.get()};
@@ -560,8 +556,6 @@ PreviewRenderer::~PreviewRenderer()
     _m2_box_program.reset();
     _wmo_program.reset();
 
-    _liquid_render = boost::none;
-
   }
   else
   {
@@ -577,8 +571,6 @@ PreviewRenderer::~PreviewRenderer()
     _m2_ribbons_program.reset();
     _m2_box_program.reset();
     _wmo_program.reset();
-
-    _liquid_render = boost::none;
   }
 
 }
@@ -593,7 +585,6 @@ void PreviewRenderer::unload_shaders()
   _m2_box_program.reset();
   _wmo_program.reset();
 
-  _liquid_render = boost::none;
 }
 
 void PreviewRenderer::unloadOpenglData(bool from_manager)

@@ -1338,6 +1338,7 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
   }
 }
 
+/*
 void WMOGroup::drawLiquid ( math::matrix_4x4 const& transform
                           , liquid_render& render
                           , bool // draw_fog
@@ -1356,6 +1357,7 @@ void WMOGroup::drawLiquid ( math::matrix_4x4 const& transform
     gl.disable(GL_BLEND);
   }
 }
+*/
 
 void WMOGroup::setupFog (bool draw_fog, std::function<void (bool)> setup_fog)
 {

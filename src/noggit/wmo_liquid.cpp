@@ -244,6 +244,7 @@ void wmo_liquid::upload(opengl::scoped::use_program& water_shader)
   _uploaded = true;
 }
 
+/*
 void wmo_liquid::draw ( math::matrix_4x4 const& transform
                       , liquid_render& render
                       , int animtime
@@ -267,3 +268,5 @@ void wmo_liquid::draw ( math::matrix_4x4 const& transform
 
   gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr);
 }
+
+ */

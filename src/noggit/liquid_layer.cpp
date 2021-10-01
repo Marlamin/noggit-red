@@ -189,7 +189,6 @@ liquid_layer::liquid_layer(liquid_layer&& other)
   , _depth(other._depth)
   , _tex_coords(other._tex_coords)
   , _indices_by_lod(other._indices_by_lod)
-  , _need_buffer_update(true)
   , pos(other.pos)
   , _chunk(other._chunk)
 {
@@ -206,7 +205,6 @@ liquid_layer::liquid_layer(liquid_layer const& other)
   , _depth(other._depth)
   , _tex_coords(other._tex_coords)
   , _indices_by_lod(other._indices_by_lod)
-  , _need_buffer_update(true)
   , pos(other.pos)
   , _chunk(other._chunk)
 {
@@ -227,9 +225,6 @@ liquid_layer& liquid_layer::operator= (liquid_layer&& other)
   std::swap(_indices_by_lod, other._indices_by_lod);
   std::swap(_chunk, other._chunk);
 
-  _need_buffer_update = true;
-  other._need_buffer_update = true;
-
   changeLiquidID(_liquid_id);
   other.changeLiquidID(other._liquid_id);
 
@@ -249,7 +244,6 @@ liquid_layer& liquid_layer::operator=(liquid_layer const& other)
   pos = other.pos;
   _indices_by_lod = other._indices_by_lod;
   _chunk = other._chunk;
-  _need_buffer_update = true;
 
   return *this;
 }
@@ -393,151 +387,6 @@ void liquid_layer::changeLiquidID(int id)
   catch (...)
   {
   }
-
-  registerUpdate(ll_TYPE);
-}
-
-void liquid_layer::update_indices()
-{
-  _indices_by_lod.clear();
-
-  for (int z = 0; z < 8; ++z)
-  {
-    for (int x = 0; x < 8; ++x)
-    {
-      size_t p = z * 9 + x;
-      
-      for (int lod_level = 0; lod_level < lod_count; ++lod_level)
-      {
-        int n = 1 << lod_level;
-        if ((z % n) == 0 && (x % n) == 0)
-        {
-          if (hasSubchunk(x, z, n))
-          {
-            _indices_by_lod[lod_level].emplace_back (p);
-            _indices_by_lod[lod_level].emplace_back (p + n * 9);
-            _indices_by_lod[lod_level].emplace_back (p + n * 9 + n);
-            _indices_by_lod[lod_level].emplace_back(p + n * 9 + n);
-            _indices_by_lod[lod_level].emplace_back (p + n);
-            _indices_by_lod[lod_level].emplace_back(p);
-          }                    
-        }
-        else
-        {
-          break;
-        }
-      }      
-    }
-  }
-
-  _need_buffer_update = true;
-}
-
-void liquid_layer::upload()
-{
-  _index_buffer.upload();
-  _buffers.upload();
-  _vertex_array.upload();
-
-  _uploaded = true;
-}
-
-void liquid_layer::unload()
-{
-  _index_buffer.unload();
-  _buffers.unload();
-  _vertex_array.unload();
-
-  _uploaded = false;
-  _need_buffer_update = true;
-  _vao_need_update = true;
-}
-
-// todo: update only buffer that needs to be updated
-void liquid_layer::update_buffers()
-{
-  for (int i = 0; i < lod_count; ++i)
-  {
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (_index_buffer[i]);
-    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _indices_by_lod[i].size() * sizeof (uint16_t), _indices_by_lod[i].data(), GL_DYNAMIC_DRAW);
-  }
-
-  gl.bufferData<GL_ARRAY_BUFFER>(_vertices_vbo, sizeof(*_vertices.data()) * _vertices.size(), _vertices.data(), GL_DYNAMIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER>(_depth_vbo, sizeof(*_depth.data()) * _depth.size(), _depth.data(), GL_DYNAMIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER>(_tex_coord_vbo, sizeof(*_tex_coords.data()) * _tex_coords.size(), _tex_coords.data(), GL_DYNAMIC_DRAW);
-
-  _need_buffer_update = false;
-  _vao_need_update = true;
-}
-
-void liquid_layer::update_vao(opengl::scoped::use_program& water_shader)
-{
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_vbo);
-    water_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_depth_vbo);
-    water_shader.attrib("depth", 1, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_tex_coord_vbo);
-    water_shader.attrib("tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
-  }
-
-  _vao_need_update = false;
-}
-
-void liquid_layer::draw ( liquid_render& render
-                        , opengl::scoped::use_program& water_shader
-                        , math::vector_3d const& camera
-                        , bool camera_moved
-                        , int animtime
-                        )
-{
-  bool lod_changed = false;
-
-  if (!_uploaded)
-  {
-    upload();
-    lod_changed = true;
-    set_lod_level(get_lod_level(camera));
-  }
-
-  if (_need_buffer_update)
-  {
-    update_buffers();
-  }
-
-  gl.bindVertexArray(_vao);
-
-  if (_vao_need_update)
-  {
-    update_vao(water_shader);
-    set_lod_level(get_lod_level(camera));
-  }
-
-  if (camera_moved)
-  {
-    int new_lod = get_lod_level(camera);
-
-    if (new_lod != _current_lod_level)
-    {
-      lod_changed = true;
-      set_lod_level(new_lod);
-    }
-  }
-
-  render.prepare_draw (water_shader, _liquid_id, animtime);
-
-  if (lod_changed)
-  {
-    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _index_buffer[_current_lod_level]);
-  }
-  
-  gl.drawElements (GL_TRIANGLES, _current_lod_indices_count, GL_UNSIGNED_SHORT, nullptr);
 }
 
 void liquid_layer::crop(MapChunk* chunk)
@@ -569,8 +418,6 @@ void liquid_layer::crop(MapChunk* chunk)
     }
   }
 
-  registerUpdate(ll_HEIGHT);
-
   update_min_max();
 }
 
@@ -583,8 +430,6 @@ void liquid_layer::update_opacity(MapChunk* chunk, float factor)
       update_vertex_opacity(x, z, chunk, factor);
     }
   }
-
-  registerUpdate(ll_DEPTH);
 }
 
 bool liquid_layer::hasSubchunk(int x, int z, int size) const
@@ -605,7 +450,6 @@ bool liquid_layer::hasSubchunk(int x, int z, int size) const
 void liquid_layer::setSubchunk(int x, int z, bool water)
 {
   misc::set_bit(_subchunks, x, z, water);
-  registerUpdate(ll_HEIGHT);
 }
 
 void liquid_layer::paintLiquid( math::vector_3d const& cursor_pos
@@ -659,8 +503,6 @@ void liquid_layer::paintLiquid( math::vector_3d const& cursor_pos
     id++;
   }
 
-  registerUpdate(ll_HEIGHT || ll_DEPTH);
-
   update_min_max();
 }
 
@@ -707,14 +549,12 @@ void liquid_layer::copy_subchunk_height(int x, int z, liquid_layer const& from)
   }
 
   setSubchunk(x, z, true);
-  registerUpdate(ll_HEIGHT);
 }
 
 void liquid_layer::update_vertex_opacity(int x, int z, MapChunk* chunk, float factor)
 {
   float diff = _vertices[z * 9 + x].y - chunk->mVertices[z * 17 + x].y;
   _depth[z * 9 + x] = diff < 0.0f ? 0.0f : (std::min(1.0f, std::max(0.0f, (diff + 1.0f) * factor)));
-  registerUpdate(ll_DEPTH);
 }
 
 int liquid_layer::get_lod_level(math::vector_3d const& camera_pos) const
@@ -728,17 +568,3 @@ int liquid_layer::get_lod_level(math::vector_3d const& camera_pos) const
        : 3;
 }
 
-void liquid_layer::set_lod_level(int lod_level)
-{
-  _current_lod_level = lod_level;
-  _current_lod_indices_count = _indices_by_lod[lod_level].size();
-}
-
-void liquid_layer::registerUpdate(unsigned flags)
-{
-
-}
-
-liquid_layer::~liquid_layer()
-{
-}

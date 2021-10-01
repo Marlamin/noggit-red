@@ -8,7 +8,6 @@
 #include <math/vector_3d.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/TextureManager.h>
-#include <noggit/liquid_render.hpp>
 #include <opengl/scoped.hpp>
 
 #include <boost/optional.hpp>
@@ -106,11 +105,6 @@ class wmo_liquid
 public:
   wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, int group_liquid, bool use_dbc_type, bool is_ocean);
   wmo_liquid(wmo_liquid const& other);
-
-  void draw ( math::matrix_4x4 const& transform
-            , liquid_render& render
-            , int animtime
-            );
 
   void upload(opengl::scoped::use_program& water_shader);
 
