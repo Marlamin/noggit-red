@@ -191,12 +191,17 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOPV');
 
+  f.seekRelative (size);
+
+  /*
   std::vector<math::vector_3d> portal_vertices;
 
   for (size_t i (0); i < size / 12; ++i) {
     f.read (ff, 12);
     portal_vertices.push_back(math::vector_3d(ff[0], ff[2], -ff[1]));
   }
+
+   */
 
   // - MOPT ----------------------------------------------
 
@@ -585,6 +590,8 @@ WMOGroup::WMOGroup(WMOGroup const& other)
   , _texcoords_2(other._texcoords_2)
   , _vertex_colors(other._vertex_colors)
   , _indices(other._indices)
+  , _render_batch_mapping(other._render_batch_mapping)
+  , _render_batches(other._render_batches)
 {
   if (other.lq)
   {
@@ -607,8 +614,134 @@ namespace
 
 void WMOGroup::upload()
 {
+  // render batches
+
+  bool texture_not_uploaded = false;
+
+  std::size_t batch_counter = 0;
+  for (auto& batch : _batches)
+  {
+    WMOMaterial const& mat (wmo->materials.at (batch.texture));
+
+    auto& tex1 = wmo->textures.at(mat.texture1);
+
+    tex1->bind();
+
+    if (!tex1->is_uploaded())
+    {
+      texture_not_uploaded = true;
+      break;
+    }
+
+    std::uint32_t tex_array0 = tex1->texture_array();
+    std::uint32_t array_index0 = tex1->array_index();
+
+    std::uint32_t tex_array1 = 0;
+    std::uint32_t array_index1 = 0;
+    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
+
+    if (use_tex2)
+    {
+      auto& tex2 = wmo->textures.at(mat.texture2);
+      tex2->bind();
+
+      if (!tex2->is_uploaded())
+      {
+        texture_not_uploaded = false;
+        break;
+      }
+
+      tex_array1 = tex2->texture_array();
+      array_index1 = tex2->array_index();
+    }
+
+    _render_batches[batch_counter].tex_array0 = tex_array0;
+    _render_batches[batch_counter].tex_array1 = tex_array1;
+    _render_batches[batch_counter].tex0 = array_index0;
+    _render_batches[batch_counter].tex1 = array_index1;
+
+    batch_counter++;
+  }
+
+  if (texture_not_uploaded)
+  {
+    return;
+  }
+
+  _draw_calls.clear();
+  WMOCombinedDrawCall* draw_call = nullptr;
+  std::vector<WMORenderBatch*> _used_batches;
+
+  batch_counter = 0;
+  for (auto& batch : _batches)
+  {
+    WMOMaterial& mat = wmo->materials.at(batch.texture);
+    bool backface_cull = !mat.flags.unculled;
+    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
+
+    bool samplers_registered = false;
+    if (draw_call && draw_call->backface_cull == backface_cull && batch.index_start == draw_call->index_start + draw_call->index_count)
+    {
+      auto it = std::find(draw_call->samplers.begin(), draw_call->samplers.end(), _render_batches[batch_counter].tex_array0);
+      if (it != draw_call->samplers.end())
+      {
+        _render_batches[batch_counter].tex_array0 = it - draw_call->samplers.begin();
+        samplers_registered = true;
+      }
+      else if ((draw_call->samplers.size() - draw_call->n_used_samplers) >= (use_tex2 ? 2 : 1))
+      {
+        draw_call->samplers[draw_call->n_used_samplers] = _render_batches[batch_counter].tex_array0;
+        _render_batches[batch_counter].tex_array0 = draw_call->n_used_samplers;
+        draw_call->n_used_samplers++;
+        samplers_registered = true;
+      }
+
+      if (samplers_registered && use_tex2)
+      {
+        auto it = std::find(draw_call->samplers.begin(), draw_call->samplers.end(), _render_batches[batch_counter].tex_array1);
+        if (it != draw_call->samplers.end())
+        {
+          _render_batches[batch_counter].tex_array1 = it - draw_call->samplers.begin();
+        }
+        else
+        {
+          draw_call->samplers[draw_call->n_used_samplers] = _render_batches[batch_counter].tex_array1;
+          _render_batches[batch_counter].tex_array1 = draw_call->n_used_samplers;
+          draw_call->n_used_samplers++;
+        }
+      }
+    }
+
+    if (!draw_call || draw_call->backface_cull != backface_cull || batch.index_start != draw_call->index_start + draw_call->index_count)
+    {
+      draw_call = &_draw_calls.emplace_back();
+      draw_call->samplers = std::vector<int>{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+      draw_call->index_start = batch.index_start;
+      draw_call->index_count = 0;
+      draw_call->n_used_samplers = use_tex2 ? 2 : 1;
+      draw_call->backface_cull = backface_cull;
+
+      draw_call->samplers[0] = _render_batches[batch_counter].tex_array0;
+      _render_batches[batch_counter].tex_array0 = 0;
+
+      if (use_tex2)
+      [[unlikely]]
+      {
+        draw_call->samplers[1] = _render_batches[batch_counter].tex_array1;
+        _render_batches[batch_counter].tex_array1 = 1;
+      }
+
+    }
+
+    draw_call->index_count += batch.index_count;
+
+    batch_counter++;
+  }
+
+  // opengl resources
   _vertex_array.upload();
   _buffers.upload();
+  gl.genTextures(1, &_render_batch_tex);
 
   gl.bufferData<GL_ARRAY_BUFFER> ( _vertices_buffer
                                  , _vertices.size() * sizeof (*_vertices.data())
@@ -627,6 +760,17 @@ void WMOGroup::upload()
                                  , _texcoords.data()
                                  , GL_STATIC_DRAW
                                  );
+
+  gl.bufferData<GL_ARRAY_BUFFER> ( _render_batch_mapping_buffer
+      , _render_batch_mapping.size() * sizeof(unsigned)
+      , _render_batch_mapping.data()
+      , GL_STATIC_DRAW
+  );
+
+  gl.bindBuffer(GL_TEXTURE_BUFFER, _render_batch_tex_buffer);
+  gl.bufferData(GL_TEXTURE_BUFFER, _render_batches.size() * sizeof(WMORenderBatch),_render_batches.data(), GL_STATIC_DRAW);
+  gl.bindTexture(GL_TEXTURE_BUFFER, _render_batch_tex);
+  gl.texBuffer(GL_TEXTURE_BUFFER,  GL_RGBA32UI, _render_batch_tex_buffer);
 
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_buffer, _indices, GL_STATIC_DRAW);
   
@@ -652,6 +796,8 @@ void WMOGroup::unload()
   _vertex_array.unload();
   _buffers.unload();
 
+  gl.deleteTextures(1, &_render_batch_tex);
+
   _uploaded = false;
   _vao_is_setup = false;
 }
@@ -665,6 +811,7 @@ void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
     wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
     wmo_shader.attrib("normal", _normals_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
     wmo_shader.attrib("texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    wmo_shader.attribi("batch_mapping", _render_batch_mapping_buffer, 1, GL_UNSIGNED_INT, 0, 0);
 
     if (header.flags.has_two_motv)
     {
@@ -758,13 +905,18 @@ void WMOGroup::load()
   // let's hope it's padded to 12 bytes, not 16...
   ::math::vector_3d const* vertices = reinterpret_cast< ::math::vector_3d const*>(f.getPointer ());
 
-  VertexBoxMin = ::math::vector_3d (9999999.0f, 9999999.0f, 9999999.0f);
-  VertexBoxMax = ::math::vector_3d (-9999999.0f, -9999999.0f, -9999999.0f);
+  VertexBoxMin = ::math::vector_3d (std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+  VertexBoxMax = ::math::vector_3d (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 
   rad = 0;
 
-  for (size_t i = 0; i < size / sizeof (::math::vector_3d); ++i) {
-    ::math::vector_3d v (vertices[i].x, vertices[i].z, -vertices[i].y);
+  _vertices.resize(size / sizeof (::math::vector_3d));
+
+  for (size_t i = 0; i < _vertices.size(); ++i)
+  {
+    _vertices[i] = math::vector_3d(vertices[i].x, vertices[i].z, -vertices[i].y);
+
+    ::math::vector_3d& v = _vertices[i];
 
     if (v.x < VertexBoxMin.x) VertexBoxMin.x = v.x;
     if (v.y < VertexBoxMin.y) VertexBoxMin.y = v.y;
@@ -772,8 +924,6 @@ void WMOGroup::load()
     if (v.x > VertexBoxMax.x) VertexBoxMax.x = v.x;
     if (v.y > VertexBoxMax.y) VertexBoxMax.y = v.y;
     if (v.z > VertexBoxMax.z) VertexBoxMax.z = v.z;
-
-    _vertices.push_back (v);
   }
 
   center = (VertexBoxMax + VertexBoxMin) * 0.5f;
@@ -817,6 +967,67 @@ void WMOGroup::load()
 
   _batches.resize (size / sizeof (wmo_batch));
   f.read (_batches.data (), size);
+
+  _render_batch_mapping.resize(_vertices.size());
+  std::fill(_render_batch_mapping.begin(), _render_batch_mapping.end(), 0);
+
+  _render_batches.resize(_batches.size());
+
+  std::size_t batch_counter = 0;
+  for (auto& batch : _batches)
+  {
+    for (std::size_t i = 0; i < (batch.vertex_end - batch.vertex_start + 1); ++i)
+    {
+      _render_batch_mapping[batch.vertex_start + i] = batch_counter + 1;
+    }
+
+    std::uint32_t flags = 0;
+
+    if (header.flags.exterior_lit | header.flags.exterior)
+    {
+      flags |= WMORenderBatchFlags::eWMOBatch_ExteriorLit;
+    }
+    if (header.flags.has_vertex_color | header.flags.use_mocv2_for_texture_blending)
+    {
+      flags |= WMORenderBatchFlags::eWMOBatch_HasMOCV;
+    }
+
+    WMOMaterial const& mat (wmo->materials.at (batch.texture));
+
+    if (mat.flags.unlit)
+    {
+      flags |= WMORenderBatchFlags::eWMOBatch_Unlit;
+    }
+
+    if (mat.flags.unfogged)
+    {
+      flags |= WMORenderBatchFlags::eWMOBatch_Unfogged;
+    }
+
+    std::uint32_t alpha_test;
+
+    switch (mat.blend_mode)
+    {
+      case 1:
+        alpha_test = 1; // 224/255
+        break;
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+        alpha_test = 2;
+        break;
+      case 0:
+      default:
+        alpha_test = 0;
+        break;
+    }
+
+    _render_batches[batch_counter] = WMORenderBatch{flags, mat.shader, 0, 0, 0, 0, alpha_test, 0};
+
+    batch_counter++;
+  }
 
   // - MOLR ----------------------------------------------
   if (header.flags.has_light)
@@ -1228,89 +1439,61 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
                    )
 {
   if (!_uploaded)
+  [[unlikely]]
   {
     upload();
+
+    if (!_uploaded)
+    [[unlikely]]
+    {
+      return;
+    }
   }
 
   if (!_vao_is_setup)
+  [[unlikely]]
   {
     setup_vao(wmo_shader);
   }
 
-  bool exterior_lit = header.flags.exterior_lit | header.flags.exterior;
-  int has_mocv = header.flags.has_vertex_color | header.flags.use_mocv2_for_texture_blending;
-
-  wmo_shader.uniform_cached("use_vertex_color", has_mocv);
-  wmo_shader.uniform_cached("exterior_lit", (int)exterior_lit);
-
   opengl::scoped::vao_binder const _ (_vao);
 
-  for (wmo_batch& batch : _batches)
+  gl.activeTexture(GL_TEXTURE0);
+  gl.bindTexture(GL_TEXTURE_BUFFER, _render_batch_tex);
+  gl.texBuffer(GL_TEXTURE_BUFFER,  GL_RGBA32UI, _render_batch_tex_buffer);
+
+  bool backface_cull = true;
+  gl.enable(GL_CULL_FACE);
+
+  for (auto& draw_call : _draw_calls)
   {
-    WMOMaterial const& mat (wmo->materials.at (batch.texture));
-    
-    float alpha_test = 0.003921568f; // 1/255
-
-    switch (mat.blend_mode)
+    if (backface_cull != draw_call.backface_cull)
     {
-      case 1:
-        gl.disable(GL_BLEND);
-        alpha_test = 0.878431372f; // 224/255
-        break;
-      case 2:
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        break;
-      case 3:
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
-        break;
-      case 4:
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_DST_COLOR, GL_ZERO);
-        break;
-      case 5:
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-        break;
-      case 6:
-        gl.enable(GL_BLEND);
-        gl.blendFunc(GL_DST_COLOR, GL_ONE);
-        break;
-      case 0:
-      default:
-        alpha_test = -1.f;
-        gl.disable(GL_BLEND);
-        break;
-    }    
+      if (draw_call.backface_cull)
+      {
+        gl.enable(GL_CULL_FACE);
+      }
+      else
+      {
+        gl.disable(GL_CULL_FACE);
+      }
 
-    wmo_shader.uniform_cached("shader_id", (int)mat.shader);
-
-    wmo_shader.uniform_cached("alpha_test", alpha_test);
-    wmo_shader.uniform_cached("unfogged", (int)mat.flags.unfogged);
-    wmo_shader.uniform_cached("unlit", (int)mat.flags.unlit);
-
-    if (mat.flags.unculled)
-    {
-      gl.disable(GL_CULL_FACE);
-    }
-    else
-    {
-      gl.enable(GL_CULL_FACE);
+      backface_cull = draw_call.backface_cull;
     }
 
-    opengl::texture::set_active_texture(0);
-    wmo->textures.at(mat.texture1)->bind();
-
-    // only shaders using 2 textures in wotlk
-    if (mat.shader == 6 || mat.shader == 5 || mat.shader == 3)
+    for(std::size_t i = 0; i < draw_call.samplers.size(); ++i)
     {
-      opengl::texture::set_active_texture(1);
-      wmo->textures.at(mat.texture2)->bind();
+      if (draw_call.samplers[i] < 0)
+        break;
+
+      gl.activeTexture(GL_TEXTURE0 + 1 + i);
+      gl.bindTexture(GL_TEXTURE_2D_ARRAY, draw_call.samplers[i]);
     }
 
-    gl.drawRangeElements (GL_TRIANGLES, batch.vertex_start, batch.vertex_end, batch.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(sizeof(std::uint16_t)*batch.index_start));
+    gl.drawElements (GL_TRIANGLES, draw_call.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(sizeof(std::uint16_t)*draw_call.index_start));
+
   }
+
 }
 
 void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) const

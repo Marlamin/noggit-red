@@ -127,6 +127,7 @@ namespace opengl
     BOOST_FORCEINLINE void texParameterf (GLenum target, GLenum pname, GLfloat param);
     BOOST_FORCEINLINE void texParameteriv (GLenum target, GLenum pname, GLint const* params);
     BOOST_FORCEINLINE void texParameterfv (GLenum target, GLenum pname, GLfloat const* params);
+    BOOST_FORCEINLINE void texBuffer(	GLenum target, GLenum internalformat, GLuint buffer);
 
     BOOST_FORCEINLINE void genVertexArrays (GLuint, GLuint*);
     BOOST_FORCEINLINE void deleteVertexArray (GLuint, GLuint*);
@@ -175,6 +176,11 @@ namespace opengl
 
     BOOST_FORCEINLINE GLint getAttribLocation (GLuint program, GLchar const* name);
     BOOST_FORCEINLINE void vertexAttribPointer (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, GLvoid const* pointer);
+    BOOST_FORCEINLINE void vertexAttribIPointer (GLuint index,
+                                                 GLint size,
+                                                 GLenum type,
+                                                 GLsizei stride,
+                                                 const void * pointer);
     BOOST_FORCEINLINE void vertexAttribDivisor (GLuint index, GLuint divisor);
     BOOST_FORCEINLINE void enableVertexAttribArray (GLuint index);
     BOOST_FORCEINLINE void disableVertexAttribArray (GLuint index);

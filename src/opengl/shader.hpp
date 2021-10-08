@@ -12,6 +12,8 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <array>
+#include <cstdint>
 #include <unordered_map>
 #include <external/tsl/robin_map.h>
 
@@ -126,6 +128,7 @@ namespace opengl
       void attrib (std::string const& name, math::matrix_4x4 const*, GLuint divisor = 0);
       void attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
       void attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
+      void attribi (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLsizei stride, const GLvoid* data);
 
       void attrib_divisor(std::string const& name, GLuint divisor, GLsizei range = 1);
 

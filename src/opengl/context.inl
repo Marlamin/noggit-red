@@ -751,6 +751,17 @@ void opengl::context::vertexAttribPointer (GLuint index, GLint size, GLenum type
 #endif
   return _current_context->functions()->glVertexAttribPointer (index, size, type, normalized, stride, pointer);
 }
+void opengl::context::vertexAttribIPointer (GLuint index,
+                                            GLint size,
+                                            GLenum type,
+                                            GLsizei stride,
+                                            const void* pointer)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glVertexAttribIPointer (index, size, type, stride, pointer);
+}
 void opengl::context::vertexAttribDivisor (GLuint index, GLuint divisor)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
@@ -945,6 +956,14 @@ void opengl::context::framebufferRenderbuffer (GLenum target, GLenum attachment,
   verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
 #endif
   return _current_context->functions()->glFramebufferRenderbuffer (target, attachment, renderbuffertarget, renderbuffer);
+}
+
+void opengl::context::texBuffer(GLenum target, GLenum internalformat, GLuint buffer)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glTexBuffer(target, internalformat, buffer);
 }
 
 template<GLenum target>

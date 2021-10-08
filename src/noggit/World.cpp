@@ -905,9 +905,11 @@ void World::initShaders()
   }
 
   {
+    std::vector<int> samplers {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+
     opengl::scoped::use_program wmo_program {*_wmo_program.get()};
-    wmo_program.uniform("tex1", 0);
-    wmo_program.uniform("tex2", 1);
+    wmo_program.uniform("render_batches_tex", 0);
+    wmo_program.uniform("texture_samplers", samplers);
     wmo_program.bind_uniform_block("matrices", 0);
     wmo_program.bind_uniform_block("lighting", 1);
   }

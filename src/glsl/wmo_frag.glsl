@@ -1,5 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#version 330 core
+#version 410 core
+
+// flags
+#define eWMOBatch_ExteriorLit 0x1u
+#define eWMOBatch_HasMOCV 0x2u
+#define eWMOBatch_Unlit 0x4u
+#define eWMOBatch_Unfogged 0x8u
 
 layout (std140) uniform lighting
 {
@@ -13,21 +19,9 @@ layout (std140) uniform lighting
   vec4 RiverColorDark;
 };
 
-uniform sampler2D tex1;
-uniform sampler2D tex2;
-
-uniform bool use_vertex_color;
-
-uniform bool unfogged;
 uniform vec3 camera;
-
-uniform bool unlit;
-uniform bool exterior_lit;
+uniform sampler2DArray texture_samplers[15];
 uniform vec3 ambient_color;
-
-uniform float alpha_test;
-
-uniform int shader_id;
 
 in vec3 f_position;
 in vec3 f_normal;
@@ -35,20 +29,94 @@ in vec2 f_texcoord;
 in vec2 f_texcoord_2;
 in vec4 f_vertex_color;
 
+flat in uint flags;
+flat in uint shader;
+flat in uint tex_array0;
+flat in uint tex_array1;
+flat in uint tex0;
+flat in uint tex1;
+flat in uint alpha_test_mode;
+
 out vec4 out_color;
+
+vec4 get_tex_color(vec2 tex_coord, uint tex_sampler, int array_index)
+{
+  if (tex_sampler == 0)
+  {
+    return texture(texture_samplers[0], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 1)
+  {
+    return texture(texture_samplers[1], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 2)
+  {
+    return texture(texture_samplers[2], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 3)
+  {
+    return texture(texture_samplers[3], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 4)
+  {
+    return texture(texture_samplers[4], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 5)
+  {
+    return texture(texture_samplers[5], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 6)
+  {
+    return texture(texture_samplers[6], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 7)
+  {
+    return texture(texture_samplers[7], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 8)
+  {
+    return texture(texture_samplers[8], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 9)
+  {
+    return texture(texture_samplers[9], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 10)
+  {
+    return texture(texture_samplers[10], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 11)
+  {
+    return texture(texture_samplers[11], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 12)
+  {
+    return texture(texture_samplers[12], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 13)
+  {
+    return texture(texture_samplers[13], vec3(tex_coord, array_index)).rgba;
+  }
+  else if (tex_sampler == 14)
+  {
+    return texture(texture_samplers[14], vec3(tex_coord, array_index)).rgba;
+  }
+
+  return vec4(0);
+}
 
 vec3 apply_lighting(vec3 material)
 {
   vec3 ambient_term;
   vec3 diffuse_term;
-  vec3 vertex_color = use_vertex_color ? f_vertex_color.rgb : vec3(0.);
+  vec3 vertex_color = bool(flags & eWMOBatch_HasMOCV) ? f_vertex_color.rgb : vec3(0.);
 
-  if(unlit)
+  if(bool(flags & eWMOBatch_Unlit))
   {
     ambient_term = vec3(0.0);
     diffuse_term = vec3(0.0);
   }
-  else if(exterior_lit)
+  else if(bool(flags & eWMOBatch_ExteriorLit))
   {
     ambient_term = AmbientColor_FogEnd.xyz;
     diffuse_term = DiffuseColor_FogStart.xyz;
@@ -64,7 +132,7 @@ vec3 apply_lighting(vec3 material)
   vec3 lDiffuse = vec3(0.0, 0.0, 0.0);
   vec3 accumlatedLight = vec3(1.0, 1.0, 1.0);
 
-  if(!unlit)
+  if(!bool(flags & eWMOBatch_Unlit))
   {
     float nDotL = clamp(dot(normalize(f_normal), -normalize(vec3(-LightDir_FogRate.x, LightDir_FogRate.z, -LightDir_FogRate.y))), 0.0, 1.0);
 
@@ -87,11 +155,19 @@ vec3 apply_lighting(vec3 material)
 
 void main()
 {
-  float dist_from_camera = distance(camera, f_position);
-  bool fog = FogColor_FogOn.w != 0 && !unfogged;
 
-  vec4 tex = texture(tex1, f_texcoord);
-  vec4 tex_2 = texture(tex2, f_texcoord_2);
+  if (tex_array0 == 34)
+  {
+    out_color = vec4(1, 0, 0, 1);
+  }
+
+  float dist_from_camera = distance(camera, f_position);
+  bool fog = FogColor_FogOn.w != 0 && !bool(flags & eWMOBatch_Unfogged);
+
+  vec4 tex = get_tex_color(f_texcoord, tex_array0, int(tex0));
+  vec4 tex_2 = get_tex_color(f_texcoord_2, tex_array1, int(tex1));
+
+  float alpha_test = !bool(alpha_test_mode) ? -1.f : (alpha_test_mode < 2 ? 0.878431372 : 0.003921568);
 
   if(tex.a < alpha_test)
   {
@@ -101,29 +177,29 @@ void main()
   vec4 vertex_color = vec4(0., 0., 0., 1.f);
   vec3 light_color = vec3(1.);
 
-  if(use_vertex_color) 
+  if(bool(flags & eWMOBatch_HasMOCV))
   {
     vertex_color = f_vertex_color;
   }
 
 
   // see: https://github.com/Deamon87/WebWowViewerCpp/blob/master/wowViewerLib/src/glsl/wmoShader.glsl
-  if(shader_id == 3) // Env
+  if(shader == 3) // Env
   {
     vec3 env = tex_2.rgb * tex.rgb;
     out_color = vec4(apply_lighting(tex.rgb) + env, 1.);
   }
-  else if(shader_id == 5) // EnvMetal
+  else if(shader == 5) // EnvMetal
   {
     vec3 env = tex_2.rgb * tex.rgb * tex.a;
     out_color = vec4(apply_lighting(tex.rgb) + env, 1.);
   }
-  else if(shader_id == 6) // TwoLayerDiffuse
+  else if(shader == 6) // TwoLayerDiffuse
   {
     vec3 layer2 = mix(tex.rgb, tex_2.rgb, tex_2.a);
     out_color = vec4(apply_lighting(mix(layer2, tex.rgb, vertex_color.a)), 1.);
   }
-  else // default shader, used for shader_id 0,1,2,4 (Diffuse, Specular, Metal, Opaque)
+  else // default shader, used for shader 0,1,2,4 (Diffuse, Specular, Metal, Opaque)
   {
     out_color = vec4(apply_lighting(tex.rgb), 1.);
   }
