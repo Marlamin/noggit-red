@@ -203,6 +203,13 @@ void ModelInstance::recalcExtents()
   _need_recalc_extents = false;
 }
 
+void ModelInstance::ensureExtents()
+{
+  if (_need_recalc_extents && model->finishedLoading())
+  {
+    recalcExtents();
+  }
+}
 
 math::vector_3d* ModelInstance::getExtents()
 {

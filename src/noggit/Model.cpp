@@ -1460,7 +1460,18 @@ void Model::draw ( math::matrix_4x4 const& model_view
 
   for (ModelInstance* mi : instances)
   {
-    if (no_cull || mi->is_visible(frustum, cull_distance, camera, display))
+    bool region_visble = false;
+
+    for (auto& tile : mi->getTiles())
+    {
+      if (tile->objects_frustum_cull_test)
+      {
+        region_visble = true;
+        break;
+      }
+    }
+
+    if (no_cull || (region_visble && mi->is_visible(frustum, cull_distance, camera, display)))
     {
       transform_matrix[n_visible_instances] = (mi->transformMatrixTransposed());
       n_visible_instances++;

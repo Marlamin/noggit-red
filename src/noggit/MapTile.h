@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <set>
 
 namespace math
 {
@@ -75,6 +76,7 @@ public:
   float xbase, zbase;
 
   std::atomic<bool> changed;
+  bool objects_frustum_cull_test = false;
 
   void draw ( math::frustum const& frustum
             , opengl::scoped::use_program& mcnk_shader
@@ -123,7 +125,9 @@ public:
   }
 
   void remove_model(uint32_t uid);
+  void remove_model(SceneObject* instance);
   void add_model(uint32_t uid);
+  void add_model(SceneObject* instance);
 
   TileWater Water;
 
@@ -148,7 +152,9 @@ public:
   std::array<float, 145 * 256 * 4>& getChunkHeightmapBuffer() { return _chunk_heightmap_buffer; };
   unsigned getChunkUpdateFlags() { return _chunk_update_flags; }
   void recalcExtents(float min, float max);
+  void recalcObjectInstanceExtents();
   std::array<math::vector_3d, 2>& getExtents() { return _extents; };
+  std::array<math::vector_3d, 2>& getObjectInstancesExtents() { return _object_instance_extents; };
 
   void unload();
 
@@ -170,6 +176,7 @@ private:
   bool _requires_paintability_recalc = true;
 
   std::array<math::vector_3d, 2> _extents;
+  std::array<math::vector_3d, 2> _object_instance_extents;
 
   // MFBO:
   math::vector_3d mMinimumValues[3 * 3];
@@ -210,6 +217,7 @@ private:
   std::vector<std::string> mWMOFilenames;
   
   std::vector<uint32_t> uids;
+  std::set<SceneObject*> object_instances; // only includes M2 and WMO. perhaps a medium common ancestor then?
 
   std::unique_ptr<MapChunk> mChunks[16][16];
 

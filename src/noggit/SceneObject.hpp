@@ -9,12 +9,15 @@
 #include <noggit/Selection.h>
 #include <noggit/ContextObject.hpp>
 #include <cstdint>
+#include <set>
 
 enum SceneObjectTypes
 {
   eMODEL,
   eWMO
 };
+
+class MapTile;
 
 class SceneObject
 {
@@ -30,6 +33,7 @@ public:
   virtual void updateTransformMatrix();
 
   virtual void recalcExtents() = 0;
+  virtual void ensureExtents() = 0;
 
   void resetDirection();
 
@@ -46,13 +50,16 @@ public:
 
   std::string const& getFilename() { return _filename; };
 
+  void refTile(MapTile* tile);
+  void derefTile(MapTile* tile);
+  std::set<MapTile*> const& getTiles() { return _tiles; };
+
 public:
   math::vector_3d pos;
   math::vector_3d  extents[2];
   math::degrees::vec3 dir;
   float scale = 1.f;
   unsigned int uid;
-
 
 protected:
   SceneObjectTypes _type;
@@ -64,6 +71,8 @@ protected:
   noggit::NoggitRenderContext _context;
 
   std::string _filename;
+
+  std::set<MapTile*> _tiles;
 };
 
 #endif //NOGGIT_3DOBJECT_HPP

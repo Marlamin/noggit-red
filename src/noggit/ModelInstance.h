@@ -89,9 +89,10 @@ public:
   bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera, display_mode display);
 
   [[nodiscard]]
-  virtual math::vector_3d get_pos() const { return pos; }
+  virtual math::vector_3d const& get_pos() const { return pos; }
 
   void recalcExtents() override;
+  void ensureExtents() override;
   math::vector_3d* getExtents();
 
 protected:
@@ -134,7 +135,7 @@ public:
 
   void update_transform_matrix_wmo(WMOInstance* wmo);
 
-  virtual math::vector_3d get_pos() const override { return world_pos; };
+  virtual math::vector_3d const& get_pos() const override { return world_pos; };
 
 protected:
   // to avoid redefining recalcExtents

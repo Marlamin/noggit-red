@@ -59,6 +59,8 @@ MapTile::MapTile( int pX
                         | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
   , _extents{math::vector_3d{pX * TILESIZE, std::numeric_limits<float>::max(), pZ * TILESIZE},
              math::vector_3d{pX * TILESIZE + TILESIZE, std::numeric_limits<float>::lowest(), pZ * TILESIZE + TILESIZE}}
+  , _object_instance_extents{math::vector_3d{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()},
+               math::vector_3d{std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()}}
 {
 }
 
@@ -777,6 +779,11 @@ bool MapTile::intersect (math::ray const& ray, selection_result* results) const
     return false;
   }
 
+  if (!ray.intersect_bounds(_extents[0], _extents[1]))
+  {
+    return false;
+  }
+
   for (size_t j (0); j < 16; ++j)
   {
     for (size_t i (0); i < 16; ++i)
@@ -986,10 +993,6 @@ void MapTile::saveTile(World* world)
         {
           lModelInstances.emplace_back(*static_cast<ModelInstance*>(boost::get<selected_object_type>(model.get())));
         }
-
-      }
-      else
-      {
 
       }
     }
@@ -1363,6 +1366,28 @@ void MapTile::remove_model(uint32_t uid)
   {
     uids.erase(it);
   }
+
+  auto& obj = _world->get_model(uid).get();
+  auto instance = boost::get<selected_object_type>(obj);
+  object_instances.erase(instance);
+  instance->derefTile(this);
+  recalcObjectInstanceExtents();
+}
+
+void MapTile::remove_model(SceneObject* instance)
+{
+  std::lock_guard<std::mutex> const lock (_mutex);
+
+  auto it = std::find(uids.begin(), uids.end(), instance->uid);
+
+  if (it != uids.end())
+  {
+    uids.erase(it);
+  }
+
+  object_instances.erase(instance);
+  instance->derefTile(this);
+  recalcObjectInstanceExtents();
 }
 
 void MapTile::add_model(uint32_t uid)
@@ -1373,6 +1398,40 @@ void MapTile::add_model(uint32_t uid)
   {
     uids.push_back(uid);
   }
+
+  auto& obj = _world->get_model(uid).get();
+  auto instance = boost::get<selected_object_type>(obj);
+  object_instances.emplace(instance);
+
+  _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, instance->extents[0].x);
+  _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, instance->extents[0].y);
+  _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, instance->extents[0].z);
+
+  _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->extents[1].x);
+  _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->extents[1].y);
+  _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->extents[1].z);
+  instance->refTile(this);
+}
+
+void MapTile::add_model(SceneObject* instance)
+{
+  std::lock_guard<std::mutex> const lock(_mutex);
+
+  if (std::find(uids.begin(), uids.end(), instance->uid) == uids.end())
+  {
+    uids.push_back(instance->uid);
+  }
+
+  object_instances.emplace(instance);
+
+  _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, instance->extents[0].x);
+  _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, instance->extents[0].y);
+  _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, instance->extents[0].z);
+
+  _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->extents[1].x);
+  _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->extents[1].y);
+  _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->extents[1].z);
+  instance->refTile(this);
 }
 
 void MapTile::initEmptyChunks()
@@ -1826,4 +1885,24 @@ void MapTile::recalcExtents(float min, float max)
 {
   _extents[0].y = std::min(_extents[0].y, min);
   _extents[1].y = std::max(_extents[1].y, max);
+}
+
+void MapTile::recalcObjectInstanceExtents()
+{
+  for (auto& instance : object_instances)
+  {
+    instance->ensureExtents();
+
+    math::vector_3d& min = instance->extents[0];
+    math::vector_3d& max = instance->extents[1];
+
+    _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, min.x);
+    _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, min.y);
+    _object_instance_extents[0].y = std::min(_object_instance_extents[0].z, min.z);
+
+    _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, max.x);
+    _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, max.y);
+    _object_instance_extents[1].y = std::max(_object_instance_extents[1].z, max.z);
+  }
+
 }

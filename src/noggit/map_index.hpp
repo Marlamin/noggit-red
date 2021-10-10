@@ -177,7 +177,7 @@ public:
   void enterTile(const tile_index& tile);
   MapTile *loadTile(const tile_index& tile, bool reloading = false);
 
-  void update_model_tile(const tile_index& tile, model_update type, uint32_t uid);
+  void update_model_tile(const tile_index& tile, model_update type, SceneObject* instance);
 
   void setChanged(const tile_index& tile);
   void setChanged(MapTile* tile);

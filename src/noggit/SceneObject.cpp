@@ -9,7 +9,6 @@ SceneObject::SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext cont
 , _filename(filename)
 , _context(context)
 {
-
 }
 
 bool SceneObject::isInsideRect(math::vector_3d rect[2]) const
@@ -47,4 +46,14 @@ void SceneObject::resetDirection()
 {
   dir =  math::degrees::vec3(0_deg, dir.y, 0.0_deg);
   recalcExtents();
+}
+
+void SceneObject::refTile(MapTile* tile)
+{
+  _tiles.emplace(tile);
+}
+
+void SceneObject::derefTile(MapTile* tile)
+{
+  _tiles.erase(tile);
 }

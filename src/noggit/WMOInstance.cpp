@@ -132,6 +132,12 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results)
   }
 }
 
+void WMOInstance::ensureExtents()
+{
+  recalcExtents();
+  // TODO: optimize
+}
+
 void WMOInstance::recalcExtents()
 {
   // todo: keep track of whether the extents need to be recalculated or not

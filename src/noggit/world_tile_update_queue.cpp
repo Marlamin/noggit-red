@@ -40,7 +40,7 @@ namespace noggit
       {
         for (int x = start.x; x <= end.x; ++x)
         {
-          world->mapIndex.update_model_tile(tile_index(x, z), update_type, instance->uid);
+          world->mapIndex.update_model_tile(tile_index(x, z), update_type, instance);
         }
       }
     }
@@ -62,6 +62,7 @@ namespace noggit
       , end(wmo->extents[1])
       , uid(wmo->uid)
       , update_type(type)
+      , instance(wmo)
     {
 
     }
@@ -72,7 +73,7 @@ namespace noggit
       {
         for (int x = start.x; x <= end.x; ++x)
         {
-          world->mapIndex.update_model_tile(tile_index(x, z), update_type, uid);
+          world->mapIndex.update_model_tile(tile_index(x, z), update_type, instance);
         }
       }
     }
@@ -81,6 +82,7 @@ namespace noggit
     tile_index end;
     std::uint32_t uid;
     model_update update_type;
+    WMOInstance* instance;
   };
 
   world_tile_update_queue::world_tile_update_queue(World* world)

@@ -1052,6 +1052,11 @@ void World::draw ( math::matrix_4x4 const& model_view
   if (_need_terrain_params_ubo_update)
     updateTerrainParamsUniformBlock();
 
+  for (MapTile* tile : mapIndex.loaded_tiles())
+  {
+    auto& tile_extents = tile->getObjectInstancesExtents();
+    tile->objects_frustum_cull_test = frustum.intersects(tile_extents[1], tile_extents[0]);
+  }
 
   // only draw the sky in 3D
   if(display == display_mode::in_3D)

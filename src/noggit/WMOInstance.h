@@ -104,6 +104,7 @@ public:
   void intersect (math::ray const&, selection_result*);
 
   void recalcExtents() override;
+  void ensureExtents() override;
 
   std::vector<wmo_doodad_instance*> get_visible_doodads( math::frustum const& frustum
                                                        , float const& cull_distance

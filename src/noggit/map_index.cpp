@@ -283,24 +283,23 @@ void MapIndex::enterTile(const tile_index& tile)
   }
 }
 
-void MapIndex::update_model_tile(const tile_index& tile, model_update type, uint32_t uid)
+void MapIndex::update_model_tile(const tile_index& tile, model_update type, SceneObject* instance)
 {
-  if (!hasTile(tile))
-  {
-    return;
-  }
-
   MapTile* adt = loadTile(tile);
+
+  if (!adt)
+    return;
+
   adt->wait_until_loaded();
   adt->changed = true;
 
   if (type == model_update::add)
   {
-    adt->add_model(uid);
+    adt->add_model(instance);
   }
   else if(type == model_update::remove)
   {
-    adt->remove_model(uid);
+    adt->remove_model(instance);
   }
 }
 
