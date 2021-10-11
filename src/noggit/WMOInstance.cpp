@@ -6,6 +6,7 @@
 #include <noggit/Misc.h> // checkinside
 #include <noggit/ModelInstance.h>
 #include <noggit/WMO.h> // WMO
+#include <noggit/MapTile.h>
 #include <noggit/WMOInstance.h>
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
@@ -76,12 +77,25 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
                                         }) != selection.end();
 
   {
-    wmo_shader.uniform("transform", _transform_mat_transposed);
+    unsigned region_visible = 0;
 
-    if (!frustum.intersects(extents[1], extents[0]))
+    for (auto& tile : getTiles())
+    {
+      if (tile->objects_frustum_cull_test)
+      {
+        region_visible = tile->objects_frustum_cull_test;
+
+        if (tile->objects_frustum_cull_test > 1)
+          break;
+      }
+    }
+
+    if (!region_visible || (region_visible <= 1 && !frustum.intersects(extents[1], extents[0])))
     {
       return;
     }
+
+    wmo_shader.uniform("transform", _transform_mat_transposed);
 
     wmo->draw ( wmo_shader
               , model_view

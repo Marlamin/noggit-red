@@ -93,6 +93,7 @@ public:
 
   void recalcExtents() override;
   void ensureExtents() override;
+  bool finishedLoading() override { return model->finishedLoading(); };
   math::vector_3d* getExtents();
 
 protected:

@@ -66,6 +66,12 @@ MapTile::MapTile( int pX
 
 MapTile::~MapTile()
 {
+
+  for (auto& instance : object_instances)
+  {
+    instance->derefTile(this);
+  }
+
   _world->remove_models_if_needed(uids);
 }
 
@@ -1365,13 +1371,13 @@ void MapTile::remove_model(uint32_t uid)
   if (it != uids.end())
   {
     uids.erase(it);
-  }
 
-  auto& obj = _world->get_model(uid).get();
-  auto instance = boost::get<selected_object_type>(obj);
-  object_instances.erase(instance);
-  instance->derefTile(this);
-  recalcObjectInstanceExtents();
+    auto& obj = _world->get_model(uid).get();
+    auto instance = boost::get<selected_object_type>(obj);
+    object_instances.erase(instance);
+    instance->derefTile(this);
+    _requires_object_extents_recalc = true;
+  }
 }
 
 void MapTile::remove_model(SceneObject* instance)
@@ -1383,11 +1389,11 @@ void MapTile::remove_model(SceneObject* instance)
   if (it != uids.end())
   {
     uids.erase(it);
-  }
 
-  object_instances.erase(instance);
-  instance->derefTile(this);
-  recalcObjectInstanceExtents();
+    object_instances.erase(instance);
+    instance->derefTile(this);
+    _requires_object_extents_recalc = true;
+  }
 }
 
 void MapTile::add_model(uint32_t uid)
@@ -1397,20 +1403,31 @@ void MapTile::add_model(uint32_t uid)
   if (std::find(uids.begin(), uids.end(), uid) == uids.end())
   {
     uids.push_back(uid);
+
+    auto& obj = _world->get_model(uid).get();
+    auto instance = boost::get<selected_object_type>(obj);
+    object_instances.emplace(instance);
+
+    if (instance->finishedLoading())
+    {
+      instance->ensureExtents();
+
+      _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, instance->extents[0].x);
+      _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, instance->extents[0].y);
+      _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, instance->extents[0].z);
+
+      _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->extents[1].x);
+      _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->extents[1].y);
+      _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->extents[1].z);
+
+    }
+    else
+    {
+      _requires_object_extents_recalc = true;
+    }
+
+    instance->refTile(this);
   }
-
-  auto& obj = _world->get_model(uid).get();
-  auto instance = boost::get<selected_object_type>(obj);
-  object_instances.emplace(instance);
-
-  _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, instance->extents[0].x);
-  _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, instance->extents[0].y);
-  _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, instance->extents[0].z);
-
-  _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->extents[1].x);
-  _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->extents[1].y);
-  _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->extents[1].z);
-  instance->refTile(this);
 }
 
 void MapTile::add_model(SceneObject* instance)
@@ -1420,18 +1437,28 @@ void MapTile::add_model(SceneObject* instance)
   if (std::find(uids.begin(), uids.end(), instance->uid) == uids.end())
   {
     uids.push_back(instance->uid);
+
+    object_instances.emplace(instance);
+
+    if (instance->finishedLoading())
+    {
+      instance->ensureExtents();
+
+      _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, instance->extents[0].x);
+      _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, instance->extents[0].y);
+      _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, instance->extents[0].z);
+
+      _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->extents[1].x);
+      _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->extents[1].y);
+      _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->extents[1].z);
+    }
+    else
+    {
+      _requires_object_extents_recalc = true;
+    }
+
+    instance->refTile(this);
   }
-
-  object_instances.emplace(instance);
-
-  _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, instance->extents[0].x);
-  _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, instance->extents[0].y);
-  _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, instance->extents[0].z);
-
-  _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->extents[1].x);
-  _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->extents[1].y);
-  _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->extents[1].z);
-  instance->refTile(this);
 }
 
 void MapTile::initEmptyChunks()
@@ -1889,8 +1916,20 @@ void MapTile::recalcExtents(float min, float max)
 
 void MapTile::recalcObjectInstanceExtents()
 {
+  if (!_requires_object_extents_recalc)
+  {
+    return;
+  }
+
+  _requires_object_extents_recalc = false;
   for (auto& instance : object_instances)
   {
+    if (!instance->finishedLoading())
+    {
+      _requires_object_extents_recalc = true;
+      continue;
+    }
+
     instance->ensureExtents();
 
     math::vector_3d& min = instance->extents[0];
@@ -1898,11 +1937,11 @@ void MapTile::recalcObjectInstanceExtents()
 
     _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, min.x);
     _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, min.y);
-    _object_instance_extents[0].y = std::min(_object_instance_extents[0].z, min.z);
+    _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, min.z);
 
     _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, max.x);
     _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, max.y);
-    _object_instance_extents[1].y = std::max(_object_instance_extents[1].z, max.z);
+    _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, max.z);
   }
 
 }

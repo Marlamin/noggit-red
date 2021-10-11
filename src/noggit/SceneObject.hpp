@@ -9,7 +9,7 @@
 #include <noggit/Selection.h>
 #include <noggit/ContextObject.hpp>
 #include <cstdint>
-#include <set>
+#include <unordered_set>
 
 enum SceneObjectTypes
 {
@@ -34,6 +34,7 @@ public:
 
   virtual void recalcExtents() = 0;
   virtual void ensureExtents() = 0;
+  virtual bool finishedLoading() = 0;
 
   void resetDirection();
 
@@ -52,7 +53,7 @@ public:
 
   void refTile(MapTile* tile);
   void derefTile(MapTile* tile);
-  std::set<MapTile*> const& getTiles() { return _tiles; };
+  std::unordered_set<MapTile*> const& getTiles() { return _tiles; };
 
 public:
   math::vector_3d pos;
@@ -72,7 +73,7 @@ protected:
 
   std::string _filename;
 
-  std::set<MapTile*> _tiles;
+  std::unordered_set<MapTile*> _tiles;
 };
 
 #endif //NOGGIT_3DOBJECT_HPP

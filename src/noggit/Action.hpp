@@ -76,10 +76,10 @@ namespace noggit
 
     struct VertexSelectionCache
     {
-      std::set<MapTile*> vertex_tiles;
-      std::set<MapChunk*> vertex_chunks;
-      std::set<MapChunk*> vertex_border_chunks;
-      std::set<math::vector_3d*> vertices_selected;
+      std::unordered_set<MapTile*> vertex_tiles;
+      std::unordered_set<MapChunk*> vertex_chunks;
+      std::unordered_set<MapChunk*> vertex_border_chunks;
+      std::unordered_set<math::vector_3d*> vertices_selected;
       math::vector_3d vertex_center;
     };
 

@@ -282,7 +282,7 @@ void main()
 
     float alpha = clamp((dist_from_camera - start) / (AmbientColor_FogEnd.w - start), 0.0, 1.0);
 
-    out_color.rgb = mix(out_color.rgb, FogColor_FogOn.rgb, alpha);
+    out_color.rgb = mix(out_color.rgb, FogColor_FogOn.rgb, fogFactor);
   }
 
   if(draw_wireframe != 0 && !lines_drawn)

@@ -1052,10 +1052,20 @@ void World::draw ( math::matrix_4x4 const& model_view
   if (_need_terrain_params_ubo_update)
     updateTerrainParamsUniformBlock();
 
-  for (MapTile* tile : mapIndex.loaded_tiles())
+  // efficient frustum culling for objects by cutting of per-tile combined bounding volumes
+  if (draw_wmo || draw_models)
   {
-    auto& tile_extents = tile->getObjectInstancesExtents();
-    tile->objects_frustum_cull_test = frustum.intersects(tile_extents[1], tile_extents[0]);
+    for (MapTile* tile : mapIndex.loaded_tiles())
+    {
+      tile->recalcObjectInstanceExtents();
+
+      auto& tile_extents = tile->getObjectInstancesExtents();
+
+      if (frustum.intersects(tile_extents[1], tile_extents[0]))
+      {
+        tile->objects_frustum_cull_test = 1 + ((frustum.contains(tile_extents[0]) && frustum.contains(tile_extents[1]) ? 1 : 0));
+      }
+    }
   }
 
   // only draw the sky in 3D
@@ -1126,7 +1136,6 @@ void World::draw ( math::matrix_4x4 const& model_view
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   //gl.disable(GL_CULL_FACE);
 
-  // height map w/ a zillion texture passes
   if (draw_terrain)
   {
     gl.disable(GL_BLEND);
@@ -1271,7 +1280,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       if (draw_models)
       {
-
         opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
         for (auto& it : _models_by_filename)
@@ -1335,7 +1343,6 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
-
       opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
@@ -3431,7 +3438,7 @@ bool World::deselectVertices(math::vector_3d const& pos, float radius)
 
   _vertex_center_updated = false;
   _vertex_border_updated = false;
-  std::set<math::vector_3d*> inRange;
+  std::unordered_set<math::vector_3d*> inRange;
 
   for (math::vector_3d* v : _vertices_selected)
   {
@@ -3554,7 +3561,7 @@ math::vector_3d const& World::vertexCenter()
   return _vertex_center;
 }
 
-std::set<MapChunk*>& World::vertexBorderChunks()
+std::unordered_set<MapChunk*>& World::vertexBorderChunks()
 {
   ZoneScoped;
   if (!_vertex_border_updated)

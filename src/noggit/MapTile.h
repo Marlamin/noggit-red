@@ -76,7 +76,7 @@ public:
   float xbase, zbase;
 
   std::atomic<bool> changed;
-  bool objects_frustum_cull_test = false;
+  unsigned objects_frustum_cull_test = 0;
 
   void draw ( math::frustum const& frustum
             , opengl::scoped::use_program& mcnk_shader
@@ -161,7 +161,9 @@ public:
   GLuint getAlphamapTextureHandle() { return _alphamap_tex; };
   World* getWorld() { return _world; };
 
-  void notifyTileRendererOnSelectedTextureChange() { _requires_paintability_recalc = true; }
+  void notifyTileRendererOnSelectedTextureChange() { _requires_paintability_recalc = true; };
+
+  std::unordered_set<SceneObject*>& getObjectInstances() { return object_instances; };
 
 private:
 
@@ -174,6 +176,7 @@ private:
   bool _split_drawcall = false;
   bool _requires_sampler_reset = true;
   bool _requires_paintability_recalc = true;
+  bool _requires_object_extents_recalc = true;
 
   std::array<math::vector_3d, 2> _extents;
   std::array<math::vector_3d, 2> _object_instance_extents;
@@ -217,7 +220,7 @@ private:
   std::vector<std::string> mWMOFilenames;
   
   std::vector<uint32_t> uids;
-  std::set<SceneObject*> object_instances; // only includes M2 and WMO. perhaps a medium common ancestor then?
+  std::unordered_set<SceneObject*> object_instances; // only includes M2 and WMO. perhaps a medium common ancestor then?
 
   std::unique_ptr<MapChunk> mChunks[16][16];
 

@@ -734,7 +734,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   m2_shader.uniform("tex_unit_lookup_2", tu2);
 
   int16_t tex_anim_lookup = m->_texture_animation_lookups[uv_animations[0]];
-  math::matrix_4x4 unit(math::matrix_4x4::unit);
+  static const math::matrix_4x4 unit(math::matrix_4x4::unit);
 
   if (tex_anim_lookup != -1)
   {
@@ -1460,18 +1460,20 @@ void Model::draw ( math::matrix_4x4 const& model_view
 
   for (ModelInstance* mi : instances)
   {
-    bool region_visble = false;
+    unsigned region_visible = 0;
 
     for (auto& tile : mi->getTiles())
     {
       if (tile->objects_frustum_cull_test)
       {
-        region_visble = true;
-        break;
+        region_visible = tile->objects_frustum_cull_test;
+
+        if (tile->objects_frustum_cull_test > 1)
+          break;
       }
     }
 
-    if (no_cull || (region_visble && mi->is_visible(frustum, cull_distance, camera, display)))
+    if (no_cull || (region_visible && (region_visible > 1 || mi->is_visible(frustum, cull_distance, camera, display))))
     {
       transform_matrix[n_visible_instances] = (mi->transformMatrixTransposed());
       n_visible_instances++;

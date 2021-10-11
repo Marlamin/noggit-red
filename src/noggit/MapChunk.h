@@ -146,10 +146,10 @@ public:
   bool changeTerrainProcessVertex(math::vector_3d const& pos, math::vector_3d const& vertex, float& dt, float radiusOuter, float radiusInner, int brushType);
   auto stamp(math::vector_3d const& pos, float dt, QImage const* img, float radiusOuter
   , float radiusInner, int brushType, bool sculpt) -> void;
-  void selectVertex(math::vector_3d const& pos, float radius, std::set<math::vector_3d*>& vertices);
-  void fixVertices(std::set<math::vector_3d*>& selected);
+  void selectVertex(math::vector_3d const& pos, float radius, std::unordered_set<math::vector_3d*>& vertices);
+  void fixVertices(std::unordered_set<math::vector_3d*>& selected);
   // for the vertex tool
-  bool isBorderChunk(std::set<math::vector_3d*>& selected);
+  bool isBorderChunk(std::unordered_set<math::vector_3d*>& selected);
 
   //! \todo implement Action stack for these
   bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);

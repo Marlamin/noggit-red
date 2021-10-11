@@ -421,17 +421,17 @@ private:
   void updateMVPUniformBlock(const math::matrix_4x4& model_view, const math::matrix_4x4& projection);
   void updateLightingUniformBlock(bool draw_fog, math::vector_3d const& camera_pos);
 
-  std::set<MapChunk*>& vertexBorderChunks();
+  std::unordered_set<MapChunk*>& vertexBorderChunks();
 
   void setupChunkVAO(opengl::scoped::use_program& mcnk_shader);
   void setupLiquidChunkVAO(opengl::scoped::use_program& water_shader);
   void setupChunkBuffers();
   void setupLiquidChunkBuffers();
 
-  std::set<MapTile*> _vertex_tiles;
-  std::set<MapChunk*> _vertex_chunks;
-  std::set<MapChunk*> _vertex_border_chunks;
-  std::set<math::vector_3d*> _vertices_selected;
+  std::unordered_set<MapTile*> _vertex_tiles;
+  std::unordered_set<MapChunk*> _vertex_chunks;
+  std::unordered_set<MapChunk*> _vertex_border_chunks;
+  std::unordered_set<math::vector_3d*> _vertices_selected;
   math::vector_3d _vertex_center;
   bool _vertex_center_updated = false;
   bool _vertex_border_updated = false;

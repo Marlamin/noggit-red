@@ -1726,7 +1726,7 @@ bool MapChunk::fixGapAbove(const MapChunk* chunk)
 }
 
 
-void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::set<math::vector_3d*>& vertices)
+void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::unordered_set<math::vector_3d*>& vertices)
 {
   if (misc::getShortestDist(pos.x, pos.z, xbase, zbase, CHUNKSIZE) > radius)
   {
@@ -1742,7 +1742,7 @@ void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::set<m
   }
 }
 
-void MapChunk::fixVertices(std::set<math::vector_3d*>& selected)
+void MapChunk::fixVertices(std::unordered_set<math::vector_3d*>& selected)
 {
   std::vector<int> ids ={ 0, 1, 17, 18 };
   // iterate through each "square" of vertices
@@ -1776,7 +1776,7 @@ void MapChunk::fixVertices(std::set<math::vector_3d*>& selected)
   }
 }
 
-bool MapChunk::isBorderChunk(std::set<math::vector_3d*>& selected)
+bool MapChunk::isBorderChunk(std::unordered_set<math::vector_3d*>& selected)
 {
   for (int i = 0; i < mapbufsize; ++i)
   {
