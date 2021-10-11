@@ -1065,6 +1065,10 @@ void World::draw ( math::matrix_4x4 const& model_view
       {
         tile->objects_frustum_cull_test = 1 + ((frustum.contains(tile_extents[0]) && frustum.contains(tile_extents[1]) ? 1 : 0));
       }
+      else
+      {
+        tile->objects_frustum_cull_test = 0;
+      }
     }
   }
 
