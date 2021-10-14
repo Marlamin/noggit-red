@@ -86,7 +86,8 @@ public:
                  );
 
 
-  bool is_visible(math::frustum const& frustum, const float& cull_distance, const math::vector_3d& camera, display_mode display);
+  bool isInFrustum(math::frustum const& frustum);
+  bool isInRenderDist(const float& cull_distance, const math::vector_3d& camera, display_mode display);
 
   [[nodiscard]]
   virtual math::vector_3d const& get_pos() const { return pos; }

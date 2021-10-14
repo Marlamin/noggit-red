@@ -1386,7 +1386,7 @@ void Model::draw( math::matrix_4x4 const& model_view
     return;
   }
 
-  if (!instance.is_visible(frustum, cull_distance, camera, display) && !no_cull)
+  if (!no_cull && !instance.isInFrustum(frustum) && !instance.isInRenderDist(cull_distance, camera, display))
   {
     return;
   }
@@ -1478,7 +1478,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
       }
     }
 
-    if (no_cull || (region_visible && (region_visible > 1 || mi->is_visible(frustum, cull_distance, camera, display))))
+    if (no_cull || (region_visible && (region_visible > 1 || mi->isInFrustum(frustum)) && mi->isInRenderDist( cull_distance, camera, display)))
     {
       transform_matrix[n_visible_instances] = (mi->transformMatrixTransposed());
       n_visible_instances++;
@@ -1514,7 +1514,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
     gl.bufferData(GL_ARRAY_BUFFER, n_visible_instances * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
-    m2_shader.attrib("transform", 0, 1);
+    //m2_shader.attrib("transform", 0, 1);
   }
 
   if (animBones)
@@ -1615,6 +1615,7 @@ std::vector<float> Model::intersect (math::matrix_4x4 const& model_view, math::r
         )
       {
         results.emplace_back (*distance);
+        return results;
       }
     }
 
@@ -1626,9 +1627,9 @@ std::vector<float> Model::intersect (math::matrix_4x4 const& model_view, math::r
     for (size_t i (pass.index_start); i < pass.index_start + pass.index_count; i += 3)
     {
       if ( auto distance
-          = ray.intersect_triangle( _current_vertices[_indices[i + 0]].position,
-                                    _current_vertices[_indices[i + 1]].position,
-                                    _current_vertices[_indices[i + 2]].position)
+          = ray.intersect_triangle( _vertices[_indices[i + 0]].position,
+                                    _vertices[_indices[i + 1]].position,
+                                    _vertices[_indices[i + 2]].position)
           )
       {
         results.emplace_back (*distance);
@@ -1731,6 +1732,12 @@ void Model::setupVAO(opengl::scoped::use_program& m2_shader)
     m2_shader.attrib("normal",        3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 8));
     m2_shader.attrib("texcoord1",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8));
     m2_shader.attrib("texcoord2",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
+    gl.bufferData(GL_ARRAY_BUFFER, 10 * sizeof(::math::matrix_4x4), nullptr, GL_DYNAMIC_DRAW);
+    m2_shader.attrib("transform", 0, 1);
   }
 
   _vao_setup = true;

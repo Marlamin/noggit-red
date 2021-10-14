@@ -1378,7 +1378,7 @@ void World::draw ( math::matrix_4x4 const& model_view
           continue;
 
         auto model = static_cast<ModelInstance*>(obj);
-        if (model->is_visible(frustum, culldistance, camera_pos, display))
+        if (model->isInFrustum(frustum) && model->isInRenderDist(culldistance, camera_pos, display))
         {
           model->draw_box(model_view, projection, false); // make optional!
         }

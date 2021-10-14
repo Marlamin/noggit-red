@@ -113,11 +113,7 @@ void ModelInstance::intersect ( math::matrix_4x4 const& model_view
 }
 
 
-bool ModelInstance::is_visible( math::frustum const& frustum
-                              , const float& cull_distance
-                              , const math::vector_3d& camera
-                              , display_mode display
-                              )
+bool ModelInstance::isInFrustum(const math::frustum& frustum)
 {
   if (_need_recalc_extents && model->finishedLoading())
   {
@@ -127,8 +123,13 @@ bool ModelInstance::is_visible( math::frustum const& frustum
   if (!frustum.intersects(extents[1], extents[0]))
     return false;
 
+  return true;
+}
+
+bool ModelInstance::isInRenderDist(const float& cull_distance, const math::vector_3d& camera, display_mode display)
+{
   float dist;
-  
+
   if (display == display_mode::in_3D)
   {
     dist = (get_pos() - camera).length() - model->rad * scale;
@@ -155,7 +156,7 @@ bool ModelInstance::is_visible( math::frustum const& frustum
   {
     return false;
   }
-  
+
   return true;
 }
 
