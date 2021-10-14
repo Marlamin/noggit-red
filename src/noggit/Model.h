@@ -230,7 +230,6 @@ public:
             , math::frustum const& frustum
             , const float& cull_distance
             , const math::vector_3d& camera
-            , bool draw_fog
             , int animtime
             , bool all_boxes
             , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
@@ -283,6 +282,7 @@ public:
   // Misc ?
   // ===============================
   std::vector<Bone> bones;
+  std::vector<math::matrix_4x4> bone_matrices;
   ModelHeader header;
   std::vector<uint16_t> blend_override;
 
@@ -315,13 +315,15 @@ private:
   void lightsOff(opengl::light lbase);
 
   void upload();
+  void setupVAO(opengl::scoped::use_program& m2_shader);
 
-    bool _finished_upload;
+  bool _finished_upload = false;
+  bool _vao_setup = false;
 
   std::vector<math::vector_3d> _vertex_box_points;
 
-  // buffers;
-  opengl::scoped::deferred_upload_buffers<5> _buffers;
+  // buffers
+  opengl::scoped::deferred_upload_buffers<6> _buffers;
   opengl::scoped::deferred_upload_vertex_arrays<2> _vertex_arrays;
 
   std::vector<uint16_t> const _box_indices = {5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7};
@@ -331,9 +333,12 @@ private:
   GLuint const& _vertices_buffer = _buffers[1];
   GLuint const& _indices_buffer = _buffers[3];
   GLuint const& _box_indices_buffer = _buffers[4];
+  GLuint const& _bone_matrices_buffer = _buffers[5];
 
   GLuint const& _box_vao = _vertex_arrays[1];
   GLuint const& _box_vbo = _buffers[2];
+
+  GLuint _bone_matrices_buf_tex;
 
   // ===============================
   // Geometry

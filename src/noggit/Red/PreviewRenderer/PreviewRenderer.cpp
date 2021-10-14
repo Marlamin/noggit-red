@@ -292,7 +292,6 @@ void PreviewRenderer::draw()
           , frustum
           , culldistance
           , _camera.position
-          , false
           , _animtime
           , _draw_boxes.get()
           , model_boxes_to_draw
@@ -309,7 +308,6 @@ void PreviewRenderer::draw()
           , frustum
           , culldistance
           , _camera.position
-          , false
           , _animtime
           , _draw_boxes.get()
           , model_boxes_to_draw

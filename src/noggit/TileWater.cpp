@@ -199,6 +199,8 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
   // create opengl resources if needed
   if (_need_buffer_update)
   {
+    _has_data = false;
+
     std::size_t layer_counter = 0;
     for(;;)
     {
@@ -211,6 +213,11 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
 
           if (layer_counter >= chunk->getLayers()->size())
             continue;
+
+          if (!_has_data)
+          {
+            _has_data = chunk->hasData(layer_counter);
+          }
 
           liquid_layer& layer = (*chunk->getLayers())[layer_counter];
 

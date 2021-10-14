@@ -401,6 +401,14 @@ namespace opengl
       gl.vertexAttribPointer (location, size, type, normalized, stride, data);
     }
 
+    void use_program::attribi (std::string const& name, GLsizei size, GLenum type, GLsizei stride, const GLvoid* data)
+    {
+      GLuint const location (attrib_location (name));
+      gl.enableVertexAttribArray (location);
+      _enabled_vertex_attrib_arrays.emplace (location);
+      gl.vertexAttribIPointer (location, size, type, stride, data);
+    }
+
     void use_program::attribi (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLsizei stride, const GLvoid* data)
     {
       GLuint const location (attrib_location (name));

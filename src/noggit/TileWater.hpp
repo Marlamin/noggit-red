@@ -55,6 +55,8 @@ public:
             , LiquidTextureManager* tex_manager
             );
   bool hasData(size_t layer);
+  bool hasData() { return _has_data; };
+
   void CropMiniChunk(int x, int z, MapChunk* chunkTerrain);
 
   void autoGen(float factor);
@@ -84,6 +86,7 @@ private:
   std::vector<LiquidLayerDrawCallData> _render_layers;
 
   bool _need_buffer_update = false;
+  bool _has_data = true;
 
   float xbase;
   float zbase;

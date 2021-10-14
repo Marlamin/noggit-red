@@ -885,8 +885,9 @@ void World::initShaders()
 
   {
     opengl::scoped::use_program m2_shader {*_m2_program.get()};
-    m2_shader.uniform("tex1", 0);
-    m2_shader.uniform("tex2", 1);
+    m2_shader.uniform("bone_matrices", 0);
+    m2_shader.uniform("tex1", 1);
+    m2_shader.uniform("tex2", 2);
 
     _buffers.upload();
     _vertex_arrays.upload();
@@ -950,8 +951,9 @@ void World::initShaders()
     opengl::scoped::use_program m2_shader_instanced {*_m2_instanced_program.get()};
     m2_shader_instanced.bind_uniform_block("matrices", 0);
     m2_shader_instanced.bind_uniform_block("lighting", 1);
-    m2_shader_instanced.uniform("tex1", 0);
-    m2_shader_instanced.uniform("tex2", 1);
+    m2_shader_instanced.uniform("bone_matrices", 0);
+    m2_shader_instanced.uniform("tex1", 1);
+    m2_shader_instanced.uniform("tex2", 2);
   }
 
   /*
@@ -1297,7 +1299,6 @@ void World::draw ( math::matrix_4x4 const& model_view
               , culldistance
               , camera_pos
               , animtime
-              , draw_model_animations
               , draw_models_with_box
               , model_boxes_to_draw
               , display

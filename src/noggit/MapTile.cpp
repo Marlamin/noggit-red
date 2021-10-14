@@ -873,7 +873,7 @@ void MapTile::drawWater ( math::frustum const& frustum
                         , LiquidTextureManager* tex_manager
                         )
 {
-  if (!Water.hasData(0) || !Water.isVisible(frustum))
+  if (!Water.hasData() || !Water.isVisible(frustum))
   {
     return; //no need to draw water on tile without water =)
   }

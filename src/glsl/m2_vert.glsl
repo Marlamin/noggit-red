@@ -5,12 +5,16 @@ in vec4 pos;
 in vec3 normal;
 in vec2 texcoord1;
 in vec2 texcoord2;
+in uvec4 bones_weight;
+in uvec4 bones_indices;
 
 #ifdef instanced
   in mat4 transform;
 #else
   uniform mat4 transform;
 #endif
+
+uniform samplerBuffer bone_matrices;
 
 out vec2 uv1;
 out vec2 uv2;
@@ -28,6 +32,8 @@ uniform int tex_unit_lookup_2;
 
 uniform mat4 tex_matrix_1;
 uniform mat4 tex_matrix_2;
+
+uniform bool anim_bones;
 
 // code from https://wowdev.wiki/M2/.skin#Environment_mapping
 vec2 sphere_map(vec3 vert, vec3 norm)
@@ -59,12 +65,41 @@ vec2 get_texture_uv(int tex_unit_lookup, vec3 vert, vec3 norm)
   }
 }
 
+mat4 get_bone_matrix(uint bone_index)
+{
+  mat4 matrix;
+  int pixel_start = int(bone_index) * 4;
+  matrix[0] = texelFetch(bone_matrices, pixel_start).rgba;
+  matrix[1] = texelFetch(bone_matrices, pixel_start + 1).rgba;
+  matrix[2] = texelFetch(bone_matrices, pixel_start + 2).rgba;
+  matrix[3] = texelFetch(bone_matrices, pixel_start + 3).rgba;
+
+  return matrix;
+}
+
 void main()
 {
-  vec4 vertex = model_view * transform * pos;
+  mat4 boneTransformMat = mat4(0);
+
+  if (anim_bones)
+  {
+    boneTransformMat += (float(bones_weight.x) / 255.0) * get_bone_matrix(bones_indices.x);
+    boneTransformMat += (float(bones_weight.y) / 255.0) * get_bone_matrix(bones_indices.y);
+    boneTransformMat += (float(bones_weight.z) / 255.0) * get_bone_matrix(bones_indices.z);
+    boneTransformMat += (float(bones_weight.w) / 255.0) * get_bone_matrix(bones_indices.w);
+  }
+  else
+  {
+    boneTransformMat = mat4(1);
+  }
+
+  mat4 cameraMatrix = model_view * transform * boneTransformMat;
+  mat3 normMatrix = mat3(transform * boneTransformMat);
+
+  vec4 vertex = cameraMatrix * pos;
 
   // important to normalize because of the scaling !!
-  norm = normalize(mat3(transform) * normal);
+  norm = normalize(normMatrix * normal);
 
   uv1 = get_texture_uv(tex_unit_lookup_1, vertex.xyz, norm);
   uv2 = get_texture_uv(tex_unit_lookup_2, vertex.xyz, norm);

@@ -192,11 +192,6 @@ void Model::initCommon(const MPQFile& f)
     v.position = fixCoordSystem(v.position);
     v.normal = fixCoordSystem(v.normal);
   }
- 
-  if (!animGeometry)
-  {
-    _current_vertices.swap(_vertices);
-  }
 
   // textures
   ModelTextureDef const* texdef = reinterpret_cast<ModelTextureDef const*>(f.getBuffer() + header.ofsTextures);
@@ -772,7 +767,7 @@ void ModelRenderPass::after_draw()
 
 void ModelRenderPass::bind_texture(size_t index, Model* m)
 {
-  opengl::texture::set_active_texture(index);
+  opengl::texture::set_active_texture(index + 1);
 
   uint16_t tex = m->_texture_lookup[textures[index]];
   
@@ -1028,6 +1023,8 @@ void Model::initAnimated(const MPQFile& f)
     {
       bones.emplace_back(f, mb[i], _global_sequences.data(), animation_files);
     }
+
+    bone_matrices.resize(bones.size());
   }  
 
   if (animTextures) 
@@ -1082,11 +1079,13 @@ void Model::calcBones( math::matrix_4x4 const& model_view
                      , int animation_time
                      )
 {
-  for (size_t i = 0; i<header.nBones; ++i) {
+  for (size_t i = 0; i<header.nBones; ++i)
+  {
     bones[i].calc = false;
   }
 
-  for (size_t i = 0; i<header.nBones; ++i) {
+  for (size_t i = 0; i<header.nBones; ++i)
+  {
     bones[i].calcMatrix(model_view, bones.data(), _anim, time, animation_time);
   }
 }
@@ -1095,15 +1094,6 @@ void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_ti
 {
   if (_animations_seq_per_id.empty() || _animations_seq_per_id[anim_id].empty())
   {
-    // use "default" vertices if the animation hasn't been found
-    if (_current_vertices.empty())
-    {
-      _current_vertices = _vertices;
-
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
-      gl.bufferData(GL_ARRAY_BUFFER, _current_vertices.size() * sizeof(ModelVertex), _current_vertices.data(), GL_STATIC_DRAW);
-    }
-
     return;
   }
 
@@ -1136,7 +1126,22 @@ void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_ti
 
   if (animGeometry) 
   {
+    std::size_t bone_counter = 0;
+    for (auto& bone : bones)
+    {
+      bone_matrices[bone_counter] = bone.mat.transposed();
+      bone_counter++;
+    }
+
+    {
+      opengl::scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder (_bone_matrices_buffer);
+      gl.bufferSubData(GL_TEXTURE_BUFFER, 0, bone_matrices.size() * sizeof(math::matrix_4x4), bone_matrices.data());
+    }
+
+
     // transform vertices
+
+    /*
     _current_vertices = _vertices;
 
     for (auto& vertex : _current_vertices)
@@ -1161,6 +1166,8 @@ void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_ti
 
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
     gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (ModelVertex), _current_vertices.data(), GL_STREAM_DRAW);
+
+     */
   }
 
   for (size_t i=0; i<header.nLights; ++i) 
@@ -1402,8 +1409,8 @@ void Model::draw( math::matrix_4x4 const& model_view
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
     m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), 0);
-    //m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    //m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
+    m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+    m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
     m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) + 8));
     m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8));
     m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
@@ -1431,7 +1438,6 @@ void Model::draw ( math::matrix_4x4 const& model_view
                  , math::frustum const& frustum
                  , const float& cull_distance
                  , const math::vector_3d& camera
-                 , bool // draw_fog
                  , int animtime
                  , bool all_boxes
                  , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
@@ -1449,10 +1455,9 @@ void Model::draw ( math::matrix_4x4 const& model_view
     upload();
   }
 
-  if (animated && (!animcalc || _per_instance_animation))
+  if (!_vao_setup)
   {
-    animate(model_view, 0, animtime);
-    animcalc = true;
+    setupVAO(m2_shader);
   }
 
   static std::array<math::matrix_4x4, 10000> transform_matrix; // TODO: ugly hardcoded cap for performance reasons, use settings, exception on overflow
@@ -1485,6 +1490,12 @@ void Model::draw ( math::matrix_4x4 const& model_view
     return;
   }
 
+  if (animated && (!animcalc || _per_instance_animation))
+  {
+    animate(model_view, 0, animtime);
+    animcalc = true;
+  }
+
   // store the model count to draw the bounding boxes later
   if (all_boxes || _hidden)
   {
@@ -1505,15 +1516,17 @@ void Model::draw ( math::matrix_4x4 const& model_view
     gl.bufferData(GL_ARRAY_BUFFER, n_visible_instances * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
     m2_shader.attrib("transform", 0, 1);
   }
-  
+
+  if (animBones)
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-    m2_shader.attrib("pos",           3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), 0);
-    //m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    //m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
-    m2_shader.attrib("normal",        3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 8));
-    m2_shader.attrib("texcoord1",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8));
-    m2_shader.attrib("texcoord2",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+    gl.activeTexture(GL_TEXTURE0);
+    gl.bindTexture(GL_TEXTURE_BUFFER, _bone_matrices_buf_tex);
+    gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _bone_matrices_buffer);
+    m2_shader.uniform("anim_bones", true);
+  }
+  else
+  {
+    m2_shader.uniform("anim_bones", false);
   }
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
@@ -1645,10 +1658,18 @@ void Model::upload()
   _buffers.upload();
   _vertex_arrays.upload();
 
-  if (!animGeometry)
+  gl.genTextures(1, &_bone_matrices_buf_tex);
+
+  if (animBones)
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
-    gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (ModelVertex), _current_vertices.data(), GL_STATIC_DRAW);
+    gl.bindTexture(GL_TEXTURE_BUFFER, _bone_matrices_buf_tex);
+    opengl::scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder(_bone_matrices_buffer);
+    gl.bufferData(GL_TEXTURE_BUFFER, bone_matrices.size() * sizeof(math::matrix_4x4), nullptr, GL_STREAM_DRAW);
+  }
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
+    gl.bufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(ModelVertex), _vertices.data(), GL_STATIC_DRAW);
   }
 
   {
@@ -1671,6 +1692,8 @@ void Model::unload()
   _buffers.unload();
   _vertex_arrays.unload();
 
+  gl.deleteTextures(1, &_bone_matrices_buf_tex);
+
   for (auto& particle : _particles)
   {
     particle.unload();
@@ -1682,8 +1705,7 @@ void Model::unload()
   }
 
   _finished_upload = false;
-
-
+  _vao_setup = false;
 }
 
 void Model::updateEmitters(float dt)
@@ -1695,4 +1717,21 @@ void Model::updateEmitters(float dt)
       particle.update (dt);
     }
   }
+}
+
+void Model::setupVAO(opengl::scoped::use_program& m2_shader)
+{
+  opengl::scoped::vao_binder const _(_vao);
+
+  {
+    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
+    m2_shader.attrib("pos",           3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), 0);
+    m2_shader.attribi("bones_weight", 4, GL_UNSIGNED_BYTE,   sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
+    m2_shader.attribi("bones_indices",4, GL_UNSIGNED_BYTE,  sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
+    m2_shader.attrib("normal",        3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 8));
+    m2_shader.attrib("texcoord1",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8));
+    m2_shader.attrib("texcoord2",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+  }
+
+  _vao_setup = true;
 }

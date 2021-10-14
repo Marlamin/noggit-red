@@ -106,6 +106,7 @@ namespace opengl
                      //: type == GL_SHADER_STORAGE_BUFFER ? GL_SHADER_STORAGE_BUFFER_BINDING
                      : type == GL_TRANSFORM_FEEDBACK_BUFFER ? GL_TRANSFORM_FEEDBACK_BUFFER_BINDING
                      : type == GL_UNIFORM_BUFFER ? GL_UNIFORM_BUFFER_BINDING
+                     : type == GL_TEXTURE_BUFFER ? GL_TEXTURE_BUFFER_BINDING
                      : throw std::logic_error ("bad bind target")
                      , reinterpret_cast<GLint*> (&_old)
                      );
