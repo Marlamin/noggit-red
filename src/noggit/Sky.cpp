@@ -508,7 +508,21 @@ bool Skies::draw( math::matrix_4x4 const& model_view
       model.scale = 0.1f;
       model.recalcExtents();
 
-      model.model->draw(model_view, model, m2_shader, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
+      opengl::M2RenderState model_render_state;
+      model_render_state.tex_arrays = {0, 0};
+      model_render_state.tex_indices = {0, 0};
+      model_render_state.tex_unit_lookups = {-1, -1};
+      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      gl.disable(GL_BLEND);
+      gl.depthMask(GL_TRUE);
+      m2_shader.uniform("blend_mode", 0);
+      m2_shader.uniform("unfogged", static_cast<int>(model_render_state.unfogged));
+      m2_shader.uniform("unlit",  static_cast<int>(model_render_state.unlit));
+      m2_shader.uniform("tex_unit_lookup_1", 0);
+      m2_shader.uniform("tex_unit_lookup_2", 0);
+      m2_shader.uniform("pixel_shader", 0);
+
+      model.model->draw(model_view, model, m2_shader, model_render_state, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
     }
   }
   // if it's night, draw the stars
@@ -519,7 +533,21 @@ bool Skies::draw( math::matrix_4x4 const& model_view
     stars.scale = 0.1f;
     stars.recalcExtents();
 
-    stars.model->draw(model_view, stars, m2_shader, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
+    opengl::M2RenderState model_render_state;
+    model_render_state.tex_arrays = {0, 0};
+    model_render_state.tex_indices = {0, 0};
+    model_render_state.tex_unit_lookups = {-1, -1};
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.disable(GL_BLEND);
+    gl.depthMask(GL_TRUE);
+    m2_shader.uniform("blend_mode", 0);
+    m2_shader.uniform("unfogged", static_cast<int>(model_render_state.unfogged));
+    m2_shader.uniform("unlit",  static_cast<int>(model_render_state.unlit));
+    m2_shader.uniform("tex_unit_lookup_1", 0);
+    m2_shader.uniform("tex_unit_lookup_2", 0);
+    m2_shader.uniform("pixel_shader", 0);
+
+    stars.model->draw(model_view, stars, m2_shader, model_render_state, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
   }
 
   return true;

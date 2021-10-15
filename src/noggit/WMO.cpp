@@ -349,7 +349,12 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , bool world_has_skies
                , display_mode display
                )
-{ 
+{
+  if (filename == "world/wmo/dungeon/md_frostgiant/nd_frostgiantcitadel.wmo")
+  {
+    LogDebug << "test" << std::endl;
+  }
+
   wmo_shader.uniform("ambient_color", ambient_light_color.xyz());
 
   for (auto& group : groups)
@@ -461,7 +466,21 @@ bool WMO::draw_skybox ( math::matrix_4x4 const& model_view
       sky.scale = 2.f;
       sky.recalcExtents();
 
-      skybox->get()->draw(model_view, sky, m2_shader, frustum, cull_distance, camera_pos, animtime, display_mode::in_3D);
+      opengl::M2RenderState model_render_state;
+      model_render_state.tex_arrays = {0, 0};
+      model_render_state.tex_indices = {0, 0};
+      model_render_state.tex_unit_lookups = {-1, -1};
+      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      gl.disable(GL_BLEND);
+      gl.depthMask(GL_TRUE);
+      m2_shader.uniform("blend_mode", 0);
+      m2_shader.uniform("unfogged", static_cast<int>(model_render_state.unfogged));
+      m2_shader.uniform("unlit",  static_cast<int>(model_render_state.unlit));
+      m2_shader.uniform("tex_unit_lookup_1", 0);
+      m2_shader.uniform("tex_unit_lookup_2", 0);
+      m2_shader.uniform("pixel_shader", 0);
+
+      skybox->get()->draw(model_view, sky, m2_shader, model_render_state, frustum, cull_distance, camera_pos, animtime, display_mode::in_3D);
 
       return true;
     }
@@ -633,7 +652,7 @@ void WMOGroup::upload()
 
     auto& tex1 = wmo->textures.at(mat.texture1);
 
-    tex1->bind();
+    tex1->upload();
 
     if (!tex1->is_uploaded())
     {
@@ -651,7 +670,7 @@ void WMOGroup::upload()
     if (use_tex2)
     {
       auto& tex2 = wmo->textures.at(mat.texture2);
-      tex2->bind();
+      tex2->upload();
 
       if (!tex2->is_uploaded())
       {

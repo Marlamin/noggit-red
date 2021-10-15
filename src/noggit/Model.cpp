@@ -604,7 +604,7 @@ ModelRenderPass::ModelRenderPass(ModelTexUnit const& tex_unit, Model* m)
 {
 }
 
-bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model *m)
+bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model *m, opengl::M2RenderState& model_render_state)
 {
   if (!m->showGeosets[submesh] || !pixel_shader)
   {
@@ -654,84 +654,103 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   {
     return false;
   }
-  
-  switch (static_cast<M2Blend>(renderflag.blend))
+
+
+  if (model_render_state.blend != renderflag.blend)
   {
-  default:
-  case M2Blend::Opaque:
-    gl.disable(GL_BLEND);
-    m2_shader.uniform("alpha_test", -1.f);    
-    m2_shader.uniform("fog_mode", 1);
-    break;
-  case M2Blend::Alpha_Key:
-    gl.disable(GL_BLEND);
-    m2_shader.uniform("alpha_test", (224.f / 255.f) * mesh_color.w);
-    m2_shader.uniform("fog_mode", 1);
-    break;
-  case M2Blend::Alpha:
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
-    m2_shader.uniform("fog_mode", 1);
-    break;
-  case M2Blend::No_Add_Alpha:
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_ONE, GL_ONE);
-    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
-    m2_shader.uniform("fog_mode", 2); // Warning: wiki is unsure on that
-    break;
-  case M2Blend::Add:
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
-    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
-    m2_shader.uniform("fog_mode", 2);
-    break;
-  case M2Blend::Mod:
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_DST_COLOR, GL_ZERO);
-    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
-    m2_shader.uniform("fog_mode", 3);
-    break;
-  case M2Blend::Mod2x:
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
-    m2_shader.uniform("alpha_test", (1.f / 255.f) * mesh_color.w);
-    m2_shader.uniform("fog_mode", 4);
-    break;
+    switch (static_cast<M2Blend>(renderflag.blend))
+    {
+      default:
+      case M2Blend::Opaque:
+      case M2Blend::Alpha_Key:
+        gl.disable(GL_BLEND);
+        break;
+      case M2Blend::Alpha:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        break;
+      case M2Blend::No_Add_Alpha:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_ONE, GL_ONE);
+        break;
+      case M2Blend::Add:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_SRC_ALPHA, GL_ONE);
+        break;
+      case M2Blend::Mod:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_DST_COLOR, GL_ZERO);
+        break;
+      case M2Blend::Mod2x:
+        gl.enable(GL_BLEND);
+        gl.blendFunc(GL_DST_COLOR, GL_SRC_COLOR);
+        break;
+    }
+
+    m2_shader.uniform("blend_mode", static_cast<int>(renderflag.blend));
+    model_render_state.blend = renderflag.blend;
   }
 
-  if (renderflag.flags.two_sided)
+  if (model_render_state.backface_cull != !renderflag.flags.two_sided)
   {
-    gl.disable(GL_CULL_FACE);
-  }
-  else
-  {
-    gl.enable(GL_CULL_FACE);
+    if (renderflag.flags.two_sided)
+    {
+      gl.disable(GL_CULL_FACE);
+    }
+    else
+    {
+      gl.enable(GL_CULL_FACE);
+    }
+
+    model_render_state.backface_cull = !renderflag.flags.two_sided;
   }
 
-  if (renderflag.flags.z_buffered)
+  if (model_render_state.z_buffered != renderflag.flags.z_buffered)
   {
-    gl.depthMask(GL_FALSE);
-  }
-  else
-  {
-    gl.depthMask(GL_TRUE);
+    if (renderflag.flags.z_buffered)
+    {
+      gl.depthMask(GL_FALSE);
+    }
+    else
+    {
+      gl.depthMask(GL_TRUE);
+    }
+
+    model_render_state.z_buffered = renderflag.flags.z_buffered;
   }
 
-  m2_shader.uniform("unfogged", (int)renderflag.flags.unfogged);
-  m2_shader.uniform("unlit", (int)renderflag.flags.unlit);
+  if (model_render_state.unfogged != renderflag.flags.unfogged)
+  {
+    m2_shader.uniform("unfogged", (int)renderflag.flags.unfogged);
+    model_render_state.unfogged = renderflag.flags.unfogged;
+  }
+
+  if (model_render_state.unlit != renderflag.flags.unlit)
+  {
+    m2_shader.uniform("unlit", (int)renderflag.flags.unlit);
+    model_render_state.unlit = renderflag.flags.unlit;
+  }
 
   if (texture_count > 1)
   {
-    bind_texture(1, m);
+    bind_texture(1, m, model_render_state, m2_shader);
   }
 
-  bind_texture(0, m);
+  bind_texture(0, m, model_render_state, m2_shader);
 
   GLint tu1 = static_cast<GLint>(tu_lookups[0]), tu2 = static_cast<GLint>(tu_lookups[1]);
 
-  m2_shader.uniform("tex_unit_lookup_1", tu1);
-  m2_shader.uniform("tex_unit_lookup_2", tu2);
+  if (model_render_state.tex_unit_lookups[0] != tu1)
+  {
+    m2_shader.uniform("tex_unit_lookup_1", tu1);
+    model_render_state.tex_unit_lookups[0] = tu1;
+  }
+
+  if (model_render_state.tex_unit_lookups[1] != tu2)
+  {
+    m2_shader.uniform("tex_unit_lookup_2", tu2);
+    model_render_state.tex_unit_lookups[1] = tu2;
+  }
 
   int16_t tex_anim_lookup = m->_texture_animation_lookups[uv_animations[0]];
   static const math::matrix_4x4 unit(math::matrix_4x4::unit);
@@ -759,7 +778,13 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   }
   
 
-  m2_shader.uniform("pixel_shader", static_cast<GLint>(pixel_shader.get()));
+  GLint ps = static_cast<GLint>(pixel_shader.get());
+  if (model_render_state.pixel_shader != ps)
+  {
+    m2_shader.uniform("pixel_shader", ps);
+    model_render_state.pixel_shader = ps;
+  }
+
   m2_shader.uniform("mesh_color", mesh_color);
 
   return true;
@@ -770,19 +795,51 @@ void ModelRenderPass::after_draw()
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void ModelRenderPass::bind_texture(size_t index, Model* m)
+void ModelRenderPass::bind_texture(size_t index, Model* m, opengl::M2RenderState& model_render_state, opengl::scoped::use_program& m2_shader)
 {
-  opengl::texture::set_active_texture(index + 1);
 
   uint16_t tex = m->_texture_lookup[textures[index]];
   
   if (m->_specialTextures[tex] == -1)
   {
-    m->_textures[tex]->bind();
+    auto& texture = m->_textures[tex];
+    texture->upload();
+    GLuint tex_array = texture->texture_array();
+    int tex_index = texture->array_index();
+
+    if (model_render_state.tex_arrays[index] != tex_array)
+    {
+      gl.activeTexture(GL_TEXTURE0 + index + 1);
+      gl.bindTexture(GL_TEXTURE_2D_ARRAY, tex_array);
+      model_render_state.tex_arrays[index] = tex_array;
+    }
+
+    if (model_render_state.tex_indices[index] != tex_index)
+    {
+      m2_shader.uniform(index ? "tex2_index" : "tex1_index", tex_index);
+      model_render_state.tex_indices[index] = tex_index;
+    }
+
   }
   else
   {
-    m->_replaceTextures.at (m->_specialTextures[tex])->bind();
+    auto& texture = m->_replaceTextures.at (m->_specialTextures[tex]);
+    texture->upload();
+    GLuint tex_array = texture->texture_array();
+    int tex_index = texture->array_index();
+
+    if (model_render_state.tex_arrays[index] != tex_array)
+    {
+      gl.activeTexture(GL_TEXTURE0 + index + 1);
+      gl.bindTexture(GL_TEXTURE_2D_ARRAY, tex_array);
+      model_render_state.tex_arrays[index] = tex_array;
+    }
+
+    if (model_render_state.tex_indices[index] != tex_index)
+    {
+      m2_shader.uniform(index ? "tex2_index" : "tex1_index", tex_index);
+      model_render_state.tex_indices[index] = tex_index;
+    }
   }    
 }
 
@@ -1136,7 +1193,7 @@ void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_ti
     calcBones(model_view, _current_anim_seq, t, _global_animtime);
   }
 
-  if (animGeometry) 
+  if (animGeometry || animBones)
   {
     std::size_t bone_counter = 0;
     for (auto& bone : bones)
@@ -1385,6 +1442,7 @@ void Bone::calcMatrix( math::matrix_4x4 const& model_view
 void Model::draw( math::matrix_4x4 const& model_view
                 , ModelInstance& instance
                 , opengl::scoped::use_program& m2_shader
+                , opengl::M2RenderState& model_render_state
                 , math::frustum const& frustum
                 , const float& cull_distance
                 , const math::vector_3d& camera
@@ -1432,7 +1490,7 @@ void Model::draw( math::matrix_4x4 const& model_view
 
   for (ModelRenderPass& p : _render_passes)
   {
-    if (p.prepare_draw(m2_shader, this))
+    if (p.prepare_draw(m2_shader, this, model_render_state))
     {
       gl.drawElements(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(p.index_start * sizeof(GLushort)));
       p.after_draw();
@@ -1447,6 +1505,7 @@ void Model::draw( math::matrix_4x4 const& model_view
 void Model::draw ( math::matrix_4x4 const& model_view
                  , std::vector<ModelInstance*>& instances
                  , opengl::scoped::use_program& m2_shader
+                 , opengl::M2RenderState& model_render_state
                  , math::frustum const& frustum
                  , const float& cull_distance
                  , const math::vector_3d& camera
@@ -1479,15 +1538,22 @@ void Model::draw ( math::matrix_4x4 const& model_view
   {
     unsigned region_visible = 0;
 
-    for (auto& tile : mi->getTiles())
+    if (!mi->isWMODoodad())
     {
-      if (tile->objects_frustum_cull_test)
+      for (auto& tile : mi->getTiles())
       {
-        region_visible = tile->objects_frustum_cull_test;
+        if (tile->objects_frustum_cull_test)
+        {
+          region_visible = tile->objects_frustum_cull_test;
 
-        if (tile->objects_frustum_cull_test > 1)
-          break;
+          if (tile->objects_frustum_cull_test > 1)
+            break;
+        }
       }
+    }
+    else
+    {
+      region_visible = 1;
     }
 
     if (no_cull || (region_visible && (region_visible > 1 || mi->isInFrustum(frustum)) && mi->isInRenderDist( cull_distance, camera, display)))
@@ -1545,16 +1611,12 @@ void Model::draw ( math::matrix_4x4 const& model_view
 
   for (ModelRenderPass& p : _render_passes)
   {
-    if (p.prepare_draw(m2_shader, this))
+    if (p.prepare_draw(m2_shader, this, model_render_state))
     {
       gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(p.index_start * sizeof(GLushort)), n_visible_instances);
-      p.after_draw();
+      //p.after_draw();
     }
   }
-
-  gl.disable(GL_BLEND);
-  gl.enable(GL_CULL_FACE);
-  gl.depthMask(GL_TRUE);
 }
 
 void Model::draw_particles( math::matrix_4x4 const& model_view

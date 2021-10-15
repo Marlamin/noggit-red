@@ -42,7 +42,7 @@ struct tuple_hash
 struct BLPHeader;
 
 struct scoped_blp_texture_reference;
-struct blp_texture : public opengl::texture, AsyncObject
+struct blp_texture : public AsyncObject
 {
   blp_texture (std::string const& filename, noggit::NoggitRenderContext context);
   void finishLoading();
@@ -52,8 +52,6 @@ struct blp_texture : public opengl::texture, AsyncObject
 
   int width() const { return _width; }
   int height() const { return _height; }
-
-  unsigned int id() const { return _id; };
 
   void bind();
   void upload();

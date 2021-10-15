@@ -305,7 +305,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
     break;
   }
 
-  model->_textures[_texture_id]->bind();
+  //model->_textures[_texture_id]->bind();
 
   math::vector_3d vRight(1, 0, 0);
   math::vector_3d vUp(0, 1, 0);
@@ -918,7 +918,7 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
   std::vector<math::vector_3d> vertices;
   std::vector<math::vector_2d> texcoords;
 
-  model->_textures[_texture_ids[0]]->bind();
+  //model->_textures[_texture_ids[0]]->bind();
 
   gl.enable(GL_BLEND);
   

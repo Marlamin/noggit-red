@@ -21,19 +21,66 @@ layout (std140) uniform lighting
 };
 
 uniform vec4 mesh_color;
+uniform int blend_mode;
 
-uniform sampler2D tex1;
-uniform sampler2D tex2;
+uniform sampler2DArray tex1;
+uniform sampler2DArray tex2;
+uniform int tex1_index;
+uniform int tex2_index;
 
-uniform int fog_mode;
 uniform int unfogged;
 uniform int unlit;
 
-uniform float alpha_test;
 uniform int pixel_shader;
 
 void main()
 {
+
+  float alpha_test;
+  int fog_mode;
+
+  switch (blend_mode)
+  {
+      default:
+      case 0: // Opaque
+      {
+          alpha_test = -1.0;
+          fog_mode = 1;
+          break;
+      }
+      case 1: // Alpha_key
+      {
+          alpha_test = (224.f / 255.f) * mesh_color.w;
+          fog_mode = 1;
+          break;
+      }
+      case 2: // Alpha
+      {
+          alpha_test = (1.f / 255.f) * mesh_color.w;
+          fog_mode = 1;
+          break;
+      }
+      case 3: // No_Add_Alpha
+      case 4: // Add
+      {
+          alpha_test = (1.f / 255.f) * mesh_color.w;
+          fog_mode = 2; // Warning: wiki is unsure on that for No_Add_Alpha
+          break;
+      }
+      case 5: // Mod
+      {
+          alpha_test = (1.f / 255.f) * mesh_color.w;
+          fog_mode = 3;
+          break;
+      }
+      case 6: // Mod2X
+      {
+          alpha_test = (1.f / 255.f) * mesh_color.w;
+          fog_mode = 4;
+          break;
+      }
+  }
+
   vec4 color = vec4(0.0);
 
   if(mesh_color.a < alpha_test)
@@ -41,8 +88,8 @@ void main()
     discard;
   }
 
-  vec4 texture1 = texture(tex1, uv1);
-  vec4 texture2 = texture(tex2, uv2);
+  vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+  vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
   
   // code from Deamon87 and https://wowdev.wiki/M2/Rendering#Pixel_Shaders
   if (pixel_shader == 0) //Combiners_Opaque

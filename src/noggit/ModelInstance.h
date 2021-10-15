@@ -97,6 +97,9 @@ public:
   bool finishedLoading() override { return model->finishedLoading(); };
   math::vector_3d* getExtents();
 
+  [[nodiscard]]
+  virtual bool isWMODoodad() const { return false; };
+
 protected:
   bool _need_recalc_extents = true;
 
@@ -139,6 +142,8 @@ public:
 
   virtual math::vector_3d const& get_pos() const override { return world_pos; };
 
+  [[nodiscard]]
+  virtual bool isWMODoodad() const override { return true; };
 protected:
   // to avoid redefining recalcExtents
   void updateTransformMatrix() override { }

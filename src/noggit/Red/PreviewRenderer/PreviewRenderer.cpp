@@ -282,6 +282,20 @@ void PreviewRenderer::draw()
     //m2_shader.uniform("diffuse_color", _diffuse_light);
     //m2_shader.uniform("ambient_color", _ambient_light);
 
+    opengl::M2RenderState model_render_state;
+    model_render_state.tex_arrays = {0, 0};
+    model_render_state.tex_indices = {0, 0};
+    model_render_state.tex_unit_lookups = {-1, -1};
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.disable(GL_BLEND);
+    gl.depthMask(GL_TRUE);
+    m2_shader.uniform("blend_mode", 0);
+    m2_shader.uniform("unfogged", static_cast<int>(model_render_state.unfogged));
+    m2_shader.uniform("unlit",  static_cast<int>(model_render_state.unlit));
+    m2_shader.uniform("tex_unit_lookup_1", 0);
+    m2_shader.uniform("tex_unit_lookup_2", 0);
+    m2_shader.uniform("pixel_shader", 0);
+
     for (auto& model_instance : _model_instances)
     {
       std::vector<ModelInstance*> instance{&model_instance};
@@ -289,6 +303,7 @@ void PreviewRenderer::draw()
           model_view().transposed()
           , instance
           , m2_shader
+          , model_render_state
           , frustum
           , culldistance
           , _camera.position
@@ -305,6 +320,7 @@ void PreviewRenderer::draw()
           model_view().transposed()
           , it.second
           , m2_shader
+          , model_render_state
           , frustum
           , culldistance
           , _camera.position

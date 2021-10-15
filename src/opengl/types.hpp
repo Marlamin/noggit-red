@@ -5,6 +5,7 @@
 #include <QtGui/QOpenGLContext>
 #include <math/matrix_4x4.hpp>
 #include <math/vector_4d.hpp>
+#include <cstdint>
 
 namespace opengl
 {
@@ -85,6 +86,20 @@ namespace opengl
     unsigned _pad5;
     unsigned _pad6;
     unsigned _pad7;
+  };
+
+  struct M2RenderState
+  {
+    std::uint16_t blend = 0;
+    bool backface_cull = true;
+    bool z_buffered = false;
+    bool unfogged = false;
+    bool unlit = false;
+    std::array<GLuint, 2> tex_arrays;
+    std::array<GLuint, 2> tex_indices;
+    std::array<GLint, 2> tex_unit_lookups;
+    GLint pixel_shader = 0;
+
   };
 
 

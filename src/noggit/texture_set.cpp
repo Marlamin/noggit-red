@@ -264,31 +264,6 @@ const std::string& TextureSet::filename(size_t id)
   return textures[id]->filename;
 }
 
-void TextureSet::bindTexture(size_t id, size_t activeTexture,  std::array<int, 4>& textures_bound)
-{
-  if (textures_bound[id] != textures[id]->id())
-  {
-    opengl::texture::set_active_texture(activeTexture);
-    textures[id]->bind();
-    textures_bound[id] = textures[id]->id();
-  }
-
-}
-
-math::vector_2d TextureSet::anim_uv_offset(int id, int animtime) const
-{
-  uint32_t flags = _layers_info[id].flags;
-
-  const int spd = (flags >> 3) & 0x7;
-  const int dir = flags & 0x7;
-  const float texanimxtab[8] = { 0, 1, 1, 1, 0, -1, -1, -1 };
-  const float texanimytab[8] = { 1, 1, 0, -1, -1, -1, 0, 1 };
-  const float fdx = -texanimxtab[dir], fdy = texanimytab[dir];
-  const int animspd = (const int)(200 * detail_size);
-  float f = ((static_cast<int>(animtime*(spd / 7.0f))) % animspd) / static_cast<float>(animspd);
-  return { f*fdx, f*fdy };
-}
-
 bool TextureSet::eraseUnusedTextures()
 {
   if (nTextures < 2)

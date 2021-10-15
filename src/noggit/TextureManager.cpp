@@ -154,8 +154,6 @@ struct BLPHeader
 
 void blp_texture::bind()
 {
-  opengl::texture::bind();
-
   if (!finished)
   {
     return;
@@ -232,7 +230,6 @@ void blp_texture::upload()
 
     for (int i = 0; i < _data.size(); ++i)
     {
-      gl.texImage2D(GL_TEXTURE_2D, i, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());
       gl.texSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, index_y, width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, _data[i].data());
 
       width = std::max(width >> 1, 1);
@@ -257,7 +254,6 @@ void blp_texture::upload()
 
     for (int i = 0; i < _compressed_data.size(); ++i)
     {
-      gl.compressedTexImage2D(GL_TEXTURE_2D, i, _compression_format.get(), width, height, 0, _compressed_data[i].size(), _compressed_data[i].data());
       gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, index_y, width, height, 1, _compression_format.get(), _compressed_data[i].size(), _compressed_data[i].data());
 
       width = std::max(width >> 1, 1);
@@ -267,13 +263,8 @@ void blp_texture::upload()
     params.n_used++;
 
     //LogDebug << "Mip level (compressed): " << std::to_string(_compressed_data.size()) << std::endl;
-
-    gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _compressed_data.size() - 1);
     _compressed_data.clear();
   }
-
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   _uploaded = true;
 }
@@ -281,7 +272,6 @@ void blp_texture::upload()
 void blp_texture::unload()
 {
   _uploaded = false;
-  opengl::texture::unload();
 
   // load data back from file. pretty sad. maybe keep it after loading?
   finishLoading();
@@ -538,7 +528,8 @@ namespace noggit
                                   GL_FRAGMENT_SHADER, R"code(
                                   #version 330 core
 
-                                  uniform sampler2D tex;
+                                  uniform sampler2DArray tex;
+                                  uniform int tex_index;
 
                                   in vec2 f_tex_coord;
 
@@ -546,7 +537,7 @@ namespace noggit
 
                                   void main()
                                   {
-                                    out_color = vec4(texture(tex, f_tex_coord/2.f + vec2(0.5)).rgb, 1.);
+                                    out_color = vec4(texture(tex, vec3(f_tex_coord/2.f + vec2(0.5), tex_index)).rgb, 1.);
                                   }
                                   )code"
                               }
@@ -586,9 +577,10 @@ namespace noggit
 
     opengl::context::scoped_setter const context_set (::gl, &_context);
 
-    opengl::texture::set_active_texture(0);
+    gl.activeTexture(GL_TEXTURE0);
     blp_texture texture(blp_filename, noggit::NoggitRenderContext::BLP_RENDERER);
     texture.finishLoading();
+    texture.upload();
 
     width = width == -1 ? texture.width() : width;
     height = height == -1 ? texture.height() : height;
@@ -609,7 +601,8 @@ namespace noggit
     shader.uniform("width", w);
     shader.uniform("height", h);
 
-    texture.bind();
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, texture.texture_array());
+    shader.uniform("tex_index", texture.array_index());
 
     opengl::scoped::vao_binder const _ (_vao[0]);
     

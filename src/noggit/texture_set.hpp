@@ -34,10 +34,6 @@ public:
              , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
              , noggit::NoggitRenderContext context);
 
-  math::vector_2d anim_uv_offset(int id, int animtime) const;
-
-  void bindTexture(size_t id, size_t activeTexture, std::array<int, 4>& textures_bound);
-
   int addTexture(scoped_blp_texture_reference texture);
   void eraseTexture(size_t id);
   void eraseTextures();

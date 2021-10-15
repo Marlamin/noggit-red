@@ -160,9 +160,9 @@ struct ModelRenderPass : ModelTexUnit
   boost::optional<ModelPixelShader> pixel_shader;
 
 
-  bool prepare_draw(opengl::scoped::use_program& m2_shader, Model *m);
+  bool prepare_draw(opengl::scoped::use_program& m2_shader, Model *m, opengl::M2RenderState& model_render_state);
   void after_draw();
-  void bind_texture(size_t index, Model* m);
+  void bind_texture(size_t index, Model* m, opengl::M2RenderState& model_render_state, opengl::scoped::use_program& m2_shader);
   void init_uv_types(Model* m);
 
   bool operator< (const ModelRenderPass &m) const
@@ -217,6 +217,7 @@ public:
   void draw( math::matrix_4x4 const& model_view
            , ModelInstance& instance
            , opengl::scoped::use_program& m2_shader
+            , opengl::M2RenderState& model_render_state
            , math::frustum const& frustum
            , const float& cull_distance
            , const math::vector_3d& camera
@@ -227,6 +228,7 @@ public:
   void draw ( math::matrix_4x4 const& model_view
             , std::vector<ModelInstance*>& instances
             , opengl::scoped::use_program& m2_shader
+            , opengl::M2RenderState& model_render_state
             , math::frustum const& frustum
             , const float& cull_distance
             , const math::vector_3d& camera

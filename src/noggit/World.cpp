@@ -1269,8 +1269,6 @@ void World::draw ( math::matrix_4x4 const& model_view
   {
     ZoneScopedN("World::draw() : Draw M2s");
 
-    gl.enable(GL_BLEND);
-
     if (draw_model_animations)
     {
       ModelManager::resetAnim();
@@ -1288,6 +1286,21 @@ void World::draw ( math::matrix_4x4 const& model_view
       {
         opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
+        opengl::M2RenderState model_render_state;
+        model_render_state.tex_arrays = {0, 0};
+        model_render_state.tex_indices = {0, 0};
+        model_render_state.tex_unit_lookups = {0, 0};
+        gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        gl.disable(GL_BLEND);
+        gl.depthMask(GL_TRUE);
+        gl.enable(GL_CULL_FACE);
+        m2_shader.uniform("blend_mode", 0);
+        m2_shader.uniform("unfogged", static_cast<int>(model_render_state.unfogged));
+        m2_shader.uniform("unlit",  static_cast<int>(model_render_state.unlit));
+        m2_shader.uniform("tex_unit_lookup_1", 0);
+        m2_shader.uniform("tex_unit_lookup_2", 0);
+        m2_shader.uniform("pixel_shader", 0);
+
         for (auto& it : _models_by_filename)
         {
           if (draw_hidden_models || !it.second[0]->model->is_hidden())
@@ -1295,6 +1308,7 @@ void World::draw ( math::matrix_4x4 const& model_view
             it.second[0]->model->draw( model_view
               , it.second
               , m2_shader
+              , model_render_state
               , frustum
               , culldistance
               , camera_pos
@@ -1306,7 +1320,6 @@ void World::draw ( math::matrix_4x4 const& model_view
           }
         }
 
-        /*
         if (draw_doodads_wmo)
         {
           _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
@@ -1316,20 +1329,21 @@ void World::draw ( math::matrix_4x4 const& model_view
               if (!doodads)
                 return;
 
+              static std::vector<ModelInstance*> instance_temp = {nullptr};
               for (auto& pair : *doodads)
               {
                 for (auto& doodad : pair.second)
                 {
-                  doodad->model->draw( model_view
+                  instance_temp[0] = &doodad;
+                  doodad.model->draw( model_view
+                    , instance_temp
                     , m2_shader
+                    , model_render_state
                     , frustum
                     , culldistance
                     , camera_pos
-                    , false
                     , animtime
-                    , draw_model_animations
                     , draw_models_with_box
-                    , model_with_particles
                     , model_boxes_to_draw
                     , display
                   );
@@ -1338,13 +1352,13 @@ void World::draw ( math::matrix_4x4 const& model_view
               }
             });
         }
-
-         */
       }
 
     }
 
     gl.disable(GL_BLEND);
+    gl.enable(GL_CULL_FACE);
+    gl.depthMask(GL_TRUE);
 
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
