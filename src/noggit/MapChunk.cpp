@@ -149,8 +149,8 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
     zbase = zbase*-1.0f + ZEROPOINT;
     xbase = xbase*-1.0f + ZEROPOINT;
 
-    vmin = math::vector_3d(9999999.0f, 9999999.0f, 9999999.0f);
-    vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
+    vmin = math::vector_3d(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    vmax = math::vector_3d(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
   }
 
   texture_set = std::make_unique<TextureSet>(this, f, base, maintile, bigAlpha,
