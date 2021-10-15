@@ -350,10 +350,6 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , display_mode display
                )
 {
-  if (filename == "world/wmo/dungeon/md_frostgiant/nd_frostgiantcitadel.wmo")
-  {
-    LogDebug << "test" << std::endl;
-  }
 
   wmo_shader.uniform("ambient_color", ambient_light_color.xyz());
 
