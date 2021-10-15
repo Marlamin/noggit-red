@@ -414,6 +414,7 @@ public:
   void markTerrainParamsUniformBlockDirty() { _need_terrain_params_ubo_update = true; };
 
   LiquidTextureManager* getLiquidTextureManager() { return &_liquid_texture_manager; };
+  void loadAllTiles();
 
 private:
   void update_models_by_filename();

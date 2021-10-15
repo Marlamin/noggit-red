@@ -1991,6 +1991,25 @@ void World::setHoleADT(math::vector_3d const& pos, bool hole)
   });
 }
 
+void World::loadAllTiles()
+{
+  ZoneScoped;
+
+  for (size_t z = 0; z < 64; z++)
+  {
+    for (size_t x = 0; x < 64; x++)
+    {
+      tile_index tile(x, z);
+
+      MapTile* mTile = mapIndex.loadTile(tile);
+
+      if (mTile)
+      {
+        mTile->wait_until_loaded();
+      }
+    }
+  }
+}
 
 void World::convert_alphamap(bool to_big_alpha)
 {

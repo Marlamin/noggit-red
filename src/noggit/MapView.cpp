@@ -1696,6 +1696,18 @@ void MapView::setupAssistMenu()
   }
   );
 
+  auto debug_menu(assist_menu->addMenu("Debug"));
+
+  ADD_ACTION_NS ( debug_menu
+  , "Load all tiles"
+  , [=]
+  {
+    makeCurrent();
+    opengl::context::scoped_setter const _(::gl, context());
+    _world->loadAllTiles();
+  }
+  );
+
 }
 
 void MapView::setupViewMenu()
