@@ -157,6 +157,7 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOGI');
 
+  groups.reserve(nGroups);
   for (size_t i (0); i < nGroups; ++i) {
     groups.emplace_back (this, &f, i, groupnames);
   }
@@ -246,6 +247,7 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MOLT');
 
+  lights.reserve(nLights);
   for (size_t i (0); i < nLights; ++i) {
     WMOLight l;
     l.init (&f);
@@ -259,6 +261,7 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MODS');
 
+  doodadsets.reserve(nDoodadSets);
   for (size_t i (0); i < nDoodadSets; ++i) {
     WMODoodadSet dds;
     f.read (&dds, 32);
@@ -285,7 +288,9 @@ void WMO::finishLoading ()
 
   assert (fourcc == 'MODD');
 
-  for (size_t i (0); i < size / 0x28; ++i) {
+  modelis.reserve(size / 0x28);
+  for (size_t i (0); i < size / 0x28; ++i)
+  {
     struct
     {
       uint32_t name_offset : 24;
@@ -313,10 +318,13 @@ void WMO::finishLoading ()
   assert (fourcc == 'MFOG');
 
   int nfogs = size / 0x30;
-  for (size_t i (0); i < nfogs; ++i) {
+  fogs.reserve(nfogs);
+
+  for (size_t i (0); i < nfogs; ++i)
+  {
     WMOFog fog;
     fog.init (&f);
-    fogs.push_back (fog);
+    fogs.push_back (std::move(fog));
   }
 
   for (auto& group : groups)
