@@ -236,7 +236,9 @@ void Model::initCommon(const MPQFile& f)
   }
 
   // init colors
-  if (header.nColors) {
+  if (header.nColors)
+  {
+    _colors.reserve(header.nColors);
     ModelColorDef const* colorDefs = reinterpret_cast<ModelColorDef const*>(f.getBuffer() + header.ofsColors);
     for (size_t i = 0; i < header.nColors; ++i)
     {
@@ -247,7 +249,9 @@ void Model::initCommon(const MPQFile& f)
   // init transparency
   _transparency_lookup = M2Array<int16_t>(f, header.ofsTransparencyLookup, header.nTransparencyLookup);
 
-  if (header.nTransparency) {
+  if (header.nTransparency)
+  {
+    _transparency.reserve(header.nTransparency);
     ModelTransDef const* trDefs = reinterpret_cast<ModelTransDef const*>(f.getBuffer() + header.ofsTransparency);
     for (size_t i = 0; i < header.nTransparency; ++i)
     {
@@ -295,6 +299,7 @@ void Model::initCommon(const MPQFile& f)
 
     _render_flags = M2Array<ModelRenderFlags>(f, header.ofsRenderFlags, header.nRenderFlags);
 
+    _render_passes.reserve(view->n_texture_unit);
     for (size_t j = 0; j<view->n_texture_unit; j++) 
     {
       size_t geoset = texture_unit[j].submesh;
@@ -307,7 +312,7 @@ void Model::initCommon(const MPQFile& f)
       pass.vertex_start = model_geosets[geoset].vstart;
       pass.vertex_end = pass.vertex_start + model_geosets[geoset].vcount;
 
-      _render_passes.push_back(pass);
+      _render_passes.push_back(std::move(pass));
     }
 
     g.close();
@@ -1029,6 +1034,7 @@ void Model::initAnimated(const MPQFile& f)
 
   if (animTextures) 
   {
+    _texture_animations.reserve(header.nTexAnims);
     ModelTexAnimDef const* ta = reinterpret_cast<ModelTexAnimDef const*>(f.getBuffer() + header.ofsTexAnims);
     for (size_t i=0; i<header.nTexAnims; ++i) {
       _texture_animations.emplace_back (f, ta[i], _global_sequences.data());
@@ -1037,7 +1043,9 @@ void Model::initAnimated(const MPQFile& f)
 
   
   // particle systems
-  if (header.nParticleEmitters) {
+  if (header.nParticleEmitters)
+  {
+    _particles.reserve(header.nParticleEmitters);
     ModelParticleEmitterDef const* pdefs = reinterpret_cast<ModelParticleEmitterDef const*>(f.getBuffer() + header.ofsParticleEmitters);
     for (size_t i = 0; i<header.nParticleEmitters; ++i) 
     {
@@ -1055,7 +1063,9 @@ void Model::initAnimated(const MPQFile& f)
 
   
   // ribbons
-  if (header.nRibbonEmitters) {
+  if (header.nRibbonEmitters)
+  {
+    _ribbons.reserve(header.nRibbonEmitters);
     ModelRibbonEmitterDef const* rdefs = reinterpret_cast<ModelRibbonEmitterDef const*>(f.getBuffer() + header.ofsRibbonEmitters);
     for (size_t i = 0; i<header.nRibbonEmitters; ++i) {
       _ribbons.emplace_back(this, f, rdefs[i], _global_sequences.data(), _context);
@@ -1064,7 +1074,9 @@ void Model::initAnimated(const MPQFile& f)
   
 
   // init lights
-  if (header.nLights) {
+  if (header.nLights)
+  {
+    _lights.reserve(header.nLights);
     ModelLightDef const* lDefs = reinterpret_cast<ModelLightDef const*>(f.getBuffer() + header.ofsLights);
     for (size_t i=0; i<header.nLights; ++i)
       _lights.emplace_back (f, lDefs[i], _global_sequences.data());
