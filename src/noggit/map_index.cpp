@@ -376,6 +376,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile, bool reloading)
   MapTile* adt = mTiles[tile.z][tile.x].tile.get();
 
   AsyncLoader::instance().queue_for_load(adt);
+  _n_loaded_tiles++;
 
   return adt;
 }
@@ -416,6 +417,7 @@ void MapIndex::unloadTile(const tile_index& tile)
   {
     mTiles[tile.z][tile.x].tile = nullptr;
     Log << "Unload Tile " << tile.x << "-" << tile.z << std::endl;
+    _n_loaded_tiles--;
   }
 }
 

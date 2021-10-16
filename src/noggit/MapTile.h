@@ -167,6 +167,9 @@ public:
 
   void doObjectOcclusionQuery(opengl::scoped::use_program& occlusion_shader);
 
+  float camDist() { return _cam_dist; }
+  void calcCamDist(math::vector_3d const& camera);
+
 private:
 
   void uploadTextures();
@@ -182,6 +185,8 @@ private:
 
   std::array<math::vector_3d, 2> _extents;
   std::array<math::vector_3d, 2> _object_instance_extents;
+  math::vector_3d _center;
+  float _cam_dist;
 
   // MFBO:
   math::vector_3d mMinimumValues[3 * 3];

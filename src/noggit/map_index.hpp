@@ -213,6 +213,7 @@ public:
   void convert_alphamap(bool to_big_alpha);
   bool hasBigAlpha() const { return mBigAlpha; }
   void setBigAlpha(bool state) { mBigAlpha = state; };
+  unsigned getNLoadedTiles() { return _n_loaded_tiles; }
 
   bool sort_models_by_size_class() const { return _sort_models_by_size_class; }
   void set_sort_models_by_size_class(bool state) { _sort_models_by_size_class = state; }
@@ -258,6 +259,7 @@ private:
   int _last_unload_time;
   int _unload_interval;
   int _unload_dist;
+  unsigned _n_loaded_tiles = 0; // to be loaded, not necessarily already loaded
 
   // Is the WDT telling us to use a different alphamap structure.
   bool mBigAlpha;

@@ -31,6 +31,7 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <array>
 
 namespace noggit
 {
@@ -488,6 +489,8 @@ private:
   GLuint const& _liquid_chunk_vao = _vertex_arrays[1];
 
   LiquidTextureManager _liquid_texture_manager;
+
+  std::array<MapTile*, 64 * 64> _loaded_tiles_buffer;
  
   bool _need_terrain_params_ubo_update = false;
 

@@ -61,6 +61,7 @@ MapTile::MapTile( int pX
              math::vector_3d{pX * TILESIZE + TILESIZE, std::numeric_limits<float>::lowest(), pZ * TILESIZE + TILESIZE}}
   , _object_instance_extents{math::vector_3d{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()},
                math::vector_3d{std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()}}
+  ,_center{pX * TILESIZE + TILESIZE / 2.f, 0.f, pZ * TILESIZE + TILESIZE / 2.f}
 {
 }
 
@@ -1917,6 +1918,8 @@ void MapTile::recalcExtents(float min, float max)
 {
   _extents[0].y = std::min(_extents[0].y, min);
   _extents[1].y = std::max(_extents[1].y, max);
+
+  _center.y = (_extents[0].y + _extents[1].y) / 2;
 }
 
 void MapTile::recalcObjectInstanceExtents()
@@ -1959,4 +1962,9 @@ void MapTile::doObjectOcclusionQuery(opengl::scoped::use_program& occlusion_shad
   gl.beginQuery(GL_ANY_SAMPLES_PASSED, _objects_occlusion_query);
   occlusion_shader.uniform("aabb", _object_instance_extents.data(), _object_instance_extents.size());
   //gl.drawElements(GL_TRIANGLES, )
+}
+
+void MapTile::calcCamDist(math::vector_3d const& camera)
+{
+  _cam_dist = (camera - _center).length();
 }

@@ -1543,7 +1543,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
 
     if (!mi->isWMODoodad())
     {
-      for (auto& tile : mi->getTiles())
+      for (auto tile : mi->getTiles())
       {
         if (tile->objects_frustum_cull_test)
         {

@@ -87,117 +87,154 @@ void main()
   {
     discard;
   }
-
-  vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
-  vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
   
   // code from Deamon87 and https://wowdev.wiki/M2/Rendering#Pixel_Shaders
   if (pixel_shader == 0) //Combiners_Opaque
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
       color.rgb = texture1.rgb * mesh_color.rgb;
       color.a = mesh_color.a;
   } 
   else if (pixel_shader == 1) // Combiners_Decal
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
       color.rgb = mix(mesh_color.rgb, texture1.rgb, mesh_color.a);
       color.a = mesh_color.a;
   } 
   else if (pixel_shader == 2) // Combiners_Add
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
       color.rgba = texture1.rgba + mesh_color.rgba;
   } 
   else if (pixel_shader == 3) // Combiners_Mod2x
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
       color.rgb = texture1.rgb * mesh_color.rgb * vec3(2.0);
       color.a = texture1.a * mesh_color.a * 2.0;
   } 
   else if (pixel_shader == 4) // Combiners_Fade
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
       color.rgb = mix(texture1.rgb, mesh_color.rgb, mesh_color.a);
       color.a = mesh_color.a;
   } 
   else if (pixel_shader == 5) // Combiners_Mod
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
       color.rgba = texture1.rgba * mesh_color.rgba;
   } 
   else if (pixel_shader == 6) // Combiners_Opaque_Opaque
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgb = texture1.rgb * texture2.rgb * mesh_color.rgb;
       color.a = mesh_color.a;
   } 
   else if (pixel_shader == 7) // Combiners_Opaque_Add
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgb = texture2.rgb + texture1.rgb * mesh_color.rgb;
       color.a = mesh_color.a + texture1.a;
   } 
   else if (pixel_shader == 8) // Combiners_Opaque_Mod2x
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgb = texture1.rgb * mesh_color.rgb * texture2.rgb * vec3(2.0);
       color.a  = texture2.a * mesh_color.a * 2.0;
   } 
   else if (pixel_shader == 9)  // Combiners_Opaque_Mod2xNA
   {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgb = texture1.rgb * mesh_color.rgb * texture2.rgb * vec3(2.0);
       color.a  = mesh_color.a;
   } 
   else if (pixel_shader == 10) // Combiners_Opaque_AddNA
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgb = texture2.rgb + texture1.rgb * mesh_color.rgb;
       color.a = mesh_color.a;
   } 
   else if (pixel_shader == 11) // Combiners_Opaque_Mod
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgb = texture1.rgb * texture2.rgb * mesh_color.rgb;
       color.a = texture2.a * mesh_color.a;
   } 
   else if (pixel_shader == 12) // Combiners_Mod_Opaque
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgb = texture1.rgb * texture2.rgb * mesh_color.rgb;
       color.a = texture1.a;
   } 
   else if (pixel_shader == 13) // Combiners_Mod_Add
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgba = texture2.rgba + texture1.rgba * mesh_color.rgba;
   } 
   else if (pixel_shader == 14) // Combiners_Mod_Mod2x
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgba = texture1.rgba * texture2.rgba * mesh_color.rgba * vec4(2.0);
   } 
   else if (pixel_shader == 15) // Combiners_Mod_Mod2xNA
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgb = texture1.rgb * texture2.rgb * mesh_color.rgb * vec3(2.0);
       color.a = texture1.a * mesh_color.a;
   } 
   else if (pixel_shader == 16) // Combiners_Mod_AddNA
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgb = texture2.rgb + texture1.rgb * mesh_color.rgb;
       color.a = texture1.a * mesh_color.a;
   } 
   else if (pixel_shader == 17) // Combiners_Mod_Mod
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgba = texture1.rgba * texture2.rgba * mesh_color.rgba;
   } 
   else if (pixel_shader == 18) // Combiners_Add_Mod
-  { 
+  {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgb = (texture1.rgb + mesh_color.rgb) * texture2.a;
       color.a = (texture1.a + mesh_color.a) * texture2.a;
   } 
   else if (pixel_shader == 19) // Combiners_Mod2x_Mod2x
   {
+      vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+      vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
       color.rgba = texture1.rgba * texture2.rgba * mesh_color.rgba * vec4(4.0);
   }
   else if (pixel_shader == 20)  // Combiners_Opaque_Mod2xNA_Alpha
   {
+    vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+    vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
     color.rgb = (mesh_color.rgb * texture1.rgb) * mix(texture2.rgb * 2.0, vec3(1.0), texture1.a);
     color.a = mesh_color.a;
   }
   else if (pixel_shader == 21)   //Combiners_Opaque_AddAlpha
   {
+    vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+    vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
     color.rgb = (mesh_color.rgb * texture1.rgb) + (texture2.rgb * texture2.a);
     color.a = mesh_color.a;
   }
   else if (pixel_shader == 22)   // Combiners_Opaque_AddAlpha_Alpha
   {
+    vec4 texture1 = texture(tex1, vec3(uv1, tex1_index));
+    vec4 texture2 = texture(tex2, vec3(uv2, tex2_index));
     color.rgb = (mesh_color.rgb * texture1.rgb) + (texture2.rgb * texture2.a * texture1.a);
     color.a = mesh_color.a;
   }

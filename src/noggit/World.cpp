@@ -1054,25 +1054,62 @@ void World::draw ( math::matrix_4x4 const& model_view
   if (_need_terrain_params_ubo_update)
     updateTerrainParamsUniformBlock();
 
-  // efficient frustum culling for objects by cutting of per-tile combined bounding volumes
-  if (draw_wmo || draw_models)
+
+  unsigned tile_counter = 0;
+  for (MapTile* tile : mapIndex.loaded_tiles())
   {
-    for (MapTile* tile : mapIndex.loade_tiles())
+    auto& tile_extents = tile->getExtents();
+    if (frustum.intersects(tile_extents[1], tile_extents[0]) || tile->getChunkUpdateFlags())
     {
-      tile->recalcObjectInstanceExtents();
+      tile->calcCamDist(camera_pos);
+      _loaded_tiles_buffer[tile_counter] = tile;
+      tile_counter++;
+    }
 
-      auto& tile_extents = tile->getObjectInstancesExtents();
+    // object culling pre-pass
+    tile->recalcObjectInstanceExtents();
 
-      if (frustum.intersects(tile_extents[1], tile_extents[0]))
+    auto& tile_obj_extents = tile->getObjectInstancesExtents();
+
+    if (frustum.intersects(tile_obj_extents[1], tile_obj_extents[0]))
+    {
+      tile->objects_frustum_cull_test = 1;
+      if (frustum.contains(tile_obj_extents[0]) && frustum.contains(tile_obj_extents[1]))
       {
-        tile->objects_frustum_cull_test = 1 + ((frustum.contains(tile_extents[0]) && frustum.contains(tile_extents[1]) ? 1 : 0));
-      }
-      else
-      {
-        tile->objects_frustum_cull_test = 0;
+        tile->objects_frustum_cull_test++;
       }
     }
+    else
+    {
+      tile->objects_frustum_cull_test = 0;
+    }
+
   }
+
+  assert(tile_counter <= _loaded_tiles_buffer.size());
+  auto buf_end = _loaded_tiles_buffer.end();
+
+  if (tile_counter < _loaded_tiles_buffer.size())
+  {
+    _loaded_tiles_buffer[tile_counter] = nullptr;
+    buf_end = _loaded_tiles_buffer.begin() + tile_counter;
+  }
+
+  std::sort(_loaded_tiles_buffer.begin(), buf_end,
+            [](MapTile* a, MapTile* b) -> bool
+            {
+              if (!a)
+              {
+                return false;
+              }
+
+              if (!b)
+              {
+                return true;
+              }
+
+              return a->camDist() < b->camDist();
+            });
 
   // only draw the sky in 3D
   if(display == display_mode::in_3D)
@@ -1171,11 +1208,12 @@ void World::draw ( math::matrix_4x4 const& model_view
     gl.bindVertexArray(_mapchunk_vao);
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mapchunk_index);
 
-    for (MapTile* tile : mapIndex.loaded_tiles())
+    for (MapTile* tile : _loaded_tiles_buffer)
     {
-      auto& tile_extents = tile->getExtents();
-      if (!frustum.intersects(tile_extents[1], tile_extents[0]) && !tile->getChunkUpdateFlags())
-        continue;
+      if (!tile)
+      {
+        break;
+      }
 
       tile->draw ( frustum
                  , mcnk_shader
@@ -1577,9 +1615,9 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
   {
     ZoneScopedN("World::intersect() : intersect terrain");
 
-    for (auto&& tile : mapIndex.loaded_tiles())
+    for (auto tile : _loaded_tiles_buffer)
     {
-      if (tile->intersect(ray, &results))
+      if (!tile || tile->intersect(ray, &results))
         break;
     }
   }
