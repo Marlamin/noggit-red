@@ -28,7 +28,7 @@
 struct tuple_hash
 {
   template <class T1, class T2, class T3, class T4>
-  std::size_t operator() (const std::tuple<T1,T2,T3, T4> &p) const
+  std::size_t operator() (const std::tuple<T1,T2,T3,T4> &p) const
   {
     auto h1 = std::hash<T1>{}(std::get<0>(p));
     auto h2 = std::hash<T2>{}(std::get<1>(p));

@@ -807,6 +807,9 @@ void ModelRenderPass::bind_texture(size_t index, Model* m, opengl::M2RenderState
     GLuint tex_array = texture->texture_array();
     int tex_index = texture->array_index();
 
+    gl.activeTexture(GL_TEXTURE0 + index + 1);
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, tex_array);
+    /*
     if (model_render_state.tex_arrays[index] != tex_array)
     {
       gl.activeTexture(GL_TEXTURE0 + index + 1);
@@ -814,11 +817,17 @@ void ModelRenderPass::bind_texture(size_t index, Model* m, opengl::M2RenderState
       model_render_state.tex_arrays[index] = tex_array;
     }
 
+
     if (model_render_state.tex_indices[index] != tex_index)
     {
       m2_shader.uniform(index ? "tex2_index" : "tex1_index", tex_index);
       model_render_state.tex_indices[index] = tex_index;
     }
+
+          */
+
+    m2_shader.uniform(index ? "tex2_index" : "tex1_index", tex_index);
+    model_render_state.tex_indices[index] = tex_index;
 
   }
   else
@@ -828,6 +837,10 @@ void ModelRenderPass::bind_texture(size_t index, Model* m, opengl::M2RenderState
     GLuint tex_array = texture->texture_array();
     int tex_index = texture->array_index();
 
+    gl.activeTexture(GL_TEXTURE0 + index + 1);
+    gl.bindTexture(GL_TEXTURE_2D_ARRAY, tex_array);
+
+    /*
     if (model_render_state.tex_arrays[index] != tex_array)
     {
       gl.activeTexture(GL_TEXTURE0 + index + 1);
@@ -840,6 +853,12 @@ void ModelRenderPass::bind_texture(size_t index, Model* m, opengl::M2RenderState
       m2_shader.uniform(index ? "tex2_index" : "tex1_index", tex_index);
       model_render_state.tex_indices[index] = tex_index;
     }
+
+          */
+
+    m2_shader.uniform(index ? "tex2_index" : "tex1_index", tex_index);
+    model_render_state.tex_indices[index] = tex_index;
+
   }    
 }
 
