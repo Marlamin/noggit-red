@@ -1102,4 +1102,44 @@ void opengl::context::drawArraysInstanced(GLenum mode, GLint first, GLsizei coun
   return _4_1_core_func->glDrawArraysInstanced (mode, first, count, instancecount);
 }
 
+void opengl::context::genQueries(GLsizei n, GLuint* ids)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glGenQueries(n, ids);
+}
+
+void opengl::context::deleteQueries(GLsizei n, GLuint* ids)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glDeleteQueries(n, ids);
+}
+
+void opengl::context::beginQuery(GLenum target, GLuint id)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glBeginQuery(target, id);
+}
+
+void opengl::context::endQuery(GLenum target)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glEndQuery(target);
+}
+
+void opengl::context::getQueryObjectiv(GLuint id, GLenum pname, GLint* params)
+{
+#ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
+  verify_context_and_check_for_gl_errors const _ (_current_context, BOOST_CURRENT_FUNCTION);
+#endif
+  return _4_1_core_func->glGetQueryObjectiv(id, pname, params);
+}
+
 #endif //NOGGIT_CONTEXT_INL

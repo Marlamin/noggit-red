@@ -1483,7 +1483,6 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
 
   gl.activeTexture(GL_TEXTURE0);
   gl.bindTexture(GL_TEXTURE_BUFFER, _render_batch_tex);
-  gl.texBuffer(GL_TEXTURE_BUFFER,  GL_RGBA32UI, _render_batch_tex_buffer);
 
   bool backface_cull = true;
   gl.enable(GL_CULL_FACE);

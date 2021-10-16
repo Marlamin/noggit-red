@@ -416,6 +416,9 @@ void MapTile::draw ( math::frustum const& frustum
 
     _samplers = std::vector{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
+    gl.genQueries(1, &_objects_occlusion_query);
+    _object_occlusion_query_in_use = false;
+
     _uploaded = true;
   }
 
@@ -1840,6 +1843,8 @@ void MapTile::unload()
     _chunk_texture_arrays.unload();
     _buffers.unload();
     _uploaded = false;
+    _object_occlusion_query_in_use = true;
+    gl.deleteQueries(1, &_objects_occlusion_query);
   }
 
   if (_mfbo_buffer_are_setup)
@@ -1944,4 +1949,14 @@ void MapTile::recalcObjectInstanceExtents()
     _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, max.z);
   }
 
+}
+
+void MapTile::doObjectOcclusionQuery(opengl::scoped::use_program& occlusion_shader)
+{
+  if (_object_occlusion_query_in_use)
+    return;
+
+  gl.beginQuery(GL_ANY_SAMPLES_PASSED, _objects_occlusion_query);
+  occlusion_shader.uniform("aabb", _object_instance_extents.data(), _object_instance_extents.size());
+  //gl.drawElements(GL_TRIANGLES, )
 }

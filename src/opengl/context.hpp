@@ -210,10 +210,18 @@ namespace opengl
     BOOST_FORCEINLINE void bindFramebuffer (GLenum target, GLuint framebuffer);
     BOOST_FORCEINLINE void framebufferTexture2D (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
 
-    BOOST_FORCEINLINE void genRenderbuffers (GLsizei n, GLuint *renderbuffers);
+    BOOST_FORCEINLINE void genRenderbuffers (GLsizei n, GLuint* renderbuffers);
     BOOST_FORCEINLINE void bindRenderbuffer (GLenum target, GLuint renderbuffer);
     BOOST_FORCEINLINE void renderbufferStorage (GLenum target, GLenum internalformat, GLsizei width, GLsizei height);
     BOOST_FORCEINLINE void framebufferRenderbuffer (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer);
+
+    BOOST_FORCEINLINE void genQueries(GLsizei n, GLuint* ids);
+    BOOST_FORCEINLINE void deleteQueries(GLsizei n, GLuint* ids);
+    BOOST_FORCEINLINE void beginQuery(GLenum target, GLuint id);
+    BOOST_FORCEINLINE void endQuery(GLenum target);
+    BOOST_FORCEINLINE void getQueryObjectiv(GLuint id, GLenum pname, GLint* params);
+
+
 
     template<GLenum target>
     BOOST_FORCEINLINE void bufferData (GLuint buffer, GLsizeiptr size, GLvoid const* data, GLenum usage);

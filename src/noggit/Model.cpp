@@ -1248,6 +1248,7 @@ void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_ti
     }
   }
 
+  /*
   for (auto& particle : _particles)
   {
     // random time distribution for teh win ..?
@@ -1259,6 +1260,8 @@ void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_ti
   {
     _ribbons[i].setup(_current_anim_seq, t, _global_animtime);
   }
+
+   */
 
   for (auto& tex_anim : _texture_animations)
   {
@@ -1599,7 +1602,6 @@ void Model::draw ( math::matrix_4x4 const& model_view
   {
     gl.activeTexture(GL_TEXTURE0);
     gl.bindTexture(GL_TEXTURE_BUFFER, _bone_matrices_buf_tex);
-    gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _bone_matrices_buffer);
     m2_shader.uniform("anim_bones", true);
   }
   else
@@ -1740,6 +1742,7 @@ void Model::upload()
     gl.bindTexture(GL_TEXTURE_BUFFER, _bone_matrices_buf_tex);
     opengl::scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder(_bone_matrices_buffer);
     gl.bufferData(GL_TEXTURE_BUFFER, bone_matrices.size() * sizeof(math::matrix_4x4), nullptr, GL_STREAM_DRAW);
+    gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _bone_matrices_buffer);
   }
 
   {

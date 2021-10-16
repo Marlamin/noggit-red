@@ -165,6 +165,8 @@ public:
 
   std::unordered_set<SceneObject*>& getObjectInstances() { return object_instances; };
 
+  void doObjectOcclusionQuery(opengl::scoped::use_program& occlusion_shader);
+
 private:
 
   void uploadTextures();
@@ -199,6 +201,9 @@ private:
   GLuint const& _mccv_tex = _chunk_texture_arrays[1];
   GLuint const& _shadowmap_tex = _chunk_texture_arrays[2];
   GLuint const& _alphamap_tex = _chunk_texture_arrays[3];
+
+  GLuint _objects_occlusion_query;
+  bool _object_occlusion_query_in_use = true;
 
   opengl::scoped::deferred_upload_buffers<1> _buffers;
 
