@@ -1057,7 +1057,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   // efficient frustum culling for objects by cutting of per-tile combined bounding volumes
   if (draw_wmo || draw_models)
   {
-    for (MapTile* tile : mapIndex.loaded_tiles())
+    for (MapTile* tile : mapIndex.loade_tiles())
     {
       tile->recalcObjectInstanceExtents();
 
