@@ -1084,10 +1084,14 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   if (tile_counter < _loaded_tiles_buffer.size())
   {
+    // nullptr should act as the data terminator, similar to null-terminator in strings
+    // the items that follow are undefined
+
     _loaded_tiles_buffer[tile_counter] = nullptr;
     buf_end = _loaded_tiles_buffer.begin() + tile_counter;
   }
 
+  // TODO: perhaps parallel sort?
   std::sort(_loaded_tiles_buffer.begin(), buf_end,
             [](MapTile* a, MapTile* b) -> bool
             {
@@ -1602,7 +1606,13 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
 
     for (auto tile : _loaded_tiles_buffer)
     {
-      if (!tile || tile->intersect(ray, &results))
+      if (!tile)
+        break;
+
+      if (!tile->finishedLoading())
+        continue;
+
+      if (tile->intersect(ray, &results))
         break;
     }
   }
