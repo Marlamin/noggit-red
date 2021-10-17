@@ -28,7 +28,6 @@ void ModelViewer::paintGL()
   _last_update = now;
 
   MinimapRenderSettings _settings_unused;
-  std::map<int, misc::random_color> area_id_colors;
 
   if (_world)
   {
@@ -40,7 +39,6 @@ void ModelViewer::paintGL()
         , CursorType::CIRCLE
         , 0.f
         , false
-        , false
         , 0.f
         , math::vector_3d(0.f, 0.f, 0.f)
         , 0.f
@@ -48,14 +46,10 @@ void ModelViewer::paintGL()
         , false
         , false
         , false
-        , false
-        , false
         , editing_mode::ground
         , _world_camera.position
         , true
         , false
-        , false
-        , false
         , true
         , true
         , true
@@ -63,10 +57,8 @@ void ModelViewer::paintGL()
         , true
         , true
         , false
-        , false
-        , false
+        , true
         , &_settings_unused
-        , area_id_colors
         , false
         , eTerrainType::eTerrainType_Flat
         , 0

@@ -95,7 +95,7 @@ public:
   void initDisplay();
 
   void update_models_emitters(float dt);
-  void draw ( math::matrix_4x4 const& model_view
+  void draw (math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection
             , math::vector_3d const& cursor_pos
             , float cursorRotation
@@ -103,7 +103,6 @@ public:
             , CursorType cursor_type
             , float brush_radius
             , bool show_unpaintable_chunks
-            , bool draw_contour
             , float inner_radius_ratio
             , math::vector_3d const& ref_pos
             , float angle
@@ -111,26 +110,19 @@ public:
             , bool use_ref_pos
             , bool angled_mode
             , bool draw_paintability_overlay
-            , bool draw_chunk_flag_overlay
-            , bool draw_areaid_overlay
-            //! \todo passing editing_mode is _so_ wrong, I don't believe I'm doing this
-            , editing_mode
+            , editing_mode terrainMode
             , math::vector_3d const& camera_pos
             , bool camera_moved
             , bool draw_mfbo
-            , bool draw_wireframe
-            , bool draw_lines
             , bool draw_terrain
             , bool draw_wmo
             , bool draw_water
-            , bool draw_doodads
+            , bool draw_wmo_doodads
             , bool draw_models
             , bool draw_model_animations
-            , bool draw_hole_lines
             , bool draw_models_with_box
             , bool draw_hidden_models
             , MinimapRenderSettings* minimap_render_settings
-            , std::map<int, misc::random_color>& area_id_colors
             , bool draw_fog
             , eTerrainType ground_editing_brush
             , int water_layer

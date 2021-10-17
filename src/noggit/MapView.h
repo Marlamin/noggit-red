@@ -142,10 +142,7 @@ public:
   noggit::bool_toggle_property _draw_hidden_models = {false};
 private:
 
-
-
   int _selected_area_id = -1;
-  std::map<int, misc::random_color> _area_id_colors;
 
   math::ray intersect_ray() const;
   selection_result intersect_result(bool terrain_only);

@@ -78,18 +78,10 @@ public:
   std::atomic<bool> changed;
   unsigned objects_frustum_cull_test = 0;
 
-  void draw ( math::frustum const& frustum
-            , opengl::scoped::use_program& mcnk_shader
-            , const float& cull_distance
+  void draw (opengl::scoped::use_program& mcnk_shader
             , const math::vector_3d& camera
-            , bool need_visibility_update
             , bool show_unpaintable_chunks
             , bool draw_paintability_overlay
-            , bool draw_chunk_flag_overlay
-            , bool draw_areaid_overlay
-            , std::map<int, misc::random_color>& area_id_colors
-            , int animtime
-            , display_mode display
             , bool is_selected
             );
   bool intersect (math::ray const&, selection_result*) const;

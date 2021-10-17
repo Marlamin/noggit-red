@@ -379,18 +379,10 @@ void MapTile::convert_alphamap(bool to_big_alpha)
   }
 }
 
-void MapTile::draw ( math::frustum const& frustum
-                   , opengl::scoped::use_program& mcnk_shader
-                   , const float& cull_distance
+void MapTile::draw (opengl::scoped::use_program& mcnk_shader
                    , const math::vector_3d& camera
-                   , bool need_visibility_update
                    , bool show_unpaintable_chunks
                    , bool draw_paintability_overlay
-                   , bool draw_chunk_flag_overlay
-                   , bool draw_areaid_overlay
-                   , std::map<int, misc::random_color>& area_id_colors
-                   , int animtime
-                   , display_mode display
                    , bool is_selected
                    )
 {

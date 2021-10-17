@@ -4107,7 +4107,6 @@ void MapView::draw_map()
                , _cursorType
                , radius
                , texturingTool->show_unpaintable_chunks()
-               , _draw_contour.get()
                , inner_radius
                , ref_pos
                , angle
@@ -4115,25 +4114,19 @@ void MapView::draw_map()
                , use_ref_pos
                , angled_mode
                , terrainMode == editing_mode::paint
-               , terrainMode == editing_mode::flags
-               , terrainMode == editing_mode::areaid
                , terrainMode
                , _camera.position
                , _camera_moved_since_last_draw
                , _draw_mfbo.get()
-               , _draw_wireframe.get()
-               , _draw_lines.get()
                , _draw_terrain.get()
                , _draw_wmo.get()
                , _draw_water.get()
                , _draw_wmo_doodads.get()
                , _draw_models.get()
                , _draw_model_animations.get()
-               , _draw_hole_lines.get() || terrainMode == editing_mode::holes
                , _draw_models_with_box.get()
                , _draw_hidden_models.get()
                , minimapTool->getMinimapRenderSettings()
-               , _area_id_colors
                , _draw_fog.get()
                , terrainTool->_edit_type
                , _display_all_water_layers.get() ? -1 : _displayed_water_layer.get()
