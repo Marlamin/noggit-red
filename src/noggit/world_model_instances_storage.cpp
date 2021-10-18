@@ -29,7 +29,7 @@ namespace noggit
       _world->updateTilesModel(&_m2s.at(uid_after), model_update::add);
     }
 
-    return instance.uid;
+    return uid_after;
   }
   std::uint32_t world_model_instances_storage::unsafe_add_model_instance_no_world_upd(ModelInstance instance)
   {
@@ -77,7 +77,7 @@ namespace noggit
       _world->updateTilesWMO(&_wmos.at(uid_after), model_update::add);
     }
 
-    return instance.uid;
+    return uid_after;
   }
   std::uint32_t world_model_instances_storage::unsafe_add_wmo_instance_no_world_upd(WMOInstance instance)
   {

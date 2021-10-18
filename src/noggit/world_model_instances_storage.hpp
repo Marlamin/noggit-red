@@ -7,7 +7,6 @@
 #include <noggit/tile_index.hpp>
 #include <noggit/WMOInstance.h>
 
-
 #include <atomic>
 #include <functional>
 #include <mutex>

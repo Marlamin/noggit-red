@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <cassert>
 #include <map>
-#include <sstream>
 #include <string>
 
 Model::Model(const std::string& filename, noggit::NoggitRenderContext context)
