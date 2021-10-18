@@ -381,6 +381,7 @@ private:
         uint64_t thread;
         int16_t srcloc;
         uint32_t callstack;
+        std::string message;
     };
 
     struct FrameImagePending
@@ -396,6 +397,7 @@ public:
         ZoneStack,
         ZoneDoubleEnd,
         ZoneText,
+        ZoneValue,
         ZoneColor,
         ZoneName,
         MemFree,
@@ -595,6 +597,7 @@ public:
     int GetTraceVersion() const { return m_traceVersion; }
     uint8_t GetHandshakeStatus() const { return m_handshake.load( std::memory_order_relaxed ); }
     int64_t GetSamplingPeriod() const { return m_samplingPeriod; }
+    bool AreSamplesInconsistent() const { return m_inconsistentSamples; }
 
     static const LoadProgress& GetLoadProgress() { return s_loadProgress; }
     int64_t GetLoadTime() const { return m_loadTime; }
@@ -713,7 +716,8 @@ private:
 
     void ZoneStackFailure( uint64_t thread, const ZoneEvent* ev );
     void ZoneDoubleEndFailure( uint64_t thread, const ZoneEvent* ev );
-    void ZoneTextFailure( uint64_t thread );
+    void ZoneTextFailure( uint64_t thread, const char* text );
+    void ZoneValueFailure( uint64_t thread, uint64_t value );
     void ZoneColorFailure( uint64_t thread );
     void ZoneNameFailure( uint64_t thread );
     void MemFreeFailure( uint64_t thread );
@@ -893,6 +897,7 @@ private:
     bool m_ignoreMemFreeFaults;
     bool m_codeTransfer;
     bool m_combineSamples;
+    bool m_inconsistentSamples;
 
     short_ptr<GpuCtxData> m_gpuCtxMap[256];
     uint32_t m_pendingCallstackId = 0;

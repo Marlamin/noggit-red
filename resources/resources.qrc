@@ -35,5 +35,7 @@
       <file alias="cursor_fs">../src/glsl/cursor_frag.glsl</file>
       <file alias="horizon_vs">../src/glsl/horizon_vert.glsl</file>
       <file alias="horizon_fs">../src/glsl/horizon_frag.glsl</file>
+      <file alias="occluder_vs">../src/glsl/occluder_vert.glsl</file>
+      <file alias="occluder_fs">../src/glsl/occluder_frag.glsl</file>
     </qresource>
 </RCC>

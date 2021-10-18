@@ -115,7 +115,7 @@ enum class QueueType : uint8_t
 
 struct QueueThreadContext
 {
-    uint64_t thread;
+    uint32_t thread;
 };
 
 struct QueueZoneBeginLean
@@ -128,14 +128,29 @@ struct QueueZoneBegin : public QueueZoneBeginLean
     uint64_t srcloc;    // ptr
 };
 
+struct QueueZoneBeginThread : public QueueZoneBegin
+{
+    uint32_t thread;
+};
+
 struct QueueZoneEnd
 {
     int64_t time;
 };
 
+struct QueueZoneEndThread : public QueueZoneEnd
+{
+    uint32_t thread;
+};
+
 struct QueueZoneValidation
 {
     uint32_t id;
+};
+
+struct QueueZoneValidationThread
+{
+    uint32_t thread;
 };
 
 struct QueueZoneColor
@@ -145,9 +160,19 @@ struct QueueZoneColor
     uint8_t b;
 };
 
+struct QueueZoneColorThread : public QueueZoneColor
+{
+    uint32_t thread;
+};
+
 struct QueueZoneValue
 {
     uint64_t value;
+};
+
+struct QueueZoneValueThread : public QueueZoneValue
+{
+    uint32_t thread;
 };
 
 struct QueueStringTransfer
@@ -191,6 +216,11 @@ struct QueueZoneTextFat
     uint16_t size;
 };
 
+struct QueueZoneTextFatThread : public QueueZoneTextFat
+{
+    uint32_t thread;
+};
+
 enum class LockType : uint8_t
 {
     Lockable,
@@ -213,28 +243,28 @@ struct QueueLockTerminate
 
 struct QueueLockWait
 {
-    uint64_t thread;
+    uint32_t thread;
     uint32_t id;
     int64_t time;
 };
 
 struct QueueLockObtain
 {
-    uint64_t thread;
+    uint32_t thread;
     uint32_t id;
     int64_t time;
 };
 
 struct QueueLockRelease
 {
-    uint64_t thread;
+    uint32_t thread;
     uint32_t id;
     int64_t time;
 };
 
 struct QueueLockMark
 {
-    uint64_t thread;
+    uint32_t thread;
     uint32_t id;
     uint64_t srcloc;    // ptr
 };
@@ -287,9 +317,19 @@ struct QueueMessageLiteral : public QueueMessage
     uint64_t text;      // ptr
 };
 
+struct QueueMessageLiteralThread : public QueueMessageLiteral
+{
+    uint32_t thread;
+};
+
 struct QueueMessageColorLiteral : public QueueMessageColor
 {
     uint64_t text;      // ptr
+};
+
+struct QueueMessageColorLiteralThread : public QueueMessageColorLiteral
+{
+    uint32_t thread;
 };
 
 struct QueueMessageFat : public QueueMessage
@@ -298,10 +338,20 @@ struct QueueMessageFat : public QueueMessage
     uint16_t size;
 };
 
+struct QueueMessageFatThread : public QueueMessageFat
+{
+    uint32_t thread;
+};
+
 struct QueueMessageColorFat : public QueueMessageColor
 {
     uint64_t text;      // ptr
     uint16_t size;
+};
+
+struct QueueMessageColorFatThread : public QueueMessageColorFat
+{
+    uint32_t thread;
 };
 
 // Don't change order, only add new entries at the end, this is also used on trace dumps!
@@ -324,7 +374,7 @@ struct QueueGpuNewContext
 {
     int64_t cpuTime;
     int64_t gpuTime;
-    uint64_t thread;
+    uint32_t thread;
     float period;
     uint8_t context;
     GpuContextFlags flags;
@@ -334,7 +384,7 @@ struct QueueGpuNewContext
 struct QueueGpuZoneBeginLean
 {
     int64_t cpuTime;
-    uint64_t thread;
+    uint32_t thread;
     uint16_t queryId;
     uint8_t context;
 };
@@ -347,7 +397,7 @@ struct QueueGpuZoneBegin : public QueueGpuZoneBeginLean
 struct QueueGpuZoneEnd
 {
     int64_t cpuTime;
-    uint64_t thread;
+    uint32_t thread;
     uint16_t queryId;
     uint8_t context;
 };
@@ -386,7 +436,7 @@ struct QueueMemNamePayload
 struct QueueMemAlloc
 {
     int64_t time;
-    uint64_t thread;
+    uint32_t thread;
     uint64_t ptr;
     char size[6];
 };
@@ -394,7 +444,7 @@ struct QueueMemAlloc
 struct QueueMemFree
 {
     int64_t time;
-    uint64_t thread;
+    uint32_t thread;
     uint64_t ptr;
 };
 
@@ -403,16 +453,26 @@ struct QueueCallstackFat
     uint64_t ptr;
 };
 
+struct QueueCallstackFatThread : public QueueCallstackFat
+{
+    uint32_t thread;
+};
+
 struct QueueCallstackAllocFat
 {
     uint64_t ptr;
     uint64_t nativePtr;
 };
 
+struct QueueCallstackAllocFatThread : public QueueCallstackAllocFat
+{
+    uint32_t thread;
+};
+
 struct QueueCallstackSample
 {
     int64_t time;
-    uint64_t thread;
+    uint32_t thread;
 };
 
 struct QueueCallstackSampleFat : public QueueCallstackSample
@@ -441,15 +501,20 @@ struct QueueSymbolInformation
 
 struct QueueCodeInformation
 {
-    uint64_t ptr;
-    uint32_t line;
     uint64_t symAddr;
+    uint32_t line;
+    uint64_t ptrOffset;
 };
 
 struct QueueCrashReport
 {
     int64_t time;
     uint64_t text;      // ptr
+};
+
+struct QueueCrashReportThread
+{
+    uint32_t thread;
 };
 
 struct QueueSysTime
@@ -461,8 +526,8 @@ struct QueueSysTime
 struct QueueContextSwitch
 {
     int64_t time;
-    uint64_t oldThread;
-    uint64_t newThread;
+    uint32_t oldThread;
+    uint32_t newThread;
     uint8_t cpu;
     uint8_t reason;
     uint8_t state;
@@ -471,7 +536,7 @@ struct QueueContextSwitch
 struct QueueThreadWakeup
 {
     int64_t time;
-    uint64_t thread;
+    uint32_t thread;
 };
 
 struct QueueTidToPid
@@ -531,16 +596,22 @@ struct QueueItem
         QueueThreadContext threadCtx;
         QueueZoneBegin zoneBegin;
         QueueZoneBeginLean zoneBeginLean;
+        QueueZoneBeginThread zoneBeginThread;
         QueueZoneEnd zoneEnd;
+        QueueZoneEndThread zoneEndThread;
         QueueZoneValidation zoneValidation;
+        QueueZoneValidationThread zoneValidationThread;
         QueueZoneColor zoneColor;
+        QueueZoneColorThread zoneColorThread;
         QueueZoneValue zoneValue;
+        QueueZoneValueThread zoneValueThread;
         QueueStringTransfer stringTransfer;
         QueueFrameMark frameMark;
         QueueFrameImage frameImage;
         QueueFrameImageFat frameImageFat;
         QueueSourceLocation srcloc;
         QueueZoneTextFat zoneTextFat;
+        QueueZoneTextFatThread zoneTextFatThread;
         QueueLockAnnounce lockAnnounce;
         QueueLockTerminate lockTerminate;
         QueueLockWait lockWait;
@@ -553,9 +624,13 @@ struct QueueItem
         QueueMessage message;
         QueueMessageColor messageColor;
         QueueMessageLiteral messageLiteral;
+        QueueMessageLiteralThread messageLiteralThread;
         QueueMessageColorLiteral messageColorLiteral;
+        QueueMessageColorLiteralThread messageColorLiteralThread;
         QueueMessageFat messageFat;
+        QueueMessageFatThread messageFatThread;
         QueueMessageColorFat messageColorFat;
+        QueueMessageColorFatThread messageColorFatThread;
         QueueGpuNewContext gpuNewContext;
         QueueGpuZoneBegin gpuZoneBegin;
         QueueGpuZoneBeginLean gpuZoneBeginLean;
@@ -568,7 +643,9 @@ struct QueueItem
         QueueMemFree memFree;
         QueueMemNamePayload memName;
         QueueCallstackFat callstackFat;
+        QueueCallstackFatThread callstackFatThread;
         QueueCallstackAllocFat callstackAllocFat;
+        QueueCallstackAllocFatThread callstackAllocFatThread;
         QueueCallstackSample callstackSample;
         QueueCallstackSampleFat callstackSampleFat;
         QueueCallstackFrameSize callstackFrameSize;
@@ -576,6 +653,7 @@ struct QueueItem
         QueueSymbolInformation symbolInformation;
         QueueCodeInformation codeInformation;
         QueueCrashReport crashReport;
+        QueueCrashReportThread crashReportThread;
         QueueSysTime sysTime;
         QueueContextSwitch contextSwitch;
         QueueThreadWakeup threadWakeup;

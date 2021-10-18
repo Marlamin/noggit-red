@@ -419,6 +419,7 @@ private:
 
   void setupChunkVAO(opengl::scoped::use_program& mcnk_shader);
   void setupLiquidChunkVAO(opengl::scoped::use_program& water_shader);
+  void setupOccluderBuffers();
   void setupChunkBuffers();
   void setupLiquidChunkBuffers();
 
@@ -448,6 +449,7 @@ private:
   std::unique_ptr<opengl::program> _m2_box_program;
   std::unique_ptr<opengl::program> _wmo_program;
   std::unique_ptr<opengl::program> _liquid_program;
+  std::unique_ptr<opengl::program> _occluder_program;
 
   // Minimap programs. Ugly, but those can't be shared between contexts, so we compile twice
   std::unique_ptr<opengl::program> _mcnk_program_mini;
@@ -461,7 +463,7 @@ private:
 
   noggit::NoggitRenderContext _context;
 
-  opengl::scoped::deferred_upload_buffers<7> _buffers;
+  opengl::scoped::deferred_upload_buffers<8> _buffers;
   GLuint const& _mvp_ubo = _buffers[0];
   GLuint const& _lighting_ubo = _buffers[1];
   GLuint const& _terrain_params_ubo = _buffers[2];
@@ -473,12 +475,13 @@ private:
   GLuint const& _mapchunk_vertex = _buffers[3];
   GLuint const& _mapchunk_index = _buffers[4];
   GLuint const& _mapchunk_texcoord = _buffers[5];
-
   GLuint const& _liquid_chunk_vertex = _buffers[6];
+  GLuint const& _occluder_index = _buffers[7];
 
-  opengl::scoped::deferred_upload_vertex_arrays<2> _vertex_arrays;
+  opengl::scoped::deferred_upload_vertex_arrays<3> _vertex_arrays;
   GLuint const& _mapchunk_vao = _vertex_arrays[0];
   GLuint const& _liquid_chunk_vao = _vertex_arrays[1];
+  GLuint const& _occluder_vao = _vertex_arrays[2];
 
   LiquidTextureManager _liquid_texture_manager;
 

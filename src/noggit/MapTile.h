@@ -77,6 +77,7 @@ public:
 
   std::atomic<bool> changed;
   unsigned objects_frustum_cull_test = 0;
+  bool objects_occluded = false;
 
   void draw (opengl::scoped::use_program& mcnk_shader
             , const math::vector_3d& camera
@@ -158,6 +159,7 @@ public:
   std::unordered_set<SceneObject*>& getObjectInstances() { return object_instances; };
 
   void doObjectOcclusionQuery(opengl::scoped::use_program& occlusion_shader);
+  bool getObjectOcclusionQueryResult();
 
   float camDist() { return _cam_dist; }
   void calcCamDist(math::vector_3d const& camera);
@@ -200,7 +202,7 @@ private:
   GLuint const& _alphamap_tex = _chunk_texture_arrays[3];
 
   GLuint _objects_occlusion_query;
-  bool _object_occlusion_query_in_use = true;
+  bool _object_occlusion_query_in_use = false;
 
   opengl::scoped::deferred_upload_buffers<1> _buffers;
 

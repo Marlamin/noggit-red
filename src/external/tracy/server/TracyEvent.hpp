@@ -268,6 +268,7 @@ enum { SampleDataSize = sizeof( SampleData ) };
 struct SampleDataRange
 {
     Int48 time;
+    uint16_t thread;
     CallstackFrameId ip;
 };
 
@@ -752,6 +753,7 @@ struct PlotData
     uint64_t name;
     double min;
     double max;
+    double sum;
     SortedVector<PlotItem, PlotItemSort> data;
     PlotType type;
     PlotValueFormatting format;

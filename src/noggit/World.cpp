@@ -881,16 +881,28 @@ void World::initShaders()
     );
   }
 
+  if (!_occluder_program)
+  {
+    _occluder_program.reset(
+        new opengl::program
+            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("occluder_vs") }
+            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("occluder_fs") }
+            }
+    );
+  }
+
   _liquid_texture_manager.upload();
+
+  _buffers.upload();
+  _vertex_arrays.upload();
+
+  setupOccluderBuffers();
 
   {
     opengl::scoped::use_program m2_shader {*_m2_program.get()};
     m2_shader.uniform("bone_matrices", 0);
     m2_shader.uniform("tex1", 1);
     m2_shader.uniform("tex2", 2);
-
-    _buffers.upload();
-    _vertex_arrays.upload();
 
     m2_shader.bind_uniform_block("matrices", 0);
     gl.bindBuffer(GL_UNIFORM_BUFFER, _mvp_ubo);
@@ -995,6 +1007,11 @@ void World::initShaders()
     m2_box_shader.bind_uniform_block("matrices", 0);
   }
 
+  {
+    opengl::scoped::use_program occluder_shader {*_occluder_program.get()};
+    occluder_shader.bind_uniform_block("matrices", 0);
+  }
+
 }
 
 void World::draw ( math::matrix_4x4 const& model_view
@@ -1077,6 +1094,7 @@ void World::draw ( math::matrix_4x4 const& model_view
       tile->objects_frustum_cull_test = 0;
     }
 
+    tile->objects_occluded = false;
   }
 
   assert(tile_counter <= _loaded_tiles_buffer.size());
@@ -1178,51 +1196,83 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   if (draw_terrain)
   {
+    ZoneScopedN("World::draw() : Draw terrain");
+
     gl.disable(GL_BLEND);
 
-    ZoneScopedN("World::draw() : Draw terrain");
-    opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
-
-    mcnk_shader.uniform ("camera", camera_pos);
-    mcnk_shader.uniform ("animtime", static_cast<int>(animtime));
-
-    if (cursor_type != CursorType::NONE)
     {
-      mcnk_shader.uniform("draw_cursor_circle", static_cast<int>(cursor_type));
-      mcnk_shader.uniform ("cursor_position", cursor_pos);
-      mcnk_shader.uniform("cursorRotation", cursorRotation);
-      mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
-      mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
-      mcnk_shader.uniform ("cursor_color", cursor_color);
-    }
-    else
-    {
-      mcnk_shader.uniform("draw_cursor_circle", 0);
-    }
+      opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
-    //std::array<int, 4> textures_bound = { -1, -1, -1, -1 };
+      mcnk_shader.uniform ("camera", camera_pos);
+      mcnk_shader.uniform ("animtime", static_cast<int>(animtime));
 
-    gl.bindVertexArray(_mapchunk_vao);
-    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mapchunk_index);
-
-    for (MapTile* tile : _loaded_tiles_buffer)
-    {
-      if (!tile)
+      if (cursor_type != CursorType::NONE)
       {
-        break;
+        mcnk_shader.uniform("draw_cursor_circle", static_cast<int>(cursor_type));
+        mcnk_shader.uniform ("cursor_position", cursor_pos);
+        mcnk_shader.uniform("cursorRotation", cursorRotation);
+        mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
+        mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
+        mcnk_shader.uniform ("cursor_color", cursor_color);
+      }
+      else
+      {
+        mcnk_shader.uniform("draw_cursor_circle", 0);
       }
 
-      tile->draw (mcnk_shader
-                 , camera_pos
-                 , show_unpaintable_chunks
-                 , draw_paintability_overlay
-                 , terrainMode == editing_mode::minimap
-                   && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z)
-                 );
+      //std::array<int, 4> textures_bound = { -1, -1, -1, -1 };
+
+      gl.bindVertexArray(_mapchunk_vao);
+      gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mapchunk_index);
+
+      for (MapTile* tile : _loaded_tiles_buffer)
+      {
+        if (!tile)
+        {
+          break;
+        }
+
+        tile->draw (mcnk_shader
+            , camera_pos
+            , show_unpaintable_chunks
+            , draw_paintability_overlay
+            , terrainMode == editing_mode::minimap
+              && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z)
+        );
+      }
+
+      gl.bindVertexArray(0);
+      gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
-    gl.bindVertexArray(0);
-    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    // occlusion culling
+    {
+      opengl::scoped::use_program occluder_shader{ *_occluder_program.get() };
+      gl.colorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+      gl.depthMask(GL_FALSE);
+      gl.bindVertexArray(_occluder_vao);
+      gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _occluder_index);
+      gl.disable(GL_CULL_FACE); // TODO: figure out why indices are bad and we need this
+
+      for (MapTile* tile : _loaded_tiles_buffer)
+      {
+        if (!tile)
+        {
+          break;
+        }
+
+        tile->objects_occluded = !tile->getObjectOcclusionQueryResult();
+        tile->doObjectOcclusionQuery(occluder_shader);
+      }
+
+      gl.enable(GL_CULL_FACE);
+      gl.colorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+      gl.depthMask(GL_TRUE);
+      gl.bindVertexArray(0);
+      gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    }
+
   }
 
   if (terrainMode == editing_mode::object && has_multiple_model_selected())
@@ -4511,9 +4561,44 @@ void World::setupLiquidChunkBuffers()
 
 void World::notifyTileRendererOnSelectedTextureChange()
 {
+  ZoneScoped;
+
   for (MapTile* tile : mapIndex.loaded_tiles())
   {
     tile->notifyTileRendererOnSelectedTextureChange();
   }
+}
+
+
+void World::setupOccluderBuffers()
+{
+  ZoneScoped;
+  static constexpr std::array<std::uint16_t, 36> indices
+  {
+      /*Above ABC,BCD*/
+      0,1,2,
+      1,2,3,
+      /*Following EFG,FGH*/
+      4,5,6,
+      5,6,7,
+      /*Left ABF,AEF*/
+      1,0,5,
+      0,4,5,
+      /*Right side CDH,CGH*/
+      3,2,7,
+      2,6,7,
+      /*ACG,AEG*/
+      2,0,6,
+      0,4,6,
+      /*Behind BFH,BDH*/
+      5,1,7,
+      1,3,7
+  };
+
+  {
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_occluder_index);
+    gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, 36 * sizeof(std::uint16_t), indices.data(), GL_STATIC_DRAW);
+  }
+
 }
 

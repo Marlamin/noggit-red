@@ -410,7 +410,6 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
     _samplers = std::vector{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
     gl.genQueries(1, &_objects_occlusion_query);
-    _object_occlusion_query_in_use = false;
 
     _uploaded = true;
   }
@@ -1836,7 +1835,6 @@ void MapTile::unload()
     _chunk_texture_arrays.unload();
     _buffers.unload();
     _uploaded = false;
-    _object_occlusion_query_in_use = true;
     gl.deleteQueries(1, &_objects_occlusion_query);
   }
 
@@ -1948,15 +1946,36 @@ void MapTile::recalcObjectInstanceExtents()
 
 void MapTile::doObjectOcclusionQuery(opengl::scoped::use_program& occlusion_shader)
 {
-  if (_object_occlusion_query_in_use)
+  if (_object_occlusion_query_in_use || !_uploaded)
     return;
 
+  _object_occlusion_query_in_use = true;
   gl.beginQuery(GL_ANY_SAMPLES_PASSED, _objects_occlusion_query);
   occlusion_shader.uniform("aabb", _object_instance_extents.data(), _object_instance_extents.size());
-  //gl.drawElements(GL_TRIANGLES, )
+  gl.drawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, nullptr);
+  gl.endQuery(GL_ANY_SAMPLES_PASSED);
+}
+
+bool MapTile::getObjectOcclusionQueryResult()
+{
+  // returns true if objects are not occluded by terrain
+  if (!_uploaded)
+    return true;
+
+  GLint result;
+  gl.getQueryObjectiv(_objects_occlusion_query, GL_QUERY_RESULT_AVAILABLE, &result);
+
+  if (result != GL_TRUE)
+    return true;
+
+  gl.getQueryObjectiv(_objects_occlusion_query, GL_QUERY_RESULT, &result);
+  _object_occlusion_query_in_use = false;
+
+  return static_cast<bool>(result);
 }
 
 void MapTile::calcCamDist(math::vector_3d const& camera)
 {
   _cam_dist = (camera - _center).length();
 }
+

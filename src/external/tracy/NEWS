@@ -6,10 +6,13 @@ here.
 v0.x.x (xxxx-xx-xx)
 -------------------
 
-- Cygwin and Mingw are deprecated due to lack of interest.
+- Support for Cygwin has been dropped. It was not working for a very long
+  time and nobody had complained about it.
+- Mingw is deprecated due to lack of interest.
 - Added TRACY_NO_CALLSTACK_INLINES macro to disable inline functions
   resolution in call stacks on Windows.
-- Limited client query response rate.
+- Limited client query response rate in order to improve apparent profiling
+  performance.
 - Improved function matching algorithm in compare traces view.
 - Added CMake integration.
 - Reworked rpmalloc initialization.
@@ -39,12 +42,22 @@ v0.x.x (xxxx-xx-xx)
     stack sampling.
 - The image name filter entry field is now providing a list of available
   images.
-- Reentrant function calls may be not excluded from calculations in the
+- Reentrant function calls may be now excluded from calculations in the
   statistics view.
 - Crash handler is now properly removed during profiler destruction.
 - Repeatedly right-clicking on the same source line in the symbol view
   window will now cycle through assembly blocks associated with this source
   line.
+- Vulkan headers must be now explicitly included before including
+  TracyVulkan.hpp.
+- The capture utility may now limit capture time to a specified number of
+  seconds.
+- Fixed message thread assignment in the import-chrome utility.
+- Sampling data can be now also found in the find zone menu.
+- Instrumentation failures may now display their context, e.g. the zone text
+  that was to be set.
+- A warning is now displayed when sampling data is out-of-order.
+- Average value for plots can be now viewed.
 
 
 v0.7.8 (2021-05-19)

@@ -9,6 +9,7 @@
 #include <noggit/World.h>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
+#include <external/tracy/Tracy.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -1538,51 +1539,62 @@ void Model::draw ( math::matrix_4x4 const& model_view
                  , bool no_cull
                  )
 {
-  if (!finishedLoading() || loading_failed())
-  {
-    return;
-  }
+  ZoneScopedN(BOOST_CURRENT_FUNCTION);
 
-  if (!_finished_upload) 
   {
-    upload();
-  }
+    ZoneScopedN("Model::draw() : uploads")
 
-  if (!_vao_setup)
-  {
-    setupVAO(m2_shader);
+    if (!finishedLoading() || loading_failed())
+    {
+      return;
+    }
+
+    if (!_finished_upload)
+    {
+      upload();
+    }
+
+    if (!_vao_setup)
+    {
+      setupVAO(m2_shader);
+    }
   }
 
   static std::array<math::matrix_4x4, 10000> transform_matrix; // TODO: ugly hardcoded cap for performance reasons, use settings, exception on overflow
   int n_visible_instances = 0;
 
-  for (ModelInstance* mi : instances)
   {
-    unsigned region_visible = 0;
+    ZoneScopedN("Model::draw() : culling")
 
-    if (!mi->isWMODoodad())
+    for (ModelInstance* mi : instances)
     {
-      for (auto tile : mi->getTiles())
-      {
-        if (tile->objects_frustum_cull_test)
-        {
-          region_visible = tile->objects_frustum_cull_test;
+      unsigned region_visible = 0;
 
-          if (tile->objects_frustum_cull_test > 1)
-            break;
+      if (!mi->isWMODoodad())
+      {
+        for (auto tile : mi->getTiles())
+        {
+          if (tile->objects_frustum_cull_test && !tile->objects_occluded)
+          {
+            region_visible = tile->objects_frustum_cull_test;
+
+            if (tile->objects_frustum_cull_test > 1)
+              break;
+          }
         }
       }
-    }
-    else
-    {
-      region_visible = 1;
+      else
+      {
+        region_visible = 1;
+      }
+
+      if (no_cull || (region_visible && (region_visible > 1 || mi->isInFrustum(frustum)) && mi->isInRenderDist( cull_distance, camera, display)))
+      {
+        transform_matrix[n_visible_instances] = mi->transformMatrixTransposed();
+        n_visible_instances++;
+      }
     }
 
-    if (no_cull || (region_visible && (region_visible > 1 || mi->isInFrustum(frustum)) && mi->isInRenderDist( cull_distance, camera, display)))
-    {
-      transform_matrix[n_visible_instances] = (mi->transformMatrixTransposed());
-      n_visible_instances++;
-    }    
   }
 
   if (!n_visible_instances)
@@ -1590,54 +1602,60 @@ void Model::draw ( math::matrix_4x4 const& model_view
     return;
   }
 
-  if (animated && (!animcalc || _per_instance_animation))
-  {
-    animate(model_view, 0, animtime);
-    animcalc = true;
-  }
-
-  // store the model count to draw the bounding boxes later
-  if (all_boxes || _hidden)
-  {
-    model_boxes_to_draw.emplace(this, n_visible_instances);
-  }
-
-  /*
-  if (draw_particles && (!_particles.empty() || !_ribbons.empty()))
-  {
-    models_with_particles.emplace(this, n_visible_instances);
-  }
-   */
-
-  opengl::scoped::vao_binder const _ (_vao);
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
-    gl.bufferData(GL_ARRAY_BUFFER, n_visible_instances * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
-    //m2_shader.attrib("transform", 0, 1);
-  }
+    ZoneScopedN("Model::draw() : drawing")
 
-  if (animBones)
-  {
-    gl.activeTexture(GL_TEXTURE0);
-    gl.bindTexture(GL_TEXTURE_BUFFER, _bone_matrices_buf_tex);
-    m2_shader.uniform("anim_bones", true);
-  }
-  else
-  {
-    m2_shader.uniform("anim_bones", false);
-  }
-
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
-
-  for (ModelRenderPass& p : _render_passes)
-  {
-    if (p.prepare_draw(m2_shader, this, model_render_state))
+    if (animated && (!animcalc || _per_instance_animation))
     {
-      gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(p.index_start * sizeof(GLushort)), n_visible_instances);
-      //p.after_draw();
+      animate(model_view, 0, animtime);
+      animcalc = true;
+    }
+
+    // store the model count to draw the bounding boxes later
+    if (all_boxes || _hidden)
+    {
+      model_boxes_to_draw.emplace(this, n_visible_instances);
+    }
+
+    /*
+    if (draw_particles && (!_particles.empty() || !_ribbons.empty()))
+    {
+      models_with_particles.emplace(this, n_visible_instances);
+    }
+     */
+
+    opengl::scoped::vao_binder const _ (_vao);
+
+    {
+      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
+      gl.bufferData(GL_ARRAY_BUFFER, n_visible_instances * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
+      //m2_shader.attrib("transform", 0, 1);
+    }
+
+    if (animBones)
+    {
+      gl.activeTexture(GL_TEXTURE0);
+      gl.bindTexture(GL_TEXTURE_BUFFER, _bone_matrices_buf_tex);
+      m2_shader.uniform("anim_bones", true);
+    }
+    else
+    {
+      m2_shader.uniform("anim_bones", false);
+    }
+
+    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
+
+    for (ModelRenderPass& p : _render_passes)
+    {
+      if (p.prepare_draw(m2_shader, this, model_render_state))
+      {
+        gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(p.index_start * sizeof(GLushort)), n_visible_instances);
+        //p.after_draw();
+      }
     }
   }
+
 }
 
 void Model::draw_particles( math::matrix_4x4 const& model_view
