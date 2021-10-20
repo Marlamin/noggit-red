@@ -135,11 +135,56 @@ vec4 get_tex_color(vec2 tex_coord, int tex_sampler, int array_index)
   }
 
   return vec4(0);
+
+
+  /*
+  // This should be more compliant to the GLSL standard, but seems to be slower :(
+  vec2 uvDx = dFdx(tex_coord);
+  vec2 uvDy = dFdy(tex_coord);
+  vec3 uv = vec3(tex_coord, array_index);
+  
+  switch(tex_sampler) 
+  {
+    case 0:
+      return textureGrad(textures[0], uv, uvDx, uvDy);
+    case 1:
+      return textureGrad(textures[1], uv, uvDx, uvDy);
+    case 2:
+      return textureGrad(textures[2], uv, uvDx, uvDy);
+    case 3:
+      return textureGrad(textures[3], uv, uvDx, uvDy);
+    case 4:
+      return textureGrad(textures[4], uv, uvDx, uvDy);
+    case 5:
+      return textureGrad(textures[5], uv, uvDx, uvDy);
+    case 6:
+      return textureGrad(textures[6], uv, uvDx, uvDy);
+    case 7:
+      return textureGrad(textures[7], uv, uvDx, uvDy);
+    case 8:
+      return textureGrad(textures[8], uv, uvDx, uvDy);
+    case 9:
+      return textureGrad(textures[9], uv, uvDx, uvDy);
+    case 10:
+      return textureGrad(textures[10], uv, uvDx, uvDy);
+    default:
+      return vec4(0.0);
+  }
+
+  */
+
 }
 
 vec4 texture_blend()
 {
   vec3 alpha = texture(alphamap, vec3(vary_texcoord / 8.0, instanceID)).rgb;
+
+  int layer_count = instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b;
+
+  alpha.r = mix(alpha.r, 0.0, float(layer_count < 2));
+  alpha.g = mix(alpha.g, 0.0, float(layer_count < 3));
+  alpha.b = mix(alpha.b, 0.0, float(layer_count < 4));
+
   float a0 = alpha.r;
   float a1 = alpha.g;
   float a2 = alpha.b;

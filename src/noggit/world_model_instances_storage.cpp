@@ -352,4 +352,32 @@ namespace noggit
 
     Log << "Deleted " << deleted_uids << " duplicate Model/WMO" << std::endl;
   }
+
+  void world_model_instances_storage::upload()
+  {
+    if (_transform_storage_uploaded)
+      return;
+
+    _buffers.upload();
+
+    gl.genTextures(1, &_m2_instances_transform_buf_tex);
+    gl.activeTexture(GL_TEXTURE0);
+    gl.bindTexture(GL_TEXTURE_BUFFER, _m2_instances_transform_buf_tex);
+    gl.bindBuffer(GL_TEXTURE_BUFFER, _m2_instances_transform_buf);
+    gl.bufferData(GL_TEXTURE_BUFFER, _n_allocated_m2_transforms * sizeof(math::matrix_4x4), nullptr, GL_DYNAMIC_DRAW);
+    gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _m2_instances_transform_buf);
+
+    _transform_storage_uploaded = true;
+  }
+
+  void world_model_instances_storage::unload()
+  {
+    if (!_transform_storage_uploaded)
+      return;
+
+    gl.deleteTextures(1, &_m2_instances_transform_buf_tex);
+    _buffers.unload();
+
+    _transform_storage_uploaded = false;
+  }
 }

@@ -6,11 +6,13 @@
 #include <noggit/Selection.h>
 #include <noggit/tile_index.hpp>
 #include <noggit/WMOInstance.h>
+#include <opengl/scoped.hpp>
 
 #include <atomic>
 #include <functional>
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
 class World;
 
@@ -52,6 +54,9 @@ namespace noggit
     {
       return _uid_duplicates_found.load();
     }
+
+    void upload();
+    void unload();
 
   private: // private functions aren't thread safe
     inline bool unsafe_uid_is_used(std::uint32_t uid) const;
@@ -107,6 +112,13 @@ namespace noggit
 
     m2_instance_umap _m2s;
     wmo_instance_umap _wmos;
+
+    opengl::scoped::deferred_upload_buffers<1> _buffers;
+    GLuint const& _m2_instances_transform_buf = _buffers[0];
+    GLuint _m2_instances_transform_buf_tex;
+    std::uint32_t _n_allocated_m2_transforms = 4096;
+    std::uint32_t _n_used_m2_transforms = 0;
+    bool _transform_storage_uploaded = false;
 
     std::unordered_map<std::uint32_t, int> _instance_count_per_uid;
   };

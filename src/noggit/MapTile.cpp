@@ -407,25 +407,22 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
                        _chunk_instance_data_ubo, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256);
     gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256, NULL, GL_DYNAMIC_DRAW);
 
-    _samplers = std::vector{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    MapTileDrawCall& draw_call = _draw_calls.emplace_back();
+    draw_call.start_chunk = 0;
+    draw_call.n_chunks = 256;
+    std::fill(draw_call.samplers.begin(), draw_call.samplers.end(), -1);
 
     gl.genQueries(1, &_objects_occlusion_query);
 
     _uploaded = true;
   }
 
-
-  gl.bindBuffer(GL_UNIFORM_BUFFER, _chunk_instance_data_ubo);
-  gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_INSTANCE_DATA,
-                     _chunk_instance_data_ubo, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256);
-
-
   bool alphamap_bound = false;
   bool heightmap_bound = false;
   bool shadowmap_bound = false;
   bool mccv_bound = false;
 
-  bool texture_not_loaded = false;
+  _texture_not_loaded = false;
 
   // figure out if we need to update based on paintability
   bool need_paintability_update = false;
@@ -455,322 +452,234 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
   // run chunk updates. running this when splitdraw call detected unused sampler configuration as well.
   if (_chunk_update_flags || is_selected != _selected || need_paintability_update || _requires_sampler_reset)
   {
-    // get back to initial vector size if sampler reset is needed.
+
+    gl.bindBuffer(GL_UNIFORM_BUFFER, _chunk_instance_data_ubo);
+
     if (_requires_sampler_reset)
     [[unlikely]]
     {
-      _samplers = std::vector{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-      _split_drawcall = false;
+      _draw_calls.clear();
+      MapTileDrawCall& draw_call = _draw_calls.emplace_back();
+      std::fill(draw_call.samplers.begin(), draw_call.samplers.end(), -1);
+      draw_call.start_chunk = 0;
+      draw_call.n_chunks = 256;
     }
 
     _selected = is_selected;
 
-    for (int j = 0; j < 16; ++j)
+    for (int i = 0; i < 256; ++i)
     {
-      for (int i = 0; i < 16; ++i)
+      int chunk_x = i / 16;
+      int chunk_y = i % 16;
+
+      auto& chunk = mChunks[chunk_y][chunk_x];
+
+      _chunk_instance_data[i].ChunkXYZBase_Pad1 = {chunk->xbase, chunk->ybase, chunk->zbase, 1.0};
+
+      unsigned flags = chunk->getUpdateFlags();
+
+      if (flags & ChunkUpdateFlags::ALPHAMAP || _requires_sampler_reset || _texture_not_loaded)
       {
-        auto& chunk = mChunks[j][i];
-        _chunk_instance_data[i * 16 + j].ChunkXYZBase_Pad1 = {chunk->xbase, chunk->ybase, chunk->zbase, 1.0};
+        gl.activeTexture(GL_TEXTURE0 + 3);
+        gl.bindTexture(GL_TEXTURE_2D_ARRAY, _alphamap_tex);
+        alphamap_bound = true;
+        chunk->texture_set->uploadAlphamapData();
 
-        unsigned flags = chunk->getUpdateFlags();
-
-        if (!flags)
-          continue;
-
-        if (flags & ChunkUpdateFlags::ALPHAMAP || _requires_sampler_reset)
+        if (!_split_drawcall && !fillSamplers(chunk.get(), i, _draw_calls.size() - 1))
         {
-          gl.activeTexture(GL_TEXTURE0 + 3);
-          gl.bindTexture(GL_TEXTURE_2D_ARRAY, _alphamap_tex);
-          alphamap_bound = true;
-          chunk->texture_set->uploadAlphamapData();
+          _split_drawcall = true;
+        }
+      }
 
-          _chunk_instance_data[i * 16 + j].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[2] = chunk->texture_set->num();
+      if (!flags)
+        continue;
 
-          auto& chunk_textures = (*chunk->texture_set->getTextures());
-          for (int k = 0; k < chunk->texture_set->num(); ++k)
-          {
-
-            chunk_textures[k]->upload();
-
-            if (!chunk_textures[k]->is_uploaded())
-            {
-              texture_not_loaded = true;
-              continue;
-            }
-
-            GLuint tex_array = (*chunk->texture_set->getTextures())[k]->texture_array();
-            int tex_index = (*chunk->texture_set->getTextures())[k]->array_index();
-
-            int sampler_id = -1;
-            for (int n = 0; n < _samplers.size(); ++n)
-            {
-              if (_samplers[n] == tex_array)
-              {
-                sampler_id = n % NUM_SAMPLERS;
-                break;
-              }
-              else if (_samplers[n] < 0)
-              {
-                _samplers[n] = tex_array;
-                sampler_id = n % NUM_SAMPLERS;
-                break;
-              }
-            }
-            // If there are not enough sampler slots (11) we have to split the drawcall :(.
-            // Extremely infrequent for terrain. Never for Blizzard terrain as their tilesets
-            // use uniform BLP format per map.
-            if (sampler_id < 0)
-            [[unlikely]]
-            {
-              _split_drawcall = true;
-              unsigned old_size = _samplers.size();
-              _samplers.resize(old_size * 2);
-              std::fill(_samplers.begin() + old_size, _samplers.end(), -1);
-
-              _samplers[old_size] = tex_array;
-              sampler_id = old_size % NUM_SAMPLERS;
-            }
-
-            _chunk_instance_data[i * 16 + j].ChunkTextureSamplers[k] = sampler_id;
-            _chunk_instance_data[i * 16 + j].ChunkTextureArrayIDs[k] = (*chunk->texture_set->getTextures())[k]->is_specular() ? tex_index : -tex_index;
-          }
+      if (flags & ChunkUpdateFlags::VERTEX || flags & ChunkUpdateFlags::NORMALS)
+      {
+        heightmap_bound = true;
+        if (flags & ChunkUpdateFlags::VERTEX)
+        {
+          chunk->updateVerticesData();
         }
 
-        if (flags & ChunkUpdateFlags::VERTEX || flags & ChunkUpdateFlags::NORMALS)
-        {
-          heightmap_bound = true;
-          if (flags & ChunkUpdateFlags::VERTEX)
-          {
-            chunk->updateVerticesData();
-          }
+        gl.activeTexture(GL_TEXTURE0 + 0);
+        gl.bindTexture(GL_TEXTURE_2D, _height_tex);
+        gl.texSubImage2D(GL_TEXTURE_2D, 0, 0, i, mapbufsize, 1, GL_RGBA, GL_FLOAT, _chunk_heightmap_buffer.data() + i * mapbufsize * 4);
+      }
 
-          gl.activeTexture(GL_TEXTURE0 + 0);
-          gl.bindTexture(GL_TEXTURE_2D, _height_tex);
-          gl.texSubImage2D(GL_TEXTURE_2D, 0, 0, i * 16 + j, mapbufsize, 1, GL_RGBA, GL_FLOAT, _chunk_heightmap_buffer.data() + (i * 16 + j) * mapbufsize * 4);
+      if (flags & ChunkUpdateFlags::MCCV)
+      {
+        mccv_bound = true;
+        gl.activeTexture(GL_TEXTURE0 + 1);
+        gl.bindTexture(GL_TEXTURE_2D, _mccv_tex);
+        chunk->update_vertex_colors();
+      }
+
+      if (flags & ChunkUpdateFlags::SHADOW)
+      {
+        shadowmap_bound = true;
+        gl.activeTexture(GL_TEXTURE0 + 2);
+        gl.bindTexture(GL_TEXTURE_2D_ARRAY, _shadowmap_tex);
+        chunk->update_shadows();
+      }
+
+      if (flags & ChunkUpdateFlags::HOLES)
+      {
+        _chunk_instance_data[i].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[0] = chunk->holes;
+      }
+
+      if (flags & ChunkUpdateFlags::FLAGS)
+      {
+        _chunk_instance_data[i].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[1] = chunk->header_flags.flags.impass;
+
+        for (int k = 0; k < chunk->texture_set->num(); ++k)
+        {
+          unsigned layer_flags = chunk->texture_set->flag(k);
+          auto flag_view = reinterpret_cast<MCLYFlags*>(&layer_flags);
+
+          _chunk_instance_data[i].ChunkTexDoAnim[k] = flag_view->animation_enabled;
+          _chunk_instance_data[i].ChunkTexAnimSpeed[k] = flag_view->animation_speed;
+          _chunk_instance_data[i].ChunkTexAnimDir[k] = flag_view->animation_rotation;
         }
 
-        if (flags & ChunkUpdateFlags::MCCV)
+        _chunk_instance_data[i].ChunkTexDoAnim[1] = chunk->header_flags.flags.impass;
+      }
+
+      if (flags & ChunkUpdateFlags::AREA_ID)
+      {
+        _chunk_instance_data[i].AreaIDColor_Pad2_DrawSelection[0] = chunk->areaID;
+      }
+
+      _chunk_instance_data[i].AreaIDColor_Pad2_DrawSelection[3] = _selected;
+
+      chunk->endChunkUpdates();
+
+      if (_texture_not_loaded)
+        chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
+
+    }
+
+    _requires_sampler_reset = false;
+
+    // for split drawcalls we need to redo samplers every frame :(
+    if (_split_drawcall)
+    {
+      _draw_calls.clear();
+      MapTileDrawCall& draw_call = _draw_calls.emplace_back();
+      std::fill(draw_call.samplers.begin(), draw_call.samplers.end(), -1);
+      draw_call.start_chunk = 0;
+      draw_call.n_chunks = 0;
+
+      for (int i = 0; i < 256; ++i)
+      {
+        int chunk_x = i / 16;
+        int chunk_y = i % 16;
+        auto& chunk = mChunks[chunk_y][chunk_x];
+
+        if (!fillSamplers(chunk.get(), i, _draw_calls.size() - 1))
         {
-          mccv_bound = true;
-          gl.activeTexture(GL_TEXTURE0 + 1);
-          gl.bindTexture(GL_TEXTURE_2D, _mccv_tex);
-          chunk->update_vertex_colors();
-        }
+          MapTileDrawCall& previous_draw_call = _draw_calls.back();
+          MapTileDrawCall& new_draw_call = _draw_calls.emplace_back();
+          std::fill(new_draw_call.samplers.begin(), new_draw_call.samplers.end(), -1);
+          new_draw_call.start_chunk = previous_draw_call.start_chunk + previous_draw_call.n_chunks;
+          new_draw_call.n_chunks = 1;
 
-        if (flags & ChunkUpdateFlags::SHADOW)
+          fillSamplers(chunk.get(), i, _draw_calls.size() - 1);
+        }
+        else
         {
-          shadowmap_bound = true;
-          gl.activeTexture(GL_TEXTURE0 + 2);
-          gl.bindTexture(GL_TEXTURE_2D_ARRAY, _shadowmap_tex);
-          chunk->update_shadows();
+          MapTileDrawCall& last_draw_call = _draw_calls.back();
+          last_draw_call.n_chunks++;
+          assert(last_draw_call.n_chunks <= 256);
         }
-
-        if (flags & ChunkUpdateFlags::HOLES)
-        {
-          _chunk_instance_data[i * 16 + j].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[0] = chunk->holes;
-        }
-
-        if (flags & ChunkUpdateFlags::FLAGS)
-        {
-          _chunk_instance_data[i * 16 + j].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[1] = chunk->header_flags.flags.impass;
-
-          for (int k = 0; k < chunk->texture_set->num(); ++k)
-          {
-            unsigned layer_flags = chunk->texture_set->flag(k);
-            auto flag_view = reinterpret_cast<MCLYFlags*>(&layer_flags);
-
-            _chunk_instance_data[i * 16 + j].ChunkTexDoAnim[k] = flag_view->animation_enabled;
-            _chunk_instance_data[i * 16 + j].ChunkTexAnimSpeed[k] = flag_view->animation_speed;
-            _chunk_instance_data[i * 16 + j].ChunkTexAnimDir[k] = flag_view->animation_rotation;
-          }
-
-          _chunk_instance_data[i * 16 + j].ChunkTexDoAnim[1] = chunk->header_flags.flags.impass;
-        }
-
-        if (flags & ChunkUpdateFlags::AREA_ID)
-        {
-          _chunk_instance_data[i * 16 + j].AreaIDColor_Pad2_DrawSelection[0] = chunk->areaID;
-        }
-
-        _chunk_instance_data[i * 16 + j].AreaIDColor_Pad2_DrawSelection[3] = _selected;
-
-        chunk->endChunkUpdates();
-
-        if (texture_not_loaded)
-          chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
 
       }
 
-      _requires_sampler_reset = false;
-
+      if (_draw_calls.size() <= 1)
+      {
+        _split_drawcall = false;
+        _requires_sampler_reset = true;
+      }
     }
 
     endChunkUpdates();
 
-    if (texture_not_loaded)
+    if (_texture_not_loaded)
       registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
 
     gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256, &_chunk_instance_data);
   }
 
   // do not draw anything when textures did not finish loading
-  if (texture_not_loaded)
+  if (_texture_not_loaded)
   [[unlikely]]
   {
     return;
   }
 
-  if (!alphamap_bound)
+  gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_INSTANCE_DATA,
+                     _chunk_instance_data_ubo, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256);
+
+
+  for (auto& draw_call : _draw_calls)
   {
-    gl.activeTexture(GL_TEXTURE0 + 3);
-    gl.bindTexture(GL_TEXTURE_2D_ARRAY, _alphamap_tex);
-  }
 
-  if (!shadowmap_bound)
-  {
-    gl.activeTexture(GL_TEXTURE0 + 2);
-    gl.bindTexture(GL_TEXTURE_2D_ARRAY, _shadowmap_tex);
-  }
+    if (!alphamap_bound)
+    {
+      gl.activeTexture(GL_TEXTURE0 + 3);
+      gl.bindTexture(GL_TEXTURE_2D_ARRAY, _alphamap_tex);
+    }
 
-  if (!mccv_bound)
-  {
-    gl.activeTexture(GL_TEXTURE0 + 1);
-    gl.bindTexture(GL_TEXTURE_2D, _mccv_tex);
-  }
+    if (!shadowmap_bound)
+    {
+      gl.activeTexture(GL_TEXTURE0 + 2);
+      gl.bindTexture(GL_TEXTURE_2D_ARRAY, _shadowmap_tex);
+    }
 
-  if (!heightmap_bound)
-  {
-    gl.activeTexture(GL_TEXTURE0 + 0);
-    gl.bindTexture(GL_TEXTURE_2D, _height_tex);
-  }
+    if (!mccv_bound)
+    {
+      gl.activeTexture(GL_TEXTURE0 + 1);
+      gl.bindTexture(GL_TEXTURE_2D, _mccv_tex);
+    }
 
-  float tile_center_x = xbase + TILESIZE / 2.0f;
-  float tile_center_z = zbase + TILESIZE / 2.0f;
+    if (!heightmap_bound)
+    {
+      gl.activeTexture(GL_TEXTURE0 + 0);
+      gl.bindTexture(GL_TEXTURE_2D, _height_tex);
+    }
 
-  bool is_lod = misc::dist(tile_center_x, tile_center_z, camera.x, camera.z) > TILESIZE;
-  mcnk_shader.uniform("lod_level", int(is_lod));
+    float tile_center_x = xbase + TILESIZE / 2.0f;
+    float tile_center_z = zbase + TILESIZE / 2.0f;
 
+    bool is_lod = misc::dist(tile_center_x, tile_center_z, camera.x, camera.z) > TILESIZE;
+    mcnk_shader.uniform("lod_level", int(is_lod));
 
-  if (!_split_drawcall)
-  [[likely]]
-  {
+    assert(draw_call.n_chunks <= 256);
+    mcnk_shader.uniform("base_instance", static_cast<int>(draw_call.start_chunk));
+
     for (int i = 0; i < NUM_SAMPLERS; ++i)
     {
       gl.activeTexture(GL_TEXTURE0 + 5 + i);
 
-      if (_samplers[i] < 0)
+      if (draw_call.samplers[i] < 0)
       {
         gl.bindTexture(GL_TEXTURE_2D_ARRAY, 0);
         continue;
       }
 
-      gl.bindTexture(GL_TEXTURE_2D_ARRAY, _samplers[i]);
+      gl.bindTexture(GL_TEXTURE_2D_ARRAY, draw_call.samplers[i]);
     }
 
     if (is_lod)
     {
-      gl.drawElementsInstanced(GL_TRIANGLES, 192, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(768 * sizeof(std::uint16_t)), 256);
+      gl.drawElementsInstanced(GL_TRIANGLES, 192, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(768 * sizeof(std::uint16_t)), draw_call.n_chunks);
     }
     else
     {
-      gl.drawElementsInstanced(GL_TRIANGLES, 768, GL_UNSIGNED_SHORT, nullptr, 256);
+      gl.drawElementsInstanced(GL_TRIANGLES, 768, GL_UNSIGNED_SHORT, nullptr, draw_call.n_chunks);
     }
 
   }
-  else
-  [[unlikely]]
-  {
-    std::array<int, NUM_SAMPLERS> batch_samplers{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-
-    bool even_sampler_sets = !(_samplers.size() % NUM_SAMPLERS);
-    unsigned n_sampler_sets = even_sampler_sets ? _samplers.size() / NUM_SAMPLERS : _samplers.size() / NUM_SAMPLERS + 1;
-    unsigned cur_sampler_set = 0;
-
-    unsigned chunk_index_start = 0;
-    unsigned n_chunks = 0;
-
-    while (cur_sampler_set < n_sampler_sets)
-    {
-      std::fill(batch_samplers.begin(), batch_samplers.end(), -1);
-      n_chunks = 0;
-
-      // find out the number of chunks we can draw with current samplers
-      for (int j = chunk_index_start / 16; j < 16; ++j)
-      {
-        for (int i = chunk_index_start % 16; i < 16; ++i)
-        {
-          auto& chunk = mChunks[j][i];
-
-          auto& chunk_textures = (*chunk->texture_set->getTextures());
-          for (int k = 0; k < chunk->texture_set->num(); ++k)
-          {
-            GLuint tex_array = (*chunk->texture_set->getTextures())[k]->texture_array();
-            int tex_index = (*chunk->texture_set->getTextures())[k]->array_index();
-
-            int sampler_id = -1;
-            for (int n = 0; n < NUM_SAMPLERS; ++n)
-            {
-              if (batch_samplers[n] == tex_array)
-              {
-                sampler_id = n;
-                break;
-              }
-              else if (batch_samplers[n] < 0)
-              {
-                batch_samplers[n] = tex_array;
-                sampler_id = n;
-                break;
-              }
-            }
-
-            if (sampler_id < 0)
-            {
-              chunk_index_start = i * 16 + j;
-              goto MapTile_DrawSplitDrawCallBreak;
-            }
-
-          }
-          n_chunks++;
-        }
-      }
-
-      MapTile_DrawSplitDrawCallBreak:
-      // perform split drawcall
-      for (int i = 0; i < NUM_SAMPLERS; ++i)
-      {
-        gl.activeTexture(GL_TEXTURE0 + 5 + i);
-
-        if (batch_samplers[i] < 0)
-        {
-          gl.bindTexture(GL_TEXTURE_2D_ARRAY, 0);
-          continue;
-        }
-
-        gl.bindTexture(GL_TEXTURE_2D_ARRAY, batch_samplers[i]);
-      }
-
-      mcnk_shader.uniform("base_instance", static_cast<int>(chunk_index_start));
-
-      if (is_lod)
-      {
-        gl.drawElementsInstanced(GL_TRIANGLES, 192, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(768), n_chunks);
-      }
-      else
-      {
-        gl.drawElementsInstanced(GL_TRIANGLES, 768, GL_UNSIGNED_SHORT, nullptr, n_chunks);
-      }
-
-      cur_sampler_set++;
-
-      if (!n_chunks)
-      {
-        _requires_sampler_reset = true;
-      }
-    }
-
-    mcnk_shader.uniform("base_instance", 0);
-  }
-
 }
 
 bool MapTile::intersect (math::ray const& ray, selection_result* results) const
@@ -1960,13 +1869,13 @@ bool MapTile::getObjectOcclusionQueryResult()
 {
   // returns true if objects are not occluded by terrain
   if (!_uploaded)
-    return true;
+    return !objects_occluded;
 
   GLint result;
   gl.getQueryObjectiv(_objects_occlusion_query, GL_QUERY_RESULT_AVAILABLE, &result);
 
   if (result != GL_TRUE)
-    return true;
+    return !objects_occluded;
 
   gl.getQueryObjectiv(_objects_occlusion_query, GL_QUERY_RESULT, &result);
   _object_occlusion_query_in_use = false;
@@ -1977,5 +1886,71 @@ bool MapTile::getObjectOcclusionQueryResult()
 void MapTile::calcCamDist(math::vector_3d const& camera)
 {
   _cam_dist = (camera - _center).length();
+}
+
+bool MapTile::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned int draw_call_index)
+{
+  MapTileDrawCall& draw_call = _draw_calls[draw_call_index];
+
+  _chunk_instance_data[chunk_index].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[2] = chunk->texture_set->num();
+
+  static constexpr unsigned NUM_SAMPLERS = 11;
+
+  _chunk_instance_data[chunk_index].ChunkTextureSamplers[0] = 0;
+  _chunk_instance_data[chunk_index].ChunkTextureSamplers[1] = 0;
+  _chunk_instance_data[chunk_index].ChunkTextureSamplers[2] = 0;
+  _chunk_instance_data[chunk_index].ChunkTextureSamplers[3] = 0;
+
+  _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[0] = -1;
+  _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[1] = -1;
+  _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[2] = -1;
+  _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[3] = -1;
+
+
+  auto& chunk_textures = (*chunk->texture_set->getTextures());
+  for (int k = 0; k < chunk->texture_set->num(); ++k)
+  {
+    chunk_textures[k]->upload();
+
+    if (!chunk_textures[k]->is_uploaded())
+    {
+      _texture_not_loaded = true;
+      continue;
+    }
+
+    GLuint tex_array = (*chunk->texture_set->getTextures())[k]->texture_array();
+    int tex_index = (*chunk->texture_set->getTextures())[k]->array_index();
+
+    int sampler_id = -1;
+    for (int n = 0; n < draw_call.samplers.size(); ++n)
+    {
+      if (draw_call.samplers[n] == tex_array)
+      {
+        sampler_id = n;
+        break;
+      }
+      else if (draw_call.samplers[n] < 0)
+      {
+        draw_call.samplers[n] = tex_array;
+        sampler_id = n;
+        break;
+      }
+    }
+
+    // If there are not enough sampler slots (11) we have to split the drawcall :(.
+    // Extremely infrequent for terrain. Never for Blizzard terrain as their tilesets
+    // use uniform BLP format per map.
+    if (sampler_id < 0)
+    [[unlikely]]
+    {
+      return false;
+    }
+
+    _chunk_instance_data[chunk_index].ChunkTextureSamplers[k] = sampler_id;
+    _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[k] = (*chunk->texture_set->getTextures())[k]->is_specular() ? tex_index : -tex_index;
+
+  }
+
+  return true;
 }
 

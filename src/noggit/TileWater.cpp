@@ -61,8 +61,6 @@ void TileWater::draw ( math::frustum const& frustum
 
   for (auto& render_layer : _render_layers)
   {
-
-    gl.bindBuffer(GL_UNIFORM_BUFFER, render_layer.chunk_data_buf);
     gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_LIQUID_INSTANCE_INDEX, render_layer.chunk_data_buf, 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock));
 
     gl.activeTexture(GL_TEXTURE0);
@@ -234,9 +232,7 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
 
             gl.genBuffers(1, &render_layer.chunk_data_buf);
             gl.bindBuffer(GL_UNIFORM_BUFFER, render_layer.chunk_data_buf);
-            gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::LiquidChunkInstanceDataUniformBlock) * 256, NULL, GL_DYNAMIC_DRAW);
-            gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_LIQUID_INSTANCE_INDEX, render_layer.chunk_data_buf, 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock));
-          }
+            gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::LiquidChunkInstanceDataUniformBlock) * 256, NULL, GL_DYNAMIC_DRAW);}
 
           auto& layer_params = _render_layers[layer_counter];
 

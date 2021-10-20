@@ -150,7 +150,10 @@ vec2 animUVOffset(int do_animate, int spd, int dir)
 
 void main()
 {
-  instanceID = base_instance + gl_InstanceID;
+  int t_i = gl_InstanceID / 16;
+  int t_y = gl_InstanceID % 16;
+
+  instanceID = base_instance + (t_i * 16 + t_y);
   vec4 normal_pos = texelFetch(heightmap, ivec2(gl_VertexID, instanceID), 0);
   vec3 pos_base = instances[instanceID].ChunkXYZBase_Pad1.xyz;
   vec3 pos = vec3(position.x + pos_base.x, pos_base.y + normal_pos.a, position.y + pos_base.z);

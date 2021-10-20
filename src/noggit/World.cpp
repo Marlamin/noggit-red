@@ -1094,7 +1094,7 @@ void World::draw ( math::matrix_4x4 const& model_view
       tile->objects_frustum_cull_test = 0;
     }
 
-    tile->objects_occluded = false;
+    //tile->objects_occluded = false;
   }
 
   assert(tile_counter <= _loaded_tiles_buffer.size());

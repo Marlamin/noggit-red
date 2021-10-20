@@ -28,6 +28,13 @@ namespace math
 
 class World;
 
+struct MapTileDrawCall
+{
+  std::array<int, 11> samplers;
+  unsigned start_chunk;
+  unsigned n_chunks;
+};
+
 class MapTile : public AsyncObject
 {
 public:
@@ -85,6 +92,7 @@ public:
             , bool draw_paintability_overlay
             , bool is_selected
             );
+
   bool intersect (math::ray const&, selection_result*) const;
   void drawWater ( math::frustum const& frustum
                  , const float& cull_distance
@@ -167,15 +175,17 @@ public:
 private:
 
   void uploadTextures();
+  bool fillSamplers(MapChunk* chunk, unsigned chunk_index, unsigned draw_call_index);
 
   tile_mode _mode;
   bool _tile_is_being_reloaded;
   bool _uploaded = false;
   bool _selected = false;
   bool _split_drawcall = false;
-  bool _requires_sampler_reset = true;
+  bool _requires_sampler_reset = false;
   bool _requires_paintability_recalc = true;
   bool _requires_object_extents_recalc = true;
+  bool _texture_not_loaded = false;
 
   std::array<math::vector_3d, 2> _extents;
   std::array<math::vector_3d, 2> _object_instance_extents;
@@ -212,7 +222,7 @@ private:
 
   unsigned _chunk_update_flags;
 
-  std::vector<int> _samplers;
+  std::vector<MapTileDrawCall> _draw_calls;
 
   // MHDR:
   int mFlags;

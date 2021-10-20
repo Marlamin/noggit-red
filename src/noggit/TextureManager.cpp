@@ -47,8 +47,8 @@ TexArrayParams& TextureManager::get_tex_array(int width, int height, int mip_lev
 {
   TexArrayParams& array_params = _tex_arrays[context][std::make_tuple(-1, width, height, mip_level)];
 
-  GLint n_layers = 0;
-  gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
+  GLint n_layers = 1024;
+  //gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
 
   int index_x = array_params.n_used / n_layers;
 
@@ -60,9 +60,6 @@ TexArrayParams& TextureManager::get_tex_array(int width, int height, int mip_lev
     gl.bindTexture(GL_TEXTURE_2D_ARRAY, array);
 
     array_params.arrays.emplace_back(array);
-
-    GLint n_layers = 0;
-    gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
 
     int width_ = width;
     int height_ = height;
@@ -94,8 +91,8 @@ TexArrayParams& TextureManager::get_tex_array(GLint compression, int width, int 
 
   TexArrayParams& array_params = _tex_arrays[context][std::make_tuple(compression, width, height, mip_level)];
 
-  GLint n_layers = 0;
-  gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
+  GLint n_layers = 1024;
+  //gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
 
   int index_x = array_params.n_used / n_layers;
 
@@ -119,7 +116,6 @@ TexArrayParams& TextureManager::get_tex_array(GLint compression, int width, int 
       height_ = std::max(height_ >> 1, 1);
     }
 
-    //gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, mip_level - 1);
     gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, mip_level - 1);
     gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     gl.texParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -216,8 +212,8 @@ void blp_texture::upload()
 
   int width = _width, height = _height;
 
-  GLint n_layers;
-  gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
+  GLint n_layers = 1024;
+  //gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
 
   if (!_compression_format)
   {
