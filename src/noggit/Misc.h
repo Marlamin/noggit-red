@@ -48,6 +48,9 @@ namespace misc
   bool vec3d_equals(math::vector_3d const& v1, math::vector_3d const& v2);
   bool deg_vec3d_equals(math::degrees::vec3 const& v1, math::degrees::vec3 const& v2);
 
+  bool pointInside(math::vector_3d point, std::array<math::vector_3d, 2> const& extents);
+  void minmax(math::vector_3d* a, math::vector_3d* b);
+
   inline int rounded_int_div(int value, int div)
   {
     return value / div + (value % div <= (div >> 1) ? 0 : 1);
@@ -154,5 +157,3 @@ struct sChunkHeader
 
 void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSize = 0);
 
-bool pointInside(math::vector_3d point, math::vector_3d extents[2]);
-void minmax(math::vector_3d* a, math::vector_3d* b);

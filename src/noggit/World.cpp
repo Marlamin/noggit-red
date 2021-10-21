@@ -1261,7 +1261,7 @@ void World::draw ( math::matrix_4x4 const& model_view
           break;
         }
 
-        tile->objects_occluded = !tile->getObjectOcclusionQueryResult();
+        tile->objects_occluded = !tile->getObjectOcclusionQueryResult(camera_pos);
         tile->doObjectOcclusionQuery(occluder_shader);
       }
 

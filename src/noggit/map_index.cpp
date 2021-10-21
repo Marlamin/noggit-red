@@ -727,9 +727,10 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
         continue;
       }
 
-      math::vector_3d tileExtents[2];
+      std::array<math::vector_3d, 2> tileExtents;
       tileExtents[0] = { x*TILESIZE, 0, z*TILESIZE };
       tileExtents[1] = { (x+1)*TILESIZE, 0, (z+1)*TILESIZE };
+      misc::minmax(&tileExtents[0], &tileExtents[1]);
 
       std::forward_list<ENTRY_MDDF> modelEntries;
       std::forward_list<ENTRY_MODF> wmoEntries;
@@ -767,7 +768,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
         bool add = true;
         ENTRY_MDDF const& mddf = mddf_ptr[i];
 
-        if (!pointInside({ mddf.pos[0], 0, mddf.pos[2] }, tileExtents))
+        if (!misc::pointInside({ mddf.pos[0], 0, mddf.pos[2] }, tileExtents))
         {
           continue;
         }
@@ -809,7 +810,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
         bool add = true;
         ENTRY_MODF const& modf = modf_ptr[i];
 
-        if (!pointInside({ modf.pos[0], 0, modf.pos[2] }, tileExtents))
+        if (!misc::pointInside({ modf.pos[0], 0, modf.pos[2] }, tileExtents))
         {
           continue;
         }

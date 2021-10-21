@@ -47,7 +47,7 @@ TexArrayParams& TextureManager::get_tex_array(int width, int height, int mip_lev
 {
   TexArrayParams& array_params = _tex_arrays[context][std::make_tuple(-1, width, height, mip_level)];
 
-  GLint n_layers = 1024;
+  GLint n_layers = 512;
   //gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
 
   int index_x = array_params.n_used / n_layers;
@@ -91,7 +91,7 @@ TexArrayParams& TextureManager::get_tex_array(GLint compression, int width, int 
 
   TexArrayParams& array_params = _tex_arrays[context][std::make_tuple(compression, width, height, mip_level)];
 
-  GLint n_layers = 1024;
+  GLint n_layers = 512;
   //gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
 
   int index_x = array_params.n_used / n_layers;
@@ -212,7 +212,7 @@ void blp_texture::upload()
 
   int width = _width, height = _height;
 
-  GLint n_layers = 1024;
+  GLint n_layers = 512;
   //gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
 
   if (!_compression_format)

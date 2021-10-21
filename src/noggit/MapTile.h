@@ -167,7 +167,7 @@ public:
   std::unordered_set<SceneObject*>& getObjectInstances() { return object_instances; };
 
   void doObjectOcclusionQuery(opengl::scoped::use_program& occlusion_shader);
-  bool getObjectOcclusionQueryResult();
+  bool getObjectOcclusionQueryResult(math::vector_3d const& camera);
 
   float camDist() { return _cam_dist; }
   void calcCamDist(math::vector_3d const& camera);

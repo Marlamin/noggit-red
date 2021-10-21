@@ -14,6 +14,29 @@
 
 namespace misc
 {
+
+  bool pointInside(math::vector_3d point, std::array<math::vector_3d, 2> const& extents)
+  {
+    return point.x >= extents[0].x && point.z >= extents[0].z &&
+           point.x <= extents[1].x && point.z <= extents[1].z;
+  }
+
+  void minmax(math::vector_3d* a, math::vector_3d* b)
+  {
+    if (a->x > b->x)
+    {
+      std::swap(a->x, b->x);
+    }
+    if (a->y > b->y)
+    {
+      std::swap(a->y, b->y);
+    }
+    if (a->z > b->z)
+    {
+      std::swap(a->z, b->z);
+    }
+  }
+
   void find_and_replace(std::string& source, const std::string& find, const std::string& replace)
   {
     size_t found = source.rfind(find);
@@ -186,26 +209,5 @@ void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSi
   Header->mSize = pSize;
 }
 
-bool pointInside(math::vector_3d point, math::vector_3d extents[2])
-{
-  minmax(&extents[0], &extents[1]);
 
-  return point.x >= extents[0].x && point.z >= extents[0].z &&
-    point.x <= extents[1].x && point.z <= extents[1].z;
-}
 
-void minmax(math::vector_3d* a, math::vector_3d* b)
-{
-  if (a->x > b->x)
-  {
-    std::swap(a->x, b->x);
-  }
-  if (a->y > b->y)
-  {
-    std::swap(a->y, b->y);
-  }
-  if (a->z > b->z)
-  {
-    std::swap(a->z, b->z);
-  }
-}

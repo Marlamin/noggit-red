@@ -19,7 +19,6 @@
 
 #include <QtCore/QSettings>
 
-#include <algorithm>
 #include <cassert>
 #include <list>
 #include <map>
@@ -27,7 +26,6 @@
 #include <utility>
 #include <vector>
 #include <limits>
-#include <cstdint>
 
 
 MapTile::MapTile( int pX
@@ -698,8 +696,7 @@ bool MapTile::intersect (math::ray const& ray, selection_result* results) const
   {
     for (size_t i (0); i < 16; ++i)
     {
-      if (mChunks[j][i]->intersect (ray, results))
-        return true;
+      mChunks[j][i]->intersect (ray, results);
     }
   }
   return false;
@@ -1865,11 +1862,17 @@ void MapTile::doObjectOcclusionQuery(opengl::scoped::use_program& occlusion_shad
   gl.endQuery(GL_ANY_SAMPLES_PASSED);
 }
 
-bool MapTile::getObjectOcclusionQueryResult()
+bool MapTile::getObjectOcclusionQueryResult(math::vector_3d const& camera)
 {
   // returns true if objects are not occluded by terrain
   if (!_uploaded)
     return !objects_occluded;
+
+  if (misc::pointInside(camera, _object_instance_extents))
+  {
+    _object_occlusion_query_in_use = false;
+    return true;
+  }
 
   GLint result;
   gl.getQueryObjectiv(_objects_occlusion_query, GL_QUERY_RESULT_AVAILABLE, &result);
