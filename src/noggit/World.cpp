@@ -1065,36 +1065,44 @@ void World::draw ( math::matrix_4x4 const& model_view
     updateTerrainParamsUniformBlock();
 
 
+  // Frustum culling
+  _n_loaded_tiles = 0;
   unsigned tile_counter = 0;
   for (MapTile* tile : mapIndex.loaded_tiles())
   {
-    auto& tile_extents = tile->getExtents();
+    tile->recalcObjectInstanceExtents();
+    tile->recalcCombinedExtents();
+
+    auto& tile_extents = tile->getCombinedExtents();
     if (frustum.intersects(tile_extents[1], tile_extents[0]) || tile->getChunkUpdateFlags())
     {
       tile->calcCamDist(camera_pos);
       _loaded_tiles_buffer[tile_counter] = tile;
-      tile_counter++;
-    }
 
-    // object culling pre-pass
-    tile->recalcObjectInstanceExtents();
-
-    auto& tile_obj_extents = tile->getObjectInstancesExtents();
-
-    if (frustum.intersects(tile_obj_extents[1], tile_obj_extents[0]))
-    {
       tile->objects_frustum_cull_test = 1;
-      if (frustum.contains(tile_obj_extents[0]) && frustum.contains(tile_obj_extents[1]))
+      if (frustum.contains(tile_extents[0]) && frustum.contains(tile_extents[1]))
       {
         tile->objects_frustum_cull_test++;
       }
+
+      if (tile->tile_frustum_culled)
+      {
+        tile->tile_occlusion_cull_override = true;
+        tile->discardTileOcclusionQuery();
+        tile->tile_occluded = false;
+      }
+
+      tile->tile_frustum_culled = false;
+
+      tile_counter++;
     }
     else
     {
+      tile->tile_frustum_culled = true;
       tile->objects_frustum_cull_test = 0;
     }
 
-    //tile->objects_occluded = false;
+    _n_loaded_tiles++;
   }
 
   assert(tile_counter <= _loaded_tiles_buffer.size());
@@ -1109,6 +1117,8 @@ void World::draw ( math::matrix_4x4 const& model_view
     buf_end = _loaded_tiles_buffer.begin() + tile_counter;
   }
 
+  // It is always import to sort tiles __front to back__.
+  // Otherwise selection would not work. Overdraw overhead is gonna occur as well.
   // TODO: perhaps parallel sort?
   std::sort(_loaded_tiles_buffer.begin(), buf_end,
             [](MapTile* a, MapTile* b) -> bool
@@ -1194,6 +1204,8 @@ void World::draw ( math::matrix_4x4 const& model_view
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   //gl.disable(GL_CULL_FACE);
 
+  _n_rendered_tiles = 0;
+
   if (draw_terrain)
   {
     ZoneScopedN("World::draw() : Draw terrain");
@@ -1220,8 +1232,6 @@ void World::draw ( math::matrix_4x4 const& model_view
         mcnk_shader.uniform("draw_cursor_circle", 0);
       }
 
-      //std::array<int, 4> textures_bound = { -1, -1, -1, -1 };
-
       gl.bindVertexArray(_mapchunk_vao);
       gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mapchunk_index);
 
@@ -1232,6 +1242,9 @@ void World::draw ( math::matrix_4x4 const& model_view
           break;
         }
 
+        if (tile->tile_occluded && !tile->getChunkUpdateFlags() && !tile->tile_occlusion_cull_override)
+          continue;
+
         tile->draw (mcnk_shader
             , camera_pos
             , show_unpaintable_chunks
@@ -1239,6 +1252,9 @@ void World::draw ( math::matrix_4x4 const& model_view
             , terrainMode == editing_mode::minimap
               && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z)
         );
+
+        _n_rendered_tiles++;
+
       }
 
       gl.bindVertexArray(0);
@@ -1246,6 +1262,10 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
 
     // occlusion culling
+    // terrain tiles act as occluders for each other, water and M2/WMOs.
+    // occlusion culling is not performed on per model instance basis
+    // rendering a little extra is cheaper than querying.
+    // occlusion latency has 1-2 frames delay.
     {
       opengl::scoped::use_program occluder_shader{ *_occluder_program.get() };
       gl.colorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -1261,8 +1281,8 @@ void World::draw ( math::matrix_4x4 const& model_view
           break;
         }
 
-        tile->objects_occluded = !tile->getObjectOcclusionQueryResult(camera_pos);
-        tile->doObjectOcclusionQuery(occluder_shader);
+        tile->tile_occluded = !tile->getTileOcclusionQueryResult(camera_pos);
+        tile->doTileOcclusionQuery(occluder_shader);
       }
 
       gl.enable(GL_CULL_FACE);
@@ -1270,7 +1290,6 @@ void World::draw ( math::matrix_4x4 const& model_view
       gl.depthMask(GL_TRUE);
       gl.bindVertexArray(0);
       gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
     }
 
   }
@@ -1543,8 +1562,14 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     water_shader.uniform ("use_transform", 0);
 
-    for (MapTile* tile : mapIndex.loaded_tiles())
+    for (MapTile* tile : _loaded_tiles_buffer)
     {
+      if (!tile)
+        break;
+
+      if (tile->tile_occluded && !tile->Water.needsUpdate() && !tile->tile_occlusion_cull_override)
+        continue;
+
       tile->drawWater ( frustum
                       , culldistance
                       , camera_pos

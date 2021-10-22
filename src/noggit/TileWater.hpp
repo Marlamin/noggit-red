@@ -76,6 +76,9 @@ public:
 
   bool isVisible(const math::frustum& frustum) const;
 
+  void tagExtents(bool state) { _extents_changed = state; };
+  bool needsUpdate() { return _need_buffer_update || _extents_changed; };
+
 private:
 
   MapTile *tile;
@@ -87,6 +90,7 @@ private:
 
   bool _need_buffer_update = false;
   bool _has_data = true;
+  bool _extents_changed = true;
 
   float xbase;
   float zbase;

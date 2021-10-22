@@ -81,7 +81,7 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
 
     for (auto& tile : getTiles())
     {
-      if (tile->objects_frustum_cull_test && !tile->objects_occluded)
+      if (tile->objects_frustum_cull_test && !tile->tile_occluded)
       {
         region_visible = tile->objects_frustum_cull_test;
 

@@ -213,6 +213,8 @@ void ChunkWater::update_layers()
     count++;
   }
 
+  _water_tile->tagExtents(true);
+
   vcenter = (vmin + vmax) * 0.5f;
 }
 

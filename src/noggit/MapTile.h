@@ -84,7 +84,9 @@ public:
 
   std::atomic<bool> changed;
   unsigned objects_frustum_cull_test = 0;
-  bool objects_occluded = false;
+  bool tile_occluded = false;
+  bool tile_frustum_culled = true;
+  bool tile_occlusion_cull_override = true;
 
   void draw (opengl::scoped::use_program& mcnk_shader
             , const math::vector_3d& camera
@@ -152,10 +154,11 @@ public:
   void endChunkUpdates() { _chunk_update_flags = 0; };
   std::array<float, 145 * 256 * 4>& getChunkHeightmapBuffer() { return _chunk_heightmap_buffer; };
   unsigned getChunkUpdateFlags() { return _chunk_update_flags; }
-  void recalcExtents(float min, float max);
+  void recalcExtents();
   void recalcObjectInstanceExtents();
+  void recalcCombinedExtents();
   std::array<math::vector_3d, 2>& getExtents() { return _extents; };
-  std::array<math::vector_3d, 2>& getObjectInstancesExtents() { return _object_instance_extents; };
+  std::array<math::vector_3d, 2>& getCombinedExtents() { return _combined_extents; };
 
   void unload();
 
@@ -166,11 +169,14 @@ public:
 
   std::unordered_set<SceneObject*>& getObjectInstances() { return object_instances; };
 
-  void doObjectOcclusionQuery(opengl::scoped::use_program& occlusion_shader);
-  bool getObjectOcclusionQueryResult(math::vector_3d const& camera);
+  void doTileOcclusionQuery(opengl::scoped::use_program& occlusion_shader);
+  bool getTileOcclusionQueryResult(math::vector_3d const& camera);
+  void discardTileOcclusionQuery() { _tile_occlusion_query_in_use = false; }
 
   float camDist() { return _cam_dist; }
   void calcCamDist(math::vector_3d const& camera);
+  void markExtentsDirty() { _extents_dirty = true; }
+  void tagCombinedExtents(bool state) { _combined_extents_dirty = state; };
 
 private:
 
@@ -186,9 +192,12 @@ private:
   bool _requires_paintability_recalc = true;
   bool _requires_object_extents_recalc = true;
   bool _texture_not_loaded = false;
+  bool _extents_dirty = true;
+  bool _combined_extents_dirty = true;
 
   std::array<math::vector_3d, 2> _extents;
   std::array<math::vector_3d, 2> _object_instance_extents;
+  std::array<math::vector_3d, 2> _combined_extents;
   math::vector_3d _center;
   float _cam_dist;
 
@@ -211,8 +220,8 @@ private:
   GLuint const& _shadowmap_tex = _chunk_texture_arrays[2];
   GLuint const& _alphamap_tex = _chunk_texture_arrays[3];
 
-  GLuint _objects_occlusion_query;
-  bool _object_occlusion_query_in_use = false;
+  GLuint _tile_occlusion_query;
+  bool _tile_occlusion_query_in_use = false;
 
   opengl::scoped::deferred_upload_buffers<1> _buffers;
 

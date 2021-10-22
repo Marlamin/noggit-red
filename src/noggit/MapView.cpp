@@ -2462,6 +2462,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_area (new QLabel (this))
   , _status_time (new QLabel (this))
   , _status_fps (new QLabel (this))
+  , _status_culling (new QLabel (this))
   , _texBrush{new opengl::texture{}}
   , _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW)
   , _tablet_manager(noggit::TabletManager::instance())
@@ -2515,6 +2516,12 @@ MapView::MapView( math::degrees camera_yaw0
           , _main_window
           , [=] { _main_window->statusBar()->removeWidget (_status_fps); }
           );
+  _main_window->statusBar()->addWidget (_status_culling);
+  connect ( this
+      , &QObject::destroyed
+      , _main_window
+      , [=] { _main_window->statusBar()->removeWidget (_status_culling); }
+  );
 
   moving = strafing = updown = lookat = turn = 0.0f;
 
@@ -3676,6 +3683,11 @@ void MapView::tick (float dt)
     _last_frame_durations.clear();
     _last_fps_update = 0.f;
   }
+
+  _status_culling->setText ( "Loaded tiles: " + QString::number(_world->getNumLoadedTiles())
+                         + " Rendered tiles: " + QString::number(_world->getNumRenderedTiles())
+                         + " Rendered obj. tiles: " + QString::number(_world->getNumRenderedObjectTiles())
+  );
 
   guiWater->updatePos (_camera.position);
 

@@ -16,8 +16,8 @@ TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase, bool use_mclq_g
   : tile(pTile)
   , xbase(pXbase)
   , zbase(pZbase)
-  ,  _extents{math::vector_3d{pXbase, std::numeric_limits<float>::max(), pZbase},
-              math::vector_3d{pXbase + TILESIZE, std::numeric_limits<float>::lowest(), pZbase + TILESIZE}}
+  , _extents{math::vector_3d{pXbase, std::numeric_limits<float>::max(), pZbase},
+            math::vector_3d{pXbase + TILESIZE, std::numeric_limits<float>::lowest(), pZbase + TILESIZE}}
 {
   for (int z = 0; z < 16; ++z)
   {
@@ -56,6 +56,25 @@ void TileWater::draw ( math::frustum const& frustum
   static std::vector<int> samplers_upload_buf {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
 
   updateLayerData(tex_manager);
+
+  if (_extents_changed)
+  {
+    _extents = {math::vector_3d{xbase, std::numeric_limits<float>::max(), zbase},
+                math::vector_3d{xbase + TILESIZE, std::numeric_limits<float>::lowest(), zbase + TILESIZE}};
+
+    for (int i = 0; i < 256; ++i)
+    {
+      int x = i / 16;
+      int z = i % 16;
+
+      auto& chunk = chunks[x][z];
+      _extents[0].y = std::min(_extents[0].y, chunk->getMinHeight());
+      _extents[1].y = std::max(_extents[1].y, chunk->getMaxHeight());
+    }
+
+    tile->tagCombinedExtents(true);
+    tagExtents(false);
+  }
 
   std::size_t n_render_blocks = _render_layers.size();
 

@@ -57,8 +57,10 @@ MapTile::MapTile( int pX
                         | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
   , _extents{math::vector_3d{pX * TILESIZE, std::numeric_limits<float>::max(), pZ * TILESIZE},
              math::vector_3d{pX * TILESIZE + TILESIZE, std::numeric_limits<float>::lowest(), pZ * TILESIZE + TILESIZE}}
-  , _object_instance_extents{math::vector_3d{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()},
-               math::vector_3d{std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()}}
+  , _combined_extents{math::vector_3d{pX * TILESIZE, std::numeric_limits<float>::max(), pZ * TILESIZE},
+             math::vector_3d{pX * TILESIZE + TILESIZE, std::numeric_limits<float>::lowest(), pZ * TILESIZE + TILESIZE}}
+  , _object_instance_extents{math::vector_3d{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()}
+  , math::vector_3d{std::numeric_limits<float>::lowest(),  std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()}}
   ,_center{pX * TILESIZE + TILESIZE / 2.f, 0.f, pZ * TILESIZE + TILESIZE / 2.f}
 {
 }
@@ -410,7 +412,7 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
     draw_call.n_chunks = 256;
     std::fill(draw_call.samplers.begin(), draw_call.samplers.end(), -1);
 
-    gl.genQueries(1, &_objects_occlusion_query);
+    gl.genQueries(1, &_tile_occlusion_query);
 
     _uploaded = true;
   }
@@ -608,6 +610,8 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
     gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256, &_chunk_instance_data);
   }
 
+  recalcExtents();
+
   // do not draw anything when textures did not finish loading
   if (_texture_not_loaded)
   [[unlikely]]
@@ -774,11 +778,12 @@ void MapTile::drawWater ( math::frustum const& frustum
                         , LiquidTextureManager* tex_manager
                         )
 {
-  if (!Water.hasData() || !Water.isVisible(frustum))
+  if (!Water.hasData())
   {
     return; //no need to draw water on tile without water =)
   }
 
+  // process water bounds
   Water.draw ( frustum
              , cull_distance
              , camera
@@ -1321,6 +1326,7 @@ void MapTile::add_model(uint32_t uid)
       _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->extents[1].y);
       _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->extents[1].z);
 
+      tagCombinedExtents(true);
     }
     else
     {
@@ -1352,6 +1358,8 @@ void MapTile::add_model(SceneObject* instance)
       _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->extents[1].x);
       _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->extents[1].y);
       _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->extents[1].z);
+
+      tagCombinedExtents(true);
     }
     else
     {
@@ -1741,7 +1749,7 @@ void MapTile::unload()
     _chunk_texture_arrays.unload();
     _buffers.unload();
     _uploaded = false;
-    gl.deleteQueries(1, &_objects_occlusion_query);
+    gl.deleteQueries(1, &_tile_occlusion_query);
   }
 
   if (_mfbo_buffer_are_setup)
@@ -1810,12 +1818,29 @@ void MapTile::uploadTextures()
   gl.bindTexture(GL_TEXTURE_2D_ARRAY, 0);
 }
 
-void MapTile::recalcExtents(float min, float max)
+void MapTile::recalcExtents()
 {
-  _extents[0].y = std::min(_extents[0].y, min);
-  _extents[1].y = std::max(_extents[1].y, max);
+  if (!_extents_dirty)
+    return;
+
+  _extents[0].y = std::numeric_limits<float>::max();
+  _extents[1].y = std::numeric_limits<float>::lowest();
+
+  for (int i = 0; i < 256; ++i)
+  {
+    unsigned x = i / 16;
+    unsigned z = i % 16;
+
+    auto& chunk = mChunks[x][z];
+
+    _extents[0].y = std::min(_extents[0].y, chunk->getMinHeight());
+    _extents[1].y = std::max(_extents[1].y, chunk->getMaxHeight());
+  }
 
   _center.y = (_extents[0].y + _extents[1].y) / 2;
+
+  _extents_dirty = false;
+  tagCombinedExtents(true);
 }
 
 void MapTile::recalcObjectInstanceExtents()
@@ -1825,7 +1850,26 @@ void MapTile::recalcObjectInstanceExtents()
     return;
   }
 
+  if (object_instances.empty())
+  {
+    _object_instance_extents[0] = {0.f, 0.f, 0.f};
+    _object_instance_extents[1] = {0.f, 0.f, 0.f};
+
+    _requires_object_extents_recalc = false;
+    tagCombinedExtents(true);
+    return;
+  }
+
+  _object_instance_extents[0] = {std::numeric_limits<float>::max(),
+                                 std::numeric_limits<float>::max(),
+                                 std::numeric_limits<float>::max()};
+
+  _object_instance_extents[1] = {std::numeric_limits<float>::lowest(),
+                                 std::numeric_limits<float>::lowest(),
+                                 std::numeric_limits<float>::lowest()};
+
   _requires_object_extents_recalc = false;
+
   for (auto& instance : object_instances)
   {
     if (!instance->finishedLoading())
@@ -1848,43 +1892,65 @@ void MapTile::recalcObjectInstanceExtents()
     _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, max.z);
   }
 
+  tagCombinedExtents(true);
+
 }
 
-void MapTile::doObjectOcclusionQuery(opengl::scoped::use_program& occlusion_shader)
+
+void MapTile::doTileOcclusionQuery(opengl::scoped::use_program& occlusion_shader)
 {
-  if (_object_occlusion_query_in_use || !_uploaded)
+  if (_tile_occlusion_query_in_use || !_uploaded)
     return;
 
-  _object_occlusion_query_in_use = true;
-  gl.beginQuery(GL_ANY_SAMPLES_PASSED, _objects_occlusion_query);
-  occlusion_shader.uniform("aabb", _object_instance_extents.data(), _object_instance_extents.size());
+  _tile_occlusion_query_in_use = true;
+  gl.beginQuery(GL_ANY_SAMPLES_PASSED, _tile_occlusion_query);
+  occlusion_shader.uniform("aabb", _combined_extents.data(), _combined_extents.size());
   gl.drawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, nullptr);
   gl.endQuery(GL_ANY_SAMPLES_PASSED);
 }
 
-bool MapTile::getObjectOcclusionQueryResult(math::vector_3d const& camera)
+bool MapTile::getTileOcclusionQueryResult(math::vector_3d const& camera)
 {
-  // returns true if objects are not occluded by terrain
-  if (!_uploaded)
-    return !objects_occluded;
+  // returns true if tile is not occluded by other tiles
 
-  if (misc::pointInside(camera, _object_instance_extents))
+  if (!_tile_occlusion_query_in_use)
+  [[unlikely]]
   {
-    _object_occlusion_query_in_use = false;
+    return !tile_occluded;
+  }
+
+  if (!_uploaded)
+    return !tile_occluded;
+
+  if (misc::pointInside(camera, _extents))
+  {
+    _tile_occlusion_query_in_use = false;
     return true;
   }
 
   GLint result;
-  gl.getQueryObjectiv(_objects_occlusion_query, GL_QUERY_RESULT_AVAILABLE, &result);
+  gl.getQueryObjectiv(_tile_occlusion_query, GL_QUERY_RESULT_AVAILABLE, &result);
 
   if (result != GL_TRUE)
-    return !objects_occluded;
+  {
+    return tile_occlusion_cull_override || !tile_occluded;
+  }
 
-  gl.getQueryObjectiv(_objects_occlusion_query, GL_QUERY_RESULT, &result);
-  _object_occlusion_query_in_use = false;
+  if (!tile_occlusion_cull_override)
+  {
+    gl.getQueryObjectiv(_tile_occlusion_query, GL_QUERY_RESULT, &result);
+  }
+  else
+  {
+    result = true;
+  }
+
+  _tile_occlusion_query_in_use = false;
+  tile_occlusion_cull_override = false;
 
   return static_cast<bool>(result);
 }
+
 
 void MapTile::calcCamDist(math::vector_3d const& camera)
 {
@@ -1956,4 +2022,29 @@ bool MapTile::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned int 
 
   return true;
 }
+
+void MapTile::recalcCombinedExtents()
+{
+  if (!_combined_extents_dirty)
+    return;
+
+  _combined_extents = _extents;
+
+  auto& water_extents =  Water.getExtents();
+  _combined_extents[0].y = std::min(_combined_extents[0].y, water_extents[0].y);
+  _combined_extents[1].y = std::max(_combined_extents[1].y, water_extents[1].y);
+
+  for (int i = 0; i < 3; ++i)
+  {
+    _combined_extents[0][i] = std::min(_combined_extents[0][i], _object_instance_extents[0][i]);
+  }
+
+  for (int i = 0; i < 3; ++i)
+  {
+    _combined_extents[1][i] = std::max(_combined_extents[1][i], _object_instance_extents[1][i]);
+  }
+
+  _combined_extents_dirty = false;
+}
+
 

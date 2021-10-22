@@ -174,8 +174,8 @@ public:
   bool GetVertex(float x, float z, math::vector_3d *V);
   void getVertexInternal(float x, float z, math::vector_3d * v);
   float getHeight(int x, int z);
-  float getMinHeight();
-  float getMaxHeight() { return vmin.y; };
+  float getMinHeight() { return vmin.y; };
+  float getMaxHeight() { return vmax.y; };
   math::vector_3d getCenter() { return vcenter; };
 
   void clearHeight();

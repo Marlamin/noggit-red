@@ -408,6 +408,9 @@ public:
 
   LiquidTextureManager* getLiquidTextureManager() { return &_liquid_texture_manager; };
   void loadAllTiles();
+  unsigned getNumLoadedTiles() { return _n_loaded_tiles; };
+  unsigned getNumRenderedTiles() { return _n_rendered_tiles; };
+  unsigned getNumRenderedObjectTiles() { return _n_rendered_object_tiles; };
 
 private:
   void update_models_by_filename();
@@ -486,7 +489,12 @@ private:
   LiquidTextureManager _liquid_texture_manager;
 
   std::array<MapTile*, 64 * 64> _loaded_tiles_buffer;
- 
+
   bool _need_terrain_params_ubo_update = false;
+
+  // Debug metrics
+  unsigned _n_loaded_tiles;
+  unsigned _n_rendered_tiles;
+  unsigned _n_rendered_object_tiles;
 
 };

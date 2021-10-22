@@ -1573,7 +1573,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
       {
         for (auto tile : mi->getTiles())
         {
-          if (tile->objects_frustum_cull_test && !tile->objects_occluded)
+          if (tile->objects_frustum_cull_test && !tile->tile_occluded)
           {
             region_visible = tile->objects_frustum_cull_test;
 

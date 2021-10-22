@@ -25,19 +25,19 @@ namespace math
       };
     };
 
-    vector_3d_base<T>() : vector_3d_base (T(0), T(0), T(0)) {}
     vector_3d_base<T> (T x_, T y_, T z_)
       : x (x_)
       , y (y_)
       , z (z_)
-    {}
+    {};
+    vector_3d_base<T>() : x (T(0)), y(T(0)), z(T(0)) {};
 
     template<typename U>
     explicit vector_3d_base<T> (vector_3d_base<U> const& other)
       : x (other.x)
       , y (other.y)
       , z (other.z)
-    {}
+    {};
 
     inline static vector_3d_base<T> min()
     {

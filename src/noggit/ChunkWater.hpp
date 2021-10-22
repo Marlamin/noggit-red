@@ -48,6 +48,8 @@ public:
 
   // update every layer's render
   void update_layers();
+  float getMinHeight() { return vmin.y; };
+  float getMaxHeight() { return vmax.y; }
 
   void paintLiquid( math::vector_3d const& pos
                   , float radius

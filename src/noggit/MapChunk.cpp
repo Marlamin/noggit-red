@@ -392,18 +392,6 @@ float MapChunk::getHeight(int x, int z)
   return mVertices[indexNoLoD(x, z)].y;
 }
 
-float MapChunk::getMinHeight()
-{
-  float min (mVertices[0].y);
-
-  for (auto&& vertex : mVertices)
-  {
-    min = std::min (min, vertex.y);
-  }
-
-  return min;
-}
-
 void MapChunk::clearHeight()
 {
   for (int i = 0; i < mapbufsize; ++i)
@@ -609,7 +597,7 @@ void MapChunk::updateVerticesData()
     tile_buffer[chunk_start + i * 4 + 3] = mVertices[i].y;
   }
 
-  mt->recalcExtents(vmin.y, vmax.y);
+  mt->markExtentsDirty();
 
   update_intersect_points();
 }
