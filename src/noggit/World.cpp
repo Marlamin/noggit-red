@@ -127,6 +127,7 @@ World::World(const std::string& name, int map_id, noggit::NoggitRenderContext co
   , _liquid_texture_manager(context)
 {
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
+  _loaded_tiles_buffer[0] = nullptr;
 }
 
 void World::update_selection_pivot()
@@ -1046,6 +1047,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , eTerrainType ground_editing_brush
                  , int water_layer
                  , display_mode display
+                 , bool draw_occlusion_boxes
                  )
 {
 
@@ -1260,38 +1262,6 @@ void World::draw ( math::matrix_4x4 const& model_view
       gl.bindVertexArray(0);
       gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
-
-    // occlusion culling
-    // terrain tiles act as occluders for each other, water and M2/WMOs.
-    // occlusion culling is not performed on per model instance basis
-    // rendering a little extra is cheaper than querying.
-    // occlusion latency has 1-2 frames delay.
-    {
-      opengl::scoped::use_program occluder_shader{ *_occluder_program.get() };
-      gl.colorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-      gl.depthMask(GL_FALSE);
-      gl.bindVertexArray(_occluder_vao);
-      gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _occluder_index);
-      gl.disable(GL_CULL_FACE); // TODO: figure out why indices are bad and we need this
-
-      for (MapTile* tile : _loaded_tiles_buffer)
-      {
-        if (!tile)
-        {
-          break;
-        }
-
-        tile->tile_occluded = !tile->getTileOcclusionQueryResult(camera_pos);
-        tile->doTileOcclusionQuery(occluder_shader);
-      }
-
-      gl.enable(GL_CULL_FACE);
-      gl.colorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-      gl.depthMask(GL_TRUE);
-      gl.bindVertexArray(0);
-      gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    }
-
   }
 
   if (terrainMode == editing_mode::object && has_multiple_model_selected())
@@ -1358,8 +1328,61 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
   }
 
-  bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
+  // occlusion culling
+  // terrain tiles act as occluders for each other, water and M2/WMOs.
+  // occlusion culling is not performed on per model instance basis
+  // rendering a little extra is cheaper than querying.
+  // occlusion latency has 1-2 frames delay.
+  {
+    opengl::scoped::use_program occluder_shader{ *_occluder_program.get() };
+    gl.colorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    gl.depthMask(GL_FALSE);
+    gl.bindVertexArray(_occluder_vao);
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _occluder_index);
+    gl.disable(GL_CULL_FACE); // TODO: figure out why indices are bad and we need this
 
+    math::matrix_4x4 identity_mtx = math::matrix_4x4{math::matrix_4x4::unit};
+    for (MapTile* tile : _loaded_tiles_buffer)
+    {
+      if (!tile)
+      {
+        break;
+      }
+
+      tile->tile_occluded = !tile->getTileOcclusionQueryResult(camera_pos);
+      tile->doTileOcclusionQuery(occluder_shader);
+    }
+
+    gl.enable(GL_CULL_FACE);
+    gl.colorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+    gl.depthMask(GL_TRUE);
+    gl.bindVertexArray(0);
+    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    // draw occlusion AABBs
+    if (draw_occlusion_boxes)
+    {
+
+      for (MapTile* tile : _loaded_tiles_buffer)
+      {
+        if (!tile)
+        {
+          break;
+        }
+
+        auto& extents = tile->getCombinedExtents();
+        opengl::primitives::wire_box::getInstance(_context).draw ( model_view
+            , projection
+            , identity_mtx
+            , { 1.0f, 1.0f, 0.0f, 1.0f }
+            , extents[0]
+            , extents[1]
+        );
+      }
+    }
+  }
+
+  bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
   // M2s / models
   if (draw_models || draw_doodads_wmo)
   {

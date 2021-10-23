@@ -201,6 +201,9 @@ void ChunkWater::update_layers()
 
   auto& extents = _water_tile->getExtents();
 
+  vmin.y = std::numeric_limits<float>::max();
+  vmax.y = std::numeric_limits<float>::lowest();
+
   for (liquid_layer& layer : _layers)
   {
     vmin.y = std::min (vmin.y, layer.min());

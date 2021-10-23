@@ -1777,6 +1777,8 @@ void MapView::setupViewMenu()
 
   ADD_TOGGLE_NS(view_menu, "Show light zones", _show_minimap_skies);
 
+  auto debug_menu (view_menu->addMenu ("Debug"));
+  ADD_TOGGLE_NS (debug_menu, "Occlusion boxes", _draw_occlusion_boxes);
 
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Windows"));
@@ -1833,7 +1835,6 @@ void MapView::setupViewMenu()
   };
 
   ADD_ACTION(view_menu, "Toggle UI", Qt::Key_Tab, hide_widgets);
-
 
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
 
@@ -4143,6 +4144,7 @@ void MapView::draw_map()
                , terrainTool->_edit_type
                , _display_all_water_layers.get() ? -1 : _displayed_water_layer.get()
                , _display_mode
+               , _draw_occlusion_boxes.get()
                );
 
   // reset after each world::draw call

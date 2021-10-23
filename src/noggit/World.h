@@ -127,6 +127,7 @@ public:
             , eTerrainType ground_editing_brush
             , int water_layer
             , display_mode display
+            , bool draw_occlusion_boxes = false
             );
 
   unsigned int getAreaID (math::vector_3d const&);

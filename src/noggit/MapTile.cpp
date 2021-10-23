@@ -1922,7 +1922,7 @@ bool MapTile::getTileOcclusionQueryResult(math::vector_3d const& camera)
   if (!_uploaded)
     return !tile_occluded;
 
-  if (misc::pointInside(camera, _extents))
+  if (misc::pointInside(camera, _combined_extents))
   {
     _tile_occlusion_query_in_use = false;
     return true;
@@ -2034,14 +2034,17 @@ void MapTile::recalcCombinedExtents()
   _combined_extents[0].y = std::min(_combined_extents[0].y, water_extents[0].y);
   _combined_extents[1].y = std::max(_combined_extents[1].y, water_extents[1].y);
 
-  for (int i = 0; i < 3; ++i)
+  if (!object_instances.empty())
   {
-    _combined_extents[0][i] = std::min(_combined_extents[0][i], _object_instance_extents[0][i]);
-  }
+    for (int i = 0; i < 3; ++i)
+    {
+      _combined_extents[0][i] = std::min(_combined_extents[0][i], _object_instance_extents[0][i]);
+    }
 
-  for (int i = 0; i < 3; ++i)
-  {
-    _combined_extents[1][i] = std::max(_combined_extents[1][i], _object_instance_extents[1][i]);
+    for (int i = 0; i < 3; ++i)
+    {
+      _combined_extents[1][i] = std::max(_combined_extents[1][i], _object_instance_extents[1][i]);
+    }
   }
 
   _combined_extents_dirty = false;

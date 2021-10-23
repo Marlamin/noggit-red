@@ -140,6 +140,7 @@ public:
   noggit::bool_toggle_property _draw_models_with_box = {false};
   noggit::bool_toggle_property _draw_fog = {false};
   noggit::bool_toggle_property _draw_hidden_models = {false};
+  noggit::bool_toggle_property _draw_occlusion_boxes = {false};
 private:
 
   int _selected_area_id = -1;
