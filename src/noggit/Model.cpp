@@ -1525,7 +1525,7 @@ void Model::draw( math::matrix_4x4 const& model_view
 }
 
 void Model::draw ( math::matrix_4x4 const& model_view
-                 , std::vector<ModelInstance*>& instances
+                 , std::vector<math::matrix_4x4> const& instances
                  , opengl::scoped::use_program& m2_shader
                  , opengl::M2RenderState& model_render_state
                  , math::frustum const& frustum
@@ -1559,48 +1559,10 @@ void Model::draw ( math::matrix_4x4 const& model_view
     }
   }
 
-  static std::array<math::matrix_4x4, 10000> transform_matrix; // TODO: ugly hardcoded cap for performance reasons, use settings, exception on overflow
-  int n_visible_instances = 0;
-
-  {
-    ZoneScopedN("Model::draw() : culling")
-
-    for (ModelInstance* mi : instances)
-    {
-      unsigned region_visible = 0;
-
-      if (!mi->isWMODoodad())
-      {
-        for (auto tile : mi->getTiles())
-        {
-          if (tile->objects_frustum_cull_test && !tile->tile_occluded)
-          {
-            region_visible = tile->objects_frustum_cull_test;
-
-            if (tile->objects_frustum_cull_test > 1)
-              break;
-          }
-        }
-      }
-      else
-      {
-        region_visible = 1;
-      }
-
-      if (no_cull || (region_visible && (region_visible > 1 || mi->isInFrustum(frustum)) && mi->isInRenderDist( cull_distance, camera, display)))
-      {
-        transform_matrix[n_visible_instances] = mi->transformMatrixTransposed();
-        n_visible_instances++;
-      }
-    }
-
-  }
-
-  if (!n_visible_instances)
+  if (instances.empty())
   {
     return;
   }
-
 
   {
     ZoneScopedN("Model::draw() : drawing")
@@ -1614,7 +1576,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
     // store the model count to draw the bounding boxes later
     if (all_boxes || _hidden)
     {
-      model_boxes_to_draw.emplace(this, n_visible_instances);
+      model_boxes_to_draw.emplace(this, instances.size());
     }
 
     /*
@@ -1628,7 +1590,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
 
     {
       opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
-      gl.bufferData(GL_ARRAY_BUFFER, n_visible_instances * sizeof(::math::matrix_4x4), transform_matrix.data(), GL_DYNAMIC_DRAW);
+      gl.bufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(::math::matrix_4x4), instances.data(), GL_DYNAMIC_DRAW);
       //m2_shader.attrib("transform", 0, 1);
     }
 
@@ -1649,7 +1611,7 @@ void Model::draw ( math::matrix_4x4 const& model_view
     {
       if (p.prepare_draw(m2_shader, this, model_render_state))
       {
-        gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(p.index_start * sizeof(GLushort)), n_visible_instances);
+        gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(p.index_start * sizeof(GLushort)), instances.size());
         //p.after_draw();
       }
     }

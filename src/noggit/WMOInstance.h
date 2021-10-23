@@ -107,6 +107,9 @@ public:
   void ensureExtents() override;
   bool finishedLoading() override { return wmo->finishedLoading(); };
 
+  [[nodiscard]]
+  AsyncObject* instance_model() override { return wmo.get(); };
+
   std::vector<wmo_doodad_instance*> get_visible_doodads( math::frustum const& frustum
                                                        , float const& cull_distance
                                                        , math::vector_3d const& camera

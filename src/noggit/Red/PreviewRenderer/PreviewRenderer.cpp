@@ -296,9 +296,11 @@ void PreviewRenderer::draw()
     m2_shader.uniform("tex_unit_lookup_2", 0);
     m2_shader.uniform("pixel_shader", 0);
 
+    /*
     for (auto& model_instance : _model_instances)
     {
       std::vector<ModelInstance*> instance{&model_instance};
+
       model_instance.model->draw(
           model_view().transposed()
           , instance
@@ -331,6 +333,8 @@ void PreviewRenderer::draw()
       );
     }
 
+     */
+
     if(_draw_boxes.get() && !model_boxes_to_draw.empty())
     {
       opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
@@ -356,6 +360,7 @@ void PreviewRenderer::draw()
       }
     }
   }
+
 
   gl.bindVertexArray(0);
   gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

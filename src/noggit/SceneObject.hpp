@@ -11,6 +11,8 @@
 #include <cstdint>
 #include <unordered_set>
 
+class AsyncObject;
+
 enum SceneObjectTypes
 {
   eMODEL,
@@ -55,12 +57,15 @@ public:
   void derefTile(MapTile* tile);
   std::unordered_set<MapTile*> const& getTiles() { return _tiles; };
 
+  virtual AsyncObject* instance_model() = 0;
+
 public:
   math::vector_3d pos;
   math::vector_3d  extents[2];
   math::degrees::vec3 dir;
   float scale = 1.f;
   unsigned int uid;
+  int frame;
 
 protected:
   SceneObjectTypes _type;

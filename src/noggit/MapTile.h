@@ -13,12 +13,12 @@
 #include <opengl/shader.fwd.hpp>
 #include <noggit/ContextObject.hpp>
 #include <noggit/Misc.h>
+#include <external/tsl/robin_map.h>
 
 #include <map>
 #include <string>
 #include <vector>
 #include <array>
-#include <set>
 
 namespace math
 {
@@ -167,7 +167,7 @@ public:
 
   void notifyTileRendererOnSelectedTextureChange() { _requires_paintability_recalc = true; };
 
-  std::unordered_set<SceneObject*>& getObjectInstances() { return object_instances; };
+  tsl::robin_map<AsyncObject*, std::vector<SceneObject*>> const& getObjectInstances() const { return object_instances; };
 
   void doTileOcclusionQuery(opengl::scoped::use_program& occlusion_shader);
   bool getTileOcclusionQueryResult(math::vector_3d const& camera);
@@ -243,7 +243,7 @@ private:
   std::vector<std::string> mWMOFilenames;
   
   std::vector<uint32_t> uids;
-  std::unordered_set<SceneObject*> object_instances; // only includes M2 and WMO. perhaps a medium common ancestor then?
+  tsl::robin_map<AsyncObject*, std::vector<SceneObject*>> object_instances; // only includes M2 and WMO. perhaps a medium common ancestor then?
 
   std::unique_ptr<MapChunk> mChunks[16][16];
 

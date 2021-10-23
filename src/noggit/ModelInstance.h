@@ -100,6 +100,9 @@ public:
   [[nodiscard]]
   virtual bool isWMODoodad() const { return false; };
 
+  [[nodiscard]]
+  AsyncObject* instance_model() override { return model.get(); };
+
 protected:
   bool _need_recalc_extents = true;
 

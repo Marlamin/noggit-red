@@ -67,10 +67,12 @@ MapTile::MapTile( int pX
 
 MapTile::~MapTile()
 {
-
-  for (auto& instance : object_instances)
+  for (auto& pair : object_instances)
   {
-    instance->derefTile(this);
+    for (auto& instance : pair.second)
+    {
+      instance->derefTile(this);
+    }
   }
 
   _world->remove_models_if_needed(uids);
@@ -1280,7 +1282,20 @@ void MapTile::remove_model(uint32_t uid)
 
     auto& obj = _world->get_model(uid).get();
     auto instance = boost::get<selected_object_type>(obj);
-    object_instances.erase(instance);
+
+    auto& instances = object_instances[instance->instance_model()];
+    auto it2 = std::find(instances.begin(), instances.end(), instance);
+
+    if (it2 != instances.end())
+    {
+      instances.erase(it2);
+    }
+
+    if (instances.empty())
+    {
+      object_instances.erase(instance->instance_model());
+    }
+
     instance->derefTile(this);
     _requires_object_extents_recalc = true;
   }
@@ -1296,7 +1311,20 @@ void MapTile::remove_model(SceneObject* instance)
   {
     uids.erase(it);
 
-    object_instances.erase(instance);
+    auto& instances = object_instances[instance->instance_model()];
+    auto it2 = std::find(instances.begin(), instances.end(), instance);
+
+    if (it2 != instances.end())
+    {
+      instances.erase(it2);
+    }
+
+    if (instances.empty())
+    {
+      object_instances.erase(instance->instance_model());
+    }
+
+
     instance->derefTile(this);
     _requires_object_extents_recalc = true;
   }
@@ -1312,7 +1340,7 @@ void MapTile::add_model(uint32_t uid)
 
     auto& obj = _world->get_model(uid).get();
     auto instance = boost::get<selected_object_type>(obj);
-    object_instances.emplace(instance);
+    object_instances[instance->instance_model()].push_back(instance);
 
     if (instance->finishedLoading())
     {
@@ -1345,7 +1373,7 @@ void MapTile::add_model(SceneObject* instance)
   {
     uids.push_back(instance->uid);
 
-    object_instances.emplace(instance);
+    object_instances[instance->instance_model()].push_back(instance);
 
     if (instance->finishedLoading())
     {
@@ -1870,26 +1898,29 @@ void MapTile::recalcObjectInstanceExtents()
 
   _requires_object_extents_recalc = false;
 
-  for (auto& instance : object_instances)
+  for (auto& pair : object_instances)
   {
-    if (!instance->finishedLoading())
+    for (auto& instance : pair.second)
     {
-      _requires_object_extents_recalc = true;
-      continue;
+      if (!instance->finishedLoading())
+      {
+        _requires_object_extents_recalc = true;
+        continue;
+      }
+
+      instance->ensureExtents();
+
+      math::vector_3d& min = instance->extents[0];
+      math::vector_3d& max = instance->extents[1];
+
+      _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, min.x);
+      _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, min.y);
+      _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, min.z);
+
+      _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, max.x);
+      _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, max.y);
+      _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, max.z);
     }
-
-    instance->ensureExtents();
-
-    math::vector_3d& min = instance->extents[0];
-    math::vector_3d& max = instance->extents[1];
-
-    _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, min.x);
-    _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, min.y);
-    _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, min.z);
-
-    _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, max.x);
-    _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, max.y);
-    _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, max.z);
   }
 
   tagCombinedExtents(true);

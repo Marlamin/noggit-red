@@ -1382,6 +1382,79 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
   }
 
+  tsl::robin_map<Model*, std::vector<math::matrix_4x4>> models_to_draw;
+  tsl::robin_map<WMO*, std::vector<math::matrix_4x4>> wmos_to_draw;
+
+  static int frame = 0;
+
+  if (frame == std::numeric_limits<int>::max())
+  {
+    frame = 0;
+  }
+  else
+  {
+    frame++;
+  }
+
+
+  for (MapTile* tile : _loaded_tiles_buffer)
+  {
+    if (!tile)
+    {
+      break;
+    }
+
+    if (tile->tile_occluded && !tile->getChunkUpdateFlags() && !tile->tile_occlusion_cull_override)
+      continue;
+
+    if (tile->camDist() > culldistance)
+      continue;
+
+    for (auto& pair : tile->getObjectInstances())
+    {
+      if (pair.second[0]->which() == eMODEL)
+      {
+        for (auto& instance : pair.second)
+        {
+          if (instance->frame == frame)
+          {
+            continue;
+          }
+
+          instance->frame = frame;
+
+          auto m2_instance = static_cast<ModelInstance*>(instance);
+
+          if ((tile->objects_frustum_cull_test > 1 || m2_instance->isInFrustum(frustum)) && m2_instance->isInRenderDist(culldistance, camera_pos, display))
+          {
+            models_to_draw[m2_instance->model.get()].push_back(m2_instance->transformMatrixTransposed());
+          }
+
+        }
+
+      }
+      else
+      {
+        for (auto& instance : pair.second)
+        {
+          if (instance->frame == frame)
+          {
+            continue;
+          }
+
+          instance->frame = frame;
+
+          auto wmo_instance = static_cast<WMOInstance*>(instance);
+
+          if (tile->objects_frustum_cull_test > 1 || frustum.intersects(wmo_instance->extents[1], wmo_instance->extents[0]))
+          {
+            wmos_to_draw[wmo_instance->wmo.get()].push_back(wmo_instance->transformMatrixTransposed());
+          }
+        }
+      }
+    }
+  }
+
   bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
   // M2s / models
   if (draw_models || draw_doodads_wmo)
@@ -1420,25 +1493,26 @@ void World::draw ( math::matrix_4x4 const& model_view
         m2_shader.uniform("tex_unit_lookup_2", 0);
         m2_shader.uniform("pixel_shader", 0);
 
-        for (auto& it : _models_by_filename)
+        for (auto& pair : models_to_draw)
         {
-          if (draw_hidden_models || !it.second[0]->model->is_hidden())
+          if (draw_hidden_models || !pair.first->is_hidden())
           {
-            it.second[0]->model->draw( model_view
-              , it.second
-              , m2_shader
-              , model_render_state
-              , frustum
-              , culldistance
-              , camera_pos
-              , animtime
-              , draw_models_with_box
-              , model_boxes_to_draw
-              , display
+            pair.first->draw( model_view
+                , pair.second
+                , m2_shader
+                , model_render_state
+                , frustum
+                , culldistance
+                , camera_pos
+                , animtime
+                , draw_models_with_box
+                , model_boxes_to_draw
+                , display
             );
           }
         }
 
+        /*
         if (draw_doodads_wmo)
         {
           _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
@@ -1471,6 +1545,8 @@ void World::draw ( math::matrix_4x4 const& model_view
               }
             });
         }
+
+                  */
       }
 
     }
