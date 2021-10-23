@@ -1760,6 +1760,9 @@ void MapView::setupViewMenu()
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Hidden models", _draw_hidden_models);
 
+  auto debug_menu (view_menu->addMenu ("Debug"));
+  ADD_TOGGLE_NS (debug_menu, "Occlusion boxes", _draw_occlusion_boxes);
+
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Tools"));
   view_menu->addSeparator();
@@ -1776,9 +1779,6 @@ void MapView::setupViewMenu()
   ADD_TOGGLE_NS(view_menu, "Show ADT borders", _show_minimap_borders);
 
   ADD_TOGGLE_NS(view_menu, "Show light zones", _show_minimap_skies);
-
-  auto debug_menu (view_menu->addMenu ("Debug"));
-  ADD_TOGGLE_NS (debug_menu, "Occlusion boxes", _draw_occlusion_boxes);
 
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Windows"));
