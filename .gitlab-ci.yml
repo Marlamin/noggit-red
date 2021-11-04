@@ -18,7 +18,7 @@ build:
     - cmake -version  
     - mkdir build
     - cd build
-    - cmake .. -D WITH_SDL2APPLICATION=Flase
+    - cmake .. -DWITH_SDL2APPLICATION=Flase
     - make
   artifacts:
     paths:
