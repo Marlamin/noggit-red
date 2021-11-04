@@ -8,13 +8,18 @@
 # can use verions as well, like gcc:5.2
 # see https://hub.docker.com/_/gcc/
 
-image: havric/noggit-red-build-win-lite:latest
+image: havric/noggit-red-build:latest
 
 build:
   stage: build
   script:
-    - cmake ./
-    -msbuild ./
+    - gcc -dumpversion
+    - g++ --version
+    - cmake -version
+    - mkdir build
+    - cd build
+    - cmake ..
+    - make
   artifacts:
     paths:
       - build
