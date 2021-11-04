@@ -15,10 +15,10 @@ build:
   script:
     - gcc -dumpversion
     - g++ --version
-    - cmake -version
+    - cmake -version  
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake .. -D FASTNOICE2_NOISETOOL=Flase
     - make
   artifacts:
     paths:
