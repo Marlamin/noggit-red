@@ -14,7 +14,7 @@ build:
   stage: build
   script:
     - cmake ./
-    -msbuild ./
+    - msbuild ./
   artifacts:
     paths:
       - build
