@@ -18,7 +18,7 @@ build:
     - cmake -version  
     - mkdir build
     - cd build
-    - cmake .. -D FASTNOICE2_NOISETOOL=Flase
+    - cmake .. -D WITH_SDL2APPLICATION=Flase
     - make
   artifacts:
     paths:
