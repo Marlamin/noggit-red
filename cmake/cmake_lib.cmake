@@ -1,89 +1,40 @@
-function(
-        collect_files
-        output
-        base_dir
-        do_recurse
-        globbing_exprs
-        exclude_dirs
-)
-    if("${do_recurse}")
-        set(glob GLOB_RECURSE)
-    else()
-        set(glob GLOB)
-    endif()
+#collect source files from given directory
+FUNCTION(collect_files output base_dir do_recurse globbing_exprs exclude_dirs)
+        IF("${do_recurse}")
+                SET(glob GLOB_RECURSE)
+        ELSE()
+                SET(glob GLOB)
+        ENDIF()
 
-    set(base_dir "${CMAKE_SOURCE_DIR}/${base_dir}")
-    list(
-            TRANSFORM
-            globbing_exprs
-            PREPEND "${base_dir}/"
-    )
-    file(
-            ${glob}
-            files
-            CONFIGURE_DEPENDS
-            ${globbing_exprs}
-    )
+        SET(base_dir "${CMAKE_SOURCE_DIR}/${base_dir}")
+        LIST(TRANSFORM globbing_exprs PREPEND "${base_dir}/")
+        FILE(${glob} files CONFIGURE_DEPENDS ${globbing_exprs})
 
-    foreach(
-            file
-            IN LISTS files
-    )
-        set(match FALSE)
+        FOREACH(file IN LISTS files)
+                SET(match FALSE)
 
-        foreach(
-                dir
-                IN LISTS exclude_dirs
-        )
-            if("${file}" MATCHES "/${dir}/")
-                set(match TRUE)
-            endif()
-        endforeach()
+                FOREACH(dir IN LISTS exclude_dirs)
+                        IF("${file}" MATCHES "/${dir}/")
+                        SET(match TRUE)
+                        ENDIF()
+                ENDFOREACH()
 
-        if(NOT ${match})
-            list(
-                    APPEND
-                    result
-                    "${file}"
-            )
-        endif()
-    endforeach()
+                IF(NOT ${match})
+                        LIST(APPEND result "${file}")
+                ENDIF()
 
-    set(
-            ${output} "${result}"
-            PARENT_SCOPE
-    )
-endfunction()
+        ENDFOREACH()
+        SET(${output} "${result}" PARENT_SCOPE)
+ENDFUNCTION()
 
-function(
-        contains_filter
-        output
-        files
-        regex
-)
-  foreach(
-          file
-          IN LISTS files
-  )
-    file(
-            STRINGS
-            "${file}"
-            contents
-            REGEX "${regex}"
-    )
+FUNCTION(contains_filter output files regex)
 
-    if("${contents}")
-      list(
-              APPEND
-              result
-              "${file}"
-      )
-      MESSAGE("Moced: ${file}")
-    endif()
-  endforeach()
-
-  set(
-          ${output} "${result}"
-          PARENT_SCOPE
-  )
-endfunction()
+        FOREACH(file IN LISTS files)
+                FILE(STRINGS "${file}" contents REGEX "${regex}")
+                IF("${contents}")
+                        LIST(APPEND result "${file}")
+                        MESSAGE("Moced: ${file}")
+                ENDIF()
+        ENDFOREACH()
+        SET(${output} "${result}"PARENT_SCOPE)
+ENDFUNCTION()
