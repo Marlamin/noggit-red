@@ -97,7 +97,7 @@ if(VALIDATE_OPENGL_PROGRAMS)
   endif()
 endif()
 
-includePlattform("prefind")
+includePlatform("prefind")
 
 FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED )
@@ -169,7 +169,7 @@ IF(NOT NOGGIT_OPENGL_ERROR_CHECK )
   ADD_DEFINITIONS( -DNOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS )
 ENDIF()
 
-includePlattform("postfind")
+includePlatform("postfind")
 
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 include_directories(PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
@@ -381,7 +381,7 @@ if (NOGGIT_LOGTOCONSOLE AND WIN32)
   set_property (TARGET noggit APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:"_CONSOLE">)
 endif()
 
-includePlattform("pack")
+includePlatform("pack")
 
 add_library (noggit-math STATIC
   "src/math/matrix_4x4.cpp"
