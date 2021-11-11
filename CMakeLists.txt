@@ -71,10 +71,7 @@ if(WIN32)
     add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4458) # class members
     add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4459) # global declaration
   endif()
-endif()
 
-if(WIN32)
-  # Disable opengl error log
   OPTION(ADDITIONAL_OPTIMIZATION_FLAGS "Enable OpenGL error check ?" OFF)
   IF(ADDITIONAL_OPTIMIZATION_FLAGS)
     MESSAGE( STATUS "Enabled additional optimization flags for msvc.")
@@ -83,7 +80,7 @@ if(WIN32)
     add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /Ot)  # favor fast code
     add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /GL)  # whole program optimization
   ENDIF()
-endif(WIN32)
+endif()
 
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)
