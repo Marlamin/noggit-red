@@ -57,6 +57,11 @@ add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -Wno-multichar)
 
 add_compiler_flag_if_supported (CMAKE_C_FLAGS -Wno-implicit-function-declaration)
 
+# better exception handling for visual studio, particularly for the asynchronous stuff
+add_compiler_flag_if_supported(CMAKE_CXX_FLAGS /EHa)
+# multi core building for visual studio
+add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /MP)
+
 if(WIN32)
   OPTION(NAME_REUSE_AS_ERROR "Make name reuse warnings errors ?" OFF)
   if(NAME_REUSE_AS_ERROR)
@@ -67,12 +72,6 @@ if(WIN32)
     add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4459) # global declaration
   endif()
 endif()
-
-# better exception handling for visual studio, particularly for the asynchronous stuff
-add_compiler_flag_if_supported(CMAKE_CXX_FLAGS /EHa)
-# multi core building for visual studio
-add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /MP)
-
 
 if(WIN32)
   # Disable opengl error log
