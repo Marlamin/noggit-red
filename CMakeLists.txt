@@ -1,5 +1,4 @@
 # This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
 cmake_minimum_required(VERSION 3.3)
 cmake_policy (SET CMP0057 NEW) # "Support new IN_LIST if() operator."
 set (CMAKE_CXX_STANDARD 20)
@@ -7,112 +6,13 @@ set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_C_STANDARD  11)
 set (CMAKE_C_STANDARD_REQUIRED  ON)
 
+#including dependencies
+include(CheckCXXCompilerFlag)
+include(cmake/cmake_lib.cmake)
+include(cmake/cmake_macro.cmake)
+
 # Project name
 project(Noggit)
-
-
-include (CheckCXXCompilerFlag)
-macro (add_compiler_flag_if_supported _VAR _FLAG)
-  string (MAKE_C_IDENTIFIER "CXX_COMPILER_SUPPORTS_${_FLAG}" _test_variable)
-  check_cxx_compiler_flag ("${_FLAG}" ${_test_variable})
-  if (${_test_variable})
-    if ("${${_VAR}}" STREQUAL "")
-      set (${_VAR} "${_FLAG}")
-    else()
-      set (${_VAR} "${${_VAR}} ${_FLAG}")
-    endif()
-  endif()
-endmacro()
-
-function(
-        collect_files
-        output
-        base_dir
-        do_recurse
-        globbing_exprs
-        exclude_dirs
-)
-  if("${do_recurse}")
-    set(glob GLOB_RECURSE)
-  else()
-    set(glob GLOB)
-  endif()
-
-  set(base_dir "${CMAKE_SOURCE_DIR}/${base_dir}")
-  list(
-          TRANSFORM
-          globbing_exprs
-          PREPEND "${base_dir}/"
-  )
-  file(
-          ${glob}
-          files
-          CONFIGURE_DEPENDS
-          ${globbing_exprs}
-  )
-
-  foreach(
-          file
-          IN LISTS files
-  )
-    set(match FALSE)
-
-    foreach(
-            dir
-            IN LISTS exclude_dirs
-    )
-      if("${file}" MATCHES "/${dir}/")
-        set(match TRUE)
-      endif()
-    endforeach()
-
-    if(NOT ${match})
-      list(
-              APPEND
-              result
-              "${file}"
-      )
-    endif()
-  endforeach()
-
-  set(
-          ${output} "${result}"
-          PARENT_SCOPE
-  )
-endfunction()
-
-function(
-        contains_filter
-        output
-        files
-        regex
-)
-  foreach(
-          file
-          IN LISTS files
-  )
-    file(
-            STRINGS
-            "${file}"
-            contents
-            REGEX "${regex}"
-    )
-
-    if("${contents}")
-      list(
-              APPEND
-              result
-              "${file}"
-      )
-      MESSAGE("Moced: ${file}")
-    endif()
-  endforeach()
-
-  set(
-          ${output} "${result}"
-          PARENT_SCOPE
-  )
-endfunction()
 
 add_compiler_flag_if_supported (CMAKE_CXX_FLAGS -fcolor-diagnostics)
 
@@ -186,37 +86,12 @@ if(WIN32)
   ENDIF()
 endif(WIN32)
 
-
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 set(EXECUTABLE_OUTPUT_PATH bin)
 set(LIBARY_OUTPUT_PATH bin)
 
 OPTION(USE_SQL "Enable sql uid save ? (require mysql installed)" OFF)
-
-macro(includePlattform SUFFIX)
-  if(UNIX)
-    if(APPLE)
-      include("${CMAKE_SOURCE_DIR}/cmake/apple_${SUFFIX}.cmake")
-    else(APPLE)
-      include("${CMAKE_SOURCE_DIR}/cmake/linux_${SUFFIX}.cmake")
-    endif(APPLE)
-  else(UNIX)
-    if(WIN32)
-      include("${CMAKE_SOURCE_DIR}/cmake/win32_${SUFFIX}.cmake")
-      # adds for library repo
-      set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/lib/")
-      #storm lib
-      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")
-      #boost
-      include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
-      set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/libs/")
-      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
-	  endif(WIN32)
-  endif(UNIX)
-endmacro(includePlattform)
-
 OPTION(VALIDATE_OPENGL_PROGRAMS "Validate Opengl programs" OFF)
-
 
 if(VALIDATE_OPENGL_PROGRAMS)
   add_definitions ( -DVALIDATE_OPENGL_PROGRAMS)
@@ -232,7 +107,6 @@ FIND_PACKAGE( OpenGL REQUIRED )
 FIND_PACKAGE( Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED )
 FIND_PACKAGE( StormLib REQUIRED )
 find_package (Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml REQUIRED)
-
 
 if (USE_SQL)
   find_library(MYSQL_LIBRARY
@@ -455,8 +329,8 @@ TARGET_LINK_LIBRARIES (noggit
 set_property(TARGET noggit PROPERTY AUTOMOC ON)
 
 if(APPLE)
-target_include_directories(noggit PRIVATE /usr/local/Cellar/llvm/12.0.1/include/c++/v1/)
-target_link_libraries(noggit /usr/local/Cellar/llvm/12.0.1/lib/libc++.1.0.dylib)
+  target_include_directories(noggit PRIVATE /usr/local/Cellar/llvm/12.0.1/include/c++/v1/)
+  target_link_libraries(noggit /usr/local/Cellar/llvm/12.0.1/lib/libc++.1.0.dylib)
 endif()
 
 set (_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")
@@ -593,6 +467,9 @@ add_library (Lua::Lua ALIAS Lua-Lua)
 target_link_libraries (Lua-Lua INTERFACE ${LUA_LIBRARIES})
 target_include_directories (Lua-Lua INTERFACE ${LUA_INCLUDE_DIR})
 
+#include blizzardDatabase
+#add_subdirectory(src/dbcd-cpp)
+
 # Dependency: sol2
 FetchContent_Declare (sol2
         GIT_REPOSITORY https://github.com/tswow/sol2
@@ -607,6 +484,7 @@ target_link_libraries (sane-sol2 INTERFACE Lua::Lua)
 target_include_directories (sane-sol2 SYSTEM INTERFACE "${sol2_SOURCE_DIR}/include")
 
 target_link_libraries (noggit
+		    #BlizzardDatabaseLib
         lodepng
         FastNoise
         nlohmann_json::nlohmann_json

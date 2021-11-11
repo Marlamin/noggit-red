@@ -1,0 +1,35 @@
+
+macro (add_compiler_flag_if_supported _VAR _FLAG)
+  string (MAKE_C_IDENTIFIER "CXX_COMPILER_SUPPORTS_${_FLAG}" _test_variable)
+  check_cxx_compiler_flag ("${_FLAG}" ${_test_variable})
+  if (${_test_variable})
+    if ("${${_VAR}}" STREQUAL "")
+      set (${_VAR} "${_FLAG}")
+    else()
+      set (${_VAR} "${${_VAR}} ${_FLAG}")
+    endif()
+  endif()
+endmacro()
+
+#Platform include
+macro(includePlattform SUFFIX)
+  if(UNIX)
+    if(APPLE)
+      include("${CMAKE_SOURCE_DIR}/cmake/apple_${SUFFIX}.cmake")
+    else(APPLE)
+      include("${CMAKE_SOURCE_DIR}/cmake/linux_${SUFFIX}.cmake")
+    endif(APPLE)
+  else(UNIX)
+    if(WIN32)
+      include("${CMAKE_SOURCE_DIR}/cmake/win32_${SUFFIX}.cmake")
+      # adds for library repo
+      set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/lib/")
+      #storm lib
+      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/StormLib/include/")
+      #boost
+      include_directories (SYSTEM "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
+      set(CMAKE_LIBRARY_PATH ${CMAKE_LIBRARY_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/libs/")
+      set(CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} "${CMAKE_SOURCE_DIR}/../Noggit3libs/Boost/")
+	  endif(WIN32)
+  endif(UNIX)
+endmacro(includePlattform)
