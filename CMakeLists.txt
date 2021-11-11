@@ -15,7 +15,7 @@ SET(CMAKE_C_STANDARD_REQUIRED  ON)
 
 #Including cmake dependencies
 INCLUDE(CheckCXXCompilerFlag)
-INCLUDE(cmake/cmake_lib.cmake)
+INCLUDE(cmake/cmake_function.cmake)
 INCLUDE(cmake/cmake_macro.cmake)
 
 #Project name
