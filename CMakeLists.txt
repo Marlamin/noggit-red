@@ -81,6 +81,7 @@ ENDIF()
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 SET(EXECUTABLE_OUTPUT_PATH bin)
 SET(LIBARY_OUTPUT_PATH bin)
+SET(EXTERNAL_SOURCE_DIR src/external)
 
 OPTION(USE_SQL "Enable sql uid save ? (require mysql installed)" OFF)
 OPTION(VALIDATE_OPENGL_PROGRAMS "Validate Opengl programs" OFF)
@@ -117,12 +118,13 @@ IF(USE_SQL)
   ENDIF()
 ENDIF()
 
-ADD_SUBDIRECTORY(src/external/qt-color-widgets)
-ADD_SUBDIRECTORY(src/external/framelesshelper)
-ADD_SUBDIRECTORY(src/external/qtimgui)
-ADD_SUBDIRECTORY(src/external/QtAdvancedDockingSystem)
-ADD_SUBDIRECTORY(src/external/NodeEditor)
-ADD_SUBDIRECTORY(src/external/libnoise)
+ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/qt-color-widgets")
+ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/framelesshelper")
+ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/qtimgui")
+ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/QtAdvancedDockingSystem")
+ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/NodeEditor")
+ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/libnoise")
+ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/dbcd-cpp")
 
 # Add the found include directories to our include list.
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_SOURCE_DIR}/include/")
@@ -144,15 +146,15 @@ OPTION(NOGGIT_ALL_WARNINGS "Enable all warnings?" OFF)
 # Log to console for easier debugging.
 OPTION( NOGGIT_LOGTOCONSOLE "Log to console instead of log.txt?" OFF)
 IF(NOGGIT_LOGTOCONSOLE)
-  MESSAGE( STATUS "And writing log to console instead of log.txt")
-  ADD_DEFINITIONS( -DDEBUG__LOGGINGTOCONSOLE)
+  MESSAGE(STATUS "And writing log to console instead of log.txt")
+  ADD_DEFINITIONS(-DDEBUG__LOGGINGTOCONSOLE)
 ENDIF(NOGGIT_LOGTOCONSOLE)
 
 # Disable opengl error log
 OPTION(NOGGIT_OPENGL_ERROR_CHECK "Enable OpenGL error check ?" ON)
 IF(NOT NOGGIT_OPENGL_ERROR_CHECK)
-  MESSAGE( STATUS "OpenGL error check disabled.")
-  ADD_DEFINITIONS( -DNOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS)
+  MESSAGE(STATUS "OpenGL error check disabled.")
+  ADD_DEFINITIONS(-DNOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS)
 ENDIF()
 
 includePlatform("postfind")
@@ -161,18 +163,19 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tmp")
 INCLUDE_DIRECTORIES(PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # And do the job.
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libimagequant" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libpng" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/libtxc_dxtn" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/pngpp" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/PNG2BLP/zlib" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguizmo" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/imguipiemenu" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/libnoise/src" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/qtgradienteditor" )
-INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/external/tracy" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/PNG2BLP" )
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/PNG2BLP/libimagequant")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/PNG2BLP/libpng")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/PNG2BLP/libtxc_dxtn")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/PNG2BLP/pngpp")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/PNG2BLP/zlib")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/imguizmo")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/imguipiemenu")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/libnoise/src")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/qtgradienteditor")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/tracy")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/dbcd-cpp/include")
 INCLUDE_DIRECTORIES(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 collect_files(noggit_root_sources src/noggit FALSE "*.cpp" "")
@@ -213,6 +216,7 @@ collect_files(imguizmo_headers src/external/imguizmo FALSE "*.h;*.hpp" "")
 collect_files(imguipiemenu_headers src/external/imguipiemenu FALSE "*.h;*.hpp" "")
 collect_files(gradienteditor_headers src/external/qtgradienteditor FALSE "*.h;*.hpp" "")
 collect_files(tracy_headers src/external/tracy FALSE "*.h;*.hpp" "")
+collect_files(blizzard_database_headers src/external/dbcd-cpp/include FALSE "*.h;*.hpp" "")
 
 IF(WIN32)
   SET(os_sources include/win/StackWalker.cpp)
@@ -281,6 +285,7 @@ ADD_EXECUTABLE(noggit
   ${compiled_ui_files}
   ${shaders}
   ${force_update_file}
+  ${blizzard_database_headers}
 )
 
 TARGET_LINK_LIBRARIES (noggit
@@ -295,6 +300,7 @@ TARGET_LINK_LIBRARIES (noggit
   Qt5::Xml
   ColorWidgets-qt5
   FramelessHelper
+  BlizzardDatabaseLib
   qt_imgui_widgets
   qtadvanceddocking
   nodes
