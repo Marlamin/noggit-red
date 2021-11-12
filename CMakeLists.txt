@@ -125,6 +125,7 @@ ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/QtAdvancedDockingSystem")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/NodeEditor")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/libnoise")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/dbcd-cpp")
+ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/glm")
 
 # Add the found include directories to our include list.
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_SOURCE_DIR}/include/")
@@ -306,6 +307,7 @@ TARGET_LINK_LIBRARIES (noggit
   nodes
   noise-static
   noiseutils-static
+  glm
 )
 
 SET_PROPERTY(TARGET noggit PROPERTY AUTOMOC ON)
