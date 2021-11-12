@@ -1,16 +1,16 @@
-cmake_minimum_required (VERSION 3.8.1)
-project(qtimgui)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.8.1)
+PROJECT(qtimgui)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-find_package(Qt5 COMPONENTS Core Quick Gui Widgets Svg REQUIRED)
+SET(CMAKE_AUTOMOC ON)
+SET(CMAKE_AUTORCC ON)
+SET(CMAKE_AUTOUIC ON)
+FIND_PACKAGE(Qt5 COMPONENTS Core Quick Gui Widgets Svg REQUIRED)
 
 # imgui library: imgui is build by default, but you can
 # provide your own version by setting QTIMGUI_BUILD_IMGUI to OFF
-option(QTIMGUI_BUILD_IMGUI "Use imgui provided as qtimgui submodule" ON)
-if (QTIMGUI_BUILD_IMGUI)
-    add_library(imgui
+OPTION(QTIMGUI_BUILD_IMGUI "Use imgui provided as qtimgui submodule" ON)
+IF(QTIMGUI_BUILD_IMGUI)
+    ADD_LIBRARY(imgui
       STATIC
       imgui/imconfig.h
       imgui/imgui_demo.cpp
@@ -19,45 +19,49 @@ if (QTIMGUI_BUILD_IMGUI)
       imgui/imgui_widgets.cpp
       imgui/imgui.cpp
     )
-    target_include_directories(imgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
-endif(QTIMGUI_BUILD_IMGUI)
+    TARGET_INCLUDE_DIRECTORIES(imgui PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
+ENDIF(QTIMGUI_BUILD_IMGUI)
 
-set(
-    qt_imgui_sources
-    ImGuiRenderer.h
-    ImGuiRenderer.cpp
-    QtImGui.h
-    QtImGui.cpp
-)
+SET(qt_imgui_sources ImGuiRenderer.h ImGuiRenderer.cpp QtImGui.h QtImGui.cpp)
 
 # qt_imgui_quick: library with a qt renderer for Qml / QtQuick applications
-add_library(qt_imgui_quick STATIC ${qt_imgui_sources})
-target_include_directories(qt_imgui_quick PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(
+ADD_LIBRARY(qt_imgui_quick STATIC ${qt_imgui_sources})
+TARGET_INCLUDE_DIRECTORIES(qt_imgui_quick PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+TARGET_LINK_LIBRARIES(
     qt_imgui_quick 
     PUBLIC
     imgui
     Qt5::Core Qt5::Quick Qt5::Svg
     )
-if (ANDROID)
-    target_link_libraries(qt_imgui_quick PUBLIC log dl GLESv2 z)
-endif()
+
+IF(ANDROID)
+    TARGET_LINK_LIBRARIES(qt_imgui_quick PUBLIC log dl GLESv2 z)
+ENDIF()
 
 # qt_imgui_widget: library with a qt renderer for classic Qt Widget applications
-add_library(qt_imgui_widgets STATIC ${qt_imgui_sources})
-target_include_directories(qt_imgui_widgets PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(
+ADD_LIBRARY(qt_imgui_widgets STATIC ${qt_imgui_sources})
+TARGET_INCLUDE_DIRECTORIES(qt_imgui_widgets PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+TARGET_LINK_LIBRARIES(
     qt_imgui_widgets
     PUBLIC
     imgui
     Qt5::Core Qt5::Widgets Qt5::Svg
     )
-if (ANDROID)
-    target_link_libraries(qt_imgui_widgets PUBLIC log dl GLESv2 z)
-endif()
-target_compile_definitions(qt_imgui_widgets PUBLIC QT_WIDGETS_LIB)
+IF(ANDROID)
+    TARGET_LINK_LIBRARIES(qt_imgui_widgets PUBLIC log dl GLESv2 z)
+ENDIF()
+TARGET_COMPILE_DEFINITIONS(qt_imgui_widgets PUBLIC QT_WIDGETS_LIB)
 
-# Demo with Qt quick
-add_subdirectory(demo-window)
-# Demo with classic widgets
-add_subdirectory(demo-widget)
+OPTION(IMGUI_QT_DEMO_WINDOW_BUILD "Include demo-window Project" OFF)
+IF(NOT IMGUI_QT_DEMO_WINDOW_BUILD)
+  MESSAGE(STATUS "Skipping demo-window Project")
+ELSE()
+	ADD_SUBDIRECTORY(demo-window)
+ENDIF(NOT IMGUI_QT_DEMO_WINDOW_BUILD)
+
+OPTION(IMGUI_QT_DEMO_WIDGET_BUILD "Include demo-widget Project" OFF)
+IF(NOT IMGUI_QT_DEMO_WIDGET_BUILD)
+  MESSAGE(STATUS "Skipping demo-widget Project")
+ELSE()
+	ADD_SUBDIRECTORY(demo-widget)
+ENDIF(NOT IMGUI_QT_DEMO_WIDGET_BUILD)
