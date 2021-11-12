@@ -363,33 +363,6 @@ ENDIF()
 
 includePlatform("pack")
 
-ADD_LIBRARY(noggit-math STATIC
-  "src/math/matrix_4x4.cpp"
-  "src/math/vector_2d.cpp"
-)
-ADD_LIBRARY(noggit::math ALIAS noggit-math)
-
-INCLUDE(CTest)
-ENABLE_TESTING()
-
-#vector 2d tests
-ADD_EXECUTABLE(math-vector_2d.test test/math/vector_2d.cpp)
-TARGET_COMPILE_DEFINITIONS(math-vector_2d.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
-TARGET_LINK_LIBRARIES(math-vector_2d.test Boost::unit_test_framework noggit::math)
-ADD_TEST(NAME math-vector_2d COMMAND $<TARGET_FILE:math-vector_2d.test>)
-
-#trig tests
-ADD_EXECUTABLE(math-trig.test test/math/trig.cpp)
-TARGET_COMPILE_DEFINITIONS(math-trig.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
-TARGET_LINK_LIBRARIES(math-trig.test Boost::unit_test_framework noggit::math)
-ADD_TEST(NAME math-trig COMMAND $<TARGET_FILE:math-trig.test>)
-
-#matrixx 4x4 tests
-ADD_EXECUTABLE(math-matrix_4x4.test test/math/matrix_4x4.cpp)
-TARGET_COMPILE_DEFINITIONS(math-matrix_4x4.test PRIVATE "-DBOOST_TEST_MODULE=\"math\"")
-TARGET_LINK_LIBRARIES(math-matrix_4x4.test Boost::unit_test_framework noggit::math)
-ADD_TEST(NAME math-matrix_4x4 COMMAND $<TARGET_FILE:math-matrix_4x4.test>)
-
 INCLUDE(FetchContent)
 
 # Dependency: json.hpp
