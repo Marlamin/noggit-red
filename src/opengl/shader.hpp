@@ -16,6 +16,8 @@
 #include <cstdint>
 #include <unordered_map>
 #include <external/tsl/robin_map.h>
+#include <glm/vec2.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace math
 {
@@ -104,8 +106,8 @@ namespace opengl
       void uniform (GLint pos, bool);
       void uniform (std::string const& name, std::vector<math::vector_3d> const& value);
       void uniform (GLint pos, std::vector<math::vector_3d> const& value);
-      void uniform (std::string const& name, math::vector_2d const&);
-      void uniform (GLint pos, math::vector_2d const&);
+      void uniform (std::string const& name, glm::vec2 const&);
+      void uniform (GLint pos, glm::vec2 const&);
       void uniform (std::string const& name, math::vector_3d const&);
       void uniform (GLint pos, math::vector_3d const&);
       void uniform (std::string const& name, math::vector_4d const&);
@@ -123,7 +125,7 @@ namespace opengl
       void sampler (std::string const& name, GLenum texture_slot, texture*);
 
       void attrib (std::string const& name, std::vector<float> const&);
-      void attrib (std::string const& name, std::vector<math::vector_2d> const&);
+      void attrib (std::string const& name, std::vector<glm::vec2> const&);
       void attrib (std::string const& name, std::vector<math::vector_3d> const&);
       void attrib (std::string const& name, math::vector_3d const*);
       void attrib (std::string const& name, math::matrix_4x4 const*, GLuint divisor = 0);

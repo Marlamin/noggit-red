@@ -14,7 +14,7 @@
 
 namespace
 {
-  inline math::vector_2d default_uv(int px, int pz)
+  inline glm::vec2 default_uv(int px, int pz)
   {
     return {static_cast<float>(px) / 4.f, static_cast<float>(pz) / 4.f};
   }
@@ -76,7 +76,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, mclq&
       if (_liquid_vertex_format == 1)
       {
         _depth[v_index] = 1.0f;
-        _tex_coords[v_index] = math::vector_2d(static_cast<float>(v.magma.x) / 255.f, static_cast<float>(v.magma.y) / 255.f);
+        _tex_coords[v_index] = glm::vec2(static_cast<float>(v.magma.x) / 255.f, static_cast<float>(v.magma.y) / 255.f);
       }
       else
       {

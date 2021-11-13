@@ -5,6 +5,7 @@
 #include <opengl/context.inl>
 #include <noggit/DBC.h>
 #include <boost/format.hpp>
+#include <glm/vec2.hpp>
 
 
 LiquidTextureManager::LiquidTextureManager(noggit::NoggitRenderContext context)
@@ -22,7 +23,7 @@ void LiquidTextureManager::upload()
     const DBCFile::Record record = gLiquidTypeDB.getRecord(i);
     unsigned liquid_type_id = record.getInt(LiquidTypeDB::ID);
     int type = record.getInt(LiquidTypeDB::Type);
-    math::vector_2d anim = {record.getFloat(LiquidTypeDB::AnimationX), record.getFloat(LiquidTypeDB::AnimationY)};
+    glm::vec2 anim = {record.getFloat(LiquidTypeDB::AnimationX), record.getFloat(LiquidTypeDB::AnimationY)};
     int shader_type = record.getInt(LiquidTypeDB::ShaderType);
 
     std::string filename;
@@ -32,7 +33,7 @@ void LiquidTextureManager::upload()
     {
       filename = "XTextures\\river\\lake_a.%d.blp";
       // default param for water
-      anim = math::vector_2d(1.f, 0.f);
+      anim = glm::vec2(1.f, 0.f);
     }
     else
     [[likely]]

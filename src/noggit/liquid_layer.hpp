@@ -7,6 +7,7 @@
 #include <noggit/MPQ.h>
 #include <opengl/scoped.hpp>
 #include <array>
+#include <glm/vec2.hpp>
 
 class MapChunk;
 class sExtendableArray;
@@ -46,7 +47,7 @@ public:
 
   std::array<math::vector_3d, 9 * 9>& getVertices() { return _vertices; };
   std::array<float, 9 * 9>& getDepth() { return _depth; };
-  std::array<math::vector_2d, 9 * 9>& getTexCoords() { return _tex_coords; };
+  std::array<glm::vec2, 9 * 9>& getTexCoords() { return _tex_coords; };
 
   float min() const { return _minimum; }
   float max() const { return _maximum; }
@@ -91,7 +92,7 @@ private:
   std::uint64_t _subchunks;
   std::array<math::vector_3d, 9 * 9> _vertices;
   std::array<float, 9 * 9> _depth;
-  std::array<math::vector_2d, 9 * 9> _tex_coords;
+  std::array<glm::vec2, 9 * 9> _tex_coords;
 
   std::map<int, std::vector<std::uint16_t>> _indices_by_lod;
 

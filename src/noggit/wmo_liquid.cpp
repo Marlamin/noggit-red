@@ -221,7 +221,7 @@ void wmo_liquid::upload(opengl::scoped::use_program& water_shader)
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_buffer, indices, GL_STATIC_DRAW);
 
   gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_buffer, vertices, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_tex_coord_buffer, tex_coords, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(_tex_coord_buffer, tex_coords, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER, float>(_depth_buffer, depths, GL_STATIC_DRAW);
 
   opengl::scoped::index_buffer_manual_binder indices_binder (_indices_buffer);

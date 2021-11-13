@@ -4534,8 +4534,8 @@ void World::setupChunkBuffers()
 
   // vertices
 
-  math::vector_2d vertices[mapbufsize];
-  math::vector_2d *ttv = vertices;
+  glm::vec2 vertices[mapbufsize];
+  glm::vec2 *ttv = vertices;
 
   for (int j = 0; j < 17; ++j)
   {
@@ -4551,7 +4551,7 @@ void World::setupChunkBuffers()
         xpos += UNITSIZE*0.5f;
       }
 
-      math::vector_2d v = math::vector_2d(xpos, zpos);
+      auto v = glm::vec2(xpos, zpos);
       *ttv++ = v;
     }
   }
@@ -4656,7 +4656,7 @@ void World::setupChunkBuffers()
   }
 
   // tex coords
-  math::vector_2d temp[mapbufsize], *vt;
+  glm::vec2 temp[mapbufsize], *vt;
   float tx, ty;
 
   // init texture coordinates for detail map:
@@ -4674,7 +4674,7 @@ void World::setupChunkBuffers()
       if (is_lod)
         tx += detail_half;
 
-      *vt++ = math::vector_2d(tx, ty);
+      *vt++ = glm::vec2(tx, ty);
     }
   }
 
@@ -4698,22 +4698,22 @@ void World::setupLiquidChunkBuffers()
   ZoneScoped;
 
   // vertices
-  math::vector_2d vertices[768 / 2];
-  math::vector_2d* vt = vertices;
+  glm::vec2 vertices[768 / 2];
+  glm::vec2* vt = vertices;
 
   for (int z = 0; z < 8; ++z)
   {
     for (int x = 0; x < 8; ++x)
     {
       // first triangle
-      *vt++ = math::vector_2d(UNITSIZE * x, UNITSIZE * z);
-      *vt++ = math::vector_2d(UNITSIZE * x, UNITSIZE * (z + 1));
-      *vt++ = math::vector_2d(UNITSIZE * (x + 1), UNITSIZE * z);
+      *vt++ = glm::vec2(UNITSIZE * x, UNITSIZE * z);
+      *vt++ = glm::vec2(UNITSIZE * x, UNITSIZE * (z + 1));
+      *vt++ = glm::vec2(UNITSIZE * (x + 1), UNITSIZE * z);
 
       // second triangle
-      *vt++ = math::vector_2d(UNITSIZE * (x + 1), UNITSIZE * z);
-      *vt++ = math::vector_2d(UNITSIZE * x, UNITSIZE * (z + 1));
-      *vt++ = math::vector_2d(UNITSIZE * (x + 1), UNITSIZE * (z + 1));
+      *vt++ = glm::vec2(UNITSIZE * (x + 1), UNITSIZE * z);
+      *vt++ = glm::vec2(UNITSIZE * x, UNITSIZE * (z + 1));
+      *vt++ = glm::vec2(UNITSIZE * (x + 1), UNITSIZE * (z + 1));
     }
   }
 

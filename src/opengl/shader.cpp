@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/matrix_4x4.hpp>
-#include <math/vector_2d.hpp>
 #include <math/vector_3d.hpp>
 #include <math/vector_4d.hpp>
 #include <opengl/scoped.hpp>
@@ -296,17 +295,17 @@ namespace opengl
     {
       gl.uniform3fv (pos, value.size(), reinterpret_cast<const GLfloat*>(value.data()));
     }
-    void use_program::uniform (std::string const& name, math::vector_2d const& value)
+    void use_program::uniform (std::string const& name, glm::vec2 const& value)
     {
       GLuint loc = uniform_location (name);
       if (loc < 0)
         return;
 
-      gl.uniform2fv (loc, 1, value);
+      gl.uniform2fv(loc, 1, glm::value_ptr(value));
     }
-    void use_program::uniform (GLint pos, math::vector_2d const& value)
+    void use_program::uniform (GLint pos, glm::vec2 const& value)
     {
-      gl.uniform2fv (pos, 1, value);
+      gl.uniform2fv (pos, 1, glm::value_ptr(value));
     }
     void use_program::uniform (std::string const& name, math::vector_3d const& value)
     {
@@ -359,7 +358,7 @@ namespace opengl
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 1, GL_FLOAT, GL_FALSE, 0, data.data());
     }
-    void use_program::attrib (std::string const& name, std::vector<math::vector_2d> const& data)
+    void use_program::attrib (std::string const& name, std::vector<glm::vec2> const& data)
     {
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);

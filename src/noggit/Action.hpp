@@ -10,14 +10,12 @@
 #include <algorithm>
 #include <external/tsl/robin_map.h>
 #include <boost/optional.hpp>
-#include <math/vector_2d.hpp>
 #include <noggit/TextureManager.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/SceneObject.hpp>
 #include <noggit/liquid_layer.hpp>
 #include <noggit/ChunkWater.hpp>
 #include <QObject>
-
 
 class MapView;
 class MapChunk;

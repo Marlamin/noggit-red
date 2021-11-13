@@ -160,10 +160,10 @@ ParticleSystem::ParticleSystem(ParticleSystem&& other)
 
 }
 
-void ParticleSystem::initTile(math::vector_2d *tc, int num)
+void ParticleSystem::initTile(glm::vec2 *tc, int num)
 {
-  math::vector_2d otc[4];
-  math::vector_2d a, b;
+  glm::vec2 otc[4];
+  glm::vec2 a, b;
   int x = num % cols;
   int y = num / cols;
   a.x = x * (1.0f / cols);
@@ -319,7 +319,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
   std::vector<math::vector_3d> vertices;
   std::vector<math::vector_3d> offsets;
   std::vector<math::vector_4d> colors_data;
-  std::vector<math::vector_2d> texcoords;
+  std::vector<glm::vec2> texcoords;
 
   std::uint16_t indice = 0;
 
@@ -460,7 +460,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
 
   gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STREAM_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER, math::vector_4d>(_colors_vbo, colors_data, GL_STREAM_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STREAM_DRAW);
 
   shader.uniform("alpha_test", alpha_test);
@@ -916,7 +916,7 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
 
   std::vector<std::uint16_t> indices;
   std::vector<math::vector_3d> vertices;
-  std::vector<math::vector_2d> texcoords;
+  std::vector<glm::vec2> texcoords;
 
   //model->_textures[_texture_ids[0]]->bind();
 
@@ -965,7 +965,7 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
   }
 
   gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STREAM_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STREAM_DRAW);
 
   opengl::scoped::vao_binder const _(_vao);

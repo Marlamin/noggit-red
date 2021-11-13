@@ -201,8 +201,8 @@ private:
 
   std::vector<::math::vector_3d> _vertices;
   std::vector<::math::vector_3d> _normals;
-  std::vector<::math::vector_2d> _texcoords;
-  std::vector<::math::vector_2d> _texcoords_2;
+  std::vector<glm::vec2> _texcoords;
+  std::vector<glm::vec2> _texcoords_2;
   std::vector<::math::vector_4d> _vertex_colors;
   std::vector<unsigned> _render_batch_mapping;
   std::vector<uint16_t> _indices;

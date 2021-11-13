@@ -1,11 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/vector_2d.hpp>
 #include <math/vector_3d.hpp>
 
 #include <cstdint>
+#include <glm/vec2.hpp>
 
 #pragma pack(push,1)
 
@@ -160,7 +159,7 @@ struct ModelVertex {
   uint8_t weights[4];
   uint8_t bones[4];
   math::vector_3d normal;
-  math::vector_2d texcoords[2];
+  glm::vec2 texcoords[2];
 };
 
 struct ModelView {

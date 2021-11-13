@@ -211,7 +211,7 @@ int TileWater::getType(size_t layer)
 
 void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
 {
-  tsl::robin_map<unsigned, std::tuple<GLuint, math::vector_2d, int, unsigned>> const& tex_frames = tex_manager->getTextureFrames();
+  tsl::robin_map<unsigned, std::tuple<GLuint, glm::vec2, int, unsigned>> const& tex_frames = tex_manager->getTextureFrames();
 
   // create opengl resources if needed
   if (_need_buffer_update)
@@ -256,7 +256,7 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
           auto& layer_params = _render_layers[layer_counter];
 
           // fill per-chunk data
-          std::tuple<GLuint, math::vector_2d, int, unsigned> const& tex_profile = tex_frames.at(layer.liquidID());
+          std::tuple<GLuint, glm::vec2, int, unsigned> const& tex_profile = tex_frames.at(layer.liquidID());
           opengl::LiquidChunkInstanceDataUniformBlock& params_data = layer_params.chunk_data[n_chunks];
 
           params_data.xbase = layer.getChunk()->xbase;
@@ -281,7 +281,7 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
           params_data.type = std::get<2>(tex_profile);
           params_data.n_texture_frames = std::get<3>(tex_profile);
 
-          math::vector_2d anim = std::get<1>(tex_profile);
+          glm::vec2 anim = std::get<1>(tex_profile);
           params_data.anim_u = anim.x;
           params_data.anim_v = anim.y;
 
@@ -300,7 +300,7 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
             for (int x_v = 0; x_v < 9; ++x_v)
             {
               const unsigned v_index = z_v * 9 + x_v;
-              math::vector_2d& tex_coord = tex_coords[v_index];
+              glm::vec2& tex_coord = tex_coords[v_index];
               layer_params.vertex_data[n_chunks][v_index] = math::vector_4d(vertices[v_index].y, depth[v_index], tex_coord.x, tex_coord.y);
             }
           }

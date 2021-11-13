@@ -1,10 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-// #define USEBLSFILES
-
-#include <math/vector_2d.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/TextureManager.h>
@@ -117,7 +113,7 @@ private:
   int _liquid_id;
 
   std::vector<float> depths;
-  std::vector<math::vector_2d> tex_coords;
+  std::vector<glm::vec2> tex_coords;
   std::vector<math::vector_3d> vertices;
   std::vector<std::uint16_t> indices;
 

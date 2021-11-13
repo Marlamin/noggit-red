@@ -48,7 +48,7 @@ public:
 };
 
 struct TexCoordSet {
-  math::vector_2d tc[4];
+    glm::vec2 tc[4];
 };
 
 class ParticleSystem 
@@ -69,7 +69,7 @@ class ParticleSystem
   int manimtime;
   int rows, cols;
   std::vector<TexCoordSet> tiles;
-  void initTile(math::vector_2d *tc, int num);
+  void initTile(glm::vec2 *tc, int num);
   bool billboard;
 
   float rem;

@@ -837,11 +837,11 @@ std::vector<MapChunk*> MapTile::chunks_in_rect (math::vector_3d const& pos, floa
     for (size_t tx (0); tx < 16; ++tx)
     {
       MapChunk* chunk = mChunks[ty][tx].get();
-      math::vector_2d l_rect{pos.x - radius, pos.z - radius};
-      math::vector_2d r_rect{pos.x + radius, pos.z + radius};
+      glm::vec2 l_rect{pos.x - radius, pos.z - radius};
+      glm::vec2 r_rect{pos.x + radius, pos.z + radius};
 
-      math::vector_2d l_chunk{chunk->xbase, chunk->zbase};
-      math::vector_2d r_chunk{chunk->xbase + CHUNKSIZE, chunk->zbase + CHUNKSIZE};
+      glm::vec2 l_chunk{chunk->xbase, chunk->zbase};
+      glm::vec2 r_chunk{chunk->xbase + CHUNKSIZE, chunk->zbase + CHUNKSIZE};
 
       if ((l_rect.x  <  r_chunk.x)  &&  (r_rect.x   >=  l_chunk.x) && (l_rect.y  <  r_chunk.y)  && (r_rect.y  >=  l_chunk.y))
       {

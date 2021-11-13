@@ -799,7 +799,7 @@ void WMOGroup::upload()
   
   if (header.flags.has_two_motv)
   {
-    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d> ( _texcoords_buffer_2
+    gl.bufferData<GL_ARRAY_BUFFER, glm::vec2> ( _texcoords_buffer_2
                                                     , _texcoords_2
                                                     , GL_STATIC_DRAW
                                                     );
@@ -977,7 +977,7 @@ void WMOGroup::load()
 
   assert (fourcc == 'MOTV');
 
-  _texcoords.resize (size / sizeof (::math::vector_2d));
+  _texcoords.resize (size / sizeof (glm::vec2));
 
   f.read (_texcoords.data (), size);
 
@@ -1271,7 +1271,7 @@ void WMOGroup::load()
     }
     else
     {
-      _texcoords_2.resize(size / sizeof(::math::vector_2d));
+      _texcoords_2.resize(size / sizeof(glm::vec2));
       f.read(_texcoords_2.data(), size);
     }
 
