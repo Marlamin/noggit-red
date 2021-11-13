@@ -85,10 +85,6 @@ namespace math
 
     vector_3d operator* (vector_3d const&) const;
     vector_4d operator* (vector_4d const&) const;
-    glm::quat operator* (glm::quat const& q) const
-    {
-      return glm::quat();
-    }
     matrix_4x4 operator* (matrix_4x4 const&) const;
     std::vector<math::vector_3d> operator*(std::vector<math::vector_3d> points) const;
 
