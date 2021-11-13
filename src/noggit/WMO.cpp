@@ -351,7 +351,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                )
 {
 
-  wmo_shader.uniform("ambient_color", ambient_light_color.xyz());
+  wmo_shader.uniform("ambient_color",glm::vec3(ambient_light_color));
 
   for (auto& group : groups)
   {
@@ -538,7 +538,7 @@ void WMOLight::init(MPQFile* f)
   float fg = ((color & 0x0000ff00) >> 8) / 255.0f;
   float fb = ((color & 0x000000ff)) / 255.0f;
 
-  fcolor = math::vector_4d(fr, fg, fb, fa);
+  fcolor = glm::vec4(fr, fg, fb, fa);
   fcolor *= intensity;
   fcolor.w = 1.0f;
 
@@ -558,11 +558,11 @@ void WMOLight::setup(GLint)
 
 void WMOLight::setupOnce(GLint, math::vector_3d, math::vector_3d)
 {
-  //math::vector_4d position(dir, 0);
-  //math::vector_4d position(0,1,0,0);
+  //glm::vec4position(dir, 0);
+  //glm::vec4position(0,1,0,0);
 
-  //math::vector_4d ambient = math::vector_4d(light_color * 0.3f, 1);
-  //math::vector_4d diffuse = math::vector_4d(light_color, 1);
+  //glm::vec4ambient = glm::vec4(light_color * 0.3f, 1);
+  //glm::vec4diffuse = glm::vec4(light_color, 1);
 
 
   //gl.enable(light);
@@ -624,14 +624,14 @@ WMOGroup::WMOGroup(WMOGroup const& other)
 
 namespace
 {
-  math::vector_4d colorFromInt(unsigned int col)
+  glm::vec4 colorFromInt(unsigned int col)
   {
     GLubyte r, g, b, a;
     a = (col & 0xFF000000) >> 24;
     r = (col & 0x00FF0000) >> 16;
     g = (col & 0x0000FF00) >> 8;
     b = (col & 0x000000FF);
-    return math::vector_4d(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+    return glm::vec4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
   }
 }
 
@@ -1385,7 +1385,7 @@ void WMOGroup::fix_vertex_color_alpha()
     interior_batchs_start = _batches[header.transparency_batches_count - 1].vertex_end + 1;
   }
 
-  math::vector_4d wmo_ambient_color;
+  glm::vec4 wmo_ambient_color;
 
   if (wmo->flags.use_unified_render_path)
   {
@@ -1577,7 +1577,7 @@ void WMOGroup::setupFog (bool draw_fog, std::function<void (bool)> setup_fog)
 void WMOFog::init(MPQFile* f)
 {
   f->read(this, 0x30);
-  color = math::vector_4d(((color1 & 0x00FF0000) >> 16) / 255.0f, ((color1 & 0x0000FF00) >> 8) / 255.0f,
+  color = glm::vec4(((color1 & 0x00FF0000) >> 16) / 255.0f, ((color1 & 0x0000FF00) >> 8) / 255.0f,
     (color1 & 0x000000FF) / 255.0f, ((color1 & 0xFF000000) >> 24) / 255.0f);
   float temp;
   temp = pos.y;

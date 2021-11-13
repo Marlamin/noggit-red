@@ -228,7 +228,7 @@ public slots:
   void on_exit_prompt();
 
 public:
-  math::vector_4d cursor_color;
+  glm::vec4 cursor_color;
 
   MapView ( math::degrees ah0
           , math::degrees av0
@@ -316,7 +316,7 @@ private:
 
   noggit::ui::main_window* _main_window;
 
-  math::vector_4d normalized_device_coords (int x, int y) const;
+  glm::vec4 normalized_device_coords (int x, int y) const;
   float aspect_ratio() const;
 
   noggit::TabletManager* _tablet_manager;

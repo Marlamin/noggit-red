@@ -489,7 +489,7 @@ bool Skies::draw( math::matrix_4x4 const& model_view
       opengl::scoped::vao_binder const _ (_vao);
 
       shader.uniform("model_view_projection", model_view*projection);
-      shader.uniform("camera_pos", camera_pos);
+      shader.uniform("camera_pos", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
 
       gl.drawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_SHORT, nullptr);
     }

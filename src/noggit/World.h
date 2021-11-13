@@ -99,7 +99,7 @@ public:
             , math::matrix_4x4 const& projection
             , math::vector_3d const& cursor_pos
             , float cursorRotation
-            , math::vector_4d const& cursor_color
+            , glm::vec4 const& cursor_color
             , CursorType cursor_type
             , float brush_radius
             , bool show_unpaintable_chunks
@@ -243,8 +243,8 @@ public:
     void for_tile_at(const tile_index& pos, Fun&&);
 
   void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
-  void changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
-  void stampShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors);
+  void changeShader(math::vector_3d const& pos, glm::vec4 const& color, float change, float radius, bool editMode);
+  void stampShader(math::vector_3d const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors);
   math::vector_3d pickShaderColor(math::vector_3d const& pos);
   void flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
   void blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode);

@@ -16,9 +16,10 @@ namespace math
       , _direction (direction.normalized())
     {}
 
-    ray (matrix_4x4 const& transform, ray const& other)
-      : ray ( (transform * math::vector_4d (other._origin, 1.0)).xyz()
-            , (transform * math::vector_4d (other._direction, 0.0)).xyz()
+    ray (matrix_4x4 const& transform, ray const& other): ray (
+        math::vector_3d(
+            (transform * glm::vec4(other._origin.x, other._origin.y, other._origin.z, 1.0))),
+        math::vector_3d((transform * glm::vec4(other._direction.x, other._direction.y, other._direction.z, 0.0)))
             )
     {}
 

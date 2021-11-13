@@ -103,7 +103,7 @@ namespace math
            , _m[2][0] * v[0] + _m[2][1] * v[1] + _m[2][2] * v[2] + _m[2][3]
            };
   }
-  vector_4d matrix_4x4::operator* (const vector_4d& v) const
+  glm::vec4 matrix_4x4::operator* (const glm::vec4& v) const
   {
     return { _m[0][0] * v[0] + _m[0][1] * v[1] + _m[0][2] * v[2] + _m[0][3] * v[3]
            , _m[1][0] * v[0] + _m[1][1] * v[1] + _m[1][2] * v[2] + _m[1][3] * v[3]

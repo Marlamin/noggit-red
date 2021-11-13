@@ -801,7 +801,7 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
   return changed;
 }
 
-bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
+bool MapChunk::ChangeMCCV(math::vector_3d const& pos, glm::vec4 const& color, float change, float radius, bool editMode)
 {
   float dist;
   bool changed = false;
@@ -854,7 +854,7 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& col
   return changed;
 }
 
-bool MapChunk::stampMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
+bool MapChunk::stampMCCV(math::vector_3d const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
 {
   float dist;
   bool changed = false;

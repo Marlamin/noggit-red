@@ -15,6 +15,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <glm/vec4.hpp>
 #include <noggit/Selection.h>
 
 // namespace for static helper functions.
@@ -74,10 +75,10 @@ namespace misc
     }
   }
 
-  struct random_color : math::vector_4d
+  struct random_color : glm::vec4
   {
     random_color()
-      : math::vector_4d ( misc::randfloat(0.0f, 1.0f)
+      : glm::vec4( misc::randfloat(0.0f, 1.0f)
                         , misc::randfloat(0.0f, 1.0f)
                         , misc::randfloat(0.0f, 1.0f)
                         , 0.7f

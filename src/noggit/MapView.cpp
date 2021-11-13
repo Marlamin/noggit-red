@@ -3788,7 +3788,7 @@ void MapView::tick (float dt)
   }
 }
 
-math::vector_4d MapView::normalized_device_coords (int x, int y) const
+glm::vec4 MapView::normalized_device_coords (int x, int y) const
 {
   return {2.0f * x / width() - 1.0f, 1.0f - 2.0f * y / height(), 0.0f, 1.0f};
 }
@@ -3806,14 +3806,10 @@ math::ray MapView::intersect_ray() const
   {
     // during rendering we multiply perspective * view
     // so we need the same order here and then invert.
-    math::vector_3d const pos 
-    (
-      ( ( projection() 
-        * model_view()
-        ).inverted()
-        * normalized_device_coords (mx, mz)
-      ).xyz_normalized_by_w()
-    );
+      math::matrix_4x4 const invertedViewMatrix = (projection() * model_view()).inverted();
+      auto normalisedView = invertedViewMatrix * normalized_device_coords(mx, mz);
+
+      auto pos = math::vector_3d(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
 
     return { _camera.position, pos - _camera.position };
   }
@@ -5075,7 +5071,7 @@ void MapView::onSettingsSave()
   params->wireframe_width = _settings->value ("wireframe/width", 1.f).toFloat();
 
   QColor c = _settings->value("wireframe/color").value<QColor>();
-  math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
+  glm::vec4 wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
   params->wireframe_color = wireframe_color;
 
   _world->markTerrainParamsUniformBlockDirty();

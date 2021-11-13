@@ -201,7 +201,7 @@ private:
   std::vector<::math::vector_3d> _normals;
   std::vector<glm::vec2> _texcoords;
   std::vector<glm::vec2> _texcoords_2;
-  std::vector<::math::vector_4d> _vertex_colors;
+  std::vector<glm::vec4> _vertex_colors;
   std::vector<unsigned> _render_batch_mapping;
   std::vector<uint16_t> _indices;
   std::vector<WMORenderBatch> _render_batches;
@@ -236,7 +236,7 @@ struct WMOLight {
   float unk[5];
   float r;
 
-  math::vector_4d fcolor;
+  glm::vec4 fcolor;
 
   void init(MPQFile* f);
   void setup(GLint light);
@@ -268,7 +268,7 @@ struct WMOFog {
   float f3;
   unsigned int color2;
   // read to here (0x30 bytes)
-  math::vector_4d color;
+  glm::vec4 color;
   void init(MPQFile* f);
   void setup();
 };
@@ -343,7 +343,7 @@ public:
   std::vector<math::vector_3d> model_nearest_light_vector;
 
   std::vector<WMOLight> lights;
-  math::vector_4d ambient_light_color;
+  glm::vec4 ambient_light_color;
 
   mohd_flags flags;
 

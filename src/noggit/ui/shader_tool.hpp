@@ -48,7 +48,7 @@ namespace noggit
       QImage* getMaskImage() { return &_mask_image; }
       void updateMaskImage();
 
-      math::vector_4d& shaderColor() { return _color; };
+      glm::vec4& shaderColor() { return _color; };
 
       noggit::Red::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
       noggit::Red::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
@@ -58,7 +58,7 @@ namespace noggit
       void fromJSON(QJsonObject const& json);
 
     private:
-      math::vector_4d _color;
+      glm::vec4 _color;
 
       noggit::Red::UiCommon::ExtendedSlider* _radius_slider;
       noggit::Red::UiCommon::ExtendedSlider* _speed_slider;

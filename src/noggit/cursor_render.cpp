@@ -6,7 +6,7 @@
 
 namespace noggit
 {
-  void cursor_render::draw(mode cursor_mode, math::matrix_4x4 const& mvp, math::vector_4d color, math::vector_3d const& pos, float radius, float inner_radius_ratio)
+  void cursor_render::draw(mode cursor_mode, math::matrix_4x4 const& mvp, glm::vec4 color, math::vector_3d const& pos, float radius, float inner_radius_ratio)
   {
     if (!_uploaded)
     {
@@ -16,7 +16,7 @@ namespace noggit
     opengl::scoped::use_program shader {*_cursor_program.get()};
 
     shader.uniform("model_view_projection", mvp);
-    shader.uniform("cursor_pos", pos);
+    shader.uniform("cursor_pos", glm::vec3(pos.x,pos.y,pos.z));
     shader.uniform("color", color);
     shader.uniform("radius", radius);
 

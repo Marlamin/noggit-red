@@ -23,7 +23,7 @@ struct Particle {
   //math::vector_3d tpos;
   float size, life, maxlife;
   unsigned int tile;
-  math::vector_4d color;
+  glm::vec4 color;
 };
 
 typedef std::list<Particle> ParticleList;
@@ -58,7 +58,7 @@ class ParticleSystem
   std::unique_ptr<ParticleEmitter> emitter;
   Animation::M2Value<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, deacceleration;
   Animation::M2Value<uint8_t> enabled;
-  std::array<math::vector_4d, 3> colors;
+  std::array<glm::vec4, 3> colors;
   std::array<float,3> sizes;
   float mid, slowdown;
   math::vector_3d pos;
@@ -147,7 +147,7 @@ class RibbonEmitter
   float length;
 
   math::vector_3d tpos;
-  math::vector_4d tcolor;
+  glm::vec4 tcolor;
   float tabove, tbelow;
 
   std::vector<uint16_t> _texture_ids;

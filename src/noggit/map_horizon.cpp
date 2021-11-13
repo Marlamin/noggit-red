@@ -382,7 +382,7 @@ void map_horizon::render::draw( math::matrix_4x4 const& model_view
 
   shader.uniform ("model_view", model_view);
   shader.uniform ("projection", projection);
-  shader.uniform ("color", color);
+  shader.uniform ("color", glm::vec3(color.x, color.y, color.z));
 
   shader.attrib ("position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
 

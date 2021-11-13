@@ -211,10 +211,10 @@ void PreviewRenderer::draw()
       //water_shader.uniform("model_view", model_view().transposed());
       //water_shader.uniform("projection", projection().transposed());
 
-      math::vector_4d ocean_color_light(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
-      math::vector_4d ocean_color_dark(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
-      math::vector_4d river_color_light(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
-      math::vector_4d river_color_dark(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4ocean_color_light(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4ocean_color_dark(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4river_color_light(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4river_color_dark(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
 
       //water_shader.uniform("ocean_color_light", ocean_color_light);
       //water_shader.uniform("ocean_color_dark", ocean_color_dark);
@@ -347,11 +347,11 @@ void PreviewRenderer::draw()
 
       for (auto& it : model_boxes_to_draw)
       {
-        math::vector_4d color = it.first->is_hidden()
-                                ? math::vector_4d(0.f, 0.f, 1.f, 1.f)
+        glm::vec4 color = it.first->is_hidden()
+                                ? glm::vec4(0.f, 0.f, 1.f, 1.f)
                                 : ( it.first->use_fake_geometry()
-                                    ? math::vector_4d(1.f, 0.f, 0.f, 1.f)
-                                    : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f)
+                                    ? glm::vec4(1.f, 0.f, 0.f, 1.f)
+                                    : glm::vec4(0.75f, 0.75f, 0.75f, 1.f)
                                 )
         ;
 
@@ -411,7 +411,7 @@ void PreviewRenderer::draw()
   if (_draw_grid.get())
   {
     _grid.draw(mvp, math::vector_3d(0.f, 0.f, 0.f),
-               math::vector_4d(0.7f, 0.7f, 0.7f, 1.0f), 30.f);
+               glm::vec4(0.7f, 0.7f, 0.7f, 1.0f), 30.f);
 
   }
 

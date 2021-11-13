@@ -301,7 +301,7 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
             {
               const unsigned v_index = z_v * 9 + x_v;
               glm::vec2& tex_coord = tex_coords[v_index];
-              layer_params.vertex_data[n_chunks][v_index] = math::vector_4d(vertices[v_index].y, depth[v_index], tex_coord.x, tex_coord.y);
+              layer_params.vertex_data[n_chunks][v_index] = glm::vec4(vertices[v_index].y, depth[v_index], tex_coord.x, tex_coord.y);
             }
           }
 

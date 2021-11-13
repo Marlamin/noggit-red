@@ -43,7 +43,7 @@ namespace opengl
       void draw ( math::matrix_4x4 const& model_view
                 , math::matrix_4x4 const& projection
                 , math::matrix_4x4 const& transform
-                , math::vector_4d const& color
+                , glm::vec4 const& color
                 , math::vector_3d const& min_point
                 , math::vector_3d const& max_point
                 );
@@ -66,7 +66,7 @@ namespace opengl
     public:
         void draw( math::matrix_4x4 const& mvp
             , math::vector_3d const& pos
-            , math::vector_4d const& color
+            , glm::vec4  const& color
             , float radius
         );
         void unload();
@@ -89,7 +89,7 @@ namespace opengl
     public:
       void draw( math::matrix_4x4 const& mvp
                , math::vector_3d const& pos
-               , math::vector_4d const& color
+               , glm::vec4  const& color
                , float radius
                );
       void unload();
@@ -116,7 +116,7 @@ namespace opengl
                , float radius // radius of the biggest circle fitting inside the square drawn
                , math::radians inclination
                , math::radians orientation
-               , math::vector_4d const& color
+               , glm::vec4  const& color
                );
       void unload();
     private:

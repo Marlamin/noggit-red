@@ -61,7 +61,7 @@ ParticleSystem::ParticleSystem(Model* model_
   memcpy(colors2, f.getBuffer() + mta.p.colors.ofsKeys, sizeof(math::vector_3d) * 3);
   for (size_t i = 0; i<3; ++i) {
     float opacity = *reinterpret_cast<int16_t const*>(f.getBuffer() + mta.p.opacity.ofsKeys + i * 2);
-    colors[i] = math::vector_4d(colors2[i].x / 255.0f, colors2[i].y / 255.0f, colors2[i].z / 255.0f, opacity / 32767.0f);
+    colors[i] = glm::vec4(colors2[i].x / 255.0f, colors2[i].y / 255.0f, colors2[i].z / 255.0f, opacity / 32767.0f);
     sizes[i] = (*reinterpret_cast<float const*>(f.getBuffer() + mta.p.sizes.ofsKeys + i * 4))*mta.p.scales[i];
   }
 
@@ -247,7 +247,7 @@ void ParticleSystem::update(float dt)
     float rlife = p.life / p.maxlife;
     // calculate size and color based on lifetime
     p.size = lifeRamp<float>(rlife, mid, sizes[0], sizes[1], sizes[2]);
-    p.color = lifeRamp<math::vector_4d>(rlife, mid, colors[0], colors[1], colors[2]);
+    p.color = lifeRamp<glm::vec4>(rlife, mid, colors[0], colors[1], colors[2]);
 
     // kill off old particles
     if (rlife >= 1.0f)
@@ -318,7 +318,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
   std::vector<std::uint16_t> indices;
   std::vector<math::vector_3d> vertices;
   std::vector<math::vector_3d> offsets;
-  std::vector<math::vector_4d> colors_data;
+  std::vector<glm::vec4> colors_data;
   std::vector<glm::vec2> texcoords;
 
   std::uint16_t indice = 0;
@@ -459,7 +459,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
   }
 
   gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STREAM_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_4d>(_colors_vbo, colors_data, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec4>(_colors_vbo, colors_data, GL_STREAM_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STREAM_DRAW);
 
@@ -898,7 +898,8 @@ void RibbonEmitter::setup(int anim, int time, int animtime)
   }
 
   tpos = ntpos;
-  tcolor = math::vector_4d(color.getValue(anim, time, animtime), opacity.getValue(anim, time, animtime));
+  auto col = color.getValue(anim, time, animtime);
+  tcolor = glm::vec4(col.x,col.y,col.z, opacity.getValue(anim, time, animtime));
 
   tabove = above.getValue(anim, time, animtime);
   tbelow = below.getValue(anim, time, animtime);

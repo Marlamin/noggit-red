@@ -1062,7 +1062,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , math::matrix_4x4 const& projection
                  , math::vector_3d const& cursor_pos
                  , float cursorRotation
-                 , math::vector_4d const& cursor_color
+                 , glm::vec4 const& cursor_color
                  , CursorType cursor_type
                  , float brush_radius
                  , bool show_unpaintable_chunks
@@ -1260,13 +1260,13 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
-      mcnk_shader.uniform ("camera", camera_pos);
+      mcnk_shader.uniform ("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
       mcnk_shader.uniform ("animtime", static_cast<int>(animtime));
 
       if (cursor_type != CursorType::NONE)
       {
         mcnk_shader.uniform("draw_cursor_circle", static_cast<int>(cursor_type));
-        mcnk_shader.uniform ("cursor_position", cursor_pos);
+        mcnk_shader.uniform ("cursor_position", glm::vec3(cursor_pos.x, cursor_pos.y, cursor_pos.z));
         mcnk_shader.uniform("cursorRotation", cursorRotation);
         mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
         mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
@@ -1330,7 +1330,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     for (math::vector_3d const* pos : _vertices_selected)
     {
-      _sphere_render.draw(mvp, *pos, math::vector_4d(1.f, 0.f, 0.f, 1.f), 0.5f);
+      _sphere_render.draw(mvp, *pos, glm::vec4(1.f, 0.f, 0.f, 1.f), 0.5f);
     }
 
     _sphere_render.draw(mvp, vertexCenter(), cursor_color, 2.f);
@@ -1445,7 +1445,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       opengl::scoped::use_program wmo_program{*_wmo_program.get()};
 
-      wmo_program.uniform("camera", camera_pos);
+      wmo_program.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
 
 
       for (auto& instance: wmos_to_draw)
@@ -1645,11 +1645,11 @@ void World::draw ( math::matrix_4x4 const& model_view
 
       for (auto& it : model_boxes_to_draw)
       {
-        math::vector_4d color = it.first->is_hidden()
-                                ? math::vector_4d(0.f, 0.f, 1.f, 1.f)
+        glm::vec4 color = it.first->is_hidden()
+                                ? glm::vec4(0.f, 0.f, 1.f, 1.f)
                                 : ( it.first->use_fake_geometry()
-                                    ? math::vector_4d(1.f, 0.f, 0.f, 1.f)
-                                    : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f)
+                                    ? glm::vec4(1.f, 0.f, 0.f, 1.f)
+                                    : glm::vec4(0.75f, 0.75f, 0.75f, 1.f)
                                 )
         ;
 
@@ -1679,7 +1679,7 @@ void World::draw ( math::matrix_4x4 const& model_view
   // set anim time only once per frame
   {
     opengl::scoped::use_program water_shader {*_liquid_program.get()};
-    water_shader.uniform("camera", camera_pos);
+    water_shader.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
     water_shader.uniform("animtime", animtime);
 
 
@@ -1775,7 +1775,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     math::degrees orient = math::degrees(orientation);
     math::degrees incl = math::degrees(angle);
-    math::vector_4d color = cursor_color;
+    glm::vec4 color = cursor_color;
     // always half transparent regardless or the cursor transparency
     color.w = 0.5f;
 
@@ -2006,7 +2006,7 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
 
 
 
-void World::changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode)
+void World::changeShader(math::vector_3d const& pos, glm::vec4 const& color, float change, float radius, bool editMode)
 {
   ZoneScoped;
   for_all_chunks_in_range
@@ -2019,7 +2019,7 @@ void World::changeShader(math::vector_3d const& pos, math::vector_4d const& colo
     );
 }
 
-void World::stampShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
+void World::stampShader(math::vector_3d const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
 {
   ZoneScoped;
   for_all_chunks_in_rect
@@ -4533,15 +4533,20 @@ void World::updateLightingUniformBlock(bool draw_fog, math::vector_3d const& cam
   math::vector_3d diffuse = skies->color_set[LIGHT_GLOBAL_DIFFUSE];
   math::vector_3d ambient = skies->color_set[LIGHT_GLOBAL_AMBIENT];
   math::vector_3d fog_color = skies->color_set[FOG_COLOR];
+  math::vector_3d ocean_color_light = skies->color_set[OCEAN_COLOR_LIGHT];
+  math::vector_3d ocean_color_dark = skies->color_set[OCEAN_COLOR_DARK];
+  math::vector_3d river_color_light = skies->color_set[RIVER_COLOR_LIGHT];
+  math::vector_3d river_color_dark = skies->color_set[RIVER_COLOR_DARK];
 
-  _lighting_ubo_data.DiffuseColor_FogStart = {diffuse, skies->fog_distance_start()};
-  _lighting_ubo_data.AmbientColor_FogEnd = {ambient, skies->fog_distance_end()};
-  _lighting_ubo_data.FogColor_FogOn = {fog_color, static_cast<float>(draw_fog)};
+
+  _lighting_ubo_data.DiffuseColor_FogStart = {diffuse.x,diffuse.y,diffuse.z, skies->fog_distance_start()};
+  _lighting_ubo_data.AmbientColor_FogEnd = {ambient.x,ambient.y,ambient.z, skies->fog_distance_end()};
+  _lighting_ubo_data.FogColor_FogOn = {fog_color.x,fog_color.y,fog_color.z, static_cast<float>(draw_fog)};
   _lighting_ubo_data.LightDir_FogRate = {outdoorLightStats.dayDir.x, outdoorLightStats.dayDir.y, outdoorLightStats.dayDir.z, skies->fogRate()};
-  _lighting_ubo_data.OceanColorLight = {skies->color_set[OCEAN_COLOR_LIGHT], skies->ocean_shallow_alpha()};
-  _lighting_ubo_data.OceanColorDark = {skies->color_set[OCEAN_COLOR_DARK], skies->ocean_deep_alpha()};
-  _lighting_ubo_data.RiverColorLight = {skies->color_set[RIVER_COLOR_LIGHT], skies->river_shallow_alpha()};
-  _lighting_ubo_data.RiverColorDark = {skies->color_set[RIVER_COLOR_DARK], skies->river_deep_alpha()};
+  _lighting_ubo_data.OceanColorLight = { ocean_color_light.x,ocean_color_light.y,ocean_color_light.z, skies->ocean_shallow_alpha()};
+  _lighting_ubo_data.OceanColorDark = { ocean_color_dark.x,ocean_color_dark.y,ocean_color_dark.z, skies->ocean_deep_alpha()};
+  _lighting_ubo_data.RiverColorLight = { river_color_light.x,river_color_light.y,river_color_light.z, skies->river_shallow_alpha()};
+  _lighting_ubo_data.RiverColorDark = { river_color_dark.x,river_color_dark.y,river_color_dark.z, skies->river_deep_alpha()};
 
   gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
   gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::LightingUniformBlock), &_lighting_ubo_data);

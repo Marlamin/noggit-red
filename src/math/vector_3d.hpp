@@ -8,6 +8,7 @@
 #include <ostream>
 #include <tuple>
 #include <vector>
+#include <glm/vec3.hpp>
 
 namespace math
 {
@@ -208,6 +209,7 @@ namespace math
   public:
     using vector_3d_base<float>::vector_3d_base;
     vector_3d (vector_3d_base<float> x) : vector_3d_base<float> (std::move (x)) {}
+    vector_3d(glm::vec3 vec3) : vector_3d_base<float>(vec3.x, vec3.y, vec3.z) {}
     vector_3d() : vector_3d_base<float>() {}
   };
 

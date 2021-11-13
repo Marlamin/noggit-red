@@ -613,8 +613,8 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
 
   // COLOUR
   // Get the colour and transparency and check that we should even render
-  math::vector_4d mesh_color = math::vector_4d(1.0f, 1.0f, 1.0f, m->trans); // ??
-  math::vector_4d emissive_color = math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
+  glm::vec4 mesh_color = glm::vec4(1.0f, 1.0f, 1.0f, m->trans); // ??
+  glm::vec4 emissive_color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
   auto const& renderflag(m->_render_flags[renderflag_index]);
 
@@ -636,7 +636,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
       mesh_color.x = mesh_color.y = mesh_color.z = 0;
     }
 
-    emissive_color = math::vector_4d(c, mesh_color.w);
+    emissive_color = glm::vec4(c.x,c.y,c.z, mesh_color.w);
   }
 
   // opacity
@@ -1329,9 +1329,12 @@ ModelLight::ModelLight(const MPQFile& f, const ModelLightDef &mld, int *global)
 
 void ModelLight::setup(int time, opengl::light, int animtime)
 {
-  math::vector_4d ambcol(ambColor.getValue(0, time, animtime) * ambIntensity.getValue(0, time, animtime), 1.0f);
-  math::vector_4d diffcol(diffColor.getValue(0, time, animtime) * diffIntensity.getValue(0, time, animtime), 1.0f);
-  math::vector_4d p;
+	auto ambient = ambColor.getValue(0, time, animtime) * ambIntensity.getValue(0, time, animtime);
+    auto diffuse = diffColor.getValue(0, time, animtime) * diffIntensity.getValue(0, time, animtime);
+
+  glm::vec4 ambcol(ambient.x, ambient.y,ambient.z, 1.0f);
+  glm::vec4 diffcol(diffuse.x, diffuse.y, diffuse.z, 1.0f);
+  glm::vec4 p;
 
   enum ModelLightTypes {
     MODELLIGHT_DIRECTIONAL = 0,
@@ -1340,14 +1343,14 @@ void ModelLight::setup(int time, opengl::light, int animtime)
 
   if (type == MODELLIGHT_DIRECTIONAL) {
     // directional
-    p = math::vector_4d(tdir, 0.0f);
+    p = glm::vec4(tdir.x, tdir.y, tdir.z, 0.0f);
   }
   else if (type == MODELLIGHT_POINT) {
     // point
-    p = math::vector_4d(tpos, 1.0f);
+    p = glm::vec4(tpos.x, tpos.y,tpos.z, 1.0f);
   }
   else {
-    p = math::vector_4d(tpos, 1.0f);
+    p = glm::vec4(tpos.x, tpos.y, tpos.z, 1.0f);
     LogError << "Light type " << type << " is unknown." << std::endl;
   }
  

@@ -27,7 +27,7 @@ struct LiquidLayerDrawCallData
 {
   unsigned n_used_chunks = 0;
   std::array<opengl::LiquidChunkInstanceDataUniformBlock, 256> chunk_data;
-  std::array<std::array<math::vector_4d, 9 * 9>, 256> vertex_data ;
+  std::array<std::array<glm::vec4, 9 * 9>, 256> vertex_data ;
   std::vector<int> texture_samplers;
   GLuint chunk_data_buf = 0;
   GLuint vertex_data_tex = 0;

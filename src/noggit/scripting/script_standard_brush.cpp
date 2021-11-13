@@ -36,7 +36,7 @@ namespace noggit {
     {
       auto v = color;
       world()->changeShader(
-        pos, math::vector_4d(v.x, v.y, v.z, alpha), change, radius, editMode);
+        pos, glm::vec4(v.x, v.y, v.z, alpha), change, radius, editMode);
     }
 
     math::vector_3d standard_brush::get_vertex_color(

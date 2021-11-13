@@ -119,8 +119,8 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
     //gl.enable(GL_BLEND);
     //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f)
-        : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);
+    glm::vec4 color = force_box ? glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)
+        : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
     opengl::primitives::wire_box::getInstance(_context).draw(model_view
        , projection

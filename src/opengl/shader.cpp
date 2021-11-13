@@ -2,14 +2,13 @@
 
 #include <math/matrix_4x4.hpp>
 #include <math/vector_3d.hpp>
-#include <math/vector_4d.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <opengl/shader.hpp>
 #include <opengl/texture.hpp>
 #include <noggit/Misc.h>
-
+#include <glm/vec3.hpp>
 #include <boost/filesystem/string_file.hpp>
 
 #include <QFile>
@@ -275,13 +274,13 @@ namespace opengl
     {
       gl.uniform1iv (pos, value.size(), value.data());
     }
-    void use_program::uniform (std::string const& name, std::vector<math::vector_3d> const& value)
+    void use_program::uniform (std::string const& name, std::vector<glm::vec3> const& value)
     {
       GLuint loc = uniform_location (name);
       if (loc < 0)
         return;
 
-      gl.uniform3fv (loc, value.size(), reinterpret_cast<const GLfloat*>(value.data()));
+      gl.uniform3fv (loc, value.size(), glm::value_ptr(value[0]));
     }
     void use_program::uniform_chunk_textures (std::string const& name, std::array<std::array<std::array<int, 2>, 4>, 256> const& value)
     {
@@ -291,9 +290,9 @@ namespace opengl
 
       gl.uniform2iv (loc, 256 * 4, reinterpret_cast<const GLint*>(value.data()));
     }
-    void use_program::uniform (GLint pos, std::vector<math::vector_3d> const& value)
+    void use_program::uniform (GLint pos, std::vector<glm::vec3> const& value)
     {
-      gl.uniform3fv (pos, value.size(), reinterpret_cast<const GLfloat*>(value.data()));
+      gl.uniform3fv (pos, value.size(),glm::value_ptr(value[0]));
     }
     void use_program::uniform (std::string const& name, glm::vec2 const& value)
     {
@@ -307,29 +306,29 @@ namespace opengl
     {
       gl.uniform2fv (pos, 1, glm::value_ptr(value));
     }
-    void use_program::uniform (std::string const& name, math::vector_3d const& value)
+    void use_program::uniform (std::string const& name, glm::vec3 const& value)
     {
       GLuint loc = uniform_location (name);
       if (loc < 0)
         return;
 
-      gl.uniform3fv (loc, 1, value);
+      gl.uniform3fv (loc, 1, glm::value_ptr(value));
     }
-    void use_program::uniform (GLint pos, math::vector_3d const& value)
+    void use_program::uniform (GLint pos, glm::vec3 const& value)
     {
-      gl.uniform3fv (pos, 1, value);
+      gl.uniform3fv (pos, 1, glm::value_ptr(value));
     }
-    void use_program::uniform (std::string const& name, math::vector_4d const& value)
+    void use_program::uniform (std::string const& name, glm::vec4 const& value)
     {
       GLuint loc = uniform_location (name);
       if (loc < 0)
         return;
 
-      gl.uniform4fv (loc, 1, value);
+      gl.uniform4fv (loc, 1, glm::value_ptr(value));
     }
-    void use_program::uniform (GLint pos, math::vector_4d const& value)
+    void use_program::uniform (GLint pos, glm::vec4 const& value)
     {
-      gl.uniform4fv (pos, 1, value);
+      gl.uniform4fv (pos, 1, glm::value_ptr(value));
     }
     void use_program::uniform (std::string const& name, math::matrix_4x4 const& value)
     {
@@ -365,14 +364,14 @@ namespace opengl
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 2, GL_FLOAT, GL_FALSE, 0, data.data());
     }
-    void use_program::attrib (std::string const& name, std::vector<math::vector_3d> const& data)
+    void use_program::attrib (std::string const& name, std::vector<glm::vec3> const& data)
     {
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data.data());
     }
-    void use_program::attrib (std::string const& name, math::vector_3d const* data)
+    void use_program::attrib (std::string const& name, glm::vec3 const* data)
     {
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
@@ -382,7 +381,7 @@ namespace opengl
     void use_program::attrib (std::string const& name, math::matrix_4x4 const* data, GLuint divisor)
     {
       GLuint const location (attrib_location (name));
-      math::vector_4d const* vec4_ptr = reinterpret_cast<math::vector_4d const*>(data);
+      glm::vec4 const* vec4_ptr = reinterpret_cast<glm::vec4 const*>(data);
 
       for (GLuint i = 0; i < 4; ++i)
       {

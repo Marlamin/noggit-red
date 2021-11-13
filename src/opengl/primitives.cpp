@@ -20,7 +20,7 @@ namespace opengl
     void wire_box::draw ( math::matrix_4x4 const& model_view
                         , math::matrix_4x4 const& projection
                         , math::matrix_4x4 const& transform
-                        , math::vector_4d const& color
+                        , glm::vec4  const& color
                         , math::vector_3d const& min_point
                         , math::vector_3d const& max_point
                         )
@@ -33,11 +33,21 @@ namespace opengl
 
       opengl::scoped::use_program wire_box_shader {*_program.get()};
 
+      auto points = math::box_points(min_point, max_point);
+
+
+      auto glmPoints = std::vector<glm::vec3>();
+
+    	for(auto const point : points)
+        {
+            glmPoints.push_back(glm::vec3(point.x, point.y, point.z));
+        }
+
       wire_box_shader.uniform("model_view", model_view);
       wire_box_shader.uniform("projection", projection);
       wire_box_shader.uniform("transform", transform);
       wire_box_shader.uniform("color", color);
-      wire_box_shader.uniform("pointPositions", math::box_points (min_point, max_point));
+      wire_box_shader.uniform("pointPositions", glmPoints);
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -113,7 +123,7 @@ namespace opengl
 
       void grid::draw( math::matrix_4x4 const& mvp
           , math::vector_3d const& pos
-          , math::vector_4d const& color
+          , glm::vec4  const& color
           , float radius
       )
       {
@@ -125,7 +135,7 @@ namespace opengl
         opengl::scoped::use_program sphere_shader {*_program.get()};
 
         sphere_shader.uniform("model_view_projection", mvp);
-        sphere_shader.uniform("origin", pos);
+        sphere_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
         sphere_shader.uniform("color", color);
         sphere_shader.uniform("radius", radius);
 
@@ -250,7 +260,7 @@ namespace opengl
 
       void sphere::draw( math::matrix_4x4 const& mvp
                      , math::vector_3d const& pos
-                     , math::vector_4d const& color
+                     , glm::vec4  const& color
                      , float radius
                      )
     {
@@ -262,7 +272,7 @@ namespace opengl
       opengl::scoped::use_program sphere_shader {*_program.get()};
 
       sphere_shader.uniform("model_view_projection", mvp);
-      sphere_shader.uniform("origin", pos);
+      sphere_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
       sphere_shader.uniform("radius", radius);
       sphere_shader.uniform("color", color);
 
@@ -384,7 +394,7 @@ void main()
                      , float radius
                      , math::radians inclination
                      , math::radians orientation
-                     , math::vector_4d const& color
+                     , glm::vec4  const& color
                      )
     {
       if (!_buffers_are_setup)
@@ -395,7 +405,7 @@ void main()
       opengl::scoped::use_program sphere_shader {*_program.get()};
 
       sphere_shader.uniform("model_view_projection", mvp);
-      sphere_shader.uniform("origin", pos);
+      sphere_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
       sphere_shader.uniform("radius", radius);
       sphere_shader.uniform("inclination", inclination._);
       sphere_shader.uniform("orientation", orientation._);

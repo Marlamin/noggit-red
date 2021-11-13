@@ -35,7 +35,7 @@ void ModelViewer::paintGL()
         , world_projection().transposed()
         , math::vector_3d(0.f, 0.f, 0.f)
         , 0.f
-        , math::vector_4d(1.f, 1.f, 1.f, 1.f)
+        , glm::vec4(1.f, 1.f, 1.f, 1.f)
         , CursorType::CIRCLE
         , 0.f
         , false
