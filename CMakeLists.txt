@@ -55,6 +55,8 @@ add_compiler_flag_if_supported(CMAKE_CXX_FLAGS -Wno-multichar)
 add_compiler_flag_if_supported(CMAKE_CXX_FLAGS /EHa)
 #Multi core building for visual studio
 add_compiler_flag_if_supported(CMAKE_CXX_FLAGS /MP)
+#Allow Big obj for msvc compilation
+add_compiler_flag_if_supported(CMAKE_CXX_FLAGS /bigobj)
 
 add_compiler_flag_if_supported (CMAKE_C_FLAGS -Wno-implicit-function-declaration)
 
