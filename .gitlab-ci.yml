@@ -8,25 +8,21 @@
 # can use verions as well, like gcc:5.2
 # see https://hub.docker.com/_/gcc/
 
-image: havric/noggit-red-build:latest
+image: $CI_BUILD_IMAGE
 
 build:
   stage: build
   script:
     - gcc -dumpversion
     - g++ --version
-    - cmake -version
+    - cmake -version  
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake .. -DWITH_SDL2APPLICATION=Flase
     - make
   artifacts:
     paths:
       - build
-      # depending on your build setup it's most likely a good idea to cache outputs to reduce the build time
-      # cache:
-      #   paths:
-      #     - "*.o"
   only:
       - web
   allow_failure: false
