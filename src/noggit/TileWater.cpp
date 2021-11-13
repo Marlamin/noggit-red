@@ -80,7 +80,7 @@ void TileWater::draw ( math::frustum const& frustum
 
   for (auto& render_layer : _render_layers)
   {
-    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_LIQUID_INSTANCE_INDEX, render_layer.chunk_data_buf, 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock));
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_LIQUID_INSTANCE_INDEX, render_layer.chunk_data_buf, 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock) * 256);
 
     gl.activeTexture(GL_TEXTURE0);
     gl.bindTexture(GL_TEXTURE_2D_ARRAY, render_layer.vertex_data_tex);
