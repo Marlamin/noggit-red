@@ -1786,6 +1786,8 @@ void Model::unload()
 
 void Model::updateEmitters(float dt)
 {
+  return;
+
   if (finished)
   {
     for (auto& particle : _particles)
