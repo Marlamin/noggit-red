@@ -1,11 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/matrix_4x4.hpp>
-#include <math/quaternion.hpp>
 #include <math/vector_3d.hpp>
 
 #include <cmath>
 #include <cstring> // memcpy, memset
+#include <glm/gtc/quaternion.hpp>
 
 namespace math
 {
@@ -19,7 +19,7 @@ namespace math
   matrix_4x4::rotation_yzx_t matrix_4x4::rotation_yzx;
   matrix_4x4::rotation_yxz_t matrix_4x4::rotation_yxz;
 
-  matrix_4x4::matrix_4x4 (rotation_t, quaternion const& q)
+  matrix_4x4::matrix_4x4 (rotation_t, glm::quat const& q)
   {
     _m[0][0] = 1.0f - 2.0f * q.y * q.y - 2.0f * q.z * q.z;
     _m[0][1] = 2.0f * q.x * q.y + 2.0f * q.w * q.z;

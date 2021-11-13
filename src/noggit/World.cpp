@@ -56,6 +56,8 @@
 #include <array>
 #include <cstdint>
 
+#include <glm/gtc/quaternion.hpp>
+
 #define BOOST_POOL_NO_MT
 
 bool World::IsEditableWorld(int pMapId)
@@ -282,7 +284,6 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
       continue;
     }
 
-
     updateTilesEntry(entry, model_update::remove);
 
     auto& obj = boost::get<selected_object_type>(entry);
@@ -294,13 +295,53 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
     float ry = misc::randfloat(minY, maxY);
     float rz = misc::randfloat(minZ, maxZ);
 
-    math::quaternion baseRotation = math::quaternion(math::radians(math::degrees(dir.z)), math::radians(math::degrees(-dir.y)), math::radians(math::degrees(dir.x)));
-    math::quaternion newRotation = math::quaternion(math::radians(math::degrees(rx)), math::radians(math::degrees(ry)), math::radians(math::degrees(rz)));
+    //Building rotations
+    auto heading = math::radians(math::degrees(dir.z))._ * 0.5;
+    auto attitude = math::radians(math::degrees(-dir.y))._ * 0.5;
+    auto bank = math::radians(math::degrees(dir.x))._ * 0.5;
+    // Assuming the angles are in radians.
+    double c1 = cos(heading);
+    double s1 = sin(heading);
+    double c2 = cos(attitude);
+    double s2 = sin(attitude);
+    double c3 = cos(bank);
+    double s3 = sin(bank);
+    double c1c2 = c1 * c2;
+    double s1s2 = s1 * s2;
+    auto w = static_cast<float>(c1c2 * c3 - s1s2 * s3);
+    auto x = static_cast<float>(c1c2 * s3 + s1s2 * c3);
+    auto y = static_cast<float>(s1 * c2 * c3 + c1 * s2 * s3);
+    auto z = static_cast<float>(c1 * s2 * c3 - s1 * c2 * s3);
 
-    math::quaternion finalRotation = baseRotation % newRotation;
-    finalRotation.normalize();
+    glm::quat baseRotation = glm::quat(x,y,z,w);
 
-    dir = finalRotation.ToEulerAngles();
+    //Building rotations
+    heading = math::radians(math::degrees(rx))._ * 0.5;
+    attitude = math::radians(math::degrees(ry))._ * 0.5;
+    bank = math::radians(math::degrees(rx))._ * 0.5;
+    // Assuming the angles are in radians.
+    c1 = cos(heading);
+    s1 = sin(heading);
+    c2 = cos(attitude);
+    s2 = sin(attitude);
+    c3 = cos(bank);
+    s3 = sin(bank);
+    c1c2 = c1 * c2;
+    s1s2 = s1 * s2;
+    w = static_cast<float>(c1c2 * c3 - s1s2 * s3);
+    x = static_cast<float>(c1c2 * s3 + s1s2 * c3);
+    y = static_cast<float>(s1 * c2 * c3 + c1 * s2 * s3);
+    z = static_cast<float>(c1 * s2 * c3 - s1 * c2 * s3);
+
+    glm::quat newRotation = glm::quat(x, y, z, w);
+    glm::quat finalRotation = baseRotation * newRotation;
+    glm::quat finalRotationNormalized = glm::normalize(finalRotation);
+
+    auto eulerAngles = glm::eulerAngles(finalRotationNormalized);
+    dir.x = math::degrees(math::radians(eulerAngles.x));
+    dir.z = math::degrees(math::radians(eulerAngles.y));
+    dir.y = math::degrees(math::radians(eulerAngles.z));
+
     obj->recalcExtents();
 
     updateTilesEntry(entry, model_update::add);
@@ -354,7 +395,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 // We hit the terrain, now we take the normal of this position and use it to get the rotation we want.
     auto const& hitChunkInfo = boost::get<selected_chunk_type>(results.front().second);
 
-    math::quaternion q;
+    glm::quat q;
     math::vector_3d varnormal;
 
     // Surface Normal
@@ -409,8 +450,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     q.w = std::sqrt((worldUp.length_squared() * (varnormal.length_squared()))
                     + (worldUp * varnormal));
 
-
-    q.normalize();
+    auto normalizedQ = glm::normalize(q);
 
     math::degrees::vec3 new_dir;
     // To euler, because wow
@@ -433,7 +473,10 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
       new_dir.x = std::atan2(siny_cosp, cosy_cosp) * 180.0f / math::constants::pi;
      }*/
 
-    dir = q.ToEulerAngles();
+    auto eulerAngles = glm::eulerAngles(normalizedQ);
+    dir.x = math::degrees(math::radians(eulerAngles.x));
+    dir.z = math::degrees(math::radians(eulerAngles.y));
+    dir.y = math::degrees(math::radians(eulerAngles.z));
 
     boost::get<selected_object_type>(entry)->recalcExtents();
 

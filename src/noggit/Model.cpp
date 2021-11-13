@@ -175,9 +175,9 @@ namespace
     return math::vector_3d(v.x, v.z, v.y);
   }
 
-  math::quaternion fixCoordSystemQuat(math::quaternion v)
+  glm::quat fixCoordSystemQuat(glm::quat v)
   {
-    return math::quaternion(-v.x, -v.z, v.y, v.w);
+    return glm::quat(-v.x, -v.z, v.y, v.w);
   }
 }
 
@@ -1388,7 +1388,7 @@ void Bone::calcMatrix( math::matrix_4x4 const& model_view
   if (calc) return;
 
   math::matrix_4x4 m {math::matrix_4x4::unit};
-  math::quaternion q;
+  glm::quat q;
 
   if ( flags.transformed
     || flags.billboard 

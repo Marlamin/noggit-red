@@ -4,7 +4,6 @@
 
 #include <math/frustum.hpp>
 #include <math/matrix_4x4.hpp>
-#include <math/quaternion.hpp>
 #include <math/ray.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/Animated.h> // Animation::M2Value
@@ -31,7 +30,7 @@ math::vector_3d fixCoordSystem(math::vector_3d v);
 
 class Bone {
   Animation::M2Value<math::vector_3d> trans;
-  Animation::M2Value<math::quaternion, math::packed_quaternion> rot;
+  Animation::M2Value<glm::quat, packed_quaternion> rot;
   Animation::M2Value<math::vector_3d> scale;
 
 public:
@@ -75,7 +74,7 @@ public:
 
 class TextureAnim {
   Animation::M2Value<math::vector_3d> trans;
-  Animation::M2Value<math::quaternion, math::packed_quaternion> rot;
+  Animation::M2Value<glm::quat, packed_quaternion> rot;
   Animation::M2Value<math::vector_3d> scale;
 
 public:

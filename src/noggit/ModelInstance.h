@@ -118,7 +118,7 @@ protected:
 class wmo_doodad_instance : public ModelInstance
 {
 public:
-  math::quaternion doodad_orientation;
+  glm::quat doodad_orientation;
   math::vector_3d world_pos;
 
   explicit wmo_doodad_instance(std::string const& filename

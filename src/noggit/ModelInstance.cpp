@@ -232,7 +232,7 @@ wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f
   pos = math::vector_3d(ff[0], ff[2], -ff[1]);
 
   f->read(ff, 16);
-  doodad_orientation = math::quaternion (-ff[0], -ff[2], ff[1], ff[3]);
+  doodad_orientation = glm::quat (-ff[0], -ff[2], ff[1], ff[3]);
 
   f->read(&scale, 4);
 

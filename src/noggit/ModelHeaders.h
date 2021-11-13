@@ -13,6 +13,14 @@ struct Vertex {
   float x, y, z;
 };
 
+struct packed_quaternion
+{
+    int16_t x;
+    int16_t y;
+    int16_t z;
+    int16_t w;
+};
+
 struct ModelHeader {
   char id[4];
   uint8_t version[4];

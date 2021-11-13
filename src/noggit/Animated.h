@@ -1,15 +1,14 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/quaternion.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/ModelHeaders.h>
-
+#include <math/interpolation.hpp>
 #include <cassert>
 #include <map>
 #include <vector>
 #include <memory>
+#include <glm/gtc/quaternion.hpp>
 
 namespace Animation
 {
@@ -38,10 +37,10 @@ namespace Animation
   };
 
   template<>
-  inline math::quaternion Conversion<math::packed_quaternion, math::quaternion>::operator()(const math::packed_quaternion& value)
+  inline glm::quat Conversion<packed_quaternion, glm::quat>::operator()(const packed_quaternion& value)
   {
     //! \todo Check if this is really correct.
-    return math::quaternion(
+    return glm::quat(
       static_cast<float>((value.x > 0 ? value.x - 32767 : value.x + 32767) / 32767.0f),
       static_cast<float>((value.y > 0 ? value.y - 32767 : value.y + 32767) / 32767.0f),
       static_cast<float>((value.z > 0 ? value.z - 32767 : value.z + 32767) / 32767.0f),

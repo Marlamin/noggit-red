@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/frustum.hpp>
-#include <math/quaternion.hpp>
 #include <math/vector_3d.hpp>
 #include <noggit/Brush.h>
 #include <noggit/TileWater.hpp>

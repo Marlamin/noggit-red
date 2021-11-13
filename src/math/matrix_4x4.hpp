@@ -1,11 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/quaternion.hpp>
 #include <math/trig.hpp>
-
+#include <math/vector_4d.hpp>
 #include <algorithm>
+#include <glm/gtc/quaternion.hpp>
 
 namespace math
 {
@@ -65,7 +64,7 @@ namespace math
     {}
 
     static struct rotation_t {} rotation;
-    matrix_4x4 (rotation_t, quaternion const&);
+    matrix_4x4 (rotation_t, glm::quat const& q);
 
     static struct rotation_xyz_t {} rotation_xyz;
     matrix_4x4 (rotation_xyz_t, degrees::vec3 const&);
@@ -86,9 +85,9 @@ namespace math
 
     vector_3d operator* (vector_3d const&) const;
     vector_4d operator* (vector_4d const&) const;
-    quaternion operator* (quaternion const& q) const
+    glm::quat operator* (glm::quat const& q) const
     {
-      return quaternion {*this * static_cast<vector_4d> (q)};
+      return glm::quat();
     }
     matrix_4x4 operator* (matrix_4x4 const&) const;
     std::vector<math::vector_3d> operator*(std::vector<math::vector_3d> points) const;
