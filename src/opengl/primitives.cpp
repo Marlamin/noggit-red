@@ -2,7 +2,6 @@
 
 #include <math/bounding_box.hpp>
 #include <math/matrix_4x4.hpp>
-#include <math/vector_4d.hpp>
 #include <noggit/Misc.h>
 #include <opengl/scoped.hpp>
 #include <opengl/context.hpp>

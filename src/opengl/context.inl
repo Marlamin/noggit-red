@@ -7,7 +7,6 @@
 #include <noggit/Log.h>
 #include <glm/vec2.hpp>
 #include <math/vector_3d.hpp>
-#include <math/vector_4d.hpp>
 
 #include <QtOpenGLExtensions/QOpenGLExtensions>
 #include <QtGui/QOpenGLFunctions>
@@ -1072,7 +1071,7 @@ void opengl::context::bufferSubData(GLuint buffer, GLintptr offset, std::vector<
 template void opengl::context::bufferData<GL_ARRAY_BUFFER, float>(GLuint buffer, std::vector<float> const& data, GLenum usage);
 template void opengl::context::bufferData<GL_ARRAY_BUFFER, glm::vec2>(GLuint buffer, std::vector<glm::vec2> const& data, GLenum usage);
 template void opengl::context::bufferData<GL_ARRAY_BUFFER, math::vector_3d>(GLuint buffer, std::vector<math::vector_3d> const& data, GLenum usage);
-template void opengl::context::bufferData<GL_ARRAY_BUFFER, math::vector_4d>(GLuint buffer, std::vector<math::vector_4d> const& data, GLenum usage);
+template void opengl::context::bufferData<GL_ARRAY_BUFFER, glm::vec4>(GLuint buffer, std::vector<glm::vec4> const& data, GLenum usage);
 template void opengl::context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint8_t>(GLuint buffer, std::vector<std::uint8_t> const& data, GLenum usage);
 template void opengl::context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(GLuint buffer, std::vector<std::uint16_t> const& data, GLenum usage);
 template void opengl::context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(GLuint buffer, std::vector<std::uint32_t> const& data, GLenum usage);
@@ -1080,7 +1079,7 @@ template void opengl::context::bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t
 template void opengl::context::bufferSubData<GL_ARRAY_BUFFER, float>(GLuint buffer, GLintptr offset, std::vector<float> const& data);
 template void opengl::context::bufferSubData<GL_ARRAY_BUFFER, glm::vec2>(GLuint buffer, GLintptr offset, std::vector<glm::vec2> const& data);
 template void opengl::context::bufferSubData<GL_ARRAY_BUFFER, math::vector_3d>(GLuint buffer, GLintptr offset, std::vector<math::vector_3d> const& data);
-template void opengl::context::bufferSubData<GL_ARRAY_BUFFER, math::vector_4d>(GLuint buffer, GLintptr offset, std::vector<math::vector_4d> const& data);
+template void opengl::context::bufferSubData<GL_ARRAY_BUFFER, glm::vec4>(GLuint buffer, GLintptr offset, std::vector<glm::vec4> const& data);
 template void opengl::context::bufferSubData<GL_ARRAY_BUFFER>(GLuint buffer, GLintptr offset, GLsizeiptr size, GLvoid const* data);
 
 

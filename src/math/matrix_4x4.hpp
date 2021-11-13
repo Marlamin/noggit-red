@@ -2,7 +2,6 @@
 
 #pragma once
 #include <math/trig.hpp>
-#include <math/vector_4d.hpp>
 #include <algorithm>
 #include <glm/gtc/quaternion.hpp>
 
@@ -110,7 +109,7 @@ namespace math
     }
 
     template<std::size_t i>
-      vector_4d column() const
+  	glm::vec4 column() const
     {
       return {_m[0][i], _m[1][i], _m[2][i], _m[3][i]};
     }

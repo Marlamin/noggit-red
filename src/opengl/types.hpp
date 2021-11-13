@@ -4,7 +4,6 @@
 
 #include <QtGui/QOpenGLContext>
 #include <math/matrix_4x4.hpp>
-#include <math/vector_4d.hpp>
 #include <cstdint>
 #include <array>
 

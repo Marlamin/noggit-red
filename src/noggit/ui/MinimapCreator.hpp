@@ -18,7 +18,6 @@
 #include <vector>
 #include <array>
 #include <glm/vec4.hpp>
-#include <math/vector_4d.hpp>
 #include <math/vector_3d.hpp>
 
 #include <noggit/ui/minimap_widget.hpp>

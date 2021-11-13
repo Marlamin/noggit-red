@@ -9,10 +9,10 @@ namespace math
 {
   frustum::frustum (matrix_4x4 const& matrix)
   {
-    const vector_4d column_0 (matrix.column<0>());
-    const vector_4d column_1 (matrix.column<1>());
-    const vector_4d column_2 (matrix.column<2>());
-    const vector_4d column_3 (matrix.column<3>());
+    const glm::vec4 column_0 (matrix.column<0>());
+    const glm::vec4 column_1 (matrix.column<1>());
+    const glm::vec4 column_2 (matrix.column<2>());
+    const glm::vec4 column_3 (matrix.column<3>());
 
     _planes[RIGHT] = column_3 - column_0;
     _planes[LEFT] = column_3 + column_0;

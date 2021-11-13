@@ -3,7 +3,6 @@
 #pragma once
 
 #include <math/vector_3d.hpp>
-#include <math/vector_4d.hpp>
 #include <math/matrix_4x4.hpp>
 
 #include <array>
@@ -27,8 +26,8 @@ namespace math
     {
     public:
       plane() = default;
-      plane (vector_4d const& vec)
-        : _normal (vec.xyz())
+      plane (glm::vec4 const& vec)
+        : _normal (vector_3d(vec.x, vec.y, vec.z))
         , _distance (vec.w)
       {
         //normalize();

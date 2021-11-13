@@ -3,7 +3,6 @@
 #pragma once
 
 #include <math/ray.hpp>
-#include <math/vector_4d.hpp>
 #include <noggit/Misc.h>
 #include <noggit/Selection.h>
 #include <noggit/bool_toggle_property.hpp>

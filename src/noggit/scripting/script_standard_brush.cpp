@@ -7,8 +7,6 @@
 #include <noggit/Brush.h>
 #include <noggit/ContextObject.hpp>
 
-#include <math/vector_4d.hpp>
-
 #include <sol/sol.hpp>
 
 namespace noggit {
