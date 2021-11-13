@@ -1,12 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/constants.hpp>
 #include <math/vector_3d.hpp>
 #include <string>
 
 #include <cmath>
+#include <glm/ext/scalar_constants.hpp>
 
 namespace math
 {
@@ -71,8 +70,8 @@ namespace math
     using vec3 = vector_3d_base<radians>;
   };
 
-  inline degrees::degrees (radians x) : _ (x._ * 180.0f / math::constants::pi) {}
-  inline radians::radians (degrees x) : _ (x._ * math::constants::pi / 180.0f) {}
+  inline degrees::degrees (radians x) : _ (x._ * 180.0f / glm::pi<float>()) {}
+  inline radians::radians (degrees x) : _ (x._ * glm::pi<float>() / 180.0f) {}
 
   inline float sin (radians x)
   {

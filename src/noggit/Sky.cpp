@@ -7,7 +7,7 @@
 #include <noggit/Sky.h>
 #include <noggit/World.h>
 #include <opengl/shader.hpp>
-#include <external/glm/glm.hpp>
+#include <glm/glm.hpp>
 
 #include <algorithm>
 #include <string>
@@ -662,8 +662,8 @@ void main()
     {
       basepos1[i] = basepos2[i] = math::vector_3d(math::cos(angles[i])*rad, math::sin(angles[i])*rad, 0);
 
-      math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians(math::constants::pi*2.0f / hseg * h));
-      math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians(math::constants::pi*2.0f / hseg * (h + 1)));
+      math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians(glm::pi<float>() *2.0f / hseg * h));
+      math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians(glm::pi<float>() *2.0f / hseg * (h + 1)));
     }
 
     for (int v = 0; v < cnum - 1; v++)

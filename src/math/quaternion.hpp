@@ -6,6 +6,7 @@
 #include <math/vector_4d.hpp>
 
 #include <cstdint>
+#include <glm/ext/scalar_constants.hpp>
 
 namespace math
 {
@@ -115,12 +116,12 @@ namespace math
           double test = x * y + z * w;
           if (test > 0.499 * unit) { // singularity at north pole
             retVal.y = -math::degrees(math::radians(2.0f * std::atan2(x, w)));
-            retVal.x = math::degrees(math::radians(math::constants::pi / 2));
+            retVal.x = math::degrees(math::radians(glm::pi<float>() / 2));
             retVal.z = 0_deg;
           }
           else if (test < -0.499 * unit) { // singularity at south pole
             retVal.y = -math::degrees(math::radians(-2.0f * std::atan2(x, w)));
-            retVal.x = -math::degrees(math::radians(math::constants::pi / 2));
+            retVal.x = -math::degrees(math::radians(glm::pi<float>() / 2));
             retVal.z = 0_deg;
           }
           else
