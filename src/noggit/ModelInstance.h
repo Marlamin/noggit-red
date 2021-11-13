@@ -13,6 +13,8 @@
 #include <noggit/tool_enums.hpp>
 #include <opengl/shader.fwd.hpp>
 #include <opengl/primitives.hpp>
+#include <optional>
+#include <cstdint>
 
 namespace math { class frustum; }
 class Model;
@@ -36,8 +38,8 @@ public:
 
   explicit ModelInstance(std::string const& filename, ENTRY_MDDF const*d, noggit::NoggitRenderContext context);
 
-  ModelInstance(ModelInstance const& other) = default;
-  ModelInstance& operator= (ModelInstance const& other) = default;
+  ModelInstance(ModelInstance const& other) = delete;
+  ModelInstance& operator= (ModelInstance const& other) = delete;
 
   ModelInstance (ModelInstance&& other)
     : SceneObject(other._type, other._context, other._filename)
@@ -103,8 +105,13 @@ public:
   [[nodiscard]]
   AsyncObject* instance_model() override { return model.get(); };
 
+  [[nodiscard]]
+  std::uint32_t gpuTransformUid() const { return _gpu_transform_uid; }
+
 protected:
   bool _need_recalc_extents = true;
+  bool _need_gpu_transform_update = true;
+  std::uint32_t _gpu_transform_uid;
 
 };
 
@@ -118,11 +125,19 @@ public:
       , MPQFile* f
       , noggit::NoggitRenderContext context );
 
-  wmo_doodad_instance(wmo_doodad_instance const& other) = default;
-  wmo_doodad_instance& operator= (wmo_doodad_instance const& other) = default;
+  wmo_doodad_instance(wmo_doodad_instance const& other)
+  : ModelInstance(other.model->filename, other._context)
+  , doodad_orientation(other.doodad_orientation)
+  , world_pos(other.world_pos)
+  , _need_matrix_update(other._need_matrix_update)
+  {
+
+  };
+
+  wmo_doodad_instance& operator= (wmo_doodad_instance const& other) = delete;
 
   wmo_doodad_instance(wmo_doodad_instance&& other)
-    : ModelInstance(other)
+    : ModelInstance(reinterpret_cast<ModelInstance&&>(other))
     , doodad_orientation(other.doodad_orientation)
     , world_pos(other.world_pos)
     , _need_matrix_update(other._need_matrix_update)
@@ -131,7 +146,7 @@ public:
 
   wmo_doodad_instance& operator= (wmo_doodad_instance&& other)
   {
-    ModelInstance::operator= (other);
+    ModelInstance::operator= (reinterpret_cast<ModelInstance&&>(other));
     std::swap (doodad_orientation, other.doodad_orientation);
     std::swap (world_pos, other.world_pos);
     std::swap (_need_matrix_update, other._need_matrix_update);

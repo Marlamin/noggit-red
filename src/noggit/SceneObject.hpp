@@ -49,9 +49,9 @@ public:
   [[nodiscard]]
   math::matrix_4x4 transformMatrixTransposed() const { return _transform_mat_transposed; };
 
-  SceneObjectTypes which() { return _type; };
+  SceneObjectTypes which() const { return _type; };
 
-  std::string const& getFilename() { return _filename; };
+  std::string const& getFilename() const { return _filename; };
 
   void refTile(MapTile* tile);
   void derefTile(MapTile* tile);

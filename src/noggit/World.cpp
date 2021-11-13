@@ -30,9 +30,8 @@
 #include <external/tracy/Tracy.hpp>
 
 #include <boost/filesystem.hpp>
-#include <boost/range/adaptor/map.hpp>
-#include <boost/thread/thread.hpp>
 #include <boost/format.hpp>
+#include <boost/pool/pool_alloc.hpp>
 
 #include <QtWidgets/QMessageBox>
 #include <QDir>
@@ -57,6 +56,7 @@
 #include <array>
 #include <cstdint>
 
+#define BOOST_POOL_NO_MT
 
 bool World::IsEditableWorld(int pMapId)
 {
@@ -1295,36 +1295,138 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   std::unordered_map<Model*, std::size_t> model_with_particles;
 
+  tsl::robin_map<Model*, std::vector<math::matrix_4x4, boost::pool_allocator<math::matrix_4x4>>> models_to_draw;
+  std::vector<WMOInstance*, boost::pool_allocator<WMOInstance*>> wmos_to_draw;
+
+  static int frame = 0;
+
+  if (frame == std::numeric_limits<int>::max())
+  {
+    frame = 0;
+  }
+  else
+  {
+    frame++;
+  }
+
+  for (MapTile* tile : _loaded_tiles_buffer)
+  {
+    if (!tile)
+    {
+      break;
+    }
+
+    if (tile->tile_occluded && !tile->getChunkUpdateFlags() && !tile->tile_occlusion_cull_override)
+      continue;
+
+    // early dist check
+    // TODO: optional
+    if (tile->camDist() > culldistance)
+      continue;
+
+    for (auto& pair : tile->getObjectInstances())
+    {
+      if (pair.second[0]->which() == eMODEL)
+      {
+        auto& instances = models_to_draw[reinterpret_cast<Model*>(pair.first)];
+
+        // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
+        // otherwise we only allocate for a half
+        if (tile->objects_frustum_cull_test > 1)
+        {
+          instances.reserve(instances.size() + pair.second.size());
+        }
+        else
+        {
+          instances.reserve(instances.size() + pair.second.size() / 2);
+        }
+
+        for (auto& instance : pair.second)
+        {
+          // do not render twice the cross-referenced objects twice
+          if (instance->frame == frame)
+          {
+            continue;
+          }
+
+          instance->frame = frame;
+
+          auto m2_instance = static_cast<ModelInstance*>(instance);
+
+          if ((tile->objects_frustum_cull_test > 1 || m2_instance->isInFrustum(frustum)) && m2_instance->isInRenderDist(culldistance, camera_pos, display))
+          {
+            instances.push_back(m2_instance->transformMatrixTransposed());
+          }
+
+        }
+
+      }
+      else
+      {
+        // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
+        // otherwise we only allocate for a half
+        if (tile->objects_frustum_cull_test > 1)
+        {
+          wmos_to_draw.reserve(wmos_to_draw.size() + pair.second.size());
+        }
+        else
+        {
+          wmos_to_draw.reserve(wmos_to_draw.size() + pair.second.size() / 2);
+        }
+
+        for (auto& instance : pair.second)
+        {
+          // do not render twice the cross-referenced objects twice
+          if (instance->frame == frame)
+          {
+            continue;
+          }
+
+          instance->frame = frame;
+
+          auto wmo_instance = static_cast<WMOInstance*>(instance);
+
+          if (tile->objects_frustum_cull_test > 1 || frustum.intersects(wmo_instance->extents[1], wmo_instance->extents[0]))
+          {
+            wmos_to_draw.push_back(wmo_instance);
+          }
+        }
+      }
+    }
+  }
+
   // WMOs / map objects
   if (draw_wmo || mapIndex.hasAGlobalWMO())
   {
     ZoneScopedN("World::draw() : Draw WMOs");
     {
-      opengl::scoped::use_program wmo_program {*_wmo_program.get()};
+      opengl::scoped::use_program wmo_program{*_wmo_program.get()};
 
       wmo_program.uniform("camera", camera_pos);
 
-      _model_instance_storage.for_each_wmo_instance([&] (WMOInstance& wmo)
+
+      for (auto& instance: wmos_to_draw)
       {
-        bool is_hidden = wmo.wmo->is_hidden();
+        bool is_hidden = instance->wmo->is_hidden();
+
         if (draw_hidden_models || !is_hidden)
         {
-          wmo.draw( wmo_program
-                  , model_view
-                  , projection
-                  , frustum
-                  , culldistance
-                  , camera_pos
-                  , is_hidden
-                  , draw_wmo_doodads
-                  , draw_fog
-                  , current_selection()
-                  , animtime
-                  , skies->hasSkies()
-                  , display
-                  );
+          instance->draw(wmo_program
+                         , model_view
+                         , projection
+                         , frustum
+                         , culldistance
+                         , camera_pos
+                         , is_hidden
+                         , draw_wmo_doodads
+                         , draw_fog
+                         , current_selection()
+                         , animtime
+                         ,skies->hasSkies()
+                         , display
+          );
         }
-      });
+      }
     }
   }
 
@@ -1382,79 +1484,6 @@ void World::draw ( math::matrix_4x4 const& model_view
     }
   }
 
-  tsl::robin_map<Model*, std::vector<math::matrix_4x4>> models_to_draw;
-  tsl::robin_map<WMO*, std::vector<math::matrix_4x4>> wmos_to_draw;
-
-  static int frame = 0;
-
-  if (frame == std::numeric_limits<int>::max())
-  {
-    frame = 0;
-  }
-  else
-  {
-    frame++;
-  }
-
-
-  for (MapTile* tile : _loaded_tiles_buffer)
-  {
-    if (!tile)
-    {
-      break;
-    }
-
-    if (tile->tile_occluded && !tile->getChunkUpdateFlags() && !tile->tile_occlusion_cull_override)
-      continue;
-
-    if (tile->camDist() > culldistance)
-      continue;
-
-    for (auto& pair : tile->getObjectInstances())
-    {
-      if (pair.second[0]->which() == eMODEL)
-      {
-        for (auto& instance : pair.second)
-        {
-          if (instance->frame == frame)
-          {
-            continue;
-          }
-
-          instance->frame = frame;
-
-          auto m2_instance = static_cast<ModelInstance*>(instance);
-
-          if ((tile->objects_frustum_cull_test > 1 || m2_instance->isInFrustum(frustum)) && m2_instance->isInRenderDist(culldistance, camera_pos, display))
-          {
-            models_to_draw[m2_instance->model.get()].push_back(m2_instance->transformMatrixTransposed());
-          }
-
-        }
-
-      }
-      else
-      {
-        for (auto& instance : pair.second)
-        {
-          if (instance->frame == frame)
-          {
-            continue;
-          }
-
-          instance->frame = frame;
-
-          auto wmo_instance = static_cast<WMOInstance*>(instance);
-
-          if (tile->objects_frustum_cull_test > 1 || frustum.intersects(wmo_instance->extents[1], wmo_instance->extents[0]))
-          {
-            wmos_to_draw[wmo_instance->wmo.get()].push_back(wmo_instance->transformMatrixTransposed());
-          }
-        }
-      }
-    }
-  }
-
   bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
   // M2s / models
   if (draw_models || draw_doodads_wmo)
@@ -1498,7 +1527,7 @@ void World::draw ( math::matrix_4x4 const& model_view
           if (draw_hidden_models || !pair.first->is_hidden())
           {
             pair.first->draw( model_view
-                , pair.second
+                , reinterpret_cast<std::vector<math::matrix_4x4> const&>(pair.second)
                 , m2_shader
                 , model_render_state
                 , frustum
@@ -1554,6 +1583,15 @@ void World::draw ( math::matrix_4x4 const& model_view
     gl.disable(GL_BLEND);
     gl.enable(GL_CULL_FACE);
     gl.depthMask(GL_TRUE);
+
+
+    models_to_draw.clear();
+    wmos_to_draw.clear();
+    boost::singleton_pool<boost::pool_allocator_tag
+    , sizeof(std::vector<math::matrix_4x4, boost::pool_allocator<math::matrix_4x4>>)>::purge_memory();
+
+    boost::singleton_pool<boost::pool_allocator_tag
+        , sizeof(std::vector<WMOInstance*, boost::pool_allocator<WMOInstance*>>)>::purge_memory();
 
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
@@ -4726,3 +4764,4 @@ void World::setupOccluderBuffers()
 
 }
 
+#undef BOOST_POOL_NO_MT

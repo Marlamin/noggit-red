@@ -132,11 +132,11 @@ bool ModelInstance::isInRenderDist(const float& cull_distance, const math::vecto
 
   if (display == display_mode::in_3D)
   {
-    dist = (get_pos() - camera).length() - model->rad * scale;
+    dist = (pos - camera).length() - model->rad * scale;
   }
   else
   {
-    dist = std::abs(get_pos().y - camera.y) - model->rad * scale;
+    dist = std::abs(pos.y - camera.y) - model->rad * scale;
   }
 
   if (dist >= cull_distance)

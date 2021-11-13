@@ -443,7 +443,7 @@ std::vector<math::vector_3d> PreviewRenderer::calcSceneExtents()
                          std::numeric_limits<float>::min(),
                          std::numeric_limits<float>::min()};
 
-  for (auto instance : _model_instances)
+  for (auto& instance : _model_instances)
   {
     for (int i = 0; i < 3; ++i)
     {
@@ -452,7 +452,7 @@ std::vector<math::vector_3d> PreviewRenderer::calcSceneExtents()
     }
   }
 
-  for (auto instance : _wmo_instances)
+  for (auto& instance : _wmo_instances)
   {
     for (int i = 0; i < 3; ++i)
     {
