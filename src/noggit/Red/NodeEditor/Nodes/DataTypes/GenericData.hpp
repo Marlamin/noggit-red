@@ -508,7 +508,7 @@ DECLARE_NODE_DATA_TYPE_EXT(json_array, JSONArray, QJsonArray, NoDefaultWidget, t
 DECLARE_NODE_DATA_TYPE_EXT(json_value, JSONValue, QJsonValue, NoDefaultWidget, toQStringNA);
 
 #define CREATE_DATA_PAIR(TYPE_ID, TYPE_NAME) \
-std::pair{#TYPE_ID ##sv, &_create<TYPE_NAME##Data>}
+std::make_pair(#TYPE_ID ##sv, &_create<TYPE_NAME##Data>)
 
 struct TypeFactory
 {

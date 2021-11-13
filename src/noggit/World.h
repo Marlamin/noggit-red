@@ -128,6 +128,7 @@ public:
             , int water_layer
             , display_mode display
             , bool draw_occlusion_boxes = false
+            , bool minimap_render = false
             );
 
   unsigned int getAreaID (math::vector_3d const&);
@@ -418,6 +419,7 @@ private:
 
   void updateMVPUniformBlock(const math::matrix_4x4& model_view, const math::matrix_4x4& projection);
   void updateLightingUniformBlock(bool draw_fog, math::vector_3d const& camera_pos);
+  void updateLightingUniformBlockMinimap(MinimapRenderSettings* settings);
 
   std::unordered_set<MapChunk*>& vertexBorderChunks();
 

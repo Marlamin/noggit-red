@@ -38,8 +38,8 @@ public:
 
   explicit ModelInstance(std::string const& filename, ENTRY_MDDF const*d, noggit::NoggitRenderContext context);
 
-  ModelInstance(ModelInstance const& other) = delete;
-  ModelInstance& operator= (ModelInstance const& other) = delete;
+  ModelInstance(ModelInstance const& other) = default;
+  ModelInstance& operator= (ModelInstance const& other) = default;
 
   ModelInstance (ModelInstance&& other)
     : SceneObject(other._type, other._context, other._filename)

@@ -611,5 +611,4 @@ target_link_libraries (noggit
         FastNoise
         nlohmann_json::nlohmann_json
         sol2::sane
-        dl
         )

@@ -1048,6 +1048,7 @@ void World::draw ( math::matrix_4x4 const& model_view
                  , int water_layer
                  , display_mode display
                  , bool draw_occlusion_boxes
+                 , bool minimap_render
                  )
 {
 
@@ -1061,11 +1062,28 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   gl.disable(GL_DEPTH_TEST);
 
-  updateLightingUniformBlock(draw_fog, camera_pos);
+  if (!minimap_render)
+    updateLightingUniformBlock(draw_fog, camera_pos);
+  else
+    updateLightingUniformBlockMinimap(minimap_render_settings);
+
+  // setup render settings for minimap
+  if (minimap_render)
+  {
+     _terrain_params_ubo_data.draw_shadows = minimap_render_settings->draw_shadows;
+     _terrain_params_ubo_data.draw_lines = minimap_render_settings->draw_adt_grid;
+     _terrain_params_ubo_data.draw_terrain_height_contour = minimap_render_settings->draw_elevation;
+     _terrain_params_ubo_data.draw_hole_lines = false;
+     _terrain_params_ubo_data.draw_impass_overlay = false;
+     _terrain_params_ubo_data.draw_areaid_overlay = false;
+     _terrain_params_ubo_data.draw_paintability_overlay = false;
+     _terrain_params_ubo_data.draw_selection_overlay = false;
+     _terrain_params_ubo_data.draw_wireframe = false;
+    _need_terrain_params_ubo_update = true;
+  }
 
   if (_need_terrain_params_ubo_update)
     updateTerrainParamsUniformBlock();
-
 
   // Frustum culling
   _n_loaded_tiles = 0;
@@ -1107,17 +1125,9 @@ void World::draw ( math::matrix_4x4 const& model_view
     _n_loaded_tiles++;
   }
 
-  assert(tile_counter <= _loaded_tiles_buffer.size());
-  auto buf_end = _loaded_tiles_buffer.end();
+  auto buf_end = _loaded_tiles_buffer.begin() + tile_counter;
+  _loaded_tiles_buffer[tile_counter] = nullptr;
 
-  if (tile_counter < _loaded_tiles_buffer.size())
-  {
-    // nullptr should act as the data terminator, similar to null-terminator in strings
-    // the items that follow are undefined
-
-    _loaded_tiles_buffer[tile_counter] = nullptr;
-    buf_end = _loaded_tiles_buffer.begin() + tile_counter;
-  }
 
   // It is always import to sort tiles __front to back__.
   // Otherwise selection would not work. Overdraw overhead is gonna occur as well.
@@ -1139,7 +1149,7 @@ void World::draw ( math::matrix_4x4 const& model_view
             });
 
   // only draw the sky in 3D
-  if(display == display_mode::in_3D)
+  if(!minimap_render && display == display_mode::in_3D)
   {
     ZoneScopedN("World::draw() : Draw skies");
     opengl::scoped::use_program m2_shader {*_m2_program.get()};
@@ -1821,7 +1831,7 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
       if (!tile)
         break;
 
-      if (!tile->finishedLoading())
+      if (!tile->finishedLoading()) // TODO: crash
         continue;
 
       if (tile->intersect(ray, &results))
@@ -2318,6 +2328,16 @@ void World::drawMinimap ( MapTile *tile
 {
   ZoneScoped;
 
+  // Also load a tile above the current one to correct the lookat approximation
+  tile_index m_tile = tile_index(camera_pos);
+  m_tile.z -= 1;
+
+  MapTile* mTile = mapIndex.loadTile(m_tile);
+
+  draw(model_view, projection, math::vector_3d{}, 0, math::vector_4d{},
+      CursorType::NONE, 0.f, false, 0.f, math::vector_3d{}, 0.f, 0.f, false, false, false, editing_mode::minimap, camera_pos, true, false, true, settings->draw_wmo, settings->draw_water, false, settings->draw_m2, false, false, true, settings, false, eTerrainType::eTerrainType_Linear, 0, display_mode::in_3D, false, true);
+
+ 
   /*
 
   if (!_display_initialized)
@@ -2680,7 +2700,7 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
 
     if (AsyncLoader::instance().is_loading())
     {
-     return false;
+     //return false;
     }
 
     float max_height = getMaxTileHeight(tile_idx);
@@ -2794,10 +2814,13 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     std::string tilename_left = (boost::format("%s\\map_%d_%02d.blp") % map_name % tile_idx.x % tile_idx.z).str();
     mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
 
+    /*
     if (unload)
     {
       mapIndex.unloadTile(tile_idx);
     }
+
+    */
   }
 
   pixel_buffer.release();
@@ -4502,6 +4525,26 @@ void World::updateLightingUniformBlock(bool draw_fog, math::vector_3d const& cam
 
   gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
   gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::LightingUniformBlock), &_lighting_ubo_data);
+}
+
+void World::updateLightingUniformBlockMinimap(MinimapRenderSettings* settings)
+{
+    ZoneScoped;
+
+    math::vector_3d diffuse = settings->diffuse_color;
+    math::vector_3d ambient = settings->ambient_color;
+
+    _lighting_ubo_data.DiffuseColor_FogStart = { diffuse, 0 };
+    _lighting_ubo_data.AmbientColor_FogEnd = { ambient, 0 };
+    _lighting_ubo_data.FogColor_FogOn = { 0, 0, 0, 0 };
+    _lighting_ubo_data.LightDir_FogRate = { outdoorLightStats.dayDir.x, outdoorLightStats.dayDir.y, outdoorLightStats.dayDir.z, skies->fogRate() };
+    _lighting_ubo_data.OceanColorLight = settings->ocean_color_light;
+    _lighting_ubo_data.OceanColorDark = settings->ocean_color_dark;
+    _lighting_ubo_data.RiverColorLight = settings->river_color_light;
+    _lighting_ubo_data.RiverColorDark = settings->river_color_dark;
+
+    gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
+    gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::LightingUniformBlock), &_lighting_ubo_data);
 }
 
 void World::updateTerrainParamsUniformBlock()
