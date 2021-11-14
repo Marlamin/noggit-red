@@ -474,9 +474,9 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
      }*/
 
     auto eulerAngles = glm::eulerAngles(normalizedQ);
-    dir.x = math::degrees(math::radians(eulerAngles.x));
+    dir.x = math::degrees(math::radians(eulerAngles.z));
+    dir.y = math::degrees(math::radians(eulerAngles.x));
     dir.z = math::degrees(math::radians(eulerAngles.y));
-    dir.y = math::degrees(math::radians(eulerAngles.z));
 
     boost::get<selected_object_type>(entry)->recalcExtents();
 
