@@ -44,7 +44,7 @@ void SceneObject::updateTransformMatrix()
 
 void SceneObject::resetDirection()
 {
-  dir =  math::degrees::vec3((0_deg)._, dir.y, (0.0_deg)._);
+  dir =  math::degrees::vec3(math::degrees(0)._, dir.y, math::degrees(0)._);
   recalcExtents();
 }
 

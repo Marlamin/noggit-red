@@ -89,13 +89,3 @@ namespace math
           && a.z < pos.z&& b.z > pos.z;
   }
 }
-
-inline math::degrees operator"" _deg (long double v)
-{
-  return math::degrees {static_cast<float> (v)};
-}
-
-inline math::degrees operator"" _deg (unsigned long long int v)
-{
-  return math::degrees {static_cast<float> (v)};
-}

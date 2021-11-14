@@ -543,7 +543,7 @@ namespace noggit
         if (obj->which() == eMODEL)
         {
           float scale(1.f);
-          math::degrees::vec3 rotation((0_deg)._, (0_deg)._, (0_deg)._);
+          math::degrees::vec3 rotation(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
 
           if (_copy_model_stats)
           {
@@ -561,7 +561,7 @@ namespace noggit
         }
         else if (obj->which() == eWMO)
         {
-          math::degrees::vec3 rotation((0_deg)._, (0_deg)._, (0_deg)._);
+          math::degrees::vec3 rotation(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
           if (_copy_model_stats)
           {
             // copy rot from original model. Dirty but working

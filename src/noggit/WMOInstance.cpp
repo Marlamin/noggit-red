@@ -40,7 +40,7 @@ WMOInstance::WMOInstance(std::string const& filename, noggit::NoggitRenderContex
 {
   change_doodadset(_doodadset);
   pos = glm::vec3(0.0f, 0.0f, 0.0f);
-  dir = math::degrees::vec3((0_deg)._, (0_deg)._, (0_deg)._);
+  dir = math::degrees::vec3(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
   uid = 0;
   _context = context;
 }
