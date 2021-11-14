@@ -1000,9 +1000,9 @@ bool MapChunk::flattenTerrain ( glm::vec3 const& pos
 	  }
 
 	  float const ah(origin.y
-		  + ((mVertices[i].x - origin.x) * math::cos(orientation)
-			  + (mVertices[i].z - origin.z) * math::sin(orientation)
-			  ) * math::tan(angle)
+		  + ((mVertices[i].x - origin.x) * glm::cos(math::radians(orientation)._)
+			  + (mVertices[i].z - origin.z) * glm::sin(math::radians(orientation)._)
+			  ) * glm::tan(math::radians(angle)._)
 	  );
 
 	  if ((!mode.lower && ah < mVertices[i].y)

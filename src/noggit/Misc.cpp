@@ -143,9 +143,9 @@ namespace misc
   float angledHeight(glm::vec3 const& origin, glm::vec3 const& pos, math::radians const& angle, math::radians const& orientation)
   {
     return ( origin.y
-           + (  (pos.x - origin.x) * math::cos(orientation)
-              + (pos.z - origin.z) * math::sin(orientation)
-             ) * math::tan(angle));
+           + (  (pos.x - origin.x) * glm::cos(orientation._)
+              + (pos.z - origin.z) * glm::sin(orientation._)
+             ) * glm::tan(angle._));
   }
 
   void extract_v3d_min_max(glm::vec3 const& point, glm::vec3& min, glm::vec3& max)

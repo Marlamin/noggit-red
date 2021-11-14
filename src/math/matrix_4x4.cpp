@@ -59,8 +59,8 @@ namespace math
       std::size_t const i_index (i_indices[a]);
       std::size_t const j_index (j_indices[a]);
 
-      float const cosV (cos (angle));
-      float const sinV (sin (angle));
+      float const cosV (glm::cos (angle._));
+      float const sinV (glm::sin (angle._));
 
       matrix_4x4 mat (matrix_4x4::unit);
       mat (j_index, j_index, cosV);

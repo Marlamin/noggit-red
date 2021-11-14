@@ -4,6 +4,8 @@
 #include <string>
 #include <iostream>
 #include <cmath>
+#include <glm/common.hpp>
+#include <glm/trigonometric.hpp>
 #include <glm/vec3.hpp>
 #include <glm/ext/scalar_constants.hpp>
 
@@ -72,37 +74,12 @@ namespace math
   inline degrees::degrees (radians x) : _ (x._ * 180.0f / glm::pi<float>()) {}
   inline radians::radians (degrees x) : _ (x._ * glm::pi<float>() / 180.0f) {}
 
-  inline float sin (radians x)
-  {
-    return std::sin (x._);
-  }
-  inline float cos (radians x)
-  {
-    return std::cos (x._);
-  }
-  inline float tan (radians x)
-  {
-    return std::tan (x._);
-  }
-  inline radians asin (float x)
-  {
-    return radians {std::asin (x)};
-  }
-  inline radians acos (float x)
-  {
-    return radians {std::acos (x)};
-  }
-  inline radians atan2 (float y, float x)
-  {
-    return radians {std::atan2 (y, x)};
-  }
-
   inline void rotate(float x0, float y0, float* x, float* y, radians angle)
   {
       const float xa(*x - x0);
       const float ya(*y - y0);
-      *x = xa * cos(angle) - ya * sin(angle) + x0;
-      *y = xa * sin(angle) + ya * cos(angle) + y0;
+      *x = xa * glm::cos(angle._) - ya * glm::sin(angle._) + x0;
+      *y = xa * glm::sin(angle._) + ya * glm::cos(angle._) + y0;
   }
 
   inline bool is_inside_of(const glm::vec3& pos, const glm::vec3& a, const glm::vec3& b)

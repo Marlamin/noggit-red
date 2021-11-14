@@ -719,7 +719,7 @@ Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int t
   */
 
   if (sys->flags == 57 || sys->flags == 313) { // Faith Halo
-    glm::vec3 bdir(w*math::cos(t)*1.6f, 0.0f, l*math::sin(t)*1.6f);
+    glm::vec3 bdir(w*glm::cos(t._)*1.6f, 0.0f, l*glm::sin(t._)*1.6f);
 
     p.pos = sys->pos + bdir;
     p.pos = sys->parent->mat * p.pos;

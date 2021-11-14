@@ -334,8 +334,8 @@ void main()
 
         for (int i = 0; i < segment; ++i)
         {
-          float x = math::cos(math::degrees(i * 360 / segment));
-          float z = math::sin(math::degrees(i * 360 / segment));
+          float x = glm::cos(math::radians(math::degrees(i * 360 / segment))._);
+          float z = glm::sin(math::radians(math::degrees(i * 360 / segment))._);
 
           glm::vec3 v(x, 0.f, z);
 

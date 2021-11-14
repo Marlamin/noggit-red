@@ -16,7 +16,7 @@ namespace math
     // float clipping_plane_distance (zFar - zNear);
 
     // with
-    float const ymax (zNear * math::tan (fovy) / 2.0f);
+    float const ymax (zNear * glm::tan(math::radians(fovy)._) / 2.0f);
     // float left (-ymax * aspect);
     // float right (ymax * aspect);
     // float bottom (-ymax);

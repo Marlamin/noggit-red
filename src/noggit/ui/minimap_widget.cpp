@@ -153,8 +153,8 @@ namespace noggit
                                , QPointF ( _camera->position.x * scale_factor
                                          , _camera->position.z * scale_factor
                                          )
-                               + QPointF ( math::cos (_camera->yaw()) * scale_factor
-                                         , -math::sin (_camera->yaw()) * scale_factor
+                               + QPointF ( glm::cos(math::radians(_camera->yaw())._) * scale_factor
+                                         , -glm::sin(math::radians(_camera->yaw())._) * scale_factor
                                          )
                                );
           camera_vector.setLength (15.0);

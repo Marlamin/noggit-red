@@ -656,7 +656,7 @@ void main()
   {
     for (int i = 0; i < cnum; ++i)
     {
-      basepos1[i] = basepos2[i] = glm::vec3(math::cos(angles[i])*rad, math::sin(angles[i])*rad, 0);
+      basepos1[i] = basepos2[i] = glm::vec3(glm::cos(math::radians(angles[i])._) * rad, glm::sin(math::radians(angles[i])._)*rad, 0);
 
       math::rotate(0, 0, &basepos1[i].x, &basepos1[i].z, math::radians(glm::pi<float>() *2.0f / hseg * h));
       math::rotate(0, 0, &basepos2[i].x, &basepos2[i].z, math::radians(glm::pi<float>() *2.0f / hseg * (h + 1)));
