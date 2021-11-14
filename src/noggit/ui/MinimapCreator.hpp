@@ -59,8 +59,8 @@ struct MinimapRenderSettings
   QListWidget* wmo_instance_filter_exclude;
 
   // Lighting
-  math::vector_3d diffuse_color = {1.0, 0.532352924, 0.0};
-  math::vector_3d ambient_color = {0.407770514, 0.508424163, 0.602650642};
+  glm::vec3 diffuse_color = {1.0, 0.532352924, 0.0};
+  glm::vec3 ambient_color = {0.407770514, 0.508424163, 0.602650642};
   glm::vec4 ocean_color_light = {0.0693173409, 0.294008732, 0.348329663, 0.75};
   glm::vec4 ocean_color_dark = {0.000762581825, 0.113907099, 0.161220074, 1.0};
   glm::vec4 river_color_light = {0.308351517, 0.363725543, 0.0798838138, 0.5};

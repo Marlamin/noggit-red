@@ -15,13 +15,13 @@
 namespace misc
 {
 
-  bool pointInside(math::vector_3d point, std::array<math::vector_3d, 2> const& extents)
+  bool pointInside(glm::vec3 point, std::array<glm::vec3, 2> const& extents)
   {
     return point.x >= extents[0].x && point.z >= extents[0].z &&
            point.x <= extents[1].x && point.z <= extents[1].z;
   }
 
-  void minmax(math::vector_3d* a, math::vector_3d* b)
+  void minmax(glm::vec3* a, glm::vec3* b)
   {
     if (a->x > b->x)
     {
@@ -68,7 +68,7 @@ namespace misc
     return std::sqrt(xdiff*xdiff + zdiff*zdiff);
   }
 
-  float dist(math::vector_3d const& p1, math::vector_3d const& p2)
+  float dist(glm::vec3 const& p1, glm::vec3 const& p2)
   {
     return dist(p1.x, p1.z, p2.x, p2.z);
   }
@@ -100,7 +100,7 @@ namespace misc
     return (px == x && pz == z) ? 0.0f : dist(x, z, px, pz);
   }
 
-  float getShortestDist(math::vector_3d const& pos, math::vector_3d const& square_pos, float unitSize)
+  float getShortestDist(glm::vec3 const& pos, glm::vec3 const& square_pos, float unitSize)
   {
     return getShortestDist(pos.x, pos.z, square_pos.x, square_pos.z, unitSize);
   }
@@ -132,7 +132,7 @@ namespace misc
     return d <= radius;
   }
 
-  bool rectOverlap(math::vector_3d const* r1, math::vector_3d const* r2)
+  bool rectOverlap(glm::vec3 const* r1, glm::vec3 const* r2)
   {
     return r1[0].x <= r2[1].x
       && r2[0].x <= r1[1].x
@@ -140,7 +140,7 @@ namespace misc
       && r2[0].z <= r1[1].z;
   }
 
-  float angledHeight(math::vector_3d const& origin, math::vector_3d const& pos, math::radians const& angle, math::radians const& orientation)
+  float angledHeight(glm::vec3 const& origin, glm::vec3 const& pos, math::radians const& angle, math::radians const& orientation)
   {
     return ( origin.y
            + (  (pos.x - origin.x) * math::cos(orientation)
@@ -148,7 +148,7 @@ namespace misc
              ) * math::tan(angle));
   }
 
-  void extract_v3d_min_max(math::vector_3d const& point, math::vector_3d& min, math::vector_3d& max)
+  void extract_v3d_min_max(glm::vec3 const& point, glm::vec3& min, glm::vec3& max)
   {
     min.x = std::min(min.x, point.x);
     max.x = std::max(max.x, point.x);
@@ -158,9 +158,9 @@ namespace misc
     max.z = std::max(max.z, point.z);
   }
 
-  std::vector<math::vector_3d> intersection_points(math::vector_3d const& vmin, math::vector_3d const& vmax)
+  std::vector<glm::vec3> intersection_points(glm::vec3 const& vmin, glm::vec3 const& vmax)
   {
-    std::vector<math::vector_3d> points;
+    std::vector<glm::vec3> points;
 
     points.emplace_back (vmin.x, vmin.y, vmin.z);
     points.emplace_back (vmin.x, vmin.y, vmax.z);
@@ -174,7 +174,7 @@ namespace misc
     return points;
   }
 
-  math::vector_3d transform_model_box_coords(math::vector_3d const& pos)
+  glm::vec3 transform_model_box_coords(glm::vec3 const& pos)
   {
     return {pos.x, pos.z, -pos.y};
   }
@@ -191,14 +191,14 @@ namespace misc
     return filename;
   }
 
-  bool vec3d_equals(math::vector_3d const& v1, math::vector_3d const& v2)
+  bool vec3d_equals(glm::vec3 const& v1, glm::vec3 const& v2)
   {
     return float_equals(v1.x, v2.x) && float_equals(v1.y, v2.y) && float_equals(v1.z, v2.z);
   }
 
   bool deg_vec3d_equals(math::degrees::vec3 const& v1, math::degrees::vec3 const& v2)
   {
-    return float_equals(v1.x._, v2.x._) && float_equals(v1.y._, v2.y._) && float_equals(v1.z._, v2.z._);
+    return float_equals(v1.x, v2.x) && float_equals(v1.y, v2.y) && float_equals(v1.z, v2.z);
   }
 }
 

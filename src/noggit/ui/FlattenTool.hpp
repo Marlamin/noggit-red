@@ -26,14 +26,14 @@ namespace noggit
     public:
       flatten_blur_tool(QWidget* parent = nullptr);
 
-      void flatten (World* world, math::vector_3d const& cursor_pos, float dt);
-      void blur (World* world, math::vector_3d const& cursor_pos, float dt);
+      void flatten (World* world, glm::vec3 const& cursor_pos, float dt);
+      void blur (World* world, glm::vec3 const& cursor_pos, float dt);
 
       void nextFlattenType();
       void nextFlattenMode();
       void toggleFlattenAngle();
       void toggleFlattenLock();
-      void lockPos (math::vector_3d const& cursor_pos);
+      void lockPos (glm::vec3 const& cursor_pos);
 
       void changeRadius(float change);
       void changeSpeed(float change);
@@ -50,7 +50,7 @@ namespace noggit
       float orientation() const { return _orientation; }
       bool angled_mode() const { return _angle_group->isChecked(); }
       bool use_ref_pos() const  { return _lock_group->isChecked(); }
-      math::vector_3d ref_pos() const { return _lock_pos; }
+      glm::vec3 ref_pos() const { return _lock_pos; }
 
       noggit::Red::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
       noggit::Red::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
@@ -64,7 +64,7 @@ namespace noggit
       float _angle;
       float _orientation;
 
-      math::vector_3d _lock_pos;
+      glm::vec3 _lock_pos;
 
       int _flatten_type;
       flatten_mode _flatten_mode;

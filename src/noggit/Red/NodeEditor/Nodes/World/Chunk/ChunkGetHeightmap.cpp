@@ -31,7 +31,7 @@ void ChunkGetHeightmapNode::compute()
 
   MapChunk* chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
 
-  math::vector_3d* heightmap = chunk->getHeightmap();
+  glm::vec3* heightmap = chunk->getHeightmap();
 
   _heightmap.clear();
   _heightmap.resize(mapbufsize);

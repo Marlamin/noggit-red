@@ -24,7 +24,7 @@ namespace noggit
     {
     public:
       texture_swapper ( QWidget* parent
-                      , const math::vector_3d* camera_pos
+                      , const glm::vec3* camera_pos
                       , MapView* map_view
                       );
 

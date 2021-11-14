@@ -25,7 +25,7 @@ using namespace noggit::Red;
 
 PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderContext context, QWidget* parent)
   :  noggit::Red::ViewportManager::Viewport(parent)
-  , _camera (math::vector_3d(0.0f, 0.0f, 0.0f), math::degrees(0.0f), math::degrees(0.0f))
+  , _camera (glm::vec3(0.0f, 0.0f, 0.0f), math::degrees(0.0f), math::degrees(0.0f))
   , _settings (new QSettings())
   , _width(width)
   , _height(height)
@@ -45,7 +45,7 @@ PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderCont
 
   opengl::context::scoped_setter const context_set (::gl, &_offscreen_context);
 
-  _light_dir = math::vector_3d(0.0f, 1.0f, 0.0f);
+  _light_dir = glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
 void PreviewRenderer::setModel(std::string const &filename)
@@ -113,7 +113,7 @@ void PreviewRenderer::resetCamera(float x, float y, float z, float roll, float y
   _camera.reset(x, y, z, roll, yaw, pitch);
   float radius = 0.f;
 
-  std::vector<math::vector_3d> extents = calcSceneExtents();
+  std::vector<glm::vec3> extents = calcSceneExtents();
   _camera.position = (extents[0] + extents[1]) / 2.0f;
   radius = std::max((_camera.position - extents[0]).length(), (_camera.position - extents[1]).length());
 
@@ -211,10 +211,10 @@ void PreviewRenderer::draw()
       //water_shader.uniform("model_view", model_view().transposed());
       //water_shader.uniform("projection", projection().transposed());
 
-      glm::vec4ocean_color_light(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
-      glm::vec4ocean_color_dark(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
-      glm::vec4river_color_light(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
-      glm::vec4river_color_dark(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4ocean_color_light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4ocean_color_dark(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4river_color_light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4river_color_dark(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
 
       //water_shader.uniform("ocean_color_light", ocean_color_light);
       //water_shader.uniform("ocean_color_dark", ocean_color_dark);
@@ -243,7 +243,7 @@ void PreviewRenderer::draw()
      {
        wmo_instance.draw(
            wmo_program, model_view().transposed(), projection().transposed(), frustum, culldistance,
-           math::vector_3d(0.0f, 0.0f, 0.0f), _draw_boxes.get(), _draw_models.get() // doodads
+           glm::vec3(0.0f, 0.0f, 0.0f), _draw_boxes.get(), _draw_models.get() // doodads
            , false, std::vector<selection_type>(), 0, false, display_mode::in_3D
        );
 
@@ -410,7 +410,7 @@ void PreviewRenderer::draw()
 
   if (_draw_grid.get())
   {
-    _grid.draw(mvp, math::vector_3d(0.f, 0.f, 0.f),
+    _grid.draw(mvp, glm::vec3(0.f, 0.f, 0.f),
                glm::vec4(0.7f, 0.7f, 0.7f, 1.0f), 30.f);
 
   }
@@ -433,13 +433,13 @@ float PreviewRenderer::aspect_ratio() const
   return static_cast<float>(_width) / static_cast<float>(_height);
 }
 
-std::vector<math::vector_3d> PreviewRenderer::calcSceneExtents()
+std::vector<glm::vec3> PreviewRenderer::calcSceneExtents()
 {
-  math::vector_3d min = {std::numeric_limits<float>::max(),
+  glm::vec3 min = {std::numeric_limits<float>::max(),
                          std::numeric_limits<float>::max(),
                          std::numeric_limits<float>::max()};
 
-  math::vector_3d max = {std::numeric_limits<float>::min(),
+  glm::vec3 max = {std::numeric_limits<float>::min(),
                          std::numeric_limits<float>::min(),
                          std::numeric_limits<float>::min()};
 
@@ -461,7 +461,7 @@ std::vector<math::vector_3d> PreviewRenderer::calcSceneExtents()
     }
   }
 
-  return std::move(std::vector<math::vector_3d>{min, max});
+  return std::move(std::vector<glm::vec3>{min, max});
 }
 
 QPixmap* PreviewRenderer::renderToPixmap()

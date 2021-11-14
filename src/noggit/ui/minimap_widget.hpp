@@ -4,6 +4,7 @@
 
 #include <QWidget>
 #include <array>
+#include <glm/vec3.hpp>
 
 namespace math
 {
@@ -56,7 +57,7 @@ namespace noggit
       QPoint locateTile(QMouseEvent* event);
 
     signals:
-      void map_clicked(const ::math::vector_3d&);
+      void map_clicked(const glm::vec3&);
       void tile_clicked(const QPoint&);
       void reset_selection();
 

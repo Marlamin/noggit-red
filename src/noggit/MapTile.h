@@ -76,8 +76,8 @@ public:
   //! \brief Get chunk for sub offset x,z.
   MapChunk* getChunk(unsigned int x, unsigned int z);
   //! \todo map_index style iterators
-  std::vector<MapChunk*> chunks_in_range (math::vector_3d const& pos, float radius) const;
-  std::vector<MapChunk*> chunks_in_rect (math::vector_3d const& pos, float radius) const;
+  std::vector<MapChunk*> chunks_in_range (glm::vec3 const& pos, float radius) const;
+  std::vector<MapChunk*> chunks_in_rect (glm::vec3 const& pos, float radius) const;
 
   const tile_index index;
   float xbase, zbase;
@@ -89,7 +89,7 @@ public:
   bool tile_occlusion_cull_override = true;
 
   void draw (opengl::scoped::use_program& mcnk_shader
-            , const math::vector_3d& camera
+            , const glm::vec3& camera
             , bool show_unpaintable_chunks
             , bool draw_paintability_overlay
             , bool is_selected
@@ -98,7 +98,7 @@ public:
   bool intersect (math::ray const&, selection_result*) const;
   void drawWater ( math::frustum const& frustum
                  , const float& cull_distance
-                 , const math::vector_3d& camera
+                 , const glm::vec3& camera
                  , bool camera_moved
                  , opengl::scoped::use_program& water_shader
                  , int animtime
@@ -109,8 +109,8 @@ public:
 
   void drawMFBO (opengl::scoped::use_program&);
 
-  bool GetVertex(float x, float z, math::vector_3d *V);
-  void getVertexInternal(float x, float z, math::vector_3d* v);
+  bool GetVertex(float x, float z, glm::vec3 *V);
+  void getVertexInternal(float x, float z, glm::vec3* v);
 
   void saveTile(World*);
 	void CropWater();
@@ -157,8 +157,8 @@ public:
   void recalcExtents();
   void recalcObjectInstanceExtents();
   void recalcCombinedExtents();
-  std::array<math::vector_3d, 2>& getExtents() { return _extents; };
-  std::array<math::vector_3d, 2>& getCombinedExtents() { return _combined_extents; };
+  std::array<glm::vec3, 2>& getExtents() { return _extents; };
+  std::array<glm::vec3, 2>& getCombinedExtents() { return _combined_extents; };
 
   void unload();
 
@@ -170,11 +170,11 @@ public:
   tsl::robin_map<AsyncObject*, std::vector<SceneObject*>> const& getObjectInstances() const { return object_instances; };
 
   void doTileOcclusionQuery(opengl::scoped::use_program& occlusion_shader);
-  bool getTileOcclusionQueryResult(math::vector_3d const& camera);
+  bool getTileOcclusionQueryResult(glm::vec3 const& camera);
   void discardTileOcclusionQuery() { _tile_occlusion_query_in_use = false; }
 
   float camDist() { return _cam_dist; }
-  void calcCamDist(math::vector_3d const& camera);
+  void calcCamDist(glm::vec3 const& camera);
   void markExtentsDirty() { _extents_dirty = true; }
   void tagCombinedExtents(bool state) { _combined_extents_dirty = state; };
 
@@ -195,15 +195,15 @@ private:
   bool _extents_dirty = true;
   bool _combined_extents_dirty = true;
 
-  std::array<math::vector_3d, 2> _extents;
-  std::array<math::vector_3d, 2> _object_instance_extents;
-  std::array<math::vector_3d, 2> _combined_extents;
-  math::vector_3d _center;
+  std::array<glm::vec3, 2> _extents;
+  std::array<glm::vec3, 2> _object_instance_extents;
+  std::array<glm::vec3, 2> _combined_extents;
+  glm::vec3 _center;
   float _cam_dist;
 
   // MFBO:
-  math::vector_3d mMinimumValues[3 * 3];
-  math::vector_3d mMaximumValues[3 * 3];
+  glm::vec3 mMinimumValues[3 * 3];
+  glm::vec3 mMaximumValues[3 * 3];
 
   bool _mfbo_buffer_are_setup = false;
   opengl::scoped::deferred_upload_vertex_arrays<2> _mfbo_vaos;

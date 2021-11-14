@@ -4,7 +4,7 @@
 
 namespace noggit
 {
-  camera::camera ( math::vector_3d const& position
+  camera::camera ( glm::vec3 const& position
                  , math::degrees yaw_
                  , math::degrees pitch_
                  )
@@ -65,20 +65,16 @@ namespace noggit
     return _fov;
   }
 
-  math::vector_3d camera::look_at() const
+  glm::vec3 camera::look_at() const
   {
     return position + direction();
   }
 
-  math::vector_3d camera::direction() const
+  glm::vec3 camera::direction() const
   {
-    math::vector_3d const forward (1.0f, 0.0f, 0.0f);
+    glm::vec3 forward (1.0f, 0.0f, 0.0f);
 
-    return ( math::matrix_4x4 ( math::matrix_4x4::rotation_yzx
-                              , math::degrees::vec3 (_roll, _yaw, _pitch)
-                              )
-           * forward
-           ).normalize();
+    return glm::normalize((math::matrix_4x4(math::matrix_4x4::rotation_yzx, math::degrees::vec3(_roll._, _yaw._, _pitch._)) * forward));
   }
 
   math::matrix_4x4 camera::look_at_matrix() const
@@ -98,15 +94,16 @@ namespace noggit
 
   void camera::move_horizontal (float sign, float dt)
   {
-    math::vector_3d const up (0.0f, 1.0f, 0.0f);
-    math::vector_3d const right ( (direction() % up).normalize());
+    glm::vec3 up (0.0f, 1.0f, 0.0f);
+    auto cross = glm::cross(direction(), up);
+    glm::vec3 right = glm::normalize(cross);
 
     position += right * sign * move_speed * dt;
   }
 
   void camera::move_vertical (float sign, float dt)
   {
-    math::vector_3d const up (0.0f, 1.0f, 0.0f);
+    glm::vec3 const up (0.0f, 1.0f, 0.0f);
 
     position += up * sign * move_speed * dt;
   }

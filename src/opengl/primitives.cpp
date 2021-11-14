@@ -20,8 +20,8 @@ namespace opengl
                         , math::matrix_4x4 const& projection
                         , math::matrix_4x4 const& transform
                         , glm::vec4  const& color
-                        , math::vector_3d const& min_point
-                        , math::vector_3d const& max_point
+                        , glm::vec3 const& min_point
+                        , glm::vec3 const& max_point
                         )
     {
 
@@ -91,7 +91,7 @@ namespace opengl
       _vao.upload();
       _buffers.upload();
 
-      //std::vector<math::vector_3d> positions (math::box_points (min_point, max_point));
+      //std::vector<glm::vec3> positions (math::box_points (min_point, max_point));
 
       static std::array<std::uint8_t, 16> const indices
           {{5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7}};
@@ -121,7 +121,7 @@ namespace opengl
       }
 
       void grid::draw( math::matrix_4x4 const& mvp
-          , math::vector_3d const& pos
+          , glm::vec3 const& pos
           , glm::vec4  const& color
           , float radius
       )
@@ -186,7 +186,7 @@ namespace opengl
                                            }));
 
 
-        std::vector<math::vector_3d> vertices;
+        std::vector<glm::vec3> vertices;
         std::vector<std::uint16_t> indices;
 
         int slices = 20;
@@ -198,7 +198,7 @@ namespace opengl
             float x = static_cast<float>(i) / static_cast<float>(slices);
             float y = 0;
             float z = static_cast<float>(j) / static_cast<float>(slices);
-            vertices.push_back(math::vector_3d(x, y, z));
+            vertices.push_back(glm::vec3(x, y, z));
           }
         }
 
@@ -225,7 +225,7 @@ namespace opengl
 
         _indice_count = indices.size();
 
-        gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>
+        gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>
             (_vertices_vbo, vertices, GL_STATIC_DRAW);
         gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>
             (_indices_vbo, indices, GL_STATIC_DRAW);
@@ -258,7 +258,7 @@ namespace opengl
 
 
       void sphere::draw( math::matrix_4x4 const& mvp
-                     , math::vector_3d const& pos
+                     , glm::vec3 const& pos
                      , glm::vec4  const& color
                      , float radius
                      )
@@ -285,7 +285,7 @@ namespace opengl
       _vao.upload();
       _buffers.upload();
 
-      std::vector<math::vector_3d> vertices;
+      std::vector<glm::vec3> vertices;
       std::vector<std::uint16_t> indices;
 
       _program.reset(new opengl::program({{ GL_VERTEX_SHADER
@@ -330,14 +330,14 @@ void main()
       for (int rotation_step = 0; rotation_step <= segment; ++rotation_step)
       {
         math::degrees rotation(360.f*rotation_step / static_cast<float>(segment));
-        math::matrix_4x4 m(math::matrix_4x4::rotation_xyz, math::degrees::vec3(math::degrees(0.f), math::degrees(0.f), rotation));
+        math::matrix_4x4 m(math::matrix_4x4::rotation_xyz, math::degrees::vec3(math::degrees(0.f)._, math::degrees(0.f)._, rotation._));
 
         for (int i = 0; i < segment; ++i)
         {
           float x = math::cos(math::degrees(i * 360 / segment));
           float z = math::sin(math::degrees(i * 360 / segment));
 
-          math::vector_3d v(x, 0.f, z);
+          glm::vec3 v(x, 0.f, z);
 
           vertices.emplace_back(m*v);
 
@@ -356,7 +356,7 @@ void main()
       
       _indice_count = indices.size();
 
-      gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>
+      gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>
         (_vertices_vbo, vertices, GL_STATIC_DRAW);
       gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>
         (_indices_vbo, indices, GL_STATIC_DRAW);
@@ -389,7 +389,7 @@ void main()
 
 
       void square::draw( math::matrix_4x4 const& mvp
-                     , math::vector_3d const& pos
+                     , glm::vec3 const& pos
                      , float radius
                      , math::radians inclination
                      , math::radians orientation
@@ -420,7 +420,7 @@ void main()
       _vao.upload();
       _buffers.upload();
 
-      std::vector<math::vector_3d> vertices = 
+      std::vector<glm::vec3> vertices = 
       {
          {-1.f, 0.f, -1.f}
         ,{-1.f, 0.f,  1.f}
@@ -474,7 +474,7 @@ void main()
                      }));
 
 
-      gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>
+      gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>
         (_vertices_vbo, vertices, GL_STATIC_DRAW);
       gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>
         (_indices_vbo, indices, GL_STATIC_DRAW);

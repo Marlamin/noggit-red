@@ -14,7 +14,7 @@ class MapChunk;
 
 struct selected_chunk_type
 {
-    selected_chunk_type(MapChunk* _chunk, std::tuple<int, int, int> _triangle, math::vector_3d _position)
+    selected_chunk_type(MapChunk* _chunk, std::tuple<int, int, int> _triangle, glm::vec3 _position)
     : chunk(_chunk)
     , triangle(_triangle)
     , position(_position)
@@ -22,7 +22,7 @@ struct selected_chunk_type
 
   MapChunk* chunk;
   std::tuple<int,int,int> triangle; // mVertices[i] points of the hit triangle
-  math::vector_3d position;
+  glm::vec3 position;
 
   bool operator== (selected_chunk_type const& other) const
   {

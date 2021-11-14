@@ -215,8 +215,8 @@ namespace math
 
 
   template<typename Fun>
-    std::vector<math::vector_3d> apply
-      (Fun&& fun, std::vector<math::vector_3d> points)
+    std::vector<glm::vec3> apply
+      (Fun&& fun, std::vector<glm::vec3> points)
   {
     for (auto& point : points)
     {

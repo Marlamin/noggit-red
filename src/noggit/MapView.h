@@ -117,7 +117,7 @@ private:
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
   CursorType _cursorType;
-  math::vector_3d _cursor_pos;
+  glm::vec3 _cursor_pos;
   float _cursorRotation;
   bool look, freelook;
   bool ui_hidden = false;
@@ -175,7 +175,7 @@ private:
   bool MoveObj;
   float numpad_moveratio = 0.001f;
 
-  math::vector_3d objMove;
+  glm::vec3 objMove;
 
   std::vector<selection_type> lastSelected;
 
@@ -231,7 +231,7 @@ public:
 
   MapView ( math::degrees ah0
           , math::degrees av0
-          , math::vector_3d camera_pos
+          , glm::vec3 camera_pos
           , noggit::ui::main_window*
           , std::unique_ptr<World>
           , uid_fix_mode uid_fix = uid_fix_mode::none
@@ -353,7 +353,7 @@ private:
   QDockWidget* _texture_palette_dock;
   QDockWidget* _object_palette_dock;
 
-  void move_camera_with_auto_height (math::vector_3d const&);
+  void move_camera_with_auto_height (glm::vec3 const&);
 
   void setToolPropertyWidgetVisibility(editing_mode mode);
 

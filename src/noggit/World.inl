@@ -7,7 +7,7 @@
 #include <forward_list>
 
 template<typename Fun>
-void World::for_all_chunks_on_tile (math::vector_3d const& pos, Fun&& fun)
+void World::for_all_chunks_on_tile (glm::vec3 const& pos, Fun&& fun)
 {
   MapTile* tile (mapIndex.getTile (pos));
 
@@ -26,7 +26,7 @@ void World::for_all_chunks_on_tile (math::vector_3d const& pos, Fun&& fun)
 }
 
 template<typename Fun>
-void World::for_chunk_at(math::vector_3d const& pos, Fun&& fun)
+void World::for_chunk_at(glm::vec3 const& pos, Fun&& fun)
 {
   MapTile* tile(mapIndex.getTile(pos));
 
@@ -38,7 +38,7 @@ void World::for_chunk_at(math::vector_3d const& pos, Fun&& fun)
 }
 
 template<typename Fun>
-auto World::for_maybe_chunk_at(math::vector_3d const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>
+auto World::for_maybe_chunk_at(glm::vec3 const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>
 {
   MapTile* tile (mapIndex.getTile (pos));
   if (tile && tile->finishedLoading())
@@ -63,7 +63,7 @@ void World::for_tile_at(tile_index const& pos, Fun&& fun)
 }
 
 template<typename Fun>
-bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, Fun&& fun)
+bool World::for_all_chunks_in_range (glm::vec3 const& pos, float radius, Fun&& fun)
 {
   bool changed (false);
 
@@ -87,7 +87,7 @@ bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, F
   return changed;
 }
 template<typename Fun, typename Post>
-bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, Fun&& fun, Post&& post)
+bool World::for_all_chunks_in_range (glm::vec3 const& pos, float radius, Fun&& fun, Post&& post)
 {
   std::forward_list<MapChunk*> modified_chunks;
 
@@ -115,7 +115,7 @@ bool World::for_all_chunks_in_range (math::vector_3d const& pos, float radius, F
 
 
 template<typename Fun>
-bool World::for_all_chunks_in_rect (math::vector_3d const& pos, float radius, Fun&& fun)
+bool World::for_all_chunks_in_rect (glm::vec3 const& pos, float radius, Fun&& fun)
 {
   bool changed (false);
 
@@ -140,7 +140,7 @@ bool World::for_all_chunks_in_rect (math::vector_3d const& pos, float radius, Fu
 }
 
 template<typename Fun, typename Post>
-bool World::for_all_chunks_in_rect (math::vector_3d const& pos, float radius, Fun&& fun, Post&& post)
+bool World::for_all_chunks_in_rect (glm::vec3 const& pos, float radius, Fun&& fun, Post&& post)
 {
   std::forward_list<MapChunk*> modified_chunks;
 

@@ -6,7 +6,7 @@
 
 namespace noggit
 {
-  void cursor_render::draw(mode cursor_mode, math::matrix_4x4 const& mvp, glm::vec4 color, math::vector_3d const& pos, float radius, float inner_radius_ratio)
+  void cursor_render::draw(mode cursor_mode, math::matrix_4x4 const& mvp, glm::vec4 color, glm::vec3 const& pos, float radius, float inner_radius_ratio)
   {
     if (!_uploaded)
     {
@@ -55,7 +55,7 @@ namespace noggit
 
   void cursor_render::create_circle_buffer(opengl::scoped::use_program& shader)
   {
-    std::vector<math::vector_3d> vertices;
+    std::vector<glm::vec3> vertices;
     std::vector<std::uint16_t> indices;
 
     int segment = 60;
@@ -90,7 +90,7 @@ namespace noggit
 
   void cursor_render::create_sphere_buffer(opengl::scoped::use_program& shader)
   {
-    std::vector<math::vector_3d> vertices;
+    std::vector<glm::vec3> vertices;
     std::vector<std::uint16_t> indices;
 
     int segment = 60;
@@ -102,14 +102,14 @@ namespace noggit
     {
       math::degrees rotation(360.f*r / static_cast<float>(rotation_plane));
 
-      math::matrix_4x4 m(math::matrix_4x4::rotation_xyz, math::degrees::vec3(math::degrees(0.f), math::degrees(0.f), rotation));
+      math::matrix_4x4 m(math::matrix_4x4::rotation_xyz, math::degrees::vec3(math::degrees(0.f)._, math::degrees(0.f)._, rotation._));
 
       for (int i = 0; i < segment; ++i)
       {
         float x = math::cos(math::degrees(i * 360 / segment));
         float z = math::sin(math::degrees(i * 360 / segment));
 
-        math::vector_3d v(x, 0.f, z);
+        glm::vec3 v(x, 0.f, z);
 
         vertices.emplace_back(m*v);
         if (r < rotation_plane)
@@ -152,7 +152,7 @@ namespace noggit
 
   void cursor_render::create_square_buffer(opengl::scoped::use_program& shader)
   {
-    std::vector<math::vector_3d> vertices = 
+    std::vector<glm::vec3> vertices = 
     {
        {-0.5f,0.f,-0.5f}
       ,{ 0.5f,0.f,-0.5f}
@@ -185,7 +185,7 @@ namespace noggit
 
   void cursor_render::create_cube_buffer(opengl::scoped::use_program& shader)
   {
-    std::vector<math::vector_3d> vertices =
+    std::vector<glm::vec3> vertices =
     {
         {-0.5f,-0.5f,-0.5f}
       , { 0.5f,-0.5f,-0.5f}

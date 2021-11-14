@@ -245,7 +245,7 @@ map_horizon::minimap::minimap(const map_horizon& horizon)
 
 map_horizon::render::render(const map_horizon& horizon)
 {
-  std::vector<math::vector_3d> vertices;
+  std::vector<glm::vec3> vertices;
 
   for (size_t y (0); y < 64; ++y)
   {
@@ -280,7 +280,7 @@ map_horizon::render::render(const map_horizon& horizon)
     }
   }
 
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d> (_vertex_buffer, vertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec3> (_vertex_buffer, vertices, GL_STATIC_DRAW);
 }
 
 static inline uint32_t outer_index(const map_horizon_batch &batch, int y, int x)
@@ -296,10 +296,10 @@ static inline uint32_t inner_index(const map_horizon_batch &batch, int y, int x)
 void map_horizon::render::draw( math::matrix_4x4 const& model_view
                               , math::matrix_4x4 const& projection
                               , MapIndex *index
-                              , const math::vector_3d& color
+                              , const glm::vec3& color
                               , const float& cull_distance
                               , const math::frustum& frustum
-                              , const math::vector_3d& camera 
+                              , const glm::vec3& camera 
                               , display_mode display
                               )
 {

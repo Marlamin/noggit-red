@@ -14,37 +14,37 @@ namespace noggit
 {
   namespace scripting
   {
-    selection::selection(script_context * ctx, std::string const&,math::vector_3d const& point1, math::vector_3d const& point2)
+    selection::selection(script_context * ctx, std::string const&,glm::vec3 const& point1, glm::vec3 const& point2)
       : script_object(ctx)
       , _world(ctx->world())
     {
-      _min = math::vector_3d(
+      _min = glm::vec3(
         std::min(point1.x, point2.x),
         std::min(point1.y, point2.y),
         std::min(point1.z, point2.z));
 
-      _max = math::vector_3d(
+      _max = glm::vec3(
         std::max(point1.x, point2.x),
         std::max(point1.y, point2.y),
         std::max(point1.z, point2.z));
 
       _size = _max - _min;
-      _center = _min + (_size / 2);
+      _center = _min + glm::vec3(_size.x / 2, _size.y / 2, _size.z / 2);
     }
 
-    math::vector_3d selection::center() 
+    glm::vec3 selection::center() 
     { 
       return _center; 
     }
-    math::vector_3d selection::min() 
+    glm::vec3 selection::min() 
     { 
       return _min; 
     }
-    math::vector_3d selection::max() 
+    glm::vec3 selection::max() 
     { 
       return _max; 
     }
-    math::vector_3d selection::size() 
+    glm::vec3 selection::size() 
     { 
       return _size; 
     }
@@ -156,7 +156,7 @@ namespace noggit
         );
 
       state->set_function("select_origin", [state](
-          math::vector_3d const& origin
+          glm::vec3 const& origin
         , float xRadius
         , float zRadius = -1
         )
@@ -166,13 +166,13 @@ namespace noggit
           zRadius = xRadius;
         }
         return std::make_shared<selection>(state, "select_origin",
-          math::vector_3d(origin.x - xRadius, 0, origin.z - zRadius),
-          math::vector_3d(origin.x + xRadius, 0, origin.z + zRadius));
+          glm::vec3(origin.x - xRadius, 0, origin.z - zRadius),
+          glm::vec3(origin.x + xRadius, 0, origin.z + zRadius));
       });
 
       state->set_function("select_between", [state](
-          math::vector_3d const& point1
-        , math::vector_3d const& point2
+          glm::vec3 const& point1
+        , glm::vec3 const& point2
         )
       {
         return std::make_shared<selection>(state, "select_between",

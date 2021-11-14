@@ -71,11 +71,11 @@ struct ModelHeader {
   uint32_t nTexAnimLookup;
   uint32_t ofsTexAnimLookup;
 
-  math::vector_3d bounding_box_min;
-  math::vector_3d bounding_box_max;
+  glm::vec3 bounding_box_min;
+  glm::vec3 bounding_box_max;
   float bounding_box_radius;
-  math::vector_3d collision_box_min;
-  math::vector_3d collision_box_max;
+  glm::vec3 collision_box_min;
+  glm::vec3 collision_box_max;
   float collision_box_radius;
 
   uint32_t nBoundingTriangles;
@@ -125,7 +125,7 @@ struct ModelAnimation {
   uint32_t d2;
   uint32_t playSpeed; // note: this can't be play speed because it's 0 for some models
 
-  math::vector_3d boxA, boxB;
+  glm::vec3 boxA, boxB;
   float rad;
 
   int16_t NextAnimation;
@@ -163,10 +163,10 @@ struct ModelTexAnimDef {
 };
 
 struct ModelVertex {
-  math::vector_3d position;
+  glm::vec3 position;
   uint8_t weights[4];
   uint8_t bones[4];
-  math::vector_3d normal;
+  glm::vec3 normal;
   glm::vec2 texcoords[2];
 };
 
@@ -192,7 +192,7 @@ struct ModelGeoset {
   uint16_t d4; // ? always 1 to 4
   uint16_t d5; // ?
   uint16_t d6; // root bone?
-  math::vector_3d BoundingBox[2];
+  glm::vec3 BoundingBox[2];
   float radius;
 };
 
@@ -249,7 +249,7 @@ struct ModelTextureDef {
 struct ModelLightDef {
   int16_t type;
   int16_t bone;
-  math::vector_3d pos;
+  glm::vec3 pos;
   AnimationBlock ambColor;
   AnimationBlock ambIntensity;
   AnimationBlock color;
@@ -263,9 +263,9 @@ struct ModelCameraDef {
   int32_t id;
   float fov, farclip, nearclip;
   AnimationBlock transPos;
-  math::vector_3d pos;
+  glm::vec3 pos;
   AnimationBlock transTarget;
-  math::vector_3d target;
+  glm::vec3 target;
   AnimationBlock rot;
 };
 
@@ -295,7 +295,7 @@ struct ModelParticleParams {
 struct ModelParticleEmitterDef {
   int32_t id;
   int32_t flags;
-  math::vector_3d pos; // The position. Relative to the following bone.
+  glm::vec3 pos; // The position. Relative to the following bone.
   int16_t bone; // The bone its attached to.
   int16_t texture; // And the texture that is used.
   int32_t nModelFileName;
@@ -330,7 +330,7 @@ struct ModelParticleEmitterDef {
 struct ModelRibbonEmitterDef {
   int32_t id;
   int32_t bone;
-  math::vector_3d pos;
+  glm::vec3 pos;
   int32_t nTextures;
   int32_t ofsTextures;
   int32_t nMaterials;
@@ -351,7 +351,7 @@ struct ModelEvents {
   char id[4];
   int32_t data;
   int32_t bone;
-  math::vector_3d pos;
+  glm::vec3 pos;
   int16_t type;
   int16_t seq;
   uint32_t nTimes;
@@ -361,7 +361,7 @@ struct ModelEvents {
 struct ModelAttachmentDef {
   int32_t id;
   int32_t bone;
-  math::vector_3d pos;
+  glm::vec3 pos;
   AnimationBlock Enabled;
 };
 
@@ -373,7 +373,7 @@ struct ModelBoneDef {
   AnimationBlock translation;
   AnimationBlock rotation;
   AnimationBlock scaling;
-  math::vector_3d pivot;
+  glm::vec3 pivot;
 };
 
 struct ModelBoundTriangle {

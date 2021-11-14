@@ -76,27 +76,27 @@ namespace math
   matrix_4x4::matrix_4x4 (rotation_xyz_t, degrees::vec3 const& angle)
     : matrix_4x4 (unit)
   {
-    *this *= rotate_axis<x> (angle.x);
-    *this *= rotate_axis<y> (angle.y);
-    *this *= rotate_axis<z> (angle.z);
+    *this *= rotate_axis<x>(degrees(angle.x));
+    *this *= rotate_axis<y>(degrees(angle.y));
+    *this *= rotate_axis<z>(degrees(angle.z));
   }
   matrix_4x4::matrix_4x4 (rotation_yzx_t, degrees::vec3 const& angle)
     : matrix_4x4 (unit)
   {
-    *this *= rotate_axis<y> (angle.y);
-    *this *= rotate_axis<z> (angle.z);
-    *this *= rotate_axis<x> (angle.x);
+    *this *= rotate_axis<y> (degrees(angle.y));
+    *this *= rotate_axis<z> (degrees(angle.z));
+    *this *= rotate_axis<x> (degrees(angle.x));
   }
 
   matrix_4x4::matrix_4x4(rotation_yxz_t, degrees::vec3 const& angle)
       : matrix_4x4(unit)
   {
-    *this *= rotate_axis<y>(angle.y);
-    *this *= rotate_axis<x>(angle.x);
-    *this *= rotate_axis<z>(angle.z);
+    *this *= rotate_axis<y>(degrees(angle.y));
+    *this *= rotate_axis<x>(degrees(angle.x));
+    *this *= rotate_axis<z>(degrees(angle.z));
   }
 
-  vector_3d matrix_4x4::operator* (vector_3d const& v) const
+  glm::vec3 matrix_4x4::operator* (glm::vec3 const& v) const
   {
     return { _m[0][0] * v[0] + _m[0][1] * v[1] + _m[0][2] * v[2] + _m[0][3]
            , _m[1][0] * v[0] + _m[1][1] * v[1] + _m[1][2] * v[2] + _m[1][3]
@@ -133,10 +133,10 @@ namespace math
            };
   }
 
-  std::vector<math::vector_3d> matrix_4x4::operator*
-    (std::vector<math::vector_3d> points) const
+  std::vector<glm::vec3> matrix_4x4::operator*
+    (std::vector<glm::vec3> points) const
   {
-    return apply ( [&] (math::vector_3d const& point)
+    return apply ( [&] (glm::vec3 const& point)
                    {
                      return *this * point;
                    }

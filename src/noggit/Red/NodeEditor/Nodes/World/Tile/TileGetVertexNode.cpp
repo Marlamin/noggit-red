@@ -34,7 +34,7 @@ void TileGetVertexNode::compute()
   auto xy_data = defaultPortData<Vector2DData>(PortType::In, 2);
   glm::vec2 const& xy = xy_data->value();
 
-  math::vector_3d n_pos(0.0f, 0.0f, 0.0f);
+  glm::vec3 n_pos(0.0f, 0.0f, 0.0f);
 
   tile->GetVertex(xy.x, xy.y, &n_pos);
 

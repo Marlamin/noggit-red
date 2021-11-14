@@ -17,7 +17,7 @@ namespace noggit {
 			, float angle
 		)
 		{
-      auto center = math::vector_3d(sel.min().x + (sel.max().x - sel.min().x) / 2, 0, sel.min().z + (sel.max().z - sel.min().z) / 2);
+      auto center = glm::vec3(sel.min().x + (sel.max().x - sel.min().x) / 2, 0, sel.min().z + (sel.max().z - sel.min().z) / 2);
       auto outer_radius = (sel.max().x - sel.min().x) / 2;
       int width = img.width();
       int height = img.height();

@@ -20,7 +20,7 @@ ChunkWater::ChunkWater(MapChunk* chunk, TileWater* water_tile, float x, float z,
 
 void ChunkWater::from_mclq(std::vector<mclq>& layers)
 {
-  math::vector_3d pos(xbase, 0.0f, zbase);
+  glm::vec3 pos(xbase, 0.0f, zbase);
 
   for (mclq& liquid : layers)
   {
@@ -105,7 +105,7 @@ void ChunkWater::fromFile(MPQFile &f, size_t basePos)
       f.read(&infoMask, bitmask_size);
     }
 
-    math::vector_3d pos(xbase, 0.0f, zbase);
+    glm::vec3 pos(xbase, 0.0f, zbase);
     _water_tile->registerNewChunk(_layers.size());
     _layers.emplace_back(this, f, basePos, pos, info, infoMask);
   }
@@ -182,7 +182,7 @@ void ChunkWater::setType(int type, size_t layer)
 
 bool ChunkWater::is_visible ( const float& cull_distance
                             , const math::frustum& frustum
-                            , const math::vector_3d& camera
+                            , const glm::vec3& camera
                             , display_mode display
                             ) const
 {
@@ -227,14 +227,14 @@ bool ChunkWater::hasData(size_t layer) const
 }
 
 
-void ChunkWater::paintLiquid( math::vector_3d const& pos
+void ChunkWater::paintLiquid( glm::vec3 const& pos
                             , float radius
                             , int liquid_id
                             , bool add
                             , math::radians const& angle
                             , math::radians const& orientation
                             , bool lock
-                            , math::vector_3d const& origin
+                            , glm::vec3 const& origin
                             , bool override_height
                             , bool override_liquid_id
                             , MapChunk* chunk
@@ -256,7 +256,7 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
 
     if (!layer_found)
     {
-      liquid_layer layer(this, math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
+      liquid_layer layer(this, glm::vec3(xbase, 0.0f, zbase), pos.y, liquid_id);
       copy_height_to_layer(layer, pos, radius);
       _water_tile->registerNewChunk(_layers.size());
       _layers.push_back(layer);
@@ -297,7 +297,7 @@ void ChunkWater::paintLiquid( math::vector_3d const& pos
   }
   else
   {
-    liquid_layer layer(this, math::vector_3d(xbase, 0.0f, zbase), pos.y, liquid_id);
+    liquid_layer layer(this, glm::vec3(xbase, 0.0f, zbase), pos.y, liquid_id);
     layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
     _water_tile->registerNewChunk(_layers.size());
     _layers.push_back(layer);
@@ -318,7 +318,7 @@ void ChunkWater::cleanup()
   }
 }
 
-void ChunkWater::copy_height_to_layer(liquid_layer& target, math::vector_3d const& pos, float radius)
+void ChunkWater::copy_height_to_layer(liquid_layer& target, glm::vec3 const& pos, float radius)
 {
   for (liquid_layer& layer : _layers)
   {

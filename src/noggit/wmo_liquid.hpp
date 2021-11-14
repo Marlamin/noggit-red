@@ -70,7 +70,7 @@ struct WMOMaterial
 
 struct WMOLiquidHeader {
   int32_t X, Y, A, B;
-  math::vector_3d pos;
+  glm::vec3 pos;
   int16_t material_id;
 };
 
@@ -107,14 +107,14 @@ public:
 private:
   int initGeometry(MPQFile* f);
 
-  math::vector_3d pos;
+  glm::vec3 pos;
   bool mTransparency;
   int xtiles, ytiles;
   int _liquid_id;
 
   std::vector<float> depths;
   std::vector<glm::vec2> tex_coords;
-  std::vector<math::vector_3d> vertices;
+  std::vector<glm::vec3> vertices;
   std::vector<std::uint16_t> indices;
 
   int _indices_count;

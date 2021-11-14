@@ -140,7 +140,7 @@ public:
       ([] (tile_index const&, MapTile* tile) { return !!tile && tile->finishedLoading(); });
   }
 
-  auto tiles_in_range (math::vector_3d const& pos, float radius)
+  auto tiles_in_range (glm::vec3 const& pos, float radius)
   {
     return tiles<true>
       ( [this, pos, radius] (tile_index const& index, MapTile*)
@@ -151,7 +151,7 @@ public:
       );
   }
 
-  auto tiles_in_rect (math::vector_3d const& pos, float radius)
+  auto tiles_in_rect (glm::vec3 const& pos, float radius)
   {
     glm::vec2 l_chunk{pos.x - radius, pos.z - radius};
     glm::vec2 r_chunk{pos.x + radius, pos.z + radius};
@@ -183,7 +183,7 @@ public:
   void setChanged(MapTile* tile);
 
   void unsetChanged(const tile_index& tile);
-  void setFlag(bool to, math::vector_3d const& pos, uint32_t flag);
+  void setFlag(bool to, glm::vec3 const& pos, uint32_t flag);
   bool has_unsaved_changes(const tile_index& tile) const;
 
   void saveTile(const tile_index& tile, World*, bool save_unloaded = false);

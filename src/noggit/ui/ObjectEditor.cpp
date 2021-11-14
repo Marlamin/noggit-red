@@ -493,8 +493,8 @@ namespace noggit
       modelImport->show();
     }
 
-    void object_editor::pasteObject ( math::vector_3d cursor_pos
-                                    , math::vector_3d camera_pos
+    void object_editor::pasteObject ( glm::vec3 cursor_pos
+                                    , glm::vec3 camera_pos
                                     , World* world
                                     , object_paste_params* paste_params
                                     )
@@ -503,7 +503,7 @@ namespace noggit
 
       for (auto& selection : selected)
       {
-        math::vector_3d pos;
+        glm::vec3 pos;
 
         if (selection.which() != eEntry_Object)
         {
@@ -513,7 +513,7 @@ namespace noggit
 
         auto obj = boost::get<selected_object_type>(selection);
 
-        math::vector_3d model_pos = obj->pos;
+        glm::vec3 model_pos = obj->pos;
 
         switch (pasteMode)
         {
@@ -523,7 +523,7 @@ namespace noggit
         case PASTE_ON_SELECTION:
           if (last_entry)
           {
-            math::vector_3d last_entry_pos =  boost::get<selected_object_type>(last_entry.get())->pos;
+            glm::vec3 last_entry_pos =  boost::get<selected_object_type>(last_entry.get())->pos;
 
             pos = last_entry_pos + model_pos;
           }
@@ -543,7 +543,7 @@ namespace noggit
         if (obj->which() == eMODEL)
         {
           float scale(1.f);
-          math::degrees::vec3 rotation(0_deg, 0_deg, 0_deg);
+          math::degrees::vec3 rotation((0_deg)._, (0_deg)._, (0_deg)._);
 
           if (_copy_model_stats)
           {
@@ -561,7 +561,7 @@ namespace noggit
         }
         else if (obj->which() == eWMO)
         {
-          math::degrees::vec3 rotation(0_deg, 0_deg, 0_deg);
+          math::degrees::vec3 rotation((0_deg)._, (0_deg)._, (0_deg)._);
           if (_copy_model_stats)
           {
             // copy rot from original model. Dirty but working
@@ -676,7 +676,7 @@ namespace noggit
           
           clone->scale = original->scale;
           clone->dir = original->dir;
-          clone->pos = pivot ? original->pos - pivot.get() : math::vector_3d();
+          clone->pos = pivot ? original->pos - pivot.get() : glm::vec3();
 
           selected_model.push_back(clone);
           _model_instance_created.push_back(clone);
@@ -686,7 +686,7 @@ namespace noggit
           auto original = static_cast<WMOInstance*>(obj);
           auto clone = new WMOInstance(original->wmo->filename, _map_view->getRenderContext());
           clone->dir = original->dir;
-          clone->pos = pivot ? original->pos - pivot.get() : math::vector_3d();
+          clone->pos = pivot ? original->pos - pivot.get() : glm::vec3();
 
           selected_model.push_back(clone);
           _model_instance_created.push_back(clone);

@@ -142,7 +142,7 @@ public:
   void draw( opengl::scoped::use_program& wmo_shader
            , math::frustum const& frustum
            , const float& cull_distance
-           , const math::vector_3d& camera
+           , const glm::vec3& camera
            , bool draw_fog
            , bool world_has_skies
            );
@@ -164,16 +164,16 @@ public:
   bool is_visible( math::matrix_4x4 const& transform_matrix
                  , math::frustum const& frustum
                  , float const& cull_distance
-                 , math::vector_3d const& camera
+                 , glm::vec3 const& camera
                  , display_mode display
                  ) const;
 
   std::vector<uint16_t> doodad_ref() const { return _doodad_ref; }
 
-  math::vector_3d BoundingBoxMin;
-  math::vector_3d BoundingBoxMax;
-  math::vector_3d VertexBoxMin;
-  math::vector_3d VertexBoxMax;
+  glm::vec3 BoundingBoxMin;
+  glm::vec3 BoundingBoxMax;
+  glm::vec3 VertexBoxMin;
+  glm::vec3 VertexBoxMax;
 
   bool use_outdoor_lights;
   std::string name;
@@ -188,7 +188,7 @@ private:
 
   WMO *wmo;
   wmo_group_header header;
-  ::math::vector_3d center;
+  ::glm::vec3 center;
   float rad;
   int32_t num;
   int32_t fog;
@@ -197,8 +197,8 @@ private:
 
   std::vector<wmo_batch> _batches;
 
-  std::vector<::math::vector_3d> _vertices;
-  std::vector<::math::vector_3d> _normals;
+  std::vector<::glm::vec3> _vertices;
+  std::vector<::glm::vec3> _normals;
   std::vector<glm::vec2> _texcoords;
   std::vector<glm::vec2> _texcoords_2;
   std::vector<glm::vec4> _vertex_colors;
@@ -231,7 +231,7 @@ private:
 
 struct WMOLight {
   uint32_t flags, color;
-  math::vector_3d pos;
+  glm::vec3 pos;
   float intensity;
   float unk[5];
   float r;
@@ -241,11 +241,11 @@ struct WMOLight {
   void init(MPQFile* f);
   void setup(GLint light);
 
-  static void setupOnce(GLint light, math::vector_3d dir, math::vector_3d light_color);
+  static void setupOnce(GLint light, glm::vec3 dir, glm::vec3 light_color);
 };
 
 struct WMOPV {
-  math::vector_3d a, b, c, d;
+  glm::vec3 a, b, c, d;
 };
 
 struct WMOPR {
@@ -261,7 +261,7 @@ struct WMODoodadSet {
 
 struct WMOFog {
   unsigned int flags;
-  math::vector_3d pos;
+  glm::vec3 pos;
   float r1, r2, fogend, fogstart;
   unsigned int color1;
   float f2;
@@ -302,7 +302,7 @@ public:
             , bool boundingbox
             , math::frustum const& frustum
             , const float& cull_distance
-            , const math::vector_3d& camera
+            , const glm::vec3& camera
             , bool draw_doodads
             , bool draw_fog
             , int animtime
@@ -311,15 +311,15 @@ public:
             );
 
   bool draw_skybox( math::matrix_4x4 const& model_view
-                  , math::vector_3d const& camera_pos
+                  , glm::vec3 const& camera_pos
                   , opengl::scoped::use_program& m2_shader
                   , math::frustum const& frustum
                   , const float& cull_distance
                   , int animtime
                   , bool draw_particles
-                  , math::vector_3d aabb_min
-                  , math::vector_3d aabb_max
-                  , std::map<int, std::pair<math::vector_3d, math::vector_3d>> const& group_extents
+                  , glm::vec3 aabb_min
+                  , glm::vec3 aabb_max
+                  , std::map<int, std::pair<glm::vec3, glm::vec3>> const& group_extents
                   ) const;
 
   std::vector<float> intersect (math::ray const&) const;
@@ -336,11 +336,11 @@ public:
 
   std::vector<WMOGroup> groups;
   std::vector<WMOMaterial> materials;
-  math::vector_3d extents[2];
+  glm::vec3 extents[2];
   std::vector<scoped_blp_texture_reference> textures;
   std::vector<std::string> models;
   std::vector<wmo_doodad_instance> modelis;
-  std::vector<math::vector_3d> model_nearest_light_vector;
+  std::vector<glm::vec3> model_nearest_light_vector;
 
   std::vector<WMOLight> lights;
   glm::vec4 ambient_light_color;

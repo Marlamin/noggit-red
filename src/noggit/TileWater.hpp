@@ -44,7 +44,7 @@ public:
 
   void draw ( math::frustum const& frustum
             , const float& cull_distance
-            , const math::vector_3d& camera
+            , const glm::vec3& camera
             , bool camera_moved
             , opengl::scoped::use_program& water_shader
             , int animtime
@@ -68,7 +68,7 @@ public:
 
   void updateLayerData(LiquidTextureManager* tex_manager);
 
-  std::array<math::vector_3d, 2>& getExtents() { return _extents; };
+  std::array<glm::vec3, 2>& getExtents() { return _extents; };
 
   void unload();
 
@@ -82,7 +82,7 @@ private:
   MapTile *tile;
 
   std::unique_ptr<ChunkWater> chunks[16][16];
-  std::array<math::vector_3d, 2> _extents;
+  std::array<glm::vec3, 2> _extents;
 
   std::vector<LiquidLayerDrawCallData> _render_layers;
 

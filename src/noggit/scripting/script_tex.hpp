@@ -19,7 +19,7 @@ namespace noggit {
       tex(script_context * ctx, MapChunk* chunk, int index);
       void set_alpha(int index, float alpha);
       float get_alpha(int index);
-      math::vector_3d get_pos_2d();
+      glm::vec3 get_pos_2d();
     
     private:
       MapChunk* _chunk;
@@ -30,16 +30,16 @@ namespace noggit {
         script_context* ctx
       , MapChunk* chnk
       , std::vector<tex>& vec
-      , math::vector_3d const& min
-      , math::vector_3d const& max
+      , glm::vec3 const& min
+      , glm::vec3 const& max
     );
 
     class tex_iterator : public script_object {
       public:
         tex_iterator( script_context * ctx
                     , std::shared_ptr<std::vector<MapChunk*>> chunks
-                    , math::vector_3d const& min
-                    , math::vector_3d const& max
+                    , glm::vec3 const& min
+                    , glm::vec3 const& max
                     );
         bool next();
         tex get();
@@ -50,8 +50,8 @@ namespace noggit {
         int _tex_iter = -1;
         std::shared_ptr<std::vector<MapChunk*>> _chunks;
         std::vector<MapChunk*>::iterator _chunk_iter;
-        math::vector_3d const& _min;
-        math::vector_3d const& _max;
+        glm::vec3 const& _min;
+        glm::vec3 const& _max;
     };
 
     void register_tex(script_context * state);

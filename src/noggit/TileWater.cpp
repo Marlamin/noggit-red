@@ -16,8 +16,8 @@ TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase, bool use_mclq_g
   : tile(pTile)
   , xbase(pXbase)
   , zbase(pZbase)
-  , _extents{math::vector_3d{pXbase, std::numeric_limits<float>::max(), pZbase},
-            math::vector_3d{pXbase + TILESIZE, std::numeric_limits<float>::lowest(), pZbase + TILESIZE}}
+  , _extents{glm::vec3{pXbase, std::numeric_limits<float>::max(), pZbase},
+            glm::vec3{pXbase + TILESIZE, std::numeric_limits<float>::lowest(), pZbase + TILESIZE}}
 {
   for (int z = 0; z < 16; ++z)
   {
@@ -42,7 +42,7 @@ void TileWater::readFromFile(MPQFile &theFile, size_t basePos)
 
 void TileWater::draw ( math::frustum const& frustum
                      , const float& cull_distance
-                     , const math::vector_3d& camera
+                     , const glm::vec3& camera
                      , bool camera_moved
                      , opengl::scoped::use_program& water_shader
                      , int animtime
@@ -59,8 +59,8 @@ void TileWater::draw ( math::frustum const& frustum
 
   if (_extents_changed)
   {
-    _extents = {math::vector_3d{xbase, std::numeric_limits<float>::max(), zbase},
-                math::vector_3d{xbase + TILESIZE, std::numeric_limits<float>::lowest(), zbase + TILESIZE}};
+    _extents = {glm::vec3{xbase, std::numeric_limits<float>::max(), zbase},
+                glm::vec3{xbase + TILESIZE, std::numeric_limits<float>::lowest(), zbase + TILESIZE}};
 
     for (int i = 0; i < 256; ++i)
     {

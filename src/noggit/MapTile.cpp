@@ -55,12 +55,12 @@ MapTile::MapTile( int pX
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
                         | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
-  , _extents{math::vector_3d{pX * TILESIZE, std::numeric_limits<float>::max(), pZ * TILESIZE},
-             math::vector_3d{pX * TILESIZE + TILESIZE, std::numeric_limits<float>::lowest(), pZ * TILESIZE + TILESIZE}}
-  , _combined_extents{math::vector_3d{pX * TILESIZE, std::numeric_limits<float>::max(), pZ * TILESIZE},
-             math::vector_3d{pX * TILESIZE + TILESIZE, std::numeric_limits<float>::lowest(), pZ * TILESIZE + TILESIZE}}
-  , _object_instance_extents{math::vector_3d{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()}
-  , math::vector_3d{std::numeric_limits<float>::lowest(),  std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()}}
+  , _extents{glm::vec3{pX * TILESIZE, std::numeric_limits<float>::max(), pZ * TILESIZE},
+             glm::vec3{pX * TILESIZE + TILESIZE, std::numeric_limits<float>::lowest(), pZ * TILESIZE + TILESIZE}}
+  , _combined_extents{glm::vec3{pX * TILESIZE, std::numeric_limits<float>::max(), pZ * TILESIZE},
+             glm::vec3{pX * TILESIZE + TILESIZE, std::numeric_limits<float>::lowest(), pZ * TILESIZE + TILESIZE}}
+  , _object_instance_extents{glm::vec3{std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()}
+  , glm::vec3{std::numeric_limits<float>::lowest(),  std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest()}}
   ,_center{pX * TILESIZE + TILESIZE / 2.f, 0.f, pZ * TILESIZE + TILESIZE / 2.f}
 {
 }
@@ -382,7 +382,7 @@ void MapTile::convert_alphamap(bool to_big_alpha)
 }
 
 void MapTile::draw (opengl::scoped::use_program& mcnk_shader
-                   , const math::vector_3d& camera
+                   , const glm::vec3& camera
                    , bool show_unpaintable_chunks
                    , bool draw_paintability_overlay
                    , bool is_selected
@@ -721,12 +721,12 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
     
 
     gl.bufferData<GL_ARRAY_BUFFER>( _mfbo_bottom_vbo
-                                  , 9 * sizeof(math::vector_3d)
+                                  , 9 * sizeof(glm::vec3)
                                   , mMinimumValues
                                   , GL_STATIC_DRAW
                                   );
     gl.bufferData<GL_ARRAY_BUFFER>( _mfbo_top_vbo
-                                  , 9 * sizeof(math::vector_3d)
+                                  , 9 * sizeof(glm::vec3)
                                   , mMaximumValues
                                   , GL_STATIC_DRAW
                                   );    
@@ -771,7 +771,7 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
 
 void MapTile::drawWater ( math::frustum const& frustum
                         , const float& cull_distance
-                        , const math::vector_3d& camera
+                        , const glm::vec3& camera
                         , bool camera_moved
                         , opengl::scoped::use_program& water_shader
                         , int animtime
@@ -810,7 +810,7 @@ MapChunk* MapTile::getChunk(unsigned int x, unsigned int z)
   }
 }
 
-std::vector<MapChunk*> MapTile::chunks_in_range (math::vector_3d const& pos, float radius) const
+std::vector<MapChunk*> MapTile::chunks_in_range (glm::vec3 const& pos, float radius) const
 {
   std::vector<MapChunk*> chunks;
 
@@ -828,7 +828,7 @@ std::vector<MapChunk*> MapTile::chunks_in_range (math::vector_3d const& pos, flo
   return chunks;
 }
 
-std::vector<MapChunk*> MapTile::chunks_in_rect (math::vector_3d const& pos, float radius) const
+std::vector<MapChunk*> MapTile::chunks_in_rect (glm::vec3 const& pos, float radius) const
 {
   std::vector<MapChunk*> chunks;
 
@@ -853,7 +853,7 @@ std::vector<MapChunk*> MapTile::chunks_in_rect (math::vector_3d const& pos, floa
   return chunks;
 }
 
-bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
+bool MapTile::GetVertex(float x, float z, glm::vec3 *V)
 {
   int xcol = (int)((x - xbase) / CHUNKSIZE);
   int ycol = (int)((z - zbase) / CHUNKSIZE);
@@ -861,7 +861,7 @@ bool MapTile::GetVertex(float x, float z, math::vector_3d *V)
   return xcol >= 0 && xcol <= 15 && ycol >= 0 && ycol <= 15 && mChunks[ycol][xcol]->GetVertex(x, z, V);
 }
 
-void MapTile::getVertexInternal(float x, float z, math::vector_3d* v)
+void MapTile::getVertexInternal(float x, float z, glm::vec3* v)
 {
   int xcol = (int)((x - xbase) / CHUNKSIZE);
   int ycol = (int)((z - zbase) / CHUNKSIZE);
@@ -880,9 +880,9 @@ void MapTile::saveTile(World* world)
   std::vector<ModelInstance> lModelInstances;
 
   // Check which doodads and WMOs are on this ADT.
-  math::vector_3d lTileExtents[2];
-  lTileExtents[0] = math::vector_3d(xbase, 0.0f, zbase);
-  lTileExtents[1] = math::vector_3d(xbase + TILESIZE, 0.0f, zbase + TILESIZE);
+  glm::vec3 lTileExtents[2];
+  lTileExtents[0] = glm::vec3(xbase, 0.0f, zbase);
+  lTileExtents[1] = glm::vec3(xbase + TILESIZE, 0.0f, zbase + TILESIZE);
 
   // get every models on the tile
   for (std::uint32_t uid : uids)
@@ -1130,9 +1130,9 @@ void MapTile::saveTile(World* world)
     lMDDF_Data[lID].pos[0] = model.pos.x;
     lMDDF_Data[lID].pos[1] = model.pos.y;
     lMDDF_Data[lID].pos[2] = model.pos.z;
-    lMDDF_Data[lID].rot[0] = model.dir.x._;
-    lMDDF_Data[lID].rot[1] = model.dir.y._;
-    lMDDF_Data[lID].rot[2] = model.dir.z._;
+    lMDDF_Data[lID].rot[0] = model.dir.x;
+    lMDDF_Data[lID].rot[1] = model.dir.y;
+    lMDDF_Data[lID].rot[2] = model.dir.z;
     lMDDF_Data[lID].scale = (uint16_t)(model.scale * 1024);
     lMDDF_Data[lID].flags = 0;
     lID++;
@@ -1167,9 +1167,9 @@ void MapTile::saveTile(World* world)
     lMODF_Data[lID].pos[1] = object.pos.y;
     lMODF_Data[lID].pos[2] = object.pos.z;
 
-    lMODF_Data[lID].rot[0] = object.dir.x._;
-    lMODF_Data[lID].rot[1] = object.dir.y._;
-    lMODF_Data[lID].rot[2] = object.dir.z._;
+    lMODF_Data[lID].rot[0] = object.dir.x;
+    lMODF_Data[lID].rot[1] = object.dir.y;
+    lMODF_Data[lID].rot[2] = object.dir.z;
 
     lMODF_Data[lID].extents[0][0] = object.extents[0].x;
     lMODF_Data[lID].extents[0][1] = object.extents[0].y;
@@ -1418,7 +1418,7 @@ QImage MapTile::getHeightmapImage(float min_height, float max_height)
     {
       MapChunk* chunk = getChunk(k, l);
 
-      math::vector_3d* heightmap = chunk->getHeightmap();
+      glm::vec3* heightmap = chunk->getHeightmap();
 
       for (unsigned y = 0; y < SUM; ++y)
       {
@@ -1451,7 +1451,7 @@ QImage MapTile::getNormalmapImage()
     {
       MapChunk* chunk = getChunk(k, l);
 
-      const math::vector_3d* normals = chunk->getNormals();
+      const glm::vec3* normals = chunk->getNormals();
 
       for (unsigned y = 0; y < SUM; ++y)
       {
@@ -1462,8 +1462,8 @@ QImage MapTile::getNormalmapImage()
           bool const erp = plain % DSUM / SUM;
           unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
 
-          auto normal = normals[idx].normalized();
-          auto normal_inner = normals[idx + (erp ? SUM : 1)].normalized();
+          auto normal = glm::normalize(normals[idx]);
+          auto normal_inner = glm::normalize(normals[idx + (erp ? SUM : 1)]);
 
           float value_r = is_virtual ? (normal.x + normal_inner.x) / 2.f : normal.x;
           float value_g = is_virtual ? (normal.y + normal_inner.y) / 2.f : normal.y;
@@ -1562,7 +1562,7 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
     {
       MapChunk* chunk = getChunk(k, l);
 
-      math::vector_3d* heightmap = chunk->getHeightmap();
+      glm::vec3* heightmap = chunk->getHeightmap();
 
       for (unsigned y = 0; y < SUM; ++y)
         for (unsigned x = 0; x < SUM; ++x)
@@ -1679,7 +1679,7 @@ QImage MapTile::getVertexColorsImage()
       if (!chunk->header_flags.flags.has_mccv)
         continue;
 
-      math::vector_3d* colors = chunk->getVertexColors();
+      glm::vec3* colors = chunk->getVertexColors();
 
       for (unsigned y = 0; y < SUM; ++y)
       {
@@ -1711,7 +1711,7 @@ void MapTile::setVertexColorImage(QImage const& image, int mode)
     {
       MapChunk* chunk = getChunk(k, l);
 
-      math::vector_3d* colors = chunk->getVertexColors();
+      glm::vec3* colors = chunk->getVertexColors();
 
       for (unsigned y = 0; y < SUM; ++y)
         for (unsigned x = 0; x < SUM; ++x)
@@ -1910,8 +1910,8 @@ void MapTile::recalcObjectInstanceExtents()
 
       instance->ensureExtents();
 
-      math::vector_3d& min = instance->extents[0];
-      math::vector_3d& max = instance->extents[1];
+      glm::vec3& min = instance->extents[0];
+      glm::vec3& max = instance->extents[1];
 
       _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, min.x);
       _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, min.y);
@@ -1940,7 +1940,7 @@ void MapTile::doTileOcclusionQuery(opengl::scoped::use_program& occlusion_shader
   gl.endQuery(GL_ANY_SAMPLES_PASSED);
 }
 
-bool MapTile::getTileOcclusionQueryResult(math::vector_3d const& camera)
+bool MapTile::getTileOcclusionQueryResult(glm::vec3 const& camera)
 {
   // returns true if tile is not occluded by other tiles
 
@@ -1983,7 +1983,7 @@ bool MapTile::getTileOcclusionQueryResult(math::vector_3d const& camera)
 }
 
 
-void MapTile::calcCamDist(math::vector_3d const& camera)
+void MapTile::calcCamDist(glm::vec3 const& camera)
 {
   _cam_dist = (camera - _center).length();
 }

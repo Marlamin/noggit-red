@@ -3,7 +3,7 @@
 #pragma once
 
 #include <math/ray.hpp>
-#include <math/vector_3d.hpp> // math::vector_3d
+#include <math/vector_3d.hpp> // glm::vec3
 #include <noggit/MPQ.h> // MPQFile
 #include <noggit/MapHeaders.h> // ENTRY_MDDF
 #include <noggit/ModelManager.h>
@@ -28,7 +28,7 @@ public:
 
   scoped_model_reference model;
 
-  math::vector_3d light_color = { 1.f, 1.f, 1.f };
+  glm::vec3 light_color = { 1.f, 1.f, 1.f };
 
   // used when flag 0x8 is set in wdt
   // longest side of an AABB transformed model's bounding box from the M2 header
@@ -89,15 +89,15 @@ public:
 
 
   bool isInFrustum(math::frustum const& frustum);
-  bool isInRenderDist(const float& cull_distance, const math::vector_3d& camera, display_mode display);
+  bool isInRenderDist(const float& cull_distance, const glm::vec3& camera, display_mode display);
 
   [[nodiscard]]
-  virtual math::vector_3d const& get_pos() const { return pos; }
+  virtual glm::vec3 const& get_pos() const { return pos; }
 
   void recalcExtents() override;
   void ensureExtents() override;
   bool finishedLoading() override { return model->finishedLoading(); };
-  math::vector_3d* getExtents();
+  glm::vec3* getExtents();
 
   [[nodiscard]]
   virtual bool isWMODoodad() const { return false; };
@@ -119,7 +119,7 @@ class wmo_doodad_instance : public ModelInstance
 {
 public:
   glm::quat doodad_orientation;
-  math::vector_3d world_pos;
+  glm::vec3 world_pos;
 
   explicit wmo_doodad_instance(std::string const& filename
       , MPQFile* f
@@ -158,7 +158,7 @@ public:
 
   void update_transform_matrix_wmo(WMOInstance* wmo);
 
-  virtual math::vector_3d const& get_pos() const override { return world_pos; };
+  virtual glm::vec3 const& get_pos() const override { return world_pos; };
 
   [[nodiscard]]
   virtual bool isWMODoodad() const override { return true; };

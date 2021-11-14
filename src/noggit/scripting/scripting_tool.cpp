@@ -208,7 +208,7 @@ namespace noggit
       get_settings()->save_json();
     }
 
-    void scripting_tool::sendBrushEvent(math::vector_3d const& pos, float dt)
+    void scripting_tool::sendBrushEvent(glm::vec3 const& pos, float dt)
     {
       bool new_left = get_view()->leftMouse;
       bool new_right = get_view()->rightMouse;

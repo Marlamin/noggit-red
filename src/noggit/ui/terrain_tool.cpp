@@ -232,7 +232,7 @@ namespace noggit
     }
 
     void terrain_tool::changeTerrain
-      (World* world, math::vector_3d const& pos, float dt)
+      (World* world, glm::vec3 const& pos, float dt)
     {
 
       float radius =  static_cast<float>(_radius_slider->value());
@@ -345,11 +345,11 @@ namespace noggit
       }
     }
 
-    void terrain_tool::setOrientRelativeTo (World* world, math::vector_3d const& pos)
+    void terrain_tool::setOrientRelativeTo (World* world, glm::vec3 const& pos)
     {
       if (_edit_type == eTerrainType_Vertex)
       {
-        math::vector_3d const& center = world->vertexCenter();
+        glm::vec3 const& center = world->vertexCenter();
         _vertex_orientation = math::radians (std::atan2(center.z - pos.z, center.x - pos.x));
         emit updateVertices(_vertex_mode, _vertex_angle, _vertex_orientation);
       }

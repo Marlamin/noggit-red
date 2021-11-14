@@ -23,11 +23,8 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, no
   , model (filename, context)
 {
 	uid = d->uniqueID;
-	pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
-  dir = math::degrees::vec3( math::degrees(d->rot[0])
-      , math::degrees(d->rot[1])
-      , math::degrees(d->rot[2])
-  );
+	pos = glm::vec3(d->pos[0], d->pos[1], d->pos[2]);
+    dir = math::degrees::vec3( math::degrees(d->rot[0])._, math::degrees(d->rot[1])._, math::degrees(d->rot[2])._);
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	scale = d->scale / 1024.0f;
 
@@ -126,7 +123,7 @@ bool ModelInstance::isInFrustum(const math::frustum& frustum)
   return true;
 }
 
-bool ModelInstance::isInRenderDist(const float& cull_distance, const math::vector_3d& camera, display_mode display)
+bool ModelInstance::isInRenderDist(const float& cull_distance, const glm::vec3& camera, display_mode display)
 {
   float dist;
 
@@ -178,12 +175,8 @@ void ModelInstance::recalcExtents()
   updateTransformMatrix();
 
   math::aabb const relative_to_model
-    ( math::min ( model->header.collision_box_min
-                , model->header.bounding_box_min
-                )
-    , math::max ( model->header.collision_box_max
-                , model->header.bounding_box_max
-                )
+    ( glm::min ( model->header.collision_box_min, model->header.bounding_box_min)
+    , glm::max ( model->header.collision_box_max, model->header.bounding_box_max)
     );
 
   //! \todo If both boxes are {inf, -inf}, or well, if any min.c > max.c,
@@ -212,7 +205,7 @@ void ModelInstance::ensureExtents()
   }
 }
 
-math::vector_3d* ModelInstance::getExtents()
+glm::vec3* ModelInstance::getExtents()
 {
   if (_need_recalc_extents && model->finishedLoading())
   {
@@ -229,7 +222,7 @@ wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f
   float ff[4];
 
   f->read(ff, 12);
-  pos = math::vector_3d(ff[0], ff[2], -ff[1]);
+  pos = glm::vec3(ff[0], ff[2], -ff[1]);
 
   f->read(ff, 16);
   doodad_orientation = glm::quat (-ff[0], -ff[2], ff[1], ff[3]);
@@ -247,7 +240,7 @@ wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f
 
   f->read(&color.packed, 4);
 
-  light_color = math::vector_3d(color.bgra.r / 255.f, color.bgra.g / 255.f, color.bgra.b / 255.f);
+  light_color = glm::vec3(color.bgra.r / 255.f, color.bgra.g / 255.f, color.bgra.b / 255.f);
 }
 
 void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)

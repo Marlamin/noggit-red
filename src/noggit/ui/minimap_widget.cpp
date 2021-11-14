@@ -204,7 +204,7 @@ namespace noggit
 
       event->accept();
 
-      emit map_clicked(::math::vector_3d ( tile.x() * TILESIZE + TILESIZE / 2
+      emit map_clicked(::glm::vec3 ( tile.x() * TILESIZE + TILESIZE / 2
                                          , 0.0f, tile.y() * TILESIZE + TILESIZE / 2));
     }
 

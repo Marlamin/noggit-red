@@ -79,10 +79,10 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
     xbase = xbase*-1.0f + ZEROPOINT;
 
     vmin.y = 0.0f;
-    vmin = math::vector_3d(9999999.0f, 9999999.0f, 9999999.0f);
-    vmax = math::vector_3d(-9999999.0f, -9999999.0f, -9999999.0f);
+    vmin = glm::vec3(9999999.0f, 9999999.0f, 9999999.0f);
+    vmax = glm::vec3(-9999999.0f, -9999999.0f, -9999999.0f);
 
-    math::vector_3d *ttv = mVertices;
+    glm::vec3 *ttv = mVertices;
 
     for (int j = 0; j < 17; ++j) {
       for (int i = 0; i < ((j % 2) ? 8 : 9); ++i) {
@@ -92,7 +92,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
         if (j % 2) {
           xpos += UNITSIZE*0.5f;
         }
-        math::vector_3d v = math::vector_3d(xbase + xpos, ybase + 0.0f, zbase + zpos);
+        glm::vec3 v = glm::vec3(xbase + xpos, ybase + 0.0f, zbase + zpos);
         *ttv++ = v;
         vmin.y = std::min(vmin.y, v.y);
         vmax.y = std::max(vmax.y, v.y);
@@ -148,8 +148,8 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
     zbase = zbase*-1.0f + ZEROPOINT;
     xbase = xbase*-1.0f + ZEROPOINT;
 
-    vmin = math::vector_3d(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-    vmax = math::vector_3d(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
+    vmin = glm::vec3(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+    vmax = glm::vec3(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
   }
 
   texture_set = std::make_unique<TextureSet>(this, f, base, maintile, bigAlpha,
@@ -163,7 +163,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
 
     assert(fourcc == 'MCVT');
 
-    math::vector_3d *ttv = mVertices;
+    glm::vec3 *ttv = mVertices;
 
     // vertices
     for (int j = 0; j < 17; ++j) {
@@ -175,7 +175,7 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
         if (j % 2) {
           xpos += UNITSIZE*0.5f;
         }
-        math::vector_3d v = math::vector_3d(xbase + xpos, ybase + h, zbase + zpos);
+        glm::vec3 v = glm::vec3(xbase + xpos, ybase + h, zbase + zpos);
         *ttv++ = v;
         vmin.y = std::min(vmin.y, v.y);
         vmax.y = std::max(vmax.y, v.y);
@@ -278,12 +278,12 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
     for (int i = 0; i < mapbufsize; ++i)
     {
       f->read(t, 4);
-      mccv[i] = math::vector_3d((float)t[2] / 127.0f, (float)t[1] / 127.0f, (float)t[0] / 127.0f);
+      mccv[i] = glm::vec3((float)t[2] / 127.0f, (float)t[1] / 127.0f, (float)t[0] / 127.0f);
     }
   }
   else
   {
-    math::vector_3d mccv_default(1.f, 1.f, 1.f);
+    glm::vec3 mccv_default(1.f, 1.f, 1.f);
     for (int i = 0; i < mapbufsize; ++i)
     {
       mccv[i] = mccv_default;
@@ -356,7 +356,7 @@ bool MapChunk::has_shadows() const
   return false;
 }
 
-bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
+bool MapChunk::GetVertex(float x, float z, glm::vec3 *V)
 {
   float xdiff, zdiff;
 
@@ -372,7 +372,7 @@ bool MapChunk::GetVertex(float x, float z, math::vector_3d *V)
   return true;
 }
 
-void MapChunk::getVertexInternal(float x, float z, math::vector_3d* v)
+void MapChunk::getVertexInternal(float x, float z, glm::vec3* v)
 {
   float xdiff, zdiff;
 
@@ -410,7 +410,7 @@ void MapChunk::clearHeight()
 void MapChunk::draw ( math::frustum const& frustum
                     , opengl::scoped::use_program& mcnk_shader
                     , const float& cull_distance
-                    , const math::vector_3d& camera
+                    , const glm::vec3& camera
                     , bool need_visibility_update
                     , bool show_unpaintable_chunks
                     , bool draw_paintability_overlay
@@ -601,7 +601,7 @@ void MapChunk::updateVerticesData()
   update_intersect_points();
 }
 
-math::vector_3d MapChunk::getNeighborVertex(int i, unsigned dir)
+glm::vec3 MapChunk::getNeighborVertex(int i, unsigned dir)
 {
   // i - vertex index
   // 0 - up_left
@@ -623,7 +623,7 @@ math::vector_3d MapChunk::getNeighborVertex(int i, unsigned dir)
   float vertex_z = mVertices[i].z + zdiff[dir];
 
   tile_index tile({vertex_x, 0, vertex_z});
-  math::vector_3d result{};
+  glm::vec3 result{};
 
   if (tile.x == mt->index.x && tile.z == mt->index.z)
   {
@@ -657,13 +657,13 @@ math::vector_3d MapChunk::getNeighborVertex(int i, unsigned dir)
 
     if (!mt->_world->mapIndex.tileLoaded(tile))
     {
-      return math::vector_3d( mVertices[i].x + xdiff[dir], mVertices[i].y, mVertices[i].z + zdiff[dir]);
+      return glm::vec3( mVertices[i].x + xdiff[dir], mVertices[i].y, mVertices[i].z + zdiff[dir]);
     }
 
-    math::vector_3d vertex{};
+    glm::vec3 vertex{};
     mt->_world->mapIndex.getTile(tile)->getVertexInternal(mVertices[i].x + xdiff[dir], mVertices[i].z + zdiff[dir], &vertex);
 
-    return math::vector_3d( mVertices[i].x + xdiff[dir], vertex.y, mVertices[i].z + zdiff[dir]);
+    return glm::vec3( mVertices[i].x + xdiff[dir], vertex.y, mVertices[i].z + zdiff[dir]);
 
   }
 
@@ -745,18 +745,18 @@ void MapChunk::recalcNorms()
 
   for (int i = 0; i < mapbufsize; ++i)
   {
-    math::vector_3d const P1 (getNeighborVertex(i, 0)); // up_left
-    math::vector_3d const P2 (getNeighborVertex(i, 1)); // up_right
-    math::vector_3d const P3 (getNeighborVertex(i, 2)); // down_left
-    math::vector_3d const P4 (getNeighborVertex(i, 3)); // down_right
+    glm::vec3 const P1 (getNeighborVertex(i, 0)); // up_left
+    glm::vec3 const P2 (getNeighborVertex(i, 1)); // up_right
+    glm::vec3 const P3 (getNeighborVertex(i, 2)); // down_left
+    glm::vec3 const P4 (getNeighborVertex(i, 3)); // down_right
 
-    math::vector_3d const N1 ((P2 - mVertices[i]) % (P1 - mVertices[i]));
-    math::vector_3d const N2 ((P3 - mVertices[i]) % (P2 - mVertices[i]));
-    math::vector_3d const N3 ((P4 - mVertices[i]) % (P3 - mVertices[i]));
-    math::vector_3d const N4 ((P1 - mVertices[i]) % (P4 - mVertices[i]));
+    glm::vec3 const N1 = glm::cross((P2 - mVertices[i]) , (P1 - mVertices[i]));
+    glm::vec3 const N2 = glm::cross((P3 - mVertices[i]) , (P2 - mVertices[i]));
+    glm::vec3 const N3 = glm::cross((P4 - mVertices[i]) , (P3 - mVertices[i]));
+    glm::vec3 const N4 = glm::cross((P1 - mVertices[i]) , (P4 - mVertices[i]));
 
-    math::vector_3d Norm (N1 + N2 + N3 + N4);
-    Norm.normalize();
+    glm::vec3 Norm (N1 + N2 + N3 + N4);
+    Norm = glm::normalize(Norm);
 
     Norm.x = std::floor(Norm.x * 127) / 127;
     Norm.y = std::floor(Norm.y * 127) / 127;
@@ -780,7 +780,7 @@ void MapChunk::updateNormalsData()
   //gl.texSubImage2D(GL_TEXTURE_2D, 0, 0, px * 16 + py, mapbufsize, 1, GL_RGB, GL_FLOAT, mNormals);
 }
 
-bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
+bool MapChunk::changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius)
 {
   float dist, xdiff, zdiff;
   bool changed = false;
@@ -801,7 +801,7 @@ bool MapChunk::changeTerrain(math::vector_3d const& pos, float change, float rad
   return changed;
 }
 
-bool MapChunk::ChangeMCCV(math::vector_3d const& pos, glm::vec4 const& color, float change, float radius, bool editMode)
+bool MapChunk::ChangeMCCV(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode)
 {
   float dist;
   bool changed = false;
@@ -854,7 +854,7 @@ bool MapChunk::ChangeMCCV(math::vector_3d const& pos, glm::vec4 const& color, fl
   return changed;
 }
 
-bool MapChunk::stampMCCV(math::vector_3d const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
+bool MapChunk::stampMCCV(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
 {
   float dist;
   bool changed = false;
@@ -880,7 +880,7 @@ bool MapChunk::stampMCCV(math::vector_3d const& pos, glm::vec4 const& color, flo
     if(std::abs(pos.x - mVertices[i].x) > radius || std::abs(pos.z - mVertices[i].z) > radius)
       continue;
 
-    math::vector_3d const diff{mVertices[i] - pos};
+    glm::vec3 const diff{mVertices[i] - pos};
 
     int pixel_x = std::round(((diff.x + radius) / (2.f * radius)) * img->width());
     int pixel_y =  std::round(((diff.z + radius) / (2.f * radius)) * img->height());
@@ -955,14 +955,14 @@ void MapChunk::update_vertex_colors()
     gl.texSubImage2D(GL_TEXTURE_2D, 0, 0, px * 16 + py, mapbufsize, 1, GL_RGB, GL_FLOAT, mccv);
 }
 
-math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)
+glm::vec3 MapChunk::pickMCCV(glm::vec3 const& pos)
 {
   float dist;
   float cur_dist = UNITSIZE;
 
   if (!hasMCCV)
   {
-    return math::vector_3d(1.0f, 1.0f, 1.0f);
+    return glm::vec3(1.0f, 1.0f, 1.0f);
   }
 
   int v_index = 0;
@@ -980,12 +980,12 @@ math::vector_3d MapChunk::pickMCCV(math::vector_3d const& pos)
 
 }
 
-bool MapChunk::flattenTerrain ( math::vector_3d const& pos
+bool MapChunk::flattenTerrain ( glm::vec3 const& pos
                               , float remain
                               , float radius
                               , int BrushType
                               , flatten_mode const& mode
-                              , math::vector_3d const& origin
+                              , glm::vec3 const& origin
                               , math::degrees angle
                               , math::degrees orientation
                               )
@@ -1041,7 +1041,7 @@ bool MapChunk::flattenTerrain ( math::vector_3d const& pos
   return changed;
 }
 
-bool MapChunk::blurTerrain ( math::vector_3d const& pos
+bool MapChunk::blurTerrain ( glm::vec3 const& pos
                            , float remain
                            , float radius
                            , int BrushType
@@ -1114,7 +1114,7 @@ bool MapChunk::blurTerrain ( math::vector_3d const& pos
   return changed;
 }
 
-bool MapChunk::changeTerrainProcessVertex(math::vector_3d const& pos, math::vector_3d const& vertex, float& dt,
+bool MapChunk::changeTerrainProcessVertex(glm::vec3 const& pos, glm::vec3 const& vertex, float& dt,
                                           float radiusOuter, float radiusInner, int brushType)
 {
   float dist, xdiff, zdiff;
@@ -1170,7 +1170,7 @@ bool MapChunk::changeTerrainProcessVertex(math::vector_3d const& pos, math::vect
   return changed;
 }
 
-auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const* img, float radiusOuter
+auto MapChunk::stamp(glm::vec3 const& pos, float dt, QImage const* img, float radiusOuter
 , float radiusInner, int brushType, bool sculpt) -> void
 {
   if (sculpt)
@@ -1183,7 +1183,7 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const* img, fl
       float delta = dt;
       changeTerrainProcessVertex(pos, mVertices[i], delta, radiusOuter, radiusInner, brushType);
 
-      math::vector_3d const diff{mVertices[i] - pos};
+      glm::vec3 const diff{mVertices[i] - pos};
 
       int pixel_x = std::round(((diff.x + radiusOuter) / (2.f * radiusOuter)) * img->width());
       int pixel_y =  std::round(((diff.z + radiusOuter) / (2.f * radiusOuter)) * img->height());
@@ -1220,7 +1220,7 @@ auto MapChunk::stamp(math::vector_3d const& pos, float dt, QImage const* img, fl
 
       changeTerrainProcessVertex(pos, mVertices[i], delta, radiusOuter, radiusInner, brushType);
 
-      math::vector_3d const diff{math::vector_3d{original_heightmap[i * 3], original_heightmap[i * 3 + 1], original_heightmap[i * 3 + 2]} - pos};
+      glm::vec3 const diff{glm::vec3{original_heightmap[i * 3], original_heightmap[i * 3 + 1], original_heightmap[i * 3 + 2]} - pos};
 
 
       int pixel_x = std::round(((diff.x + radiusOuter) / (2.f * radiusOuter)) * img->width());
@@ -1265,17 +1265,17 @@ void MapChunk::switchTexture(scoped_blp_texture_reference const& oldTexture, sco
   texture_set->replace_texture(oldTexture, std::move (newTexture));
 }
 
-bool MapChunk::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
+bool MapChunk::paintTexture(glm::vec3 const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
   return texture_set->paintTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, std::move (texture));
 }
 
-bool MapChunk::stampTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint)
+bool MapChunk::stampTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint)
 {
   return texture_set->stampTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, std::move (texture), img, paint);
 }
 
-bool MapChunk::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
+bool MapChunk::replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
 {
   return texture_set->replace_texture(xbase, zbase, pos.x, pos.z, radius, old_texture, std::move (new_texture));
 }
@@ -1303,7 +1303,7 @@ bool MapChunk::isHole(int i, int j)
   return (holes & ((1 << ((j * 4) + i)))) != 0;
 }
 
-void MapChunk::setHole(math::vector_3d const& pos, float radius, bool big, bool add)
+void MapChunk::setHole(glm::vec3 const& pos, float radius, bool big, bool add)
 {
   if (big)
   {
@@ -1542,9 +1542,9 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   std::list<int> lDoodadIDs;
   std::list<int> lObjectIDs;
 
-  math::vector_3d lChunkExtents[2];
-  lChunkExtents[0] = math::vector_3d(xbase, 0.0f, zbase);
-  lChunkExtents[1] = math::vector_3d(xbase + CHUNKSIZE, 0.0f, zbase + CHUNKSIZE);
+  glm::vec3 lChunkExtents[2];
+  lChunkExtents[0] = glm::vec3(xbase, 0.0f, zbase);
+  lChunkExtents[1] = glm::vec3(xbase + CHUNKSIZE, 0.0f, zbase + CHUNKSIZE);
 
   // search all wmos that are inside this chunk
   lID = 0;
@@ -1713,7 +1713,7 @@ bool MapChunk::fixGapAbove(const MapChunk* chunk)
 }
 
 
-void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::unordered_set<math::vector_3d*>& vertices)
+void MapChunk::selectVertex(glm::vec3 const& pos, float radius, std::unordered_set<glm::vec3*>& vertices)
 {
   if (misc::getShortestDist(pos.x, pos.z, xbase, zbase, CHUNKSIZE) > radius)
   {
@@ -1729,7 +1729,7 @@ void MapChunk::selectVertex(math::vector_3d const& pos, float radius, std::unord
   }
 }
 
-void MapChunk::fixVertices(std::unordered_set<math::vector_3d*>& selected)
+void MapChunk::fixVertices(std::unordered_set<glm::vec3*>& selected)
 {
   std::vector<int> ids ={ 0, 1, 17, 18 };
   // iterate through each "square" of vertices
@@ -1763,7 +1763,7 @@ void MapChunk::fixVertices(std::unordered_set<math::vector_3d*>& selected)
   }
 }
 
-bool MapChunk::isBorderChunk(std::unordered_set<math::vector_3d*>& selected)
+bool MapChunk::isBorderChunk(std::unordered_set<glm::vec3*>& selected)
 {
   for (int i = 0; i < mapbufsize; ++i)
   {
@@ -1779,7 +1779,7 @@ bool MapChunk::isBorderChunk(std::unordered_set<math::vector_3d*>& selected)
 
 QImage MapChunk::getHeightmapImage(float min_height, float max_height)
 {
-  math::vector_3d* heightmap = getHeightmap();
+  glm::vec3* heightmap = getHeightmap();
 
   QImage image(17, 17, QImage::Format_RGBA64);
 
@@ -1823,7 +1823,7 @@ QImage MapChunk::getAlphamapImage(unsigned layer)
 
 void MapChunk::setHeightmapImage(QImage const& image, float multiplier, int mode)
 {
-  math::vector_3d* heightmap = getHeightmap();
+  glm::vec3* heightmap = getHeightmap();
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
@@ -1895,7 +1895,7 @@ void MapChunk::setAlphamapImage(const QImage &image, unsigned int layer)
 
 QImage MapChunk::getVertexColorImage()
 {
-  math::vector_3d* colors = getVertexColors();
+  glm::vec3* colors = getVertexColors();
 
   QImage image(17, 17, QImage::Format_RGBA8888);
 
@@ -1920,7 +1920,7 @@ QImage MapChunk::getVertexColorImage()
 
 void MapChunk::setVertexColorImage(const QImage &image)
 {
-  math::vector_3d* colors = getVertexColors();
+  glm::vec3* colors = getVertexColors();
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 

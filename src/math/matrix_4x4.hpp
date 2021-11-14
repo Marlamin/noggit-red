@@ -42,7 +42,7 @@ namespace math
     }
 
     static struct translation_t {} translation;
-    matrix_4x4 (translation_t, vector_3d const& tr)
+    matrix_4x4 (translation_t, glm::vec3 const& tr)
       : matrix_4x4 ( 1.0f, 0.0f, 0.0f, tr.x
                    , 0.0f, 1.0f, 0.0f, tr.y
                    , 0.0f, 0.0f, 1.0f, tr.z
@@ -51,7 +51,7 @@ namespace math
     {}
 
     static struct scale_t {} scale;
-    matrix_4x4 (scale_t, vector_3d const& sc)
+    matrix_4x4 (scale_t, glm::vec3 const& sc)
       : matrix_4x4 ( sc.x, 0.0f, 0.0f, 0.0f
                    , 0.0f, sc.y, 0.0f, 0.0f
                    , 0.0f, 0.0f, sc.z, 0.0f
@@ -82,10 +82,10 @@ namespace math
       return _m[j][i] = value;
     }
 
-    vector_3d operator* (vector_3d const&) const;
+    glm::vec3 operator* (glm::vec3 const&) const;
     glm::vec4 operator* (glm::vec4 const&) const;
     matrix_4x4 operator* (matrix_4x4 const&) const;
-    std::vector<math::vector_3d> operator*(std::vector<math::vector_3d> points) const;
+    std::vector<glm::vec3> operator*(std::vector<glm::vec3> points) const;
 
     matrix_4x4& operator* (float);
     matrix_4x4& operator/ (float);

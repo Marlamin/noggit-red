@@ -2331,7 +2331,7 @@ void MapView::setupMinimap()
   _minimap->draw_skies (_show_minimap_skies.get());
 
   connect ( _minimap, &noggit::ui::minimap_widget::map_clicked
-    , [this] (math::vector_3d const& pos)
+    , [this] (glm::vec3 const& pos)
             {
               move_camera_with_auto_height (pos);
             }
@@ -2443,7 +2443,7 @@ void MapView::on_exit_prompt()
 
 MapView::MapView( math::degrees camera_yaw0
                 , math::degrees camera_pitch0
-                , math::vector_3d camera_pos
+                , glm::vec3 camera_pos
                 , noggit::ui::main_window* main_window
                 , std::unique_ptr<World> world
                 , uid_fix_mode uid_fix
@@ -2569,7 +2569,7 @@ auto MapView::setBrushTexture(QImage const* img) -> void
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
-void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
+void MapView::move_camera_with_auto_height (glm::vec3 const& pos)
 {
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
@@ -2869,7 +2869,7 @@ void MapView::paintGL()
     _transform_gizmo.setUseMultiselectionPivot(_use_median_pivot_point.get());
 
     auto pivot = _world->multi_select_pivot().is_initialized() ?
-        _world->multi_select_pivot().get() : math::vector_3d(0.f, 0.f, 0.f);
+        _world->multi_select_pivot().get() : glm::vec3(0.f, 0.f, 0.f);
 
     _transform_gizmo.setMultiselectionPivot(pivot);
 
@@ -3052,9 +3052,9 @@ void MapView::tick (float dt)
 
   math::degrees yaw (-_camera.yaw()._);
 
-  math::vector_3d dir(1.0f, 0.0f, 0.0f);
-  math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
-  math::vector_3d dirRight(0.0f, 0.0f, 1.0f);
+  glm::vec3 dir(1.0f, 0.0f, 0.0f);
+  glm::vec3 dirUp(1.0f, 0.0f, 0.0f);
+  glm::vec3 dirRight(0.0f, 0.0f, 1.0f);
   math::rotate(0.0f, 0.0f, &dir.x, &dir.y, _camera.pitch());
   math::rotate(0.0f, 0.0f, &dir.x, &dir.z, yaw);
 
@@ -3809,19 +3809,19 @@ math::ray MapView::intersect_ray() const
       math::matrix_4x4 const invertedViewMatrix = (projection() * model_view()).inverted();
       auto normalisedView = invertedViewMatrix * normalized_device_coords(mx, mz);
 
-      auto pos = math::vector_3d(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
+      auto pos = glm::vec3(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
 
     return { _camera.position, pos - _camera.position };
   }
   else
   {
-    math::vector_3d const pos
+    glm::vec3 const pos
     ( _camera.position.x - (width() * 0.5f - mx) * _2d_zoom
     , _camera.position.y
     , _camera.position.z - (height() * 0.5f - mz) * _2d_zoom
     );
     
-    return { pos, math::vector_3d(0.f, -1.f, 0.f) };
+    return { pos, glm::vec3(0.f, -1.f, 0.f) };
   }
 }
 
@@ -4001,8 +4001,8 @@ math::matrix_4x4 MapView::model_view() const
 {
   if (_display_mode == display_mode::in_2D)
   {
-    math::vector_3d eye = _camera.position;
-    math::vector_3d target = eye;
+    glm::vec3 eye = _camera.position;
+    glm::vec3 target = eye;
     target.y -= 1.f;
     target.z -= 0.001f;
 
@@ -4035,7 +4035,7 @@ void MapView::draw_map()
   ZoneScoped;
   //! \ todo: make the current tool return the radius
   float radius = 0.0f, inner_radius = 0.0f, angle = 0.0f, orientation = 0.0f;
-  math::vector_3d ref_pos;
+  glm::vec3 ref_pos;
   bool angled_mode = false, use_ref_pos = false;
 
   _cursorType = CursorType::CIRCLE;
@@ -4277,7 +4277,7 @@ void MapView::keyPressEvent (QKeyEvent *event)
   }
   if (event->key() == Qt::Key_Home)
   {
-	  _camera.position = math::vector_3d(_cursor_pos.x, _cursor_pos.y + 50, _cursor_pos.z);
+	  _camera.position = glm::vec3(_cursor_pos.x, _cursor_pos.y + 50, _cursor_pos.z);
     _camera_moved_since_last_draw = true;
 	  _minimap->update();
   }
@@ -4294,28 +4294,28 @@ void MapView::keyPressEvent (QKeyEvent *event)
     if (event->key() == Qt::Key_Up)
     {
       auto next_z = cur_tile.z - 1;
-      _camera.position = math::vector_3d((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
+      _camera.position = glm::vec3((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
       _minimap->update();
     }
     else if (event->key() == Qt::Key_Down)
     {
       auto next_z = cur_tile.z + 1;
-      _camera.position = math::vector_3d((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
+      _camera.position = glm::vec3((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
       _minimap->update();
     }
     else if (event->key() == Qt::Key_Left)
     {
       auto next_x = cur_tile.x - 1;
-      _camera.position = math::vector_3d((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
+      _camera.position = glm::vec3((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
       _minimap->update();
     }
     else if (event->key() == Qt::Key_Right)
     {
       auto next_x = cur_tile.x + 1;
-      _camera.position = math::vector_3d((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
+      _camera.position = glm::vec3((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
       _minimap->update();
     }

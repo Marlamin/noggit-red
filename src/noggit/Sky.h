@@ -19,7 +19,7 @@
 struct OutdoorLightStats
 {
   float nightIntensity;
-  math::vector_3d dayDir;
+  glm::vec3 dayDir;
 
   void interpolate(OutdoorLightStats *a, OutdoorLightStats *b, float r);
 };
@@ -37,7 +37,7 @@ public:
 
 struct SkyColor 
 {
-  math::vector_3d color;
+  glm::vec3 color;
   int time;
 
   SkyColor(int t, int col);
@@ -56,7 +56,7 @@ class Sky
 public:
   boost::optional<ModelInstance> skybox;
 
-  math::vector_3d pos;
+  glm::vec3 pos;
   float r1, r2;
 
   explicit Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context);
@@ -68,7 +68,7 @@ public:
 
   char name[32];
 
-  math::vector_3d colorFor(int r, int t) const;
+  glm::vec3 colorFor(int r, int t) const;
   float floatParamFor(int r, int t) const;
 
   float weight;
@@ -142,7 +142,7 @@ private:
   ModelInstance stars;
 
   int _last_time = -1;
-  math::vector_3d _last_pos;
+  glm::vec3 _last_pos;
 
   float _river_shallow_alpha;
   float _river_deep_alpha;
@@ -156,16 +156,16 @@ private:
 
 public:
   std::vector<Sky> skies;
-  std::vector<math::vector_3d> color_set = std::vector<math::vector_3d>(NUM_SkyColorNames);
+  std::vector<glm::vec3> color_set = std::vector<glm::vec3>(NUM_SkyColorNames);
 
   explicit Skies(unsigned int mapid, noggit::NoggitRenderContext context);
 
-  Sky* findSkyWeights(math::vector_3d pos);
-  void update_sky_colors(math::vector_3d pos, int time);
+  Sky* findSkyWeights(glm::vec3 pos);
+  void update_sky_colors(glm::vec3 pos, int time);
 
   bool draw ( math::matrix_4x4 const& model_view
             , math::matrix_4x4 const& projection
-            , math::vector_3d const& camera_pos
+            , glm::vec3 const& camera_pos
             , opengl::scoped::use_program& m2_shader
             , math::frustum const& frustum
             , const float& cull_distance
@@ -175,14 +175,14 @@ public:
 
   void drawLightingSpheres (math::matrix_4x4 const& model_view
                           , math::matrix_4x4 const& projection
-                          , math::vector_3d const& camera_pos
+                          , glm::vec3 const& camera_pos
                           , math::frustum const& frustum
                           , const float& cull_distance
                           );
 
   void drawLightingSphereHandles (math::matrix_4x4 const& model_view
                                 , math::matrix_4x4 const& projection
-                                , math::vector_3d const& camera_pos
+                                , glm::vec3 const& camera_pos
                                 , math::frustum const& frustum
                                 , const float& cull_distance
                                 , bool draw_spheres

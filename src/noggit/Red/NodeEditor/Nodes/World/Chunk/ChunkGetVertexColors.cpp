@@ -30,14 +30,14 @@ void ChunkGetVertexColorsNode::compute()
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   MapChunk* chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
-  math::vector_3d* colors = chunk->getVertexColors();
+  glm::vec3* colors = chunk->getVertexColors();
 
   _colors.clear();
   _colors.resize(mapbufsize);
 
   for (int i = 0; i < mapbufsize; ++i)
   {
-    math::vector_3d& color = colors[i];
+    glm::vec3& color = colors[i];
     _colors[i] = std::make_shared<ColorData>(glm::vec4(color.x, color.y, color.z, 1.0));
   }
 

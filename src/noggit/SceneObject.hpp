@@ -27,7 +27,7 @@ public:
   SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context, std::string filename = "");
 
   [[nodiscard]]
-  bool isInsideRect(math::vector_3d rect[2]) const;
+  bool isInsideRect(glm::vec3 rect[2]) const;
 
   [[nodiscard]]
   bool isDuplicateOf(SceneObject const& other);
@@ -60,9 +60,9 @@ public:
   virtual AsyncObject* instance_model() = 0;
 
 public:
-  math::vector_3d pos;
-  math::vector_3d  extents[2];
-  math::degrees::vec3 dir;
+  glm::vec3 pos;
+  glm::vec3 extents[2];
+  glm::vec3 dir;
   float scale = 1.f;
   unsigned int uid;
   int frame;

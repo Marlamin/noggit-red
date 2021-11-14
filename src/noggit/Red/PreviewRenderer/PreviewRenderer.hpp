@@ -74,7 +74,7 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
 
     bool _destroying = false;
 
-    std::vector<math::vector_3d> calcSceneExtents();
+    std::vector<glm::vec3> calcSceneExtents();
     virtual void draw();
     virtual void tick(float dt);
     virtual math::matrix_4x4 model_view() const;
@@ -97,10 +97,10 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
     QOpenGLFramebufferObjectFormat _fmt;
     QOffscreenSurface _offscreen_surface;
 
-    math::vector_3d _background_color;
-    math::vector_3d _diffuse_light;
-    math::vector_3d _ambient_light;
-    math::vector_3d _light_dir;
+    glm::vec3 _background_color;
+    glm::vec3 _diffuse_light;
+    glm::vec3 _ambient_light;
+    glm::vec3 _light_dir;
 
     bool _gl_initialized = false;
 

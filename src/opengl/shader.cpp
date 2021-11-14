@@ -262,7 +262,7 @@ namespace opengl
 
       gl.uniform1iv (loc, size, data);
     }
-    void use_program::uniform (std::string const& name, math::vector_3d const* data, std::size_t size)
+    void use_program::uniform (std::string const& name, glm::vec3 const* data, std::size_t size)
     {
       GLuint loc = uniform_location (name);
       if (loc < 0)

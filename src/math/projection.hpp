@@ -11,9 +11,9 @@ namespace math
   inline matrix_4x4 perspective (math::degrees fovy, float aspect, float zNear, float zFar)
   {
     // assuming
-    // math::vector_3d lower_left_clipping_plane (left, bottom, -nearVal);
-    // math::vector_3d upper_right_clipping_plane (right, top, -nearVal);
-    // math::vector_3d eye (0, 0, 0);
+    // glm::vec3 lower_left_clipping_plane (left, bottom, -nearVal);
+    // glm::vec3 upper_right_clipping_plane (right, top, -nearVal);
+    // glm::vec3 eye (0, 0, 0);
     // float clipping_plane_distance (zFar - zNear);
 
     // with

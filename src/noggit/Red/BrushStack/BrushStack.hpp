@@ -24,7 +24,7 @@ namespace noggit::Red
   public:
     BrushStack(MapView* map_view, QWidget* parent = nullptr);
 
-    void execute(math::vector_3d const& cursor_pos, World* world, float dt, bool mod_shift_down, bool mod_alt_down, bool mod_ctrl_down, bool is_under_map);
+    void execute(glm::vec3 const& cursor_pos, World* world, float dt, bool mod_shift_down, bool mod_alt_down, bool mod_ctrl_down, bool is_under_map);
 
     void changeRadius(float change);
     void changeInnerRadius(float change);

@@ -15,7 +15,7 @@ namespace noggit {
     : script_object(ctx)
     {}
 
-    void standard_brush::set_area_id(math::vector_3d const& pos
+    void standard_brush::set_area_id(glm::vec3 const& pos
                                     , int id
                                     , bool adt
                                     )
@@ -24,8 +24,8 @@ namespace noggit {
     }
 
     void standard_brush::change_vertex_color(
-          math::vector_3d const& pos
-        , math::vector_3d const& color
+          glm::vec3 const& pos
+        , glm::vec3 const& color
         , float alpha
         , float change
         , float radius
@@ -37,19 +37,19 @@ namespace noggit {
         pos, glm::vec4(v.x, v.y, v.z, alpha), change, radius, editMode);
     }
 
-    math::vector_3d standard_brush::get_vertex_color(
-      math::vector_3d const& pos)
+    glm::vec3 standard_brush::get_vertex_color(
+      glm::vec3 const& pos)
     {
       return world()->pickShaderColor(pos);
     }
 
-    void standard_brush::flatten_terrain(math::vector_3d const& pos
+    void standard_brush::flatten_terrain(glm::vec3 const& pos
                                         , float remain
                                         , float radius
                                         , int brush_type
                                         , bool lower
                                         , bool raise
-                                        , math::vector_3d const& origin
+                                        , glm::vec3 const& origin
                                         , double angle
                                         , double orientation
                                         )
@@ -64,7 +64,7 @@ namespace noggit {
                              , math::degrees(orientation));
     }
 
-    void standard_brush::blur_terrain(math::vector_3d const& pos
+    void standard_brush::blur_terrain(glm::vec3 const& pos
                                      , float remain
                                      , float radius
                                      , int brush_type
@@ -79,27 +79,27 @@ namespace noggit {
                           , flatten_mode(raise, lower));
     }
 
-    void standard_brush::erase_textures(math::vector_3d const& pos)
+    void standard_brush::erase_textures(glm::vec3 const& pos)
     {
       world()->eraseTextures(pos);
     }
 
-    void standard_brush::clear_shadows(math::vector_3d const& pos)
+    void standard_brush::clear_shadows(glm::vec3 const& pos)
     {
       world()->clear_shadows(pos);
     }
 
-    void standard_brush::clear_textures(math::vector_3d const& pos)
+    void standard_brush::clear_textures(glm::vec3 const& pos)
     {
       world()->clearTextures(pos);
     }
 
-    void standard_brush::clear_height(math::vector_3d const& pos)
+    void standard_brush::clear_height(glm::vec3 const& pos)
     {
       world()->clearHeight(pos);
     }
 
-    void standard_brush::set_hole( math::vector_3d const& pos
+    void standard_brush::set_hole( glm::vec3 const& pos
                                  , bool big
                                  , bool hole
                                  )
@@ -107,7 +107,7 @@ namespace noggit {
       world()->setHole(pos, 1.0f, big, hole);
     }
 
-    void standard_brush::set_hole_adt( math::vector_3d const& pos
+    void standard_brush::set_hole_adt( glm::vec3 const& pos
                                      , bool hole
                                      )
     {
@@ -120,7 +120,7 @@ namespace noggit {
       world()->updateSelectedVertices();
     }
 
-    void standard_brush::deselect_vertices( math::vector_3d const& pos
+    void standard_brush::deselect_vertices( glm::vec3 const& pos
                                           , float radius
                                           )
     {
@@ -142,7 +142,7 @@ namespace noggit {
       world()->clearVertexSelection();
     }
 
-    void standard_brush::paint_texture( math::vector_3d const& pos
+    void standard_brush::paint_texture( glm::vec3 const& pos
                                       , float strength
                                       , float pressure
                                       , float hardness
@@ -160,7 +160,7 @@ namespace noggit {
                            , scoped_blp_texture_reference(texture, noggit::NoggitRenderContext::MAP_VIEW));
     }
 
-    void standard_brush::change_terrain( math::vector_3d const& pos
+    void standard_brush::change_terrain( glm::vec3 const& pos
                                        , float change
                                        , float radius
                                        , float inner_radius

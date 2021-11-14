@@ -31,7 +31,7 @@ void ChunkSetHeightmapNode::compute()
   MapChunk* chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
   auto list = defaultPortData<ListData>(PortType::In, 2)->value();
 
-  math::vector_3d* heightmap = chunk->getHeightmap();
+  glm::vec3* heightmap = chunk->getHeightmap();
 
   for (int i = 0; i < mapbufsize; ++i)
   {

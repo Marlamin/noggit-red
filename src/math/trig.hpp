@@ -56,8 +56,7 @@ namespace math
       return os << std::to_string(v._) << "°";
     }
 
-
-      using vec3 = vector_3d_base<degrees>;
+      using vec3 = glm::vec3;
   };
 
   struct radians
@@ -104,6 +103,13 @@ namespace math
       const float ya(*y - y0);
       *x = xa * cos(angle) - ya * sin(angle) + x0;
       *y = xa * sin(angle) + ya * cos(angle) + y0;
+  }
+
+  inline bool is_inside_of(const glm::vec3& pos, const glm::vec3& a, const glm::vec3& b)
+  {
+      return a.x < pos.x&& b.x > pos.x
+          && a.y < pos.y&& b.y > pos.y
+          && a.z < pos.z&& b.z > pos.z;
   }
 }
 

@@ -10,14 +10,14 @@ namespace math
 {
   struct aabb
   {
-    aabb(math::vector_3d const& min_, math::vector_3d const& max_);
-    aabb(std::vector<math::vector_3d> points);
+    aabb(glm::vec3 const& min_, glm::vec3 const& max_);
+    aabb(std::vector<glm::vec3> points);
 
-    std::vector<math::vector_3d> all_corners() const;
+    std::vector<glm::vec3> all_corners() const;
 
-    math::vector_3d min;
-    math::vector_3d max;
+    glm::vec3 min;
+    glm::vec3 max;
   };
 
-  std::vector<math::vector_3d> box_points(math::vector_3d const& box_min, math::vector_3d const& box_max);
+  std::vector<glm::vec3> box_points(glm::vec3 const& box_min, glm::vec3 const& box_max);
 }

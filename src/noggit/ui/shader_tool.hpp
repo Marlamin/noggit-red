@@ -29,8 +29,8 @@ namespace noggit
     public:
       shader_tool(MapView* map_view, QWidget* parent = nullptr);
 
-      void changeShader (World*, math::vector_3d const& pos, float dt, bool add);
-      void pickColor(World* world, math::vector_3d const& pos);
+      void changeShader (World*, glm::vec3 const& pos, float dt, bool add);
+      void pickColor(World* world, glm::vec3 const& pos);
       void addColorToPalette();
 
       void changeRadius(float change);

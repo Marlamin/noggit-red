@@ -36,13 +36,13 @@ void ObjectInstanceInfoNode::compute()
 
   if (_out_ports[0].connected)
   {
-    _out_ports[0].out_value = std::make_shared<Vector3DData>(glm::vec3(obj->pos.x, obj->pos.y, obj->pos.z));
+    _out_ports[0].out_value = std::make_shared<Vector3DData>(obj->pos);
     _node->onDataUpdated(0);
   }
 
   if (_out_ports[1].connected)
   {
-    _out_ports[1].out_value = std::make_shared<Vector3DData>(glm::vec3(obj->dir.x._, obj->dir.y._, obj->dir.z._));
+    _out_ports[1].out_value = std::make_shared<Vector3DData>(obj->dir);
     _node->onDataUpdated(1);
   }
 
@@ -54,17 +54,13 @@ void ObjectInstanceInfoNode::compute()
 
   if (_out_ports[3].connected)
   {
-    _out_ports[3].out_value = std::make_shared<Vector3DData>(glm::vec3(obj->extents[0].x,
-                                                                       obj->extents[0].y,
-                                                                       obj->extents[0].z));
+    _out_ports[3].out_value = std::make_shared<Vector3DData>(obj->extents[0]);
     _node->onDataUpdated(3);
   }
 
   if (_out_ports[4].connected)
   {
-    _out_ports[4].out_value = std::make_shared<Vector3DData>(glm::vec3(obj->extents[1].x,
-                                                                       obj->extents[1].y,
-                                                                       obj->extents[1].z));
+    _out_ports[4].out_value = std::make_shared<Vector3DData>(obj->extents[1]);
     _node->onDataUpdated(4);
   }
 

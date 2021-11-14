@@ -51,10 +51,10 @@ public:
     void draw( math::matrix_4x4 const& model_view
              , math::matrix_4x4 const& projection
              , MapIndex *index
-             , const math::vector_3d& color
+             , const glm::vec3& color
              , const float& cull_distance
              , const math::frustum& frustum
-             , const math::vector_3d& camera 
+             , const glm::vec3& camera 
              , display_mode display
              );
 

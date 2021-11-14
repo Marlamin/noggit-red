@@ -26,15 +26,15 @@ class ModelInstance;
 class ParticleSystem;
 class RibbonEmitter;
 
-math::vector_3d fixCoordSystem(math::vector_3d v);
+glm::vec3 fixCoordSystem(glm::vec3 v);
 
 class Bone {
-  Animation::M2Value<math::vector_3d> trans;
+  Animation::M2Value<glm::vec3> trans;
   Animation::M2Value<glm::quat, packed_quaternion> rot;
-  Animation::M2Value<math::vector_3d> scale;
+  Animation::M2Value<glm::vec3> scale;
 
 public:
-  math::vector_3d pivot;
+  glm::vec3 pivot;
   int parent;
 
   typedef struct
@@ -73,9 +73,9 @@ public:
 
 
 class TextureAnim {
-  Animation::M2Value<math::vector_3d> trans;
+  Animation::M2Value<glm::vec3> trans;
   Animation::M2Value<glm::quat, packed_quaternion> rot;
-  Animation::M2Value<math::vector_3d> scale;
+  Animation::M2Value<glm::vec3> scale;
 
 public:
   math::matrix_4x4 mat;
@@ -85,7 +85,7 @@ public:
 };
 
 struct ModelColor {
-  Animation::M2Value<math::vector_3d> color;
+  Animation::M2Value<glm::vec3> color;
   Animation::M2Value<float, int16_t> opacity;
 
   ModelColor(const MPQFile& f, const ModelColorDef &mcd, int *global);
@@ -185,14 +185,14 @@ struct FakeGeometry
 {
   FakeGeometry(Model* m);
 
-  std::vector<math::vector_3d> vertices;
+  std::vector<glm::vec3> vertices;
   std::vector<uint16_t> indices;
 };
 
 struct ModelLight {
   int type, parent;
-  math::vector_3d pos, tpos, dir, tdir;
-  Animation::M2Value<math::vector_3d> diffColor, ambColor;
+  glm::vec3 pos, tpos, dir, tdir;
+  Animation::M2Value<glm::vec3> diffColor, ambColor;
   Animation::M2Value<float> diffIntensity, ambIntensity;
   //Animation::M2Value<float> attStart,attEnd;
   //Animation::M2Value<bool> Enabled;
@@ -219,7 +219,7 @@ public:
             , opengl::M2RenderState& model_render_state
            , math::frustum const& frustum
            , const float& cull_distance
-           , const math::vector_3d& camera
+           , const glm::vec3& camera
            , int animtime
            , display_mode display
            , bool no_cull = false
@@ -230,7 +230,7 @@ public:
             , opengl::M2RenderState& model_render_state
             , math::frustum const& frustum
             , const float& cull_distance
-            , const math::vector_3d& camera
+            , const glm::vec3& camera
             , int animtime
             , bool all_boxes
             , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
@@ -321,7 +321,7 @@ private:
   bool _finished_upload = false;
   bool _vao_setup = false;
 
-  std::vector<math::vector_3d> _vertex_box_points;
+  std::vector<glm::vec3> _vertex_box_points;
 
   // buffers
   opengl::scoped::deferred_upload_buffers<6> _buffers;

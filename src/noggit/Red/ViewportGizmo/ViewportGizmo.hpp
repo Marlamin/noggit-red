@@ -49,7 +49,7 @@ namespace noggit
             bool isOver() {ImGuizmo::SetID(_gizmo_context); return ImGuizmo::IsOver();};
             bool isUsing() {ImGuizmo::SetID(_gizmo_context); return ImGuizmo::IsUsing();};
             void setUseMultiselectionPivot(bool use_pivot) { _use_multiselection_pivot = use_pivot; };
-            void setMultiselectionPivot(math::vector_3d const& pivot) { _multiselection_pivot = pivot; };
+            void setMultiselectionPivot(glm::vec3 const& pivot) { _multiselection_pivot = pivot; };
             void setWorld(World* world) { _world = world; }
 
         private:
@@ -59,7 +59,7 @@ namespace noggit
             ImGuizmo::MODE _gizmo_mode;
             GizmoContext _gizmo_context;
             bool _use_multiselection_pivot;
-            math::vector_3d _multiselection_pivot;
+            glm::vec3 _multiselection_pivot;
             float _last_pivot_scale;
         };
     }

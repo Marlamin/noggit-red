@@ -49,7 +49,7 @@ namespace noggit
       void resetLogScroll();
       void clearLog();
       void doReload();
-      void sendBrushEvent(math::vector_3d const& pos,float dt);
+      void sendBrushEvent(glm::vec3 const& pos,float dt);
 
       MapView* get_view();
       script_context* get_context();

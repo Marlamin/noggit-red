@@ -137,7 +137,7 @@ void World::update_selection_pivot()
   ZoneScoped;
   if (has_multiple_model_selected())
   {
-    math::vector_3d pivot;
+    glm::vec3 pivot;
     int model_count = 0;
 
     for (auto const& entry : _current_selection)
@@ -250,19 +250,29 @@ boost::optional<selection_type> World::get_last_selected_model() const
     ? boost::optional<selection_type>() : boost::optional<selection_type> (*it);
 }
 
-math::vector_3d getBarycentricCoordinatesAt(
-    const math::vector_3d& a,
-    const math::vector_3d& b,
-    const math::vector_3d& c,
-    const math::vector_3d& point,
-    const math::vector_3d& normal)
+glm::vec3 getBarycentricCoordinatesAt(
+    const glm::vec3& a,
+    const glm::vec3& b,
+    const glm::vec3& c,
+    const glm::vec3& point,
+    const glm::vec3& normal)
 {
-  math::vector_3d bary;
+  glm::vec3 bary;
   // The area of a triangle is
 
-  double areaABC = normal * ((b - a) % (c - a));
-  double areaPBC = normal * ((b - point) % (c - point));
-  double areaPCA = normal * ((c - point) % (a - point));
+  glm::vec3 aMb = (b - a);
+  glm::vec3 cMa = (c - a);
+  glm::vec3 bMpoint = (b - point);
+  glm::vec3 cMpont = (c - point);
+  glm::vec3 aMpoint = (a - point);
+
+  glm::vec3 ABC = glm::cross(aMb ,cMa);
+  glm::vec3 PBC = glm::cross(bMpoint, cMpont);
+  glm::vec3 PCA = glm::cross(cMpont, aMpoint);
+
+  double areaABC = glm::dot(normal , ABC);
+  double areaPBC = glm::dot(normal , PBC);
+  double areaPCA = glm::dot(normal , PCA);
 
   bary.x = areaPBC / areaABC; // alpha
   bary.y = areaPCA / areaABC; // beta
@@ -338,9 +348,9 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
     glm::quat finalRotationNormalized = glm::normalize(finalRotation);
 
     auto eulerAngles = glm::eulerAngles(finalRotationNormalized);
-    dir.x = math::degrees(math::radians(eulerAngles.x));
-    dir.z = math::degrees(math::radians(eulerAngles.y));
-    dir.y = math::degrees(math::radians(eulerAngles.z));
+    dir.x = math::degrees(math::radians(eulerAngles.z))._;
+    dir.y = math::degrees(math::radians(eulerAngles.x))._;
+    dir.z = math::degrees(math::radians(eulerAngles.y))._;
 
     obj->recalcExtents();
 
@@ -365,7 +375,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 
     updateTilesEntry(entry, model_update::remove);
 
-    math::vector_3d rayPos = obj->pos;
+    glm::vec3 rayPos = obj->pos;
     math::degrees::vec3& dir = obj->dir;
 
 
@@ -373,13 +383,13 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     for_chunk_at(rayPos, [&](MapChunk* chunk)
     {
         {
-          math::ray intersect_ray(rayPos, math::vector_3d(0.f, -1.f, 0.f));
+          math::ray intersect_ray(rayPos, glm::vec3(0.f, -1.f, 0.f));
           chunk->intersect(intersect_ray, &results);
         }
         // object is below ground
         if (results.empty())
         {
-          math::ray intersect_ray(rayPos, math::vector_3d(0.f, 1.f, 0.f));
+          math::ray intersect_ray(rayPos, glm::vec3(0.f, 1.f, 0.f));
           chunk->intersect(intersect_ray, &results);
         }
     });
@@ -396,17 +406,17 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     auto const& hitChunkInfo = boost::get<selected_chunk_type>(results.front().second);
 
     glm::quat q;
-    math::vector_3d varnormal;
+    glm::vec3 varnormal;
 
     // Surface Normal
     auto &p0 = hitChunkInfo.chunk->mVertices[std::get<0>(hitChunkInfo.triangle)];
     auto &p1 = hitChunkInfo.chunk->mVertices[std::get<1>(hitChunkInfo.triangle)];
     auto &p2 = hitChunkInfo.chunk->mVertices[std::get<2>(hitChunkInfo.triangle)];
 
-    math::vector_3d v1 = p1 - p0;
-    math::vector_3d v2 = p2 - p0;
+    glm::vec3 v1 = p1 - p0;
+    glm::vec3 v2 = p2 - p0;
 
-    const auto tmpVec = v2 % v1;
+    auto tmpVec = glm::cross(v2 ,v1);
     varnormal.x = tmpVec.z;
     varnormal.y = tmpVec.y;
     varnormal.z = tmpVec.x;
@@ -419,9 +429,9 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
       auto& tile_buffer = hitChunkInfo.chunk->mt->getChunkHeightmapBuffer();
       int chunk_start = (hitChunkInfo.chunk->px * 16 + hitChunkInfo.chunk->py) * mapbufsize * 4;
 
-      const auto& vNormal0 = *reinterpret_cast<math::vector_3d*>(&tile_buffer[chunk_start + std::get<0>(hitChunkInfo.triangle) * 4]);
-      const auto& vNormal1 = *reinterpret_cast<math::vector_3d*>(&tile_buffer[chunk_start + std::get<1>(hitChunkInfo.triangle) * 4]);
-      const auto& vNormal2 = *reinterpret_cast<math::vector_3d*>(&tile_buffer[chunk_start + std::get<2>(hitChunkInfo.triangle) * 4]);
+      const auto& vNormal0 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<0>(hitChunkInfo.triangle) * 4]);
+      const auto& vNormal1 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<1>(hitChunkInfo.triangle) * 4]);
+      const auto& vNormal2 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<2>(hitChunkInfo.triangle) * 4]);
 
       varnormal.x =
           vNormal0.x * normalWeights.x +
@@ -440,15 +450,22 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     }
 
 
-    math::vector_3d worldUp = math::vector_3d(0, 1, 0);
-    math::vector_3d a = worldUp % (varnormal);
+    glm::vec3 worldUp = glm::vec3(0, 1, 0);
+    glm::vec3 a =glm::cross(worldUp ,varnormal);
 
     q.x = a.x;
     q.y = a.y;
     q.z = a.z;
 
-    q.w = std::sqrt((worldUp.length_squared() * (varnormal.length_squared()))
-                    + (worldUp * varnormal));
+    math::vector_3d x;
+
+    auto as = 5 + x;
+
+    auto worldLengthSqrd = glm::length(worldUp) * glm::length(worldUp);
+    auto normalLengthSqrd = glm::length(varnormal) * glm::length(varnormal);
+    auto worldDotNormal = glm::dot(worldUp, varnormal);
+
+    q.w = std::sqrt((worldLengthSqrd * normalLengthSqrd) + (worldDotNormal));
 
     auto normalizedQ = glm::normalize(q);
 
@@ -474,9 +491,9 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
      }*/
 
     auto eulerAngles = glm::eulerAngles(normalizedQ);
-    dir.x = math::degrees(math::radians(eulerAngles.z));
-    dir.y = math::degrees(math::radians(eulerAngles.x));
-    dir.z = math::degrees(math::radians(eulerAngles.y));
+    dir.x = math::degrees(math::radians(eulerAngles.z))._; //Roll
+    dir.y = math::degrees(math::radians(eulerAngles.x))._; //Pitch
+    dir.z = math::degrees(math::radians(eulerAngles.y))._; //Yaw
 
     boost::get<selected_object_type>(entry)->recalcExtents();
 
@@ -579,7 +596,7 @@ void World::snap_selected_models_to_the_ground()
 
     auto& obj = boost::get<selected_object_type>(entry);
     noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
-    math::vector_3d& pos = obj->pos;
+    glm::vec3& pos = obj->pos;
 
     selection_result hits;
 
@@ -587,13 +604,13 @@ void World::snap_selected_models_to_the_ground()
     for_chunk_at(pos, [&] (MapChunk* chunk)
     {
       {
-        math::ray intersect_ray(pos, math::vector_3d(0.f, -1.f, 0.f));
+        math::ray intersect_ray(pos, glm::vec3(0.f, -1.f, 0.f));
         chunk->intersect(intersect_ray, &hits);
       }
       // object is below ground
       if (hits.empty())
       {
-        math::ray intersect_ray(pos, math::vector_3d(0.f, 1.f, 0.f));
+        math::ray intersect_ray(pos, glm::vec3(0.f, 1.f, 0.f));
         chunk->intersect(intersect_ray, &hits);
       }
     });
@@ -674,7 +691,7 @@ void World::move_selected_models(float dx, float dy, float dz)
 
     auto& obj = boost::get<selected_object_type>(entry);
     noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
-    math::vector_3d& pos = obj->pos;
+    glm::vec3& pos = obj->pos;
 
     updateTilesEntry(entry, model_update::remove);
 
@@ -690,13 +707,13 @@ void World::move_selected_models(float dx, float dy, float dz)
   update_selection_pivot();
 }
 
-void World::set_selected_models_pos(math::vector_3d const& pos, bool change_height)
+void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
 {
   ZoneScoped;
   // move models relative to the pivot when several are selected
   if (has_multiple_model_selected())
   {
-    math::vector_3d diff = pos - _multi_select_pivot.get();
+    glm::vec3 diff = pos - _multi_select_pivot.get();
 
     if (change_height)
     {
@@ -734,7 +751,7 @@ void World::set_selected_models_pos(math::vector_3d const& pos, bool change_heig
 void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
 {
   ZoneScoped;
-  math::degrees::vec3 dir_change(rx, ry, rz);
+  math::degrees::vec3 dir_change(rx._, ry._, rz._);
   bool has_multi_select = has_multiple_model_selected();
 
   for (auto& entry : _current_selection)
@@ -753,10 +770,10 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
     if (use_pivot && has_multi_select)
     {
 
-      math::vector_3d& pos = obj->pos;
+      glm::vec3& pos = obj->pos;
       math::degrees::vec3& dir = obj->dir;
-      math::vector_3d diff_pos = pos - _multi_select_pivot.get();
-      math::vector_3d rot_result = math::matrix_4x4(math::matrix_4x4::rotation_xyz, {rx, ry, rz}) * diff_pos;
+      glm::vec3 diff_pos = pos - _multi_select_pivot.get();
+      glm::vec3 rot_result = math::matrix_4x4(math::matrix_4x4::rotation_xyz, {rx._, ry._, rz._ }) * diff_pos;
 
       pos += rot_result - diff_pos;
     }
@@ -775,7 +792,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
 void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
 {
   ZoneScoped;
-  math::degrees::vec3 new_dir(rx, ry, rz);
+  math::degrees::vec3 new_dir(rx._, ry._, rz._);
 
   for (auto& entry : _current_selection)
   {
@@ -822,7 +839,7 @@ void World::initDisplay()
   ol = std::make_unique<OutdoorLighting> ("World\\dnc.db");
 }
 
-MapChunk* World::getChunkAt(math::vector_3d const& pos)
+MapChunk* World::getChunkAt(glm::vec3 const& pos)
 {
   MapTile* tile(mapIndex.getTile(pos));
   if (tile && tile->finishedLoading())
@@ -1060,21 +1077,21 @@ void World::initShaders()
 
 void World::draw ( math::matrix_4x4 const& model_view
                  , math::matrix_4x4 const& projection
-                 , math::vector_3d const& cursor_pos
+                 , glm::vec3 const& cursor_pos
                  , float cursorRotation
                  , glm::vec4 const& cursor_color
                  , CursorType cursor_type
                  , float brush_radius
                  , bool show_unpaintable_chunks
                  , float inner_radius_ratio
-                 , math::vector_3d const& ref_pos
+                 , glm::vec3 const& ref_pos
                  , float angle
                  , float orientation
                  , bool use_ref_pos
                  , bool angled_mode
                  , bool draw_paintability_overlay
                  , editing_mode terrainMode
-                 , math::vector_3d const& camera_pos
+                 , glm::vec3 const& camera_pos
                  , bool camera_moved
                  , bool draw_mfbo
                  , bool draw_terrain
@@ -1328,7 +1345,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     float size = (vertexCenter() - camera_pos).length();
     gl.pointSize(std::max(0.001f, 10.0f - (1.25f * size / CHUNKSIZE)));
 
-    for (math::vector_3d const* pos : _vertices_selected)
+    for (glm::vec3 const* pos : _vertices_selected)
     {
       _sphere_render.draw(mvp, *pos, glm::vec4(1.f, 0.f, 0.f, 1.f), 0.5f);
     }
@@ -1783,7 +1800,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     if (angled_mode && !use_ref_pos)
     {
-      math::vector_3d pos = cursor_pos;
+      glm::vec3 pos = cursor_pos;
       pos.y += 0.1f; // to avoid z-fighting with the ground
       _square_render.draw(mvp, pos, radius, incl, orient, color);
     }
@@ -1791,7 +1808,7 @@ void World::draw ( math::matrix_4x4 const& model_view
     {
       if (angled_mode)
       {
-        math::vector_3d pos = cursor_pos;
+        glm::vec3 pos = cursor_pos;
         pos.y = misc::angledHeight(ref_pos, pos, incl, orient);
         pos.y += 0.1f;
         _square_render.draw(mvp, pos, radius, incl, orient, color);
@@ -1799,14 +1816,14 @@ void World::draw ( math::matrix_4x4 const& model_view
         // display the plane when the cursor is far from ref_point
         if (misc::dist(pos.x, pos.z, ref_pos.x, ref_pos.z) > 10.f + radius)
         {
-          math::vector_3d ref = ref_pos;
+          glm::vec3 ref = ref_pos;
           ref.y += 0.1f;
           _square_render.draw(mvp, ref, 10.f, incl, orient, color);
         }
       }
       else
       {
-        math::vector_3d pos = cursor_pos;
+        glm::vec3 pos = cursor_pos;
         pos.y = ref_pos.y + 0.1f;
         _square_render.draw(mvp, pos, radius, math::degrees(0.f), math::degrees(0.f), color);
       }
@@ -1913,13 +1930,13 @@ void World::update_models_emitters(float dt)
   ModelManager::updateEmitters(dt);
 }
 
-unsigned int World::getAreaID (math::vector_3d const& pos)
+unsigned int World::getAreaID (glm::vec3 const& pos)
 {
   ZoneScoped;
   return for_maybe_chunk_at (pos, [&] (MapChunk* chunk) { return chunk->getAreaID(); }).get_value_or (-1);
 }
 
-void World::clearHeight(math::vector_3d const& pos)
+void World::clearHeight(glm::vec3 const& pos)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -1952,7 +1969,7 @@ void World::CropWaterADT(const tile_index& pos)
   });
 }
 
-void World::setAreaID(math::vector_3d const& pos, int id, bool adt, float radius)
+void World::setAreaID(glm::vec3 const& pos, int id, bool adt, float radius)
 {
   ZoneScoped;
   if (adt)
@@ -1989,7 +2006,7 @@ void World::setAreaID(math::vector_3d const& pos, int id, bool adt, float radius
   }
 }
 
-bool World::GetVertex(float x, float z, math::vector_3d *V) const
+bool World::GetVertex(float x, float z, glm::vec3 *V) const
 {
   ZoneScoped;
   tile_index tile({x, 0, z});
@@ -2006,7 +2023,7 @@ bool World::GetVertex(float x, float z, math::vector_3d *V) const
 
 
 
-void World::changeShader(math::vector_3d const& pos, glm::vec4 const& color, float change, float radius, bool editMode)
+void World::changeShader(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode)
 {
   ZoneScoped;
   for_all_chunks_in_range
@@ -2019,7 +2036,7 @@ void World::changeShader(math::vector_3d const& pos, glm::vec4 const& color, flo
     );
 }
 
-void World::stampShader(math::vector_3d const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
+void World::stampShader(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors)
 {
   ZoneScoped;
   for_all_chunks_in_rect
@@ -2032,10 +2049,10 @@ void World::stampShader(math::vector_3d const& pos, glm::vec4 const& color, floa
     );
 }
 
-math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
+glm::vec3 World::pickShaderColor(glm::vec3 const& pos)
 {
   ZoneScoped;
-  math::vector_3d color = math::vector_3d(1.0f, 1.0f, 1.0f);
+  glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
   for_all_chunks_in_range
   (pos, 0.1f
     , [&] (MapChunk* chunk)
@@ -2048,7 +2065,7 @@ math::vector_3d World::pickShaderColor(math::vector_3d const& pos)
   return color;
 }
 
-auto World::stamp(math::vector_3d const& pos, float dt, QImage const* img, float radiusOuter
+auto World::stamp(glm::vec3 const& pos, float dt, QImage const* img, float radiusOuter
 , float radiusInner, int brushType, bool sculpt) -> void
 {
   ZoneScoped;
@@ -2121,7 +2138,7 @@ auto World::stamp(math::vector_3d const& pos, float dt, QImage const* img, float
 }
 
 
-void World::changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius)
+void World::changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius)
 {
   ZoneScoped;
   for_all_chunks_in_range
@@ -2138,7 +2155,7 @@ void World::changeTerrain(math::vector_3d const& pos, float change, float radius
     );
 }
 
-void World::flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const math::vector_3d& origin, math::degrees angle, math::degrees orientation)
+void World::flattenTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const glm::vec3& origin, math::degrees angle, math::degrees orientation)
 {
   ZoneScoped;
   for_all_chunks_in_range
@@ -2155,7 +2172,7 @@ void World::flattenTerrain(math::vector_3d const& pos, float remain, float radiu
     );
 }
 
-void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode)
+void World::blurTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode)
 {
   ZoneScoped;
   for_all_chunks_in_range
@@ -2170,7 +2187,7 @@ void World::blurTerrain(math::vector_3d const& pos, float remain, float radius, 
                                   , mode
                                   , [this] (float x, float z) -> boost::optional<float>
                                     {
-                                      math::vector_3d vec;
+                                      glm::vec3 vec;
                                       auto res (GetVertex (x, z, &vec));
                                       return boost::make_optional (res, vec.y);
                                     }
@@ -2189,7 +2206,7 @@ void World::recalc_norms (MapChunk* chunk) const
     chunk->recalcNorms();
 }
 
-bool World::paintTexture(math::vector_3d const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
+bool World::paintTexture(glm::vec3 const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
 {
   ZoneScoped;
   return for_all_chunks_in_range
@@ -2202,7 +2219,7 @@ bool World::paintTexture(math::vector_3d const& pos, Brush* brush, float strengt
     );
 }
 
-bool World::stampTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint)
+bool World::stampTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint)
 {
   ZoneScoped;
   return for_all_chunks_in_rect
@@ -2215,7 +2232,7 @@ bool World::stampTexture(math::vector_3d const& pos, Brush *brush, float strengt
     );
 }
 
-bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture)
+bool World::sprayTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture)
 {
   ZoneScoped;
   bool succ = false;
@@ -2235,7 +2252,7 @@ bool World::sprayTexture(math::vector_3d const& pos, Brush *brush, float strengt
   return succ;
 }
 
-bool World::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
+bool World::replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
 {
   ZoneScoped;
   return for_all_chunks_in_range
@@ -2248,7 +2265,7 @@ bool World::replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_
     );
 }
 
-void World::eraseTextures(math::vector_3d const& pos)
+void World::eraseTextures(glm::vec3 const& pos)
 {
   ZoneScoped;
   for_chunk_at(pos, [](MapChunk* chunk)
@@ -2258,7 +2275,7 @@ void World::eraseTextures(math::vector_3d const& pos)
   });
 }
 
-void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
+void World::overwriteTextureAtCurrentChunk(glm::vec3 const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
 {
   ZoneScoped;
   for_chunk_at(pos, [&](MapChunk* chunk)
@@ -2268,7 +2285,7 @@ void World::overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_bl
   });
 }
 
-void World::setHole(math::vector_3d const& pos, float radius, bool big, bool hole)
+void World::setHole(glm::vec3 const& pos, float radius, bool big, bool hole)
 {
   ZoneScoped;
   for_all_chunks_in_range
@@ -2282,7 +2299,7 @@ void World::setHole(math::vector_3d const& pos, float radius, bool big, bool hol
       );
 }
 
-void World::setHoleADT(math::vector_3d const& pos, bool hole)
+void World::setHoleADT(glm::vec3 const& pos, bool hole)
 {
   ZoneScoped;
 
@@ -2355,7 +2372,7 @@ void World::convert_alphamap(bool to_big_alpha)
 void World::drawMinimap ( MapTile *tile
     , math::matrix_4x4 const& model_view
     , math::matrix_4x4 const& projection
-    , math::vector_3d const& camera_pos
+    , glm::vec3 const& camera_pos
     , MinimapRenderSettings* settings
 )
 {
@@ -2433,13 +2450,13 @@ void World::drawMinimap ( MapTile *tile
   skies->update_sky_colors(camera_pos, daytime);
   outdoorLightStats = ol->getLightStats(static_cast<int>(time) * 60);
 
-  math::vector_3d light_dir = outdoorLightStats.dayDir;
+  glm::vec3 light_dir = outdoorLightStats.dayDir;
   light_dir = {-light_dir.x, light_dir.z, -light_dir.y};
   // todo: figure out why I need to use a different light vector for the terrain
-  math::vector_3d terrain_light_dir = outdoorLightStats.dayDir;
+  glm::vec3 terrain_light_dir = outdoorLightStats.dayDir;
 
-  math::vector_3d diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE]);
-  math::vector_3d ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT]);
+  glm::vec3 diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE]);
+  glm::vec3 ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT]);
 
   culldistance = 100000.0f;
 
@@ -2738,14 +2755,14 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
         100000.0f
     );
 
-    auto look_at = math::look_at(math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 10.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f),
-                                 math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 9.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0 - 0.005f),
-                                 math::vector_3d(0.f,1.f, 0.f));
+    auto look_at = math::look_at(glm::vec3(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 10.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f),
+                                 glm::vec3(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 9.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0 - 0.005f),
+                                 glm::vec3(0.f,1.f, 0.f));
 
     drawMinimap(mTile
         , look_at.transposed()
         , projection.transposed()
-        , math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f
+        , glm::vec3(TILESIZE * tile_idx.x + TILESIZE / 2.0f
             , max_height + 15.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f)
         , settings);
 
@@ -2900,9 +2917,9 @@ void World::unload_every_model_and_wmo_instance()
 }
 
 void World::addM2 ( std::string const& filename
-                  , math::vector_3d newPos
+                  , glm::vec3 newPos
                   , float scale
-                  , math::degrees::vec3 rotation
+                  , glm::vec3 rotation
                   , noggit::object_paste_params* paste_params
                   )
 {
@@ -2920,15 +2937,15 @@ void World::addM2 ( std::string const& filename
     {
       float min = paste_params->minRotation;
       float max = paste_params->maxRotation;
-      model_instance.dir.y += math::degrees(misc::randfloat(min, max));
+      model_instance.dir.y += math::degrees(misc::randfloat(min, max))._;
     }
 
     if (_settings->value ("model/random_tilt", false).toBool ())
     {
       float min = paste_params->minTilt;
       float max = paste_params->maxTilt;
-      model_instance.dir.x += math::degrees(misc::randfloat(min, max));
-      model_instance.dir.z += math::degrees(misc::randfloat(min, max));
+      model_instance.dir.x += math::degrees(misc::randfloat(min, max))._;
+      model_instance.dir.z += math::degrees(misc::randfloat(min, max))._;
     }
 
     if (_settings->value ("model/random_size", false).toBool ())
@@ -2949,7 +2966,7 @@ void World::addM2 ( std::string const& filename
 }
 
 ModelInstance* World::addM2AndGetInstance ( std::string const& filename
-    , math::vector_3d newPos
+    , glm::vec3 newPos
     , float scale
     , math::degrees::vec3 rotation
     , noggit::object_paste_params* paste_params
@@ -2969,15 +2986,15 @@ ModelInstance* World::addM2AndGetInstance ( std::string const& filename
     {
       float min = paste_params->minRotation;
       float max = paste_params->maxRotation;
-      model_instance.dir.y += math::degrees(misc::randfloat(min, max));
+      model_instance.dir.y += math::degrees(misc::randfloat(min, max))._;
     }
 
     if (_settings->value ("model/random_tilt", false).toBool ())
     {
       float min = paste_params->minTilt;
       float max = paste_params->maxTilt;
-      model_instance.dir.x += math::degrees(misc::randfloat(min, max));
-      model_instance.dir.z += math::degrees(misc::randfloat(min, max));
+      model_instance.dir.x += math::degrees(misc::randfloat(min, max))._;
+      model_instance.dir.z += math::degrees(misc::randfloat(min, max))._;
     }
 
     if (_settings->value ("model/random_size", false).toBool ())
@@ -3001,7 +3018,7 @@ ModelInstance* World::addM2AndGetInstance ( std::string const& filename
 }
 
 void World::addWMO ( std::string const& filename
-                   , math::vector_3d newPos
+                   , glm::vec3 newPos
                    , math::degrees::vec3 rotation
                    )
 {
@@ -3020,7 +3037,7 @@ void World::addWMO ( std::string const& filename
 }
 
 WMOInstance* World::addWMOAndGetInstance ( std::string const& filename
-    , math::vector_3d newPos
+    , glm::vec3 newPos
     , math::degrees::vec3 rotation
 )
 {
@@ -3149,7 +3166,7 @@ unsigned int World::getMapID()
   return mapIndex._map_id;
 }
 
-void World::clearTextures(math::vector_3d const& pos)
+void World::clearTextures(glm::vec3 const& pos)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -3160,7 +3177,7 @@ void World::clearTextures(math::vector_3d const& pos)
 }
 
 
-void World::exportADTAlphamap(math::vector_3d const& pos)
+void World::exportADTAlphamap(glm::vec3 const& pos)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -3188,7 +3205,7 @@ void World::exportADTAlphamap(math::vector_3d const& pos)
   );
 }
 
-void World::exportADTNormalmap(math::vector_3d const& pos)
+void World::exportADTNormalmap(glm::vec3 const& pos)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -3212,7 +3229,7 @@ void World::exportADTNormalmap(math::vector_3d const& pos)
   );
 }
 
-void World::exportADTAlphamap(math::vector_3d const& pos, std::string const& filename)
+void World::exportADTAlphamap(glm::vec3 const& pos, std::string const& filename)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -3238,7 +3255,7 @@ void World::exportADTAlphamap(math::vector_3d const& pos, std::string const& fil
   );
 }
 
-void World::exportADTHeightmap(math::vector_3d const& pos, float min_height, float max_height)
+void World::exportADTHeightmap(glm::vec3 const& pos, float min_height, float max_height)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -3264,7 +3281,7 @@ void World::exportADTHeightmap(math::vector_3d const& pos, float min_height, flo
   );
 }
 
-void World::exportADTVertexColorMap(math::vector_3d const& pos)
+void World::exportADTVertexColorMap(glm::vec3 const& pos)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -3290,7 +3307,7 @@ void World::exportADTVertexColorMap(math::vector_3d const& pos)
   );
 }
 
-void World::importADTAlphamap(math::vector_3d const& pos, QImage const& image, unsigned layer)
+void World::importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigned layer)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -3322,7 +3339,7 @@ void World::importADTAlphamap(math::vector_3d const& pos, QImage const& image, u
 
 }
 
-void World::importADTAlphamap(math::vector_3d const& pos)
+void World::importADTAlphamap(glm::vec3 const& pos)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -3361,7 +3378,7 @@ void World::importADTAlphamap(math::vector_3d const& pos)
   );
 }
 
-void World::importADTHeightmap(math::vector_3d const& pos, QImage const& image, float multiplier, unsigned mode)
+void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -3392,7 +3409,7 @@ void World::importADTHeightmap(math::vector_3d const& pos, QImage const& image, 
   }
 }
 
-void World::importADTHeightmap(math::vector_3d const& pos, float multiplier, unsigned mode)
+void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -3429,7 +3446,7 @@ void World::importADTHeightmap(math::vector_3d const& pos, float multiplier, uns
   );
 }
 
-void World::importADTVertexColorMap(math::vector_3d const& pos, int mode)
+void World::importADTVertexColorMap(glm::vec3 const& pos, int mode)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -3466,7 +3483,7 @@ void World::importADTVertexColorMap(math::vector_3d const& pos, int mode)
   );
 }
 
-void World::ensureAllTilesetsADT(math::vector_3d const& pos)
+void World::ensureAllTilesetsADT(glm::vec3 const& pos)
 {
   ZoneScoped;
   static QStringList textures {"tileset/generic/black.blp",
@@ -3490,7 +3507,7 @@ void World::ensureAllTilesetsADT(math::vector_3d const& pos)
   });
 }
 
-void World::importADTVertexColorMap(math::vector_3d const& pos, QImage const& image, int mode)
+void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -3521,7 +3538,7 @@ void World::importADTVertexColorMap(math::vector_3d const& pos, QImage const& im
   }
 }
 
-void World::setBaseTexture(math::vector_3d const& pos)
+void World::setBaseTexture(glm::vec3 const& pos)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -3535,7 +3552,7 @@ void World::setBaseTexture(math::vector_3d const& pos)
   });
 }
 
-void World::clear_shadows(math::vector_3d const& pos)
+void World::clear_shadows(glm::vec3 const& pos)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [] (MapChunk* chunk)
@@ -3545,7 +3562,7 @@ void World::clear_shadows(math::vector_3d const& pos)
   });
 }
 
-void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex)
+void World::swapTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex)
 {
   ZoneScoped;
   if (!!noggit::ui::selected_texture::get())
@@ -3558,7 +3575,7 @@ void World::swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference
   }
 }
 
-void World::removeTexDuplicateOnADT(math::vector_3d const& pos)
+void World::removeTexDuplicateOnADT(glm::vec3 const& pos)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -3568,7 +3585,7 @@ void World::removeTexDuplicateOnADT(math::vector_3d const& pos)
   } );
 }
 
-void World::change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add)
+void World::change_texture_flag(glm::vec3 const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add)
 {
   ZoneScoped;
   for_chunk_at(pos, [&] (MapChunk* chunk)
@@ -3578,14 +3595,14 @@ void World::change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_r
   });
 }
 
-void World::paintLiquid( math::vector_3d const& pos
+void World::paintLiquid( glm::vec3 const& pos
                        , float radius
                        , int liquid_id
                        , bool add
                        , math::radians const& angle
                        , math::radians const& orientation
                        , bool lock
-                       , math::vector_3d const& origin
+                       , glm::vec3 const& origin
                        , bool override_height
                        , bool override_liquid_id
                        , float opacity_factor
@@ -3723,7 +3740,7 @@ void World::fixAllGaps()
   }
 }
 
-bool World::isUnderMap(math::vector_3d const& pos)
+bool World::isUnderMap(glm::vec3 const& pos)
 {
   ZoneScoped;
   tile_index const tile (pos);
@@ -3740,7 +3757,7 @@ bool World::isUnderMap(math::vector_3d const& pos)
   return true;
 }
 
-void World::selectVertices(math::vector_3d const& pos, float radius)
+void World::selectVertices(glm::vec3 const& pos, float radius)
 {
   ZoneScoped;
   noggit::ActionManager::instance()->getCurrentAction()->registerVertexSelectionChange();
@@ -3757,16 +3774,16 @@ void World::selectVertices(math::vector_3d const& pos, float radius)
 
 }
 
-bool World::deselectVertices(math::vector_3d const& pos, float radius)
+bool World::deselectVertices(glm::vec3 const& pos, float radius)
 {
   ZoneScoped;
   noggit::ActionManager::instance()->getCurrentAction()->registerVertexSelectionChange();
 
   _vertex_center_updated = false;
   _vertex_border_updated = false;
-  std::unordered_set<math::vector_3d*> inRange;
+  std::unordered_set<glm::vec3*> inRange;
 
-  for (math::vector_3d* v : _vertices_selected)
+  for (glm::vec3* v : _vertices_selected)
   {
     if (misc::dist(*v, pos) <= radius)
     {
@@ -3774,7 +3791,7 @@ bool World::deselectVertices(math::vector_3d const& pos, float radius)
     }
   }
 
-  for (math::vector_3d* v : inRange)
+  for (glm::vec3* v : inRange)
   {
     _vertices_selected.erase(v);
   }
@@ -3793,7 +3810,7 @@ void World::moveVertices(float h)
     cur_action->registerChunkTerrainChange(chunk);
 
   _vertex_center_updated = false;
-  for (math::vector_3d* v : _vertices_selected)
+  for (glm::vec3* v : _vertices_selected)
   {
     v->y += h;
   }
@@ -3823,7 +3840,7 @@ void World::updateSelectedVertices()
   }
 }
 
-void World::orientVertices ( math::vector_3d const& ref_pos
+void World::orientVertices ( glm::vec3 const& ref_pos
                            , math::degrees vertex_angle
                            , math::degrees vertex_orientation
                            )
@@ -3836,7 +3853,7 @@ void World::orientVertices ( math::vector_3d const& ref_pos
   for (auto& chunk : _vertex_chunks)
     cur_action->registerChunkTerrainChange(chunk);
 
-  for (math::vector_3d* v : _vertices_selected)
+  for (glm::vec3* v : _vertices_selected)
   {
     v->y = misc::angledHeight(ref_pos, *v, vertex_angle, vertex_orientation);
   }
@@ -3846,7 +3863,7 @@ void World::orientVertices ( math::vector_3d const& ref_pos
 void World::flattenVertices (float height)
 {
   ZoneScoped;
-  for (math::vector_3d* v : _vertices_selected)
+  for (glm::vec3* v : _vertices_selected)
   {
     v->y = height;
   }
@@ -3870,13 +3887,13 @@ void World::updateVertexCenter()
   _vertex_center_updated = true;
   _vertex_center = { 0,0,0 };
   float f = 1.0f / _vertices_selected.size();
-  for (math::vector_3d* v : _vertices_selected)
+  for (glm::vec3* v : _vertices_selected)
   {
     _vertex_center += (*v) * f;
   }
 }
 
-math::vector_3d const& World::vertexCenter()
+glm::vec3 const& World::vertexCenter()
 {
   ZoneScoped;
   if (!_vertex_center_updated)
@@ -3921,7 +3938,7 @@ void World::update_models_by_filename()
   need_model_updates = false;
 }
 
-void World::range_add_to_selection(math::vector_3d const& pos, float radius, bool remove)
+void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remove)
 {
   ZoneScoped;
   for_tile_at(pos, [this, pos, radius, remove](MapTile* tile)
@@ -4521,7 +4538,7 @@ void World::updateMVPUniformBlock(const math::matrix_4x4& model_view, const math
 
 }
 
-void World::updateLightingUniformBlock(bool draw_fog, math::vector_3d const& camera_pos)
+void World::updateLightingUniformBlock(bool draw_fog, glm::vec3 const& camera_pos)
 {
   ZoneScoped;
 
@@ -4530,13 +4547,13 @@ void World::updateLightingUniformBlock(bool draw_fog, math::vector_3d const& cam
   skies->update_sky_colors(camera_pos, daytime);
   outdoorLightStats = ol->getLightStats(static_cast<int>(time));
 
-  math::vector_3d diffuse = skies->color_set[LIGHT_GLOBAL_DIFFUSE];
-  math::vector_3d ambient = skies->color_set[LIGHT_GLOBAL_AMBIENT];
-  math::vector_3d fog_color = skies->color_set[FOG_COLOR];
-  math::vector_3d ocean_color_light = skies->color_set[OCEAN_COLOR_LIGHT];
-  math::vector_3d ocean_color_dark = skies->color_set[OCEAN_COLOR_DARK];
-  math::vector_3d river_color_light = skies->color_set[RIVER_COLOR_LIGHT];
-  math::vector_3d river_color_dark = skies->color_set[RIVER_COLOR_DARK];
+  glm::vec3 diffuse = skies->color_set[LIGHT_GLOBAL_DIFFUSE];
+  glm::vec3 ambient = skies->color_set[LIGHT_GLOBAL_AMBIENT];
+  glm::vec3 fog_color = skies->color_set[FOG_COLOR];
+  glm::vec3 ocean_color_light = skies->color_set[OCEAN_COLOR_LIGHT];
+  glm::vec3 ocean_color_dark = skies->color_set[OCEAN_COLOR_DARK];
+  glm::vec3 river_color_light = skies->color_set[RIVER_COLOR_LIGHT];
+  glm::vec3 river_color_dark = skies->color_set[RIVER_COLOR_DARK];
 
 
   _lighting_ubo_data.DiffuseColor_FogStart = {diffuse.x,diffuse.y,diffuse.z, skies->fog_distance_start()};

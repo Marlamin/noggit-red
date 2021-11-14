@@ -22,11 +22,11 @@ namespace noggit
     public:
       model(script_context * ctx, SceneObject* object);
 
-      math::vector_3d get_pos();
-      void set_pos(math::vector_3d& pos);
+      glm::vec3 get_pos();
+      void set_pos(glm::vec3& pos);
 
-      math::vector_3d get_rot();
-      void set_rot(math::vector_3d& rot);
+      glm::vec3 get_rot();
+      void set_rot(glm::vec3& rot);
 
       float get_scale();
       void set_scale(float scale);
@@ -47,8 +47,8 @@ namespace noggit
     void collect_models(
         script_context * ctx
       , World * world
-      , math::vector_3d const& min
-      , math::vector_3d const& max
+      , glm::vec3 const& min
+      , glm::vec3 const& max
       , std::vector<model>& vec
     );
 

@@ -190,7 +190,7 @@ namespace noggit
               );
     }
 
-    void flatten_blur_tool::flatten (World* world, math::vector_3d const& cursor_pos, float dt)
+    void flatten_blur_tool::flatten (World* world, glm::vec3 const& cursor_pos, float dt)
     {
       world->flattenTerrain ( cursor_pos
                             , 1.f - pow (0.5f, dt *_speed_slider->value())
@@ -203,7 +203,7 @@ namespace noggit
                             );
     }
 
-    void flatten_blur_tool::blur (World* world, math::vector_3d const& cursor_pos, float dt)
+    void flatten_blur_tool::blur (World* world, glm::vec3 const& cursor_pos, float dt)
     {
       world->blurTerrain ( cursor_pos
                          , 1.f - pow (0.5f, dt * _speed_slider->value())
@@ -239,7 +239,7 @@ namespace noggit
       _lock_group->setChecked(!use_ref_pos());
     }
 
-    void flatten_blur_tool::lockPos (math::vector_3d const& cursor_pos)
+    void flatten_blur_tool::lockPos (glm::vec3 const& cursor_pos)
     {
       _lock_pos = cursor_pos;
       _lock_x->setValue (_lock_pos.x);

@@ -10,7 +10,7 @@ namespace noggit
   class camera
   {
   public:
-    camera ( math::vector_3d const& position
+    camera ( glm::vec3 const& position
            , math::degrees yaw_
            , math::degrees pitch_
            );
@@ -25,8 +25,8 @@ namespace noggit
 
     math::radians fov() const;
 
-    math::vector_3d look_at() const;
-    math::vector_3d direction() const;
+    glm::vec3 look_at() const;
+    glm::vec3 direction() const;
 
     math::matrix_4x4 look_at_matrix() const;
 
@@ -38,7 +38,7 @@ namespace noggit
 
     void reset(float x, float y, float z, float roll, float yaw, float pitch);
 
-    math::vector_3d position;
+    glm::vec3 position;
     float move_speed;
 
   private:

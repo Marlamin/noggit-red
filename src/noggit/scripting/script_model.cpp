@@ -23,12 +23,12 @@ namespace noggit
     {}
     
 
-    math::vector_3d model::get_pos()
+    glm::vec3 model::get_pos()
     {
       return _object->pos;
     }
 
-    void model::set_pos(math::vector_3d& pos)
+    void model::set_pos(glm::vec3& pos)
     {
       world()->updateTilesEntry(_object, model_update::remove);
       _object->pos = pos;
@@ -36,12 +36,12 @@ namespace noggit
       world()->updateTilesEntry(_object, model_update::add);
     }
 
-    math::vector_3d model::get_rot()
+    glm::vec3 model::get_rot()
     {
-      return {_object->dir.x._, _object->dir.y._, _object->dir.z._};
+      return _object->dir;
     }
 
-    void model::set_rot(math::vector_3d& rot)
+    void model::set_rot(glm::vec3& rot)
     {
       math::degrees::vec3 dir = math::degrees::vec3{ rot };
       world()->updateTilesEntry(_object, model_update::remove);
@@ -115,8 +115,8 @@ namespace noggit
     void collect_models(
         script_context * ctx
       , World * world
-      , math::vector_3d const& min
-      , math::vector_3d const& max
+      , glm::vec3 const& min
+      , glm::vec3 const& max
       , std::vector<model> & vec
     )
     {

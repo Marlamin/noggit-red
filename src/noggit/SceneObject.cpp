@@ -11,7 +11,7 @@ SceneObject::SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext cont
 {
 }
 
-bool SceneObject::isInsideRect(math::vector_3d rect[2]) const
+bool SceneObject::isInsideRect(glm::vec3 rect[2]) const
 {
   return misc::rectOverlap(extents, rect);
 }
@@ -30,7 +30,7 @@ void SceneObject::updateTransformMatrix()
                         * math::matrix_4x4
                             ( math::matrix_4x4::rotation_yzx
                                 , { -dir.z
-                                  , dir.y - 90.0_deg
+                                  , dir.y - math::degrees(90.0)._
                                   , dir.x
                               })
 
@@ -44,7 +44,7 @@ void SceneObject::updateTransformMatrix()
 
 void SceneObject::resetDirection()
 {
-  dir =  math::degrees::vec3(0_deg, dir.y, 0.0_deg);
+  dir =  math::degrees::vec3((0_deg)._, dir.y, (0.0_deg)._);
   recalcExtents();
 }
 

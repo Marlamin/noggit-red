@@ -45,13 +45,13 @@ namespace noggit
     private:
       void loadMap (int mapID);
 
-      void check_uid_then_enter_map ( math::vector_3d pos
+      void check_uid_then_enter_map ( glm::vec3 pos
                                     , math::degrees camera_pitch
                                     , math::degrees camera_yaw
                                     , bool from_bookmark = false
                                     );
 
-      void enterMapAt ( math::vector_3d pos
+      void enterMapAt ( glm::vec3 pos
                       , math::degrees camera_pitch
                       , math::degrees camera_yaw
                       , uid_fix_mode uid_fix = uid_fix_mode::none
@@ -72,7 +72,7 @@ namespace noggit
       {
         int mapID;
         std::string name;
-        math::vector_3d pos;
+        glm::vec3 pos;
         float camera_yaw;
         float camera_pitch;
       };
