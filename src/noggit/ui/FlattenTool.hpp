@@ -1,11 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
 #include <noggit/tool_enums.hpp>
 #include <noggit/Red/UiCommon/ExtendedSlider.hpp>
-#include <math/vector_3d.hpp>
-
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDial>
@@ -13,8 +10,8 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
-
 #include <QJsonObject>
+#include <glm/vec3.hpp>
 
 class World;
 namespace noggit

@@ -5,8 +5,6 @@
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_selection.hpp>
 
-#include <math/vector_3d.hpp>
-
 namespace noggit {
 	namespace scripting {
 		void procedures::paint_texture(

@@ -3,7 +3,6 @@
 #pragma once
 
 #include <math/ray.hpp>
-#include <math/vector_3d.hpp> // glm::vec3
 #include <noggit/MPQ.h> // MPQFile
 #include <noggit/MapHeaders.h> // ENTRY_MDDF
 #include <noggit/ModelManager.h>

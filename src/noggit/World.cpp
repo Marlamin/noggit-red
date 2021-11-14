@@ -457,10 +457,6 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     q.y = a.y;
     q.z = a.z;
 
-    math::vector_3d x;
-
-    auto as = 5 + x;
-
     auto worldLengthSqrd = glm::length(worldUp) * glm::length(worldUp);
     auto normalLengthSqrd = glm::length(varnormal) * glm::length(varnormal);
     auto worldDotNormal = glm::dot(worldUp, varnormal);

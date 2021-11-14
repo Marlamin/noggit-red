@@ -183,8 +183,14 @@ void ModelInstance::recalcExtents()
   //! the model is bad itself. We *could* detect that case and explicitly
   //! assume {-1, 1} then, to be nice to fuckported models.
 
-  auto const corners_in_world (math::apply (misc::transform_model_box_coords, relative_to_model.all_corners()));
-
+  auto corners_in_world = std::vector<glm::vec3>();
+  auto transform = misc::transform_model_box_coords;
+  auto points = relative_to_model.all_corners();
+  for (auto& point : points)
+  {
+      point = transform(point);
+      corners_in_world.push_back(point);
+  }
   auto const rotated_corners_in_world (_transform_mat_transposed.transposed() * corners_in_world);
 
   math::aabb const bounding_of_rotated_points (rotated_corners_in_world);

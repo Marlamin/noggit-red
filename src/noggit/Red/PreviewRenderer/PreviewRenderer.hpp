@@ -2,7 +2,6 @@
 #define NOGGIT_PREVIEWRENDERER_HPP
 
 #include <math/matrix_4x4.hpp>
-#include <math/vector_3d.hpp>
 #include <noggit/camera.hpp>
 #include <noggit/WMOInstance.h>
 #include <noggit/ModelInstance.h>

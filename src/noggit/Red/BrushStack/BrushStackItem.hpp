@@ -22,8 +22,6 @@
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/Water.h>
 #include <noggit/ui/TexturingGUI.h>
-#include <math/vector_3d.hpp>
-
 
 class World;
 

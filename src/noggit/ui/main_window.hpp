@@ -1,6 +1,4 @@
 #pragma once
-
-#include <math/vector_3d.hpp>
 #include <math/trig.hpp>
 #include <noggit/World.h>
 #include <noggit/MapView.h>

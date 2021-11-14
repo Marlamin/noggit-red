@@ -1,10 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
 #pragma once
-
 #include <noggit/SceneObject.hpp>
 #include <math/ray.hpp>
-#include <math/vector_3d.hpp> // glm::vec3
 #include <noggit/WMO.h>
 #include <noggit/ContextObject.hpp>
 

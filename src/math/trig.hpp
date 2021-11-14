@@ -1,10 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-#include <math/vector_3d.hpp>
 #include <string>
-
+#include <iostream>
 #include <cmath>
+#include <glm/vec3.hpp>
 #include <glm/ext/scalar_constants.hpp>
 
 namespace math
@@ -53,7 +53,7 @@ namespace math
 
     friend std::ostream& operator<< (std::ostream& os, degrees const& v)
     {
-      return os << std::to_string(v._) << "°";
+      return os << std::to_string(v._) << std::string("Degrees");
     }
 
       using vec3 = glm::vec3;
@@ -66,7 +66,7 @@ namespace math
 
     float _;
 
-    using vec3 = vector_3d_base<radians>;
+    using vec3 = glm::vec3;
   };
 
   inline degrees::degrees (radians x) : _ (x._ * 180.0f / glm::pi<float>()) {}

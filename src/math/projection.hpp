@@ -4,7 +4,6 @@
 
 #include <math/matrix_4x4.hpp>
 #include <math/trig.hpp>
-#include <math/vector_3d.hpp>
 
 namespace math
 {
@@ -57,18 +56,18 @@ namespace math
            };
   }
 
-  inline matrix_4x4 look_at ( vector_3d const& eye
-                            , vector_3d const& center
-                            , vector_3d const& up
+  inline matrix_4x4 look_at (glm::vec3 const& eye
+                            , glm::vec3 const& center
+                            , glm::vec3 const& up
                             )
   {
-    vector_3d const z ((eye - center).normalized());
-    vector_3d const x ((up % z).normalized());
-    vector_3d const y ((z % x).normalized());
+    glm::vec3 const z = glm::normalize(eye - center);
+    glm::vec3 const x = glm::normalize(glm::cross(up, z));
+    glm::vec3 const y = glm::normalize(glm::cross(z, x));
 
-    return { x.x, x.y, x.z, x * -eye
-           , y.x, y.y, y.z, y * -eye
-           , z.x, z.y, z.z, z * -eye
+    return { x.x, x.y, x.z, glm::dot(x, glm::vec3(-eye.x,-eye.y,-eye.z))
+           , y.x, y.y, y.z, glm::dot(y ,glm::vec3(-eye.x,-eye.y,-eye.z))
+           , z.x, z.y, z.z, glm::dot(z ,glm::vec3(-eye.x,-eye.y,-eye.z))
            , 0.f, 0.f, 0.f, 1.f
            };
   }

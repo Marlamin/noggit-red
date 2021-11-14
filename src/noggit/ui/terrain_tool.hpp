@@ -1,13 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
 #include <math/trig.hpp>
-#include <math/vector_3d.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/Red/UiCommon/ExtendedSlider.hpp>
 #include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
-
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDial>
 #include <QtWidgets/QDoubleSpinBox>

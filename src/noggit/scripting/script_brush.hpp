@@ -1,13 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
-
 #include <noggit/scripting/script_object.hpp>
-#include <math/vector_3d.hpp>
-
 #include <sol/sol.hpp>
-
 #include <string>
 #include <memory>
+#include <glm/vec3.hpp>
 
 namespace noggit {
   namespace scripting {

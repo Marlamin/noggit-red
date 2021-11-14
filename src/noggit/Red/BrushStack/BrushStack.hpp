@@ -9,7 +9,6 @@
 #include <QWidget>
 #include <QComboBox>
 #include <QButtonGroup>
-#include <math/vector_3d.hpp>
 
 #include <QJsonObject>
 

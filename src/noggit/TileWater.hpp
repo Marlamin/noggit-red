@@ -1,7 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
 #pragma once
-#include <math/vector_3d.hpp>
 #include <noggit/ChunkWater.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/MapHeaders.h>

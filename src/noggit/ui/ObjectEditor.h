@@ -1,8 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/vector_3d.hpp>
 #include <noggit/Selection.h>
 #include <noggit/bool_toggle_property.hpp>
 

@@ -5,7 +5,6 @@
 #include <math/frustum.hpp>
 #include <math/matrix_4x4.hpp>
 #include <math/ray.hpp>
-#include <math/vector_3d.hpp>
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/AsyncObject.h> // AsyncObject
 #include <noggit/MPQ.h>

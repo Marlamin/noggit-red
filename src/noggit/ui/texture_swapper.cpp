@@ -1,8 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/texture_swapper.hpp>
-
-#include <math/vector_3d.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
 #include <noggit/MapView.h>

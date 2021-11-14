@@ -2,9 +2,8 @@
 
 #pragma once
 
-#include <math/vector_3d.hpp>
-
 #include <vector>
+#include <glm/vec3.hpp>
 
 namespace math
 {

@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/matrix_4x4.hpp>
-#include <math/vector_3d.hpp>
 
 #include <cmath>
 #include <cstring> // memcpy, memset
@@ -133,15 +132,16 @@ namespace math
            };
   }
 
-  std::vector<glm::vec3> matrix_4x4::operator*
-    (std::vector<glm::vec3> points) const
+  std::vector<glm::vec3> matrix_4x4::operator* (std::vector<glm::vec3> points) const
   {
-    return apply ( [&] (glm::vec3 const& point)
-                   {
-                     return *this * point;
-                   }
-                 , points
-                 );
+  	auto adjustedPoints = std::vector<glm::vec3>();
+
+    for(auto const &point : points)
+    {
+        adjustedPoints.push_back(*this * point);
+    }
+
+    return adjustedPoints;
   }
 
   namespace

@@ -3,7 +3,6 @@
 #include "noggit/WMOInstance.h"
 #include "noggit/ActionManager.hpp"
 #include "noggit/Action.hpp"
-#include "math/vector_3d.hpp"
 #include "external/glm/glm.hpp"
 #include <external/glm/gtx/matrix_decompose.hpp>
 #include <external/glm/gtc/type_ptr.hpp>

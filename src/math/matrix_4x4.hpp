@@ -3,6 +3,7 @@
 #pragma once
 #include <math/trig.hpp>
 #include <algorithm>
+#include <vector>
 #include <glm/gtc/quaternion.hpp>
 
 namespace math

@@ -5,10 +5,8 @@
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_noise.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
-
 #include <noggit/MapView.h>
 #include <noggit/World.h>
-#include <math/vector_3d.hpp>
 
 namespace noggit
 {

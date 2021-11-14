@@ -1,12 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
-
 #include <noggit/scripting/script_object.hpp>
 #include <noggit/scripting/script_model.hpp>
 #include <noggit/scripting/script_chunk.hpp>
-
-#include <math/vector_3d.hpp>
-
 #include <vector>
 #include <string>
 #include <memory>

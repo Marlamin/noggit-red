@@ -1,8 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
 #pragma once
 #include <math/ray.hpp>
-#include <math/vector_3d.hpp>
 #include <noggit/MPQ.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/ModelManager.h>
