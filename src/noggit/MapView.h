@@ -152,7 +152,7 @@ private:
   display_mode _display_mode;
 
   math::matrix_4x4 model_view() const;
-  math::matrix_4x4 projection() const;
+  glm::mat4x4 projection() const;
 
   void draw_map();
 

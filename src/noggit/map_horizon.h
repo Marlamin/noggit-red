@@ -49,7 +49,7 @@ public:
     render(const map_horizon& horizon);
 
     void draw( math::matrix_4x4 const& model_view
-             , math::matrix_4x4 const& projection
+             , glm::mat4x4 const& projection
              , MapIndex *index
              , const glm::vec3& color
              , const float& cull_distance

@@ -161,7 +161,7 @@ public:
   void update_sky_colors(glm::vec3 pos, int time);
 
   bool draw ( math::matrix_4x4 const& model_view
-            , math::matrix_4x4 const& projection
+            , glm::mat4x4 const& projection
             , glm::vec3 const& camera_pos
             , opengl::scoped::use_program& m2_shader
             , math::frustum const& frustum
@@ -171,14 +171,14 @@ public:
             );
 
   void drawLightingSpheres (math::matrix_4x4 const& model_view
-                          , math::matrix_4x4 const& projection
+                          , glm::mat4x4 const& projection
                           , glm::vec3 const& camera_pos
                           , math::frustum const& frustum
                           , const float& cull_distance
                           );
 
   void drawLightingSphereHandles (math::matrix_4x4 const& model_view
-                                , math::matrix_4x4 const& projection
+                                , glm::mat4x4 const& projection
                                 , glm::vec3 const& camera_pos
                                 , math::frustum const& frustum
                                 , const float& cull_distance

@@ -1072,7 +1072,7 @@ void World::initShaders()
 }
 
 void World::draw ( math::matrix_4x4 const& model_view
-                 , math::matrix_4x4 const& projection
+                 , glm::mat4x4 const& projection
                  , glm::vec3 const& cursor_pos
                  , float cursorRotation
                  , glm::vec4 const& cursor_color
@@ -1109,7 +1109,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   ZoneScoped;
 
-  math::matrix_4x4 const mvp(model_view * projection);
+  glm::mat4x4 const mvp(model_view.Convert() * projection);
   math::frustum const frustum (mvp);
 
   if (camera_moved)
@@ -2367,7 +2367,7 @@ void World::convert_alphamap(bool to_big_alpha)
 
 void World::drawMinimap ( MapTile *tile
     , math::matrix_4x4 const& model_view
-    , math::matrix_4x4 const& projection
+    , glm::mat4x4 const& projection
     , glm::vec3 const& camera_pos
     , MinimapRenderSettings* settings
 )
@@ -2757,7 +2757,7 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
 
     drawMinimap(mTile
         , look_at.transposed()
-        , projection.transposed()
+        , projection
         , glm::vec3(TILESIZE * tile_idx.x + TILESIZE / 2.0f
             , max_height + 15.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f)
         , settings);
@@ -4522,7 +4522,7 @@ void World::ensureAllTilesetsAllADTs()
   }
 }
 
-void World::updateMVPUniformBlock(const math::matrix_4x4& model_view, const math::matrix_4x4& projection)
+void World::updateMVPUniformBlock(const math::matrix_4x4& model_view, const glm::mat4x4& projection)
 {
   ZoneScoped;
 

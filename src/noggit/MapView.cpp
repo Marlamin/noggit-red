@@ -3806,7 +3806,7 @@ math::ray MapView::intersect_ray() const
   {
     // during rendering we multiply perspective * view
     // so we need the same order here and then invert.
-      math::matrix_4x4 const invertedViewMatrix = (projection() * model_view()).inverted();
+      glm::mat4x4 const invertedViewMatrix = glm::inverse(projection() * model_view().Convert());
       auto normalisedView = invertedViewMatrix * normalized_device_coords(mx, mz);
 
       auto pos = glm::vec3(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
@@ -3958,7 +3958,7 @@ void MapView::update_cursor_pos()
       glm::vec3 wincoord = glm::vec3(mx, height() - mz - 1, static_cast<float>(*ptr) / std::numeric_limits<unsigned short>::max());
 
       math::matrix_4x4 model_view_ = model_view().transposed();
-      math::matrix_4x4 projection_ = projection().transposed();
+      glm::mat4x4 projection_ = projection();
 
       glm::vec3 objcoord = glm::unProject(wincoord, glm::make_mat4(reinterpret_cast<float*>(&model_view_)),
                                           glm::make_mat4(reinterpret_cast<float*>(&projection_)), viewport);
@@ -4013,7 +4013,7 @@ math::matrix_4x4 MapView::model_view() const
     return _camera.look_at_matrix();
   }
 }
-math::matrix_4x4 MapView::projection() const
+glm::mat4x4 MapView::projection() const
 {
   float far_z = _settings->value("farZ", 2048).toFloat();
 
@@ -4108,8 +4108,9 @@ void MapView::draw_map()
     doSelection(true);
   }
 
+
   _world->draw ( model_view().transposed()
-               , projection().transposed()
+               , projection()
                , _cursor_pos
                , _cursorRotation
                , terrainMode == editing_mode::mccv ? shaderTool->shaderColor() : cursor_color

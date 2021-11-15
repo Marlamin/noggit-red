@@ -55,7 +55,7 @@ namespace math
     std::array<plane, SIDES_MAX> _planes;
 
   public:
-    frustum (matrix_4x4 const& matrix);
+    frustum (glm::mat4x4 const& matrix);
 
     bool contains (const glm::vec3& point) const;
     bool intersects (const std::array<glm::vec3, 8>& intersect_points) const;

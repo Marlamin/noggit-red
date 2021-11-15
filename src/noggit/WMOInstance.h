@@ -85,7 +85,7 @@ public:
 
   void draw ( opengl::scoped::use_program& wmo_shader
             , math::matrix_4x4 const& model_view
-            , math::matrix_4x4 const& projection
+            , glm::mat4x4 const& projection
             , math::frustum const& frustum
             , const float& cull_distance
             , const glm::vec3& camera

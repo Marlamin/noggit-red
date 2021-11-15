@@ -42,7 +42,7 @@ namespace noggit
             void handleTransformGizmo(MapView* map_view
                 , std::vector<selection_type> const& selection
                 , math::matrix_4x4 const& model_view
-                , math::matrix_4x4 const& projection);
+                , glm::mat4x4 const& projection);
 
             void setCurrentGizmoOperation(ImGuizmo::OPERATION operation) { _gizmo_operation = operation; }
             void setCurrentGizmoMode(ImGuizmo::MODE mode) { _gizmo_mode = mode; }

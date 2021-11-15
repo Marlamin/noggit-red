@@ -7,12 +7,12 @@
 
 namespace math
 {
-  frustum::frustum (matrix_4x4 const& matrix)
+  frustum::frustum (glm::mat4x4 const& matrix)
   {
-    const glm::vec4 column_0 (matrix.column<0>());
-    const glm::vec4 column_1 (matrix.column<1>());
-    const glm::vec4 column_2 (matrix.column<2>());
-    const glm::vec4 column_3 (matrix.column<3>());
+    const glm::vec4 column_0 = matrix[0];
+    const glm::vec4 column_1 = matrix[1];
+    const glm::vec4 column_2 = matrix[2];
+    const glm::vec4 column_3 = matrix[3];
 
     _planes[RIGHT] = column_3 - column_0;
     _planes[LEFT] = column_3 + column_0;

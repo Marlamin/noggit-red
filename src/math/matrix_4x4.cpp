@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstring> // memcpy, memset
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace math
 {
@@ -208,6 +209,24 @@ namespace math
   {
     return adjoint() / determinant (*this);
   }
+
+	glm::mat4x4 matrix_4x4::Convert() const
+  {
+        return { _m[0][0], _m[1][0], _m[2][0], _m[3][0]
+           , _m[0][1], _m[1][1], _m[2][1], _m[3][1]
+           , _m[0][2], _m[1][2], _m[2][2], _m[3][2]
+           , _m[0][3], _m[1][3], _m[2][3], _m[3][3]
+        };
+  }
+
+    glm::mat4x4 matrix_4x4::ConvertX() const
+    {
+        return { _m[0][0] , _m[0][1] , _m[0][2] , _m[0][3],
+      _m[1][0] , _m[1][1] , _m[1][2] , _m[1][3] ,
+      _m[2][0] , _m[2][1] , _m[2][2] , _m[2][3] ,
+      _m[3][0] , _m[3][1] , _m[3][2] , _m[3][3] 
+        };
+    }
 
   matrix_4x4 matrix_4x4::transposed() const
   {

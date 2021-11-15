@@ -7,9 +7,19 @@
 
 namespace math
 {
-  inline matrix_4x4 perspective (math::degrees fovy, float aspect, float zNear, float zFar)
-  {
-    // assuming
+    inline glm::mat4x4 perspective(math::degrees fovy, float aspect, float zNear, float zFar)
+    {
+        return glm::perspective(math::radians(fovy)._, aspect, zNear, zFar);
+    }
+
+    inline glm::mat4x4 ortho(float left, float right, float bottom, float top, float z_near, float z_far)
+    {
+        return glm::ortho(left,right,bottom, top,z_near,z_far);
+    }
+
+    /*
+    inline matrix_4x4 perspective(math::degrees fovy, float aspect, float zNear, float zFar)
+    {// assuming
     // glm::vec3 lower_left_clipping_plane (left, bottom, -nearVal);
     // glm::vec3 upper_right_clipping_plane (right, top, -nearVal);
     // glm::vec3 eye (0, 0, 0);
@@ -54,7 +64,7 @@ namespace math
            , 0.f, 0.f,  v2, tz
            , 0.f, 0.f, 0.f, 1.f
            };
-  }
+  }*/
 
   inline matrix_4x4 look_at (glm::vec3 const& eye
                             , glm::vec3 const& center

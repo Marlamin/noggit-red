@@ -115,6 +115,8 @@ namespace opengl
       void uniform (GLint pos, glm::vec4 const&);
       void uniform (std::string const& name, math::matrix_4x4 const&);
       void uniform (GLint pos, math::matrix_4x4 const&);
+      void uniform(std::string const& name, glm::mat4x4 const&);
+      void uniform(GLint pos, glm::mat4x4 const&);
       template<typename T> void uniform (std::string const&, T) = delete;
 
       void uniform_chunk_textures (std::string const& name, std::array<std::array<std::array<int, 2>, 4>, 256> const& value);

@@ -449,7 +449,7 @@ void Skies::update_sky_colors(glm::vec3 pos, int time)
 }
 
 bool Skies::draw( math::matrix_4x4 const& model_view
-                , math::matrix_4x4 const& projection
+                , glm::mat4x4 const& projection
                 , glm::vec3 const& camera_pos
                 , opengl::scoped::use_program& m2_shader
                 , math::frustum const& frustum
@@ -484,7 +484,7 @@ bool Skies::draw( math::matrix_4x4 const& model_view
     {
       opengl::scoped::vao_binder const _ (_vao);
 
-      shader.uniform("model_view_projection", model_view*projection);
+      shader.uniform("model_view_projection", model_view.Convert() * projection);
       shader.uniform("camera_pos", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
 
       gl.drawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_SHORT, nullptr);
@@ -550,7 +550,7 @@ bool Skies::draw( math::matrix_4x4 const& model_view
 }
 
 void Skies::drawLightingSpheres (math::matrix_4x4 const& model_view
-  , math::matrix_4x4 const& projection
+  , glm::mat4x4 const& projection
   , glm::vec3 const& camera_pos
   , math::frustum const& frustum
   , const float& cull_distance
@@ -562,14 +562,14 @@ void Skies::drawLightingSpheres (math::matrix_4x4 const& model_view
     {
       glm::vec3 diffuse = color_set[LIGHT_GLOBAL_DIFFUSE];
       glm::vec3 ambient = color_set[LIGHT_GLOBAL_AMBIENT];
-      _sphere_render.draw(model_view * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
-      _sphere_render.draw(model_view * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
+      _sphere_render.draw(model_view.Convert() * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
+      _sphere_render.draw(model_view.Convert() * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
     }
   }
 }
 
 void Skies::drawLightingSphereHandles (math::matrix_4x4 const& model_view
-  , math::matrix_4x4 const& projection
+  , glm::mat4x4 const& projection
   , glm::vec3 const& camera_pos
   , math::frustum const& frustum
   , const float& cull_distance
@@ -580,15 +580,15 @@ void Skies::drawLightingSphereHandles (math::matrix_4x4 const& model_view
     if ((sky.pos - camera_pos).length() - sky.r2 <= cull_distance) // TODO: frustum cull here
     {
 
-      _sphere_render.draw(model_view * projection, sky.pos, {1.f, 0.f, 0.f, 1.f}, 5.f);
+      _sphere_render.draw(model_view.Convert() * projection, sky.pos, {1.f, 0.f, 0.f, 1.f}, 5.f);
 
       if (sky.selected())
       {
         glm::vec3 diffuse = color_set[LIGHT_GLOBAL_DIFFUSE];
         glm::vec3 ambient = color_set[LIGHT_GLOBAL_AMBIENT];
 
-        _sphere_render.draw(model_view * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
-        _sphere_render.draw(model_view * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
+        _sphere_render.draw(model_view.Convert() * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
+        _sphere_render.draw(model_view.Convert() * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
       }
     }
   }
@@ -624,7 +624,7 @@ out vec3 f_color;
 
 void main()
 {
-  vec4 pos = vec4(position+camera_pos, 1.f);
+  vec4 pos = vec4(position + camera_pos, 1.f);
   gl_Position = model_view_projection * pos;
   f_color = color;
 }

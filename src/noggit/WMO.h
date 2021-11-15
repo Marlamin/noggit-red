@@ -294,7 +294,7 @@ public:
 
   void draw ( opengl::scoped::use_program& wmo_shader
             , math::matrix_4x4 const& model_view
-            , math::matrix_4x4 const& projection
+            , glm::mat4x4 const& projection
             , math::matrix_4x4 const& transform_matrix
             , math::matrix_4x4 const& transform_matrix_transposed
             , bool boundingbox

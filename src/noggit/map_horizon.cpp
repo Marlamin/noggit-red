@@ -294,7 +294,7 @@ static inline uint32_t inner_index(const map_horizon_batch &batch, int y, int x)
 };
 
 void map_horizon::render::draw( math::matrix_4x4 const& model_view
-                              , math::matrix_4x4 const& projection
+                              , glm::mat4x4 const& projection
                               , MapIndex *index
                               , const glm::vec3& color
                               , const float& cull_distance

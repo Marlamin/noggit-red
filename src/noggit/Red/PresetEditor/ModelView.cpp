@@ -32,7 +32,7 @@ void ModelViewer::paintGL()
   if (_world)
   {
     _world->draw(world_model_view().transposed()
-        , world_projection().transposed()
+        , world_projection()
         , glm::vec3(0.f, 0.f, 0.f)
         , 0.f
         , glm::vec4(1.f, 1.f, 1.f, 1.f)
@@ -127,7 +127,7 @@ math::matrix_4x4 ModelViewer::world_model_view() const
   return _world_camera.look_at_matrix();
 }
 
-math::matrix_4x4 ModelViewer::world_projection() const
+glm::mat4x4 ModelViewer::world_projection() const
 {
   float far_z = _settings->value("farZ", 2048).toFloat();
   return math::perspective(_world_camera.fov(), aspect_ratio(), 0.1f, far_z);

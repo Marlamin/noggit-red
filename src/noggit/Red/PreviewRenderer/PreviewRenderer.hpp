@@ -77,7 +77,7 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
     virtual void draw();
     virtual void tick(float dt);
     virtual math::matrix_4x4 model_view() const;
-    virtual math::matrix_4x4 projection() const;
+    virtual glm::mat4x4 projection() const;
     virtual float aspect_ratio() const;
 
     void update_emitters(float dt);

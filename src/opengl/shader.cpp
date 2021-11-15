@@ -341,6 +341,19 @@ namespace opengl
       gl.uniformMatrix4fv(pos, 1, GL_FALSE, value);
     }
 
+    void use_program::uniform(std::string const& name, glm::mat4x4 const& value)
+    {
+        GLuint loc = uniform_location(name);
+        if (loc < 0)
+            return;
+
+        gl.uniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
+    }
+    void use_program::uniform(GLint pos, glm::mat4x4 const& value)
+    {
+        gl.uniformMatrix4fv(pos, 1, GL_FALSE, glm::value_ptr(value));
+    }
+
     void use_program::sampler (std::string const& name, GLenum texture_slot, texture* tex)
     {
       uniform (name, GLint (texture_slot - GL_TEXTURE0));

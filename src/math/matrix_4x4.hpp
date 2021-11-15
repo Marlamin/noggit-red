@@ -94,6 +94,8 @@ namespace math
     matrix_4x4 adjoint() const;
     matrix_4x4 inverted() const;
     matrix_4x4 transposed() const;
+    glm::mat4x4 Convert() const;
+    glm::mat4x4 ConvertX() const;
 
     inline matrix_4x4& operator*= (matrix_4x4 const& p)
     {

@@ -23,7 +23,7 @@ namespace opengl
   struct MVPUniformBlock
   {
     math::matrix_4x4 model_view;
-    math::matrix_4x4 projection;
+    glm::mat4x4 projection;
   };
 
   struct LightingUniformBlock

@@ -130,7 +130,7 @@ void PreviewRenderer::draw()
   
   float culldistance = 10000000;
 
-  math::matrix_4x4 const mvp(model_view().transposed() * projection().transposed());
+  glm::mat4x4 const mvp(model_view().transposed().Convert() * projection());
   math::frustum const frustum (mvp);
 
   if (!_m2_program)
@@ -242,7 +242,7 @@ void PreviewRenderer::draw()
      for (auto& wmo_instance : _wmo_instances)
      {
        wmo_instance.draw(
-           wmo_program, model_view().transposed(), projection().transposed(), frustum, culldistance,
+           wmo_program, model_view().transposed(), projection(), frustum, culldistance,
            glm::vec3(0.0f, 0.0f, 0.0f), _draw_boxes.get(), _draw_models.get() // doodads
            , false, std::vector<selection_type>(), 0, false, display_mode::in_3D
        );
@@ -340,7 +340,7 @@ void PreviewRenderer::draw()
       opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
       m2_box_shader.uniform ("model_view", model_view().transposed());
-      m2_box_shader.uniform ("projection", projection().transposed());
+      m2_box_shader.uniform("projection", projection());
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -422,7 +422,7 @@ math::matrix_4x4 PreviewRenderer::model_view() const
   return _camera.look_at_matrix();
 }
 
-math::matrix_4x4 PreviewRenderer::projection() const
+glm::mat4x4 PreviewRenderer::projection() const
 {
   float far_z = _settings->value("farZ", 2048).toFloat();
   return math::perspective(_camera.fov(), aspect_ratio(), 0.1f, far_z);

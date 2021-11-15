@@ -17,7 +17,7 @@ namespace opengl
   namespace primitives
   {
     void wire_box::draw ( math::matrix_4x4 const& model_view
-                        , math::matrix_4x4 const& projection
+                        , glm::mat4x4 const& projection
                         , math::matrix_4x4 const& transform
                         , glm::vec4  const& color
                         , glm::vec3 const& min_point
@@ -120,7 +120,7 @@ namespace opengl
         _buffers_are_setup = false;
       }
 
-      void grid::draw( math::matrix_4x4 const& mvp
+      void grid::draw(glm::mat4x4 const& mvp
           , glm::vec3 const& pos
           , glm::vec4  const& color
           , float radius
@@ -257,7 +257,7 @@ namespace opengl
       }
 
 
-      void sphere::draw( math::matrix_4x4 const& mvp
+      void sphere::draw(glm::mat4x4 const& mvp
                      , glm::vec3 const& pos
                      , glm::vec4  const& color
                      , float radius
@@ -388,7 +388,7 @@ void main()
       }
 
 
-      void square::draw( math::matrix_4x4 const& mvp
+      void square::draw(glm::mat4x4 const& mvp
                      , glm::vec3 const& pos
                      , float radius
                      , math::radians inclination
