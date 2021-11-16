@@ -1,7 +1,5 @@
 #include <noggit/camera.hpp>
 
-#include <math/projection.hpp>
-
 namespace noggit
 {
   camera::camera ( glm::vec3 const& position
@@ -79,7 +77,19 @@ namespace noggit
 
   glm::mat4x4 camera::look_at_matrix() const
   {
-    return math::look_at(position, look_at(), {0.f, 1.f, 0.f});
+    auto eye = position;
+    auto center = look_at();
+    auto up = glm::vec3(0.f, 1.f, 0.f);
+
+    glm::vec3 const z = glm::normalize(eye - center);
+    glm::vec3 const x = glm::normalize(glm::cross(up, z));
+    glm::vec3 const y = glm::normalize(glm::cross(z, x));
+
+    return glm::transpose(glm::mat4x4(x.x, x.y, x.z, glm::dot(x, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , y.x, y.y, y.z, glm::dot(y, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , z.x, z.y, z.z, glm::dot(z, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , 0.f, 0.f, 0.f, 1.f
+    ));
   }
 
   void camera::move_forward (float sign, float dt)

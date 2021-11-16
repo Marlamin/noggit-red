@@ -1,5 +1,4 @@
 #include "ModelView.hpp"
-#include <math/projection.hpp>
 #include <external/qtimgui/imgui/imgui.h>
 #include <external/imguizmo/ImGuizmo.h>
 
@@ -130,7 +129,7 @@ glm::mat4x4 ModelViewer::world_model_view() const
 glm::mat4x4 ModelViewer::world_projection() const
 {
   float far_z = _settings->value("farZ", 2048).toFloat();
-  return math::perspective(_world_camera.fov(), aspect_ratio(), 0.1f, far_z);
+  return glm::perspective(_camera.fov()._, aspect_ratio(), 1.f, far_z);
 }
 
 void ModelViewer::tick(float dt)

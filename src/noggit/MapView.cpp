@@ -1,6 +1,4 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
-#include <math/projection.hpp>
 #include <noggit/DBC.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
@@ -4005,7 +4003,18 @@ glm::mat4x4 MapView::model_view() const
     target.y -= 1.f;
     target.z -= 0.001f;
 
-    return math::look_at(eye, target, {0.f,1.f, 0.f});
+    auto center = target;
+    auto up = glm::vec3(0.f, 1.f, 0.f);
+
+    glm::vec3 const z = glm::normalize(eye - center);
+    glm::vec3 const x = glm::normalize(glm::cross(up, z));
+    glm::vec3 const y = glm::normalize(glm::cross(z, x));
+
+    return glm::transpose(glm::mat4x4(x.x, x.y, x.z, glm::dot(x, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , y.x, y.y, y.z, glm::dot(y, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , z.x, z.y, z.z, glm::dot(z, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , 0.f, 0.f, 0.f, 1.f
+    ));
   }
   else
   {
@@ -4021,11 +4030,11 @@ glm::mat4x4 MapView::projection() const
     float half_width = width() * 0.5f * _2d_zoom;
     float half_height = height() * 0.5f * _2d_zoom;
 
-    return math::ortho(-half_width, half_width, -half_height, half_height, -1.f, far_z);
+    return glm::ortho(-half_width, half_width, -half_height, half_height, -1.f, far_z);
   }
   else
   {
-    return math::perspective(_camera.fov(), aspect_ratio(), 1.f, far_z);
+    return glm::perspective(_camera.fov()._, aspect_ratio(), 1.f, far_z);
   }
 }
 

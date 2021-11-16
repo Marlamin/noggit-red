@@ -4,7 +4,6 @@
 #include <noggit/World.inl>
 
 #include <math/frustum.hpp>
-#include <math/projection.hpp>
 #include <noggit/Brush.h> // brush
 #include <noggit/ChunkWater.hpp>
 #include <noggit/DBC.h>
@@ -2742,18 +2741,22 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     float max_height = getMaxTileHeight(tile_idx);
 
     // setup view matrices
-    auto projection = math::ortho(
-        -TILESIZE / 2.0f,
-        TILESIZE / 2.0f,
-        -TILESIZE / 2.0f,
-        TILESIZE / 2.0f,
-        5.f,
-        100000.0f
-    );
 
-    auto look_at = math::look_at(glm::vec3(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 10.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f),
-                                 glm::vec3(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 9.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0 - 0.005f),
-                                 glm::vec3(0.f,1.f, 0.f));
+    auto projection = glm::ortho( -TILESIZE / 2.0f,TILESIZE / 2.0f,-TILESIZE / 2.0f,TILESIZE / 2.0f,5.f,100000.0f);
+
+    auto eye = glm::vec3(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 10.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f);
+    auto center = glm::vec3(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 9.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0 - 0.005f);
+    auto up = glm::vec3(0.f, 1.f, 0.f);
+
+    glm::vec3 const z = glm::normalize(eye - center);
+    glm::vec3 const x = glm::normalize(glm::cross(up, z));
+    glm::vec3 const y = glm::normalize(glm::cross(z, x));
+
+    auto look_at = glm::transpose(glm::mat4x4(x.x, x.y, x.z, glm::dot(x, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , y.x, y.y, y.z, glm::dot(y, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , z.x, z.y, z.z, glm::dot(z, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , 0.f, 0.f, 0.f, 1.f
+    ));
 
     drawMinimap(mTile
         , look_at

@@ -2,7 +2,6 @@
 
 #include <opengl/scoped.hpp>
 #include <opengl/primitives.hpp>
-#include <math/projection.hpp>
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/AsyncLoader.h>
@@ -425,7 +424,7 @@ glm::mat4x4 PreviewRenderer::model_view() const
 glm::mat4x4 PreviewRenderer::projection() const
 {
   float far_z = _settings->value("farZ", 2048).toFloat();
-  return math::perspective(_camera.fov(), aspect_ratio(), 0.1f, far_z);
+  return glm::perspective(_camera.fov()._, aspect_ratio(), 1.f, far_z);
 }
 
 float PreviewRenderer::aspect_ratio() const
