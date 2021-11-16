@@ -31,7 +31,7 @@ void ModelViewer::paintGL()
 
   if (_world)
   {
-    _world->draw(world_model_view().transposed()
+    _world->draw(world_model_view()
         , world_projection()
         , glm::vec3(0.f, 0.f, 0.f)
         , 0.f
@@ -122,7 +122,7 @@ void ModelViewer::loadWorldUnderlay(const std::string& internal_name, int map_id
 
 }
 
-math::matrix_4x4 ModelViewer::world_model_view() const
+glm::mat4x4 ModelViewer::world_model_view() const
 {
   return _world_camera.look_at_matrix();
 }

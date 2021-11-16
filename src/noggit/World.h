@@ -95,7 +95,7 @@ public:
   void initDisplay();
 
   void update_models_emitters(float dt);
-  void draw (math::matrix_4x4 const& model_view
+  void draw (glm::mat4x4 const& model_view
             , glm::mat4x4 const& projection
             , glm::vec3 const& cursor_pos
             , float cursorRotation
@@ -135,7 +135,7 @@ public:
 
   noggit::NoggitRenderContext getRenderContext() { return _context; };
 
-  selection_result intersect ( math::matrix_4x4 const& model_view
+  selection_result intersect (glm::mat4x4 const& model_view
                              , math::ray const&
                              , bool only_map
                              , bool do_objects
@@ -333,7 +333,7 @@ public:
 
   bool saveMinimap (tile_index const& tile_idx, MinimapRenderSettings* settings);
   void drawMinimap ( MapTile *tile
-      , math::matrix_4x4 const& model_view
+      , glm::mat4x4 const& model_view
       , glm::mat4x4 const& projection
       , glm::vec3 const& camera_pos
       , MinimapRenderSettings* settings
@@ -416,7 +416,7 @@ public:
 private:
   void update_models_by_filename();
 
-  void updateMVPUniformBlock(const math::matrix_4x4& model_view, const glm::mat4x4& projection);
+  void updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection);
   void updateLightingUniformBlock(bool draw_fog, glm::vec3 const& camera_pos);
 
   std::unordered_set<MapChunk*>& vertexBorderChunks();

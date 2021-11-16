@@ -3806,7 +3806,7 @@ math::ray MapView::intersect_ray() const
   {
     // during rendering we multiply perspective * view
     // so we need the same order here and then invert.
-      glm::mat4x4 const invertedViewMatrix = glm::inverse(projection() * model_view().Convert());
+      glm::mat4x4 const invertedViewMatrix = glm::inverse(projection() * model_view());
       auto normalisedView = invertedViewMatrix * normalized_device_coords(mx, mz);
 
       auto pos = glm::vec3(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
@@ -3829,7 +3829,7 @@ selection_result MapView::intersect_result(bool terrain_only)
 {
   selection_result results
   ( _world->intersect 
-    ( model_view().transposed()
+    ( glm::transpose(model_view())
     , intersect_ray()
     , terrain_only
     , terrainMode == editing_mode::object || terrainMode == editing_mode::minimap
@@ -3957,11 +3957,10 @@ void MapView::update_cursor_pos()
       glm::vec4 viewport = glm::vec4(0, 0, width(), height());
       glm::vec3 wincoord = glm::vec3(mx, height() - mz - 1, static_cast<float>(*ptr) / std::numeric_limits<unsigned short>::max());
 
-      math::matrix_4x4 model_view_ = model_view().transposed();
+      glm::mat4x4 model_view_ = model_view();
       glm::mat4x4 projection_ = projection();
 
-      glm::vec3 objcoord = glm::unProject(wincoord, glm::make_mat4(reinterpret_cast<float*>(&model_view_)),
-                                          glm::make_mat4(reinterpret_cast<float*>(&projection_)), viewport);
+      glm::vec3 objcoord = glm::unProject(wincoord, model_view_,projection_, viewport);
 
 
       tile_index tile({objcoord.x, objcoord.y, objcoord.z});
@@ -3997,7 +3996,7 @@ void MapView::update_cursor_pos()
   }
 }
 
-math::matrix_4x4 MapView::model_view() const
+glm::mat4x4 MapView::model_view() const
 {
   if (_display_mode == display_mode::in_2D)
   {
@@ -4109,7 +4108,7 @@ void MapView::draw_map()
   }
 
 
-  _world->draw ( model_view().transposed()
+  _world->draw ( model_view()
                , projection()
                , _cursor_pos
                , _cursorRotation

@@ -66,7 +66,7 @@ namespace math
            };
   }*/
 
-  inline matrix_4x4 look_at (glm::vec3 const& eye
+  inline glm::mat4x4 look_at (glm::vec3 const& eye
                             , glm::vec3 const& center
                             , glm::vec3 const& up
                             )
@@ -75,10 +75,10 @@ namespace math
     glm::vec3 const x = glm::normalize(glm::cross(up, z));
     glm::vec3 const y = glm::normalize(glm::cross(z, x));
 
-    return { x.x, x.y, x.z, glm::dot(x, glm::vec3(-eye.x,-eye.y,-eye.z))
-           , y.x, y.y, y.z, glm::dot(y ,glm::vec3(-eye.x,-eye.y,-eye.z))
-           , z.x, z.y, z.z, glm::dot(z ,glm::vec3(-eye.x,-eye.y,-eye.z))
-           , 0.f, 0.f, 0.f, 1.f
-           };
+    return glm::transpose(glm::mat4x4(x.x, x.y, x.z, glm::dot(x, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , y.x, y.y, y.z, glm::dot(y, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , z.x, z.y, z.z, glm::dot(z, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , 0.f, 0.f, 0.f, 1.f
+    ));
   }
 }

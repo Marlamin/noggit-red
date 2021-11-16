@@ -335,7 +335,7 @@ void WMO::finishLoading ()
 }
 
 void WMO::draw ( opengl::scoped::use_program& wmo_shader
-               , math::matrix_4x4 const& model_view
+               , glm::mat4x4 const& model_view
                , glm::mat4x4 const& projection
                , math::matrix_4x4 const& transform_matrix
                , math::matrix_4x4 const& transform_matrix_transposed
@@ -427,7 +427,7 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
   return results;
 }
 
-bool WMO::draw_skybox ( math::matrix_4x4 const& model_view
+bool WMO::draw_skybox (glm::mat4x4 const& model_view
                       , glm::vec3 const& camera_pos
                       , opengl::scoped::use_program& m2_shader
                       , math::frustum const& frustum

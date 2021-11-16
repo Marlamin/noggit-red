@@ -1161,7 +1161,7 @@ void Model::initAnimated(const MPQFile& f)
   animcalc = false;
 }
 
-void Model::calcBones( math::matrix_4x4 const& model_view
+void Model::calcBones(glm::mat4x4 const& model_view
                      , int _anim
                      , int time
                      , int animation_time
@@ -1178,7 +1178,7 @@ void Model::calcBones( math::matrix_4x4 const& model_view
   }
 }
 
-void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_time)
+void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
 {
   if (_animations_seq_per_id.empty() || _animations_seq_per_id[anim_id].empty())
   {
@@ -1381,7 +1381,7 @@ Bone::Bone( const MPQFile& f,
   scale.apply(fixCoordSystem2);
 }
 
-void Bone::calcMatrix( math::matrix_4x4 const& model_view
+void Bone::calcMatrix(glm::mat4x4 const& model_view
                      , Bone *allbones
                      , int anim
                      , int time
@@ -1419,8 +1419,8 @@ void Bone::calcMatrix( math::matrix_4x4 const& model_view
 
     if (flags.billboard)
     {
-      glm::vec3 vRight (model_view[0], model_view[4], model_view[8]);
-      glm::vec3 vUp (model_view[1], model_view[5], model_view[9]); // Spherical billboarding
+      glm::vec3 vRight (model_view[0][0], model_view[1][0], model_view[2][0]);
+      glm::vec3 vUp (model_view[0][1], model_view[1][1], model_view[2][1]); // Spherical billboarding
       //glm::vec3 vUp = glm::vec3(0,1,0); // Cylindrical billboarding
       vRight =  glm::vec3(vRight.x * -1, vRight.y * -1, vRight.z * -1);
       m (0, 2, vRight.x);
@@ -1464,7 +1464,7 @@ void Bone::calcMatrix( math::matrix_4x4 const& model_view
   calc = true;
 }
 
-void Model::draw( math::matrix_4x4 const& model_view
+void Model::draw( glm::mat4x4 const& model_view
                 , ModelInstance& instance
                 , opengl::scoped::use_program& m2_shader
                 , opengl::M2RenderState& model_render_state
@@ -1527,7 +1527,7 @@ void Model::draw( math::matrix_4x4 const& model_view
   gl.depthMask(GL_TRUE);
 }
 
-void Model::draw ( math::matrix_4x4 const& model_view
+void Model::draw (glm::mat4x4 const& model_view
                  , std::vector<math::matrix_4x4> const& instances
                  , opengl::scoped::use_program& m2_shader
                  , opengl::M2RenderState& model_render_state
@@ -1664,7 +1664,7 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
 }
 
 
-std::vector<float> Model::intersect (math::matrix_4x4 const& model_view, math::ray const& ray, int animtime)
+std::vector<float> Model::intersect (glm::mat4x4 const& model_view, math::ray const& ray, int animtime)
 {
   std::vector<float> results;
 

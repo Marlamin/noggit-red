@@ -56,7 +56,7 @@ public:
   math::matrix_4x4 mrot = math::matrix_4x4::uninitialized;
 
   bool calc;
-  void calcMatrix( math::matrix_4x4 const& model_view
+  void calcMatrix(glm::mat4x4 const& model_view
                  , Bone* allbones
                  , int anim
                  , int time
@@ -212,7 +212,7 @@ public:
 
   Model(const std::string& name, noggit::NoggitRenderContext context );
 
-  void draw( math::matrix_4x4 const& model_view
+  void draw(glm::mat4x4 const& model_view
            , ModelInstance& instance
            , opengl::scoped::use_program& m2_shader
             , opengl::M2RenderState& model_render_state
@@ -223,7 +223,7 @@ public:
            , display_mode display
            , bool no_cull = false
            );
-  void draw ( math::matrix_4x4 const& model_view
+  void draw (glm::mat4x4 const& model_view
             , std::vector<math::matrix_4x4> const& instances
             , opengl::scoped::use_program& m2_shader
             , opengl::M2RenderState& model_render_state
@@ -246,7 +246,7 @@ public:
 
   void draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count);
 
-  std::vector<float> intersect (math::matrix_4x4 const& model_view, math::ray const&, int animtime);
+  std::vector<float> intersect (glm::mat4x4 const& model_view, math::ray const&, int animtime);
 
   void updateEmitters(float dt);
 
@@ -308,8 +308,8 @@ private:
   void fix_shader_id_layer();
   void compute_pixel_shader_ids();
 
-  void animate(math::matrix_4x4 const& model_view, int anim_id, int anim_time);
-  void calcBones(math::matrix_4x4 const& model_view, int anim, int time, int animation_time);
+  void animate(glm::mat4x4 const& model_view, int anim_id, int anim_time);
+  void calcBones(glm::mat4x4 const& model_view, int anim, int time, int animation_time);
 
   void lightsOn(opengl::light lbase);
   void lightsOff(opengl::light lbase);

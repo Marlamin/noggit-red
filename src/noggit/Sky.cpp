@@ -448,7 +448,7 @@ void Skies::update_sky_colors(glm::vec3 pos, int time)
   _need_color_buffer_update = true;  
 }
 
-bool Skies::draw( math::matrix_4x4 const& model_view
+bool Skies::draw(glm::mat4x4 const& model_view
                 , glm::mat4x4 const& projection
                 , glm::vec3 const& camera_pos
                 , opengl::scoped::use_program& m2_shader
@@ -483,8 +483,8 @@ bool Skies::draw( math::matrix_4x4 const& model_view
 
     {
       opengl::scoped::vao_binder const _ (_vao);
-
-      shader.uniform("model_view_projection", model_view.Convert() * projection);
+       
+      shader.uniform("model_view_projection", projection * model_view);
       shader.uniform("camera_pos", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
 
       gl.drawElements(GL_TRIANGLES, _indices_count, GL_UNSIGNED_SHORT, nullptr);

@@ -77,7 +77,7 @@ namespace noggit
     return glm::normalize((math::matrix_4x4(math::matrix_4x4::rotation_yzx, math::degrees::vec3(_roll._, _yaw._, _pitch._)) * forward));
   }
 
-  math::matrix_4x4 camera::look_at_matrix() const
+  glm::mat4x4 camera::look_at_matrix() const
   {
     return math::look_at(position, look_at(), {0.f, 1.f, 0.f});
   }

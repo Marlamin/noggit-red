@@ -28,7 +28,7 @@ namespace noggit
     glm::vec3 look_at() const;
     glm::vec3 direction() const;
 
-    math::matrix_4x4 look_at_matrix() const;
+    glm::mat4x4 look_at_matrix() const;
 
     void move_forward (float sign, float dt);
     void move_horizontal (float sign, float dt);

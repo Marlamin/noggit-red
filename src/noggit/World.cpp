@@ -1071,7 +1071,7 @@ void World::initShaders()
 
 }
 
-void World::draw ( math::matrix_4x4 const& model_view
+void World::draw (glm::mat4x4 const& model_view
                  , glm::mat4x4 const& projection
                  , glm::vec3 const& cursor_pos
                  , float cursorRotation
@@ -1109,8 +1109,8 @@ void World::draw ( math::matrix_4x4 const& model_view
 
   ZoneScoped;
 
-  glm::mat4x4 const mvp(model_view.Convert() * projection);
-  math::frustum const frustum (mvp);
+  glm::mat4x4 const mvp(projection * model_view);
+  math::frustum const frustum (glm::transpose(mvp));
 
   if (camera_moved)
     updateMVPUniformBlock(model_view, projection);
@@ -1855,7 +1855,7 @@ void World::draw ( math::matrix_4x4 const& model_view
 
 }
 
-selection_result World::intersect ( math::matrix_4x4 const& model_view
+selection_result World::intersect (glm::mat4x4 const& model_view
                                   , math::ray const& ray
                                   , bool pOnlyMap
                                   , bool do_objects
@@ -2366,7 +2366,7 @@ void World::convert_alphamap(bool to_big_alpha)
 }
 
 void World::drawMinimap ( MapTile *tile
-    , math::matrix_4x4 const& model_view
+    , glm::mat4x4 const& model_view
     , glm::mat4x4 const& projection
     , glm::vec3 const& camera_pos
     , MinimapRenderSettings* settings
@@ -2756,7 +2756,7 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
                                  glm::vec3(0.f,1.f, 0.f));
 
     drawMinimap(mTile
-        , look_at.transposed()
+        , look_at
         , projection
         , glm::vec3(TILESIZE * tile_idx.x + TILESIZE / 2.0f
             , max_height + 15.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f)
@@ -4522,7 +4522,7 @@ void World::ensureAllTilesetsAllADTs()
   }
 }
 
-void World::updateMVPUniformBlock(const math::matrix_4x4& model_view, const glm::mat4x4& projection)
+void World::updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection)
 {
   ZoneScoped;
 

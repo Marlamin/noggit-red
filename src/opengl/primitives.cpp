@@ -16,7 +16,7 @@ namespace opengl
 {
   namespace primitives
   {
-    void wire_box::draw ( math::matrix_4x4 const& model_view
+    void wire_box::draw ( glm::mat4x4 const& model_view
                         , glm::mat4x4 const& projection
                         , math::matrix_4x4 const& transform
                         , glm::vec4  const& color

@@ -160,7 +160,7 @@ public:
   Sky* findSkyWeights(glm::vec3 pos);
   void update_sky_colors(glm::vec3 pos, int time);
 
-  bool draw ( math::matrix_4x4 const& model_view
+  bool draw ( glm::mat4x4 const& model_view
             , glm::mat4x4 const& projection
             , glm::vec3 const& camera_pos
             , opengl::scoped::use_program& m2_shader

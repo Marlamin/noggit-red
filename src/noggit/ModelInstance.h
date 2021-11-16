@@ -75,12 +75,12 @@ public:
     return *this;
   }
 
-  void draw_box ( math::matrix_4x4 const& model_view
+  void draw_box (glm::mat4x4 const& model_view
                 , glm::mat4x4 const& projection
                 , bool is_current_selection
                 );
 
-  void intersect ( math::matrix_4x4 const& model_view
+  void intersect (glm::mat4x4 const& model_view
                  , math::ray const&
                  , selection_result*
                  , int animtime

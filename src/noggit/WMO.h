@@ -293,7 +293,7 @@ public:
   explicit WMO(const std::string& name, noggit::NoggitRenderContext context );
 
   void draw ( opengl::scoped::use_program& wmo_shader
-            , math::matrix_4x4 const& model_view
+            , glm::mat4x4 const& model_view
             , glm::mat4x4 const& projection
             , math::matrix_4x4 const& transform_matrix
             , math::matrix_4x4 const& transform_matrix_transposed
@@ -308,7 +308,7 @@ public:
             , display_mode display
             );
 
-  bool draw_skybox( math::matrix_4x4 const& model_view
+  bool draw_skybox(glm::mat4x4 const& model_view
                   , glm::vec3 const& camera_pos
                   , opengl::scoped::use_program& m2_shader
                   , math::frustum const& frustum

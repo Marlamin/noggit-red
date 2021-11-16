@@ -76,7 +76,7 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
     std::vector<glm::vec3> calcSceneExtents();
     virtual void draw();
     virtual void tick(float dt);
-    virtual math::matrix_4x4 model_view() const;
+    virtual glm::mat4x4 model_view() const;
     virtual glm::mat4x4 projection() const;
     virtual float aspect_ratio() const;
 

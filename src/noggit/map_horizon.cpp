@@ -293,7 +293,7 @@ static inline uint32_t inner_index(const map_horizon_batch &batch, int y, int x)
   return batch.vertex_start + 17 * 17 + y * 16 + x;
 };
 
-void map_horizon::render::draw( math::matrix_4x4 const& model_view
+void map_horizon::render::draw( glm::mat4x4 const& model_view
                               , glm::mat4x4 const& projection
                               , MapIndex *index
                               , const glm::vec3& color

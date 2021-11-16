@@ -22,7 +22,7 @@ ViewportGizmo::ViewportGizmo(noggit::Red::ViewportGizmo::GizmoContext gizmo_cont
 
 void ViewportGizmo::handleTransformGizmo(MapView* map_view
                                         , const std::vector<selection_type>& selection
-                                        , math::matrix_4x4 const& model_view
+                                        , glm::mat4x4 const& model_view
                                         , glm::mat4x4 const& projection)
 {
 
@@ -33,7 +33,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
   GizmoInternalMode gizmo_selection_type;
 
-  auto model_view_trs = model_view.transposed();
+  auto model_view_trs = model_view;
   auto projection_trs = projection;
 
   int n_selected = selection.size();
@@ -79,7 +79,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance = boost::get<selected_object_type>(selection[0]);
       obj_instance->recalcExtents();
       object_matrix = obj_instance->transformMatrixTransposed();
-      ImGuizmo::Manipulate(model_view_trs, glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, object_matrix, delta_matrix, nullptr);
+      ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, object_matrix, delta_matrix, nullptr);
       break;
     }
     case MULTISELECTION:
@@ -87,7 +87,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       if (isUsing())
         _last_pivot_scale = ImGuizmo::GetOperationScaleLast();
 
-      ImGuizmo::Manipulate(model_view_trs, glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, pivot_matrix, delta_matrix, nullptr);
+      ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, pivot_matrix, delta_matrix, nullptr);
       break;
     }
   }

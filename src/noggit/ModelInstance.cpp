@@ -39,7 +39,7 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, no
 }
 
 
-void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
+void ModelInstance::draw_box (glm::mat4x4 const& model_view
                              , glm::mat4x4 const& projection
                              , bool is_current_selection
                              )
@@ -85,7 +85,7 @@ void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
   }
 }
 
-void ModelInstance::intersect ( math::matrix_4x4 const& model_view
+void ModelInstance::intersect (glm::mat4x4 const& model_view
                               , math::ray const& ray
                               , selection_result* results
                               , int animtime

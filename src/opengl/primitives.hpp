@@ -40,7 +40,7 @@ namespace opengl
         return instances.at(context);
       }
 
-      void draw ( math::matrix_4x4 const& model_view
+      void draw ( glm::mat4x4 const& model_view
                 , glm::mat4x4 const& projection
                 , math::matrix_4x4 const& transform
                 , glm::vec4 const& color

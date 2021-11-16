@@ -35,7 +35,7 @@ namespace noggit
 
         void tick(float dt) override;
 
-        math::matrix_4x4 world_model_view() const;
+        glm::mat4x4 world_model_view() const;
         glm::mat4x4 world_projection() const;
 
         void mouseMoveEvent(QMouseEvent* event) override;

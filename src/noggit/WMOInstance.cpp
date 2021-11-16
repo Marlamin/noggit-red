@@ -47,7 +47,7 @@ WMOInstance::WMOInstance(std::string const& filename, noggit::NoggitRenderContex
 
 
 void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
-                       , math::matrix_4x4 const& model_view
+                       , glm::mat4x4 const& model_view
                        , glm::mat4x4 const& projection
                        , math::frustum const& frustum
                        , const float& cull_distance
