@@ -5,8 +5,6 @@
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_selection.hpp>
 
-#include <math/vector_3d.hpp>
-
 namespace noggit {
 	namespace scripting {
 		void procedures::paint_texture(
@@ -17,7 +15,7 @@ namespace noggit {
 			, float angle
 		)
 		{
-      auto center = math::vector_3d(sel.min().x + (sel.max().x - sel.min().x) / 2, 0, sel.min().z + (sel.max().z - sel.min().z) / 2);
+      auto center = glm::vec3(sel.min().x + (sel.max().x - sel.min().x) / 2, 0, sel.min().z + (sel.max().z - sel.min().z) / 2);
       auto outer_radius = (sel.max().x - sel.min().x) / 2;
       int width = img.width();
       int height = img.height();

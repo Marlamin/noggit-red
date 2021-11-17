@@ -4,8 +4,6 @@
 
 #include <boost/optional.hpp>
 #include <math/trig.hpp>
-#include <math/vector_3d.hpp>
-#include <math/vector_4d.hpp>
 #include <noggit/Log.h>
 
 #include <algorithm>
@@ -15,6 +13,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <glm/vec4.hpp>
 #include <noggit/Selection.h>
 
 // namespace for static helper functions.
@@ -26,16 +25,16 @@ namespace misc
   float randfloat(float lower, float upper);
   int randint(int lower, int upper);
   float dist(float x1, float z1, float x2, float z2);
-  float dist(math::vector_3d const& p1, math::vector_3d const& p2);
+  float dist(glm::vec3 const& p1, glm::vec3 const& p2);
   float getShortestDist(float x, float z, float squareX, float squareZ, float unitSize);
-  float getShortestDist(math::vector_3d const& pos, math::vector_3d const& square_pos, float unitSize);
+  float getShortestDist(glm::vec3 const& pos, glm::vec3 const& square_pos, float unitSize);
   bool square_is_in_circle(float x, float z, float radius, float square_x, float square_z, float square_size);
-  bool rectOverlap(math::vector_3d const*, math::vector_3d const*);
+  bool rectOverlap(glm::vec3 const*, glm::vec3 const*);
   // used for angled tools, get the height a point (pos) should be given an origin, angle and orientation
-  float angledHeight(math::vector_3d const& origin, math::vector_3d const& pos, math::radians const& angle, math::radians const& orientation);
-  void extract_v3d_min_max(math::vector_3d const& point, math::vector_3d& min, math::vector_3d& max);
-  std::vector<math::vector_3d> intersection_points(math::vector_3d const& vmin, math::vector_3d const& vmax);  
-  math::vector_3d transform_model_box_coords(math::vector_3d const& pos);
+  float angledHeight(glm::vec3 const& origin, glm::vec3 const& pos, math::radians const& angle, math::radians const& orientation);
+  void extract_v3d_min_max(glm::vec3 const& point, glm::vec3& min, glm::vec3& max);
+  std::vector<glm::vec3> intersection_points(glm::vec3 const& vmin, glm::vec3 const& vmax);  
+  glm::vec3 transform_model_box_coords(glm::vec3 const& pos);
   // normalize the filename used in adts since TC extractors don't accept /
   std::string normalize_adt_filename(std::string filename);
 
@@ -45,11 +44,11 @@ namespace misc
     return std::abs(a - b) < (std::max(1.f, std::max(a, b)) * std::numeric_limits<float>::epsilon());
   }
 
-  bool vec3d_equals(math::vector_3d const& v1, math::vector_3d const& v2);
+  bool vec3d_equals(glm::vec3 const& v1, glm::vec3 const& v2);
   bool deg_vec3d_equals(math::degrees::vec3 const& v1, math::degrees::vec3 const& v2);
 
-  bool pointInside(math::vector_3d point, std::array<math::vector_3d, 2> const& extents);
-  void minmax(math::vector_3d* a, math::vector_3d* b);
+  bool pointInside(glm::vec3 point, std::array<glm::vec3, 2> const& extents);
+  void minmax(glm::vec3* a, glm::vec3* b);
 
   inline int rounded_int_div(int value, int div)
   {
@@ -74,10 +73,10 @@ namespace misc
     }
   }
 
-  struct random_color : math::vector_4d
+  struct random_color : glm::vec4
   {
     random_color()
-      : math::vector_4d ( misc::randfloat(0.0f, 1.0f)
+      : glm::vec4( misc::randfloat(0.0f, 1.0f)
                         , misc::randfloat(0.0f, 1.0f)
                         , misc::randfloat(0.0f, 1.0f)
                         , 0.7f

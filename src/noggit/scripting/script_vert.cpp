@@ -46,18 +46,18 @@ namespace noggit
     void vert::set_color(float r, float g, float b)
     {
       // todo create MCCV
-      _chunk->mccv[_index] = math::vector_3d(r, g, b);
+      _chunk->mccv[_index] = glm::vec3(r, g, b);
     }
 
-    math::vector_3d vert::get_color()
+    glm::vec3 vert::get_color()
     {
       if (!_chunk->hasColors())
       {
-        return math::vector_3d(1, 1, 1);
+        return glm::vec3(1, 1, 1);
       }
       else
       {
-        return math::vector_3d(_chunk->mccv[_index]);
+        return glm::vec3(_chunk->mccv[_index]);
       }
     }
 
@@ -69,7 +69,7 @@ namespace noggit
       }
 
       // TODO: Extremely inefficient
-      _chunk->liquid_chunk()->paintLiquid(get_pos(), 1, type, true, math::radians(0), math::radians(0), true, math::vector_3d(0, height, 0), true, true, _chunk, 1);
+      _chunk->liquid_chunk()->paintLiquid(get_pos(), 1, type, true, math::radians(0), math::radians(0), true, glm::vec3(0, height, 0), true, true, _chunk, 1);
     }
 
     void vert::set_hole(bool add)
@@ -77,7 +77,7 @@ namespace noggit
       _chunk->setHole(get_pos(), 1.f, false, add);
     }
 
-    math::vector_3d vert::get_pos()
+    glm::vec3 vert::get_pos()
     {
       return _chunk->mVertices[_index];
     }

@@ -1,10 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
-
-#include <math/vector_3d.hpp>
-
 #include <memory>
 #include <string>
+#include <glm/vec3.hpp>
 
 namespace noggit
 {
@@ -35,9 +33,9 @@ namespace noggit
     float sqrt(float arg);
     float abs(float arg);
     float lerp(float from, float to, float amount);
-    float dist_2d(math::vector_3d const& from, math::vector_3d const& to);
-    int dist_2d_compare(math::vector_3d const& from, math::vector_3d const& to, float dist);
-    math::vector_3d rotate_2d(math::vector_3d const& point, math::vector_3d const& origin, float angleDeg);
+    float dist_2d(glm::vec3 const& from, glm::vec3 const& to);
+    int dist_2d_compare(glm::vec3 const& from, glm::vec3 const& to, float dist);
+    glm::vec3 rotate_2d(glm::vec3 const& point, glm::vec3 const& origin, float angleDeg);
 
     void register_math(script_context * state);
   } // namespace scripting

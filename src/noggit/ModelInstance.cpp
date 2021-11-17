@@ -23,11 +23,8 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, no
   , model (filename, context)
 {
 	uid = d->uniqueID;
-	pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
-  dir = math::degrees::vec3( math::degrees(d->rot[0])
-      , math::degrees(d->rot[1])
-      , math::degrees(d->rot[2])
-  );
+	pos = glm::vec3(d->pos[0], d->pos[1], d->pos[2]);
+    dir = math::degrees::vec3( math::degrees(d->rot[0])._, math::degrees(d->rot[1])._, math::degrees(d->rot[2])._);
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	scale = d->scale / 1024.0f;
 
@@ -42,8 +39,8 @@ ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, no
 }
 
 
-void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
-                             , math::matrix_4x4 const& projection
+void ModelInstance::draw_box (glm::mat4x4 const& model_view
+                             , glm::mat4x4 const& projection
                              , bool is_current_selection
                              )
 {
@@ -88,7 +85,7 @@ void ModelInstance::draw_box ( math::matrix_4x4 const& model_view
   }
 }
 
-void ModelInstance::intersect ( math::matrix_4x4 const& model_view
+void ModelInstance::intersect (glm::mat4x4 const& model_view
                               , math::ray const& ray
                               , selection_result* results
                               , int animtime
@@ -126,7 +123,7 @@ bool ModelInstance::isInFrustum(const math::frustum& frustum)
   return true;
 }
 
-bool ModelInstance::isInRenderDist(const float& cull_distance, const math::vector_3d& camera, display_mode display)
+bool ModelInstance::isInRenderDist(const float& cull_distance, const glm::vec3& camera, display_mode display)
 {
   float dist;
 
@@ -178,20 +175,22 @@ void ModelInstance::recalcExtents()
   updateTransformMatrix();
 
   math::aabb const relative_to_model
-    ( math::min ( model->header.collision_box_min
-                , model->header.bounding_box_min
-                )
-    , math::max ( model->header.collision_box_max
-                , model->header.bounding_box_max
-                )
+    ( glm::min ( model->header.collision_box_min, model->header.bounding_box_min)
+    , glm::max ( model->header.collision_box_max, model->header.bounding_box_max)
     );
 
   //! \todo If both boxes are {inf, -inf}, or well, if any min.c > max.c,
   //! the model is bad itself. We *could* detect that case and explicitly
   //! assume {-1, 1} then, to be nice to fuckported models.
 
-  auto const corners_in_world (math::apply (misc::transform_model_box_coords, relative_to_model.all_corners()));
-
+  auto corners_in_world = std::vector<glm::vec3>();
+  auto transform = misc::transform_model_box_coords;
+  auto points = relative_to_model.all_corners();
+  for (auto& point : points)
+  {
+      point = transform(point);
+      corners_in_world.push_back(point);
+  }
   auto const rotated_corners_in_world (_transform_mat_transposed.transposed() * corners_in_world);
 
   math::aabb const bounding_of_rotated_points (rotated_corners_in_world);
@@ -212,7 +211,7 @@ void ModelInstance::ensureExtents()
   }
 }
 
-math::vector_3d* ModelInstance::getExtents()
+glm::vec3* ModelInstance::getExtents()
 {
   if (_need_recalc_extents && model->finishedLoading())
   {
@@ -228,10 +227,10 @@ wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f
   float ff[4];
 
   f->read(ff, 12);
-  pos = math::vector_3d(ff[0], ff[2], -ff[1]);
+  pos = glm::vec3(ff[0], ff[2], -ff[1]);
 
   f->read(ff, 16);
-  doodad_orientation = math::quaternion (-ff[0], -ff[2], ff[1], ff[3]);
+  doodad_orientation = glm::quat (-ff[0], -ff[2], ff[1], ff[3]);
 
   f->read(&scale, 4);
 
@@ -246,7 +245,7 @@ wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f
 
   f->read(&color.packed, 4);
 
-  light_color = math::vector_3d(color.bgra.r / 255.f, color.bgra.g / 255.f, color.bgra.b / 255.f);
+  light_color = glm::vec3(color.bgra.r / 255.f, color.bgra.g / 255.f, color.bgra.b / 255.f);
 }
 
 void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)

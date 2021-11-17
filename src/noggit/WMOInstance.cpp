@@ -18,13 +18,13 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggi
   , mUnknown(d->unknown), mNameset(d->nameSet)
   , _doodadset(d->doodadSet)
 {
-  pos = math::vector_3d(d->pos[0], d->pos[1], d->pos[2]);
-  dir = math::degrees::vec3{math::degrees(d->rot[0]), math::degrees(d->rot[1]), math::degrees(d->rot[2])};
+  pos = glm::vec3(d->pos[0], d->pos[1], d->pos[2]);
+  dir = math::degrees::vec3{math::degrees(d->rot[0])._, math::degrees(d->rot[1])._, math::degrees(d->rot[2])._ };
 
   uid = d->uniqueID;
 
-  extents[0] = math::vector_3d(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
-  extents[1] = math::vector_3d(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
+  extents[0] = glm::vec3(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
+  extents[1] = glm::vec3(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
 
   updateTransformMatrix();
   change_doodadset(_doodadset);
@@ -39,19 +39,19 @@ WMOInstance::WMOInstance(std::string const& filename, noggit::NoggitRenderContex
   , _doodadset(0)
 {
   change_doodadset(_doodadset);
-  pos = math::vector_3d(0.0f, 0.0f, 0.0f);
-  dir = math::degrees::vec3(0_deg, 0_deg, 0_deg);
+  pos = glm::vec3(0.0f, 0.0f, 0.0f);
+  dir = math::degrees::vec3(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
   uid = 0;
   _context = context;
 }
 
 
 void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
-                       , math::matrix_4x4 const& model_view
-                       , math::matrix_4x4 const& projection
+                       , glm::mat4x4 const& model_view
+                       , glm::mat4x4 const& projection
                        , math::frustum const& frustum
                        , const float& cull_distance
-                       , const math::vector_3d& camera
+                       , const glm::vec3& camera
                        , bool force_box
                        , bool draw_doodads
                        , bool draw_fog
@@ -119,8 +119,8 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
     //gl.enable(GL_BLEND);
     //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    math::vector_4d color = force_box ? math::vector_4d(0.0f, 0.0f, 1.0f, 1.0f)
-        : math::vector_4d(0.0f, 1.0f, 0.0f, 1.0f);
+    glm::vec4 color = force_box ? glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)
+        : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
     opengl::primitives::wire_box::getInstance(_context).draw(model_view
        , projection
@@ -164,10 +164,10 @@ void WMOInstance::recalcExtents()
   updateTransformMatrix();
   update_doodads();
 
-  std::vector<math::vector_3d> points;
+  std::vector<glm::vec3> points;
 
-  math::vector_3d wmo_min(misc::transform_model_box_coords(wmo->extents[0]));
-  math::vector_3d wmo_max(misc::transform_model_box_coords(wmo->extents[1]));
+  glm::vec3 wmo_min(misc::transform_model_box_coords(wmo->extents[0]));
+  glm::vec3 wmo_max(misc::transform_model_box_coords(wmo->extents[1]));
 
   auto&& root_points = _transform_mat * math::aabb(wmo_min, wmo_max).all_corners();
 
@@ -233,7 +233,7 @@ void WMOInstance::update_doodads()
 std::vector<wmo_doodad_instance*> WMOInstance::get_visible_doodads
   ( math::frustum const& frustum
   , float const& cull_distance
-  , math::vector_3d const& camera
+  , glm::vec3 const& camera
   , bool draw_hidden_models
   , display_mode display
   )

@@ -1,8 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/vector_3d.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/TextureManager.h>
 
@@ -24,7 +22,7 @@ namespace noggit
     {
     public:
       texture_swapper ( QWidget* parent
-                      , const math::vector_3d* camera_pos
+                      , const glm::vec3* camera_pos
                       , MapView* map_view
                       );
 

@@ -12,14 +12,14 @@ namespace noggit {
   namespace scripting {
       script_brush_event::script_brush_event(
           script_settings * settings
-        , math::vector_3d const& pos
+        , glm::vec3 const& pos
         , float dt)
         : _settings(settings)
         , _pos(pos)
         , _dt(dt)
         {}
 
-    math::vector_3d script_brush_event::pos()
+    glm::vec3 script_brush_event::pos()
     {
       return _pos;
     }

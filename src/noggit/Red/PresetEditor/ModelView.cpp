@@ -1,5 +1,4 @@
 #include "ModelView.hpp"
-#include <math/projection.hpp>
 #include <external/qtimgui/imgui/imgui.h>
 #include <external/imguizmo/ImGuizmo.h>
 
@@ -31,16 +30,16 @@ void ModelViewer::paintGL()
 
   if (_world)
   {
-    _world->draw(world_model_view().transposed()
-        , world_projection().transposed()
-        , math::vector_3d(0.f, 0.f, 0.f)
+    _world->draw(world_model_view()
+        , world_projection()
+        , glm::vec3(0.f, 0.f, 0.f)
         , 0.f
-        , math::vector_4d(1.f, 1.f, 1.f, 1.f)
+        , glm::vec4(1.f, 1.f, 1.f, 1.f)
         , CursorType::CIRCLE
         , 0.f
         , false
         , 0.f
-        , math::vector_3d(0.f, 0.f, 0.f)
+        , glm::vec3(0.f, 0.f, 0.f)
         , 0.f
         , 0.f
         , false
@@ -122,15 +121,15 @@ void ModelViewer::loadWorldUnderlay(const std::string& internal_name, int map_id
 
 }
 
-math::matrix_4x4 ModelViewer::world_model_view() const
+glm::mat4x4 ModelViewer::world_model_view() const
 {
   return _world_camera.look_at_matrix();
 }
 
-math::matrix_4x4 ModelViewer::world_projection() const
+glm::mat4x4 ModelViewer::world_projection() const
 {
   float far_z = _settings->value("farZ", 2048).toFloat();
-  return math::perspective(_world_camera.fov(), aspect_ratio(), 0.1f, far_z);
+  return glm::perspective(_camera.fov()._, aspect_ratio(), 1.f, far_z);
 }
 
 void ModelViewer::tick(float dt)

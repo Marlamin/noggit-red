@@ -74,9 +74,9 @@ void WMO::finishLoading ()
   f.read (&ambient_color, 4);
   f.read (&nX, 4);
   f.read (ff, 12);
-  extents[0] = ::math::vector_3d (ff[0], ff[1], ff[2]);
+  extents[0] = ::glm::vec3 (ff[0], ff[1], ff[2]);
   f.read (ff, 12);
-  extents[1] = ::math::vector_3d (ff[0], ff[1], ff[2]);
+  extents[1] = ::glm::vec3 (ff[0], ff[1], ff[2]);
   f.read(&flags, 2);
 
   f.seekRelative (2);
@@ -195,11 +195,11 @@ void WMO::finishLoading ()
   f.seekRelative (size);
 
   /*
-  std::vector<math::vector_3d> portal_vertices;
+  std::vector<glm::vec3> portal_vertices;
 
   for (size_t i (0); i < size / 12; ++i) {
     f.read (ff, 12);
-    portal_vertices.push_back(math::vector_3d(ff[0], ff[2], -ff[1]));
+    portal_vertices.push_back(glm::vec3(ff[0], ff[2], -ff[1]));
   }
 
    */
@@ -349,14 +349,14 @@ void WMO::waitForChildrenLoaded()
 }
 
 void WMO::draw ( opengl::scoped::use_program& wmo_shader
-               , math::matrix_4x4 const& model_view
-               , math::matrix_4x4 const& projection
+               , glm::mat4x4 const& model_view
+               , glm::mat4x4 const& projection
                , math::matrix_4x4 const& transform_matrix
                , math::matrix_4x4 const& transform_matrix_transposed
                , bool boundingbox
                , math::frustum const& frustum
                , const float& cull_distance
-               , const math::vector_3d& camera
+               , const glm::vec3& camera
                , bool // draw_doodads
                , bool draw_fog
                , int animtime
@@ -365,7 +365,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                )
 {
 
-  wmo_shader.uniform("ambient_color", ambient_light_color.xyz());
+  wmo_shader.uniform("ambient_color",glm::vec3(ambient_light_color));
 
   for (auto& group : groups)
   {
@@ -417,8 +417,8 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
       , projection
       , transform_matrix_transposed
       , {1.0f, 0.0f, 0.0f, 1.0f}
-      , math::vector_3d(extents[0].x, extents[0].z, -extents[0].y)
-      , math::vector_3d(extents[1].x, extents[1].z, -extents[1].y)
+      , glm::vec3(extents[0].x, extents[0].z, -extents[0].y)
+      , glm::vec3(extents[1].x, extents[1].z, -extents[1].y)
       );
 
   }
@@ -441,19 +441,22 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
   return results;
 }
 
-bool WMO::draw_skybox ( math::matrix_4x4 const& model_view
-                      , math::vector_3d const& camera_pos
+bool WMO::draw_skybox (glm::mat4x4 const& model_view
+                      , glm::vec3 const& camera_pos
                       , opengl::scoped::use_program& m2_shader
                       , math::frustum const& frustum
                       , const float& cull_distance
                       , int animtime
                       , bool draw_particles
-                      , math::vector_3d aabb_min
-                      , math::vector_3d aabb_max
-                      , std::map<int, std::pair<math::vector_3d, math::vector_3d>> const& group_extents
+                      , glm::vec3 aabb_min
+                      , glm::vec3 aabb_max
+                      , std::map<int, std::pair<glm::vec3, glm::vec3>> const& group_extents
                       ) const
 {
-  if (!skybox || !camera_pos.is_inside_of(aabb_min, aabb_max))
+
+
+
+  if (!skybox || !math::is_inside_of(camera_pos,aabb_min, aabb_max))
   {
     return false;
   }
@@ -469,7 +472,7 @@ bool WMO::draw_skybox ( math::matrix_4x4 const& model_view
 
     auto& extent(group_extents.at(i));
 
-    if (camera_pos.is_inside_of(extent.first, extent.second))
+    if (math::is_inside_of(camera_pos, extent.first, extent.second))
     {
       ModelInstance sky(skybox.get()->filename, _context);
       sky.pos = camera_pos;
@@ -539,12 +542,12 @@ void WMOLight::init(MPQFile* f)
   char type[4];
   f->read(&type, 4);
   f->read(&color, 4);
-  f->read(pos, 12);
+  f->read(&pos, 12);
   f->read(&intensity, 4);
   f->read(unk, 4 * 5);
   f->read(&r, 4);
 
-  pos = math::vector_3d(pos.x, pos.z, -pos.y);
+  pos = glm::vec3(pos.x, pos.z, -pos.y);
 
   // rgb? bgr? hm
   float fa = ((color & 0xff000000) >> 24) / 255.0f;
@@ -552,7 +555,7 @@ void WMOLight::init(MPQFile* f)
   float fg = ((color & 0x0000ff00) >> 8) / 255.0f;
   float fb = ((color & 0x000000ff)) / 255.0f;
 
-  fcolor = math::vector_4d(fr, fg, fb, fa);
+  fcolor = glm::vec4(fr, fg, fb, fa);
   fcolor *= intensity;
   fcolor.w = 1.0f;
 
@@ -570,13 +573,13 @@ void WMOLight::setup(GLint)
   // not used right now -_-
 }
 
-void WMOLight::setupOnce(GLint, math::vector_3d, math::vector_3d)
+void WMOLight::setupOnce(GLint, glm::vec3, glm::vec3)
 {
-  //math::vector_4d position(dir, 0);
-  //math::vector_4d position(0,1,0,0);
+  //glm::vec4position(dir, 0);
+  //glm::vec4position(0,1,0,0);
 
-  //math::vector_4d ambient = math::vector_4d(light_color * 0.3f, 1);
-  //math::vector_4d diffuse = math::vector_4d(light_color, 1);
+  //glm::vec4ambient = glm::vec4(light_color * 0.3f, 1);
+  //glm::vec4diffuse = glm::vec4(light_color, 1);
 
 
   //gl.enable(light);
@@ -593,9 +596,9 @@ WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char const* names)
   f->read(&flags, 4);
   float ff[3];
   f->read(ff, 12);
-  VertexBoxMax = math::vector_3d(ff[0], ff[1], ff[2]);
+  VertexBoxMax = glm::vec3(ff[0], ff[1], ff[2]);
   f->read(ff, 12);
-  VertexBoxMin = math::vector_3d(ff[0], ff[1], ff[2]);
+  VertexBoxMin = glm::vec3(ff[0], ff[1], ff[2]);
   int nameOfs;
   f->read(&nameOfs, 4);
 
@@ -638,14 +641,14 @@ WMOGroup::WMOGroup(WMOGroup const& other)
 
 namespace
 {
-  math::vector_4d colorFromInt(unsigned int col)
+  glm::vec4 colorFromInt(unsigned int col)
   {
     GLubyte r, g, b, a;
     a = (col & 0xFF000000) >> 24;
     r = (col & 0x00FF0000) >> 16;
     g = (col & 0x0000FF00) >> 8;
     b = (col & 0x000000FF);
-    return math::vector_4d(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+    return glm::vec4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
   }
 }
 
@@ -813,7 +816,7 @@ void WMOGroup::upload()
   
   if (header.flags.has_two_motv)
   {
-    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d> ( _texcoords_buffer_2
+    gl.bufferData<GL_ARRAY_BUFFER, glm::vec2> ( _texcoords_buffer_2
                                                     , _texcoords_2
                                                     , GL_STATIC_DRAW
                                                     );
@@ -917,8 +920,8 @@ void WMOGroup::load()
   if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
   else fog = header.fogs[0];
 
-  BoundingBoxMin = ::math::vector_3d (header.box1[0], header.box1[2], -header.box1[1]);
-  BoundingBoxMax = ::math::vector_3d (header.box2[0], header.box2[2], -header.box2[1]);
+  BoundingBoxMin = ::glm::vec3 (header.box1[0], header.box1[2], -header.box1[1]);
+  BoundingBoxMax = ::glm::vec3 (header.box2[0], header.box2[2], -header.box2[1]);
 
   // - MOPY ----------------------------------------------
 
@@ -948,20 +951,20 @@ void WMOGroup::load()
   assert (fourcc == 'MOVT');
 
   // let's hope it's padded to 12 bytes, not 16...
-  ::math::vector_3d const* vertices = reinterpret_cast< ::math::vector_3d const*>(f.getPointer ());
+  ::glm::vec3 const* vertices = reinterpret_cast< ::glm::vec3 const*>(f.getPointer ());
 
-  VertexBoxMin = ::math::vector_3d (std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-  VertexBoxMax = ::math::vector_3d (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
+  VertexBoxMin = ::glm::vec3 (std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+  VertexBoxMax = ::glm::vec3 (std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
 
   rad = 0;
 
-  _vertices.resize(size / sizeof (::math::vector_3d));
+  _vertices.resize(size / sizeof (::glm::vec3));
 
   for (size_t i = 0; i < _vertices.size(); ++i)
   {
-    _vertices[i] = math::vector_3d(vertices[i].x, vertices[i].z, -vertices[i].y);
+    _vertices[i] = glm::vec3(vertices[i].x, vertices[i].z, -vertices[i].y);
 
-    ::math::vector_3d& v = _vertices[i];
+    ::glm::vec3& v = _vertices[i];
 
     if (v.x < VertexBoxMin.x) VertexBoxMin.x = v.x;
     if (v.y < VertexBoxMin.y) VertexBoxMin.y = v.y;
@@ -983,7 +986,7 @@ void WMOGroup::load()
 
   assert (fourcc == 'MONR');
 
-  _normals.resize (size / sizeof (::math::vector_3d));
+  _normals.resize (size / sizeof (::glm::vec3));
 
   f.read (_normals.data (), size);
 
@@ -999,7 +1002,7 @@ void WMOGroup::load()
 
   assert (fourcc == 'MOTV');
 
-  _texcoords.resize (size / sizeof (::math::vector_2d));
+  _texcoords.resize (size / sizeof (glm::vec2));
 
   f.read (_texcoords.data (), size);
 
@@ -1293,7 +1296,7 @@ void WMOGroup::load()
     }
     else
     {
-      _texcoords_2.resize(size / sizeof(::math::vector_2d));
+      _texcoords_2.resize(size / sizeof(glm::vec2));
       f.read(_texcoords_2.data(), size);
     }
 
@@ -1336,7 +1339,7 @@ void WMOGroup::load()
   // "real" lighting?
   if (header.flags.indoor && header.flags.has_vertex_color)
   {
-    ::math::vector_3d dirmin(1, 1, 1);
+    ::glm::vec3 dirmin(1, 1, 1);
     float lenmin;
 
     for (auto doodad : _doodad_ref)
@@ -1352,8 +1355,9 @@ void WMOGroup::load()
       for (unsigned int j = 0; j < wmo->lights.size(); j++)
       {
         WMOLight& l = wmo->lights[j];
-        ::math::vector_3d dir = l.pos - mi.pos;
-        float ll = dir.length_squared ();
+        ::glm::vec3 dir = l.pos - mi.pos;
+
+        float ll = glm::length(dir) * glm::length(dir);
         if (ll < lenmin)
         {
           lenmin = ll;
@@ -1413,7 +1417,7 @@ void WMOGroup::fix_vertex_color_alpha()
     interior_batchs_start = _batches[header.transparency_batches_count - 1].vertex_end + 1;
   }
 
-  math::vector_4d wmo_ambient_color;
+  glm::vec4 wmo_ambient_color;
 
   if (wmo->flags.use_unified_render_path)
   {
@@ -1463,11 +1467,11 @@ void WMOGroup::fix_vertex_color_alpha()
 bool WMOGroup::is_visible( math::matrix_4x4 const& transform
                          , math::frustum const& frustum
                          , float const& cull_distance
-                         , math::vector_3d const& camera
+                         , glm::vec3 const& camera
                          , display_mode display
                          ) const
 {
-  math::vector_3d pos = transform * center;
+  glm::vec3 pos = transform * center;
 
   if (!frustum.intersects(pos + BoundingBoxMin, pos + BoundingBoxMax))
   {
@@ -1484,7 +1488,7 @@ bool WMOGroup::is_visible( math::matrix_4x4 const& transform
 void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
                    , math::frustum const& // frustum
                    , const float& //cull_distance
-                   , const math::vector_3d& //camera
+                   , const glm::vec3& //camera
                    , bool // draw_fog
                    , bool // world_has_skies
                    )
@@ -1605,7 +1609,7 @@ void WMOGroup::setupFog (bool draw_fog, std::function<void (bool)> setup_fog)
 void WMOFog::init(MPQFile* f)
 {
   f->read(this, 0x30);
-  color = math::vector_4d(((color1 & 0x00FF0000) >> 16) / 255.0f, ((color1 & 0x0000FF00) >> 8) / 255.0f,
+  color = glm::vec4(((color1 & 0x00FF0000) >> 16) / 255.0f, ((color1 & 0x0000FF00) >> 8) / 255.0f,
     (color1 & 0x000000FF) / 255.0f, ((color1 & 0xFF000000) >> 24) / 255.0f);
   float temp;
   temp = pos.y;

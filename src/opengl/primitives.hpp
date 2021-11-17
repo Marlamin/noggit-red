@@ -40,12 +40,12 @@ namespace opengl
         return instances.at(context);
       }
 
-      void draw ( math::matrix_4x4 const& model_view
-                , math::matrix_4x4 const& projection
+      void draw ( glm::mat4x4 const& model_view
+                , glm::mat4x4 const& projection
                 , math::matrix_4x4 const& transform
-                , math::vector_4d const& color
-                , math::vector_3d const& min_point
-                , math::vector_3d const& max_point
+                , glm::vec4 const& color
+                , glm::vec3 const& min_point
+                , glm::vec3 const& max_point
                 );
 
       void unload();
@@ -64,9 +64,9 @@ namespace opengl
     class grid
     {
     public:
-        void draw( math::matrix_4x4 const& mvp
-            , math::vector_3d const& pos
-            , math::vector_4d const& color
+        void draw(glm::mat4x4 const& mvp
+            , glm::vec3 const& pos
+            , glm::vec4  const& color
             , float radius
         );
         void unload();
@@ -87,9 +87,9 @@ namespace opengl
     class sphere
     {
     public:
-      void draw( math::matrix_4x4 const& mvp
-               , math::vector_3d const& pos
-               , math::vector_4d const& color
+      void draw(glm::mat4x4 const& mvp
+               , glm::vec3 const& pos
+               , glm::vec4  const& color
                , float radius
                );
       void unload();
@@ -111,12 +111,12 @@ namespace opengl
     class square
     {
     public:      
-      void draw( math::matrix_4x4 const& mvp
-               , math::vector_3d const& pos
+      void draw(glm::mat4x4 const& mvp
+               , glm::vec3 const& pos
                , float radius // radius of the biggest circle fitting inside the square drawn
                , math::radians inclination
                , math::radians orientation
-               , math::vector_4d const& color
+               , glm::vec4  const& color
                );
       void unload();
     private:

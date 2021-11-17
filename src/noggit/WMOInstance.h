@@ -1,10 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
 #pragma once
-
 #include <noggit/SceneObject.hpp>
 #include <math/ray.hpp>
-#include <math/vector_3d.hpp> // math::vector_3d
 #include <noggit/WMO.h>
 #include <noggit/ContextObject.hpp>
 
@@ -18,7 +15,7 @@ class WMOInstance : public SceneObject
 {
 public:
   scoped_wmo_reference wmo;
-  std::map<int, std::pair<math::vector_3d, math::vector_3d>> group_extents;
+  std::map<int, std::pair<glm::vec3, glm::vec3>> group_extents;
   uint16_t mFlags;
   uint16_t mUnknown;
   uint16_t mNameset; 
@@ -87,11 +84,11 @@ public:
   }
 
   void draw ( opengl::scoped::use_program& wmo_shader
-            , math::matrix_4x4 const& model_view
-            , math::matrix_4x4 const& projection
+            , glm::mat4x4 const& model_view
+            , glm::mat4x4 const& projection
             , math::frustum const& frustum
             , const float& cull_distance
-            , const math::vector_3d& camera
+            , const glm::vec3& camera
             , bool force_box
             , bool draw_doodads
             , bool draw_fog
@@ -112,7 +109,7 @@ public:
 
   std::vector<wmo_doodad_instance*> get_visible_doodads( math::frustum const& frustum
                                                        , float const& cull_distance
-                                                       , math::vector_3d const& camera
+                                                       , glm::vec3 const& camera
                                                        , bool draw_hidden_models
                                                        , display_mode display
                                                        );

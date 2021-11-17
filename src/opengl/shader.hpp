@@ -16,13 +16,16 @@
 #include <cstdint>
 #include <unordered_map>
 #include <external/tsl/robin_map.h>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace math
 {
   struct matrix_4x4;
   struct vector_2d;
   struct vector_3d;
-  struct vector_4d;
 }
 
 namespace opengl
@@ -94,7 +97,7 @@ namespace opengl
       void bind_uniform_block(std::string const& name, unsigned);
       void uniform (std::string const& name, std::vector<int> const&);
       void uniform (std::string const& name, int const* data, std::size_t size);
-      void uniform (std::string const& name, math::vector_3d const* data, std::size_t size);
+      void uniform (std::string const& name, glm::vec3 const* data, std::size_t size);
       void uniform (GLint pos, std::vector<int> const&);
       void uniform (std::string const& name, GLint);
       void uniform (GLint pos, GLint);
@@ -102,16 +105,18 @@ namespace opengl
       void uniform (GLint pos, GLfloat);
       void uniform (std::string const& name, bool);
       void uniform (GLint pos, bool);
-      void uniform (std::string const& name, std::vector<math::vector_3d> const& value);
-      void uniform (GLint pos, std::vector<math::vector_3d> const& value);
-      void uniform (std::string const& name, math::vector_2d const&);
-      void uniform (GLint pos, math::vector_2d const&);
-      void uniform (std::string const& name, math::vector_3d const&);
-      void uniform (GLint pos, math::vector_3d const&);
-      void uniform (std::string const& name, math::vector_4d const&);
-      void uniform (GLint pos, math::vector_4d const&);
+      void uniform (std::string const& name, std::vector<glm::vec3> const& value);
+      void uniform (GLint pos, std::vector<glm::vec3> const& value);
+      void uniform (std::string const& name, glm::vec2 const&);
+      void uniform (GLint pos, glm::vec2 const&);
+      void uniform (std::string const& name, glm::vec3 const&);
+      void uniform (GLint pos, glm::vec3 const&);
+      void uniform (std::string const& name, glm::vec4 const&);
+      void uniform (GLint pos, glm::vec4 const&);
       void uniform (std::string const& name, math::matrix_4x4 const&);
       void uniform (GLint pos, math::matrix_4x4 const&);
+      void uniform(std::string const& name, glm::mat4x4 const&);
+      void uniform(GLint pos, glm::mat4x4 const&);
       template<typename T> void uniform (std::string const&, T) = delete;
 
       void uniform_chunk_textures (std::string const& name, std::array<std::array<std::array<int, 2>, 4>, 256> const& value);
@@ -123,9 +128,9 @@ namespace opengl
       void sampler (std::string const& name, GLenum texture_slot, texture*);
 
       void attrib (std::string const& name, std::vector<float> const&);
-      void attrib (std::string const& name, std::vector<math::vector_2d> const&);
-      void attrib (std::string const& name, std::vector<math::vector_3d> const&);
-      void attrib (std::string const& name, math::vector_3d const*);
+      void attrib (std::string const& name, std::vector<glm::vec2> const&);
+      void attrib (std::string const& name, std::vector<glm::vec3> const&);
+      void attrib (std::string const& name, glm::vec3 const*);
       void attrib (std::string const& name, math::matrix_4x4 const*, GLuint divisor = 0);
       void attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
       void attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);

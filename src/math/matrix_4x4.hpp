@@ -1,11 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/quaternion.hpp>
 #include <math/trig.hpp>
-
 #include <algorithm>
+#include <vector>
+#include <glm/gtc/quaternion.hpp>
 
 namespace math
 {
@@ -44,7 +43,7 @@ namespace math
     }
 
     static struct translation_t {} translation;
-    matrix_4x4 (translation_t, vector_3d const& tr)
+    matrix_4x4 (translation_t, glm::vec3 const& tr)
       : matrix_4x4 ( 1.0f, 0.0f, 0.0f, tr.x
                    , 0.0f, 1.0f, 0.0f, tr.y
                    , 0.0f, 0.0f, 1.0f, tr.z
@@ -53,7 +52,7 @@ namespace math
     {}
 
     static struct scale_t {} scale;
-    matrix_4x4 (scale_t, vector_3d const& sc)
+    matrix_4x4 (scale_t, glm::vec3 const& sc)
       : matrix_4x4 ( sc.x, 0.0f, 0.0f, 0.0f
                    , 0.0f, sc.y, 0.0f, 0.0f
                    , 0.0f, 0.0f, sc.z, 0.0f
@@ -65,7 +64,7 @@ namespace math
     {}
 
     static struct rotation_t {} rotation;
-    matrix_4x4 (rotation_t, quaternion const&);
+    matrix_4x4 (rotation_t, glm::quat const& q);
 
     static struct rotation_xyz_t {} rotation_xyz;
     matrix_4x4 (rotation_xyz_t, degrees::vec3 const&);
@@ -84,14 +83,10 @@ namespace math
       return _m[j][i] = value;
     }
 
-    vector_3d operator* (vector_3d const&) const;
-    vector_4d operator* (vector_4d const&) const;
-    quaternion operator* (quaternion const& q) const
-    {
-      return quaternion {*this * static_cast<vector_4d> (q)};
-    }
+    glm::vec3 operator* (glm::vec3 const&) const;
+    glm::vec4 operator* (glm::vec4 const&) const;
     matrix_4x4 operator* (matrix_4x4 const&) const;
-    std::vector<math::vector_3d> operator*(std::vector<math::vector_3d> points) const;
+    std::vector<glm::vec3> operator*(std::vector<glm::vec3> points) const;
 
     matrix_4x4& operator* (float);
     matrix_4x4& operator/ (float);
@@ -99,6 +94,8 @@ namespace math
     matrix_4x4 adjoint() const;
     matrix_4x4 inverted() const;
     matrix_4x4 transposed() const;
+    glm::mat4x4 Convert() const;
+    glm::mat4x4 ConvertX() const;
 
     inline matrix_4x4& operator*= (matrix_4x4 const& p)
     {
@@ -115,7 +112,7 @@ namespace math
     }
 
     template<std::size_t i>
-      vector_4d column() const
+  	glm::vec4 column() const
     {
       return {_m[0][i], _m[1][i], _m[2][i], _m[3][i]};
     }

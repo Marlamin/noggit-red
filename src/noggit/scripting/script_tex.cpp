@@ -45,17 +45,17 @@ namespace noggit {
     }
 
     namespace {
-      math::vector_3d tex_location(MapChunk* chnk, int index)
+      glm::vec3 tex_location(MapChunk* chnk, int index)
       {
         float cx = chnk->xbase;
         float cz = chnk->zbase;
         float x = index % TEXTURE_UNITS_WIDTH;
         float z = (float(index) / float(TEXTURE_UNITS_WIDTH));
-        return math::vector_3d(cx + x * TEXDETAILSIZE, 0, cz + z * TEXDETAILSIZE);
+        return glm::vec3(cx + x * TEXDETAILSIZE, 0, cz + z * TEXDETAILSIZE);
       }
     }
 
-    math::vector_3d tex::get_pos_2d()
+    glm::vec3 tex::get_pos_2d()
     {
       return tex_location(_chunk, _index);
     }
@@ -64,13 +64,13 @@ namespace noggit {
         script_context * ctx
       , MapChunk* chnk
       , std::vector<tex>& vec
-      , math::vector_3d const& min
-      , math::vector_3d const& max
+      , glm::vec3 const& min
+      , glm::vec3 const& max
     )
     {
       for (int i = 0; i < TEXTURE_UNITS_PER_CHUNK; ++i)
       {
-        math::vector_3d loc = tex_location(chnk, i);
+        glm::vec3 loc = tex_location(chnk, i);
         if (loc.x >= min.x && loc.x <= max.x && loc.z >= min.z && loc.z <= max.z)
         {
           vec.emplace_back(ctx, chnk, i);

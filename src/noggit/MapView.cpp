@@ -1,6 +1,4 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
-#include <math/projection.hpp>
 #include <noggit/DBC.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
@@ -2342,7 +2340,7 @@ void MapView::setupMinimap()
   _minimap->set_resizeable(true);
 
   connect ( _minimap, &noggit::ui::minimap_widget::map_clicked
-    , [this] (math::vector_3d const& pos)
+    , [this] (glm::vec3 const& pos)
             {
               move_camera_with_auto_height (pos);
             }
@@ -2458,7 +2456,7 @@ void MapView::on_exit_prompt()
 
 MapView::MapView( math::degrees camera_yaw0
                 , math::degrees camera_pitch0
-                , math::vector_3d camera_pos
+                , glm::vec3 camera_pos
                 , noggit::ui::main_window* main_window
                 , std::unique_ptr<World> world
                 , uid_fix_mode uid_fix
@@ -2584,7 +2582,7 @@ auto MapView::setBrushTexture(QImage const* img) -> void
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
-void MapView::move_camera_with_auto_height (math::vector_3d const& pos)
+void MapView::move_camera_with_auto_height (glm::vec3 const& pos)
 {
   makeCurrent();
   opengl::context::scoped_setter const _ (::gl, context());
@@ -3005,7 +3003,7 @@ void MapView::paintGL()
     _transform_gizmo.setUseMultiselectionPivot(_use_median_pivot_point.get());
 
     auto pivot = _world->multi_select_pivot().is_initialized() ?
-        _world->multi_select_pivot().get() : math::vector_3d(0.f, 0.f, 0.f);
+        _world->multi_select_pivot().get() : glm::vec3(0.f, 0.f, 0.f);
 
     _transform_gizmo.setMultiselectionPivot(pivot);
 
@@ -3188,9 +3186,9 @@ void MapView::tick (float dt)
 
   math::degrees yaw (-_camera.yaw()._);
 
-  math::vector_3d dir(1.0f, 0.0f, 0.0f);
-  math::vector_3d dirUp(1.0f, 0.0f, 0.0f);
-  math::vector_3d dirRight(0.0f, 0.0f, 1.0f);
+  glm::vec3 dir(1.0f, 0.0f, 0.0f);
+  glm::vec3 dirUp(1.0f, 0.0f, 0.0f);
+  glm::vec3 dirRight(0.0f, 0.0f, 1.0f);
   math::rotate(0.0f, 0.0f, &dir.x, &dir.y, _camera.pitch());
   math::rotate(0.0f, 0.0f, &dir.x, &dir.z, yaw);
 
@@ -3924,7 +3922,7 @@ void MapView::tick (float dt)
   }
 }
 
-math::vector_4d MapView::normalized_device_coords (int x, int y) const
+glm::vec4 MapView::normalized_device_coords (int x, int y) const
 {
   return {2.0f * x / width() - 1.0f, 1.0f - 2.0f * y / height(), 0.0f, 1.0f};
 }
@@ -3942,26 +3940,22 @@ math::ray MapView::intersect_ray() const
   {
     // during rendering we multiply perspective * view
     // so we need the same order here and then invert.
-    math::vector_3d const pos 
-    (
-      ( ( projection() 
-        * model_view()
-        ).inverted()
-        * normalized_device_coords (mx, mz)
-      ).xyz_normalized_by_w()
-    );
+      glm::mat4x4 const invertedViewMatrix = glm::inverse(projection() * model_view());
+      auto normalisedView = invertedViewMatrix * normalized_device_coords(mx, mz);
+
+      auto pos = glm::vec3(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
 
     return { _camera.position, pos - _camera.position };
   }
   else
   {
-    math::vector_3d const pos
+    glm::vec3 const pos
     ( _camera.position.x - (width() * 0.5f - mx) * _2d_zoom
     , _camera.position.y
     , _camera.position.z - (height() * 0.5f - mz) * _2d_zoom
     );
     
-    return { pos, math::vector_3d(0.f, -1.f, 0.f) };
+    return { pos, glm::vec3(0.f, -1.f, 0.f) };
   }
 }
 
@@ -3969,7 +3963,7 @@ selection_result MapView::intersect_result(bool terrain_only)
 {
   selection_result results
   ( _world->intersect 
-    ( model_view().transposed()
+    ( glm::transpose(model_view())
     , intersect_ray()
     , terrain_only
     , terrainMode == editing_mode::object || terrainMode == editing_mode::minimap
@@ -4097,11 +4091,10 @@ void MapView::update_cursor_pos()
       glm::vec4 viewport = glm::vec4(0, 0, width(), height());
       glm::vec3 wincoord = glm::vec3(mx, height() - mz - 1, static_cast<float>(*ptr) / std::numeric_limits<unsigned short>::max());
 
-      math::matrix_4x4 model_view_ = model_view().transposed();
-      math::matrix_4x4 projection_ = projection().transposed();
+      glm::mat4x4 model_view_ = model_view();
+      glm::mat4x4 projection_ = projection();
 
-      glm::vec3 objcoord = glm::unProject(wincoord, glm::make_mat4(reinterpret_cast<float*>(&model_view_)),
-                                          glm::make_mat4(reinterpret_cast<float*>(&projection_)), viewport);
+      glm::vec3 objcoord = glm::unProject(wincoord, model_view_,projection_, viewport);
 
 
       tile_index tile({objcoord.x, objcoord.y, objcoord.z});
@@ -4137,23 +4130,34 @@ void MapView::update_cursor_pos()
   }
 }
 
-math::matrix_4x4 MapView::model_view() const
+glm::mat4x4 MapView::model_view() const
 {
   if (_display_mode == display_mode::in_2D)
   {
-    math::vector_3d eye = _camera.position;
-    math::vector_3d target = eye;
+    glm::vec3 eye = _camera.position;
+    glm::vec3 target = eye;
     target.y -= 1.f;
     target.z -= 0.001f;
 
-    return math::look_at(eye, target, {0.f,1.f, 0.f});
+    auto center = target;
+    auto up = glm::vec3(0.f, 1.f, 0.f);
+
+    glm::vec3 const z = glm::normalize(eye - center);
+    glm::vec3 const x = glm::normalize(glm::cross(up, z));
+    glm::vec3 const y = glm::normalize(glm::cross(z, x));
+
+    return glm::transpose(glm::mat4x4(x.x, x.y, x.z, glm::dot(x, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , y.x, y.y, y.z, glm::dot(y, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , z.x, z.y, z.z, glm::dot(z, glm::vec3(-eye.x, -eye.y, -eye.z))
+        , 0.f, 0.f, 0.f, 1.f
+    ));
   }
   else
   {
     return _camera.look_at_matrix();
   }
 }
-math::matrix_4x4 MapView::projection() const
+glm::mat4x4 MapView::projection() const
 {
   float far_z = _settings->value("farZ", 2048).toFloat();
 
@@ -4162,11 +4166,11 @@ math::matrix_4x4 MapView::projection() const
     float half_width = width() * 0.5f * _2d_zoom;
     float half_height = height() * 0.5f * _2d_zoom;
 
-    return math::ortho(-half_width, half_width, -half_height, half_height, -1.f, far_z);
+    return glm::ortho(-half_width, half_width, -half_height, half_height, -1.f, far_z);
   }
   else
   {
-    return math::perspective(_camera.fov(), aspect_ratio(), 1.f, far_z);
+    return glm::perspective(_camera.fov()._, aspect_ratio(), 1.f, far_z);
   }
 }
 
@@ -4175,7 +4179,7 @@ void MapView::draw_map()
   ZoneScoped;
   //! \ todo: make the current tool return the radius
   float radius = 0.0f, inner_radius = 0.0f, angle = 0.0f, orientation = 0.0f;
-  math::vector_3d ref_pos;
+  glm::vec3 ref_pos;
   bool angled_mode = false, use_ref_pos = false;
 
   _cursorType = CursorType::CIRCLE;
@@ -4248,8 +4252,9 @@ void MapView::draw_map()
     doSelection(true);
   }
 
-  _world->draw ( model_view().transposed()
-               , projection().transposed()
+
+  _world->draw ( model_view()
+               , projection()
                , _cursor_pos
                , _cursorRotation
                , terrainMode == editing_mode::mccv ? shaderTool->shaderColor() : cursor_color
@@ -4417,7 +4422,7 @@ void MapView::keyPressEvent (QKeyEvent *event)
   }
   if (event->key() == Qt::Key_Home)
   {
-	  _camera.position = math::vector_3d(_cursor_pos.x, _cursor_pos.y + 50, _cursor_pos.z);
+	  _camera.position = glm::vec3(_cursor_pos.x, _cursor_pos.y + 50, _cursor_pos.z);
     _camera_moved_since_last_draw = true;
 	  _minimap->update();
   }
@@ -4434,28 +4439,28 @@ void MapView::keyPressEvent (QKeyEvent *event)
     if (event->key() == Qt::Key_Up)
     {
       auto next_z = cur_tile.z - 1;
-      _camera.position = math::vector_3d((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
+      _camera.position = glm::vec3((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
       _minimap->update();
     }
     else if (event->key() == Qt::Key_Down)
     {
       auto next_z = cur_tile.z + 1;
-      _camera.position = math::vector_3d((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
+      _camera.position = glm::vec3((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
       _minimap->update();
     }
     else if (event->key() == Qt::Key_Left)
     {
       auto next_x = cur_tile.x - 1;
-      _camera.position = math::vector_3d((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
+      _camera.position = glm::vec3((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
       _minimap->update();
     }
     else if (event->key() == Qt::Key_Right)
     {
       auto next_x = cur_tile.x + 1;
-      _camera.position = math::vector_3d((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
+      _camera.position = glm::vec3((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
       _minimap->update();
     }
@@ -5211,7 +5216,7 @@ void MapView::onSettingsSave()
   params->wireframe_width = _settings->value ("wireframe/width", 1.f).toFloat();
 
   QColor c = _settings->value("wireframe/color").value<QColor>();
-  math::vector_4d wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
+  glm::vec4 wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
   params->wireframe_color = wireframe_color;
 
   _world->markTerrainParamsUniformBlockDirty();

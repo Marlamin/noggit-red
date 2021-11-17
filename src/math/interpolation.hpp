@@ -27,7 +27,7 @@ namespace math
 
       radians const a (acos (dot)._ * percentage);
 
-      return T (start * cos (a) + T (end - start * dot).normalize() * sin (a));
+      return T (start * glm::cos(a._) + T (end - start * dot).normalize() * glm::sin(a._));
     }
 
     template<typename T>

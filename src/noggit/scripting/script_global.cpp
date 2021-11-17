@@ -21,9 +21,9 @@ namespace noggit {
 
       state->set_function("add_m2",[global](
         std::string const& filename
-        , math::vector_3d const& pos
+        , glm::vec3 const& pos
         , float scale
-        , math::vector_3d const& rotation)
+        , glm::vec3 const& rotation)
       { 
         // note: we set both min/max random scale and the normal scale parameter,
         // because noggit picks one based on random scale settings in the object tool
@@ -35,13 +35,13 @@ namespace noggit {
       });
 
       state->set_function("vec",[](float x, float y, float z){
-        return math::vector_3d(x,y,z);
+        return glm::vec3(x,y,z);
       });
 
       state->set_function("add_wmo",[global](
           std::string const& filename
-        , math::vector_3d const& pos
-        , math::vector_3d const& rotation)
+        , glm::vec3 const& pos
+        , glm::vec3 const& rotation)
       {
         global->get_view()->_world.get()->addWMO(
             filename
@@ -55,7 +55,7 @@ namespace noggit {
       });
 
       state->set_function("get_area_id",[global](
-        math::vector_3d const& pos)
+        glm::vec3 const& pos)
       {
         return global->get_view()->_world.get()->getAreaID(pos);
       });

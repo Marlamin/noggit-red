@@ -121,7 +121,7 @@ void PresetEditorWidget::setupConnectsCommon()
   );
 
   connect(ui->minimapWidget, &minimap_widget::map_clicked
-      , [this] (::math::vector_3d const& pos)
+      , [this] (::glm::vec3 const& pos)
           {
               ui->viewport->getWorldCamera()->position = pos;
           }

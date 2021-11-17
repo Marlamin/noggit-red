@@ -32,7 +32,7 @@ void ChunkSetVertexColorsNode::compute()
   MapChunk* chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
   auto list = defaultPortData<ListData>(PortType::In, 2)->value();
 
-  math::vector_3d* colors = chunk->getVertexColors();
+  glm::vec3* colors = chunk->getVertexColors();
 
   for (int i = 0; i < mapbufsize; ++i)
   {

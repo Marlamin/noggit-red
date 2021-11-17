@@ -229,7 +229,7 @@ void BrushStack::addAction(BrushStackItem* brush_stack_item)
 
 }
 
-void BrushStack::execute(math::vector_3d const& cursor_pos, World* world, float dt, bool mod_shift_down, bool mod_alt_down, bool mod_ctrl_down, bool is_under_map)
+void BrushStack::execute(glm::vec3 const& cursor_pos, World* world, float dt, bool mod_shift_down, bool mod_alt_down, bool mod_ctrl_down, bool is_under_map)
 {
   for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
   {

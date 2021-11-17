@@ -332,7 +332,7 @@ bool MapIndex::has_unsaved_changes(const tile_index& tile) const
   return (tileLoaded(tile) ? getTile(tile)->changed.load() : false);
 }
 
-void MapIndex::setFlag(bool to, math::vector_3d const& pos, uint32_t flag)
+void MapIndex::setFlag(bool to, glm::vec3 const& pos, uint32_t flag)
 {
   tile_index tile(pos);
 
@@ -727,7 +727,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
         continue;
       }
 
-      std::array<math::vector_3d, 2> tileExtents;
+      std::array<glm::vec3, 2> tileExtents;
       tileExtents[0] = { x*TILESIZE, 0, z*TILESIZE };
       tileExtents[1] = { (x+1)*TILESIZE, 0, (z+1)*TILESIZE };
       misc::minmax(&tileExtents[0], &tileExtents[1]);

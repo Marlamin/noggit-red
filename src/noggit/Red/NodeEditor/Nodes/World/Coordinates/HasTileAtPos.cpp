@@ -34,7 +34,7 @@ void HasTileAtPosNode::compute()
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<BooleanData>(world->mapIndex.hasTile(math::vector_3d(pos.x, pos.y, pos.z)));
+  _out_ports[1].out_value = std::make_shared<BooleanData>(world->mapIndex.hasTile(glm::vec3(pos.x, pos.y, pos.z)));
   _node->onDataUpdated(1);
 
 }

@@ -2,7 +2,6 @@
 
 #include <opengl/scoped.hpp>
 #include <opengl/primitives.hpp>
-#include <math/projection.hpp>
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/AsyncLoader.h>
@@ -25,7 +24,7 @@ using namespace noggit::Red;
 
 PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderContext context, QWidget* parent)
   :  noggit::Red::ViewportManager::Viewport(parent)
-  , _camera (math::vector_3d(0.0f, 0.0f, 0.0f), math::degrees(0.0f), math::degrees(0.0f))
+  , _camera (glm::vec3(0.0f, 0.0f, 0.0f), math::degrees(0.0f), math::degrees(0.0f))
   , _settings (new QSettings())
   , _width(width)
   , _height(height)
@@ -45,7 +44,7 @@ PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderCont
 
   opengl::context::scoped_setter const context_set (::gl, &_offscreen_context);
 
-  _light_dir = math::vector_3d(0.0f, 1.0f, 0.0f);
+  _light_dir = glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
 void PreviewRenderer::setModel(std::string const &filename)
@@ -113,7 +112,7 @@ void PreviewRenderer::resetCamera(float x, float y, float z, float roll, float y
   _camera.reset(x, y, z, roll, yaw, pitch);
   float radius = 0.f;
 
-  std::vector<math::vector_3d> extents = calcSceneExtents();
+  std::vector<glm::vec3> extents = calcSceneExtents();
   _camera.position = (extents[0] + extents[1]) / 2.0f;
   radius = std::max((_camera.position - extents[0]).length(), (_camera.position - extents[1]).length());
 
@@ -130,7 +129,7 @@ void PreviewRenderer::draw()
   
   float culldistance = 10000000;
 
-  math::matrix_4x4 const mvp(model_view().transposed() * projection().transposed());
+  glm::mat4x4 const mvp(model_view() * projection());
   math::frustum const frustum (mvp);
 
   if (!_m2_program)
@@ -211,10 +210,10 @@ void PreviewRenderer::draw()
       //water_shader.uniform("model_view", model_view().transposed());
       //water_shader.uniform("projection", projection().transposed());
 
-      math::vector_4d ocean_color_light(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
-      math::vector_4d ocean_color_dark(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
-      math::vector_4d river_color_light(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
-      math::vector_4d river_color_dark(math::vector_3d(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4ocean_color_light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4ocean_color_dark(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4river_color_light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
+      glm::vec4river_color_dark(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
 
       //water_shader.uniform("ocean_color_light", ocean_color_light);
       //water_shader.uniform("ocean_color_dark", ocean_color_dark);
@@ -242,8 +241,8 @@ void PreviewRenderer::draw()
      for (auto& wmo_instance : _wmo_instances)
      {
        wmo_instance.draw(
-           wmo_program, model_view().transposed(), projection().transposed(), frustum, culldistance,
-           math::vector_3d(0.0f, 0.0f, 0.0f), _draw_boxes.get(), _draw_models.get() // doodads
+           wmo_program, model_view(), projection(), frustum, culldistance,
+           glm::vec3(0.0f, 0.0f, 0.0f), _draw_boxes.get(), _draw_models.get() // doodads
            , false, std::vector<selection_type>(), 0, false, display_mode::in_3D
        );
 
@@ -339,19 +338,19 @@ void PreviewRenderer::draw()
     {
       opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
-      m2_box_shader.uniform ("model_view", model_view().transposed());
-      m2_box_shader.uniform ("projection", projection().transposed());
+      m2_box_shader.uniform ("model_view", model_view());
+      m2_box_shader.uniform("projection", projection());
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
       for (auto& it : model_boxes_to_draw)
       {
-        math::vector_4d color = it.first->is_hidden()
-                                ? math::vector_4d(0.f, 0.f, 1.f, 1.f)
+        glm::vec4 color = it.first->is_hidden()
+                                ? glm::vec4(0.f, 0.f, 1.f, 1.f)
                                 : ( it.first->use_fake_geometry()
-                                    ? math::vector_4d(1.f, 0.f, 0.f, 1.f)
-                                    : math::vector_4d(0.75f, 0.75f, 0.75f, 1.f)
+                                    ? glm::vec4(1.f, 0.f, 0.f, 1.f)
+                                    : glm::vec4(0.75f, 0.75f, 0.75f, 1.f)
                                 )
         ;
 
@@ -410,22 +409,22 @@ void PreviewRenderer::draw()
 
   if (_draw_grid.get())
   {
-    _grid.draw(mvp, math::vector_3d(0.f, 0.f, 0.f),
-               math::vector_4d(0.7f, 0.7f, 0.7f, 1.0f), 30.f);
+    _grid.draw(mvp, glm::vec3(0.f, 0.f, 0.f),
+               glm::vec4(0.7f, 0.7f, 0.7f, 1.0f), 30.f);
 
   }
 
 }
 
-math::matrix_4x4 PreviewRenderer::model_view() const
+glm::mat4x4 PreviewRenderer::model_view() const
 {
   return _camera.look_at_matrix();
 }
 
-math::matrix_4x4 PreviewRenderer::projection() const
+glm::mat4x4 PreviewRenderer::projection() const
 {
   float far_z = _settings->value("farZ", 2048).toFloat();
-  return math::perspective(_camera.fov(), aspect_ratio(), 0.1f, far_z);
+  return glm::perspective(_camera.fov()._, aspect_ratio(), 1.f, far_z);
 }
 
 float PreviewRenderer::aspect_ratio() const
@@ -433,13 +432,13 @@ float PreviewRenderer::aspect_ratio() const
   return static_cast<float>(_width) / static_cast<float>(_height);
 }
 
-std::vector<math::vector_3d> PreviewRenderer::calcSceneExtents()
+std::vector<glm::vec3> PreviewRenderer::calcSceneExtents()
 {
-  math::vector_3d min = {std::numeric_limits<float>::max(),
+  glm::vec3 min = {std::numeric_limits<float>::max(),
                          std::numeric_limits<float>::max(),
                          std::numeric_limits<float>::max()};
 
-  math::vector_3d max = {std::numeric_limits<float>::min(),
+  glm::vec3 max = {std::numeric_limits<float>::min(),
                          std::numeric_limits<float>::min(),
                          std::numeric_limits<float>::min()};
 
@@ -461,7 +460,7 @@ std::vector<math::vector_3d> PreviewRenderer::calcSceneExtents()
     }
   }
 
-  return std::move(std::vector<math::vector_3d>{min, max});
+  return std::move(std::vector<glm::vec3>{min, max});
 }
 
 QPixmap* PreviewRenderer::renderToPixmap()

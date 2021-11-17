@@ -22,8 +22,6 @@
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/Water.h>
 #include <noggit/ui/TexturingGUI.h>
-#include <math/vector_3d.hpp>
-
 
 class World;
 
@@ -58,7 +56,7 @@ namespace noggit::Red
     void setSpeed(float speed);
     void setMaskRotation(int rot);
     void setBrushMode(bool sculpt);
-    void execute(math::vector_3d const& cursor_pos, World* world, float dt, bool mod_shift_down, bool mod_alt_down, bool mod_ctrl_down, bool is_under_map);
+    void execute(glm::vec3 const& cursor_pos, World* world, float dt, bool mod_shift_down, bool mod_alt_down, bool mod_ctrl_down, bool is_under_map);
     void syncSliders(double radius, double inner_radius, double speed, int rot, int brushMode);
 
     bool isRadiusAffecting() { return _is_radius_affecting->isChecked(); };

@@ -33,19 +33,19 @@ namespace noggit
     float sqrt(float arg) { return ::sqrt(arg); }
     float abs(float arg) { return ::abs(arg); }
     float lerp(float from, float to, float ratio) { return from + ratio * (to - from); }
-    float dist_2d(math::vector_3d const& from, math::vector_3d const& to)
+    float dist_2d(glm::vec3 const& from, glm::vec3 const& to)
     {
       return std::sqrt(std::pow(from.x - to.x, 2) + std::pow(from.z - to.z, 2));
     }
 
-    int dist_2d_compare(math::vector_3d const& from, math::vector_3d const& to, float compare)
+    int dist_2d_compare(glm::vec3 const& from, glm::vec3 const& to, float compare)
     {
       float dist = std::pow(from.x - to.x, 2) + std::pow(from.z - to.z, 2);
       compare = std::pow(compare, 2);
       return dist > compare ? 1 : dist == compare ? 0 : -1;
     }
 
-    math::vector_3d rotate_2d(math::vector_3d const& point, math::vector_3d const& origin, float angle)
+    glm::vec3 rotate_2d(glm::vec3 const& point, glm::vec3 const& origin, float angle)
     {
       float s = std::sin(angle * 0.0174532925);
       float c = std::cos(angle * 0.0174532925);
@@ -56,7 +56,7 @@ namespace noggit
       float nx = lx * c - lz * s + origin.x;
       float nz = lx * s + lz * c + origin.z;
 
-      return math::vector_3d(nx, point.y, nz);
+      return glm::vec3(nx, point.y, nz);
     }
 
     void register_math(script_context * state)
@@ -88,10 +88,10 @@ namespace noggit
       state->set_function("dist_2d_compare",dist_2d_compare);
       state->set_function("rotate_2d",rotate_2d);
 
-      state->new_usertype<math::vector_3d>("vector_3d"
-        , "x", &math::vector_3d::x
-        , "y", &math::vector_3d::y
-        , "z", &math::vector_3d::z
+      state->new_usertype<glm::vec3>("vector_3d"
+        , "x", &glm::vec3::x
+        , "y", &glm::vec3::y
+        , "z", &glm::vec3::z
       );
     }
   } // namespace scripting

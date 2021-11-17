@@ -1,11 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
-
 #include <noggit/scripting/script_selection.hpp>
 #include <noggit/scripting/script_object.hpp>
-
-#include <math/vector_3d.hpp>
-
 #include <FastNoise/FastNoise.h>
 #include <vector>
 #include <string>
@@ -28,10 +24,10 @@ namespace noggit
               , std::string const& algorithm 
               , std::string const& seed);
 
-      float get(math::vector_3d &pos);
-      bool is_highest(math::vector_3d &pos, int check_radius);
+      float get(glm::vec3 &pos);
+      bool is_highest(glm::vec3 &pos, int check_radius);
       void set(int x, int y, float value);
-      math::vector_3d start();
+      glm::vec3 start();
       unsigned width();
       unsigned height();
     

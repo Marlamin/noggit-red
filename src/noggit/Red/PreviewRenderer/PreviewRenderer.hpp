@@ -2,7 +2,6 @@
 #define NOGGIT_PREVIEWRENDERER_HPP
 
 #include <math/matrix_4x4.hpp>
-#include <math/vector_3d.hpp>
 #include <noggit/camera.hpp>
 #include <noggit/WMOInstance.h>
 #include <noggit/ModelInstance.h>
@@ -74,11 +73,11 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
 
     bool _destroying = false;
 
-    std::vector<math::vector_3d> calcSceneExtents();
+    std::vector<glm::vec3> calcSceneExtents();
     virtual void draw();
     virtual void tick(float dt);
-    virtual math::matrix_4x4 model_view() const;
-    virtual math::matrix_4x4 projection() const;
+    virtual glm::mat4x4 model_view() const;
+    virtual glm::mat4x4 projection() const;
     virtual float aspect_ratio() const;
 
     void update_emitters(float dt);
@@ -97,10 +96,10 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
     QOpenGLFramebufferObjectFormat _fmt;
     QOffscreenSurface _offscreen_surface;
 
-    math::vector_3d _background_color;
-    math::vector_3d _diffuse_light;
-    math::vector_3d _ambient_light;
-    math::vector_3d _light_dir;
+    glm::vec3 _background_color;
+    glm::vec3 _diffuse_light;
+    glm::vec3 _ambient_light;
+    glm::vec3 _light_dir;
 
     bool _gl_initialized = false;
 

@@ -60,7 +60,7 @@ namespace
 
 // todo: use material
 wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const&, int group_liquid, bool use_dbc_type, bool is_ocean)
-  : pos(math::vector_3d(header.pos.x, header.pos.z, -header.pos.y))
+  : pos(glm::vec3(header.pos.x, header.pos.z, -header.pos.y))
   , xtiles(header.A)
   , ytiles(header.B)
 {
@@ -124,14 +124,14 @@ int wmo_liquid::initGeometry(MPQFile* f)
   int last_liquid_id = 0;
 
   // generate vertices
-  std::vector<math::vector_3d> lVertices ((xtiles + 1)*(ytiles + 1));
+  std::vector<glm::vec3> lVertices ((xtiles + 1)*(ytiles + 1));
 
   for (int j = 0; j<ytiles + 1; j++)
   {
     for (int i = 0; i<xtiles + 1; ++i)
     {
       size_t p = j*(xtiles + 1) + i;
-      lVertices[p] = math::vector_3d( pos.x + UNITSIZE * i
+      lVertices[p] = glm::vec3( pos.x + UNITSIZE * i
                                     , map[p].height
                                     , pos.z - UNITSIZE * j
                                     );
@@ -220,8 +220,8 @@ void wmo_liquid::upload(opengl::scoped::use_program& water_shader)
 
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_buffer, indices, GL_STATIC_DRAW);
 
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_buffer, vertices, GL_STATIC_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_tex_coord_buffer, tex_coords, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>(_vertices_buffer, vertices, GL_STATIC_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(_tex_coord_buffer, tex_coords, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER, float>(_depth_buffer, depths, GL_STATIC_DRAW);
 
   opengl::scoped::index_buffer_manual_binder indices_binder (_indices_buffer);

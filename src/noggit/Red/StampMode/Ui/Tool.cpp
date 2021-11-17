@@ -111,7 +111,7 @@ auto Tool::getInnerRadius(void) const -> float
   return _radiusInner;
 }
 
-auto Tool::stamp(World* world, math::vector_3d const& pos, float dt, bool doAdd) const -> void
+auto Tool::stamp(World* world, glm::vec3 const& pos, float dt, bool doAdd) const -> void
 {
   if(!_curPixmap)
     return;

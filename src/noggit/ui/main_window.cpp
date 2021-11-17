@@ -208,7 +208,7 @@ namespace noggit
     }
 
     void main_window::check_uid_then_enter_map
-                        ( math::vector_3d pos
+                        ( glm::vec3 pos
                         , math::degrees camera_pitch
                         , math::degrees camera_yaw
                         , bool from_bookmark
@@ -247,7 +247,7 @@ namespace noggit
         connect( uidFixWindow
                , &noggit::ui::uid_fix_window::fix_uid
                , [this, from_bookmark] 
-                   ( math::vector_3d pos
+                   ( glm::vec3 pos
                    , math::degrees camera_pitch
                    , math::degrees camera_yaw
                    , uid_fix_mode uid_fix
@@ -259,7 +259,7 @@ namespace noggit
       }
     }
 
-    void main_window::enterMapAt ( math::vector_3d pos
+    void main_window::enterMapAt ( glm::vec3 pos
                                  , math::degrees camera_pitch
                                  , math::degrees camera_yaw
                                  , uid_fix_mode uid_fix
@@ -386,7 +386,7 @@ namespace noggit
 
       QObject::connect
         ( _minimap,  &minimap_widget::map_clicked
-        , [this] (::math::vector_3d const& pos)
+        , [this] (::glm::vec3 const& pos)
           {
             check_uid_then_enter_map(pos, math::degrees(30.f), math::degrees(90.f));
           }

@@ -18,12 +18,12 @@ class ParticleSystem;
 class RibbonEmitter;
 
 struct Particle {
-  math::vector_3d pos, speed, down, origin, dir;
-  math::vector_3d  corners[4];
-  //math::vector_3d tpos;
+  glm::vec3 pos, speed, down, origin, dir;
+  glm::vec3  corners[4];
+  //glm::vec3 tpos;
   float size, life, maxlife;
   unsigned int tile;
-  math::vector_4d color;
+  glm::vec4 color;
 };
 
 typedef std::list<Particle> ParticleList;
@@ -48,7 +48,7 @@ public:
 };
 
 struct TexCoordSet {
-  math::vector_2d tc[4];
+    glm::vec2 tc[4];
 };
 
 class ParticleSystem 
@@ -58,10 +58,10 @@ class ParticleSystem
   std::unique_ptr<ParticleEmitter> emitter;
   Animation::M2Value<float> speed, variation, spread, lat, gravity, lifespan, rate, areal, areaw, deacceleration;
   Animation::M2Value<uint8_t> enabled;
-  std::array<math::vector_4d, 3> colors;
+  std::array<glm::vec4, 3> colors;
   std::array<float,3> sizes;
   float mid, slowdown;
-  math::vector_3d pos;
+  glm::vec3 pos;
   uint16_t _texture_id;
   ParticleList particles;
   int blend, order, type;
@@ -69,7 +69,7 @@ class ParticleSystem
   int manimtime;
   int rows, cols;
   std::vector<TexCoordSet> tiles;
-  void initTile(math::vector_2d *tc, int num);
+  void initTile(glm::vec2 *tc, int num);
   bool billboard;
 
   float rem;
@@ -122,9 +122,9 @@ private:
 
 struct RibbonSegment 
 {
-  math::vector_3d pos, up, back;
+  glm::vec3 pos, up, back;
   float len, len0;
-  RibbonSegment (::math::vector_3d pos_, float len_)
+  RibbonSegment (::glm::vec3 pos_, float len_)
     : pos (pos_)
     , len (len_)
   {}
@@ -134,20 +134,20 @@ class RibbonEmitter
 {
   Model *model;
 
-  Animation::M2Value<math::vector_3d> color;
+  Animation::M2Value<glm::vec3> color;
   Animation::M2Value<float, int16_t> opacity;
   Animation::M2Value<float> above, below;
 
   Bone *parent;
 
-  math::vector_3d pos;
+  glm::vec3 pos;
 
   int manim, mtime;
   int seglen;
   float length;
 
-  math::vector_3d tpos;
-  math::vector_4d tcolor;
+  glm::vec3 tpos;
+  glm::vec4 tcolor;
   float tabove, tbelow;
 
   std::vector<uint16_t> _texture_ids;

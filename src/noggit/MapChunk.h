@@ -1,8 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/quaternion.hpp> // math::vector_4d
 #include <noggit/map_enums.hpp>
 #include <noggit/MapTile.h> // MapTile
 #include <noggit/ModelInstance.h>
@@ -66,7 +64,7 @@ public:
 
   auto getHoleMask(void) const -> unsigned { return static_cast<unsigned>(holes); }
   MapTile *mt;
-  math::vector_3d vmin, vmax, vcenter;
+  glm::vec3 vmin, vmax, vcenter;
   int px, py;
 
   MapChunkHeader header;
@@ -83,9 +81,9 @@ public:
 
   unsigned int areaID;
 
-  math::vector_3d mVertices[mapbufsize];
-  math::vector_3d mNormals[mapbufsize];
-  math::vector_3d mccv[mapbufsize];
+  glm::vec3 mVertices[mapbufsize];
+  glm::vec3 mNormals[mapbufsize];
+  glm::vec3 mccv[mapbufsize];
 
   uint8_t _shadow_map[64 * 64];
 
@@ -109,7 +107,7 @@ public:
   void draw ( math::frustum const& frustum
             , opengl::scoped::use_program& mcnk_shader
             , const float& cull_distance
-            , const math::vector_3d& camera
+            , const glm::vec3& camera
             , bool need_visibility_update
             , bool show_unpaintable_chunks
             , bool draw_paintability_overlay
@@ -123,9 +121,9 @@ public:
   //! \todo only this function should be public, all others should be called from it
 
   bool intersect (math::ray const&, selection_result*);
-  bool ChangeMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
-  bool stampMCCV(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors);
-  math::vector_3d pickMCCV(math::vector_3d const& pos);
+  bool ChangeMCCV(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode);
+  bool stampMCCV(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors);
+  glm::vec3 pickMCCV(glm::vec3 const& pos);
 
   ChunkWater* liquid_chunk() const;
 
@@ -135,27 +133,27 @@ public:
   void recalcExtents();
   void recalcNorms();
   void updateNormalsData();
-  math::vector_3d getNeighborVertex(int i, unsigned dir);
+  glm::vec3 getNeighborVertex(int i, unsigned dir);
 
   //! \todo implement Action stack for these
-  bool changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
-  bool flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
-  bool blurTerrain ( math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode
+  bool changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius);
+  bool flattenTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const glm::vec3& origin, math::degrees angle, math::degrees orientation);
+  bool blurTerrain ( glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode
                    , std::function<boost::optional<float> (float, float)> height
                    );
 
-  bool changeTerrainProcessVertex(math::vector_3d const& pos, math::vector_3d const& vertex, float& dt, float radiusOuter, float radiusInner, int brushType);
-  auto stamp(math::vector_3d const& pos, float dt, QImage const* img, float radiusOuter
+  bool changeTerrainProcessVertex(glm::vec3 const& pos, glm::vec3 const& vertex, float& dt, float radiusOuter, float radiusInner, int brushType);
+  auto stamp(glm::vec3 const& pos, float dt, QImage const* img, float radiusOuter
   , float radiusInner, int brushType, bool sculpt) -> void;
-  void selectVertex(math::vector_3d const& pos, float radius, std::unordered_set<math::vector_3d*>& vertices);
-  void fixVertices(std::unordered_set<math::vector_3d*>& selected);
+  void selectVertex(glm::vec3 const& pos, float radius, std::unordered_set<glm::vec3*>& vertices);
+  void fixVertices(std::unordered_set<glm::vec3*>& selected);
   // for the vertex tool
-  bool isBorderChunk(std::unordered_set<math::vector_3d*>& selected);
+  bool isBorderChunk(std::unordered_set<glm::vec3*>& selected);
 
   //! \todo implement Action stack for these
-  bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
-  bool stampTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint);
-  bool replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture);
+  bool paintTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool stampTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint);
+  bool replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture);
   bool canPaintTexture(scoped_blp_texture_reference texture);
   int addTexture(scoped_blp_texture_reference texture);
   void switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
@@ -165,19 +163,19 @@ public:
   void clear_shadows();
 
   bool isHole(int i, int j);
-  void setHole(math::vector_3d const& pos, float radius, bool big, bool add);
+  void setHole(glm::vec3 const& pos, float radius, bool big, bool add);
 
   void setFlag(bool value, uint32_t);
 
   int getAreaID();
   void setAreaID(int ID);
 
-  bool GetVertex(float x, float z, math::vector_3d *V);
-  void getVertexInternal(float x, float z, math::vector_3d * v);
+  bool GetVertex(float x, float z, glm::vec3 *V);
+  void getVertexInternal(float x, float z, glm::vec3 * v);
   float getHeight(int x, int z);
   float getMinHeight() { return vmin.y; };
   float getMaxHeight() { return vmax.y; };
-  math::vector_3d getCenter() { return vcenter; };
+  glm::vec3 getCenter() { return vcenter; };
 
   void clearHeight();
 
@@ -189,9 +187,9 @@ public:
   // fix the gaps with the chunk above
   bool fixGapAbove(const MapChunk* chunk);
 
-  math::vector_3d* getHeightmap() { return &mVertices[0]; };
-  math::vector_3d const* getNormals() const { return &mNormals[0]; }
-  math::vector_3d* getVertexColors() { return &mccv[0]; };
+  glm::vec3* getHeightmap() { return &mVertices[0]; };
+  glm::vec3 const* getNormals() const { return &mNormals[0]; }
+  glm::vec3* getVertexColors() { return &mccv[0]; };
 
   void update_vertex_colors();
 

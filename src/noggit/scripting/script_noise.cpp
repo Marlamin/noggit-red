@@ -29,12 +29,12 @@ namespace noggit
       return get_map()[index];
     }
 
-    float noisemap::get(math::vector_3d& pos)
+    float noisemap::get(glm::vec3& pos)
     {
       return get_index("noise_get",std::round(pos.x) - _start_x, std::round(pos.z) - _start_y);
     }
 
-    bool noisemap::is_highest(math::vector_3d& pos, int check_radius)
+    bool noisemap::is_highest(glm::vec3& pos, int check_radius)
     {
       int x = std::round(pos.x) - _start_x;
       int z = std::round(pos.z) - _start_y;
@@ -149,9 +149,9 @@ namespace noggit
       );
     }
 
-    math::vector_3d noisemap::start()
+    glm::vec3 noisemap::start()
     {
-      return math::vector_3d(_start_x,0,_start_y);
+      return glm::vec3(_start_x,0,_start_y);
     }
 
     unsigned noisemap::width()

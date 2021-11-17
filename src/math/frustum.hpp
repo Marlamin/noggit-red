@@ -1,9 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/vector_3d.hpp>
-#include <math/vector_4d.hpp>
 #include <math/matrix_4x4.hpp>
 
 #include <array>
@@ -27,8 +24,8 @@ namespace math
     {
     public:
       plane() = default;
-      plane (vector_4d const& vec)
-        : _normal (vec.xyz())
+      plane (glm::vec4 const& vec)
+        : _normal (glm::vec3(vec.x, vec.y, vec.z))
         , _distance (vec.w)
       {
         //normalize();
@@ -46,26 +43,26 @@ namespace math
         return _distance;
       }
 
-      const vector_3d& normal() const
+      const glm::vec3& normal() const
       {
         return _normal;
       }
 
     private:
-      vector_3d _normal;
+      glm::vec3 _normal;
       float _distance;
     };
     std::array<plane, SIDES_MAX> _planes;
 
   public:
-    frustum (matrix_4x4 const& matrix);
+    frustum (glm::mat4x4 const& matrix);
 
-    bool contains (const vector_3d& point) const;
-    bool intersects (const std::array<vector_3d, 8>& intersect_points) const;
-    bool intersects ( const vector_3d& v1
-                    , const vector_3d& v2
+    bool contains (const glm::vec3& point) const;
+    bool intersects (const std::array<glm::vec3, 8>& intersect_points) const;
+    bool intersects ( const glm::vec3& v1
+                    , const glm::vec3& v2
                     ) const;
-    bool intersectsSphere ( const vector_3d& position
+    bool intersectsSphere ( const glm::vec3& position
                           , const float& radius
                           ) const;
   };

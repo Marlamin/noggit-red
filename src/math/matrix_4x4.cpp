@@ -1,11 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/matrix_4x4.hpp>
-#include <math/quaternion.hpp>
-#include <math/vector_3d.hpp>
 
 #include <cmath>
 #include <cstring> // memcpy, memset
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace math
 {
@@ -19,7 +19,7 @@ namespace math
   matrix_4x4::rotation_yzx_t matrix_4x4::rotation_yzx;
   matrix_4x4::rotation_yxz_t matrix_4x4::rotation_yxz;
 
-  matrix_4x4::matrix_4x4 (rotation_t, quaternion const& q)
+  matrix_4x4::matrix_4x4 (rotation_t, glm::quat const& q)
   {
     _m[0][0] = 1.0f - 2.0f * q.y * q.y - 2.0f * q.z * q.z;
     _m[0][1] = 2.0f * q.x * q.y + 2.0f * q.w * q.z;
@@ -60,8 +60,8 @@ namespace math
       std::size_t const i_index (i_indices[a]);
       std::size_t const j_index (j_indices[a]);
 
-      float const cosV (cos (angle));
-      float const sinV (sin (angle));
+      float const cosV (glm::cos (angle._));
+      float const sinV (glm::sin (angle._));
 
       matrix_4x4 mat (matrix_4x4::unit);
       mat (j_index, j_index, cosV);
@@ -76,34 +76,34 @@ namespace math
   matrix_4x4::matrix_4x4 (rotation_xyz_t, degrees::vec3 const& angle)
     : matrix_4x4 (unit)
   {
-    *this *= rotate_axis<x> (angle.x);
-    *this *= rotate_axis<y> (angle.y);
-    *this *= rotate_axis<z> (angle.z);
+    *this *= rotate_axis<x>(degrees(angle.x));
+    *this *= rotate_axis<y>(degrees(angle.y));
+    *this *= rotate_axis<z>(degrees(angle.z));
   }
   matrix_4x4::matrix_4x4 (rotation_yzx_t, degrees::vec3 const& angle)
     : matrix_4x4 (unit)
   {
-    *this *= rotate_axis<y> (angle.y);
-    *this *= rotate_axis<z> (angle.z);
-    *this *= rotate_axis<x> (angle.x);
+    *this *= rotate_axis<y> (degrees(angle.y));
+    *this *= rotate_axis<z> (degrees(angle.z));
+    *this *= rotate_axis<x> (degrees(angle.x));
   }
 
   matrix_4x4::matrix_4x4(rotation_yxz_t, degrees::vec3 const& angle)
       : matrix_4x4(unit)
   {
-    *this *= rotate_axis<y>(angle.y);
-    *this *= rotate_axis<x>(angle.x);
-    *this *= rotate_axis<z>(angle.z);
+    *this *= rotate_axis<y>(degrees(angle.y));
+    *this *= rotate_axis<x>(degrees(angle.x));
+    *this *= rotate_axis<z>(degrees(angle.z));
   }
 
-  vector_3d matrix_4x4::operator* (vector_3d const& v) const
+  glm::vec3 matrix_4x4::operator* (glm::vec3 const& v) const
   {
     return { _m[0][0] * v[0] + _m[0][1] * v[1] + _m[0][2] * v[2] + _m[0][3]
            , _m[1][0] * v[0] + _m[1][1] * v[1] + _m[1][2] * v[2] + _m[1][3]
            , _m[2][0] * v[0] + _m[2][1] * v[1] + _m[2][2] * v[2] + _m[2][3]
            };
   }
-  vector_4d matrix_4x4::operator* (const vector_4d& v) const
+  glm::vec4 matrix_4x4::operator* (const glm::vec4& v) const
   {
     return { _m[0][0] * v[0] + _m[0][1] * v[1] + _m[0][2] * v[2] + _m[0][3] * v[3]
            , _m[1][0] * v[0] + _m[1][1] * v[1] + _m[1][2] * v[2] + _m[1][3] * v[3]
@@ -133,15 +133,16 @@ namespace math
            };
   }
 
-  std::vector<math::vector_3d> matrix_4x4::operator*
-    (std::vector<math::vector_3d> points) const
+  std::vector<glm::vec3> matrix_4x4::operator* (std::vector<glm::vec3> points) const
   {
-    return apply ( [&] (math::vector_3d const& point)
-                   {
-                     return *this * point;
-                   }
-                 , points
-                 );
+  	auto adjustedPoints = std::vector<glm::vec3>();
+
+    for(auto const &point : points)
+    {
+        adjustedPoints.push_back(*this * point);
+    }
+
+    return adjustedPoints;
   }
 
   namespace
@@ -208,6 +209,24 @@ namespace math
   {
     return adjoint() / determinant (*this);
   }
+
+	glm::mat4x4 matrix_4x4::Convert() const
+  {
+        return { _m[0][0], _m[1][0], _m[2][0], _m[3][0]
+           , _m[0][1], _m[1][1], _m[2][1], _m[3][1]
+           , _m[0][2], _m[1][2], _m[2][2], _m[3][2]
+           , _m[0][3], _m[1][3], _m[2][3], _m[3][3]
+        };
+  }
+
+    glm::mat4x4 matrix_4x4::ConvertX() const
+    {
+        return { _m[0][0] , _m[0][1] , _m[0][2] , _m[0][3],
+      _m[1][0] , _m[1][1] , _m[1][2] , _m[1][3] ,
+      _m[2][0] , _m[2][1] , _m[2][2] , _m[2][3] ,
+      _m[3][0] , _m[3][1] , _m[3][2] , _m[3][3] 
+        };
+    }
 
   matrix_4x4 matrix_4x4::transposed() const
   {

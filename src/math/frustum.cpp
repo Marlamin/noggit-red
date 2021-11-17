@@ -7,12 +7,12 @@
 
 namespace math
 {
-  frustum::frustum (matrix_4x4 const& matrix)
+  frustum::frustum (glm::mat4x4 const& matrix)
   {
-    const vector_4d column_0 (matrix.column<0>());
-    const vector_4d column_1 (matrix.column<1>());
-    const vector_4d column_2 (matrix.column<2>());
-    const vector_4d column_3 (matrix.column<3>());
+    const glm::vec4 column_0 = matrix[0];
+    const glm::vec4 column_1 = matrix[1];
+    const glm::vec4 column_2 = matrix[2];
+    const glm::vec4 column_3 = matrix[3];
 
     _planes[RIGHT] = column_3 - column_0;
     _planes[LEFT] = column_3 + column_0;
@@ -22,11 +22,11 @@ namespace math
     _planes[FRONT] = column_3 + column_2;
   }
 
-  bool frustum::contains (const vector_3d& point) const
+  bool frustum::contains (const glm::vec3& point) const
   {
     for (auto const& plane : _planes)
     {
-      if (plane.normal() * point <= -plane.distance())
+      if (glm::dot(plane.normal() , point) <= -plane.distance())
       {
         return false;
       }
@@ -34,13 +34,13 @@ namespace math
     return true;
   }
 
-  bool frustum::intersects (const std::array<vector_3d, 8>& intersect_points) const
+  bool frustum::intersects (const std::array<glm::vec3, 8>& intersect_points) const
   {
     for (auto const& plane : _planes)
     {
       for (auto const& point : intersect_points)
       {
-        if (plane.normal() * point > -plane.distance())
+        if (glm::dot(plane.normal(), point) > -plane.distance())
         {
           //! \note C does not know how to continue out of two loops otherwise.
           goto intersects_next_side;
@@ -56,15 +56,15 @@ namespace math
 
   }
 
-  bool frustum::intersects ( const vector_3d& v1
-                           , const vector_3d& v2
+  bool frustum::intersects ( const glm::vec3& v1
+                           , const glm::vec3& v2
                            ) const
   {
     for (auto const& plane : _planes)
     {
 
       glm::vec3 vmin;
-      vector_3d normal = plane.normal();
+      glm::vec3 normal = plane.normal();
 
       // X axis 
       if (normal.x > 0)
@@ -96,9 +96,9 @@ namespace math
         vmin.z = v2.z;
       }
 
-      auto plane_normal = reinterpret_cast<glm::vec3*>(&normal._data);
+      auto plane_normal = normal;
 
-      if (dot(*plane_normal, vmin) + plane.distance() <= 0)
+      if (glm::dot(plane_normal, vmin) + plane.distance() <= 0)
       {
         return false;
       }
@@ -109,15 +109,13 @@ namespace math
   }
 
 
-  bool frustum::intersectsSphere ( const vector_3d& position
+  bool frustum::intersectsSphere ( const glm::vec3& position
                                  , const float& radius
                                  ) const
   {
     for (auto const& plane : _planes)
     {
-      const float distance ( plane.normal() * position
-                           + plane.distance()
-                           );
+      const float distance = glm::dot(plane.normal(), position+ plane.distance());
       if (distance < -radius)
       {
         return false;

@@ -1,8 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/vector_3d.hpp>
 #include <noggit/Selection.h>
 #include <noggit/bool_toggle_property.hpp>
 
@@ -70,8 +68,8 @@ namespace noggit
       void import_last_model_from_wmv(int type);
       void copy(std::string const& filename);
       void copy_current_selection(World* world);
-      void pasteObject ( math::vector_3d cursor_pos
-                       , math::vector_3d camera_pos
+      void pasteObject ( glm::vec3 cursor_pos
+                       , glm::vec3 camera_pos
                        , World*
                        , object_paste_params*
                        );

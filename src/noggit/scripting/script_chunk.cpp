@@ -25,7 +25,7 @@ namespace noggit
 
     void chunk::set_hole(bool hole)
     {
-      _chunk->setHole(math::vector_3d(0, 0, 0), 10.f, true, hole); // todo: fake const
+      _chunk->setHole(glm::vec3(0, 0, 0), 10.f, true, hole); // todo: fake const
       _chunk->registerChunkUpdate(ChunkUpdateFlags::HOLES);
     }
 
@@ -137,7 +137,7 @@ namespace noggit
       std::fill (
         _chunk->mccv,
         _chunk->mccv + mapbufsize,
-        math::vector_3d (1.f, 1.f, 1.f)
+        glm::vec3 (1.f, 1.f, 1.f)
       );
     }
 
@@ -158,7 +158,7 @@ namespace noggit
 
     void register_chunk(script_context * state)
     {
-      state->set_function("get_chunk", [state](math::vector_3d const& pos) {
+      state->set_function("get_chunk", [state](glm::vec3 const& pos) {
         return chunk(state,state->tool()->get_view()->_world->getChunkAt(pos));
       });
 
