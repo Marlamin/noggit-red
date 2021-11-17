@@ -1,13 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
 #include <math/trig.hpp>
-#include <math/vector_3d.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/Red/UiCommon/ExtendedSlider.hpp>
 #include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
-
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDial>
 #include <QtWidgets/QDoubleSpinBox>
@@ -32,7 +29,7 @@ namespace noggit
     public:
       terrain_tool(MapView* map_view, QWidget* parent = nullptr, bool stamp = false);
 
-      void changeTerrain (World*, math::vector_3d const& pos, float dt);
+      void changeTerrain (World*, glm::vec3 const& pos, float dt);
 
       void nextType();
       void changeRadius(float change);
@@ -57,12 +54,12 @@ namespace noggit
 
       void changeOrientation (float change);
       void changeAngle (float change);
-      void setOrientRelativeTo (World*, math::vector_3d const& pos);
+      void setOrientRelativeTo (World*, glm::vec3 const& pos);
 
       float brushRadius() const { return static_cast<float>(_radius_slider->value()); }
       float innerRadius() const { return static_cast<float>(_inner_radius_slider->value());  }
 
-      void storeCursorPos (math::vector_3d* cursor_pos) { _cursor_pos = cursor_pos; }
+      void storeCursorPos (glm::vec3* cursor_pos) { _cursor_pos = cursor_pos; }
 
       noggit::Red::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
 
@@ -87,7 +84,7 @@ namespace noggit
       math::degrees _vertex_angle;
       math::degrees _vertex_orientation;
 
-      math::vector_3d* _cursor_pos;
+      glm::vec3* _cursor_pos;
 
       int _vertex_mode;
 

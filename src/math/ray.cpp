@@ -7,7 +7,7 @@
 namespace math
 {
   boost::optional<float> ray::intersect_bounds
-    (vector_3d const& min, vector_3d const& max) const
+    (glm::vec3 const& min, glm::vec3 const& max) const
   {
     float tmin (std::numeric_limits<float>::lowest());
     float tmax (std::numeric_limits<float>::max());
@@ -48,41 +48,41 @@ namespace math
   }
 
   boost::optional<float> ray::intersect_triangle
-    (vector_3d const& v0, vector_3d const& v1, vector_3d const& v2) const
+    (glm::vec3 const& v0, glm::vec3 const& v1, glm::vec3 const& v2) const
   {
-    vector_3d const e1 (v1 - v0);
-    vector_3d const e2 (v2 - v0);
+      glm::vec3 e1 (v1 - v0);
+      glm::vec3 e2 (v2 - v0);
 
-    vector_3d const P (_direction % e2);
+      glm::vec3 P  = glm::cross(_direction,e2);
 
-    float const det (e1 * P);
+    float const det = glm::dot(e1, P);
 
     if (det == 0.0f)
     {
       return boost::none;
     }
 
-    vector_3d const T (_origin - v0);
-    float const u ((T * P) / det);
+    glm::vec3 const T (_origin - v0);
+    float const dotu = glm::dot(T , P) / det;
 
-    if (u < 0.0f || u > 1.0f)
+    if (dotu < 0.0f || dotu > 1.0f)
     {
       return boost::none;
     }
 
-    vector_3d const Q (T % e1);
-    float const v ((_direction * Q) / det);
+    glm::vec3 const Q (glm::cross(T, e1));
+    float const dotv = glm::dot(_direction , Q) / det;
 
-    if (v < 0.0f || u + v > 1.0f)
+    if (dotv < 0.0f || dotu + dotv > 1.0f)
     {
       return boost::none;
     }
 
-    float const t ((e2 * Q) / det);
+    float const dott = glm::dot(e2 , Q) / det;
 
-    if (t > std::numeric_limits<float>::min())
+    if (dott > std::numeric_limits<float>::min())
     {
-      return t;
+      return dott;
     }
 
     return boost::none;

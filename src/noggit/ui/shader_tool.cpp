@@ -161,7 +161,7 @@ namespace noggit
     }
 
     void shader_tool::changeShader
-      (World* world, math::vector_3d const& pos, float dt, bool add)
+      (World* world, glm::vec3 const& pos, float dt, bool add)
     {
       if (!_image_mask_group->isEnabled())
       {
@@ -194,9 +194,9 @@ namespace noggit
       _speed_slider->setValue(speed);
     }
 
-    void shader_tool::pickColor(World* world, math::vector_3d const& pos)
+    void shader_tool::pickColor(World* world, glm::vec3 const& pos)
     {
-      math::vector_3d color = world->pickShaderColor(pos);
+      glm::vec3 color = world->pickShaderColor(pos);
 
       QColor new_color;
       new_color.setRgbF(color.x * 0.5, color.y * 0.5, color.z * 0.5);

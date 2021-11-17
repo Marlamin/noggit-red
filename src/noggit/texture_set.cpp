@@ -400,7 +400,7 @@ bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush*
 
       dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
 
-      math::vector_3d const diff{math::vector_3d{xPos + TEXDETAILSIZE / 2.0f, 0.f, zPos + TEXDETAILSIZE / 2.0f} - math::vector_3d{x, 0.f, z}};
+      glm::vec3 const diff{glm::vec3{xPos + TEXDETAILSIZE / 2.0f, 0.f, zPos + TEXDETAILSIZE / 2.0f} - glm::vec3{x, 0.f, z}};
 
       int pixel_x = std::round(((diff.x + radius) / (2.f * radius)) * image->width());
       int pixel_y =  std::round(((diff.z + radius) / (2.f * radius)) * image->height());
@@ -574,7 +574,7 @@ bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush*
 
       dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
 
-      math::vector_3d const diff{math::vector_3d{xPos + TEXDETAILSIZE / 2.0f, 0.f, zPos + TEXDETAILSIZE / 2.0f} - math::vector_3d{x, 0.f, z}};
+      glm::vec3 const diff{glm::vec3{xPos + TEXDETAILSIZE / 2.0f, 0.f, zPos + TEXDETAILSIZE / 2.0f} - glm::vec3{x, 0.f, z}};
 
       int pixel_x = std::floor(diff.x + radius);
       int pixel_y = std::floor(diff.z + radius);

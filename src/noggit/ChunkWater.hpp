@@ -1,9 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
 #pragma once
-
 #include <math/frustum.hpp>
-#include <math/vector_3d.hpp>
 #include <noggit/liquid_layer.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/tool_enums.hpp>
@@ -33,7 +30,7 @@ public:
 
   bool is_visible ( const float& cull_distance
                   , const math::frustum& frustum
-                  , const math::vector_3d& camera
+                  , const glm::vec3& camera
                   , display_mode display
                   ) const;
 
@@ -51,14 +48,14 @@ public:
   float getMinHeight() { return vmin.y; };
   float getMaxHeight() { return vmax.y; }
 
-  void paintLiquid( math::vector_3d const& pos
+  void paintLiquid( glm::vec3 const& pos
                   , float radius
                   , int liquid_id
                   , bool add
                   , math::radians const& angle
                   , math::radians const& orientation
                   , bool lock
-                  , math::vector_3d const& origin
+                  , glm::vec3 const& origin
                   , bool override_height
                   , bool override_liquid_id
                   , MapChunk* chunk
@@ -72,13 +69,13 @@ public:
 
 private:
 
-  math::vector_3d vmin, vmax, vcenter;
+  glm::vec3 vmin, vmax, vcenter;
   bool _use_mclq_green_lava;
 
   // remove empty layers
   void cleanup();
 
-  void copy_height_to_layer(liquid_layer& target, math::vector_3d const& pos, float radius);
+  void copy_height_to_layer(liquid_layer& target, glm::vec3 const& pos, float radius);
 
 
   MH2O_Render Render;

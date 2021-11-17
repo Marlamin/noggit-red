@@ -37,7 +37,7 @@ namespace noggit
       , _override_height(true)
       , _opacity_mode(river_opacity)
       , _custom_opacity_factor(0.0337f)
-      , _lock_pos(math::vector_3d(0.0f, 0.0f, 0.0f))
+      , _lock_pos(glm::vec3(0.0f, 0.0f, 0.0f))
       , tile(0, 0)
     {
       setMinimumWidth(250);
@@ -291,7 +291,7 @@ namespace noggit
       _h_spin->setValue(_lock_pos.y + change);
     }
 
-    void water::paintLiquid (World* world, math::vector_3d const& pos, bool add)
+    void water::paintLiquid (World* world, glm::vec3 const& pos, bool add)
     {
       world->paintLiquid ( pos
                          , _radius
@@ -307,7 +307,7 @@ namespace noggit
                          );
     }
 
-    void water::lockPos(math::vector_3d const& cursor_pos)
+    void water::lockPos(glm::vec3 const& cursor_pos)
     {
       QSignalBlocker const blocker_x(_x_spin);
       QSignalBlocker const blocker_z(_z_spin);

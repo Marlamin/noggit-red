@@ -1,8 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/vector_3d.hpp>
 #include <noggit/bool_toggle_property.hpp>
 #include <noggit/Brush.h>
 #include <noggit/TextureManager.h>
@@ -39,7 +37,7 @@ namespace noggit
     class texturing_tool : public QWidget
     {
     public:
-      texturing_tool ( const math::vector_3d* camera_pos
+      texturing_tool ( const glm::vec3* camera_pos
                      , MapView* map_view
                      , bool_toggle_property* show_quick_palette
                      , QWidget* parent = nullptr
@@ -69,7 +67,7 @@ namespace noggit
       noggit::Red::UiCommon::ExtendedSlider* getSpeedSlider() { return _pressure_slider; };
       QDial* getMaskOrientationDial() { return _image_mask_group->getMaskOrientationDial(); };
 
-      void paint (World* world, math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture);      
+      void paint (World* world, glm::vec3 const& pos, float dt, scoped_blp_texture_reference texture);      
 
       Brush const& texture_brush() const
       {
@@ -96,7 +94,7 @@ namespace noggit
       void fromJSON(QJsonObject const& json);
 
     private:
-      void change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture);
+      void change_tex_flag(World* world, glm::vec3 const& pos, bool add, scoped_blp_texture_reference texture);
 
       // slider functions
       void update_brush_hardness();

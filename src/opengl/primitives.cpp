@@ -2,7 +2,6 @@
 
 #include <math/bounding_box.hpp>
 #include <math/matrix_4x4.hpp>
-#include <math/vector_4d.hpp>
 #include <noggit/Misc.h>
 #include <opengl/scoped.hpp>
 #include <opengl/context.hpp>
@@ -17,12 +16,12 @@ namespace opengl
 {
   namespace primitives
   {
-    void wire_box::draw ( math::matrix_4x4 const& model_view
-                        , math::matrix_4x4 const& projection
+    void wire_box::draw ( glm::mat4x4 const& model_view
+                        , glm::mat4x4 const& projection
                         , math::matrix_4x4 const& transform
-                        , math::vector_4d const& color
-                        , math::vector_3d const& min_point
-                        , math::vector_3d const& max_point
+                        , glm::vec4  const& color
+                        , glm::vec3 const& min_point
+                        , glm::vec3 const& max_point
                         )
     {
 
@@ -33,11 +32,21 @@ namespace opengl
 
       opengl::scoped::use_program wire_box_shader {*_program.get()};
 
+      auto points = math::box_points(min_point, max_point);
+
+
+      auto glmPoints = std::vector<glm::vec3>();
+
+    	for(auto const point : points)
+        {
+            glmPoints.push_back(glm::vec3(point.x, point.y, point.z));
+        }
+
       wire_box_shader.uniform("model_view", model_view);
       wire_box_shader.uniform("projection", projection);
       wire_box_shader.uniform("transform", transform);
       wire_box_shader.uniform("color", color);
-      wire_box_shader.uniform("pointPositions", math::box_points (min_point, max_point));
+      wire_box_shader.uniform("pointPositions", glmPoints);
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -82,7 +91,7 @@ namespace opengl
       _vao.upload();
       _buffers.upload();
 
-      //std::vector<math::vector_3d> positions (math::box_points (min_point, max_point));
+      //std::vector<glm::vec3> positions (math::box_points (min_point, max_point));
 
       static std::array<std::uint8_t, 16> const indices
           {{5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7}};
@@ -111,9 +120,9 @@ namespace opengl
         _buffers_are_setup = false;
       }
 
-      void grid::draw( math::matrix_4x4 const& mvp
-          , math::vector_3d const& pos
-          , math::vector_4d const& color
+      void grid::draw(glm::mat4x4 const& mvp
+          , glm::vec3 const& pos
+          , glm::vec4  const& color
           , float radius
       )
       {
@@ -125,7 +134,7 @@ namespace opengl
         opengl::scoped::use_program sphere_shader {*_program.get()};
 
         sphere_shader.uniform("model_view_projection", mvp);
-        sphere_shader.uniform("origin", pos);
+        sphere_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
         sphere_shader.uniform("color", color);
         sphere_shader.uniform("radius", radius);
 
@@ -177,7 +186,7 @@ namespace opengl
                                            }));
 
 
-        std::vector<math::vector_3d> vertices;
+        std::vector<glm::vec3> vertices;
         std::vector<std::uint16_t> indices;
 
         int slices = 20;
@@ -189,7 +198,7 @@ namespace opengl
             float x = static_cast<float>(i) / static_cast<float>(slices);
             float y = 0;
             float z = static_cast<float>(j) / static_cast<float>(slices);
-            vertices.push_back(math::vector_3d(x, y, z));
+            vertices.push_back(glm::vec3(x, y, z));
           }
         }
 
@@ -216,7 +225,7 @@ namespace opengl
 
         _indice_count = indices.size();
 
-        gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>
+        gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>
             (_vertices_vbo, vertices, GL_STATIC_DRAW);
         gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>
             (_indices_vbo, indices, GL_STATIC_DRAW);
@@ -248,9 +257,9 @@ namespace opengl
       }
 
 
-      void sphere::draw( math::matrix_4x4 const& mvp
-                     , math::vector_3d const& pos
-                     , math::vector_4d const& color
+      void sphere::draw(glm::mat4x4 const& mvp
+                     , glm::vec3 const& pos
+                     , glm::vec4  const& color
                      , float radius
                      )
     {
@@ -262,7 +271,7 @@ namespace opengl
       opengl::scoped::use_program sphere_shader {*_program.get()};
 
       sphere_shader.uniform("model_view_projection", mvp);
-      sphere_shader.uniform("origin", pos);
+      sphere_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
       sphere_shader.uniform("radius", radius);
       sphere_shader.uniform("color", color);
 
@@ -276,7 +285,7 @@ namespace opengl
       _vao.upload();
       _buffers.upload();
 
-      std::vector<math::vector_3d> vertices;
+      std::vector<glm::vec3> vertices;
       std::vector<std::uint16_t> indices;
 
       _program.reset(new opengl::program({{ GL_VERTEX_SHADER
@@ -321,14 +330,14 @@ void main()
       for (int rotation_step = 0; rotation_step <= segment; ++rotation_step)
       {
         math::degrees rotation(360.f*rotation_step / static_cast<float>(segment));
-        math::matrix_4x4 m(math::matrix_4x4::rotation_xyz, math::degrees::vec3(math::degrees(0.f), math::degrees(0.f), rotation));
+        math::matrix_4x4 m(math::matrix_4x4::rotation_xyz, math::degrees::vec3(math::degrees(0.f)._, math::degrees(0.f)._, rotation._));
 
         for (int i = 0; i < segment; ++i)
         {
-          float x = math::cos(math::degrees(i * 360 / segment));
-          float z = math::sin(math::degrees(i * 360 / segment));
+          float x = glm::cos(math::radians(math::degrees(i * 360 / segment))._);
+          float z = glm::sin(math::radians(math::degrees(i * 360 / segment))._);
 
-          math::vector_3d v(x, 0.f, z);
+          glm::vec3 v(x, 0.f, z);
 
           vertices.emplace_back(m*v);
 
@@ -347,7 +356,7 @@ void main()
       
       _indice_count = indices.size();
 
-      gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>
+      gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>
         (_vertices_vbo, vertices, GL_STATIC_DRAW);
       gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>
         (_indices_vbo, indices, GL_STATIC_DRAW);
@@ -379,12 +388,12 @@ void main()
       }
 
 
-      void square::draw( math::matrix_4x4 const& mvp
-                     , math::vector_3d const& pos
+      void square::draw(glm::mat4x4 const& mvp
+                     , glm::vec3 const& pos
                      , float radius
                      , math::radians inclination
                      , math::radians orientation
-                     , math::vector_4d const& color
+                     , glm::vec4  const& color
                      )
     {
       if (!_buffers_are_setup)
@@ -395,7 +404,7 @@ void main()
       opengl::scoped::use_program sphere_shader {*_program.get()};
 
       sphere_shader.uniform("model_view_projection", mvp);
-      sphere_shader.uniform("origin", pos);
+      sphere_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
       sphere_shader.uniform("radius", radius);
       sphere_shader.uniform("inclination", inclination._);
       sphere_shader.uniform("orientation", orientation._);
@@ -411,7 +420,7 @@ void main()
       _vao.upload();
       _buffers.upload();
 
-      std::vector<math::vector_3d> vertices = 
+      std::vector<glm::vec3> vertices = 
       {
          {-1.f, 0.f, -1.f}
         ,{-1.f, 0.f,  1.f}
@@ -465,7 +474,7 @@ void main()
                      }));
 
 
-      gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>
+      gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>
         (_vertices_vbo, vertices, GL_STATIC_DRAW);
       gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>
         (_indices_vbo, indices, GL_STATIC_DRAW);

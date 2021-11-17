@@ -46,7 +46,7 @@ void SetWaterTypeNode::compute()
 
   unsigned layer = defaultPortData<UnsignedIntegerData>(PortType::In, 2)->value();
 
-  math::vector_3d n_pos(pos.x, pos.y, pos.z);
+  glm::vec3 n_pos(pos.x, pos.y, pos.z);
 
   world->mapIndex.loadTile(n_pos);
   MapTile* tile(world->mapIndex.getTile(n_pos));

@@ -233,8 +233,8 @@ namespace noggit
                                , QPointF ( _camera->position.x * scale_factor
                                          , _camera->position.z * scale_factor
                                          )
-                               + QPointF ( math::cos (_camera->yaw()) * scale_factor
-                                         , -math::sin (_camera->yaw()) * scale_factor
+                               + QPointF ( glm::cos(math::radians(_camera->yaw())._) * scale_factor
+                                         , -glm::sin(math::radians(_camera->yaw())._) * scale_factor
                                          )
                                );
           camera_vector.setLength (15.0);
@@ -284,7 +284,7 @@ namespace noggit
 
       event->accept();
 
-      emit map_clicked(::math::vector_3d ( tile.x() * TILESIZE + TILESIZE / 2
+      emit map_clicked(::glm::vec3 ( tile.x() * TILESIZE + TILESIZE / 2
                                          , 0.0f, tile.y() * TILESIZE + TILESIZE / 2));
     }
 

@@ -1,13 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
-
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_brush.hpp>
 #include <noggit/tool_enums.hpp>
-
 #include <math/trig.hpp>
-#include <math/vector_3d.hpp>
-
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QLabel>
@@ -19,7 +15,6 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QGridLayout>
 #include <QSettings>
-
 #include <map>
 #include <mutex>
 
@@ -49,7 +44,7 @@ namespace noggit
       void resetLogScroll();
       void clearLog();
       void doReload();
-      void sendBrushEvent(math::vector_3d const& pos,float dt);
+      void sendBrushEvent(glm::vec3 const& pos,float dt);
 
       MapView* get_view();
       script_context* get_context();

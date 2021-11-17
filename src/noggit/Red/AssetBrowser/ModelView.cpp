@@ -1,6 +1,5 @@
 #include "ModelView.hpp"
 #include <opengl/scoped.hpp>
-#include <math/projection.hpp>
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ContextObject.hpp>

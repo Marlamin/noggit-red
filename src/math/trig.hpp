@@ -1,12 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/constants.hpp>
-#include <math/vector_3d.hpp>
 #include <string>
-
+#include <iostream>
 #include <cmath>
+#include <glm/common.hpp>
+#include <glm/trigonometric.hpp>
+#include <glm/vec3.hpp>
+#include <glm/ext/scalar_constants.hpp>
 
 namespace math
 {
@@ -54,11 +55,10 @@ namespace math
 
     friend std::ostream& operator<< (std::ostream& os, degrees const& v)
     {
-      return os << std::to_string(v._) << "°";
+      return os << std::to_string(v._) << std::string("Degrees");
     }
 
-
-      using vec3 = vector_3d_base<degrees>;
+      using vec3 = glm::vec3;
   };
 
   struct radians
@@ -68,44 +68,24 @@ namespace math
 
     float _;
 
-    using vec3 = vector_3d_base<radians>;
+    using vec3 = glm::vec3;
   };
 
-  inline degrees::degrees (radians x) : _ (x._ * 180.0f / math::constants::pi) {}
-  inline radians::radians (degrees x) : _ (x._ * math::constants::pi / 180.0f) {}
+  inline degrees::degrees (radians x) : _ (x._ * 180.0f / glm::pi<float>()) {}
+  inline radians::radians (degrees x) : _ (x._ * glm::pi<float>() / 180.0f) {}
 
-  inline float sin (radians x)
+  inline void rotate(float x0, float y0, float* x, float* y, radians angle)
   {
-    return std::sin (x._);
+      const float xa(*x - x0);
+      const float ya(*y - y0);
+      *x = xa * glm::cos(angle._) - ya * glm::sin(angle._) + x0;
+      *y = xa * glm::sin(angle._) + ya * glm::cos(angle._) + y0;
   }
-  inline float cos (radians x)
-  {
-    return std::cos (x._);
-  }
-  inline float tan (radians x)
-  {
-    return std::tan (x._);
-  }
-  inline radians asin (float x)
-  {
-    return radians {std::asin (x)};
-  }
-  inline radians acos (float x)
-  {
-    return radians {std::acos (x)};
-  }
-  inline radians atan2 (float y, float x)
-  {
-    return radians {std::atan2 (y, x)};
-  }
-}
 
-inline math::degrees operator"" _deg (long double v)
-{
-  return math::degrees {static_cast<float> (v)};
-}
-
-inline math::degrees operator"" _deg (unsigned long long int v)
-{
-  return math::degrees {static_cast<float> (v)};
+  inline bool is_inside_of(const glm::vec3& pos, const glm::vec3& a, const glm::vec3& b)
+  {
+      return a.x < pos.x&& b.x > pos.x
+          && a.y < pos.y&& b.y > pos.y
+          && a.z < pos.z&& b.z > pos.z;
+  }
 }

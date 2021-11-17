@@ -10,14 +10,12 @@
 #include <algorithm>
 #include <external/tsl/robin_map.h>
 #include <boost/optional.hpp>
-#include <math/vector_2d.hpp>
 #include <noggit/TextureManager.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/SceneObject.hpp>
 #include <noggit/liquid_layer.hpp>
 #include <noggit/ChunkWater.hpp>
 #include <QObject>
-
 
 class MapView;
 class MapChunk;
@@ -69,7 +67,7 @@ namespace noggit
     struct ObjectInstanceCache
     {
       std::string filename;
-      math::vector_3d pos;
+      glm::vec3 pos;
       math::degrees::vec3 dir;
       float scale;
     };
@@ -79,8 +77,8 @@ namespace noggit
       std::unordered_set<MapTile*> vertex_tiles;
       std::unordered_set<MapChunk*> vertex_chunks;
       std::unordered_set<MapChunk*> vertex_border_chunks;
-      std::unordered_set<math::vector_3d*> vertices_selected;
-      math::vector_3d vertex_center;
+      std::unordered_set<glm::vec3*> vertices_selected;
+      glm::vec3 vertex_center;
     };
 
     class Action : public QObject

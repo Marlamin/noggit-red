@@ -176,21 +176,21 @@ bool Model::isAnimated(const MPQFile& f)
 }
 
 
-math::vector_3d fixCoordSystem(math::vector_3d v)
+glm::vec3 fixCoordSystem(glm::vec3 v)
 {
-  return math::vector_3d(v.x, v.z, -v.y);
+  return glm::vec3(v.x, v.z, -v.y);
 }
 
 namespace
 {
-  math::vector_3d fixCoordSystem2(math::vector_3d v)
+  glm::vec3 fixCoordSystem2(glm::vec3 v)
   {
-    return math::vector_3d(v.x, v.z, v.y);
+    return glm::vec3(v.x, v.z, v.y);
   }
 
-  math::quaternion fixCoordSystemQuat(math::quaternion v)
+  glm::quat fixCoordSystemQuat(glm::quat v)
   {
-    return math::quaternion(-v.x, -v.z, v.y, v.w);
+    return glm::quat(-v.x, -v.z, v.y, v.w);
   }
 }
 
@@ -626,15 +626,15 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
 
   // COLOUR
   // Get the colour and transparency and check that we should even render
-  math::vector_4d mesh_color = math::vector_4d(1.0f, 1.0f, 1.0f, m->trans); // ??
-  math::vector_4d emissive_color = math::vector_4d(0.0f, 0.0f, 0.0f, 0.0f);
+  glm::vec4 mesh_color = glm::vec4(1.0f, 1.0f, 1.0f, m->trans); // ??
+  glm::vec4 emissive_color = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
   auto const& renderflag(m->_render_flags[renderflag_index]);
 
   // emissive colors
   if (color_index != -1 && m->_colors[color_index].color.uses(0))
   {
-    ::math::vector_3d c (m->_colors[color_index].color.getValue (0, m->_anim_time, m->_global_animtime));
+    ::glm::vec3 c (m->_colors[color_index].color.getValue (0, m->_anim_time, m->_global_animtime));
     if (m->_colors[color_index].opacity.uses (m->_current_anim_seq))
     {
       mesh_color.w = m->_colors[color_index].opacity.getValue (m->_current_anim_seq, m->_anim_time, m->_global_animtime);
@@ -649,7 +649,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
       mesh_color.x = mesh_color.y = mesh_color.z = 0;
     }
 
-    emissive_color = math::vector_4d(c, mesh_color.w);
+    emissive_color = glm::vec4(c.x,c.y,c.z, mesh_color.w);
   }
 
   // opacity
@@ -911,7 +911,7 @@ void ModelRenderPass::init_uv_types(Model* m)
 
 FakeGeometry::FakeGeometry(Model* m)
 {
-  math::vector_3d min = m->header.bounding_box_min, max = m->header.bounding_box_max;
+  glm::vec3 min = m->header.bounding_box_min, max = m->header.bounding_box_max;
 
   vertices.emplace_back(min.x, max.y, min.z);
   vertices.emplace_back(min.x, max.y, max.z);
@@ -1174,7 +1174,7 @@ void Model::initAnimated(const MPQFile& f)
   animcalc = false;
 }
 
-void Model::calcBones( math::matrix_4x4 const& model_view
+void Model::calcBones(glm::mat4x4 const& model_view
                      , int _anim
                      , int time
                      , int animation_time
@@ -1191,7 +1191,7 @@ void Model::calcBones( math::matrix_4x4 const& model_view
   }
 }
 
-void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_time)
+void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
 {
   if (_animations_seq_per_id.empty() || _animations_seq_per_id[anim_id].empty())
   {
@@ -1247,15 +1247,15 @@ void Model::animate(math::matrix_4x4 const& model_view, int anim_id, int anim_ti
 
     for (auto& vertex : _current_vertices)
     {
-      ::math::vector_3d v(0, 0, 0), n(0, 0, 0);
+      ::glm::vec3 v(0, 0, 0), n(0, 0, 0);
 
       for (size_t b (0); b < 4; ++b)
       {
         if (vertex.weights[b] <= 0)
           continue;
 
-        ::math::vector_3d tv = bones[vertex.bones[b]].mat * vertex.position;
-        ::math::vector_3d tn = bones[vertex.bones[b]].mrot * vertex.normal;
+        ::glm::vec3 tv = bones[vertex.bones[b]].mat * vertex.position;
+        ::glm::vec3 tn = bones[vertex.bones[b]].mrot * vertex.normal;
 
         v += tv * (static_cast<float> (vertex.weights[b]) / 255.0f);
         n += tn * (static_cast<float> (vertex.weights[b]) / 255.0f);
@@ -1332,8 +1332,8 @@ ModelLight::ModelLight(const MPQFile& f, const ModelLightDef &mld, int *global)
   , parent (mld.bone)
   , pos (fixCoordSystem(mld.pos))
   , tpos (fixCoordSystem(mld.pos))
-  , dir (::math::vector_3d(0,1,0))
-  , tdir (::math::vector_3d(0,1,0)) // obviously wrong
+  , dir (::glm::vec3(0,1,0))
+  , tdir (::glm::vec3(0,1,0)) // obviously wrong
   , diffColor (mld.color, f, global)
   , ambColor (mld.ambColor, f, global)
   , diffIntensity (mld.intensity, f, global)
@@ -1342,9 +1342,12 @@ ModelLight::ModelLight(const MPQFile& f, const ModelLightDef &mld, int *global)
 
 void ModelLight::setup(int time, opengl::light, int animtime)
 {
-  math::vector_4d ambcol(ambColor.getValue(0, time, animtime) * ambIntensity.getValue(0, time, animtime), 1.0f);
-  math::vector_4d diffcol(diffColor.getValue(0, time, animtime) * diffIntensity.getValue(0, time, animtime), 1.0f);
-  math::vector_4d p;
+	auto ambient = ambColor.getValue(0, time, animtime) * ambIntensity.getValue(0, time, animtime);
+    auto diffuse = diffColor.getValue(0, time, animtime) * diffIntensity.getValue(0, time, animtime);
+
+  glm::vec4 ambcol(ambient.x, ambient.y,ambient.z, 1.0f);
+  glm::vec4 diffcol(diffuse.x, diffuse.y, diffuse.z, 1.0f);
+  glm::vec4 p;
 
   enum ModelLightTypes {
     MODELLIGHT_DIRECTIONAL = 0,
@@ -1353,14 +1356,14 @@ void ModelLight::setup(int time, opengl::light, int animtime)
 
   if (type == MODELLIGHT_DIRECTIONAL) {
     // directional
-    p = math::vector_4d(tdir, 0.0f);
+    p = glm::vec4(tdir.x, tdir.y, tdir.z, 0.0f);
   }
   else if (type == MODELLIGHT_POINT) {
     // point
-    p = math::vector_4d(tpos, 1.0f);
+    p = glm::vec4(tpos.x, tpos.y,tpos.z, 1.0f);
   }
   else {
-    p = math::vector_4d(tpos, 1.0f);
+    p = glm::vec4(tpos.x, tpos.y, tpos.z, 1.0f);
     LogError << "Light type " << type << " is unknown." << std::endl;
   }
  
@@ -1391,7 +1394,7 @@ Bone::Bone( const MPQFile& f,
   scale.apply(fixCoordSystem2);
 }
 
-void Bone::calcMatrix( math::matrix_4x4 const& model_view
+void Bone::calcMatrix(glm::mat4x4 const& model_view
                      , Bone *allbones
                      , int anim
                      , int time
@@ -1401,7 +1404,7 @@ void Bone::calcMatrix( math::matrix_4x4 const& model_view
   if (calc) return;
 
   math::matrix_4x4 m {math::matrix_4x4::unit};
-  math::quaternion q;
+  glm::quat q;
 
   if ( flags.transformed
     || flags.billboard 
@@ -1429,10 +1432,10 @@ void Bone::calcMatrix( math::matrix_4x4 const& model_view
 
     if (flags.billboard)
     {
-      math::vector_3d vRight (model_view[0], model_view[4], model_view[8]);
-      math::vector_3d vUp (model_view[1], model_view[5], model_view[9]); // Spherical billboarding
-      //math::vector_3d vUp = math::vector_3d(0,1,0); // Cylindrical billboarding
-      vRight = vRight * -1;
+      glm::vec3 vRight (model_view[0][0], model_view[1][0], model_view[2][0]);
+      glm::vec3 vUp (model_view[0][1], model_view[1][1], model_view[2][1]); // Spherical billboarding
+      //glm::vec3 vUp = glm::vec3(0,1,0); // Cylindrical billboarding
+      vRight =  glm::vec3(vRight.x * -1, vRight.y * -1, vRight.z * -1);
       m (0, 2, vRight.x);
       m (1, 2, vRight.y);
       m (2, 2, vRight.z);
@@ -1474,13 +1477,13 @@ void Bone::calcMatrix( math::matrix_4x4 const& model_view
   calc = true;
 }
 
-void Model::draw( math::matrix_4x4 const& model_view
+void Model::draw( glm::mat4x4 const& model_view
                 , ModelInstance& instance
                 , opengl::scoped::use_program& m2_shader
                 , opengl::M2RenderState& model_render_state
                 , math::frustum const& frustum
                 , const float& cull_distance
-                , const math::vector_3d& camera
+                , const glm::vec3& camera
                 , int animtime
                 , display_mode display
                 , bool no_cull
@@ -1514,11 +1517,11 @@ void Model::draw( math::matrix_4x4 const& model_view
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
     m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), 0);
-    m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
-    m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) + 8));
-    m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8));
-    m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+    m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3)));
+    m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3) + 4));
+    m2_shader.attrib("normal", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::glm::vec3) + 8));
+    m2_shader.attrib("texcoord1", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::glm::vec3) * 2 + 8));
+    m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::glm::vec3) * 2 + 8 + sizeof(glm::vec2)));
   }
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
@@ -1537,13 +1540,13 @@ void Model::draw( math::matrix_4x4 const& model_view
   gl.depthMask(GL_TRUE);
 }
 
-void Model::draw ( math::matrix_4x4 const& model_view
+void Model::draw (glm::mat4x4 const& model_view
                  , std::vector<math::matrix_4x4> const& instances
                  , opengl::scoped::use_program& m2_shader
                  , opengl::M2RenderState& model_render_state
                  , math::frustum const& frustum
                  , const float& cull_distance
-                 , const math::vector_3d& camera
+                 , const glm::vec3& camera
                  , int animtime
                  , bool all_boxes
                  , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
@@ -1674,7 +1677,7 @@ void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t bo
 }
 
 
-std::vector<float> Model::intersect (math::matrix_4x4 const& model_view, math::ray const& ray, int animtime)
+std::vector<float> Model::intersect (glm::mat4x4 const& model_view, math::ray const& ray, int animtime)
 {
   std::vector<float> results;
 
@@ -1763,7 +1766,7 @@ void Model::upload()
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
-    gl.bufferData (GL_ARRAY_BUFFER, _vertex_box_points.size() * sizeof (math::vector_3d), _vertex_box_points.data(), GL_STATIC_DRAW);
+    gl.bufferData (GL_ARRAY_BUFFER, _vertex_box_points.size() * sizeof (glm::vec3), _vertex_box_points.data(), GL_STATIC_DRAW);
   }
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
@@ -1817,11 +1820,11 @@ void Model::setupVAO(opengl::scoped::use_program& m2_shader)
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
     m2_shader.attrib("pos",           3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), 0);
-    m2_shader.attribi("bones_weight", 4, GL_UNSIGNED_BYTE,   sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d)));
-    m2_shader.attribi("bones_indices",4, GL_UNSIGNED_BYTE,  sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 4));
-    m2_shader.attrib("normal",        3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) + 8));
-    m2_shader.attrib("texcoord1",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8));
-    m2_shader.attrib("texcoord2",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::math::vector_3d) * 2 + 8 + sizeof(::math::vector_2d)));
+    m2_shader.attribi("bones_weight", 4, GL_UNSIGNED_BYTE,   sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3)));
+    m2_shader.attribi("bones_indices",4, GL_UNSIGNED_BYTE,  sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3) + 4));
+    m2_shader.attrib("normal",        3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3) + 8));
+    m2_shader.attrib("texcoord1",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3) * 2 + 8));
+    m2_shader.attrib("texcoord2",     2, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3) * 2 + 8 + sizeof(glm::vec2)));
   }
 
   {

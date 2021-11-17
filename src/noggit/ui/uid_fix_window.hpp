@@ -1,8 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
 #pragma once
-
-#include <math/vector_3d.hpp>
 #include <math/trig.hpp>
 
 #include <QtWidgets/QDialog>
@@ -28,10 +25,10 @@ namespace noggit
     Q_OBJECT
 
     public:
-      uid_fix_window (math::vector_3d pos, math::degrees camera_pitch, math::degrees camera_yaw);
+      uid_fix_window (glm::vec3 pos, math::degrees camera_pitch, math::degrees camera_yaw);
 
     signals:
-      void fix_uid  ( math::vector_3d pos
+      void fix_uid  ( glm::vec3 pos
                     , math::degrees camera_pitch
                     , math::degrees camera_yaw
                     , uid_fix_mode uid_fix

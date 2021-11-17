@@ -57,11 +57,11 @@ ParticleSystem::ParticleSystem(Model* model_
   , tofs (misc::frand())
   , _context(context)
 {
-  math::vector_3d colors2[3];
-  memcpy(colors2, f.getBuffer() + mta.p.colors.ofsKeys, sizeof(math::vector_3d) * 3);
+  glm::vec3 colors2[3];
+  memcpy(colors2, f.getBuffer() + mta.p.colors.ofsKeys, sizeof(glm::vec3) * 3);
   for (size_t i = 0; i<3; ++i) {
     float opacity = *reinterpret_cast<int16_t const*>(f.getBuffer() + mta.p.opacity.ofsKeys + i * 2);
-    colors[i] = math::vector_4d(colors2[i].x / 255.0f, colors2[i].y / 255.0f, colors2[i].z / 255.0f, opacity / 32767.0f);
+    colors[i] = glm::vec4(colors2[i].x / 255.0f, colors2[i].y / 255.0f, colors2[i].z / 255.0f, opacity / 32767.0f);
     sizes[i] = (*reinterpret_cast<float const*>(f.getBuffer() + mta.p.sizes.ofsKeys + i * 4))*mta.p.scales[i];
   }
 
@@ -160,10 +160,10 @@ ParticleSystem::ParticleSystem(ParticleSystem&& other)
 
 }
 
-void ParticleSystem::initTile(math::vector_2d *tc, int num)
+void ParticleSystem::initTile(glm::vec2 *tc, int num)
 {
-  math::vector_2d otc[4];
-  math::vector_2d a, b;
+  glm::vec2 otc[4];
+  glm::vec2 a, b;
   int x = num % cols;
   int y = num / cols;
   a.x = x * (1.0f / cols);
@@ -247,7 +247,7 @@ void ParticleSystem::update(float dt)
     float rlife = p.life / p.maxlife;
     // calculate size and color based on lifetime
     p.size = lifeRamp<float>(rlife, mid, sizes[0], sizes[1], sizes[2]);
-    p.color = lifeRamp<math::vector_4d>(rlife, mid, colors[0], colors[1], colors[2]);
+    p.color = lifeRamp<glm::vec4>(rlife, mid, colors[0], colors[1], colors[2]);
 
     // kill off old particles
     if (rlife >= 1.0f)
@@ -307,27 +307,27 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
 
   //model->_textures[_texture_id]->bind();
 
-  math::vector_3d vRight(1, 0, 0);
-  math::vector_3d vUp(0, 1, 0);
+  glm::vec3 vRight(1, 0, 0);
+  glm::vec3 vUp(0, 1, 0);
 
   // position stuff
   const float f = 1;//0.707106781f; // sqrt(2)/2
-  math::vector_3d bv0 = math::vector_3d(-f, +f, 0);
-  math::vector_3d bv1 = math::vector_3d(+f, +f, 0);
+  glm::vec3 bv0 = glm::vec3(-f, +f, 0);
+  glm::vec3 bv1 = glm::vec3(+f, +f, 0);
 
   std::vector<std::uint16_t> indices;
-  std::vector<math::vector_3d> vertices;
-  std::vector<math::vector_3d> offsets;
-  std::vector<math::vector_4d> colors_data;
-  std::vector<math::vector_2d> texcoords;
+  std::vector<glm::vec3> vertices;
+  std::vector<glm::vec3> offsets;
+  std::vector<glm::vec4> colors_data;
+  std::vector<glm::vec2> texcoords;
 
   std::uint16_t indice = 0;
 
   if (billboard) 
   {
-    vRight = math::vector_3d(model_view[0], model_view[4], model_view[8]);
-    vUp = math::vector_3d(model_view[1], model_view[5], model_view[9]); // Spherical billboarding
-    //vUp = math::vector_3d(0,1,0); // Cylindrical billboarding
+    vRight = glm::vec3(model_view[0], model_view[4], model_view[8]);
+    vUp = glm::vec3(model_view[1], model_view[5], model_view[9]); // Spherical billboarding
+    //vUp = glm::vec3(0,1,0); // Cylindrical billboarding
   }
 
   auto add_quad_indices([] (std::vector<std::uint16_t>& indices, std::uint16_t& start)
@@ -423,12 +423,12 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
   { // Sphere particles
     // particles from origin to position
     /*
-    bv0 = mbb * math::vector_3d(0,-1.0f,0);
-    bv1 = mbb * math::vector_3d(0,+1.0f,0);
+    bv0 = mbb * glm::vec3(0,-1.0f,0);
+    bv1 = mbb * glm::vec3(0,+1.0f,0);
 
 
-    bv0 = mbb * math::vector_3d(-1.0f,0,0);
-    bv1 = mbb * math::vector_3d(1.0f,0,0);
+    bv0 = mbb * glm::vec3(-1.0f,0,0);
+    bv1 = mbb * glm::vec3(1.0f,0,0);
     */
 
     for (ParticleList::iterator it = particles.begin(); it != particles.end(); ++it) 
@@ -458,9 +458,9 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
     }
   }
 
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STREAM_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_4d>(_colors_vbo, colors_data, GL_STREAM_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>(_vertices_vbo, vertices, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec4>(_colors_vbo, colors_data, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STREAM_DRAW);
 
   shader.uniform("alpha_test", alpha_test);
@@ -474,7 +474,7 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
   }
   if(billboard)
   {
-    gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_offsets_vbo, offsets, GL_STREAM_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>(_offsets_vbo, offsets, GL_STREAM_DRAW);
 
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const offset_binder (_offsets_vbo);
     shader.attrib("offset", 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -610,57 +610,57 @@ Particle PlaneParticleEmitter::newParticle(ParticleSystem* sys, int anim, int ti
   auto mrot = sys->parent->mrot*CalcSpreadMatrix(spr, spr, 1.0f, 1.0f);
 
   if (sys->flags == 1041) { // Trans Halo
-    p.pos = sys->parent->mat * (sys->pos + math::vector_3d(misc::randfloat(-l, l), 0, misc::randfloat(-w, w)));
+    p.pos = sys->parent->mat * (sys->pos + glm::vec3(misc::randfloat(-l, l), 0, misc::randfloat(-w, w)));
 
-    const float t = misc::randfloat(0.0f, 2.0f * (float)math::constants::pi);
+    const float t = misc::randfloat(0.0f, 2.0f * glm::pi<float>());
 
-    p.pos = math::vector_3d(0.0f, sys->pos.y + 0.15f, sys->pos.z) + math::vector_3d(cos(t) / 8, 0.0f, sin(t) / 8); // Need to manually correct for the halo - why?
+    p.pos = glm::vec3(0.0f, sys->pos.y + 0.15f, sys->pos.z) + glm::vec3(cos(t) / 8, 0.0f, sin(t) / 8); // Need to manually correct for the halo - why?
 
     // var isn't being used, which is set to 1.0f,  whats the importance of this?
     // why does this set of values differ from other particles
 
-    math::vector_3d dir(0.0f, 1.0f, 0.0f);
+    glm::vec3 dir(0.0f, 1.0f, 0.0f);
     p.dir = dir;
 
-    p.speed = dir.normalize() * spd * misc::randfloat(0, var);
+    p.speed = glm::normalize(dir) * spd * misc::randfloat(0, var);
   }
   else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
-    p.pos = sys->parent->pivot + (sys->pos + math::vector_3d(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
-    math::vector_3d dir = mrot * math::vector_3d(0.0f, 1.0f, 0.0f);
-    p.dir = dir.normalize();
-    //math::vector_3d dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * math::vector_3d(0.0f, 1.0f, 0.0f);
+    p.pos = sys->parent->pivot + (sys->pos + glm::vec3(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
+    glm::vec3 dir = mrot * glm::vec3(0.0f, 1.0f, 0.0f);
+    p.dir = glm::normalize(dir);
+    //glm::vec3 dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * glm::vec3(0.0f, 1.0f, 0.0f);
     //p.speed = dir.normalize() * spd;
 
   }
   else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
-    p.pos = sys->parent->mat * (sys->pos + math::vector_3d(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
-    math::vector_3d dir = math::vector_3d(sys->parent->mat (1, 0), sys->parent->mat (1, 1), sys->parent->mat (1, 2)) + math::vector_3d(0.0f, 1.0f, 0.0f);
-    p.speed = dir.normalize() * spd * misc::randfloat(0, var * 2);
+    p.pos = sys->parent->mat * (sys->pos + glm::vec3(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
+    glm::vec3 dir = glm::vec3(sys->parent->mat (1, 0), sys->parent->mat (1, 1), sys->parent->mat (1, 2)) + glm::vec3(0.0f, 1.0f, 0.0f);
+    p.speed = glm::normalize(dir) * spd * misc::randfloat(0, var * 2);
 
   }
   else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
-    p.pos = sys->parent->pivot + (sys->pos + math::vector_3d(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
-    math::vector_3d dir = mrot * math::vector_3d(0, 1, 0);
-    p.dir = dir.normalize();
+    p.pos = sys->parent->pivot + (sys->pos + glm::vec3(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
+    glm::vec3 dir = mrot * glm::vec3(0, 1, 0);
+    p.dir = glm::normalize(dir);
 
   }
   else {
-    p.pos = sys->pos + math::vector_3d(misc::randfloat(-l, l), 0, misc::randfloat(-w, w));
+    p.pos = sys->pos + glm::vec3(misc::randfloat(-l, l), 0, misc::randfloat(-w, w));
     p.pos = sys->parent->mat * p.pos;
 
-    //math::vector_3d dir = mrot * math::vector_3d(0,1,0);
-    math::vector_3d dir = sys->parent->mrot * math::vector_3d(0, 1, 0);
+    //glm::vec3 dir = mrot * glm::vec3(0,1,0);
+    glm::vec3 dir = sys->parent->mrot * glm::vec3(0, 1, 0);
 
     p.dir = dir;//.normalize();
-    p.down = math::vector_3d(0, -1.0f, 0); // dir * -1.0f;
-    p.speed = dir.normalize() * spd * (1.0f + misc::randfloat(-var, var));
+    p.down = glm::vec3(0, -1.0f, 0); // dir * -1.0f;
+    p.speed = glm::normalize(dir) * spd * (1.0f + misc::randfloat(-var, var));
   }
 
   if (!sys->billboard)  {
-    p.corners[0] = mrot * math::vector_3d(-1, 0, +1);
-    p.corners[1] = mrot * math::vector_3d(+1, 0, +1);
-    p.corners[2] = mrot * math::vector_3d(+1, 0, -1);
-    p.corners[3] = mrot * math::vector_3d(-1, 0, -1);
+    p.corners[0] = mrot * glm::vec3(-1, 0, +1);
+    p.corners[1] = mrot * glm::vec3(+1, 0, +1);
+    p.corners[2] = mrot * glm::vec3(+1, 0, -1);
+    p.corners[3] = mrot * glm::vec3(-1, 0, -1);
   }
 
   p.life = 0;
@@ -675,7 +675,7 @@ Particle PlaneParticleEmitter::newParticle(ParticleSystem* sys, int anim, int ti
 Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int time, int animtime, float w, float l, float spd, float var, float spr, float spr2)
 {
   Particle p;
-  math::vector_3d dir;
+  glm::vec3 dir;
   float radius;
 
   radius = misc::randfloat(0, 1);
@@ -687,7 +687,7 @@ Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int t
   // Spread should never be zero for sphere particles ?
   math::radians t (0);
   if (spr == 0)
-    t._ = misc::randfloat((float)-math::constants::pi, (float)math::constants::pi);
+    t._ = misc::randfloat(-glm::pi<float>(), glm::pi<float>());
   else
     t._ = misc::randfloat(-spr, spr);
 
@@ -700,18 +700,18 @@ Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int t
   //  l = w;
 
   // New method
-  // math::vector_3d bdir(w*math::cos(t), 0.0f, l*math::sin(t));
+  // glm::vec3 bdir(w*math::cos(t), 0.0f, l*math::sin(t));
   // --
 
   //! \todo fix shpere emitters to work properly
   /* // Old Method
-  //math::vector_3d bdir(l*math::cos(t), 0, w*math::sin(t));
-  //math::vector_3d bdir(0, w*math::cos(t), l*math::sin(t));
+  //glm::vec3 bdir(l*math::cos(t), 0, w*math::sin(t));
+  //glm::vec3 bdir(0, w*math::cos(t), l*math::sin(t));
 
 
   float theta_range = sys->spread.getValue(anim, time, animtime);
   float theta = -0.5f* theta_range + misc::randfloat(0, theta_range);
-  math::vector_3d bdir(0, l*math::cos(theta), w*math::sin(theta));
+  glm::vec3 bdir(0, l*math::cos(theta), w*math::sin(theta));
 
   float phi_range = sys->lat.getValue(anim, time, animtime);
   float phi = misc::randfloat(0, phi_range);
@@ -719,24 +719,24 @@ Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int t
   */
 
   if (sys->flags == 57 || sys->flags == 313) { // Faith Halo
-    math::vector_3d bdir(w*math::cos(t)*1.6f, 0.0f, l*math::sin(t)*1.6f);
+    glm::vec3 bdir(w*glm::cos(t._)*1.6f, 0.0f, l*glm::sin(t._)*1.6f);
 
     p.pos = sys->pos + bdir;
     p.pos = sys->parent->mat * p.pos;
 
-    if (bdir.length_squared() == 0)
-      p.speed = math::vector_3d(0, 0, 0);
+    if (glm::length(bdir) * glm::length(bdir) == 0)
+      p.speed = glm::vec3(0, 0, 0);
     else {
-      dir = sys->parent->mrot * (bdir.normalize());//mrot * math::vector_3d(0, 1.0f,0);
-      p.speed = dir.normalize() * spd * (1.0f + misc::randfloat(-var, var));   // ?
+      dir = sys->parent->mrot * (glm::normalize(bdir));//mrot * glm::vec3(0, 1.0f,0);
+      p.speed = glm::normalize(dir) * spd * (1.0f + misc::randfloat(-var, var));   // ?
     }
 
   }
   else {
-    math::vector_3d bdir;
+    glm::vec3 bdir;
     float temp;
 
-    bdir = mrot * math::vector_3d(0, 1, 0) * radius;
+    bdir = mrot * glm::vec3(0, 1, 0) * radius;
     temp = bdir.z;
     bdir.z = bdir.y;
     bdir.y = temp;
@@ -748,24 +748,24 @@ Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int t
     //p.pos = sys->parent->mat * p.pos;
 
 
-    if (!bdir.length_squared() && !(sys->flags & 0x100))
+    if (!(glm::length(bdir) * glm::length(bdir)) && !(sys->flags & 0x100))
     {
-      p.speed = math::vector_3d(0, 0, 0);
-      dir = sys->parent->mrot * math::vector_3d(0, 1, 0);
+      p.speed = glm::vec3(0, 0, 0);
+      dir = sys->parent->mrot * glm::vec3(0, 1, 0);
     }
     else
     {
       if (sys->flags & 0x100)
-        dir = sys->parent->mrot * math::vector_3d(0, 1, 0);
+        dir = sys->parent->mrot * glm::vec3(0, 1, 0);
       else
-        dir = bdir.normalize();
+        dir = glm::normalize(bdir);
 
-      p.speed = dir.normalize() * spd * (1.0f + misc::randfloat(-var, var));   // ?
+      p.speed = glm::normalize(dir) * spd * (1.0f + misc::randfloat(-var, var));   // ?
     }
   }
 
-  p.dir = dir.normalize();//mrot * math::vector_3d(0, 1.0f,0);
-  p.down = math::vector_3d(0, -1.0f, 0);
+  p.dir = glm::normalize(dir);//mrot * glm::vec3(0, 1.0f,0);
+  p.down = glm::vec3(0, -1.0f, 0);
 
   p.life = 0;
   p.maxlife = sys->lifespan.getValue(anim, time, animtime);
@@ -855,10 +855,10 @@ RibbonEmitter::RibbonEmitter(RibbonEmitter&& other)
 
 void RibbonEmitter::setup(int anim, int time, int animtime)
 {
-  math::vector_3d ntpos = parent->mat * pos;
-  math::vector_3d ntup = parent->mat * (pos + math::vector_3d(0, 0, 1));
+  glm::vec3 ntpos = parent->mat * pos;
+  glm::vec3 ntup = parent->mat * (pos + glm::vec3(0, 0, 1));
   ntup -= ntpos;
-  ntup.normalize();
+  ntup = glm::normalize(ntup);
   float dlen = (ntpos - tpos).length();
 
   manim = anim;
@@ -868,7 +868,7 @@ void RibbonEmitter::setup(int anim, int time, int animtime)
   RibbonSegment &first = *segs.begin();
   if (first.len > seglen) {
     // add new segment
-    first.back = (tpos - ntpos).normalize();
+    first.back = glm::normalize((tpos - ntpos));
     first.len0 = first.len;
     RibbonSegment newseg (ntpos, dlen);
     newseg.up = ntup;
@@ -898,7 +898,8 @@ void RibbonEmitter::setup(int anim, int time, int animtime)
   }
 
   tpos = ntpos;
-  tcolor = math::vector_4d(color.getValue(anim, time, animtime), opacity.getValue(anim, time, animtime));
+  auto col = color.getValue(anim, time, animtime);
+  tcolor = glm::vec4(col.x,col.y,col.z, opacity.getValue(anim, time, animtime));
 
   tabove = above.getValue(anim, time, animtime);
   tbelow = below.getValue(anim, time, animtime);
@@ -915,8 +916,8 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
   }
 
   std::vector<std::uint16_t> indices;
-  std::vector<math::vector_3d> vertices;
-  std::vector<math::vector_2d> texcoords;
+  std::vector<glm::vec3> vertices;
+  std::vector<glm::vec2> texcoords;
 
   //model->_textures[_texture_ids[0]]->bind();
 
@@ -964,8 +965,8 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
     vertices.push_back(it->pos - tbelow * it->up + (it->len / it->len0) * it->back);
   }
 
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_3d>(_vertices_vbo, vertices, GL_STREAM_DRAW);
-  gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>(_vertices_vbo, vertices, GL_STREAM_DRAW);
+  gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STREAM_DRAW);
 
   opengl::scoped::vao_binder const _(_vao);

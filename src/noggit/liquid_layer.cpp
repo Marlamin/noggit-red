@@ -14,13 +14,13 @@
 
 namespace
 {
-  inline math::vector_2d default_uv(int px, int pz)
+  inline glm::vec2 default_uv(int px, int pz)
   {
     return {static_cast<float>(px) / 4.f, static_cast<float>(pz) / 4.f};
   }
 }
 
-liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, float height, int liquid_id)
+liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, float height, int liquid_id)
   : _liquid_id(liquid_id)
   , _liquid_vertex_format(0)
   , _minimum(height)
@@ -36,7 +36,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, float
        unsigned v_index = z * 9 + x;
       _tex_coords[v_index] = default_uv(x, z);
       _depth[v_index] = 1.0f;
-      _vertices[v_index] = math::vector_3d(
+      _vertices[v_index] = glm::vec3(
                             pos.x + UNITSIZE * x
                             , height
                             , pos.z + UNITSIZE * z
@@ -48,7 +48,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, float
   
 }
 
-liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, mclq& liquid, int liquid_id)
+liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, mclq& liquid, int liquid_id)
   : _liquid_id(liquid_id)
   , _minimum(liquid.min_height)
   , _maximum(liquid.max_height)
@@ -76,7 +76,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, mclq&
       if (_liquid_vertex_format == 1)
       {
         _depth[v_index] = 1.0f;
-        _tex_coords[v_index] = math::vector_2d(static_cast<float>(v.magma.x) / 255.f, static_cast<float>(v.magma.y) / 255.f);
+        _tex_coords[v_index] = glm::vec2(static_cast<float>(v.magma.x) / 255.f, static_cast<float>(v.magma.y) / 255.f);
       }
       else
       {
@@ -84,7 +84,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, mclq&
         _tex_coords[v_index] = default_uv(x, z);
       }
 
-      _vertices[v_index] = math::vector_3d(
+      _vertices[v_index] = glm::vec3(
                             pos.x + UNITSIZE * x
                             // sometimes there's garbage data on unused tiles that mess things up
                             , std::max(std::min(v.height, _maximum), _minimum)
@@ -95,7 +95,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, math::vector_3d const& base, mclq&
 
 }
 
-liquid_layer::liquid_layer(ChunkWater* chunk, MPQFile &f, std::size_t base_pos, math::vector_3d const& base, MH2O_Information const& info, std::uint64_t infomask)
+liquid_layer::liquid_layer(ChunkWater* chunk, MPQFile &f, std::size_t base_pos, glm::vec3 const& base, MH2O_Information const& info, std::uint64_t infomask)
   : _liquid_id(info.liquid_id)
   , _liquid_vertex_format(info.liquid_vertex_format)
   , _minimum(info.minHeight)
@@ -122,7 +122,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, MPQFile &f, std::size_t base_pos, 
       const unsigned v_index = z * 9 + x;
       _tex_coords[v_index] = default_uv(x, z);
       _depth[v_index] = 1.0f;
-      _vertices[v_index] = math::vector_3d(
+      _vertices[v_index] = glm::vec3(
           pos.x + UNITSIZE * x
         , _minimum
         , pos.z + UNITSIZE * z
@@ -452,21 +452,21 @@ void liquid_layer::setSubchunk(int x, int z, bool water)
   misc::set_bit(_subchunks, x, z, water);
 }
 
-void liquid_layer::paintLiquid( math::vector_3d const& cursor_pos
+void liquid_layer::paintLiquid( glm::vec3 const& cursor_pos
                               , float radius
                               , bool add
                               , math::radians const& angle
                               , math::radians const& orientation
                               , bool lock
-                              , math::vector_3d const& origin
+                              , glm::vec3 const& origin
                               , bool override_height
                               , MapChunk* chunk
                               , float opacity_factor
                               )
 {
-  math::vector_3d ref ( lock
+  glm::vec3 ref ( lock
                       ? origin
-                      : math::vector_3d (cursor_pos.x, cursor_pos.y + 1.0f, cursor_pos.z)
+                      : glm::vec3 (cursor_pos.x, cursor_pos.y + 1.0f, cursor_pos.z)
                       );
 
   int id = 0;
@@ -512,7 +512,7 @@ void liquid_layer::update_min_max()
   _maximum = std::numeric_limits<float>::lowest();
   int x = 0, z = 0;
 
-  for (math::vector_3d& v : _vertices)
+  for (glm::vec3& v : _vertices)
   {
     if (hasSubchunk(std::min(x, 7), std::min(z, 7)))
     {
@@ -557,7 +557,7 @@ void liquid_layer::update_vertex_opacity(int x, int z, MapChunk* chunk, float fa
   _depth[z * 9 + x] = diff < 0.0f ? 0.0f : (std::min(1.0f, std::max(0.0f, (diff + 1.0f) * factor)));
 }
 
-int liquid_layer::get_lod_level(math::vector_3d const& camera_pos) const
+int liquid_layer::get_lod_level(glm::vec3 const& camera_pos) const
 {
   auto const& center_vertex (_vertices[5 * 9 + 4]);
   auto const dist ((center_vertex - camera_pos).length());

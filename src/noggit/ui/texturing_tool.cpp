@@ -24,7 +24,7 @@ namespace noggit
 {
   namespace ui
   {
-    texturing_tool::texturing_tool ( const math::vector_3d* camera_pos
+    texturing_tool::texturing_tool ( const glm::vec3* camera_pos
                                    , MapView* map_view
                                    , bool_toggle_property* show_quick_palette
                                    , QWidget* parent
@@ -497,7 +497,7 @@ namespace noggit
       return _show_unpaintable_chunks && _texturing_mode == texturing_mode::paint; 
     }
 
-    void texturing_tool::paint (World* world, math::vector_3d const& pos, float dt, scoped_blp_texture_reference texture)
+    void texturing_tool::paint (World* world, glm::vec3 const& pos, float dt, scoped_blp_texture_reference texture)
     {
       if (TabletManager::instance()->isActive())
       {
@@ -559,7 +559,7 @@ namespace noggit
       }
     }
 
-    void texturing_tool::change_tex_flag(World* world, math::vector_3d const& pos, bool add, scoped_blp_texture_reference texture)
+    void texturing_tool::change_tex_flag(World* world, glm::vec3 const& pos, bool add, scoped_blp_texture_reference texture)
     {
       std::uint32_t flag = 0;
 

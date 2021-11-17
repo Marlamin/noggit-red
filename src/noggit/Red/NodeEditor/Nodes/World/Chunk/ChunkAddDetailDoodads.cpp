@@ -200,7 +200,7 @@ void ChunkAddDetailDoodads::compute()
     subchunkStatuses |= mask;
     unsigned const curOfs{curSplat[1] * 17 + curSplat[0]};
     using namespace math;
-    vector_3d const* curOrigin{chunk->getHeightmap() + curOfs};
+    glm::vec3 const* curOrigin{chunk->getHeightmap() + curOfs};
     float const ref{curOrigin[9].y};
     std::array<float, 2> rels;
     std::array<float, 2> relHs;
@@ -331,7 +331,7 @@ void ChunkAddDetailDoodads::compute()
       filename = filename.replace(".mdx", ".m2", Qt::CaseInsensitive);
 
       world->addM2(filename.toStdString(), {chunk->xbase - inMinichunkCoords[0]
-          , 0, chunk->zbase - inMinichunkCoords[1]}, 1.0, {0_deg, 0_deg, 0_deg}, nullptr);
+          , 0, chunk->zbase - inMinichunkCoords[1]}, 1.0, {math::degrees(0)._, math::degrees(0)._, math::degrees(0)._ }, nullptr);
     }
   }
 

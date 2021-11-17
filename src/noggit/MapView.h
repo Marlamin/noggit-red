@@ -3,7 +3,6 @@
 #pragma once
 
 #include <math/ray.hpp>
-#include <math/vector_4d.hpp>
 #include <noggit/Misc.h>
 #include <noggit/Selection.h>
 #include <noggit/bool_toggle_property.hpp>
@@ -119,7 +118,7 @@ private:
   float _2d_zoom = 1.f;
   float moving, strafing, updown, mousedir, turn, lookat;
   CursorType _cursorType;
-  math::vector_3d _cursor_pos;
+  glm::vec3 _cursor_pos;
   float _cursorRotation;
   bool look, freelook;
   bool ui_hidden = false;
@@ -153,8 +152,8 @@ private:
 
   display_mode _display_mode;
 
-  math::matrix_4x4 model_view() const;
-  math::matrix_4x4 projection() const;
+  glm::mat4x4 model_view() const;
+  glm::mat4x4 projection() const;
 
   void draw_map();
 
@@ -177,7 +176,7 @@ private:
   bool MoveObj;
   float numpad_moveratio = 0.001f;
 
-  math::vector_3d objMove;
+  glm::vec3 objMove;
 
   std::vector<selection_type> lastSelected;
 
@@ -227,11 +226,11 @@ public slots:
   void on_exit_prompt();
 
 public:
-  math::vector_4d cursor_color;
+  glm::vec4 cursor_color;
 
   MapView ( math::degrees ah0
           , math::degrees av0
-          , math::vector_3d camera_pos
+          , glm::vec3 camera_pos
           , noggit::ui::main_window*
           , std::unique_ptr<World>
           , uid_fix_mode uid_fix = uid_fix_mode::none
@@ -316,7 +315,7 @@ private:
 
   noggit::ui::main_window* _main_window;
 
-  math::vector_4d normalized_device_coords (int x, int y) const;
+  glm::vec4 normalized_device_coords (int x, int y) const;
   float aspect_ratio() const;
 
   noggit::TabletManager* _tablet_manager;
@@ -354,7 +353,7 @@ private:
   QDockWidget* _texture_palette_dock;
   QDockWidget* _object_palette_dock;
 
-  void move_camera_with_auto_height (math::vector_3d const&);
+  void move_camera_with_auto_height (glm::vec3 const&);
 
   void setToolPropertyWidgetVisibility(editing_mode mode);
 

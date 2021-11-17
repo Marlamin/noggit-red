@@ -12,16 +12,13 @@
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QStringList>
-
 #include <math/matrix_4x4.hpp>
-#include <math/vector_3d.hpp>
 #include <noggit/camera.hpp>
 #include <noggit/WMOInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/WMO.h>
 #include <noggit/Model.h>
 #include <noggit/Red/PreviewRenderer/PreviewRenderer.hpp>
-
 
 namespace noggit
 {

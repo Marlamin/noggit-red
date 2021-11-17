@@ -4,9 +4,7 @@
 
 #include <math/frustum.hpp>
 #include <math/matrix_4x4.hpp>
-#include <math/quaternion.hpp>
 #include <math/ray.hpp>
-#include <math/vector_3d.hpp>
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/AsyncObject.h> // AsyncObject
 #include <noggit/MPQ.h>
@@ -27,15 +25,15 @@ class ModelInstance;
 class ParticleSystem;
 class RibbonEmitter;
 
-math::vector_3d fixCoordSystem(math::vector_3d v);
+glm::vec3 fixCoordSystem(glm::vec3 v);
 
 class Bone {
-  Animation::M2Value<math::vector_3d> trans;
-  Animation::M2Value<math::quaternion, math::packed_quaternion> rot;
-  Animation::M2Value<math::vector_3d> scale;
+  Animation::M2Value<glm::vec3> trans;
+  Animation::M2Value<glm::quat, packed_quaternion> rot;
+  Animation::M2Value<glm::vec3> scale;
 
 public:
-  math::vector_3d pivot;
+  glm::vec3 pivot;
   int parent;
 
   typedef struct
@@ -58,7 +56,7 @@ public:
   math::matrix_4x4 mrot = math::matrix_4x4::uninitialized;
 
   bool calc;
-  void calcMatrix( math::matrix_4x4 const& model_view
+  void calcMatrix(glm::mat4x4 const& model_view
                  , Bone* allbones
                  , int anim
                  , int time
@@ -74,9 +72,9 @@ public:
 
 
 class TextureAnim {
-  Animation::M2Value<math::vector_3d> trans;
-  Animation::M2Value<math::quaternion, math::packed_quaternion> rot;
-  Animation::M2Value<math::vector_3d> scale;
+  Animation::M2Value<glm::vec3> trans;
+  Animation::M2Value<glm::quat, packed_quaternion> rot;
+  Animation::M2Value<glm::vec3> scale;
 
 public:
   math::matrix_4x4 mat;
@@ -86,7 +84,7 @@ public:
 };
 
 struct ModelColor {
-  Animation::M2Value<math::vector_3d> color;
+  Animation::M2Value<glm::vec3> color;
   Animation::M2Value<float, int16_t> opacity;
 
   ModelColor(const MPQFile& f, const ModelColorDef &mcd, int *global);
@@ -186,14 +184,14 @@ struct FakeGeometry
 {
   FakeGeometry(Model* m);
 
-  std::vector<math::vector_3d> vertices;
+  std::vector<glm::vec3> vertices;
   std::vector<uint16_t> indices;
 };
 
 struct ModelLight {
   int type, parent;
-  math::vector_3d pos, tpos, dir, tdir;
-  Animation::M2Value<math::vector_3d> diffColor, ambColor;
+  glm::vec3 pos, tpos, dir, tdir;
+  Animation::M2Value<glm::vec3> diffColor, ambColor;
   Animation::M2Value<float> diffIntensity, ambIntensity;
   //Animation::M2Value<float> attStart,attEnd;
   //Animation::M2Value<bool> Enabled;
@@ -214,24 +212,24 @@ public:
 
   Model(const std::string& name, noggit::NoggitRenderContext context );
 
-  void draw( math::matrix_4x4 const& model_view
+  void draw(glm::mat4x4 const& model_view
            , ModelInstance& instance
            , opengl::scoped::use_program& m2_shader
             , opengl::M2RenderState& model_render_state
            , math::frustum const& frustum
            , const float& cull_distance
-           , const math::vector_3d& camera
+           , const glm::vec3& camera
            , int animtime
            , display_mode display
            , bool no_cull = false
            );
-  void draw ( math::matrix_4x4 const& model_view
+  void draw (glm::mat4x4 const& model_view
             , std::vector<math::matrix_4x4> const& instances
             , opengl::scoped::use_program& m2_shader
             , opengl::M2RenderState& model_render_state
             , math::frustum const& frustum
             , const float& cull_distance
-            , const math::vector_3d& camera
+            , const glm::vec3& camera
             , int animtime
             , bool all_boxes
             , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
@@ -248,7 +246,7 @@ public:
 
   void draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count);
 
-  std::vector<float> intersect (math::matrix_4x4 const& model_view, math::ray const&, int animtime);
+  std::vector<float> intersect (glm::mat4x4 const& model_view, math::ray const&, int animtime);
 
   void updateEmitters(float dt);
 
@@ -311,8 +309,8 @@ private:
   void fix_shader_id_layer();
   void compute_pixel_shader_ids();
 
-  void animate(math::matrix_4x4 const& model_view, int anim_id, int anim_time);
-  void calcBones(math::matrix_4x4 const& model_view, int anim, int time, int animation_time);
+  void animate(glm::mat4x4 const& model_view, int anim_id, int anim_time);
+  void calcBones(glm::mat4x4 const& model_view, int anim, int time, int animation_time);
 
   void lightsOn(opengl::light lbase);
   void lightsOff(opengl::light lbase);
@@ -323,7 +321,7 @@ private:
   bool _finished_upload = false;
   bool _vao_setup = false;
 
-  std::vector<math::vector_3d> _vertex_box_points;
+  std::vector<glm::vec3> _vertex_box_points;
 
   // buffers
   opengl::scoped::deferred_upload_buffers<6> _buffers;

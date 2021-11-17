@@ -3,7 +3,6 @@
 #include "noggit/WMOInstance.h"
 #include "noggit/ActionManager.hpp"
 #include "noggit/Action.hpp"
-#include "math/vector_3d.hpp"
 #include "external/glm/glm.hpp"
 #include <external/glm/gtx/matrix_decompose.hpp>
 #include <external/glm/gtc/type_ptr.hpp>
@@ -23,8 +22,8 @@ ViewportGizmo::ViewportGizmo(noggit::Red::ViewportGizmo::GizmoContext gizmo_cont
 
 void ViewportGizmo::handleTransformGizmo(MapView* map_view
                                         , const std::vector<selection_type>& selection
-                                        , math::matrix_4x4 const& model_view
-                                        , math::matrix_4x4 const& projection)
+                                        , glm::mat4x4 const& model_view
+                                        , glm::mat4x4 const& projection)
 {
 
   if (!isUsing())
@@ -34,8 +33,8 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
   GizmoInternalMode gizmo_selection_type;
 
-  auto model_view_trs = model_view.transposed();
-  auto projection_trs = projection.transposed();
+  auto model_view_trs = model_view;
+  auto projection_trs = projection;
 
   int n_selected = selection.size();
 
@@ -80,7 +79,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance = boost::get<selected_object_type>(selection[0]);
       obj_instance->recalcExtents();
       object_matrix = obj_instance->transformMatrixTransposed();
-      ImGuizmo::Manipulate(model_view_trs, projection_trs, _gizmo_operation, _gizmo_mode, object_matrix, delta_matrix, nullptr);
+      ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, object_matrix, delta_matrix, nullptr);
       break;
     }
     case MULTISELECTION:
@@ -88,7 +87,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       if (isUsing())
         _last_pivot_scale = ImGuizmo::GetOperationScaleLast();
 
-      ImGuizmo::Manipulate(model_view_trs, projection_trs, _gizmo_operation, _gizmo_mode, pivot_matrix, delta_matrix, nullptr);
+      ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, pivot_matrix, delta_matrix, nullptr);
       break;
     }
   }
@@ -118,7 +117,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
       glm::mat4 glm_transform_mat = glm::make_mat4(static_cast<float*>(delta_matrix));
 
-      math::vector_3d& pos = obj_instance->pos;
+      glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
       float wmo_scale = 0.f;
       float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
@@ -146,7 +145,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       {
         case ImGuizmo::TRANSLATE:
         {
-          pos += {new_translation.x, new_translation.y, new_translation.z};
+            pos += glm::vec3(new_translation.x, new_translation.y, new_translation.z);
           break;
         }
         case ImGuizmo::ROTATE:
@@ -156,12 +155,12 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
           if (!_use_multiselection_pivot)
           {
-            rotation += {math::degrees(rot_euler.x), math::degrees(rot_euler.y), math::degrees(rot_euler.z)};
+            rotation += glm::vec3(math::degrees(rot_euler.x)._, math::degrees(rot_euler.y)._, math::degrees(rot_euler.z)._);
           }
           else
           {
             //LogDebug << rot_euler.x << " " << rot_euler.y << " " << rot_euler.z << std::endl;
-            rotation.y += math::degrees(rot_euler.y);
+            rotation.y += math::degrees(rot_euler.y)._;
 
             // building model matrix
             glm::mat4 model_transform = glm::make_mat4(static_cast<float*>(object_matrix));
@@ -237,7 +236,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
       glm::mat4 glm_transform_mat = glm::make_mat4(static_cast<float*>(delta_matrix));
 
-      math::vector_3d& pos = obj_instance->pos;
+      glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
       float wmo_scale = 0.f;
       float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
@@ -266,13 +265,13 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
         case ImGuizmo::TRANSLATE:
         {
-          pos += {new_translation.x, new_translation.y, new_translation.z};
+            pos += glm::vec3(new_translation.x, new_translation.y, new_translation.z);
           break;
         }
         case ImGuizmo::ROTATE:
         {
           auto rot_euler = glm::eulerAngles(new_orientation) * 57.2957795f;
-          rotation += {math::degrees(rot_euler.x), math::degrees(rot_euler.y), math::degrees(rot_euler.z)};
+          rotation += glm::vec3(math::degrees(rot_euler.x)._, math::degrees(rot_euler.y)._, math::degrees(rot_euler.z)._);
           break;
         }
         case ImGuizmo::SCALE:

@@ -1,8 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/vector_4d.hpp>
 #include <noggit/Red/UiCommon/ExtendedSlider.hpp>
 #include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
 
@@ -31,8 +29,8 @@ namespace noggit
     public:
       shader_tool(MapView* map_view, QWidget* parent = nullptr);
 
-      void changeShader (World*, math::vector_3d const& pos, float dt, bool add);
-      void pickColor(World* world, math::vector_3d const& pos);
+      void changeShader (World*, glm::vec3 const& pos, float dt, bool add);
+      void pickColor(World* world, glm::vec3 const& pos);
       void addColorToPalette();
 
       void changeRadius(float change);
@@ -48,7 +46,7 @@ namespace noggit
       QImage* getMaskImage() { return &_mask_image; }
       void updateMaskImage();
 
-      math::vector_4d& shaderColor() { return _color; };
+      glm::vec4& shaderColor() { return _color; };
 
       noggit::Red::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
       noggit::Red::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
@@ -58,7 +56,7 @@ namespace noggit
       void fromJSON(QJsonObject const& json);
 
     private:
-      math::vector_4d _color;
+      glm::vec4 _color;
 
       noggit::Red::UiCommon::ExtendedSlider* _radius_slider;
       noggit::Red::UiCommon::ExtendedSlider* _speed_slider;

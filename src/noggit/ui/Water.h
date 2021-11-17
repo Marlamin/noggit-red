@@ -34,7 +34,7 @@ namespace noggit
 
       void changeWaterType(int waterint);
 
-      void paintLiquid (World*, math::vector_3d const& pos, bool add);
+      void paintLiquid (World*, glm::vec3 const& pos, bool add);
 
       void changeRadius(float change);
       void setRadius(float radius);
@@ -42,7 +42,7 @@ namespace noggit
       void changeAngle(float change);
       void change_height(float change);
 
-      void lockPos(math::vector_3d const& cursor_pos);
+      void lockPos(glm::vec3 const& cursor_pos);
       void toggle_lock();
       void toggle_angled_mode();
 
@@ -51,7 +51,7 @@ namespace noggit
       float orientation() const { return _orientation; }
       bool angled_mode() const { return _angled_mode.get(); }
       bool use_ref_pos() const { return _locked.get(); }
-      math::vector_3d ref_pos() const { return _lock_pos; }
+      glm::vec3 ref_pos() const { return _lock_pos; }
 
       QSize sizeHint() const override;
 
@@ -77,7 +77,7 @@ namespace noggit
       int _opacity_mode;
       float _custom_opacity_factor;
 
-      math::vector_3d _lock_pos;
+      glm::vec3 _lock_pos;
 
       QDoubleSpinBox* _radius_spin;
       QDoubleSpinBox* _angle_spin;

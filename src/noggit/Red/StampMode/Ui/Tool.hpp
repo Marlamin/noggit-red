@@ -8,6 +8,7 @@
 #include <QSlider>
 #include <QDial>
 #include <QDoubleSpinBox>
+#include <glm/vec3.hpp>
 
 class QPixmap;
 class World;
@@ -31,7 +32,7 @@ namespace noggit
         Tool(bool_toggle_property* showPalette, float* cursorRotation, QWidget* parent = nullptr);
         auto getOuterRadius(void) const -> float;
         auto getInnerRadius(void) const -> float;
-        auto stamp(World* world, math::vector_3d const& pos, float dt, bool doAdd) const -> void;
+        auto stamp(World* world, glm::vec3 const& pos, float dt, bool doAdd) const -> void;
         public slots:
         void setPixmap(QPixmap const* pixmap);
       private:

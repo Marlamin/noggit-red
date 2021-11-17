@@ -1,6 +1,4 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
-#include <math/vector_2d.hpp>
 #include <noggit/TextureManager.h>
 #include <noggit/Log.h> // LogDebug
 
@@ -8,6 +6,7 @@
 #include <QtGui/QPixmap>
 
 #include <algorithm>
+#include <glm/vec2.hpp>
 
 decltype (TextureManager::_) TextureManager::_;
 decltype (TextureManager::_tex_arrays) TextureManager::_tex_arrays;
@@ -479,14 +478,14 @@ namespace noggit
     GLuint const& vertices_vbo = _buffers[1];
     GLuint const& texcoords_vbo = _buffers[2];
 
-    std::vector<math::vector_2d> vertices =
+    std::vector<glm::vec2> vertices =
         {
              {-1.0f, -1.0f}
             ,{-1.0f, 1.0f}
             ,{ 1.0f, 1.0f}
             ,{ 1.0f, -1.0f}
         };
-    std::vector<math::vector_2d> texcoords =
+    std::vector<glm::vec2> texcoords =
         {
              {0.f, 0.f}
             ,{0.f, 1.0f}
@@ -495,8 +494,8 @@ namespace noggit
         };
     std::vector<std::uint16_t> indices = {0,1,2, 2,3,0};
 
-    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(vertices_vbo, vertices, GL_STATIC_DRAW);
-    gl.bufferData<GL_ARRAY_BUFFER, math::vector_2d>(texcoords_vbo, texcoords, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER,glm::vec2>(vertices_vbo, vertices, GL_STATIC_DRAW);
+    gl.bufferData<GL_ARRAY_BUFFER,glm::vec2>(texcoords_vbo, texcoords, GL_STATIC_DRAW);
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(indices_vbo, indices, GL_STATIC_DRAW);
 
 

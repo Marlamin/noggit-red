@@ -1,13 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
-#include <math/vector_3d.hpp>
 #include <noggit/MapHeaders.h>
 
 struct tile_index
 {
-  tile_index(const math::vector_3d& pos) : tile_index(std::floor(pos.x / TILESIZE), std::floor(pos.z / TILESIZE)) { }
+  tile_index(const glm::vec3& pos) : tile_index(std::floor(pos.x / TILESIZE), std::floor(pos.z / TILESIZE)) { }
   tile_index(std::size_t tileX, std::size_t tileZ) : x(tileX), z(tileZ) { }
 
   friend bool operator== (tile_index const& lhs, tile_index const& rhs)
@@ -23,7 +21,7 @@ struct tile_index
 
   float dist(tile_index const& other) const
   {
-    return (math::vector_3d(x, 0.f, z) - math::vector_3d(other.x, 0.f, other.z)).length();
+    return (glm::vec3(x, 0.f, z) - glm::vec3(other.x, 0.f, other.z)).length();
   }
 
   std::size_t x;

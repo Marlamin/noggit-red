@@ -1,11 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
-
 #include <noggit/scripting/script_tex.hpp>
 #include <noggit/scripting/script_object.hpp>
-
 #include <noggit/MapChunk.h>
-#include <math/vector_3d.hpp>
 
 namespace noggit
 {
@@ -18,12 +15,12 @@ namespace noggit
     {
     public:
       vert(script_context * ctx, MapChunk* chunk, int index);
-      math::vector_3d get_pos();
+      glm::vec3 get_pos();
       void set_height(float y);
       void add_height(float y);
       void sub_height(float y);
 
-      math::vector_3d get_color();
+      glm::vec3 get_color();
       void set_color(float r, float g, float b);
       void set_water(int type, float height);
       void set_hole(bool add);

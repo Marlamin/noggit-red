@@ -5,12 +5,10 @@
 
 #include <noggit/TextureManager.h>
 #include <noggit/ContextObject.hpp>
-#include <math/vector_2d.hpp>
-#include <opengl/context.hpp>
-#include <opengl/scoped.hpp>
 #include <external/tsl/robin_map.h>
 
 #include <tuple>
+#include <glm/vec2.hpp>
 
 class LiquidTextureManager
 {
@@ -22,13 +20,13 @@ public:
   void upload();
   void unload();
 
-  tsl::robin_map<unsigned, std::tuple<GLuint, math::vector_2d, int, unsigned>> const& getTextureFrames() { return _texture_frames_map; };
+  tsl::robin_map<unsigned, std::tuple<GLuint, glm::vec2, int, unsigned>> const& getTextureFrames() { return _texture_frames_map; };
 
 private:
   bool _uploaded = false;
 
   // liquidTypeRecID : (array, (animation_x, animation_y), liquid_type)
-  tsl::robin_map<unsigned, std::tuple<GLuint, math::vector_2d, int, unsigned>> _texture_frames_map;
+  tsl::robin_map<unsigned, std::tuple<GLuint, glm::vec2, int, unsigned>> _texture_frames_map;
 
   noggit::NoggitRenderContext _context;
 };

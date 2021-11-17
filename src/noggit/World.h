@@ -95,23 +95,23 @@ public:
   void initDisplay();
 
   void update_models_emitters(float dt);
-  void draw (math::matrix_4x4 const& model_view
-            , math::matrix_4x4 const& projection
-            , math::vector_3d const& cursor_pos
+  void draw (glm::mat4x4 const& model_view
+            , glm::mat4x4 const& projection
+            , glm::vec3 const& cursor_pos
             , float cursorRotation
-            , math::vector_4d const& cursor_color
+            , glm::vec4 const& cursor_color
             , CursorType cursor_type
             , float brush_radius
             , bool show_unpaintable_chunks
             , float inner_radius_ratio
-            , math::vector_3d const& ref_pos
+            , glm::vec3 const& ref_pos
             , float angle
             , float orientation
             , bool use_ref_pos
             , bool angled_mode
             , bool draw_paintability_overlay
             , editing_mode terrainMode
-            , math::vector_3d const& camera_pos
+            , glm::vec3 const& camera_pos
             , bool camera_moved
             , bool draw_mfbo
             , bool draw_terrain
@@ -131,12 +131,12 @@ public:
             , bool minimap_render = false
             );
 
-  unsigned int getAreaID (math::vector_3d const&);
-  void setAreaID(math::vector_3d const& pos, int id, bool adt,  float radius = -1.0f);
+  unsigned int getAreaID (glm::vec3 const&);
+  void setAreaID(glm::vec3 const& pos, int id, bool adt,  float radius = -1.0f);
 
   noggit::NoggitRenderContext getRenderContext() { return _context; };
 
-  selection_result intersect ( math::matrix_4x4 const& model_view
+  selection_result intersect (glm::mat4x4 const& model_view
                              , math::ray const&
                              , bool only_map
                              , bool do_objects
@@ -146,18 +146,18 @@ public:
                              , bool draw_hidden_models
                              );
 
-  MapChunk* getChunkAt(math::vector_3d const& pos);
+  MapChunk* getChunkAt(glm::vec3 const& pos);
 
 private:
   // Information about the currently selected model / WMO / triangle.
   int _selected_model_count = 0;
-  boost::optional<math::vector_3d> _multi_select_pivot;
+  boost::optional<glm::vec3> _multi_select_pivot;
 public:
 
   void unload_shaders();
 
   void update_selection_pivot();
-  boost::optional<math::vector_3d> const& multi_select_pivot() const { return _multi_select_pivot; }
+  boost::optional<glm::vec3> const& multi_select_pivot() const { return _multi_select_pivot; }
 
   // Selection related methods.
   bool is_selected(selection_type selection) const;
@@ -173,7 +173,7 @@ public:
   void remove_from_selection(std::uint32_t uid);
   void reset_selection();
   void delete_selected_models();
-  void range_add_to_selection(math::vector_3d const& pos, float radius, bool remove);
+  void range_add_to_selection(glm::vec3 const& pos, float radius, bool remove);
   noggit::world_model_instances_storage& getModelInstanceStorage() { return _model_instance_storage; };
 
   enum class m2_scaling_type
@@ -186,7 +186,7 @@ public:
   void snap_selected_models_to_the_ground();
   void scale_selected_models(float v, m2_scaling_type type);
   void move_selected_models(float dx, float dy, float dz);
-  void move_selected_models(math::vector_3d const& delta)
+  void move_selected_models(glm::vec3 const& delta)
   {
     move_selected_models(delta.x, delta.y, delta.z);
   }
@@ -194,7 +194,7 @@ public:
   {
     return set_selected_models_pos({x,y,z}, change_height);
   }
-  void set_selected_models_pos(math::vector_3d const& pos, bool change_height = true);
+  void set_selected_models_pos(glm::vec3 const& pos, bool change_height = true);
   void rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot);
   void rotate_selected_models_randomly(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
   void set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz);
@@ -202,118 +202,118 @@ public:
   // Checks the normal of the terrain on model origin and rotates to that spot.
   void rotate_selected_models_to_ground_normal(bool smoothNormals);
 
-  bool GetVertex(float x, float z, math::vector_3d *V) const;
+  bool GetVertex(float x, float z, glm::vec3 *V) const;
 
   // check if the cursor is under map or in an unloaded tile
-  bool isUnderMap(math::vector_3d const& pos);
+  bool isUnderMap(glm::vec3 const& pos);
 
   template<typename Fun>
-    bool for_all_chunks_in_range ( math::vector_3d const& pos
+    bool for_all_chunks_in_range ( glm::vec3 const& pos
                                  , float radius
                                  , Fun&& /* MapChunk* -> bool changed */
                                  );
   template<typename Fun, typename Post>
-    bool for_all_chunks_in_range ( math::vector_3d const& pos
+    bool for_all_chunks_in_range ( glm::vec3 const& pos
                                  , float radius
                                  , Fun&& /* MapChunk* -> bool changed */
                                  , Post&& /* MapChunk* -> void; called for all changed chunks */
                                  );
 
   template<typename Fun>
-  bool for_all_chunks_in_rect ( math::vector_3d const& pos
+  bool for_all_chunks_in_rect ( glm::vec3 const& pos
     , float radius
     , Fun&& /* MapChunk* -> bool changed */
   );
 
   template<typename Fun, typename Post>
-  bool for_all_chunks_in_rect ( math::vector_3d const& pos
+  bool for_all_chunks_in_rect (glm::vec3 const& pos
     , float radius
     , Fun&& /* MapChunk* -> bool changed */
     , Post&& /* MapChunk* -> void; called for all changed chunks */
   );
 
   template<typename Fun>
-    void for_all_chunks_on_tile (math::vector_3d const& pos, Fun&&);
+    void for_all_chunks_on_tile (glm::vec3 const& pos, Fun&&);
 
   template<typename Fun>
-    void for_chunk_at(math::vector_3d const& pos, Fun&& fun);
+    void for_chunk_at(glm::vec3 const& pos, Fun&& fun);
   template<typename Fun>
-    auto for_maybe_chunk_at (math::vector_3d const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>;
+    auto for_maybe_chunk_at (glm::vec3 const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>;
 
   template<typename Fun>
     void for_tile_at(const tile_index& pos, Fun&&);
 
-  void changeTerrain(math::vector_3d const& pos, float change, float radius, int BrushType, float inner_radius);
-  void changeShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode);
-  void stampShader(math::vector_3d const& pos, math::vector_4d const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors);
-  math::vector_3d pickShaderColor(math::vector_3d const& pos);
-  void flattenTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const math::vector_3d& origin, math::degrees angle, math::degrees orientation);
-  void blurTerrain(math::vector_3d const& pos, float remain, float radius, int BrushType, flatten_mode const& mode);
-  bool paintTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
-  bool stampTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint);
-  bool sprayTexture(math::vector_3d const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture);
-  bool replaceTexture(math::vector_3d const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture);
+  void changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius);
+  void changeShader(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode);
+  void stampShader(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors);
+  glm::vec3 pickShaderColor(glm::vec3 const& pos);
+  void flattenTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const glm::vec3& origin, math::degrees angle, math::degrees orientation);
+  void blurTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode);
+  bool paintTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
+  bool stampTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint);
+  bool sprayTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture);
+  bool replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture);
 
-  void eraseTextures(math::vector_3d const& pos);
-  void overwriteTextureAtCurrentChunk(math::vector_3d const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
-  void setBaseTexture(math::vector_3d const& pos);
-  void clear_shadows(math::vector_3d const& pos);
-  void clearTextures(math::vector_3d const& pos);
-  void swapTexture(math::vector_3d const& pos, scoped_blp_texture_reference tex);
-  void removeTexDuplicateOnADT(math::vector_3d const& pos);
-  void change_texture_flag(math::vector_3d const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
+  void eraseTextures(glm::vec3 const& pos);
+  void overwriteTextureAtCurrentChunk(glm::vec3 const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
+  void setBaseTexture(glm::vec3 const& pos);
+  void clear_shadows(glm::vec3 const& pos);
+  void clearTextures(glm::vec3 const& pos);
+  void swapTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex);
+  void removeTexDuplicateOnADT(glm::vec3 const& pos);
+  void change_texture_flag(glm::vec3 const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 
-  void setHole(math::vector_3d const& pos, float radius, bool big, bool hole);
-  void setHoleADT(math::vector_3d const& pos, bool hole);
+  void setHole(glm::vec3 const& pos, float radius, bool big, bool hole);
+  void setHoleADT(glm::vec3 const& pos, bool hole);
 
-  void exportADTAlphamap(math::vector_3d const& pos);
-  void exportADTNormalmap(math::vector_3d const& pos);
-  void exportADTAlphamap(math::vector_3d const& pos, std::string const& filename);
-  void exportADTHeightmap(math::vector_3d const& pos, float min_height, float max_height);
-  void exportADTVertexColorMap(math::vector_3d const& pos);
+  void exportADTAlphamap(glm::vec3 const& pos);
+  void exportADTNormalmap(glm::vec3 const& pos);
+  void exportADTAlphamap(glm::vec3 const& pos, std::string const& filename);
+  void exportADTHeightmap(glm::vec3 const& pos, float min_height, float max_height);
+  void exportADTVertexColorMap(glm::vec3 const& pos);
   void exportAllADTsAlphamap();
   void exportAllADTsAlphamap(std::string const& filename);
   void exportAllADTsHeightmap();
   void exportAllADTsVertexColorMap();
 
-  void importADTAlphamap(math::vector_3d const& pos, QImage const& image, unsigned layer);
-  void importADTAlphamap(math::vector_3d const& pos);
-  void importADTHeightmap(math::vector_3d const& pos, QImage const& image, float multiplier, unsigned mode);
-  void importADTHeightmap(math::vector_3d const& pos, float multiplier, unsigned mode);
-  void importADTVertexColorMap(math::vector_3d const& pos, int mode);
-  void importADTVertexColorMap(math::vector_3d const& pos, QImage const& image, int mode);
+  void importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigned layer);
+  void importADTAlphamap(glm::vec3 const& pos);
+  void importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode);
+  void importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode);
+  void importADTVertexColorMap(glm::vec3 const& pos, int mode);
+  void importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode);
 
   void importAllADTsAlphamaps();
   void importAllADTsHeightmaps(float multiplier, unsigned mode);
   void importAllADTVertexColorMaps(unsigned mode);
 
-  void ensureAllTilesetsADT(math::vector_3d const& pos);
+  void ensureAllTilesetsADT(glm::vec3 const& pos);
   void ensureAllTilesetsAllADTs();
 
   void notifyTileRendererOnSelectedTextureChange();
 
   void addM2 ( std::string const& filename
-             , math::vector_3d newPos
+             , glm::vec3 newPos
              , float scale, math::degrees::vec3 rotation
              , noggit::object_paste_params*
              );
   void addWMO ( std::string const& filename
-              , math::vector_3d newPos
+              , glm::vec3 newPos
               , math::degrees::vec3 rotation
               );
 
   ModelInstance* addM2AndGetInstance ( std::string const& filename
-      , math::vector_3d newPos
+      , glm::vec3 newPos
       , float scale, math::degrees::vec3 rotation
       , noggit::object_paste_params*
   );
 
   WMOInstance* addWMOAndGetInstance ( std::string const& filename
-      , math::vector_3d newPos
+      , glm::vec3 newPos
       , math::degrees::vec3 rotation
   );
 
-  auto stamp(math::vector_3d const& pos, float dt, QImage const* img, float radiusOuter
+  auto stamp(glm::vec3 const& pos, float dt, QImage const* img, float radiusOuter
   , float radiusInner, int BrushType, bool sculpt) -> void;
 
   // add a m2 instance to the world (needs to be positioned already), return the uid
@@ -334,9 +334,9 @@ public:
 
   bool saveMinimap (tile_index const& tile_idx, MinimapRenderSettings* settings, std::optional<QImage>& combined_image);
   void drawMinimap ( MapTile *tile
-      , math::matrix_4x4 const& model_view
-      , math::matrix_4x4 const& projection
-      , math::vector_3d const& camera_pos
+      , glm::mat4x4 const& model_view
+      , glm::mat4x4 const& projection
+      , glm::vec3 const& camera_pos
       , MinimapRenderSettings* settings
   );
 
@@ -350,18 +350,18 @@ public:
 
 	static bool IsEditableWorld(int pMapId);
 
-  void clearHeight(math::vector_3d const& pos);
+  void clearHeight(glm::vec3 const& pos);
   void clearAllModelsOnADT(tile_index const& tile);
 
   // liquids
-  void paintLiquid( math::vector_3d const& pos
+  void paintLiquid( glm::vec3 const& pos
                   , float radius
                   , int liquid_id
                   , bool add
                   , math::radians const& angle
                   , math::radians const& orientation
                   , bool lock
-                  , math::vector_3d const& origin
+                  , glm::vec3 const& origin
                   , bool override_height
                   , bool override_liquid_id
                   , float opacity_factor
@@ -376,10 +376,10 @@ public:
 
   void convert_alphamap(bool to_big_alpha);
 
-  bool deselectVertices(math::vector_3d const& pos, float radius);
-  void selectVertices(math::vector_3d const& pos, float radius);
+  bool deselectVertices(glm::vec3 const& pos, float radius);
+  void selectVertices(glm::vec3 const& pos, float radius);
   void moveVertices(float h);
-  void orientVertices ( math::vector_3d const& ref_pos
+  void orientVertices ( glm::vec3 const& ref_pos
                       , math::degrees vertex_angle
                       , math::degrees vertex_orientation
                       );
@@ -393,7 +393,7 @@ public:
 
   float getMaxTileHeight(const tile_index& tile);
 
-  math::vector_3d const& vertexCenter();
+  glm::vec3 const& vertexCenter();
 
   void initShaders();
 
@@ -417,9 +417,10 @@ public:
 private:
   void update_models_by_filename();
 
-  void updateMVPUniformBlock(const math::matrix_4x4& model_view, const math::matrix_4x4& projection);
-  void updateLightingUniformBlock(bool draw_fog, math::vector_3d const& camera_pos);
+  void updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection);
+  void updateLightingUniformBlock(bool draw_fog, glm::vec3 const& camera_pos);
   void updateLightingUniformBlockMinimap(MinimapRenderSettings* settings);
+
 
   std::unordered_set<MapChunk*>& vertexBorderChunks();
 
@@ -432,8 +433,8 @@ private:
   std::unordered_set<MapTile*> _vertex_tiles;
   std::unordered_set<MapChunk*> _vertex_chunks;
   std::unordered_set<MapChunk*> _vertex_border_chunks;
-  std::unordered_set<math::vector_3d*> _vertices_selected;
-  math::vector_3d _vertex_center;
+  std::unordered_set<glm::vec3*> _vertices_selected;
+  glm::vec3 _vertex_center;
   bool _vertex_center_updated = false;
   bool _vertex_border_updated = false;
 

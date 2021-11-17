@@ -12,7 +12,7 @@ namespace noggit
 {
   namespace ui
   {
-    uid_fix_window::uid_fix_window ( math::vector_3d pos
+    uid_fix_window::uid_fix_window ( glm::vec3 pos
                                    , math::degrees camera_pitch
                                    , math::degrees camera_yaw
                                    )

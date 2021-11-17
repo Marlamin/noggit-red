@@ -4,7 +4,6 @@
 
 #include <QtGui/QOpenGLContext>
 #include <math/matrix_4x4.hpp>
-#include <math/vector_4d.hpp>
 #include <cstdint>
 #include <array>
 
@@ -23,20 +22,20 @@ namespace opengl
 
   struct MVPUniformBlock
   {
-    math::matrix_4x4 model_view;
-    math::matrix_4x4 projection;
+  	glm::mat4x4 model_view;
+    glm::mat4x4 projection;
   };
 
   struct LightingUniformBlock
   {
-    math::vector_4d DiffuseColor_FogStart;
-    math::vector_4d AmbientColor_FogEnd;
-    math::vector_4d FogColor_FogOn;
-    math::vector_4d LightDir_FogRate;
-    math::vector_4d OceanColorLight;
-    math::vector_4d OceanColorDark;
-    math::vector_4d RiverColorLight;
-    math::vector_4d RiverColorDark;
+    glm::vec4 DiffuseColor_FogStart;
+    glm::vec4 AmbientColor_FogEnd;
+    glm::vec4 FogColor_FogOn;
+    glm::vec4 LightDir_FogRate;
+    glm::vec4 OceanColorLight;
+    glm::vec4 OceanColorDark;
+    glm::vec4 RiverColorLight;
+    glm::vec4 RiverColorDark;
   };
 
   struct TerrainParamsUniformBlock
@@ -53,7 +52,7 @@ namespace opengl
     int draw_impass_overlay = false;
     int draw_paintability_overlay = false;
     int draw_selection_overlay = false;
-    math::vector_4d wireframe_color;
+    glm::vec4 wireframe_color;
 
   };
 
@@ -65,7 +64,7 @@ namespace opengl
     int ChunkTexDoAnim[4];
     int ChunkTexAnimSpeed[4];
     int AreaIDColor_Pad2_DrawSelection[4];
-    math::vector_4d ChunkXYZBase_Pad1;
+    glm::vec4 ChunkXYZBase_Pad1;
     int ChunkTexAnimDir[4];
   };
 

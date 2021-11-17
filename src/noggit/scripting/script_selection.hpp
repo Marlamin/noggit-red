@@ -1,12 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
-
 #include <noggit/scripting/script_object.hpp>
 #include <noggit/scripting/script_model.hpp>
 #include <noggit/scripting/script_chunk.hpp>
-
-#include <math/vector_3d.hpp>
-
 #include <vector>
 #include <string>
 #include <memory>
@@ -29,8 +25,8 @@ namespace noggit
     public:
       selection( script_context * ctx
                , std::string const& caller
-               , math::vector_3d const& point1
-               , math::vector_3d const& point2
+               , glm::vec3 const& point1
+               , glm::vec3 const& point2
                );
 
       std::shared_ptr<noisemap> make_noise(
@@ -39,10 +35,10 @@ namespace noggit
         , std::string const& seed
         );
 
-      math::vector_3d center();
-      math::vector_3d min();
-      math::vector_3d max();
-      math::vector_3d size();
+      glm::vec3 center();
+      glm::vec3 min();
+      glm::vec3 max();
+      glm::vec3 size();
 
       std::vector<chunk> chunks_raw();
       std::vector<vert> verts_raw();
@@ -58,10 +54,10 @@ namespace noggit
     
     private:
       World* _world;
-      math::vector_3d _center;
-      math::vector_3d _min;
-      math::vector_3d _max;
-      math::vector_3d _size;
+      glm::vec3 _center;
+      glm::vec3 _min;
+      glm::vec3 _max;
+      glm::vec3 _size;
     };
 
     void register_selection(script_context * state);
