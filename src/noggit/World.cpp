@@ -2437,8 +2437,8 @@ void World::drawMinimap ( MapTile *tile
 
   }
 
-  draw(model_view, projection, math::vector_3d{}, 0, math::vector_4d{},
-      CursorType::NONE, 0.f, false, 0.f, math::vector_3d{}, 0.f, 0.f, false, false, false, editing_mode::minimap, camera_pos, true, false, true, settings->draw_wmo, settings->draw_water, false, settings->draw_m2, false, false, true, settings, false, eTerrainType::eTerrainType_Linear, 0, display_mode::in_3D, false, true);
+  draw(model_view, projection, glm::vec3(), 0, glm::vec4(),
+      CursorType::NONE, 0.f, false, 0.f, glm::vec3(), 0.f, 0.f, false, false, false, editing_mode::minimap, camera_pos, true, false, true, settings->draw_wmo, settings->draw_water, false, settings->draw_m2, false, false, true, settings, false, eTerrainType::eTerrainType_Linear, 0, display_mode::in_3D, false, true);
 
  
   if (unload)
@@ -4649,8 +4649,8 @@ void World::updateLightingUniformBlockMinimap(MinimapRenderSettings* settings)
 {
     ZoneScoped;
 
-    math::vector_3d diffuse = settings->diffuse_color;
-    math::vector_3d ambient = settings->ambient_color;
+    glm::vec3 diffuse = settings->diffuse_color;
+    glm::vec3 ambient = settings->ambient_color;
 
     _lighting_ubo_data.DiffuseColor_FogStart = { diffuse, 0 };
     _lighting_ubo_data.AmbientColor_FogEnd = { ambient, 0 };
