@@ -156,11 +156,6 @@ vec3 apply_lighting(vec3 material)
 void main()
 {
 
-  if (tex_array0 == 34)
-  {
-    out_color = vec4(1, 0, 0, 1);
-  }
-
   float dist_from_camera = distance(camera, f_position);
   bool fog = FogColor_FogOn.w != 0 && !bool(flags & eWMOBatch_Unfogged);
 
