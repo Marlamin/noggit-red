@@ -79,6 +79,19 @@ void Model::finishLoading()
   _state_changed.notify_all();
 }
 
+void Model::waitForChildrenLoaded()
+{
+  for (auto& tex : _textures)
+  {
+    tex.get()->wait_until_loaded();
+  }
+
+  for (auto& pair : _replaceTextures)
+  {
+    pair.second.get()->wait_until_loaded();
+  }
+}
+
 
 bool Model::isAnimated(const MPQFile& f)
 {

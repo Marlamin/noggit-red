@@ -52,6 +52,7 @@ public:
   ~MapTile();
 
   void finishLoading();
+  void waitForChildrenLoaded();
 
   //! \todo on destruction, unload ModelInstances and WMOInstances on this tile:
   // a) either keep up the information what tiles the instances are on at all times
@@ -70,6 +71,7 @@ public:
 	//! \brief Get the maximum height of terrain on this map tile.
 	float getMaxHeight();
 	float getMinHeight();
+  void forceRecalcExtents();
 
   void convert_alphamap(bool to_big_alpha);
 

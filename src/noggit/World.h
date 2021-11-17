@@ -332,7 +332,7 @@ public:
   void updateTilesModel(ModelInstance* m2, model_update type);
   void wait_for_all_tile_updates();
 
-  bool saveMinimap (tile_index const& tile_idx, MinimapRenderSettings* settings);
+  bool saveMinimap (tile_index const& tile_idx, MinimapRenderSettings* settings, std::optional<QImage>& combined_image);
   void drawMinimap ( MapTile *tile
       , math::matrix_4x4 const& model_view
       , math::matrix_4x4 const& projection
@@ -491,7 +491,7 @@ private:
 
   LiquidTextureManager _liquid_texture_manager;
 
-  std::array<MapTile*, 64 * 64> _loaded_tiles_buffer;
+  std::array<std::pair<std::pair<int, int>, MapTile*>, 64 * 64 > _loaded_tiles_buffer;
 
   bool _need_terrain_params_ubo_update = false;
 

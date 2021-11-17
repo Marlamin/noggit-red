@@ -46,6 +46,7 @@ struct blp_texture : public AsyncObject
 {
   blp_texture (std::string const& filename, noggit::NoggitRenderContext context);
   void finishLoading();
+  virtual void waitForChildrenLoaded() override {};
 
   void loadFromUncompressedData(BLPHeader const* lHeader, char const* lData);
   void loadFromCompressedData(BLPHeader const* lHeader, char const* lData);

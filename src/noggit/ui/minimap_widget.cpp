@@ -23,16 +23,96 @@ namespace noggit
       , _world (nullptr)
       , _camera (nullptr)
       , _draw_skies (false)
+      , _selected_tiles(nullptr)
+      , _resizeable(false)
     {
       setSizePolicy (QSizePolicy::Preferred, QSizePolicy::Preferred);
-      //setMouseTracking(true);
+      setMouseTracking(true);
       setMaximumSize(QSize(1024, 1024));
       setMinimumSize(QSize(128, 128));
+
+
+
+      connect(this, &minimap_widget::tile_clicked
+        , [this](QPoint tile)
+        {
+          if (!_selected_tiles)
+            return;
+
+          if (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
+          {
+            int x = tile.x() - 1;
+            int y = tile.y() - 1;
+
+            for (int i = 0; i < 3; ++i)
+            {
+              for (int j = 0; j < 3; ++j)
+              {
+                if (_world->mapIndex.hasTile(tile_index(x + i, y + j)))
+                {
+                  (*_selected_tiles)[64 * (x + i) + (y + j)]
+                    = !QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
+                }
+
+              }
+            }
+          }
+          else
+          {
+            if (_world->mapIndex.hasTile(tile_index(tile.x(), tile.y())))
+            {
+              (*_selected_tiles)[64 * tile.x() + tile.y()]
+                = !QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
+            }
+          }
+
+          update();
+        }
+      );
+
+      connect(this, &minimap_widget::reset_selection
+        , [this]()
+        {
+          if (!_selected_tiles)
+            return;
+
+          _selected_tiles->fill(false);
+        }
+      );
+    }
+
+
+    void minimap_widget::wheelEvent(QWheelEvent* event)
+    {
+      if (!_resizeable)
+        return;
+
+      if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
+      {
+        const int degrees = event->angleDelta().y() / 8;
+        int steps = degrees / 15;
+
+        auto base_size = width();
+
+        if (steps > 0)
+        {
+          auto new_size = std::min(std::max(128, base_size + 64), 4096);
+          setFixedSize(new_size, new_size);
+        }
+        else
+        {
+          auto new_size = std::max(std::min(4096, base_size - 64), 128);
+          setFixedSize(new_size, new_size);
+        }
+
+        event->ignore();
+      }
+
     }
 
     QSize minimap_widget::sizeHint() const
     {
-      return QSize (1024, 1024);
+      return QSize (512, 512);
     }
 
     //! \todo Only redraw stuff as told in event.
@@ -233,7 +313,7 @@ namespace noggit
 
     void minimap_widget::mouseMoveEvent(QMouseEvent* event)
     {
-      if (world())
+      if (_world)
       {
         QPoint tile = locateTile(event);
 

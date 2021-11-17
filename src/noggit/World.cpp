@@ -106,28 +106,28 @@ bool World::IsEditableWorld(int pMapId)
 }
 
 World::World(const std::string& name, int map_id, noggit::NoggitRenderContext context, bool create_empty)
-  : _model_instance_storage(this)
-  , _tile_update_queue(this)
-  , mapIndex (name, map_id, this, context, create_empty)
-  , horizon(name, &mapIndex)
-  , mWmoFilename("")
-  , mWmoEntry(ENTRY_MODF())
-  , ol(nullptr)
-  , animtime(0)
-  , time(1450)
-  , basename(name)
-  , fogdistance(777.0f)
-  , culldistance(fogdistance)
-  , skies(nullptr)
-  , outdoorLightStats(OutdoorLightStats())
-  , _current_selection()
-  , _settings (new QSettings())
-  , _view_distance(_settings->value ("view_distance", 1000.f).toFloat())
-  , _context(context)
-  , _liquid_texture_manager(context)
+    : _model_instance_storage(this)
+    , _tile_update_queue(this)
+    , mapIndex(name, map_id, this, context, create_empty)
+    , horizon(name, &mapIndex)
+    , mWmoFilename("")
+    , mWmoEntry(ENTRY_MODF())
+    , ol(nullptr)
+    , animtime(0)
+    , time(1450)
+    , basename(name)
+    , fogdistance(777.0f)
+    , culldistance(fogdistance)
+    , skies(nullptr)
+    , outdoorLightStats(OutdoorLightStats())
+    , _current_selection()
+    , _settings(new QSettings())
+    , _view_distance(_settings->value("view_distance", 1000.f).toFloat())
+    , _context(context)
+    , _liquid_texture_manager(context)
 {
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
-  _loaded_tiles_buffer[0] = nullptr;
+  _loaded_tiles_buffer[0] = std::make_pair<std::pair<int, int>, MapTile*>(std::make_pair(0, 0), nullptr);
 }
 
 void World::update_selection_pivot()
@@ -1093,11 +1093,25 @@ void World::draw ( math::matrix_4x4 const& model_view
     tile->recalcObjectInstanceExtents();
     tile->recalcCombinedExtents();
 
+    if (minimap_render)
+    {
+        auto& tile_extents = tile->getCombinedExtents();
+        tile->calcCamDist(camera_pos);
+        tile->tile_frustum_culled = false;
+        tile->objects_frustum_cull_test = 2;
+        tile->tile_occluded = false;
+        _loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(tile->index.x, tile->index.z), tile);
+
+        tile_counter++;
+        _n_loaded_tiles++;
+        continue;
+    }
+
     auto& tile_extents = tile->getCombinedExtents();
     if (frustum.intersects(tile_extents[1], tile_extents[0]) || tile->getChunkUpdateFlags())
     {
       tile->calcCamDist(camera_pos);
-      _loaded_tiles_buffer[tile_counter] = tile;
+      _loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(tile->index.x, tile->index.z), tile);
 
       tile->objects_frustum_cull_test = 1;
       if (frustum.contains(tile_extents[0]) && frustum.contains(tile_extents[1]))
@@ -1126,26 +1140,26 @@ void World::draw ( math::matrix_4x4 const& model_view
   }
 
   auto buf_end = _loaded_tiles_buffer.begin() + tile_counter;
-  _loaded_tiles_buffer[tile_counter] = nullptr;
+  _loaded_tiles_buffer[tile_counter] = std::make_pair<std::pair<int, int>, MapTile*>(std::make_pair<int, int>(0, 0), nullptr);
 
 
   // It is always import to sort tiles __front to back__.
   // Otherwise selection would not work. Overdraw overhead is gonna occur as well.
   // TODO: perhaps parallel sort?
   std::sort(_loaded_tiles_buffer.begin(), buf_end,
-            [](MapTile* a, MapTile* b) -> bool
+            [](std::pair<std::pair<int, int>, MapTile*>& a, std::pair<std::pair<int, int>, MapTile*>& b) -> bool
             {
-              if (!a)
+              if (!a.second)
               {
                 return false;
               }
 
-              if (!b)
+              if (!b.second)
               {
                 return true;
               }
 
-              return a->camDist() < b->camDist();
+              return a.second->camDist() < b.second->camDist();
             });
 
   // only draw the sky in 3D
@@ -1247,12 +1261,17 @@ void World::draw ( math::matrix_4x4 const& model_view
       gl.bindVertexArray(_mapchunk_vao);
       gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mapchunk_index);
 
-      for (MapTile* tile : _loaded_tiles_buffer)
+      for (auto& pair : _loaded_tiles_buffer)
       {
+        MapTile* tile = pair.second;
+
         if (!tile)
         {
           break;
         }
+
+        if (minimap_render)
+            tile->tile_occluded = false;
 
         if (tile->tile_occluded && !tile->getChunkUpdateFlags() && !tile->tile_occlusion_cull_override)
           continue;
@@ -1319,12 +1338,17 @@ void World::draw ( math::matrix_4x4 const& model_view
     frame++;
   }
 
-  for (MapTile* tile : _loaded_tiles_buffer)
+  for (auto& pair : _loaded_tiles_buffer)
   {
+    MapTile* tile = pair.second;
+
     if (!tile)
     {
       break;
     }
+
+    if (minimap_render)
+        tile->tile_occluded = false;
 
     if (tile->tile_occluded && !tile->getChunkUpdateFlags() && !tile->tile_occlusion_cull_override)
       continue;
@@ -1454,8 +1478,10 @@ void World::draw ( math::matrix_4x4 const& model_view
     gl.disable(GL_CULL_FACE); // TODO: figure out why indices are bad and we need this
 
     math::matrix_4x4 identity_mtx = math::matrix_4x4{math::matrix_4x4::unit};
-    for (MapTile* tile : _loaded_tiles_buffer)
+    for (auto& pair : _loaded_tiles_buffer)
     {
+      MapTile* tile = pair.second;
+
       if (!tile)
       {
         break;
@@ -1475,8 +1501,10 @@ void World::draw ( math::matrix_4x4 const& model_view
     if (draw_occlusion_boxes)
     {
 
-      for (MapTile* tile : _loaded_tiles_buffer)
+      for (auto& pair : _loaded_tiles_buffer)
       {
+        MapTile* tile = pair.second;
+
         if (!tile)
         {
           break;
@@ -1709,8 +1737,10 @@ void World::draw ( math::matrix_4x4 const& model_view
 
     water_shader.uniform ("use_transform", 0);
 
-    for (MapTile* tile : _loaded_tiles_buffer)
+    for (auto& pair : _loaded_tiles_buffer)
     {
+      MapTile* tile = pair.second;
+
       if (!tile)
         break;
 
@@ -1826,12 +1856,21 @@ selection_result World::intersect ( math::matrix_4x4 const& model_view
   {
     ZoneScopedN("World::intersect() : intersect terrain");
 
-    for (auto tile : _loaded_tiles_buffer)
+    for (auto& pair : _loaded_tiles_buffer)
     {
+      MapTile* tile = pair.second;
+
       if (!tile)
         break;
 
-      if (!tile->finishedLoading()) // TODO: crash
+      tile_index index{ static_cast<std::size_t>(pair.first.first)
+                        , static_cast<std::size_t>(pair.first.second) };
+
+      // handle tiles that got unloaded mid-frame to avoid illegal access
+      if (!mapIndex.tileLoaded(index) || mapIndex.tileAwaitingLoading(index))
+          continue;
+
+      if (!tile->finishedLoading())
         continue;
 
       if (tile->intersect(ray, &results))
@@ -2332,12 +2371,26 @@ void World::drawMinimap ( MapTile *tile
   tile_index m_tile = tile_index(camera_pos);
   m_tile.z -= 1;
 
+  bool unload = !mapIndex.has_unsaved_changes(m_tile);
+
   MapTile* mTile = mapIndex.loadTile(m_tile);
+
+  if (mTile)
+  {
+    mTile->wait_until_loaded();
+    mTile->waitForChildrenLoaded();
+
+  }
 
   draw(model_view, projection, math::vector_3d{}, 0, math::vector_4d{},
       CursorType::NONE, 0.f, false, 0.f, math::vector_3d{}, 0.f, 0.f, false, false, false, editing_mode::minimap, camera_pos, true, false, true, settings->draw_wmo, settings->draw_water, false, settings->draw_m2, false, false, true, settings, false, eTerrainType::eTerrainType_Linear, 0, display_mode::in_3D, false, true);
 
  
+  if (unload)
+  {
+    mapIndex.unloadTile(m_tile);
+  }
+
   /*
 
   if (!_display_initialized)
@@ -2673,12 +2726,12 @@ void World::drawMinimap ( MapTile *tile
    */
 }
 
-bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* settings)
+bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* settings, std::optional<QImage>& combined_image)
 {
   ZoneScoped;
   // Setup framebuffer
   QOpenGLFramebufferObjectFormat fmt;
-  fmt.setSamples(1);
+  fmt.setSamples(0);
   fmt.setInternalTextureFormat(GL_RGBA8);
   fmt.setAttachment(QOpenGLFramebufferObject::Depth);
 
@@ -2691,19 +2744,32 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
 
   // Load tile
   bool unload = !mapIndex.has_unsaved_changes(tile_idx);
-  MapTile* mTile = mapIndex.loadTile(tile_idx);
+  
+  if (!mapIndex.tileLoaded(tile_idx) && !mapIndex.tileAwaitingLoading(tile_idx))
+  {
+      MapTile* tile = mapIndex.loadTile(tile_idx);
+      tile->wait_until_loaded();
+      wait_for_all_tile_updates();
+      tile->waitForChildrenLoaded();
+  }
+
+  MapTile* mTile = mapIndex.getTile(tile_idx);
 
   if (mTile)
   {
-    mTile->wait_until_loaded();
-    wait_for_all_tile_updates();
+    unsigned counter = 0;
+    constexpr unsigned TIMEOUT = 5000;
 
-    if (AsyncLoader::instance().is_loading())
+    while (AsyncLoader::instance().is_loading() || !mTile->finishedLoading())
     {
-     //return false;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        counter++;
+
+        if (counter >= TIMEOUT)
+            break;
     }
 
-    float max_height = getMaxTileHeight(tile_idx);
+    float max_height = std::max(getMaxTileHeight(tile_idx), 200.f);
 
     // setup view matrices
     auto projection = math::ortho(
@@ -2711,13 +2777,16 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
         TILESIZE / 2.0f,
         -TILESIZE / 2.0f,
         TILESIZE / 2.0f,
-        5.f,
+        0.f,
         100000.0f
     );
 
     auto look_at = math::look_at(math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 10.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0f),
-                                 math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 9.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0 - 0.005f),
+                                 math::vector_3d(TILESIZE * tile_idx.x + TILESIZE / 2.0f, max_height + 5.0f, TILESIZE * tile_idx.z + TILESIZE / 2.0 - 0.005f),
                                  math::vector_3d(0.f,1.f, 0.f));
+
+    glFinish();
+
 
     drawMinimap(mTile
         , look_at.transposed()
@@ -2729,10 +2798,13 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     // Clearing alpha from image
     gl.colorMask(false, false, false, true);
     gl.clearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    gl.clear(GL_COLOR_BUFFER_BIT);
     gl.colorMask(true, true, true, true);
 
+    assert(pixel_buffer.isValid() && pixel_buffer.isBound());
+
     QImage image = pixel_buffer.toImage();
+ 
     image = image.convertToFormat(QImage::Format_RGBA8888);
 
     QSettings app_settings;
@@ -2776,24 +2848,9 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     }
 
     // Write combined file
-    if (settings->combined_minimap)
+    if (settings->combined_minimap && combined_image.has_value())
     {
-      QString image_path = QString(std::string(basename + "_combined_minimap.png").c_str());
-      QImage combined_image;
-
-      if (dir.exists(image_path))
-      {
-        combined_image = QImage(dir.filePath(image_path));
-
-        if (combined_image.width() != 8192 | combined_image.height() != 8192)
-        {
-          combined_image = QImage(8192, 8192, QImage::Format_RGBA8888);
-        }
-      }
-      else
-      {
-        combined_image = QImage(8192, 8192, QImage::Format_RGBA8888);
-      }
+      QImage& combined_image = combined_image;
 
       QImage scaled_image = image.scaled(128, 128,  Qt::KeepAspectRatio);
 
@@ -2805,22 +2862,18 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
         }
       }
 
-      combined_image.save(dir.filePath(image_path));
-
     }
 
     // Register in md5translate.trs
-    std::string map_name = gMapDB.getMapName(mapIndex._map_id);
-    std::string tilename_left = (boost::format("%s\\map_%d_%02d.blp") % map_name % tile_idx.x % tile_idx.z).str();
+    std::string map_name = gMapDB.getByID(mapIndex._map_id).getString(MapDB::InternalName);
+    std::string tilename_left = (boost::format("%s\\map%02d_%02d.blp") % map_name % tile_idx.x % tile_idx.z).str();
     mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
 
-    /*
     if (unload)
     {
       mapIndex.unloadTile(tile_idx);
     }
 
-    */
   }
 
   pixel_buffer.release();
@@ -3944,7 +3997,7 @@ void World::range_add_to_selection(math::vector_3d const& pos, float radius, boo
         }
       }
     }
-
+    
   });
 }
 
@@ -3953,6 +4006,7 @@ float World::getMaxTileHeight(const tile_index& tile)
   ZoneScoped;
   MapTile* m_tile = mapIndex.getTile(tile);
 
+  m_tile->forceRecalcExtents();
   float max_height = m_tile->getMaxHeight();
 
   std::vector<uint32_t>* uids = m_tile->get_uids();
@@ -3964,6 +4018,7 @@ float World::getMaxTileHeight(const tile_index& tile)
     if (instance.get().which() == eEntry_Object)
     {
       auto obj = boost::get<selected_object_type>(instance.get());
+      obj->ensureExtents();
       max_height = std::max(max_height, std::max(obj->extents[0].y, obj->extents[1].y));
     }
   }

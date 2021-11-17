@@ -253,6 +253,7 @@ public:
   void updateEmitters(float dt);
 
   virtual void finishLoading();
+  virtual void waitForChildrenLoaded() override;
 
   bool is_hidden() const { return _hidden; }
   void toggle_visibility() { _hidden = !_hidden; }

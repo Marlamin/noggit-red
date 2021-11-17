@@ -41,10 +41,11 @@ namespace noggit
       inline const bool& draw_boundaries() const { return _draw_boundaries; }
 
       inline const std::array<bool, 4096>* use_selection (std::array<bool, 4096>* selection_)
-      { _use_selection = true; _selected_tiles = selection_; update(); return _selected_tiles; }
+      { _use_selection = selection_; _selected_tiles = selection_; update(); return _selected_tiles; }
       inline const std::array<bool, 4096>* selection() const { return _selected_tiles; }
 
       inline void camera (noggit::camera* camera) { _camera = camera; }
+      void set_resizeable(bool state) { _resizeable = state; };
 
     protected:
       virtual void paintEvent (QPaintEvent*) override;
@@ -52,6 +53,7 @@ namespace noggit
       virtual void mouseMoveEvent(QMouseEvent*) override;
       virtual void mousePressEvent(QMouseEvent* event) override;
       virtual void mouseReleaseEvent(QMouseEvent* event) override;
+      virtual void wheelEvent(QWheelEvent* event) override;
 
       QPoint locateTile(QMouseEvent* event);
 
@@ -68,6 +70,7 @@ namespace noggit
       bool _draw_skies;
       bool _draw_camera;
       bool _draw_boundaries;
+      bool _resizeable;
 
       bool _use_selection = false;
       bool _is_selecting = false;

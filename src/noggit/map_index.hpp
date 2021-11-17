@@ -228,6 +228,8 @@ public:
   void addTile(const tile_index& tile);
   void removeTile(const tile_index& tile);
 
+  unsigned getNumExistingTiles();
+
   // todo: find out how wow choose to use the green lava in outland
   inline bool use_mclq_green_lava() const
   {
@@ -260,6 +262,7 @@ private:
   int _unload_interval;
   int _unload_dist;
   unsigned _n_loaded_tiles = 0; // to be loaded, not necessarily already loaded
+  int _n_existing_tiles = -1;
 
   // Is the WDT telling us to use a different alphamap structure.
   bool mBigAlpha;

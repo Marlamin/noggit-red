@@ -1163,6 +1163,25 @@ void MapIndex::removeTile(const tile_index &tile)
   changed = true;
 }
 
+unsigned MapIndex::getNumExistingTiles()
+{
+  if (_n_existing_tiles >= 0)
+    return _n_existing_tiles;
+
+  _n_existing_tiles = 0;
+  for (int i = 0; i < 4096; ++i)
+  {
+    tile_index index(i / 64, i % 64);
+
+    if (hasTile(index))
+    {
+      _n_existing_tiles++;
+    }
+  }
+
+  return _n_existing_tiles;
+}
+
 void MapIndex::set_basename(const std::string &pBasename)
 {
   basename = pBasename;

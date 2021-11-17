@@ -74,6 +74,7 @@
 #include <QDateTime>
 #include <QCursor>
 #include <QFileDialog>
+#include <QProgressDialog>
 
 #include <algorithm>
 #include <cmath>
@@ -230,6 +231,7 @@ void MapView::set_editing_mode (editing_mode mode)
     _world->getTerrainParamsUniformBlock()->draw_impass_overlay = false;
     _world->getTerrainParamsUniformBlock()->draw_paintability_overlay = false;
     _world->getTerrainParamsUniformBlock()->draw_selection_overlay = false;
+    _minimap->use_selection(nullptr);
 
     switch (mode)
     {
@@ -269,6 +271,7 @@ void MapView::set_editing_mode (editing_mode mode)
         break;
       case editing_mode::minimap:
         _world->getTerrainParamsUniformBlock()->draw_selection_overlay = true;
+        _minimap->use_selection(minimapTool->getSelectedTiles());
         break;
       default:
         break;
@@ -548,6 +551,7 @@ void MapView::setupTexturePainterUi()
   _texture_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
                                      | QDockWidget::DockWidgetFloatable
                                      | QDockWidget::DockWidgetClosable);
+  _texture_browser_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
   _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_browser_dock);
   _texture_browser_dock->hide();
 
@@ -670,6 +674,7 @@ void MapView::setupTexturePainterUi()
                                   | QDockWidget::DockWidgetFloatable
                                   | QDockWidget::DockWidgetClosable);
   _main_window->addDockWidget(Qt::BottomDockWidgetArea, _texture_picker_dock);
+  _texture_picker_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
   _texture_picker_dock->setFloating(true);
   _texture_picker_dock->hide();
   connect(this, &QObject::destroyed, _texture_picker_dock, &QObject::deleteLater);
@@ -837,6 +842,7 @@ void MapView::setupNodeEditor()
   auto _node_editor = new noggit::Red::NodeEditor::Ui::NodeEditorWidget(this);
   _node_editor_dock = new QDockWidget("Node editor", this);
   _node_editor_dock->setWidget(_node_editor);
+  _node_editor_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
 
   _main_window->addDockWidget(Qt::LeftDockWidgetArea, _node_editor_dock);
   _node_editor_dock->setFeatures(QDockWidget::DockWidgetMovable
@@ -912,6 +918,9 @@ void MapView::setupDetailInfos()
   _detail_infos_dock->setFeatures(QDockWidget::DockWidgetMovable
                                   | QDockWidget::DockWidgetFloatable
                                   | QDockWidget::DockWidgetClosable);
+
+  _detail_infos_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
+
 
   _main_window->addDockWidget(Qt::BottomDockWidgetArea, _detail_infos_dock);
   _detail_infos_dock->setFloating(true);
@@ -1010,8 +1019,6 @@ void MapView::setupFileMenu()
                    << _world->getAreaID (_camera.position) << std::endl;
                }
   );
-
-  ADD_ACTION (file_menu, "Save minimaps", "Ctrl+Shift+P", [this] { saving_minimap = true; });
 
   ADD_ACTION ( file_menu
   , "Write coordinates to port.txt"
@@ -2324,11 +2331,15 @@ void MapView::setupMinimap()
 {
   _minimap = new noggit::ui::minimap_widget(this);
   _minimap_dock = new QDockWidget("Minimap", this);
+  _minimap_dock->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+  _minimap_dock->setFixedSize(_minimap->sizeHint());
+  _minimap_dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
 
   _minimap->world (_world.get());
   _minimap->camera (&_camera);
   _minimap->draw_boundaries (_show_minimap_borders.get());
   _minimap->draw_skies (_show_minimap_skies.get());
+  _minimap->set_resizeable(true);
 
   connect ( _minimap, &noggit::ui::minimap_widget::map_clicked
     , [this] (math::vector_3d const& pos)
@@ -2341,8 +2352,12 @@ void MapView::setupMinimap()
                                | QDockWidget::DockWidgetFloatable
                                | QDockWidget::DockWidgetClosable
   );
-  _minimap_dock->setWidget(_minimap);
-  _main_window->addDockWidget (Qt::RightDockWidgetArea, _minimap_dock);
+  auto minimap_scroll_area = new QScrollArea(_minimap_dock);
+  minimap_scroll_area->setWidget(_minimap);
+  minimap_scroll_area->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+  _minimap_dock->setWidget(minimap_scroll_area);
+  _main_window->addDockWidget (Qt::LeftDockWidgetArea, _minimap_dock);
   _minimap_dock->setVisible (false);
   _minimap_dock->setFloating(true);
   _minimap_dock->move(_main_window->rect().center() - _minimap->rect().center());
@@ -2679,11 +2694,13 @@ void MapView::initializeGL()
 
 void MapView::saveMinimap(MinimapRenderSettings* settings)
 {
-  // This convoluted logic is necessary here if we want to draw minimaps in the same OpenGL context.
-  // And we do, to avoid loading geometry twice. Even though, offscreen one in the background would be nice.
-  // The idea is, if rendering fails due to unfinished loading, we skip to the next frame until we are able to render.
 
   opengl::context::scoped_setter const _ (::gl, context());
+
+  bool mmap_render_success = false;
+
+  static QProgressBar* progress;
+  static QPushButton* cancel_btn;
 
   switch (settings->export_mode)
   {
@@ -2693,120 +2710,239 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
       if (_world->mapIndex.hasTile(tile))
       {
-        mmap_render_success = _world->saveMinimap(tile, settings);
-      }
-      else
-      {
-        saving_minimap = false;
+        mmap_render_success = _world->saveMinimap(tile, settings, _mmap_combined_image);
       }
 
       if (mmap_render_success)
       {
-        saving_minimap = false;
         _world->mapIndex.saveMinimapMD5translate();
       }
+
+      saving_minimap = false;
 
       break;
     }
     case MinimapGenMode::MAP:
     {
-      tile_index tile = tile_index(mmap_render_index / 64, mmap_render_index % 64);
 
-      if (_world->mapIndex.hasTile(tile))
+      // init progress
+      if (!_mmap_async_index)
       {
-        mmap_render_success = _world->saveMinimap(tile, settings);
+        progress = new QProgressBar(nullptr);
+        progress->setMinimum(0);
+        progress->setMaximum(_world->mapIndex.getNumExistingTiles());
+        _main_window->statusBar()->addPermanentWidget(progress);
 
-        if (mmap_render_success)
+        cancel_btn = new QPushButton(nullptr);
+        cancel_btn->setText("Cancel");
+
+        connect(cancel_btn, &QPushButton::clicked, 
+          [=, this] 
+          { 
+            _mmap_async_index = 0; 
+            _mmap_render_index = 0; 
+            saving_minimap = false;
+            progress->deleteLater(); 
+            cancel_btn->deleteLater();
+            _mmap_combined_image.reset();
+          });
+
+        _main_window->statusBar()->addPermanentWidget(cancel_btn);
+
+        connect(this, &MapView::updateProgress, progress, &QProgressBar::setValue);
+      
+        // setup combined image if necessary
+        if (settings->combined_minimap)
         {
-          mmap_render_index++;
+          _mmap_combined_image.emplace(8192, 8192, QImage::Format_RGBA8888);
+          _mmap_combined_image->fill(Qt::black);
         }
+      
+      }
+
+      if (!saving_minimap)
+        return;
+
+      if (_mmap_async_index < 4096 && _mmap_render_index < progress->maximum())
+      {
+        tile_index tile = tile_index(_mmap_async_index / 64, _mmap_async_index % 64);
+
+        if (_world->mapIndex.hasTile(tile))
+        {
+          opengl::context::scoped_setter const _(::gl, context());
+          makeCurrent();
+          mmap_render_success = _world->saveMinimap(tile, settings, _mmap_combined_image);
+
+          _mmap_render_index++;
+          emit updateProgress(_mmap_render_index);
+
+          if (!mmap_render_success)
+          {
+            LogError << "Minimap rendered incorrectly for tile: " << tile.x << "_" << tile.z << std::endl;
+          }
+        }
+
+        _mmap_async_index++;
       }
       else
       {
-        do
-        {
-          mmap_render_index++;
-          tile.x = mmap_render_index / 64;
-          tile.z = mmap_render_index % 64;
-
-        } while (!_world->mapIndex.hasTile(tile) && mmap_render_index != 4095 );
-
-      }
-
-      if (mmap_render_success && mmap_render_index >= 4095)
-      {
+        _mmap_async_index = 0;
+        _mmap_render_index = 0;
         saving_minimap = false;
-        mmap_render_index = 0;
-        mmap_render_success = false;
+        progress->deleteLater();
+        cancel_btn->deleteLater();
         _world->mapIndex.saveMinimapMD5translate();
+
+        // save combined minimap
+        if (settings->combined_minimap)
+        {
+          QString image_path = QString(std::string(_world->basename + "_combined_minimap.png").c_str());
+          QSettings app_settings;
+          QString str = app_settings.value("project/path").toString();
+          if (!(str.endsWith('\\') || str.endsWith('/')))
+          {
+            str += "/";
+          }
+
+          QDir dir(str + "/textures/minimap/");
+          if (!dir.exists())
+            dir.mkpath(".");
+
+          _mmap_combined_image->save(dir.filePath(image_path));
+          _mmap_combined_image.reset();
+        }
+      
       }
 
+      //_main_window->statusBar()->showMessage("Minimap rendering done.", 2000);
       break;
-    }
+    } 
     case MinimapGenMode::SELECTED_ADTS:
     {
       auto selected_tiles = minimapTool->getSelectedTiles();
 
-      while (mmap_render_index < 4096)
+      // init progress
+      if (!_mmap_async_index)
       {
+        progress = new QProgressBar(nullptr);
+        progress->setMinimum(0);
 
-        bool is_selected = selected_tiles->at(mmap_render_index);
+        unsigned n_selected_tiles = 0;
 
-        if (is_selected)
+        for (int i = 0; i < 4096; ++i)
         {
-          tile_index tile = tile_index(mmap_render_index / 64, mmap_render_index % 64);
+          if (selected_tiles->at(i))
+            n_selected_tiles++;
+        }
+
+        progress->setMaximum(n_selected_tiles);
+        _main_window->statusBar()->addPermanentWidget(progress);
+
+        cancel_btn = new QPushButton(nullptr);
+        cancel_btn->setText("Cancel");
+
+        connect(cancel_btn, &QPushButton::clicked,
+          [=, this]
+          {
+            _mmap_async_index = 0;
+            _mmap_render_index = 0;
+            saving_minimap = false;
+            progress->deleteLater();
+            cancel_btn->deleteLater();
+            _mmap_combined_image.reset();
+          });
+
+        _main_window->statusBar()->addPermanentWidget(cancel_btn);
+
+        connect(this, &MapView::updateProgress, progress, &QProgressBar::setValue);
+
+        // setup combined image if necessary
+        if (settings->combined_minimap)
+        {
+          _mmap_combined_image.emplace(8192, 8192, QImage::Format_RGBA8888);
+          _mmap_combined_image->fill(Qt::black);
+        }
+      
+      }
+
+      if (!saving_minimap)
+        return;
+
+
+      if (_mmap_async_index < 4096 && _mmap_render_index < progress->maximum())
+      {
+        if (selected_tiles->at(_mmap_async_index))
+        {
+          tile_index tile = tile_index(_mmap_async_index / 64, _mmap_async_index % 64);
 
           if (_world->mapIndex.hasTile(tile))
           {
-            mmap_render_success = _world->saveMinimap(tile, settings);
+            mmap_render_success = _world->saveMinimap(tile, settings, _mmap_combined_image);
+            _mmap_render_index++;
 
-            if (mmap_render_success)
+            emit updateProgress(_mmap_render_index);
+
+
+            if (!mmap_render_success)
             {
-              mmap_render_index++;
-              break;
-            }
-            else
-            {
-              break;
+              LogError << "Minimap rendered incorrectly for tile: " << tile.x << "_" << tile.z << std::endl;
             }
           }
-          else
-          {
-            mmap_render_index++;
-          }
         }
-        else
-        {
-          mmap_render_index++;
-        }
+        _mmap_async_index++;
 
       }
-
-      if (mmap_render_success && mmap_render_index >= 4095)
+      else
       {
+        _mmap_async_index = 0;
+        _mmap_render_index = 0;
         saving_minimap = false;
-        mmap_render_index = 0;
-        mmap_render_success = false;
+        progress->deleteLater();
+        cancel_btn->deleteLater();
         _world->mapIndex.saveMinimapMD5translate();
+
+        // save combined minimap
+        if (settings->combined_minimap)
+        {
+          QString image_path = QString(std::string(_world->basename + "_combined_minimap.png").c_str());
+          QSettings app_settings;
+          QString str = app_settings.value("project/path").toString();
+          if (!(str.endsWith('\\') || str.endsWith('/')))
+          {
+            str += "/";
+          }
+
+          QDir dir(str + "/textures/minimap/");
+          if (!dir.exists())
+            dir.mkpath(".");
+
+          _mmap_combined_image->save(dir.filePath(image_path));
+          _mmap_combined_image.reset();
+        }
+     
       }
 
       break;
+     
     }
   }
 
-  minimapTool->progressUpdate(mmap_render_index);
-
-
+  //minimapTool->progressUpdate(0);
 }
 
 void MapView::paintGL()
 {
+  ZoneScoped;
+
+  static bool lock = false;
+
+  if (lock)
+    return;
+
   if (!_needs_redraw)
     return;
   else
     _needs_redraw = false;
-
-  ZoneScoped;
 
   if (!_gl_initialized)
   {
@@ -2819,36 +2955,36 @@ void MapView::paintGL()
     return;
   }
 
-  opengl::context::scoped_setter const _ (::gl, context());
-
-  if (saving_minimap)
-  {
-    saveMinimap(minimapTool->getMinimapRenderSettings());
-    _main_window->setEnabled(false);
-  }
-
   const qreal now(_startup_time.elapsed() / 1000.0);
 
   _last_frame_durations.emplace_back (now - _last_update);
 
+  // minimap rendering
+  if (saving_minimap)
+  {
+    opengl::context::scoped_setter const _(::gl, context());
+    makeCurrent();
+    _camera_moved_since_last_draw = true;
+    lock = true;
+    saveMinimap(minimapTool->getMinimapRenderSettings());
+    lock = false;
+    return;
+  }
+
+  opengl::context::scoped_setter const _(::gl, context());
   makeCurrent();
 
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  draw_map();
-
   if (!saving_minimap)
   {
+
+    draw_map();
     tick (now - _last_update);
-    _main_window->setEnabled(true);
   }
 
   _last_update = now;
 
-  if (saving_minimap)
-  {
-    gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  }
 
   if (_gizmo_on.get() && _world->has_selection())
   {

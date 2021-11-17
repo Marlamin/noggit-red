@@ -602,6 +602,15 @@ void MapChunk::updateVerticesData()
   update_intersect_points();
 }
 
+void MapChunk::recalcExtents()
+{
+  for (int i(0); i < mapbufsize; ++i)
+  {
+    vmin.y = std::min(vmin.y, mVertices[i].y);
+    vmax.y = std::max(vmax.y, mVertices[i].y);
+  }
+}
+
 math::vector_3d MapChunk::getNeighborVertex(int i, unsigned dir)
 {
   // i - vertex index
