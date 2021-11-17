@@ -81,4 +81,5 @@ public:
   }
 
   virtual void finishLoading() = 0;
+  virtual void waitForChildrenLoaded() = 0;
 };

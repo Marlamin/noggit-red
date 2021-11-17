@@ -334,6 +334,20 @@ void WMO::finishLoading ()
   _state_changed.notify_all();
 }
 
+void WMO::waitForChildrenLoaded()
+{
+  for (auto& tex : textures)
+  {
+    tex.get()->wait_until_loaded();
+  }
+
+  for (auto& doodad : modelis)
+  {
+    doodad.model->wait_until_loaded();
+    doodad.model->waitForChildrenLoaded();
+  }
+}
+
 void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , glm::mat4x4 const& model_view
                , glm::mat4x4 const& projection
@@ -731,9 +745,9 @@ void WMOGroup::upload()
         }
         else
         {
-          draw_call->samplers[draw_call->n_used_samplers] = _render_batches[batch_counter].tex_array1;
-          _render_batches[batch_counter].tex_array1 = draw_call->n_used_samplers;
-          draw_call->n_used_samplers++;
+          //draw_call->samplers[draw_call->n_used_samplers] = _render_batches[batch_counter].tex_array1;
+          //_render_batches[batch_counter].tex_array1 = draw_call->n_used_samplers;
+          //draw_call->n_used_samplers++;
         }
       }
     }
@@ -894,7 +908,15 @@ void WMOGroup::load()
 
   f.read (&header, sizeof (wmo_group_header));
 
-  WMOFog &wf = wmo->fogs[header.fogs[0]];
+  unsigned fog_index = header.fogs[0];
+
+  // downport hack
+  if (fog_index >= wmo->fogs.size())
+  {
+      fog_index = 0;
+  }
+  WMOFog &wf = wmo->fogs[fog_index];
+
   if (wf.r2 <= 0) fog = -1; // default outdoor fog..?
   else fog = header.fogs[0];
 
@@ -1322,6 +1344,12 @@ void WMOGroup::load()
 
     for (auto doodad : _doodad_ref)
     {
+      if (doodad >= wmo->modelis.size())
+      {
+          continue;
+          LogError << "The WMO file currently loaded is potentially corrupt. Non-existing doodad referenced." << std::endl;
+      }
+
       lenmin = 999999.0f * 999999.0f;
       ModelInstance& mi = wmo->modelis[doodad];
       for (unsigned int j = 0; j < wmo->lights.size(); j++)

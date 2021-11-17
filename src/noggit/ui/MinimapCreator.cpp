@@ -20,7 +20,6 @@
 #include <QWheelEvent>
 #include <QApplication>
 #include <QComboBox>
-#include <QProgressBar>
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -129,10 +128,6 @@ namespace noggit
       combined_minimap->setChecked(_render_settings.combined_minimap);
       draw_elements_box_layout->addWidget(combined_minimap, 3, 1);
 
-
-      _progress_bar = new QProgressBar(this);
-      _progress_bar->setRange(0, 4096);
-      generate_layout->addRow(_progress_bar);
 
       // Filter
       auto filter_widget = new QWidget(this);
@@ -351,22 +346,7 @@ namespace noggit
 
       // Minimap
 
-      auto scroll_minimap = new QScrollArea(this);
-      scroll_minimap->setFixedSize(226, 226);
-
-      _minimap_widget = new minimap_widget(this);
-      layout->addWidget(scroll_minimap);
-
-      scroll_minimap->setAlignment(Qt::AlignCenter);
-      scroll_minimap->setWidget(_minimap_widget);
-      scroll_minimap->setWidgetResizable(true);
-
-      _minimap_widget->world(world);
-      _minimap_widget->draw_boundaries(true);
-      _minimap_widget->use_selection(&_render_settings.selected_tiles);
-      _minimap_widget->camera(mapView->getCamera());
-
-      scroll_minimap->ensureWidgetVisible(_minimap_widget, 0, 0);
+      _minimap_widget = mapView->getMinimapWidget();
 
       loadFiltersFromJSON();
 
@@ -859,51 +839,6 @@ namespace noggit
         mapView->initMinimapSave();
       });
 
-      // Selection
-
-      QObject::connect
-          ( _minimap_widget,  &minimap_widget::tile_clicked
-              , [this, world] (QPoint tile)
-            {
-              if (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
-              {
-                int x = tile.x() - 1;
-                int y = tile.y() - 1;
-
-                for (int i = 0; i < 3; ++i)
-                {
-                  for (int j = 0; j < 3; ++j)
-                  {
-                    if (world->mapIndex.hasTile(tile_index(x + i, y + j)))
-                    {
-                      _render_settings.selected_tiles[64 * (x + i) + (y + j)]
-                        = !QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
-                    }
-
-                  }
-                }
-              }
-              else
-              {
-                if (world->mapIndex.hasTile(tile_index(tile.x(), tile.y())))
-                {
-                  _render_settings.selected_tiles[64 * tile.x() + tile.y()]
-                    = !QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
-                }
-              }
-
-              update();
-            }
-          );
-
-      QObject::connect
-          ( _minimap_widget,  &minimap_widget::reset_selection
-              , [this, world] ()
-            {
-              _render_settings.selected_tiles.fill(false);
-            }
-          );
-
     }
 
     void MinimapCreator::changeRadius(float change)
@@ -916,31 +851,6 @@ namespace noggit
       return QSize(width(), height());
     }
 
-    void MinimapCreator::wheelEvent(QWheelEvent* event)
-    {
-
-      if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
-      {
-        const int degrees = event->angleDelta().y() / 8;
-        int steps = degrees / 15;
-
-        auto base_size = _minimap_widget->width();
-
-        if (steps > 0)
-        {
-          auto new_size = std::max(512, base_size + 64);
-          _minimap_widget->setFixedSize(new_size, new_size);
-        }
-        else
-        {
-          auto new_size = std::min(4096, base_size - 64);
-          _minimap_widget->setFixedSize(new_size, new_size);
-        }
-
-        event->ignore();
-      }
-
-    }
 
     void MinimapCreator::includeM2Model(std::string filename, float size_cat)
     {

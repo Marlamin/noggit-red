@@ -431,15 +431,14 @@ FetchContent_Declare (sol2
 FetchContent_MakeAvailable (sol2)
 # sol2::sol2 neither links lua nor sets include directories as system so will clobber us with
 # loads of warnings, sadly. It also wants to be install(EXPORT)ed which is not what we want.
-ADD_LIBRARY(sane-sol2 INTERFACE)
-ADD_LIBRARY(sol2::sane ALIAS sane-sol2)
-TARGET_LINK_LIBRARIES(sane-sol2 INTERFACE Lua::Lua)
-TARGET_INCLUDE_DIRECTORIES(sane-sol2 SYSTEM INTERFACE "${sol2_SOURCE_DIR}/include")
+add_library (sane-sol2 INTERFACE)
+add_library (sol2::sane ALIAS sane-sol2)
+target_link_libraries (sane-sol2 INTERFACE Lua::Lua)
+target_include_directories (sane-sol2 SYSTEM INTERFACE "${sol2_SOURCE_DIR}/include")
 
-TARGET_LINK_LIBRARIES(noggit
-  lodepng
-  FastNoise
-  nlohmann_json::nlohmann_json
-  sol2::sane
-  dl
-)
+target_link_libraries (noggit
+        lodepng
+        FastNoise
+        nlohmann_json::nlohmann_json
+        sol2::sane
+        )

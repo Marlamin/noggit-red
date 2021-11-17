@@ -78,8 +78,32 @@ MapTile::~MapTile()
   _world->remove_models_if_needed(uids);
 }
 
+void MapTile::waitForChildrenLoaded()
+{
+  for (auto& instance : object_instances)
+  {
+    instance.first->wait_until_loaded();
+    instance.first->waitForChildrenLoaded();
+  }
+
+  for (int i = 0; i < 16; ++i)
+  {
+    for (int j = 0; j < 16; ++j)
+    {
+      for (int k = 0; k < mChunks[i][j].get()->texture_set->num(); ++k)
+      {
+        (*mChunks[i][j].get()->texture_set->getTextures())[k].get()->wait_until_loaded();
+      }
+    }
+  }
+}
+
 void MapTile::finishLoading()
 {
+  
+  if (finished)
+    return;
+
   MPQFile theFile(filename);
 
   Log << "Opening tile " << index.x << ", " << index.z << " (\"" << filename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
@@ -367,6 +391,20 @@ float MapTile::getMaxHeight()
 float MapTile::getMinHeight()
 {
   return _extents[0].y;
+}
+
+void MapTile::forceRecalcExtents()
+{
+  for (int i = 0; i < 16; ++i)
+  {
+    for (int j = 0; j < 16; ++j)
+    {
+      MapChunk* chunk = mChunks[i][j].get();
+      chunk->recalcExtents();
+      _extents[0].y = std::min(_extents[0].y, chunk->getMinHeight());
+      _extents[1].y = std::max(_extents[1].y, chunk->getMaxHeight());
+    }
+  }
 }
 
 void MapTile::convert_alphamap(bool to_big_alpha)

@@ -128,6 +128,7 @@ public:
             , int water_layer
             , display_mode display
             , bool draw_occlusion_boxes = false
+            , bool minimap_render = false
             );
 
   unsigned int getAreaID (glm::vec3 const&);
@@ -331,7 +332,7 @@ public:
   void updateTilesModel(ModelInstance* m2, model_update type);
   void wait_for_all_tile_updates();
 
-  bool saveMinimap (tile_index const& tile_idx, MinimapRenderSettings* settings);
+  bool saveMinimap (tile_index const& tile_idx, MinimapRenderSettings* settings, std::optional<QImage>& combined_image);
   void drawMinimap ( MapTile *tile
       , glm::mat4x4 const& model_view
       , glm::mat4x4 const& projection
@@ -418,6 +419,8 @@ private:
 
   void updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection);
   void updateLightingUniformBlock(bool draw_fog, glm::vec3 const& camera_pos);
+  void updateLightingUniformBlockMinimap(MinimapRenderSettings* settings);
+
 
   std::unordered_set<MapChunk*>& vertexBorderChunks();
 
@@ -489,7 +492,7 @@ private:
 
   LiquidTextureManager _liquid_texture_manager;
 
-  std::array<MapTile*, 64 * 64> _loaded_tiles_buffer;
+  std::array<std::pair<std::pair<int, int>, MapTile*>, 64 * 64 > _loaded_tiles_buffer;
 
   bool _need_terrain_params_ubo_update = false;
 

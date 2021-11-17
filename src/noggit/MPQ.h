@@ -32,6 +32,7 @@ public:
   bool openFile(const std::string& filename, HANDLE* fileHandle) const;
 
   void finishLoading();
+  virtual void waitForChildrenLoaded() override {};
 
   static bool allFinishedLoading();
   static void allFinishLoading();

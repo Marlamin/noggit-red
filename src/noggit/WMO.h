@@ -324,6 +324,8 @@ public:
 
   void finishLoading();
 
+  virtual void waitForChildrenLoaded() override;
+
   void unload();
 
   std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads_per_group(uint16_t doodadset) const;

@@ -221,7 +221,6 @@ glm::vec3* ModelInstance::getExtents()
   return &extents[0];
 }
 
-
 wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f, noggit::NoggitRenderContext context)
   : ModelInstance(filename, context)
 {
@@ -279,3 +278,4 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
 
   _need_matrix_update = false;
 }
+

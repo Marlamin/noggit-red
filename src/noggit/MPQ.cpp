@@ -223,8 +223,8 @@ MPQFile::MPQFile(std::string const& filename)
     return;
   }
 
-  LogError << "File '" << filename << "' does not exist." << std::endl;
-  //throw std::invalid_argument ("File '" + filename + "' does not exist.");
+  //LogError << "File '" << filename << "' does not exist." << std::endl;
+  throw std::invalid_argument ("File '" + filename + "' does not exist.");
 }
 
 MPQFile::~MPQFile()

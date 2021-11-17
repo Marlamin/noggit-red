@@ -5,9 +5,9 @@
 #include <QSlider>
 #include <QDoubleSpinBox>
 #include <QSpinBox>
-#include <QProgressBar>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QApplication>
 #include <qt-color-widgets/color_selector.hpp>
 #include <boost/optional.hpp>
 #include <string>
@@ -85,9 +85,6 @@ namespace noggit
       MinimapRenderSettings* getMinimapRenderSettings() { return &_render_settings; };
 
       QSize sizeHint() const override;
-      void wheelEvent(QWheelEvent* event) override;
-
-      void progressUpdate(int value) { _progress_bar->setValue(value); };
 
       void includeM2Model(std::string filename, float size_cat = 0.0f);
       void unincludeM2Model(std::string filename);
@@ -108,7 +105,6 @@ namespace noggit
       QSlider* _radius_slider;
       QDoubleSpinBox* _radius_spin;
       minimap_widget* _minimap_widget;
-      QProgressBar* _progress_bar;
       QListWidget* _m2_model_filter_include;
       QListWidget* _m2_instance_filter_include;
       QListWidget* _wmo_model_filter_exclude;

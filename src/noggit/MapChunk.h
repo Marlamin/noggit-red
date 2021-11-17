@@ -130,6 +130,7 @@ public:
   bool hasColors() const { return hasMCCV; };
 
   void updateVerticesData();
+  void recalcExtents();
   void recalcNorms();
   void updateNormalsData();
   glm::vec3 getNeighborVertex(int i, unsigned dir);

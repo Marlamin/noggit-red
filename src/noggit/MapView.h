@@ -41,6 +41,7 @@
 #include <unordered_set>
 #include <thread>
 #include <array>
+#include <optional>
 
 #include <ui_MapViewOverlay.h>
 
@@ -181,9 +182,6 @@ private:
 
   bool _rotation_editor_need_update = false;
 
-  bool mmap_render_success = false;
-  int mmap_render_index = 0;
-
   // Vars for the ground editing toggle mode store the status of some
   // view settings when the ground editing mode is switched on to
   // restore them if switch back again
@@ -223,6 +221,7 @@ signals:
   void uid_fix_failed();
   void resized();
   void saved();
+  void updateProgress(int value);
 public slots:
   void on_exit_prompt();
 
@@ -252,6 +251,7 @@ public:
   void randomizeShaderRotation();
   void randomizeStampRotation();
   void onSettingsSave();
+  noggit::ui::minimap_widget* getMinimapWidget() const { return _minimap;  }
 
   void set_editing_mode (editing_mode);
   editing_mode get_editing_mode() { return terrainMode; };
@@ -398,6 +398,10 @@ private:
   bool _gl_initialized = false;
   bool _destroying = false;
   bool _needs_redraw = false;
+
+  unsigned _mmap_async_index = 0;
+  unsigned _mmap_render_index = 0;
+  std::optional<QImage> _mmap_combined_image;
 
   opengl::scoped::deferred_upload_buffers<2> _buffers;
 

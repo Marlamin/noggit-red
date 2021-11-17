@@ -161,6 +161,7 @@ public:
 
   [[nodiscard]]
   virtual bool isWMODoodad() const override { return true; };
+
 protected:
   // to avoid redefining recalcExtents
   void updateTransformMatrix() override { }
