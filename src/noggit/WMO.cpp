@@ -719,41 +719,77 @@ void WMOGroup::upload()
     bool backface_cull = !mat.flags.unculled;
     bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
 
-    bool samplers_registered = false;
+    bool create_draw_call = false;
     if (draw_call && draw_call->backface_cull == backface_cull && batch.index_start == draw_call->index_start + draw_call->index_count)
     {
+      // identify if we can fit this batch into current draw_call
+      unsigned n_required_slots = use_tex2 ? 2 : 1;
+      unsigned n_avaliable_slots = draw_call->samplers.size() - draw_call->n_used_samplers;
+      unsigned n_slots_to_be_occupied = 0;
+
+      std::vector<int>::iterator it2;
       auto it = std::find(draw_call->samplers.begin(), draw_call->samplers.end(), _render_batches[batch_counter].tex_array0);
-      if (it != draw_call->samplers.end())
+
+      if (it == draw_call->samplers.end())
       {
-        _render_batches[batch_counter].tex_array0 = it - draw_call->samplers.begin();
-        samplers_registered = true;
+        if (n_avaliable_slots)
+          n_slots_to_be_occupied++;
+        else
+          create_draw_call = true;
       }
-      else if ((draw_call->samplers.size() - draw_call->n_used_samplers) >= (use_tex2 ? 2 : 1))
+ 
+
+      if (!create_draw_call && use_tex2)
       {
-        draw_call->samplers[draw_call->n_used_samplers] = _render_batches[batch_counter].tex_array0;
-        _render_batches[batch_counter].tex_array0 = draw_call->n_used_samplers;
-        draw_call->n_used_samplers++;
-        samplers_registered = true;
+         it2 = std::find(draw_call->samplers.begin(), draw_call->samplers.end(), _render_batches[batch_counter].tex_array1);
+
+         if (it2 == draw_call->samplers.end())
+         {
+           if (n_slots_to_be_occupied < n_avaliable_slots)
+             n_slots_to_be_occupied++;
+           else
+             create_draw_call = true;
+         }
+
       }
 
-      if (samplers_registered && use_tex2)
+      if (!create_draw_call)
       {
-        auto it = std::find(draw_call->samplers.begin(), draw_call->samplers.end(), _render_batches[batch_counter].tex_array1);
         if (it != draw_call->samplers.end())
         {
-          _render_batches[batch_counter].tex_array1 = it - draw_call->samplers.begin();
+          _render_batches[batch_counter].tex_array0 = it - draw_call->samplers.begin();
         }
         else
         {
-          //draw_call->samplers[draw_call->n_used_samplers] = _render_batches[batch_counter].tex_array1;
-          //_render_batches[batch_counter].tex_array1 = draw_call->n_used_samplers;
-          //draw_call->n_used_samplers++;
+          draw_call->samplers[draw_call->n_used_samplers] = _render_batches[batch_counter].tex_array0;
+          _render_batches[batch_counter].tex_array0 = draw_call->n_used_samplers;
+          draw_call->n_used_samplers++;
+        }
+
+        if (use_tex2)
+        {
+          if (it2 != draw_call->samplers.end())
+          {
+            _render_batches[batch_counter].tex_array1 = it2 - draw_call->samplers.begin();
+          }
+          else
+          {
+            draw_call->samplers[draw_call->n_used_samplers] = _render_batches[batch_counter].tex_array1;
+            _render_batches[batch_counter].tex_array1 = draw_call->n_used_samplers;
+            draw_call->n_used_samplers++;
+          }
         }
       }
-    }
 
-    if (!draw_call || draw_call->backface_cull != backface_cull || batch.index_start != draw_call->index_start + draw_call->index_count)
+    }
+    else
     {
+      create_draw_call = true;
+    }
+    
+    if (create_draw_call)
+    {
+      // create new combined draw call
       draw_call = &_draw_calls.emplace_back();
       draw_call->samplers = std::vector<int>{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
       draw_call->index_start = batch.index_start;
@@ -1031,11 +1067,11 @@ void WMOGroup::load()
 
     std::uint32_t flags = 0;
 
-    if (header.flags.exterior_lit | header.flags.exterior)
+    if (header.flags.exterior_lit || header.flags.exterior)
     {
       flags |= WMORenderBatchFlags::eWMOBatch_ExteriorLit;
     }
-    if (header.flags.has_vertex_color | header.flags.use_mocv2_for_texture_blending)
+    if (header.flags.has_vertex_color || header.flags.use_mocv2_for_texture_blending)
     {
       flags |= WMORenderBatchFlags::eWMOBatch_HasMOCV;
     }
