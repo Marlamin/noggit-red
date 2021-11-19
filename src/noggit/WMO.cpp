@@ -864,6 +864,15 @@ void WMOGroup::upload()
                                  , GL_STATIC_DRAW
                                  );
 
+  // free unused data
+  _normals.clear();
+  _texcoords.clear();
+  _texcoords_2.clear();
+  _indices.clear();
+  _vertex_colors.clear();
+  _render_batches.clear();
+  _render_batch_mapping.clear();
+
   _uploaded = true;
 }
 

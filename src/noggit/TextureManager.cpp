@@ -11,6 +11,8 @@
 decltype (TextureManager::_) TextureManager::_;
 decltype (TextureManager::_tex_arrays) TextureManager::_tex_arrays;
 
+constexpr unsigned N_ARRAY_TEX = 1;
+
 void TextureManager::report()
 {
   std::string output = "Still in the Texture manager:\n";

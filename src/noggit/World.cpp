@@ -1524,6 +1524,9 @@ void World::draw (glm::mat4x4 const& model_view
   // occlusion culling is not performed on per model instance basis
   // rendering a little extra is cheaper than querying.
   // occlusion latency has 1-2 frames delay.
+
+  constexpr bool occlusion_cull = false;
+  if (occlusion_cull)
   {
     opengl::scoped::use_program occluder_shader{ *_occluder_program.get() };
     gl.colorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -1532,7 +1535,6 @@ void World::draw (glm::mat4x4 const& model_view
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _occluder_index);
     gl.disable(GL_CULL_FACE); // TODO: figure out why indices are bad and we need this
 
-    math::matrix_4x4 identity_mtx = math::matrix_4x4{math::matrix_4x4::unit};
     for (auto& pair : _loaded_tiles_buffer)
     {
       MapTile* tile = pair.second;
@@ -1551,29 +1553,31 @@ void World::draw (glm::mat4x4 const& model_view
     gl.depthMask(GL_TRUE);
     gl.bindVertexArray(0);
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  }
+  
 
-    // draw occlusion AABBs
-    if (draw_occlusion_boxes)
+  // draw occlusion AABBs
+  if (draw_occlusion_boxes)
+  {
+
+    for (auto& pair : _loaded_tiles_buffer)
     {
+      MapTile* tile = pair.second;
 
-      for (auto& pair : _loaded_tiles_buffer)
+      if (!tile)
       {
-        MapTile* tile = pair.second;
-
-        if (!tile)
-        {
-          break;
-        }
-
-        auto& extents = tile->getCombinedExtents();
-        opengl::primitives::wire_box::getInstance(_context).draw ( model_view
-            , projection
-            , identity_mtx
-            , { 1.0f, 1.0f, 0.0f, 1.0f }
-            , extents[0]
-            , extents[1]
-        );
+        break;
       }
+
+      math::matrix_4x4 identity_mtx = math::matrix_4x4{ math::matrix_4x4::unit };
+      auto& extents = tile->getCombinedExtents();
+      opengl::primitives::wire_box::getInstance(_context).draw ( model_view
+          , projection
+          , identity_mtx
+          , { 1.0f, 1.0f, 0.0f, 1.0f }
+          , extents[0]
+          , extents[1]
+      );
     }
   }
 

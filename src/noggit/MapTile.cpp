@@ -693,7 +693,7 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
     float tile_center_x = xbase + TILESIZE / 2.0f;
     float tile_center_z = zbase + TILESIZE / 2.0f;
 
-    bool is_lod = misc::dist(tile_center_x, tile_center_z, camera.x, camera.z) > TILESIZE;
+    bool is_lod = misc::dist(tile_center_x, tile_center_z, camera.x, camera.z) > TILESIZE * 3;
     mcnk_shader.uniform("lod_level", int(is_lod));
 
     assert(draw_call.n_chunks <= 256);

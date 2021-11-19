@@ -1394,6 +1394,10 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
                      , int animtime
                      )
 {
+  // temp
+  auto mv = glm::transpose(model_view);
+  //end temp
+
   if (calc) return;
 
   math::matrix_4x4 m {math::matrix_4x4::unit};
@@ -1425,8 +1429,8 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
     if (flags.billboard)
     {
-      glm::vec3 vRight (model_view[0][0], model_view[1][0], model_view[2][0]);
-      glm::vec3 vUp (model_view[0][1], model_view[1][1], model_view[2][1]); // Spherical billboarding
+      glm::vec3 vRight (mv[0][0], mv[1][0], mv[2][0]);
+      glm::vec3 vUp (mv[0][1], mv[1][1], mv[2][1]); // Spherical billboarding
       //glm::vec3 vUp = glm::vec3(0,1,0); // Cylindrical billboarding
       vRight =  glm::vec3(vRight.x * -1, vRight.y * -1, vRight.z * -1);
       m (0, 2, vRight.x);
@@ -1442,7 +1446,7 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
   if (parent >= 0)
   {
-    allbones[parent].calcMatrix (model_view, allbones, anim, time, animtime);
+    allbones[parent].calcMatrix (mv, allbones, anim, time, animtime);
     mat = allbones[parent].mat * m;
   }
   else
@@ -1767,6 +1771,10 @@ void Model::upload()
 
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> box_indices_binder(_box_indices_buffer);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _box_indices.size() * sizeof(uint16_t), _box_indices.data(), GL_STATIC_DRAW);
+
+
+  _textureFilenames.clear();
+  _indices.clear();
 
   _finished_upload = true;
 }
