@@ -1354,6 +1354,7 @@ void MapTile::remove_model(SceneObject* instance)
 
     if (it2 != instances.end())
     {
+      instance->derefTile(this);
       instances.erase(it2);
     }
 
@@ -1362,8 +1363,6 @@ void MapTile::remove_model(SceneObject* instance)
       object_instances.erase(instance->instance_model());
     }
 
-
-    instance->derefTile(this);
     _requires_object_extents_recalc = true;
   }
 }

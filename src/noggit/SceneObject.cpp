@@ -11,9 +11,9 @@ SceneObject::SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext cont
 {
 }
 
-bool SceneObject::isInsideRect(glm::vec3 rect[2]) const
+bool SceneObject::isInsideRect(std::array<glm::vec3, 2> const* rect) const
 {
-  return misc::rectOverlap(extents, rect);
+  return misc::rectOverlap(extents.data(), rect->data());
 }
 
 bool SceneObject::isDuplicateOf(SceneObject const& other)
@@ -50,10 +50,14 @@ void SceneObject::resetDirection()
 
 void SceneObject::refTile(MapTile* tile)
 {
-  _tiles.emplace(tile);
+  auto it = std::find(_tiles.begin(), _tiles.end(), tile);
+  if (it == _tiles.end())
+    _tiles.push_back(tile);
 }
 
 void SceneObject::derefTile(MapTile* tile)
 {
-  _tiles.erase(tile);
+  auto it = std::find(_tiles.begin(), _tiles.end(), tile);
+  if (it != _tiles.end())
+    _tiles.erase(it);
 }

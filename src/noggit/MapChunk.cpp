@@ -1549,7 +1549,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   std::list<int> lDoodadIDs;
   std::list<int> lObjectIDs;
 
-  glm::vec3 lChunkExtents[2];
+  std::array<glm::vec3, 2> lChunkExtents;
   lChunkExtents[0] = glm::vec3(xbase, 0.0f, zbase);
   lChunkExtents[1] = glm::vec3(xbase + CHUNKSIZE, 0.0f, zbase + CHUNKSIZE);
 
@@ -1557,7 +1557,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lID = 0;
   for(auto const& wmo : lObjectInstances)
   {
-    if (wmo.isInsideRect(lChunkExtents))
+    if (wmo.isInsideRect(&lChunkExtents))
     {
       lObjectIDs.push_back(lID);
     }
@@ -1569,7 +1569,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
   lID = 0;
   for(auto const& model : lModelInstances)
   {
-    if (model.isInsideRect (lChunkExtents))
+    if (model.isInsideRect(&lChunkExtents))
     {
       lDoodadIDs.push_back(lID);
     }
@@ -1640,7 +1640,7 @@ void MapChunk::save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCI
 
   char * lAlphaMaps = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
-  for (auto alpha : alphamaps)
+  for (auto& alpha : alphamaps)
   {
     memcpy(lAlphaMaps, alpha.data(), alpha.size());
     lAlphaMaps += alpha.size();

@@ -9,6 +9,7 @@
 #include <noggit/ContextObject.hpp>
 #include <cstdint>
 #include <unordered_set>
+#include <array>
 
 class AsyncObject;
 
@@ -26,7 +27,7 @@ public:
   SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context, std::string filename = "");
 
   [[nodiscard]]
-  bool isInsideRect(glm::vec3 rect[2]) const;
+  bool isInsideRect(std::array<glm::vec3, 2> const* rect) const;
 
   [[nodiscard]]
   bool isDuplicateOf(SceneObject const& other);
@@ -54,13 +55,15 @@ public:
 
   void refTile(MapTile* tile);
   void derefTile(MapTile* tile);
-  std::unordered_set<MapTile*> const& getTiles() { return _tiles; };
+  std::vector<MapTile*> const& getTiles() { return _tiles; };
 
   virtual AsyncObject* instance_model() = 0;
 
+  std::array<glm::vec3, 2> const& getExtents() { ensureExtents(); return extents; }
+
 public:
   glm::vec3 pos;
-  glm::vec3 extents[2];
+  std::array<glm::vec3, 2> extents;
   glm::vec3 dir;
   float scale = 1.f;
   unsigned int uid;
@@ -77,7 +80,7 @@ protected:
 
   std::string _filename;
 
-  std::unordered_set<MapTile*> _tiles;
+  std::vector<MapTile*> _tiles;
 };
 
 #endif //NOGGIT_3DOBJECT_HPP
