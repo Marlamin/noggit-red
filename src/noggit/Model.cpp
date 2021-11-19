@@ -640,14 +640,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
       mesh_color.w = m->_colors[color_index].opacity.getValue (m->_current_anim_seq, m->_anim_time, m->_global_animtime);
     }
 
-    if (renderflag.flags.unlit)
-    {
-      mesh_color.x = c.x; mesh_color.y = c.y; mesh_color.z = c.z;
-    }
-    else
-    {
-      mesh_color.x = mesh_color.y = mesh_color.z = 0;
-    }
+    mesh_color.x = c.x; mesh_color.y = c.y; mesh_color.z = c.z;
 
     emissive_color = glm::vec4(c.x,c.y,c.z, mesh_color.w);
   }
