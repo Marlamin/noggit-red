@@ -324,12 +324,12 @@ Sky* Skies::findSkyWeights(glm::vec3 pos)
 
   std::sort(skies.begin(), skies.end(), [=](Sky& a, Sky& b)
   {
-    return (pos - a.pos).length() > (pos - b.pos).length();
+    return glm::distance(pos, a.pos) > glm::distance(pos, b.pos);
   });
 
   for (auto& sky : skies)
   {
-    float distance_to_light = (pos - sky.pos).length();
+    float distance_to_light = glm::distance(pos, sky.pos);
 
     if (default_sky == &sky || distance_to_light > sky.r2)
     {
@@ -558,7 +558,7 @@ void Skies::drawLightingSpheres (math::matrix_4x4 const& model_view
 {
   for (Sky& sky : skies)
   {
-    if ((sky.pos - camera_pos).length() - sky.r2 <= cull_distance) // TODO: frustum cull here
+    if (glm::distance(sky.pos, camera_pos) - sky.r2 <= cull_distance) // TODO: frustum cull here
     {
       glm::vec3 diffuse = color_set[LIGHT_GLOBAL_DIFFUSE];
       glm::vec3 ambient = color_set[LIGHT_GLOBAL_AMBIENT];
@@ -577,7 +577,7 @@ void Skies::drawLightingSphereHandles (math::matrix_4x4 const& model_view
 {
   for (Sky& sky : skies)
   {
-    if ((sky.pos - camera_pos).length() - sky.r2 <= cull_distance) // TODO: frustum cull here
+    if (glm::distance(sky.pos, camera_pos) - sky.r2 <= cull_distance) // TODO: frustum cull here
     {
 
       _sphere_render.draw(model_view.Convert() * projection, sky.pos, {1.f, 0.f, 0.f, 1.f}, 5.f);

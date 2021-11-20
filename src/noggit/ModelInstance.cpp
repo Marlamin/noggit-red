@@ -129,7 +129,7 @@ bool ModelInstance::isInRenderDist(const float& cull_distance, const glm::vec3& 
 
   if (display == display_mode::in_3D)
   {
-    dist = (pos - camera).length() - model->rad * scale;
+    dist = glm::distance(camera, pos) - model->rad * scale;
   }
   else
   {
@@ -198,7 +198,7 @@ void ModelInstance::recalcExtents()
   extents[0] = bounding_of_rotated_points.min;
   extents[1] = bounding_of_rotated_points.max;
 
-  size_cat = (bounding_of_rotated_points.max - bounding_of_rotated_points.min).length();
+  size_cat = glm::distance(bounding_of_rotated_points.max, bounding_of_rotated_points.min);
 
   _need_recalc_extents = false;
 }

@@ -5,6 +5,7 @@
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <opengl/shader.hpp>
+#include <glm/vec3.hpp>
 
 #include <list>
 
@@ -859,7 +860,7 @@ void RibbonEmitter::setup(int anim, int time, int animtime)
   glm::vec3 ntup = parent->mat * (pos + glm::vec3(0, 0, 1));
   ntup -= ntpos;
   ntup = glm::normalize(ntup);
-  float dlen = (ntpos - tpos).length();
+  float dlen = glm::distance(ntpos, tpos);
 
   manim = anim;
   mtime = time;

@@ -1353,7 +1353,7 @@ void World::draw (glm::mat4x4 const& model_view
     ZoneScopedN("World::draw() : Draw pivot point");
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
 
-    float dist = (camera_pos - _multi_select_pivot.get()).length();
+    float dist = glm::distance(camera_pos, _multi_select_pivot.get());
     _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, std::min(2.f, std::max(0.15f, dist * 0.02f)));
   }
 
@@ -1366,7 +1366,7 @@ void World::draw (glm::mat4x4 const& model_view
   if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex)
   {
     ZoneScopedN("World::draw() : Draw vertex points");
-    float size = (vertexCenter() - camera_pos).length();
+    float size = glm::distance(vertexCenter(), camera_pos);
     gl.pointSize(std::max(0.001f, 10.0f - (1.25f * size / CHUNKSIZE)));
 
     for (glm::vec3 const* pos : _vertices_selected)
@@ -4036,7 +4036,7 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
         {
           auto obj = boost::get<selected_object_type>(instance.get());
 
-          if ((obj->pos - pos).length() <= radius && is_selected(obj))
+          if (glm::distance(obj->pos, pos) <= radius && is_selected(obj))
           {
             remove_from_selection(obj);
           }
@@ -4054,7 +4054,7 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
         {
           auto obj = boost::get<selected_object_type>(instance.get());
 
-          if ((obj->pos - pos).length() <= radius && !is_selected(obj))
+          if (glm::distance(obj->pos, pos) <= radius && !is_selected(obj))
           {
             add_to_selection(obj);
           }

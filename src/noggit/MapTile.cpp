@@ -2024,7 +2024,7 @@ bool MapTile::getTileOcclusionQueryResult(glm::vec3 const& camera)
 
 void MapTile::calcCamDist(glm::vec3 const& camera)
 {
-  _cam_dist = (camera - _center).length();
+  _cam_dist = glm::distance(camera, _center);
 }
 
 bool MapTile::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned int draw_call_index)

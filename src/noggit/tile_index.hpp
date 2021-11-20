@@ -21,7 +21,7 @@ struct tile_index
 
   float dist(tile_index const& other) const
   {
-    return (glm::vec3(x, 0.f, z) - glm::vec3(other.x, 0.f, other.z)).length();
+    return glm::distance(glm::vec3(x, 0.f, z), glm::vec3(other.x, 0.f, other.z));
   }
 
   std::size_t x;

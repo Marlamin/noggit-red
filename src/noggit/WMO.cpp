@@ -1524,7 +1524,7 @@ bool WMOGroup::is_visible( math::matrix_4x4 const& transform
   }
 
   float dist = display == display_mode::in_3D
-    ? (pos - camera).length() - rad
+    ? glm::distance(pos, camera) - rad
     : std::abs(pos.y - camera.y) - rad;
 
   return (dist < cull_distance);
