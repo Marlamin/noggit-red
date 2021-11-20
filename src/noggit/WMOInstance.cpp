@@ -152,6 +152,42 @@ void WMOInstance::ensureExtents()
   // TODO: optimize
 }
 
+void WMOInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
+{
+  std::stringstream select_info;
+
+  select_info << "<b>filename: </b>" << wmo->filename
+    << "<br><b>unique ID: </b>" << uid
+    << "<br><b>position X/Y/Z: </b>{" << pos.x << ", " << pos.y << ", " << pos.z << "}"
+    << "<br><b>rotation X/Y/Z: </b>{" << dir.x << ", " << dir.y << ", " << dir.z << "}"
+    << "<br><b>doodad set: </b>" << doodadset()
+    << "<br><b>textures used: </b>" << wmo->textures.size()
+    << "<span>";
+
+  for (unsigned j = 0; j < wmo->textures.size(); j++)
+  {
+    bool stuck = !wmo->textures[j]->finishedLoading();
+    bool error = !wmo->textures[j]->is_uploaded();
+
+    select_info << "<br> ";
+
+    if (stuck)
+      select_info << "<font color=\"Orange\">";
+
+    if (error)
+      select_info << "<font color=\"Red\">";
+
+    select_info  << "<b>" << (j + 1) << ":</b> " << wmo->textures[j]->filename;
+
+    if (stuck || error)
+      select_info << "</font>";
+  }
+
+  select_info << "<br></span>";
+
+  detail_widget->setText(select_info.str());
+}
+
 void WMOInstance::recalcExtents()
 {
   // todo: keep track of whether the extents need to be recalculated or not

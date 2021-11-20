@@ -103,6 +103,7 @@ public:
   void recalcExtents() override;
   void ensureExtents() override;
   bool finishedLoading() override { return wmo->finishedLoading(); };
+  virtual void updateDetails(noggit::ui::detail_infos* detail_widget) override;
 
   [[nodiscard]]
   AsyncObject* instance_model() override { return wmo.get(); };

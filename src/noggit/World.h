@@ -412,7 +412,6 @@ public:
   void loadAllTiles();
   unsigned getNumLoadedTiles() { return _n_loaded_tiles; };
   unsigned getNumRenderedTiles() { return _n_rendered_tiles; };
-  unsigned getNumRenderedObjectTiles() { return _n_rendered_object_tiles; };
 
 private:
   void update_models_by_filename();
@@ -499,6 +498,5 @@ private:
   // Debug metrics
   unsigned _n_loaded_tiles;
   unsigned _n_rendered_tiles;
-  unsigned _n_rendered_object_tiles;
 
 };

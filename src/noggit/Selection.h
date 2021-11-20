@@ -1,14 +1,25 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 #include <boost/variant.hpp>
+#include <noggit/ui/DetailInfos.h>
 #include <glm/vec3.hpp>
 #include <string>
 #include <vector>
+#include <QString>
+
 
 class SceneObject;
 class MapChunk;
 
-struct selected_chunk_type
+class Selectable
+{
+public:
+  Selectable() = default;
+
+  virtual void updateDetails(noggit::ui::detail_infos* detail_widget) = 0;
+};
+
+struct selected_chunk_type : Selectable
 {
     selected_chunk_type(MapChunk* _chunk, std::tuple<int, int, int> _triangle, glm::vec3 _position)
     : chunk(_chunk)
@@ -24,6 +35,8 @@ struct selected_chunk_type
   {
     return chunk == other.chunk;
   }
+
+  virtual void updateDetails(noggit::ui::detail_infos* detail_widget) override;
 };
 
 using selected_object_type = SceneObject*;

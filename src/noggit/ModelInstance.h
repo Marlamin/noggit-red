@@ -104,6 +104,8 @@ public:
   [[nodiscard]]
   AsyncObject* instance_model() override { return model.get(); };
 
+  virtual void updateDetails(noggit::ui::detail_infos* detail_widget) override;
+
   [[nodiscard]]
   std::uint32_t gpuTransformUid() const { return _gpu_transform_uid; }
 

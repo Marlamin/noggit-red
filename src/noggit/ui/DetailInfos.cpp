@@ -2,7 +2,8 @@
 
 #include <noggit/ui/DetailInfos.h>
 
-#include <QtWidgets/QFormLayout>
+#include <QVBoxLayout>
+#include <QScrollArea>
 
 namespace noggit
 {
@@ -12,9 +13,17 @@ namespace noggit
       : widget (parent, Qt::Window)
     {
       setWindowFlags (Qt::Tool);
-      auto layout (new QFormLayout (this));
+      auto layout (new QVBoxLayout (this));
 
-      layout->addRow (_info_text = new QLabel (this));
+      auto scroll_area = new QScrollArea(this);
+      scroll_area->setWidget(_info_text = new QLabel(this));
+      scroll_area->setWidgetResizable(true);
+
+      _info_text->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+      _info_text->setTextInteractionFlags(Qt::TextSelectableByMouse);
+      _info_text->setAlignment(Qt::AlignTop);
+      _info_text->setTextFormat(Qt::RichText);
+      layout->addWidget(scroll_area);
     }
 
     void detail_infos::setText (const std::string& t)

@@ -1379,8 +1379,8 @@ void World::draw (glm::mat4x4 const& model_view
 
   std::unordered_map<Model*, std::size_t> model_with_particles;
 
-  tsl::robin_map<Model*, std::vector<math::matrix_4x4, boost::pool_allocator<math::matrix_4x4>>> models_to_draw;
-  std::vector<WMOInstance*, boost::pool_allocator<WMOInstance*>> wmos_to_draw;
+  tsl::robin_map<Model*, std::vector<math::matrix_4x4>> models_to_draw;
+  std::vector<WMOInstance*> wmos_to_draw;
 
   static int frame = 0;
 
@@ -1421,6 +1421,7 @@ void World::draw (glm::mat4x4 const& model_view
 
         // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
         // otherwise we only allocate for a half
+
         if (tile->objects_frustum_cull_test > 1)
         {
           instances.reserve(instances.size() + pair.second.size());
@@ -1429,6 +1430,7 @@ void World::draw (glm::mat4x4 const& model_view
         {
           instances.reserve(instances.size() + pair.second.size() / 2);
         }
+
 
         for (auto& instance : pair.second)
         {
@@ -1454,6 +1456,7 @@ void World::draw (glm::mat4x4 const& model_view
       {
         // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
         // otherwise we only allocate for a half
+
         if (tile->objects_frustum_cull_test > 1)
         {
           wmos_to_draw.reserve(wmos_to_draw.size() + pair.second.size());
@@ -1525,7 +1528,7 @@ void World::draw (glm::mat4x4 const& model_view
   // rendering a little extra is cheaper than querying.
   // occlusion latency has 1-2 frames delay.
 
-  constexpr bool occlusion_cull = false;
+  constexpr bool occlusion_cull = true;
   if (occlusion_cull)
   {
     opengl::scoped::use_program occluder_shader{ *_occluder_program.get() };
@@ -1684,11 +1687,11 @@ void World::draw (glm::mat4x4 const& model_view
 
     models_to_draw.clear();
     wmos_to_draw.clear();
-    boost::singleton_pool<boost::pool_allocator_tag
-    , sizeof(std::vector<math::matrix_4x4, boost::pool_allocator<math::matrix_4x4>>)>::purge_memory();
+    //boost::singleton_pool<boost::pool_allocator_tag
+    //, sizeof(std::vector<math::matrix_4x4, boost::pool_allocator<math::matrix_4x4>>)>::purge_memory();
 
-    boost::singleton_pool<boost::pool_allocator_tag
-        , sizeof(std::vector<WMOInstance*, boost::pool_allocator<WMOInstance*>>)>::purge_memory();
+    //boost::singleton_pool<boost::pool_allocator_tag
+     //   , sizeof(std::vector<WMOInstance*, boost::pool_allocator<WMOInstance*>>)>::purge_memory();
 
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {

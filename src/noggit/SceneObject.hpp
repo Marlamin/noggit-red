@@ -21,7 +21,7 @@ enum SceneObjectTypes
 
 class MapTile;
 
-class SceneObject
+class SceneObject : public Selectable
 {
 public:
   SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context, std::string filename = "");

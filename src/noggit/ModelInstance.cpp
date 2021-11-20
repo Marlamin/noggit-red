@@ -221,6 +221,32 @@ glm::vec3* ModelInstance::getExtents()
   return &extents[0];
 }
 
+void ModelInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
+{
+  std::stringstream select_info;
+
+  select_info << "filename: " << model->filename
+    << "\nunique ID: " << uid
+    << "\nposition X/Y/Z: " << pos.x << " / " << pos.y << " / " << pos.z
+    << "\nrotation X/Y/Z: " << dir.x << " / " << dir.y << " / " << dir.z
+    << "\nscale: " << scale
+    << "\ntextures Used: " << model->header.nTextures
+    << "\nsize category: " << size_cat;
+
+  for (unsigned int j = 0; j < std::min(model->header.nTextures, 6U); j++)
+  {
+    select_info << "\n " << (j + 1) << ": " << model->_textures[j]->filename;
+  }
+  if (model->header.nTextures > 25)
+  {
+    select_info << "\n and more.";
+  }
+
+  select_info << "\n";
+
+  detail_widget->setText(select_info.str());
+}
+
 wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f, noggit::NoggitRenderContext context)
   : ModelInstance(filename, context)
 {

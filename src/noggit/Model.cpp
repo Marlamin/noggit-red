@@ -1394,9 +1394,6 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
                      , int animtime
                      )
 {
-  // temp
-  auto mv = glm::transpose(model_view);
-  //end temp
 
   if (calc) return;
 
@@ -1429,8 +1426,8 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
     if (flags.billboard)
     {
-      glm::vec3 vRight (mv[0][0], mv[1][0], mv[2][0]);
-      glm::vec3 vUp (mv[0][1], mv[1][1], mv[2][1]); // Spherical billboarding
+      glm::vec3 vRight (model_view[0][0], model_view[1][0], model_view[2][0]);
+      glm::vec3 vUp (model_view[0][1], model_view[1][1], model_view[2][1]); // Spherical billboarding
       //glm::vec3 vUp = glm::vec3(0,1,0); // Cylindrical billboarding
       vRight =  glm::vec3(vRight.x * -1, vRight.y * -1, vRight.z * -1);
       m (0, 2, vRight.x);
@@ -1446,7 +1443,7 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
   if (parent >= 0)
   {
-    allbones[parent].calcMatrix (mv, allbones, anim, time, animtime);
+    allbones[parent].calcMatrix (model_view, allbones, anim, time, animtime);
     mat = allbones[parent].mat * m;
   }
   else
@@ -1745,11 +1742,12 @@ void Model::upload()
 
   _buffers.upload();
   _vertex_arrays.upload();
-
-  gl.genTextures(1, &_bone_matrices_buf_tex);
+  _bone_matrices_buf_tex = 0;
 
   if (animBones)
   {
+    gl.genTextures(1, &_bone_matrices_buf_tex);
+
     gl.bindTexture(GL_TEXTURE_BUFFER, _bone_matrices_buf_tex);
     opengl::scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder(_bone_matrices_buffer);
     gl.bufferData(GL_TEXTURE_BUFFER, bone_matrices.size() * sizeof(math::matrix_4x4), nullptr, GL_STREAM_DRAW);
@@ -1785,7 +1783,8 @@ void Model::unload()
   _buffers.unload();
   _vertex_arrays.unload();
 
-  gl.deleteTextures(1, &_bone_matrices_buf_tex);
+  if (_bone_matrices_buf_tex)
+    gl.deleteTextures(1, &_bone_matrices_buf_tex);
 
   for (auto& particle : _particles)
   {
