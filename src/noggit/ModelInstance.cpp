@@ -141,15 +141,15 @@ bool ModelInstance::isInRenderDist(const float& cull_distance, const glm::vec3& 
     return false;
   }
 
-  if (size_cat < 1.f && dist > 30.f)
+  if (size_cat < 1.f && dist > 300.f)
   {
     return false;
   }
-  else if (size_cat < 4.f && dist > 150.f)
+  else if (size_cat < 4.f && dist > 500.f)
   {
     return false;
   }
-  else if (size_cat < 25.f && dist > 300.f)
+  else if (size_cat < 25.f && dist > 1000.f)
   {
     return false;
   }

@@ -944,13 +944,19 @@ void MapView::setupDetailInfos()
   );
 
   connect(noggit::ActionManager::instance(), &noggit::ActionManager::onActionBegin, 
-    [this](noggit::Action* action)
+    [this](noggit::Action*)
     {
       updateDetailInfos(true);
     });
 
   connect(noggit::ActionManager::instance(), &noggit::ActionManager::onActionEnd,
-    [this](noggit::Action* action)
+    [this](noggit::Action*)
+    {
+      updateDetailInfos(true);
+    });
+
+  connect(noggit::ActionManager::instance(), &noggit::ActionManager::currentActionChanged,
+    [this](unsigned)
     {
       updateDetailInfos(true);
     });
