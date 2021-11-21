@@ -225,24 +225,34 @@ void ModelInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
 {
   std::stringstream select_info;
 
-  select_info << "filename: " << model->filename
-    << "\nunique ID: " << uid
-    << "\nposition X/Y/Z: " << pos.x << " / " << pos.y << " / " << pos.z
-    << "\nrotation X/Y/Z: " << dir.x << " / " << dir.y << " / " << dir.z
-    << "\nscale: " << scale
-    << "\ntextures Used: " << model->header.nTextures
-    << "\nsize category: " << size_cat;
+  select_info << "<b>filename:</b> " << model->filename
+    << "<br><b>unique ID:</b> " << uid
+    << "<br><b>position X/Y/Z:</b> {" << pos.x << " , " << pos.y << " , " << pos.z << "}"
+    << "<br><b>rotation X/Y/Z:</b> {" << dir.x << " , " << dir.y << " , " << dir.z << "}"
+    << "<br><b>scale:</b> " << scale
+    << "<br><b>textures Used:</b> " << model->header.nTextures
+    << "<br><b>size category:</b><span> " << size_cat;
 
-  for (unsigned int j = 0; j < std::min(model->header.nTextures, 6U); j++)
+  for (unsigned j  = 0; j < model->header.nTextures; j++)
   {
-    select_info << "\n " << (j + 1) << ": " << model->_textures[j]->filename;
-  }
-  if (model->header.nTextures > 25)
-  {
-    select_info << "\n and more.";
+    bool stuck = !model->_textures[j]->finishedLoading();
+    bool error = model->_textures[j]->finishedLoading() && !model->_textures[j]->is_uploaded();
+
+    select_info << "<br> ";
+
+    if (stuck)
+      select_info << "<font color=\"Orange\">";
+
+    if (error)
+      select_info << "<font color=\"Red\">";
+
+    select_info << "<b>" << (j + 1) << ":</b> " << model->_textures[j]->filename;
+
+    if (stuck || error)
+      select_info << "</font>";
   }
 
-  select_info << "\n";
+  select_info << "</span>";
 
   detail_widget->setText(select_info.str());
 }

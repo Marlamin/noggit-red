@@ -167,7 +167,7 @@ void WMOInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
   for (unsigned j = 0; j < wmo->textures.size(); j++)
   {
     bool stuck = !wmo->textures[j]->finishedLoading();
-    bool error = !wmo->textures[j]->is_uploaded();
+    bool error = wmo->textures[j]->finishedLoading() && !wmo->textures[j]->is_uploaded();
 
     select_info << "<br> ";
 

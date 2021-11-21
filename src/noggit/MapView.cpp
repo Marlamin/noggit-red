@@ -942,6 +942,64 @@ void MapView::setupDetailInfos()
   connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
     , &_show_detail_info_window, &noggit::bool_toggle_property::set
   );
+
+  connect(noggit::ActionManager::instance(), &noggit::ActionManager::onActionBegin, 
+    [this](noggit::Action* action)
+    {
+      updateDetailInfos(true);
+    });
+
+  connect(noggit::ActionManager::instance(), &noggit::ActionManager::onActionEnd,
+    [this](noggit::Action* action)
+    {
+      updateDetailInfos(true);
+    });
+}
+
+void MapView::updateDetailInfos(bool no_sel_change_check)
+{
+  auto& current_selection = _world->current_selection();
+
+  // update detail infos TODO: selection update signal.
+  static std::uintptr_t last_sel = 0;
+
+  if (guidetailInfos->isVisible())
+  {
+    if (current_selection.size() > 0)
+    {
+      selection_type& last_selection = const_cast<selection_type&>(current_selection.at(current_selection.size() - 1));
+
+      switch (last_selection.which())
+      {
+        case eEntry_Object:
+        {
+          auto obj = boost::get<selected_object_type>(last_selection);
+
+          if (no_sel_change_check || reinterpret_cast<std::uintptr_t>(obj) != last_sel || noggit::ActionManager::instance()->getCurrentAction())
+          {
+            last_sel = reinterpret_cast<std::uintptr_t>(obj);
+            obj->updateDetails(guidetailInfos);
+          }
+          break;
+        }
+        case eEntry_MapChunk:
+        {
+          selected_chunk_type& chunk_sel(boost::get<selected_chunk_type>(last_selection));
+
+          if (no_sel_change_check || reinterpret_cast<std::uintptr_t>(chunk_sel.chunk) != last_sel || noggit::ActionManager::instance()->getCurrentAction())
+          {
+            last_sel = reinterpret_cast<std::uintptr_t>(chunk_sel.chunk);
+            chunk_sel.updateDetails(guidetailInfos);
+          }
+          break;
+        }
+      }
+    }
+    else
+    {
+      guidetailInfos->setText("");
+    }
+  }
 }
 
 void MapView::setupToolbars()
@@ -3785,6 +3843,8 @@ void MapView::tick (float dt)
     }
   }
 
+  updateDetailInfos();
+
   _status_area->setText
     (QString::fromStdString (gAreaDB.getAreaName (_world->getAreaID (_camera.position))));
 
@@ -3825,48 +3885,6 @@ void MapView::tick (float dt)
   );
 
   guiWater->updatePos (_camera.position);
-
-  
-  // update detail infos TODO: selection update signal.
-  static std::uintptr_t last_sel = 0;
-
-  if (guidetailInfos->isVisible())
-  {
-    if(currentSelection.size() > 0)
-    {
-      auto& lastSelection = currentSelection.back();
-
-      switch (lastSelection.which())
-      {
-        case eEntry_Object:
-        {
-          auto obj = boost::get<selected_object_type>(lastSelection);
-
-          if (reinterpret_cast<std::uintptr_t>(obj) != last_sel)
-          {
-            last_sel = reinterpret_cast<std::uintptr_t>(obj);
-            obj->updateDetails(guidetailInfos);
-          }
-          break;
-        }
-        case eEntry_MapChunk:
-        {
-          auto& chunk_sel(boost::get<selected_chunk_type>(lastSelection));
-
-          if (reinterpret_cast<std::uintptr_t>(&chunk_sel) != last_sel)
-          {
-            last_sel = reinterpret_cast<std::uintptr_t>(&chunk_sel);
-            chunk_sel.updateDetails(guidetailInfos);
-          }
-          break;
-        }
-      }
-    }
-    else
-    {
-      guidetailInfos->setText("");
-    }
-  }
 }
 
 glm::vec4 MapView::normalized_device_coords (int x, int y) const
