@@ -2976,8 +2976,9 @@ void MapView::paintGL()
 
   if (!saving_minimap)
   {
-
+    lock = true;
     draw_map();
+    lock = false;
     tick (now - _last_update);
   }
 

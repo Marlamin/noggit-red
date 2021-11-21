@@ -365,6 +365,12 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                )
 {
 
+  if (!finishedLoading())
+  [[unlikely]]
+  {
+    return;
+  }
+
   wmo_shader.uniform("ambient_color",glm::vec3(ambient_light_color));
 
   for (auto& group : groups)
@@ -664,14 +670,9 @@ void WMOGroup::upload()
     WMOMaterial const& mat (wmo->materials.at (batch.texture));
 
     auto& tex1 = wmo->textures.at(mat.texture1);
-
+    
+    tex1->wait_until_loaded();
     tex1->upload();
-
-    if (!tex1->is_uploaded())
-    {
-      texture_not_uploaded = true;
-      break;
-    }
 
     std::uint32_t tex_array0 = tex1->texture_array();
     std::uint32_t array_index0 = tex1->array_index();
@@ -683,13 +684,8 @@ void WMOGroup::upload()
     if (use_tex2)
     {
       auto& tex2 = wmo->textures.at(mat.texture2);
+      tex2->wait_until_loaded();
       tex2->upload();
-
-      if (!tex2->is_uploaded())
-      {
-        texture_not_uploaded = false;
-        break;
-      }
 
       tex_array1 = tex2->texture_array();
       array_index1 = tex2->array_index();
@@ -868,7 +864,6 @@ void WMOGroup::upload()
   _normals.clear();
   _texcoords.clear();
   _texcoords_2.clear();
-  _indices.clear();
   _vertex_colors.clear();
   _render_batches.clear();
   _render_batch_mapping.clear();

@@ -1772,7 +1772,6 @@ void Model::upload()
 
 
   _textureFilenames.clear();
-  _indices.clear();
 
   _finished_upload = true;
 }
