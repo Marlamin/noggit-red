@@ -457,12 +457,6 @@ private:
   std::unique_ptr<opengl::program> _liquid_program;
   std::unique_ptr<opengl::program> _occluder_program;
 
-  // Minimap programs. Ugly, but those can't be shared between contexts, so we compile twice
-  std::unique_ptr<opengl::program> _mcnk_program_mini;
-  std::unique_ptr<opengl::program> _m2_program_mini;
-  std::unique_ptr<opengl::program> _m2_instanced_program_mini;
-  std::unique_ptr<opengl::program> _wmo_program_mini;
-
   noggit::cursor_render _cursor_render;
   opengl::primitives::sphere _sphere_render;
   opengl::primitives::square _square_render;

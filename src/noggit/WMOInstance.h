@@ -96,6 +96,7 @@ public:
             , int animtime
             , bool world_has_skies
             , display_mode display
+            , bool no_cull = false
             );
 
   void intersect (math::ray const&, selection_result*);

@@ -43,6 +43,8 @@ WMOInstance::WMOInstance(std::string const& filename, noggit::NoggitRenderContex
   dir = math::degrees::vec3(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
   uid = 0;
   _context = context;
+
+  updateTransformMatrix();
 }
 
 
@@ -59,6 +61,7 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
                        , int animtime
                        , bool world_has_skies
                        , display_mode display
+                       , bool no_cull
                        )
 {
   if (!wmo->finishedLoading() || wmo->loading_failed())
@@ -79,18 +82,21 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
   {
     unsigned region_visible = 0;
 
-    for (auto& tile : getTiles())
+    if (!no_cull)
     {
-      if (tile->objects_frustum_cull_test && !tile->tile_occluded)
+      for (auto& tile : getTiles())
       {
-        region_visible = tile->objects_frustum_cull_test;
+        if (tile->objects_frustum_cull_test && !tile->tile_occluded)
+        {
+          region_visible = tile->objects_frustum_cull_test;
 
-        if (tile->objects_frustum_cull_test > 1)
-          break;
+          if (tile->objects_frustum_cull_test > 1)
+            break;
+        }
       }
     }
 
-    if (!region_visible || (region_visible <= 1 && !frustum.intersects(extents[1], extents[0])))
+    if (!no_cull && (!region_visible || (region_visible <= 1 && !frustum.intersects(extents[1], extents[0]))))
     {
       return;
     }

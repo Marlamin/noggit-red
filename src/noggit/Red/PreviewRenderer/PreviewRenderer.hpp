@@ -11,6 +11,7 @@
 #include <noggit/bool_toggle_property.hpp>
 #include <noggit/Red/ViewportManager/ViewportManager.hpp>
 #include <opengl/primitives.hpp>
+#include <noggit/LiquidTextureManager.hpp>
 
 #include <QOpenGLWidget>
 #include <QSettings>
@@ -63,6 +64,7 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
     std::unique_ptr<opengl::program> _m2_ribbons_program;
     std::unique_ptr<opengl::program> _m2_box_program;
     std::unique_ptr<opengl::program> _wmo_program;
+    std::unique_ptr<opengl::program> _liquid_program;
 
     std::vector<ModelInstance> _model_instances;
     std::vector<WMOInstance> _wmo_instances;
@@ -82,9 +84,15 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
 
     void update_emitters(float dt);
 
-    void unload_shaders();
+    void upload();
+
+    void unload();
 
     void unloadOpenglData(bool from_manager = false) override;
+
+    void updateLightingUniformBlock();
+
+    void updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection);
 
   private:
     int _width;
@@ -101,7 +109,17 @@ class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
     glm::vec3 _ambient_light;
     glm::vec3 _light_dir;
 
-    bool _gl_initialized = false;
+    opengl::scoped::deferred_upload_buffers<2> _buffers;
+    GLuint const& _mvp_ubo = _buffers[0];
+    GLuint const& _lighting_ubo = _buffers[1];
+
+    opengl::MVPUniformBlock _mvp_ubo_data;
+    opengl::LightingUniformBlock _lighting_ubo_data;
+
+    LiquidTextureManager _liquid_texture_manager;
+
+    bool _uploaded = false;
+    bool _lighting_needs_update = true;
 
   };
 

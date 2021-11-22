@@ -16,6 +16,8 @@ ModelInstance::ModelInstance(std::string const& filename, noggit::NoggitRenderCo
   : SceneObject(SceneObjectTypes::eMODEL, context, filename)
   , model (filename, context)
 {
+  pos = glm::vec3(0.f, 0.f, 0.f);
+  dir = math::degrees::vec3(0, 0, 0);
 }
 
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, noggit::NoggitRenderContext context)
