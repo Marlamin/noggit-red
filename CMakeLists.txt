@@ -1,11 +1,11 @@
-#██████   █████    ███████      █████████    █████████  █████ ███████████    ███████████   ██████████ ██████████  
-#░░██████ ░░███   ███░░░░░███   ███░░░░░███  ███░░░░░███░░███ ░█░░░███░░░█   ░░███░░░░░███ ░░███░░░░░█░░███░░░░███ 
+#██████   █████    ███████      █████████    █████████  █████ ███████████    ███████████   ██████████ ██████████
+#░░██████ ░░███   ███░░░░░███   ███░░░░░███  ███░░░░░███░░███ ░█░░░███░░░█   ░░███░░░░░███ ░░███░░░░░█░░███░░░░███
 # ░███░███ ░███  ███     ░░███ ███     ░░░  ███     ░░░  ░███ ░   ░███  ░     ░███    ░███  ░███  █ ░  ░███   ░░███
 # ░███░░███░███ ░███      ░███░███         ░███          ░███     ░███        ░██████████   ░██████    ░███    ░███
 # ░███ ░░██████ ░███      ░███░███    █████░███    █████ ░███     ░███        ░███░░░░░███  ░███░░█    ░███    ░███
-# ░███  ░░█████ ░░███     ███ ░░███  ░░███ ░░███  ░░███  ░███     ░███        ░███    ░███  ░███ ░   █ ░███    ███ 
-# █████  ░░█████ ░░░███████░   ░░█████████  ░░█████████  █████    █████       █████   █████ ██████████ ██████████  
-#░░░░░    ░░░░░    ░░░░░░░      ░░░░░░░░░    ░░░░░░░░░  ░░░░░    ░░░░░       ░░░░░   ░░░░░ ░░░░░░░░░░ ░░░░░░░░░░   
+# ░███  ░░█████ ░░███     ███ ░░███  ░░███ ░░███  ░░███  ░███     ░███        ░███    ░███  ░███ ░   █ ░███    ███
+# █████  ░░█████ ░░░███████░   ░░█████████  ░░█████████  █████    █████       █████   █████ ██████████ ██████████
+#░░░░░    ░░░░░    ░░░░░░░      ░░░░░░░░░    ░░░░░░░░░  ░░░░░    ░░░░░       ░░░░░   ░░░░░ ░░░░░░░░░░ ░░░░░░░░░░
 CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
 CMAKE_POLICY(SET CMP0057 NEW) # "Support new IN_LIST if() operator."
 SET(CMAKE_CXX_STANDARD 20)
@@ -63,7 +63,7 @@ add_compiler_flag_if_supported (CMAKE_C_FLAGS -Wno-implicit-function-declaration
 IF(WIN32)
   OPTION(NAME_REUSE_AS_ERROR "Make name reuse warnings errors ?" OFF)
   IF(NAME_REUSE_AS_ERROR)
-    # declaration of 'identifier' hides previous: 
+    # declaration of 'identifier' hides previous:
     add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4456) # local declaration
     add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4457) # function parameter
     add_compiler_flag_if_supported (CMAKE_CXX_FLAGS /we4458) # class members
@@ -103,11 +103,11 @@ FIND_PACKAGE(StormLib REQUIRED )
 FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml REQUIRED)
 
 IF(USE_SQL)
-  FIND_LIBRARY(MYSQL_LIBRARY NAMES libmysql 
+  FIND_LIBRARY(MYSQL_LIBRARY NAMES libmysql
               HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql")
-  FIND_LIBRARY(MYSQLCPPCONN_LIBRARY NAMES mysqlcppconn 
+  FIND_LIBRARY(MYSQLCPPCONN_LIBRARY NAMES mysqlcppconn
               HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
-  FIND_PATH(MYSQLCPPCONN_INCLUDE NAMES cppconn/driver.h 
+  FIND_PATH(MYSQLCPPCONN_INCLUDE NAMES cppconn/driver.h
               HINTS "${CMAKE_SOURCE_DIR}/../Noggit3libs/mysql/connector")
 
   IF(MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
@@ -226,29 +226,42 @@ IF(WIN32)
   SET(os_headers include/win/StackWalker.h)
 ENDIF(WIN32)
 
-#collect_files(headers_to_moc src/noggit true "*.h;*.hpp" "")
-# here we need only those which contain qt meta identifiers
-#contains_filter(result "${headers_to_moc}" "[\n][ \t]*Q_OBJECT[^a-zA-Z0-9_]")
-
-#qt5_wrap_cpp (moced ${result})
-SOURCE_GROUP("noggit"  FILES ${noggit_root_sources} ${noggit_root_headers})
-SOURCE_GROUP("noggit\\ui"  FILES ${noggit_ui_sources} ${noggit_ui_headers})
-SOURCE_GROUP("noggit\\scripting"  FILES ${noggit_scripting_sources} ${noggit_scripting_headers})
-SOURCE_GROUP("opengl"  FILES ${opengl_sources} ${opengl_headers})
-SOURCE_GROUP("math"  FILES ${math_sources} ${math_headers})
-SOURCE_GROUP("external"  FILES ${external_sources} ${external_headers})
-SOURCE_GROUP("os"  FILES ${os_sources} ${os_headers})
-SOURCE_GROUP("util"  FILES ${util_sources})
-SOURCE_GROUP("glsl"  FILES ${shaders})
-SOURCE_GROUP("noggit/Red" FILES ${red_headers} ${red_sources})
-SOURCE_GROUP("png_blp" FILES ${png_blp_headers} ${png_blp_sources})
-SOURCE_GROUP("imguizmo" FILES ${imguizmo_headers} ${imguizmo_sources})
-SOURCE_GROUP("gradient_editor" FILES ${gradienteditor_headers} ${gradienteditor_sources})
-
 collect_files(resource_files resources FALSE "*.qrc" "")
 qt5_add_resources (compiled_resource_files ${resource_files})
 collect_files(ui_files src TRUE "*.ui" "")
 qt5_wrap_ui(compiled_ui_files ${ui_files})
+
+assign_source_group(
+  ${noggit_root_sources} 
+  ${noggit_root_headers}
+  ${noggit_ui_sources}
+  ${noggit_ui_headers}
+  ${noggit_scripting_sources} 
+  ${noggit_scripting_headers}
+  ${opengl_sources} 
+  ${opengl_headers}
+  ${math_sources} 
+  ${math_headers}
+  ${external_sources} 
+  ${external_headers}
+  ${os_sources} 
+  ${os_headers}
+  ${util_sources}
+  ${shaders}
+  ${red_headers} 
+  ${red_sources}
+  ${png_blp_headers} 
+  ${png_blp_sources}
+  ${imguizmo_headers} 
+  ${imguizmo_sources}
+  ${gradienteditor_headers} 
+  ${gradienteditor_sources}
+  ${resource_files}
+  ${ui_files}
+  ${blizzard_database_headers}
+  ${tracy_sources}
+  ${tracy_headers}
+)
 
 ADD_EXECUTABLE(noggit
   WIN32
