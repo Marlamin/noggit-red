@@ -119,7 +119,7 @@ void PreviewRenderer::resetCamera(float x, float y, float z, float roll, float y
   _camera.position = (extents[0] + extents[1]) / 2.0f;
   radius = std::max(glm::distance(_camera.position, extents[0]), glm::distance(_camera.position, extents[1]));
 
-  float distance_factor = abs( radius / sin(_camera.fov()._ / 2.f));
+  float distance_factor = abs( radius / sin(_camera.fov()._ / 3.f));
   _camera.move_forward_factor(-1.f, distance_factor);
 
 }
@@ -136,7 +136,6 @@ void PreviewRenderer::draw()
   gl.clearColor(_background_color.r, _background_color.g, _background_color.b, 1.0f);
   gl.depthMask(GL_TRUE);
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
   float culldistance = 10000000;
 
@@ -186,6 +185,8 @@ void PreviewRenderer::draw()
 
       for (auto& wmo_instance : _wmo_instances)
       {
+        wmo_instance.wmo->wait_until_loaded();
+        wmo_instance.wmo->waitForChildrenLoaded();
         wmo_instance.draw(
             wmo_program, model_view(), projection(), frustum, culldistance,
             _camera.position, _draw_boxes.get(), _draw_models.get() // doodads
@@ -235,6 +236,8 @@ void PreviewRenderer::draw()
 
     for (auto& model_instance : _model_instances)
     {
+      model_instance.model->wait_until_loaded();
+      model_instance.model->waitForChildrenLoaded();
       instance[0] = &model_instance;
       instance_mtx[0] = model_instance.transformMatrixTransposed();
 
@@ -418,6 +421,7 @@ QPixmap* PreviewRenderer::renderToPixmap()
 
   gl.viewport(0, 0, _width, _height);
   gl.clearColor(_background_color.r, _background_color.g, _background_color.b, 1.f);
+  gl.depthMask(GL_TRUE);
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   tick(1.0f);
@@ -425,14 +429,18 @@ QPixmap* PreviewRenderer::renderToPixmap()
 
   auto& async_loader = AsyncLoader::instance();
 
-  do
+  if (async_loader.is_loading())
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    // wait for the loader to finish
+    do
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    } while (async_loader.is_loading());
+
+    // redraw
     gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw();
-  } while (async_loader.is_loading());
-  gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  draw();
+  }
 
   // Clearing alpha from image
   gl.colorMask(false, false, false, true);
