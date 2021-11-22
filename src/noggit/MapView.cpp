@@ -879,15 +879,24 @@ void MapView::setupAssetBrowser()
 {
   _asset_browser_dock = new QDockWidget("Asset browser", this);
   _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this, this);
-  _asset_browser_dock->setWidget(_asset_browser);
 
-  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _asset_browser_dock);
+  //_main_window->addDockWidget(Qt::BottomDockWidgetArea, _asset_browser_dock);
   _asset_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
                                    | QDockWidget::DockWidgetFloatable
                                    | QDockWidget::DockWidgetClosable);
-  _asset_browser_dock->setAllowedAreas(Qt::BottomDockWidgetArea);
+  _asset_browser_dock->setAllowedAreas(Qt::NoDockWidgetArea);
 
+  _asset_browser_dock->setFloating(true);
   _asset_browser_dock->hide();
+
+  _asset_browser_dock->setWidget(_asset_browser);
+  _asset_browser_dock->setWindowFlags(
+    Qt::CustomizeWindowHint |
+    Qt::Window | 
+    Qt::WindowMinimizeButtonHint |
+    Qt::WindowMaximizeButtonHint |
+    Qt::WindowCloseButtonHint | 
+    Qt::WindowStaysOnTopHint);
 
   connect(_asset_browser_dock, &QDockWidget::visibilityChanged,
           [=](bool visible)
@@ -897,15 +906,10 @@ void MapView::setupAssetBrowser()
 
             _settings->setValue ("map_view/asset_browser", visible);
             _settings->sync();
-          });
-
-    connect(_asset_browser_dock, &QDockWidget::topLevelChanged,
-          [=](bool is_floating)
-          {
-            unloadOpenglData();
-          });
+          });;
 
   connect(this, &QObject::destroyed, _asset_browser_dock, &QObject::deleteLater);
+
 }
 
 void MapView::setupDetailInfos()
