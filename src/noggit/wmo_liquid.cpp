@@ -245,7 +245,7 @@ void wmo_liquid::upload(opengl::scoped::use_program& water_shader)
 }
 
 /*
-void wmo_liquid::draw ( math::matrix_4x4 const& transform
+void wmo_liquid::draw ( glm::mat4x4 const& transform
                       , liquid_render& render
                       , int animtime
                       )

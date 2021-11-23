@@ -63,12 +63,12 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
   ImGuiIO& io = ImGui::GetIO();
   ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-  math::matrix_4x4 delta_matrix = math::matrix_4x4(math::matrix_4x4::unit).transposed();
-  math::matrix_4x4 object_matrix = {math::matrix_4x4::unit};
-  math::matrix_4x4 pivot_matrix = math::matrix_4x4(math::matrix_4x4::translation,
+  glm::mat4x4 delta_matrix = glm::transpose(glm::mat4x4(1.0f));
+  glm::mat4x4 object_matrix = glm::mat4x4(1.0f);
+  glm::mat4x4 pivot_matrix = glm::transpose(glm::translate(glm::mat4x4(),
                                                    {_multiselection_pivot.x,
                                                     _multiselection_pivot.y,
-                                                    _multiselection_pivot.z}).transposed();
+                                                    _multiselection_pivot.z }));
   float last_pivot_scale = 1.f;
 
   switch (gizmo_selection_type)
@@ -79,7 +79,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance = boost::get<selected_object_type>(selection[0]);
       obj_instance->recalcExtents();
       object_matrix = obj_instance->transformMatrixTransposed();
-      ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, object_matrix, delta_matrix, nullptr);
+      ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, glm::value_ptr(object_matrix), glm::value_ptr(delta_matrix), nullptr);
       break;
     }
     case MULTISELECTION:
@@ -87,7 +87,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       if (isUsing())
         _last_pivot_scale = ImGuizmo::GetOperationScaleLast();
 
-      ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, pivot_matrix, delta_matrix, nullptr);
+      ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, glm::value_ptr(pivot_matrix), glm::value_ptr(delta_matrix), nullptr);
       break;
     }
   }
@@ -113,9 +113,9 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj_instance);
 
       obj_instance->recalcExtents();
-      object_matrix = math::matrix_4x4(obj_instance->transformMatrixTransposed());
+      object_matrix = obj_instance->transformMatrixTransposed();
 
-      glm::mat4 glm_transform_mat = glm::make_mat4(static_cast<float*>(delta_matrix));
+      glm::mat4 glm_transform_mat = delta_matrix;
 
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
@@ -163,10 +163,10 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
             rotation.y += math::degrees(rot_euler.y)._;
 
             // building model matrix
-            glm::mat4 model_transform = glm::make_mat4(static_cast<float*>(object_matrix));
+            glm::mat4 model_transform = object_matrix;
 
             // only translation of pivot
-            glm::mat4 transformed_pivot = glm::make_mat4(static_cast<float*>(pivot_matrix));
+            glm::mat4 transformed_pivot = pivot_matrix;
 
             // model matrix relative to translated pivot
             glm::mat4 model_transform_rel = glm::inverse(transformed_pivot) * model_transform;
@@ -231,10 +231,10 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj_instance);
 
       obj_instance->recalcExtents();
-      object_matrix = math::matrix_4x4(obj_instance->transformMatrixTransposed());
+      object_matrix = obj_instance->transformMatrixTransposed();
 
 
-      glm::mat4 glm_transform_mat = glm::make_mat4(static_cast<float*>(delta_matrix));
+      glm::mat4 glm_transform_mat = delta_matrix;
 
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;

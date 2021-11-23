@@ -40,13 +40,13 @@ public:
   void resetDirection();
 
   [[nodiscard]]
-  math::matrix_4x4 transformMatrix() const { return _transform_mat; };
+  glm::mat4x4 transformMatrix() const { return _transform_mat; };
 
   [[nodiscard]]
-  math::matrix_4x4 transformMatrixInverted() const { return _transform_mat_inverted; };
+  glm::mat4x4 transformMatrixInverted() const { return _transform_mat_inverted; };
 
   [[nodiscard]]
-  math::matrix_4x4 transformMatrixTransposed() const { return _transform_mat_transposed; };
+  glm::mat4x4 transformMatrixTransposed() const { return _transform_mat_transposed; };
 
   SceneObjectTypes which() const { return _type; };
 
@@ -69,9 +69,9 @@ public:
 protected:
   SceneObjectTypes _type;
 
-  math::matrix_4x4 _transform_mat = math::matrix_4x4::uninitialized;
-  math::matrix_4x4 _transform_mat_inverted = math::matrix_4x4::uninitialized;
-  math::matrix_4x4 _transform_mat_transposed = math::matrix_4x4::uninitialized;
+  glm::mat4x4 _transform_mat = glm::mat4x4();
+  glm::mat4x4 _transform_mat_inverted = glm::mat4x4();
+  glm::mat4x4 _transform_mat_transposed = glm::mat4x4();
 
   noggit::NoggitRenderContext _context;
 

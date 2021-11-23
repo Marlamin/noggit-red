@@ -11,6 +11,7 @@
 
 #include <array>
 #include <vector>
+#include <glm/gtx/quaternion.hpp>
 
 namespace opengl
 {
@@ -18,7 +19,7 @@ namespace opengl
   {
     void wire_box::draw ( glm::mat4x4 const& model_view
                         , glm::mat4x4 const& projection
-                        , math::matrix_4x4 const& transform
+                        , glm::mat4x4 const& transform
                         , glm::vec4  const& color
                         , glm::vec3 const& min_point
                         , glm::vec3 const& max_point
@@ -330,16 +331,15 @@ void main()
       for (int rotation_step = 0; rotation_step <= segment; ++rotation_step)
       {
         math::degrees rotation(360.f*rotation_step / static_cast<float>(segment));
-        math::matrix_4x4 m(math::matrix_4x4::rotation_xyz, math::degrees::vec3(math::degrees(0.f)._, math::degrees(0.f)._, rotation._));
-
+        auto rotationQuat = glm::angleAxis(rotation._, glm::vec3(0, 0, 1));
         for (int i = 0; i < segment; ++i)
         {
           float x = glm::cos(math::radians(math::degrees(i * 360 / segment))._);
           float z = glm::sin(math::radians(math::degrees(i * 360 / segment))._);
 
-          glm::vec3 v(x, 0.f, z);
+          glm::vec4 v(x, 0.f, z,0.0f);
 
-          vertices.emplace_back(m*v);
+          vertices.emplace_back(glm::toMat4(rotationQuat) * v);
 
           if (rotation_step < segment)
           {

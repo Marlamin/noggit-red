@@ -268,7 +268,7 @@ void ParticleSystem::setup(int anim, int time, int animtime)
   manimtime = animtime;
 }
 
-void ParticleSystem::draw( math::matrix_4x4 const& model_view
+void ParticleSystem::draw( glm::mat4x4 const& model_view
                          , opengl::scoped::use_program& shader
                          , GLuint const& transform_vbo
                          , int instances_count
@@ -325,8 +325,11 @@ void ParticleSystem::draw( math::matrix_4x4 const& model_view
 
   if (billboard) 
   {
-    vRight = glm::vec3(model_view[0], model_view[4], model_view[8]);
-    vUp = glm::vec3(model_view[1], model_view[5], model_view[9]); // Spherical billboarding
+      vRight = model_view[0]; 
+      vUp = model_view[1];
+
+    //vRight = glm::vec3(model_view[0][0], model_view[1][0], model_view[2][0]);
+    //vUp = glm::vec3(model_view[0][1], model_view[1][1], model_view[2][1]); // Spherical billboarding
     //vUp = glm::vec3(0,1,0); // Cylindrical billboarding
   }
 
@@ -514,12 +517,12 @@ void ParticleSystem::unload()
 namespace
 {
   //Generates the rotation matrix based on spread
-  math::matrix_4x4 CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
+  glm::mat4x4 CalcSpreadMatrix(float Spread1, float Spread2, float w, float l)
   {
     int i, j;
     float a[2], c[2], s[2];
 
-    math::matrix_4x4 SpreadMat (math::matrix_4x4::unit);
+    glm::mat4x4 SpreadMat = glm::mat4x4(1);
 
     a[0] = misc::randfloat(-Spread1, Spread1) / 2.0f;
     a[1] = misc::randfloat(-Spread2, Spread2) / 2.0f;
@@ -535,21 +538,21 @@ namespace
     }
 
     {
-      math::matrix_4x4 Temp (math::matrix_4x4::unit);
-      Temp (1, 1, c[0]);
-      Temp (2, 1, s[0]);
-      Temp (2, 2, c[0]);
-      Temp (1, 2, -s[0]);
+        glm::mat4x4 Temp = glm::mat4x4(1);
+        Temp[1][1] = c[0];
+        Temp[2][1] = s[0];
+        Temp[2][2] = c[0];
+        Temp[1][2] = -s[0];
 
-      SpreadMat = SpreadMat*Temp;
+       SpreadMat = SpreadMat * Temp;
     }
 
     {
-      math::matrix_4x4 Temp (math::matrix_4x4::unit);
-      Temp (0, 0, c[1]);
-      Temp (1, 0, s[1]);
-      Temp (1, 1, c[1]);
-      Temp (0, 1, -s[1]);
+        glm::mat4x4 Temp = glm::mat4x4(1);
+      Temp[0][0]= c[1];
+      Temp[1][0]= s[1];
+      Temp[1][1]= c[1];
+      Temp[0][1]= -s[1];
 
       SpreadMat = SpreadMat*Temp;
     }
@@ -557,7 +560,7 @@ namespace
     float Size = std::abs(c[0])*l + std::abs(s[0])*w;
     for (i = 0; i<3; ++i)
       for (j = 0; j<3; j++)
-        SpreadMat (i, j, SpreadMat (i, j) * Size);
+        SpreadMat[i][j] = SpreadMat[i][j] * Size;
 
     return SpreadMat;
   }
@@ -610,7 +613,7 @@ Particle PlaneParticleEmitter::newParticle(ParticleSystem* sys, int anim, int ti
   auto mrot = sys->parent->mrot*CalcSpreadMatrix(spr, spr, 1.0f, 1.0f);
 
   if (sys->flags == 1041) { // Trans Halo
-    p.pos = sys->parent->mat * (sys->pos + glm::vec3(misc::randfloat(-l, l), 0, misc::randfloat(-w, w)));
+    p.pos = sys->parent->mat * (glm::vec4(sys->pos,0) + glm::vec4(misc::randfloat(-l, l), 0, misc::randfloat(-w, w),0));
 
     const float t = misc::randfloat(0.0f, 2.0f * glm::pi<float>());
 
@@ -626,30 +629,30 @@ Particle PlaneParticleEmitter::newParticle(ParticleSystem* sys, int anim, int ti
   }
   else if (sys->flags == 25 && sys->parent->parent<1) { // Weapon Flame
     p.pos = sys->parent->pivot + (sys->pos + glm::vec3(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
-    glm::vec3 dir = mrot * glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 dir = mrot * glm::vec4(0.0f, 1.0f, 0.0f,0.0f);
     p.dir = glm::normalize(dir);
     //glm::vec3 dir = sys->model->bones[sys->parent->parent].mrot * sys->parent->mrot * glm::vec3(0.0f, 1.0f, 0.0f);
     //p.speed = dir.normalize() * spd;
 
   }
   else if (sys->flags == 25 && sys->parent->parent > 0) { // Weapon with built-in Flame (Avenger lightsaber!)
-    p.pos = sys->parent->mat * (sys->pos + glm::vec3(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
-    glm::vec3 dir = glm::vec3(sys->parent->mat (1, 0), sys->parent->mat (1, 1), sys->parent->mat (1, 2)) + glm::vec3(0.0f, 1.0f, 0.0f);
+    p.pos = sys->parent->mat * (glm::vec4(sys->pos,0) + glm::vec4(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w),0));
+    glm::vec3 dir = glm::vec4(sys->parent->mat[1][0], sys->parent->mat[1][1], sys->parent->mat [1][2],0.0f) + glm::vec4(0.0f, 1.0f, 0.0f,0.0f);
     p.speed = glm::normalize(dir) * spd * misc::randfloat(0, var * 2);
 
   }
   else if (sys->flags == 17 && sys->parent->parent<1) { // Weapon Glow
     p.pos = sys->parent->pivot + (sys->pos + glm::vec3(misc::randfloat(-l, l), misc::randfloat(-l, l), misc::randfloat(-w, w)));
-    glm::vec3 dir = mrot * glm::vec3(0, 1, 0);
+    glm::vec3 dir = mrot * glm::vec4(0, 1, 0,0);
     p.dir = glm::normalize(dir);
 
   }
   else {
     p.pos = sys->pos + glm::vec3(misc::randfloat(-l, l), 0, misc::randfloat(-w, w));
-    p.pos = sys->parent->mat * p.pos;
+    p.pos = sys->parent->mat * glm::vec4(p.pos,0);
 
     //glm::vec3 dir = mrot * glm::vec3(0,1,0);
-    glm::vec3 dir = sys->parent->mrot * glm::vec3(0, 1, 0);
+    glm::vec3 dir = sys->parent->mrot * glm::vec4(0, 1, 0,0);
 
     p.dir = dir;//.normalize();
     p.down = glm::vec3(0, -1.0f, 0); // dir * -1.0f;
@@ -657,10 +660,10 @@ Particle PlaneParticleEmitter::newParticle(ParticleSystem* sys, int anim, int ti
   }
 
   if (!sys->billboard)  {
-    p.corners[0] = mrot * glm::vec3(-1, 0, +1);
-    p.corners[1] = mrot * glm::vec3(+1, 0, +1);
-    p.corners[2] = mrot * glm::vec3(+1, 0, -1);
-    p.corners[3] = mrot * glm::vec3(-1, 0, -1);
+    p.corners[0] = mrot * glm::vec4(-1, 0, +1, 0);
+    p.corners[1] = mrot * glm::vec4(+1, 0, +1, 0);
+    p.corners[2] = mrot * glm::vec4(+1, 0, -1, 0);
+    p.corners[3] = mrot * glm::vec4(-1, 0, -1, 0);
   }
 
   p.life = 0;
@@ -722,12 +725,12 @@ Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int t
     glm::vec3 bdir(w*glm::cos(t._)*1.6f, 0.0f, l*glm::sin(t._)*1.6f);
 
     p.pos = sys->pos + bdir;
-    p.pos = sys->parent->mat * p.pos;
+    p.pos = sys->parent->mat * glm::vec4(p.pos,0);
 
     if (glm::length(bdir) * glm::length(bdir) == 0)
       p.speed = glm::vec3(0, 0, 0);
     else {
-      dir = sys->parent->mrot * (glm::normalize(bdir));//mrot * glm::vec3(0, 1.0f,0);
+      dir = sys->parent->mrot * glm::vec4((glm::normalize(bdir)),0);//mrot * glm::vec3(0, 1.0f,0);
       p.speed = glm::normalize(dir) * spd * (1.0f + misc::randfloat(-var, var));   // ?
     }
 
@@ -736,12 +739,12 @@ Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int t
     glm::vec3 bdir;
     float temp;
 
-    bdir = mrot * glm::vec3(0, 1, 0) * radius;
+    bdir = mrot * glm::vec4(0, 1, 0, 0) * radius;
     temp = bdir.z;
     bdir.z = bdir.y;
     bdir.y = temp;
 
-    p.pos = sys->parent->mat * sys->pos + bdir;
+    p.pos = sys->parent->mat * glm::vec4(sys->pos,0) + glm::vec4(bdir,0);
 
 
     //p.pos = sys->pos + bdir;
@@ -751,12 +754,12 @@ Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int t
     if (!(glm::length(bdir) * glm::length(bdir)) && !(sys->flags & 0x100))
     {
       p.speed = glm::vec3(0, 0, 0);
-      dir = sys->parent->mrot * glm::vec3(0, 1, 0);
+      dir = sys->parent->mrot * glm::vec4(0, 1, 0, 0);
     }
     else
     {
       if (sys->flags & 0x100)
-        dir = sys->parent->mrot * glm::vec3(0, 1, 0);
+        dir = sys->parent->mrot * glm::vec4(0, 1, 0, 0);
       else
         dir = glm::normalize(bdir);
 
@@ -855,8 +858,8 @@ RibbonEmitter::RibbonEmitter(RibbonEmitter&& other)
 
 void RibbonEmitter::setup(int anim, int time, int animtime)
 {
-  glm::vec3 ntpos = parent->mat * pos;
-  glm::vec3 ntup = parent->mat * (pos + glm::vec3(0, 0, 1));
+  glm::vec3 ntpos = parent->mat * glm::vec4(pos,0);
+  glm::vec3 ntup = parent->mat * (glm::vec4(pos, 0) + glm::vec4(0, 0, 1,0));
   ntup -= ntpos;
   ntup = glm::normalize(ntup);
   float dlen = (ntpos - tpos).length();

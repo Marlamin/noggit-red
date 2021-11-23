@@ -4138,19 +4138,10 @@ glm::mat4x4 MapView::model_view() const
     glm::vec3 target = eye;
     target.y -= 1.f;
     target.z -= 0.001f;
-
     auto center = target;
     auto up = glm::vec3(0.f, 1.f, 0.f);
 
-    glm::vec3 const z = glm::normalize(eye - center);
-    glm::vec3 const x = glm::normalize(glm::cross(up, z));
-    glm::vec3 const y = glm::normalize(glm::cross(z, x));
-
-    return glm::transpose(glm::mat4x4(x.x, x.y, x.z, glm::dot(x, glm::vec3(-eye.x, -eye.y, -eye.z))
-        , y.x, y.y, y.z, glm::dot(y, glm::vec3(-eye.x, -eye.y, -eye.z))
-        , z.x, z.y, z.z, glm::dot(z, glm::vec3(-eye.x, -eye.y, -eye.z))
-        , 0.f, 0.f, 0.f, 1.f
-    ));
+    return glm::lookAt(eye, target, up);
   }
   else
   {

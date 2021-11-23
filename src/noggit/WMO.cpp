@@ -351,8 +351,8 @@ void WMO::waitForChildrenLoaded()
 void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , glm::mat4x4 const& model_view
                , glm::mat4x4 const& projection
-               , math::matrix_4x4 const& transform_matrix
-               , math::matrix_4x4 const& transform_matrix_transposed
+               , glm::mat4x4 const& transform_matrix
+               , glm::mat4x4 const& transform_matrix_transposed
                , bool boundingbox
                , math::frustum const& frustum
                , const float& cull_distance
@@ -1500,14 +1500,14 @@ void WMOGroup::fix_vertex_color_alpha()
   }
 }
 
-bool WMOGroup::is_visible( math::matrix_4x4 const& transform
+bool WMOGroup::is_visible( glm::mat4x4 const& transform
                          , math::frustum const& frustum
                          , float const& cull_distance
                          , glm::vec3 const& camera
                          , display_mode display
                          ) const
 {
-  glm::vec3 pos = transform * center;
+    glm::vec3 pos = transform * glm::vec4(center, 0);
 
   if (!frustum.intersects(pos + BoundingBoxMin, pos + BoundingBoxMax))
   {
@@ -1612,7 +1612,7 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
 }
 
 /*
-void WMOGroup::drawLiquid ( math::matrix_4x4 const& transform
+void WMOGroup::drawLiquid ( glm::mat4x4 const& transform
                           , liquid_render& render
                           , bool // draw_fog
                           , int animtime

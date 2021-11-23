@@ -93,7 +93,7 @@ public:
   void update(float dt);
 
   void setup(int anim, int time, int animtime);
-  void draw( math::matrix_4x4 const& model_view
+  void draw( glm::mat4x4 const& model_view
            , opengl::scoped::use_program& shader
            , GLuint const& transform_vbo
            , int instances_count

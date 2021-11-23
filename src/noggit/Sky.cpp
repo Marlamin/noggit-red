@@ -549,7 +549,7 @@ bool Skies::draw(glm::mat4x4 const& model_view
   return true;
 }
 
-void Skies::drawLightingSpheres (math::matrix_4x4 const& model_view
+void Skies::drawLightingSpheres (glm::mat4x4 const& model_view
   , glm::mat4x4 const& projection
   , glm::vec3 const& camera_pos
   , math::frustum const& frustum
@@ -562,13 +562,13 @@ void Skies::drawLightingSpheres (math::matrix_4x4 const& model_view
     {
       glm::vec3 diffuse = color_set[LIGHT_GLOBAL_DIFFUSE];
       glm::vec3 ambient = color_set[LIGHT_GLOBAL_AMBIENT];
-      _sphere_render.draw(model_view.Convert() * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
-      _sphere_render.draw(model_view.Convert() * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
+      _sphere_render.draw(model_view * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
+      _sphere_render.draw(model_view * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
     }
   }
 }
 
-void Skies::drawLightingSphereHandles (math::matrix_4x4 const& model_view
+void Skies::drawLightingSphereHandles (glm::mat4x4 const& model_view
   , glm::mat4x4 const& projection
   , glm::vec3 const& camera_pos
   , math::frustum const& frustum
@@ -580,15 +580,15 @@ void Skies::drawLightingSphereHandles (math::matrix_4x4 const& model_view
     if ((sky.pos - camera_pos).length() - sky.r2 <= cull_distance) // TODO: frustum cull here
     {
 
-      _sphere_render.draw(model_view.Convert() * projection, sky.pos, {1.f, 0.f, 0.f, 1.f}, 5.f);
+      _sphere_render.draw(model_view * projection, sky.pos, {1.f, 0.f, 0.f, 1.f}, 5.f);
 
       if (sky.selected())
       {
         glm::vec3 diffuse = color_set[LIGHT_GLOBAL_DIFFUSE];
         glm::vec3 ambient = color_set[LIGHT_GLOBAL_AMBIENT];
 
-        _sphere_render.draw(model_view.Convert() * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
-        _sphere_render.draw(model_view.Convert() * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
+        _sphere_render.draw(model_view * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
+        _sphere_render.draw(model_view * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
       }
     }
   }

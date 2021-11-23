@@ -42,7 +42,7 @@ namespace opengl
 
       void draw ( glm::mat4x4 const& model_view
                 , glm::mat4x4 const& projection
-                , math::matrix_4x4 const& transform
+                , glm::mat4x4 const& transform
                 , glm::vec4 const& color
                 , glm::vec3 const& min_point
                 , glm::vec3 const& max_point

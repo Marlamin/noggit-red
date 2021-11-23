@@ -170,14 +170,14 @@ public:
             , OutdoorLightStats const& light_stats
             );
 
-  void drawLightingSpheres (math::matrix_4x4 const& model_view
+  void drawLightingSpheres (glm::mat4x4 const& model_view
                           , glm::mat4x4 const& projection
                           , glm::vec3 const& camera_pos
                           , math::frustum const& frustum
                           , const float& cull_distance
                           );
 
-  void drawLightingSphereHandles (math::matrix_4x4 const& model_view
+  void drawLightingSphereHandles (glm::mat4x4 const& model_view
                                 , glm::mat4x4 const& projection
                                 , glm::vec3 const& camera_pos
                                 , math::frustum const& frustum

@@ -52,8 +52,8 @@ public:
   } bone_flags;
 
   bone_flags flags;
-  math::matrix_4x4 mat = math::matrix_4x4::uninitialized;
-  math::matrix_4x4 mrot = math::matrix_4x4::uninitialized;
+  glm::mat4x4 mat = glm::mat4x4();
+  glm::mat4x4 mrot = glm::mat4x4();
 
   bool calc;
   void calcMatrix(glm::mat4x4 const& model_view
@@ -77,7 +77,7 @@ class TextureAnim {
   Animation::M2Value<glm::vec3> scale;
 
 public:
-  math::matrix_4x4 mat;
+  glm::mat4x4 mat;
 
   void calc(int anim, int time, int animtime);
   TextureAnim(const MPQFile& f, const ModelTexAnimDef &mta, int *global);
@@ -224,7 +224,7 @@ public:
            , bool no_cull = false
            );
   void draw (glm::mat4x4 const& model_view
-            , std::vector<math::matrix_4x4> const& instances
+            , std::vector<glm::mat4x4> const& instances
             , opengl::scoped::use_program& m2_shader
             , opengl::M2RenderState& model_render_state
             , math::frustum const& frustum
@@ -236,7 +236,7 @@ public:
             , display_mode display
             , bool no_cull = false
             );
-  void draw_particles( math::matrix_4x4 const& model_view
+  void draw_particles( glm::mat4x4 const& model_view
                      , opengl::scoped::use_program& particles_shader
                      , std::size_t instance_count
                      );
@@ -283,7 +283,7 @@ public:
   // Misc ?
   // ===============================
   std::vector<Bone> bones;
-  std::vector<math::matrix_4x4> bone_matrices;
+  std::vector<glm::mat4x4> bone_matrices;
   ModelHeader header;
   std::vector<uint16_t> blend_override;
 

@@ -56,6 +56,7 @@
 #include <cstdint>
 
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #define BOOST_POOL_NO_MT
 
@@ -764,11 +765,12 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
 
     if (use_pivot && has_multi_select)
     {
-
       glm::vec3& pos = obj->pos;
       math::degrees::vec3& dir = obj->dir;
       glm::vec3 diff_pos = pos - _multi_select_pivot.get();
-      glm::vec3 rot_result = math::matrix_4x4(math::matrix_4x4::rotation_xyz, {rx._, ry._, rz._ }) * diff_pos;
+
+      glm::quat rotationQuat = glm::quat(glm::vec3(glm::radians(rx._), glm::radians(ry._), glm::radians(rz._)));
+      glm::vec3 rot_result = glm::toMat4(rotationQuat) * glm::vec4(diff_pos,0);
 
       pos += rot_result - diff_pos;
     }
@@ -1110,7 +1112,7 @@ void World::draw (glm::mat4x4 const& model_view
   ZoneScoped;
 
   glm::mat4x4 const mvp(projection * model_view);
-  math::frustum const frustum (glm::transpose(mvp));
+  math::frustum const frustum (mvp);
 
   if (camera_moved)
     updateMVPUniformBlock(model_view, projection);
@@ -1379,7 +1381,7 @@ void World::draw (glm::mat4x4 const& model_view
 
   std::unordered_map<Model*, std::size_t> model_with_particles;
 
-  tsl::robin_map<Model*, std::vector<math::matrix_4x4, boost::pool_allocator<math::matrix_4x4>>> models_to_draw;
+  tsl::robin_map<Model*, std::vector<glm::mat4x4, boost::pool_allocator<glm::mat4x4>>> models_to_draw;
   std::vector<WMOInstance*, boost::pool_allocator<WMOInstance*>> wmos_to_draw;
 
   static int frame = 0;
@@ -1532,7 +1534,7 @@ void World::draw (glm::mat4x4 const& model_view
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _occluder_index);
     gl.disable(GL_CULL_FACE); // TODO: figure out why indices are bad and we need this
 
-    math::matrix_4x4 identity_mtx = math::matrix_4x4{math::matrix_4x4::unit};
+    glm::mat4x4 identity_mtx = glm::mat4x4{glm::mat4x4(1)};
     for (auto& pair : _loaded_tiles_buffer)
     {
       MapTile* tile = pair.second;
@@ -1620,7 +1622,7 @@ void World::draw (glm::mat4x4 const& model_view
           if (draw_hidden_models || !pair.first->is_hidden())
           {
             pair.first->draw( model_view
-                , reinterpret_cast<std::vector<math::matrix_4x4> const&>(pair.second)
+                , reinterpret_cast<std::vector<glm::mat4x4> const&>(pair.second)
                 , m2_shader
                 , model_render_state
                 , frustum
@@ -1681,7 +1683,7 @@ void World::draw (glm::mat4x4 const& model_view
     models_to_draw.clear();
     wmos_to_draw.clear();
     boost::singleton_pool<boost::pool_allocator_tag
-    , sizeof(std::vector<math::matrix_4x4, boost::pool_allocator<math::matrix_4x4>>)>::purge_memory();
+    , sizeof(std::vector<glm::mat4x4, boost::pool_allocator<glm::mat4x4>>)>::purge_memory();
 
     boost::singleton_pool<boost::pool_allocator_tag
         , sizeof(std::vector<WMOInstance*, boost::pool_allocator<WMOInstance*>>)>::purge_memory();
@@ -2460,7 +2462,7 @@ void World::drawMinimap ( MapTile *tile
     _global_vbos_initialized = true;
   }
 
-  math::matrix_4x4 const mvp(model_view * projection);
+  glm::mat4x4 const mvp(model_view * projection);
   math::frustum const frustum(mvp);
 
   if (!_m2_program_mini)

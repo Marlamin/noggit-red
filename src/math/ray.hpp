@@ -10,7 +10,7 @@ namespace math
     ray (glm::vec3 origin, glm::vec3 const& direction): _origin (std::move (origin)), _direction (glm::normalize(direction))
     {}
 
-    ray (matrix_4x4 const& transform, ray const& other): ray (
+    ray (glm::mat4x4 const& transform, ray const& other): ray (
         glm::vec3(
             (transform * glm::vec4(other._origin.x, other._origin.y, other._origin.z, 1.0))),
         glm::vec3((transform * glm::vec4(other._direction.x, other._direction.y, other._direction.z, 0.0)))

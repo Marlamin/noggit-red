@@ -95,7 +95,7 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
       return;
     }
 
-    wmo_shader.uniform("transform", _transform_mat_transposed);
+    wmo_shader.uniform("transform", _transform_mat);
 
     wmo->draw ( wmo_shader
               , model_view
@@ -124,7 +124,7 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
 
     opengl::primitives::wire_box::getInstance(_context).draw(model_view
        , projection
-       , math::matrix_4x4(math::matrix_4x4::unit)
+       , glm::mat4x4(glm::mat4x4(1))
        , color
        , extents[0]
        , extents[1]);
@@ -169,23 +169,34 @@ void WMOInstance::recalcExtents()
   glm::vec3 wmo_min(misc::transform_model_box_coords(wmo->extents[0]));
   glm::vec3 wmo_max(misc::transform_model_box_coords(wmo->extents[1]));
 
-  auto&& root_points = _transform_mat * math::aabb(wmo_min, wmo_max).all_corners();
+  auto&& root_points = math::aabb(wmo_min, wmo_max).all_corners(); 
+  auto adjustedPoints = std::vector<glm::vec3>();
 
-  points.insert(points.end(), root_points.begin(), root_points.end());
+  for (auto const& point : root_points)
+  {
+      adjustedPoints.push_back(_transform_mat * glm::vec4(point,0));
+  }
+
+  points.insert(points.end(), adjustedPoints.begin(), adjustedPoints.end());
 
   for (int i = 0; i < (int)wmo->groups.size(); ++i)
   {
     auto const& group = wmo->groups[i];
-    auto&& group_points = _transform_mat
-      * math::aabb( group.BoundingBoxMin // no need to use misc::transform_model_box_coords
-                  , group.BoundingBoxMax // they are already in world coord (see group ctor)
-                  ).all_corners();
 
-    points.insert(points.end(), group_points.begin(), group_points.end());
+    auto&& group_points = math::aabb(group.BoundingBoxMin, group.BoundingBoxMax).all_corners();
+    auto adjustedGroupPoints = std::vector<glm::vec3>();
+
+    for (auto const& point : group_points)
+    {
+        adjustedGroupPoints.push_back(_transform_mat * glm::vec4(point, 0));
+    }
+
+
+    points.insert(points.end(), adjustedGroupPoints.begin(), adjustedGroupPoints.end());
 
     if (group.has_skybox())
     {
-      math::aabb const group_aabb(group_points);
+      math::aabb const group_aabb(adjustedGroupPoints);
 
       group_extents[i] = {group_aabb.min, group_aabb.max};
     }

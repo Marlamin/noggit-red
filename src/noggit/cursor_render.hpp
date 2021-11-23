@@ -21,7 +21,7 @@ namespace noggit
       mode_count
     };
 
-    void draw(mode cursor_mode, math::matrix_4x4 const& mvp, glm::vec4 color, glm::vec3 const& pos, float radius, float inner_radius_ratio = 0.f);
+    void draw(mode cursor_mode, glm::mat4x4 const& mvp, glm::vec4 color, glm::vec3 const& pos, float radius, float inner_radius_ratio = 0.f);
 
       void unload();
 

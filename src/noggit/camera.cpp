@@ -1,3 +1,4 @@
+#include <glm/gtx/quaternion.hpp>
 #include <noggit/camera.hpp>
 
 namespace noggit
@@ -70,9 +71,9 @@ namespace noggit
 
   glm::vec3 camera::direction() const
   {
-    glm::vec3 forward (1.0f, 0.0f, 0.0f);
-
-    return glm::normalize((math::matrix_4x4(math::matrix_4x4::rotation_yzx, math::degrees::vec3(_roll._, _yaw._, _pitch._)) * forward));
+    glm::vec4 forward (0.0f, 0.0f, 1.0f,0.0f);
+    auto rotation = glm::quat(glm::vec3(glm::radians(_pitch._),glm::radians(_yaw._), glm::radians(_roll._)));
+    return glm::normalize(glm::toMat4(rotation) * forward);
   }
 
   glm::mat4x4 camera::look_at_matrix() const
@@ -81,15 +82,7 @@ namespace noggit
     auto center = look_at();
     auto up = glm::vec3(0.f, 1.f, 0.f);
 
-    glm::vec3 const z = glm::normalize(eye - center);
-    glm::vec3 const x = glm::normalize(glm::cross(up, z));
-    glm::vec3 const y = glm::normalize(glm::cross(z, x));
-
-    return glm::transpose(glm::mat4x4(x.x, x.y, x.z, glm::dot(x, glm::vec3(-eye.x, -eye.y, -eye.z))
-        , y.x, y.y, y.z, glm::dot(y, glm::vec3(-eye.x, -eye.y, -eye.z))
-        , z.x, z.y, z.z, glm::dot(z, glm::vec3(-eye.x, -eye.y, -eye.z))
-        , 0.f, 0.f, 0.f, 1.f
-    ));
+    return glm::lookAt(eye, center, up);
   }
 
   void camera::move_forward (float sign, float dt)
