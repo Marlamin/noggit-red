@@ -28,6 +28,7 @@ PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderCont
   , _settings (new QSettings())
   , _width(width)
   , _height(height)
+  , _liquid_texture_manager(context)
 {
   _context = context;
   _cache = {};
@@ -74,6 +75,8 @@ void PreviewRenderer::setModel(std::string const &filename)
     throw std::logic_error("Preview renderer only supports viewing M2 and WMO for now.");
   }
 
+  _lighting_needs_update = true;
+
   auto diffuse_color = _settings->value("assetBrowser/diffuse_light",
     QVariant::fromValue(QColor::fromRgbF(1.0f, 0.532352924f, 0.0f))).value<QColor>();
   _diffuse_light = {static_cast<float>(diffuse_color.redF()),
@@ -114,9 +117,9 @@ void PreviewRenderer::resetCamera(float x, float y, float z, float roll, float y
 
   std::vector<glm::vec3> extents = calcSceneExtents();
   _camera.position = (extents[0] + extents[1]) / 2.0f;
-  radius = std::max((_camera.position - extents[0]).length(), (_camera.position - extents[1]).length());
+  radius = std::max(glm::distance(_camera.position, extents[0]), glm::distance(_camera.position, extents[1]));
 
-  float distance_factor = abs( radius / sin(_camera.fov()._ / 2.f));
+  float distance_factor = abs( radius / sin(_camera.fov()._ / 3.f));
   _camera.move_forward_factor(-1.f, distance_factor);
 
 }
@@ -124,73 +127,28 @@ void PreviewRenderer::resetCamera(float x, float y, float z, float roll, float y
 
 void PreviewRenderer::draw()
 {
+  if (!_uploaded)
+  [[unlikely]]
+  {  
+    upload();
+  }
 
-  return;
-  
+  gl.clearColor(_background_color.r, _background_color.g, _background_color.b, 1.0f);
+  gl.depthMask(GL_TRUE);
+  gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
   float culldistance = 10000000;
 
-  glm::mat4x4 const mvp(model_view() * projection());
-  math::frustum const frustum (mvp);
+  auto mv = model_view();
+  auto proj = projection();
 
-  if (!_m2_program)
-  {
-    //setModel("world/wmo/azeroth/buildings/human_farm/farm.wmo");
-    _m2_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
-              }
-        );
-  }
-  if (!_m2_instanced_program)
-  {
-    _m2_instanced_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs", {"instanced"}) }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
-              }
-        );
-  }
+  glm::mat4x4 const mvp(proj * mv);
+  math::frustum const frustum (glm::transpose(mvp));
 
-  if (!_m2_box_program)
-  {
-    _m2_box_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_box_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_box_fs") }
-              }
-        );
-  }
+  updateMVPUniformBlock(mv, proj);
 
-  if (!_m2_ribbons_program)
-  {
-    _m2_ribbons_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("ribbon_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("ribbon_fs") }
-              }
-        );
-  }
-  if (!_m2_particles_program)
-  {
-    _m2_particles_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("particle_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("particle_fs") }
-              }
-        );
-  }
-
-  if (!_wmo_program)
-  {
-    _wmo_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("wmo_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs") }
-              }
-        );
-  }
-
+  if (_lighting_needs_update)
+    updateLightingUniformBlock();
 
   gl.enable(GL_DEPTH_TEST);
   gl.depthFunc(GL_LEQUAL);
@@ -210,11 +168,6 @@ void PreviewRenderer::draw()
       //water_shader.uniform("model_view", model_view().transposed());
       //water_shader.uniform("projection", projection().transposed());
 
-      glm::vec4ocean_color_light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
-      glm::vec4ocean_color_dark(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
-      glm::vec4river_color_light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
-      glm::vec4river_color_dark(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
-
       //water_shader.uniform("ocean_color_light", ocean_color_light);
       //water_shader.uniform("ocean_color_dark", ocean_color_dark);
       //water_shader.uniform("river_color_light", river_color_light);
@@ -227,34 +180,25 @@ void PreviewRenderer::draw()
     {
       opengl::scoped::use_program wmo_program{*_wmo_program.get()};
 
-      //wmo_program.uniform("model_view", model_view().transposed());
-      //wmo_program.uniform("projection", projection().transposed());
-      wmo_program.uniform("tex1", 0);
-      wmo_program.uniform("tex2", 1);
+      wmo_program.uniform("camera", glm::vec3(_camera.position.x, _camera.position.y, _camera.position.z));
 
-      //wmo_program.uniform("draw_fog", 0);
 
-      //wmo_program.uniform("exterior_light_dir", _light_dir);
-      //wmo_program.uniform("exterior_diffuse_color", _diffuse_light);
-      //wmo_program.uniform("exterior_ambient_color", _ambient_light);
+      for (auto& wmo_instance : _wmo_instances)
+      {
+        wmo_instance.wmo->wait_until_loaded();
+        wmo_instance.wmo->waitForChildrenLoaded();
+        wmo_instance.ensureExtents();
+        wmo_instance.draw(
+            wmo_program, model_view(), projection(), frustum, culldistance,
+            _camera.position, _draw_boxes.get(), _draw_models.get() 
+            , false, std::vector<selection_type>(), 0, false, display_mode::in_3D, true
+        );
 
-     for (auto& wmo_instance : _wmo_instances)
-     {
-       wmo_instance.draw(
-           wmo_program, model_view(), projection(), frustum, culldistance,
-           glm::vec3(0.0f, 0.0f, 0.0f), _draw_boxes.get(), _draw_models.get() // doodads
-           , false, std::vector<selection_type>(), 0, false, display_mode::in_3D
-       );
-
-       gl.enable(GL_BLEND);
-       gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-       gl.enable(GL_CULL_FACE);
-
-       for (auto& doodad : wmo_instance.get_visible_doodads(frustum, culldistance, _camera.position,
-                                                            false,display_mode::in_3D))
-       {
-         _wmo_doodads[doodad->model->filename].push_back(doodad);
-       }
+        for (auto& pair : *wmo_instance.get_doodads(true))
+        {
+          for (auto& doodad : pair.second)
+            _wmo_doodads[doodad.model->filename].push_back(&doodad);
+        }
      }
 
     }
@@ -271,55 +215,57 @@ void PreviewRenderer::draw()
 
     opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
-    //m2_shader.uniform("model_view", model_view().transposed());
-    //m2_shader.uniform("projection", projection().transposed());
-    m2_shader.uniform("tex1", 0);
-    m2_shader.uniform("tex2", 1);
-    //m2_shader.uniform("draw_fog", 0);
-
-    //m2_shader.uniform("light_dir", _light_dir);
-    //m2_shader.uniform("diffuse_color", _diffuse_light);
-    //m2_shader.uniform("ambient_color", _ambient_light);
-
     opengl::M2RenderState model_render_state;
-    model_render_state.tex_arrays = {0, 0};
-    model_render_state.tex_indices = {0, 0};
-    model_render_state.tex_unit_lookups = {-1, -1};
+    model_render_state.tex_arrays = { 0, 0 };
+    model_render_state.tex_indices = { 0, 0 };
+    model_render_state.tex_unit_lookups = { 0, 0 };
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     gl.disable(GL_BLEND);
     gl.depthMask(GL_TRUE);
     m2_shader.uniform("blend_mode", 0);
     m2_shader.uniform("unfogged", static_cast<int>(model_render_state.unfogged));
-    m2_shader.uniform("unlit",  static_cast<int>(model_render_state.unlit));
+    m2_shader.uniform("unlit", static_cast<int>(model_render_state.unlit));
     m2_shader.uniform("tex_unit_lookup_1", 0);
     m2_shader.uniform("tex_unit_lookup_2", 0);
     m2_shader.uniform("pixel_shader", 0);
 
-    /*
+    std::vector<ModelInstance*> instance{ nullptr };
+    std::vector<glm::mat4x4> instance_mtx{ glm::mat4x4(1)};
+
     for (auto& model_instance : _model_instances)
     {
-      std::vector<ModelInstance*> instance{&model_instance};
+      model_instance.model->wait_until_loaded();
+      model_instance.model->waitForChildrenLoaded();
+      instance[0] = &model_instance;
+      instance_mtx[0] = model_instance.transformMatrixTransposed();
 
       model_instance.model->draw(
-          model_view().transposed()
-          , instance
-          , m2_shader
-          , model_render_state
-          , frustum
-          , culldistance
-          , _camera.position
-          , _animtime
-          , _draw_boxes.get()
-          , model_boxes_to_draw
-          , display_mode::in_3D
+        mv
+        , instance_mtx
+        , m2_shader
+        , model_render_state
+        , frustum
+        , culldistance
+        , _camera.position
+        , _animtime
+        , _draw_boxes.get()
+        , model_boxes_to_draw
+        , display_mode::in_3D
       );
     }
 
     for (auto& it : _wmo_doodads)
     {
+      instance_mtx.clear();
+      
+      for (auto& instance : it.second)
+      {
+        instance_mtx.push_back(instance->transformMatrixTransposed());
+      }
+
       it.second[0]->model->draw(
-          model_view().transposed()
-          , it.second
+          mv
+          , instance_mtx
           , m2_shader
           , model_render_state
           , frustum
@@ -332,14 +278,10 @@ void PreviewRenderer::draw()
       );
     }
 
-     */
 
     if(_draw_boxes.get() && !model_boxes_to_draw.empty())
     {
       opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
-
-      m2_box_shader.uniform ("model_view", model_view());
-      m2_box_shader.uniform("projection", projection());
 
       opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -481,7 +423,8 @@ QPixmap* PreviewRenderer::renderToPixmap()
   pixel_buffer.bind();
 
   gl.viewport(0, 0, _width, _height);
-  gl.clearColor(0.5f, 0.5f, 0.5f, 1.f);
+  gl.clearColor(_background_color.r, _background_color.g, _background_color.b, 1.f);
+  gl.depthMask(GL_TRUE);
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   tick(1.0f);
@@ -489,14 +432,18 @@ QPixmap* PreviewRenderer::renderToPixmap()
 
   auto& async_loader = AsyncLoader::instance();
 
-  do
+  if (async_loader.is_loading())
   {
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    // wait for the loader to finish
+    do
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    } while (async_loader.is_loading());
+
+    // redraw
     gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw();
-  } while (async_loader.is_loading());
-  gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  draw();
+  }
 
   // Clearing alpha from image
   gl.colorMask(false, false, false, true);
@@ -529,6 +476,8 @@ void PreviewRenderer::setLightDirection(float y, float z)
   _light_dir.x = light_dir.x();
   _light_dir.y = light_dir.y();
   _light_dir.z = light_dir.z();
+
+  _lighting_needs_update = true;
 }
 
 
@@ -593,15 +542,163 @@ PreviewRenderer::~PreviewRenderer()
 
 }
 
-
-void PreviewRenderer::unload_shaders()
+void PreviewRenderer::upload()
 {
+  _buffers.upload();
+
+  // m2
+
+  _m2_program.reset
+  (new opengl::program
+    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs") }
+      , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+    }
+  );
+
+  {
+    opengl::scoped::use_program m2_shader{ *_m2_program.get() };
+    m2_shader.uniform("bone_matrices", 0);
+    m2_shader.uniform("tex1", 1);
+    m2_shader.uniform("tex2", 2);
+
+    m2_shader.bind_uniform_block("matrices", 0);
+    gl.bindBuffer(GL_UNIFORM_BUFFER, _mvp_ubo);
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::MVPUniformBlock), NULL, GL_DYNAMIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::MVP, _mvp_ubo, 0, sizeof(opengl::MVPUniformBlock));
+    gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
+
+    m2_shader.bind_uniform_block("lighting", 1);
+    gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::LightingUniformBlock), NULL, GL_DYNAMIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::LIGHTING, _lighting_ubo, 0, sizeof(opengl::LightingUniformBlock));
+    gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
+  }
+
+  // m2 instaced
+  
+  _m2_instanced_program.reset
+  (new opengl::program
+    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs", {"instanced"}) }
+        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+    }
+  );
+
+  {
+    opengl::scoped::use_program m2_shader_instanced{ *_m2_instanced_program.get() };
+    m2_shader_instanced.bind_uniform_block("matrices", 0);
+    m2_shader_instanced.bind_uniform_block("lighting", 1);
+    m2_shader_instanced.uniform("bone_matrices", 0);
+    m2_shader_instanced.uniform("tex1", 1);
+    m2_shader_instanced.uniform("tex2", 2);
+  }
+ 
+  // m2 box
+
+  _m2_box_program.reset
+  (new opengl::program
+    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_box_vs") }
+        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_box_fs") }
+    }
+  );
+
+  {
+    opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
+    m2_box_shader.bind_uniform_block("matrices", 0);
+  }
+
+
+  /*
+  
+
+  _m2_ribbons_program.reset
+  (new opengl::program
+    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("ribbon_vs") }
+        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("ribbon_fs") }
+    }
+  );
+  
+
+  _m2_particles_program.reset
+  (new opengl::program
+    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("particle_vs") }
+        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("particle_fs") }
+    }
+  );
+
+  */
+
+  // wmo
+  
+  _wmo_program.reset
+  (new opengl::program
+    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("wmo_vs") }
+        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs") }
+    }
+  );
+
+  {
+    std::vector<int> samplers{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+    opengl::scoped::use_program wmo_program{ *_wmo_program.get() };
+    wmo_program.uniform("render_batches_tex", 0);
+    wmo_program.uniform("texture_samplers", samplers);
+    wmo_program.bind_uniform_block("matrices", 0);
+    wmo_program.bind_uniform_block("lighting", 1);
+  }
+
+  // liquid
+  _liquid_texture_manager.upload();
+  _liquid_program.reset
+    (new opengl::program
+      { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("liquid_vs") }
+          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("liquid_fs") }
+      }
+    );
+
+  {
+    opengl::scoped::use_program liquid_render{ *_liquid_program.get() };
+
+    //setupLiquidChunkBuffers();
+    //setupLiquidChunkVAO(liquid_render);
+
+    static std::vector<int> samplers{ 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+    liquid_render.bind_uniform_block("matrices", 0);
+    liquid_render.bind_uniform_block("lighting", 1);
+    liquid_render.bind_uniform_block("liquid_layers_params", 4);
+    liquid_render.uniform("vertex_data", 0);
+    liquid_render.uniform("texture_samplers", samplers);
+
+  }
+
+  setModel("world/wmo/azeroth/buildings/human_farm/farm.wmo");
+
+  auto background_color = _settings->value("assetBrowser/background_color",
+    QVariant::fromValue(QColor(127, 127, 127))).value<QColor>();
+
+  _background_color = { static_cast<float>(background_color.redF()),
+                       static_cast<float>(background_color.greenF()),
+                       static_cast<float>(background_color.blueF()) };
+ 
+  _uploaded = true;
+
+}
+
+
+void PreviewRenderer::unload()
+{
+  _buffers.unload();
+
   _m2_program.reset();
   _m2_instanced_program.reset();
   _m2_particles_program.reset();
   _m2_ribbons_program.reset();
   _m2_box_program.reset();
   _wmo_program.reset();
+  _liquid_program.reset();
+  _liquid_texture_manager.unload();
+
+  _uploaded = false;
 
 }
 
@@ -618,10 +715,43 @@ void PreviewRenderer::unloadOpenglData(bool from_manager)
   WMOManager::unload_all(_context);
   TextureManager::unload_all(_context);
 
-  PreviewRenderer::unload_shaders();
+  unload();
 
   LogDebug << "Changed context of Asset Browser / Preset Editor.." << std::endl;
 
   if (!from_manager)
     ViewportManager::ViewportManager::unloadOpenglData(this);
+}
+
+void noggit::Red::PreviewRenderer::updateLightingUniformBlock()
+{
+
+  glm::vec4 ocean_color_light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
+  glm::vec4 ocean_color_dark(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
+  glm::vec4 river_color_light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
+  glm::vec4 river_color_dark(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
+
+  _lighting_ubo_data.DiffuseColor_FogStart = { _diffuse_light.x,_diffuse_light.y,_diffuse_light.z, 0};
+  _lighting_ubo_data.AmbientColor_FogEnd = { _ambient_light.x, _ambient_light.y, _ambient_light.z, 0};
+  _lighting_ubo_data.FogColor_FogOn = { 0, 0, 0, 0};
+  _lighting_ubo_data.LightDir_FogRate = { _light_dir.x, _light_dir.y, _light_dir.z, 1.0f};
+  _lighting_ubo_data.OceanColorLight = { 1.0f, 1.0f, 1.0f, 1.0f };
+  _lighting_ubo_data.OceanColorDark = { 1.0f, 1.0f, 1.0f, 1.0f };
+  _lighting_ubo_data.RiverColorLight = { 1.0f, 1.0f, 1.0f, 1.0f };
+  _lighting_ubo_data.RiverColorDark = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+  gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
+  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::LightingUniformBlock), &_lighting_ubo_data);
+  
+  _lighting_needs_update = false;
+}
+
+void noggit::Red::PreviewRenderer::updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection)
+{
+  _mvp_ubo_data.model_view = model_view;
+  _mvp_ubo_data.projection = projection;
+
+  gl.bindBuffer(GL_UNIFORM_BUFFER, _mvp_ubo);
+  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::MVPUniformBlock), &_mvp_ubo_data);
+
 }

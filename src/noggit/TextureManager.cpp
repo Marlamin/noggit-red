@@ -11,6 +11,8 @@
 decltype (TextureManager::_) TextureManager::_;
 decltype (TextureManager::_tex_arrays) TextureManager::_tex_arrays;
 
+constexpr unsigned N_ARRAY_TEX = 1;
+
 void TextureManager::report()
 {
   std::string output = "Still in the Texture manager:\n";
@@ -46,7 +48,7 @@ TexArrayParams& TextureManager::get_tex_array(int width, int height, int mip_lev
 {
   TexArrayParams& array_params = _tex_arrays[context][std::make_tuple(-1, width, height, mip_level)];
 
-  GLint n_layers = 512;
+  GLint n_layers = N_ARRAY_TEX;
   //gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
 
   int index_x = array_params.n_used / n_layers;
@@ -90,7 +92,7 @@ TexArrayParams& TextureManager::get_tex_array(GLint compression, int width, int 
 
   TexArrayParams& array_params = _tex_arrays[context][std::make_tuple(compression, width, height, mip_level)];
 
-  GLint n_layers = 512;
+  GLint n_layers = N_ARRAY_TEX;
   //gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
 
   int index_x = array_params.n_used / n_layers;
@@ -211,7 +213,7 @@ void blp_texture::upload()
 
   int width = _width, height = _height;
 
-  GLint n_layers = 512;
+  GLint n_layers = N_ARRAY_TEX;
   //gl.getIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &n_layers);
 
   if (!_compression_format)

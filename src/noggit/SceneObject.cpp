@@ -3,6 +3,7 @@
 #include "SceneObject.hpp"
 
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <noggit/Misc.h>
 #include <math/trig.hpp>
 
@@ -13,9 +14,9 @@ SceneObject::SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext cont
 {
 }
 
-bool SceneObject::isInsideRect(glm::vec3 rect[2]) const
+bool SceneObject::isInsideRect(std::array<glm::vec3, 2> const* rect) const
 {
-  return misc::rectOverlap(extents, rect);
+  return misc::rectOverlap(extents.data(), rect->data());
 }
 
 bool SceneObject::isDuplicateOf(SceneObject const& other)
@@ -28,20 +29,21 @@ bool SceneObject::isDuplicateOf(SceneObject const& other)
 
 void SceneObject::updateTransformMatrix()
 {
-    auto rotationVector = glm::vec3(0);
-    rotationVector.x = glm::radians(dir.x);
-    rotationVector.y = glm::radians(dir.y - math::degrees(90.0)._);
-    rotationVector.z = glm::radians(dir.z);
+  auto rotationVector = glm::vec3(0);
+  rotationVector.x = glm::radians(dir.x);
+  rotationVector.y = glm::radians(dir.y - math::degrees(90.0)._);
+  rotationVector.z = glm::radians(dir.z);
 
-    auto matrix = glm::mat4x4(1);
-    matrix = glm::translate(matrix, pos);
-    glm::quat roationQuat = glm::quat(rotationVector);
-	matrix = matrix * glm::toMat4(roationQuat);
-    matrix = glm::scale(matrix, glm::vec3(scale, scale, scale));
+  auto matrix = glm::mat4x4(1);
+  matrix = glm::translate(matrix, pos);
+  glm::quat roationQuat = glm::quat(rotationVector);
+  matrix = matrix * glm::toMat4(roationQuat);
+  matrix = glm::scale(matrix, glm::vec3(scale, scale, scale));
 
-   _transform_mat = matrix;
-   _transform_mat_inverted = glm::inverse(matrix);
-   _transform_mat_transposed = matrix;
+  _transform_mat = matrix;
+  _transform_mat_inverted = glm::inverse(matrix);
+  _transform_mat_transposed = matrix;
+
 }
 
 void SceneObject::resetDirection()
@@ -52,10 +54,14 @@ void SceneObject::resetDirection()
 
 void SceneObject::refTile(MapTile* tile)
 {
-  _tiles.emplace(tile);
+  auto it = std::find(_tiles.begin(), _tiles.end(), tile);
+  if (it == _tiles.end())
+    _tiles.push_back(tile);
 }
 
 void SceneObject::derefTile(MapTile* tile)
 {
-  _tiles.erase(tile);
+  auto it = std::find(_tiles.begin(), _tiles.end(), tile);
+  if (it != _tiles.end())
+    _tiles.erase(it);
 }

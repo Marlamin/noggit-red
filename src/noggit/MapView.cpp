@@ -879,15 +879,24 @@ void MapView::setupAssetBrowser()
 {
   _asset_browser_dock = new QDockWidget("Asset browser", this);
   _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this, this);
-  _asset_browser_dock->setWidget(_asset_browser);
 
-  _main_window->addDockWidget(Qt::BottomDockWidgetArea, _asset_browser_dock);
+  //_main_window->addDockWidget(Qt::BottomDockWidgetArea, _asset_browser_dock);
   _asset_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
                                    | QDockWidget::DockWidgetFloatable
                                    | QDockWidget::DockWidgetClosable);
-  _asset_browser_dock->setAllowedAreas(Qt::BottomDockWidgetArea);
+  _asset_browser_dock->setAllowedAreas(Qt::NoDockWidgetArea);
 
+  _asset_browser_dock->setFloating(true);
   _asset_browser_dock->hide();
+
+  _asset_browser_dock->setWidget(_asset_browser);
+  _asset_browser_dock->setWindowFlags(
+    Qt::CustomizeWindowHint |
+    Qt::Window | 
+    Qt::WindowMinimizeButtonHint |
+    Qt::WindowMaximizeButtonHint |
+    Qt::WindowCloseButtonHint | 
+    Qt::WindowStaysOnTopHint);
 
   connect(_asset_browser_dock, &QDockWidget::visibilityChanged,
           [=](bool visible)
@@ -897,15 +906,10 @@ void MapView::setupAssetBrowser()
 
             _settings->setValue ("map_view/asset_browser", visible);
             _settings->sync();
-          });
-
-    connect(_asset_browser_dock, &QDockWidget::topLevelChanged,
-          [=](bool is_floating)
-          {
-            unloadOpenglData();
-          });
+          });;
 
   connect(this, &QObject::destroyed, _asset_browser_dock, &QObject::deleteLater);
+
 }
 
 void MapView::setupDetailInfos()
@@ -942,6 +946,70 @@ void MapView::setupDetailInfos()
   connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
     , &_show_detail_info_window, &noggit::bool_toggle_property::set
   );
+
+  connect(noggit::ActionManager::instance(), &noggit::ActionManager::onActionBegin, 
+    [this](noggit::Action*)
+    {
+      updateDetailInfos(true);
+    });
+
+  connect(noggit::ActionManager::instance(), &noggit::ActionManager::onActionEnd,
+    [this](noggit::Action*)
+    {
+      updateDetailInfos(true);
+    });
+
+  connect(noggit::ActionManager::instance(), &noggit::ActionManager::currentActionChanged,
+    [this](unsigned)
+    {
+      updateDetailInfos(true);
+    });
+}
+
+void MapView::updateDetailInfos(bool no_sel_change_check)
+{
+  auto& current_selection = _world->current_selection();
+
+  // update detail infos TODO: selection update signal.
+  static std::uintptr_t last_sel = 0;
+
+  if (guidetailInfos->isVisible())
+  {
+    if (current_selection.size() > 0)
+    {
+      selection_type& last_selection = const_cast<selection_type&>(current_selection.at(current_selection.size() - 1));
+
+      switch (last_selection.which())
+      {
+        case eEntry_Object:
+        {
+          auto obj = boost::get<selected_object_type>(last_selection);
+
+          if (no_sel_change_check || reinterpret_cast<std::uintptr_t>(obj) != last_sel || noggit::ActionManager::instance()->getCurrentAction())
+          {
+            last_sel = reinterpret_cast<std::uintptr_t>(obj);
+            obj->updateDetails(guidetailInfos);
+          }
+          break;
+        }
+        case eEntry_MapChunk:
+        {
+          selected_chunk_type& chunk_sel(boost::get<selected_chunk_type>(last_selection));
+
+          if (no_sel_change_check || reinterpret_cast<std::uintptr_t>(chunk_sel.chunk) != last_sel || noggit::ActionManager::instance()->getCurrentAction())
+          {
+            last_sel = reinterpret_cast<std::uintptr_t>(chunk_sel.chunk);
+            chunk_sel.updateDetails(guidetailInfos);
+          }
+          break;
+        }
+      }
+    }
+    else
+    {
+      guidetailInfos->setText("");
+    }
+  }
 }
 
 void MapView::setupToolbars()
@@ -2976,8 +3044,9 @@ void MapView::paintGL()
 
   if (!saving_minimap)
   {
-
+    lock = true;
     draw_map();
+    lock = false;
     tick (now - _last_update);
   }
 
@@ -3784,6 +3853,8 @@ void MapView::tick (float dt)
     }
   }
 
+  updateDetailInfos();
+
   _status_area->setText
     (QString::fromStdString (gAreaDB.getAreaName (_world->getAreaID (_camera.position))));
 
@@ -3821,105 +3892,9 @@ void MapView::tick (float dt)
 
   _status_culling->setText ( "Loaded tiles: " + QString::number(_world->getNumLoadedTiles())
                          + " Rendered tiles: " + QString::number(_world->getNumRenderedTiles())
-                         + " Rendered obj. tiles: " + QString::number(_world->getNumRenderedObjectTiles())
   );
 
   guiWater->updatePos (_camera.position);
-
-  
-  if (guidetailInfos->isVisible())
-  {
-    if(currentSelection.size() > 0)
-    {
-      std::stringstream select_info;
-      auto lastSelection = currentSelection.back();
-
-      switch (lastSelection.which())
-      {
-      case eEntry_Object:
-        {
-          auto obj = boost::get<selected_object_type>(lastSelection);
-
-          if (obj->which() == eMODEL)
-          {
-            auto instance(static_cast<ModelInstance*>(obj));
-            select_info << "filename: " << instance->model->filename
-                        << "\nunique ID: " << instance->uid
-                        << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
-                        << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
-                        << "\nscale: " << instance->scale
-                        << "\ntextures Used: " << instance->model->header.nTextures
-                        << "\nsize category: " << instance->size_cat;
-
-            for (unsigned int j = 0; j < std::min(instance->model->header.nTextures, 6U); j++)
-            {
-              select_info << "\n " << (j + 1) << ": " << instance->model->_textures[j]->filename;
-            }
-            if (instance->model->header.nTextures > 25)
-            {
-              select_info << "\n and more.";
-            }
-
-            select_info << "\n";
-          }
-          else if (obj->which() == eWMO)
-          {
-            auto instance(static_cast<WMOInstance*>(obj));
-            select_info << "filename: " << instance->wmo->filename
-                        << "\nunique ID: " << instance->uid
-                        << "\nposition X/Y/Z: " << instance->pos.x << " / " << instance->pos.y << " / " << instance->pos.z
-                        << "\nrotation X/Y/Z: " << instance->dir.x << " / " << instance->dir.y << " / " << instance->dir.z
-                        << "\ndoodad set: " << instance->doodadset()
-                        << "\ntextures used: " << instance->wmo->textures.size();
-
-
-            const unsigned int texture_count (std::min((unsigned int)(instance->wmo->textures.size()), 8U));
-            for (unsigned int j = 0; j < texture_count; j++)
-            {
-              select_info << "\n " << (j + 1) << ": " << instance->wmo->textures[j]->filename;
-            }
-            if (instance->wmo->textures.size() > 25)
-            {
-              select_info << "\n and more.";
-            }
-
-            select_info << "\n";
-          }
-
-          break;
-        }
-      case eEntry_MapChunk:
-        {
-        auto chunk(boost::get<selected_chunk_type>(lastSelection).chunk);
-          mcnk_flags const& flags = chunk->header_flags;
-
-          select_info << "MCNK " << chunk->px << ", " << chunk->py << " (" << chunk->py * 16 + chunk->px
-                      << ") of tile (" << chunk->mt->index.x << " " << chunk->mt->index.z << ")"
-                      << "\narea ID: " << chunk->getAreaID() << " (\"" << gAreaDB.getAreaName(chunk->getAreaID()) << "\")"
-                      << "\nflags: "
-                      << (flags.flags.has_mcsh ? "shadows " : "")
-                      << (flags.flags.impass   ? "impassable " : "")
-                      << (flags.flags.lq_river ? "river " : "")
-                      << (flags.flags.lq_ocean ? "ocean " : "")
-                      << (flags.flags.lq_magma ? "lava" : "")
-                      << (flags.flags.lq_slime ? "slime" : "")
-                      << "\ntextures used: " << chunk->texture_set->num();
-
-          //! \todo get a list of textures and their flags as well as detail doodads.
-
-          select_info << "\n";
-
-          break;
-        }
-      }
-    
-      guidetailInfos->setText(select_info.str());
-    }
-    else
-    {
-      guidetailInfos->setText("");
-    }
-  }
 }
 
 glm::vec4 MapView::normalized_device_coords (int x, int y) const

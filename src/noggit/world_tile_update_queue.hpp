@@ -11,8 +11,7 @@
 #include <queue>
 #include <thread>
 
-class ModelInstance;
-class WMOInstance;
+class SceneObject;
 class World;
 
 namespace noggit
@@ -33,8 +32,7 @@ namespace noggit
 
     void wait_for_all_update();
 
-    void queue_update(ModelInstance* instance, model_update type);
-    void queue_update(WMOInstance* instance, model_update type);
+    void queue_update(SceneObject* instance, model_update type);
 
   private:
     void process_queue();

@@ -57,6 +57,8 @@ namespace noggit
       void addedAction(Action* action);
       void purged();
       void currentActionChanged(unsigned index);
+      void onActionBegin(Action* action);
+      void onActionEnd(Action* action);
 
 
     private:

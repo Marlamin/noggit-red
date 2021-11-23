@@ -17,6 +17,8 @@ ModelInstance::ModelInstance(std::string const& filename, noggit::NoggitRenderCo
   : SceneObject(SceneObjectTypes::eMODEL, context, filename)
   , model (filename, context)
 {
+  pos = glm::vec3(0.f, 0.f, 0.f);
+  dir = math::degrees::vec3(0, 0, 0);
 }
 
 ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, noggit::NoggitRenderContext context)
@@ -130,7 +132,7 @@ bool ModelInstance::isInRenderDist(const float& cull_distance, const glm::vec3& 
 
   if (display == display_mode::in_3D)
   {
-    dist = (pos - camera).length() - model->rad * scale;
+    dist = glm::distance(camera, pos) - model->rad * scale;
   }
   else
   {
@@ -142,15 +144,15 @@ bool ModelInstance::isInRenderDist(const float& cull_distance, const glm::vec3& 
     return false;
   }
 
-  if (size_cat < 1.f && dist > 30.f)
+  if (size_cat < 1.f && dist > 300.f)
   {
     return false;
   }
-  else if (size_cat < 4.f && dist > 150.f)
+  else if (size_cat < 4.f && dist > 500.f)
   {
     return false;
   }
-  else if (size_cat < 25.f && dist > 300.f)
+  else if (size_cat < 25.f && dist > 1000.f)
   {
     return false;
   }
@@ -205,7 +207,7 @@ void ModelInstance::recalcExtents()
   extents[0] = bounding_of_rotated_points.min;
   extents[1] = bounding_of_rotated_points.max;
 
-  size_cat = (bounding_of_rotated_points.max - bounding_of_rotated_points.min).length();
+  size_cat = glm::distance(bounding_of_rotated_points.max, bounding_of_rotated_points.min);
 
   _need_recalc_extents = false;
 }
@@ -226,6 +228,42 @@ glm::vec3* ModelInstance::getExtents()
   }
 
   return &extents[0];
+}
+
+void ModelInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
+{
+  std::stringstream select_info;
+
+  select_info << "<b>filename:</b> " << model->filename
+    << "<br><b>unique ID:</b> " << uid
+    << "<br><b>position X/Y/Z:</b> {" << pos.x << " , " << pos.y << " , " << pos.z << "}"
+    << "<br><b>rotation X/Y/Z:</b> {" << dir.x << " , " << dir.y << " , " << dir.z << "}"
+    << "<br><b>scale:</b> " << scale
+    << "<br><b>textures Used:</b> " << model->header.nTextures
+    << "<br><b>size category:</b><span> " << size_cat;
+
+  for (unsigned j  = 0; j < model->header.nTextures; j++)
+  {
+    bool stuck = !model->_textures[j]->finishedLoading();
+    bool error = model->_textures[j]->finishedLoading() && !model->_textures[j]->is_uploaded();
+
+    select_info << "<br> ";
+
+    if (stuck)
+      select_info << "<font color=\"Orange\">";
+
+    if (error)
+      select_info << "<font color=\"Red\">";
+
+    select_info << "<b>" << (j + 1) << ":</b> " << model->_textures[j]->filename;
+
+    if (stuck || error)
+      select_info << "</font>";
+  }
+
+  select_info << "</span>";
+
+  detail_widget->setText(select_info.str());
 }
 
 wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f, noggit::NoggitRenderContext context)

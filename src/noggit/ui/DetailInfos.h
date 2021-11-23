@@ -20,6 +20,7 @@ namespace noggit
     public:
       detail_infos(QWidget* parent);
       void setText (const std::string& t);
+      virtual QSize sizeHint() const override { return QSize(350, 250); };
     };
   }
 }

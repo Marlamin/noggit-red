@@ -490,7 +490,7 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
   }
 
   // run chunk updates. running this when splitdraw call detected unused sampler configuration as well.
-  if (_chunk_update_flags || is_selected != _selected || need_paintability_update || _requires_sampler_reset)
+  if (_chunk_update_flags || is_selected != _selected || need_paintability_update || _requires_sampler_reset || _texture_not_loaded)
   {
 
     gl.bindBuffer(GL_UNIFORM_BUFFER, _chunk_instance_data_ubo);
@@ -601,7 +601,7 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
 
     _requires_sampler_reset = false;
 
-    // for split drawcalls we need to redo samplers every frame :(
+
     if (_split_drawcall)
     {
       _draw_calls.clear();
@@ -612,16 +612,16 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
 
       for (int i = 0; i < 256; ++i)
       {
-        int chunk_x = i / 16;
-        int chunk_y = i % 16;
-        auto& chunk = mChunks[chunk_y][chunk_x];
+        auto& chunk = mChunks[i % 16][i / 16];
 
         if (!fillSamplers(chunk.get(), i, _draw_calls.size() - 1))
         {
-          MapTileDrawCall& previous_draw_call = _draw_calls.back();
+          MapTileDrawCall& previous_draw_call = _draw_calls[_draw_calls.size() - 1];
+          unsigned new_start = previous_draw_call.start_chunk + previous_draw_call.n_chunks;
+
           MapTileDrawCall& new_draw_call = _draw_calls.emplace_back();
           std::fill(new_draw_call.samplers.begin(), new_draw_call.samplers.end(), -1);
-          new_draw_call.start_chunk = previous_draw_call.start_chunk + previous_draw_call.n_chunks;
+          new_draw_call.start_chunk = new_start;
           new_draw_call.n_chunks = 1;
 
           fillSamplers(chunk.get(), i, _draw_calls.size() - 1);
@@ -656,6 +656,8 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
   if (_texture_not_loaded)
   [[unlikely]]
   {
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_INSTANCE_DATA,
+                    _chunk_instance_data_ubo, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256);
     return;
   }
 
@@ -693,7 +695,7 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
     float tile_center_x = xbase + TILESIZE / 2.0f;
     float tile_center_z = zbase + TILESIZE / 2.0f;
 
-    bool is_lod = misc::dist(tile_center_x, tile_center_z, camera.x, camera.z) > TILESIZE;
+    bool is_lod = misc::dist(tile_center_x, tile_center_z, camera.x, camera.z) > TILESIZE * 3;
     mcnk_shader.uniform("lod_level", int(is_lod));
 
     assert(draw_call.n_chunks <= 256);
@@ -1354,6 +1356,7 @@ void MapTile::remove_model(SceneObject* instance)
 
     if (it2 != instances.end())
     {
+      instance->derefTile(this);
       instances.erase(it2);
     }
 
@@ -1362,8 +1365,6 @@ void MapTile::remove_model(SceneObject* instance)
       object_instances.erase(instance->instance_model());
     }
 
-
-    instance->derefTile(this);
     _requires_object_extents_recalc = true;
   }
 }
@@ -2023,7 +2024,7 @@ bool MapTile::getTileOcclusionQueryResult(glm::vec3 const& camera)
 
 void MapTile::calcCamDist(glm::vec3 const& camera)
 {
-  _cam_dist = (camera - _center).length();
+  _cam_dist = glm::distance(camera, _center);
 }
 
 bool MapTile::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned int draw_call_index)

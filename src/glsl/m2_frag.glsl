@@ -243,6 +243,7 @@ void main()
   {
     discard;
   }
+
   // apply world lighting
   vec3 currColor;
   vec3 lDiffuse = vec3(0.0, 0.0, 0.0);

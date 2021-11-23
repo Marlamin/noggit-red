@@ -1355,7 +1355,7 @@ void World::draw (glm::mat4x4 const& model_view
     ZoneScopedN("World::draw() : Draw pivot point");
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
 
-    float dist = (camera_pos - _multi_select_pivot.get()).length();
+    float dist = glm::distance(camera_pos, _multi_select_pivot.get());
     _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, std::min(2.f, std::max(0.15f, dist * 0.02f)));
   }
 
@@ -1368,7 +1368,7 @@ void World::draw (glm::mat4x4 const& model_view
   if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex)
   {
     ZoneScopedN("World::draw() : Draw vertex points");
-    float size = (vertexCenter() - camera_pos).length();
+    float size = glm::distance(vertexCenter(), camera_pos);
     gl.pointSize(std::max(0.001f, 10.0f - (1.25f * size / CHUNKSIZE)));
 
     for (glm::vec3 const* pos : _vertices_selected)
@@ -1423,6 +1423,7 @@ void World::draw (glm::mat4x4 const& model_view
 
         // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
         // otherwise we only allocate for a half
+
         if (tile->objects_frustum_cull_test > 1)
         {
           instances.reserve(instances.size() + pair.second.size());
@@ -1431,6 +1432,7 @@ void World::draw (glm::mat4x4 const& model_view
         {
           instances.reserve(instances.size() + pair.second.size() / 2);
         }
+
 
         for (auto& instance : pair.second)
         {
@@ -1456,6 +1458,7 @@ void World::draw (glm::mat4x4 const& model_view
       {
         // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
         // otherwise we only allocate for a half
+
         if (tile->objects_frustum_cull_test > 1)
         {
           wmos_to_draw.reserve(wmos_to_draw.size() + pair.second.size());
@@ -1526,6 +1529,9 @@ void World::draw (glm::mat4x4 const& model_view
   // occlusion culling is not performed on per model instance basis
   // rendering a little extra is cheaper than querying.
   // occlusion latency has 1-2 frames delay.
+
+  constexpr bool occlusion_cull = true;
+  if (occlusion_cull)
   {
     opengl::scoped::use_program occluder_shader{ *_occluder_program.get() };
     gl.colorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
@@ -1534,7 +1540,6 @@ void World::draw (glm::mat4x4 const& model_view
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _occluder_index);
     gl.disable(GL_CULL_FACE); // TODO: figure out why indices are bad and we need this
 
-    glm::mat4x4 identity_mtx = glm::mat4x4{glm::mat4x4(1)};
     for (auto& pair : _loaded_tiles_buffer)
     {
       MapTile* tile = pair.second;
@@ -1553,29 +1558,31 @@ void World::draw (glm::mat4x4 const& model_view
     gl.depthMask(GL_TRUE);
     gl.bindVertexArray(0);
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  }
+  
 
-    // draw occlusion AABBs
-    if (draw_occlusion_boxes)
+  // draw occlusion AABBs
+  if (draw_occlusion_boxes)
+  {
+
+    for (auto& pair : _loaded_tiles_buffer)
     {
+      MapTile* tile = pair.second;
 
-      for (auto& pair : _loaded_tiles_buffer)
+      if (!tile)
       {
-        MapTile* tile = pair.second;
-
-        if (!tile)
-        {
-          break;
-        }
-
-        auto& extents = tile->getCombinedExtents();
-        opengl::primitives::wire_box::getInstance(_context).draw ( model_view
-            , projection
-            , identity_mtx
-            , { 1.0f, 1.0f, 0.0f, 1.0f }
-            , extents[0]
-            , extents[1]
-        );
+        break;
       }
+
+      glm::mat4x4 identity_mtx = glm::mat4x4{1};
+      auto& extents = tile->getCombinedExtents();
+      opengl::primitives::wire_box::getInstance(_context).draw ( model_view
+          , projection
+          , identity_mtx
+          , { 1.0f, 1.0f, 0.0f, 1.0f }
+          , extents[0]
+          , extents[1]
+      );
     }
   }
 
@@ -2447,340 +2454,6 @@ void World::drawMinimap ( MapTile *tile
   {
     mapIndex.unloadTile(m_tile);
   }
-
-  /*
-
-  if (!_display_initialized)
-  {
-    initDisplay();
-    _display_initialized = true;
-  }
-
-  if (!_global_vbos_initialized)
-  {
-    //initGlobalVBOs(&detailtexcoords, &alphatexcoords);
-    _global_vbos_initialized = true;
-  }
-
-  glm::mat4x4 const mvp(model_view * projection);
-  math::frustum const frustum(mvp);
-
-  if (!_m2_program_mini)
-  {
-    _m2_program_mini.reset
-        (new opengl::program
-             {{GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs")},
-              {GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs")}
-             }
-        );
-  }
-  if (!_m2_instanced_program_mini)
-  {
-    _m2_instanced_program_mini.reset
-        (new opengl::program
-             {{GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs", {"instanced"})},
-              {GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs")}
-             }
-        );
-  }
-
-  if (!_mcnk_program_mini)
-  {
-    _mcnk_program_mini.reset
-        (new opengl::program
-             {{GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("terrain_vs")},
-              {GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("terrain_fs")}
-             }
-        );
-  }
-
-  if (!_liquid_render_mini)
-  {
-    _liquid_render_mini.emplace(_context);
-  }
-  if (!_wmo_program_mini)
-  {
-    _wmo_program_mini.reset
-        (new opengl::program
-             {{GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("wmo_vs")},
-              {GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs")}
-             }
-        );
-  }
-
-  // Also load a tile above the current one to correct the lookat approximation
-  tile_index m_tile = tile_index (camera_pos);
-  m_tile.z -= 1;
-
-  bool unload = !mapIndex.has_unsaved_changes(m_tile);
-  MapTile* mTile = mapIndex.loadTile(m_tile);
-
-  int daytime = static_cast<int>(time) % 2880;
-
-  skies->update_sky_colors(camera_pos, daytime);
-  outdoorLightStats = ol->getLightStats(static_cast<int>(time) * 60);
-
-  glm::vec3 light_dir = outdoorLightStats.dayDir;
-  light_dir = {-light_dir.x, light_dir.z, -light_dir.y};
-  // todo: figure out why I need to use a different light vector for the terrain
-  glm::vec3 terrain_light_dir = outdoorLightStats.dayDir;
-
-  glm::vec3 diffuse_color(skies->color_set[LIGHT_GLOBAL_DIFFUSE]);
-  glm::vec3 ambient_color(skies->color_set[LIGHT_GLOBAL_AMBIENT]);
-
-  culldistance = 100000.0f;
-
-  gl.enable(GL_DEPTH_TEST);
-  gl.depthFunc(GL_LEQUAL); // less z-fighting artifacts this way, I think
-  gl.enable(GL_BLEND);
-  gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  // draw terrain
-  {
-    opengl::scoped::use_program mcnk_shader{*_mcnk_program_mini.get()};
-
-    mcnk_shader.uniform("model_view", model_view);
-    mcnk_shader.uniform("projection", projection);
-
-    mcnk_shader.uniform("draw_lines", static_cast<int>(settings->draw_adt_grid));
-    mcnk_shader.uniform("draw_terrain_height_contour", static_cast<int>(settings->draw_elevation));
-
-    mcnk_shader.uniform("light_dir", terrain_light_dir);
-    mcnk_shader.uniform("diffuse_color",  settings->diffuse_color);
-    mcnk_shader.uniform("ambient_color", settings->ambient_color);
-
-    mcnk_shader.uniform("alphamap", 0);
-    mcnk_shader.uniform("tex0", 1);
-    mcnk_shader.uniform("tex1", 2);
-    mcnk_shader.uniform("tex2", 3);
-    mcnk_shader.uniform("tex3", 4);
-
-    mcnk_shader.uniform("shadow_map", 5);
-
-    mcnk_shader.uniform("tex_anim_0", math::vector_2d());
-    mcnk_shader.uniform("tex_anim_1", math::vector_2d());
-    mcnk_shader.uniform("tex_anim_2", math::vector_2d());
-    mcnk_shader.uniform("tex_anim_3", math::vector_2d());
-
-    std::array<int, 4> textures_bound = { -1, -1, -1, -1 };
-    std::map<int, misc::random_color> area_id_colors;
-
-    tile->draw(frustum, mcnk_shader, detailtexcoords, culldistance, camera_pos, true, false,
-               false, false, false, area_id_colors, animtime,
-               display_mode::in_2D, textures_bound
-    );
-
-    if (mTile)
-    {
-      mTile->wait_until_loaded();
-
-      mTile->draw(frustum, mcnk_shader, detailtexcoords, culldistance, camera_pos, true, false,
-                 false, false, false, area_id_colors, animtime,
-                 display_mode::in_2D, textures_bound
-      );
-    }
-
-    gl.bindVertexArray(0);
-    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  }
-
-  // M2s / models
-  if (settings->draw_m2 || settings->use_filters)
-  {
-
-    if (need_model_updates)
-    {
-      update_models_by_filename();
-    }
-
-    std::unordered_map<Model *, std::size_t> model_boxes_to_draw;
-    std::unordered_map<Model *, std::size_t> model_with_particles;
-
-    {
-      opengl::scoped::use_program m2_shader{*_m2_instanced_program_mini.get()};
-
-      m2_shader.uniform("model_view", model_view);
-      m2_shader.uniform("projection", projection);
-      m2_shader.uniform("tex1", 0);
-      m2_shader.uniform("tex2", 1);
-
-      m2_shader.uniform("light_dir", light_dir);
-      m2_shader.uniform("diffuse_color", settings->diffuse_color);
-      m2_shader.uniform("ambient_color", settings->ambient_color);
-
-      for (auto &it : _models_by_filename)
-      {
-        std::vector<ModelInstance*> instances;
-
-        if (settings->use_filters)
-        {
-          instances = it.second;
-          for (auto instance : it.second)
-          {
-            bool found_model = false;
-            bool found_instance = false;
-
-            for (int i = 0; i < settings->m2_model_filter_include->count(); ++i)
-            {
-              auto item_wgt_m = reinterpret_cast<noggit::ui::MinimapM2ModelFilterEntry *>(
-                  settings->m2_model_filter_include->itemWidget(settings->m2_model_filter_include->item(i)));
-
-              if (item_wgt_m->getFileName().toStdString() == instance->model->filename
-                  && item_wgt_m->getSizeCategory() <= instance->size_cat)
-              {
-                found_model = true;
-              }
-            }
-
-            for (int i = 0; i < settings->m2_instance_filter_include->count(); ++i)
-            {
-              auto item_wgt_i = reinterpret_cast<noggit::ui::MinimapInstanceFilterEntry*>(
-                  settings->m2_instance_filter_include->itemWidget(settings->m2_instance_filter_include->item(i)));
-
-              if (item_wgt_i->getUid() == instance->uid)
-              {
-                found_instance = true;
-              }
-            }
-
-            if (!(found_model || found_instance))
-            {
-              std::vector<ModelInstance*>::iterator position = std::find(instances.begin(), instances.end(), instance);
-              if (position != instances.end())
-              {
-                instances.erase(position);
-              }
-            }
-          }
-        }
-
-        it.second[0]->model->wait_until_loaded();
-        it.second[0]->model->draw(model_view, settings->use_filters ? instances : it.second, m2_shader, frustum,
-                                  100000.0f, camera_pos, false,animtime,
-                                  false, model_boxes_to_draw, display_mode::in_2D, true);
-      }
-
-    }
-  }
-
-  // Setup liquid lighting
-  if (settings->draw_water)
-  {
-    opengl::scoped::use_program water_shader{_liquid_render_mini->shader_program()};
-    water_shader.uniform("animtime", 0.0f);
-
-    water_shader.uniform("model_view", model_view);
-    water_shader.uniform("projection", projection);
-
-    water_shader.uniform("ocean_color_light", settings->ocean_color_light);
-    water_shader.uniform("ocean_color_dark", settings->ocean_color_dark);
-    water_shader.uniform("river_color_light", settings->river_color_light);
-    water_shader.uniform("river_color_dark", settings->river_color_dark);
-    water_shader.uniform("use_transform", 1);
-
-  }
-
-  // WMOs / map objects
-  if (settings->draw_wmo)
-  {
-    opengl::scoped::use_program wmo_program{*_wmo_program_mini.get()};
-
-    wmo_program.uniform("model_view", model_view);
-    wmo_program.uniform("projection", projection);
-    wmo_program.uniform("tex1", 0);
-    wmo_program.uniform("tex2", 1);
-
-    wmo_program.uniform("draw_fog", 0);
-
-    wmo_program.uniform("exterior_light_dir", light_dir);
-    wmo_program.uniform("exterior_diffuse_color", settings->diffuse_color);
-    wmo_program.uniform("exterior_ambient_color", settings->ambient_color);
-
-    _model_instance_storage.for_each_wmo_instance(
-        [&](WMOInstance &wmo)
-        {
-          if (settings->use_filters)
-          {
-            bool found_model = false;
-            bool found_instance = false;
-
-            for (int i = 0; i < settings->wmo_model_filter_exclude->count(); ++i)
-            {
-              auto item_wgt_m = reinterpret_cast<noggit::ui::MinimapWMOModelFilterEntry*>(
-                  settings->wmo_model_filter_exclude->itemWidget(settings->wmo_model_filter_exclude->item(i)));
-
-              if (item_wgt_m->getFileName().toStdString() == wmo.wmo->filename)
-              {
-                found_model = true;
-              }
-            }
-
-            for (int i = 0; i < settings->wmo_instance_filter_exclude->count(); ++i)
-            {
-              auto item_wgt_i = reinterpret_cast<noggit::ui::MinimapInstanceFilterEntry*>(
-                  settings->wmo_instance_filter_exclude->itemWidget(settings->wmo_instance_filter_exclude->item(i)));
-
-              if (item_wgt_i->getUid() == wmo.uid)
-              {
-                found_instance = true;
-              }
-            }
-
-            // For WMOs we exclude models from rendering
-            if (found_model || found_instance)
-            {
-              return;
-            }
-
-          }
-
-          wmo.wmo->wait_until_loaded();
-          wmo.draw(wmo_program, model_view, projection, frustum,
-                   100000.0f, camera_pos, false, false,
-                   false, _liquid_render_mini.get(), current_selection(),
-                   animtime, skies->hasSkies(), display_mode::in_2D
-          );
-
-        });
-
-    gl.enable(GL_BLEND);
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  }
-
-  // Liquids
-  if (settings->draw_water)
-  {
-    _liquid_render_mini->force_texture_update();
-
-    // draw the water on both sides
-    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
-
-    opengl::scoped::use_program water_shader{_liquid_render_mini->shader_program()};
-
-    water_shader.uniform("use_transform", 0);
-
-    tile->drawWater(frustum, culldistance, camera_pos, true, _liquid_render_mini.get(), water_shader, animtime,
-                    -1, display_mode::in_2D
-    );
-
-    if (mTile)
-    {
-      mTile->wait_until_loaded();
-
-      mTile->drawWater(frustum, culldistance, camera_pos, true, _liquid_render_mini.get(), water_shader, animtime,
-                      -1, display_mode::in_2D
-      );
-    }
-
-    gl.bindVertexArray(0);
-    gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-  }
-
-  if (unload)
-  {
-    mapIndex.unloadTile(m_tile);
-  }
-   */
 }
 
 bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* settings, std::optional<QImage>& combined_image)
@@ -4031,7 +3704,7 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
         {
           auto obj = boost::get<selected_object_type>(instance.get());
 
-          if ((obj->pos - pos).length() <= radius && is_selected(obj))
+          if (glm::distance(obj->pos, pos) <= radius && is_selected(obj))
           {
             remove_from_selection(obj);
           }
@@ -4049,7 +3722,7 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
         {
           auto obj = boost::get<selected_object_type>(instance.get());
 
-          if ((obj->pos - pos).length() <= radius && !is_selected(obj))
+          if (glm::distance(obj->pos, pos) <= radius && !is_selected(obj))
           {
             add_to_selection(obj);
           }
@@ -4122,11 +3795,6 @@ void World::unload_shaders()
   _m2_box_program.reset();
   _wmo_program.reset();
   _liquid_program.reset();
-
-  _mcnk_program_mini.reset();
-  _m2_program_mini.reset();
-  _m2_instanced_program_mini.reset();
-  _wmo_program_mini.reset();
 
   _cursor_render.unload();
   _sphere_render.unload();

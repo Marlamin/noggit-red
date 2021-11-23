@@ -35,11 +35,6 @@ ModelViewer::ModelViewer(QWidget* parent, noggit::NoggitRenderContext context)
 
 void ModelViewer::initializeGL()
 {
-  _gl_guard_connection = connect(context(), &QOpenGLContext::aboutToBeDestroyed,
-  [this]()
-  {
-      unloadOpenglData();
-  });
 
   opengl::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, width(), height());

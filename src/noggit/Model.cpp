@@ -641,14 +641,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
       mesh_color.w = m->_colors[color_index].opacity.getValue (m->_current_anim_seq, m->_anim_time, m->_global_animtime);
     }
 
-    if (renderflag.flags.unlit)
-    {
-      mesh_color.x = c.x; mesh_color.y = c.y; mesh_color.z = c.z;
-    }
-    else
-    {
-      mesh_color.x = mesh_color.y = mesh_color.z = 0;
-    }
+    mesh_color.x = c.x; mesh_color.y = c.y; mesh_color.z = c.z;
 
     emissive_color = glm::vec4(c.x,c.y,c.z, mesh_color.w);
   }
@@ -1231,7 +1224,7 @@ void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
     std::size_t bone_counter = 0;
     for (auto& bone : bones)
     {
-    	bone_matrices[bone_counter] = glm::transpose(bone.mat);
+    	bone_matrices[bone_counter] = bone.mat;
       bone_counter++;
     }
 
@@ -1402,6 +1395,7 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
                      , int animtime
                      )
 {
+
   if (calc) return;
 
   glm::mat4x4 m = glm::mat4x4(1);
@@ -1423,7 +1417,7 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
     if (rot.uses(anim))
     {
-        m *= glm::toMat4(rot.getValue(anim, time, animtime));
+      m *= glm::transpose(glm::toMat4(q = rot.getValue(anim, time, animtime)));
     }
 
     if (scale.uses(anim))
@@ -1469,16 +1463,16 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
   {
     if (parent >= 0)
     {
-        mrot = allbones[parent].mrot * glm::toMat4(q);
+      mrot = allbones[parent].mrot * glm::transpose(glm::toMat4(q));
     }
     else
     {
-        mrot = glm::toMat4(q);
+      mrot = glm::transpose(glm::toMat4(q));
     }
   }
   else
   {
-      mrot = glm::mat4x4(1);
+    mrot = glm::mat4x4(1);
   }
 
   calc = true;
@@ -1755,11 +1749,12 @@ void Model::upload()
 
   _buffers.upload();
   _vertex_arrays.upload();
-
-  gl.genTextures(1, &_bone_matrices_buf_tex);
+  _bone_matrices_buf_tex = 0;
 
   if (animBones)
   {
+    gl.genTextures(1, &_bone_matrices_buf_tex);
+
     gl.bindTexture(GL_TEXTURE_BUFFER, _bone_matrices_buf_tex);
     opengl::scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder(_bone_matrices_buffer);
     gl.bufferData(GL_TEXTURE_BUFFER, bone_matrices.size() * sizeof(glm::mat4x4), nullptr, GL_STREAM_DRAW);
@@ -1782,6 +1777,9 @@ void Model::upload()
   opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> box_indices_binder(_box_indices_buffer);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _box_indices.size() * sizeof(uint16_t), _box_indices.data(), GL_STATIC_DRAW);
 
+
+  _textureFilenames.clear();
+
   _finished_upload = true;
 }
 
@@ -1791,7 +1789,8 @@ void Model::unload()
   _buffers.unload();
   _vertex_arrays.unload();
 
-  gl.deleteTextures(1, &_bone_matrices_buf_tex);
+  if (_bone_matrices_buf_tex)
+    gl.deleteTextures(1, &_bone_matrices_buf_tex);
 
   for (auto& particle : _particles)
   {

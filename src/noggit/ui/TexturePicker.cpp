@@ -127,6 +127,7 @@ namespace noggit
 
     void texture_picker::update(bool set_changed)
     {
+
       if (set_changed)
       {
         _chunk->mt->changed = true;

@@ -96,6 +96,8 @@ Action* ActionManager::beginAction(MapView* map_view
 
   _cur_action = action;
 
+  emit onActionBegin(action);
+
   return action;
 }
 
@@ -112,6 +114,8 @@ void ActionManager::endAction()
   {
     _action_stack.pop_back();
   }
+
+  emit onActionEnd(_cur_action);
   _cur_action = nullptr;
   emit currentActionChanged(_undo_index);
 }
