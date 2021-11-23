@@ -58,7 +58,6 @@ public:
 
     _transform_mat = other._transform_mat;
     _transform_mat_inverted = other._transform_mat_inverted;
-    _transform_mat_transposed = other._transform_mat_transposed;
   }
 
   WMOInstance& operator= (WMOInstance&& other)
@@ -77,7 +76,6 @@ public:
     std::swap(_need_doodadset_update, other._need_doodadset_update);
     std::swap(_transform_mat, other._transform_mat);
     std::swap(_transform_mat_inverted, other._transform_mat_inverted);
-    std::swap(_transform_mat_transposed, other._transform_mat_transposed);
     std::swap(_context, other._context);
     std::swap(_filename, other._filename);
     return *this;

@@ -1448,7 +1448,7 @@ void World::draw (glm::mat4x4 const& model_view
 
           if ((tile->objects_frustum_cull_test > 1 || m2_instance->isInFrustum(frustum)) && m2_instance->isInRenderDist(culldistance, camera_pos, display))
           {
-            instances.push_back(m2_instance->transformMatrixTransposed());
+              instances.push_back(m2_instance->transformMatrix());
           }
 
         }

@@ -42,8 +42,6 @@ void SceneObject::updateTransformMatrix()
 
   _transform_mat = matrix;
   _transform_mat_inverted = glm::inverse(matrix);
-  _transform_mat_transposed = matrix;
-
 }
 
 void SceneObject::resetDirection()

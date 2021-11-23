@@ -52,7 +52,6 @@ public:
     scale = other.scale;
     extents[0] = other.extents[0];
     extents[1] = other.extents[1];
-    _transform_mat_transposed = other._transform_mat_transposed;
     _transform_mat_inverted =  other._transform_mat_inverted;
     _context = other._context;
     uid = other.uid;
@@ -69,7 +68,6 @@ public:
     std::swap (size_cat, other.size_cat);
     std::swap (_need_recalc_extents, other._need_recalc_extents);
     std::swap (extents, other.extents);
-    std::swap(_transform_mat_transposed, other._transform_mat_transposed);
     std::swap(_transform_mat_inverted, other._transform_mat_inverted);
     std::swap(_context, other._context);
     return *this;

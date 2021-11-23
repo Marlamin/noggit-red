@@ -54,7 +54,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
   {
     opengl::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
-      , transformMatrixTransposed()
+      , transformMatrix()
       , { 1.0f, 1.0f, 0.0f, 1.0f }
       , misc::transform_model_box_coords(model->header.collision_box_min)
       , misc::transform_model_box_coords(model->header.collision_box_max)
@@ -62,7 +62,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
 
     opengl::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
-      , transformMatrixTransposed()
+      , transformMatrix()
       , {1.0f, 1.0f, 1.0f, 1.0f}
       , misc::transform_model_box_coords(model->header.bounding_box_min)
       , misc::transform_model_box_coords(model->header.bounding_box_max)
@@ -80,7 +80,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
   {
     opengl::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
-      , transformMatrixTransposed()
+      , transformMatrix()
       , {0.5f, 0.5f, 0.5f, 1.0f}
       , misc::transform_model_box_coords(model->header.bounding_box_min)
       , misc::transform_model_box_coords(model->header.bounding_box_max)
@@ -313,7 +313,6 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
   );
 
   _transform_mat_inverted = glm::inverse(mat);
-  _transform_mat_transposed = mat;
 
   // to compute the size category (used in culling)
   recalcExtents();

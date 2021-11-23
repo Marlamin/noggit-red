@@ -78,7 +78,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     {
       obj_instance = boost::get<selected_object_type>(selection[0]);
       obj_instance->recalcExtents();
-      object_matrix = obj_instance->transformMatrixTransposed();
+      object_matrix = obj_instance->transformMatrix();
       ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, glm::value_ptr(object_matrix), glm::value_ptr(delta_matrix), nullptr);
       break;
     }
@@ -113,7 +113,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj_instance);
 
       obj_instance->recalcExtents();
-      object_matrix = obj_instance->transformMatrixTransposed();
+      object_matrix = obj_instance->transformMatrix();
 
       glm::mat4 glm_transform_mat = delta_matrix;
 
@@ -231,7 +231,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj_instance);
 
       obj_instance->recalcExtents();
-      object_matrix = obj_instance->transformMatrixTransposed();
+      object_matrix = obj_instance->transformMatrix();
 
 
       glm::mat4 glm_transform_mat = delta_matrix;

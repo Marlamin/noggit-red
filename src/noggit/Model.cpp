@@ -1513,7 +1513,7 @@ void Model::draw( glm::mat4x4 const& model_view
 
   opengl::scoped::vao_binder const _(_vao);
 
-  m2_shader.uniform("transform", instance.transformMatrixTransposed());
+  m2_shader.uniform("transform", instance.transformMatrix());
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);

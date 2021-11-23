@@ -352,7 +352,6 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
                , glm::mat4x4 const& model_view
                , glm::mat4x4 const& projection
                , glm::mat4x4 const& transform_matrix
-               , glm::mat4x4 const& transform_matrix_transposed
                , bool boundingbox
                , math::frustum const& frustum
                , const float& cull_distance
@@ -412,7 +411,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
     {
       opengl::primitives::wire_box::getInstance(_context).draw( model_view
        , projection
-       , transform_matrix_transposed
+       , transform_matrix
        , {1.0f, 1.0f, 1.0f, 1.0f}
        , group.BoundingBoxMin
        , group.BoundingBoxMax
@@ -421,7 +420,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
 
     opengl::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
-      , transform_matrix_transposed
+      , transform_matrix
       , {1.0f, 0.0f, 0.0f, 1.0f}
       , glm::vec3(extents[0].x, extents[0].z, -extents[0].y)
       , glm::vec3(extents[1].x, extents[1].z, -extents[1].y)

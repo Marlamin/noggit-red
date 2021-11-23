@@ -107,7 +107,6 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
               , model_view
               , projection
               , _transform_mat
-              , _transform_mat_transposed
               , is_selected
               , frustum
               , cull_distance

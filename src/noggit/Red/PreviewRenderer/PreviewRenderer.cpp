@@ -237,7 +237,7 @@ void PreviewRenderer::draw()
       model_instance.model->wait_until_loaded();
       model_instance.model->waitForChildrenLoaded();
       instance[0] = &model_instance;
-      instance_mtx[0] = model_instance.transformMatrixTransposed();
+      instance_mtx[0] = model_instance.transformMatrix();
 
       model_instance.model->draw(
         mv
@@ -260,7 +260,7 @@ void PreviewRenderer::draw()
       
       for (auto& instance : it.second)
       {
-        instance_mtx.push_back(instance->transformMatrixTransposed());
+        instance_mtx.push_back(instance->transformMatrix());
       }
 
       it.second[0]->model->draw(

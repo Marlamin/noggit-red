@@ -46,9 +46,6 @@ public:
   [[nodiscard]]
   glm::mat4x4 transformMatrixInverted() const { return _transform_mat_inverted; };
 
-  [[nodiscard]]
-  glm::mat4x4 transformMatrixTransposed() const { return _transform_mat_transposed; };
-
   SceneObjectTypes which() const { return _type; };
 
   std::string const& getFilename() const { return _filename; };
@@ -74,7 +71,6 @@ protected:
 
   glm::mat4x4 _transform_mat = glm::mat4x4();
   glm::mat4x4 _transform_mat_inverted = glm::mat4x4();
-  glm::mat4x4 _transform_mat_transposed = glm::mat4x4();
 
   noggit::NoggitRenderContext _context;
 

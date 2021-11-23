@@ -296,7 +296,6 @@ public:
             , glm::mat4x4 const& model_view
             , glm::mat4x4 const& projection
             , glm::mat4x4 const& transform_matrix
-            , glm::mat4x4 const& transform_matrix_transposed
             , bool boundingbox
             , math::frustum const& frustum
             , const float& cull_distance
