@@ -187,20 +187,18 @@ void PreviewRenderer::draw()
       {
         wmo_instance.wmo->wait_until_loaded();
         wmo_instance.wmo->waitForChildrenLoaded();
+        wmo_instance.ensureExtents();
         wmo_instance.draw(
             wmo_program, model_view(), projection(), frustum, culldistance,
-            _camera.position, _draw_boxes.get(), _draw_models.get() // doodads
+            _camera.position, _draw_boxes.get(), _draw_models.get() 
             , false, std::vector<selection_type>(), 0, false, display_mode::in_3D, true
         );
 
-        /*
-        for (auto& doodad : wmo_instance.get_visible_doodads(frustum, culldistance, _camera.position,
-                                                            false,display_mode::in_3D))
+        for (auto& pair : *wmo_instance.get_doodads(true))
         {
-          _wmo_doodads[doodad->model->filename].push_back(doodad);
+          for (auto& doodad : pair.second)
+            _wmo_doodads[doodad.model->filename].push_back(&doodad);
         }
-
-        */
      }
 
     }
@@ -255,10 +253,16 @@ void PreviewRenderer::draw()
         , display_mode::in_3D
       );
     }
-    /*
+
     for (auto& it : _wmo_doodads)
     {
-      instance_mtx[0] = it.second[0]->transformMatrixTransposed();
+      instance_mtx.clear();
+      
+      for (auto& instance : it.second)
+      {
+        instance_mtx.push_back(instance->transformMatrixTransposed());
+      }
+
       it.second[0]->model->draw(
           mv
           , instance_mtx
@@ -273,7 +277,6 @@ void PreviewRenderer::draw()
           , display_mode::in_3D
       );
     }
-    */
 
 
     if(_draw_boxes.get() && !model_boxes_to_draw.empty())
