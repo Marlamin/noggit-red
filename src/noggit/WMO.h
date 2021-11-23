@@ -146,7 +146,7 @@ public:
            );
 
   /*
-  void drawLiquid ( math::matrix_4x4 const& transform
+  void drawLiquid ( glm::mat4x4 const& transform
                   , liquid_render& render
                   , bool draw_fog
                   , int animtime
@@ -159,7 +159,7 @@ public:
   void intersect (math::ray const&, std::vector<float>* results) const;
 
   // todo: portal culling
-  bool is_visible( math::matrix_4x4 const& transform_matrix
+  bool is_visible( glm::mat4x4 const& transform_matrix
                  , math::frustum const& frustum
                  , float const& cull_distance
                  , glm::vec3 const& camera
@@ -295,8 +295,8 @@ public:
   void draw ( opengl::scoped::use_program& wmo_shader
             , glm::mat4x4 const& model_view
             , glm::mat4x4 const& projection
-            , math::matrix_4x4 const& transform_matrix
-            , math::matrix_4x4 const& transform_matrix_transposed
+            , glm::mat4x4 const& transform_matrix
+            , glm::mat4x4 const& transform_matrix_transposed
             , bool boundingbox
             , math::frustum const& frustum
             , const float& cull_distance

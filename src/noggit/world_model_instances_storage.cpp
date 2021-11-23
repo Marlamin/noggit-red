@@ -364,7 +364,7 @@ namespace noggit
     gl.activeTexture(GL_TEXTURE0);
     gl.bindTexture(GL_TEXTURE_BUFFER, _m2_instances_transform_buf_tex);
     gl.bindBuffer(GL_TEXTURE_BUFFER, _m2_instances_transform_buf);
-    gl.bufferData(GL_TEXTURE_BUFFER, _n_allocated_m2_transforms * sizeof(math::matrix_4x4), nullptr, GL_DYNAMIC_DRAW);
+    gl.bufferData(GL_TEXTURE_BUFFER, _n_allocated_m2_transforms * sizeof(glm::mat4x4), nullptr, GL_DYNAMIC_DRAW);
     gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _m2_instances_transform_buf);
 
     _transform_storage_uploaded = true;

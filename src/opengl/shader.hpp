@@ -113,8 +113,6 @@ namespace opengl
       void uniform (GLint pos, glm::vec3 const&);
       void uniform (std::string const& name, glm::vec4 const&);
       void uniform (GLint pos, glm::vec4 const&);
-      void uniform (std::string const& name, math::matrix_4x4 const&);
-      void uniform (GLint pos, math::matrix_4x4 const&);
       void uniform(std::string const& name, glm::mat4x4 const&);
       void uniform(GLint pos, glm::mat4x4 const&);
       template<typename T> void uniform (std::string const&, T) = delete;
@@ -131,7 +129,7 @@ namespace opengl
       void attrib (std::string const& name, std::vector<glm::vec2> const&);
       void attrib (std::string const& name, std::vector<glm::vec3> const&);
       void attrib (std::string const& name, glm::vec3 const*);
-      void attrib (std::string const& name, math::matrix_4x4 const*, GLuint divisor = 0);
+      void attrib (std::string const& name, glm::mat4x4 const*, GLuint divisor = 0);
       void attrib (std::string const& name, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
       void attrib (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* data);
       void attribi (std::string const& name, GLuint buffer, GLsizei size, GLenum type, GLsizei stride, const GLvoid* data);

@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "SceneObject.hpp"
+
+#include <glm/gtx/quaternion.hpp>
 #include <noggit/Misc.h>
 #include <math/trig.hpp>
 
@@ -26,20 +28,20 @@ bool SceneObject::isDuplicateOf(SceneObject const& other)
 
 void SceneObject::updateTransformMatrix()
 {
-  math::matrix_4x4 mat( math::matrix_4x4(math::matrix_4x4::translation, pos)
-                        * math::matrix_4x4
-                            ( math::matrix_4x4::rotation_yzx
-                                , { -dir.z
-                                  , dir.y - math::degrees(90.0)._
-                                  , dir.x
-                              })
+    auto rotationVector = glm::vec3(0);
+    rotationVector.x = glm::radians(dir.x);
+    rotationVector.y = glm::radians(dir.y - math::degrees(90.0)._);
+    rotationVector.z = glm::radians(dir.z);
 
-                          * math::matrix_4x4 (math::matrix_4x4::scale, scale)
-  );
+    auto matrix = glm::mat4x4(1);
+    matrix = glm::translate(matrix, pos);
+    glm::quat roationQuat = glm::quat(rotationVector);
+	matrix = matrix * glm::toMat4(roationQuat);
+    matrix = glm::scale(matrix, glm::vec3(scale, scale, scale));
 
-  _transform_mat = mat;
-  _transform_mat_inverted = mat.inverted();
-  _transform_mat_transposed = mat.transposed();
+   _transform_mat = matrix;
+   _transform_mat_inverted = glm::inverse(matrix);
+   _transform_mat_transposed = matrix;
 }
 
 void SceneObject::resetDirection()

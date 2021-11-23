@@ -6,7 +6,7 @@
 
 namespace noggit
 {
-  void cursor_render::draw(mode cursor_mode, math::matrix_4x4 const& mvp, glm::vec4 color, glm::vec3 const& pos, float radius, float inner_radius_ratio)
+  void cursor_render::draw(mode cursor_mode, glm::mat4x4 const& mvp, glm::vec4 color, glm::vec3 const& pos, float radius, float inner_radius_ratio)
   {
     if (!_uploaded)
     {
@@ -100,18 +100,20 @@ namespace noggit
 
     for (int r = 0; r <= rotation_plane; ++r)
     {
-      math::degrees rotation(360.f*r / static_cast<float>(rotation_plane));
+    	math::degrees rotation(360.f*r / static_cast<float>(rotation_plane));
 
-      math::matrix_4x4 m(math::matrix_4x4::rotation_xyz, math::degrees::vec3(math::degrees(0.f)._, math::degrees(0.f)._, rotation._));
+        glm::mat4x4 rotationMatrix = glm::mat4x4();
+        glm::mat4x4 m = glm::rotate(rotationMatrix, math::radians(rotation)._, glm::vec3(0, 0, 1));
+
 
       for (int i = 0; i < segment; ++i)
       {
         float x = glm::cos(math::radians(math::degrees(i * 360 / segment))._);
         float z = glm::sin(math::radians(math::degrees(i * 360 / segment))._);
 
-        glm::vec3 v(x, 0.f, z);
+        glm::vec4 v(x, 0.f, z,0);
 
-        vertices.emplace_back(m*v);
+        vertices.emplace_back(m * v);
         if (r < rotation_plane)
         {
           indices.emplace_back(i + id_ofs);

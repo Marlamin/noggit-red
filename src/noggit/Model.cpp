@@ -15,6 +15,7 @@
 #include <cassert>
 #include <map>
 #include <string>
+#include <glm/gtx/quaternion.hpp>
 
 Model::Model(const std::string& filename, noggit::NoggitRenderContext context)
   : AsyncObject(filename)
@@ -759,7 +760,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   }
 
   int16_t tex_anim_lookup = m->_texture_animation_lookups[uv_animations[0]];
-  static const math::matrix_4x4 unit(math::matrix_4x4::unit);
+  static const glm::mat4x4 unit(glm::mat4x4(1));
 
   if (tex_anim_lookup != -1)
   {
@@ -1223,13 +1224,13 @@ void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
     std::size_t bone_counter = 0;
     for (auto& bone : bones)
     {
-      bone_matrices[bone_counter] = bone.mat.transposed();
+    	bone_matrices[bone_counter] = glm::transpose(bone.mat);
       bone_counter++;
     }
 
     {
       opengl::scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder (_bone_matrices_buffer);
-      gl.bufferSubData(GL_TEXTURE_BUFFER, 0, bone_matrices.size() * sizeof(math::matrix_4x4), bone_matrices.data());
+      gl.bufferSubData(GL_TEXTURE_BUFFER, 0, bone_matrices.size() * sizeof(glm::mat4x4), bone_matrices.data());
     }
 
 
@@ -1268,8 +1269,8 @@ void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
   {
     if (_lights[i].parent >= 0) 
     {
-      _lights[i].tpos = bones[_lights[i].parent].mat * _lights[i].pos;
-      _lights[i].tdir = bones[_lights[i].parent].mrot * _lights[i].dir;
+        _lights[i].tpos = bones[_lights[i].parent].mat * glm::vec4(_lights[i].pos,0);
+      _lights[i].tdir = bones[_lights[i].parent].mrot * glm::vec4(_lights[i].dir,0);
     }
   }
 
@@ -1296,18 +1297,18 @@ void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
 
 void TextureAnim::calc(int anim, int time, int animtime)
 {
-  mat = math::matrix_4x4::unit;
+    mat = glm::mat4x4(1);
   if (trans.uses(anim)) 
-  {  
-    mat *= math::matrix_4x4 (math::matrix_4x4::translation, trans.getValue(anim, time, animtime));
+  {
+      mat = glm::translate(mat, trans.getValue(anim, time, animtime));
   }
   if (rot.uses(anim)) 
   {
-    mat *= math::matrix_4x4 (math::matrix_4x4::rotation, rot.getValue(anim, time, animtime));
+      mat *= glm::toMat4(rot.getValue(anim, time, animtime));
   }
   if (scale.uses(anim)) 
   {
-    mat *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue(anim, time, animtime));
+      mat = glm::scale(mat, scale.getValue(anim, time, animtime));
   }
 }
 
@@ -1367,7 +1368,7 @@ TextureAnim::TextureAnim (const MPQFile& f, const ModelTexAnimDef &mta, int *glo
   : trans (mta.trans, f, global)
   , rot (mta.rot, f, global)
   , scale (mta.scale, f, global)
-  , mat (math::matrix_4x4::uninitialized)
+  , mat (glm::mat4x4())
 {}
 
 Bone::Bone( const MPQFile& f,
@@ -1397,8 +1398,8 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
   if (calc) return;
 
-  math::matrix_4x4 m {math::matrix_4x4::unit};
-  glm::quat q;
+  glm::mat4x4 m = glm::mat4x4(1);
+  glm::quat q = glm::quat();
 
   if ( flags.transformed
     || flags.billboard 
@@ -1407,38 +1408,44 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
     || flags.cylindrical_billboard_lock_z
       )
   {
-    m = {math::matrix_4x4::translation, pivot};
+      m = glm::translate(m, pivot);
 
     if (trans.uses(anim))
     {
-      m *= math::matrix_4x4 (math::matrix_4x4::translation, trans.getValue (anim, time, animtime));
+      m = glm::translate(m, trans.getValue (anim, time, animtime));
     }
 
     if (rot.uses(anim))
     {
-      m *= math::matrix_4x4 (math::matrix_4x4::rotation, q = rot.getValue (anim, time, animtime));
+        m *= glm::toMat4(rot.getValue(anim, time, animtime));
     }
 
     if (scale.uses(anim))
     {
-      m *= math::matrix_4x4 (math::matrix_4x4::scale, scale.getValue (anim, time, animtime));
+      m = glm::scale(m, scale.getValue (anim, time, animtime));
     }
 
     if (flags.billboard)
     {
-      glm::vec3 vRight (model_view[0][0], model_view[1][0], model_view[2][0]);
-      glm::vec3 vUp (model_view[0][1], model_view[1][1], model_view[2][1]); // Spherical billboarding
+        glm::vec3 vRight = model_view[0];
+      glm::vec3 vUp = model_view[1]; 
       //glm::vec3 vUp = glm::vec3(0,1,0); // Cylindrical billboarding
       vRight =  glm::vec3(vRight.x * -1, vRight.y * -1, vRight.z * -1);
-      m (0, 2, vRight.x);
-      m (1, 2, vRight.y);
-      m (2, 2, vRight.z);
-      m (0, 1, vUp.x);
-      m (1, 1, vUp.y);
-      m (2, 1, vUp.z);
+      //m[0][2] = vRight.x;
+      //m[1][2] = vRight.y;
+      //m[2][2] = vRight.z;
+      //m[0][1] = vUp.x;
+      //m[1][1] = vUp.y;
+      //m[2][1] = vUp.z;
+      m[2][0] = vRight.x;
+      m[2][1] = vRight.y;
+      m[2][2] = vRight.z;
+      m[1][0] = vUp.x;
+      m[1][1] = vUp.y;
+      m[1][2] = vUp.z;
     }
 
-    m *= math::matrix_4x4 (math::matrix_4x4::translation, -pivot);
+    m = glm::translate(m, -pivot);
   }
 
   if (parent >= 0)
@@ -1456,16 +1463,16 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
   {
     if (parent >= 0)
     {
-      mrot = allbones[parent].mrot * math::matrix_4x4 (math::matrix_4x4::rotation, q);
+        mrot = allbones[parent].mrot * glm::toMat4(q);
     }
     else
     {
-      mrot = math::matrix_4x4 (math::matrix_4x4::rotation, q);
+        mrot = glm::toMat4(q);
     }
   }
   else
   {
-    mrot = math::matrix_4x4::unit;
+      mrot = glm::mat4x4(1);
   }
 
   calc = true;
@@ -1535,7 +1542,7 @@ void Model::draw( glm::mat4x4 const& model_view
 }
 
 void Model::draw (glm::mat4x4 const& model_view
-                 , std::vector<math::matrix_4x4> const& instances
+                 , std::vector<glm::mat4x4> const& instances
                  , opengl::scoped::use_program& m2_shader
                  , opengl::M2RenderState& model_render_state
                  , math::frustum const& frustum
@@ -1600,7 +1607,7 @@ void Model::draw (glm::mat4x4 const& model_view
 
     {
       opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
-      gl.bufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(::math::matrix_4x4), instances.data(), GL_DYNAMIC_DRAW);
+      gl.bufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(::glm::mat4x4), instances.data(), GL_DYNAMIC_DRAW);
       //m2_shader.attrib("transform", 0, 1);
     }
 
@@ -1629,7 +1636,7 @@ void Model::draw (glm::mat4x4 const& model_view
 
 }
 
-void Model::draw_particles( math::matrix_4x4 const& model_view
+void Model::draw_particles( glm::mat4x4 const& model_view
                           , opengl::scoped::use_program& particles_shader
                           , std::size_t instance_count
                           )
@@ -1750,7 +1757,7 @@ void Model::upload()
 
     gl.bindTexture(GL_TEXTURE_BUFFER, _bone_matrices_buf_tex);
     opengl::scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder(_bone_matrices_buffer);
-    gl.bufferData(GL_TEXTURE_BUFFER, bone_matrices.size() * sizeof(math::matrix_4x4), nullptr, GL_STREAM_DRAW);
+    gl.bufferData(GL_TEXTURE_BUFFER, bone_matrices.size() * sizeof(glm::mat4x4), nullptr, GL_STREAM_DRAW);
     gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _bone_matrices_buffer);
   }
 
@@ -1828,7 +1835,7 @@ void Model::setupVAO(opengl::scoped::use_program& m2_shader)
 
   {
     opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
-    gl.bufferData(GL_ARRAY_BUFFER, 10 * sizeof(::math::matrix_4x4), nullptr, GL_DYNAMIC_DRAW);
+    gl.bufferData(GL_ARRAY_BUFFER, 10 * sizeof(::glm::mat4x4), nullptr, GL_DYNAMIC_DRAW);
     m2_shader.attrib("transform", 0, 1);
   }
 

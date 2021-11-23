@@ -328,18 +328,6 @@ namespace opengl
     {
       gl.uniform4fv (pos, 1, glm::value_ptr(value));
     }
-    void use_program::uniform (std::string const& name, math::matrix_4x4 const& value)
-    {
-      GLuint loc = uniform_location (name);
-      if (loc < 0)
-        return;
-
-      gl.uniformMatrix4fv (loc, 1, GL_FALSE, value);
-    }
-    void use_program::uniform (GLint pos, math::matrix_4x4 const& value)
-    {
-      gl.uniformMatrix4fv(pos, 1, GL_FALSE, value);
-    }
 
     void use_program::uniform(std::string const& name, glm::mat4x4 const& value)
     {
@@ -389,7 +377,7 @@ namespace opengl
       _enabled_vertex_attrib_arrays.emplace (location);
       gl.vertexAttribPointer (location, 3, GL_FLOAT, GL_FALSE, 0, data);
     }
-    void use_program::attrib (std::string const& name, math::matrix_4x4 const* data, GLuint divisor)
+    void use_program::attrib (std::string const& name, glm::mat4x4 const* data, GLuint divisor)
     {
       GLuint const location (attrib_location (name));
       glm::vec4 const* vec4_ptr = reinterpret_cast<glm::vec4 const*>(data);
@@ -398,7 +386,7 @@ namespace opengl
       {
         gl.enableVertexAttribArray (location + i);
         _enabled_vertex_attrib_arrays.emplace (location + i);
-        gl.vertexAttribPointer (location + i, 4, GL_FLOAT, GL_FALSE, sizeof(math::matrix_4x4), vec4_ptr + i);
+        gl.vertexAttribPointer (location + i, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4x4), vec4_ptr + i);
         gl.vertexAttribDivisor(location + i, divisor);
       }      
     }
