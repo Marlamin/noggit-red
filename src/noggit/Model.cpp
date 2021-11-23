@@ -1224,7 +1224,7 @@ void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
     std::size_t bone_counter = 0;
     for (auto& bone : bones)
     {
-    	bone_matrices[bone_counter] = glm::transpose(bone.mat);
+    	bone_matrices[bone_counter] = bone.mat;
       bone_counter++;
     }
 
@@ -1417,7 +1417,7 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
     if (rot.uses(anim))
     {
-        m *= glm::toMat4(rot.getValue(anim, time, animtime));
+      m *= glm::transpose(glm::toMat4(q = rot.getValue(anim, time, animtime)));
     }
 
     if (scale.uses(anim))
@@ -1463,16 +1463,16 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
   {
     if (parent >= 0)
     {
-        mrot = allbones[parent].mrot * glm::toMat4(q);
+      mrot = allbones[parent].mrot * glm::transpose(glm::toMat4(q));
     }
     else
     {
-        mrot = glm::toMat4(q);
+      mrot = glm::transpose(glm::toMat4(q));
     }
   }
   else
   {
-      mrot = glm::mat4x4(1);
+    mrot = glm::mat4x4(1);
   }
 
   calc = true;

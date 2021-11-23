@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <glm/gtx/quaternion.hpp>
 #include <math/bounding_box.hpp>
 #include <math/frustum.hpp>
 #include <noggit/Log.h>
@@ -69,7 +70,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
 
     opengl::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
-      , math::matrix_4x4(math::matrix_4x4::unit)
+      , glm::mat4x4(glm::mat4x4((1)))
       , {0.0f, 1.0f, 0.0f, 1.0f}
       , extents[0]
       , extents[1]
@@ -193,7 +194,13 @@ void ModelInstance::recalcExtents()
       point = transform(point);
       corners_in_world.push_back(point);
   }
-  auto const rotated_corners_in_world (_transform_mat_transposed.transposed() * corners_in_world);
+ 
+  auto rotated_corners_in_world = std::vector<glm::vec3>();
+  auto transposedMat = _transform_mat;
+  for (auto const& point : corners_in_world)
+  {
+      rotated_corners_in_world.push_back(transposedMat * glm::vec4(point,0));
+  }
 
   math::aabb const bounding_of_rotated_points (rotated_corners_in_world);
 
@@ -293,23 +300,20 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
     return;
   }  
 
-  world_pos = wmo->transformMatrix() * pos;
+  world_pos = wmo->transformMatrix() * glm::vec4(pos,0);
 
-  math::matrix_4x4 m2_mat
+  auto m2_mat = glm::mat4x4(1);
+  m2_mat = glm::translate(m2_mat, pos);
+  m2_mat = m2_mat * glm::toMat4(doodad_orientation);
+  m2_mat = glm::scale(m2_mat, glm::vec3(scale));
+
+  glm::mat4x4 mat
   (
-    math::matrix_4x4(math::matrix_4x4::translation, pos)
-    * math::matrix_4x4 (math::matrix_4x4::rotation, doodad_orientation)
-    * math::matrix_4x4 (math::matrix_4x4::scale, scale)
+    wmo->transformMatrix() * m2_mat
   );
 
-  math::matrix_4x4 mat
-  (
-    wmo->transformMatrix()
-    * m2_mat
-  );
-
-  _transform_mat_inverted = mat.inverted();
-  _transform_mat_transposed = mat.transposed();
+  _transform_mat_inverted = glm::inverse(mat);
+  _transform_mat_transposed = mat;
 
   // to compute the size category (used in culling)
   recalcExtents();

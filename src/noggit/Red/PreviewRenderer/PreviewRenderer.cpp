@@ -230,7 +230,7 @@ void PreviewRenderer::draw()
     m2_shader.uniform("pixel_shader", 0);
 
     std::vector<ModelInstance*> instance{ nullptr };
-    std::vector<math::matrix_4x4> instance_mtx{ math::matrix_4x4()};
+    std::vector<glm::mat4x4> instance_mtx{ glm::mat4x4(1)};
 
     for (auto& model_instance : _model_instances)
     {

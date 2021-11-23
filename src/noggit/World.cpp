@@ -1574,7 +1574,7 @@ void World::draw (glm::mat4x4 const& model_view
         break;
       }
 
-      math::matrix_4x4 identity_mtx = math::matrix_4x4{ math::matrix_4x4::unit };
+      glm::mat4x4 identity_mtx = glm::mat4x4{1};
       auto& extents = tile->getCombinedExtents();
       opengl::primitives::wire_box::getInstance(_context).draw ( model_view
           , projection
