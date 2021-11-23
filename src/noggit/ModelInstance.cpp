@@ -70,7 +70,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
 
     opengl::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
-      , glm::mat4x4(glm::mat4x4((1)))
+      , glm::mat4x4(1)
       , {0.0f, 1.0f, 0.0f, 1.0f}
       , extents[0]
       , extents[1]
