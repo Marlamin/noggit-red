@@ -189,15 +189,15 @@ void ModelInstance::recalcExtents()
   auto points = relative_to_model.all_corners();
   for (auto& point : points)
   {
-      point = transform(point);
-      corners_in_world.push_back(point);
+    point = transform(point);
+    corners_in_world.push_back(point);
   }
  
   auto rotated_corners_in_world = std::vector<glm::vec3>();
   auto transposedMat = _transform_mat;
   for (auto const& point : corners_in_world)
   {
-      rotated_corners_in_world.push_back(transposedMat * glm::vec4(point,0));
+    rotated_corners_in_world.push_back(transposedMat * glm::vec4(point, 1.f));
   }
 
   math::aabb const bounding_of_rotated_points (rotated_corners_in_world);

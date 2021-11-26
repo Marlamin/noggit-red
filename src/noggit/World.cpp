@@ -1298,17 +1298,17 @@ void World::draw (glm::mat4x4 const& model_view
     {
       opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
-      mcnk_shader.uniform ("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
-      mcnk_shader.uniform ("animtime", static_cast<int>(animtime));
+      mcnk_shader.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
+      mcnk_shader.uniform("animtime", static_cast<int>(animtime));
 
       if (cursor_type != CursorType::NONE)
       {
         mcnk_shader.uniform("draw_cursor_circle", static_cast<int>(cursor_type));
-        mcnk_shader.uniform ("cursor_position", glm::vec3(cursor_pos.x, cursor_pos.y, cursor_pos.z));
+        mcnk_shader.uniform("cursor_position", glm::vec3(cursor_pos.x, cursor_pos.y, cursor_pos.z));
         mcnk_shader.uniform("cursorRotation", cursorRotation);
-        mcnk_shader.uniform ("outer_cursor_radius", brush_radius);
-        mcnk_shader.uniform ("inner_cursor_ratio", inner_radius_ratio);
-        mcnk_shader.uniform ("cursor_color", cursor_color);
+        mcnk_shader.uniform("outer_cursor_radius", brush_radius);
+        mcnk_shader.uniform("inner_cursor_ratio", inner_radius_ratio);
+        mcnk_shader.uniform("cursor_color", cursor_color);
       }
       else
       {
@@ -1516,7 +1516,7 @@ void World::draw (glm::mat4x4 const& model_view
                          , draw_fog
                          , current_selection()
                          , animtime
-                         ,skies->hasSkies()
+                         , skies->hasSkies()
                          , display
           );
         }
