@@ -30,14 +30,14 @@ bool SceneObject::isDuplicateOf(SceneObject const& other)
 void SceneObject::updateTransformMatrix()
 {
   auto rotationVector = glm::vec3(0);
+  rotationVector.z = glm::radians(dir.y - math::degrees(90.0)._);
+  rotationVector.y = glm::radians(-dir.z);
   rotationVector.x = glm::radians(dir.x);
-  rotationVector.y = glm::radians(dir.y - math::degrees(90.0)._);
-  rotationVector.z = glm::radians(dir.z);
 
   auto matrix = glm::mat4x4(1);
   matrix = glm::translate(matrix, pos);
   glm::quat roationQuat = glm::quat(rotationVector);
-  matrix = matrix * glm::toMat4(roationQuat);
+  matrix = matrix * glm::eulerAngleYZX(glm::radians(dir.y - math::degrees(90.0)._), glm::radians(-dir.x), glm::radians(dir.z));
   matrix = glm::scale(matrix, glm::vec3(scale, scale, scale));
 
   _transform_mat = matrix;
