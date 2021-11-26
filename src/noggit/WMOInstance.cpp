@@ -230,7 +230,7 @@ void WMOInstance::recalcExtents()
 
     for (auto const& point : group_points)
     {
-      adjustedGroupPoints.push_back(_transform_mat * glm::vec4(point, 0));
+      adjustedGroupPoints.push_back(_transform_mat * glm::vec4(point, 1.f));
     }
 
 
