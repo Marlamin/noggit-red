@@ -5,7 +5,6 @@
 #include <external/qtimgui/imgui/imgui.h>
 #include <external/imguizmo/ImGuizmo.h>
 #include <noggit/Selection.h>
-#include <math/matrix_4x4.hpp>
 #include <noggit/World.h>
 
 

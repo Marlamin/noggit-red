@@ -3,7 +3,7 @@
 #ifndef NOGGIT_3DOBJECT_HPP
 #define NOGGIT_3DOBJECT_HPP
 
-#include <math/matrix_4x4.hpp>
+#include <glm/mat4x4.hpp>
 #include <math/ray.hpp>
 #include <noggit/Selection.h>
 #include <noggit/ContextObject.hpp>

@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-#include <math/matrix_4x4.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
 

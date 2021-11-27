@@ -12,7 +12,6 @@
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QStringList>
-#include <math/matrix_4x4.hpp>
 #include <noggit/camera.hpp>
 #include <noggit/WMOInstance.h>
 #include <noggit/Selection.h>

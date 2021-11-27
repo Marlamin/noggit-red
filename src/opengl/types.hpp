@@ -3,7 +3,7 @@
 #pragma once
 
 #include <QtGui/QOpenGLContext>
-#include <math/matrix_4x4.hpp>
+#include <glm/mat4x4.hpp>
 #include <cstdint>
 #include <array>
 
