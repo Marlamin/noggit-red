@@ -1400,7 +1400,8 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
   if (calc) return;
 
   glm::mat4x4 m = glm::mat4x4(1);
-  glm::quat q = glm::quat();
+  glm::mat4x4 mr = glm::mat4x4(1);
+
   if ( flags.transformed
     || flags.billboard 
     || flags.cylindrical_billboard_lock_x 
@@ -1410,6 +1411,7 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
   {
   	m = glm::translate(m, pivot);
 
+
     if (trans.uses(anim))
     {
       m = glm::translate(m, trans.getValue (anim, time, animtime));
@@ -1417,8 +1419,17 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
     if (rot.uses(anim))
     {
-    	q = rot.getValue(anim, time, animtime);
-        m = m * glm::eulerAngleXYZ(glm::radians(q.x), glm::radians(q.z),glm::radians(q.y) );
+      glm::quat ref = glm::quat_cast(glm::mat4x4(1));
+      glm::quat q = rot.getValue(anim, time, animtime);
+      glm::vec3 rot_euler = glm::eulerAngles(q);
+
+      glm::vec3 test_rot_vec = glm::vec3(rot_euler[2], 
+        -(rot_euler[1] + glm::radians(180.f)),
+        -(rot_euler[0] + glm::radians(180.f)));
+
+      mr = glm::eulerAngleXYZ(test_rot_vec.x, test_rot_vec.y, test_rot_vec.z);
+
+      m = m * mr;
     }
 
     if (scale.uses(anim))
@@ -1457,11 +1468,11 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
   {
     if (parent >= 0)
     {
-        mrot = allbones[parent].mrot * glm::toMat4(q);
+        mrot = allbones[parent].mrot * mr;
     }
     else
     {
-      mrot = glm::toMat4(q);
+      mrot = mr;
     }
   }
   else

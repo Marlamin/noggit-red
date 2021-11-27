@@ -41,10 +41,10 @@ namespace Animation
   {
     //! \todo Check if this is really correct.
     return glm::quat(
+      static_cast<float>((value.w > 0 ? value.w - 32767 : value.w + 32767) / 32767.0f),
       static_cast<float>((value.x > 0 ? value.x - 32767 : value.x + 32767) / 32767.0f),
       static_cast<float>((value.y > 0 ? value.y - 32767 : value.y + 32767) / 32767.0f),
-      static_cast<float>((value.z > 0 ? value.z - 32767 : value.z + 32767) / 32767.0f),
-      static_cast<float>((value.w > 0 ? value.w - 32767 : value.w + 32767) / 32767.0f));
+      static_cast<float>((value.z > 0 ? value.z - 32767 : value.z + 32767) / 32767.0f));
   }
 
   template<>
@@ -147,6 +147,7 @@ namespace Animation
         }
         else
         {
+
           TimestampType t1 = timestampVector[pos];
           TimestampType t2 = timestampVector[pos + 1];
           const float percentage = (time - t1) / static_cast<float>(t2 - t1);
