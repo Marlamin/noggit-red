@@ -3,6 +3,8 @@
 #pragma once
 
 #include <math/trig.hpp>
+#include <glm/glm.hpp>
+#include <type_traits>
 
 namespace math
 {
@@ -11,7 +13,7 @@ namespace math
     template<typename T>
     static T linear (const float& percentage, const T& start, const T& end)
     {
-      return T (start * (1.0f - percentage) + end * percentage);
+      return glm::mix(start, end, percentage);
     }
 
     template<typename T>
