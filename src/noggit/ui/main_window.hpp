@@ -11,6 +11,8 @@
 #include <string>
 #include <unordered_set>
 
+#include <noggit/ui/VersionSelector.h>
+
 class StackedWidget;
 
 namespace noggit
@@ -30,12 +32,12 @@ namespace noggit
 
       void prompt_exit(QCloseEvent* event);
       void prompt_uid_fix_failure();
-      void build_map_lists();
+      void build_map_lists(bool isShadowlands);
 
       QMenuBar* _menuBar;
 
       std::unordered_set<QWidget*> displayed_widgets;
-
+      void build_menu(bool isShadowlands);
     signals:
       void exit_prompt_opened();
       void map_selected(int map_id);
@@ -57,7 +59,6 @@ namespace noggit
                       );
 
       void createBookmarkList();
-      void build_menu();
 
       struct MapEntry
       {
@@ -84,6 +85,7 @@ namespace noggit
       QWidget* _null_widget;
       MapView* _map_view;
       StackedWidget* _stack_widget;
+      versionSelector* _version_selector;
 
       noggit::Red::MapCreationWizard::Ui::MapCreationWizard* _map_creation_wizard;
       QMetaObject::Connection _map_wizard_connection;

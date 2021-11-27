@@ -15,7 +15,7 @@
 #include <noggit/ui/font_awesome.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/Red/UiCommon/StackedWidget.hpp>
-
+#include <BlizzardDatabase.h>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QListWidget>
@@ -158,10 +158,11 @@ namespace noggit
       createBookmarkList();
 
       _about = new about(this);
-
-      _menuBar = menuBar();
-
       _settings = new settings(this);
+      setEnabled(false);
+
+      _version_selector = new versionSelector(this);
+      _menuBar = menuBar();
 
       QSettings settings;
 
@@ -172,6 +173,8 @@ namespace noggit
         titleBarWidget->horizontalLayout->insertWidget(2, _menuBar);
         setMenuWidget(widget);
       }
+
+    
 
       _menuBar->setNativeMenuBar(settings.value("nativeMenubar", true).toBool());
 
@@ -193,6 +196,14 @@ namespace noggit
                          }
                        );
 
+      auto version_action(file_menu->addAction("Version"));
+      QObject::connect(version_action, &QAction::triggered
+          , [this]
+          {
+              _version_selector->show();
+          }
+      );
+
       auto mapmenu_action (file_menu->addAction ("Exit"));
       QObject::connect ( mapmenu_action, &QAction::triggered
                        , [this]
@@ -203,8 +214,7 @@ namespace noggit
 
 
       _menuBar->adjustSize();
-
-      build_menu();
+      _version_selector->show();
     }
 
     void main_window::check_uid_then_enter_map
@@ -300,7 +310,7 @@ namespace noggit
       LogError << "Map with ID " << mapID << " not found. Failed loading." << std::endl;
     }
 
-    void main_window::build_menu()
+    void main_window::build_menu(bool isShadowlands)
     {
       _stack_widget = new StackedWidget(this);
       _stack_widget->setAutoResize(true);
@@ -346,7 +356,7 @@ namespace noggit
 
       layout->addWidget (entry_points_tabs);
 
-      build_map_lists();
+      build_map_lists(isShadowlands);
 
       qulonglong bookmark_index (0);
       for (auto entry : mBookmarks)
@@ -408,7 +418,7 @@ namespace noggit
       _map_wizard_connection = connect(_map_creation_wizard, &noggit::Red::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated
           ,[=]
           {
-            build_map_lists();
+            build_map_lists(isShadowlands);
           }
       );
 
@@ -421,7 +431,7 @@ namespace noggit
       _minimap->adjustSize();
     }
 
-    void noggit::ui::main_window::build_map_lists()
+    void noggit::ui::main_window::build_map_lists(bool isShadowlands)
     {
 
       std::array<QListWidget*, 5> type_to_table
@@ -432,19 +442,50 @@ namespace noggit
         table->clear();
       }
 
-      for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
-      {
-        MapEntry e;
-        e.mapID = i->getInt(MapDB::MapID);
-        e.name = i->getLocalizedString(MapDB::Name);
-        e.areaType = i->getUInt(MapDB::AreaType);
+        if(isShadowlands)
+        {
+            std::string dbcFileDirectory = std::string("./workspace/dbfilesclient");
+            std::string dbdFileDirectory = std::string("./workspace/definitions");
 
-        if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
-          continue;
+            const auto& build = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
+            const auto& table = std::string("map");
 
-        auto item (new QListWidgetItem (QString::number(e.mapID) + " - " + QString::fromUtf8 (e.name.c_str()), type_to_table[e.areaType]));
-        item->setData (Qt::UserRole, QVariant (e.mapID));
-      }
+            auto blizzardDatabase = BlizzardDatabaseLib::BlizzardDatabase(dbcFileDirectory, dbdFileDirectory);
+            auto mapTable = blizzardDatabase.LoadTable(table, build);
+
+            auto iterator = mapTable.Records();
+            while (iterator.HasRecords())
+            {
+
+                auto record = iterator.Next();
+                MapEntry e;
+                e.mapID = record.RecordId;
+                e.name = record.Columns["MapName_lang"].Value;
+                e.areaType = std::stoi(record.Columns["InstanceType"].Value);
+
+                if (e.areaType < 0 || e.areaType > 4)
+                    continue;
+
+                auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()), type_to_table[e.areaType]));
+                item->setData(Qt::UserRole, QVariant(e.mapID));
+            }
+        }
+    	else
+        {
+            for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
+            {
+                MapEntry e;
+                e.mapID = i->getInt(MapDB::MapID);
+                e.name = i->getLocalizedString(MapDB::Name);
+                e.areaType = i->getUInt(MapDB::AreaType);
+
+                if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
+                    continue;
+
+                auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()), type_to_table[e.areaType]));
+                item->setData(Qt::UserRole, QVariant(e.mapID));
+            }
+        }
     }
 
 
