@@ -15,6 +15,7 @@
 #include <cassert>
 #include <map>
 #include <string>
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 Model::Model(const std::string& filename, noggit::NoggitRenderContext context)
@@ -1400,7 +1401,6 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
   glm::mat4x4 m = glm::mat4x4(1);
   glm::quat q = glm::quat();
-
   if ( flags.transformed
     || flags.billboard 
     || flags.cylindrical_billboard_lock_x 
@@ -1408,7 +1408,7 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
     || flags.cylindrical_billboard_lock_z
       )
   {
-      m = glm::translate(m, pivot);
+  	m = glm::translate(m, pivot);
 
     if (trans.uses(anim))
     {
@@ -1417,7 +1417,8 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
     if (rot.uses(anim))
     {
-      m *= glm::transpose(glm::toMat4(q = rot.getValue(anim, time, animtime)));
+    	q = rot.getValue(anim, time, animtime);
+        m = m * glm::eulerAngleXYZ(glm::radians(q.x), glm::radians(q.z),glm::radians(q.y) );
     }
 
     if (scale.uses(anim))
@@ -1428,21 +1429,14 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
     if (flags.billboard)
     {
         glm::vec3 vRight = model_view[0];
-      glm::vec3 vUp = model_view[1]; 
-      //glm::vec3 vUp = glm::vec3(0,1,0); // Cylindrical billboarding
-      vRight =  glm::vec3(vRight.x * -1, vRight.y * -1, vRight.z * -1);
-      //m[0][2] = vRight.x;
-      //m[1][2] = vRight.y;
-      //m[2][2] = vRight.z;
-      //m[0][1] = vUp.x;
-      //m[1][1] = vUp.y;
-      //m[2][1] = vUp.z;
-      m[2][0] = vRight.x;
-      m[2][1] = vRight.y;
-      m[2][2] = vRight.z;
-      m[1][0] = vUp.x;
-      m[1][1] = vUp.y;
-      m[1][2] = vUp.z;
+        glm::vec3 vUp = model_view[1]; 
+    	vRight =  glm::vec3(vRight.x * -1, vRight.y * -1, vRight.z * -1);
+        m[0][2] = vRight.x;
+        m[1][2] = vRight.y;
+        m[2][2] = vRight.z;
+        m[0][1] = vUp.x;
+        m[1][1] = vUp.y;
+        m[2][1] = vUp.z;
     }
 
     m = glm::translate(m, -pivot);
@@ -1457,17 +1451,17 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
   {
     mat = m;
   }
-
+  
   // transform matrix for normal vectors ... ??
   if (rot.uses(anim))
   {
     if (parent >= 0)
     {
-      mrot = allbones[parent].mrot * glm::transpose(glm::toMat4(q));
+        mrot = allbones[parent].mrot * glm::toMat4(q);
     }
     else
     {
-      mrot = glm::transpose(glm::toMat4(q));
+      mrot = glm::toMat4(q);
     }
   }
   else
