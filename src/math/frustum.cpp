@@ -3,23 +3,24 @@
 #include <math/frustum.hpp>
 
 #include <array>
-#include <external/glm/glm.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_access.hpp>
 
 namespace math
 {
   frustum::frustum (glm::mat4x4 const& matrix)
   {
-    const glm::vec4 column_0 = matrix[0];
-    const glm::vec4 column_1 = matrix[1];
-    const glm::vec4 column_2 = matrix[2];
-    const glm::vec4 column_3 = matrix[3];
+    const glm::vec4 row_0 = glm::row(matrix, 0);
+    const glm::vec4 row_1 = glm::row(matrix, 1);
+    const glm::vec4 row_2 = glm::row(matrix, 2);
+    const glm::vec4 row_3 = glm::row(matrix, 3);
 
-    _planes[RIGHT] = column_3 - column_0;
-    _planes[LEFT] = column_3 + column_0;
-    _planes[TOP] = column_3 - column_1;
-    _planes[BOTTOM] = column_3 + column_1;
-    _planes[BACK] = column_3 - column_2;
-    _planes[FRONT] = column_3 + column_2;
+    _planes[RIGHT] = row_3 - row_0;
+    _planes[LEFT] = row_3 + row_0;
+    _planes[TOP] = row_3 - row_1;
+    _planes[BOTTOM] = row_3 + row_1;
+    _planes[BACK] = row_3 - row_2;
+    _planes[FRONT] = row_3 + row_2;
   }
 
   bool frustum::contains (const glm::vec3& point) const

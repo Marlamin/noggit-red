@@ -6,12 +6,18 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <noggit/Misc.h>
 #include <math/trig.hpp>
+#include <limits>
 
 SceneObject::SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context, std::string filename)
 : _type(type)
 , _filename(filename)
 , _context(context)
+, pos(0.f, 0.f, 0.f)
+, dir(0.f, 0.f, 0.f)
 {
+  // min and max initialized to their opposites
+  extents[0] = glm::vec3(std::numeric_limits<float>::max()); 
+  extents[1] = glm::vec3(std::numeric_limits<float>::lowest()); 
 }
 
 bool SceneObject::isInsideRect(std::array<glm::vec3, 2> const* rect) const
@@ -29,15 +35,9 @@ bool SceneObject::isDuplicateOf(SceneObject const& other)
 
 void SceneObject::updateTransformMatrix()
 {
-  auto rotationVector = glm::vec3(0);
-  rotationVector.x = glm::radians(dir.x);
-  rotationVector.y = glm::radians(dir.y - math::degrees(90.0)._);
-  rotationVector.z = glm::radians(dir.z);
-
   auto matrix = glm::mat4x4(1);
   matrix = glm::translate(matrix, pos);
-  glm::quat roationQuat = glm::quat(rotationVector);
-  matrix = matrix * glm::toMat4(roationQuat);
+  matrix = matrix * glm::eulerAngleYZX(glm::radians(dir.y - math::degrees(90.0)._), glm::radians(-dir.x), glm::radians(dir.z));
   matrix = glm::scale(matrix, glm::vec3(scale, scale, scale));
 
   _transform_mat = matrix;

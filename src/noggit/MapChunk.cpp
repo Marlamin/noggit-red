@@ -21,6 +21,7 @@
 #include <map>
 #include <QPixmap>
 #include <QImage>
+#include <limits>
 
 MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
                    tile_mode mode, noggit::NoggitRenderContext context, bool init_empty, int chunk_idx)
@@ -28,11 +29,14 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
   , mt(maintile)
   , use_big_alphamap(bigAlpha)
   , _context(context)
+  , vmin(std::numeric_limits<float>::max())
+  , vmax(std::numeric_limits<float>::lowest())
   , _chunk_update_flags(ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
                         | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
 {
+
 
   if (init_empty)
   {
@@ -75,10 +79,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
 
     zbase = zbase*-1.0f + ZEROPOINT;
     xbase = xbase*-1.0f + ZEROPOINT;
-
-    vmin.y = 0.0f;
-    vmin = glm::vec3(9999999.0f, 9999999.0f, 9999999.0f);
-    vmax = glm::vec3(-9999999.0f, -9999999.0f, -9999999.0f);
 
     glm::vec3 *ttv = mVertices;
 
@@ -145,9 +145,6 @@ MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
     // correct the x and z values ^_^
     zbase = zbase*-1.0f + ZEROPOINT;
     xbase = xbase*-1.0f + ZEROPOINT;
-
-    vmin = glm::vec3(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-    vmax = glm::vec3(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
   }
 
   texture_set = std::make_unique<TextureSet>(this, f, base, maintile, bigAlpha,
