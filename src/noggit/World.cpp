@@ -137,7 +137,7 @@ void World::update_selection_pivot()
   ZoneScoped;
   if (has_multiple_model_selected())
   {
-    glm::vec3 pivot;
+    glm::vec3 pivot = glm::vec3(0);
     int model_count = 0;
 
     for (auto const& entry : _current_selection)
