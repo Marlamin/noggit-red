@@ -552,12 +552,17 @@ namespace noggit
             rotation = obj->dir;
           }
 
-          world->addM2( obj->getFilename()
-                      , pos
-                      , scale
-                      , rotation
-                      , paste_params
-                      );
+          auto new_obj = world->addM2AndGetInstance( obj->getFilename()
+                        , pos
+                        , scale
+                        , rotation
+                        , paste_params
+                        );
+
+          new_obj->model->wait_until_loaded();
+          new_obj->model->waitForChildrenLoaded();
+          new_obj->recalcExtents();
+
         }
         else if (obj->which() == eWMO)
         {
@@ -568,7 +573,10 @@ namespace noggit
             rotation = obj->dir;
           }
 
-          world->addWMO(obj->getFilename(), pos, rotation);
+          auto new_obj = world->addWMOAndGetInstance(obj->getFilename(), pos, rotation);
+          new_obj->wmo->wait_until_loaded();
+          new_obj->wmo->waitForChildrenLoaded();
+          new_obj->recalcExtents();
         }        
       }
     }
