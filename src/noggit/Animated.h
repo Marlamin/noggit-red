@@ -8,7 +8,9 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <type_traits>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/ext/quaternion_common.hpp>
 
 namespace Animation
 {
@@ -157,7 +159,15 @@ namespace Animation
           case Animation::Interpolation::Type::LINEAR:
           {
             //result = math::interpolation::linear (percentage, dataVector[pos], dataVector[pos + 1]);
-            result = glm::mix(dataVector[pos], dataVector[pos + 1], percentage);
+            if constexpr (std::is_same_v<AnimatedType, glm::quat>)
+            {
+              result = glm::slerp(dataVector[pos], dataVector[pos + 1], percentage);
+            }
+            else
+            {
+              result = glm::mix(dataVector[pos], dataVector[pos + 1], percentage);
+            }
+           
           }
             break;
 
