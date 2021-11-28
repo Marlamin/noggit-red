@@ -141,7 +141,7 @@ namespace Animation
           }
         }
 
-        if (pos == timestampVector.size() - 1 || _interpolationType == Animation::Interpolation::Type::NONE)
+        if (_interpolationType == Animation::Interpolation::Type::NONE)
         {
           result = dataVector[pos];
         }
@@ -156,7 +156,8 @@ namespace Animation
           {
           case Animation::Interpolation::Type::LINEAR:
           {
-            result = math::interpolation::linear (percentage, dataVector[pos], dataVector[pos + 1]);
+            //result = math::interpolation::linear (percentage, dataVector[pos], dataVector[pos + 1]);
+            result = glm::mix(dataVector[pos], dataVector[pos + 1], percentage);
           }
             break;
 

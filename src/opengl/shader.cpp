@@ -1,5 +1,4 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <math/matrix_4x4.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/context.hpp>
 #include <opengl/context.inl>

@@ -17,6 +17,7 @@
 #include <string>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <math/trig.hpp>
 
 Model::Model(const std::string& filename, noggit::NoggitRenderContext context)
   : AsyncObject(filename)

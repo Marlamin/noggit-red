@@ -13,7 +13,7 @@ namespace math
     template<typename T>
     static T linear (const float& percentage, const T& start, const T& end)
     {
-      return glm::mix(start, end, percentage);
+      return T();
     }
 
     template<typename T>
