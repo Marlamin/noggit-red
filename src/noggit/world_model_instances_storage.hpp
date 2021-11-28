@@ -39,7 +39,7 @@ namespace noggit
 
     boost::optional<ModelInstance*> get_model_instance(std::uint32_t uid);
     boost::optional<WMOInstance*> get_wmo_instance(std::uint32_t uid);
-    boost::optional<selection_type> get_instance(std::uint32_t uid);
+    boost::optional<selection_type> get_instance(std::uint32_t uid, bool lock=true);
 
     void delete_instances_from_tile(tile_index const& tile);
     void delete_instances(std::vector<selection_type> const& instances);

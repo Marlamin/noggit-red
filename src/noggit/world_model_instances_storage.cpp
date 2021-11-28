@@ -185,12 +185,13 @@ namespace noggit
   {
     std::unique_lock<std::mutex> const lock (_mutex);
 
-    if (noggit::ActionManager::instance()->getCurrentAction())
+    if (auto instance = get_instance(uid, false))
     {
-      if (auto instance = get_instance(uid))
+      _world->updateTilesEntry(instance.get(), model_update::remove);
+      auto obj = boost::get<selected_object_type>(instance.get());
+
+      if (noggit::ActionManager::instance()->getCurrentAction())
       {
-        _world->updateTilesEntry(instance.get(), model_update::remove);
-        auto obj = boost::get<selected_object_type>(instance.get());
         noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(obj);
       }
     }
@@ -267,27 +268,52 @@ namespace noggit
     }
   }
 
-  boost::optional<selection_type> world_model_instances_storage::get_instance(std::uint32_t uid)
+  boost::optional<selection_type> world_model_instances_storage::get_instance(std::uint32_t uid, bool lock)
   {
-    std::unique_lock<std::mutex> const lock (_mutex);
-    
-    auto wmo_it = _wmos.find(uid);
-
-    if (wmo_it != _wmos.end())
+    if (lock)
     {
-      return selection_type {&wmo_it->second};
-    }
-    else
-    {
-      auto m2_it = _m2s.find(uid);
+      std::unique_lock<std::mutex> const lock(_mutex);
 
-      if (m2_it != _m2s.end())
+      auto wmo_it = _wmos.find(uid);
+
+      if (wmo_it != _wmos.end())
       {
-        return selection_type {&m2_it->second};
+        return selection_type{ &wmo_it->second };
       }
       else
       {
-        return boost::none;
+        auto m2_it = _m2s.find(uid);
+
+        if (m2_it != _m2s.end())
+        {
+          return selection_type{ &m2_it->second };
+        }
+        else
+        {
+          return boost::none;
+        }
+      }
+    }
+    else
+    {
+      auto wmo_it = _wmos.find(uid);
+
+      if (wmo_it != _wmos.end())
+      {
+        return selection_type{ &wmo_it->second };
+      }
+      else
+      {
+        auto m2_it = _m2s.find(uid);
+
+        if (m2_it != _m2s.end())
+        {
+          return selection_type{ &m2_it->second };
+        }
+        else
+        {
+          return boost::none;
+        }
       }
     }
   }

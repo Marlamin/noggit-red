@@ -222,6 +222,10 @@ unsigned noggit::Action::handleObjectAdded(unsigned uid, bool redo)
         obj = _map_view->getWorld()->addM2AndGetInstance(pair.second.filename, pair.second.pos,
                                                          pair.second.scale,  pair.second.dir, nullptr);
 
+      obj->instance_model()->wait_until_loaded();
+      obj->instance_model()->waitForChildrenLoaded();
+      obj->recalcExtents();
+
       new_uid = obj->uid;
       pair.first = new_uid;
 
@@ -284,6 +288,10 @@ unsigned noggit::Action::handleObjectRemoved(unsigned uid, bool redo)
       else
         obj = _map_view->getWorld()->addM2AndGetInstance(pair.second.filename, pair.second.pos,
                                                          pair.second.scale,  pair.second.dir, nullptr);
+
+      obj->instance_model()->wait_until_loaded();
+      obj->instance_model()->waitForChildrenLoaded();
+      obj->recalcExtents();
 
       new_uid = obj->uid;
       pair.first = new_uid;
