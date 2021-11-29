@@ -235,7 +235,7 @@
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
-                 <widget class="noggit::Red::PresetEditor::ModelViewer" name="viewport">
+                 <widget class="noggit::ui::tools::PresetEditor::ModelViewer" name="viewport">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
                     <horstretch>1</horstretch>
@@ -436,9 +436,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>noggit::Red::PresetEditor::ModelViewer</class>
+   <class>noggit::ui::tools::PresetEditor::ModelViewer</class>
    <extends>QOpenGLWidget</extends>
-   <header location="global">noggit/Red/PresetEditor/ModelView.hpp</header>
+   <header location="global">noggit/ui/tools/PresetEditor/ModelView.hpp</header>
   </customwidget>
   <customwidget>
    <class>noggit::ui::minimap_widget</class>

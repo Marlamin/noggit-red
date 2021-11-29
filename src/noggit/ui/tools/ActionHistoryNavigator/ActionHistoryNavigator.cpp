@@ -9,7 +9,7 @@
 #include <QDateTime>
 #include <QLabel>
 
-using namespace noggit::Red;
+using namespace noggit::ui::tools;
 using namespace noggit::ui;
 
 ActionHistoryNavigator::ActionHistoryNavigator(QWidget* parent)

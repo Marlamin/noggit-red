@@ -3,7 +3,7 @@
 #include <noggit/ui/font_noggit.hpp>
 #include <noggit/DBC.h>
 
-using namespace noggit::Red::PresetEditor::Ui;
+using namespace noggit::ui::tools::PresetEditor::Ui;
 using namespace noggit::ui;
 
 PresetEditorWidget::PresetEditorWidget(QWidget *parent)

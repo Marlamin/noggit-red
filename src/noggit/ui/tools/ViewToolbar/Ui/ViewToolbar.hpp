@@ -13,7 +13,7 @@
 
 namespace noggit
 {
-  namespace Red::ViewToolbar::Ui
+  namespace ui::tools::ViewToolbar::Ui
   {
     class ViewToolbar: public QToolBar
     {

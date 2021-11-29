@@ -266,7 +266,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="noggit::Red::AssetBrowser::ModelViewer" name="viewport">
+              <widget class="noggit::ui::tools::AssetBrowser::ModelViewer" name="viewport">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -307,9 +307,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>noggit::Red::AssetBrowser::ModelViewer</class>
+   <class>noggit::ui::tools::AssetBrowser::ModelViewer</class>
    <extends>QOpenGLWidget</extends>
-   <header location="global">noggit/Red/AssetBrowser/ModelView.hpp</header>
+   <header location="global">noggit/ui/tools/AssetBrowser/ModelView.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

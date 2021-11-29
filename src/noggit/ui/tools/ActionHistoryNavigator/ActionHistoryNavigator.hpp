@@ -13,7 +13,7 @@ namespace noggit
 {
   class Action;
 
-  namespace Red
+  namespace ui::tools
   {
     class ActionHistoryNavigator : public QWidget
     {

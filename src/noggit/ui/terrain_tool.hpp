@@ -43,9 +43,9 @@ namespace noggit
       void setSpeed (float speed);
       float getSpeed () { return _speed_slider->value(); };
 
-      noggit::Red::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
-      noggit::Red::UiCommon::ExtendedSlider* getInnerRadiusSlider() { return _inner_radius_slider; };
-      noggit::Red::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
+      noggit::ui::tools::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
+      noggit::ui::tools::UiCommon::ExtendedSlider* getInnerRadiusSlider() { return _inner_radius_slider; };
+      noggit::ui::tools::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
       QDial* getMaskOrientationDial() { return _image_mask_group->getMaskOrientationDial(); };
 
       // vertex edit only functions
@@ -61,7 +61,7 @@ namespace noggit
 
       void storeCursorPos (glm::vec3* cursor_pos) { _cursor_pos = cursor_pos; }
 
-      noggit::Red::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
+      noggit::ui::tools::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
 
       QImage* getMaskImage() { return &_mask_image; };
 
@@ -94,11 +94,11 @@ namespace noggit
       QButtonGroup* _vertex_button_group;
       QGroupBox* _speed_box;
       QGroupBox* _vertex_type_group;
-      noggit::Red::ImageMaskSelector* _image_mask_group;
+      noggit::ui::tools::ImageMaskSelector* _image_mask_group;
 
-      noggit::Red::UiCommon::ExtendedSlider* _radius_slider;
-      noggit::Red::UiCommon::ExtendedSlider* _inner_radius_slider;
-      noggit::Red::UiCommon::ExtendedSlider* _speed_slider;
+      noggit::ui::tools::UiCommon::ExtendedSlider* _radius_slider;
+      noggit::ui::tools::UiCommon::ExtendedSlider* _inner_radius_slider;
+      noggit::ui::tools::UiCommon::ExtendedSlider* _speed_slider;
 
       QSlider* _angle_slider;
       QDial* _orientation_dial;

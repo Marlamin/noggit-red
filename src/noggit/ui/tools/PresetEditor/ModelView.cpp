@@ -4,13 +4,13 @@
 
 #include <vector>
 
-using namespace noggit::Red::PresetEditor;
+using namespace noggit::ui::tools::PresetEditor;
 
 ModelViewer::ModelViewer(QWidget *parent)
 : AssetBrowser::ModelViewer(parent, noggit::NoggitRenderContext::PRESET_EDITOR)
 , _world(nullptr)
 , _world_camera(_camera.position, _camera.yaw(), _camera.pitch())
-, _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::PRESET_EDITOR)
+, _transform_gizmo(noggit::ui::tools::ViewportGizmo::GizmoContext::PRESET_EDITOR)
 {
 }
 

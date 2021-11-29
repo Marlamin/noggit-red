@@ -8,7 +8,7 @@
 
 #include <stdexcept>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 LogicBranch::LogicBranch(Node* logic_node)
 : _logic_node(logic_node)

@@ -53,13 +53,13 @@ namespace noggit
       auto settings_layout = new QVBoxLayout(settings_group);
 
 
-      _radius_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
+      _radius_slider = new noggit::ui::tools::UiCommon::ExtendedSlider(this);
       _radius_slider->setPrefix("Radius:");
       _radius_slider->setRange (0, 1000);
       _radius_slider->setDecimals (2);
       _radius_slider->setValue (10.0f);
 
-      _speed_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
+      _speed_slider = new noggit::ui::tools::UiCommon::ExtendedSlider(this);
       _speed_slider->setPrefix("Speed:");
       _speed_slider->setRange (0, 10);
       _speed_slider->setSingleStep (1);

@@ -18,7 +18,7 @@ using QtNodes::NodeValidationState;
 
 namespace noggit
 {
-    namespace Red::NodeEditor::Nodes
+    namespace ui::tools::NodeEditor::Nodes
     {
       template <typename T, typename T1>
       class VectorScalarMathNodeBase : public BaseNode

@@ -19,7 +19,7 @@ using namespace std::literals;
 
 namespace noggit
 {
-    namespace Red::NodeEditor::Nodes
+    namespace ui::tools::NodeEditor::Nodes
     {
         class MathNode : public BaseNode
         {

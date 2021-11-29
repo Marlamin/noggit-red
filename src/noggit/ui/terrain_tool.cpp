@@ -89,13 +89,13 @@ namespace noggit
 
       layout->addWidget(terrain_type_group);
 
-      _radius_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
+      _radius_slider = new noggit::ui::tools::UiCommon::ExtendedSlider(this);
       _radius_slider->setRange (0, 1000);
       _radius_slider->setPrefix("Radius:");
       _radius_slider->setDecimals(2);
       _radius_slider->setValue(15);
 
-      _inner_radius_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
+      _inner_radius_slider = new noggit::ui::tools::UiCommon::ExtendedSlider(this);
       _inner_radius_slider->setRange (0.0, 1.0);
       _inner_radius_slider->setPrefix("Inner Radius:");
       _inner_radius_slider->setDecimals(2);
@@ -106,7 +106,7 @@ namespace noggit
       auto settings_layout (new QVBoxLayout (settings_group));
       settings_layout->setContentsMargins(0, 12, 0, 12);
 
-      _speed_slider = new noggit::Red::UiCommon::ExtendedSlider(this);
+      _speed_slider = new noggit::ui::tools::UiCommon::ExtendedSlider(this);
       _speed_slider->setPrefix("Speed:");
       _speed_slider->setRange (0, 10 * 100);
       _speed_slider->setSingleStep (1);
@@ -118,7 +118,7 @@ namespace noggit
 
       layout->addWidget(settings_group);
 
-      _image_mask_group = new noggit::Red::ImageMaskSelector(map_view, this);
+      _image_mask_group = new noggit::ui::tools::ImageMaskSelector(map_view, this);
       _mask_image = _image_mask_group->getPixmap()->toImage();
       layout->addWidget(_image_mask_group);
       _image_mask_group->setBrushModeVisible(!stamp);
@@ -212,9 +212,9 @@ namespace noggit
                   }
                 );
 
-      connect (_image_mask_group, &noggit::Red::ImageMaskSelector::rotationUpdated, this, &terrain_tool::updateMaskImage);
-      connect (_radius_slider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged, this, &terrain_tool::updateMaskImage);
-      connect(_image_mask_group, &noggit::Red::ImageMaskSelector::pixmapUpdated, this, &terrain_tool::updateMaskImage);
+      connect (_image_mask_group, &noggit::ui::tools::ImageMaskSelector::rotationUpdated, this, &terrain_tool::updateMaskImage);
+      connect (_radius_slider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged, this, &terrain_tool::updateMaskImage);
+      connect(_image_mask_group, &noggit::ui::tools::ImageMaskSelector::pixmapUpdated, this, &terrain_tool::updateMaskImage);
 
 
     }

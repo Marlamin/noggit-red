@@ -15,7 +15,7 @@
 
 namespace noggit
 {
-    namespace Red::NodeEditor::Ui
+    namespace ui::tools::NodeEditor::Ui
     {
         class NodeEditorWidget : public QMainWindow
         {

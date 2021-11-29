@@ -7,7 +7,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodeScene.hpp>
 #include <external/NodeEditor/include/nodes/Node>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 using QtNodes::Node;
 
 RewiringPointNode::RewiringPointNode()

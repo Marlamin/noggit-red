@@ -21,7 +21,7 @@
 
 namespace noggit
 {
-  namespace Red::AssetBrowser
+  namespace ui::tools::AssetBrowser
   {
 
   class ModelViewer : public PreviewRenderer

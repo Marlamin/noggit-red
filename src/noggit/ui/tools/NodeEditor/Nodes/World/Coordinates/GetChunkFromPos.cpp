@@ -8,7 +8,7 @@
 #include <noggit/Action.hpp>
 #include <external/glm/gtx/string_cast.hpp>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 GetChunkFromPosNode::GetChunkFromPosNode()
 : ContextLogicNodeBase()

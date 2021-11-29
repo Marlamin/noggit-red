@@ -6,7 +6,7 @@
 #include <QHBoxLayout>
 #include <QInputDialog>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 using QtNodes::Node;
 
 InNodePort::InNodePort(QString const& caption_, bool caption_visible_)

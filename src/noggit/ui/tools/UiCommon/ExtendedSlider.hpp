@@ -9,7 +9,7 @@
 
 namespace noggit
 {
-    namespace Red::UiCommon
+    namespace ui::tools::UiCommon
     {
         class ExtendedSlider : public QWidget
         {

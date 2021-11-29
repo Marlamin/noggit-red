@@ -87,7 +87,7 @@ namespace noggit
       StackedWidget* _stack_widget;
       versionSelector* _version_selector;
 
-      noggit::Red::MapCreationWizard::Ui::MapCreationWizard* _map_creation_wizard;
+      noggit::ui::tools::MapCreationWizard::Ui::MapCreationWizard* _map_creation_wizard;
       QMetaObject::Connection _map_wizard_connection;
 
       QListWidget* _continents_table;

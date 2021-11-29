@@ -10,7 +10,7 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
-namespace noggit::Red::NodeEditor::Nodes
+namespace noggit::ui::tools::NodeEditor::Nodes
 {
   class ChunkAddDetailDoodads : public ContextLogicNodeBase
   {

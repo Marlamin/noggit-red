@@ -25,7 +25,7 @@
 
 class World;
 
-namespace noggit::Red
+namespace noggit::ui::tools
 {
   using operation_type = boost::variant
     < noggit::ui::terrain_tool*

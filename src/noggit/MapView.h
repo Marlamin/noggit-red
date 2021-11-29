@@ -49,12 +49,12 @@ class World;
 namespace noggit
 {
 
-  namespace Red::ViewToolbar::Ui
+  namespace ui::tools::ViewToolbar::Ui
   {
     class ViewToolbar;
   }
 
-  namespace Red
+  namespace ui::tools
   {
     class BrushStack;
     class LightEditor;
@@ -94,7 +94,7 @@ enum class save_mode
   all
 };
 
-class MapView : public noggit::Red::ViewportManager::Viewport
+class MapView : public noggit::ui::tools::ViewportManager::Viewport
 {
   Q_OBJECT
 public:
@@ -207,12 +207,12 @@ private:
   bool saving_minimap = false;
 
   noggit::ui::toolbar* _toolbar;
-  noggit::Red::ViewToolbar::Ui::ViewToolbar* _view_toolbar;
+  noggit::ui::tools::ViewToolbar::Ui::ViewToolbar* _view_toolbar;
 
   void save(save_mode mode);
 
   QSettings* _settings;
-  noggit::Red::ViewportGizmo::ViewportGizmo _transform_gizmo;
+  noggit::ui::tools::ViewportGizmo::ViewportGizmo _transform_gizmo;
   ImGuiContext* _imgui_context;
 
 signals:
@@ -372,13 +372,13 @@ private:
   noggit::ui::texturing_tool* texturingTool;
   noggit::ui::hole_tool* holeTool;
   noggit::ui::MinimapCreator* minimapTool;
-  noggit::Red::BrushStack* stampTool;
-  noggit::Red::LightEditor* lightEditor;
+  noggit::ui::tools::BrushStack* stampTool;
+  noggit::ui::tools::LightEditor* lightEditor;
   noggit::scripting::scripting_tool* scriptingTool;
 
   opengl::texture* const _texBrush;
 
-  noggit::Red::AssetBrowser::Ui::AssetBrowserWidget* _asset_browser;
+  noggit::ui::tools::AssetBrowser::Ui::AssetBrowserWidget* _asset_browser;
 
   QDockWidget* _asset_browser_dock;
   QDockWidget* _node_editor_dock;
@@ -386,7 +386,7 @@ private:
   QDockWidget* _texture_picker_dock;
   QDockWidget* _detail_infos_dock;
 
-  noggit::Red::ToolPanel* _tool_panel_dock;
+  noggit::ui::tools::ToolPanel* _tool_panel_dock;
 
   ::Ui::MapViewOverlay* _viewport_overlay_ui;
   ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;

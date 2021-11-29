@@ -13,9 +13,9 @@
 
 namespace noggit
 {
-  namespace Red::PresetEditor
+  namespace ui::tools::PresetEditor
   {
-    class ModelViewer : public Red::AssetBrowser::ModelViewer
+    class ModelViewer : public ui::tools::AssetBrowser::ModelViewer
     {
     public:
         explicit ModelViewer(QWidget* parent = nullptr);

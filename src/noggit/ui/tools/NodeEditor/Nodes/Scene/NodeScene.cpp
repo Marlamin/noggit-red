@@ -9,7 +9,7 @@
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 
 bool NodeScene::execute()

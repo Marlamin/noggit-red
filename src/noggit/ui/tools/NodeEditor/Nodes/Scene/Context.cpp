@@ -6,10 +6,10 @@
 #include <QDir>
 #include <QFileInfo>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
-Context* noggit::Red::NodeEditor::Nodes::gCurrentContext = new Context(NodeExecutionContext::MAP_VIEW);
-std::shared_ptr<DataModelRegistry> noggit::Red::NodeEditor::Nodes::gDataModelRegistry;
+Context* noggit::ui::tools::NodeEditor::Nodes::gCurrentContext = new Context(NodeExecutionContext::MAP_VIEW);
+std::shared_ptr<DataModelRegistry> noggit::ui::tools::NodeEditor::Nodes::gDataModelRegistry;
 
 Context::Context(NodeExecutionContext context_type, QObject* parent)
 : QObject(parent)

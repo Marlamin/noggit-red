@@ -19,11 +19,11 @@
 #include <QVector3D>
 
 
-using namespace noggit::Red;
+using namespace noggit::ui::tools;
 
 
 PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderContext context, QWidget* parent)
-  :  noggit::Red::ViewportManager::Viewport(parent)
+  :  noggit::ui::tools::ViewportManager::Viewport(parent)
   , _camera (glm::vec3(0.0f, 0.0f, 0.0f), math::degrees(0.0f), math::degrees(0.0f))
   , _settings (new QSettings())
   , _width(width)
@@ -723,7 +723,7 @@ void PreviewRenderer::unloadOpenglData(bool from_manager)
     ViewportManager::ViewportManager::unloadOpenglData(this);
 }
 
-void noggit::Red::PreviewRenderer::updateLightingUniformBlock()
+void noggit::ui::tools::PreviewRenderer::updateLightingUniformBlock()
 {
 
   glm::vec4 ocean_color_light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
@@ -746,7 +746,7 @@ void noggit::Red::PreviewRenderer::updateLightingUniformBlock()
   _lighting_needs_update = false;
 }
 
-void noggit::Red::PreviewRenderer::updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection)
+void noggit::ui::tools::PreviewRenderer::updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection)
 {
   _mvp_ubo_data.model_view = model_view;
   _mvp_ubo_data.projection = projection;

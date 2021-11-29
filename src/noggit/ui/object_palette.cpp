@@ -91,7 +91,7 @@ namespace noggit
 
           layout->addWidget(_object_list, 0, 0);
 
-          _preview_renderer = new noggit::Red::PreviewRenderer(_object_list->iconSize().width(), _object_list->iconSize().height(),
+          _preview_renderer = new noggit::ui::tools::PreviewRenderer(_object_list->iconSize().width(), _object_list->iconSize().height(),
                                                   noggit::NoggitRenderContext::OBJECT_PALETTE_PREVIEW, this);
           _preview_renderer->setVisible(false);
 
@@ -130,7 +130,7 @@ namespace noggit
         void ObjectPalette::addObject()
         {
 
-          std::string const& display_name = reinterpret_cast<noggit::Red::AssetBrowser::Ui::AssetBrowserWidget*>(
+          std::string const& display_name = reinterpret_cast<noggit::ui::tools::AssetBrowser::Ui::AssetBrowserWidget*>(
               _map_view->getAssetBrowser()->widget())->getFilename();
 
           addObjectByFilename(display_name.c_str());

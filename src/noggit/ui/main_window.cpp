@@ -413,9 +413,9 @@ namespace noggit
       right_side->addTab(minimap_holder, "Enter map");
       minimap_holder->setAccessibleName("main_menu_minimap_holder");
 
-      _map_creation_wizard = new noggit::Red::MapCreationWizard::Ui::MapCreationWizard(this);
+      _map_creation_wizard = new noggit::ui::tools::MapCreationWizard::Ui::MapCreationWizard(this);
 
-      _map_wizard_connection = connect(_map_creation_wizard, &noggit::Red::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated
+      _map_wizard_connection = connect(_map_creation_wizard, &noggit::ui::tools::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated
           ,[=]
           {
             build_map_lists(isShadowlands);

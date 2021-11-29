@@ -16,7 +16,7 @@
 #include <QDial>
 #include <QSlider>
 
-using namespace noggit::Red::AssetBrowser::Ui;
+using namespace noggit::ui::tools::AssetBrowser::Ui;
 using namespace noggit::ui;
 
 AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)

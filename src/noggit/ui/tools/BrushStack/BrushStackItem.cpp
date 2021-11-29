@@ -8,7 +8,7 @@
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
 
-using namespace noggit::Red;
+using namespace noggit::ui::tools;
 
 BrushStackItem::BrushStackItem(QWidget* parent)
 : ReorderableVerticalBox(parent)

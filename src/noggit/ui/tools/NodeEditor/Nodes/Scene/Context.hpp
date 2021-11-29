@@ -13,7 +13,7 @@
 
 namespace noggit
 {
-    namespace Red::NodeEditor::Nodes
+    namespace ui::tools::NodeEditor::Nodes
     {
         using VariableMap = tsl::robin_map<std::string, std::pair<std::string, std::shared_ptr<NodeData>>>;
 

@@ -14,7 +14,7 @@
 #include <QComboBox>
 #include <QDir>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 LogicProcedureNode::LogicProcedureNode()
 : LogicNodeBase()

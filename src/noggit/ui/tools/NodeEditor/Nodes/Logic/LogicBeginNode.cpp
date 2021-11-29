@@ -6,7 +6,7 @@
 
 #include <QInputDialog>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 LogicBeginNode::LogicBeginNode()
 : LogicNodeBase()

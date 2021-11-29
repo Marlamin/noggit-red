@@ -1,6 +1,6 @@
 #include "ViewportManager.hpp"
 
-using namespace noggit::Red::ViewportManager;
+using namespace noggit::ui::tools::ViewportManager;
 
 std::vector<Viewport*> ViewportManager::_viewports;
 

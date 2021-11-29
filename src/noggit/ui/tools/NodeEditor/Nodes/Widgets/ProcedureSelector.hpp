@@ -7,7 +7,7 @@
 
 namespace noggit
 {
-    namespace Red::NodeEditor::Nodes
+    namespace ui::tools::NodeEditor::Nodes
     {
         class ProcedureSelector : public QWidget
         {

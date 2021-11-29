@@ -7,7 +7,7 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/Brush.h>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 TexturingSprayTextureNode::TexturingSprayTextureNode()
 : ContextLogicNodeBase()

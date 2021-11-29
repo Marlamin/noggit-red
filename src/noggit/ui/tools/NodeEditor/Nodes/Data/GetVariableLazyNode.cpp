@@ -10,7 +10,7 @@
 #include <boost/format.hpp>
 #include <external/NodeEditor/include/nodes/Node>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 using QtNodes::Node;
 
 GetVariableLazyNodeBase::GetVariableLazyNodeBase()

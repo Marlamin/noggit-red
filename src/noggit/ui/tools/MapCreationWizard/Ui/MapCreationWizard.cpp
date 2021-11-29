@@ -25,7 +25,7 @@
 #include <QDir>
 #include <QMessageBox>
 
-using namespace noggit::Red::MapCreationWizard::Ui;
+using namespace noggit::ui::tools::MapCreationWizard::Ui;
 
 MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(parent)
 {

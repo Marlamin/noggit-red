@@ -7,7 +7,7 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.inl>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 TexturingSetAdtBaseTextureAtPosNode::TexturingSetAdtBaseTextureAtPosNode()
 : ContextLogicNodeBase()

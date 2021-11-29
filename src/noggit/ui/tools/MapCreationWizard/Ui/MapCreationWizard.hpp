@@ -27,7 +27,7 @@
 namespace noggit
 {
 
-  namespace Red::MapCreationWizard::Ui
+  namespace ui::tools::MapCreationWizard::Ui
   {
 
     class LocaleDBCEntry : public QWidget

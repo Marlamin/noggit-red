@@ -7,7 +7,7 @@
 #include <QStyleOption>
 #include <QPainter>
 
-using namespace noggit::Red;
+using namespace noggit::ui::tools;
 
 void ReorderableVerticalBox::mouseMoveEvent(QMouseEvent* event)
 {

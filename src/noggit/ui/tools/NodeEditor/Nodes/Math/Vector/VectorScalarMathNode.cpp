@@ -4,7 +4,7 @@
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 Vector3DScalarMathNode::Vector3DScalarMathNode()
 {

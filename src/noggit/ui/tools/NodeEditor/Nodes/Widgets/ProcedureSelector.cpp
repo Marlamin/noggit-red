@@ -15,7 +15,7 @@
 #include <QHeaderView>
 
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 ProcedureSelector::ProcedureSelector(QWidget *parent)
 {

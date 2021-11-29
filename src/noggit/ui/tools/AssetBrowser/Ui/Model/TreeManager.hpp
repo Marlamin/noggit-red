@@ -10,7 +10,7 @@
 
 namespace noggit
 {
-  namespace Red::AssetBrowser::Ui::Model
+  namespace ui::tools::AssetBrowser::Ui::Model
   {
     class TreeManager
     {

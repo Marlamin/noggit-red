@@ -11,7 +11,7 @@
 
 namespace noggit
 {
-  namespace Red
+  namespace ui::tools
   {
     class ToolPanel : public QDockWidget
     {

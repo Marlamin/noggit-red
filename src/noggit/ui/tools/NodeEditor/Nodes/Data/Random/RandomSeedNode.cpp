@@ -7,7 +7,7 @@
 #include <random>
 #include <limits>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 RandomSeedNode::RandomSeedNode()
 : LogicNodeBase()

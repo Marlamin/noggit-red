@@ -42,7 +42,7 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="noggit::Red::UiCommon::ExtendedSlider" name="radiusSlider">
+          <widget class="noggit::ui::tools::UiCommon::ExtendedSlider" name="radiusSlider">
            <property name="prefix">
             <string>Radius</string>
            </property>
@@ -52,7 +52,7 @@
           </widget>
          </item>
          <item>
-          <widget class="noggit::Red::UiCommon::ExtendedSlider" name="innerRadiusSlider">
+          <widget class="noggit::ui::tools::UiCommon::ExtendedSlider" name="innerRadiusSlider">
            <property name="prefix">
             <string>Inner Radius</string>
            </property>
@@ -62,7 +62,7 @@
           </widget>
          </item>
          <item>
-          <widget class="noggit::Red::UiCommon::ExtendedSlider" name="speedSlider">
+          <widget class="noggit::ui::tools::UiCommon::ExtendedSlider" name="speedSlider">
            <property name="prefix">
             <string>Speed</string>
            </property>
@@ -187,7 +187,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>noggit::Red::UiCommon::ExtendedSlider</class>
+   <class>noggit::ui::tools::UiCommon::ExtendedSlider</class>
    <extends>QDoubleSpinBox</extends>
    <header location="global">noggit/ui/tools/UiCommon/ExtendedSlider.hpp</header>
   </customwidget>

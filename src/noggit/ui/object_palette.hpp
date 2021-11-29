@@ -71,7 +71,7 @@ namespace noggit
             QPushButton* _remove_button;
             std::unordered_set<std::string> _object_paths;
             MapView* _map_view;
-            noggit::Red::PreviewRenderer* _preview_renderer;
+            noggit::ui::tools::PreviewRenderer* _preview_renderer;
 
         };
     }

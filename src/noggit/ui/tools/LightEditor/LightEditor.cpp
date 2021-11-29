@@ -2,7 +2,7 @@
 
 #include "LightEditor.hpp"
 
-using namespace noggit::Red;
+using namespace noggit::ui::tools;
 
 LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 : QWidget(parent)

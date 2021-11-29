@@ -9,7 +9,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 SaveJSONObjectNode::SaveJSONObjectNode()
 : LogicNodeBase()

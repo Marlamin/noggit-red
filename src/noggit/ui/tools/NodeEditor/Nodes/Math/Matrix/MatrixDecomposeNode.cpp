@@ -8,7 +8,7 @@
 #include <external/glm/gtx/euler_angles.hpp>
 #include <external/glm/gtx/quaternion.hpp>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 MatrixDecomposeNode::MatrixDecomposeNode()
 : BaseNode()

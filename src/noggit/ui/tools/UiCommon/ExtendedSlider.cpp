@@ -11,7 +11,7 @@
 #include <QHBoxLayout>
 #include <QSignalBlocker>
 
-using namespace noggit::Red::UiCommon;
+using namespace noggit::ui::tools::UiCommon;
 using namespace noggit::ui;
 
 ExtendedSlider::ExtendedSlider(QWidget* parent)

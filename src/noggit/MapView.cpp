@@ -825,19 +825,19 @@ void MapView::setupMinimapEditorUi()
 }
 void MapView::setupStampUi()
 {
-  stampTool = new noggit::Red::BrushStack(this, this);
+  stampTool = new noggit::ui::tools::BrushStack(this, this);
   _tool_panel_dock->registerTool("Stamp", stampTool);
 }
 
 void MapView::setupLightEditorUi()
 {
-  lightEditor = new noggit::Red::LightEditor(this, this);
+  lightEditor = new noggit::ui::tools::LightEditor(this, this);
   _tool_panel_dock->registerTool("Light Editor", lightEditor);
 }
 
 void MapView::setupNodeEditor()
 {
-  auto _node_editor = new noggit::Red::NodeEditor::Ui::NodeEditorWidget(this);
+  auto _node_editor = new noggit::ui::tools::NodeEditor::Ui::NodeEditorWidget(this);
   _node_editor_dock = new QDockWidget("Node editor", this);
   _node_editor_dock->setWidget(_node_editor);
   _node_editor_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
@@ -878,7 +878,7 @@ void MapView::setupNodeEditor()
 void MapView::setupAssetBrowser()
 {
   _asset_browser_dock = new QDockWidget("Asset browser", this);
-  _asset_browser = new noggit::Red::AssetBrowser::Ui::AssetBrowserWidget(this, this);
+  _asset_browser = new noggit::ui::tools::AssetBrowser::Ui::AssetBrowserWidget(this, this);
 
   //_main_window->addDockWidget(Qt::BottomDockWidgetArea, _asset_browser_dock);
   _asset_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
@@ -1022,7 +1022,7 @@ void MapView::setupToolbars()
   right_toolbar_layout->setContentsMargins(0, 5, 0,5);
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
 
-  _view_toolbar = new noggit::Red::ViewToolbar::Ui::ViewToolbar(this);
+  _view_toolbar = new noggit::ui::tools::ViewToolbar::Ui::ViewToolbar(this);
   auto top_toolbar_layout = new QHBoxLayout(_viewport_overlay_ui->upperToolbarHolder);
   top_toolbar_layout->addWidget( _view_toolbar);
   top_toolbar_layout->setContentsMargins(5, 0, 5, 0);
@@ -2464,7 +2464,7 @@ void MapView::setupMinimap()
 void MapView::createGUI()
 {
   // Combined dock
-  _tool_panel_dock = new noggit::Red::ToolPanel(this);
+  _tool_panel_dock = new noggit::ui::tools::ToolPanel(this);
   _tool_panel_dock->setFeatures(QDockWidget::DockWidgetMovable
                                 | QDockWidget::DockWidgetFloatable);
   _tool_panel_dock->setAllowedAreas(Qt::RightDockWidgetArea);
@@ -2546,7 +2546,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_fps (new QLabel (this))
   , _status_culling (new QLabel (this))
   , _texBrush{new opengl::texture{}}
-  , _transform_gizmo(noggit::Red::ViewportGizmo::GizmoContext::MAP_VIEW)
+  , _transform_gizmo(noggit::ui::tools::ViewportGizmo::GizmoContext::MAP_VIEW)
   , _tablet_manager(noggit::TabletManager::instance())
 {
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
@@ -5155,7 +5155,7 @@ void MapView::unloadOpenglData(bool from_manager)
   _world->unload_shaders();
 
   if (!from_manager)
-    noggit::Red::ViewportManager::ViewportManager::unloadOpenglData(this);
+    noggit::ui::tools::ViewportManager::ViewportManager::unloadOpenglData(this);
 
   _buffers.unload();
 

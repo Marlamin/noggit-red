@@ -22,10 +22,10 @@
 #include <vector>
 
 
-namespace noggit::Red
+namespace noggit::ui::tools
 {
 
-class PreviewRenderer : public noggit::Red::ViewportManager::Viewport
+class PreviewRenderer : public noggit::ui::tools::ViewportManager::Viewport
   {
     Q_OBJECT
 

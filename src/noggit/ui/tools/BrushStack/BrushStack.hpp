@@ -16,7 +16,7 @@
 class MapView;
 class World;
 
-namespace noggit::Red
+namespace noggit::ui::tools
 {
   class BrushStack : public QWidget
   {

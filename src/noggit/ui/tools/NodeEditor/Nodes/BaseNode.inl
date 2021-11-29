@@ -5,7 +5,7 @@
 #include "DataTypes/GenericData.hpp"
 
 template<typename T>
-void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
+void noggit::ui::tools::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
                                                               const QString &caption,
                                                               bool caption_visible,
                                                               ConnectionPolicy out_policy)
@@ -38,7 +38,7 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
 }
 
 template<typename T>
-void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
+void noggit::ui::tools::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
                                                               PortIndex port_index,
                                                               const QString &caption,
                                                               bool caption_visible,
@@ -71,7 +71,7 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPort(PortType port_type,
 }
 
 template<typename T>
-void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDynamic(PortType port_type, PortIndex port_index,
+void noggit::ui::tools::NodeEditor::Nodes::BaseNode::addPortDynamic(PortType port_type, PortIndex port_index,
                                                                      const QString& caption, bool caption_visible,
                                                                      ConnectionPolicy out_policy)
 {
@@ -80,7 +80,7 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDynamic(PortType port_type
 }
 
 template<typename T>
-void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type,
+void noggit::ui::tools::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type,
                                                                     const QString &caption,
                                                                     bool caption_visible,
                                                                     ConnectionPolicy out_policy)
@@ -105,7 +105,7 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type
 }
 
 template<typename T>
-void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type,
+void noggit::ui::tools::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type,
                                                                      PortIndex port_index,
                                                                      const QString &caption,
                                                                      bool caption_visible,
@@ -128,7 +128,7 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefault(PortType port_type
 }
 
 template<typename T>
-void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefaultDynamic(PortType port_type, PortIndex port_index,
+void noggit::ui::tools::NodeEditor::Nodes::BaseNode::addPortDefaultDynamic(PortType port_type, PortIndex port_index,
                                                                             const QString& caption, bool caption_visible,
                                                                             ConnectionPolicy out_policy)
 {
@@ -137,7 +137,7 @@ void noggit::Red::NodeEditor::Nodes::BaseNode::addPortDefaultDynamic(PortType po
 }
 
 template <typename T>
-std::shared_ptr<T> noggit::Red::NodeEditor::Nodes::BaseNode::defaultPortData(PortType port_type,
+std::shared_ptr<T> noggit::ui::tools::NodeEditor::Nodes::BaseNode::defaultPortData(PortType port_type,
                                                                                     PortIndex port_index)
 {
   if (port_type == PortType::In)

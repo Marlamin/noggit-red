@@ -6,7 +6,7 @@
 #include <QSlider>
 
 using namespace noggit::ui;
-using namespace noggit::Red::ViewToolbar::Ui;
+using namespace noggit::ui::tools::ViewToolbar::Ui;
 
 ViewToolbar::ViewToolbar(MapView* mapView)
   : _tool_group(this)
@@ -55,7 +55,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   undo_stack_popup->setMinimumWidth(160);
   undo_stack_popup->setMinimumHeight(300);
   auto layout = new QVBoxLayout(undo_stack_popup);
-  auto action_navigator = new noggit::Red::ActionHistoryNavigator(undo_stack_popup);
+  auto action_navigator = new noggit::ui::tools::ActionHistoryNavigator(undo_stack_popup);
   action_navigator->setMinimumWidth(160);
   action_navigator->setMinimumHeight(300);
   layout->addWidget(undo_stack_popup);

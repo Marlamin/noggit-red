@@ -8,7 +8,7 @@
 #include <QSortFilterProxyModel>
 #include <ui_ImageBrowser.h>
 
-namespace noggit::Red
+namespace noggit::ui::tools
 {
   class ImageBrowserFilesystemModel : public QFileSystemModel
   {

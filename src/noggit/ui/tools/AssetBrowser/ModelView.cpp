@@ -11,7 +11,7 @@
 #include <QVector3D>
 
 
-using namespace noggit::Red::AssetBrowser;
+using namespace noggit::ui::tools::AssetBrowser;
 
 
 ModelViewer::ModelViewer(QWidget* parent, noggit::NoggitRenderContext context)

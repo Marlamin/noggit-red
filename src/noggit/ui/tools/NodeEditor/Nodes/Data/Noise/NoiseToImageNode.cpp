@@ -7,7 +7,7 @@
 
 #include <external/libnoise/noiseutils/noiseutils.h>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 NoiseToImageNode::NoiseToImageNode()
 : LogicNodeBase()

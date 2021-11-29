@@ -62,9 +62,9 @@ namespace noggit
       void change_spray_size (float change);
       void change_spray_pressure (float change);
 
-      noggit::Red::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
-      noggit::Red::UiCommon::ExtendedSlider* getInnerRadiusSlider() { return _hardness_slider; };
-      noggit::Red::UiCommon::ExtendedSlider* getSpeedSlider() { return _pressure_slider; };
+      noggit::ui::tools::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
+      noggit::ui::tools::UiCommon::ExtendedSlider* getInnerRadiusSlider() { return _hardness_slider; };
+      noggit::ui::tools::UiCommon::ExtendedSlider* getSpeedSlider() { return _pressure_slider; };
       QDial* getMaskOrientationDial() { return _image_mask_group->getMaskOrientationDial(); };
 
       void paint (World* world, glm::vec3 const& pos, float dt, scoped_blp_texture_reference texture);      
@@ -85,7 +85,7 @@ namespace noggit
 
       QSize sizeHint() const override;
 
-      noggit::Red::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
+      noggit::ui::tools::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
       QImage* getMaskImage() { return &_mask_image; }
       texturing_mode getTexturingMode() { return _texturing_mode; };
       void updateMaskImage();
@@ -120,9 +120,9 @@ namespace noggit
 
     private:
       QSlider* _brush_level_slider;
-      noggit::Red::UiCommon::ExtendedSlider* _hardness_slider;
-      noggit::Red::UiCommon::ExtendedSlider* _radius_slider;
-      noggit::Red::UiCommon::ExtendedSlider* _pressure_slider;
+      noggit::ui::tools::UiCommon::ExtendedSlider* _hardness_slider;
+      noggit::ui::tools::UiCommon::ExtendedSlider* _radius_slider;
+      noggit::ui::tools::UiCommon::ExtendedSlider* _pressure_slider;
       QSpinBox* _brush_level_spin;
 
       QCheckBox* _show_unpaintable_chunks_cb;
@@ -139,7 +139,7 @@ namespace noggit
 
       texture_swapper* _texture_switcher;
 
-      noggit::Red::ImageMaskSelector* _image_mask_group;
+      noggit::ui::tools::ImageMaskSelector* _image_mask_group;
 
       QTabWidget* tabs;
 

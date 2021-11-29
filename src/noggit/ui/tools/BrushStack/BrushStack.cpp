@@ -6,7 +6,7 @@
 #include <QPushButton>
 #include <QJsonArray>
 
-using namespace noggit::Red;
+using namespace noggit::ui::tools;
 
 
 BrushStack::BrushStack(MapView* map_view, QWidget* parent)
@@ -101,7 +101,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
             _active_item = nullptr;
           });
 
-  connect(_ui.radiusSlider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged,
+  connect(_ui.radiusSlider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged,
           [this](double value)
           {
             for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
@@ -115,7 +115,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
             }
           });
 
-  connect(_ui.innerRadiusSlider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged,
+  connect(_ui.innerRadiusSlider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged,
           [this](double value)
           {
             for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
@@ -129,7 +129,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
             }
           });
 
-  connect(_ui.speedSlider, &noggit::Red::UiCommon::ExtendedSlider::valueChanged,
+  connect(_ui.speedSlider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged,
           [this](double value)
           {
             for (int i = 0; i < _ui.brushList->layout()->count(); ++i)

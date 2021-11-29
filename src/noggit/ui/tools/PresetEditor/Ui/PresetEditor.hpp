@@ -14,7 +14,7 @@
 
 namespace noggit
 {
-    namespace Red::PresetEditor::Ui
+    namespace ui::tools::PresetEditor::Ui
     {
       class PresetEditorWidget : public QMainWindow
       {

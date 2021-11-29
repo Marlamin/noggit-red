@@ -6,7 +6,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/TextureManager.h>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 TexturingTilesetNode::TexturingTilesetNode()
 : ContextNodeBase()

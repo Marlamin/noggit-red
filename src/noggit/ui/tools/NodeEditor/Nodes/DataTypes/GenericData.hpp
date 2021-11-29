@@ -42,7 +42,7 @@
 using QtNodes::NodeDataType;
 using QtNodes::NodeData;
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 using namespace std::literals;
 
 template<typename Ty, const char* type_id, const char* type_name, typename C, typename D>

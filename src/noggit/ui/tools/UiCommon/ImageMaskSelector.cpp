@@ -4,7 +4,7 @@
 #include <noggit/MapView.h>
 #include <noggit/ui/terrain_tool.hpp>
 
-using namespace noggit::Red;
+using namespace noggit::ui::tools;
 
 ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
 : QWidget(parent)

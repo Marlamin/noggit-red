@@ -19,8 +19,8 @@
 #include <QElapsedTimer>
 #include <QModelIndex>
 
-using namespace noggit::Red::NodeEditor::Ui;
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Ui;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 using QtNodes::FlowView;
 using QtNodes::FlowScene;

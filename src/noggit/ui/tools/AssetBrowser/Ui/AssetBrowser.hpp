@@ -16,7 +16,7 @@ class MapView;
 
 namespace noggit
 {
-  namespace Red::AssetBrowser::Ui
+  namespace ui::tools::AssetBrowser::Ui
   {
     class AssetBrowserWidget : public QMainWindow
     {

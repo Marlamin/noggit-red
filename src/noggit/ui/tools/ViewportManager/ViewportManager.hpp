@@ -7,7 +7,7 @@
 
 namespace noggit
 {
-    namespace Red::ViewportManager
+    namespace ui::tools::ViewportManager
     {
         class Viewport;
         class ViewportManager

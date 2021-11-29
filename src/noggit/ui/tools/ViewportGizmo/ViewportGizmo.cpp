@@ -13,9 +13,9 @@
 #include <limits>
 
 
-using namespace noggit::Red::ViewportGizmo;
+using namespace noggit::ui::tools::ViewportGizmo;
 
-ViewportGizmo::ViewportGizmo(noggit::Red::ViewportGizmo::GizmoContext gizmo_context, World* world)
+ViewportGizmo::ViewportGizmo(noggit::ui::tools::ViewportGizmo::GizmoContext gizmo_context, World* world)
 : _gizmo_context(gizmo_context)
 , _world(world)
 {}

@@ -271,7 +271,7 @@ using QtNodes::TypeConverterId;
 
 namespace noggit
 {
-    namespace Red::NodeEditor::Nodes
+    namespace ui::tools::NodeEditor::Nodes
     {
 
         static std::shared_ptr<DataModelRegistry> registerDataModels()

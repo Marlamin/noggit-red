@@ -3,7 +3,7 @@
 #include "ToolPanel.hpp"
 #include <QScrollBar>
 
-using namespace noggit::Red;
+using namespace noggit::ui::tools;
 
 ToolPanel::ToolPanel(QWidget* parent)
 : QDockWidget(parent)

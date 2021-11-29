@@ -7,7 +7,7 @@
 #include <external/glm/gtx/transform.hpp>
 #include <external/glm/gtx/euler_angles.hpp>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 MatrixTransformNode::MatrixTransformNode()
 : BaseNode()

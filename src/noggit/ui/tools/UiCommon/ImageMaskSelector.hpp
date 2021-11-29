@@ -10,7 +10,7 @@
 
 class MapView;
 
-namespace noggit::Red
+namespace noggit::ui::tools
 {
   class ImageMaskSelector : public QWidget
   {

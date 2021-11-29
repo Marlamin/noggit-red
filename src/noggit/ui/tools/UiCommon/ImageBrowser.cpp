@@ -9,7 +9,7 @@
 #include <QDir>
 #include <QKeyEvent>
 
-using namespace  noggit::Red;
+using namespace  noggit::ui::tools;
 
 ImageBrowserFilesystemModel::ImageBrowserFilesystemModel(QObject* parent)
 : QFileSystemModel(parent)

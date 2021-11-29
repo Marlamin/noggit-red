@@ -8,7 +8,7 @@
 #include <QFileDialog>
 #include <QImage>
 
-using namespace noggit::Red::NodeEditor::Nodes;
+using namespace noggit::ui::tools::NodeEditor::Nodes;
 
 LoadImageNode::LoadImageNode()
 : LogicNodeBase()
