@@ -12,8 +12,6 @@
 #include <noggit/ui/MinimapCreator.hpp>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/unsigned_int_property.hpp>
-#include <noggit/Red/StampMode/Ui/Tool.hpp>
-#include <noggit/Red/StampMode/Ui/PaletteMain.hpp>
 #include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/Red/ViewportGizmo/ViewportGizmo.hpp>
 #include <noggit/Red/ViewportManager/ViewportManager.hpp>
