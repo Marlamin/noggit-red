@@ -63,12 +63,12 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
   ImGuiIO& io = ImGui::GetIO();
   ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-  glm::mat4x4 delta_matrix = glm::transpose(glm::mat4x4(1.0f));
+  glm::mat4x4 delta_matrix = glm::mat4x4(1.0f);
   glm::mat4x4 object_matrix = glm::mat4x4(1.0f);
-  glm::mat4x4 pivot_matrix = glm::transpose(glm::translate(glm::mat4x4(),
+  glm::mat4x4 pivot_matrix = glm::translate(glm::mat4x4(1.f),
                                                    {_multiselection_pivot.x,
                                                     _multiselection_pivot.y,
-                                                    _multiselection_pivot.z }));
+                                                    _multiselection_pivot.z });
   float last_pivot_scale = 1.f;
 
   switch (gizmo_selection_type)
