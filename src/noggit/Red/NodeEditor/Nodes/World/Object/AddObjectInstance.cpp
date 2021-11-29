@@ -71,7 +71,7 @@ void AddObjectInstanceNode::compute()
     return;
   }
 
-  noggit::ActionManager::instance()->getCurrentAction()->registerObjectAdded(obj);
+  NOGGIT_CUR_ACTION->registerObjectAdded(obj);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

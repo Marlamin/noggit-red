@@ -388,7 +388,7 @@ void BrushStackItem::setMaskRotation(int rot)
 
 void BrushStackItem::execute(glm::vec3 const& cursor_pos, World* world, float dt, bool mod_shift_down, bool mod_alt_down, bool mod_ctrl_down, bool is_under_map)
 {
-  auto action = noggit::ActionManager::instance()->getCurrentAction();
+  auto action = NOGGIT_CUR_ACTION;
 
   switch(_tool_widget.which())
   {

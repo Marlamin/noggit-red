@@ -181,15 +181,15 @@ namespace noggit
       connect ( _angle_slider, &QSlider::valueChanged
               , [this] (int v)
                   {
-                    if (noggit::ActionManager::instance()->getCurrentAction())
+                    if (NOGGIT_CUR_ACTION)
                     {
                       setAngle(v);
                     }
                     else
                     {
-                      noggit::ActionManager::instance()->beginAction(_map_view);
+                      NOGGIT_ACTION_MGR->beginAction(_map_view);
                       setAngle(v);
-                      noggit::ActionManager::instance()->endAction();
+                      NOGGIT_ACTION_MGR->endAction();
                     }
 
                   }
@@ -198,15 +198,15 @@ namespace noggit
       connect ( _orientation_dial, &QDial::valueChanged
               , [this] (int v)
                   {
-                    if (noggit::ActionManager::instance()->getCurrentAction())
+                    if (NOGGIT_CUR_ACTION)
                     {
                       setOrientation(v + 90.0f);
                     }
                     else
                     {
-                      noggit::ActionManager::instance()->beginAction(_map_view);
+                      NOGGIT_ACTION_MGR->beginAction(_map_view);
                       setOrientation(v + 90.0f);
-                      noggit::ActionManager::instance()->endAction();
+                      NOGGIT_ACTION_MGR->endAction();
                     }
 
                   }

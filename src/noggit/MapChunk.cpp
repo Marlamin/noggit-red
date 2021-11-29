@@ -1209,7 +1209,7 @@ auto MapChunk::stamp(glm::vec3 const& pos, float dt, QImage const* img, float ra
   }
   else
   {
-    auto cur_action = noggit::ActionManager::instance()->getCurrentAction();
+    auto cur_action = NOGGIT_CUR_ACTION;
     float* original_heightmap = cur_action->getChunkTerrainOriginalData(this);
 
     if (!original_heightmap)

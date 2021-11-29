@@ -50,7 +50,7 @@ void GetChunksInRangeNode::compute()
     for (MapChunk* chunk : tile->chunks_in_range({pos.x, pos.y, pos.z}, radius))
     {
       _chunks.push_back(std::make_shared<ChunkData>(chunk));
-      noggit::ActionManager::instance()->getCurrentAction()->registerAllChunkChanges(chunk);
+      NOGGIT_CUR_ACTION->registerAllChunkChanges(chunk);
     }
   }
 

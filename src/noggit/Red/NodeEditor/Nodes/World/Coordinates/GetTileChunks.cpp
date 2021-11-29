@@ -41,7 +41,7 @@ void GetTileChunksNode::compute()
     {
       MapChunk* chunk = tile->getChunk(i, j);
       _chunks[i * 16 + j] = std::make_shared<ChunkData>();
-      noggit::ActionManager::instance()->getCurrentAction()->registerAllChunkChanges(chunk);
+      NOGGIT_CUR_ACTION->registerAllChunkChanges(chunk);
     }
   }
 

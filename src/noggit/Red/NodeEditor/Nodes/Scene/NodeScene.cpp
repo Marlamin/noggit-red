@@ -19,11 +19,11 @@ bool NodeScene::execute()
 
 
 
-  noggit::ActionManager::instance()->beginAction(reinterpret_cast<MapView*>(gCurrentContext->getViewport()));
+  NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(gCurrentContext->getViewport()));
   auto main_branch = LogicBranch(_begin_node);
   bool result = main_branch.execute();
   _variables.clear();
-  noggit::ActionManager::instance()->endAction();
+  NOGGIT_ACTION_MGR->endAction();
   return result;
 }
 

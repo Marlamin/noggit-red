@@ -42,7 +42,7 @@ void GetObjectInstanceByUIDNode::compute()
 
   SceneObject* obj = boost::get<selected_object_type>(obj_optional.get());
 
-  noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
+  NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

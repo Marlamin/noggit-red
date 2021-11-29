@@ -344,7 +344,7 @@ void MapIndex::setFlag(bool to, glm::vec3 const& pos, uint32_t flag)
     int cz = (pos.z - tile.z * TILESIZE) / CHUNKSIZE;
 
     MapChunk* chunk = getTile(tile)->getChunk(cx, cz);
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkFlagChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkFlagChange(chunk);
     chunk->setFlag(to, flag);
   }
 }

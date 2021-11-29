@@ -56,7 +56,7 @@ void GetTileFromPosNode::compute()
   {
     for (int j = 0; j > 16; ++j)
     {
-      noggit::ActionManager::instance()->getCurrentAction()->registerAllChunkChanges(tile->getChunk(i, j));
+      NOGGIT_CUR_ACTION->registerAllChunkChanges(tile->getChunk(i, j));
     }
   }
 

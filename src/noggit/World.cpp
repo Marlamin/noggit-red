@@ -297,7 +297,7 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
     updateTilesEntry(entry, model_update::remove);
 
     auto& obj = boost::get<selected_object_type>(entry);
-    noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
+    NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
     math::degrees::vec3& dir = obj->dir;
 
@@ -371,7 +371,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     }
 
     auto& obj = boost::get<selected_object_type>(entry);
-    noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
+    NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
     updateTilesEntry(entry, model_update::remove);
 
@@ -591,7 +591,7 @@ void World::snap_selected_models_to_the_ground()
     }
 
     auto& obj = boost::get<selected_object_type>(entry);
-    noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
+    NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
     glm::vec3& pos = obj->pos;
 
     selection_result hits;
@@ -643,7 +643,7 @@ void World::scale_selected_models(float v, m2_scaling_type type)
 
       ModelInstance* mi = static_cast<ModelInstance*>(obj);
 
-      noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(mi);
+      NOGGIT_CUR_ACTION->registerObjectTransformed(mi);
 
       float scale = mi->scale;
 
@@ -686,7 +686,7 @@ void World::move_selected_models(float dx, float dy, float dz)
     }
 
     auto& obj = boost::get<selected_object_type>(entry);
-    noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
+    NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
     glm::vec3& pos = obj->pos;
 
     updateTilesEntry(entry, model_update::remove);
@@ -734,7 +734,7 @@ void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
     updateTilesEntry(entry, model_update::remove);
 
     auto& obj = boost::get<selected_object_type>(entry);
-    noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
+    NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
     obj->pos = pos;
     obj->recalcExtents();
 
@@ -761,7 +761,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
     updateTilesEntry(entry, model_update::remove);
 
     auto& obj = boost::get<selected_object_type>(entry);
-    noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
+    NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
     if (use_pivot && has_multi_select)
     {
@@ -800,7 +800,7 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
     }
 
     auto& obj = boost::get<selected_object_type>(entry);
-    noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
+    NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
     updateTilesEntry(entry, model_update::remove);
 
@@ -1994,7 +1994,7 @@ void World::clearHeight(glm::vec3 const& pos)
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
     chunk->clearHeight();
   });
   for_all_chunks_on_tile(pos, [this] (MapChunk* chunk) {
@@ -2016,7 +2016,7 @@ void World::CropWaterADT(const tile_index& pos)
   {
     for (int i = 0; i < 16; ++i)
       for (int j = 0; j < 16; ++j)
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkLiquidChange(tile->getChunk(i, j));
+        NOGGIT_CUR_ACTION->registerChunkLiquidChange(tile->getChunk(i, j));
 
     tile->CropWater();
   });
@@ -2029,7 +2029,7 @@ void World::setAreaID(glm::vec3 const& pos, int id, bool adt, float radius)
   {
     for_all_chunks_on_tile(pos, [&](MapChunk* chunk)
     {
-      noggit::ActionManager::instance()->getCurrentAction()->registerChunkAreaIDChange(chunk);
+      NOGGIT_CUR_ACTION->registerChunkAreaIDChange(chunk);
       chunk->setAreaID(id);
     });
   }
@@ -2041,7 +2041,7 @@ void World::setAreaID(glm::vec3 const& pos, int id, bool adt, float radius)
       for_all_chunks_in_range(pos, radius,
                               [&] (MapChunk* chunk)
                               {
-                                noggit::ActionManager::instance()->getCurrentAction()->registerChunkAreaIDChange(chunk);
+                                NOGGIT_CUR_ACTION->registerChunkAreaIDChange(chunk);
                                 chunk->setAreaID(id);
                                 return true;
                               }
@@ -2052,7 +2052,7 @@ void World::setAreaID(glm::vec3 const& pos, int id, bool adt, float radius)
     {
       for_chunk_at(pos, [&](MapChunk* chunk)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkAreaIDChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkAreaIDChange(chunk);
         chunk->setAreaID(id);
       });
     }
@@ -2083,7 +2083,7 @@ void World::changeShader(glm::vec3 const& pos, glm::vec4 const& color, float cha
     ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkVertexColorChange(chunk);
         return chunk->ChangeMCCV(pos, color, change, radius, editMode);
       }
     );
@@ -2096,7 +2096,7 @@ void World::stampShader(glm::vec3 const& pos, glm::vec4 const& color, float chan
     ( pos, radius
       , [&] (MapChunk* chunk)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkVertexColorChange(chunk);
         return chunk->stampMCCV(pos, color, change, radius, editMode, img, paint, use_image_colors);
       }
     );
@@ -2122,14 +2122,14 @@ auto World::stamp(glm::vec3 const& pos, float dt, QImage const* img, float radiu
 , float radiusInner, int brushType, bool sculpt) -> void
 {
   ZoneScoped;
-  auto action = noggit::ActionManager::instance()->getCurrentAction();
+  auto action = NOGGIT_CUR_ACTION;
   float delta = action->getDelta() + dt;
   action->setDelta(delta);
 
   for_all_chunks_in_rect(pos, radiusOuter,
                           [=](MapChunk* chunk) -> bool
                           {
-                            auto action = noggit::ActionManager::instance()->getCurrentAction();
+                            auto action = NOGGIT_CUR_ACTION;
                             action->registerChunkTerrainChange(chunk);
                             action->setBlockCursor(!sculpt);
                             chunk->stamp(pos, dt, img, radiusOuter, radiusInner, brushType, sculpt); return true;
@@ -2198,7 +2198,7 @@ void World::changeTerrain(glm::vec3 const& pos, float change, float radius, int 
     ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
         return chunk->changeTerrain(pos, change, radius, BrushType, inner_radius);
       }
     , [this] (MapChunk* chunk)
@@ -2215,7 +2215,7 @@ void World::flattenTerrain(glm::vec3 const& pos, float remain, float radius, int
     ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
         return chunk->flattenTerrain(pos, remain, radius, BrushType, mode, origin, angle, orientation);
       }
     , [this] (MapChunk* chunk)
@@ -2232,7 +2232,7 @@ void World::blurTerrain(glm::vec3 const& pos, float remain, float radius, int Br
     ( pos, radius
     , [&] (MapChunk* chunk)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
         return chunk->blurTerrain ( pos
                                   , remain
                                   , radius
@@ -2266,7 +2266,7 @@ bool World::paintTexture(glm::vec3 const& pos, Brush* brush, float strength, flo
     ( pos, brush->getRadius()
     , [&] (MapChunk* chunk)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
         return chunk->paintTexture(pos, brush, strength, pressure, texture);
       }
     );
@@ -2279,7 +2279,7 @@ bool World::stampTexture(glm::vec3 const& pos, Brush *brush, float strength, flo
     ( pos, brush->getRadius()
       , [&] (MapChunk* chunk)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
         return chunk->stampTexture(pos, brush, strength, pressure, texture, img, paint);
       }
     );
@@ -2312,7 +2312,7 @@ bool World::replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_textur
     ( pos, radius
       , [&](MapChunk* chunk)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
         return chunk->replaceTexture(pos, radius, old_texture, new_texture);
       }
     );
@@ -2323,7 +2323,7 @@ void World::eraseTextures(glm::vec3 const& pos)
   ZoneScoped;
   for_chunk_at(pos, [](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
     chunk->eraseTextures();
   });
 }
@@ -2333,7 +2333,7 @@ void World::overwriteTextureAtCurrentChunk(glm::vec3 const& pos, scoped_blp_text
   ZoneScoped;
   for_chunk_at(pos, [&](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
     chunk->switchTexture(oldTexture, std::move (newTexture));
   });
 }
@@ -2345,7 +2345,7 @@ void World::setHole(glm::vec3 const& pos, float radius, bool big, bool hole)
       ( pos, radius
         , [&](MapChunk* chunk)
         {
-          noggit::ActionManager::instance()->getCurrentAction()->registerChunkHoleChange(chunk);
+          NOGGIT_CUR_ACTION->registerChunkHoleChange(chunk);
           chunk->setHole(pos, radius, big, hole);
           return true;
         }
@@ -2358,7 +2358,7 @@ void World::setHoleADT(glm::vec3 const& pos, bool hole)
 
   for_all_chunks_on_tile(pos, [&](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkHoleChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkHoleChange(chunk);
     chunk->setHole(pos, 1.0f, true, hole);
   });
 }
@@ -2920,7 +2920,7 @@ void World::clearTextures(glm::vec3 const& pos)
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
     chunk->eraseTextures();
   });
 }
@@ -3061,7 +3061,7 @@ void World::importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigne
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
   });
 
   if (image.width() != 1024 || image.height() != 1024)
@@ -3093,7 +3093,7 @@ void World::importADTAlphamap(glm::vec3 const& pos)
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
   });
 
   QString path = _settings->value("project/path").toString();
@@ -3132,7 +3132,7 @@ void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float 
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
   });
 
   if (image.width() != 257 || image.height() != 257)
@@ -3180,7 +3180,7 @@ void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned 
 
       for_all_chunks_on_tile(pos, [](MapChunk* chunk)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
       });
 
       QImage img;
@@ -3217,7 +3217,7 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, int mode)
 
         for_all_chunks_on_tile(pos, [](MapChunk* chunk)
         {
-          noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(chunk);
+          NOGGIT_CUR_ACTION->registerChunkVertexColorChange(chunk);
         });
 
         QImage img;
@@ -3242,7 +3242,7 @@ void World::ensureAllTilesetsADT(glm::vec3 const& pos)
 
   for_all_chunks_on_tile(pos, [=](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
 
     for (int i = 0; i < 4; ++i)
     {
@@ -3261,7 +3261,7 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, i
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkVertexColorChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkVertexColorChange(chunk);
   });
 
   if (image.width() != 257 || image.height() != 257)
@@ -3292,7 +3292,7 @@ void World::setBaseTexture(glm::vec3 const& pos)
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
     chunk->eraseTextures();
     if (!!noggit::ui::selected_texture::get())
     {
@@ -3306,7 +3306,7 @@ void World::clear_shadows(glm::vec3 const& pos)
   ZoneScoped;
   for_all_chunks_on_tile(pos, [] (MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkShadowChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkShadowChange(chunk);
     chunk->clear_shadows();
   });
 }
@@ -3318,7 +3318,7 @@ void World::swapTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex)
   {
     for_all_chunks_on_tile(pos, [&](MapChunk* chunk)
     {
-      noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+      NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
       chunk->switchTexture(tex, *noggit::ui::selected_texture::get());
     });
   }
@@ -3329,7 +3329,7 @@ void World::removeTexDuplicateOnADT(glm::vec3 const& pos)
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
     chunk->texture_set->removeDuplicate();
   } );
 }
@@ -3339,7 +3339,7 @@ void World::change_texture_flag(glm::vec3 const& pos, scoped_blp_texture_referen
   ZoneScoped;
   for_chunk_at(pos, [&] (MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkTextureChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
     chunk->change_texture_flag(tex, flag, add);
   });
 }
@@ -3360,7 +3360,7 @@ void World::paintLiquid( glm::vec3 const& pos
   ZoneScoped;
   for_all_chunks_in_range(pos, radius, [&](MapChunk* chunk)
   {
-    noggit::ActionManager::instance()->getCurrentAction()->registerChunkLiquidChange(chunk);
+    NOGGIT_CUR_ACTION->registerChunkLiquidChange(chunk);
     chunk->liquid_chunk()->paintLiquid(pos, radius, liquid_id, add, angle, orientation, lock, origin, override_height, override_liquid_id, chunk, opacity_factor);
     return true;
   });
@@ -3374,7 +3374,7 @@ void World::setWaterType(const tile_index& pos, int type, int layer)
                 {
                   for (int i = 0; i < 16; ++i)
                     for (int j = 0; j < 16; ++j)
-                      noggit::ActionManager::instance()->getCurrentAction()->registerChunkLiquidChange(tile->getChunk(i, j));
+                      NOGGIT_CUR_ACTION->registerChunkLiquidChange(tile->getChunk(i, j));
 
                   tile->Water.setType (type, layer);
                 }
@@ -3401,7 +3401,7 @@ void World::autoGenWaterTrans(const tile_index& pos, float factor)
   {
     for (int i = 0; i < 16; ++i)
       for (int j = 0; j < 16; ++j)
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkLiquidChange(tile->getChunk(i, j));
+        NOGGIT_CUR_ACTION->registerChunkLiquidChange(tile->getChunk(i, j));
 
     tile->Water.autoGen(factor);
   });
@@ -3425,7 +3425,7 @@ void World::fixAllGaps()
       for (size_t ty = 0; ty < 16; ty++)
       {
         MapChunk* chunk = tile->getChunk(0, ty);
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
         if (chunk->fixGapLeft(left->getChunk(15, ty)))
         {
           chunks.emplace_back(chunk);
@@ -3440,7 +3440,7 @@ void World::fixAllGaps()
       for (size_t tx = 0; tx < 16; tx++)
       {
         MapChunk* chunk = tile->getChunk(tx, 0);
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
         if (chunk->fixGapAbove(above->getChunk(tx, 15)))
         {
           chunks.emplace_back(chunk);
@@ -3455,7 +3455,7 @@ void World::fixAllGaps()
       for (size_t tx = 0; tx < 16; tx++)
       {
         MapChunk* chunk = tile->getChunk(tx, ty);
-        noggit::ActionManager::instance()->getCurrentAction()->registerChunkTerrainChange(chunk);
+        NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
         bool changed = false;
 
         // if the chunk isn't the first of the row
@@ -3509,7 +3509,7 @@ bool World::isUnderMap(glm::vec3 const& pos)
 void World::selectVertices(glm::vec3 const& pos, float radius)
 {
   ZoneScoped;
-  noggit::ActionManager::instance()->getCurrentAction()->registerVertexSelectionChange();
+  NOGGIT_CUR_ACTION->registerVertexSelectionChange();
 
   _vertex_center_updated = false;
   _vertex_border_updated = false;
@@ -3526,7 +3526,7 @@ void World::selectVertices(glm::vec3 const& pos, float radius)
 bool World::deselectVertices(glm::vec3 const& pos, float radius)
 {
   ZoneScoped;
-  noggit::ActionManager::instance()->getCurrentAction()->registerVertexSelectionChange();
+  NOGGIT_CUR_ACTION->registerVertexSelectionChange();
 
   _vertex_center_updated = false;
   _vertex_border_updated = false;
@@ -3551,7 +3551,7 @@ bool World::deselectVertices(glm::vec3 const& pos, float radius)
 void World::moveVertices(float h)
 {
   ZoneScoped;
-  noggit::Action* cur_action = noggit::ActionManager::instance()->getCurrentAction();
+  noggit::Action* cur_action = NOGGIT_CUR_ACTION;
 
   assert(cur_action && "moveVertices called without an action running.");
 
@@ -3595,7 +3595,7 @@ void World::orientVertices ( glm::vec3 const& ref_pos
                            )
 {
   ZoneScoped;
-  noggit::Action* cur_action = noggit::ActionManager::instance()->getCurrentAction();
+  noggit::Action* cur_action = NOGGIT_CUR_ACTION;
 
   assert(cur_action && "orientVertices called without an action running.");
 
@@ -3622,7 +3622,7 @@ void World::flattenVertices (float height)
 void World::clearVertexSelection()
 {
   ZoneScoped;
-  noggit::ActionManager::instance()->getCurrentAction()->registerVertexSelectionChange();
+  NOGGIT_CUR_ACTION->registerVertexSelectionChange();
   _vertex_border_updated = false;
   _vertex_center_updated = false;
   _vertices_selected.clear();

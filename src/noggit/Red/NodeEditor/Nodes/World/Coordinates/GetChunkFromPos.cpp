@@ -58,7 +58,7 @@ void GetChunkFromPosNode::compute()
 
   MapChunk* chunk = tile->getChunk((pos.x - tile->xbase) / CHUNKSIZE,
                                    (pos.z - tile->zbase) / CHUNKSIZE);
-  noggit::ActionManager::instance()->getCurrentAction()->registerAllChunkChanges(chunk);
+  NOGGIT_CUR_ACTION->registerAllChunkChanges(chunk);
 
   _out_ports[1].out_value = std::make_shared<ChunkData>(chunk);
   _node->onDataUpdated(1);

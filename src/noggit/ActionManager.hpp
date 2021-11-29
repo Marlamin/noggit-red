@@ -10,6 +10,7 @@
 
 class MapView;
 
+
 namespace noggit
 {
 
@@ -73,4 +74,8 @@ namespace noggit
 
 }
 
+#define NOGGIT_CUR_ACTION noggit::ActionManager::instance()->getCurrentAction()
+#define NOGGIT_ACTION_MGR noggit::ActionManager::instance()
+
 #endif //NOGGITQT_ACTIONMANAGER_HPP
+

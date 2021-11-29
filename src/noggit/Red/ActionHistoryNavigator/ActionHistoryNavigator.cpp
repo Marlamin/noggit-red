@@ -24,7 +24,7 @@ ActionHistoryNavigator::ActionHistoryNavigator(QWidget* parent)
   _action_stack->setSelectionBehavior(QAbstractItemView::SelectRows);
   _action_stack->setSelectionRectVisible(true);
 
-  auto action_mgr = noggit::ActionManager::instance();
+  auto action_mgr = NOGGIT_ACTION_MGR;
 
   connect(action_mgr, &noggit::ActionManager::popBack, this, &ActionHistoryNavigator::popBack);
   connect(action_mgr, &noggit::ActionManager::popFront, this, &ActionHistoryNavigator::popFront);

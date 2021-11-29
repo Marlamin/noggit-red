@@ -97,7 +97,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     return;
   }
 
-  noggit::ActionManager::instance()->beginAction(map_view, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+  NOGGIT_ACTION_MGR->beginAction(map_view, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                  noggit::ActionModalityControllers::eLMB);
 
   if (gizmo_selection_type == MULTISELECTION)
@@ -110,7 +110,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
         continue;
 
       obj_instance = boost::get<selected_object_type>(selected);
-      noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj_instance);
+      NOGGIT_CUR_ACTION->registerObjectTransformed(obj_instance);
 
       obj_instance->recalcExtents();
       object_matrix = obj_instance->transformMatrix();
@@ -228,7 +228,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
         continue;
 
       obj_instance = boost::get<selected_object_type>(selected);
-      noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj_instance);
+      NOGGIT_CUR_ACTION->registerObjectTransformed(obj_instance);
 
       obj_instance->recalcExtents();
       object_matrix = obj_instance->transformMatrix();

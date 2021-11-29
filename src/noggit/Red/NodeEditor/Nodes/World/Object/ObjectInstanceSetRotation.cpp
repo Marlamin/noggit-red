@@ -30,7 +30,7 @@ void ObjectInstanceSetRotationNode::compute()
   opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   SceneObject* obj = defaultPortData<ObjectInstanceData>(PortType::In, 1)->value();
-  noggit::ActionManager::instance()->getCurrentAction()->registerObjectTransformed(obj);
+  NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
   auto rot_data = defaultPortData<Vector3DData>(PortType::In, 2);
   glm::vec3 const& rotation = rot_data->value();
 

@@ -47,8 +47,8 @@ namespace noggit
     }
     else if(!unsafe_uid_is_used(uid))
     {
-      if (noggit::ActionManager::instance()->getCurrentAction())
-        noggit::ActionManager::instance()->getCurrentAction()->registerObjectAdded(&instance);
+      if (NOGGIT_CUR_ACTION)
+        NOGGIT_CUR_ACTION->registerObjectAdded(&instance);
       _m2s.emplace(uid, instance);
       _instance_count_per_uid[uid] = 1;
       return uid;
@@ -96,8 +96,8 @@ namespace noggit
     }
     else if (!unsafe_uid_is_used(uid))
     {
-      if (noggit::ActionManager::instance()->getCurrentAction())
-        noggit::ActionManager::instance()->getCurrentAction()->registerObjectAdded(&instance);
+      if (NOGGIT_CUR_ACTION)
+        NOGGIT_CUR_ACTION->registerObjectAdded(&instance);
       _wmos.emplace(uid, instance);
       _instance_count_per_uid[uid] = 1;
       return uid;
@@ -118,8 +118,8 @@ namespace noggit
     {
       if (tile_index(it->second.pos) == tile)
       {
-        if (noggit::ActionManager::instance()->getCurrentAction())
-          noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(&it->second);
+        if (NOGGIT_CUR_ACTION)
+          NOGGIT_CUR_ACTION->registerObjectRemoved(&it->second);
         _world->updateTilesModel(&it->second, model_update::remove);
         _instance_count_per_uid.erase(it->first);
         it = _m2s.erase(it);
@@ -133,8 +133,8 @@ namespace noggit
     {
       if (tile_index(it->second.pos) == tile)
       {
-        if (noggit::ActionManager::instance()->getCurrentAction())
-          noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(&it->second);
+        if (NOGGIT_CUR_ACTION)
+          NOGGIT_CUR_ACTION->registerObjectRemoved(&it->second);
         _world->updateTilesWMO(&it->second, model_update::remove);
         _instance_count_per_uid.erase(it->first);
         it = _wmos.erase(it);
@@ -157,8 +157,8 @@ namespace noggit
 
       auto obj = boost::get<selected_object_type>(it);
 
-      if (noggit::ActionManager::instance()->getCurrentAction())
-        noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(obj);
+      if (NOGGIT_CUR_ACTION)
+        NOGGIT_CUR_ACTION->registerObjectRemoved(obj);
 
       if (obj->which() == eMODEL)
       {
@@ -190,9 +190,9 @@ namespace noggit
       _world->updateTilesEntry(instance.get(), model_update::remove);
       auto obj = boost::get<selected_object_type>(instance.get());
 
-      if (noggit::ActionManager::instance()->getCurrentAction())
+      if (NOGGIT_CUR_ACTION)
       {
-        noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(obj);
+        NOGGIT_CUR_ACTION->registerObjectRemoved(obj);
       }
     }
 
@@ -340,8 +340,8 @@ namespace noggit
           _world->updateTilesWMO(&rhs->second, model_update::remove);
 
           _instance_count_per_uid.erase(rhs->second.uid);
-          if (noggit::ActionManager::instance()->getCurrentAction())
-            noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(&rhs->second);
+          if (NOGGIT_CUR_ACTION)
+            NOGGIT_CUR_ACTION->registerObjectRemoved(&rhs->second);
           rhs = _wmos.erase(rhs);
           deleted_uids++;
         }
@@ -364,8 +364,8 @@ namespace noggit
 
           _instance_count_per_uid.erase(rhs->second.uid);
 
-          if (noggit::ActionManager::instance()->getCurrentAction())
-            noggit::ActionManager::instance()->getCurrentAction()->registerObjectRemoved(&rhs->second);
+          if (NOGGIT_CUR_ACTION)
+            NOGGIT_CUR_ACTION->registerObjectRemoved(&rhs->second);
           rhs = _m2s.erase(rhs);
           deleted_uids++;
         }
