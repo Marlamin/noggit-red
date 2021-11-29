@@ -15,6 +15,7 @@
 #include <noggit/Action.hpp>
 #include <opengl/scoped.hpp>
 #include <external/tracy/Tracy.hpp>
+#include <glm/glm.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -1025,13 +1026,15 @@ bool MapChunk::flattenTerrain ( glm::vec3 const& pos
 		  continue;
 	  }
 
-    mVertices[i].y = math::interpolation::linear
-      ( BrushType == eFlattenType_Flat ? remain
+    mVertices[i].y = glm::mix
+      ( 
+        mVertices[i].y
+      , ah
+      , BrushType == eFlattenType_Flat ? remain
       : BrushType == eFlattenType_Linear ? remain * (1.f - dist / radius)
       : BrushType == eFlattenType_Smooth ? pow (remain, 1.f + dist / radius)
       : throw std::logic_error ("bad brush type")
-      , mVertices[i].y
-      , ah
+
       );
 
     changed = true;
@@ -1098,13 +1101,14 @@ bool MapChunk::blurTerrain ( glm::vec3 const& pos
       continue;
     }
 
-    y = math::interpolation::linear
-      ( BrushType == eFlattenType_Flat ? remain
+    y = glm::mix
+      ( 
+        y,
+        target,
+        BrushType == eFlattenType_Flat ? remain
       : BrushType == eFlattenType_Linear ? remain * (1.f - dist / radius)
       : BrushType == eFlattenType_Smooth ? pow (remain, 1.f + dist / radius)
       : throw std::logic_error ("bad brush type")
-      , y
-      , target
       );
 
     changed = true;
