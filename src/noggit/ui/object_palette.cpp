@@ -5,7 +5,7 @@
 #include <noggit/ui/font_awesome.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/CurrentTexture.h>
-#include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
+#include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/MapView.h>
 
 #include <QtWidgets/QGridLayout>

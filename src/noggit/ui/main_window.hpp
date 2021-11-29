@@ -3,7 +3,7 @@
 #include <noggit/World.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/uid_fix_window.hpp>
-#include <noggit/Red/MapCreationWizard/Ui/MapCreationWizard.hpp>
+#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
 
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QStackedWidget>

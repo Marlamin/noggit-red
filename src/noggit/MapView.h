@@ -12,10 +12,10 @@
 #include <noggit/ui/MinimapCreator.hpp>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/unsigned_int_property.hpp>
-#include <noggit/Red/AssetBrowser/Ui/AssetBrowser.hpp>
-#include <noggit/Red/ViewportGizmo/ViewportGizmo.hpp>
-#include <noggit/Red/ViewportManager/ViewportManager.hpp>
-#include <noggit/Red/ToolPanel/ToolPanel.hpp>
+#include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
+#include <noggit/ui/tools/ViewportGizmo/ViewportGizmo.hpp>
+#include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
+#include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
 #include <noggit/TabletManager.hpp>
 #include <external/qtimgui/QtImGui.h>
 #include <external/QtAdvancedDockingSystem/src/DockManager.h>

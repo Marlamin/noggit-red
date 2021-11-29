@@ -15,7 +15,7 @@
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTabWidget>
-#include <noggit/Red/UiCommon/ExtendedSlider.hpp>
+#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
 
 #define _USE_MATH_DEFINES
 #include <math.h>

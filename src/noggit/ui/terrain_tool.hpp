@@ -3,8 +3,8 @@
 #pragma once
 #include <math/trig.hpp>
 #include <noggit/tool_enums.hpp>
-#include <noggit/Red/UiCommon/ExtendedSlider.hpp>
-#include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
+#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
+#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDial>
 #include <QtWidgets/QDoubleSpinBox>

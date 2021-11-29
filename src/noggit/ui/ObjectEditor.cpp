@@ -10,7 +10,7 @@
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/checkbox.hpp>
-#include <noggit/Red/UiCommon/expanderwidget.h>
+#include <noggit/ui/tools/UiCommon/expanderwidget.h>
 #include <util/qt/overload.hpp>
 
 #include <boost/algorithm/string/predicate.hpp>

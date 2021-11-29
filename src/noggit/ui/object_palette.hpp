@@ -4,7 +4,7 @@
 #define NOGGIT_OBJECT_PALETTE_HPP
 
 #include <noggit/ui/widget.hpp>
-#include <noggit/Red/PreviewRenderer/PreviewRenderer.hpp>
+#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
 #include <QtWidgets/QListWidget>
 #include <unordered_set>
 #include <string>

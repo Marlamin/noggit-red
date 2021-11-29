@@ -2,7 +2,7 @@
 
 #pragma once
 #include <noggit/tool_enums.hpp>
-#include <noggit/Red/UiCommon/ExtendedSlider.hpp>
+#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDial>

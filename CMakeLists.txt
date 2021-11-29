@@ -182,15 +182,15 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/dbcd-cpp/include
 INCLUDE_DIRECTORIES(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 collect_files(noggit_root_sources src/noggit FALSE "*.cpp" "")
-collect_files(noggit_ui_sources src/noggit/ui TRUE "*.cpp" "")
+collect_files(noggit_ui_sources src/noggit/ui FALSE "*.cpp" "")
 collect_files(noggit_scripting_sources src/noggit/scripting TRUE "*.cpp" "")
 collect_files(math_sources src/math FALSE "*.cpp" "")
 collect_files(opengl_sources src/opengl FALSE "*.cpp" "")
 
 IF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
-  collect_files(red_sources src/noggit/Red TRUE "*.cpp" "NodeEditor/Nodes/Containers;NodeEditor/Nodes/Data;NodeEditor/Nodes/Functions;NodeEditor/Nodes/Math;NodeEditor/Nodes/World")
+  collect_files(red_sources src/noggit/ui/tools TRUE "*.cpp" "NodeEditor/Nodes/Containers;NodeEditor/Nodes/Data;NodeEditor/Nodes/Functions;NodeEditor/Nodes/Math;NodeEditor/Nodes/World")
 ELSE()
-  collect_files(red_sources src/noggit/Red TRUE "*.cpp" "")
+  collect_files(red_sources src/noggit/ui/tools TRUE "*.cpp" "")
 ENDIF()
 
 collect_files(png_blp_sources src/external/PNG2BLP TRUE "*.c;*.cpp;" "")
@@ -202,16 +202,16 @@ collect_files(tracy_sources src/external/tracy FALSE "*.c;*.cpp;" "")
 SET(util_sources src/util/exception_to_string.cpp)
 
 collect_files(noggit_root_headers src/noggit FALSE "*.h;*.hpp;*.inl" "")
-collect_files(noggit_ui_headers src/noggit/ui TRUE "*.h;*.hpp" "")
+collect_files(noggit_ui_headers src/noggit/ui FALSE "*.h;*.hpp" "")
 collect_files(noggit_scripting_headers src/noggit/scripting TRUE "*.h;*.hpp" "")
 collect_files(math_headers src/math FALSE "*.h;*.hpp" "")
 collect_files(opengl_headers src/opengl FALSE "*.h;*.hpp" "")
 collect_files(shaders src/glsl FALSE "*.glsl" "")
 
 IF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
-  collect_files(red_headers src/noggit/Red TRUE "*.h;*.hpp" "NodeEditor/Nodes/Containers;NodeEditor/Nodes/Data;NodeEditor/Nodes/Functions;NodeEditor/Nodes/Math;NodeEditor/Nodes/World")
+  collect_files(red_headers src/noggit/ui/tools TRUE "*.h;*.hpp" "NodeEditor/Nodes/Containers;NodeEditor/Nodes/Data;NodeEditor/Nodes/Functions;NodeEditor/Nodes/Math;NodeEditor/Nodes/World")
 ELSE()
-  collect_files(red_headers src/noggit/Red TRUE "*.h;*.hpp" "")
+  collect_files(red_headers src/noggit/ui/tools TRUE "*.h;*.hpp" "")
 ENDIF()
 
 collect_files(png_blp_headers src/external/PNG2BLP TRUE "*.h;*.hpp" "")

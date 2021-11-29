@@ -11,10 +11,10 @@
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/uid_storage.hpp>
-#include <noggit/Red/MapCreationWizard/Ui/MapCreationWizard.hpp>
+#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <noggit/ui/font_awesome.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
-#include <noggit/Red/UiCommon/StackedWidget.hpp>
+#include <noggit/ui/tools/UiCommon/StackedWidget.hpp>
 #include <BlizzardDatabase.h>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>

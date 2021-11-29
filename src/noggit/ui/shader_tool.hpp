@@ -1,8 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-#include <noggit/Red/UiCommon/ExtendedSlider.hpp>
-#include <noggit/Red/UiCommon/ImageMaskSelector.hpp>
+#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
+#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
 
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
