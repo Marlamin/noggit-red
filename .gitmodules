@@ -1,3 +1,6 @@
-[submodule "src/external/dbcd-cpp"]
-	path = src/external/dbcd-cpp
-	url = https://gitlab.com/prophecy-rp/dbcd-cpp.git
+[submodule "src/external/blizzard-database-library"]
+	path = src/external/blizzard-database-library
+	url = https://gitlab.com/prophecy-rp/blizzard-database-library.git
+[submodule "src/external/blizzard-archive-library"]
+	path = src/external/blizzard-archive-library
+	url = https://gitlab.com/prophecy-rp/blizzard-archive-library.git
