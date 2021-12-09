@@ -15,6 +15,7 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 INCLUDE(CheckCXXCompilerFlag)
 INCLUDE(cmake/cmake_function.cmake)
 INCLUDE(cmake/cmake_macro.cmake)
+INCLUDE(FetchContent)
 
 #Project name
 PROJECT(Noggit)
@@ -377,8 +378,6 @@ IF(NOGGIT_LOGTOCONSOLE AND WIN32)
 ENDIF()
 
 includePlatform("pack")
-
-INCLUDE(FetchContent)
 
 # Dependency: json.hpp
 FetchContent_Declare (json

@@ -4,3 +4,7 @@
 [submodule "src/external/blizzard-archive-library"]
 	path = src/external/blizzard-archive-library
 	url = https://gitlab.com/prophecy-rp/blizzard-archive-library.git
+[submodule "cmake"]
+	path = cmake
+	url = https://gitlab.com/prophecy-rp/build-dependencies.git
+	branch = dep-cmake
