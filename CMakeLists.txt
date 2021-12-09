@@ -96,9 +96,20 @@ ENDIF()
 
 includePlatform("prefind")
 
-FIND_PACKAGE(OpenGL REQUIRED )
+# Dependency: Lua
+FIND_PACKAGE(Lua REQUIRED)
+ADD_LIBRARY(Lua-Lua INTERFACE)
+ADD_LIBRARY(Lua::Lua ALIAS Lua-Lua)
+TARGET_LINK_LIBRARIES(Lua-Lua INTERFACE ${LUA_LIBRARIES})
+TARGET_INCLUDE_DIRECTORIES(Lua-Lua INTERFACE ${LUA_INCLUDE_DIR})
+
+FIND_PACKAGE(OpenGL REQUIRED)
+FIND_PACKAGE(Json REQUIRED)
+FIND_PACKAGE(lodepng REQUIRED)
+FIND_PACKAGE(FastNoise2 REQUIRED)
+FIND_PACKAGE(StormLib REQUIRED)
+FIND_PACKAGE(Sol2 REQUIRED)
 FIND_PACKAGE(Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED)
-FIND_PACKAGE(StormLib REQUIRED )
 FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml REQUIRED)
 
 IF(USE_SQL)
@@ -322,6 +333,10 @@ TARGET_LINK_LIBRARIES (noggit
   noise-static
   noiseutils-static
   glm
+  lodepng
+  FastNoise
+  nlohmann_json::nlohmann_json
+  sol2::sane
 )
 
 SET_PROPERTY(TARGET noggit PROPERTY AUTOMOC ON)
@@ -378,77 +393,3 @@ IF(NOGGIT_LOGTOCONSOLE AND WIN32)
 ENDIF()
 
 includePlatform("pack")
-
-# Dependency: json.hpp
-FetchContent_Declare (json
-  GIT_REPOSITORY https://github.com/ArthurSonzogni/nlohmann_json_cmake_fetchcontent
-  GIT_TAG v3.9.1
-)
-FetchContent_GetProperties (json)
-IF(NOT json_POPULATED)
-  MESSAGE(STATUS "Installing json.hpp...")
-  FetchContent_Populate(json)
-ENDIF()
-ADD_SUBDIRECTORY(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
-
-# Dependency: lodepng
-FetchContent_Declare (lodepng
-  GIT_REPOSITORY https://github.com/lvandeve/lodepng.git
-  GIT_TAG 7fdcc96a5e5864eee72911c3ca79b1d9f0d12292
-)
-FetchContent_GetProperties (lodepng)
-IF(NOT lodepng_POPULATED)
-  MESSAGE(STATUS "Installing lodepng...")
-  FetchContent_Populate (lodepng)
-ENDIF()
-ADD_LIBRARY(lodepng "${lodepng_SOURCE_DIR}/lodepng.cpp")
-TARGET_INCLUDE_DIRECTORIES(lodepng SYSTEM PUBLIC ${lodepng_SOURCE_DIR})
-
-# Dependency: FastNoise2
-FetchContent_Declare (fastnoise2
-        GIT_REPOSITORY https://github.com/tswow/FastNoise2.git
-        GIT_TAG v0.0.1-heightmap
-        PATCH_COMMAND "${CMAKE_COMMAND}" -P "${CMAKE_SOURCE_DIR}/cmake/deps/patch_fastnoise2.cmake"
-        UPDATE_DISCONNECTED true
-        )
-FetchContent_GetProperties (fastnoise2)
-IF(NOT fastnoise2_POPULATED)
-  MESSAGE(STATUS "Installing FastNoise2... (big repo, large download)")
-  FetchContent_Populate (fastnoise2)
-ENDIF()
-
-SET(FASTNOISE2_NOISETOOL OFF)
-SET(FASTNOISE2_TESTS:BOOL OFF)
-
-IF(FASTNOISE2_NOISETOOL)
-  ADD_SUBDIRECTORY(${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR})
-ELSE()
-  ADD_SUBDIRECTORY(${fastnoise2_SOURCE_DIR} ${fastnoise2_BINARY_DIR} EXCLUDE_FROM_ALL)
-ENDIF()
-
-# Dependency: Lua
-FIND_PACKAGE(Lua REQUIRED)
-ADD_LIBRARY(Lua-Lua INTERFACE)
-ADD_LIBRARY(Lua::Lua ALIAS Lua-Lua)
-TARGET_LINK_LIBRARIES(Lua-Lua INTERFACE ${LUA_LIBRARIES})
-TARGET_INCLUDE_DIRECTORIES(Lua-Lua INTERFACE ${LUA_INCLUDE_DIR})
-
-# Dependency: sol2
-FetchContent_Declare (sol2
-        GIT_REPOSITORY https://github.com/tswow/sol2
-        GIT_TAG b9c83d5ecf6bc9503dc66779f2395dc32dffb1e5
-        )
-FetchContent_MakeAvailable (sol2)
-# sol2::sol2 neither links lua nor sets include directories as system so will clobber us with
-# loads of warnings, sadly. It also wants to be install(EXPORT)ed which is not what we want.
-add_library (sane-sol2 INTERFACE)
-add_library (sol2::sane ALIAS sane-sol2)
-target_link_libraries (sane-sol2 INTERFACE Lua::Lua)
-target_include_directories (sane-sol2 SYSTEM INTERFACE "${sol2_SOURCE_DIR}/include")
-
-target_link_libraries (noggit
-        lodepng
-        FastNoise
-        nlohmann_json::nlohmann_json
-        sol2::sane
-        )
