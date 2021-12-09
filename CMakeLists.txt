@@ -10,8 +10,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.3)
 CMAKE_POLICY(SET CMP0057 NEW) # "Support new IN_LIST if() operator."
 SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-SET(CMAKE_C_STANDARD  11)
-SET(CMAKE_C_STANDARD_REQUIRED  ON)
 
 #Including cmake dependencies
 INCLUDE(CheckCXXCompilerFlag)
@@ -127,6 +125,7 @@ ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/QtAdvancedDockingSystem")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/NodeEditor")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/libnoise")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/blizzard-database-library")
+ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/blizzard-archive-library")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/glm")
 
 # Add the found include directories to our include list.
@@ -179,6 +178,7 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/libnoise/src")
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/qtgradienteditor")
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/tracy")
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/blizzard-database-library/include")
+INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/blizzard-archive-library/include")
 INCLUDE_DIRECTORIES(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 collect_files(noggit_root_sources src/noggit FALSE "*.cpp" "")
@@ -219,7 +219,6 @@ collect_files(imguizmo_headers src/external/imguizmo FALSE "*.h;*.hpp" "")
 collect_files(imguipiemenu_headers src/external/imguipiemenu FALSE "*.h;*.hpp" "")
 collect_files(gradienteditor_headers src/external/qtgradienteditor FALSE "*.h;*.hpp" "")
 collect_files(tracy_headers src/external/tracy FALSE "*.h;*.hpp" "")
-collect_files(blizzard_database_headers src/external/blizzard-database-library/include FALSE "*.h;*.hpp" "")
 
 IF(WIN32)
   SET(os_sources include/win/StackWalker.cpp)
@@ -258,7 +257,6 @@ assign_source_group(
   ${gradienteditor_sources}
   ${resource_files}
   ${ui_files}
-  ${blizzard_database_headers}
   ${tracy_sources}
   ${tracy_headers}
 )
@@ -301,11 +299,12 @@ ADD_EXECUTABLE(noggit
   ${compiled_ui_files}
   ${shaders}
   ${force_update_file}
-  ${blizzard_database_headers}
 )
 
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
+  BlizzardDatabaseLib
+  BlizzardArchiveLib
   StormLib
   Boost::thread
   Boost::filesystem
@@ -316,7 +315,6 @@ TARGET_LINK_LIBRARIES (noggit
   Qt5::Xml
   ColorWidgets-qt5
   FramelessHelper
-  BlizzardDatabaseLib
   qt_imgui_widgets
   qtadvanceddocking
   nodes
