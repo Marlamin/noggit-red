@@ -137,7 +137,6 @@ ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/QtAdvancedDockingSystem")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/NodeEditor")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/libnoise")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/blizzard-database-library")
-ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/blizzard-archive-library")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/glm")
 
 # Add the found include directories to our include list.
@@ -210,6 +209,7 @@ collect_files(imguizmo_sources src/external/imguizmo FALSE "*.c;*.cpp;" "")
 collect_files(imguipiemenu_sources src/external/imguipiemenu FALSE "*.c;*.cpp;" "")
 collect_files(gradienteditor_sources src/external/qtgradienteditor FALSE "*.c;*.cpp;" "")
 collect_files(tracy_sources src/external/tracy FALSE "*.c;*.cpp;" "")
+collect_files(archive_sources src/external/blizzard-archive-library FALSE "*.c;*.cpp;" "")
 
 SET(util_sources src/util/exception_to_string.cpp)
 
@@ -231,6 +231,7 @@ collect_files(imguizmo_headers src/external/imguizmo FALSE "*.h;*.hpp" "")
 collect_files(imguipiemenu_headers src/external/imguipiemenu FALSE "*.h;*.hpp" "")
 collect_files(gradienteditor_headers src/external/qtgradienteditor FALSE "*.h;*.hpp" "")
 collect_files(tracy_headers src/external/tracy FALSE "*.h;*.hpp" "")
+collect_files(archive_headers src/external/blizzard-archive-library FALSE "*.h;*.hpp" "")
 
 IF(WIN32)
   SET(os_sources include/win/StackWalker.cpp)
@@ -271,6 +272,8 @@ assign_source_group(
   ${ui_files}
   ${tracy_sources}
   ${tracy_headers}
+  ${archive_sources}
+  ${archive_headers}
 )
 
 ADD_EXECUTABLE(noggit
@@ -291,6 +294,7 @@ ADD_EXECUTABLE(noggit
   ${imguipiemenu_sources}
   ${gradienteditor_sources}
   ${tracy_sources}
+  ${archive_sources}
   ${noggit_root_headers}
   ${noggit_ui_headers}
   ${noggit_scripting_headers}
@@ -307,6 +311,7 @@ ADD_EXECUTABLE(noggit
   ${imguipiemenu_headers}
   ${gradienteditor_headers}
   ${tracy_headers}
+  ${archive_sources}
   ${compiled_resource_files}
   ${compiled_ui_files}
   ${shaders}
@@ -316,7 +321,6 @@ ADD_EXECUTABLE(noggit
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   BlizzardDatabaseLib
-  BlizzardArchiveLib
   StormLib
   Boost::thread
   Boost::filesystem
