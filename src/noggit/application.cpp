@@ -1,31 +1,19 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/application.hpp>
 #include <noggit/AsyncLoader.h>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/MPQ.h>
-#include <noggit/MapView.h>
-#include <noggit/Model.h>
-#include <noggit/ModelManager.h> // ModelManager::report()
-#include <noggit/TextureManager.h> // TextureManager::report()
-#include <noggit/WMO.h> // WMOManager::report()
 #include <noggit/errorHandling.h>
-#include <noggit/liquid_layer.hpp>
 #include <noggit/ui/main_window.hpp>
 #include <opengl/context.hpp>
-#include <opengl/context.inl>
 #include <util/exception_to_string.hpp>
-
-#include <boost/filesystem.hpp>
-#include <boost/thread/thread.hpp>
 
 #include <external/framelesshelper/framelesswindowsmanager.h>
 
-#include <algorithm>
 #include <cstdlib>
 #include <ctime>
-#include <filesystem>
-#include <fstream>
 #include <iterator>
 #include <list>
 #include <string>
@@ -47,23 +35,6 @@
 #include <string>
 #include <type_traits>
 #include "revision.h"
-
-class Noggit
-{
-public:
-  Noggit (int argc, char *argv[]);
-
-private:
-  void initPath(char *argv[]);
-  void loadMPQs();
-
-  std::unique_ptr<noggit::ui::main_window> main_window;
-
-  boost::filesystem::path wowpath;
-
-  bool fullscreen;
-  bool doAntiAliasing;
-};
 
 void Noggit::initPath(char *argv[])
 {
@@ -387,7 +358,7 @@ int main(int argc, char *argv[])
   qapp.setApplicationName ("Noggit");
   qapp.setOrganizationName ("Noggit");
 
-  Noggit app (argc, argv);
+  Noggit::instance(argc, argv);
 
   return qapp.exec();
 }

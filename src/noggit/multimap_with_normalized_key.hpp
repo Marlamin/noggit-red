@@ -7,6 +7,7 @@
 #include <noggit/ContextObject.hpp>
 #include <noggit/Log.h>
 #include <noggit/MPQ.h>
+#include <ClientData.hpp>
 
 #include <boost/thread.hpp>
 
@@ -35,7 +36,8 @@ namespace noggit
   template<typename T>
   struct async_object_multimap_with_normalized_key
   {
-    async_object_multimap_with_normalized_key (std::function<std::string (std::string)> normalize = &mpq::normalized_filename)
+    async_object_multimap_with_normalized_key (std::function<std::string (std::string)> normalize
+      = &BlizzardArchive::ClientData::normalizeFilenameInternal)
       : _normalize (std::move (normalize))
     {}
 

@@ -108,6 +108,7 @@ FIND_PACKAGE(Json REQUIRED)
 FIND_PACKAGE(lodepng REQUIRED)
 FIND_PACKAGE(FastNoise2 REQUIRED)
 FIND_PACKAGE(StormLib REQUIRED)
+FIND_PACKAGE(CascLib REQUIRED)
 FIND_PACKAGE(Sol2 REQUIRED)
 FIND_PACKAGE(Boost 1.60 COMPONENTS thread filesystem system unit_test_framework REQUIRED)
 FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml REQUIRED)
@@ -209,7 +210,7 @@ collect_files(imguizmo_sources src/external/imguizmo FALSE "*.c;*.cpp;" "")
 collect_files(imguipiemenu_sources src/external/imguipiemenu FALSE "*.c;*.cpp;" "")
 collect_files(gradienteditor_sources src/external/qtgradienteditor FALSE "*.c;*.cpp;" "")
 collect_files(tracy_sources src/external/tracy FALSE "*.c;*.cpp;" "")
-collect_files(archive_sources src/external/blizzard-archive-library FALSE "*.c;*.cpp;" "")
+collect_files(archive_sources src/external/blizzard-archive-library/src FALSE "*.c;*.cpp;" "")
 
 SET(util_sources src/util/exception_to_string.cpp)
 
@@ -231,7 +232,7 @@ collect_files(imguizmo_headers src/external/imguizmo FALSE "*.h;*.hpp" "")
 collect_files(imguipiemenu_headers src/external/imguipiemenu FALSE "*.h;*.hpp" "")
 collect_files(gradienteditor_headers src/external/qtgradienteditor FALSE "*.h;*.hpp" "")
 collect_files(tracy_headers src/external/tracy FALSE "*.h;*.hpp" "")
-collect_files(archive_headers src/external/blizzard-archive-library FALSE "*.h;*.hpp" "")
+collect_files(archive_headers src/external/blizzard-archive-library/include FALSE "*.h;*.hpp" "")
 
 IF(WIN32)
   SET(os_sources include/win/StackWalker.cpp)
@@ -311,7 +312,7 @@ ADD_EXECUTABLE(noggit
   ${imguipiemenu_headers}
   ${gradienteditor_headers}
   ${tracy_headers}
-  ${archive_sources}
+  ${archive_headers}
   ${compiled_resource_files}
   ${compiled_ui_files}
   ${shaders}
@@ -322,6 +323,7 @@ TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   BlizzardDatabaseLib
   StormLib
+  CascLib
   Boost::thread
   Boost::filesystem
   Boost::system
