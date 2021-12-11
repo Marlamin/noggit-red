@@ -16,6 +16,7 @@
 #include <ctime>
 #include <iterator>
 #include <list>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -35,6 +36,8 @@
 #include <string>
 #include <type_traits>
 #include "revision.h"
+
+using namespace BlizzardArchive;
 
 void Noggit::initPath(char *argv[])
 {
@@ -58,139 +61,13 @@ void Noggit::initPath(char *argv[])
   }
 }
 
-void Noggit::loadMPQs()
-{
-  std::vector<std::string> archiveNames;
-  archiveNames.push_back("common.MPQ");
-  archiveNames.push_back("common-2.MPQ");
-  archiveNames.push_back("expansion.MPQ");
-  archiveNames.push_back("lichking.MPQ");
-  archiveNames.push_back("patch.MPQ");
-  archiveNames.push_back("patch-{number}.MPQ");
-  archiveNames.push_back("patch-{character}.MPQ");
-
-  //archiveNames.push_back( "{locale}/backup-{locale}.MPQ" );
-  //archiveNames.push_back( "{locale}/base-{locale}.MPQ" );
-  archiveNames.push_back("{locale}/locale-{locale}.MPQ");
-  //archiveNames.push_back( "{locale}/speech-{locale}.MPQ" );
-  archiveNames.push_back("{locale}/expansion-locale-{locale}.MPQ");
-  //archiveNames.push_back( "{locale}/expansion-speech-{locale}.MPQ" );
-  archiveNames.push_back("{locale}/lichking-locale-{locale}.MPQ");
-  //archiveNames.push_back( "{locale}/lichking-speech-{locale}.MPQ" );
-  archiveNames.push_back("{locale}/patch-{locale}.MPQ");
-  archiveNames.push_back("{locale}/patch-{locale}-{number}.MPQ");
-  archiveNames.push_back("{locale}/patch-{locale}-{character}.MPQ");
-
-  archiveNames.push_back("development.MPQ");
-
-  const char * locales[] = { "enGB", "enUS", "deDE", "koKR", "frFR", "zhCN", "zhTW", "esES", "esMX", "ruRU" };
-  const char * locale("****");
-
-  // Find locale, take first one.
-  for (int i(0); i < 10; ++i)
-  {
-    if (boost::filesystem::exists (wowpath / "Data" / locales[i] / "realmlist.wtf"))
-    {
-      locale = locales[i];
-      Log << "Locale: " << locale << std::endl;
-      break;
-    }
-  }
-  if (!strcmp(locale, "****"))
-  {
-    LogError << "Could not find locale directory. Be sure, that there is one containing the file \"realmlist.wtf\"." << std::endl;
-    //return -1;
-  }
-
-
-  //! \todo  This may be done faster. Maybe.
-  for (size_t i(0); i < archiveNames.size(); ++i)
-  {
-    std::string path((wowpath / "Data" / archiveNames[i]).string());
-    std::string::size_type location(std::string::npos);
-
-    do
-    {
-      location = path.find("{locale}");
-      if (location != std::string::npos)
-      {
-        path.replace(location, 8, locale);
-      }
-    } while (location != std::string::npos);
-
-    if (path.find("{number}") != std::string::npos)
-    {
-      location = path.find("{number}");
-      path.replace(location, 8, " ");
-      for (char j = '2'; j <= '9'; j++)
-      {
-        path.replace(location, 1, std::string(&j, 1));
-        if (boost::filesystem::exists(path))
-          MPQArchive::loadMPQ (&AsyncLoader::instance(), path, true);
-      }
-    }
-    else if (path.find("{character}") != std::string::npos)
-    {
-      location = path.find("{character}");
-      path.replace(location, 11, " ");
-      for (char c = 'a'; c <= 'z'; c++)
-      {
-        path.replace(location, 1, std::string(&c, 1));
-        if (boost::filesystem::exists(path))
-          MPQArchive::loadMPQ (&AsyncLoader::instance(), path, true);
-      }
-    }
-    else
-      if (boost::filesystem::exists(path))
-        MPQArchive::loadMPQ (&AsyncLoader::instance(), path, true);
-  }
-}
-
-namespace
-{
-  bool is_valid_game_path (const QDir& path)
-  {
-    if (!path.exists ())
-    {
-      LogError << "Path \"" << qPrintable (path.absolutePath ())
-        << "\" does not exist." << std::endl;
-      return false;
-    }
-
-    QStringList locales;
-    locales << "enGB" << "enUS" << "deDE" << "koKR" << "frFR"
-      << "zhCN" << "zhTW" << "esES" << "esMX" << "ruRU";
-    QString found_locale ("****");
-
-    foreach (const QString& locale, locales)
-    {
-      if (path.exists (("Data/" + locale)))
-      {
-        found_locale = locale;
-        break;
-      }
-    }
-
-    if (found_locale == "****")
-    {
-      LogError << "Path \"" << qPrintable (path.absolutePath ())
-        << "\" does not contain a locale directory "
-        << "(invalid installation or no installation at all)."
-        << std::endl;
-      return false;
-    }
-
-    return true;
-  }
-}
-
 Noggit::Noggit(int argc, char *argv[])
   : fullscreen(false)
   , doAntiAliasing(true)
 {
   InitLogging();
   assert (argc >= 1); (void) argc;
-  initPath(argv);
+  Noggit::initPath(argv);
 
   Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
@@ -202,18 +79,6 @@ Noggit::Noggit(int argc, char *argv[])
 
   srand(::time(nullptr));
   QDir path (settings.value ("project/game_path").toString());
-
-  while (!is_valid_game_path (path))
-  {
-    QDir new_path (QFileDialog::getExistingDirectory (nullptr, "Open WoW Directory", "/", QFileDialog::ShowDirsOnly));
-    if (new_path.absolutePath () == "")
-    {
-      LogError << "Could not auto-detect game path "
-        << "and user canceled the dialog." << std::endl;
-      throw std::runtime_error ("no folder chosen");
-    }
-    std::swap (new_path, path);
-  }
 
   wowpath = path.absolutePath().toStdString();
 
@@ -227,7 +92,8 @@ Noggit::Noggit(int argc, char *argv[])
   settings.setValue ("project/game_path", path.absolutePath());
   settings.setValue ("project/path", QString::fromStdString(project_path));
 
-  loadMPQs(); // listfiles are not available straight away! They are async! Do not rely on anything at this point!
+  _client_data = std::make_unique<ClientData>(wowpath.string(),
+                                              ClientVersion::WOTLK, Locale::AUTO, project_path);
 
   OpenDBs();
 

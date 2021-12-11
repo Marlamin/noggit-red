@@ -5,6 +5,7 @@
 
 #include <memory>
 #include <boost/filesystem.hpp>
+#include <ClientData.hpp>
 
 namespace noggit::ui
 {
@@ -20,13 +21,15 @@ public:
     return &inst;
   }
 
+  BlizzardArchive::ClientData* clientData() { return _client_data.get(); };
+
 private:
   Noggit (int argc, char *argv[]);
 
-  void initPath(char *argv[]);
-  void loadMPQs();
+  static void initPath(char *argv[]);
 
   std::unique_ptr<noggit::ui::main_window> main_window;
+  std::unique_ptr<BlizzardArchive::ClientData> _client_data;
 
   boost::filesystem::path wowpath;
 
