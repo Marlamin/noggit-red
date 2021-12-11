@@ -12,7 +12,7 @@
 #include <noggit/alphamap.hpp>
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/TexturingGUI.h>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <ClientFile.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>

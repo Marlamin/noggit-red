@@ -8,7 +8,7 @@
 #include <noggit/WMO.h>
 #include <noggit/World.h>
 #include <opengl/primitives.hpp>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <opengl/scoped.hpp>
 
 #include <boost/algorithm/string.hpp>

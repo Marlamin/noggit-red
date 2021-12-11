@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/TextureManager.h>
 #include <noggit/Log.h> // LogDebug
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <ClientFile.hpp>
 
 #include <QtCore/QString>

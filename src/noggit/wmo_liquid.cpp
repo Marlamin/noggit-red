@@ -4,7 +4,7 @@
 #include <noggit/Log.h>
 #include <noggit/World.h>
 #include <noggit/wmo_liquid.hpp>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <opengl/shader.hpp>

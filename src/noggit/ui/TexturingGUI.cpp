@@ -14,7 +14,7 @@
 
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/ui/TextureList.hpp>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 
 #include <unordered_set>
 

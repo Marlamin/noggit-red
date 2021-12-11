@@ -14,7 +14,7 @@
 #endif
 #include <noggit/map_index.hpp>
 #include <noggit/uid_storage.hpp>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <ClientFile.hpp>
 
 #include <QtCore/QSettings>

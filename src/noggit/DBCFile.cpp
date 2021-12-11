@@ -2,7 +2,7 @@
 
 #include <noggit/DBCFile.h>
 #include <noggit/Log.h>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <ClientFile.hpp>
 
 #include <string>

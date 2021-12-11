@@ -5,7 +5,7 @@
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/font_noggit.hpp>
 #include <noggit/MapView.h>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 
 #include <QStandardItemModel>
 #include <QItemSelectionModel>

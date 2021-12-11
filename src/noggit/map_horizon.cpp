@@ -3,7 +3,7 @@
 #include "map_horizon.h"
 
 #include <noggit/Log.h>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/map_index.hpp>
 #include <noggit/World.h>
 #include <opengl/context.hpp>
