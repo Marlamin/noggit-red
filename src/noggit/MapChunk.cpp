@@ -16,15 +16,15 @@
 #include <opengl/scoped.hpp>
 #include <external/tracy/Tracy.hpp>
 #include <glm/glm.hpp>
+#include <ClientFile.hpp>
 
 #include <algorithm>
 #include <iostream>
 #include <map>
-#include <QPixmap>
 #include <QImage>
 #include <limits>
 
-MapChunk::MapChunk(MapTile *maintile, MPQFile *f, bool bigAlpha,
+MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAlpha,
                    tile_mode mode, noggit::NoggitRenderContext context, bool init_empty, int chunk_idx)
   : _mode(mode)
   , mt(maintile)

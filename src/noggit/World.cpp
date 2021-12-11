@@ -20,8 +20,10 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/TexturingGUI.h>
+#include <noggit/application.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
+
 
 #include <noggit/ActionManager.hpp>
 
@@ -78,13 +80,13 @@ bool World::IsEditableWorld(int pMapId)
   std::stringstream ssfilename;
   ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
 
-  if (!MPQFile::exists(ssfilename.str()))
+  if (!NOGGIT_APP->clientData()->exists(ssfilename.str()))
   {
     Log << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
     return false;
   }
 
-  MPQFile mf(ssfilename.str());
+  BlizzardArchive::ClientFile mf(ssfilename.str(), NOGGIT_APP->clientData());
 
   //sometimes, wdts don't open, so ignore them...
   if (mf.isEof())
@@ -3679,7 +3681,7 @@ void World::update_models_by_filename()
 
   _model_instance_storage.for_each_m2_instance([&] (ModelInstance& model_instance)
   {
-    _models_by_filename[model_instance.model->filename].push_back(&model_instance);
+    _models_by_filename[model_instance.model->_file_key.filepath()].push_back(&model_instance);
     // to make sure the transform matrix are up to date
     model_instance.recalcExtents();
   });

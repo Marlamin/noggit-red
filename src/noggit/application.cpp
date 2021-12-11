@@ -4,7 +4,7 @@
 #include <noggit/AsyncLoader.h>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
-#include <noggit/MPQ.h>
+
 #include <noggit/errorHandling.h>
 #include <noggit/ui/main_window.hpp>
 #include <opengl/context.hpp>
@@ -84,18 +84,13 @@ Noggit::Noggit(int argc, char *argv[])
 
   Log << "Game path: " << wowpath << std::endl;
 
-  std::string project_path = settings.value ("project/path", path.absolutePath()).toString().toStdString();
+  project_path = settings.value ("project/path", path.absolutePath()).toString().toStdString();
   settings.setValue ("project/path", QString::fromStdString (project_path));
 
   Log << "Project path: " << project_path << std::endl;
 
   settings.setValue ("project/game_path", path.absolutePath());
   settings.setValue ("project/path", QString::fromStdString(project_path));
-
-  _client_data = std::make_unique<ClientData>(wowpath.string(),
-                                              ClientVersion::WOTLK, Locale::AUTO, project_path);
-
-  OpenDBs();
 
   if (!QGLFormat::hasOpenGL())
   {
@@ -133,6 +128,14 @@ Noggit::Noggit(int argc, char *argv[])
   LogDebug << "GL: Vendor: " << gl.getString (GL_VENDOR) << std::endl;
   LogDebug << "GL: Renderer: " << gl.getString (GL_RENDERER) << std::endl;
 
+}
+
+void Noggit::start()
+{
+  _client_data = std::make_unique<ClientData>(wowpath.string(),
+                                              ClientVersion::WOTLK, Locale::AUTO, project_path);
+
+  OpenDBs();
 
   main_window = std::make_unique<noggit::ui::main_window>();
 
@@ -224,7 +227,8 @@ int main(int argc, char *argv[])
   qapp.setApplicationName ("Noggit");
   qapp.setOrganizationName ("Noggit");
 
-  Noggit::instance(argc, argv);
+  auto noggit = Noggit::instance(argc, argv);
+  noggit->start();
 
   return qapp.exec();
 }

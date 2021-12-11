@@ -5,7 +5,9 @@
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <opengl/shader.hpp>
+#include <ClientFile.hpp>
 #include <glm/vec3.hpp>
+
 
 #include <list>
 
@@ -19,7 +21,7 @@ T lifeRamp(float life, float mid, const T &a, const T &b, const T &c)
 }
 
 ParticleSystem::ParticleSystem(Model* model_
-                               , const MPQFile& f
+                               , const BlizzardArchive::ClientFile& f
                                , const ModelParticleEmitterDef &mta
                                , int *globals
                                , noggit::NoggitRenderContext context)
@@ -781,7 +783,7 @@ Particle SphereParticleEmitter::newParticle(ParticleSystem* sys, int anim, int t
 }
 
 RibbonEmitter::RibbonEmitter(Model* model_
-                             , const MPQFile &f
+                             , const BlizzardArchive::ClientFile &f
                              , ModelRibbonEmitterDef const& mta
                              , int *globals
                              , noggit::NoggitRenderContext context)

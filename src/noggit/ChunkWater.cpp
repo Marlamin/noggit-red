@@ -3,9 +3,9 @@
 #include <noggit/ChunkWater.hpp>
 #include <noggit/TileWater.hpp>
 #include <noggit/liquid_layer.hpp>
-#include <noggit/MPQ.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
+#include <ClientFile.hpp>
 
 ChunkWater::ChunkWater(MapChunk* chunk, TileWater* water_tile, float x, float z, bool use_mclq_green_lava)
   : xbase(x)
@@ -69,7 +69,7 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
   update_layers();
 }
 
-void ChunkWater::fromFile(MPQFile &f, size_t basePos)
+void ChunkWater::fromFile(BlizzardArchive::ClientFile &f, size_t basePos)
 {
   MH2O_Header header;
   f.read(&header, sizeof(MH2O_Header));

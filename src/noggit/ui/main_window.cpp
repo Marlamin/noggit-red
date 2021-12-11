@@ -471,21 +471,21 @@ namespace noggit
             }
         }
     	else
-        {
-            for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
-            {
-                MapEntry e;
-                e.mapID = i->getInt(MapDB::MapID);
-                e.name = i->getLocalizedString(MapDB::Name);
-                e.areaType = i->getUInt(MapDB::AreaType);
+      {
+          for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
+          {
+              MapEntry e;
+              e.mapID = i->getInt(MapDB::MapID);
+              e.name = i->getLocalizedString(MapDB::Name);
+              e.areaType = i->getUInt(MapDB::AreaType);
 
-                if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
-                    continue;
+              if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
+                  continue;
 
-                auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()), type_to_table[e.areaType]));
-                item->setData(Qt::UserRole, QVariant(e.mapID));
-            }
-        }
+              auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()), type_to_table[e.areaType]));
+              item->setData(Qt::UserRole, QVariant(e.mapID));
+          }
+      }
     }
 
 

@@ -3,14 +3,18 @@
 #pragma once
 
 #include <noggit/Log.h>
-#include <noggit/MPQ.h>
 #include <opengl/texture.hpp>
+
+namespace BlizzardArchive
+{
+  class ClientFile;
+}
 
 class Alphamap
 {
 public:
   Alphamap();
-  Alphamap(MPQFile* f, unsigned int flags, bool use_big_alphamaps, bool do_not_fix_alpha_map);
+  Alphamap(BlizzardArchive::ClientFile* f, unsigned int flags, bool use_big_alphamaps, bool do_not_fix_alpha_map);
 
   void setAlpha(size_t offset, unsigned char value);
   void setAlpha(unsigned char *pAmap);
@@ -21,9 +25,9 @@ public:
   std::vector<uint8_t> compress() const;
 
 private:
-  void readCompressed(MPQFile *f);
-  void readBigAlpha(MPQFile *f);
-  void readNotCompressed(MPQFile *f, bool do_not_fix_alpha_map);
+  void readCompressed(BlizzardArchive::ClientFile *f);
+  void readBigAlpha(BlizzardArchive::ClientFile *f);
+  void readNotCompressed(BlizzardArchive::ClientFile *f, bool do_not_fix_alpha_map);
 
   void createNew(); 
 

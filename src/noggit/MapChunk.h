@@ -19,7 +19,11 @@
 #include <array>
 #include <QImage>
 
-class MPQFile;
+namespace BlizzardArchive
+{
+  class ClientFile;
+}
+
 namespace math
 {
   class frustum;
@@ -59,7 +63,7 @@ private:
 
 
 public:
-  MapChunk(MapTile* mt, MPQFile* f, bool bigAlpha, tile_mode mode, noggit::NoggitRenderContext context
+  MapChunk(MapTile* mt, BlizzardArchive::ClientFile* f, bool bigAlpha, tile_mode mode, noggit::NoggitRenderContext context
            , bool init_empty = false, int chunk_idx = 0);
 
   auto getHoleMask(void) const -> unsigned { return static_cast<unsigned>(holes); }

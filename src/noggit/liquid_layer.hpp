@@ -4,7 +4,6 @@
 
 #include <math/trig.hpp>
 #include <noggit/MapHeaders.h>
-#include <noggit/MPQ.h>
 #include <opengl/scoped.hpp>
 #include <array>
 #include <glm/vec2.hpp>
@@ -22,6 +21,11 @@ enum LiquidLayerUpdateFlags
   ll_FLAGS = 0x10
 };
 
+namespace BlizzardArchive
+{
+  class ClientFile;
+}
+
 // handle liquids like oceans, lakes, rivers, slime, magma
 class liquid_layer
 {
@@ -30,7 +34,7 @@ public:
   liquid_layer() = delete;
   liquid_layer(ChunkWater* chunk, glm::vec3 const& base, float height, int liquid_id);
   liquid_layer(ChunkWater* chunk, glm::vec3 const& base, mclq& liquid, int liquid_id);
-  liquid_layer(ChunkWater* chunk, MPQFile &f, std::size_t base_pos, glm::vec3 const& base, MH2O_Information const& info, std::uint64_t infomask);
+  liquid_layer(ChunkWater* chunk, BlizzardArchive::ClientFile& f, std::size_t base_pos, glm::vec3 const& base, MH2O_Information const& info, std::uint64_t infomask);
 
   liquid_layer(liquid_layer const& other);
   liquid_layer(liquid_layer&&);

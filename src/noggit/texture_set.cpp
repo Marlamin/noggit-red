@@ -7,6 +7,7 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/World.h>
 #include <noggit/texture_set.hpp>
+#include <ClientFile.hpp>
 
 #include <algorithm>    // std::min
 #include <array>
@@ -14,7 +15,7 @@
 
 #include <boost/utility/in_place_factory.hpp>
 
-TextureSet::TextureSet (MapChunk* chunk, MPQFile* f, size_t base, MapTile* tile
+TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
                         , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
                         , noggit::NoggitRenderContext context)
   : nTextures(chunk->header.nLayers)
@@ -261,7 +262,7 @@ bool TextureSet::canPaintTexture(scoped_blp_texture_reference const& texture)
 
 const std::string& TextureSet::filename(size_t id)
 {
-  return textures[id]->filename;
+  return textures[id]->_file_key.filepath();
 }
 
 bool TextureSet::eraseUnusedTextures()

@@ -25,6 +25,8 @@
 #include <QDir>
 #include <QMessageBox>
 
+#include <filesystem>
+
 using namespace noggit::ui::tools::MapCreationWizard::Ui;
 
 MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(parent)
@@ -392,14 +394,14 @@ void MapCreationWizard::saveCurrentEntry()
     filename << "World\\Maps\\" << map_internal_name << "\\" << map_internal_name << ".wdt";
 
     QSettings settings;
-    auto project_path = boost::filesystem::path (settings.value ("project/path").toString().toStdString());
+    auto project_path = std::filesystem::path (settings.value ("project/path").toString().toStdString());
 
     QDir dir((project_path / "/world/maps/" / map_internal_name).string().c_str());
 
     if (!dir.exists())
       dir.mkpath(".");
 
-    auto filepath = project_path / noggit::mpq::normalized_filename (filename.str());
+    auto filepath = project_path / BlizzardArchive::ClientData::normalizeFilenameInternal (filename.str());
 
     QFile file(filepath.string().c_str());
     file.open(QIODevice::WriteOnly);

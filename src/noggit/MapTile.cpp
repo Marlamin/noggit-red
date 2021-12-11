@@ -10,12 +10,14 @@
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
 #include <noggit/alphamap.hpp>
-#include <noggit/map_index.hpp>
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/TexturingGUI.h>
+#include <noggit/application.hpp>
+#include <ClientFile.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 #include <external/tracy/Tracy.hpp>
+
 
 #include <QtCore/QSettings>
 
@@ -103,9 +105,9 @@ void MapTile::finishLoading()
   if (finished)
     return;
 
-  MPQFile theFile(filename);
+  BlizzardArchive::ClientFile theFile(_file_key, NOGGIT_APP->clientData());
 
-  Log << "Opening tile " << index.x << ", " << index.z << " (\"" << filename << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
+  Log << "Opening tile " << index.x << ", " << index.z << " (\"" << _file_key.stringRepr() << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
 
   // - Parsing the file itself. --------------------------
 
@@ -168,7 +170,7 @@ void MapTile::finishLoading()
 
     while (lCurPos < lEnd)
     {
-      mTextureFilenames.push_back(noggit::mpq::normalized_filename(std::string(lCurPos)));
+      mTextureFilenames.push_back(BlizzardArchive::ClientData::normalizeFilenameInternal(std::string(lCurPos)));
       lCurPos += strlen(lCurPos) + 1;
     }
   }
@@ -189,7 +191,7 @@ void MapTile::finishLoading()
 
       while (lCurPos < lEnd)
       {
-        mModelFilenames.push_back(noggit::mpq::normalized_filename(std::string(lCurPos)));
+        mModelFilenames.push_back(BlizzardArchive::ClientData::normalizeFilenameInternal(std::string(lCurPos)));
         lCurPos += strlen(lCurPos) + 1;
       }
     }
@@ -208,7 +210,7 @@ void MapTile::finishLoading()
 
       while (lCurPos < lEnd)
       {
-        mWMOFilenames.push_back(noggit::mpq::normalized_filename(std::string(lCurPos)));
+        mWMOFilenames.push_back(BlizzardArchive::ClientData::normalizeFilenameInternal(std::string(lCurPos)));
         lCurPos += strlen(lCurPos) + 1;
       }
     }
@@ -912,7 +914,7 @@ void MapTile::getVertexInternal(float x, float z, glm::vec3* v)
 
 void MapTile::saveTile(World* world)
 {
-  Log << "Saving ADT \"" << filename << "\"." << std::endl;
+  Log << "Saving ADT \"" << _file_key.stringRepr() << "\"." << std::endl;
 
   int lID;  // This is a global counting variable. Do not store something in here you need later.
   std::vector<WMOInstance> lObjectInstances;
@@ -931,7 +933,7 @@ void MapTile::saveTile(World* world)
     if (!model)
     {
       // todo: save elsewhere if this happens ? it shouldn't but still
-      LogError << "Could not find model with uid=" << uid << " when saving " << filename << std::endl;
+      LogError << "Could not find model with uid=" << uid << " when saving " << _file_key.stringRepr() << std::endl;
     }
     else
     {
@@ -963,9 +965,9 @@ void MapTile::saveTile(World* world)
 
   for (auto const& model : lModelInstances)
   {
-    if (lModels.find(model.model->filename) == lModels.end())
+    if (lModels.find(model.model->_file_key.filepath()) == lModels.end())
     {
-      lModels.emplace (model.model->filename, nullyThing);
+      lModels.emplace (model.model->_file_key.filepath(), nullyThing);
     }
   }
 
@@ -979,9 +981,9 @@ void MapTile::saveTile(World* world)
 
   for (auto const& object : lObjectInstances)
   {
-    if (lObjects.find(object.wmo->filename) == lObjects.end())
+    if (lObjects.find(object.wmo->_file_key.filepath()) == lObjects.end())
     {
-      lObjects.emplace (object.wmo->filename, nullyThing);
+      lObjects.emplace (object.wmo->_file_key.filepath(), nullyThing);
     }
   }
 
@@ -1157,7 +1159,7 @@ void MapTile::saveTile(World* world)
   lID = 0;
   for (auto const& model : lModelInstances)
   {
-    auto filename_to_offset_and_name = lModels.find(model.model->filename);
+    auto filename_to_offset_and_name = lModels.find(model.model->_file_key.filepath());
     if (filename_to_offset_and_name == lModels.end())
     {
       LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -1193,7 +1195,7 @@ void MapTile::saveTile(World* world)
   lID = 0;
   for (auto const& object : lObjectInstances)
   {
-    auto filename_to_offset_and_name = lObjects.find(object.wmo->filename);
+    auto filename_to_offset_and_name = lObjects.find(object.wmo->_file_key.filepath());
     if (filename_to_offset_and_name == lObjects.end())
     {
       LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -1287,9 +1289,9 @@ void MapTile::saveTile(World* world)
 
 
   {
-    MPQFile f(filename);
+    BlizzardArchive::ClientFile f(_file_key.filepath(), NOGGIT_APP->clientData());
     f.setBuffer(lADTFile.data);
-    f.SaveFile();
+    f.save();
   }
 
   lObjectInstances.clear();

@@ -2,8 +2,8 @@
 
 #include "map_horizon.h"
 
-#include <noggit/MPQ.h>
 #include <noggit/Log.h>
+#include <noggit/application.hpp>
 #include <noggit/map_index.hpp>
 #include <noggit/World.h>
 #include <opengl/context.hpp>
@@ -96,13 +96,13 @@ map_horizon::map_horizon(const std::string& basename, const MapIndex * const ind
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
   _filename = filename.str();
 
-  if (!MPQFile::exists(_filename))
+  if (!NOGGIT_APP->clientData()->exists(_filename))
   {
     LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
     return;
   }
 
-  MPQFile wdl_file (_filename);
+  BlizzardArchive::ClientFile wdl_file (_filename, NOGGIT_APP->clientData());
 
   uint32_t fourcc;
   uint32_t size;

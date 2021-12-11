@@ -6,11 +6,8 @@
 #include <memory>
 #include <boost/filesystem.hpp>
 #include <ClientData.hpp>
+#include <noggit/ui/main_window.hpp>
 
-namespace noggit::ui
-{
-  struct main_window;
-}
 
 class Noggit
 {
@@ -23,6 +20,8 @@ public:
 
   BlizzardArchive::ClientData* clientData() { return _client_data.get(); };
 
+  void start();
+
 private:
   Noggit (int argc, char *argv[]);
 
@@ -32,6 +31,7 @@ private:
   std::unique_ptr<BlizzardArchive::ClientData> _client_data;
 
   boost::filesystem::path wowpath;
+  std::string project_path;
 
   bool fullscreen;
   bool doAntiAliasing;

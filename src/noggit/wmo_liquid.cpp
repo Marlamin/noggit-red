@@ -4,6 +4,7 @@
 #include <noggit/Log.h>
 #include <noggit/World.h>
 #include <noggit/wmo_liquid.hpp>
+#include <noggit/application.hpp>
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <opengl/shader.hpp>
@@ -59,7 +60,7 @@ namespace
 }
 
 // todo: use material
-wmo_liquid::wmo_liquid(MPQFile* f, WMOLiquidHeader const& header, WMOMaterial const&, int group_liquid, bool use_dbc_type, bool is_ocean)
+wmo_liquid::wmo_liquid(BlizzardArchive::ClientFile* f, WMOLiquidHeader const& header, WMOMaterial const&, int group_liquid, bool use_dbc_type, bool is_ocean)
   : pos(glm::vec3(header.pos.x, header.pos.z, -header.pos.y))
   , xtiles(header.A)
   , ytiles(header.B)
@@ -117,7 +118,7 @@ wmo_liquid::wmo_liquid(wmo_liquid const& other)
 }
 
 
-int wmo_liquid::initGeometry(MPQFile* f)
+int wmo_liquid::initGeometry(BlizzardArchive::ClientFile* f)
 {
   LiquidVertex const* map = reinterpret_cast<LiquidVertex const*>(f->getPointer());
   SMOLTile const* tiles = reinterpret_cast<SMOLTile const*>(f->getPointer() + (xtiles + 1)*(ytiles + 1) * sizeof(LiquidVertex));

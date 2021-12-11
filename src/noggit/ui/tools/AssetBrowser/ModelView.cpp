@@ -240,7 +240,7 @@ QStringList ModelViewer::getDoodadSetNames(const std::string& filename)
 
   for (auto& wmo_instance : _wmo_instances)
   {
-    if (wmo_instance.wmo->filename != filename)
+    if (wmo_instance.wmo->_file_key.filepath() != filename)
     {
       continue;
     }
@@ -260,7 +260,7 @@ void ModelViewer::setActiveDoodadSet(const std::string& filename, const std::str
 {
   for (auto& wmo_instance : _wmo_instances)
   {
-    if (wmo_instance.wmo->filename != filename)
+    if (wmo_instance.wmo->_file_key.filepath() != filename)
     {
       continue;
     }

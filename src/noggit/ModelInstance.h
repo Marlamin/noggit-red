@@ -3,7 +3,7 @@
 #pragma once
 
 #include <math/ray.hpp>
-#include <noggit/MPQ.h> // MPQFile
+#include <ClientFile.hpp> // BlizzardArchive::ClientFile
 #include <noggit/MapHeaders.h> // ENTRY_MDDF
 #include <noggit/ModelManager.h>
 #include <noggit/Selection.h>
@@ -121,11 +121,11 @@ public:
   glm::vec3 world_pos;
 
   explicit wmo_doodad_instance(std::string const& filename
-      , MPQFile* f
+      , BlizzardArchive::ClientFile* f
       , noggit::NoggitRenderContext context );
 
   wmo_doodad_instance(wmo_doodad_instance const& other)
-  : ModelInstance(other.model->filename, other._context)
+  : ModelInstance(other.model->_file_key.filepath(), other._context)
   , doodad_orientation(other.doodad_orientation)
   , world_pos(other.world_pos)
   , _need_matrix_update(other._need_matrix_update)

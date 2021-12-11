@@ -7,7 +7,6 @@
 #include <math/ray.hpp>
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/AsyncObject.h> // AsyncObject
-#include <noggit/MPQ.h>
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
 #include <noggit/TextureManager.h>
@@ -15,6 +14,7 @@
 #include <noggit/ContextObject.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
+#include <ClientFile.hpp>
 
 #include <string>
 #include <vector>
@@ -24,6 +24,7 @@ class Model;
 class ModelInstance;
 class ParticleSystem;
 class RibbonEmitter;
+
 
 glm::vec3 fixCoordSystem(glm::vec3 v);
 
@@ -62,10 +63,10 @@ public:
                  , int time
                  , int animtime
                  );
-  Bone ( const MPQFile& f,
+  Bone ( const BlizzardArchive::ClientFile& f,
          const ModelBoneDef &b,
          int *global,
-         const std::vector<std::unique_ptr<MPQFile>>& animation_files
+         const std::vector<std::unique_ptr<BlizzardArchive::ClientFile>>& animation_files
        );
 
 };
@@ -80,20 +81,20 @@ public:
   glm::mat4x4 mat;
 
   void calc(int anim, int time, int animtime);
-  TextureAnim(const MPQFile& f, const ModelTexAnimDef &mta, int *global);
+  TextureAnim(const BlizzardArchive::ClientFile& f, const ModelTexAnimDef &mta, int *global);
 };
 
 struct ModelColor {
   Animation::M2Value<glm::vec3> color;
   Animation::M2Value<float, int16_t> opacity;
 
-  ModelColor(const MPQFile& f, const ModelColorDef &mcd, int *global);
+  ModelColor(const BlizzardArchive::ClientFile& f, const ModelColorDef &mcd, int *global);
 };
 
 struct ModelTransparency {
   Animation::M2Value<float, int16_t> trans;
 
-  ModelTransparency(const MPQFile& f, const ModelTransDef &mtd, int *global);
+  ModelTransparency(const BlizzardArchive::ClientFile& f, const ModelTransDef &mtd, int *global);
 };
 
 
@@ -196,7 +197,7 @@ struct ModelLight {
   //Animation::M2Value<float> attStart,attEnd;
   //Animation::M2Value<bool> Enabled;
 
-  ModelLight(const MPQFile&  f, const ModelLightDef &mld, int *global);
+  ModelLight(const BlizzardArchive::ClientFile&  f, const ModelLightDef &mld, int *global);
   void setup(int time, opengl::light l, int animtime);
 };
 
@@ -204,7 +205,7 @@ class Model : public AsyncObject
 {
 public:
   template<typename T>
-    static std::vector<T> M2Array(MPQFile const& f, uint32_t offset, uint32_t count)
+  static std::vector<T> M2Array(BlizzardArchive::ClientFile const& f, uint32_t offset, uint32_t count)
   {
     T const* start = reinterpret_cast<T const*>(f.getBuffer() + offset);
     return std::vector<T>(start, start + count);
@@ -301,9 +302,9 @@ private:
 
   noggit::NoggitRenderContext _context;
 
-  void initCommon(const MPQFile& f);
-  bool isAnimated(const MPQFile& f);
-  void initAnimated(const MPQFile& f);
+  void initCommon(const BlizzardArchive::ClientFile& f);
+  bool isAnimated(const BlizzardArchive::ClientFile& f);
+  void initAnimated(const BlizzardArchive::ClientFile& f);
 
   void fix_shader_id_blend_override();
   void fix_shader_id_layer();

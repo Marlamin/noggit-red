@@ -11,9 +11,10 @@
 
 #include <noggit/DBC.h>
 #include <noggit/Misc.h>
-#include <noggit/MPQ.h>
+
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/ui/TextureList.hpp>
+#include <noggit/application.hpp>
 
 #include <unordered_set>
 
@@ -66,28 +67,25 @@ namespace noggit
       setWindowIcon (QIcon (":/icon"));
       setMinimumHeight(490);
 
-      while (!MPQArchive::allFinishedLoading())
-      {
-        MPQArchive::allFinishLoading();
-      }
-
       std::vector<std::string> tilesets;
       std::unordered_set<std::string> tilesets_with_specular_variant;
 
-      for (auto const& entry : gListfile)
+      for (auto const& entry_pair : NOGGIT_APP->clientData()->listfile()->pathToFileDataIDMap())
       {
-        if ( entry.find ("tileset") != std::string::npos
-          && entry.find (".blp") != std::string::npos
+        std::string const& filepath = entry_pair.first;
+
+        if ( filepath.find ("tileset") != std::string::npos
+          && filepath.find (".blp") != std::string::npos
            )
         {
-          auto suffix_pos (entry.find ("_s.blp"));
+          auto suffix_pos (filepath.find ("_s.blp"));
           if (suffix_pos == std::string::npos)
           {
-            tilesets.emplace_back (entry);
+            tilesets.emplace_back (filepath);
           }
           else
           {
-            std::string specular (entry);
+            std::string specular (filepath);
             specular.erase (suffix_pos, strlen ("_s"));
             tilesets_with_specular_variant.emplace (specular);
           }
@@ -107,7 +105,7 @@ namespace noggit
                   (boost::filesystem::recursive_directory_iterator (prefix), {})
               )
           {
-            auto entry ( mpq::normalized_filename
+            auto entry ( BlizzardArchive::ClientData::normalizeFilenameInternal
                           (entry_abs.path().string().substr (prefix_size))
                        );
 

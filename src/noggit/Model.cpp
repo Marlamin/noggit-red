@@ -10,6 +10,7 @@
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 #include <external/tracy/Tracy.hpp>
+#include <noggit/application.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -29,11 +30,11 @@ Model::Model(const std::string& filename, noggit::NoggitRenderContext context)
 
 void Model::finishLoading()
 {
-  MPQFile f(filename);
+  BlizzardArchive::ClientFile f(_file_key.filepath(), NOGGIT_APP->clientData());
 
   if (f.isEof() || !f.getSize())
   {
-    LogError << "Error loading file \"" << filename << "\". Aborting to load model." << std::endl;
+    LogError << "Error loading file \"" << _file_key.stringRepr() << "\". Aborting to load model." << std::endl;
     finished = true;
     return;
   }
@@ -96,7 +97,7 @@ void Model::waitForChildrenLoaded()
 }
 
 
-bool Model::isAnimated(const MPQFile& f)
+bool Model::isAnimated(const BlizzardArchive::ClientFile& f)
 {
   // see if we have any animated bones
   ModelBoneDef const* bo = reinterpret_cast<ModelBoneDef const*>(f.getBuffer() + header.ofsBones);
@@ -198,7 +199,7 @@ namespace
 }
 
 
-void Model::initCommon(const MPQFile& f)
+void Model::initCommon(const BlizzardArchive::ClientFile& f)
 {
   // vertices, normals, texcoords
   _vertices = M2Array<ModelVertex>(f, header.ofsVertices, header.nVertices);
@@ -220,7 +221,7 @@ void Model::initCommon(const MPQFile& f)
     {
       if (texdef[i].nameLen == 0)
       {
-        LogDebug << "Texture " << i << " has a lenght of 0 for '" << filename << std::endl;
+        LogDebug << "Texture " << i << " has a lenght of 0 for '" << _file_key.stringRepr() << std::endl;
         continue;
       }
 
@@ -280,9 +281,9 @@ void Model::initCommon(const MPQFile& f)
 
   if (header.nViews > 0) {
     // indices - allocate space, too
-    std::string lodname = filename.substr(0, filename.length() - 3);
+    std::string lodname = _file_key.filepath().substr(0, _file_key.filepath().length() - 3);
     lodname.append("00.skin");
-    MPQFile g(lodname.c_str());
+    BlizzardArchive::ClientFile g(lodname, NOGGIT_APP->clientData());
     if (g.isEof()) {
       LogError << "loading skinfile " << lodname << std::endl;
       g.close();
@@ -368,7 +369,7 @@ void Model::fix_shader_id_blend_override()
     // fuckporting check
     if (pass.texture_coord_combo_index + pass.texture_count - 1 >= _texture_unit_lookup.size())
     {
-      LogDebug << "wrong texture coord combo index on fuckported model: " << filename << std::endl;
+      LogDebug << "wrong texture coord combo index on fuckported model: " << _file_key.stringRepr() << std::endl;
       // use default stuff
       pass.shader_id = 0;
       pass.texture_count = 1;
@@ -878,7 +879,7 @@ void ModelRenderPass::init_uv_types(Model* m)
 
   if (m->_texture_unit_lookup.size() < texture_coord_combo_index + texture_count)
   {
-    LogError << "model: texture_coord_combo_index out of range " << m->filename << std::endl;
+    LogError << "model: texture_coord_combo_index out of range " << m->_file_key.stringRepr() << std::endl;
 
     for (int i = 0; i < texture_count; ++i)
     {
@@ -1079,9 +1080,9 @@ void Model::compute_pixel_shader_ids()
   }
 }
 
-void Model::initAnimated(const MPQFile& f)
+void Model::initAnimated(const BlizzardArchive::ClientFile& f)
 {
-  std::vector<std::unique_ptr<MPQFile>> animation_files;
+  std::vector<std::unique_ptr<BlizzardArchive::ClientFile>> animation_files;
 
   if (header.nAnimations > 0) 
   {
@@ -1096,12 +1097,13 @@ void Model::initAnimated(const MPQFile& f)
       _animation_length[anim.animID] += anim.length;
       _animations_seq_per_id[anim.animID][anim.subAnimID] = anim;
 
-      std::string lodname = filename.substr(0, filename.length() - 3);
+      std::string lodname = _file_key.filepath().substr(0, _file_key.filepath().length() - 3);
       std::stringstream tempname;
       tempname << lodname << anim.animID << "-" << anim.subAnimID << ".anim";
-      if (MPQFile::exists(tempname.str()))
+      if (NOGGIT_APP->clientData()->exists(tempname.str()))
       {
-        animation_files.push_back(std::make_unique<MPQFile>(tempname.str()));
+        animation_files.push_back(std::make_unique<BlizzardArchive::ClientFile>(tempname.str(),
+                                                                                NOGGIT_APP->clientData()));
       }
     }
   }
@@ -1140,7 +1142,7 @@ void Model::initAnimated(const MPQFile& f)
       }
       catch (std::logic_error error)
       {
-        LogError << "Loading particles for '" << filename << "' " << error.what() << std::endl;
+        LogError << "Loading particles for '" << _file_key.stringRepr() << "' " << error.what() << std::endl;
       }      
     }
   }
@@ -1314,16 +1316,16 @@ void TextureAnim::calc(int anim, int time, int animtime)
   }
 }
 
-ModelColor::ModelColor(const MPQFile& f, const ModelColorDef &mcd, int *global)
+ModelColor::ModelColor(const BlizzardArchive::ClientFile& f, const ModelColorDef &mcd, int *global)
   : color (mcd.color, f, global)
   , opacity(mcd.opacity, f, global)
 {}
 
-ModelTransparency::ModelTransparency(const MPQFile& f, const ModelTransDef &mcd, int *global)
+ModelTransparency::ModelTransparency(const BlizzardArchive::ClientFile& f, const ModelTransDef &mcd, int *global)
   : trans (mcd.trans, f, global)
 {}
 
-ModelLight::ModelLight(const MPQFile& f, const ModelLightDef &mld, int *global)
+ModelLight::ModelLight(const BlizzardArchive::ClientFile& f, const ModelLightDef &mld, int *global)
   : type (mld.type)
   , parent (mld.bone)
   , pos (fixCoordSystem(mld.pos))
@@ -1366,17 +1368,17 @@ void ModelLight::setup(int time, opengl::light, int animtime)
   // todo: use models' light
 }
 
-TextureAnim::TextureAnim (const MPQFile& f, const ModelTexAnimDef &mta, int *global)
+TextureAnim::TextureAnim (const BlizzardArchive::ClientFile& f, const ModelTexAnimDef &mta, int *global)
   : trans (mta.trans, f, global)
   , rot (mta.rot, f, global)
   , scale (mta.scale, f, global)
   , mat (glm::mat4x4())
 {}
 
-Bone::Bone( const MPQFile& f,
+Bone::Bone( const BlizzardArchive::ClientFile& f,
             const ModelBoneDef &b,
             int *global,
-            const std::vector<std::unique_ptr<MPQFile>>& animation_files)
+            const std::vector<std::unique_ptr<BlizzardArchive::ClientFile>>& animation_files)
   : trans (b.translation, f, global, animation_files)
   , rot (b.rotation, f, global, animation_files)
   , scale (b.scaling, f, global, animation_files)

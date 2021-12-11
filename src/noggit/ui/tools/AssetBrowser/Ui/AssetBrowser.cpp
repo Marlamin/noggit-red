@@ -1,10 +1,11 @@
 #include "AssetBrowser.hpp"
-#include <noggit/MPQ.h>
+
 #include <noggit/Log.h>
 #include <noggit/ContextObject.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/font_noggit.hpp>
 #include <noggit/MapView.h>
+#include <noggit/application.hpp>
 
 #include <QStandardItemModel>
 #include <QItemSelectionModel>
@@ -291,15 +292,17 @@ void AssetBrowserWidget::recurseDirectory(Model::TreeManager& tree_mgr, const QS
 void AssetBrowserWidget::updateModelData()
 {
   Model::TreeManager tree_mgr =  Model::TreeManager(_model);
-  for (auto path : gListfile)
+  for (auto& key_pair : NOGGIT_APP->clientData()->listfile()->pathToFileDataIDMap())
   {
-    QString q_path = QString(path.c_str());
+    std::string const& filename = key_pair.first;
+
+    QString q_path = QString(filename.c_str());
 
     if (!((q_path.endsWith(".wmo") && !_wmo_group_and_lod_regex.match(q_path).hasMatch())
     || q_path.endsWith(".m2")))
       continue;
 
-    tree_mgr.addItem(path.c_str());
+    tree_mgr.addItem(filename.c_str());
   }
 
 

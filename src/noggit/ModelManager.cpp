@@ -11,7 +11,7 @@ namespace
 {
   std::string normalized_filename (std::string filename)
   {
-    filename = noggit::mpq::normalized_filename (filename);
+    filename = BlizzardArchive::ClientData::normalizeFilenameInternal(filename);
 
     std::size_t found;
     if ((found = filename.rfind (".mdx")) != std::string::npos)
@@ -27,14 +27,14 @@ namespace
   }
 }
 
-decltype (ModelManager::_) ModelManager::_ {normalized_filename};
+decltype (ModelManager::_) ModelManager::_ {};
 
 void ModelManager::report()
 {
   std::string output = "Still in the Model manager:\n";
-  _.apply ( [&] (std::string const& key, Model const&)
+  _.apply ( [&] (BlizzardArchive::Listfile::FileKey const& key, Model const&)
             {
-              output += " - " + key + "\n";
+              output += " - " + key.stringRepr() + "\n";
             }
           );
   LogDebug << output;
@@ -42,7 +42,7 @@ void ModelManager::report()
 
 void ModelManager::resetAnim()
 {
-  _.apply ( [&] (std::string const&, Model& model)
+  _.apply ( [&] (BlizzardArchive::Listfile::FileKey const&, Model& model)
             {
               model.animcalc = false;
             }
@@ -51,7 +51,7 @@ void ModelManager::resetAnim()
 
 void ModelManager::updateEmitters(float dt)
 {
-  _.apply ( [&] (std::string const&, Model& model)
+  _.apply ( [&] (BlizzardArchive::Listfile::FileKey const&, Model& model)
             {
               model.updateEmitters (dt);
             }
@@ -60,7 +60,7 @@ void ModelManager::updateEmitters(float dt)
 
 void ModelManager::clear_hidden_models()
 {
-  _.apply ( [&] (std::string const&, Model& model)
+  _.apply ( [&] (BlizzardArchive::Listfile::FileKey const&, Model& model)
             {
               model.show();
             }
@@ -70,7 +70,7 @@ void ModelManager::clear_hidden_models()
 void ModelManager::unload_all(noggit::NoggitRenderContext context)
 {
   _.context_aware_apply(
-      [&] (std::string const&, Model& model)
+      [&] (BlizzardArchive::Listfile::FileKey const&, Model& model)
       {
           model.unload();
       }

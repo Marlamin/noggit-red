@@ -3,7 +3,7 @@
 #pragma once
 
 #include <noggit/Model.h>
-#include <noggit/multimap_with_normalized_key.hpp>
+#include <noggit/AsyncObjectMultimap.hpp>
 #include <noggit/ContextObject.hpp>
 
 #include <map>
@@ -24,7 +24,7 @@ public:
 
 private:
   friend struct scoped_model_reference;
-  static noggit::async_object_multimap_with_normalized_key<Model> _;
+  static noggit::AsyncObjectMultimap<Model> _;
 };
 
 struct scoped_model_reference

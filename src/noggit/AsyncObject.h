@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <Listfile.hpp>
 #include <noggit/Log.h>
 
 #include <atomic>
@@ -26,19 +27,21 @@ protected:
   std::mutex _mutex;
   std::condition_variable _state_changed;
 
-  AsyncObject(std::string filename) : filename(filename) {}
+  AsyncObject(BlizzardArchive::Listfile::FileKey file_key) : _file_key(std::move(file_key)) {}
 
 public:
-  std::string filename;
+  BlizzardArchive::Listfile::FileKey _file_key;
 
   AsyncObject() = delete;
   virtual ~AsyncObject() = default;
 
+  [[nodiscard]]
   virtual bool finishedLoading() const
   {
     return finished.load();
   }
 
+  [[nodiscard]]
   bool loading_failed() const
   {
     return _loading_failed;
@@ -64,12 +67,15 @@ public:
 
   void error_on_loading()
   {
-    LogError << filename << " could not be loaded" << std::endl;
+    LogError << "File " <<  (_file_key.hasFilepath() ? _file_key.filepath() : std::to_string(_file_key.fileDataID()))
+      << " could not be loaded" << std::endl;
+
     _loading_failed = true;
     finished = true;
     _state_changed.notify_all();
   }
 
+  [[nodiscard]]
   virtual bool is_required_when_saving() const
   {
     return false;

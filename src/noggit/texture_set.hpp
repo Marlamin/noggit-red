@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <noggit/MPQ.h>
 #include <noggit/alphamap.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/ContextObject.hpp>
@@ -13,6 +12,11 @@
 class Brush;
 class MapTile;
 class MapChunk;
+
+namespace BlizzardArchive
+{
+  class ClientFile;
+}
 
 struct tmp_edit_alpha_values
 {
@@ -30,7 +34,7 @@ class TextureSet
 {
 public:
   TextureSet() = delete;
-  TextureSet(MapChunk* chunk, MPQFile* f, size_t base, MapTile* tile
+  TextureSet(MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
              , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
              , noggit::NoggitRenderContext context);
 

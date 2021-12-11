@@ -620,7 +620,7 @@ namespace noggit
       json["spray_pressure"] = _spray_pressure_spin->value();
 
       if (_texture_switcher->texture_to_swap().is_initialized())
-        json["texture_to_swap"] = _texture_switcher->texture_to_swap().get()->filename.c_str();
+        json["texture_to_swap"] = _texture_switcher->texture_to_swap().get()->_file_key.filepath().c_str();
       else
         json["texture_to_swap"] = "";
 

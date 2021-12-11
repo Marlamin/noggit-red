@@ -59,7 +59,7 @@ namespace noggit
 
       std::ifstream fileReader (settings.value ("project/import_file", "import.txt").toString().toStdString());
       std::string const filter
-        (mpq::normalized_filename (_textBox->text().toStdString()));
+        (BlizzardArchive::ClientData::normalizeFilenameInternal(_textBox->text().toStdString()));
 
       std::string line;
       while (std::getline (fileReader, line))
@@ -69,7 +69,7 @@ namespace noggit
           continue;
         }
 
-        std::string path (mpq::normalized_filename (line));
+        std::string path (BlizzardArchive::ClientData::normalizeFilenameInternal(line));
 
         if (!filter.empty() && path.find (filter) == std::string::npos)
         {

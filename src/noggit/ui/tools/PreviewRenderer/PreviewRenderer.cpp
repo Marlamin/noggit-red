@@ -197,7 +197,7 @@ void PreviewRenderer::draw()
         for (auto& pair : *wmo_instance.get_doodads(true))
         {
           for (auto& doodad : pair.second)
-            _wmo_doodads[doodad.model->filename].push_back(&doodad);
+            _wmo_doodads[doodad.model->_file_key.filepath()].push_back(&doodad);
         }
      }
 

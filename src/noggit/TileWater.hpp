@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 #include <noggit/ChunkWater.hpp>
-#include <noggit/MPQ.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/tool_enums.hpp>
 #include <opengl/context.hpp>
@@ -18,6 +17,10 @@ class liquid_layer;
 class sExtendableArray;
 enum LiquidLayerUpdateFlags;
 
+namespace BlizzardArchive
+{
+  class ClientFile;
+}
 
 struct LiquidLayerDrawCallData
 {
@@ -37,8 +40,8 @@ public:
 
   ChunkWater* getChunk(int x, int z);
 
-  void readFromFile(MPQFile &theFile, size_t basePos);
-  void saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition);
+  void readFromFile(BlizzardArchive::ClientFile& theFile, size_t basePos);
+  void saveToFile(sExtendableArray& lADTFile, int& lMHDR_Position, int& lCurrentPosition);
 
   void draw ( math::frustum const& frustum
             , const float& cull_distance

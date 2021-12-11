@@ -232,7 +232,8 @@ void ModelInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
 {
   std::stringstream select_info;
 
-  select_info << "<b>filename:</b> " << model->filename
+  select_info << "<b>filename:</b> " << model->_file_key.filepath()
+    << "<br><b>FileDataID:</b> " << model->_file_key.fileDataID()
     << "<br><b>unique ID:</b> " << uid
     << "<br><b>position X/Y/Z:</b> {" << pos.x << " , " << pos.y << " , " << pos.z << "}"
     << "<br><b>rotation X/Y/Z:</b> {" << dir.x << " , " << dir.y << " , " << dir.z << "}"
@@ -253,7 +254,7 @@ void ModelInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
     if (error)
       select_info << "<font color=\"Red\">";
 
-    select_info << "<b>" << (j + 1) << ":</b> " << model->_textures[j]->filename;
+    select_info << "<b>" << (j + 1) << ":</b> " << model->_textures[j]->_file_key.stringRepr();
 
     if (stuck || error)
       select_info << "</font>";
@@ -264,7 +265,7 @@ void ModelInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
   detail_widget->setText(select_info.str());
 }
 
-wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, MPQFile* f, noggit::NoggitRenderContext context)
+wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, BlizzardArchive::ClientFile* f, noggit::NoggitRenderContext context)
   : ModelInstance(filename, context)
 {
   float ff[4];

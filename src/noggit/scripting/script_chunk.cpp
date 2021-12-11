@@ -91,7 +91,7 @@ namespace noggit
         );
       }
 
-      return _chunk->texture_set->texture(index)->filename;
+      return _chunk->texture_set->texture(index)->_file_key.filepath();
     }
 
     void chunk::apply_heightmap()

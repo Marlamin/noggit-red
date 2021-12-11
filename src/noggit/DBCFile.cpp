@@ -2,7 +2,8 @@
 
 #include <noggit/DBCFile.h>
 #include <noggit/Log.h>
-#include <noggit/MPQ.h>
+#include <noggit/application.hpp>
+#include <ClientFile.hpp>
 
 #include <string>
 #include <QSettings>
@@ -25,7 +26,7 @@ DBCFile::DBCFile(const std::string& _filename)
 
 void DBCFile::open()
 {
-  MPQFile f (filename);
+  BlizzardArchive::ClientFile f (filename, NOGGIT_APP->clientData());
 
   if (f.isEof())
   {
@@ -66,7 +67,7 @@ void DBCFile::save()
     str += "/";
   }
 
-  std::string filename_proj = noggit::mpq::normalized_filename(str.toStdString() + filename);
+  std::string filename_proj = BlizzardArchive::ClientData::normalizeFilenameInternal(str.toStdString() + filename);
   QDir dir(str + "/DBFilesClient/");
   if (!dir.exists())
     dir.mkpath(".");

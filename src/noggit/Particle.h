@@ -17,6 +17,11 @@ class Model;
 class ParticleSystem;
 class RibbonEmitter;
 
+namespace BlizzardArchive
+{
+  class ClientFile;
+}
+
 struct Particle {
   glm::vec3 pos, speed, down, origin, dir;
   glm::vec3  corners[4];
@@ -82,7 +87,7 @@ class ParticleSystem
 public:
   float tofs;
 
-  ParticleSystem(Model*, const MPQFile& f, const ModelParticleEmitterDef &mta,
+  ParticleSystem(Model*, const BlizzardArchive::ClientFile& f, const ModelParticleEmitterDef &mta,
                  int *globals, noggit::NoggitRenderContext context);
 
   ParticleSystem(ParticleSystem const& other);
@@ -156,7 +161,7 @@ class RibbonEmitter
   std::list<RibbonSegment> segs;
 
 public:
-  RibbonEmitter(Model*, const MPQFile &f, ModelRibbonEmitterDef const& mta, int *globals
+  RibbonEmitter(Model*, const BlizzardArchive::ClientFile &f, ModelRibbonEmitterDef const& mta, int *globals
                 , noggit::NoggitRenderContext context);
 
   RibbonEmitter(RibbonEmitter const& other);

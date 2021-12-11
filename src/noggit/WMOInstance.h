@@ -8,7 +8,6 @@
 #include <cstdint>
 #include <set>
 
-class MPQFile;
 struct ENTRY_MODF;
 
 class WMOInstance : public SceneObject

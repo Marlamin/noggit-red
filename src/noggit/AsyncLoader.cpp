@@ -61,7 +61,8 @@ void AsyncLoader::process()
       if (additional_log)
       {
         std::lock_guard<std::mutex> const lock(_guard);
-        LogDebug << "Loading '" << object->filename << "'" << std::endl;
+        LogDebug << "Loading file '" << (object->_file_key.hasFilepath() ? object->_file_key.filepath()
+          : std::to_string(object->_file_key.fileDataID()))<< "'" << std::endl;
       }
 
       object->finishLoading();
@@ -69,7 +70,8 @@ void AsyncLoader::process()
       if (additional_log)
       {
         std::lock_guard<std::mutex> const lock(_guard);
-        LogDebug << "Loaded  '" << object->filename << "'" << std::endl;
+        LogDebug << "Loaded  file '" << (object->_file_key.hasFilepath() ? object->_file_key.filepath()
+        : std::to_string(object->_file_key.fileDataID())) << "'" << std::endl;
       }
 
       {

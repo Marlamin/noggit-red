@@ -8,6 +8,7 @@
 #include <noggit/liquid_layer.hpp>
 #include <noggit/World.h>
 #include <noggit/LiquidTextureManager.hpp>
+#include <ClientFile.hpp>
 
 #include <stdexcept>
 #include <limits>
@@ -28,7 +29,7 @@ TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase, bool use_mclq_g
   }
 }
 
-void TileWater::readFromFile(MPQFile &theFile, size_t basePos)
+void TileWater::readFromFile(BlizzardArchive::ClientFile &theFile, size_t basePos)
 {
   for (int z = 0; z < 16; ++z)
   {

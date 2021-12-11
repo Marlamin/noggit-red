@@ -69,7 +69,7 @@ namespace noggit
         _texture_to_swap = selected_texture::get();
         if (_texture_to_swap)
         {
-          _texture_to_swap_display->set_texture(_texture_to_swap.get()->filename);
+          _texture_to_swap_display->set_texture(_texture_to_swap.get()->_file_key.filepath());
         }
       });
 

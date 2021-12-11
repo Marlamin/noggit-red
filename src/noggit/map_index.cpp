@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/AsyncLoader.h>
-#include <noggit/MPQ.h>
+
 #include <noggit/MapChunk.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
@@ -14,6 +14,8 @@
 #endif
 #include <noggit/map_index.hpp>
 #include <noggit/uid_storage.hpp>
+#include <noggit/application.hpp>
+#include <ClientFile.hpp>
 
 #include <QtCore/QSettings>
 #include <QByteArray>
@@ -69,7 +71,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
 
-  MPQFile theFile(filename.str());
+  BlizzardArchive::ClientFile theFile(filename.str(), NOGGIT_APP->clientData());
 
   uint32_t fourcc;
   uint32_t size;
@@ -125,7 +127,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
       adt_filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
 
       mTiles[j][i].tile = nullptr;
-      mTiles[j][i].onDisc = MPQFile::existsOnDisk(adt_filename.str());
+      mTiles[j][i].onDisc = BlizzardArchive::ClientData::existsOnDisk(adt_filename.str());
 
 			if (mTiles[j][i].onDisc && !(mTiles[j][i].flags & 1))
 			{
@@ -254,9 +256,9 @@ void MapIndex::save()
     //  }
   }
 
-  MPQFile f(filename.str());
+  BlizzardArchive::ClientFile f(filename.str(), NOGGIT_APP->clientData());
   f.setBuffer(wdtFile.data);
-  f.SaveFile();
+  f.save();
   f.close();
 
   changed = false;
@@ -364,7 +366,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile, bool reloading)
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
-  if (!MPQFile::exists(filename.str()))
+  if (!NOGGIT_APP->clientData()->exists(filename.str()))
   {
     LogError << "The requested tile \"" << filename.str() << "\" does not exist! Oo" << std::endl;
     return nullptr;
@@ -444,7 +446,7 @@ void MapIndex::saveTile(const tile_index& tile, World* world, bool save_unloaded
   {
     QSettings settings;
     auto filepath = boost::filesystem::path (settings.value ("project/path").toString().toStdString())
-                    / noggit::mpq::normalized_filename (mTiles[tile.z][tile.x].tile->filename);
+                    / BlizzardArchive::ClientData::normalizeFilenameInternal (mTiles[tile.z][tile.x].tile->_file_key.filepath());
 
     QFile file(filepath.string().c_str());
     file.open(QIODevice::WriteOnly);
@@ -487,7 +489,7 @@ void MapIndex::saveChanged (World* world, bool save_unloaded)
 
         QSettings settings;
         auto filepath = boost::filesystem::path (settings.value ("project/path").toString().toStdString())
-                        / noggit::mpq::normalized_filename (mTiles[i][j].tile->filename);
+                        / BlizzardArchive::ClientData::normalizeFilenameInternal (mTiles[i][j].tile->_file_key.filepath());
 
         if (mTiles[i][j].flags & 0x1)
         {
@@ -605,7 +607,7 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 {
 	uint32_t highGUID = 0;
 
-    MPQFile theFile(pFilename);
+    BlizzardArchive::ClientFile theFile(pFilename, NOGGIT_APP->clientData());
     if (theFile.isEof())
     {
       return highGUID;
@@ -720,7 +722,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
       std::stringstream filename;
       filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
-      MPQFile file(filename.str());
+      BlizzardArchive::ClientFile file(filename.str(), NOGGIT_APP->clientData());
 
       if (file.isEof())
       {
@@ -1051,14 +1053,14 @@ void MapIndex::loadMaxUID()
 
 void MapIndex::loadMinimapMD5translate()
 {
-  if (!MPQFile::exists("textures/minimap/md5translate.trs"))
+  if (!NOGGIT_APP->clientData()->exists("textures/minimap/md5translate.trs"))
   {
     LogError << "md5translate.trs was not found. "
                 "Noggit will generate a new one in the project directory on minimap save." << std::endl;
     return;
   }
 
-  MPQFile md5trs_file("textures/minimap/md5translate.trs");
+  BlizzardArchive::ClientFile md5trs_file("textures/minimap/md5translate.trs", NOGGIT_APP->clientData());
 
   size_t size = md5trs_file.getSize();
   void* buffer_raw = std::malloc(size);

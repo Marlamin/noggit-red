@@ -1,15 +1,16 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 #include <math/ray.hpp>
-#include <noggit/MPQ.h>
+
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/ModelManager.h>
-#include <noggit/multimap_with_normalized_key.hpp>
+#include <noggit/AsyncObjectMultimap.hpp>
 #include <noggit/TextureManager.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/wmo_liquid.hpp>
 #include <noggit/ContextObject.hpp>
 #include <opengl/primitives.hpp>
+#include <ClientFile.hpp>
 
 #include <boost/optional.hpp>
 
@@ -132,7 +133,7 @@ struct wmo_group_header
 class WMOGroup 
 {
 public:
-  WMOGroup(WMO *wmo, MPQFile* f, int num, char const* names);
+  WMOGroup(WMO *wmo, BlizzardArchive::ClientFile* f, int num, char const* names);
   WMOGroup(WMOGroup const&);
 
   void load();
@@ -181,7 +182,7 @@ public:
   void unload();
 
 private:
-  void load_mocv(MPQFile& f, uint32_t size);
+  void load_mocv(BlizzardArchive::ClientFile& f, uint32_t size);
   void fix_vertex_color_alpha();
 
   WMO *wmo;
@@ -236,7 +237,7 @@ struct WMOLight {
 
   glm::vec4 fcolor;
 
-  void init(MPQFile* f);
+  void init(BlizzardArchive::ClientFile* f);
   void setup(GLint light);
 
   static void setupOnce(GLint light, glm::vec3 dir, glm::vec3 light_color);
@@ -267,7 +268,7 @@ struct WMOFog {
   unsigned int color2;
   // read to here (0x30 bytes)
   glm::vec4 color;
-  void init(MPQFile* f);
+  void init(BlizzardArchive::ClientFile* f);
   void setup();
 };
 
@@ -375,7 +376,7 @@ public:
   static void unload_all(noggit::NoggitRenderContext context);
 private:
   friend struct scoped_wmo_reference;
-  static noggit::async_object_multimap_with_normalized_key<WMO> _;
+  static noggit::AsyncObjectMultimap<WMO> _;
 };
 
 struct scoped_wmo_reference

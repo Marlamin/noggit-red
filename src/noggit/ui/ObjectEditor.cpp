@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/MapView.h>
+#include <noggit/application.hpp>
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h> // WMOInstance
@@ -623,7 +624,7 @@ namespace noggit
 
     void object_editor::copy(std::string const& filename)
     {
-      if (!MPQFile::exists(filename))
+      if (!NOGGIT_APP->clientData()->exists(filename))
       {
         QMessageBox::warning
           ( nullptr
@@ -680,7 +681,7 @@ namespace noggit
         if (obj->which() == eMODEL)
         {
           auto original = static_cast<ModelInstance*>(obj);
-          auto clone = new ModelInstance(original->model->filename, _map_view->getRenderContext());
+          auto clone = new ModelInstance(original->model->_file_key.filepath(), _map_view->getRenderContext());
           
           clone->scale = original->scale;
           clone->dir = original->dir;
@@ -692,7 +693,7 @@ namespace noggit
         else if (obj->which() == eWMO)
         {
           auto original = static_cast<WMOInstance*>(obj);
-          auto clone = new WMOInstance(original->wmo->filename, _map_view->getRenderContext());
+          auto clone = new WMOInstance(original->wmo->_file_key.filepath(), _map_view->getRenderContext());
           clone->dir = original->dir;
           clone->pos = pivot ? original->pos - pivot.get() : glm::vec3();
 

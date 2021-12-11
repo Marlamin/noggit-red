@@ -41,7 +41,7 @@ void ChunkGetTextureByLayerNode::compute()
     return;
   }
 
-  std::string& tex = chunk->texture_set->texture(id)->filename;
+  std::string const& tex = chunk->texture_set->texture(id)->_file_key.filepath();
 
   _out_ports[1].out_value = std::make_shared<StringData>(tex);
   _node->onDataUpdated(1);

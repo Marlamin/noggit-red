@@ -4,7 +4,7 @@
 
 #include <noggit/AsyncObject.h>
 #include <noggit/ContextObject.hpp>
-#include <noggit/multimap_with_normalized_key.hpp>
+#include <noggit/AsyncObjectMultimap.hpp>
 #include <opengl/texture.hpp>
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
@@ -44,7 +44,7 @@ struct BLPHeader;
 struct scoped_blp_texture_reference;
 struct blp_texture : public AsyncObject
 {
-  blp_texture (std::string const& filename, noggit::NoggitRenderContext context);
+  blp_texture (BlizzardArchive::Listfile::FileKey const& filename, noggit::NoggitRenderContext context);
   void finishLoading();
   virtual void waitForChildrenLoaded() override {};
 
@@ -110,7 +110,7 @@ public:
 
 private:
   friend struct scoped_blp_texture_reference;
-  static noggit::async_object_multimap_with_normalized_key<blp_texture> _;
+  static noggit::AsyncObjectMultimap<blp_texture> _;
   static std::array<std::unordered_map<std::tuple<GLint, int, int, int>, TexArrayParams, tuple_hash>, 7> _tex_arrays;
 
 };

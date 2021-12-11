@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-#include <noggit/MPQ.h>
 #include <noggit/ModelHeaders.h>
 #include <math/interpolation.hpp>
 #include <cassert>
@@ -11,6 +10,7 @@
 #include <type_traits>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/ext/quaternion_common.hpp>
+#include <ClientFile.hpp>
 
 namespace Animation
 {
@@ -183,8 +183,12 @@ namespace Animation
       return result;
     }
 
-    //! \todo Use a vector of MPQFile& for the anim files instead for safety.
-    M2Value (const AnimationBlock& animationBlock, const MPQFile& file, int32_t* globalSequences, const std::vector<std::unique_ptr<MPQFile>>& animation_files = std::vector<std::unique_ptr<MPQFile>>())
+    //! \todo Use a vector of BlizzardArchive::ClientFile& for the anim files instead for safety.
+    M2Value (const AnimationBlock& animationBlock
+             , const BlizzardArchive::ClientFile& file
+             , int32_t* globalSequences
+             , const std::vector<std::unique_ptr<BlizzardArchive::ClientFile>>& animation_files
+             = std::vector<std::unique_ptr<BlizzardArchive::ClientFile>>())
     {
       assert(animationBlock.nTimes == animationBlock.nKeys);
 

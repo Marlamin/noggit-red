@@ -142,7 +142,7 @@ public:
 
   void initEmptyChunks();
 
-  void setFilename(const std::string& new_filename) {filename = new_filename;};
+  void setFilename(const std::string& new_filename) {_file_key.setFilepath(new_filename);};
 
   QImage getHeightmapImage(float min_height, float max_height);
   QImage getAlphamapImage(unsigned layer);

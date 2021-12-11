@@ -4,6 +4,7 @@
 
 #include <opengl/context.inl>
 #include <noggit/DBC.h>
+#include <noggit/application.hpp>
 #include <boost/format.hpp>
 #include <glm/vec2.hpp>
 
@@ -93,7 +94,7 @@ void LiquidTextureManager::upload()
     unsigned n_frames = 30;
     for (int j = 0; j < N_FRAMES; ++j)
     {
-      if (!MPQFile::exists(boost::str(boost::format(filename) % (j + 1))))
+      if (!NOGGIT_APP->clientData()->exists(boost::str(boost::format(filename) % (j + 1))))
       {
         n_frames = j;
         break;

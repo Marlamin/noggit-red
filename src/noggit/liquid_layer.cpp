@@ -5,6 +5,7 @@
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
+#include <ClientFile.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
@@ -95,7 +96,12 @@ liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, mclq& liqui
 
 }
 
-liquid_layer::liquid_layer(ChunkWater* chunk, MPQFile &f, std::size_t base_pos, glm::vec3 const& base, MH2O_Information const& info, std::uint64_t infomask)
+liquid_layer::liquid_layer(ChunkWater* chunk
+                           , BlizzardArchive::ClientFile& f
+                           , std::size_t base_pos
+                           , glm::vec3 const& base
+                           , MH2O_Information const& info
+                           , std::uint64_t infomask)
   : _liquid_id(info.liquid_id)
   , _liquid_vertex_format(info.liquid_vertex_format)
   , _minimum(info.minHeight)

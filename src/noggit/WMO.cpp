@@ -8,6 +8,7 @@
 #include <noggit/WMO.h>
 #include <noggit/World.h>
 #include <opengl/primitives.hpp>
+#include <noggit/application.hpp>
 #include <opengl/scoped.hpp>
 
 #include <boost/algorithm/string.hpp>
@@ -30,9 +31,9 @@ WMO::WMO(const std::string& filenameArg, noggit::NoggitRenderContext context)
 
 void WMO::finishLoading ()
 {
-  MPQFile f(filename);
+  BlizzardArchive::ClientFile f(_file_key.filepath(), NOGGIT_APP->clientData());
   if (f.isEof()) {
-    LogError << "Error loading WMO \"" << filename << "\"." << std::endl;
+    LogError << "Error loading WMO \"" << _file_key.stringRepr() << "\"." << std::endl;
     return;
   }
 
@@ -171,12 +172,12 @@ void WMO::finishLoading ()
 
   if (size > 4)
   {
-    std::string path = noggit::mpq::normalized_filename(std::string (reinterpret_cast<char const*>(f.getPointer ())));
+    std::string path = BlizzardArchive::ClientData::normalizeFilenameInternal(std::string (reinterpret_cast<char const*>(f.getPointer ())));
     boost::replace_all(path, "mdx", "m2");
 
     if (path.length())
     {
-      if (MPQFile::exists(path))
+      if (NOGGIT_APP->clientData()->exists(path))
       {
         skybox = scoped_model_reference(path, _context);
       }
@@ -479,7 +480,7 @@ bool WMO::draw_skybox (glm::mat4x4 const& model_view
 
     if (math::is_inside_of(camera_pos, extent.first, extent.second))
     {
-      ModelInstance sky(skybox.get()->filename, _context);
+      ModelInstance sky(skybox.get()->_file_key.filepath(), _context);
       sky.pos = camera_pos;
       sky.scale = 2.f;
       sky.recalcExtents();
@@ -513,7 +514,7 @@ std::map<uint32_t, std::vector<wmo_doodad_instance>> WMO::doodads_per_group(uint
 
   if (doodadset >= doodadsets.size())
   {
-    LogError << "Invalid doodadset for instance of wmo " << filename << std::endl;
+    LogError << "Invalid doodadset for instance of wmo " << _file_key.stringRepr() << std::endl;
     return doodads;
   }
 
@@ -542,7 +543,7 @@ void WMO::unload()
   }
 }
 
-void WMOLight::init(MPQFile* f)
+void WMOLight::init(BlizzardArchive::ClientFile* f)
 {
   char type[4];
   f->read(&type, 4);
@@ -592,7 +593,7 @@ void WMOLight::setupOnce(GLint, glm::vec3, glm::vec3)
 
 
 
-WMOGroup::WMOGroup(WMO *_wmo, MPQFile* f, int _num, char const* names)
+WMOGroup::WMOGroup(WMO *_wmo, BlizzardArchive::ClientFile* f, int _num, char const* names)
   : wmo(_wmo)
   , num(_num)
 {
@@ -915,10 +916,10 @@ void WMOGroup::load()
   std::stringstream curNum;
   curNum << "_" << std::setw (3) << std::setfill ('0') << num;
 
-  std::string fname = wmo->filename;
+  std::string fname = wmo->_file_key.filepath();
   fname.insert (fname.find (".wmo"), curNum.str ());
 
-  MPQFile f(fname);
+  BlizzardArchive::ClientFile f(fname, NOGGIT_APP->clientData());
   if (f.isEof()) {
     LogError << "Error loading WMO \"" << fname << "\"." << std::endl;
     return;
@@ -1414,7 +1415,7 @@ void WMOGroup::load()
   }
 }
 
-void WMOGroup::load_mocv(MPQFile& f, uint32_t size)
+void WMOGroup::load_mocv(BlizzardArchive::ClientFile& f, uint32_t size)
 {
   uint32_t const* colors = reinterpret_cast<uint32_t const*> (f.getPointer());
   _vertex_colors.resize(size / sizeof(uint32_t));
@@ -1645,7 +1646,7 @@ void WMOGroup::setupFog (bool draw_fog, std::function<void (bool)> setup_fog)
   }
 }
 
-void WMOFog::init(MPQFile* f)
+void WMOFog::init(BlizzardArchive::ClientFile* f)
 {
   f->read(this, 0x30);
   color = glm::vec4(((color1 & 0x00FF0000) >> 16) / 255.0f, ((color1 & 0x0000FF00) >> 8) / 255.0f,
@@ -1668,9 +1669,9 @@ decltype (WMOManager::_) WMOManager::_;
 void WMOManager::report()
 {
   std::string output = "Still in the WMO manager:\n";
-  _.apply ( [&] (std::string const& key, WMO const&)
+  _.apply ( [&] (BlizzardArchive::Listfile::FileKey const& key, WMO const&)
             {
-              output += " - " + key + "\n";
+              output += " - " + key.stringRepr() + "\n";
             }
           );
   LogDebug << output;
@@ -1678,7 +1679,7 @@ void WMOManager::report()
 
 void WMOManager::clear_hidden_wmos()
 {
-  _.apply ( [&] (std::string const&, WMO& wmo)
+  _.apply ( [&] (BlizzardArchive::Listfile::FileKey const&, WMO& wmo)
             {
               wmo.show();
             }
@@ -1688,7 +1689,7 @@ void WMOManager::clear_hidden_wmos()
 void WMOManager::unload_all(noggit::NoggitRenderContext context)
 {
     _.context_aware_apply(
-        [&] (std::string const&, WMO& wmo)
+        [&] (BlizzardArchive::Listfile::FileKey const&, WMO& wmo)
         {
             wmo.unload();
         }

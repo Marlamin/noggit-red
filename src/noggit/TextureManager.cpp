@@ -1,6 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include <noggit/TextureManager.h>
 #include <noggit/Log.h> // LogDebug
+#include <noggit/application.hpp>
+#include <ClientFile.hpp>
 
 #include <QtCore/QString>
 #include <QtGui/QPixmap>
@@ -16,9 +18,9 @@ constexpr unsigned N_ARRAY_TEX = 1;
 void TextureManager::report()
 {
   std::string output = "Still in the Texture manager:\n";
-  _.apply ( [&] (std::string const& key, blp_texture const&)
+  _.apply ( [&] (BlizzardArchive::Listfile::FileKey const& key, blp_texture const&)
             {
-              output += " - " + key + "\n";
+              output += " - " + key.stringRepr() + "\n";
             }
           );
   LogDebug << output;
@@ -27,7 +29,7 @@ void TextureManager::report()
 void TextureManager::unload_all(noggit::NoggitRenderContext context)
 {
   _.context_aware_apply(
-      [&] (std::string const&, blp_texture& blp_texture)
+      [&] (BlizzardArchive::Listfile::FileKey const&, blp_texture& blp_texture)
       {
           blp_texture.unload();
       }
@@ -148,7 +150,7 @@ struct BLPHeader
 #pragma pack(pop)
 
 #include <boost/thread.hpp>
-#include <noggit/MPQ.h>
+
 
 void blp_texture::bind()
 {
@@ -375,7 +377,7 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
 
     if (size < lHeader->sizes[i])
     {
-      LogDebug << "mipmap size mismatch in '" << filename << "'" << std::endl;
+      LogDebug << "mipmap size mismatch in '" << _file_key.stringRepr() << "'" << std::endl;
       return;
     }
 
@@ -389,29 +391,29 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
   }
 }
 
-blp_texture::blp_texture(const std::string& filenameArg, noggit::NoggitRenderContext context)
-  : AsyncObject(filenameArg)
+blp_texture::blp_texture(BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
+  : AsyncObject(file_key)
   , _context(context)
 {
 }
 
 void blp_texture::finishLoading()
 {
-  bool exists = MPQFile::exists(filename);
+  bool exists = NOGGIT_APP->clientData()->exists( _file_key.filepath());
   if (!exists)
   {
-    LogError << "file not found: '" << filename << "'" << std::endl;
+    LogError << "file not found: '" <<  _file_key.stringRepr() << "'" << std::endl;
   }
 
   std::string spec_filename;
   bool has_specular = false;
 
-  if (filename.starts_with("tileset/"))
+  if (_file_key.filepath().starts_with("tileset/"))
   {
     _is_tileset = true;
 
-    spec_filename = filename.substr(0, filename.find_last_of(".")) + "_s.blp";
-    has_specular = MPQFile::exists(spec_filename);
+    spec_filename = _file_key.filepath().substr(0, _file_key.filepath().find_last_of(".")) + "_s.blp";
+    has_specular = NOGGIT_APP->clientData()->exists(spec_filename);
 
     if (has_specular)
     {
@@ -419,11 +421,13 @@ void blp_texture::finishLoading()
     }
   }
 
-  MPQFile f(exists ? (has_specular ? spec_filename : filename) : "textures/shanecube.blp");
+  BlizzardArchive::ClientFile f(
+      exists ? (has_specular ? spec_filename : _file_key.filepath()) : "textures/shanecube.blp"
+      , NOGGIT_APP->clientData());
   if (f.isEof())
   {
     finished = true;
-    throw std::runtime_error ("File " + filename + " does not exist");
+    throw std::runtime_error ("File " + _file_key.stringRepr() + " does not exist");
   }
 
   char const* lData = f.getPointer();
@@ -633,13 +637,13 @@ scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& f
 {}
 
 scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_reference const& other)
-  : _blp_texture(other._blp_texture ? TextureManager::_.emplace(other._blp_texture->filename, other._context) : nullptr)
+  : _blp_texture(other._blp_texture ? TextureManager::_.emplace(other._blp_texture->_file_key.filepath(), other._context) : nullptr)
   , _context(other._context)
 {}
 
 void scoped_blp_texture_reference::Deleter::operator() (blp_texture* texture) const
 {
-  TextureManager::_.erase(texture->filename, texture->getContext());
+  TextureManager::_.erase(texture->_file_key.filepath(), texture->getContext());
 }
 
 blp_texture* scoped_blp_texture_reference::operator->() const

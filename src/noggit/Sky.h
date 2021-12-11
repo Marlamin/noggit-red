@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 #include <noggit/DBCFile.h>
-#include <noggit/MPQ.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/ContextObject.hpp>
 #include <opengl/scoped.hpp>

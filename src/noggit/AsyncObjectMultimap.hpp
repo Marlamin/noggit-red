@@ -6,8 +6,9 @@
 #include <noggit/AsyncObject.h>
 #include <noggit/ContextObject.hpp>
 #include <noggit/Log.h>
-#include <noggit/MPQ.h>
+
 #include <ClientData.hpp>
+#include <Listfile.hpp>
 
 #include <boost/thread.hpp>
 
@@ -19,29 +20,24 @@
 
 struct pair_hash
 {
-  template <class T1, class T2>
-  std::size_t operator() (const std::pair<T1,T2> &p) const
+  std::size_t operator() (const std::pair<int, BlizzardArchive::Listfile::FileKey> &p) const noexcept
   {
-    auto h1 = std::hash<T1>{}(p.first);
-    auto h2 = std::hash<T2>{}(p.second);
+    auto h1 = std::hash<int>{}(p.first);
+    auto h2 = std::hash<std::string>{}(p.second.filepath());
+    auto h3 = std::hash<int>{}(p.second.fileDataID());
 
-    return h1 ^ h2; // use hash combine here
+    return h1 ^ h2 ^ h3;
   }
 };
-
 
 namespace noggit
 {
 
   template<typename T>
-  struct async_object_multimap_with_normalized_key
+  struct AsyncObjectMultimap
   {
-    async_object_multimap_with_normalized_key (std::function<std::string (std::string)> normalize
-      = &BlizzardArchive::ClientData::normalizeFilenameInternal)
-      : _normalize (std::move (normalize))
-    {}
-
-    ~async_object_multimap_with_normalized_key()
+    AsyncObjectMultimap() = default;
+    ~AsyncObjectMultimap()
     {
       /*
       apply ( [&] (std::string const& key, T const&)
@@ -54,10 +50,9 @@ namespace noggit
     }
 
     template<typename... Args>
-      T* emplace (std::string const& filename, noggit::NoggitRenderContext context, Args&&... args)
+      T* emplace (BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context, Args&&... args)
     {
-      std::string const normalized (_normalize (filename));
-      auto pair = std::make_pair(context, normalized);
+      auto pair = std::make_pair(context, file_key);
       //LogDebug << "Emplacing " << normalized << " into context" << context << std::endl;
 
       {
@@ -75,7 +70,7 @@ namespace noggit
                        boost::mutex::scoped_lock const lock(_mutex);
                        return &_elements.emplace ( std::piecewise_construct
                                                  , std::forward_as_tuple (pair)
-                                                 , std::forward_as_tuple (normalized, context, args...)
+                                                 , std::forward_as_tuple (file_key.filepath(), context, args...)
                                                  ).first->second;
                      }()
                    );
@@ -84,10 +79,9 @@ namespace noggit
 
       return obj; 
     }
-    void erase (std::string const& filename, noggit::NoggitRenderContext context)
+    void erase (BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
     {
-      std::string const normalized (_normalize (filename));
-      auto pair = std::make_pair(context, normalized);
+      auto pair = std::make_pair(context, file_key);
       //LogDebug << "Erasing " << normalized << " from context" << context << std::endl;
 
       AsyncObject* obj = nullptr;
@@ -97,7 +91,7 @@ namespace noggit
 
         if (--_counts.at(pair) == 0)
         {
-          obj = static_cast<AsyncObject*>(&_elements.at(pair));
+          obj = static_cast<AsyncObject*>(&(_elements.at(pair)));
         }
       }
 
@@ -116,7 +110,7 @@ namespace noggit
         }
       }
     }
-    void apply (std::function<void (std::string const&, T&)> fun)
+    void apply (std::function<void (BlizzardArchive::Listfile::FileKey const&, T&)> fun)
     {
       boost::mutex::scoped_lock lock(_mutex);
 
@@ -125,7 +119,7 @@ namespace noggit
         fun (element.first.second, element.second);
       }
     }
-    void apply (std::function<void (std::string const&, T const&)> fun) const
+    void apply (std::function<void (BlizzardArchive::Listfile::FileKey const&, T const&)> fun) const
     {
       boost::mutex::scoped_lock lock(_mutex);
       for (auto const& element : _elements)
@@ -134,7 +128,7 @@ namespace noggit
       }
     }
 
-    void context_aware_apply(std::function<void (std::string const&, T&)> fun, noggit::NoggitRenderContext context)
+    void context_aware_apply(std::function<void (BlizzardArchive::Listfile::FileKey const&, T&)> fun, noggit::NoggitRenderContext context)
     {
       boost::mutex::scoped_lock lock(_mutex);
 
@@ -146,7 +140,7 @@ namespace noggit
         fun (element.first.second, element.second);
       }
     }
-    void context_aware_apply(std::function<void (std::string const&, T const&)> fun, noggit::NoggitRenderContext context) const
+    void context_aware_apply(std::function<void (BlizzardArchive::Listfile::FileKey const&, T const&)> fun, noggit::NoggitRenderContext context) const
     {
       boost::mutex::scoped_lock lock(_mutex);
       for (auto const& element : _elements)
@@ -159,9 +153,8 @@ namespace noggit
     }
 
   private:
-    std::map<std::pair<int, std::string>, T> _elements;
-    std::unordered_map<std::pair<int, std::string>, std::size_t, pair_hash> _counts;
-    std::function<std::string (std::string)> _normalize;
+    std::map<std::pair<int, BlizzardArchive::Listfile::FileKey>, T> _elements;
+    std::unordered_map<std::pair<int, BlizzardArchive::Listfile::FileKey>, std::size_t, pair_hash> _counts;
     boost::mutex mutable _mutex;
   };
 

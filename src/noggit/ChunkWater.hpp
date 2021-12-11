@@ -8,10 +8,14 @@
 #include <vector>
 #include <set>
 
-class MPQFile;
 class sExtendableArray;
 class MapChunk;
 class TileWater;
+
+namespace BlizzardArchive
+{
+  class ClientFile;
+}
 
 class ChunkWater
 {
@@ -25,7 +29,7 @@ public:
   ChunkWater& operator= (ChunkWater&&) = delete;
 
   void from_mclq(std::vector<mclq>& layers);
-  void fromFile(MPQFile &f, size_t basePos);
+  void fromFile(BlizzardArchive::ClientFile& f, size_t basePos);
   void save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
 
   bool is_visible ( const float& cull_distance

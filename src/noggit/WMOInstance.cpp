@@ -161,7 +161,8 @@ void WMOInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
 {
   std::stringstream select_info;
 
-  select_info << "<b>filename: </b>" << wmo->filename
+  select_info << "<b>filename: </b>" << wmo->_file_key.filepath()
+    << "<br><b>FileDataID: </b>" << wmo->_file_key.fileDataID()
     << "<br><b>unique ID: </b>" << uid
     << "<br><b>position X/Y/Z: </b>{" << pos.x << ", " << pos.y << ", " << pos.z << "}"
     << "<br><b>rotation X/Y/Z: </b>{" << dir.x << ", " << dir.y << ", " << dir.z << "}"
@@ -182,7 +183,7 @@ void WMOInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
     if (error)
       select_info << "<font color=\"Red\">";
 
-    select_info  << "<b>" << (j + 1) << ":</b> " << wmo->textures[j]->filename;
+    select_info  << "<b>" << (j + 1) << ":</b> " << wmo->textures[j]->_file_key.stringRepr();
 
     if (stuck || error)
       select_info << "</font>";
