@@ -7,8 +7,8 @@
 
 class World;
 
-namespace noggit {
-  namespace scripting {
+namespace Noggit {
+  namespace Scripting {
     class script_context;
     class scripting_tool;
 

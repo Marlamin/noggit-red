@@ -267,7 +267,7 @@ diff --git a/src/noggit/application.cpp b/src/noggit/application.cpp
 +
    try
    {
-     noggit::application application (argc, argv);
+     Noggit::application application (argc, argv);
 diff --git a/src/noggit/async/loader.h b/src/noggit/async/loader.h
 --- a/src/noggit/async/loader.h
 +++ b/src/noggit/async/loader.h
@@ -698,7 +698,7 @@ diff --git a/translations/noggit_cz.ts b/translations/noggit_cz.ts
 +    </message>
 +</context>
 +<context>
-+    <name>noggit::MainWindow</name>
++    <name>Noggit::MainWindow</name>
 +    <message>
 +        <location filename="../src/noggit/MainWindow.cpp" line="34"/>
 +        <source>Ready</source>
@@ -721,7 +721,7 @@ diff --git a/translations/noggit_cz.ts b/translations/noggit_cz.ts
 +    </message>
 +</context>
 +<context>
-+    <name>noggit::MapView</name>
++    <name>Noggit::MapView</name>
 +    <message>
 +        <location filename="../src/noggit/MapView.cpp" line="160"/>
 +        <source>Save current tile</source>
@@ -1019,7 +1019,7 @@ diff --git a/translations/noggit_cz.ts b/translations/noggit_cz.ts
 +    </message>
 +</context>
 +<context>
-+    <name>noggit::application</name>
++    <name>Noggit::application</name>
 +    <message>
 +        <location filename="../src/noggit/application.cpp" line="209"/>
 +        <source>Open WoW Directory</source>
@@ -1027,7 +1027,7 @@ diff --git a/translations/noggit_cz.ts b/translations/noggit_cz.ts
 +    </message>
 +</context>
 +<context>
-+    <name>noggit::async::loader</name>
++    <name>Noggit::async::loader</name>
 +    <message>
 +        <location filename="../src/noggit/async/loader.cpp" line="17"/>
 +        <source>Asynchronous loading with %1 threads.</source>
@@ -1035,7 +1035,7 @@ diff --git a/translations/noggit_cz.ts b/translations/noggit_cz.ts
 +    </message>
 +</context>
 +<context>
-+    <name>noggit::ui::about_widget</name>
++    <name>Noggit::Ui::about_widget</name>
      <message>
          <location filename="../src/noggit/ui/about_widget.cpp" line="23"/>
          <source>About Noggit</source>
@@ -1075,7 +1075,7 @@ diff --git a/translations/noggit_cz.ts b/translations/noggit_cz.ts
  </context>
  <context>
 -    <name>cursor_selector</name>
-+    <name>noggit::ui::cursor_selector</name>
++    <name>Noggit::Ui::cursor_selector</name>
      <message>
          <location filename="../src/noggit/ui/cursor_selector.cpp" line="60"/>
          <source>Cursor options</source>
@@ -1084,7 +1084,7 @@ diff --git a/translations/noggit_cz.ts b/translations/noggit_cz.ts
  </context>
  <context>
 -    <name>help_widget</name>
-+    <name>noggit::ui::help_widget</name>
++    <name>Noggit::Ui::help_widget</name>
      <message>
          <location filename="../src/noggit/ui/help_widget.cpp" line="16"/>
          <source>Help</source>
@@ -1131,7 +1131,7 @@ diff --git a/translations/noggit_cz.ts b/translations/noggit_cz.ts
  </context>
  <context>
 -    <name>minimap_widget</name>
-+    <name>noggit::ui::minimap_widget</name>
++    <name>Noggit::Ui::minimap_widget</name>
      <message>
          <location filename="../src/noggit/ui/minimap_widget.cpp" line="138"/>
          <source>Select a map on the left side.</source>
@@ -1141,7 +1141,7 @@ diff --git a/translations/noggit_cz.ts b/translations/noggit_cz.ts
  </context>
  <context>
 -    <name>settingsDialog</name>
-+    <name>noggit::ui::settingsDialog</name>
++    <name>Noggit::Ui::settingsDialog</name>
      <message>
 -        <location filename="../src/noggit/ui/settingsDialog.cpp" line="70"/>
 +        <location filename="../src/noggit/ui/settingsDialog.cpp" line="32"/>
@@ -1539,7 +1539,7 @@ diff --git a/translations/noggit_de.ts b/translations/noggit_de.ts
 +    </message>
 +</context>
 +<context>
-+    <name>noggit::MainWindow</name>
++    <name>Noggit::MainWindow</name>
 +    <message>
 +        <location filename="../src/noggit/MainWindow.cpp" line="34"/>
 +        <source>Ready</source>
@@ -1562,7 +1562,7 @@ diff --git a/translations/noggit_de.ts b/translations/noggit_de.ts
 +    </message>
 +</context>
 +<context>
-+    <name>noggit::MapView</name>
++    <name>Noggit::MapView</name>
 +    <message>
 +        <location filename="../src/noggit/MapView.cpp" line="160"/>
 +        <source>Save current tile</source>
@@ -1860,7 +1860,7 @@ diff --git a/translations/noggit_de.ts b/translations/noggit_de.ts
 +    </message>
 +</context>
 +<context>
-+    <name>noggit::application</name>
++    <name>Noggit::application</name>
 +    <message>
 +        <location filename="../src/noggit/application.cpp" line="209"/>
 +        <source>Open WoW Directory</source>
@@ -1868,7 +1868,7 @@ diff --git a/translations/noggit_de.ts b/translations/noggit_de.ts
 +    </message>
 +</context>
 +<context>
-+    <name>noggit::async::loader</name>
++    <name>Noggit::async::loader</name>
 +    <message>
 +        <location filename="../src/noggit/async/loader.cpp" line="17"/>
 +        <source>Asynchronous loading with %1 threads.</source>
@@ -1876,7 +1876,7 @@ diff --git a/translations/noggit_de.ts b/translations/noggit_de.ts
 +    </message>
 +</context>
 +<context>
-+    <name>noggit::ui::about_widget</name>
++    <name>Noggit::Ui::about_widget</name>
      <message>
          <location filename="../src/noggit/ui/about_widget.cpp" line="23"/>
          <source>About Noggit</source>
@@ -1885,7 +1885,7 @@ diff --git a/translations/noggit_de.ts b/translations/noggit_de.ts
  </context>
  <context>
 -    <name>cursor_selector</name>
-+    <name>noggit::ui::cursor_selector</name>
++    <name>Noggit::Ui::cursor_selector</name>
      <message>
          <location filename="../src/noggit/ui/cursor_selector.cpp" line="60"/>
          <source>Cursor options</source>
@@ -1894,7 +1894,7 @@ diff --git a/translations/noggit_de.ts b/translations/noggit_de.ts
  </context>
  <context>
 -    <name>help_widget</name>
-+    <name>noggit::ui::help_widget</name>
++    <name>Noggit::Ui::help_widget</name>
      <message>
          <location filename="../src/noggit/ui/help_widget.cpp" line="16"/>
          <source>Help</source>
@@ -1911,7 +1911,7 @@ diff --git a/translations/noggit_de.ts b/translations/noggit_de.ts
 -</context>
 -<context>
 -    <name>minimap_widget</name>
-+    <name>noggit::ui::minimap_widget</name>
++    <name>Noggit::Ui::minimap_widget</name>
      <message>
          <location filename="../src/noggit/ui/minimap_widget.cpp" line="138"/>
          <source>Select a map on the left side.</source>
@@ -1920,7 +1920,7 @@ diff --git a/translations/noggit_de.ts b/translations/noggit_de.ts
  </context>
  <context>
 -    <name>settingsDialog</name>
-+    <name>noggit::ui::settingsDialog</name>
++    <name>Noggit::Ui::settingsDialog</name>
      <message>
 -        <location filename="../src/noggit/ui/settingsDialog.cpp" line="70"/>
 +        <location filename="../src/noggit/ui/settingsDialog.cpp" line="32"/>

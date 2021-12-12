@@ -24,7 +24,7 @@ ParticleSystem::ParticleSystem(Model* model_
                                , const BlizzardArchive::ClientFile& f
                                , const ModelParticleEmitterDef &mta
                                , int *globals
-                               , noggit::NoggitRenderContext context)
+                               , Noggit::NoggitRenderContext context)
   : model (model_)
   , emitter_type(mta.EmitterType)
   , emitter ( mta.EmitterType == 1 ? std::unique_ptr<ParticleEmitter> (std::make_unique<PlaneParticleEmitter>())
@@ -272,7 +272,7 @@ void ParticleSystem::setup(int anim, int time, int animtime)
 }
 
 void ParticleSystem::draw( glm::mat4x4 const& model_view
-                         , opengl::scoped::use_program& shader
+                         , OpenGL::Scoped::use_program& shader
                          , GLuint const& transform_vbo
                          , int instances_count
 )
@@ -472,33 +472,33 @@ void ParticleSystem::draw( glm::mat4x4 const& model_view
   shader.uniform("alpha_test", alpha_test);
   shader.uniform("billboard", (int)billboard);
 
-  opengl::scoped::vao_binder const _ (_vao);
+  OpenGL::Scoped::vao_binder const _ (_vao);
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
     shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
   if(billboard)
   {
     gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>(_offsets_vbo, offsets, GL_STREAM_DRAW);
 
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const offset_binder (_offsets_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const offset_binder (_offsets_vbo);
     shader.attrib("offset", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder (_texcoord_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder (_texcoord_vbo);
     shader.attrib("uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
   }
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const colors_binder (_colors_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const colors_binder (_colors_vbo);
     shader.attrib("color", 4, GL_FLOAT, GL_FALSE, 0, 0);
   }
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (transform_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (transform_vbo);
     shader.attrib("transform", 0, 1);
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder (_indices_vbo);
+  OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder (_indices_vbo);
   gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
 
 }
@@ -786,7 +786,7 @@ RibbonEmitter::RibbonEmitter(Model* model_
                              , const BlizzardArchive::ClientFile &f
                              , ModelRibbonEmitterDef const& mta
                              , int *globals
-                             , noggit::NoggitRenderContext context)
+                             , Noggit::NoggitRenderContext context)
   : model (model_)
   , color (mta.color, f, globals)
   , opacity (mta.opacity, f, globals)
@@ -911,7 +911,7 @@ void RibbonEmitter::setup(int anim, int time, int animtime)
   tbelow = below.getValue(anim, time, animtime);
 }
 
-void RibbonEmitter::draw( opengl::scoped::use_program& shader
+void RibbonEmitter::draw( OpenGL::Scoped::use_program& shader
                         , GLuint const& transform_vbo
                         , int instances_count
                         )
@@ -975,22 +975,22 @@ void RibbonEmitter::draw( opengl::scoped::use_program& shader
   gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(_texcoord_vbo, texcoords, GL_STREAM_DRAW);
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STREAM_DRAW);
 
-  opengl::scoped::vao_binder const _(_vao);
+  OpenGL::Scoped::vao_binder const _(_vao);
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder(_vertices_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder(_vertices_vbo);
     shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder(_texcoord_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const texcoord_binder(_texcoord_vbo);
     shader.attrib("uv", 2, GL_FLOAT, GL_FALSE, 0, 0);
   }
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder(transform_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder(transform_vbo);
     shader.attrib("transform", 0, 1);
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder(_indices_vbo);
+  OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder(_indices_vbo);
   gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
 }
 

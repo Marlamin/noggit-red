@@ -4,9 +4,9 @@
 #include <string>
 #include <glm/vec3.hpp>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     class scripting_tool;
     class script_context;
@@ -38,5 +38,5 @@ namespace noggit
     glm::vec3 rotate_2d(glm::vec3 const& point, glm::vec3 const& origin, float angleDeg);
 
     void register_math(script_context * state);
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

@@ -29,7 +29,7 @@ class MapTile;
 class SceneObject : public Selectable
 {
 public:
-  SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context);
+  SceneObject(SceneObjectTypes type, Noggit::NoggitRenderContext context);
 
   [[nodiscard]]
   bool isInsideRect(std::array<glm::vec3, 2> const* rect) const;
@@ -82,7 +82,7 @@ protected:
   glm::mat4x4 _transform_mat = glm::mat4x4();
   glm::mat4x4 _transform_mat_inverted = glm::mat4x4();
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 
   std::vector<MapTile*> _tiles;
 };

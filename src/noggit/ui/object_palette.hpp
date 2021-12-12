@@ -22,9 +22,9 @@ class QPoint;
 class MapView;
 
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui
+    namespace Ui
     {
         class current_texture;
 
@@ -71,7 +71,7 @@ namespace noggit
             QPushButton* _remove_button;
             std::unordered_set<std::string> _object_paths;
             MapView* _map_view;
-            noggit::ui::tools::PreviewRenderer* _preview_renderer;
+            Noggit::Ui::Tools::PreviewRenderer* _preview_renderer;
 
         };
     }

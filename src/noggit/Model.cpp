@@ -20,7 +20,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <math/trig.hpp>
 
-Model::Model(const std::string& filename, noggit::NoggitRenderContext context)
+Model::Model(const std::string& filename, Noggit::NoggitRenderContext context)
   : AsyncObject(filename)
   , _finished_upload(false)
   , _context(context)
@@ -621,7 +621,7 @@ ModelRenderPass::ModelRenderPass(ModelTexUnit const& tex_unit, Model* m)
 {
 }
 
-bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model *m, opengl::M2RenderState& model_render_state)
+bool ModelRenderPass::prepare_draw(OpenGL::Scoped::use_program& m2_shader, Model *m, OpenGL::M2RenderState& model_render_state)
 {
   if (!m->showGeosets[submesh] || !pixel_shader)
   {
@@ -805,7 +805,7 @@ void ModelRenderPass::after_draw()
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-void ModelRenderPass::bind_texture(size_t index, Model* m, opengl::M2RenderState& model_render_state, opengl::scoped::use_program& m2_shader)
+void ModelRenderPass::bind_texture(size_t index, Model* m, OpenGL::M2RenderState& model_render_state, OpenGL::Scoped::use_program& m2_shader)
 {
 
   uint16_t tex = m->_texture_lookup[textures[index]];
@@ -1233,7 +1233,7 @@ void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
     }
 
     {
-      opengl::scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder (_bone_matrices_buffer);
+      OpenGL::Scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder (_bone_matrices_buffer);
       gl.bufferSubData(GL_TEXTURE_BUFFER, 0, bone_matrices.size() * sizeof(glm::mat4x4), bone_matrices.data());
     }
 
@@ -1263,7 +1263,7 @@ void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
       vertex.normal = n.normalized();
     }
 
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
     gl.bufferData (GL_ARRAY_BUFFER, _current_vertices.size() * sizeof (ModelVertex), _current_vertices.data(), GL_STREAM_DRAW);
 
      */
@@ -1338,7 +1338,7 @@ ModelLight::ModelLight(const BlizzardArchive::ClientFile& f, const ModelLightDef
   , ambIntensity (mld.ambIntensity, f, global)
 {}
 
-void ModelLight::setup(int time, opengl::light, int animtime)
+void ModelLight::setup(int time, OpenGL::light, int animtime)
 {
 	auto ambient = ambColor.getValue(0, time, animtime) * ambIntensity.getValue(0, time, animtime);
     auto diffuse = diffColor.getValue(0, time, animtime) * diffIntensity.getValue(0, time, animtime);
@@ -1488,8 +1488,8 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 
 void Model::draw( glm::mat4x4 const& model_view
                 , ModelInstance& instance
-                , opengl::scoped::use_program& m2_shader
-                , opengl::M2RenderState& model_render_state
+                , OpenGL::Scoped::use_program& m2_shader
+                , OpenGL::M2RenderState& model_render_state
                 , math::frustum const& frustum
                 , const float& cull_distance
                 , const glm::vec3& camera
@@ -1519,12 +1519,12 @@ void Model::draw( glm::mat4x4 const& model_view
     animcalc = true;
   }
 
-  opengl::scoped::vao_binder const _(_vao);
+  OpenGL::Scoped::vao_binder const _(_vao);
 
   m2_shader.uniform("transform", instance.transformMatrix());
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
     m2_shader.attrib("pos", 3, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), 0);
     m2_shader.attrib("bones_weight",  4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3)));
     m2_shader.attrib("bones_indices", 4, GL_UNSIGNED_BYTE,  GL_FALSE, sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3) + 4));
@@ -1533,7 +1533,7 @@ void Model::draw( glm::mat4x4 const& model_view
     m2_shader.attrib("texcoord2", 2, GL_FLOAT, GL_FALSE, sizeof(ModelVertex), reinterpret_cast<void*> (sizeof(::glm::vec3) * 2 + 8 + sizeof(glm::vec2)));
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
+  OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
 
   for (ModelRenderPass& p : _render_passes)
   {
@@ -1551,8 +1551,8 @@ void Model::draw( glm::mat4x4 const& model_view
 
 void Model::draw (glm::mat4x4 const& model_view
                  , std::vector<glm::mat4x4> const& instances
-                 , opengl::scoped::use_program& m2_shader
-                 , opengl::M2RenderState& model_render_state
+                 , OpenGL::Scoped::use_program& m2_shader
+                 , OpenGL::M2RenderState& model_render_state
                  , math::frustum const& frustum
                  , const float& cull_distance
                  , const glm::vec3& camera
@@ -1611,10 +1611,10 @@ void Model::draw (glm::mat4x4 const& model_view
     }
      */
 
-    opengl::scoped::vao_binder const _ (_vao);
+    OpenGL::Scoped::vao_binder const _ (_vao);
 
     {
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
+      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
       gl.bufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(::glm::mat4x4), instances.data(), GL_DYNAMIC_DRAW);
       //m2_shader.attrib("transform", 0, 1);
     }
@@ -1630,7 +1630,7 @@ void Model::draw (glm::mat4x4 const& model_view
       m2_shader.uniform("anim_bones", false);
     }
 
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
+    OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
 
     for (ModelRenderPass& p : _render_passes)
     {
@@ -1645,7 +1645,7 @@ void Model::draw (glm::mat4x4 const& model_view
 }
 
 void Model::draw_particles( glm::mat4x4 const& model_view
-                          , opengl::scoped::use_program& particles_shader
+                          , OpenGL::Scoped::use_program& particles_shader
                           , std::size_t instance_count
                           )
 {
@@ -1655,7 +1655,7 @@ void Model::draw_particles( glm::mat4x4 const& model_view
   }
 }
 
-void Model::draw_ribbons( opengl::scoped::use_program& ribbons_shader
+void Model::draw_ribbons( OpenGL::Scoped::use_program& ribbons_shader
                         , std::size_t instance_count
                         )
 {
@@ -1665,22 +1665,22 @@ void Model::draw_ribbons( opengl::scoped::use_program& ribbons_shader
   }
 }
 
-void Model::draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count)
+void Model::draw_box (OpenGL::Scoped::use_program& m2_box_shader, std::size_t box_count)
 {
 
-  opengl::scoped::vao_binder const _ (_box_vao);
+  OpenGL::Scoped::vao_binder const _ (_box_vao);
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
     m2_box_shader.attrib("transform", 0, 1);
   }
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
     m2_box_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_box_indices_buffer);
+  OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_box_indices_buffer);
 
   gl.drawElementsInstanced (GL_LINE_STRIP, _box_indices.size(), GL_UNSIGNED_SHORT, nullptr, box_count);
 }
@@ -1739,13 +1739,13 @@ std::vector<float> Model::intersect (glm::mat4x4 const& model_view, math::ray co
   return results;
 }
 
-void Model::lightsOn(opengl::light lbase)
+void Model::lightsOn(OpenGL::light lbase)
 {
   // setup lights
   for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(_anim_time, l++, _global_animtime);
 }
 
-void Model::lightsOff(opengl::light lbase)
+void Model::lightsOff(OpenGL::light lbase)
 {
   for (unsigned int i = 0, l = lbase; i<header.nLights; ++i) gl.disable(l++);
 }
@@ -1764,25 +1764,25 @@ void Model::upload()
     gl.genTextures(1, &_bone_matrices_buf_tex);
 
     gl.bindTexture(GL_TEXTURE_BUFFER, _bone_matrices_buf_tex);
-    opengl::scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder(_bone_matrices_buffer);
+    OpenGL::Scoped::buffer_binder<GL_TEXTURE_BUFFER> const binder(_bone_matrices_buffer);
     gl.bufferData(GL_TEXTURE_BUFFER, bone_matrices.size() * sizeof(glm::mat4x4), nullptr, GL_STREAM_DRAW);
     gl.texBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, _bone_matrices_buffer);
   }
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_vertices_buffer);
     gl.bufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(ModelVertex), _vertices.data(), GL_STATIC_DRAW);
   }
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_box_vbo);
     gl.bufferData (GL_ARRAY_BUFFER, _vertex_box_points.size() * sizeof (glm::vec3), _vertex_box_points.data(), GL_STATIC_DRAW);
   }
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
+  OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(uint16_t), _indices.data(), GL_STATIC_DRAW);
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> box_indices_binder(_box_indices_buffer);
+  OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> box_indices_binder(_box_indices_buffer);
   gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, _box_indices.size() * sizeof(uint16_t), _box_indices.data(), GL_STATIC_DRAW);
 
 
@@ -1827,12 +1827,12 @@ void Model::updateEmitters(float dt)
   }
 }
 
-void Model::setupVAO(opengl::scoped::use_program& m2_shader)
+void Model::setupVAO(OpenGL::Scoped::use_program& m2_shader)
 {
-  opengl::scoped::vao_binder const _(_vao);
+  OpenGL::Scoped::vao_binder const _(_vao);
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const binder (_vertices_buffer);
     m2_shader.attrib("pos",           3, GL_FLOAT, GL_FALSE, sizeof (ModelVertex), 0);
     m2_shader.attribi("bones_weight", 4, GL_UNSIGNED_BYTE,   sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3)));
     m2_shader.attribi("bones_indices",4, GL_UNSIGNED_BYTE,  sizeof (ModelVertex), reinterpret_cast<void*> (sizeof (::glm::vec3) + 4));
@@ -1842,7 +1842,7 @@ void Model::setupVAO(opengl::scoped::use_program& m2_shader)
   }
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const transform_binder (_transform_buffer);
     gl.bufferData(GL_ARRAY_BUFFER, 10 * sizeof(::glm::mat4x4), nullptr, GL_DYNAMIC_DRAW);
     m2_shader.attrib("transform", 0, 1);
   }

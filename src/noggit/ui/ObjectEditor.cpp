@@ -32,9 +32,9 @@
 #include <string>
 #include <sstream>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     object_editor::object_editor ( MapView* mapView
                                  , World* world

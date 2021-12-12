@@ -9,8 +9,8 @@
 
 #include <noggit/ui/ObjectEditor.h>
 
-namespace noggit {
-  namespace scripting {
+namespace Noggit {
+  namespace Scripting {
     void register_global(script_context * state)
     {
       scripting_tool * global = state->tool();

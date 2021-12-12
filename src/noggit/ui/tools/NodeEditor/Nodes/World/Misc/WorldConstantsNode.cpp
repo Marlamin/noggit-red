@@ -7,7 +7,7 @@
 #include <noggit/MapHeaders.h>
 #include <cmath>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 WorldConstantsNode::WorldConstantsNode()
 : ContextNodeBase()

@@ -18,9 +18,9 @@ class QListWidget;
 class QPoint;
 
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class current_texture;
 

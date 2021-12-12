@@ -1,7 +1,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <noggit/camera.hpp>
 
-namespace noggit
+namespace Noggit
 {
   camera::camera ( glm::vec3 const& position
                  , math::degrees yaw_

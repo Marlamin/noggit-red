@@ -14,9 +14,9 @@
 #include <glm/vec3.hpp>
 
 class World;
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class flatten_blur_tool : public QWidget
     {
@@ -49,8 +49,8 @@ namespace noggit
       bool use_ref_pos() const  { return _lock_group->isChecked(); }
       glm::vec3 ref_pos() const { return _lock_pos; }
 
-      noggit::ui::tools::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
-      noggit::ui::tools::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
 
       QSize sizeHint() const override;
 
@@ -68,8 +68,8 @@ namespace noggit
 
     private:
       QButtonGroup* _type_button_box;
-      noggit::ui::tools::UiCommon::ExtendedSlider* _radius_slider;
-      noggit::ui::tools::UiCommon::ExtendedSlider* _speed_slider;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* _radius_slider;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* _speed_slider;
 
       QGroupBox* _angle_group;
       QSlider* _angle_slider;

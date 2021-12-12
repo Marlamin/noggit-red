@@ -20,8 +20,8 @@
 
 #include <sol/sol.hpp>
 
-namespace noggit {
-  namespace scripting {
+namespace Noggit {
+  namespace Scripting {
     namespace {
       void register_functions(script_context * lua)
       {

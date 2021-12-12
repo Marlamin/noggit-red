@@ -2,115 +2,116 @@
 
 #include "noggit/project/_Project.h"
 
-namespace noggit::application {
+namespace Noggit::Application
+{
 
-    Noggit::Noggit(int argc, char* argv[])
-	: fullscreen(false),
-	doAntiAliasing(true)
-    {
-        InitLogging();
-        assert(argc >= 1); (void)argc;
-        Noggit::initPath(argv);
+  Noggit::Noggit(int argc, char* argv[])
+  : fullscreen(false)
+  , doAntiAliasing(true)
+  {
+      InitLogging();
+      assert(argc >= 1); (void)argc;
+      Noggit::initPath(argv);
 
-        Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
-
-
-        QSettings settings;
-        doAntiAliasing = settings.value("antialiasing", false).toBool();
-        fullscreen = settings.value("fullscreen", false).toBool();
+      Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
 
-        srand(::time(nullptr));
-        QDir path(settings.value("project/game_path").toString());
+      QSettings settings;
+      doAntiAliasing = settings.value("antialiasing", false).toBool();
+      fullscreen = settings.value("fullscreen", false).toBool();
 
-        wowpath = path.absolutePath().toStdString();
 
-        Log << "Game path: " << wowpath << std::endl;
+      srand(::time(nullptr));
+      QDir path(settings.value("project/game_path").toString());
 
-        project_path = settings.value("project/path", path.absolutePath()).toString().toStdString();
-        settings.setValue("project/path", QString::fromStdString(project_path));
+      wowpath = path.absolutePath().toStdString();
 
-        Log << "Project path: " << project_path << std::endl;
+      Log << "Game path: " << wowpath << std::endl;
 
-        settings.setValue("project/game_path", path.absolutePath());
-        settings.setValue("project/path", QString::fromStdString(project_path));
+      project_path = settings.value("project/path", path.absolutePath()).toString().toStdString();
+      settings.setValue("project/path", QString::fromStdString(project_path));
 
-        if (!QGLFormat::hasOpenGL())
-        {
-            throw std::runtime_error("Your system does not support OpenGL. Sorry, this application can't run without it.");
-        }
+      Log << "Project path: " << project_path << std::endl;
 
-        QSurfaceFormat format;
+      settings.setValue("project/game_path", path.absolutePath());
+      settings.setValue("project/path", QString::fromStdString(project_path));
 
-        format.setRenderableType(QSurfaceFormat::OpenGL);
-        format.setVersion(4, 1);
-        format.setProfile(QSurfaceFormat::CoreProfile);
-        //format.setOption(QSurfaceFormat::ResetNotification, true);
-        format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
-        format.setSwapInterval(0);
-        format.setRenderableType(QSurfaceFormat::OpenGL);
-        format.setDepthBufferSize(16);
-        format.setSamples(0);
+      if (!QGLFormat::hasOpenGL())
+      {
+          throw std::runtime_error("Your system does not support OpenGL. Sorry, this application can't run without it.");
+      }
 
-        if (doAntiAliasing)
-        {
-            format.setSamples(4);
-        }
+      QSurfaceFormat format;
 
-        QSurfaceFormat::setDefaultFormat(format);
+      format.setRenderableType(QSurfaceFormat::OpenGL);
+      format.setVersion(4, 1);
+      format.setProfile(QSurfaceFormat::CoreProfile);
+      //format.setOption(QSurfaceFormat::ResetNotification, true);
+      format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
+      format.setSwapInterval(0);
+      format.setRenderableType(QSurfaceFormat::OpenGL);
+      format.setDepthBufferSize(16);
+      format.setSamples(0);
 
-        QOpenGLContext context;
-        context.create();
-        QOffscreenSurface surface;
-        surface.create();
-        context.makeCurrent(&surface);
+      if (doAntiAliasing)
+      {
+          format.setSamples(4);
+      }
 
-        opengl::context::scoped_setter const _(::gl, &context);
+      QSurfaceFormat::setDefaultFormat(format);
 
-        LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
-        LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
-        LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
-    }
+      QOpenGLContext context;
+      context.create();
+      QOffscreenSurface surface;
+      surface.create();
+      context.makeCurrent(&surface);
 
-    void Noggit::initPath(char* argv[])
-    {
-        try
-        {
-            std::filesystem::path startupPath(argv[0]);
-            startupPath.remove_filename();
+      OpenGL::context::scoped_setter const _(::gl, &context);
 
-            if (startupPath.is_relative())
-            {
-                std::filesystem::current_path(std::filesystem::current_path() / startupPath);
-            }
-            else
-            {
-                std::filesystem::current_path(startupPath);
-            }
-        }
-        catch (const std::filesystem::filesystem_error& ex)
-        {
-            LogError << ex.what() << std::endl;
-        }
-    }
+      LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
+      LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
+      LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
+  }
 
-    void Noggit::start()
-    {
-        _client_data = std::make_unique<BlizzardArchive::ClientData>(wowpath.string(), BlizzardArchive::ClientVersion::WOTLK, BlizzardArchive::Locale::AUTO, project_path);
+  void Noggit::initPath(char* argv[])
+  {
+      try
+      {
+          std::filesystem::path startupPath(argv[0]);
+          startupPath.remove_filename();
 
-        OpenDBs();
+          if (startupPath.is_relative())
+          {
+              std::filesystem::current_path(std::filesystem::current_path() / startupPath);
+          }
+          else
+          {
+              std::filesystem::current_path(startupPath);
+          }
+      }
+      catch (const std::filesystem::filesystem_error& ex)
+      {
+          LogError << ex.what() << std::endl;
+      }
+  }
 
-        main_window = std::make_unique<noggit::ui::main_window>();
+  void Noggit::start()
+  {
+      _client_data = std::make_unique<BlizzardArchive::ClientData>(wowpath.string(), BlizzardArchive::ClientVersion::WOTLK, BlizzardArchive::Locale::AUTO, project_path);
 
-        if (fullscreen)
-        {
-            main_window->showFullScreen();
-        }
-        else
-        {
-            main_window->showMaximized();
-        }
-    }
+      OpenDBs();
+
+      main_window = std::make_unique<::Noggit::Ui::main_window>();
+
+      if (fullscreen)
+      {
+          main_window->showFullScreen();
+      }
+      else
+      {
+          main_window->showMaximized();
+      }
+  }
 }
 
 

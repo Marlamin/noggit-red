@@ -17,7 +17,7 @@
 
 TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
                         , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
-                        , noggit::NoggitRenderContext context)
+                        , Noggit::NoggitRenderContext context)
   : nTextures(chunk->header.nLayers)
   , _do_not_convert_alphamaps(do_not_convert_alphamaps)
   , _context(context)

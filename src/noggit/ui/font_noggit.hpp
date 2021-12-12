@@ -7,9 +7,9 @@
 #include <QtGui/QIcon>
 
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     struct font_noggit
     {

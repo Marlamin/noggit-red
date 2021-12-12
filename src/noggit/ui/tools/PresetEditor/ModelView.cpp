@@ -4,20 +4,20 @@
 
 #include <vector>
 
-using namespace noggit::ui::tools::PresetEditor;
+using namespace Noggit::Ui::Tools::PresetEditor;
 
 ModelViewer::ModelViewer(QWidget *parent)
-: AssetBrowser::ModelViewer(parent, noggit::NoggitRenderContext::PRESET_EDITOR)
+: AssetBrowser::ModelViewer(parent, Noggit::NoggitRenderContext::PRESET_EDITOR)
 , _world(nullptr)
 , _world_camera(_camera.position, _camera.yaw(), _camera.pitch())
-, _transform_gizmo(noggit::ui::tools::ViewportGizmo::GizmoContext::PRESET_EDITOR)
+, _transform_gizmo(Noggit::Ui::Tools::ViewportGizmo::GizmoContext::PRESET_EDITOR)
 {
 }
 
 void ModelViewer::paintGL()
 {
   const qreal now(_startup_time.elapsed() / 1000.0);
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
   makeCurrent();
 
   gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -106,7 +106,7 @@ void ModelViewer::paintGL()
 
 void ModelViewer::loadWorldUnderlay(const std::string& internal_name, int map_id)
 {
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
   makeCurrent();
 
   if (map_id < 0)
@@ -116,7 +116,7 @@ void ModelViewer::loadWorldUnderlay(const std::string& internal_name, int map_id
   else
   {
     _world = std::make_unique<World> (internal_name, map_id,
-                                      noggit::NoggitRenderContext::PRESET_EDITOR);
+                                      Noggit::NoggitRenderContext::PRESET_EDITOR);
   }
 
 }

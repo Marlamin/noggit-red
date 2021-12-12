@@ -6,9 +6,9 @@
 
 #include <sol/sol.hpp>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     random::random(script_context * ctx, unsigned seed)
       : script_object(ctx)
@@ -90,5 +90,5 @@ namespace noggit
         return random_from_time(state);
       });
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

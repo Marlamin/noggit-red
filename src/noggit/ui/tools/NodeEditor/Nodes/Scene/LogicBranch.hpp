@@ -15,9 +15,9 @@ using QtNodes::NodeValidationState;
 using QtNodes::Connection;
 
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::NodeEditor::Nodes
+    namespace Ui::Tools::NodeEditor::Nodes
     {
         class LogicBranch
         {

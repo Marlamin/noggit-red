@@ -58,9 +58,9 @@ public:
 };
 
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     main_window::main_window()
       : QMainWindow (nullptr)
@@ -169,7 +169,7 @@ namespace noggit
       if (!settings.value("systemWindowFrame", true).toBool())
       {
         QWidget *widget = new QWidget(this);
-        Ui::TitleBar* titleBarWidget = setupFramelessWindow(widget, this, minimumSize(), maximumSize(), true);
+        ::Ui::TitleBar* titleBarWidget = setupFramelessWindow(widget, this, minimumSize(), maximumSize(), true);
         titleBarWidget->horizontalLayout->insertWidget(2, _menuBar);
         setMenuWidget(widget);
       }
@@ -255,7 +255,7 @@ namespace noggit
         uidFixWindow->show();
 
         connect( uidFixWindow
-               , &noggit::ui::uid_fix_window::fix_uid
+               , &Noggit::Ui::uid_fix_window::fix_uid
                , [this, from_bookmark] 
                    ( glm::vec3 pos
                    , math::degrees camera_pitch
@@ -299,7 +299,7 @@ namespace noggit
         if (it->getInt(MapDB::MapID) == mapID)
         {
           _world = std::make_unique<World> (it->getString(MapDB::InternalName), mapID,
-                                            noggit::NoggitRenderContext::MAP_VIEW);
+                                            Noggit::NoggitRenderContext::MAP_VIEW);
           _minimap->world (_world.get());
           emit map_selected(mapID);
 
@@ -377,7 +377,7 @@ namespace noggit
                              if (it->getInt(MapDB::MapID) == entry.mapID)
                              {
                                _world = std::make_unique<World> (it->getString(MapDB::InternalName),
-                                                                 entry.mapID, noggit::NoggitRenderContext::MAP_VIEW);
+                                                                 entry.mapID, Noggit::NoggitRenderContext::MAP_VIEW);
                                check_uid_then_enter_map ( entry.pos
                                                         , math::degrees (entry.camera_pitch)
                                                         , math::degrees (entry.camera_yaw)
@@ -413,9 +413,9 @@ namespace noggit
       right_side->addTab(minimap_holder, "Enter map");
       minimap_holder->setAccessibleName("main_menu_minimap_holder");
 
-      _map_creation_wizard = new noggit::ui::tools::MapCreationWizard::Ui::MapCreationWizard(this);
+      _map_creation_wizard = new Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard(this);
 
-      _map_wizard_connection = connect(_map_creation_wizard, &noggit::ui::tools::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated
+      _map_wizard_connection = connect(_map_creation_wizard, &Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated
           ,[=]
           {
             build_map_lists(isShadowlands);
@@ -431,7 +431,7 @@ namespace noggit
       _minimap->adjustSize();
     }
 
-    void noggit::ui::main_window::build_map_lists(bool isShadowlands)
+    void Noggit::Ui::main_window::build_map_lists(bool isShadowlands)
     {
 
       std::array<QListWidget*, 5> type_to_table

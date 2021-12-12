@@ -34,10 +34,10 @@ public:
   float size_cat;
 
   explicit ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
-                         , noggit::NoggitRenderContext context);
+                         , Noggit::NoggitRenderContext context);
 
   explicit ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
-                         , ENTRY_MDDF const*d, noggit::NoggitRenderContext context);
+                         , ENTRY_MDDF const*d, Noggit::NoggitRenderContext context);
 
   ModelInstance(ModelInstance const& other) = default;
   ModelInstance& operator= (ModelInstance const& other) = default;
@@ -104,7 +104,7 @@ public:
   [[nodiscard]]
   AsyncObject* instance_model() const override { return model.get(); };
 
-  void updateDetails(noggit::ui::detail_infos* detail_widget) override;
+  void updateDetails(Noggit::Ui::detail_infos* detail_widget) override;
 
   [[nodiscard]]
   std::uint32_t gpuTransformUid() const { return _gpu_transform_uid; }
@@ -124,7 +124,7 @@ public:
 
   explicit wmo_doodad_instance(BlizzardArchive::Listfile::FileKey const& file_key
       , BlizzardArchive::ClientFile* f
-      , noggit::NoggitRenderContext context );
+      , Noggit::NoggitRenderContext context );
 
   wmo_doodad_instance(wmo_doodad_instance const& other)
   : ModelInstance(other.model->file_key(), other._context)

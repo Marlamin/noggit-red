@@ -10,7 +10,7 @@
 #include <math/trig.hpp>
 #include <limits>
 
-SceneObject::SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context)
+SceneObject::SceneObject(SceneObjectTypes type, Noggit::NoggitRenderContext context)
 : _type(type)
 , _context(context)
 , pos(0.f, 0.f, 0.f)

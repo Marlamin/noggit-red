@@ -8,7 +8,7 @@
 #include <noggit/World.h>
 
 
-namespace noggit
+namespace Noggit
 {
   struct instance_update
   {

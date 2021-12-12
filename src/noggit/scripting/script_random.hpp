@@ -6,9 +6,9 @@
 #include <random>
 #include <chrono>
 #include <memory>
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     class scripting_tool;
     class script_context;
@@ -28,5 +28,5 @@ namespace noggit
     std::shared_ptr<random> random_from_time(script_context * state);
 
     void register_random(script_context * state);
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

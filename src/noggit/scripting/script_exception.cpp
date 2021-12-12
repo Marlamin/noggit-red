@@ -4,9 +4,9 @@
 #include <string>
 #include <exception>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     script_exception::script_exception(std::string const& funcName, std::string const& msg)
     : std::runtime_error(msg+" (in function "+funcName+")")
@@ -17,5 +17,5 @@ namespace noggit
           set_cur_exception(std::string(what()));
         }
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

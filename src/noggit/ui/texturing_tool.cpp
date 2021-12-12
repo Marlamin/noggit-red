@@ -20,9 +20,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     texturing_tool::texturing_tool ( const glm::vec3* camera_pos
                                    , MapView* map_view
@@ -69,7 +69,7 @@ namespace noggit
       slider_layout->addLayout(slider_layout_right, 0, 1);
 
       slider_layout_left->addWidget(new QLabel("Hardness:", tool_widget));
-      _hardness_slider = new noggit::ui::tools::UiCommon::ExtendedSlider(tool_widget);
+      _hardness_slider = new Noggit::Ui::Tools::UiCommon::ExtendedSlider(tool_widget);
       _hardness_slider->setPrefix("");
       _hardness_slider->setRange (0, 1);
       _hardness_slider->setDecimals(2);
@@ -78,7 +78,7 @@ namespace noggit
       slider_layout_left->addWidget(_hardness_slider);
 
       slider_layout_left->addWidget(new QLabel("Radius:", tool_widget));
-      _radius_slider = new noggit::ui::tools::UiCommon::ExtendedSlider(tool_widget);
+      _radius_slider = new Noggit::Ui::Tools::UiCommon::ExtendedSlider(tool_widget);
       _radius_slider->setPrefix("");
       _radius_slider->setRange (0, 1000);
       _radius_slider->setDecimals (2);
@@ -86,7 +86,7 @@ namespace noggit
       slider_layout_left->addWidget (_radius_slider);
 
       slider_layout_left->addWidget(new QLabel("Pressure:", tool_widget));
-      _pressure_slider = new noggit::ui::tools::UiCommon::ExtendedSlider(tool_widget);
+      _pressure_slider = new Noggit::Ui::Tools::UiCommon::ExtendedSlider(tool_widget);
       _pressure_slider->setPrefix("");
       _pressure_slider->setRange (0, 1.0f);
       _pressure_slider->setDecimals (2);
@@ -155,7 +155,7 @@ namespace noggit
       _texture_switcher = new texture_swapper(tool_widget, camera_pos, map_view);
       _texture_switcher->hide();
 
-      _image_mask_group = new noggit::ui::tools::ImageMaskSelector(map_view, this);
+      _image_mask_group = new Noggit::Ui::Tools::ImageMaskSelector(map_view, this);
       _image_mask_group->setContinuousActionName("Paint");
       _image_mask_group->setBrushModeVisible(parent == map_view);
       _mask_image = _image_mask_group->getPixmap()->toImage();
@@ -213,8 +213,8 @@ namespace noggit
                 }
               );
 
-      connect (anim_speed_slider, &QSlider::valueChanged, &_anim_speed_prop, &noggit::unsigned_int_property::set);
-      connect (anim_orientation_dial, &QDial::valueChanged, &_anim_rotation_prop, &noggit::unsigned_int_property::set);
+      connect (anim_speed_slider, &QSlider::valueChanged, &_anim_speed_prop, &Noggit::unsigned_int_property::set);
+      connect (anim_orientation_dial, &QDial::valueChanged, &_anim_rotation_prop, &Noggit::unsigned_int_property::set);
 
       connect ( tabs, &QTabWidget::currentChanged
               , [this] (int index)
@@ -306,7 +306,7 @@ namespace noggit
               );
 
 
-      connect ( _radius_slider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged
+      connect ( _radius_slider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged
           , [&] (double v)
                 {
                     set_radius(static_cast<float>(_radius_slider->value()));
@@ -314,16 +314,16 @@ namespace noggit
       );
 
 
-      connect ( _hardness_slider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged
+      connect ( _hardness_slider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged
           , [&] (double v)
                 {
                     update_brush_hardness();
                 }
       );
 
-      connect (_image_mask_group, &noggit::ui::tools::ImageMaskSelector::rotationUpdated, this, &texturing_tool::updateMaskImage);
-      connect (_radius_slider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged, this, &texturing_tool::updateMaskImage);
-      connect(_image_mask_group, &noggit::ui::tools::ImageMaskSelector::pixmapUpdated, this, &texturing_tool::updateMaskImage);
+      connect (_image_mask_group, &Noggit::Ui::Tools::ImageMaskSelector::rotationUpdated, this, &texturing_tool::updateMaskImage);
+      connect (_radius_slider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged, this, &texturing_tool::updateMaskImage);
+      connect(_image_mask_group, &Noggit::Ui::Tools::ImageMaskSelector::pixmapUpdated, this, &texturing_tool::updateMaskImage);
 
 
 

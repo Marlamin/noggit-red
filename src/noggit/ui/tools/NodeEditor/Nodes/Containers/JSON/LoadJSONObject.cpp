@@ -8,7 +8,7 @@
 #include <QFile>
 #include <QJsonDocument>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 LoadJSONObjectNode::LoadJSONObjectNode()
 : LogicNodeBase()

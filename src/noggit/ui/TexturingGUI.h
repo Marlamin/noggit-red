@@ -11,9 +11,9 @@
 class QMouseEvent;
 class QListView;
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class current_texture;
 

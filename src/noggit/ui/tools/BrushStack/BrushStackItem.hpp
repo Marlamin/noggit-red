@@ -25,13 +25,13 @@
 
 class World;
 
-namespace noggit::ui::tools
+namespace Noggit::Ui::Tools
 {
   using operation_type = boost::variant
-    < noggit::ui::terrain_tool*
-    , noggit::ui::flatten_blur_tool*
-    , noggit::ui::texturing_tool*
-    , noggit::ui::shader_tool*
+    < Noggit::Ui::terrain_tool*
+    , Noggit::Ui::flatten_blur_tool*
+    , Noggit::Ui::texturing_tool*
+    , Noggit::Ui::shader_tool*
   >;
 
   //! \note Keep in same order as variant!
@@ -81,7 +81,7 @@ namespace noggit::ui::tools
     void settingsChanged(BrushStackItem* item);
 
   private:
-    Ui::brushStackItem _ui;
+    ::Ui::brushStackItem _ui;
     QIcon _expanded_icon;
     QIcon _collapsed_icon;
     QIcon _enabled_icon;
@@ -95,7 +95,7 @@ namespace noggit::ui::tools
     QCheckBox* _is_speed_affecting;
 
     boost::optional<scoped_blp_texture_reference> _selected_texture;
-    noggit::ui::tileset_chooser* _texture_palette = nullptr;
+    Noggit::Ui::tileset_chooser* _texture_palette = nullptr;
     bool _is_texture_dirty = false;
 
   };

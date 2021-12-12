@@ -6,9 +6,9 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     float noisemap::get_index(std::string const& caller, int x, int y)
     {
@@ -213,5 +213,5 @@ namespace noggit
                            );
         });
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

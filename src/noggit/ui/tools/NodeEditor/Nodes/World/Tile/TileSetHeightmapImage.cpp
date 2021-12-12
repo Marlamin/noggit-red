@@ -6,7 +6,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/tool_enums.hpp>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 TileSetHeightmapImageNode::TileSetHeightmapImageNode()
 : ContextLogicNodeBase()
@@ -30,7 +30,7 @@ TileSetHeightmapImageNode::TileSetHeightmapImageNode()
 void TileSetHeightmapImageNode::compute()
 {
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
   QImage* image = defaultPortData<ImageData>(PortType::In, 2)->value_ptr();

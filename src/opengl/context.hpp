@@ -7,7 +7,7 @@
 
 #include <QtGui/QOpenGLFunctions_4_1_Core>
 
-namespace opengl
+namespace OpenGL
 {
   struct context
   {
@@ -244,4 +244,4 @@ namespace opengl
   };
 }
 
-extern opengl::context gl;
+extern OpenGL::context gl;

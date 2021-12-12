@@ -16,9 +16,9 @@
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     rotation_editor::rotation_editor(QWidget* parent, World* world)
       : QWidget (parent)
@@ -76,7 +76,7 @@ namespace noggit
               , [&, world, parent]
       {
         NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                       noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                       Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
         set_model_rotation(world);
         NOGGIT_ACTION_MGR->endAction();
       }
@@ -85,7 +85,7 @@ namespace noggit
               , [&, world, parent]
               {
                 NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                               noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                               Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                 set_model_rotation(world);
                 NOGGIT_ACTION_MGR->endAction();
               }
@@ -94,7 +94,7 @@ namespace noggit
               , [&, world, parent]
               {
                 NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                               noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                               Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                 set_model_rotation(world);
                 NOGGIT_ACTION_MGR->endAction();
               }
@@ -109,7 +109,7 @@ namespace noggit
                     if (_rotation_x->hasFocus())
                     {
                       NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                                     noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                                     Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                       change_models_rotation(world);
                       NOGGIT_ACTION_MGR->endAction();
                     }
@@ -130,7 +130,7 @@ namespace noggit
                     if (_rotation_z->hasFocus())
                     {
                       NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                                     noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                                     Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                       change_models_rotation(world);
                       NOGGIT_ACTION_MGR->endAction();
                     }
@@ -151,7 +151,7 @@ namespace noggit
                     if (_rotation_y->hasFocus())
                     {
                       NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                                     noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                                     Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                       change_models_rotation(world);
                       NOGGIT_ACTION_MGR->endAction();
                     }
@@ -168,7 +168,7 @@ namespace noggit
               , [&, world, parent] (double v)
                 {
                   NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                                 noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                                 Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                   world->set_selected_models_pos(v, _position_y->value(), _position_z->value());
                   NOGGIT_ACTION_MGR->endAction();
                 }
@@ -177,7 +177,7 @@ namespace noggit
               , [&, world, parent] (double v)
                 {
                   NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                                 noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                                 Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                   world->set_selected_models_pos(_position_x->value(), _position_y->value(), v);
                   NOGGIT_ACTION_MGR->endAction();
                 }
@@ -186,7 +186,7 @@ namespace noggit
               , [&, world, parent] (double v)
                 {
                   NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                                 noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                                 Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                   world->set_selected_models_pos(_position_x->value(), v, _position_z->value());
                   NOGGIT_ACTION_MGR->endAction();
                 }
@@ -198,7 +198,7 @@ namespace noggit
                   if (!world->has_multiple_model_selected())
                   {
                     NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                                   noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                                   Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                     world->scale_selected_models(v, World::m2_scaling_type::set);
                     NOGGIT_ACTION_MGR->endAction();
                   }
@@ -213,7 +213,7 @@ namespace noggit
                     if (_scale->hasFocus())
                     {
                       NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
-                                                                     noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                                                                     Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                       world->scale_selected_models(_scale->value(), World::m2_scaling_type::mult);
                       NOGGIT_ACTION_MGR->endAction();
                     }

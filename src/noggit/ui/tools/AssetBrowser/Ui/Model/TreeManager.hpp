@@ -8,9 +8,9 @@
 #include <QWidget>
 #include <QStandardItemModel>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui::tools::AssetBrowser::Ui::Model
+  namespace Ui::Tools::AssetBrowser::Ui::Model
   {
     class TreeManager
     {

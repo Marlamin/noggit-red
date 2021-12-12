@@ -6,7 +6,7 @@
 #include <QWidget>
 #include <noggit/MapView.h>
 
-namespace noggit::ui::tools
+namespace Noggit::Ui::Tools
 {
   class LightEditor : public QWidget
   {

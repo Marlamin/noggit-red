@@ -16,9 +16,9 @@ enum class uid_fix_mode
   fix_all_fuckporting_edition
 };
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class uid_fix_window : public QDialog
     {

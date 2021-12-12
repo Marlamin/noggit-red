@@ -10,9 +10,9 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/font_noggit.hpp>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class toolbar: public QToolBar
     {

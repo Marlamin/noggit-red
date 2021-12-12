@@ -4,7 +4,7 @@
 
 #include <QtCore/QObject>
 
-namespace noggit
+namespace Noggit
 {
   struct unsigned_int_property : QObject
   {

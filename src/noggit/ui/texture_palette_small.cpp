@@ -22,9 +22,9 @@
 #include <algorithm>
 
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
 
     PaletteList::PaletteList(QWidget* parent) : QListWidget(parent)
@@ -120,8 +120,8 @@ namespace noggit
     {
 
       std::string filename;
-      if (noggit::ui::selected_texture::get())
-        filename = noggit::ui::selected_texture::get().get()->file_key().filepath();
+      if (Noggit::Ui::selected_texture::get())
+        filename = Noggit::Ui::selected_texture::get().get()->file_key().filepath();
       else
         filename = "tileset\\generic\\black.blp";
 

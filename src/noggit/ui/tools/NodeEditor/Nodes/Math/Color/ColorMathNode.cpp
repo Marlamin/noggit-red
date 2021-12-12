@@ -6,7 +6,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <external/qt-color-widgets/qt-color-widgets/color_selector.hpp>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 ColorMathNode::ColorMathNode()
 : BaseNode()

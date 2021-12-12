@@ -14,9 +14,9 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     texture_swapper::texture_swapper ( QWidget* parent
                                      , const glm::vec3* camera_pos
@@ -65,7 +65,7 @@ namespace noggit
       connect(select, &QPushButton::clicked, [&, map_view]() {
 
         map_view->context()->makeCurrent(map_view->context()->surface());
-        opengl::context::scoped_setter const _ (::gl, map_view->context());
+        OpenGL::context::scoped_setter const _ (::gl, map_view->context());
         _texture_to_swap = selected_texture::get();
         if (_texture_to_swap)
         {

@@ -10,9 +10,9 @@
 #include <functional>
 #include <string>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class zone_id_browser : public QWidget
     {

@@ -11,10 +11,10 @@
 #include <QVector3D>
 
 
-using namespace noggit::ui::tools::AssetBrowser;
+using namespace Noggit::Ui::Tools::AssetBrowser;
 
 
-ModelViewer::ModelViewer(QWidget* parent, noggit::NoggitRenderContext context)
+ModelViewer::ModelViewer(QWidget* parent, Noggit::NoggitRenderContext context)
  : PreviewRenderer(0, 0, context, parent)
  , look(false)
  , mousedir(-1.0f)
@@ -36,7 +36,7 @@ ModelViewer::ModelViewer(QWidget* parent, noggit::NoggitRenderContext context)
 void ModelViewer::initializeGL()
 {
 
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, width(), height());
   gl.clearColor (0.5f, 0.5f, 0.5f, 1.0f);
   emit resized();
@@ -46,7 +46,7 @@ void ModelViewer::paintGL()
 {
   const qreal now(_startup_time.elapsed() / 1000.0);
 
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
   makeCurrent();
 
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -61,7 +61,7 @@ void ModelViewer::paintGL()
 
 void ModelViewer::resizeGL(int w, int h)
 {
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, w, h);
   emit resized();
 }
@@ -95,7 +95,7 @@ void ModelViewer::tick(float dt)
 
 void ModelViewer::setModel(std::string const& filename)
 {
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
   makeCurrent();
   PreviewRenderer::setModel(filename);
   emit model_set(filename);

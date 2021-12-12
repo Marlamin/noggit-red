@@ -14,9 +14,9 @@
 
 namespace fs = std::filesystem;
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     void mkdirs(std::string const& pathstr)
     {
@@ -106,5 +106,5 @@ namespace noggit
       state->set_function("read_file",read_file);
       state->set_function("path_exists",path_exists);
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

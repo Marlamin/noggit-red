@@ -6,7 +6,7 @@
 #include <QPushButton>
 #include <QJsonArray>
 
-using namespace noggit::ui::tools;
+using namespace Noggit::Ui::Tools;
 
 
 BrushStack::BrushStack(MapView* map_view, QWidget* parent)
@@ -48,16 +48,16 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
             switch (_add_operation_combo->currentIndex())
             {
               case eTools::eRaiseLower:
-                brush_stack_item->setTool(new noggit::ui::terrain_tool(_map_view, this, true));
+                brush_stack_item->setTool(new Noggit::Ui::terrain_tool(_map_view, this, true));
                 break;
               case eTools::eFlattenBlur:
-                brush_stack_item->setTool(new noggit::ui::flatten_blur_tool(this));
+                brush_stack_item->setTool(new Noggit::Ui::flatten_blur_tool(this));
                 break;
               case eTools::eTexturing:
-                brush_stack_item->setTool(new noggit::ui::texturing_tool(&_map_view->getCamera()->position, _map_view, nullptr, this));
+                brush_stack_item->setTool(new Noggit::Ui::texturing_tool(&_map_view->getCamera()->position, _map_view, nullptr, this));
                 break;
               case eTools::eShader:
-                brush_stack_item->setTool(new noggit::ui::shader_tool(_map_view, this));
+                brush_stack_item->setTool(new Noggit::Ui::shader_tool(_map_view, this));
                 break;
             }
 
@@ -101,7 +101,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
             _active_item = nullptr;
           });
 
-  connect(_ui.radiusSlider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged,
+  connect(_ui.radiusSlider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged,
           [this](double value)
           {
             for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
@@ -115,7 +115,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
             }
           });
 
-  connect(_ui.innerRadiusSlider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged,
+  connect(_ui.innerRadiusSlider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged,
           [this](double value)
           {
             for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
@@ -129,7 +129,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
             }
           });
 
-  connect(_ui.speedSlider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged,
+  connect(_ui.speedSlider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged,
           [this](double value)
           {
             for (int i = 0; i < _ui.brushList->layout()->count(); ++i)
@@ -329,19 +329,19 @@ void BrushStack::fromJSON(const QJsonObject& json)
 
     if (type == "TERRAIN")
     {
-      brush_stack_item->setTool(new noggit::ui::terrain_tool(_map_view, this, true));
+      brush_stack_item->setTool(new Noggit::Ui::terrain_tool(_map_view, this, true));
     }
     else if (type == "FLATTEN_BLUR")
     {
-      brush_stack_item->setTool(new noggit::ui::flatten_blur_tool(this));
+      brush_stack_item->setTool(new Noggit::Ui::flatten_blur_tool(this));
     }
     else if (type == "TEXTURING")
     {
-      brush_stack_item->setTool(new noggit::ui::texturing_tool(&_map_view->getCamera()->position, _map_view, nullptr, this));
+      brush_stack_item->setTool(new Noggit::Ui::texturing_tool(&_map_view->getCamera()->position, _map_view, nullptr, this));
     }
     else if (type == "SHADER")
     {
-      brush_stack_item->setTool(new noggit::ui::shader_tool(_map_view, this));
+      brush_stack_item->setTool(new Noggit::Ui::shader_tool(_map_view, this));
     }
     else
     {

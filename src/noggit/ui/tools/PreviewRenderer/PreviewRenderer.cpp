@@ -19,11 +19,11 @@
 #include <QVector3D>
 
 
-using namespace noggit::ui::tools;
+using namespace Noggit::Ui::Tools;
 
 
-PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderContext context, QWidget* parent)
-  :  noggit::ui::tools::ViewportManager::Viewport(parent)
+PreviewRenderer::PreviewRenderer(int width, int height, Noggit::NoggitRenderContext context, QWidget* parent)
+  :  Noggit::Ui::Tools::ViewportManager::Viewport(parent)
   , _camera (glm::vec3(0.0f, 0.0f, 0.0f), math::degrees(0.0f), math::degrees(0.0f))
   , _settings (new QSettings())
   , _width(width)
@@ -33,7 +33,7 @@ PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderCont
   _context = context;
   _cache = {};
 
-  opengl::context::save_current_context const context_save (::gl);
+  OpenGL::context::save_current_context const context_save (::gl);
   _offscreen_context.create();
 
   _fmt.setSamples(1);
@@ -43,7 +43,7 @@ PreviewRenderer::PreviewRenderer(int width, int height, noggit::NoggitRenderCont
   _offscreen_surface.create();
   _offscreen_context.makeCurrent(&_offscreen_surface);
 
-  opengl::context::scoped_setter const context_set (::gl, &_offscreen_context);
+  OpenGL::context::scoped_setter const context_set (::gl, &_offscreen_context);
 
   _light_dir = glm::vec3(0.0f, 1.0f, 0.0f);
 }
@@ -102,9 +102,9 @@ void PreviewRenderer::setModel(std::string const &filename)
 
 void PreviewRenderer::setModelOffscreen(std::string const& filename)
 {
-  opengl::context::save_current_context const context_save (::gl);
+  OpenGL::context::save_current_context const context_save (::gl);
   _offscreen_context.makeCurrent(&_offscreen_surface);
-  opengl::context::scoped_setter const context_set (::gl, &_offscreen_context);
+  OpenGL::context::scoped_setter const context_set (::gl, &_offscreen_context);
 
   setModel(filename);
 }
@@ -162,7 +162,7 @@ void PreviewRenderer::draw()
   {
     /* set anim time only once per frame
     {
-      opengl::scoped::use_program water_shader {_liquid_render->shader_program()};
+      OpenGL::Scoped::use_program water_shader {_liquid_render->shader_program()};
       water_shader.uniform("animtime", _animtime / 2880.f);
 
       //water_shader.uniform("model_view", model_view().transposed());
@@ -178,7 +178,7 @@ void PreviewRenderer::draw()
      */
 
     {
-      opengl::scoped::use_program wmo_program{*_wmo_program.get()};
+      OpenGL::Scoped::use_program wmo_program{*_wmo_program.get()};
 
       wmo_program.uniform("camera", glm::vec3(_camera.position.x, _camera.position.y, _camera.position.z));
 
@@ -219,9 +219,9 @@ void PreviewRenderer::draw()
     if (_draw_animated.get())
       ModelManager::resetAnim();
 
-    opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
+    OpenGL::Scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
-    opengl::M2RenderState model_render_state;
+    OpenGL::M2RenderState model_render_state;
     model_render_state.tex_arrays = { 0, 0 };
     model_render_state.tex_indices = { 0, 0 };
     model_render_state.tex_unit_lookups = { 0, 0 };
@@ -287,9 +287,9 @@ void PreviewRenderer::draw()
 
     if(_draw_boxes.get() && !model_boxes_to_draw.empty())
     {
-      opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
+      OpenGL::Scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
-      opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
+      OpenGL::Scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
       for (auto& it : model_boxes_to_draw)
@@ -317,14 +317,14 @@ void PreviewRenderer::draw()
   /*
   if (_draw_animated.get() && !model_with_particles.empty())
   {
-    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
-    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+    OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+    OpenGL::Scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
-    opengl::scoped::use_program particles_shader {*_m2_particles_program.get()};
+    OpenGL::Scoped::use_program particles_shader {*_m2_particles_program.get()};
 
     particles_shader.uniform("model_view_projection", mvp);
     particles_shader.uniform("tex", 0);
-    opengl::texture::set_active_texture(0);
+    OpenGL::texture::set_active_texture(0);
 
     for (auto& it : model_with_particles)
     {
@@ -334,10 +334,10 @@ void PreviewRenderer::draw()
 
   if (_draw_animated.get() && !model_with_particles.empty())
   {
-    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
-    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+    OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+    OpenGL::Scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
-    opengl::scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
+    OpenGL::Scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
 
     ribbon_shader.uniform("model_view_projection", mvp);
     ribbon_shader.uniform("tex", 0);
@@ -419,11 +419,11 @@ QPixmap* PreviewRenderer::renderToPixmap()
   if(it != _cache.end())
     return &it->second;
 
-  opengl::context::save_current_context const context_save (::gl);
+  OpenGL::context::save_current_context const context_save (::gl);
 
   _offscreen_context.makeCurrent(&_offscreen_surface);
 
-  opengl::context::scoped_setter const context_set (::gl, &_offscreen_context);
+  OpenGL::context::scoped_setter const context_set (::gl, &_offscreen_context);
 
   QOpenGLFramebufferObject pixel_buffer(_width, _height, _fmt);
   pixel_buffer.bind();
@@ -515,9 +515,9 @@ PreviewRenderer::~PreviewRenderer()
 
   if (_offscreen_mode)
   {
-    opengl::context::save_current_context const context_save (::gl);
+    OpenGL::context::save_current_context const context_save (::gl);
     _offscreen_context.makeCurrent(&_offscreen_surface);
-    opengl::context::scoped_setter const context_set (::gl, &_offscreen_context);
+    OpenGL::context::scoped_setter const context_set (::gl, &_offscreen_context);
 
     _model_instances.clear();
     _wmo_instances.clear();
@@ -533,7 +533,7 @@ PreviewRenderer::~PreviewRenderer()
   else
   {
     makeCurrent();
-    opengl::context::scoped_setter const context_set (::gl, context());
+    OpenGL::context::scoped_setter const context_set (::gl, context());
 
     _model_instances.clear();
     _wmo_instances.clear();
@@ -555,42 +555,42 @@ void PreviewRenderer::upload()
   // m2
 
   _m2_program.reset
-  (new opengl::program
-    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs") }
-      , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+  (new OpenGL::program
+    { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_vs") }
+      , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_fs") }
     }
   );
 
   {
-    opengl::scoped::use_program m2_shader{ *_m2_program.get() };
+    OpenGL::Scoped::use_program m2_shader{ *_m2_program.get() };
     m2_shader.uniform("bone_matrices", 0);
     m2_shader.uniform("tex1", 1);
     m2_shader.uniform("tex2", 2);
 
     m2_shader.bind_uniform_block("matrices", 0);
     gl.bindBuffer(GL_UNIFORM_BUFFER, _mvp_ubo);
-    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::MVPUniformBlock), NULL, GL_DYNAMIC_DRAW);
-    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::MVP, _mvp_ubo, 0, sizeof(opengl::MVPUniformBlock));
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(OpenGL::MVPUniformBlock), NULL, GL_DYNAMIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, OpenGL::ubo_targets::MVP, _mvp_ubo, 0, sizeof(OpenGL::MVPUniformBlock));
     gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
 
     m2_shader.bind_uniform_block("lighting", 1);
     gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
-    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::LightingUniformBlock), NULL, GL_DYNAMIC_DRAW);
-    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::LIGHTING, _lighting_ubo, 0, sizeof(opengl::LightingUniformBlock));
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(OpenGL::LightingUniformBlock), NULL, GL_DYNAMIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, OpenGL::ubo_targets::LIGHTING, _lighting_ubo, 0, sizeof(OpenGL::LightingUniformBlock));
     gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
   }
 
   // m2 instaced
   
   _m2_instanced_program.reset
-  (new opengl::program
-    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs", {"instanced"}) }
-        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+  (new OpenGL::program
+    { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_vs", {"instanced"}) }
+        , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_fs") }
     }
   );
 
   {
-    opengl::scoped::use_program m2_shader_instanced{ *_m2_instanced_program.get() };
+    OpenGL::Scoped::use_program m2_shader_instanced{ *_m2_instanced_program.get() };
     m2_shader_instanced.bind_uniform_block("matrices", 0);
     m2_shader_instanced.bind_uniform_block("lighting", 1);
     m2_shader_instanced.uniform("bone_matrices", 0);
@@ -601,14 +601,14 @@ void PreviewRenderer::upload()
   // m2 box
 
   _m2_box_program.reset
-  (new opengl::program
-    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_box_vs") }
-        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_box_fs") }
+  (new OpenGL::program
+    { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_box_vs") }
+        , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_box_fs") }
     }
   );
 
   {
-    opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
+    OpenGL::Scoped::use_program m2_box_shader{ *_m2_box_program.get() };
     m2_box_shader.bind_uniform_block("matrices", 0);
   }
 
@@ -617,17 +617,17 @@ void PreviewRenderer::upload()
   
 
   _m2_ribbons_program.reset
-  (new opengl::program
-    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("ribbon_vs") }
-        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("ribbon_fs") }
+  (new OpenGL::program
+    { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("ribbon_vs") }
+        , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("ribbon_fs") }
     }
   );
   
 
   _m2_particles_program.reset
-  (new opengl::program
-    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("particle_vs") }
-        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("particle_fs") }
+  (new OpenGL::program
+    { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("particle_vs") }
+        , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("particle_fs") }
     }
   );
 
@@ -636,16 +636,16 @@ void PreviewRenderer::upload()
   // wmo
   
   _wmo_program.reset
-  (new opengl::program
-    { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("wmo_vs") }
-        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs") }
+  (new OpenGL::program
+    { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("wmo_vs") }
+        , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("wmo_fs") }
     }
   );
 
   {
     std::vector<int> samplers{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 
-    opengl::scoped::use_program wmo_program{ *_wmo_program.get() };
+    OpenGL::Scoped::use_program wmo_program{ *_wmo_program.get() };
     wmo_program.uniform("render_batches_tex", 0);
     wmo_program.uniform("texture_samplers", samplers);
     wmo_program.bind_uniform_block("matrices", 0);
@@ -655,14 +655,14 @@ void PreviewRenderer::upload()
   // liquid
   _liquid_texture_manager.upload();
   _liquid_program.reset
-    (new opengl::program
-      { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("liquid_vs") }
-          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("liquid_fs") }
+    (new OpenGL::program
+      { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("liquid_vs") }
+          , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("liquid_fs") }
       }
     );
 
   {
-    opengl::scoped::use_program liquid_render{ *_liquid_program.get() };
+    OpenGL::Scoped::use_program liquid_render{ *_liquid_program.get() };
 
     //setupLiquidChunkBuffers();
     //setupLiquidChunkVAO(liquid_render);
@@ -715,7 +715,7 @@ void PreviewRenderer::unloadOpenglData(bool from_manager)
 
   LogDebug << "Changing context of Asset Browser / Preset Editor." << std::endl;
   makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
 
   ModelManager::unload_all(_context);
   WMOManager::unload_all(_context);
@@ -729,7 +729,7 @@ void PreviewRenderer::unloadOpenglData(bool from_manager)
     ViewportManager::ViewportManager::unloadOpenglData(this);
 }
 
-void noggit::ui::tools::PreviewRenderer::updateLightingUniformBlock()
+void Noggit::Ui::Tools::PreviewRenderer::updateLightingUniformBlock()
 {
 
   glm::vec4 ocean_color_light(glm::vec3(1.0f, 1.0f, 1.0f), 1.f);
@@ -747,17 +747,17 @@ void noggit::ui::tools::PreviewRenderer::updateLightingUniformBlock()
   _lighting_ubo_data.RiverColorDark = { 1.0f, 1.0f, 1.0f, 1.0f };
 
   gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
-  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::LightingUniformBlock), &_lighting_ubo_data);
+  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(OpenGL::LightingUniformBlock), &_lighting_ubo_data);
   
   _lighting_needs_update = false;
 }
 
-void noggit::ui::tools::PreviewRenderer::updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection)
+void Noggit::Ui::Tools::PreviewRenderer::updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection)
 {
   _mvp_ubo_data.model_view = model_view;
   _mvp_ubo_data.projection = projection;
 
   gl.bindBuffer(GL_UNIFORM_BUFFER, _mvp_ubo);
-  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::MVPUniformBlock), &_mvp_ubo_data);
+  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(OpenGL::MVPUniformBlock), &_mvp_ubo_data);
 
 }

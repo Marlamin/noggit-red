@@ -29,7 +29,7 @@ SkyFloatParam::SkyFloatParam(int t, float val)
 {
 }
 
-Sky::Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context)
+Sky::Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context)
 : _context(context)
 , _selected(false)
 {
@@ -272,7 +272,7 @@ const int cnum = 7;
 const int hseg = 32;
 
 
-Skies::Skies(unsigned int mapid, noggit::NoggitRenderContext context)
+Skies::Skies(unsigned int mapid, Noggit::NoggitRenderContext context)
   : stars (ModelInstance("Environments\\Stars\\Stars.mdx", context))
   , _context(context)
 {
@@ -451,7 +451,7 @@ void Skies::update_sky_colors(glm::vec3 pos, int time)
 bool Skies::draw(glm::mat4x4 const& model_view
                 , glm::mat4x4 const& projection
                 , glm::vec3 const& camera_pos
-                , opengl::scoped::use_program& m2_shader
+                , OpenGL::Scoped::use_program& m2_shader
                 , math::frustum const& frustum
                 , const float& cull_distance
                 , int animtime
@@ -474,7 +474,7 @@ bool Skies::draw(glm::mat4x4 const& model_view
   }
 
   {
-    opengl::scoped::use_program shader {*_program.get()};
+    OpenGL::Scoped::use_program shader {*_program.get()};
 
     if(_need_vao_update)
     {
@@ -482,7 +482,7 @@ bool Skies::draw(glm::mat4x4 const& model_view
     }
 
     {
-      opengl::scoped::vao_binder const _ (_vao);
+      OpenGL::Scoped::vao_binder const _ (_vao);
        
       shader.uniform("model_view_projection", projection * model_view);
       shader.uniform("camera_pos", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
@@ -504,7 +504,7 @@ bool Skies::draw(glm::mat4x4 const& model_view
       model.scale = 0.1f;
       model.recalcExtents();
 
-      opengl::M2RenderState model_render_state;
+      OpenGL::M2RenderState model_render_state;
       model_render_state.tex_arrays = {0, 0};
       model_render_state.tex_indices = {0, 0};
       model_render_state.tex_unit_lookups = {-1, -1};
@@ -529,7 +529,7 @@ bool Skies::draw(glm::mat4x4 const& model_view
     stars.scale = 0.1f;
     stars.recalcExtents();
 
-    opengl::M2RenderState model_render_state;
+    OpenGL::M2RenderState model_render_state;
     model_render_state.tex_arrays = {0, 0};
     model_render_state.tex_indices = {0, 0};
     model_render_state.tex_unit_lookups = {-1, -1};
@@ -609,7 +609,7 @@ void Skies::unload()
 
 void Skies::upload()
 {
-  _program.reset(new opengl::program(
+  _program.reset(new OpenGL::program(
     {
         {GL_VERTEX_SHADER, R"code(
 #version 330 core
@@ -690,17 +690,17 @@ void main()
   _need_vao_update = true;
 }
 
-void Skies::update_vao(opengl::scoped::use_program& shader)
+void Skies::update_vao(OpenGL::Scoped::use_program& shader)
 {
-  opengl::scoped::index_buffer_manual_binder indices_binder (_indices_vbo);
+  OpenGL::Scoped::index_buffer_manual_binder indices_binder (_indices_vbo);
 
   {
-    opengl::scoped::vao_binder const _ (_vao);
+    OpenGL::Scoped::vao_binder const _ (_vao);
 
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_buffer (_vertices_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_buffer (_vertices_vbo);
     shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> colors_buffer (_colors_vbo);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> colors_buffer (_colors_vbo);
     shader.attrib("color", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
     indices_binder.bind();

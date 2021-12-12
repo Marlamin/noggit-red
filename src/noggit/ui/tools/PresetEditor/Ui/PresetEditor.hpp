@@ -12,9 +12,9 @@
 #include <QFileSystemModel>
 #include <QSortFilterProxyModel>
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::PresetEditor::Ui
+    namespace Ui::Tools::PresetEditor::Ui
     {
       class PresetEditorWidget : public QMainWindow
       {

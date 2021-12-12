@@ -6,15 +6,15 @@
 
 #include <ui_About.h>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     about::about(QWidget* parent)
       : QDialog(parent)
     {
       setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-      Ui::About AboutUi;
+      ::Ui::About AboutUi;
      
       AboutUi.setupUi(this);
       AboutUi.version->setText("v. " STRPRODUCTVER);

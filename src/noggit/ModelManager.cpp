@@ -67,7 +67,7 @@ void ModelManager::clear_hidden_models()
           );
 }
 
-void ModelManager::unload_all(noggit::NoggitRenderContext context)
+void ModelManager::unload_all(Noggit::NoggitRenderContext context)
 {
   _.context_aware_apply(
       [&] (BlizzardArchive::Listfile::FileKey const&, Model& model)

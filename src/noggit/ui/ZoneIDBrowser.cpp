@@ -13,9 +13,9 @@
 #include <sstream>
 #include <string>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     zone_id_browser::zone_id_browser(QWidget* parent)
       : QWidget(parent)

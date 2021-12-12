@@ -26,7 +26,7 @@ void TextureManager::report()
   LogDebug << output;
 }
 
-void TextureManager::unload_all(noggit::NoggitRenderContext context)
+void TextureManager::unload_all(Noggit::NoggitRenderContext context)
 {
   _.context_aware_apply(
       [&] (BlizzardArchive::Listfile::FileKey const&, blp_texture& blp_texture)
@@ -46,7 +46,7 @@ void TextureManager::unload_all(noggit::NoggitRenderContext context)
 }
 
 TexArrayParams& TextureManager::get_tex_array(int width, int height, int mip_level,
-                                              noggit::NoggitRenderContext context)
+                                              Noggit::NoggitRenderContext context)
 {
   TexArrayParams& array_params = _tex_arrays[context][std::make_tuple(-1, width, height, mip_level)];
 
@@ -89,7 +89,7 @@ TexArrayParams& TextureManager::get_tex_array(int width, int height, int mip_lev
 }
 
 TexArrayParams& TextureManager::get_tex_array(GLint compression, int width, int height, int mip_level,
-                              std::map<int, std::vector<uint8_t>>& comp_data, noggit::NoggitRenderContext context)
+                              std::map<int, std::vector<uint8_t>>& comp_data, Noggit::NoggitRenderContext context)
 {
 
   TexArrayParams& array_params = _tex_arrays[context][std::make_tuple(compression, width, height, mip_level)];
@@ -391,7 +391,7 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
   }
 }
 
-blp_texture::blp_texture(BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
+blp_texture::blp_texture(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context)
   : AsyncObject(file_key)
   , _context(context)
 {
@@ -455,14 +455,14 @@ void blp_texture::finishLoading()
   _state_changed.notify_all();
 }
 
-namespace noggit
+namespace Noggit
 {
 
   BLPRenderer::BLPRenderer()
   {
     _cache = {};
 
-    opengl::context::save_current_context const context_save (::gl);
+    OpenGL::context::save_current_context const context_save (::gl);
     _context.create();
 
     _fmt.setSamples(1);
@@ -472,10 +472,10 @@ namespace noggit
 
     _context.makeCurrent(&_surface);
 
-    opengl::context::scoped_setter const context_set (::gl, &_context);
+    OpenGL::context::scoped_setter const context_set (::gl, &_context);
 
-    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
-    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth;
+    OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
+    OpenGL::Scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> depth;
 
     _vao.upload();
     _buffers.upload();
@@ -505,7 +505,7 @@ namespace noggit
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(indices_vbo, indices, GL_STATIC_DRAW);
 
 
-    _program.reset(new opengl::program
+    _program.reset(new OpenGL::program
                       (
                           {
                               {
@@ -546,16 +546,16 @@ namespace noggit
                           }
                       ));
     
-    opengl::scoped::use_program shader (*_program.get());
+    OpenGL::Scoped::use_program shader (*_program.get());
     
-    opengl::scoped::vao_binder const _ (_vao[0]);
+    OpenGL::Scoped::vao_binder const _ (_vao[0]);
 
     {
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_binder (vertices_vbo);
+      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_binder (vertices_vbo);
       shader.attrib("position", 2, GL_FLOAT, GL_FALSE, 0, 0);
     }
     {
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> texcoords_binder (texcoords_vbo);
+      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> texcoords_binder (texcoords_vbo);
       shader.attrib("tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
@@ -573,14 +573,14 @@ namespace noggit
     if(it != _cache.end())
       return &it->second;
 
-    opengl::context::save_current_context const context_save (::gl);
+    OpenGL::context::save_current_context const context_save (::gl);
 
     _context.makeCurrent(&_surface);
 
-    opengl::context::scoped_setter const context_set (::gl, &_context);
+    OpenGL::context::scoped_setter const context_set (::gl, &_context);
 
     gl.activeTexture(GL_TEXTURE0);
-    blp_texture texture(blp_filename, noggit::NoggitRenderContext::BLP_RENDERER);
+    blp_texture texture(blp_filename, Noggit::NoggitRenderContext::BLP_RENDERER);
     texture.finishLoading();
     texture.upload();
 
@@ -597,7 +597,7 @@ namespace noggit
     gl.clearColor(.0f, .0f, .0f, 1.f);
     gl.clear(GL_COLOR_BUFFER_BIT);
     
-    opengl::scoped::use_program shader (*_program.get());
+    OpenGL::Scoped::use_program shader (*_program.get());
 
     shader.uniform("tex", 0);
     shader.uniform("width", w);
@@ -606,9 +606,9 @@ namespace noggit
     gl.bindTexture(GL_TEXTURE_2D_ARRAY, texture.texture_array());
     shader.uniform("tex_index", texture.array_index());
 
-    opengl::scoped::vao_binder const _ (_vao[0]);
+    OpenGL::Scoped::vao_binder const _ (_vao[0]);
     
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_buffers[0]);
+    OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_buffers[0]);
 
     gl.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
@@ -627,11 +627,11 @@ namespace noggit
 
   BLPRenderer::~BLPRenderer()
   {
-    opengl::context::scoped_setter const context_set (::gl, &_context);
+    OpenGL::context::scoped_setter const context_set (::gl, &_context);
   }
 }
 
-scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& filename, noggit::NoggitRenderContext context)
+scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& filename, Noggit::NoggitRenderContext context)
   : _blp_texture(TextureManager::_.emplace(filename, context))
   , _context(context)
 {}

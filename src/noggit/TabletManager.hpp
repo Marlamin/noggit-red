@@ -5,7 +5,7 @@
 
 #include <QObject>
 
-namespace noggit
+namespace Noggit
 {
     class TabletManager : public QObject
     {

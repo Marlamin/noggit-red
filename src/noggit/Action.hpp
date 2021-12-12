@@ -21,7 +21,7 @@
 class MapView;
 class MapChunk;
 
-namespace noggit
+namespace Noggit
 {
 
     enum ActionFlags

@@ -12,9 +12,9 @@
 
 class MapView;
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::ViewportGizmo
+    namespace Ui::Tools::ViewportGizmo
     {
         enum GizmoContext
         {

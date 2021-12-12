@@ -8,8 +8,8 @@
 #include <string>
 #include <map>
 
-namespace noggit {
-  namespace scripting {
+namespace Noggit {
+  namespace Scripting {
       script_brush_event::script_brush_event(
           script_settings * settings
         , glm::vec3 const& pos

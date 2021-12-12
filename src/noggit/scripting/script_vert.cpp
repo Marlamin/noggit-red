@@ -17,9 +17,9 @@
 
 #include <noggit/scripting/script_vert-script_texture_index.ipp>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     vert::vert(script_context * ctx, MapChunk* chunk, int index)
       : script_object(ctx)
@@ -176,5 +176,5 @@ namespace noggit
         , "is_water_aligned", &vert::is_water_aligned
       );
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

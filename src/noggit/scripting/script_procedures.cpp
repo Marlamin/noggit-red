@@ -5,8 +5,8 @@
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_selection.hpp>
 
-namespace noggit {
-	namespace scripting {
+namespace Noggit {
+	namespace Scripting {
 		void procedures::paint_texture(
         selection & sel
 			, image const& img 

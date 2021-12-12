@@ -5,9 +5,9 @@
 #include <vector>
 #include <noggit/ContextObject.hpp>
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::ViewportManager
+    namespace Ui::Tools::ViewportManager
     {
         class Viewport;
         class ViewportManager
@@ -40,12 +40,12 @@ namespace noggit
         public:
           Viewport(QWidget* parent = nullptr);
           virtual void unloadOpenglData(bool from_manager = false) = 0;
-          noggit::NoggitRenderContext getRenderContext() { return _context; };
+          Noggit::NoggitRenderContext getRenderContext() { return _context; };
 
           ~Viewport();
 
         protected:
-            noggit::NoggitRenderContext _context;
+            Noggit::NoggitRenderContext _context;
         };
 
     }

@@ -16,9 +16,9 @@
 
 #include <cassert>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     texture_picker::texture_picker
         (current_texture* current_texture_window, QWidget* parent)

@@ -1,8 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-namespace opengl
+namespace OpenGL
 {
-  namespace scoped
+  namespace Scoped
   {
     template<GLenum cap>
       class bool_setter<cap, GL_TRUE>

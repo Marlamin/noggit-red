@@ -10,9 +10,9 @@
 
 class QGridLayout;
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class current_texture;
 

@@ -18,9 +18,9 @@
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QRadioButton>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     water::water ( unsigned_int_property* current_layer
                  , bool_toggle_property* display_all_layers

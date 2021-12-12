@@ -32,9 +32,9 @@ using QtNodes::Connection;
 using ConnectionPolicy = QtNodes::NodeDataModel::ConnectionPolicy;
 
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::NodeEditor::Nodes
+    namespace Ui::Tools::NodeEditor::Nodes
     {
         struct InNodePort
         {

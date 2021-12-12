@@ -9,15 +9,15 @@
 #include <ui_SettingsPanel.h>
 
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class settings : public QMainWindow
     {
       Q_OBJECT
       QSettings* _settings;
-      Ui::SettingsPanel* ui;
+      ::Ui::SettingsPanel* ui;
     public:
       settings(QWidget* parent = nullptr);
       void discard_changes();

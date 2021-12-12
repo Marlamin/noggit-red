@@ -24,10 +24,10 @@
 #include <noggit/World.h>
 
 
-namespace noggit
+namespace Noggit
 {
 
-  namespace ui::tools::MapCreationWizard::Ui
+  namespace Ui::Tools::MapCreationWizard::Ui
   {
 
     class LocaleDBCEntry : public QWidget
@@ -76,7 +76,7 @@ namespace noggit
         QSpinBox* _flags;
     };
 
-    class MapCreationWizard : public ui::widget
+  class MapCreationWizard : public Noggit::Ui::widget
     {
       Q_OBJECT
 
@@ -91,7 +91,7 @@ namespace noggit
       void map_dbc_updated();
 
     private:
-      ui::minimap_widget* _minimap_widget;
+      Noggit::Ui::minimap_widget* _minimap_widget;
       int _selected_map;
       QGroupBox* _map_settings;
 

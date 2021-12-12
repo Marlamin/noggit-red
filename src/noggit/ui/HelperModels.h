@@ -4,9 +4,9 @@
 
 #include <QtWidgets/QWidget>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class object_editor;
 

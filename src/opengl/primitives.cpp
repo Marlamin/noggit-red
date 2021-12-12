@@ -12,7 +12,7 @@
 #include <vector>
 #include <glm/gtx/quaternion.hpp>
 
-namespace opengl
+namespace OpenGL
 {
   namespace primitives
   {
@@ -30,7 +30,7 @@ namespace opengl
         setup_buffers();
       }
 
-      opengl::scoped::use_program wire_box_shader {*_program.get()};
+      OpenGL::Scoped::use_program wire_box_shader {*_program.get()};
 
       auto points = math::box_points(min_point, max_point);
 
@@ -48,17 +48,17 @@ namespace opengl
       wire_box_shader.uniform("color", color);
       wire_box_shader.uniform("pointPositions", glmPoints);
 
-      opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
+      OpenGL::Scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
       
-      opengl::scoped::vao_binder const _(_vao[0]);
+      OpenGL::Scoped::vao_binder const _(_vao[0]);
 
       gl.drawElements (GL_LINE_STRIP, _indices, 16, GL_UNSIGNED_BYTE, nullptr);
     }
 
     void wire_box::setup_buffers()
     {
-      _program.reset(new opengl::program( {{ GL_VERTEX_SHADER
+      _program.reset(new OpenGL::program( {{ GL_VERTEX_SHADER
                      , R"code(
                           #version 330 core
 
@@ -96,16 +96,16 @@ namespace opengl
       static std::array<std::uint8_t, 16> const indices
           {{5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7}};
 
-      scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (_indices);
+      Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const index_buffer (_indices);
       gl.bufferData ( GL_ELEMENT_ARRAY_BUFFER
           , indices.size() * sizeof (*indices.data())
           , indices.data()
           , GL_STATIC_DRAW
       );
 
-      opengl::scoped::use_program shader (*_program.get());
+      OpenGL::Scoped::use_program shader (*_program.get());
 
-      opengl::scoped::vao_binder const _ (_vao[0]);
+      OpenGL::Scoped::vao_binder const _ (_vao[0]);
 
       _buffers_are_setup = true;
 
@@ -131,14 +131,14 @@ namespace opengl
           setup_buffers();
         }
 
-        opengl::scoped::use_program sphere_shader {*_program.get()};
+        OpenGL::Scoped::use_program sphere_shader {*_program.get()};
 
         sphere_shader.uniform("model_view_projection", mvp);
         sphere_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
         sphere_shader.uniform("color", color);
         sphere_shader.uniform("radius", radius);
 
-        opengl::scoped::vao_binder const _(_vao[0]);
+        OpenGL::Scoped::vao_binder const _(_vao[0]);
         gl.drawElements(GL_LINES, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
       }
 
@@ -148,7 +148,7 @@ namespace opengl
         _vao.upload();
         _buffers.upload();
 
-        _program.reset(new opengl::program({{ GL_VERTEX_SHADER
+        _program.reset(new OpenGL::program({{ GL_VERTEX_SHADER
                                                 , R"code(
                                                 #version 330 core
 
@@ -231,14 +231,14 @@ namespace opengl
             (_indices_vbo, indices, GL_STATIC_DRAW);
 
 
-        scoped::index_buffer_manual_binder indices_binder(_indices_vbo);
+        Scoped::index_buffer_manual_binder indices_binder(_indices_vbo);
 
-        opengl::scoped::use_program shader (*_program.get());
+        OpenGL::Scoped::use_program shader (*_program.get());
 
         {
-          opengl::scoped::vao_binder const _ (_vao[0]);
+          OpenGL::Scoped::vao_binder const _ (_vao[0]);
 
-          opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
+          OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
           shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
           indices_binder.bind();
@@ -268,14 +268,14 @@ namespace opengl
         setup_buffers();
       }
 
-      opengl::scoped::use_program sphere_shader {*_program.get()};
+      OpenGL::Scoped::use_program sphere_shader {*_program.get()};
 
       sphere_shader.uniform("model_view_projection", mvp);
       sphere_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
       sphere_shader.uniform("radius", radius);
       sphere_shader.uniform("color", color);
 
-      opengl::scoped::vao_binder const _(_vao[0]);
+      OpenGL::Scoped::vao_binder const _(_vao[0]);
       gl.drawElements(GL_TRIANGLES, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
     }
   
@@ -288,7 +288,7 @@ namespace opengl
       std::vector<glm::vec3> vertices;
       std::vector<std::uint16_t> indices;
 
-      _program.reset(new opengl::program({{ GL_VERTEX_SHADER
+      _program.reset(new OpenGL::program({{ GL_VERTEX_SHADER
                    , R"code(
 #version 330 core
 
@@ -361,14 +361,14 @@ void main()
         (_indices_vbo, indices, GL_STATIC_DRAW);
 
 
-      scoped::index_buffer_manual_binder indices_binder(_indices_vbo);
+      Scoped::index_buffer_manual_binder indices_binder(_indices_vbo);
 
-      opengl::scoped::use_program shader (*_program.get());
+      OpenGL::Scoped::use_program shader (*_program.get());
 
       {
-        opengl::scoped::vao_binder const _ (_vao[0]);
+        OpenGL::Scoped::vao_binder const _ (_vao[0]);
 
-        opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
+        OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
         shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         indices_binder.bind();
@@ -400,7 +400,7 @@ void main()
         setup_buffers();
       }
 
-      opengl::scoped::use_program sphere_shader {*_program.get()};
+      OpenGL::Scoped::use_program sphere_shader {*_program.get()};
 
       sphere_shader.uniform("model_view_projection", mvp);
       sphere_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
@@ -409,7 +409,7 @@ void main()
       sphere_shader.uniform("orientation", orientation._);
       sphere_shader.uniform("color", color);
 
-      opengl::scoped::vao_binder const _ (_vao[0]);
+      OpenGL::Scoped::vao_binder const _ (_vao[0]);
       gl.drawElements(GL_TRIANGLES, _indices_vbo, 6, GL_UNSIGNED_SHORT, nullptr);
     }
 
@@ -428,7 +428,7 @@ void main()
       };
       std::vector<std::uint16_t> indices = {0,1,2, 2,3,0};
 
-      _program.reset(new opengl::program({{ GL_VERTEX_SHADER
+      _program.reset(new OpenGL::program({{ GL_VERTEX_SHADER
                    , R"code(
 #version 330 core
 
@@ -479,14 +479,14 @@ void main()
         (_indices_vbo, indices, GL_STATIC_DRAW);
 
 
-      scoped::index_buffer_manual_binder indices_binder (_indices_vbo);
+      Scoped::index_buffer_manual_binder indices_binder (_indices_vbo);
 
-      opengl::scoped::use_program shader(*_program.get());
+      OpenGL::Scoped::use_program shader(*_program.get());
 
       {
-        opengl::scoped::vao_binder const _ (_vao[0]);
+        OpenGL::Scoped::vao_binder const _ (_vao[0]);
 
-        opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
+        OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
         shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
         indices_binder.bind();

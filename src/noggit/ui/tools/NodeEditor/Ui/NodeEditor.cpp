@@ -19,8 +19,8 @@
 #include <QElapsedTimer>
 #include <QModelIndex>
 
-using namespace noggit::ui::tools::NodeEditor::Ui;
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Ui;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 using QtNodes::FlowView;
 using QtNodes::FlowScene;
@@ -147,7 +147,7 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
         _model->setNameFilters(filters_search);
       });
 
-  ui->newButton->setIcon(noggit::ui::font_awesome_icon(ui::font_awesome::icons::file));
+  ui->newButton->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::icons::file));
   connect(ui->newButton, &QPushButton::clicked
       , [this]()
           {
@@ -175,14 +175,14 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 
                       });
 
-            int tab_index = ui->nodeArea->addTab(tab, noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired)
+            int tab_index = ui->nodeArea->addTab(tab, Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::icons::networkwired)
                   , "New scene *");
             ui->nodeArea->setCurrentIndex(tab_index);
 
           });
 
 
-  ui->clearButton->setIcon(noggit::ui::font_awesome_icon(ui::font_awesome::icons::eraser));
+  ui->clearButton->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::icons::eraser));
   connect(ui->clearButton, &QPushButton::clicked
       , [this]()
           {
@@ -194,7 +194,7 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
               static_cast<NodeScene*>(scene)->clearScene();
           });
 
-  ui->loadButton->setIcon(noggit::ui::font_awesome_icon(ui::font_awesome::icons::folderopen));
+  ui->loadButton->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::icons::folderopen));
   connect(ui->loadButton, &QPushButton::clicked
       , [this]()
           {
@@ -207,7 +207,7 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
             loadScene(path);
           });
 
-  ui->saveButton->setIcon(noggit::ui::font_awesome_icon(ui::font_awesome::icons::save));
+  ui->saveButton->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::icons::save));
   connect(ui->saveButton, &QPushButton::clicked
       , [this]()
           {
@@ -230,7 +230,7 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 
           });
 
-  ui->saveAllButton->setIcon(noggit::ui::font_awesome_icon(ui::font_awesome::icons::save));
+  ui->saveAllButton->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::icons::save));
   connect(ui->saveAllButton, &QPushButton::clicked
       , [this]()
           {
@@ -253,7 +253,7 @@ NodeEditorWidget::NodeEditorWidget(QWidget *parent)
 
           });
 
-  ui->executeButton->setIcon(noggit::ui::font_awesome_icon(ui::font_awesome::icons::play));
+  ui->executeButton->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::icons::play));
   connect(ui->executeButton, &QPushButton::clicked
       , [this]()
           {
@@ -308,7 +308,7 @@ void NodeEditorWidget::loadScene(const QString& filepath)
   layout->setSpacing(0);
 
   int tab_index = ui->nodeArea->addTab(tab,
-                                   noggit::ui::font_awesome_icon(ui::font_awesome::icons::networkwired),
+                                   Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::icons::networkwired),
                                    scene->getSceneName());
 
   ui->nodeArea->setCurrentIndex(tab_index);

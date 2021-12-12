@@ -4,9 +4,9 @@
 #include <noggit/scripting/script_object.hpp>
 #include <noggit/MapChunk.h>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     class scripting_tool;
     class script_context;
@@ -35,5 +35,5 @@ namespace noggit
     };
 
     void register_vert(script_context * state);
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

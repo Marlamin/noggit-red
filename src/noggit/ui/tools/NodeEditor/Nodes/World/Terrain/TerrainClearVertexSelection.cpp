@@ -6,7 +6,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/tool_enums.hpp>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 TerrainClearVertexSelectionNode::TerrainClearVertexSelectionNode()
 : ContextLogicNodeBase()
@@ -24,7 +24,7 @@ void TerrainClearVertexSelectionNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   world->clearVertexSelection();
 

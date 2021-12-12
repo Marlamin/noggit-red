@@ -7,9 +7,9 @@
 
 class QFormLayout;
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class help : public widget
     {

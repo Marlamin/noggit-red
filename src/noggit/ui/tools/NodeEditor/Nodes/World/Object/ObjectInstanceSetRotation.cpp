@@ -7,7 +7,7 @@
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 ObjectInstanceSetRotationNode::ObjectInstanceSetRotationNode()
 : ContextLogicNodeBase()
@@ -27,7 +27,7 @@ void ObjectInstanceSetRotationNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   SceneObject* obj = defaultPortData<ObjectInstanceData>(PortType::In, 1)->value();
   NOGGIT_CUR_ACTION->registerObjectTransformed(obj);

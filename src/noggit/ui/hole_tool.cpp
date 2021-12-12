@@ -5,9 +5,9 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QFormLayout>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     hole_tool::hole_tool(QWidget* parent) : QWidget(parent)
     {

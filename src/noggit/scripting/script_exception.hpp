@@ -4,14 +4,14 @@
 #include <stdexcept>
 #include <string>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     class script_exception : public std::runtime_error
     {
     public:
       script_exception(std::string const& funcName, std::string const& msg);
     };
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

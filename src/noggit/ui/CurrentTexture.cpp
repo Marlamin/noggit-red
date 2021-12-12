@@ -12,9 +12,9 @@
 #include <QtGui/QDrag>
 #include <QMimeData>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     current_texture::current_texture(bool accept_drop, QWidget* parent)
       : clickable_label (parent)

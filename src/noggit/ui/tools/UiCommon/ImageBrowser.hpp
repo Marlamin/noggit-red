@@ -8,7 +8,7 @@
 #include <QSortFilterProxyModel>
 #include <ui_ImageBrowser.h>
 
-namespace noggit::ui::tools
+namespace Noggit::Ui::Tools
 {
   class ImageBrowserFilesystemModel : public QFileSystemModel
   {
@@ -34,7 +34,7 @@ namespace noggit::ui::tools
     void imageSelected(QString name);
 
   private:
-    Ui::imageBrowserTree _ui;
+    ::Ui::imageBrowserTree _ui;
     ImageBrowserFilesystemModel* _model;
     QSortFilterProxyModel* _dir_proxy_model;
   };

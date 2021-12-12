@@ -10,47 +10,47 @@
 #include <cstring>
 
 
-noggit::Action::Action(MapView* map_view)
+Noggit::Action::Action(MapView* map_view)
 : QObject()
 , _map_view(map_view)
 {
 }
 
-void noggit::Action::setFlags(int flags)
+void Noggit::Action::setFlags(int flags)
 {
   _flags = flags;
 }
 
-void noggit::Action::addFlags(int flags)
+void Noggit::Action::addFlags(int flags)
 {
   _flags |= flags;
 }
 
-int noggit::Action::getFlags()
+int Noggit::Action::getFlags()
 {
   return _flags;
 }
 
-void noggit::Action::setModalityControllers(int modality_controls)
+void Noggit::Action::setModalityControllers(int modality_controls)
 {
   _modality_controls = modality_controls;
 }
 
 
-void noggit::Action::addModalityControllers(int modality_controls)
+void Noggit::Action::addModalityControllers(int modality_controls)
 {
   _modality_controls |= modality_controls;
 }
 
-int noggit::Action::getModalityControllers()
+int Noggit::Action::getModalityControllers()
 {
   return _modality_controls;
 }
 
-void noggit::Action::undo(bool redo)
+void Noggit::Action::undo(bool redo)
 {
   _map_view->context()->makeCurrent(_map_view->context()->surface());
-  opengl::context::scoped_setter const _ (::gl, _map_view->context());
+  OpenGL::context::scoped_setter const _ (::gl, _map_view->context());
 
   if (_flags & ActionFlags::eCHUNKS_TERRAIN)
   {
@@ -84,7 +84,7 @@ void noggit::Action::undo(bool redo)
 
       for (auto& filename : pair.second.textures)
       {
-        textures->emplace_back(filename, noggit::NoggitRenderContext::MAP_VIEW);
+        textures->emplace_back(filename, Noggit::NoggitRenderContext::MAP_VIEW);
       }
 
       texture_set->markDirty();
@@ -203,7 +203,7 @@ void noggit::Action::undo(bool redo)
 
 }
 
-unsigned noggit::Action::handleObjectAdded(unsigned uid, bool redo)
+unsigned Noggit::Action::handleObjectAdded(unsigned uid, bool redo)
 {
   for (auto& pair : _added_objects_pre)
   {
@@ -267,7 +267,7 @@ unsigned noggit::Action::handleObjectAdded(unsigned uid, bool redo)
   return -1;
 }
 
-unsigned noggit::Action::handleObjectRemoved(unsigned uid, bool redo)
+unsigned Noggit::Action::handleObjectRemoved(unsigned uid, bool redo)
 {
   for (auto& pair : _removed_objects_pre)
   {
@@ -331,7 +331,7 @@ unsigned noggit::Action::handleObjectRemoved(unsigned uid, bool redo)
   return -1;
 }
 
-unsigned noggit::Action::handleObjectTransformed(unsigned uid, bool redo)
+unsigned Noggit::Action::handleObjectTransformed(unsigned uid, bool redo)
 {
    for (auto& pair : redo ? _transformed_objects_post : _transformed_objects_pre)
    {
@@ -358,7 +358,7 @@ unsigned noggit::Action::handleObjectTransformed(unsigned uid, bool redo)
    return -1;
 }
 
-void noggit::Action::finish()
+void Noggit::Action::finish()
 {
   if (_flags & ActionFlags::eCHUNKS_TERRAIN)
   {
@@ -505,7 +505,7 @@ void noggit::Action::finish()
     (_map_view->*_post)();
 }
 
-float* noggit::Action::getChunkTerrainOriginalData(MapChunk* chunk)
+float* Noggit::Action::getChunkTerrainOriginalData(MapChunk* chunk)
 {
   for (auto& pair : _chunk_terrain_pre)
   {
@@ -515,28 +515,28 @@ float* noggit::Action::getChunkTerrainOriginalData(MapChunk* chunk)
   return nullptr;
 }
 
-void noggit::Action::setDelta(float delta)
+void Noggit::Action::setDelta(float delta)
 {
   _delta = delta;
 }
 
-float noggit::Action::getDelta() const
+float Noggit::Action::getDelta() const
 {
   return _delta;
 }
 
-void noggit::Action::setBlockCursor(bool state)
+void Noggit::Action::setBlockCursor(bool state)
 {
   _block_cursor = state;
 }
 
-bool noggit::Action::getBlockCursor() const
+bool Noggit::Action::getBlockCursor() const
 {
   return _block_cursor;
 
 }
 
-void noggit::Action::setPostCallback(auto(MapView::*method)()->void)
+void Noggit::Action::setPostCallback(auto(MapView::*method)()->void)
 {
   _post = method;
 }
@@ -546,7 +546,7 @@ void noggit::Action::setPostCallback(auto(MapView::*method)()->void)
 /* Registrators */
 /* ============ */
 
-void noggit::Action::registerChunkTerrainChange(MapChunk* chunk)
+void Noggit::Action::registerChunkTerrainChange(MapChunk* chunk)
 {
   _flags |= ActionFlags::eCHUNKS_TERRAIN;
 
@@ -562,7 +562,7 @@ void noggit::Action::registerChunkTerrainChange(MapChunk* chunk)
   //LogDebug << "Chunk: " << chunk->px << "_" << chunk->py << "on tile: " << chunk->mt->index.x << "_" << chunk->mt->index.z << std::endl;
 }
 
-void noggit::Action::registerChunkTextureChange(MapChunk* chunk)
+void Noggit::Action::registerChunkTextureChange(MapChunk* chunk)
 {
   _flags |= ActionFlags::eCHUNKS_TEXTURE;
 
@@ -588,7 +588,7 @@ void noggit::Action::registerChunkTextureChange(MapChunk* chunk)
   _chunk_texture_pre.emplace_back(std::make_pair(chunk, std::move(cache)));
 }
 
-void noggit::Action::registerChunkVertexColorChange(MapChunk* chunk)
+void Noggit::Action::registerChunkVertexColorChange(MapChunk* chunk)
 {
   _flags |= ActionFlags::eCHUNKS_VERTEX_COLOR;
 
@@ -603,7 +603,7 @@ void noggit::Action::registerChunkVertexColorChange(MapChunk* chunk)
   _chunk_vertex_color_pre.emplace_back(std::make_pair(chunk, data));
 }
 
-void noggit::Action::registerObjectTransformed(SceneObject* obj)
+void Noggit::Action::registerObjectTransformed(SceneObject* obj)
 {
   _flags |= ActionFlags::eOBJECTS_TRANSFORMED;
 
@@ -624,7 +624,7 @@ void noggit::Action::registerObjectTransformed(SceneObject* obj)
                                                                  , obj->scale}));
 }
 
-void noggit::Action::registerObjectAdded(SceneObject* obj)
+void Noggit::Action::registerObjectAdded(SceneObject* obj)
 {
   _flags |= ActionFlags::eOBJECTS_ADDED;
 
@@ -646,7 +646,7 @@ void noggit::Action::registerObjectAdded(SceneObject* obj)
                                                            ));
 }
 
-void noggit::Action::registerObjectRemoved(SceneObject* obj)
+void Noggit::Action::registerObjectRemoved(SceneObject* obj)
 {
   _flags |= ActionFlags::eOBJECTS_REMOVED;
 
@@ -668,7 +668,7 @@ void noggit::Action::registerObjectRemoved(SceneObject* obj)
                                                              ));
 }
 
-void noggit::Action::registerChunkHoleChange(MapChunk* chunk)
+void Noggit::Action::registerChunkHoleChange(MapChunk* chunk)
 {
   _flags |= ActionFlags::eCHUNKS_HOLES;
 
@@ -680,7 +680,7 @@ void noggit::Action::registerChunkHoleChange(MapChunk* chunk)
   _chunk_holes_pre.emplace_back(std::make_pair(chunk, chunk->holes));
 }
 
-void noggit::Action::registerChunkAreaIDChange(MapChunk* chunk)
+void Noggit::Action::registerChunkAreaIDChange(MapChunk* chunk)
 {
   _flags |= ActionFlags::eCHUNKS_AREAID;
 
@@ -692,7 +692,7 @@ void noggit::Action::registerChunkAreaIDChange(MapChunk* chunk)
   _chunk_area_id_pre.emplace_back(std::make_pair(chunk, chunk->areaID));
 }
 
-void noggit::Action::registerChunkFlagChange(MapChunk *chunk)
+void Noggit::Action::registerChunkFlagChange(MapChunk *chunk)
 {
   _flags |= ActionFlags::eCHUNKS_FLAGS;
 
@@ -704,7 +704,7 @@ void noggit::Action::registerChunkFlagChange(MapChunk *chunk)
   _chunk_flags_pre.emplace_back(std::make_pair(chunk, chunk->header_flags));
 }
 
-void noggit::Action::registerChunkLiquidChange(MapChunk* chunk)
+void Noggit::Action::registerChunkLiquidChange(MapChunk* chunk)
 {
   _flags |= ActionFlags::eCHUNKS_WATER;
 
@@ -716,7 +716,7 @@ void noggit::Action::registerChunkLiquidChange(MapChunk* chunk)
   _chunk_liquid_pre.emplace_back(std::make_pair(chunk, *chunk->liquid_chunk()->getLayers()));
 }
 
-void noggit::Action::registerVertexSelectionChange()
+void Noggit::Action::registerVertexSelectionChange()
 {
   _flags |= ActionFlags::eVERTEX_SELECTION;
 
@@ -727,7 +727,7 @@ void noggit::Action::registerVertexSelectionChange()
   _vertex_selection_recorded = true;
 }
 
-void noggit::Action::registerChunkShadowChange(MapChunk *chunk)
+void Noggit::Action::registerChunkShadowChange(MapChunk *chunk)
 {
   _flags |= ActionFlags::eCHUNK_SHADOWS;
 
@@ -742,7 +742,7 @@ void noggit::Action::registerChunkShadowChange(MapChunk *chunk)
   _chunk_shadow_map_pre.emplace_back(std::make_pair(chunk, std::move(data)));
 }
 
-void noggit::Action::registerAllChunkChanges(MapChunk* chunk)
+void Noggit::Action::registerAllChunkChanges(MapChunk* chunk)
 {
   registerChunkTerrainChange(chunk);
   registerChunkTextureChange(chunk);
@@ -756,6 +756,6 @@ void noggit::Action::registerAllChunkChanges(MapChunk* chunk)
   registerAllChunkChanges(chunk);
 }
 
-noggit::Action::~Action()
+Noggit::Action::~Action()
 {
 }

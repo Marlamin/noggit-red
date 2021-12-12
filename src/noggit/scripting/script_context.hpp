@@ -11,10 +11,10 @@
 
 class World;
 
-namespace noggit
+namespace Noggit
 {
   class camera;
-  namespace scripting
+  namespace Scripting
   {
     class scripting_tool;
 
@@ -62,5 +62,5 @@ namespace noggit
       script_context* _lua;
       std::string _name;
     };
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

@@ -33,7 +33,7 @@
 #include <vector>
 #include <array>
 
-namespace noggit
+namespace Noggit
 {
   struct object_paste_params;
   struct VertexSelectionCache;
@@ -55,13 +55,13 @@ class World
 private:
   std::vector<selection_type> _current_selection;
   std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
-  noggit::world_model_instances_storage _model_instance_storage;
-  noggit::world_tile_update_queue _tile_update_queue;
+  Noggit::world_model_instances_storage _model_instance_storage;
+  Noggit::world_tile_update_queue _tile_update_queue;
   std::mutex _guard;
 
 public:
   MapIndex mapIndex;
-  noggit::map_horizon horizon;
+  Noggit::map_horizon horizon;
 
   // Temporary variables for loading a WMO, if we have a global WMO.
   std::string mWmoFilename;
@@ -86,7 +86,7 @@ public:
 
   OutdoorLightStats outdoorLightStats;
 
-  explicit World(const std::string& name, int map_id, noggit::NoggitRenderContext context, bool create_empty = false);
+  explicit World(const std::string& name, int map_id, Noggit::NoggitRenderContext context, bool create_empty = false);
 
   void setBasename(const std::string& name);
 
@@ -134,7 +134,7 @@ public:
   unsigned int getAreaID (glm::vec3 const&);
   void setAreaID(glm::vec3 const& pos, int id, bool adt,  float radius = -1.0f);
 
-  noggit::NoggitRenderContext getRenderContext() { return _context; };
+  Noggit::NoggitRenderContext getRenderContext() { return _context; };
 
   selection_result intersect (glm::mat4x4 const& model_view
                              , math::ray const&
@@ -174,7 +174,7 @@ public:
   void reset_selection();
   void delete_selected_models();
   void range_add_to_selection(glm::vec3 const& pos, float radius, bool remove);
-  noggit::world_model_instances_storage& getModelInstanceStorage() { return _model_instance_storage; };
+  Noggit::world_model_instances_storage& getModelInstanceStorage() { return _model_instance_storage; };
 
   enum class m2_scaling_type
   {
@@ -295,7 +295,7 @@ public:
   void addM2 ( BlizzardArchive::Listfile::FileKey const& file_key
              , glm::vec3 newPos
              , float scale, math::degrees::vec3 rotation
-             , noggit::object_paste_params*
+             , Noggit::object_paste_params*
              );
   void addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
               , glm::vec3 newPos
@@ -305,7 +305,7 @@ public:
   ModelInstance* addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
       , glm::vec3 newPos
       , float scale, math::degrees::vec3 rotation
-      , noggit::object_paste_params*
+      , Noggit::object_paste_params*
   );
 
   WMOInstance* addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
@@ -400,12 +400,12 @@ public:
 
   void recalc_norms (MapChunk*) const;
 
-  noggit::VertexSelectionCache getVertexSelectionCache();
-  void setVertexSelectionCache(noggit::VertexSelectionCache& cache);
+  Noggit::VertexSelectionCache getVertexSelectionCache();
+  void setVertexSelectionCache(Noggit::VertexSelectionCache& cache);
 
   bool need_model_updates = false;
 
-  opengl::TerrainParamsUniformBlock* getTerrainParamsUniformBlock() { return &_terrain_params_ubo_data; };
+  OpenGL::TerrainParamsUniformBlock* getTerrainParamsUniformBlock() { return &_terrain_params_ubo_data; };
   void updateTerrainParamsUniformBlock();
   void markTerrainParamsUniformBlockDirty() { _need_terrain_params_ubo_update = true; };
 
@@ -424,8 +424,8 @@ private:
 
   std::unordered_set<MapChunk*>& vertexBorderChunks();
 
-  void setupChunkVAO(opengl::scoped::use_program& mcnk_shader);
-  void setupLiquidChunkVAO(opengl::scoped::use_program& water_shader);
+  void setupChunkVAO(OpenGL::Scoped::use_program& mcnk_shader);
+  void setupLiquidChunkVAO(OpenGL::Scoped::use_program& water_shader);
   void setupOccluderBuffers();
   void setupChunkBuffers();
   void setupLiquidChunkBuffers();
@@ -438,7 +438,7 @@ private:
   bool _vertex_center_updated = false;
   bool _vertex_border_updated = false;
 
-  std::unique_ptr<noggit::map_horizon::render> _horizon_render;
+  std::unique_ptr<Noggit::map_horizon::render> _horizon_render;
 
   bool _display_initialized = false;
   bool _global_vbos_initialized = false;
@@ -447,31 +447,31 @@ private:
 
   float _view_distance;
 
-  std::unique_ptr<opengl::program> _mcnk_program;;
-  std::unique_ptr<opengl::program> _mfbo_program;
-  std::unique_ptr<opengl::program> _m2_program;
-  std::unique_ptr<opengl::program> _m2_instanced_program;
-  std::unique_ptr<opengl::program> _m2_particles_program;
-  std::unique_ptr<opengl::program> _m2_ribbons_program;
-  std::unique_ptr<opengl::program> _m2_box_program;
-  std::unique_ptr<opengl::program> _wmo_program;
-  std::unique_ptr<opengl::program> _liquid_program;
-  std::unique_ptr<opengl::program> _occluder_program;
+  std::unique_ptr<OpenGL::program> _mcnk_program;;
+  std::unique_ptr<OpenGL::program> _mfbo_program;
+  std::unique_ptr<OpenGL::program> _m2_program;
+  std::unique_ptr<OpenGL::program> _m2_instanced_program;
+  std::unique_ptr<OpenGL::program> _m2_particles_program;
+  std::unique_ptr<OpenGL::program> _m2_ribbons_program;
+  std::unique_ptr<OpenGL::program> _m2_box_program;
+  std::unique_ptr<OpenGL::program> _wmo_program;
+  std::unique_ptr<OpenGL::program> _liquid_program;
+  std::unique_ptr<OpenGL::program> _occluder_program;
 
-  noggit::cursor_render _cursor_render;
-  opengl::primitives::sphere _sphere_render;
-  opengl::primitives::square _square_render;
+  Noggit::cursor_render _cursor_render;
+  OpenGL::primitives::sphere _sphere_render;
+  OpenGL::primitives::square _square_render;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 
-  opengl::scoped::deferred_upload_buffers<8> _buffers;
+  OpenGL::Scoped::deferred_upload_buffers<8> _buffers;
   GLuint const& _mvp_ubo = _buffers[0];
   GLuint const& _lighting_ubo = _buffers[1];
   GLuint const& _terrain_params_ubo = _buffers[2];
 
-  opengl::MVPUniformBlock _mvp_ubo_data;
-  opengl::LightingUniformBlock _lighting_ubo_data;
-  opengl::TerrainParamsUniformBlock _terrain_params_ubo_data;
+  OpenGL::MVPUniformBlock _mvp_ubo_data;
+  OpenGL::LightingUniformBlock _lighting_ubo_data;
+  OpenGL::TerrainParamsUniformBlock _terrain_params_ubo_data;
 
   GLuint const& _mapchunk_vertex = _buffers[3];
   GLuint const& _mapchunk_index = _buffers[4];
@@ -479,7 +479,7 @@ private:
   GLuint const& _liquid_chunk_vertex = _buffers[6];
   GLuint const& _occluder_index = _buffers[7];
 
-  opengl::scoped::deferred_upload_vertex_arrays<3> _vertex_arrays;
+  OpenGL::Scoped::deferred_upload_vertex_arrays<3> _vertex_arrays;
   GLuint const& _mapchunk_vao = _vertex_arrays[0];
   GLuint const& _liquid_chunk_vao = _vertex_arrays[1];
   GLuint const& _occluder_vao = _vertex_arrays[2];

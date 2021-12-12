@@ -19,7 +19,7 @@ class World;
 using m2_instance_umap = std::unordered_map<std::uint32_t, ModelInstance>;
 using wmo_instance_umap = std::unordered_map<std::uint32_t, WMOInstance>;
 
-namespace noggit
+namespace Noggit
 {
   class world_model_instances_storage
   {
@@ -113,7 +113,7 @@ namespace noggit
     m2_instance_umap _m2s;
     wmo_instance_umap _wmos;
 
-    opengl::scoped::deferred_upload_buffers<1> _buffers;
+    OpenGL::Scoped::deferred_upload_buffers<1> _buffers;
     GLuint const& _m2_instances_transform_buf = _buffers[0];
     GLuint _m2_instances_transform_buf_tex;
     std::uint32_t _n_allocated_m2_transforms = 4096;

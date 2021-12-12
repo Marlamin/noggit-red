@@ -7,7 +7,7 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.inl>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 TexturingSetAdtBaseTextureAtPosNode::TexturingSetAdtBaseTextureAtPosNode()
 : ContextLogicNodeBase()
@@ -28,7 +28,7 @@ void TexturingSetAdtBaseTextureAtPosNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   auto pos_data = defaultPortData<Vector3DData>(PortType::In, 1);
   glm::vec3 const& pos = pos_data->value();

@@ -19,7 +19,7 @@
 #include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/TexturePicker.h>
 #include <noggit/ui/TexturingGUI.h>
-#include <noggit/ui/Toolbar.h> // noggit::ui::toolbar
+#include <noggit/ui/Toolbar.h> // Noggit::Ui::toolbar
 #include <noggit/ui/Water.h>
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/main_window.hpp>
@@ -114,9 +114,9 @@ ACTION_CODE                                                                     
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &noggit::bool_toggle_property::set      \
+            , &property_, &Noggit::bool_toggle_property::set      \
             );                                                    \
-    connect ( &property_, &noggit::bool_toggle_property::changed  \
+    connect ( &property_, &Noggit::bool_toggle_property::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
   }                                                               \
@@ -131,9 +131,9 @@ ACTION_CODE                                                                     
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &noggit::bool_toggle_property::set      \
+            , &property_, &Noggit::bool_toggle_property::set      \
             );                                                    \
-    connect ( &property_, &noggit::bool_toggle_property::changed  \
+    connect ( &property_, &Noggit::bool_toggle_property::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
   }                                                               \
@@ -149,13 +149,13 @@ ACTION_CODE                                                                     
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &noggit::bool_toggle_property::set      \
+            , &property_, &Noggit::bool_toggle_property::set      \
             );                                                    \
-    connect ( &property_, &noggit::bool_toggle_property::changed  \
+    connect ( &property_, &Noggit::bool_toggle_property::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
     connect ( action, &QAction::toggled, post_);                  \
-    connect ( &property_, &noggit::bool_toggle_property::changed, \
+    connect ( &property_, &Noggit::bool_toggle_property::changed, \
     post_);                                                       \
   }                                                               \
   while (false)
@@ -170,15 +170,15 @@ ACTION_CODE                                                                     
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &noggit::bool_toggle_property::set      \
+            , &property_, &Noggit::bool_toggle_property::set      \
             );                                                    \
-    connect ( &property_, &noggit::bool_toggle_property::changed  \
+    connect ( &property_, &Noggit::bool_toggle_property::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
       connect ( action, &QAction::toggled                         \
             ,  code_                                              \
             );                                                    \
-    connect ( &property_, &noggit::bool_toggle_property::changed  \
+    connect ( &property_, &Noggit::bool_toggle_property::changed  \
             , code_                                               \
             );                                                    \
   }                                                               \
@@ -240,7 +240,7 @@ void MapView::set_editing_mode (editing_mode mode)
         }
         break;
       case editing_mode::paint:
-        if (texturingTool->getTexturingMode() == noggit::ui::texturing_mode::paint && texturingTool->getImageMaskSelector()->isEnabled())
+        if (texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::paint && texturingTool->getImageMaskSelector()->isEnabled())
         {
           texturingTool->updateMaskImage();
         }
@@ -369,7 +369,7 @@ void MapView::DeleteSelectedObject()
   }
 
   makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
 
   _world->delete_selected_models();
   _rotation_editor_need_update = true;
@@ -410,11 +410,11 @@ void MapView::setupViewportOverlay()
   _overlay_widget->setMouseTracking(true);
   _overlay_widget->setGeometry(0,0, width(), height());
 
-  _viewport_overlay_ui->gizmoVisibleButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_VISIBILITY));
-  _viewport_overlay_ui->gizmoModeButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_LOCAL));
-  _viewport_overlay_ui->gizmoRotateButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_ROTATE));
-  _viewport_overlay_ui->gizmoScaleButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_SCALE));
-  _viewport_overlay_ui->gizmoTranslateButton->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::icons::GIZMO_TRANSLATE));
+  _viewport_overlay_ui->gizmoVisibleButton->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::icons::GIZMO_VISIBILITY));
+  _viewport_overlay_ui->gizmoModeButton->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::icons::GIZMO_LOCAL));
+  _viewport_overlay_ui->gizmoRotateButton->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::icons::GIZMO_ROTATE));
+  _viewport_overlay_ui->gizmoScaleButton->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::icons::GIZMO_SCALE));
+  _viewport_overlay_ui->gizmoTranslateButton->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::icons::GIZMO_TRANSLATE));
 
   connect(this, &MapView::resized
     ,[this]()
@@ -430,7 +430,7 @@ void MapView::setupViewportOverlay()
           }
   );
 
-  connect(&_gizmo_on, &noggit::bool_toggle_property::changed
+  connect(&_gizmo_on, &Noggit::bool_toggle_property::changed
     ,[this](bool state)
           {
             _viewport_overlay_ui->gizmoVisibleButton->setChecked(state);
@@ -475,15 +475,15 @@ void MapView::setupViewportOverlay()
 
 void MapView::setupRaiseLowerUi()
 {
-  terrainTool = new noggit::ui::terrain_tool(this, this);
+  terrainTool = new Noggit::Ui::terrain_tool(this, this);
   _tool_panel_dock->registerTool("Raise | Lower", terrainTool);
 
   connect(terrainTool
-    , &noggit::ui::terrain_tool::updateVertices
+    , &Noggit::Ui::terrain_tool::updateVertices
     , [this](int vertex_mode, math::degrees const& angle, math::degrees const& orientation)
           {
             makeCurrent();
-            opengl::context::scoped_setter const _(::gl, context());
+            OpenGL::context::scoped_setter const _(::gl, context());
 
             _world->orientVertices(vertex_mode == eVertexMode_Mouse
                                    ? _cursor_pos
@@ -500,40 +500,40 @@ void MapView::setupRaiseLowerUi()
 
 void MapView::setupFlattenBlurUi()
 {
-  flattenTool = new noggit::ui::flatten_blur_tool(this);
+  flattenTool = new Noggit::Ui::flatten_blur_tool(this);
   _tool_panel_dock->registerTool("Flatten | Blur", flattenTool);
 }
 
 void MapView::setupTexturePainterUi()
 {
   /* Tool */
-  texturingTool = new noggit::ui::texturing_tool(&_camera.position, this, &_show_texture_palette_small_window, this);
+  texturingTool = new Noggit::Ui::texturing_tool(&_camera.position, this, &_show_texture_palette_small_window, this);
   _tool_panel_dock->registerTool("Texture Painter", texturingTool);
 
   // Connects
   connect( texturingTool->texture_swap_tool()->texture_display()
-    , &noggit::ui::current_texture::texture_dropped
+    , &Noggit::Ui::current_texture::texture_dropped
     , [=] (std::string const& filename)
            {
              makeCurrent();
-             opengl::context::scoped_setter const _(::gl, context());
+             OpenGL::context::scoped_setter const _(::gl, context());
 
              texturingTool->texture_swap_tool()->set_texture(filename);
            }
   );
 
   connect( texturingTool->_current_texture
-    , &noggit::ui::current_texture::texture_dropped
+    , &Noggit::Ui::current_texture::texture_dropped
     , [=] (std::string const& filename)
            {
              makeCurrent();
-             opengl::context::scoped_setter const _(::gl, context());
+             OpenGL::context::scoped_setter const _(::gl, context());
 
-             noggit::ui::selected_texture::set({filename, _context});
+             Noggit::Ui::selected_texture::set({filename, _context});
            }
   );
 
-  connect(texturingTool->_current_texture, &noggit::ui::current_texture::clicked
+  connect(texturingTool->_current_texture, &Noggit::Ui::current_texture::clicked
     , [=]
           {
             _texture_browser_dock->setVisible(!_texture_browser_dock->isVisible());
@@ -566,26 +566,26 @@ void MapView::setupTexturePainterUi()
   connect(this, &QObject::destroyed, _texture_browser_dock, &QObject::deleteLater);
   // End Dock
 
-  TexturePalette = new noggit::ui::tileset_chooser(this);
+  TexturePalette = new Noggit::Ui::tileset_chooser(this);
   _texture_browser_dock->setWidget(TexturePalette);
   connect(this, &QObject::destroyed, TexturePalette, &QObject::deleteLater);
 
-  connect(TexturePalette, &noggit::ui::tileset_chooser::selected
+  connect(TexturePalette, &Noggit::Ui::tileset_chooser::selected
     , [=](std::string const& filename)
           {
             makeCurrent();
-            opengl::context::scoped_setter const _(::gl, context());
+            OpenGL::context::scoped_setter const _(::gl, context());
 
-            noggit::ui::selected_texture::set({filename, _context});
+            Noggit::Ui::selected_texture::set({filename, _context});
             texturingTool->_current_texture->set_texture(filename);
           }
   );
 
-  connect ( TexturePalette, &noggit::ui::widget::visibilityChanged
-    , &_show_texture_palette_window, &noggit::bool_toggle_property::set
+  connect ( TexturePalette, &Noggit::Ui::widget::visibilityChanged
+    , &_show_texture_palette_window, &Noggit::bool_toggle_property::set
   );
 
-  connect ( &_show_texture_palette_window, &noggit::bool_toggle_property::changed
+  connect ( &_show_texture_palette_window, &Noggit::bool_toggle_property::changed
     ,  [this]
             {
               if ((terrainMode == editing_mode::paint || terrainMode == editing_mode::stamp)  && !ui_hidden)
@@ -602,7 +602,7 @@ void MapView::setupTexturePainterUi()
 
 
   /* Texture Palette Small */
-  _texture_palette_small = new noggit::ui::texture_palette_small(this);
+  _texture_palette_small = new Noggit::Ui::texture_palette_small(this);
 
   // Dock
   _texture_palette_dock = new QDockWidget("Texture Palette", this);
@@ -627,19 +627,19 @@ void MapView::setupTexturePainterUi()
             _settings->sync();
           });
 
-  connect(_texture_palette_small, &noggit::ui::texture_palette_small::selected
+  connect(_texture_palette_small, &Noggit::Ui::texture_palette_small::selected
     , [=](std::string const& filename)
           {
             makeCurrent();
-            opengl::context::scoped_setter const _(::gl, context());
+            OpenGL::context::scoped_setter const _(::gl, context());
 
-            noggit::ui::selected_texture::set({filename, _context});
+            Noggit::Ui::selected_texture::set({filename, _context});
             texturingTool->_current_texture->set_texture(filename);
           }
   );
   connect(this, &QObject::destroyed, _texture_palette_small, &QObject::deleteLater);
 
-  connect(&_show_texture_palette_small_window, &noggit::bool_toggle_property::changed
+  connect(&_show_texture_palette_small_window, &Noggit::bool_toggle_property::changed
     , _texture_palette_dock, [this]
           {
             QSignalBlocker const blocker(_show_texture_palette_small_window);
@@ -654,10 +654,10 @@ void MapView::setupTexturePainterUi()
           }
   );
   connect(_texture_palette_dock, &QDockWidget::visibilityChanged
-    , &_show_texture_palette_small_window, &noggit::bool_toggle_property::set
+    , &_show_texture_palette_small_window, &Noggit::bool_toggle_property::set
   );
 
-  connect(texturingTool->_current_texture, &noggit::ui::current_texture::texture_updated
+  connect(texturingTool->_current_texture, &Noggit::Ui::current_texture::texture_updated
           , [=]()
       {
        _world->notifyTileRendererOnSelectedTextureChange();
@@ -678,32 +678,32 @@ void MapView::setupTexturePainterUi()
   connect(this, &QObject::destroyed, _texture_picker_dock, &QObject::deleteLater);
   // End Dock
 
-  TexturePicker = new noggit::ui::texture_picker(texturingTool->_current_texture, this);
+  TexturePicker = new Noggit::Ui::texture_picker(texturingTool->_current_texture, this);
   _texture_picker_dock->setWidget(TexturePicker);
   connect(this, &QObject::destroyed, TexturePicker, &QObject::deleteLater);
 
   connect( TexturePicker
-    , &noggit::ui::texture_picker::set_texture
+    , &Noggit::Ui::texture_picker::set_texture
     , [=] (scoped_blp_texture_reference texture)
            {
              makeCurrent();
-             opengl::context::scoped_setter const _(::gl, context());
-             noggit::ui::selected_texture::set(std::move(texture));
+             OpenGL::context::scoped_setter const _(::gl, context());
+             Noggit::Ui::selected_texture::set(std::move(texture));
            }
   );
-  connect(TexturePicker, &noggit::ui::texture_picker::shift_left
+  connect(TexturePicker, &Noggit::Ui::texture_picker::shift_left
     , [=]
           {
             makeCurrent();
-            opengl::context::scoped_setter const _(::gl, context());
+            OpenGL::context::scoped_setter const _(::gl, context());
             TexturePicker->shiftSelectedTextureLeft();
           }
   );
-  connect(TexturePicker, &noggit::ui::texture_picker::shift_right
+  connect(TexturePicker, &Noggit::Ui::texture_picker::shift_right
     , [=]
           {
             makeCurrent();
-            opengl::context::scoped_setter const _(::gl, context());
+            OpenGL::context::scoped_setter const _(::gl, context());
             TexturePicker->shiftSelectedTextureRight();
           }
   );
@@ -712,17 +712,17 @@ void MapView::setupTexturePainterUi()
 
 void MapView::setupHoleCutterUi()
 {
-  holeTool = new noggit::ui::hole_tool(this);
+  holeTool = new Noggit::Ui::hole_tool(this);
   _tool_panel_dock->registerTool("Hole Cutter", holeTool);
 }
 
 void MapView::setupAreaDesignatorUi()
 {
-  ZoneIDBrowser = new noggit::ui::zone_id_browser(this);
+  ZoneIDBrowser = new Noggit::Ui::zone_id_browser(this);
   _tool_panel_dock->registerTool("Area Designator", ZoneIDBrowser);
 
   ZoneIDBrowser->setMapID(_world->getMapID());
-  connect(ZoneIDBrowser, &noggit::ui::zone_id_browser::selected
+  connect(ZoneIDBrowser, &Noggit::Ui::zone_id_browser::selected
     , [this](int area_id) { changeZoneIDValue(area_id); }
   );
 }
@@ -735,26 +735,26 @@ void MapView::setupFlagUi()
 
 void MapView::setupWaterEditorUi()
 {
-  guiWater = new noggit::ui::water(&_displayed_water_layer, &_display_all_water_layers, this);
+  guiWater = new Noggit::Ui::water(&_displayed_water_layer, &_display_all_water_layers, this);
   _tool_panel_dock->registerTool("Water Editor", guiWater);
 
-  connect(guiWater, &noggit::ui::water::regenerate_water_opacity
+  connect(guiWater, &Noggit::Ui::water::regenerate_water_opacity
     , [this](float factor)
           {
             makeCurrent();
-            opengl::context::scoped_setter const _(::gl, context());
-            NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_WATER);
+            OpenGL::context::scoped_setter const _(::gl, context());
+            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_WATER);
             _world->autoGenWaterTrans(_camera.position, factor);
             NOGGIT_ACTION_MGR->endAction();
           }
   );
 
-  connect(guiWater, &noggit::ui::water::crop_water
+  connect(guiWater, &Noggit::Ui::water::crop_water
     , [this]
           {
             makeCurrent();
-            opengl::context::scoped_setter const _(::gl, context());
-            NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_WATER);
+            OpenGL::context::scoped_setter const _(::gl, context());
+            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_WATER);
             _world->CropWaterADT(_camera.position);
             NOGGIT_ACTION_MGR->endAction();
           }
@@ -762,20 +762,20 @@ void MapView::setupWaterEditorUi()
 }
 void MapView::setupVertexPainterUi()
 {
-  shaderTool = new noggit::ui::shader_tool(this, this);
+  shaderTool = new Noggit::Ui::shader_tool(this, this);
   _tool_panel_dock->registerTool("Vertex Painter", shaderTool);
 }
 
 void MapView::setupScriptingUi()
 {
-  scriptingTool = new noggit::scripting::scripting_tool(this, this, _settings);
+  scriptingTool = new Noggit::Scripting::scripting_tool(this, this, _settings);
   _tool_panel_dock->registerTool("Scripting", scriptingTool);
 }
 
 void MapView::setupObjectEditorUi()
 {
   /* Tool */
-  objectEditor = new noggit::ui::object_editor(this
+  objectEditor = new Noggit::Ui::object_editor(this
     , _world.get()
     , &_move_model_to_cursor_position
     , &_snap_multi_selection_to_ground
@@ -791,7 +791,7 @@ void MapView::setupObjectEditorUi()
   /* Additional tools */
 
   /* Object Palette */
-  _object_palette = new noggit::ui::ObjectPalette(this, this);
+  _object_palette = new Noggit::Ui::ObjectPalette(this, this);
   _object_palette->hide();
 
   // Dock
@@ -820,24 +820,24 @@ void MapView::setupObjectEditorUi()
 }
 void MapView::setupMinimapEditorUi()
 {
-  minimapTool = new noggit::ui::MinimapCreator(this, _world.get(), this);
+  minimapTool = new Noggit::Ui::MinimapCreator(this, _world.get(), this);
   _tool_panel_dock->registerTool("Minimap Editor", minimapTool);
 }
 void MapView::setupStampUi()
 {
-  stampTool = new noggit::ui::tools::BrushStack(this, this);
+  stampTool = new Noggit::Ui::Tools::BrushStack(this, this);
   _tool_panel_dock->registerTool("Stamp", stampTool);
 }
 
 void MapView::setupLightEditorUi()
 {
-  lightEditor = new noggit::ui::tools::LightEditor(this, this);
+  lightEditor = new Noggit::Ui::Tools::LightEditor(this, this);
   _tool_panel_dock->registerTool("Light Editor", lightEditor);
 }
 
 void MapView::setupNodeEditor()
 {
-  auto _node_editor = new noggit::ui::tools::NodeEditor::Ui::NodeEditorWidget(this);
+  auto _node_editor = new Noggit::Ui::Tools::NodeEditor::Ui::NodeEditorWidget(this);
   _node_editor_dock = new QDockWidget("Node editor", this);
   _node_editor_dock->setWidget(_node_editor);
   _node_editor_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
@@ -861,7 +861,7 @@ void MapView::setupNodeEditor()
 
   connect(this, &QObject::destroyed, _node_editor_dock, &QObject::deleteLater);
 
-  connect ( &_show_node_editor, &noggit::bool_toggle_property::changed
+  connect ( &_show_node_editor, &Noggit::bool_toggle_property::changed
     , _node_editor_dock, [this]
             {
               if (!ui_hidden)
@@ -870,7 +870,7 @@ void MapView::setupNodeEditor()
   );
 
   connect ( _node_editor_dock, &QDockWidget::visibilityChanged
-    , &_show_node_editor, &noggit::bool_toggle_property::set
+    , &_show_node_editor, &Noggit::bool_toggle_property::set
   );
 
 }
@@ -878,7 +878,7 @@ void MapView::setupNodeEditor()
 void MapView::setupAssetBrowser()
 {
   _asset_browser_dock = new QDockWidget("Asset browser", this);
-  _asset_browser = new noggit::ui::tools::AssetBrowser::Ui::AssetBrowserWidget(this, this);
+  _asset_browser = new Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget(this, this);
 
   //_main_window->addDockWidget(Qt::BottomDockWidgetArea, _asset_browser_dock);
   _asset_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
@@ -930,12 +930,12 @@ void MapView::setupDetailInfos()
   connect(this, &QObject::destroyed, _detail_infos_dock, &QObject::deleteLater);
   // End Dock
 
-  guidetailInfos = new noggit::ui::detail_infos(this);
+  guidetailInfos = new Noggit::Ui::detail_infos(this);
   _detail_infos_dock->setWidget(guidetailInfos);
   connect(this, &QObject::destroyed, guidetailInfos, &QObject::deleteLater);
 
 
-  connect ( &_show_detail_info_window, &noggit::bool_toggle_property::changed
+  connect ( &_show_detail_info_window, &Noggit::bool_toggle_property::changed
     , guidetailInfos, [this]
             {
               if (!ui_hidden)
@@ -943,23 +943,23 @@ void MapView::setupDetailInfos()
             }
   );
 
-  connect ( guidetailInfos, &noggit::ui::widget::visibilityChanged
-    , &_show_detail_info_window, &noggit::bool_toggle_property::set
+  connect ( guidetailInfos, &Noggit::Ui::widget::visibilityChanged
+    , &_show_detail_info_window, &Noggit::bool_toggle_property::set
   );
 
-  connect(NOGGIT_ACTION_MGR, &noggit::ActionManager::onActionBegin, 
-    [this](noggit::Action*)
+  connect(NOGGIT_ACTION_MGR, &Noggit::ActionManager::onActionBegin,
+    [this](Noggit::Action*)
     {
       updateDetailInfos(true);
     });
 
-  connect(NOGGIT_ACTION_MGR, &noggit::ActionManager::onActionEnd,
-    [this](noggit::Action*)
+  connect(NOGGIT_ACTION_MGR, &Noggit::ActionManager::onActionEnd,
+    [this](Noggit::Action*)
     {
       updateDetailInfos(true);
     });
 
-  connect(NOGGIT_ACTION_MGR, &noggit::ActionManager::currentActionChanged,
+  connect(NOGGIT_ACTION_MGR, &Noggit::ActionManager::currentActionChanged,
     [this](unsigned)
     {
       updateDetailInfos(true);
@@ -1014,7 +1014,7 @@ void MapView::updateDetailInfos(bool no_sel_change_check)
 
 void MapView::setupToolbars()
 {
-  _toolbar = new noggit::ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
+  _toolbar = new Noggit::Ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
   _toolbar->setOrientation(Qt::Vertical);
   auto right_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->leftToolbarHolder);
   right_toolbar_layout->addWidget( _toolbar);
@@ -1022,7 +1022,7 @@ void MapView::setupToolbars()
   right_toolbar_layout->setContentsMargins(0, 5, 0,5);
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
 
-  _view_toolbar = new noggit::ui::tools::ViewToolbar::Ui::ViewToolbar(this);
+  _view_toolbar = new Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar(this);
   auto top_toolbar_layout = new QHBoxLayout(_viewport_overlay_ui->upperToolbarHolder);
   top_toolbar_layout->addWidget( _view_toolbar);
   top_toolbar_layout->setContentsMargins(5, 0, 5, 0);
@@ -1031,16 +1031,16 @@ void MapView::setupToolbars()
 
 void MapView::setupKeybindingsGui()
 {
-  _keybindings = new noggit::ui::help(this);
+  _keybindings = new Noggit::Ui::help(this);
   _keybindings->hide();
   connect(this, &QObject::destroyed, _keybindings, &QObject::deleteLater);
 
-  connect ( &_show_keybindings_window, &noggit::bool_toggle_property::changed
+  connect ( &_show_keybindings_window, &Noggit::bool_toggle_property::changed
     , _keybindings, &QWidget::setVisible
   );
 
-  connect ( _keybindings, &noggit::ui::widget::visibilityChanged
-    , &_show_keybindings_window, &noggit::bool_toggle_property::set
+  connect ( _keybindings, &Noggit::Ui::widget::visibilityChanged
+    , &_show_keybindings_window, &Noggit::bool_toggle_property::set
   );
 }
 
@@ -1059,7 +1059,7 @@ void MapView::setupFileMenu()
   , [this]
                {
                  makeCurrent();
-                 opengl::context::scoped_setter const _ (::gl, context());
+                 OpenGL::context::scoped_setter const _ (::gl, context());
                  _world->reload_tile (_camera.position);
                  _rotation_editor_need_update = true;
                  emit saved();
@@ -1111,7 +1111,7 @@ void MapView::setupEditMenu()
   edit_menu->addSeparator();
   ADD_ACTION (edit_menu, "Delete", Qt::Key_Delete, [this]
   {
-    NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_REMOVED);
+    NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
     DeleteSelectedObject();
     NOGGIT_ACTION_MGR->endAction();
   });
@@ -1119,13 +1119,13 @@ void MapView::setupEditMenu()
   ADD_ACTION (edit_menu, "Reset rotation", "Ctrl+R",
               [this]
               {
-                NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                 ResetSelectedObjectRotation();
                 NOGGIT_ACTION_MGR->endAction();
               });
   ADD_ACTION (edit_menu, "Set to ground", Qt::Key_PageDown,
               [this] {
-                NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                 snap_selected_models_to_the_ground();
                 NOGGIT_ACTION_MGR->endAction();
 
@@ -1164,7 +1164,7 @@ void MapView::setupAssistMenu()
                   {
                     if (_selected_area_id != -1)
                     {
-                      NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_AREAID);
+                      NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_AREAID);
                       _world->setAreaID(_camera.position, _selected_area_id, true);
                       NOGGIT_ACTION_MGR->endAction();
                     }
@@ -1176,9 +1176,9 @@ void MapView::setupAssistMenu()
   , [=]
     {
       makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
+      OpenGL::context::scoped_setter const _(::gl, context());
 
-      NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+      NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
       _world->ensureAllTilesetsADT(_camera.position);
       NOGGIT_ACTION_MGR->endAction();
 
@@ -1192,8 +1192,8 @@ void MapView::setupAssistMenu()
   , [this]
                   {
                     makeCurrent();
-                    opengl::context::scoped_setter const _ (::gl, context());
-                    NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
+                    OpenGL::context::scoped_setter const _ (::gl, context());
+                    NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
                     _world->clearHeight(_camera.position);
                     NOGGIT_ACTION_MGR->endAction();
                   }
@@ -1203,8 +1203,8 @@ void MapView::setupAssistMenu()
   , [this]
                   {
                     makeCurrent();
-                    opengl::context::scoped_setter const _ (::gl, context());
-                    NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+                    OpenGL::context::scoped_setter const _ (::gl, context());
+                    NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
                     _world->removeTexDuplicateOnADT(_camera.position);
                     NOGGIT_ACTION_MGR->endAction();
                   }
@@ -1214,8 +1214,8 @@ void MapView::setupAssistMenu()
   , [this]
                   {
                     makeCurrent();
-                    opengl::context::scoped_setter const _ (::gl, context());
-                    NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+                    OpenGL::context::scoped_setter const _ (::gl, context());
+                    NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
                     _world->clearTextures(_camera.position);
                     NOGGIT_ACTION_MGR->endAction();
                   }
@@ -1225,8 +1225,8 @@ void MapView::setupAssistMenu()
   , [this]
                   {
                     makeCurrent();
-                    opengl::context::scoped_setter const _ (::gl, context());
-                    NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+                    OpenGL::context::scoped_setter const _ (::gl, context());
+                    NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
                     _world->setBaseTexture(_camera.position);
                     NOGGIT_ACTION_MGR->endAction();
                   }
@@ -1236,8 +1236,8 @@ void MapView::setupAssistMenu()
   , [this]
                   {
                     makeCurrent();
-                    opengl::context::scoped_setter const _ (::gl, context());
-                    NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNK_SHADOWS);
+                    OpenGL::context::scoped_setter const _ (::gl, context());
+                    NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNK_SHADOWS);
                     _world->clear_shadows(_camera.position);
                     NOGGIT_ACTION_MGR->endAction();
                   }
@@ -1247,8 +1247,8 @@ void MapView::setupAssistMenu()
   , [this]
                   {
                     makeCurrent();
-                    opengl::context::scoped_setter const _ (::gl, context());
-                    NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_REMOVED);
+                    OpenGL::context::scoped_setter const _ (::gl, context());
+                    NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
                     _world->clearAllModelsOnADT(_camera.position);
                     NOGGIT_ACTION_MGR->endAction();
                     _rotation_editor_need_update = true;
@@ -1261,7 +1261,7 @@ void MapView::setupAssistMenu()
                     DESTRUCTIVE_ACTION
                       (
                         makeCurrent();
-                    opengl::context::scoped_setter const _(::gl, context());
+                    OpenGL::context::scoped_setter const _(::gl, context());
                     _world->delete_duplicate_model_and_wmo_instances();
                     )
                   }
@@ -1273,7 +1273,7 @@ void MapView::setupAssistMenu()
   , [this]
   {
     makeCurrent();
-    opengl::context::scoped_setter const _(::gl, context());
+    OpenGL::context::scoped_setter const _(::gl, context());
     _world->exportADTAlphamap(_camera.position);
   }
   );
@@ -1283,11 +1283,11 @@ void MapView::setupAssistMenu()
   , [this]
   {
     makeCurrent();
-    opengl::context::scoped_setter const _(::gl, context());
+    OpenGL::context::scoped_setter const _(::gl, context());
 
-    if (!!noggit::ui::selected_texture::get())
+    if (!!Noggit::Ui::selected_texture::get())
     {
-      _world->exportADTAlphamap(_camera.position, noggit::ui::selected_texture::get()->get()->file_key().filepath());
+      _world->exportADTAlphamap(_camera.position, Noggit::Ui::selected_texture::get()->get()->file_key().filepath());
     }
 
   }
@@ -1298,7 +1298,7 @@ void MapView::setupAssistMenu()
   , [this]
                   {
                     makeCurrent();
-                    opengl::context::scoped_setter const _(::gl, context());
+                    OpenGL::context::scoped_setter const _(::gl, context());
 
                     _world->exportADTVertexColorMap(_camera.position);
                   }
@@ -1362,7 +1362,7 @@ void MapView::setupAssistMenu()
                 if (heightmap_export_params->exec() == QDialog::Accepted)
                 {
                   makeCurrent();
-                  opengl::context::scoped_setter const _(::gl, context());
+                  OpenGL::context::scoped_setter const _(::gl, context());
 
                   _world->exportADTHeightmap(_camera.position, heightmap_export_min->value(), heightmap_export_max->value());
                 }
@@ -1375,7 +1375,7 @@ void MapView::setupAssistMenu()
   , [this]
       {
         makeCurrent();
-        opengl::context::scoped_setter const _(::gl, context());
+        OpenGL::context::scoped_setter const _(::gl, context());
         _world->exportADTNormalmap(_camera.position);
       }
   );
@@ -1418,7 +1418,7 @@ void MapView::setupAssistMenu()
                     if (adt_import_params->exec() == QDialog::Accepted)
                     {
                       makeCurrent();
-                      opengl::context::scoped_setter const _(::gl, context());
+                      OpenGL::context::scoped_setter const _(::gl, context());
 
                       QString filepath = QFileDialog::getOpenFileName(
                         this,
@@ -1433,7 +1433,7 @@ void MapView::setupAssistMenu()
                       QImage img;
                       img.load(filepath, "PNG");
 
-                      NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+                      NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
                       _world->importADTAlphamap(_camera.position, img, adt_import_params_layer->value());
                       NOGGIT_ACTION_MGR->endAction();
                     }
@@ -1447,9 +1447,9 @@ void MapView::setupAssistMenu()
     {
 
         makeCurrent();
-        opengl::context::scoped_setter const _(::gl, context());
+        OpenGL::context::scoped_setter const _(::gl, context());
 
-        NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
         _world->importADTAlphamap(_camera.position);
         NOGGIT_ACTION_MGR->endAction();
     }
@@ -1487,7 +1487,7 @@ void MapView::setupAssistMenu()
         if (adt_import_height_params->exec() == QDialog::Accepted)
         {
           makeCurrent();
-          opengl::context::scoped_setter const _(::gl, context());
+          OpenGL::context::scoped_setter const _(::gl, context());
 
           QString filepath = QFileDialog::getOpenFileName(
             this,
@@ -1502,7 +1502,7 @@ void MapView::setupAssistMenu()
           QImage img;
           img.load(filepath, "PNG");
 
-          NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
           _world->importADTHeightmap(_camera.position, img, adt_import_height_params_multiplier->value(),
                                      adt_import_height_params_mode->currentIndex());
           NOGGIT_ACTION_MGR->endAction();
@@ -1517,9 +1517,9 @@ void MapView::setupAssistMenu()
         if (adt_import_height_params->exec() == QDialog::Accepted)
         {
           makeCurrent();
-          opengl::context::scoped_setter const _(::gl, context());
+          OpenGL::context::scoped_setter const _(::gl, context());
 
-          NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
           _world->importADTHeightmap(_camera.position, adt_import_height_params_multiplier->value(),
                                      adt_import_height_params_mode->currentIndex());
           NOGGIT_ACTION_MGR->endAction();
@@ -1555,7 +1555,7 @@ void MapView::setupAssistMenu()
       if (adt_import_vcol_params->exec() == QDialog::Accepted)
       {
         makeCurrent();
-        opengl::context::scoped_setter const _(::gl, context());
+        OpenGL::context::scoped_setter const _(::gl, context());
 
         QString filepath = QFileDialog::getOpenFileName(
           this,
@@ -1570,7 +1570,7 @@ void MapView::setupAssistMenu()
         QImage img;
         img.load(filepath, "PNG");
 
-        NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
         _world->importADTVertexColorMap(_camera.position, img, adt_import_vcol_params_mode->currentIndex());
         NOGGIT_ACTION_MGR->endAction();
       }
@@ -1584,9 +1584,9 @@ void MapView::setupAssistMenu()
         if (adt_import_vcol_params->exec() == QDialog::Accepted)
         {
           makeCurrent();
-          opengl::context::scoped_setter const _(::gl, context());
+          OpenGL::context::scoped_setter const _(::gl, context());
 
-          NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
           _world->importADTVertexColorMap(_camera.position, adt_import_vcol_params_mode->currentIndex());
           NOGGIT_ACTION_MGR->endAction();
         }
@@ -1602,8 +1602,8 @@ void MapView::setupAssistMenu()
   , [this]
       {
         makeCurrent();
-        opengl::context::scoped_setter const _ (::gl, context());
-        NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
+        OpenGL::context::scoped_setter const _ (::gl, context());
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
         _world->fixAllGaps();
         NOGGIT_ACTION_MGR->endAction();
       }
@@ -1619,7 +1619,7 @@ void MapView::setupAssistMenu()
       DESTRUCTIVE_ACTION
       (
         makeCurrent();
-        opengl::context::scoped_setter const _ (::gl, context());
+        OpenGL::context::scoped_setter const _ (::gl, context());
         _world->convert_alphamap(true);
       )
 
@@ -1632,7 +1632,7 @@ void MapView::setupAssistMenu()
       DESTRUCTIVE_ACTION
       (
         makeCurrent();
-        opengl::context::scoped_setter const _(::gl, context());
+        OpenGL::context::scoped_setter const _(::gl, context());
         _world->convert_alphamap(false);
       )
     }
@@ -1646,7 +1646,7 @@ void MapView::setupAssistMenu()
         DESTRUCTIVE_ACTION
         (
           makeCurrent();
-          opengl::context::scoped_setter const _(::gl, context());
+          OpenGL::context::scoped_setter const _(::gl, context());
           _world->ensureAllTilesetsAllADTs();
         )
 
@@ -1662,7 +1662,7 @@ void MapView::setupAssistMenu()
       DESTRUCTIVE_ACTION
       (
         makeCurrent();
-        opengl::context::scoped_setter const _(::gl, context());
+        OpenGL::context::scoped_setter const _(::gl, context());
         _world->exportAllADTsAlphamap();
       )
     }
@@ -1675,11 +1675,11 @@ void MapView::setupAssistMenu()
     DESTRUCTIVE_ACTION
     (
       makeCurrent();
-      opengl::context::scoped_setter const _(::gl, context());
+      OpenGL::context::scoped_setter const _(::gl, context());
 
-      if (!!noggit::ui::selected_texture::get())
+      if (!!Noggit::Ui::selected_texture::get())
       {
-        _world->exportAllADTsAlphamap(noggit::ui::selected_texture::get()->get()->file_key().filepath());
+        _world->exportAllADTsAlphamap(Noggit::Ui::selected_texture::get()->get()->file_key().filepath());
       }
     )
   }
@@ -1692,7 +1692,7 @@ void MapView::setupAssistMenu()
       DESTRUCTIVE_ACTION
       (
         makeCurrent();
-        opengl::context::scoped_setter const _(::gl, context());
+        OpenGL::context::scoped_setter const _(::gl, context());
 
         _world->exportAllADTsHeightmap();
       )
@@ -1706,7 +1706,7 @@ void MapView::setupAssistMenu()
       DESTRUCTIVE_ACTION
       (
         makeCurrent();
-        opengl::context::scoped_setter const _(::gl, context());
+        OpenGL::context::scoped_setter const _(::gl, context());
 
         _world->exportAllADTsVertexColorMap();
       )
@@ -1722,8 +1722,8 @@ void MapView::setupAssistMenu()
     DESTRUCTIVE_ACTION
     (
         makeCurrent();
-        opengl::context::scoped_setter const _(::gl, context());
-        NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+        OpenGL::context::scoped_setter const _(::gl, context());
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
         _world->importAllADTsAlphamaps();
         NOGGIT_ACTION_MGR->endAction();
 
@@ -1740,8 +1740,8 @@ void MapView::setupAssistMenu()
         DESTRUCTIVE_ACTION
         (
             makeCurrent();
-            opengl::context::scoped_setter const _(::gl, context());
-            NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+            OpenGL::context::scoped_setter const _(::gl, context());
+            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
             _world->importAllADTsHeightmaps(adt_import_height_params_multiplier->value(), adt_import_height_params_mode->currentIndex());
             NOGGIT_ACTION_MGR->endAction();
         )
@@ -1759,8 +1759,8 @@ void MapView::setupAssistMenu()
       DESTRUCTIVE_ACTION
       (
           makeCurrent();
-          opengl::context::scoped_setter const _(::gl, context());
-          NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE);
+          OpenGL::context::scoped_setter const _(::gl, context());
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
           _world->importAllADTVertexColorMaps(adt_import_vcol_params_mode->currentIndex());
           NOGGIT_ACTION_MGR->endAction();
       )
@@ -1776,7 +1776,7 @@ void MapView::setupAssistMenu()
   , [=]
   {
     makeCurrent();
-    opengl::context::scoped_setter const _(::gl, context());
+    OpenGL::context::scoped_setter const _(::gl, context());
     _world->loadAllTiles();
   }
   );
@@ -2072,7 +2072,7 @@ void MapView::setupHotkeys()
     ,
               [this]
               {
-                NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_ADDED);
+                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED);
                 objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
                 NOGGIT_ACTION_MGR->endAction();
               }
@@ -2082,7 +2082,7 @@ void MapView::setupHotkeys()
     , MOD_none
     , [this]
               {
-                NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_ADDED);
+                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED);
                 objectEditor->pasteObject (_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
                 NOGGIT_ACTION_MGR->endAction();
               }
@@ -2103,7 +2103,7 @@ void MapView::setupHotkeys()
     , MOD_none
     , [this]
     {
-      NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eVERTEX_SELECTION);
+      NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eVERTEX_SELECTION);
       _world->clearVertexSelection();
       NOGGIT_ACTION_MGR->endAction();
     }
@@ -2114,7 +2114,7 @@ void MapView::setupHotkeys()
     , MOD_ctrl
     , [this]
              {
-               NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_ADDED);
+               NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED);
                objectEditor->copy_current_selection(_world.get());
                objectEditor->pasteObject(_cursor_pos, _camera.position, _world.get(), &_object_paste_params);
                NOGGIT_ACTION_MGR->endAction();
@@ -2165,7 +2165,7 @@ void MapView::setupHotkeys()
     , MOD_none
     , [&]
               {
-                NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_HOLES);
+                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_HOLES);
                 _world->setHoleADT (_camera.position, false);
                 NOGGIT_ACTION_MGR->endAction();
               }
@@ -2179,7 +2179,7 @@ void MapView::setupHotkeys()
     , MOD_alt
     , [&]
               {
-                NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_HOLES);
+                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_HOLES);
                 _world->setHoleADT (_camera.position, true);
                 NOGGIT_ACTION_MGR->endAction();
               }
@@ -2264,7 +2264,7 @@ void MapView::setupHotkeys()
     , MOD_space
     , [&]
               {
-                NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN);
+                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
                 terrainTool->flattenVertices (_world.get());
                 NOGGIT_ACTION_MGR->endAction();
 
@@ -2308,7 +2308,7 @@ void MapView::setupHotkeys()
     , [&]
               {
 
-                NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
                 _world->set_selected_models_pos(_cursor_pos);
                 _rotation_editor_need_update = true;
                 NOGGIT_ACTION_MGR->endAction();
@@ -2395,7 +2395,7 @@ void MapView::setupHotkeys()
 
 void MapView::setupMinimap()
 {
-  _minimap = new noggit::ui::minimap_widget(this);
+  _minimap = new Noggit::Ui::minimap_widget(this);
   _minimap_dock = new QDockWidget("Minimap", this);
   _minimap_dock->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
   _minimap_dock->setFixedSize(_minimap->sizeHint());
@@ -2407,7 +2407,7 @@ void MapView::setupMinimap()
   _minimap->draw_skies (_show_minimap_skies.get());
   _minimap->set_resizeable(true);
 
-  connect ( _minimap, &noggit::ui::minimap_widget::map_clicked
+  connect ( _minimap, &Noggit::Ui::minimap_widget::map_clicked
     , [this] (glm::vec3 const& pos)
             {
               move_camera_with_auto_height (pos);
@@ -2432,7 +2432,7 @@ void MapView::setupMinimap()
   connect(this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
   connect(this, &QObject::destroyed, _minimap, &QObject::deleteLater);
 
-  connect ( &_show_minimap_window, &noggit::bool_toggle_property::changed
+  connect ( &_show_minimap_window, &Noggit::bool_toggle_property::changed
     , _minimap_dock, [this]
             {
               if (!ui_hidden)
@@ -2442,17 +2442,17 @@ void MapView::setupMinimap()
 
 
   connect ( _minimap_dock, &QDockWidget::visibilityChanged
-    , &_show_minimap_window, &noggit::bool_toggle_property::set
+    , &_show_minimap_window, &Noggit::bool_toggle_property::set
   );
 
-  connect ( &_show_minimap_borders, &noggit::bool_toggle_property::changed
+  connect ( &_show_minimap_borders, &Noggit::bool_toggle_property::changed
     , [this]
             {
               _minimap->draw_boundaries(_show_minimap_borders.get());
             }
   );
 
-  connect ( &_show_minimap_skies, &noggit::bool_toggle_property::changed
+  connect ( &_show_minimap_skies, &Noggit::bool_toggle_property::changed
     , [this]
             {
               _minimap->draw_skies(_show_minimap_skies.get());
@@ -2464,7 +2464,7 @@ void MapView::setupMinimap()
 void MapView::createGUI()
 {
   // Combined dock
-  _tool_panel_dock = new noggit::ui::tools::ToolPanel(this);
+  _tool_panel_dock = new Noggit::Ui::Tools::ToolPanel(this);
   _tool_panel_dock->setFeatures(QDockWidget::DockWidgetMovable
                                 | QDockWidget::DockWidgetFloatable);
   _tool_panel_dock->setAllowedAreas(Qt::RightDockWidgetArea);
@@ -2502,7 +2502,7 @@ void MapView::createGUI()
   setupHelpMenu();
   setupHotkeys();
 
-  connect(_main_window, &noggit::ui::main_window::exit_prompt_opened, this, &MapView::on_exit_prompt);
+  connect(_main_window, &Noggit::Ui::main_window::exit_prompt_opened, this, &MapView::on_exit_prompt);
 
   set_editing_mode (editing_mode::ground);
 }
@@ -2525,7 +2525,7 @@ void MapView::on_exit_prompt()
 MapView::MapView( math::degrees camera_yaw0
                 , math::degrees camera_pitch0
                 , glm::vec3 camera_pos
-                , noggit::ui::main_window* main_window
+                , Noggit::Ui::main_window* main_window
                 , std::unique_ptr<World> world
                 , uid_fix_mode uid_fix
                 , bool from_bookmark
@@ -2545,9 +2545,9 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_time (new QLabel (this))
   , _status_fps (new QLabel (this))
   , _status_culling (new QLabel (this))
-  , _texBrush{new opengl::texture{}}
-  , _transform_gizmo(noggit::ui::tools::ViewportGizmo::GizmoContext::MAP_VIEW)
-  , _tablet_manager(noggit::TabletManager::instance())
+  , _texBrush{new OpenGL::texture{}}
+  , _transform_gizmo(Noggit::Ui::Tools::ViewportGizmo::GizmoContext::MAP_VIEW)
+  , _tablet_manager(Noggit::TabletManager::instance())
 {
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
   setFocusPolicy (Qt::StrongFocus);
@@ -2557,7 +2557,7 @@ MapView::MapView( math::degrees camera_yaw0
   setAttribute(Qt::WA_OpaquePaintEvent, true);
   setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
 
-  _context = noggit::NoggitRenderContext::MAP_VIEW;
+  _context = Noggit::NoggitRenderContext::MAP_VIEW;
   _transform_gizmo.setWorld(_world.get());
 
   _main_window->setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
@@ -2640,8 +2640,8 @@ auto MapView::setBrushTexture(QImage const* img) -> void
       tex[i * width + j] = img->pixel(j, i);
 
   makeCurrent();
-  opengl::context::scoped_setter const _{gl, context()};
-  opengl::texture::set_active_texture(4);
+  OpenGL::context::scoped_setter const _{gl, context()};
+  OpenGL::texture::set_active_texture(4);
   _texBrush->bind();
   gl.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex.data());
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -2653,7 +2653,7 @@ auto MapView::setBrushTexture(QImage const* img) -> void
 void MapView::move_camera_with_auto_height (glm::vec3 const& pos)
 {
   makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
 
   _world->mapIndex.loadTile(pos)->wait_until_loaded();
 
@@ -2694,7 +2694,7 @@ void MapView::initializeGL()
 
   bool uid_warning = false;
 
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
 
   gl.viewport(0.0f, 0.0f, width(), height());
 
@@ -2761,7 +2761,7 @@ void MapView::initializeGL()
 void MapView::saveMinimap(MinimapRenderSettings* settings)
 {
 
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
 
   bool mmap_render_success = false;
 
@@ -2835,7 +2835,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
         if (_world->mapIndex.hasTile(tile))
         {
-          opengl::context::scoped_setter const _(::gl, context());
+          OpenGL::context::scoped_setter const _(::gl, context());
           makeCurrent();
           mmap_render_success = _world->saveMinimap(tile, settings, _mmap_combined_image);
 
@@ -3028,7 +3028,7 @@ void MapView::paintGL()
   // minimap rendering
   if (saving_minimap)
   {
-    opengl::context::scoped_setter const _(::gl, context());
+    OpenGL::context::scoped_setter const _(::gl, context());
     makeCurrent();
     _camera_moved_since_last_draw = true;
     lock = true;
@@ -3037,7 +3037,7 @@ void MapView::paintGL()
     return;
   }
 
-  opengl::context::scoped_setter const _(::gl, context());
+  OpenGL::context::scoped_setter const _(::gl, context());
   makeCurrent();
 
   gl.clear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -3152,7 +3152,7 @@ void MapView::paintGL()
 
 void MapView::resizeGL (int width, int height)
 {
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, width, height);
   emit resized();
   _camera_moved_since_last_draw = true;
@@ -3166,7 +3166,7 @@ MapView::~MapView()
 
   _destroying = true;
 
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
   delete _texBrush;
   delete _viewport_overlay_ui;
 
@@ -3187,7 +3187,7 @@ MapView::~MapView()
 
   AsyncLoader::instance().reset_object_fail();
 
-  noggit::ui::selected_texture::texture.reset();
+  Noggit::Ui::selected_texture::texture.reset();
 
   ModelManager::report();
   TextureManager::report();
@@ -3205,21 +3205,21 @@ void MapView::tick (float dt)
 
 	unsigned action_modality = 0;
 	if (_mod_shift_down)
-    action_modality |= noggit::ActionModalityControllers::eSHIFT;
+    action_modality |= Noggit::ActionModalityControllers::eSHIFT;
 	if (_mod_ctrl_down)
-    action_modality |= noggit::ActionModalityControllers::eCTRL;
+    action_modality |= Noggit::ActionModalityControllers::eCTRL;
   if (_mod_alt_down)
-    action_modality |= noggit::ActionModalityControllers::eALT;
+    action_modality |= Noggit::ActionModalityControllers::eALT;
   if (_mod_num_down)
-    action_modality |= noggit::ActionModalityControllers::eNUM;
+    action_modality |= Noggit::ActionModalityControllers::eNUM;
   if (_mod_space_down)
-    action_modality |= noggit::ActionModalityControllers::eSPACE;
+    action_modality |= Noggit::ActionModalityControllers::eSPACE;
   if (leftMouse)
-    action_modality |= noggit::ActionModalityControllers::eLMB;
+    action_modality |= Noggit::ActionModalityControllers::eLMB;
   if (rightMouse)
-    action_modality |= noggit::ActionModalityControllers::eRMB;
+    action_modality |= Noggit::ActionModalityControllers::eRMB;
   if (MoveObj)
-    action_modality |= noggit::ActionModalityControllers::eMMB;
+    action_modality |= Noggit::ActionModalityControllers::eMMB;
 
   NOGGIT_ACTION_MGR->endActionOnModalityMismatch(action_modality);
 
@@ -3327,16 +3327,16 @@ void MapView::tick (float dt)
       {
         if (_mod_alt_down)
         {
-          NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
-                                                         noggit::ActionModalityControllers::eALT
-                                                         | noggit::ActionModalityControllers::eMMB );
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                                         Noggit::ActionModalityControllers::eALT
+                                                         | Noggit::ActionModalityControllers::eMMB );
           _world->scale_selected_models(std::pow(2.f, mv*4.f), World::m2_scaling_type::mult);
         }
         else if (_mod_shift_down)
         {
-          NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
-                                                         noggit::ActionModalityControllers::eSHIFT
-                                                         | noggit::ActionModalityControllers::eMMB );
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                                         Noggit::ActionModalityControllers::eSHIFT
+                                                         | Noggit::ActionModalityControllers::eMMB );
           _world->move_selected_models(0.f, mv*80.f, 0.f);
         }
         else
@@ -3344,8 +3344,8 @@ void MapView::tick (float dt)
           bool snapped = false;
           if (_world->has_multiple_model_selected())
           {
-            NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
-                                                                 noggit::ActionModalityControllers::eMMB );
+            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                                                 Noggit::ActionModalityControllers::eMMB );
             _world->set_selected_models_pos(_cursor_pos, false);
 
             if (_snap_multi_selection_to_ground.get())
@@ -3358,14 +3358,14 @@ void MapView::tick (float dt)
           {
             if (!_move_model_to_cursor_position.get())
             {
-              NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
-                                                                   noggit::ActionModalityControllers::eMMB );
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                                                   Noggit::ActionModalityControllers::eMMB );
               _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
             }
             else
             {
-              NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
-                                                             noggit::ActionModalityControllers::eMMB );
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                                             Noggit::ActionModalityControllers::eMMB );
               _world->set_selected_models_pos(_cursor_pos, false);
               snapped = true;
             }
@@ -3428,9 +3428,9 @@ void MapView::tick (float dt)
       {
         if (_mod_ctrl_down) // X
         {
-          NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
-                                                         noggit::ActionModalityControllers::eCTRL
-                                                         | noggit::ActionModalityControllers::eRMB );
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                                         Noggit::ActionModalityControllers::eCTRL
+                                                         | Noggit::ActionModalityControllers::eRMB );
           _world->rotate_selected_models( math::degrees(rh + rv)
                                         , math::degrees(0.f)
                                         , math::degrees(0.f)
@@ -3439,9 +3439,9 @@ void MapView::tick (float dt)
         }
         if (_mod_shift_down) // Y
         {
-          NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
-                                                         noggit::ActionModalityControllers::eSHIFT
-                                                         | noggit::ActionModalityControllers::eRMB );
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                                         Noggit::ActionModalityControllers::eSHIFT
+                                                         | Noggit::ActionModalityControllers::eRMB );
           _world->rotate_selected_models( math::degrees(0.f)
                                         , math::degrees(rh + rv)
                                         , math::degrees(0.f)
@@ -3450,9 +3450,9 @@ void MapView::tick (float dt)
         }
         if (_mod_alt_down) // Z
         {
-          NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
-                                                         noggit::ActionModalityControllers::eALT
-                                                         | noggit::ActionModalityControllers::eRMB );
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                                         Noggit::ActionModalityControllers::eALT
+                                                         | Noggit::ActionModalityControllers::eRMB );
           _world->rotate_selected_models( math::degrees(0.f)
                                         , math::degrees(0.f)
                                         , math::degrees(rh + rv)
@@ -3485,9 +3485,9 @@ void MapView::tick (float dt)
 
             if (_mod_shift_down && (!mask_selector->isEnabled() || mask_selector->getBrushMode()))
             {
-              auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                                             noggit::ActionModalityControllers::eSHIFT
-                                                             | noggit::ActionModalityControllers::eLMB);
+              auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                             Noggit::ActionModalityControllers::eSHIFT
+                                                             | Noggit::ActionModalityControllers::eLMB);
 
               action->setPostCallback(&MapView::randomizeTerrainRotation);
 
@@ -3495,9 +3495,9 @@ void MapView::tick (float dt)
             }
             else if (_mod_ctrl_down && (!mask_selector->isEnabled() || mask_selector->getBrushMode()))
             {
-              auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                                             noggit::ActionModalityControllers::eCTRL
-                                                             | noggit::ActionModalityControllers::eLMB);
+              auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                             Noggit::ActionModalityControllers::eCTRL
+                                                             | Noggit::ActionModalityControllers::eLMB);
 
               action->setPostCallback(&MapView::randomizeTerrainRotation);
 
@@ -3510,17 +3510,17 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                                             noggit::ActionModalityControllers::eSHIFT
-                                                             | noggit::ActionModalityControllers::eLMB);
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                             Noggit::ActionModalityControllers::eSHIFT
+                                                             | Noggit::ActionModalityControllers::eLMB);
               flattenTool->flatten(_world.get(), _cursor_pos, dt);
             }
             else if (_mod_ctrl_down)
             {
 
-              NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                                             noggit::ActionModalityControllers::eCTRL
-                                                             | noggit::ActionModalityControllers::eLMB);
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                             Noggit::ActionModalityControllers::eCTRL
+                                                             | Noggit::ActionModalityControllers::eLMB);
               flattenTool->blur(_world.get(), _cursor_pos, dt);
             }
           }
@@ -3531,11 +3531,11 @@ void MapView::tick (float dt)
             // clear chunk texture
             if (!underMap)
             {
-              NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE,
-                                                             noggit::ActionModalityControllers::eSHIFT
-                                                             | noggit::ActionModalityControllers::eCTRL
-                                                             | noggit::ActionModalityControllers::eALT
-                                                             | noggit::ActionModalityControllers::eLMB);
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE,
+                                                             Noggit::ActionModalityControllers::eSHIFT
+                                                             | Noggit::ActionModalityControllers::eCTRL
+                                                             | Noggit::ActionModalityControllers::eALT
+                                                             | Noggit::ActionModalityControllers::eLMB);
 
               _world->eraseTextures(_cursor_pos);
             }
@@ -3546,30 +3546,30 @@ void MapView::tick (float dt)
             _texture_picker_dock->setVisible(true);
             TexturePicker->getTextures(selection);
           }
-          else  if (_mod_shift_down && !!noggit::ui::selected_texture::get())
+          else  if (_mod_shift_down && !!Noggit::Ui::selected_texture::get())
           {
             if ((_display_mode == display_mode::in_3D && !underMap) || _display_mode == display_mode::in_2D)
             {
               auto image_mask_selector = texturingTool->getImageMaskSelector();
 
               if (NOGGIT_CUR_ACTION
-              && texturingTool->getTexturingMode() == noggit::ui::texturing_mode::paint
+              && texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::paint
               && image_mask_selector->isEnabled()
               && !image_mask_selector->getBrushMode())
                 break;
 
-              auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TEXTURE,
-                                             noggit::ActionModalityControllers::eSHIFT
-                                                             | noggit::ActionModalityControllers::eLMB);
+              auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE,
+                                             Noggit::ActionModalityControllers::eSHIFT
+                                                             | Noggit::ActionModalityControllers::eLMB);
 
               action->setPostCallback(&MapView::randomizeTexturingRotation);
 
-              if (texturingTool->getTexturingMode() == noggit::ui::texturing_mode::paint
+              if (texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::paint
                   && image_mask_selector->isEnabled()
                   && !image_mask_selector->getBrushMode())
                 action->setBlockCursor(true);
 
-              texturingTool->paint(_world.get(), _cursor_pos, dt, *noggit::ui::selected_texture::get());
+              texturingTool->paint(_world.get(), _cursor_pos, dt, *Noggit::Ui::selected_texture::get());
             }
           }
           break;
@@ -3578,16 +3578,16 @@ void MapView::tick (float dt)
           // no undermap check here, else it's impossible to remove holes
           if (_mod_shift_down)
           {
-            NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_HOLES,
-                                                           noggit::ActionModalityControllers::eSHIFT
-                                                           | noggit::ActionModalityControllers::eLMB);
+            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_HOLES,
+                                                           Noggit::ActionModalityControllers::eSHIFT
+                                                           | Noggit::ActionModalityControllers::eLMB);
             _world->setHole(_cursor_pos, holeTool->brushRadius(),_mod_alt_down, false);
           }
           else if (_mod_ctrl_down && !underMap)
           {
-            NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_HOLES,
-                                                           noggit::ActionModalityControllers::eCTRL
-                                                           | noggit::ActionModalityControllers::eLMB);
+            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_HOLES,
+                                                           Noggit::ActionModalityControllers::eCTRL
+                                                           | Noggit::ActionModalityControllers::eLMB);
             _world->setHole(_cursor_pos, holeTool->brushRadius(), _mod_alt_down, true);
           }
           break;
@@ -3596,9 +3596,9 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_AREAID,
-                                                             noggit::ActionModalityControllers::eSHIFT
-                                                             | noggit::ActionModalityControllers::eLMB);
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_AREAID,
+                                                             Noggit::ActionModalityControllers::eSHIFT
+                                                             | Noggit::ActionModalityControllers::eLMB);
               // draw the selected AreaId on current selected chunk
               _world->setAreaID(_cursor_pos, _selected_area_id, false, ZoneIDBrowser->brushRadius());
             }
@@ -3618,16 +3618,16 @@ void MapView::tick (float dt)
             // todo: replace this
             if (_mod_shift_down)
             {
-              NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_FLAGS,
-                                                             noggit::ActionModalityControllers::eSHIFT
-                                                             | noggit::ActionModalityControllers::eLMB);
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_FLAGS,
+                                                             Noggit::ActionModalityControllers::eSHIFT
+                                                             | Noggit::ActionModalityControllers::eLMB);
               _world->mapIndex.setFlag(true, _cursor_pos, 0x2);
             }
             else if (_mod_ctrl_down)
             {
-              NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_FLAGS,
-                                                             noggit::ActionModalityControllers::eCTRL
-                                                             | noggit::ActionModalityControllers::eLMB);
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_FLAGS,
+                                                             Noggit::ActionModalityControllers::eCTRL
+                                                             | Noggit::ActionModalityControllers::eLMB);
               _world->mapIndex.setFlag(false, _cursor_pos, 0x2);
             }
           }
@@ -3637,16 +3637,16 @@ void MapView::tick (float dt)
           {
             if (_mod_shift_down)
             {
-              NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_WATER,
-                                                             noggit::ActionModalityControllers::eSHIFT
-                                                             | noggit::ActionModalityControllers::eLMB);
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_WATER,
+                                                             Noggit::ActionModalityControllers::eSHIFT
+                                                             | Noggit::ActionModalityControllers::eLMB);
               guiWater->paintLiquid(_world.get(), _cursor_pos, true);
             }
             else if (_mod_ctrl_down)
             {
-              NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_WATER,
-                                                             noggit::ActionModalityControllers::eCTRL
-                                                             | noggit::ActionModalityControllers::eLMB);
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_WATER,
+                                                             Noggit::ActionModalityControllers::eCTRL
+                                                             | Noggit::ActionModalityControllers::eLMB);
               guiWater->paintLiquid(_world.get(), _cursor_pos, false);
             }
           }
@@ -3654,9 +3654,9 @@ void MapView::tick (float dt)
         case editing_mode::stamp:
           if (_display_mode == display_mode::in_3D && (_mod_shift_down || _mod_ctrl_down || _mod_alt_down) && stampTool->getBrushMode())
           {
-            auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eNO_FLAG,
-                                                           noggit::ActionModalityControllers::eSHIFT
-                                                           | noggit::ActionModalityControllers::eLMB);
+            auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eNO_FLAG,
+                                                           Noggit::ActionModalityControllers::eSHIFT
+                                                           | Noggit::ActionModalityControllers::eLMB);
 
             if (!stampTool->getBrushMode())
               action->setBlockCursor(true);
@@ -3677,9 +3677,9 @@ void MapView::tick (float dt)
                   && !image_mask_selector->getBrushMode())
                 break;
 
-              auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_VERTEX_COLOR,
-                                                             noggit::ActionModalityControllers::eSHIFT
-                                                             | noggit::ActionModalityControllers::eLMB);
+              auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_VERTEX_COLOR,
+                                                             Noggit::ActionModalityControllers::eSHIFT
+                                                             | Noggit::ActionModalityControllers::eLMB);
 
               action->setPostCallback(&MapView::randomizeShaderRotation);
 
@@ -3699,9 +3699,9 @@ void MapView::tick (float dt)
                 break;
 
 
-              auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_VERTEX_COLOR,
-                                                             noggit::ActionModalityControllers::eCTRL
-                                                             | noggit::ActionModalityControllers::eLMB);
+              auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_VERTEX_COLOR,
+                                                             Noggit::ActionModalityControllers::eCTRL
+                                                             | Noggit::ActionModalityControllers::eLMB);
 
               action->setPostCallback(&MapView::randomizeShaderRotation);
 
@@ -4169,7 +4169,7 @@ void MapView::draw_map()
   case editing_mode::paint:
     radius = texturingTool->brush_radius();
     inner_radius = texturingTool->hardness();
-    if(texturingTool->getTexturingMode() == noggit::ui::texturing_mode::paint && texturingTool->getImageMaskSelector()->isEnabled())
+    if(texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::paint && texturingTool->getImageMaskSelector()->isEnabled())
       _cursorType = CursorType::STAMP;
     break;
   case editing_mode::stamp:
@@ -4274,7 +4274,7 @@ void MapView::keyPressEvent (QKeyEvent *event)
     if (event->key() == hotkey.key && modifier == hotkey.modifiers && hotkey.condition())
     {
       makeCurrent();
-      opengl::context::scoped_setter const _ (::gl, context());
+      OpenGL::context::scoped_setter const _ (::gl, context());
 
       hotkey.function();
       return;
@@ -4530,7 +4530,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 {
   //! \todo:  move the function call requiring a context in tick ?
   makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
   QLineF const relative_movement (_last_mouse_pos, event->pos());
 
   if ((look || freelook) && !(_mod_shift_down || _mod_ctrl_down || _mod_alt_down || _mod_space_down))
@@ -4564,8 +4564,8 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     {
       if (terrainTool->_edit_type == eTerrainType_Vertex)
       {
-        NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                     noggit::ActionModalityControllers::eALT | noggit::ActionModalityControllers::eRMB);
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                     Noggit::ActionModalityControllers::eALT | Noggit::ActionModalityControllers::eRMB);
         terrainTool->changeOrientation (-relative_movement.dx() / XSENS * 4.5f);
       }
       else
@@ -4590,8 +4590,8 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     {
       if (terrainTool->_edit_type == eTerrainType_Vertex)
       {
-        NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                                       noggit::ActionModalityControllers::eSHIFT | noggit::ActionModalityControllers::eRMB);
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                       Noggit::ActionModalityControllers::eSHIFT | Noggit::ActionModalityControllers::eRMB);
         terrainTool->moveVertices (_world.get(), -relative_movement.dy() / YSENS);
       }
     }
@@ -4603,9 +4603,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     {
       if (terrainTool->_edit_type == eTerrainType_Vertex)
       {
-        NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                                       noggit::ActionModalityControllers::eCTRL |
-                                                       noggit::ActionModalityControllers::eRMB);
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                       Noggit::ActionModalityControllers::eCTRL |
+                                                       Noggit::ActionModalityControllers::eRMB);
         terrainTool->changeAngle(-relative_movement.dy() / YSENS * 4.f);
       }
     }
@@ -4618,16 +4618,16 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     {
       if (terrainTool->_edit_type == eTerrainType_Vertex)
       {
-        NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                                       noggit::ActionModalityControllers::eRMB
-                                                       | noggit::ActionModalityControllers::eSPACE);
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                       Noggit::ActionModalityControllers::eRMB
+                                                       | Noggit::ActionModalityControllers::eSPACE);
         terrainTool->setOrientRelativeTo(_world.get(), _cursor_pos);
       }
       else if (terrainTool->getImageMaskSelector()->isEnabled())
       {
-        auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
-                                                       noggit::ActionModalityControllers::eRMB
-                                                       | noggit::ActionModalityControllers::eSPACE);
+        auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
+                                                       Noggit::ActionModalityControllers::eRMB
+                                                       | Noggit::ActionModalityControllers::eSPACE);
         terrainTool->getImageMaskSelector()->setRotation(-relative_movement.dx() / XSENS * 10.f);
         action->setBlockCursor(true);
       }
@@ -4637,9 +4637,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     {
       if (texturingTool->getImageMaskSelector()->isEnabled())
       {
-        auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
-                                                                     noggit::ActionModalityControllers::eRMB
-                                                                     | noggit::ActionModalityControllers::eSPACE);
+        auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
+                                                                     Noggit::ActionModalityControllers::eRMB
+                                                                     | Noggit::ActionModalityControllers::eSPACE);
         texturingTool->getImageMaskSelector()->setRotation(-relative_movement.dx() / XSENS * 10.f);
         action->setBlockCursor(true);
 
@@ -4650,9 +4650,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     {
       if (shaderTool->getImageMaskSelector()->isEnabled())
       {
-        auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
-                                                                     noggit::ActionModalityControllers::eRMB
-                                                                     | noggit::ActionModalityControllers::eSPACE);
+        auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
+                                                                     Noggit::ActionModalityControllers::eRMB
+                                                                     | Noggit::ActionModalityControllers::eSPACE);
         shaderTool->getImageMaskSelector()->setRotation(-relative_movement.dx() / XSENS * 10.f);
         action->setBlockCursor(true);
 
@@ -4662,9 +4662,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     else if (terrainMode == editing_mode::stamp)
     {
 
-      auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
-                                                                   noggit::ActionModalityControllers::eRMB
-                                                                   | noggit::ActionModalityControllers::eSPACE);
+      auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eDO_NOT_WRITE_HISTORY,
+                                                                   Noggit::ActionModalityControllers::eRMB
+                                                                   | Noggit::ActionModalityControllers::eSPACE);
       stampTool->changeRotation(-relative_movement.dx() / XSENS * 10.f);
       action->setBlockCursor(true);
     }
@@ -4749,9 +4749,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       if (terrainTool->_edit_type != eTerrainType_Vertex && terrainTool->_edit_type != eTerrainType_Script &&
         image_mask_selector->isEnabled() && !image_mask_selector->getBrushMode())
       {
-        auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eCHUNKS_TERRAIN,
-                                                       noggit::ActionModalityControllers::eSHIFT
-                                                       | noggit::ActionModalityControllers::eLMB);
+        auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN,
+                                                       Noggit::ActionModalityControllers::eSHIFT
+                                                       | Noggit::ActionModalityControllers::eLMB);
 
         action->setPostCallback(&MapView::randomizeTerrainRotation);
 
@@ -4760,9 +4760,9 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     }
     else if (terrainMode == editing_mode::stamp && _display_mode == display_mode::in_3D && !stampTool->getBrushMode())
     {
-      auto action = NOGGIT_ACTION_MGR->beginAction(this, noggit::ActionFlags::eNO_FLAG,
-                                                                   noggit::ActionModalityControllers::eSHIFT
-                                                                   | noggit::ActionModalityControllers::eLMB);
+      auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eNO_FLAG,
+                                                                   Noggit::ActionModalityControllers::eSHIFT
+                                                                   | Noggit::ActionModalityControllers::eLMB);
 
       action->setPostCallback(&MapView::randomizeStampRotation);
       action->setBlockCursor(true);
@@ -4830,7 +4830,7 @@ void MapView::mousePressEvent(QMouseEvent* event)
   }
 
   makeCurrent();
-  opengl::context::scoped_setter const _(::gl, context());
+  OpenGL::context::scoped_setter const _(::gl, context());
 
   switch (event->button())
   {
@@ -4879,7 +4879,7 @@ void MapView::wheelEvent (QWheelEvent* event)
 {
   //! \todo: move the function call requiring a context in tick ?
   makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
 
   auto&& delta_for_range
     ( [&] (float range)
@@ -5043,7 +5043,7 @@ void MapView::save(save_mode mode)
   if (save)
   {
     makeCurrent();
-    opengl::context::scoped_setter const _ (::gl, context());
+    OpenGL::context::scoped_setter const _ (::gl, context());
 
     switch (mode)
     {
@@ -5132,7 +5132,7 @@ void MapView::unloadOpenglData(bool from_manager)
   LogDebug << "Changing context of MapView." << std::endl;
 
   makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, context());
+  OpenGL::context::scoped_setter const _ (::gl, context());
 
   ModelManager::unload_all(_context);
   WMOManager::unload_all(_context);
@@ -5155,7 +5155,7 @@ void MapView::unloadOpenglData(bool from_manager)
   _world->unload_shaders();
 
   if (!from_manager)
-    noggit::ui::tools::ViewportManager::ViewportManager::unloadOpenglData(this);
+    Noggit::Ui::Tools::ViewportManager::ViewportManager::unloadOpenglData(this);
 
   _buffers.unload();
 
@@ -5176,7 +5176,7 @@ QWidget* MapView::getActiveStampModeItem()
 
 void MapView::onSettingsSave()
 {
-  opengl::TerrainParamsUniformBlock* params = _world->getTerrainParamsUniformBlock();
+  OpenGL::TerrainParamsUniformBlock* params = _world->getTerrainParamsUniformBlock();
   params->wireframe_type = _settings->value("wireframe/type", 0).toInt();
   params->wireframe_radius = _settings->value("wireframe/radius", 1.5f).toFloat();
   params->wireframe_width = _settings->value ("wireframe/width", 1.f).toFloat();

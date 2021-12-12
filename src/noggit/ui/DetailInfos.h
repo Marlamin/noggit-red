@@ -8,9 +8,9 @@
 
 #include <string>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class detail_infos : public widget
     {

@@ -19,19 +19,19 @@ public:
   static void resetAnim();
   static void updateEmitters(float dt);
   static void clear_hidden_models();
-  static void unload_all(noggit::NoggitRenderContext context);
+  static void unload_all(Noggit::NoggitRenderContext context);
 
   static void report();
 
 private:
   friend struct scoped_model_reference;
-  static noggit::AsyncObjectMultimap<Model> _;
+  static Noggit::AsyncObjectMultimap<Model> _;
 };
 
 struct scoped_model_reference
 {
   scoped_model_reference (
-      BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
+      BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context)
 
     : _valid(true)
     , _file_key(file_key)
@@ -96,5 +96,5 @@ private:
   bool _valid;
   BlizzardArchive::Listfile::FileKey _file_key;
   Model* _model;
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 };

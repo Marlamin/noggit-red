@@ -6,7 +6,7 @@
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
 
-namespace noggit
+namespace Noggit
 {
   world_model_instances_storage::world_model_instances_storage(World* world)
     : _world(world)

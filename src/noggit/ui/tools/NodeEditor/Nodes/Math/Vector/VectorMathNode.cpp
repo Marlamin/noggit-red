@@ -4,7 +4,7 @@
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 Vector3DMathNode::Vector3DMathNode()
 {

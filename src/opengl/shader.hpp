@@ -28,7 +28,7 @@ namespace math
   struct vector_3d;
 }
 
-namespace opengl
+namespace OpenGL
 {
   struct shader
   {
@@ -70,7 +70,7 @@ namespace opengl
     inline GLuint uniform_block_location (std::string const& name) const;
     inline GLuint attrib_location (std::string const& name) const;
 
-    friend struct scoped::use_program;
+    friend struct Scoped::use_program;
 
     boost::optional<GLuint> _handle;
 
@@ -82,7 +82,7 @@ namespace opengl
     tsl::robin_map<GLuint, bool> _uniforms_bool_cache;
   };
 
-  namespace scoped
+  namespace Scoped
   {
     struct use_program
     {

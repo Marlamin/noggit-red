@@ -15,7 +15,7 @@
 #include <regex>
 #include <sstream>
 
-namespace opengl
+namespace OpenGL
 {
   shader::shader (GLenum type, std::string const& source)
   try
@@ -137,7 +137,7 @@ namespace opengl
     return gl.getAttribLocation (*_handle, name.c_str());
   }
 
-  namespace scoped
+  namespace Scoped
   {
     use_program::use_program (program const& p)
       : _program (p)
@@ -400,7 +400,7 @@ namespace opengl
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
-      scoped::buffer_binder<GL_ARRAY_BUFFER> const bind (buffer);
+      Scoped::buffer_binder<GL_ARRAY_BUFFER> const bind (buffer);
       gl.vertexAttribPointer (location, size, type, normalized, stride, data);
     }
 
@@ -417,7 +417,7 @@ namespace opengl
       GLuint const location (attrib_location (name));
       gl.enableVertexAttribArray (location);
       _enabled_vertex_attrib_arrays.emplace (location);
-      scoped::buffer_binder<GL_ARRAY_BUFFER> const bind (buffer);
+      Scoped::buffer_binder<GL_ARRAY_BUFFER> const bind (buffer);
       gl.vertexAttribIPointer (location, size, type, stride, data);
     }
 

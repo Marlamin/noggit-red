@@ -15,7 +15,7 @@ namespace math
   struct vector_4d;
 }
 
-namespace opengl
+namespace OpenGL
 {
   namespace primitives
   {
@@ -27,9 +27,9 @@ namespace opengl
       wire_box& operator=( wire_box& box ) { return *this; };
 
     public:
-      static wire_box& getInstance(noggit::NoggitRenderContext context)
+      static wire_box& getInstance(Noggit::NoggitRenderContext context)
       {
-        static std::unordered_map<noggit::NoggitRenderContext, wire_box> instances;
+        static std::unordered_map<Noggit::NoggitRenderContext, wire_box> instances;
 
         if (instances.find(context) == instances.end())
         {
@@ -55,10 +55,10 @@ namespace opengl
 
       void setup_buffers();
 
-      scoped::deferred_upload_vertex_arrays<1> _vao;
-      scoped::deferred_upload_buffers<1> _buffers;
+      Scoped::deferred_upload_vertex_arrays<1> _vao;
+      Scoped::deferred_upload_buffers<1> _buffers;
       GLuint const& _indices = _buffers[0];
-      std::unique_ptr<opengl::program> _program;
+      std::unique_ptr<OpenGL::program> _program;
     };
 
     class grid
@@ -77,11 +77,11 @@ namespace opengl
 
         int _indice_count = 0;
 
-        scoped::deferred_upload_vertex_arrays<1> _vao;
-        scoped::deferred_upload_buffers<2> _buffers;
+        Scoped::deferred_upload_vertex_arrays<1> _vao;
+        Scoped::deferred_upload_buffers<2> _buffers;
         GLuint const& _vertices_vbo = _buffers[0];
         GLuint const& _indices_vbo = _buffers[1];
-        std::unique_ptr<opengl::program> _program;
+        std::unique_ptr<OpenGL::program> _program;
     };
 
     class sphere
@@ -101,11 +101,11 @@ namespace opengl
 
       int _indice_count = 0;
 
-      scoped::deferred_upload_vertex_arrays<1> _vao;
-      scoped::deferred_upload_buffers<2> _buffers;
+      Scoped::deferred_upload_vertex_arrays<1> _vao;
+      Scoped::deferred_upload_buffers<2> _buffers;
       GLuint const& _vertices_vbo = _buffers[0];
       GLuint const& _indices_vbo = _buffers[1];
-      std::unique_ptr<opengl::program> _program;
+      std::unique_ptr<OpenGL::program> _program;
     };
 
     class square
@@ -124,11 +124,11 @@ namespace opengl
 
       void setup_buffers();
 
-      scoped::deferred_upload_vertex_arrays<1> _vao;
-      scoped::deferred_upload_buffers<2> _buffers;
+      Scoped::deferred_upload_vertex_arrays<1> _vao;
+      Scoped::deferred_upload_buffers<2> _buffers;
       GLuint const& _vertices_vbo = _buffers[0];
       GLuint const& _indices_vbo = _buffers[1];
-      std::unique_ptr<opengl::program> _program;
+      std::unique_ptr<OpenGL::program> _program;
     };
   }
 }

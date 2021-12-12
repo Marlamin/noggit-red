@@ -8,9 +8,9 @@
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     selection::selection(script_context * ctx, std::string const&,glm::vec3 const& point1, glm::vec3 const& point2)
       : script_object(ctx)
@@ -52,7 +52,7 @@ namespace noggit
       , std::string const& algorithm
       , std::string const& seed)
     {
-      return noggit::scripting::make_noise(
+      return Noggit::Scripting::make_noise(
           state()
         // padding to ensure we get no rounding errors (should be smaller?)
         , std::floor(_min.x)-2
@@ -177,5 +177,5 @@ namespace noggit
           point1,point2);
       });
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

@@ -10,7 +10,7 @@
 
 #include <typeinfo>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 AddObjectInstanceNode::AddObjectInstanceNode()
 : ContextLogicNodeBase()
@@ -33,7 +33,7 @@ void AddObjectInstanceNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   auto path_data = defaultPortData<StringData>(PortType::In, 1);
   std::string const& path = path_data->value();
@@ -57,7 +57,7 @@ void AddObjectInstanceNode::compute()
 
   if (QString(path.c_str()).endsWith(".m2", Qt::CaseInsensitive))
   {
-    noggit::object_paste_params paste_params;
+    Noggit::object_paste_params paste_params;
     obj = world->addM2AndGetInstance(path, {pos.x, pos.y, pos.z}, scale, {math::degrees(dir.x)._, math::degrees(dir.y)._, math::degrees(dir.z)._ }, &paste_params);
   }
   else if (QString(path.c_str()).endsWith(".wmo", Qt::CaseInsensitive))

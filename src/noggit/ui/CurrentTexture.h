@@ -15,9 +15,9 @@ class QMouseEvent;
 class QDropEvent;
 class QDragEnterEvent;
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class texture_swapper;
 

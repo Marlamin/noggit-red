@@ -21,7 +21,7 @@
 #include <codecvt>
 #include <string>
 
-namespace noggit::application
+namespace Noggit::application
 {
     void noggit_terminate_handler()
     {
@@ -61,8 +61,8 @@ namespace noggit::application
 
 int main(int argc, char *argv[])
 {
-  noggit::RegisterErrorHandlers();
-  std::set_terminate(noggit::application::noggit_terminate_handler);
+  Noggit::RegisterErrorHandlers();
+  std::set_terminate(Noggit::application::noggit_terminate_handler);
 
   QApplication::setStyle(QStyleFactory::create("Fusion"));
   //QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
   qapp.setApplicationName ("Noggit");
   qapp.setOrganizationName ("Noggit");
 
-  auto noggit = noggit::application::Noggit::instance(argc, argv);
+  auto noggit = Noggit::Application::Noggit::instance(argc, argv);
   noggit->start();
 
   return qapp.exec();

@@ -17,9 +17,9 @@ using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 using namespace std::literals;
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::NodeEditor::Nodes
+    namespace Ui::Tools::NodeEditor::Nodes
     {
         class MathNode : public BaseNode
         {

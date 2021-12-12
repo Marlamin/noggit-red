@@ -5,7 +5,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 SnapSelectedObjectInstancesToGroundNode::SnapSelectedObjectInstancesToGroundNode()
 : ContextLogicNodeBase()
@@ -23,7 +23,7 @@ void SnapSelectedObjectInstancesToGroundNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   world->snap_selected_models_to_the_ground();
 

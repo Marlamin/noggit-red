@@ -4,9 +4,9 @@
 
 #include <QtWidgets/QDialog>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class about : public QDialog
     {

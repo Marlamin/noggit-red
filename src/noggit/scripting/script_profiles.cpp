@@ -7,11 +7,11 @@
 // TODO: duplicate
 #define CUR_PROFILE_PATH "__cur_profile"
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
-    script_profiles::script_profiles(noggit::scripting::scripting_tool * tool)
+    script_profiles::script_profiles(Noggit::Scripting::scripting_tool * tool)
         : QGroupBox("Script Profiles"), _tool(tool)
     {
       _select_column = new QGridLayout(this);
@@ -149,5 +149,5 @@ namespace noggit
     {
       return _selection->itemText(index).toStdString();
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

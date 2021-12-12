@@ -2,9 +2,9 @@
 
 #include <noggit/ui/clickable_label.hpp>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     clickable_label::clickable_label(QWidget* parent) : QLabel(parent){}
 

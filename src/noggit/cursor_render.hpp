@@ -6,7 +6,7 @@
 
 #include <memory>
 
-namespace noggit
+namespace Noggit
 {
   class cursor_render
   {
@@ -29,16 +29,16 @@ namespace noggit
 
     void upload();
 
-      void create_circle_buffer(opengl::scoped::use_program& shader);
-    void create_sphere_buffer(opengl::scoped::use_program& shader);
-    void create_square_buffer(opengl::scoped::use_program& shader);
-    void create_cube_buffer(opengl::scoped::use_program& shader);
+      void create_circle_buffer(OpenGL::Scoped::use_program& shader);
+    void create_sphere_buffer(OpenGL::Scoped::use_program& shader);
+    void create_square_buffer(OpenGL::Scoped::use_program& shader);
+    void create_cube_buffer(OpenGL::Scoped::use_program& shader);
 
-    opengl::scoped::deferred_upload_vertex_arrays<(int)mode::mode_count> _vaos;
-    opengl::scoped::deferred_upload_buffers<(int)mode::mode_count * 2> _vbos;
+    OpenGL::Scoped::deferred_upload_vertex_arrays<(int)mode::mode_count> _vaos;
+    OpenGL::Scoped::deferred_upload_buffers<(int)mode::mode_count * 2> _vbos;
 
     std::map<mode, int> _indices_count;
 
-    std::unique_ptr<opengl::program> _cursor_program;
+    std::unique_ptr<OpenGL::program> _cursor_program;
   };
 }

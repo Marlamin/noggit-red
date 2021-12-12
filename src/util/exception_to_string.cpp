@@ -43,7 +43,7 @@ namespace util
 
   std::string exception_to_string (std::exception_ptr ptr)
   {
-    noggit::printStacktrace();
+    Noggit::printStacktrace();
     return exception_to_string_impl (ptr, 0, true);
   }
 }

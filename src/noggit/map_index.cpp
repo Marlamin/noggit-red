@@ -29,7 +29,7 @@
 #include <cstdlib>
 
 MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
-                    noggit::NoggitRenderContext context, bool create_empty)
+                    Noggit::NoggitRenderContext context, bool create_empty)
   : basename(pBasename)
   , _map_id (map_id)
   , _last_unload_time((clock() / CLOCKS_PER_SEC)) // to not try to unload right away

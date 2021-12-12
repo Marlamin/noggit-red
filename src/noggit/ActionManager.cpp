@@ -4,7 +4,7 @@
 #include <noggit/MapView.h>
 #include <cmath>
 
-using namespace noggit;
+using namespace Noggit;
 
 std::deque<Action*>* ActionManager::getActionStack()
 {

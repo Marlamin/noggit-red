@@ -5,9 +5,9 @@
 #include <noggit/scripting/script_object.hpp>
 #include <noggit/MapChunk.h>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     class script_context;
     class selection;
@@ -44,5 +44,5 @@ namespace noggit
     };
 
     void register_chunk(script_context * state);
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

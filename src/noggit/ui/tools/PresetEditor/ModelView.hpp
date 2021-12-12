@@ -11,24 +11,24 @@
 
 
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui::tools::PresetEditor
+  namespace Ui::Tools::PresetEditor
   {
-    class ModelViewer : public ui::tools::AssetBrowser::ModelViewer
+    class ModelViewer : public Ui::Tools::AssetBrowser::ModelViewer
     {
     public:
         explicit ModelViewer(QWidget* parent = nullptr);
 
         void loadWorldUnderlay(std::string const& internal_name, int map_id);
         World* getWorld() { return _world.get(); };
-        noggit::camera* getCamera() { return &_camera; };
-        noggit::camera* getWorldCamera() { return &_world_camera; };
+        Noggit::camera* getCamera() { return &_camera; };
+        Noggit::camera* getWorldCamera() { return &_world_camera; };
 
     private:
         std::unique_ptr<World> _world;
 
-        noggit::camera _world_camera;
+        Noggit::camera _world_camera;
 
         void paintGL() override;
         void initializeGL() override;
@@ -44,7 +44,7 @@ namespace noggit
         ImGuiContext* _imgui_context;
         ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
         ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
-        noggit::bool_toggle_property _gizmo_on = {true};
+        Noggit::bool_toggle_property _gizmo_on = {true};
 
 
     };

@@ -7,9 +7,9 @@
 #include <string>
 #include <memory>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     class script_context;
     class noisemap: public script_object
@@ -53,5 +53,5 @@ namespace noggit
       , std::string const& seed);
 
     void register_noise(script_context * state);
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

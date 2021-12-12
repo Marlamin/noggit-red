@@ -9,11 +9,11 @@
 
 
 
-namespace noggit
+namespace Noggit
 {
   class Action;
 
-  namespace ui::tools
+  namespace Ui::Tools
   {
     class ActionHistoryNavigator : public QWidget
     {
@@ -22,7 +22,7 @@ namespace noggit
       ActionHistoryNavigator(QWidget* parent = nullptr);
 
     public slots:
-      void pushAction(noggit::Action* action);
+      void pushAction(Noggit::Action* action);
       void popFront();
       void popBack();
       void purge();

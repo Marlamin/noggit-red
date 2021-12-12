@@ -45,7 +45,7 @@ void TileWater::draw ( math::frustum const& frustum
                      , const float& cull_distance
                      , const glm::vec3& camera
                      , bool camera_moved
-                     , opengl::scoped::use_program& water_shader
+                     , OpenGL::Scoped::use_program& water_shader
                      , int animtime
                      , int layer
                      , display_mode display
@@ -81,7 +81,7 @@ void TileWater::draw ( math::frustum const& frustum
 
   for (auto& render_layer : _render_layers)
   {
-    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_LIQUID_INSTANCE_INDEX, render_layer.chunk_data_buf, 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock) * 256);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, OpenGL::ubo_targets::CHUNK_LIQUID_INSTANCE_INDEX, render_layer.chunk_data_buf, 0, sizeof(OpenGL::LiquidChunkInstanceDataUniformBlock) * 256);
 
     gl.activeTexture(GL_TEXTURE0);
     gl.bindTexture(GL_TEXTURE_2D_ARRAY, render_layer.vertex_data_tex);
@@ -252,13 +252,13 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
 
             gl.genBuffers(1, &render_layer.chunk_data_buf);
             gl.bindBuffer(GL_UNIFORM_BUFFER, render_layer.chunk_data_buf);
-            gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::LiquidChunkInstanceDataUniformBlock) * 256, NULL, GL_DYNAMIC_DRAW);}
+            gl.bufferData(GL_UNIFORM_BUFFER, sizeof(OpenGL::LiquidChunkInstanceDataUniformBlock) * 256, NULL, GL_DYNAMIC_DRAW);}
 
           auto& layer_params = _render_layers[layer_counter];
 
           // fill per-chunk data
           std::tuple<GLuint, glm::vec2, int, unsigned> const& tex_profile = tex_frames.at(layer.liquidID());
-          opengl::LiquidChunkInstanceDataUniformBlock& params_data = layer_params.chunk_data[n_chunks];
+          OpenGL::LiquidChunkInstanceDataUniformBlock& params_data = layer_params.chunk_data[n_chunks];
 
           params_data.xbase = layer.getChunk()->xbase;
           params_data.zbase = layer.getChunk()->zbase;
@@ -336,7 +336,7 @@ void TileWater::updateLayerData(LiquidTextureManager* tex_manager)
         gl.bindTexture(GL_TEXTURE_2D_ARRAY, layer_params.vertex_data_tex);
         gl.bindBuffer(GL_UNIFORM_BUFFER, layer_params.chunk_data_buf);
 
-        gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::LiquidChunkInstanceDataUniformBlock) * 256, layer_params.chunk_data.data());
+        gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(OpenGL::LiquidChunkInstanceDataUniformBlock) * 256, layer_params.chunk_data.data());
         gl.texSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, 9, 9, 256, GL_RGBA, GL_FLOAT, layer_params.vertex_data.data());
       }
 

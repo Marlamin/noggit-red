@@ -14,9 +14,9 @@
 #include <noggit/camera.hpp>
 #include <QTransform>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     minimap_widget::minimap_widget (QWidget* parent)
       : QWidget (parent)

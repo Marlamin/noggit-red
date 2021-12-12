@@ -7,7 +7,7 @@
 
 #include <cmath>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 MathUnaryNode::MathUnaryNode()
 : BaseNode()

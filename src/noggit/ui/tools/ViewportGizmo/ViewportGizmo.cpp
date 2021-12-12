@@ -13,9 +13,9 @@
 #include <limits>
 
 
-using namespace noggit::ui::tools::ViewportGizmo;
+using namespace Noggit::Ui::Tools::ViewportGizmo;
 
-ViewportGizmo::ViewportGizmo(noggit::ui::tools::ViewportGizmo::GizmoContext gizmo_context, World* world)
+ViewportGizmo::ViewportGizmo(Noggit::Ui::Tools::ViewportGizmo::GizmoContext gizmo_context, World* world)
 : _gizmo_context(gizmo_context)
 , _world(world)
 {}
@@ -97,8 +97,8 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     return;
   }
 
-  NOGGIT_ACTION_MGR->beginAction(map_view, noggit::ActionFlags::eOBJECTS_TRANSFORMED,
-                                                 noggit::ActionModalityControllers::eLMB);
+  NOGGIT_ACTION_MGR->beginAction(map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                                 Noggit::ActionModalityControllers::eLMB);
 
   if (gizmo_selection_type == MULTISELECTION)
   {

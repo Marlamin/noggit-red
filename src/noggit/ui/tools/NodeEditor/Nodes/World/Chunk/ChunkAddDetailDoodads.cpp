@@ -7,7 +7,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include "ChunkAddDetailDoodads.hpp"
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 ChunkAddDetailDoodads::ChunkAddDetailDoodads()
 : ContextLogicNodeBase()
@@ -165,7 +165,7 @@ void ChunkAddDetailDoodads::compute()
   assert(gGroundEffectTextureDB.getRecordCount());
   World* const world{gCurrentContext->getWorld()};
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _{::gl, gCurrentContext->getViewport()->context()};
+  OpenGL::context::scoped_setter const _{::gl, gCurrentContext->getViewport()->context()};
   MapChunk* const chunk{defaultPortData<ChunkData>(PortType::In
   , 1)->value()};
 

@@ -4,7 +4,7 @@
 
 #include <opengl/types.hpp>
 
-namespace opengl
+namespace OpenGL
 {
   class texture
   {

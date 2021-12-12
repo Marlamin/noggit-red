@@ -6,9 +6,9 @@
 #include <sol/sol.hpp>
 #include <cmath>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     int round(float a1) { return std::floor(a1); }
     float pow(float a1, float a2) { return ::pow(a1, a2); }
@@ -94,5 +94,5 @@ namespace noggit
         , "z", &glm::vec3::z
       );
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

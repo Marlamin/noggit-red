@@ -46,7 +46,7 @@ public:
          , bool use_mclq_green_lava
          , bool reloading_tile
          , World*
-         , noggit::NoggitRenderContext context
+         , Noggit::NoggitRenderContext context
          , tile_mode mode = tile_mode::edit
          );
   ~MapTile();
@@ -90,7 +90,7 @@ public:
   bool tile_frustum_culled = true;
   bool tile_occlusion_cull_override = true;
 
-  void draw (opengl::scoped::use_program& mcnk_shader
+  void draw (OpenGL::Scoped::use_program& mcnk_shader
             , const glm::vec3& camera
             , bool show_unpaintable_chunks
             , bool draw_paintability_overlay
@@ -102,14 +102,14 @@ public:
                  , const float& cull_distance
                  , const glm::vec3& camera
                  , bool camera_moved
-                 , opengl::scoped::use_program& water_shader
+                 , OpenGL::Scoped::use_program& water_shader
                  , int animtime
                  , int layer
                  , display_mode display
                  , LiquidTextureManager* tex_manager
                  );
 
-  void drawMFBO (opengl::scoped::use_program&);
+  void drawMFBO (OpenGL::Scoped::use_program&);
 
   bool GetVertex(float x, float z, glm::vec3 *V);
   void getVertexInternal(float x, float z, glm::vec3* v);
@@ -171,7 +171,7 @@ public:
 
   tsl::robin_map<AsyncObject*, std::vector<SceneObject*>> const& getObjectInstances() const { return object_instances; };
 
-  void doTileOcclusionQuery(opengl::scoped::use_program& occlusion_shader);
+  void doTileOcclusionQuery(OpenGL::Scoped::use_program& occlusion_shader);
   bool getTileOcclusionQueryResult(glm::vec3 const& camera);
   void discardTileOcclusionQuery() { _tile_occlusion_query_in_use = false; }
 
@@ -208,15 +208,15 @@ private:
   glm::vec3 mMaximumValues[3 * 3];
 
   bool _mfbo_buffer_are_setup = false;
-  opengl::scoped::deferred_upload_vertex_arrays<2> _mfbo_vaos;
+  OpenGL::Scoped::deferred_upload_vertex_arrays<2> _mfbo_vaos;
   GLuint const& _mfbo_bottom_vao = _mfbo_vaos[0];
   GLuint const& _mfbo_top_vao = _mfbo_vaos[1];
-  opengl::scoped::deferred_upload_buffers<3> _mfbo_vbos;
+  OpenGL::Scoped::deferred_upload_buffers<3> _mfbo_vbos;
   GLuint const& _mfbo_bottom_vbo = _mfbo_vbos[0];
   GLuint const& _mfbo_top_vbo = _mfbo_vbos[1];
   GLuint const& _mfbo_indices = _mfbo_vbos[2];
 
-  opengl::scoped::deferred_upload_textures<4> _chunk_texture_arrays;
+  OpenGL::Scoped::deferred_upload_textures<4> _chunk_texture_arrays;
   GLuint const& _height_tex = _chunk_texture_arrays[0];
   GLuint const& _mccv_tex = _chunk_texture_arrays[1];
   GLuint const& _shadowmap_tex = _chunk_texture_arrays[2];
@@ -225,10 +225,10 @@ private:
   GLuint _tile_occlusion_query;
   bool _tile_occlusion_query_in_use = false;
 
-  opengl::scoped::deferred_upload_buffers<1> _buffers;
+  OpenGL::Scoped::deferred_upload_buffers<1> _buffers;
 
   GLuint const& _chunk_instance_data_ubo = _buffers[0];
-  opengl::ChunkInstanceDataUniformBlock _chunk_instance_data[256];
+  OpenGL::ChunkInstanceDataUniformBlock _chunk_instance_data[256];
   std::array<float, 145 * 256 * 4> _chunk_heightmap_buffer;
 
   unsigned _chunk_update_flags;
@@ -252,7 +252,7 @@ private:
   bool _load_models;
   World* _world;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 
   friend class MapChunk;
   friend class TextureSet;

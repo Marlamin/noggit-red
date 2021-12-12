@@ -16,7 +16,7 @@ class Selectable
 public:
   Selectable() = default;
 
-  virtual void updateDetails(noggit::ui::detail_infos* detail_widget) = 0;
+  virtual void updateDetails(Noggit::Ui::detail_infos* detail_widget) = 0;
 };
 
 struct selected_chunk_type : Selectable
@@ -36,7 +36,7 @@ struct selected_chunk_type : Selectable
     return chunk == other.chunk;
   }
 
-  virtual void updateDetails(noggit::ui::detail_infos* detail_widget) override;
+  virtual void updateDetails(Noggit::Ui::detail_infos* detail_widget) override;
 };
 
 using selected_object_type = SceneObject*;

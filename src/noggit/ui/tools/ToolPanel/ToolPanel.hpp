@@ -9,9 +9,9 @@
 
 #include <vector>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui::tools
+  namespace Ui::Tools
   {
     class ToolPanel : public QDockWidget
     {
@@ -24,7 +24,7 @@ namespace noggit
       void registerTool(QString const& title, QWidget* widget);
 
     private:
-      Ui::toolPanel _ui;
+      ::Ui::toolPanel _ui;
       std::vector<QString> _titles;
       std::vector<QWidget*> _widgets;
 

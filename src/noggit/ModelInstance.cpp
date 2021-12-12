@@ -14,14 +14,14 @@
 #include <opengl/shader.hpp>
 
 ModelInstance::ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
-                             , noggit::NoggitRenderContext context)
+                             , Noggit::NoggitRenderContext context)
   : SceneObject(SceneObjectTypes::eMODEL, context)
   , model(file_key, context)
 {
 }
 
 ModelInstance::ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
-                             , ENTRY_MDDF const*d, noggit::NoggitRenderContext context)
+                             , ENTRY_MDDF const*d, Noggit::NoggitRenderContext context)
   : SceneObject(SceneObjectTypes::eMODEL, context)
   , model(file_key, context)
 {
@@ -44,7 +44,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
 
   if (is_current_selection)
   {
-    opengl::primitives::wire_box::getInstance(_context).draw ( model_view
+    OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
       , transformMatrix()
       , { 1.0f, 1.0f, 0.0f, 1.0f }
@@ -52,7 +52,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , misc::transform_model_box_coords(model->header.collision_box_max)
       );
 
-    opengl::primitives::wire_box::getInstance(_context).draw ( model_view
+    OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
       , transformMatrix()
       , {1.0f, 1.0f, 1.0f, 1.0f}
@@ -60,7 +60,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , misc::transform_model_box_coords(model->header.bounding_box_max)
       );
 
-    opengl::primitives::wire_box::getInstance(_context).draw ( model_view
+    OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
       , glm::mat4x4(1)
       , {0.0f, 1.0f, 0.0f, 1.0f}
@@ -70,7 +70,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
   }
   else
   {
-    opengl::primitives::wire_box::getInstance(_context).draw ( model_view
+    OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
       , transformMatrix()
       , {0.5f, 0.5f, 0.5f, 1.0f}
@@ -222,7 +222,7 @@ glm::vec3* ModelInstance::getExtents()
   return &extents[0];
 }
 
-void ModelInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
+void ModelInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 {
   std::stringstream select_info;
 
@@ -261,7 +261,7 @@ void ModelInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
 
 wmo_doodad_instance::wmo_doodad_instance(BlizzardArchive::Listfile::FileKey const& file_key
                                          , BlizzardArchive::ClientFile* f
-                                         , noggit::NoggitRenderContext context)
+                                         , Noggit::NoggitRenderContext context)
   : ModelInstance(file_key, context)
 {
   float ff[4];

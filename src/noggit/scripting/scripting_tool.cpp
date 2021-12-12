@@ -23,9 +23,9 @@
 
 #define CUR_PROFILE_PATH "__cur_profile"
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     // TEMP: remove when exceptions are working
     namespace
@@ -319,5 +319,5 @@ namespace noggit
     {
       return _noggit_settings;
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

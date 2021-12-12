@@ -31,9 +31,9 @@ private:
   bool _need_doodadset_update = true;
 
 public:
-  WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, noggit::NoggitRenderContext context);
+  WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, Noggit::NoggitRenderContext context);
 
-  explicit WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context);
+  explicit WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context);
 
   WMOInstance(WMOInstance const& other) = default;
   WMOInstance& operator=(WMOInstance const& other) = default;
@@ -79,7 +79,7 @@ public:
     return *this;
   }
 
-  void draw ( opengl::scoped::use_program& wmo_shader
+  void draw ( OpenGL::Scoped::use_program& wmo_shader
             , glm::mat4x4 const& model_view
             , glm::mat4x4 const& projection
             , math::frustum const& frustum
@@ -100,7 +100,7 @@ public:
   void recalcExtents() override;
   void ensureExtents() override;
   bool finishedLoading() override { return wmo->finishedLoading(); };
-  virtual void updateDetails(noggit::ui::detail_infos* detail_widget) override;
+  virtual void updateDetails(Noggit::Ui::detail_infos* detail_widget) override;
 
   [[nodiscard]]
   AsyncObject* instance_model() const override { return wmo.get(); };

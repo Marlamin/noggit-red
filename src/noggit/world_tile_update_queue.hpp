@@ -14,7 +14,7 @@
 class SceneObject;
 class World;
 
-namespace noggit
+namespace Noggit
 {
   struct instance_update;
 

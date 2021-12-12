@@ -8,7 +8,7 @@
 
 #include <QInputDialog>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 LogicReturnNode::LogicReturnNode()
 : LogicNodeBase()

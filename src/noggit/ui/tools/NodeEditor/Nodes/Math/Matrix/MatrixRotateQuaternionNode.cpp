@@ -8,7 +8,7 @@
 #include <external/glm/gtx/quaternion.hpp>
 
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 MatrixRotateQuaternionNode::MatrixRotateQuaternionNode()
 : BaseNode()

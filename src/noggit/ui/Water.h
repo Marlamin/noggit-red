@@ -15,9 +15,9 @@ class QSpinBox;
 class World;
 class QComboBox;
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class water : public QWidget
     {

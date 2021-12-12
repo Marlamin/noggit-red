@@ -16,7 +16,7 @@
 
 class MapIndex;
 
-namespace noggit
+namespace Noggit
 {
 
 struct map_horizon_tile
@@ -60,15 +60,15 @@ public:
 
     map_horizon_batch _batches[64][64];
 
-    opengl::scoped::deferred_upload_vertex_arrays<1> _vaos;
+    OpenGL::Scoped::deferred_upload_vertex_arrays<1> _vaos;
     GLuint const& _vao = _vaos[0];
-    opengl::scoped::buffers<2> _buffers;
+    OpenGL::Scoped::buffers<2> _buffers;
     GLuint const& _index_buffer = _buffers[0];
     GLuint const& _vertex_buffer = _buffers[1];
-    std::unique_ptr<opengl::program> _map_horizon_program;
+    std::unique_ptr<OpenGL::program> _map_horizon_program;
   };
 
-  class minimap : public opengl::texture
+  class minimap : public OpenGL::texture
   {
   public:
     minimap(const map_horizon& horizon);

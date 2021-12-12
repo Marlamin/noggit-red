@@ -10,9 +10,9 @@
 class MapChunk;
 class World;
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     class script_context;
     class model_iterator;
@@ -61,5 +61,5 @@ namespace noggit
     };
 
     void register_selection(script_context * state);
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

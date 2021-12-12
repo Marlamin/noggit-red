@@ -3,8 +3,8 @@
 
 #include <vector>
 
-namespace noggit {
-	namespace scripting {
+namespace Noggit {
+	namespace Scripting {
 		class selection;
 		class image;
 		class script_context;

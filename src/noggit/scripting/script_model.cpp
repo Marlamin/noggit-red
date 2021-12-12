@@ -13,9 +13,9 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/case_conv.hpp>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     model::model (script_context* ctx, SceneObject* object)
       : script_object(ctx)
@@ -154,5 +154,5 @@ namespace noggit
         , "replace", &model::replace
       );
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

@@ -3,7 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
-namespace noggit::project
+namespace Noggit::project
 {
 	struct NoggitProjectConfiguration
 	{

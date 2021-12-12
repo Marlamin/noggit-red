@@ -7,7 +7,7 @@
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 GetChunkNode::GetChunkNode()
 : ContextLogicNodeBase()
@@ -28,7 +28,7 @@ void GetChunkNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   MapTile* tile = defaultPortData<TileData>(PortType::In, 1)->value();
 

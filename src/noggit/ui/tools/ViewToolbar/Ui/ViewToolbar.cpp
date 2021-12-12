@@ -5,8 +5,8 @@
 #include <noggit/ui/font_awesome.hpp>
 #include <QSlider>
 
-using namespace noggit::ui;
-using namespace noggit::ui::tools::ViewToolbar::Ui;
+using namespace Noggit::Ui;
+using namespace Noggit::Ui::Tools::ViewToolbar::Ui;
 
 ViewToolbar::ViewToolbar(MapView* mapView)
   : _tool_group(this)
@@ -55,7 +55,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   undo_stack_popup->setMinimumWidth(160);
   undo_stack_popup->setMinimumHeight(300);
   auto layout = new QVBoxLayout(undo_stack_popup);
-  auto action_navigator = new noggit::ui::tools::ActionHistoryNavigator(undo_stack_popup);
+  auto action_navigator = new Noggit::Ui::Tools::ActionHistoryNavigator(undo_stack_popup);
   action_navigator->setMinimumWidth(160);
   action_navigator->setMinimumHeight(300);
   layout->addWidget(undo_stack_popup);
@@ -85,7 +85,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
 
 }
 
-void ViewToolbar::add_tool_icon(noggit::bool_toggle_property* view_state, const QString& name, const font_noggit::icons& icon)
+void ViewToolbar::add_tool_icon(Noggit::bool_toggle_property* view_state, const QString& name, const font_noggit::icons& icon)
 {
   auto action = addAction(font_noggit_icon{icon}, name);
 
@@ -94,7 +94,7 @@ void ViewToolbar::add_tool_icon(noggit::bool_toggle_property* view_state, const 
     view_state->set(!view_state->get());
   });
 
-  connect (view_state, &noggit::bool_toggle_property::changed, [this, action, view_state] () {
+  connect (view_state, &Noggit::bool_toggle_property::changed, [this, action, view_state] () {
     action->setChecked(view_state->get());
   });
 

@@ -4,9 +4,9 @@
 
 #include <QtWidgets/QLabel>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class clickable_label : public QLabel
     {

@@ -11,7 +11,7 @@
 
 #include <external/NodeEditor/include/nodes/Node>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 SetVariableNodeBase::SetVariableNodeBase()
 : LogicNodeBase()

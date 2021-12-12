@@ -5,7 +5,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 MoveSelectedObjectInstancesNode::MoveSelectedObjectInstancesNode()
 : ContextLogicNodeBase()
@@ -24,7 +24,7 @@ void MoveSelectedObjectInstancesNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   auto delta_data = defaultPortData<Vector3DData>(PortType::In, 1);
   glm::vec3 const& delta = delta_data->value();

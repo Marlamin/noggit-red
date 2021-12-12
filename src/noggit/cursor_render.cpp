@@ -4,7 +4,7 @@
 #include "math/trig.hpp"
 #include <opengl/shader.hpp>
 
-namespace noggit
+namespace Noggit
 {
   void cursor_render::draw(mode cursor_mode, glm::mat4x4 const& mvp, glm::vec4 color, glm::vec3 const& pos, float radius, float inner_radius_ratio)
   {
@@ -13,14 +13,14 @@ namespace noggit
       upload();
     }
 
-    opengl::scoped::use_program shader {*_cursor_program.get()};
+    OpenGL::Scoped::use_program shader {*_cursor_program.get()};
 
     shader.uniform("model_view_projection", mvp);
     shader.uniform("cursor_pos", glm::vec3(pos.x,pos.y,pos.z));
     shader.uniform("color", color);
     shader.uniform("radius", radius);
 
-    opengl::scoped::vao_binder const _ (_vaos[static_cast<int>(cursor_mode)]);
+    OpenGL::Scoped::vao_binder const _ (_vaos[static_cast<int>(cursor_mode)]);
 
     gl.drawElements(GL_LINES, _indices_count[cursor_mode], GL_UNSIGNED_SHORT, nullptr);
 
@@ -37,13 +37,13 @@ namespace noggit
     _vbos.upload();
 
     _cursor_program.reset
-      ( new opengl::program
-          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("cursor_vs") }
-          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("cursor_fs") }
+      ( new OpenGL::program
+          { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("cursor_vs") }
+          , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("cursor_fs") }
           }
       );    
 
-    opengl::scoped::use_program shader {*_cursor_program.get()};
+    OpenGL::Scoped::use_program shader {*_cursor_program.get()};
 
     create_circle_buffer(shader);
     create_sphere_buffer(shader);
@@ -53,7 +53,7 @@ namespace noggit
     _uploaded = true;
   }
 
-  void cursor_render::create_circle_buffer(opengl::scoped::use_program& shader)
+  void cursor_render::create_circle_buffer(OpenGL::Scoped::use_program& shader)
   {
     std::vector<glm::vec3> vertices;
     std::vector<std::uint16_t> indices;
@@ -76,19 +76,19 @@ namespace noggit
     gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
 
-    opengl::scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
+    OpenGL::Scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
 
     {
-      opengl::scoped::vao_binder const _(_vaos[id]);
+      OpenGL::Scoped::vao_binder const _(_vaos[id]);
 
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
+      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
       shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       indices_binder.bind();
     }
   }
 
-  void cursor_render::create_sphere_buffer(opengl::scoped::use_program& shader)
+  void cursor_render::create_sphere_buffer(OpenGL::Scoped::use_program& shader)
   {
     std::vector<glm::vec3> vertices;
     std::vector<std::uint16_t> indices;
@@ -140,19 +140,19 @@ namespace noggit
     gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
 
-    opengl::scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
+    OpenGL::Scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
 
     {
-      opengl::scoped::vao_binder const _(_vaos[id]);
+      OpenGL::Scoped::vao_binder const _(_vaos[id]);
 
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
+      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
       shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       indices_binder.bind();
     }
   }
 
-  void cursor_render::create_square_buffer(opengl::scoped::use_program& shader)
+  void cursor_render::create_square_buffer(OpenGL::Scoped::use_program& shader)
   {
     std::vector<glm::vec3> vertices = 
     {
@@ -171,12 +171,12 @@ namespace noggit
     gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
 
-    opengl::scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
+    OpenGL::Scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
 
     {
-      opengl::scoped::vao_binder const _(_vaos[id]);
+      OpenGL::Scoped::vao_binder const _(_vaos[id]);
 
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
+      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
       shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       indices_binder.bind();
@@ -185,7 +185,7 @@ namespace noggit
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
-  void cursor_render::create_cube_buffer(opengl::scoped::use_program& shader)
+  void cursor_render::create_cube_buffer(OpenGL::Scoped::use_program& shader)
   {
     std::vector<glm::vec3> vertices =
     {
@@ -213,12 +213,12 @@ namespace noggit
     gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
 
-    opengl::scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
+    OpenGL::Scoped::index_buffer_manual_binder indices_binder(_vbos[id * 2 + 1]);
 
     {
-      opengl::scoped::vao_binder const _(_vaos[id]);
+      OpenGL::Scoped::vao_binder const _(_vaos[id]);
 
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
+      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> vertices_vbo(_vbos[id * 2]);
       shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
       indices_binder.bind();

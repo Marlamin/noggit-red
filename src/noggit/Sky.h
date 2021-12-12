@@ -55,7 +55,7 @@ public:
   glm::vec3 pos;
   float r1, r2;
 
-  explicit Sky(DBCFile::Iterator data, noggit::NoggitRenderContext context);
+  explicit Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context);
 
   std::vector<SkyColor> colorRows[36];
   std::vector<SkyFloatParam> floatParams[6];
@@ -93,7 +93,7 @@ private:
   float _glow;
   bool _selected;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 };
 
 enum SkyColorNames 
@@ -154,7 +154,7 @@ public:
   std::vector<Sky> skies;
   std::vector<glm::vec3> color_set = std::vector<glm::vec3>(NUM_SkyColorNames);
 
-  explicit Skies(unsigned int mapid, noggit::NoggitRenderContext context);
+  explicit Skies(unsigned int mapid, Noggit::NoggitRenderContext context);
 
   Sky* findSkyWeights(glm::vec3 pos);
   void update_sky_colors(glm::vec3 pos, int time);
@@ -162,7 +162,7 @@ public:
   bool draw ( glm::mat4x4 const& model_view
             , glm::mat4x4 const& projection
             , glm::vec3 const& camera_pos
-            , opengl::scoped::use_program& m2_shader
+            , OpenGL::Scoped::use_program& m2_shader
             , math::frustum const& frustum
             , const float& cull_distance
             , int animtime
@@ -210,18 +210,18 @@ private:
 
   void upload();
   void update_color_buffer();
-  void update_vao(opengl::scoped::use_program& shader);
+  void update_vao(OpenGL::Scoped::use_program& shader);
 
-  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  OpenGL::Scoped::deferred_upload_vertex_arrays<1> _vertex_array;
   GLuint const& _vao = _vertex_array[0];
-  opengl::scoped::deferred_upload_buffers<3> _buffers;
+  OpenGL::Scoped::deferred_upload_buffers<3> _buffers;
   GLuint const& _vertices_vbo = _buffers[0];
   GLuint const& _colors_vbo = _buffers[1];
   GLuint const& _indices_vbo = _buffers[2];
 
-  std::unique_ptr<opengl::program> _program;
+  std::unique_ptr<OpenGL::program> _program;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 
-  opengl::primitives::sphere _sphere_render;
+  OpenGL::primitives::sphere _sphere_render;
 };

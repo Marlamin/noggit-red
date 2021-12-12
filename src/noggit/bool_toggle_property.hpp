@@ -4,7 +4,7 @@
 
 #include <QtCore/QObject>
 
-namespace noggit
+namespace Noggit
 {
   struct bool_toggle_property : QObject
   {

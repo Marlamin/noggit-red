@@ -26,9 +26,9 @@
 #include <QByteArray>
 #include <QPalette>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     MinimapCreator::MinimapCreator (
         MapView* mapView,

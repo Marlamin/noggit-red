@@ -9,8 +9,8 @@
 #include <QDateTime>
 #include <QLabel>
 
-using namespace noggit::ui::tools;
-using namespace noggit::ui;
+using namespace Noggit::Ui::Tools;
+using namespace Noggit::Ui;
 
 ActionHistoryNavigator::ActionHistoryNavigator(QWidget* parent)
 : QWidget(parent)
@@ -26,11 +26,11 @@ ActionHistoryNavigator::ActionHistoryNavigator(QWidget* parent)
 
   auto action_mgr = NOGGIT_ACTION_MGR;
 
-  connect(action_mgr, &noggit::ActionManager::popBack, this, &ActionHistoryNavigator::popBack);
-  connect(action_mgr, &noggit::ActionManager::popFront, this, &ActionHistoryNavigator::popFront);
-  connect(action_mgr, &noggit::ActionManager::addedAction, this, &ActionHistoryNavigator::pushAction);
-  connect(action_mgr, &noggit::ActionManager::purged, this, &ActionHistoryNavigator::purge);
-  connect(action_mgr, &noggit::ActionManager::currentActionChanged, this, &ActionHistoryNavigator::changeCurrentAction);
+  connect(action_mgr, &Noggit::ActionManager::popBack, this, &ActionHistoryNavigator::popBack);
+  connect(action_mgr, &Noggit::ActionManager::popFront, this, &ActionHistoryNavigator::popFront);
+  connect(action_mgr, &Noggit::ActionManager::addedAction, this, &ActionHistoryNavigator::pushAction);
+  connect(action_mgr, &Noggit::ActionManager::purged, this, &ActionHistoryNavigator::purge);
+  connect(action_mgr, &Noggit::ActionManager::currentActionChanged, this, &ActionHistoryNavigator::changeCurrentAction);
 
   connect(_active_action_button_group, &QButtonGroup::idClicked
           , [=](int index)
@@ -42,7 +42,7 @@ ActionHistoryNavigator::ActionHistoryNavigator(QWidget* parent)
 
 }
 
-void ActionHistoryNavigator::pushAction(noggit::Action* action)
+void ActionHistoryNavigator::pushAction(Noggit::Action* action)
 {
   auto item = new QListWidgetItem();
   _action_stack->insertItem(_action_stack->count(), item);

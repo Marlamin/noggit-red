@@ -12,9 +12,9 @@
 
 class World;
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class rotation_editor : public QWidget
     {

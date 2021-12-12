@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <array>
 
-namespace opengl
+namespace OpenGL
 {
   typedef GLuint light;
 

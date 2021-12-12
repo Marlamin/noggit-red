@@ -25,7 +25,7 @@ namespace BlizzardArchive
 struct LiquidLayerDrawCallData
 {
   unsigned n_used_chunks = 0;
-  std::array<opengl::LiquidChunkInstanceDataUniformBlock, 256> chunk_data;
+  std::array<OpenGL::LiquidChunkInstanceDataUniformBlock, 256> chunk_data;
   std::array<std::array<glm::vec4, 9 * 9>, 256> vertex_data ;
   std::vector<int> texture_samplers;
   GLuint chunk_data_buf = 0;
@@ -47,7 +47,7 @@ public:
             , const float& cull_distance
             , const glm::vec3& camera
             , bool camera_moved
-            , opengl::scoped::use_program& water_shader
+            , OpenGL::Scoped::use_program& water_shader
             , int animtime
             , int layer
             , display_mode display

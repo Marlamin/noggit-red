@@ -36,7 +36,7 @@ public:
   TextureSet() = delete;
   TextureSet(MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
              , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
-             , noggit::NoggitRenderContext context);
+             , Noggit::NoggitRenderContext context);
 
   int addTexture(scoped_blp_texture_reference texture);
   void eraseTexture(size_t id);
@@ -126,5 +126,5 @@ private:
 
   bool _do_not_convert_alphamaps;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 };

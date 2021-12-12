@@ -3,9 +3,9 @@
 #include <filesystem>
 #include <string>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     class script_context;
     class scripting_tool;
@@ -17,5 +17,5 @@ namespace noggit
     bool path_exists(std::string const& path);
     void register_filesystem(script_context * state);
     void mkdirs(std::string const& path);
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

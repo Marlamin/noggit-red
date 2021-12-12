@@ -21,10 +21,10 @@
 class World;
 class MapView;
 
-namespace noggit
+namespace Noggit
 {
   class camera;
-  namespace scripting
+  namespace Scripting
   {
     class script_context;
     class script_settings;
@@ -77,5 +77,5 @@ namespace noggit
 
     // TEMP: remove when exceptions are working
     void set_cur_exception(std::string const& exception);
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

@@ -2,12 +2,12 @@
 
 #pragma once
 
-namespace opengl
+namespace OpenGL
 {
   struct shader;
   struct program;
 
-  namespace scoped
+  namespace Scoped
   {
     struct use_program;
   }

@@ -23,9 +23,9 @@
 
 #include <functional>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     shader_tool::shader_tool(MapView* map_view, QWidget* parent)
       : QWidget(parent)
@@ -35,7 +35,7 @@ namespace noggit
 
       auto layout (new QFormLayout(this));
 
-      _radius_slider = new noggit::ui::tools::UiCommon::ExtendedSlider (this);
+      _radius_slider = new Noggit::Ui::Tools::UiCommon::ExtendedSlider (this);
       _radius_slider->setPrefix("Radius:");
       _radius_slider->setRange(0, 1000);
       _radius_slider->setDecimals(2);
@@ -43,7 +43,7 @@ namespace noggit
 
       layout->addRow (_radius_slider);
 
-      _speed_slider = new noggit::ui::tools::UiCommon::ExtendedSlider (this);
+      _speed_slider = new Noggit::Ui::Tools::UiCommon::ExtendedSlider (this);
       _speed_slider->setPrefix("Speed:");
       _speed_slider->setRange (0, 10);
       _speed_slider->setSingleStep (1);
@@ -92,7 +92,7 @@ namespace noggit
       _use_image_colors->setChecked(true);
       layout->addRow("Use image colors", _use_image_colors);
 
-      _image_mask_group = new noggit::ui::tools::ImageMaskSelector(map_view, this);
+      _image_mask_group = new Noggit::Ui::Tools::ImageMaskSelector(map_view, this);
       _image_mask_group->setContinuousActionName("Paint");
       _image_mask_group->setBrushModeVisible(parent == map_view);
       _image_mask_group->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum));
@@ -152,9 +152,9 @@ namespace noggit
                });
 
 
-      connect (_image_mask_group, &noggit::ui::tools::ImageMaskSelector::rotationUpdated, this, &shader_tool::updateMaskImage);
-      connect (_radius_slider, &noggit::ui::tools::UiCommon::ExtendedSlider::valueChanged, this, &shader_tool::updateMaskImage);
-      connect(_image_mask_group, &noggit::ui::tools::ImageMaskSelector::pixmapUpdated, this, &shader_tool::updateMaskImage);
+      connect (_image_mask_group, &Noggit::Ui::Tools::ImageMaskSelector::rotationUpdated, this, &shader_tool::updateMaskImage);
+      connect (_radius_slider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged, this, &shader_tool::updateMaskImage);
+      connect(_image_mask_group, &Noggit::Ui::Tools::ImageMaskSelector::pixmapUpdated, this, &shader_tool::updateMaskImage);
 
       setMinimumWidth(250);
       setMaximumWidth(250);

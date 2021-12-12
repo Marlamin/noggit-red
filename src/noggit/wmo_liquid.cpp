@@ -213,7 +213,7 @@ int wmo_liquid::initGeometry(BlizzardArchive::ClientFile* f)
   return last_liquid_id;
 }
 
-void wmo_liquid::upload(opengl::scoped::use_program& water_shader)
+void wmo_liquid::upload(OpenGL::Scoped::use_program& water_shader)
 {
   _buffer.upload();
   _vertex_array.upload();
@@ -224,18 +224,18 @@ void wmo_liquid::upload(opengl::scoped::use_program& water_shader)
   gl.bufferData<GL_ARRAY_BUFFER, glm::vec2>(_tex_coord_buffer, tex_coords, GL_STATIC_DRAW);
   gl.bufferData<GL_ARRAY_BUFFER, float>(_depth_buffer, depths, GL_STATIC_DRAW);
 
-  opengl::scoped::index_buffer_manual_binder indices_binder (_indices_buffer);
+  OpenGL::Scoped::index_buffer_manual_binder indices_binder (_indices_buffer);
 
   {
-    opengl::scoped::vao_binder const _ (_vao);
+    OpenGL::Scoped::vao_binder const _ (_vao);
     
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_buffer);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_buffer);
     water_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const tex_coord_binder(_tex_coord_buffer);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const tex_coord_binder(_tex_coord_buffer);
     water_shader.attrib("tex_coord", 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const depth_binder(_depth_buffer);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const depth_binder(_depth_buffer);
     water_shader.attrib("depth", 1, GL_FLOAT, GL_FALSE, 0, 0);
 
     indices_binder.bind();
@@ -250,18 +250,18 @@ void wmo_liquid::draw ( glm::mat4x4 const& transform
                       , int animtime
                       )
 {
-  opengl::scoped::use_program water_shader(render.shader_program());
+  OpenGL::Scoped::use_program water_shader(render.shader_program());
 
   if (!_uploaded)
   {
     upload(water_shader);
   }
 
-  opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+  OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
 
   water_shader.uniform ("transform", transform);
 
-  opengl::scoped::vao_binder const _ (_vao);
+  OpenGL::Scoped::vao_binder const _ (_vao);
 
   render.force_texture_update();
   render.prepare_draw (water_shader, _liquid_id, animtime);

@@ -8,14 +8,14 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
 
-namespace noggit {
-  namespace scripting {
+namespace Noggit {
+  namespace Scripting {
     class scripting_tool;
     class script_settings;
 
     class script_profiles : public QGroupBox {
     public:
-      script_profiles(noggit::scripting::scripting_tool * tool);
+      script_profiles(Noggit::Scripting::scripting_tool * tool);
       void select_profile(int profile);
       std::string get_cur_profile();
       void clear();
@@ -23,7 +23,7 @@ namespace noggit {
       int profile_count();
       std::string get_profile(int index);
     private:
-      noggit::scripting::scripting_tool* _tool;
+      Noggit::Scripting::scripting_tool* _tool;
       QGridLayout* _select_column;
       QComboBox* _selection;
       QLineEdit* _name_entry;

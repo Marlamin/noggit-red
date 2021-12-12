@@ -11,7 +11,7 @@
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 
-WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, noggit::NoggitRenderContext context)
+WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, Noggit::NoggitRenderContext context)
   : SceneObject(SceneObjectTypes::eWMO, context)
   , wmo(file_key, context)
   , mFlags(d->flags)
@@ -30,7 +30,7 @@ WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENT
   change_doodadset(_doodadset);
 }
 
-WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
+WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context)
   : SceneObject(SceneObjectTypes::eWMO, context)
   , wmo(file_key, context)
   , mFlags(0)
@@ -48,7 +48,7 @@ WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, nog
 }
 
 
-void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
+void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
                        , glm::mat4x4 const& model_view
                        , glm::mat4x4 const& projection
                        , math::frustum const& frustum
@@ -127,7 +127,7 @@ void WMOInstance::draw ( opengl::scoped::use_program& wmo_shader
     glm::vec4 color = force_box ? glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)
         : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
-    opengl::primitives::wire_box::getInstance(_context).draw(model_view
+    OpenGL::primitives::wire_box::getInstance(_context).draw(model_view
        , projection
        , glm::mat4x4(glm::mat4x4(1))
        , color
@@ -157,7 +157,7 @@ void WMOInstance::ensureExtents()
   // TODO: optimize
 }
 
-void WMOInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
+void WMOInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 {
   std::stringstream select_info;
 

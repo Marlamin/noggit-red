@@ -5,9 +5,9 @@
 
 class QMouseEvent;
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class TextureList : public QListView
     {

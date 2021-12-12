@@ -4,7 +4,7 @@
 #include <glm/mat4x4.hpp>
 #include "math/trig.hpp"
 
-namespace noggit
+namespace Noggit
 {
   //! \todo there should be a seperate class for tile mode
   class camera

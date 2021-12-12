@@ -10,7 +10,7 @@
 
 class MapView;
 
-namespace noggit::ui::tools
+namespace Noggit::Ui::Tools
 {
   class ImageMaskSelector : public QWidget
   {
@@ -39,7 +39,7 @@ namespace noggit::ui::tools
     void rotationUpdated(int value);
 
   private:
-    Ui::imageMaskSelector _ui;
+    ::Ui::imageMaskSelector _ui;
     ImageBrowser* _image_browser;
     QPixmap _pixmap;
     MapView* _map_view;

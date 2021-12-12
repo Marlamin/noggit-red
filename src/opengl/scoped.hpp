@@ -10,9 +10,9 @@
 
 #include <stdexcept>
 
-namespace opengl
+namespace OpenGL
 {
-  namespace scoped
+  namespace Scoped
   {
     template<GLenum cap, GLboolean value>
       class bool_setter

@@ -10,9 +10,9 @@
 #include <noggit/ui/font_noggit.hpp>
 #include <noggit/Log.h>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
 
       font_noggit_icon_engine::font_noggit_icon_engine(const QString& text)

@@ -7,9 +7,9 @@
 #include <memory>
 
 
-opengl::context gl;
+OpenGL::context gl;
 
-namespace opengl
+namespace OpenGL
 {
 
   context::scoped_setter::scoped_setter (context& context_, QOpenGLContext* current_context)

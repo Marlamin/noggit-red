@@ -16,7 +16,7 @@
 class MapView;
 class World;
 
-namespace noggit::ui::tools
+namespace Noggit::Ui::Tools
 {
   class BrushStack : public QWidget
   {
@@ -44,7 +44,7 @@ namespace noggit::ui::tools
 
     void addAction(BrushStackItem* brush_stack_item);
 
-    Ui::brushStack _ui;
+    ::Ui::brushStack _ui;
     QWidget* _add_popup;
     QComboBox* _add_operation_combo;
     MapView* _map_view;

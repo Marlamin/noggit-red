@@ -13,8 +13,8 @@
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
 
-namespace noggit {
-  namespace scripting {
+namespace Noggit {
+  namespace Scripting {
     class scripting_tool;
     class script_profiles;
     class script_context;
@@ -102,7 +102,7 @@ namespace noggit {
       float _radius = 0;
       float _inner_radius = 0;
     private:
-      noggit::scripting::scripting_tool* _tool;
+      Noggit::Scripting::scripting_tool* _tool;
       std::vector<QWidget*> _widgets;
       nlohmann::json _json;
       std::map<std::string, QComboBox*> _string_arrays;

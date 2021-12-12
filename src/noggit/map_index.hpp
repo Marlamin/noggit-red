@@ -170,7 +170,7 @@ public:
       );
   }
 
-  MapIndex(const std::string& pBasename, int map_id, World*, noggit::NoggitRenderContext context, bool create_empty = false);
+  MapIndex(const std::string& pBasename, int map_id, World*, Noggit::NoggitRenderContext context, bool create_empty = false);
 
   void set_basename(const std::string& pBasename);
 
@@ -285,7 +285,7 @@ private:
   //! \todo REMOVE!
   World* _world;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 
   std::mutex _mutex;
 };

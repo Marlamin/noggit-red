@@ -19,9 +19,9 @@
 #include <noggit/Model.h>
 #include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui::tools::AssetBrowser
+  namespace Ui::Tools::AssetBrowser
   {
 
   class ModelViewer : public PreviewRenderer
@@ -30,7 +30,7 @@ namespace noggit
 
     public:
       explicit ModelViewer(QWidget* parent = nullptr
-          , noggit::NoggitRenderContext context = noggit::NoggitRenderContext::ASSET_BROWSER);
+          , Noggit::NoggitRenderContext context = Noggit::NoggitRenderContext::ASSET_BROWSER);
 
       void setModel(std::string const& filename) override;
       void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; };

@@ -269,9 +269,9 @@ using QtNodes::TypeConverterId;
         T_TO##Data().type()),                                       \
         TypeConverter{T_FROM##To##T_TO##TypeConverter()})
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::NodeEditor::Nodes
+    namespace Ui::Tools::NodeEditor::Nodes
     {
 
         static std::shared_ptr<DataModelRegistry> registerDataModels()

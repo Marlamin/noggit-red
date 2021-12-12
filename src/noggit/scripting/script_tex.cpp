@@ -12,8 +12,8 @@
 #define TEXTURE_UNITS_WIDTH 64
 #define TEXTURE_UNITS_PER_CHUNK 4096
 
-namespace noggit {
-  namespace scripting {
+namespace Noggit {
+  namespace Scripting {
 
     tex::tex(script_context * ctx, MapChunk* chunk, int index)
       : script_object(ctx)

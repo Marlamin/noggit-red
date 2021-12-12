@@ -2,9 +2,9 @@
 
 #include <noggit/ui/Toolbar.h>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     toolbar::toolbar(std::function<void (editing_mode)> set_editing_mode)
       : _set_editing_mode (set_editing_mode)

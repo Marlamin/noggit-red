@@ -1,7 +1,7 @@
 #ifndef NOGGIT_CONTEXTOBJECT_HPP
 #define NOGGIT_CONTEXTOBJECT_HPP
 
-namespace noggit
+namespace Noggit
 {
   enum NoggitRenderContext
   {

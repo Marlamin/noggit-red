@@ -44,7 +44,7 @@ struct BLPHeader;
 struct scoped_blp_texture_reference;
 struct blp_texture : public AsyncObject
 {
-  blp_texture (BlizzardArchive::Listfile::FileKey const& filename, noggit::NoggitRenderContext context);
+  blp_texture (BlizzardArchive::Listfile::FileKey const& filename, Noggit::NoggitRenderContext context);
   void finishLoading() override;
   virtual void waitForChildrenLoaded() override {};
 
@@ -68,7 +68,7 @@ struct blp_texture : public AsyncObject
   std::map<int, std::vector<uint8_t>>& compressed_data() { return _compressed_data; };
   boost::optional<GLint> const& compression_format() { return _compression_format; };
 
-  noggit::NoggitRenderContext getContext() { return _context; };
+  Noggit::NoggitRenderContext getContext() { return _context; };
 
   [[nodiscard]]
   async_priority loading_priority() const override
@@ -82,7 +82,7 @@ private:
   int _width;
   int _height;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 
   bool _is_specular = false;
   bool _is_tileset = false;
@@ -105,13 +105,13 @@ class TextureManager
 {
 public:
   static void report();
-  static void unload_all(noggit::NoggitRenderContext context);
-  static TexArrayParams& get_tex_array(int width, int height, int mip_level, noggit::NoggitRenderContext context);
-  static TexArrayParams& get_tex_array(GLint compression, int width, int height, int mip_level, std::map<int, std::vector<uint8_t>>& comp_data, noggit::NoggitRenderContext context);
+  static void unload_all(Noggit::NoggitRenderContext context);
+  static TexArrayParams& get_tex_array(int width, int height, int mip_level, Noggit::NoggitRenderContext context);
+  static TexArrayParams& get_tex_array(GLint compression, int width, int height, int mip_level, std::map<int, std::vector<uint8_t>>& comp_data, Noggit::NoggitRenderContext context);
 
 private:
   friend struct scoped_blp_texture_reference;
-  static noggit::AsyncObjectMultimap<blp_texture> _;
+  static Noggit::AsyncObjectMultimap<blp_texture> _;
   static std::array<std::unordered_map<std::tuple<GLint, int, int, int>, TexArrayParams, tuple_hash>, 7> _tex_arrays;
 
 };
@@ -119,7 +119,7 @@ private:
 struct scoped_blp_texture_reference
 {
   scoped_blp_texture_reference() = delete;
-  scoped_blp_texture_reference (std::string const& filename, noggit::NoggitRenderContext context);
+  scoped_blp_texture_reference (std::string const& filename, Noggit::NoggitRenderContext context);
   scoped_blp_texture_reference (scoped_blp_texture_reference const& other);
   scoped_blp_texture_reference (scoped_blp_texture_reference&&) = default;
   scoped_blp_texture_reference& operator= (scoped_blp_texture_reference const&) = delete;
@@ -137,10 +137,10 @@ private:
     void operator() (blp_texture*) const;
   };
   std::unique_ptr<blp_texture, Deleter> _blp_texture;
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 };
 
-namespace noggit
+namespace Noggit
 {
 
   class BLPRenderer
@@ -156,10 +156,10 @@ namespace noggit
     QOpenGLContext _context;
     QOpenGLFramebufferObjectFormat _fmt;
     QOffscreenSurface _surface;
-    std::unique_ptr<opengl::program> _program;
+    std::unique_ptr<OpenGL::program> _program;
 
-    opengl::scoped::deferred_upload_vertex_arrays<1> _vao;
-    opengl::scoped::deferred_upload_buffers<3> _buffers;
+    OpenGL::Scoped::deferred_upload_vertex_arrays<1> _vao;
+    OpenGL::Scoped::deferred_upload_buffers<3> _buffers;
 
   public:
     static BLPRenderer& getInstance()

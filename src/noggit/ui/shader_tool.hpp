@@ -19,9 +19,9 @@
 class World;
 class MapView;
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class shader_tool : public QWidget
     {
@@ -42,14 +42,14 @@ namespace noggit
 
       QSize sizeHint() const override;
 
-      noggit::ui::tools::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
+      Noggit::Ui::Tools::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
       QImage* getMaskImage() { return &_mask_image; }
       void updateMaskImage();
 
       glm::vec4& shaderColor() { return _color; };
 
-      noggit::ui::tools::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
-      noggit::ui::tools::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
       QDial* getMaskOrientationDial() { return _image_mask_group->getMaskOrientationDial(); };
 
       QJsonObject toJSON();
@@ -58,8 +58,8 @@ namespace noggit
     private:
       glm::vec4 _color;
 
-      noggit::ui::tools::UiCommon::ExtendedSlider* _radius_slider;
-      noggit::ui::tools::UiCommon::ExtendedSlider* _speed_slider;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* _radius_slider;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* _speed_slider;
       QSpinBox* _spin_hue;
       QSpinBox* _spin_saturation;
       QSpinBox* _spin_value;
@@ -73,7 +73,7 @@ namespace noggit
       color_widgets::GradientSlider* _slide_value;
       color_widgets::ColorListWidget* _color_palette;
 
-      noggit::ui::tools::ImageMaskSelector* _image_mask_group;
+      Noggit::Ui::Tools::ImageMaskSelector* _image_mask_group;
       QImage _mask_image;
       MapView* _map_view;
 

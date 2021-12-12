@@ -14,7 +14,7 @@ class LiquidTextureManager
 {
 public:
 
-  explicit LiquidTextureManager(noggit::NoggitRenderContext context);
+  explicit LiquidTextureManager(Noggit::NoggitRenderContext context);
   LiquidTextureManager() = delete;
 
   void upload();
@@ -28,7 +28,7 @@ private:
   // liquidTypeRecID : (array, (animation_x, animation_y), liquid_type)
   tsl::robin_map<unsigned, std::tuple<GLuint, glm::vec2, int, unsigned>> _texture_frames_map;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 };
 
 #endif //NOGGIT_LIQUIDTEXTUREMANAGER_HPP

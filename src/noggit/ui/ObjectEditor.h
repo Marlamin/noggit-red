@@ -16,9 +16,9 @@ class MapView;
 class QButtonGroup;
 class World;
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class model_import;
     class rotation_editor;
@@ -34,7 +34,7 @@ enum ModelPasteMode
   PASTE_MODE_COUNT
 };
 
-namespace noggit
+namespace Noggit
 {
   struct object_paste_params
   {
@@ -46,7 +46,7 @@ namespace noggit
     float maxScale = 1.1f;
   };
 
-  namespace ui
+  namespace Ui
   {
     class object_editor : public QWidget
     {

@@ -159,9 +159,9 @@ struct ModelRenderPass : ModelTexUnit
   boost::optional<ModelPixelShader> pixel_shader;
 
 
-  bool prepare_draw(opengl::scoped::use_program& m2_shader, Model *m, opengl::M2RenderState& model_render_state);
+  bool prepare_draw(OpenGL::Scoped::use_program& m2_shader, Model *m, OpenGL::M2RenderState& model_render_state);
   void after_draw();
-  void bind_texture(size_t index, Model* m, opengl::M2RenderState& model_render_state, opengl::scoped::use_program& m2_shader);
+  void bind_texture(size_t index, Model* m, OpenGL::M2RenderState& model_render_state, OpenGL::Scoped::use_program& m2_shader);
   void init_uv_types(Model* m);
 
   bool operator< (const ModelRenderPass &m) const
@@ -198,7 +198,7 @@ struct ModelLight {
   //Animation::M2Value<bool> Enabled;
 
   ModelLight(const BlizzardArchive::ClientFile&  f, const ModelLightDef &mld, int *global);
-  void setup(int time, opengl::light l, int animtime);
+  void setup(int time, OpenGL::light l, int animtime);
 };
 
 class Model : public AsyncObject
@@ -211,12 +211,12 @@ public:
     return std::vector<T>(start, start + count);
   }
 
-  Model(const std::string& name, noggit::NoggitRenderContext context );
+  Model(const std::string& name, Noggit::NoggitRenderContext context );
 
   void draw(glm::mat4x4 const& model_view
            , ModelInstance& instance
-           , opengl::scoped::use_program& m2_shader
-            , opengl::M2RenderState& model_render_state
+           , OpenGL::Scoped::use_program& m2_shader
+            , OpenGL::M2RenderState& model_render_state
            , math::frustum const& frustum
            , const float& cull_distance
            , const glm::vec3& camera
@@ -226,8 +226,8 @@ public:
            );
   void draw (glm::mat4x4 const& model_view
             , std::vector<glm::mat4x4> const& instances
-            , opengl::scoped::use_program& m2_shader
-            , opengl::M2RenderState& model_render_state
+            , OpenGL::Scoped::use_program& m2_shader
+            , OpenGL::M2RenderState& model_render_state
             , math::frustum const& frustum
             , const float& cull_distance
             , const glm::vec3& camera
@@ -238,14 +238,14 @@ public:
             , bool no_cull = false
             );
   void draw_particles( glm::mat4x4 const& model_view
-                     , opengl::scoped::use_program& particles_shader
+                     , OpenGL::Scoped::use_program& particles_shader
                      , std::size_t instance_count
                      );
-  void draw_ribbons( opengl::scoped::use_program& ribbons_shader
+  void draw_ribbons( OpenGL::Scoped::use_program& ribbons_shader
                    , std::size_t instance_count
                    );
 
-  void draw_box (opengl::scoped::use_program& m2_box_shader, std::size_t box_count);
+  void draw_box (OpenGL::Scoped::use_program& m2_box_shader, std::size_t box_count);
 
   std::vector<float> intersect (glm::mat4x4 const& model_view, math::ray const&, int animtime);
 
@@ -304,7 +304,7 @@ private:
   int _anim_time;
   int _global_animtime;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 
   void initCommon(const BlizzardArchive::ClientFile& f);
   bool isAnimated(const BlizzardArchive::ClientFile& f);
@@ -317,11 +317,11 @@ private:
   void animate(glm::mat4x4 const& model_view, int anim_id, int anim_time);
   void calcBones(glm::mat4x4 const& model_view, int anim, int time, int animation_time);
 
-  void lightsOn(opengl::light lbase);
-  void lightsOff(opengl::light lbase);
+  void lightsOn(OpenGL::light lbase);
+  void lightsOff(OpenGL::light lbase);
 
   void upload();
-  void setupVAO(opengl::scoped::use_program& m2_shader);
+  void setupVAO(OpenGL::Scoped::use_program& m2_shader);
 
   bool _finished_upload = false;
   bool _vao_setup = false;
@@ -329,8 +329,8 @@ private:
   std::vector<glm::vec3> _vertex_box_points;
 
   // buffers
-  opengl::scoped::deferred_upload_buffers<6> _buffers;
-  opengl::scoped::deferred_upload_vertex_arrays<2> _vertex_arrays;
+  OpenGL::Scoped::deferred_upload_buffers<6> _buffers;
+  OpenGL::Scoped::deferred_upload_vertex_arrays<2> _vertex_arrays;
 
   std::vector<uint16_t> const _box_indices = {5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7};
 

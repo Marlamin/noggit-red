@@ -22,15 +22,15 @@
 #include <vector>
 
 
-namespace noggit::ui::tools
+namespace Noggit::Ui::Tools
 {
 
-class PreviewRenderer : public noggit::ui::tools::ViewportManager::Viewport
+class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport
   {
     Q_OBJECT
 
   public:
-    explicit PreviewRenderer(int width, int height, noggit::NoggitRenderContext context, QWidget* parent = nullptr);
+    explicit PreviewRenderer(int width, int height, Noggit::NoggitRenderContext context, QWidget* parent = nullptr);
 
     void resetCamera(float x = 0.f, float y = 0.f, float z = 0.f, float roll = 0.f, float yaw = 120.f, float pitch = 20.f);
     QPixmap* renderToPixmap();
@@ -53,22 +53,22 @@ class PreviewRenderer : public noggit::ui::tools::ViewportManager::Viewport
   protected:
 
     bool _offscreen_mode = true;
-    noggit::camera _camera;
+    Noggit::camera _camera;
     QSettings* _settings;
     std::string _filename;
 
-    std::unique_ptr<opengl::program> _m2_program;
-    std::unique_ptr<opengl::program> _m2_instanced_program;
-    std::unique_ptr<opengl::program> _m2_particles_program;
-    std::unique_ptr<opengl::program> _m2_ribbons_program;
-    std::unique_ptr<opengl::program> _m2_box_program;
-    std::unique_ptr<opengl::program> _wmo_program;
-    std::unique_ptr<opengl::program> _liquid_program;
+    std::unique_ptr<OpenGL::program> _m2_program;
+    std::unique_ptr<OpenGL::program> _m2_instanced_program;
+    std::unique_ptr<OpenGL::program> _m2_particles_program;
+    std::unique_ptr<OpenGL::program> _m2_ribbons_program;
+    std::unique_ptr<OpenGL::program> _m2_box_program;
+    std::unique_ptr<OpenGL::program> _wmo_program;
+    std::unique_ptr<OpenGL::program> _liquid_program;
 
     std::vector<ModelInstance> _model_instances;
     std::vector<WMOInstance> _wmo_instances;
 
-    opengl::primitives::grid _grid;
+    OpenGL::primitives::grid _grid;
 
     float _animtime = 0.f;
 
@@ -108,12 +108,12 @@ class PreviewRenderer : public noggit::ui::tools::ViewportManager::Viewport
     glm::vec3 _ambient_light;
     glm::vec3 _light_dir;
 
-    opengl::scoped::deferred_upload_buffers<2> _buffers;
+    OpenGL::Scoped::deferred_upload_buffers<2> _buffers;
     GLuint const& _mvp_ubo = _buffers[0];
     GLuint const& _lighting_ubo = _buffers[1];
 
-    opengl::MVPUniformBlock _mvp_ubo_data;
-    opengl::LightingUniformBlock _lighting_ubo_data;
+    OpenGL::MVPUniformBlock _mvp_ubo_data;
+    OpenGL::LightingUniformBlock _lighting_ubo_data;
 
     LiquidTextureManager _liquid_texture_manager;
 

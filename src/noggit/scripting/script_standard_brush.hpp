@@ -5,9 +5,9 @@
 
 class World;
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     class scripting_tool;
     class script_context;
@@ -73,5 +73,5 @@ namespace noggit
     };
 
     void register_standard_brush(script_context * state);
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

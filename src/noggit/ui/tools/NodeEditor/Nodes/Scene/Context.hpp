@@ -11,9 +11,9 @@
 #include <QObject>
 #include <QJsonDocument>
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::NodeEditor::Nodes
+    namespace Ui::Tools::NodeEditor::Nodes
     {
         using VariableMap = tsl::robin_map<std::string, std::pair<std::string, std::shared_ptr<NodeData>>>;
 

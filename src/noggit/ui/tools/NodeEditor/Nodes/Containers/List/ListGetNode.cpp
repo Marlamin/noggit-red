@@ -10,7 +10,7 @@
 
 using QtNodes::Node;
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 ListGetNode::ListGetNode()
 : LogicNodeBase()

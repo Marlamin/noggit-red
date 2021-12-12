@@ -8,10 +8,10 @@
 #include <QWidget>
 
 
-namespace noggit::ui
+namespace Noggit::Ui
 {
   template <typename T>
-  Ui::TitleBar* setupFramelessWindow(QWidget* titlebar_target, T* window,  QSize minimum_size, QSize maximum_size, bool is_resizeable = true)
+  ::Ui::TitleBar* setupFramelessWindow(QWidget* titlebar_target, T* window,  QSize minimum_size, QSize maximum_size, bool is_resizeable = true)
   {
 
     QSettings settings;
@@ -20,7 +20,7 @@ namespace noggit::ui
       return nullptr;
     }
 
-    auto titleBarWidget = new Ui::TitleBar;
+    auto titleBarWidget = new ::Ui::TitleBar;
     titleBarWidget->setupUi(titlebar_target);
     titleBarWidget->windowTitle->setText(window->windowTitle());
 

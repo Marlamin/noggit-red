@@ -17,8 +17,8 @@
 #include <QDial>
 #include <QSlider>
 
-using namespace noggit::ui::tools::AssetBrowser::Ui;
-using namespace noggit::ui;
+using namespace Noggit::Ui::Tools::AssetBrowser::Ui;
+using namespace Noggit::Ui;
 
 AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
 : QMainWindow(parent, Qt::Window)
@@ -80,7 +80,7 @@ AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
   ui->listfileTree->setModel(_sort_model);
 
   _preview_renderer = new PreviewRenderer(90, 90,
-      noggit::NoggitRenderContext::ASSET_BROWSER_PREVIEW, this);
+      Noggit::NoggitRenderContext::ASSET_BROWSER_PREVIEW, this);
   _preview_renderer->setVisible(false);
 
   // just to initialize context, ugly-ish

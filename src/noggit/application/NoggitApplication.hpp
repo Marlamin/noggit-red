@@ -28,7 +28,7 @@
 #include <string>
 #include <revision.h>
 
-namespace noggit::application {
+namespace Noggit::Application {
 
     class Noggit
     {
@@ -48,7 +48,7 @@ namespace noggit::application {
 
         static void initPath(char* argv[]);
 
-        std::unique_ptr<noggit::ui::main_window> main_window;
+        std::unique_ptr<::Noggit::Ui::main_window> main_window;
         std::unique_ptr<BlizzardArchive::ClientData> _client_data;
 
         std::filesystem::path wowpath;
@@ -60,6 +60,6 @@ namespace noggit::application {
 
 }
 
-#define NOGGIT_APP noggit::application::Noggit::instance(0, nullptr)
+#define NOGGIT_APP Noggit::Application::Noggit::instance(0, nullptr)
 
 #endif //NOGGIT_APPLICATION_HPP

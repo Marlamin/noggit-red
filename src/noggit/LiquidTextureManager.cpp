@@ -9,7 +9,7 @@
 #include <glm/vec2.hpp>
 
 
-LiquidTextureManager::LiquidTextureManager(noggit::NoggitRenderContext context)
+LiquidTextureManager::LiquidTextureManager(Noggit::NoggitRenderContext context)
   : _context(context)
 {
 }

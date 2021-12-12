@@ -14,9 +14,9 @@
 #include <noggit/Log.h>
 
 #include <vector>
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
 
     namespace
@@ -183,5 +183,5 @@ namespace noggit
         : create_table();
       _file_stack.pop_back();
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

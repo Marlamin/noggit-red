@@ -3,8 +3,8 @@
 #include <noggit/ui/font_noggit.hpp>
 #include <noggit/DBC.h>
 
-using namespace noggit::ui::tools::PresetEditor::Ui;
-using namespace noggit::ui;
+using namespace Noggit::Ui::Tools::PresetEditor::Ui;
+using namespace Noggit::Ui;
 
 PresetEditorWidget::PresetEditorWidget(QWidget *parent)
 : QMainWindow(parent, Qt::Window)
@@ -60,7 +60,7 @@ PresetEditorWidget::PresetEditorWidget(QWidget *parent)
   ui->listfileTree->setModel(_sort_model);
 
   _preview_renderer = new PreviewRenderer(90, 90,
-                                          noggit::NoggitRenderContext::PRESET_EDITOR_PREVIEW, this);
+                                          Noggit::NoggitRenderContext::PRESET_EDITOR_PREVIEW, this);
   _preview_renderer->setVisible(false);
 
   // just to initialize context, ugly-ish

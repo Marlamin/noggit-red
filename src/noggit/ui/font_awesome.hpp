@@ -6,9 +6,9 @@
 #include <QtGui/QIconEngine>
 
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     struct font_awesome
     {

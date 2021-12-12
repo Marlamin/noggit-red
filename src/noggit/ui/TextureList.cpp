@@ -11,9 +11,9 @@
 #include <QMimeData>
 
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     TextureList::TextureList(QWidget* parent)
       : QListView(parent)

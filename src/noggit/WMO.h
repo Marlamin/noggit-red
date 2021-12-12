@@ -138,7 +138,7 @@ public:
 
   void load();
 
-  void draw( opengl::scoped::use_program& wmo_shader
+  void draw( OpenGL::Scoped::use_program& wmo_shader
            , math::frustum const& frustum
            , const float& cull_distance
            , const glm::vec3& camera
@@ -206,9 +206,9 @@ private:
   std::vector<WMORenderBatch> _render_batches;
   std::vector<WMOCombinedDrawCall> _draw_calls;
 
-  opengl::scoped::deferred_upload_vertex_arrays<1> _vertex_array;
+  OpenGL::Scoped::deferred_upload_vertex_arrays<1> _vertex_array;
   GLuint const& _vao = _vertex_array[0];
-  opengl::scoped::deferred_upload_buffers<8> _buffers;
+  OpenGL::Scoped::deferred_upload_buffers<8> _buffers;
   GLuint const& _vertices_buffer = _buffers[0];
   GLuint const& _normals_buffer = _buffers[1];
   GLuint const& _texcoords_buffer = _buffers[2];
@@ -225,7 +225,7 @@ private:
 
   void upload();
 
-  void setup_vao(opengl::scoped::use_program& wmo_shader);
+  void setup_vao(OpenGL::Scoped::use_program& wmo_shader);
 };
 
 struct WMOLight {
@@ -291,9 +291,9 @@ static_assert ( sizeof (mohd_flags) == sizeof (std::uint16_t)
 class WMO : public AsyncObject
 {
 public:
-  explicit WMO(BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context );
+  explicit WMO(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context );
 
-  void draw ( opengl::scoped::use_program& wmo_shader
+  void draw ( OpenGL::Scoped::use_program& wmo_shader
             , glm::mat4x4 const& model_view
             , glm::mat4x4 const& projection
             , glm::mat4x4 const& transform_matrix
@@ -310,7 +310,7 @@ public:
 
   bool draw_skybox(glm::mat4x4 const& model_view
                   , glm::vec3 const& camera_pos
-                  , opengl::scoped::use_program& m2_shader
+                  , OpenGL::Scoped::use_program& m2_shader
                   , math::frustum const& frustum
                   , const float& cull_distance
                   , int animtime
@@ -351,7 +351,7 @@ public:
 
   boost::optional<scoped_model_reference> skybox;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 
   [[nodiscard]]
   bool is_hidden() const { return _hidden; }
@@ -374,15 +374,15 @@ class WMOManager
 public:
   static void report();
   static void clear_hidden_wmos();
-  static void unload_all(noggit::NoggitRenderContext context);
+  static void unload_all(Noggit::NoggitRenderContext context);
 private:
   friend struct scoped_wmo_reference;
-  static noggit::AsyncObjectMultimap<WMO> _;
+  static Noggit::AsyncObjectMultimap<WMO> _;
 };
 
 struct scoped_wmo_reference
 {
-  scoped_wmo_reference (BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
+  scoped_wmo_reference (BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context)
     : _valid(true)
     , _file_key(file_key)
     , _context(context)
@@ -446,5 +446,5 @@ private:
 
   BlizzardArchive::Listfile::FileKey _file_key;
   WMO* _wmo;
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 };

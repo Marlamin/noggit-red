@@ -11,9 +11,9 @@
 
 #include <initializer_list>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
 
     help::help(QWidget* parent)

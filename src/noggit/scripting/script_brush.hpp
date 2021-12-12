@@ -6,8 +6,8 @@
 #include <memory>
 #include <glm/vec3.hpp>
 
-namespace noggit {
-  namespace scripting {
+namespace Noggit {
+  namespace Scripting {
     class scripting_tool;
     class script_settings;
     class bool_tag;

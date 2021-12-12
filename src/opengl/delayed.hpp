@@ -2,7 +2,7 @@
 
 #include <unordered_set>
 
-namespace opengl
+namespace OpenGL
 {
   namespace delayed
   {

@@ -8,9 +8,9 @@
 #include <sol/sol.hpp>
 #include <lodepng.h>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     void image::resize(int width, int height)
     {
@@ -183,5 +183,5 @@ namespace noggit
         return std::make_shared<image>(state, path);
       });
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

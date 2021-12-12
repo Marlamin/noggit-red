@@ -24,9 +24,9 @@
 #include <algorithm>
 
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui
+    namespace Ui
     {
 
         ObjectList::ObjectList(QWidget* parent) : QListWidget(parent)
@@ -91,8 +91,8 @@ namespace noggit
 
           layout->addWidget(_object_list, 0, 0);
 
-          _preview_renderer = new noggit::ui::tools::PreviewRenderer(_object_list->iconSize().width(), _object_list->iconSize().height(),
-                                                  noggit::NoggitRenderContext::OBJECT_PALETTE_PREVIEW, this);
+          _preview_renderer = new Noggit::Ui::Tools::PreviewRenderer(_object_list->iconSize().width(), _object_list->iconSize().height(),
+                                                  Noggit::NoggitRenderContext::OBJECT_PALETTE_PREVIEW, this);
           _preview_renderer->setVisible(false);
 
           // just to initialize context, ugly-ish
@@ -130,7 +130,7 @@ namespace noggit
         void ObjectPalette::addObject()
         {
 
-          std::string const& display_name = reinterpret_cast<noggit::ui::tools::AssetBrowser::Ui::AssetBrowserWidget*>(
+          std::string const& display_name = reinterpret_cast<Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget*>(
               _map_view->getAssetBrowser()->widget())->getFilename();
 
           addObjectByFilename(display_name.c_str());

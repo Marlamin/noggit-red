@@ -2,14 +2,14 @@
 
 #include <noggit/ui/VersionSelector.h>
 #include <noggit/ui/main_window.hpp>
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
-      versionSelector::versionSelector(main_window* parent) : QDialog(parent)
+    versionSelector::versionSelector(main_window* parent) : QDialog(parent)
     {
       setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
-      Ui::VersionSelector versionSelector;
+      ::Ui::VersionSelector versionSelector;
      
       versionSelector.setupUi(this);
 

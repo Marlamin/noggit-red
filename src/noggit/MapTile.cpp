@@ -38,7 +38,7 @@ MapTile::MapTile( int pX
                 , bool use_mclq_green_lava
                 , bool reloading_tile
                 , World* world
-                , noggit::NoggitRenderContext context
+                , Noggit::NoggitRenderContext context
                 , tile_mode mode
                 )
   : AsyncObject(pFilename)
@@ -420,7 +420,7 @@ void MapTile::convert_alphamap(bool to_big_alpha)
   }
 }
 
-void MapTile::draw (opengl::scoped::use_program& mcnk_shader
+void MapTile::draw (OpenGL::Scoped::use_program& mcnk_shader
                    , const glm::vec3& camera
                    , bool show_unpaintable_chunks
                    , bool draw_paintability_overlay
@@ -444,9 +444,9 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
     _buffers.upload();
 
     gl.bindBuffer(GL_UNIFORM_BUFFER, _chunk_instance_data_ubo);
-    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_INSTANCE_DATA,
-                       _chunk_instance_data_ubo, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256);
-    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256, NULL, GL_DYNAMIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, OpenGL::ubo_targets::CHUNK_INSTANCE_DATA,
+                       _chunk_instance_data_ubo, 0, sizeof(OpenGL::ChunkInstanceDataUniformBlock) * 256);
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(OpenGL::ChunkInstanceDataUniformBlock) * 256, NULL, GL_DYNAMIC_DRAW);
 
     MapTileDrawCall& draw_call = _draw_calls.emplace_back();
     draw_call.start_chunk = 0;
@@ -470,7 +470,7 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
   if (_requires_paintability_recalc && draw_paintability_overlay && show_unpaintable_chunks)
   [[unlikely]]
   {
-    auto cur_tex = noggit::ui::selected_texture::get();
+    auto cur_tex = Noggit::Ui::selected_texture::get();
     for (int j = 0; j < 16; ++j)
     {
       for (int i = 0; i < 16; ++i)
@@ -648,7 +648,7 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
     if (_texture_not_loaded)
       registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
 
-    gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256, &_chunk_instance_data);
+    gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(OpenGL::ChunkInstanceDataUniformBlock) * 256, &_chunk_instance_data);
   }
 
   recalcExtents();
@@ -657,13 +657,13 @@ void MapTile::draw (opengl::scoped::use_program& mcnk_shader
   if (_texture_not_loaded)
   [[unlikely]]
   {
-    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_INSTANCE_DATA,
-                    _chunk_instance_data_ubo, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, OpenGL::ubo_targets::CHUNK_INSTANCE_DATA,
+                    _chunk_instance_data_ubo, 0, sizeof(OpenGL::ChunkInstanceDataUniformBlock) * 256);
     return;
   }
 
-  gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::CHUNK_INSTANCE_DATA,
-                     _chunk_instance_data_ubo, 0, sizeof(opengl::ChunkInstanceDataUniformBlock) * 256);
+  gl.bindBufferRange(GL_UNIFORM_BUFFER, OpenGL::ubo_targets::CHUNK_INSTANCE_DATA,
+                     _chunk_instance_data_ubo, 0, sizeof(OpenGL::ChunkInstanceDataUniformBlock) * 256);
 
 
   for (auto& draw_call : _draw_calls)
@@ -750,7 +750,7 @@ bool MapTile::intersect (math::ray const& ray, selection_result* results) const
 }
 
 
-void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
+void MapTile::drawMFBO (OpenGL::Scoped::use_program& mfbo_shader)
 {
   static std::vector<std::uint8_t> const indices = {4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1};
 
@@ -773,19 +773,19 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
                                   );    
 
     {
-      opengl::scoped::vao_binder const _ (_mfbo_bottom_vao);
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder (_mfbo_bottom_vbo);
+      OpenGL::Scoped::vao_binder const _ (_mfbo_bottom_vao);
+      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder (_mfbo_bottom_vbo);
       mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     {
-      opengl::scoped::vao_binder const _(_mfbo_top_vao);
-      opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder(_mfbo_top_vbo);
+      OpenGL::Scoped::vao_binder const _(_mfbo_top_vao);
+      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder(_mfbo_top_vbo);
       mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     {
-      opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
+      OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
       gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint16_t), indices.data(), GL_STATIC_DRAW);
     }
 
@@ -793,16 +793,16 @@ void MapTile::drawMFBO (opengl::scoped::use_program& mfbo_shader)
   }
 
   {
-    opengl::scoped::vao_binder const _(_mfbo_bottom_vao);
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
+    OpenGL::Scoped::vao_binder const _(_mfbo_bottom_vao);
+    OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
 
     mfbo_shader.uniform("color", glm::vec4(1.0f, 1.0f, 0.0f, 0.2f));
     gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, nullptr);
   }
 
   {
-    opengl::scoped::vao_binder const _(_mfbo_top_vao);
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
+    OpenGL::Scoped::vao_binder const _(_mfbo_top_vao);
+    OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
 
     mfbo_shader.uniform("color", glm::vec4(0.0f, 1.0f, 1.0f, 0.2f));
     gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, nullptr);
@@ -814,7 +814,7 @@ void MapTile::drawWater ( math::frustum const& frustum
                         , const float& cull_distance
                         , const glm::vec3& camera
                         , bool camera_moved
-                        , opengl::scoped::use_program& water_shader
+                        , OpenGL::Scoped::use_program& water_shader
                         , int animtime
                         , int layer
                         , display_mode display
@@ -1968,7 +1968,7 @@ void MapTile::recalcObjectInstanceExtents()
 }
 
 
-void MapTile::doTileOcclusionQuery(opengl::scoped::use_program& occlusion_shader)
+void MapTile::doTileOcclusionQuery(OpenGL::Scoped::use_program& occlusion_shader)
 {
   if (_tile_occlusion_query_in_use || !_uploaded)
     return;

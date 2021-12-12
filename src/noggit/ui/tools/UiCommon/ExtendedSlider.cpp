@@ -11,8 +11,8 @@
 #include <QHBoxLayout>
 #include <QSignalBlocker>
 
-using namespace noggit::ui::tools::UiCommon;
-using namespace noggit::ui;
+using namespace Noggit::Ui::Tools::UiCommon;
+using namespace Noggit::Ui;
 
 ExtendedSlider::ExtendedSlider(QWidget* parent)
 : QWidget(parent)
@@ -127,7 +127,7 @@ ExtendedSlider::ExtendedSlider(QWidget* parent)
               emit valueChanged(value());
           });
 
-  connect(_tablet_manager, &noggit::TabletManager::pressureChanged,
+  connect(_tablet_manager, &Noggit::TabletManager::pressureChanged,
           [=](double pressure)
           {
               int p_value = (_ui.slider->maximum() - _ui.slider->minimum())

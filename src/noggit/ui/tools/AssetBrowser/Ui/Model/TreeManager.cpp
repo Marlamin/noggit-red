@@ -1,7 +1,7 @@
 #include "TreeManager.hpp"
 
 
-using namespace noggit::ui::tools::AssetBrowser::Ui::Model;
+using namespace Noggit::Ui::Tools::AssetBrowser::Ui::Model;
 
 
 QStandardItem* TreeManager::addItem(QString path)

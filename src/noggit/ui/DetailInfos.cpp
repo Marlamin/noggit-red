@@ -5,9 +5,9 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     detail_infos::detail_infos(QWidget* parent)
       : widget (parent, Qt::Window)

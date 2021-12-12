@@ -14,9 +14,9 @@ using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::NodeEditor::Nodes
+    namespace Ui::Tools::NodeEditor::Nodes
     {
         class MatrixMathNode : public BaseNode
         {

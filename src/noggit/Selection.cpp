@@ -3,7 +3,7 @@
 #include <noggit/DBC.h>
 
 
-void selected_chunk_type::updateDetails(noggit::ui::detail_infos* detail_widget)
+void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 {
   std::stringstream select_info;
 

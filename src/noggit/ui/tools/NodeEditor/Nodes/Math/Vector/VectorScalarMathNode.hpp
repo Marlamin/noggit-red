@@ -16,9 +16,9 @@ using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::NodeEditor::Nodes
+    namespace Ui::Tools::NodeEditor::Nodes
     {
       template <typename T, typename T1>
       class VectorScalarMathNodeBase : public BaseNode

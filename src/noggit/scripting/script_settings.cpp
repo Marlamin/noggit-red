@@ -15,9 +15,9 @@
 #define OUTER_RADIUS_PATH "__outer_radius"
 #define SCRIPT_FILE "script_settings.json"
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     script_settings::script_settings(scripting_tool *tool)
         : QGroupBox("Script Settings"), _tool(tool)
@@ -519,5 +519,5 @@ namespace noggit
       state->new_usertype<string_tag>("string_tag","get",&string_tag::get);
       state->new_usertype<string_list_tag>("string_list_tag","get",&string_list_tag::get);
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

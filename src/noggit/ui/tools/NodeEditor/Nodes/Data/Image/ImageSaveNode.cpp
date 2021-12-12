@@ -8,7 +8,7 @@
 #include <QDir>
 #include <QFileInfo>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 ImageSaveNode::ImageSaveNode()
 : LogicNodeBase()

@@ -63,7 +63,7 @@ private:
 
 
 public:
-  MapChunk(MapTile* mt, BlizzardArchive::ClientFile* f, bool bigAlpha, tile_mode mode, noggit::NoggitRenderContext context
+  MapChunk(MapTile* mt, BlizzardArchive::ClientFile* f, bool bigAlpha, tile_mode mode, Noggit::NoggitRenderContext context
            , bool init_empty = false, int chunk_idx = 0);
 
   auto getHoleMask(void) const -> unsigned { return static_cast<unsigned>(holes); }
@@ -102,14 +102,14 @@ private:
 
   unsigned _chunk_update_flags;
 
-  noggit::NoggitRenderContext _context;
+  Noggit::NoggitRenderContext _context;
 
 public:
 
   TextureSet* getTextureSet() { return texture_set.get(); };
 
   void draw ( math::frustum const& frustum
-            , opengl::scoped::use_program& mcnk_shader
+            , OpenGL::Scoped::use_program& mcnk_shader
             , const float& cull_distance
             , const glm::vec3& camera
             , bool need_visibility_update

@@ -6,9 +6,9 @@
 
 #include <QtWidgets/QCheckBox>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class checkbox : public QCheckBox
     {

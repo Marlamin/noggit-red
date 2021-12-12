@@ -7,9 +7,9 @@
 #include <QWidget>
 #include "ui_ExtendedSliderUi.h"
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::UiCommon
+    namespace Ui::Tools::UiCommon
     {
         class ExtendedSlider : public QWidget
         {
@@ -34,7 +34,7 @@ namespace noggit
           void valueChanged(double value);
 
         private:
-          Ui::ExtendedSliderUi _ui;
+          ::Ui::ExtendedSliderUi _ui;
           bool _is_tablet_supported = true;
           bool _is_tablet_affecting = false;
           QWidget* _tablet_popup;

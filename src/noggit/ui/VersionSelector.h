@@ -4,9 +4,9 @@
 #include <QtWidgets/QDialog>
 #include <ui_VersionSelector.h>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
       struct main_window;
     class versionSelector : public QDialog

@@ -5,7 +5,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 DeselectObjectInstanceNode::DeselectObjectInstanceNode()
 : ContextLogicNodeBase()
@@ -24,7 +24,7 @@ void DeselectObjectInstanceNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   SceneObject* obj = defaultPortData<ObjectInstanceData>(PortType::In, 1)->value();
   world->remove_from_selection(obj);

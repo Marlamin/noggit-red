@@ -9,7 +9,7 @@
 #include <external/libnoise/noiseutils/noiseutils.h>
 #include <QSize>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 NoiseViewerNode::NoiseViewerNode()
 : BaseNode()

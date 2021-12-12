@@ -87,7 +87,7 @@ static inline uint32_t color_for_height (int16_t height)
 
   return lerp_color(colors[correct_color]._color, colors[correct_color + 1]._color, t);
 }
-namespace noggit
+namespace Noggit
 {
 
 map_horizon::map_horizon(const std::string& basename, const MapIndex * const index)
@@ -366,9 +366,9 @@ void map_horizon::render::draw( glm::mat4x4 const& model_view
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint32_t>(_index_buffer, indices, GL_DYNAMIC_DRAW);
 
     _map_horizon_program.reset
-      ( new opengl::program
-          { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("horizon_vs") }
-          , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("horizon_fs") }
+      ( new OpenGL::program
+          { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("horizon_vs") }
+          , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("horizon_fs") }
           }
       );
   
@@ -376,9 +376,9 @@ void map_horizon::render::draw( glm::mat4x4 const& model_view
   }
    
 
-  opengl::scoped::use_program shader {*_map_horizon_program.get()};
+  OpenGL::Scoped::use_program shader {*_map_horizon_program.get()};
 
-  opengl::scoped::vao_binder const _ (_vao);
+  OpenGL::Scoped::vao_binder const _ (_vao);
 
   shader.uniform ("model_view", model_view);
   shader.uniform ("projection", projection);
@@ -386,7 +386,7 @@ void map_horizon::render::draw( glm::mat4x4 const& model_view
 
   shader.attrib ("position", _vertex_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-  opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder (_index_buffer);
+  OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder (_index_buffer);
 
   
   gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);

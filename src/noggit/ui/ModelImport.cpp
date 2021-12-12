@@ -15,11 +15,11 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QHBoxLayout>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
-    model_import::model_import (noggit::ui::object_editor* object_editor)
+    model_import::model_import (Noggit::Ui::object_editor* object_editor)
       : QWidget (object_editor, Qt::Tool | Qt::WindowStaysOnTopHint)
     {
       setWindowIcon (QIcon (":/icon"));

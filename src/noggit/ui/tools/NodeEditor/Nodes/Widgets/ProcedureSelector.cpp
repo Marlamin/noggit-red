@@ -15,7 +15,7 @@
 #include <QHeaderView>
 
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 ProcedureSelector::ProcedureSelector(QWidget *parent)
 {
@@ -25,7 +25,7 @@ ProcedureSelector::ProcedureSelector(QWidget *parent)
 
   auto search_button = new QPushButton("None", this);
   layout->addWidget(search_button);
-  search_button->setIcon(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::icons::networkwired));
+  search_button->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::icons::networkwired));
   search_button->setToolTip("Select procedure");
   search_button->adjustSize();
 

@@ -12,7 +12,7 @@
   #include <errhandlingapi.h>
 #endif
 
-namespace noggit
+namespace Noggit
 {
   void printStacktrace()
   {

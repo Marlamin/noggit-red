@@ -27,9 +27,9 @@
 
 #include <filesystem>
 
-using namespace noggit::ui::tools::MapCreationWizard::Ui;
+using namespace Noggit::Ui::Tools::MapCreationWizard::Ui;
 
-MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(parent)
+MapCreationWizard::MapCreationWizard(QWidget* parent) : Noggit::Ui::widget(parent)
 {
 
   auto layout = new QHBoxLayout(this);
@@ -40,7 +40,7 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
 
   auto scroll_minimap = new QScrollArea(this);
 
-  _minimap_widget = new noggit::ui::minimap_widget(this);
+  _minimap_widget = new Noggit::Ui::minimap_widget(this);
   _minimap_widget->draw_boundaries(true);
 
   layout_left->addWidget(scroll_minimap);
@@ -86,13 +86,13 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   }
 
   auto add_btn = new QPushButton("New",this);
-  add_btn->setIcon(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::plus));
+  add_btn->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::plus));
   layout_selector->addWidget(add_btn);
 
   add_btn->setAccessibleName("map_wizard_add_button");
 
   auto remove_btn = new QPushButton("Remove",this);
-  remove_btn->setIcon(noggit::ui::font_awesome_icon(noggit::ui::font_awesome::times));
+  remove_btn->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::times));
   layout_selector->addWidget(remove_btn);
   
   remove_btn->setAccessibleName("map_wizard_remove_button");
@@ -227,8 +227,8 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
             removeMap();
           });
 
-  _connection = connect(reinterpret_cast<noggit::ui::main_window*>(parent),
-                        QOverload<int>::of(&noggit::ui::main_window::map_selected)
+  _connection = connect(reinterpret_cast<Noggit::Ui::main_window*>(parent),
+                        QOverload<int>::of(&Noggit::Ui::main_window::map_selected)
                         , [&] (int index)
                               {
                                 selectMap(index);
@@ -238,7 +238,7 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : noggit::ui::widget(paren
   // Selection
 
   QObject::connect
-      ( _minimap_widget,  &noggit::ui::minimap_widget::tile_clicked
+      ( _minimap_widget,  &Noggit::Ui::minimap_widget::tile_clicked
           , [this] (QPoint tile)
         {
           if (QApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
@@ -300,7 +300,7 @@ void MapCreationWizard::selectMap(int map_id)
     delete _world;
   }
 
-  _world = new World(record.getString(MapDB::InternalName), map_id, noggit::NoggitRenderContext::MAP_VIEW);
+  _world = new World(record.getString(MapDB::InternalName), map_id, Noggit::NoggitRenderContext::MAP_VIEW);
   _minimap_widget->world(_world);
 
   _directory->setText(record.getString(1));
@@ -473,7 +473,7 @@ void MapCreationWizard::addNewMap()
     delete _world;
   }
 
-  _world = new World("New_Map", _cur_map_id, noggit::NoggitRenderContext::MAP_VIEW, true);
+  _world = new World("New_Map", _cur_map_id, Noggit::NoggitRenderContext::MAP_VIEW, true);
   _minimap_widget->world(_world);
 
   _directory->setText("New_Map");

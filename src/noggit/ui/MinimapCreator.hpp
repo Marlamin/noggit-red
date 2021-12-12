@@ -65,10 +65,10 @@ struct MinimapRenderSettings
 };
 
 
-namespace noggit
+namespace Noggit
 {
 
-  namespace ui
+  namespace Ui
   {
 
     class MinimapCreator : public QWidget

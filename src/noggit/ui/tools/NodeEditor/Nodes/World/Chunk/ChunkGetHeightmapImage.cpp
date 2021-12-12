@@ -7,7 +7,7 @@
 #include <cmath>
 #include <limits>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 ChunkGetHeightmapImageNode::ChunkGetHeightmapImageNode()
 : ContextLogicNodeBase()
@@ -29,7 +29,7 @@ void ChunkGetHeightmapImageNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   MapChunk* chunk = defaultPortData<ChunkData>(PortType::In, 1)->value();
   double min_height = defaultPortData<DecimalData>(PortType::In, 2)->value();

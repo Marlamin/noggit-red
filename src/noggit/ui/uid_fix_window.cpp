@@ -8,9 +8,9 @@
 #include <QtWidgets/QPushButton>
 
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     uid_fix_window::uid_fix_window ( glm::vec3 pos
                                    , math::degrees camera_pitch

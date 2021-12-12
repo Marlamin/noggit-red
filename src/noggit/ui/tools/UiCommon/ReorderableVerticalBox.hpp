@@ -7,7 +7,7 @@
 #include <QPoint>
 #include <QRect>
 
-namespace noggit::ui::tools
+namespace Noggit::Ui::Tools
 {
 
 

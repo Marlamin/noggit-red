@@ -6,7 +6,7 @@
 
 #include <utility>
 
-namespace opengl
+namespace OpenGL
 {
   texture::texture()
     : _id (0)

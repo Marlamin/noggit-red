@@ -13,9 +13,9 @@
 
 #include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
 
-namespace noggit
+namespace Noggit
 {
-    namespace ui::tools::NodeEditor::Ui
+    namespace Ui::Tools::NodeEditor::Ui
     {
         class NodeEditorWidget : public QMainWindow
         {

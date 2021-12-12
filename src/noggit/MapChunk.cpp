@@ -25,7 +25,7 @@
 #include <limits>
 
 MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAlpha,
-                   tile_mode mode, noggit::NoggitRenderContext context, bool init_empty, int chunk_idx)
+                   tile_mode mode, Noggit::NoggitRenderContext context, bool init_empty, int chunk_idx)
   : _mode(mode)
   , mt(maintile)
   , use_big_alphamap(bigAlpha)
@@ -404,7 +404,7 @@ void MapChunk::clearHeight()
 
 
 void MapChunk::draw ( math::frustum const& frustum
-                    , opengl::scoped::use_program& mcnk_shader
+                    , OpenGL::Scoped::use_program& mcnk_shader
                     , const float& cull_distance
                     , const glm::vec3& camera
                     , bool need_visibility_update
@@ -423,8 +423,8 @@ void MapChunk::draw ( math::frustum const& frustum
 /*
   bool cantPaint = show_unpaintable_chunks
                     && draw_paintability_overlay
-                    && noggit::ui::selected_texture::get()
-                    && !canPaintTexture(*noggit::ui::selected_texture::get());
+                    && Noggit::Ui::selected_texture::get()
+                    && !canPaintTexture(*Noggit::Ui::selected_texture::get());
 
   {
     ZoneScopedN("MapChunk::draw() : Binding textures");
@@ -446,7 +446,7 @@ void MapChunk::draw ( math::frustum const& frustum
       }
     }
 
-    opengl::texture::set_active_texture(5);
+    OpenGL::texture::set_active_texture(5);
     shadow.bind();
   }
 

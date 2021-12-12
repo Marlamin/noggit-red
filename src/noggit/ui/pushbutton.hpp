@@ -4,9 +4,9 @@
 
 #include <QtWidgets/QPushButton>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     class pushbutton : public QPushButton
     {

@@ -27,14 +27,14 @@
 #include <algorithm>
 
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     settings::settings(QWidget *parent) : QMainWindow(parent, Qt::Window), _settings(new QSettings(this))
     {
       auto body = new QWidget(this);
-      ui = new Ui::SettingsPanel;
+      ui = new ::Ui::SettingsPanel;
       ui->setupUi(body);
       setCentralWidget(body);
       setWindowTitle("Settings");

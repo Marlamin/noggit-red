@@ -14,9 +14,9 @@
 #include <noggit/ContextObject.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-namespace noggit
+namespace Noggit
 {
-  namespace scripting
+  namespace Scripting
   {
     chunk::chunk(script_context * ctx, MapChunk* chunk)
     : script_object(ctx)
@@ -32,7 +32,7 @@ namespace noggit
     int chunk::add_texture(std::string const& texture, int effectID)
     {
       std::string tex = std::string(texture);
-      int tex_index = _chunk->texture_set->addTexture(scoped_blp_texture_reference(tex, noggit::NoggitRenderContext::MAP_VIEW));
+      int tex_index = _chunk->texture_set->addTexture(scoped_blp_texture_reference(tex, Noggit::NoggitRenderContext::MAP_VIEW));
       if (effectID >= -1)
       {
         set_effect(tex_index, effectID);
@@ -188,5 +188,5 @@ namespace noggit
         , "get_vert", &chunk::get_vert
       ); 
     }
-  } // namespace scripting
-} // namespace noggit
+  } // namespace Scripting
+} // namespace Noggit

@@ -6,7 +6,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/tool_enums.hpp>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 TerrainFlattenNode::TerrainFlattenNode()
 : ContextLogicNodeBase()
@@ -38,7 +38,7 @@ void TerrainFlattenNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   glm::vec3 pos = defaultPortData<Vector3DData>(PortType::In, 1)->value();
   glm::vec3 origin = defaultPortData<Vector3DData>(PortType::In, 6)->value();

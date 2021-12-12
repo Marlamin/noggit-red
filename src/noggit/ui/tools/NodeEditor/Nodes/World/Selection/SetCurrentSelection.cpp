@@ -5,7 +5,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
-using namespace noggit::ui::tools::NodeEditor::Nodes;
+using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 SetCurrentSelectionNode::SetCurrentSelectionNode()
 : ContextLogicNodeBase()
@@ -24,7 +24,7 @@ void SetCurrentSelectionNode::compute()
 {
   World* world = gCurrentContext->getWorld();
   gCurrentContext->getViewport()->makeCurrent();
-  opengl::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
+  OpenGL::context::scoped_setter const _ (::gl, gCurrentContext->getViewport()->context());
 
   SceneObject* obj = defaultPortData<ObjectInstanceData>(PortType::In, 1)->value();
   world->set_current_selection(obj);

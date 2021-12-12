@@ -5,8 +5,8 @@
 
 #include <noggit/World.h>
 
-namespace noggit {
-  namespace scripting {
+namespace Noggit {
+  namespace Scripting {
       script_object::script_object(script_context * state)
       : _state(state)
       {}

@@ -2,7 +2,7 @@
 
 #pragma once
 
-namespace noggit
+namespace Noggit
 {
   void RegisterErrorHandlers();
   void printStacktrace();

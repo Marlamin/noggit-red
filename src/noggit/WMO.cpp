@@ -22,7 +22,7 @@
 #include <vector>
 
 
-WMO::WMO(BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
+WMO::WMO(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context)
   : AsyncObject(file_key)
   , _context(context)
 {
@@ -348,7 +348,7 @@ void WMO::waitForChildrenLoaded()
   }
 }
 
-void WMO::draw ( opengl::scoped::use_program& wmo_shader
+void WMO::draw ( OpenGL::Scoped::use_program& wmo_shader
                , glm::mat4x4 const& model_view
                , glm::mat4x4 const& projection
                , glm::mat4x4 const& transform_matrix
@@ -404,12 +404,12 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
 
   if (boundingbox)
   {
-    //opengl::scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
+    //OpenGL::Scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
     //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (auto& group : groups)
     {
-      opengl::primitives::wire_box::getInstance(_context).draw( model_view
+      OpenGL::primitives::wire_box::getInstance(_context).draw( model_view
        , projection
        , transform_matrix
        , {1.0f, 1.0f, 1.0f, 1.0f}
@@ -418,7 +418,7 @@ void WMO::draw ( opengl::scoped::use_program& wmo_shader
        );
     }
 
-    opengl::primitives::wire_box::getInstance(_context).draw ( model_view
+    OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
       , projection
       , transform_matrix
       , {1.0f, 0.0f, 0.0f, 1.0f}
@@ -448,7 +448,7 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
 
 bool WMO::draw_skybox (glm::mat4x4 const& model_view
                       , glm::vec3 const& camera_pos
-                      , opengl::scoped::use_program& m2_shader
+                      , OpenGL::Scoped::use_program& m2_shader
                       , math::frustum const& frustum
                       , const float& cull_distance
                       , int animtime
@@ -484,7 +484,7 @@ bool WMO::draw_skybox (glm::mat4x4 const& model_view
       sky.scale = 2.f;
       sky.recalcExtents();
 
-      opengl::M2RenderState model_render_state;
+      OpenGL::M2RenderState model_render_state;
       model_render_state.tex_arrays = {0, 0};
       model_render_state.tex_indices = {0, 0};
       model_render_state.tex_unit_lookups = {-1, -1};
@@ -881,11 +881,11 @@ void WMOGroup::unload()
   _vao_is_setup = false;
 }
 
-void WMOGroup::setup_vao(opengl::scoped::use_program& wmo_shader)
+void WMOGroup::setup_vao(OpenGL::Scoped::use_program& wmo_shader)
 {
-  opengl::scoped::index_buffer_manual_binder indices (_indices_buffer);
+  OpenGL::Scoped::index_buffer_manual_binder indices (_indices_buffer);
   {
-    opengl::scoped::vao_binder const _ (_vao);
+    OpenGL::Scoped::vao_binder const _ (_vao);
 
     wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
     wmo_shader.attrib("normal", _normals_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -1524,7 +1524,7 @@ bool WMOGroup::is_visible( glm::mat4x4 const& transform
   return (dist < cull_distance);
 }
 
-void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
+void WMOGroup::draw( OpenGL::Scoped::use_program& wmo_shader
                    , math::frustum const& // frustum
                    , const float& //cull_distance
                    , const glm::vec3& //camera
@@ -1550,7 +1550,7 @@ void WMOGroup::draw( opengl::scoped::use_program& wmo_shader
     setup_vao(wmo_shader);
   }
 
-  opengl::scoped::vao_binder const _ (_vao);
+  OpenGL::Scoped::vao_binder const _ (_vao);
 
   gl.activeTexture(GL_TEXTURE0);
   gl.bindTexture(GL_TEXTURE_BUFFER, _render_batch_tex);
@@ -1685,7 +1685,7 @@ void WMOManager::clear_hidden_wmos()
           );
 }
 
-void WMOManager::unload_all(noggit::NoggitRenderContext context)
+void WMOManager::unload_all(Noggit::NoggitRenderContext context)
 {
     _.context_aware_apply(
         [&] (BlizzardArchive::Listfile::FileKey const&, WMO& wmo)

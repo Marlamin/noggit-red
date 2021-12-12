@@ -107,7 +107,7 @@ bool World::IsEditableWorld(int pMapId)
   return false;
 }
 
-World::World(const std::string& name, int map_id, noggit::NoggitRenderContext context, bool create_empty)
+World::World(const std::string& name, int map_id, Noggit::NoggitRenderContext context, bool create_empty)
     : _model_instance_storage(this)
     , _tile_update_queue(this)
     , mapIndex(name, map_id, this, context, create_empty)
@@ -828,7 +828,7 @@ void World::initDisplay()
   }
   else
   {
-    _horizon_render = std::make_unique<noggit::map_horizon::render>(horizon);
+    _horizon_render = std::make_unique<Noggit::map_horizon::render>(horizon);
   }
 
   skies = std::make_unique<Skies> (mapIndex._map_id, _context);
@@ -858,63 +858,63 @@ void World::initShaders()
   if (!_m2_program)
   {
     _m2_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+        ( new OpenGL::program
+              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_vs") }
+                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_fs") }
               }
         );
   }
   if (!_m2_instanced_program)
   {
     _m2_instanced_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_vs", {"instanced"}) }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_fs") }
+        ( new OpenGL::program
+              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_vs", {"instanced"}) }
+                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_fs") }
               }
         );
   }
   if (!_m2_box_program)
   {
     _m2_box_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("m2_box_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("m2_box_fs") }
+        ( new OpenGL::program
+              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_box_vs") }
+                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_box_fs") }
               }
         );
   }
   if (!_m2_ribbons_program)
   {
     _m2_ribbons_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("ribbon_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("ribbon_fs") }
+        ( new OpenGL::program
+              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("ribbon_vs") }
+                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("ribbon_fs") }
               }
         );
   }
   if (!_m2_particles_program)
   {
     _m2_particles_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("particle_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("particle_fs") }
+        ( new OpenGL::program
+              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("particle_vs") }
+                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("particle_fs") }
               }
         );
   }
   if (!_mcnk_program)
   {
     _mcnk_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("terrain_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("terrain_fs") }
+        ( new OpenGL::program
+              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("terrain_vs") }
+                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("terrain_fs") }
               }
         );
   }
   if (!_mfbo_program)
   {
     _mfbo_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("mfbo_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("mfbo_fs") }
+        ( new OpenGL::program
+              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("mfbo_vs") }
+                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("mfbo_fs") }
               }
         );
   }
@@ -922,9 +922,9 @@ void World::initShaders()
   if (!_wmo_program)
   {
     _wmo_program.reset
-        ( new opengl::program
-              { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("wmo_vs") }
-                  , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("wmo_fs") }
+        ( new OpenGL::program
+              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("wmo_vs") }
+                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("wmo_fs") }
               }
         );
   }
@@ -932,9 +932,9 @@ void World::initShaders()
   if (!_liquid_program)
   {
     _liquid_program.reset(
-    new opengl::program
-        { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("liquid_vs") }
-        , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("liquid_fs") }
+    new OpenGL::program
+        { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("liquid_vs") }
+        , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("liquid_fs") }
         }
     );
   }
@@ -942,9 +942,9 @@ void World::initShaders()
   if (!_occluder_program)
   {
     _occluder_program.reset(
-        new opengl::program
-            { { GL_VERTEX_SHADER,   opengl::shader::src_from_qrc("occluder_vs") }
-            , { GL_FRAGMENT_SHADER, opengl::shader::src_from_qrc("occluder_fs") }
+        new OpenGL::program
+            { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("occluder_vs") }
+            , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("occluder_fs") }
             }
     );
   }
@@ -957,28 +957,28 @@ void World::initShaders()
   setupOccluderBuffers();
 
   {
-    opengl::scoped::use_program m2_shader {*_m2_program.get()};
+    OpenGL::Scoped::use_program m2_shader {*_m2_program.get()};
     m2_shader.uniform("bone_matrices", 0);
     m2_shader.uniform("tex1", 1);
     m2_shader.uniform("tex2", 2);
 
     m2_shader.bind_uniform_block("matrices", 0);
     gl.bindBuffer(GL_UNIFORM_BUFFER, _mvp_ubo);
-    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::MVPUniformBlock), NULL, GL_DYNAMIC_DRAW);
-    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::MVP, _mvp_ubo, 0, sizeof(opengl::MVPUniformBlock));
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(OpenGL::MVPUniformBlock), NULL, GL_DYNAMIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, OpenGL::ubo_targets::MVP, _mvp_ubo, 0, sizeof(OpenGL::MVPUniformBlock));
     gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
 
     m2_shader.bind_uniform_block("lighting", 1);
     gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
-    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::LightingUniformBlock), NULL, GL_DYNAMIC_DRAW);
-    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::LIGHTING, _lighting_ubo, 0, sizeof(opengl::LightingUniformBlock));
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(OpenGL::LightingUniformBlock), NULL, GL_DYNAMIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, OpenGL::ubo_targets::LIGHTING, _lighting_ubo, 0, sizeof(OpenGL::LightingUniformBlock));
     gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
   }
 
   {
     std::vector<int> samplers {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
 
-    opengl::scoped::use_program wmo_program {*_wmo_program.get()};
+    OpenGL::Scoped::use_program wmo_program {*_wmo_program.get()};
     wmo_program.uniform("render_batches_tex", 0);
     wmo_program.uniform("texture_samplers", samplers);
     wmo_program.bind_uniform_block("matrices", 0);
@@ -986,7 +986,7 @@ void World::initShaders()
   }
 
   {
-    opengl::scoped::use_program mcnk_shader {*_mcnk_program.get()};
+    OpenGL::Scoped::use_program mcnk_shader {*_mcnk_program.get()};
 
     if (!_global_vbos_initialized)
     {
@@ -1001,8 +1001,8 @@ void World::initShaders()
     mcnk_shader.bind_uniform_block("chunk_instances", 3);
 
     gl.bindBuffer(GL_UNIFORM_BUFFER, _terrain_params_ubo);
-    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(opengl::TerrainParamsUniformBlock), NULL, GL_STATIC_DRAW);
-    gl.bindBufferRange(GL_UNIFORM_BUFFER, opengl::ubo_targets::TERRAIN_OVERLAYS, _terrain_params_ubo, 0, sizeof(opengl::TerrainParamsUniformBlock));
+    gl.bufferData(GL_UNIFORM_BUFFER, sizeof(OpenGL::TerrainParamsUniformBlock), NULL, GL_STATIC_DRAW);
+    gl.bindBufferRange(GL_UNIFORM_BUFFER, OpenGL::ubo_targets::TERRAIN_OVERLAYS, _terrain_params_ubo, 0, sizeof(OpenGL::TerrainParamsUniformBlock));
     gl.bindBuffer(GL_UNIFORM_BUFFER, 0);
 
     mcnk_shader.uniform("heightmap", 0);
@@ -1018,7 +1018,7 @@ void World::initShaders()
   }
 
   {
-    opengl::scoped::use_program m2_shader_instanced {*_m2_instanced_program.get()};
+    OpenGL::Scoped::use_program m2_shader_instanced {*_m2_instanced_program.get()};
     m2_shader_instanced.bind_uniform_block("matrices", 0);
     m2_shader_instanced.bind_uniform_block("lighting", 1);
     m2_shader_instanced.uniform("bone_matrices", 0);
@@ -1028,19 +1028,19 @@ void World::initShaders()
 
   /*
   {
-    opengl::scoped::use_program particles_shader {*_m2_particles_program.get()};
+    OpenGL::Scoped::use_program particles_shader {*_m2_particles_program.get()};
     particles_shader.uniform("tex", 0);
   }
 
   {
-    opengl::scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
+    OpenGL::Scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
     ribbon_shader.uniform("tex", 0);
   }
 
    */
 
   {
-    opengl::scoped::use_program liquid_render {*_liquid_program.get()};
+    OpenGL::Scoped::use_program liquid_render {*_liquid_program.get()};
 
     setupLiquidChunkBuffers();
     setupLiquidChunkVAO(liquid_render);
@@ -1056,17 +1056,17 @@ void World::initShaders()
   }
 
   {
-    opengl::scoped::use_program mfbo_shader {*_mfbo_program.get()};
+    OpenGL::Scoped::use_program mfbo_shader {*_mfbo_program.get()};
     mfbo_shader.bind_uniform_block("matrices", 0);
   }
 
   {
-    opengl::scoped::use_program m2_box_shader {*_m2_box_program.get()};
+    OpenGL::Scoped::use_program m2_box_shader {*_m2_box_program.get()};
     m2_box_shader.bind_uniform_block("matrices", 0);
   }
 
   {
-    opengl::scoped::use_program occluder_shader {*_occluder_program.get()};
+    OpenGL::Scoped::use_program occluder_shader {*_occluder_program.get()};
     occluder_shader.bind_uniform_block("matrices", 0);
   }
 
@@ -1223,7 +1223,7 @@ void World::draw (glm::mat4x4 const& model_view
   if(!minimap_render && display == display_mode::in_3D)
   {
     ZoneScopedN("World::draw() : Draw skies");
-    opengl::scoped::use_program m2_shader {*_m2_program.get()};
+    OpenGL::Scoped::use_program m2_shader {*_m2_program.get()};
 
     bool hadSky = false;
 
@@ -1296,7 +1296,7 @@ void World::draw (glm::mat4x4 const& model_view
     gl.disable(GL_BLEND);
 
     {
-      opengl::scoped::use_program mcnk_shader{ *_mcnk_program.get() };
+      OpenGL::Scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
       mcnk_shader.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
       mcnk_shader.uniform("animtime", static_cast<int>(animtime));
@@ -1353,7 +1353,7 @@ void World::draw (glm::mat4x4 const& model_view
   if (terrainMode == editing_mode::object && has_multiple_model_selected())
   {
     ZoneScopedN("World::draw() : Draw pivot point");
-    opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
+    OpenGL::Scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
 
     float dist = glm::distance(camera_pos, _multi_select_pivot.get());
     _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, std::min(2.f, std::max(0.15f, dist * 0.02f)));
@@ -1494,7 +1494,7 @@ void World::draw (glm::mat4x4 const& model_view
   {
     ZoneScopedN("World::draw() : Draw WMOs");
     {
-      opengl::scoped::use_program wmo_program{*_wmo_program.get()};
+      OpenGL::Scoped::use_program wmo_program{*_wmo_program.get()};
 
       wmo_program.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
 
@@ -1533,7 +1533,7 @@ void World::draw (glm::mat4x4 const& model_view
   constexpr bool occlusion_cull = true;
   if (occlusion_cull)
   {
-    opengl::scoped::use_program occluder_shader{ *_occluder_program.get() };
+    OpenGL::Scoped::use_program occluder_shader{ *_occluder_program.get() };
     gl.colorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
     gl.depthMask(GL_FALSE);
     gl.bindVertexArray(_occluder_vao);
@@ -1576,7 +1576,7 @@ void World::draw (glm::mat4x4 const& model_view
 
       glm::mat4x4 identity_mtx = glm::mat4x4{1};
       auto& extents = tile->getCombinedExtents();
-      opengl::primitives::wire_box::getInstance(_context).draw ( model_view
+      OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
           , projection
           , identity_mtx
           , { 1.0f, 1.0f, 0.0f, 1.0f }
@@ -1607,9 +1607,9 @@ void World::draw (glm::mat4x4 const& model_view
     {
       if (draw_models)
       {
-        opengl::scoped::use_program m2_shader {*_m2_instanced_program.get()};
+        OpenGL::Scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
-        opengl::M2RenderState model_render_state;
+        OpenGL::M2RenderState model_render_state;
         model_render_state.tex_arrays = {0, 0};
         model_render_state.tex_indices = {0, 0};
         model_render_state.tex_unit_lookups = {0, 0};
@@ -1697,9 +1697,9 @@ void World::draw (glm::mat4x4 const& model_view
 
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
-      opengl::scoped::use_program m2_box_shader{ *_m2_box_program.get() };
+      OpenGL::Scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
-      opengl::scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
+      OpenGL::Scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
       for (auto& it : model_boxes_to_draw)
@@ -1737,7 +1737,7 @@ void World::draw (glm::mat4x4 const& model_view
 
   // set anim time only once per frame
   {
-    opengl::scoped::use_program water_shader {*_liquid_program.get()};
+    OpenGL::Scoped::use_program water_shader {*_liquid_program.get()};
     water_shader.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
     water_shader.uniform("animtime", animtime);
 
@@ -1751,13 +1751,13 @@ void World::draw (glm::mat4x4 const& model_view
   // model particles
   if (draw_model_animations && !model_with_particles.empty())
   {
-    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
-    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+    OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+    OpenGL::Scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
-    opengl::scoped::use_program particles_shader {*_m2_particles_program.get()};
+    OpenGL::Scoped::use_program particles_shader {*_m2_particles_program.get()};
 
     particles_shader.uniform("model_view_projection", mvp);
-    opengl::texture::set_active_texture(0);
+    OpenGL::texture::set_active_texture(0);
 
     for (auto& it : model_with_particles)
     {
@@ -1768,10 +1768,10 @@ void World::draw (glm::mat4x4 const& model_view
 
   if (draw_model_animations && !model_with_particles.empty())
   {
-    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
-    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+    OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+    OpenGL::Scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
-    opengl::scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
+    OpenGL::Scoped::use_program ribbon_shader {*_m2_ribbons_program.get()};
 
     ribbon_shader.uniform("model_view_projection", mvp);
 
@@ -1793,9 +1793,9 @@ void World::draw (glm::mat4x4 const& model_view
     ZoneScopedN("World::draw() : Draw water");
 
     // draw the water on both sides
-    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
+    OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> const cull;
 
-    opengl::scoped::use_program water_shader{ *_liquid_program.get()};
+    OpenGL::Scoped::use_program water_shader{ *_liquid_program.get()};
 
     gl.bindVertexArray(_liquid_chunk_vao);
 
@@ -1831,8 +1831,8 @@ void World::draw (glm::mat4x4 const& model_view
   if (angled_mode || use_ref_pos)
   {
     ZoneScopedN("World::draw() : Draw angles");
-    opengl::scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
-    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+    OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
+    OpenGL::Scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
     math::degrees orient = math::degrees(orientation);
     math::degrees incl = math::degrees(angle);
@@ -1881,9 +1881,9 @@ void World::draw (glm::mat4x4 const& model_view
   {
     ZoneScopedN("World::draw() : Draw flight bounds");
     // don't write on the depth buffer
-    opengl::scoped::depth_mask_setter<GL_FALSE> const depth_mask;
+    OpenGL::Scoped::depth_mask_setter<GL_FALSE> const depth_mask;
 
-    opengl::scoped::use_program mfbo_shader {*_mfbo_program.get()};
+    OpenGL::Scoped::use_program mfbo_shader {*_mfbo_program.get()};
 
     for (MapTile* tile : mapIndex.loaded_tiles())
     {
@@ -2682,7 +2682,7 @@ void World::addM2 ( BlizzardArchive::Listfile::FileKey const& file_key
                   , glm::vec3 newPos
                   , float scale
                   , glm::vec3 rotation
-                  , noggit::object_paste_params* paste_params
+                  , Noggit::object_paste_params* paste_params
                   )
 {
   ZoneScoped;
@@ -2731,7 +2731,7 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
     , glm::vec3 newPos
     , float scale
     , math::degrees::vec3 rotation
-    , noggit::object_paste_params* paste_params
+    , Noggit::object_paste_params* paste_params
 )
 {
   ZoneScoped;
@@ -3261,7 +3261,7 @@ void World::ensureAllTilesetsADT(glm::vec3 const& pos)
     {
       if (chunk->texture_set->num() <= i)
       {
-        scoped_blp_texture_reference tex {textures[i].toStdString(), noggit::NoggitRenderContext::MAP_VIEW};
+        scoped_blp_texture_reference tex {textures[i].toStdString(), Noggit::NoggitRenderContext::MAP_VIEW};
         chunk->texture_set->addTexture(tex);
       }
     }
@@ -3307,9 +3307,9 @@ void World::setBaseTexture(glm::vec3 const& pos)
   {
     NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
     chunk->eraseTextures();
-    if (!!noggit::ui::selected_texture::get())
+    if (!!Noggit::Ui::selected_texture::get())
     {
-      chunk->addTexture(*noggit::ui::selected_texture::get());
+      chunk->addTexture(*Noggit::Ui::selected_texture::get());
     }
   });
 }
@@ -3327,12 +3327,12 @@ void World::clear_shadows(glm::vec3 const& pos)
 void World::swapTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex)
 {
   ZoneScoped;
-  if (!!noggit::ui::selected_texture::get())
+  if (!!Noggit::Ui::selected_texture::get())
   {
     for_all_chunks_on_tile(pos, [&](MapChunk* chunk)
     {
       NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
-      chunk->switchTexture(tex, *noggit::ui::selected_texture::get());
+      chunk->switchTexture(tex, *Noggit::Ui::selected_texture::get());
     });
   }
 }
@@ -3564,7 +3564,7 @@ bool World::deselectVertices(glm::vec3 const& pos, float radius)
 void World::moveVertices(float h)
 {
   ZoneScoped;
-  noggit::Action* cur_action = NOGGIT_CUR_ACTION;
+  Noggit::Action* cur_action = NOGGIT_CUR_ACTION;
 
   assert(cur_action && "moveVertices called without an action running.");
 
@@ -3608,7 +3608,7 @@ void World::orientVertices ( glm::vec3 const& ref_pos
                            )
 {
   ZoneScoped;
-  noggit::Action* cur_action = NOGGIT_CUR_ACTION;
+  Noggit::Action* cur_action = NOGGIT_CUR_ACTION;
 
   assert(cur_action && "orientVertices called without an action running.");
 
@@ -3825,14 +3825,14 @@ void World::unload_shaders()
   _display_initialized = false;
 }
 
-noggit::VertexSelectionCache World::getVertexSelectionCache()
+Noggit::VertexSelectionCache World::getVertexSelectionCache()
 {
   ZoneScoped;
-  return std::move(noggit::VertexSelectionCache{_vertex_tiles, _vertex_chunks, _vertex_border_chunks,
+  return std::move(Noggit::VertexSelectionCache{_vertex_tiles, _vertex_chunks, _vertex_border_chunks,
                                                 _vertices_selected, _vertex_center});
 }
 
-void World::setVertexSelectionCache(noggit::VertexSelectionCache& cache)
+void World::setVertexSelectionCache(Noggit::VertexSelectionCache& cache)
 {
   ZoneScoped;
   _vertex_tiles = cache.vertex_tiles;
@@ -4264,7 +4264,7 @@ void World::ensureAllTilesetsAllADTs()
             {
               if (chunk->texture_set->num() <= i)
               {
-                scoped_blp_texture_reference tex {textures[i].toStdString(), noggit::NoggitRenderContext::MAP_VIEW};
+                scoped_blp_texture_reference tex {textures[i].toStdString(), Noggit::NoggitRenderContext::MAP_VIEW};
                 chunk->texture_set->addTexture(tex);
               }
             }
@@ -4293,7 +4293,7 @@ void World::updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4
   _mvp_ubo_data.projection = projection;
 
   gl.bindBuffer(GL_UNIFORM_BUFFER, _mvp_ubo);
-  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::MVPUniformBlock), &_mvp_ubo_data);
+  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(OpenGL::MVPUniformBlock), &_mvp_ubo_data);
 
 }
 
@@ -4325,7 +4325,7 @@ void World::updateLightingUniformBlock(bool draw_fog, glm::vec3 const& camera_po
   _lighting_ubo_data.RiverColorDark = { river_color_dark.x,river_color_dark.y,river_color_dark.z, skies->river_deep_alpha()};
 
   gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
-  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::LightingUniformBlock), &_lighting_ubo_data);
+  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(OpenGL::LightingUniformBlock), &_lighting_ubo_data);
 }
 
 void World::updateLightingUniformBlockMinimap(MinimapRenderSettings* settings)
@@ -4345,29 +4345,29 @@ void World::updateLightingUniformBlockMinimap(MinimapRenderSettings* settings)
     _lighting_ubo_data.RiverColorDark = settings->river_color_dark;
 
     gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
-    gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::LightingUniformBlock), &_lighting_ubo_data);
+    gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(OpenGL::LightingUniformBlock), &_lighting_ubo_data);
 }
 
 void World::updateTerrainParamsUniformBlock()
 {
   ZoneScoped;
   gl.bindBuffer(GL_UNIFORM_BUFFER, _terrain_params_ubo);
-  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(opengl::TerrainParamsUniformBlock), &_terrain_params_ubo_data);
+  gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(OpenGL::TerrainParamsUniformBlock), &_terrain_params_ubo_data);
   _need_terrain_params_ubo_update = false;
 }
 
-void World::setupChunkVAO(opengl::scoped::use_program& mcnk_shader)
+void World::setupChunkVAO(OpenGL::Scoped::use_program& mcnk_shader)
 {
   ZoneScoped;
-  opengl::scoped::vao_binder const _ (_mapchunk_vao);
+  OpenGL::Scoped::vao_binder const _ (_mapchunk_vao);
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mapchunk_texcoord);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mapchunk_texcoord);
     mcnk_shader.attrib("texcoord", 2, GL_FLOAT, GL_FALSE, 0, 0);
   }
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mapchunk_vertex);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_mapchunk_vertex);
     mcnk_shader.attrib("position", 2, GL_FLOAT, GL_FALSE, 0, 0);
   }
 }
@@ -4495,7 +4495,7 @@ void World::setupChunkBuffers()
    */
 
   {
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_mapchunk_index);
+    OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_mapchunk_index);
     gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, (768 + 192) * sizeof(std::uint16_t), indices.data(), GL_STATIC_DRAW);
   }
 
@@ -4526,13 +4526,13 @@ void World::setupChunkBuffers()
 
 }
 
-void World::setupLiquidChunkVAO(opengl::scoped::use_program& water_shader)
+void World::setupLiquidChunkVAO(OpenGL::Scoped::use_program& water_shader)
 {
   ZoneScoped;
-  opengl::scoped::vao_binder const _ (_liquid_chunk_vao);
+  OpenGL::Scoped::vao_binder const _ (_liquid_chunk_vao);
 
   {
-    opengl::scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_liquid_chunk_vertex);
+    OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const binder(_liquid_chunk_vertex);
     water_shader.attrib("position", 2, GL_FLOAT, GL_FALSE, 0, 0);
   }
 }
@@ -4602,7 +4602,7 @@ void World::setupOccluderBuffers()
   };
 
   {
-    opengl::scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_occluder_index);
+    OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const _ (_occluder_index);
     gl.bufferData (GL_ELEMENT_ARRAY_BUFFER, 36 * sizeof(std::uint16_t), indices.data(), GL_STATIC_DRAW);
   }
 

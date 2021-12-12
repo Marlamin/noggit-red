@@ -11,9 +11,9 @@
 #include <noggit/ui/font_noggit.hpp>
 #include <noggit/bool_toggle_property.hpp>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui::tools::ViewToolbar::Ui
+  namespace Ui::Tools::ViewToolbar::Ui
   {
     class ViewToolbar: public QToolBar
     {
@@ -22,7 +22,7 @@ namespace noggit
 
     private:
       QActionGroup _tool_group;
-      void add_tool_icon(noggit::bool_toggle_property* view_state, const QString& name, const noggit::ui::font_noggit::icons& icon);
+      void add_tool_icon(Noggit::bool_toggle_property* view_state, const QString& name, const Noggit::Ui::font_noggit::icons& icon);
     };
   }
 }

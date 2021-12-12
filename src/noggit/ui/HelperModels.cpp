@@ -12,9 +12,9 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
 
-namespace noggit
+namespace Noggit
 {
-  namespace ui
+  namespace Ui
   {
     helper_models::helper_models(object_editor* object_editor)
       : QWidget (object_editor, Qt::Tool | Qt::WindowStaysOnTopHint)
