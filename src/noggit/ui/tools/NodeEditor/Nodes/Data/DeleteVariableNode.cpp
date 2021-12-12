@@ -5,9 +5,9 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodeScene.hpp>
-#include "noggit/ui/tools/NodeEditor/Nodes/Scene/Context.hpp"
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/Context.hpp>
 
-#include <boost/format.hpp>
+#include <sstream>
 #include <external/NodeEditor/include/nodes/Node>
 
 
@@ -41,8 +41,11 @@ void DeleteVariableNodeBase::compute()
 
   if (it == variables->end())
   {
+    auto sstream = std::stringstream();
+    sstream << "Error: variable \"" << variable_name << "\" is not defined.";
+
     setValidationState(NodeValidationState::Error);
-    setValidationMessage((boost::format("Error: variable \"%s\" is not defined.") % variable_name).str().c_str());
+    setValidationMessage(sstream.str().c_str());
     return;
   }
 

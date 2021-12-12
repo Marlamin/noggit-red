@@ -55,6 +55,8 @@ void LogicBeginNode::compute()
       {
         setValidationState(NodeValidationState::Error);
 
+
+
         auto message = boost::format("Error: Argument of type <%s> at port %d does not have a default value and was not passed.")
             % _out_ports[i].data_type->type().name.toStdString() % i;
 

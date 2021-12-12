@@ -6,8 +6,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodeScene.hpp>
 #include "noggit/ui/tools/NodeEditor/Nodes/Scene/Context.hpp"
-
-#include <boost/format.hpp>
+#include <sstream>
 
 #include <external/NodeEditor/include/nodes/Node>
 
@@ -42,9 +41,11 @@ void SetVariableNodeBase::compute()
 
   if (it != variables->end() && _in_ports[2].data_type->type().id != it->second.first.c_str())
   {
+      auto sstream = std::stringstream();
+      sstream << "Error: variable \"" << variable_name << "\" of type \"" << it->second.first << "\" does not match required type \"" << _out_ports[0].data_type->type().id.toStdString() << "\".";
+
     setValidationState(NodeValidationState::Error);
-    setValidationMessage((boost::format("Error: existing variable \"%s\" of type \"%s\" does not match required type \"%s\".")
-      % variable_name % it->second.first.c_str() % _in_ports[2].data_type->type().id.toStdString()).str().c_str());
+    setValidationMessage(sstream.str().c_str());
     return;
   }
 

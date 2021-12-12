@@ -35,16 +35,21 @@ void GetVariableLazyNodeBase::compute()
 
   if (it == variables->end())
   {
+      auto sstream = std::stringstream();
+      sstream << "Error: variable \"" << variable_name << "\" is not defined.";
+
     setValidationState(NodeValidationState::Error);
-    setValidationMessage((boost::format("Error: variable \"%s\" is not defined.") % variable_name).str().c_str());
+    setValidationMessage(sstream.str().c_str());
     return;
   }
 
   if (_out_ports[0].data_type->type().id != it->second.first.c_str())
   {
+      auto sstream = std::stringstream();
+      sstream << "Error: variable \"" << variable_name << "\" of type \"" << it->second.first << "\" does not match required type \"" << _out_ports[0].data_type->type().id.toStdString() << "\".";
+
     setValidationState(NodeValidationState::Error);
-    setValidationMessage((boost::format("Error: variable \"%s\" of type \"%s\" does not match required type \"%s\".")
-                          % variable_name % it->second.first.c_str() % _out_ports[0].data_type->type().id.toStdString()).str().c_str());
+    setValidationMessage(sstream.str().c_str());
     return;
   }
 

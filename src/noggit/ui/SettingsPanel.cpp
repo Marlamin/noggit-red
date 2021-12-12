@@ -6,8 +6,7 @@
 #include <noggit/TextureManager.h>
 #include <util/qt/overload.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
-
-#include <boost/format.hpp>
+#include <sstream>
 
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QFileDialog>
@@ -165,7 +164,10 @@ namespace Noggit
                   return;
                 }
 
-                QFile file((boost::format("./themes/%s/theme.qss") % s.toStdString().c_str()).str().c_str());
+                auto sstream = std::stringstream();
+                sstream << "./themes/" << s.toStdString() << "/theme.qss";
+
+                QFile file(sstream.str().c_str());
                 if (file.open(QFile::ReadOnly))
                 {
                   QString style_sheet = QLatin1String(file.readAll());
