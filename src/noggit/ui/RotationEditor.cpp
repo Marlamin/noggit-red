@@ -266,7 +266,7 @@ namespace noggit
         {
           selection_type selection = entry.value();
 
-          auto obj = boost::get<selected_object_type>(selection);
+          auto obj = std::get<selected_object_type>(selection);
 
           _scale->setEnabled(obj->which() != eWMO);
 

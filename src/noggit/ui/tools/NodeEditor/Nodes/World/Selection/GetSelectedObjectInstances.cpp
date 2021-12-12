@@ -36,10 +36,10 @@ void GetSelectedObjectInstancesNode::compute()
   {
     auto selection_entry = selection[i];
 
-    if (selection_entry.which() != eEntry_Object)
+    if (selection_entry.index() != eEntry_Object)
       continue;
 
-    _objects.push_back(std::make_shared<ObjectInstanceData>(boost::get<selected_object_type>(selection_entry)));
+    _objects.push_back(std::make_shared<ObjectInstanceData>(std::get<selected_object_type>(selection_entry)));
   }
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);

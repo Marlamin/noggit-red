@@ -469,14 +469,14 @@ namespace noggit
     {
       for (auto& instance : _model_instance_created)
       {
-        auto obj = boost::get<selected_object_type>(instance);
+        auto obj = std::get<selected_object_type>(instance);
 
         if (obj->which() == eMODEL)
         {
           ModelInstance* mi = static_cast<ModelInstance*>(obj);
           delete mi;
         }
-        else if (instance.which() == eWMO)
+        else if (instance.index() == eWMO)
         {
           WMOInstance* wi = static_cast<WMOInstance*>(obj);
           delete wi;
@@ -506,13 +506,13 @@ namespace noggit
       {
         glm::vec3 pos;
 
-        if (selection.which() != eEntry_Object)
+        if (selection.index() != eEntry_Object)
         {
           LogError << "Invalid selection" << std::endl;
           return;
         }
 
-        auto obj = boost::get<selected_object_type>(selection);
+        auto obj = std::get<selected_object_type>(selection);
 
         glm::vec3 model_pos = obj->pos;
 
@@ -524,7 +524,7 @@ namespace noggit
         case PASTE_ON_SELECTION:
           if (last_entry)
           {
-            glm::vec3 last_entry_pos =  boost::get<selected_object_type>(last_entry.value())->pos;
+            glm::vec3 last_entry_pos =  std::get<selected_object_type>(last_entry.value())->pos;
 
             pos = last_entry_pos + model_pos;
           }
@@ -604,9 +604,9 @@ namespace noggit
         ss << "Model: ";
 
         auto selectedObject = new_selection.front();
-        if (selectedObject.which() == eEntry_Object)
+        if (selectedObject.index() == eEntry_Object)
         {
-          ss << boost::get<selected_object_type>(selectedObject)->instance_model()->file_key().filepath();
+          ss << std::get<selected_object_type>(selectedObject)->instance_model()->file_key().filepath();
         }
         else
         {
@@ -671,12 +671,12 @@ namespace noggit
 
       for (auto& selection : current_selection)
       {
-        if (selection.which() != eEntry_Object)
+        if (selection.index() != eEntry_Object)
         {
           continue;
         }
 
-        auto obj = boost::get<selected_object_type>(selection);
+        auto obj = std::get<selected_object_type>(selection);
 
         if (obj->which() == eMODEL)
         {
@@ -714,12 +714,12 @@ namespace noggit
       std::ofstream stream(_settings->value("project/import_file", "import.txt").toString().toStdString(), std::ios_base::app);
       for (auto& selection : world->current_selection())
       {
-        if (selection.which() != eEntry_Object)
+        if (selection.index() != eEntry_Object)
         {
           continue;
         }
 
-        std::string path = boost::get<selected_object_type>(selection)->instance_model()->file_key().filepath();
+        std::string path = std::get<selected_object_type>(selection)->instance_model()->file_key().filepath();
 
         stream << path << std::endl;
       }

@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/world_model_instances_storage.hpp>
-
 #include <noggit/World.h>
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
@@ -152,10 +151,10 @@ namespace noggit
 
     for (auto& it : instances)
     {
-      if (it.which() != eEntry_Object)
+      if (it.index() != eEntry_Object)
         continue;
 
-      auto obj = boost::get<selected_object_type>(it);
+      auto obj = std::get<selected_object_type>(it);
 
       if (NOGGIT_CUR_ACTION)
         NOGGIT_CUR_ACTION->registerObjectRemoved(obj);
@@ -188,7 +187,7 @@ namespace noggit
     if (auto instance = get_instance(uid, false))
     {
       _world->updateTilesEntry(instance.value(), model_update::remove);
-      auto obj = boost::get<selected_object_type>(instance.value());
+      auto obj = std::get<selected_object_type>(instance.value());
 
       if (NOGGIT_CUR_ACTION)
       {

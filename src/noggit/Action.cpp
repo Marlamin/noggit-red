@@ -429,7 +429,7 @@ void noggit::Action::finish()
         continue;
       }
 
-      auto obj = boost::get<selected_object_type>(instance.value());
+      auto obj = std::get<selected_object_type>(instance.value());
 
       post.second.pos = obj->pos;
       post.second.dir = obj->dir;

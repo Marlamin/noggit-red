@@ -142,9 +142,9 @@ void World::update_selection_pivot()
 
     for (auto const& entry : _current_selection)
     {
-      if (entry.which() == eEntry_Object)
+      if (entry.index() == eEntry_Object)
       {
-        pivot += boost::get<selected_object_type>(entry)->pos;
+        pivot += std::get<selected_object_type>(entry)->pos;
         model_count++;
       }
     }
@@ -160,21 +160,21 @@ void World::update_selection_pivot()
 bool World::is_selected(selection_type selection) const
 {
   ZoneScoped;
-  if (selection.which() != eEntry_Object)
+  if (selection.index() != eEntry_Object)
     return false;
 
-  auto which = boost::get<selected_object_type>(selection)->which();
+  auto which = std::get<selected_object_type>(selection)->which();
 
   if (which == eMODEL)
   {
-    uint uid = static_cast<ModelInstance*>(boost::get<selected_object_type>(selection))->uid;
+    uint uid = static_cast<ModelInstance*>(std::get<selected_object_type>(selection))->uid;
     auto const& it = std::find_if(_current_selection.begin()
                                   , _current_selection.end()
                                   , [uid] (selection_type type)
     {
-      return type.type() == typeid(selected_object_type)
-        && boost::get<selected_object_type>(type)->which() == eMODEL
-        && static_cast<ModelInstance*>(boost::get<selected_object_type>(type))->uid == uid;
+      return var_type(type) == typeid(selected_object_type)
+        && std::get<selected_object_type>(type)->which() == eMODEL
+        && static_cast<ModelInstance*>(std::get<selected_object_type>(type))->uid == uid;
     }
     );
 
@@ -185,14 +185,14 @@ bool World::is_selected(selection_type selection) const
   }
   else if (which == eWMO)
   {
-    uint uid = static_cast<WMOInstance*>(boost::get<selected_object_type>(selection))->uid;
+    uint uid = static_cast<WMOInstance*>(std::get<selected_object_type>(selection))->uid;
     auto const& it = std::find_if(_current_selection.begin()
                             , _current_selection.end()
                             , [uid] (selection_type type)
     {
-      return type.type() == typeid(selected_object_type)
-        && boost::get<selected_object_type>(type)->which() == eWMO
-        && static_cast<WMOInstance*>(boost::get<selected_object_type>(type))->uid == uid;
+      return var_type(type) == typeid(selected_object_type)
+        && std::get<selected_object_type>(type)->which() == eWMO
+        && static_cast<WMOInstance*>(std::get<selected_object_type>(type))->uid == uid;
     }
     );
     if (it != _current_selection.end())
@@ -209,10 +209,10 @@ bool World::is_selected(std::uint32_t uid) const
   ZoneScoped;
   for (selection_type const& entry : _current_selection)
   {
-    if (entry.which() != eEntry_Object)
+    if (entry.index() != eEntry_Object)
       continue;
 
-    auto obj = boost::get<selected_object_type>(entry);
+    auto obj = std::get<selected_object_type>(entry);
 
     if (obj->which() == eWMO)
     {
@@ -241,7 +241,7 @@ std::optional<selection_type> World::get_last_selected_model() const
                    , _current_selection.rend()
                    , [&] (selection_type const& entry)
                      {
-                       return entry.which() != eEntry_MapChunk;
+                       return entry.index() != eEntry_MapChunk;
                      }
                    )
     );
@@ -288,7 +288,7 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
 
   for (auto& entry : _current_selection)
   {
-    auto type = entry.which();
+    auto type = entry.index();
     if (type == eEntry_MapChunk)
     {
       continue;
@@ -296,7 +296,7 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
 
     updateTilesEntry(entry, model_update::remove);
 
-    auto& obj = boost::get<selected_object_type>(entry);
+    auto& obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
     math::degrees::vec3& dir = obj->dir;
@@ -364,13 +364,13 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
   ZoneScoped;
   for (auto& entry : _current_selection)
   {
-    auto type = entry.which();
+    auto type = entry.index();
     if (type == eEntry_MapChunk)
     {
       continue;
     }
 
-    auto& obj = boost::get<selected_object_type>(entry);
+    auto& obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
     updateTilesEntry(entry, model_update::remove);
@@ -403,7 +403,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 
 
 // We hit the terrain, now we take the normal of this position and use it to get the rotation we want.
-    auto const& hitChunkInfo = boost::get<selected_chunk_type>(results.front().second);
+    auto const& hitChunkInfo = std::get<selected_chunk_type>(results.front().second);
 
     glm::quat q;
     glm::vec3 varnormal;
@@ -491,7 +491,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     dir.y = math::degrees(math::radians(eulerAngles.x))._; //Pitch
     dir.z = math::degrees(math::radians(eulerAngles.y))._; //Yaw
 
-    boost::get<selected_object_type>(entry)->recalcExtents();
+    std::get<selected_object_type>(entry)->recalcExtents();
 
     // yaw (z-axis rotation)
     double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
@@ -507,13 +507,13 @@ void World::set_current_selection(selection_type entry)
   _current_selection.push_back(entry);
   _multi_select_pivot = std::nullopt;
 
-  _selected_model_count = entry.which() == eEntry_MapChunk ? 0 : 1;
+  _selected_model_count = entry.index() == eEntry_MapChunk ? 0 : 1;
 }
 
 void World::add_to_selection(selection_type entry)
 {
   ZoneScoped;
-  if (entry.which() != eEntry_MapChunk)
+  if (entry.index() != eEntry_MapChunk)
   {
     _selected_model_count++;
   }
@@ -528,7 +528,7 @@ void World::remove_from_selection(selection_type entry)
   std::vector<selection_type>::iterator position = std::find(_current_selection.begin(), _current_selection.end(), entry);
   if (position != _current_selection.end())
   {
-    if (entry.which() != eEntry_MapChunk)
+    if (entry.index() != eEntry_MapChunk)
     {
       _selected_model_count--;
     }
@@ -543,10 +543,10 @@ void World::remove_from_selection(std::uint32_t uid)
   ZoneScoped;
   for (auto it = _current_selection.begin(); it != _current_selection.end(); ++it)
   {
-    if (it->which() != eEntry_Object)
+    if (it->index() != eEntry_Object)
       continue;
 
-    auto obj = boost::get<selected_object_type>(*it);
+    auto obj = std::get<selected_object_type>(*it);
 
     if (obj->which() == eMODEL && static_cast<ModelInstance*>(obj)->uid == uid)
     {
@@ -584,13 +584,13 @@ void World::snap_selected_models_to_the_ground()
   ZoneScoped;
   for (auto& entry : _current_selection)
   {
-    auto type = entry.which();
+    auto type = entry.index();
     if (type == eEntry_MapChunk)
     {
       continue;
     }
 
-    auto& obj = boost::get<selected_object_type>(entry);
+    auto& obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
     glm::vec3& pos = obj->pos;
 
@@ -619,9 +619,9 @@ void World::snap_selected_models_to_the_ground()
     }
 
     // the ground can only be intersected once
-    pos.y = boost::get<selected_chunk_type>(hits[0].second).position.y;
+    pos.y = std::get<selected_chunk_type>(hits[0].second).position.y;
 
-    boost::get<selected_object_type>(entry)->recalcExtents();
+    std::get<selected_object_type>(entry)->recalcExtents();
 
     updateTilesEntry(entry, model_update::add);
   }
@@ -634,9 +634,9 @@ void World::scale_selected_models(float v, m2_scaling_type type)
   ZoneScoped;
   for (auto& entry : _current_selection)
   {
-    if (entry.which() == eEntry_Object)
+    if (entry.index() == eEntry_Object)
     {
-      auto obj = boost::get<selected_object_type>(entry);
+      auto obj = std::get<selected_object_type>(entry);
 
       if (obj->which() != eMODEL)
         continue;
@@ -679,13 +679,13 @@ void World::move_selected_models(float dx, float dy, float dz)
   ZoneScoped;
   for (auto& entry : _current_selection)
   {
-    auto type = entry.which();
+    auto type = entry.index();
     if (type == eEntry_MapChunk)
     {
       continue;
     }
 
-    auto& obj = boost::get<selected_object_type>(entry);
+    auto& obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
     glm::vec3& pos = obj->pos;
 
@@ -695,7 +695,7 @@ void World::move_selected_models(float dx, float dy, float dz)
     pos.y += dy;
     pos.z += dz;
 
-    boost::get<selected_object_type>(entry)->recalcExtents();
+    std::get<selected_object_type>(entry)->recalcExtents();
 
     updateTilesEntry(entry, model_update::add);
   }
@@ -725,7 +725,7 @@ void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
 
   for (auto& entry : _current_selection)
   {
-    auto type = entry.which();
+    auto type = entry.index();
     if (type == eEntry_MapChunk)
     {
       continue;
@@ -733,7 +733,7 @@ void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
 
     updateTilesEntry(entry, model_update::remove);
 
-    auto& obj = boost::get<selected_object_type>(entry);
+    auto& obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
     obj->pos = pos;
     obj->recalcExtents();
@@ -752,7 +752,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
 
   for (auto& entry : _current_selection)
   {
-    auto type = entry.which();
+    auto type = entry.index();
     if (type == eEntry_MapChunk)
     {
       continue;
@@ -760,7 +760,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
 
     updateTilesEntry(entry, model_update::remove);
 
-    auto& obj = boost::get<selected_object_type>(entry);
+    auto& obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
     if (use_pivot && has_multi_select)
@@ -793,13 +793,13 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
 
   for (auto& entry : _current_selection)
   {
-    auto type = entry.which();
+    auto type = entry.index();
     if (type == eEntry_MapChunk)
     {
       continue;
     }
 
-    auto& obj = boost::get<selected_object_type>(entry);
+    auto& obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
     updateTilesEntry(entry, model_update::remove);
@@ -1719,9 +1719,9 @@ void World::draw (glm::mat4x4 const& model_view
 
     for (auto& selection : current_selection())
     {
-      if (selection.which() == eEntry_Object)
+      if (selection.index() == eEntry_Object)
       {
-        auto obj = boost::get<selected_object_type>(selection);
+        auto obj = std::get<selected_object_type>(selection);
 
         if (obj->which() != eMODEL)
           continue;
@@ -2856,7 +2856,7 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
   }
 
   // deselect the terrain when an adt is unloaded
-  if (_current_selection.size() == 1 && _current_selection.at(0).which() == eEntry_MapChunk)
+  if (_current_selection.size() == 1 && _current_selection.at(0).index() == eEntry_MapChunk)
   {
     reset_selection();
   }
@@ -2881,10 +2881,10 @@ void World::deleteObjects(std::vector<selection_type> const& types)
 void World::updateTilesEntry(selection_type const& entry, model_update type)
 {
   ZoneScoped;
-  if (entry.which() != eEntry_Object)
+  if (entry.index() != eEntry_Object)
     return;
 
-  auto obj = boost::get<selected_object_type>(entry);
+  auto obj = std::get<selected_object_type>(entry);
 
   if (obj->which() == eWMO)
     updateTilesWMO (static_cast<WMOInstance*>(obj), type);
@@ -3713,9 +3713,9 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
       {
         auto instance = _model_instance_storage.get_instance(uid);
 
-        if (instance && instance.value().which() == eEntry_Object)
+        if (instance && instance.value().index() == eEntry_Object)
         {
-          auto obj = boost::get<selected_object_type>(instance.value());
+          auto obj = std::get<selected_object_type>(instance.value());
 
           if (glm::distance(obj->pos, pos) <= radius && is_selected(obj))
           {
@@ -3731,9 +3731,9 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
       {
         auto instance = _model_instance_storage.get_instance(uid);
 
-        if (instance && instance.value().which() == eEntry_Object)
+        if (instance && instance.value().index() == eEntry_Object)
         {
-          auto obj = boost::get<selected_object_type>(instance.value());
+          auto obj = std::get<selected_object_type>(instance.value());
 
           if (glm::distance(obj->pos, pos) <= radius && !is_selected(obj))
           {
@@ -3761,9 +3761,9 @@ float World::getMaxTileHeight(const tile_index& tile)
   {
     auto instance = _model_instance_storage.get_instance(uid);
 
-    if (instance.value().which() == eEntry_Object)
+    if (instance.value().index() == eEntry_Object)
     {
-      auto obj = boost::get<selected_object_type>(instance.value());
+      auto obj = std::get<selected_object_type>(instance.value());
       obj->ensureExtents();
       max_height = std::max(max_height, std::max(obj->extents[0].y, obj->extents[1].y));
     }
@@ -3781,9 +3781,9 @@ SceneObject* World::getObjectInstance(std::uint32_t uid)
   if (!instance)
     return nullptr;
 
-  if (instance.value().which() == eEntry_Object)
+  if (instance.value().index() == eEntry_Object)
   {
-    return boost::get<selected_object_type>(instance.value());
+    return std::get<selected_object_type>(instance.value());
   }
 
   return nullptr;

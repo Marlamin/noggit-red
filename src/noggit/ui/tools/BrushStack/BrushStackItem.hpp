@@ -9,8 +9,8 @@
 #include <QToolButton>
 #include <QJsonObject>
 #include <ui_BrushStackItem.h>
-#include <boost/variant.hpp>
-#include <boost/optional.hpp>
+#include <optional>
+#include <variant>
 
 #include <noggit/ui/tools/UiCommon/ReorderableVerticalBox.hpp>
 
@@ -27,7 +27,7 @@ class World;
 
 namespace noggit::ui::tools
 {
-  using operation_type = boost::variant
+  using operation_type = std::variant
     < noggit::ui::terrain_tool*
     , noggit::ui::flatten_blur_tool*
     , noggit::ui::texturing_tool*
@@ -94,7 +94,7 @@ namespace noggit::ui::tools
     QCheckBox* _is_mask_rotation_affecting;
     QCheckBox* _is_speed_affecting;
 
-    boost::optional<scoped_blp_texture_reference> _selected_texture;
+    std::optional<scoped_blp_texture_reference> _selected_texture;
     noggit::ui::tileset_chooser* _texture_palette = nullptr;
     bool _is_texture_dirty = false;
 

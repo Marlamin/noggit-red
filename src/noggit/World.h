@@ -47,6 +47,7 @@ static const float doodaddrawdistance = 64.0f;
 
 using StripType = uint16_t;
 
+
 class World
 {
 private:

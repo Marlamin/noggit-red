@@ -35,7 +35,7 @@ void GetLastSelectedObjectInstanceNode::compute()
     return;
   }
 
-  SceneObject* obj = boost::get<selected_object_type>(obj_optional.value());
+  SceneObject* obj = std::get<selected_object_type>(obj_optional.value());
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

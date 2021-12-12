@@ -431,10 +431,10 @@ namespace noggit
 
                   for (auto& selection : world->current_selection())
                   {
-                    if (selection.which() != eEntry_Object)
+                    if (selection.index() != eEntry_Object)
                       continue;
 
-                    auto obj = boost::get<selected_object_type>(selection);
+                    auto obj = std::get<selected_object_type>(selection);
 
                     if (obj->which() == eMODEL)
                     {
@@ -463,10 +463,10 @@ namespace noggit
 
                 for (auto& selection : world->current_selection())
                 {
-                  if (selection.which() != eEntry_Object)
+                  if (selection.index() != eEntry_Object)
                     continue;
 
-                  auto obj = boost::get<selected_object_type>(selection);
+                  auto obj = std::get<selected_object_type>(selection);
 
                   if (obj->which() == eMODEL)
                   {
@@ -497,10 +497,10 @@ namespace noggit
 
                   for (auto& selection : world->current_selection())
                   {
-                    if (selection.which() != eEntry_Object)
+                    if (selection.index() != eEntry_Object)
                       continue;
 
-                    auto obj = boost::get<selected_object_type>(selection);
+                    auto obj = std::get<selected_object_type>(selection);
 
                     if(obj->which() == eMODEL)
                     {
@@ -529,10 +529,10 @@ namespace noggit
 
                 for (auto& selection : world->current_selection())
                 {
-                  if (selection.which() != eEntry_Object)
+                  if (selection.index() != eEntry_Object)
                     continue;
 
-                  auto obj = boost::get<selected_object_type>(selection);
+                  auto obj = std::get<selected_object_type>(selection);
 
                   if (obj->which() == eMODEL)
                   {
@@ -562,10 +562,10 @@ namespace noggit
 
                 for (auto& selection : world->current_selection())
                 {
-                  if (selection.which() != eEntry_Object)
+                  if (selection.index() != eEntry_Object)
                     continue;
 
-                  auto obj = boost::get<selected_object_type>(selection);
+                  auto obj = std::get<selected_object_type>(selection);
 
 
                   if (obj->which() == eWMO)
@@ -596,10 +596,10 @@ namespace noggit
                 for (auto& selection : world->current_selection())
                 {
 
-                  if (selection.which() != eEntry_Object)
+                  if (selection.index() != eEntry_Object)
                     continue;
 
-                  auto obj = boost::get<selected_object_type>(selection);
+                  auto obj = std::get<selected_object_type>(selection);
 
                   if (obj->which() == eWMO)
                   {
@@ -629,10 +629,10 @@ namespace noggit
 
                 for (auto& selection : world->current_selection())
                 {
-                  if (selection.which() != eEntry_Object)
+                  if (selection.index() != eEntry_Object)
                     continue;
 
-                  auto obj = boost::get<selected_object_type>(selection);
+                  auto obj = std::get<selected_object_type>(selection);
 
                   if (obj->which() == eWMO)
                   {
@@ -661,10 +661,10 @@ namespace noggit
 
                 for (auto& selection : world->current_selection())
                 {
-                  if (selection.which() != eEntry_Object)
+                  if (selection.index() != eEntry_Object)
                     continue;
 
-                  auto obj = boost::get<selected_object_type>(selection);
+                  auto obj = std::get<selected_object_type>(selection);
 
                   if (obj->which() == eWMO)
                   {

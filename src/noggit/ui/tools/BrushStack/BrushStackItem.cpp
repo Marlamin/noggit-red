@@ -100,26 +100,26 @@ void BrushStackItem::setTool(operation_type tool)
 {
   _tool_widget = tool;
 
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
-      _ui.contentWidget->layout()->addWidget(boost::get<noggit::ui::terrain_tool*>(_tool_widget));
+      _ui.contentWidget->layout()->addWidget(std::get<noggit::ui::terrain_tool*>(_tool_widget));
       _ui.brushNameLabel->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::TOOL_RAISE_LOWER));
       _ui.brushNameLabel->setToolTip("Raise | Lower");
       break;
     case eFlattenBlur:
-      _ui.contentWidget->layout()->addWidget(boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget));
+      _ui.contentWidget->layout()->addWidget(std::get<noggit::ui::flatten_blur_tool*>(_tool_widget));
       _ui.brushNameLabel->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::TOOL_FLATTEN_BLUR));
       _ui.brushNameLabel->setToolTip("Flatten | Blur");
       break;
     case eTexturing:
-      _ui.contentWidget->layout()->addWidget(boost::get<noggit::ui::texturing_tool*>(_tool_widget));
+      _ui.contentWidget->layout()->addWidget(std::get<noggit::ui::texturing_tool*>(_tool_widget));
       _ui.brushNameLabel->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::TOOL_TEXTURE_PAINT));
       _ui.brushNameLabel->setToolTip("Texture");
 
       _texture_palette = new noggit::ui::tileset_chooser(this);
 
-      connect(boost::get<noggit::ui::texturing_tool*>(_tool_widget)->_current_texture, &noggit::ui::current_texture::clicked
+      connect(std::get<noggit::ui::texturing_tool*>(_tool_widget)->_current_texture, &noggit::ui::current_texture::clicked
       , [this]
       {
         _texture_palette->setVisible(!_texture_palette->isVisible());
@@ -128,14 +128,14 @@ void BrushStackItem::setTool(operation_type tool)
       connect(_texture_palette, &noggit::ui::tileset_chooser::selected
         , [=](std::string const& filename)
               {
-                boost::get<noggit::ui::texturing_tool*>(_tool_widget)->_current_texture->set_texture(filename);
+                std::get<noggit::ui::texturing_tool*>(_tool_widget)->_current_texture->set_texture(filename);
                 _is_texture_dirty = true;
               }
       );
 
       break;
     case eShader:
-      _ui.contentWidget->layout()->addWidget(boost::get<noggit::ui::shader_tool*>(_tool_widget));
+      _ui.contentWidget->layout()->addWidget(std::get<noggit::ui::shader_tool*>(_tool_widget));
       _ui.brushNameLabel->setIcon(noggit::ui::font_noggit_icon(noggit::ui::font_noggit::TOOL_VERTEX_PAINT));
       _ui.brushNameLabel->setToolTip("Shader");
       break;
@@ -145,16 +145,16 @@ void BrushStackItem::setTool(operation_type tool)
 
 QWidget* BrushStackItem::getTool()
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
-      return boost::get<noggit::ui::terrain_tool*>(_tool_widget);
+      return std::get<noggit::ui::terrain_tool*>(_tool_widget);
     case eFlattenBlur:
-      return boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget);
+      return std::get<noggit::ui::flatten_blur_tool*>(_tool_widget);
     case eTexturing:
-      return boost::get<noggit::ui::texturing_tool*>(_tool_widget);
+      return std::get<noggit::ui::texturing_tool*>(_tool_widget);
     case eShader:
-      return boost::get<noggit::ui::shader_tool*>(_tool_widget);
+      return std::get<noggit::ui::shader_tool*>(_tool_widget);
   }
 
   return nullptr;
@@ -162,106 +162,106 @@ QWidget* BrushStackItem::getTool()
 
 void BrushStackItem::setBrushMode(bool sculpt)
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
-      boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
+      std::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
       break;
     case eTexturing:
-      boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
+      std::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
       break;
     case eShader:
-      boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
+      std::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
       break;
   }
 }
 
 QJsonObject BrushStackItem::toJSON()
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
     {
-      return boost::get<noggit::ui::terrain_tool*>(_tool_widget)->toJSON();
+      return std::get<noggit::ui::terrain_tool*>(_tool_widget)->toJSON();
     }
     case eFlattenBlur:
     {
-      return boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->toJSON();
+      return std::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->toJSON();
     }
     case eTexturing:
     {
-      return boost::get<noggit::ui::texturing_tool*>(_tool_widget)->toJSON();
+      return std::get<noggit::ui::texturing_tool*>(_tool_widget)->toJSON();
     }
     case eShader:
     {
-      return boost::get<noggit::ui::shader_tool*>(_tool_widget)->toJSON();
+      return std::get<noggit::ui::shader_tool*>(_tool_widget)->toJSON();
     }
   }
 }
 
 void BrushStackItem::fromJSON(QJsonObject const& json)
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
     {
-      return boost::get<noggit::ui::terrain_tool*>(_tool_widget)->fromJSON(json);
+      return std::get<noggit::ui::terrain_tool*>(_tool_widget)->fromJSON(json);
     }
     case eFlattenBlur:
     {
-      return boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->fromJSON(json);
+      return std::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->fromJSON(json);
     }
     case eTexturing:
     {
-      return boost::get<noggit::ui::texturing_tool*>(_tool_widget)->fromJSON(json);
+      return std::get<noggit::ui::texturing_tool*>(_tool_widget)->fromJSON(json);
     }
     case eShader:
     {
-      return boost::get<noggit::ui::shader_tool*>(_tool_widget)->fromJSON(json);
+      return std::get<noggit::ui::shader_tool*>(_tool_widget)->fromJSON(json);
     }
   }
 }
 
 void BrushStackItem::syncSliders(double radius, double inner_radius, double speed, int rot, int brushMode)
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
       case eRaiseLower:
       {
-        auto rad_slider = boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getRadiusSlider();
+        auto rad_slider = std::get<noggit::ui::terrain_tool*>(_tool_widget)->getRadiusSlider();
         rad_slider->setEnabled(!_is_radius_affecting->isChecked());
 
         if (_is_radius_affecting->isChecked())
           rad_slider->setValue(radius);
 
-        auto inner_rad_slider = boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getInnerRadiusSlider();
+        auto inner_rad_slider = std::get<noggit::ui::terrain_tool*>(_tool_widget)->getInnerRadiusSlider();
         inner_rad_slider->setEnabled(!_is_inner_radius_affecting->isChecked());
 
         if (_is_inner_radius_affecting->isChecked())
           inner_rad_slider->setValue(inner_radius);
 
-        auto speed_slider = boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getSpeedSlider();
+        auto speed_slider = std::get<noggit::ui::terrain_tool*>(_tool_widget)->getSpeedSlider();
         speed_slider->setEnabled(!_is_speed_affecting->isChecked());
 
         if (_is_speed_affecting->isChecked())
           speed_slider->setValue(speed);
         
-        boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
+        std::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
 
-        boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
+        std::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
 
         break;
 
       }
       case eFlattenBlur:
       {
-        auto rad_slider = boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->getRadiusSlider();
+        auto rad_slider = std::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->getRadiusSlider();
         rad_slider->setEnabled(!_is_radius_affecting->isChecked());
 
         if (_is_radius_affecting->isChecked())
           rad_slider->setValue(radius);
 
-        auto speed_slider = boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->getSpeedSlider();
+        auto speed_slider = std::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->getSpeedSlider();
         speed_slider->setEnabled(!_is_speed_affecting->isChecked());
 
         if (_is_speed_affecting->isChecked())
@@ -271,48 +271,48 @@ void BrushStackItem::syncSliders(double radius, double inner_radius, double spee
       }
       case eTexturing:
       {
-        auto rad_slider = boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getRadiusSlider();
+        auto rad_slider = std::get<noggit::ui::texturing_tool*>(_tool_widget)->getRadiusSlider();
         rad_slider->setEnabled(!_is_radius_affecting->isChecked());
 
         if (_is_radius_affecting->isChecked())
           rad_slider->setValue(radius);
 
-        auto inner_rad_slider = boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getInnerRadiusSlider();
+        auto inner_rad_slider = std::get<noggit::ui::texturing_tool*>(_tool_widget)->getInnerRadiusSlider();
         inner_rad_slider->setEnabled(!_is_inner_radius_affecting->isChecked());
 
         if (_is_inner_radius_affecting->isChecked())
           inner_rad_slider->setValue(inner_radius);
 
-        auto speed_slider = boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getSpeedSlider();
+        auto speed_slider = std::get<noggit::ui::texturing_tool*>(_tool_widget)->getSpeedSlider();
         speed_slider->setEnabled(!_is_speed_affecting->isChecked());
 
         if (_is_speed_affecting->isChecked())
           speed_slider->setValue(speed);
 
-        boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
+        std::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
 
 
-        boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
+        std::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
 
         break;
       }
       case eShader:
       {
-        auto rad_slider = boost::get<noggit::ui::shader_tool*>(_tool_widget)->getRadiusSlider();
+        auto rad_slider = std::get<noggit::ui::shader_tool*>(_tool_widget)->getRadiusSlider();
         rad_slider->setEnabled(!_is_radius_affecting->isChecked());
 
         if (_is_radius_affecting->isChecked())
           rad_slider->setValue(radius);
 
-        auto speed_slider = boost::get<noggit::ui::shader_tool*>(_tool_widget)->getSpeedSlider();
+        auto speed_slider = std::get<noggit::ui::shader_tool*>(_tool_widget)->getSpeedSlider();
         speed_slider->setEnabled(!_is_speed_affecting->isChecked());
 
         if (_is_speed_affecting->isChecked())
           speed_slider->setValue(speed);
 
-        boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
+        std::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
 
-        boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
+        std::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
 
         break;
       }
@@ -321,67 +321,67 @@ void BrushStackItem::syncSliders(double radius, double inner_radius, double spee
 
 void BrushStackItem::setRadius(float radius)
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
-      boost::get<noggit::ui::terrain_tool*>(_tool_widget)->setRadius(radius);
+      std::get<noggit::ui::terrain_tool*>(_tool_widget)->setRadius(radius);
       break;
     case eFlattenBlur:
-      boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->setRadius(radius);
+      std::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->setRadius(radius);
       break;
     case eTexturing:
-      boost::get<noggit::ui::texturing_tool*>(_tool_widget)->setRadius(radius);
+      std::get<noggit::ui::texturing_tool*>(_tool_widget)->setRadius(radius);
       break;
     case eShader:
-      boost::get<noggit::ui::shader_tool*>(_tool_widget)->setRadius(radius);
+      std::get<noggit::ui::shader_tool*>(_tool_widget)->setRadius(radius);
       break;
   }
 }
 
 void BrushStackItem::setInnerRadius(float inner_radius)
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
-      boost::get<noggit::ui::terrain_tool*>(_tool_widget)->setInnerRadius(inner_radius);
+      std::get<noggit::ui::terrain_tool*>(_tool_widget)->setInnerRadius(inner_radius);
       break;
     case eTexturing:
-      boost::get<noggit::ui::texturing_tool*>(_tool_widget)->setHardness(inner_radius);
+      std::get<noggit::ui::texturing_tool*>(_tool_widget)->setHardness(inner_radius);
       break;
   }
 }
 
 void BrushStackItem::setSpeed(float speed)
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
-      boost::get<noggit::ui::terrain_tool*>(_tool_widget)->setSpeed(speed * 1000.f);
+      std::get<noggit::ui::terrain_tool*>(_tool_widget)->setSpeed(speed * 1000.f);
       break;
     case eFlattenBlur:
-      boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->setSpeed(speed * 10.f);
+      std::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->setSpeed(speed * 10.f);
       break;
     case eTexturing:
-      boost::get<noggit::ui::texturing_tool*>(_tool_widget)->set_pressure(speed);
+      std::get<noggit::ui::texturing_tool*>(_tool_widget)->set_pressure(speed);
       break;
     case eShader:
-      boost::get<noggit::ui::shader_tool*>(_tool_widget)->setSpeed(speed * 10.f);
+      std::get<noggit::ui::shader_tool*>(_tool_widget)->setSpeed(speed * 10.f);
       break;
   }
 }
 
 void BrushStackItem::setMaskRotation(int rot)
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
-      boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
+      std::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
       break;
     case eTexturing:
-      boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
+      std::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
       break;
     case eShader:
-      boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
+      std::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
       break;
   }
 }
@@ -390,102 +390,102 @@ void BrushStackItem::execute(glm::vec3 const& cursor_pos, World* world, float dt
 {
   auto action = NOGGIT_CUR_ACTION;
 
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
       if (mod_shift_down)
-        boost::get<noggit::ui::terrain_tool*>(_tool_widget)->changeTerrain(world, cursor_pos, 7.5f * dt);
+        std::get<noggit::ui::terrain_tool*>(_tool_widget)->changeTerrain(world, cursor_pos, 7.5f * dt);
       else if (mod_ctrl_down)
-        boost::get<noggit::ui::terrain_tool*>(_tool_widget)->changeTerrain(world, cursor_pos, -7.5f * dt);
+        std::get<noggit::ui::terrain_tool*>(_tool_widget)->changeTerrain(world, cursor_pos, -7.5f * dt);
       break;
     case eFlattenBlur:
       if (mod_shift_down)
-        boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->flatten(world, cursor_pos, dt);
+        std::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->flatten(world, cursor_pos, dt);
       else if (mod_ctrl_down)
-        boost::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->blur(world, cursor_pos, dt);
+        std::get<noggit::ui::flatten_blur_tool*>(_tool_widget)->blur(world, cursor_pos, dt);
       break;
     case eTexturing:
 
       if (_is_texture_dirty)
       {
-        _selected_texture = scoped_blp_texture_reference(boost::get<noggit::ui::texturing_tool*>(_tool_widget)->_current_texture->filename(),
+        _selected_texture = scoped_blp_texture_reference(std::get<noggit::ui::texturing_tool*>(_tool_widget)->_current_texture->filename(),
                                                          noggit::NoggitRenderContext::MAP_VIEW);
         _is_texture_dirty = false;
       }
 
       if (mod_shift_down && mod_ctrl_down && mod_alt_down)
         world->eraseTextures(cursor_pos);
-      else if (mod_shift_down && _selected_texture.is_initialized())
+      else if (mod_shift_down && _selected_texture.has_value())
       {
-        auto tool = boost::get<noggit::ui::texturing_tool*>(_tool_widget);
+        auto tool = std::get<noggit::ui::texturing_tool*>(_tool_widget);
         if (tool->getImageMaskSelector()->isEnabled() && !tool->getImageMaskSelector()->getBrushMode())
         {
           if (action->checkAdressTag(reinterpret_cast<std::uintptr_t>(tool)))
             break;
 
-          tool->paint(world, cursor_pos, 1000.f, _selected_texture.get());
+          tool->paint(world, cursor_pos, 1000.f, _selected_texture.value());
           action->tagAdress(reinterpret_cast<std::uintptr_t>(tool));
         }
         else
         {
-          boost::get<noggit::ui::texturing_tool*>(_tool_widget)->paint(world, cursor_pos, dt, _selected_texture.get());
+          std::get<noggit::ui::texturing_tool*>(_tool_widget)->paint(world, cursor_pos, dt, _selected_texture.value());
         }
       }
       break;
     case eShader:
 
-      auto tool = boost::get<noggit::ui::shader_tool*>(_tool_widget);
+      auto tool = std::get<noggit::ui::shader_tool*>(_tool_widget);
       if (tool->getImageMaskSelector()->isEnabled() && !tool->getImageMaskSelector()->getBrushMode())
       {
         if (action->checkAdressTag(reinterpret_cast<std::uintptr_t>(tool)))
           break;
 
         if (mod_shift_down)
-          boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, 1000.f, true);
+          std::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, 1000.f, true);
         else if (mod_ctrl_down)
-          boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, 1000.f, false);
+          std::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, 1000.f, false);
 
         action->tagAdress(reinterpret_cast<std::uintptr_t>(tool));
       }
       else
       {
         if (mod_shift_down)
-          boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, true);
+          std::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, true);
         else if (mod_ctrl_down)
-          boost::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, false);
+          std::get<noggit::ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, false);
       }
   }
 }
 
 bool BrushStackItem::isMaskEnabled()
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
-      return boost::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
+      return std::get<noggit::ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
     case eFlattenBlur:
       return false;
     case eTexturing:
-      return boost::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
+      return std::get<noggit::ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
     case eShader:
-      return boost::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
+      return std::get<noggit::ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
   }
 }
 
 void BrushStackItem::updateMask()
 {
-  switch(_tool_widget.which())
+  switch(_tool_widget.index())
   {
     case eRaiseLower:
-      boost::get<noggit::ui::terrain_tool*>(_tool_widget)->updateMaskImage();
+      std::get<noggit::ui::terrain_tool*>(_tool_widget)->updateMaskImage();
       break;
     case eFlattenBlur:
       break;
     case eTexturing:
-      boost::get<noggit::ui::texturing_tool*>(_tool_widget)->updateMaskImage();
+      std::get<noggit::ui::texturing_tool*>(_tool_widget)->updateMaskImage();
       break;
     case eShader:
-      boost::get<noggit::ui::shader_tool*>(_tool_widget)->updateMaskImage();
+      std::get<noggit::ui::shader_tool*>(_tool_widget)->updateMaskImage();
       break;
   }
 }

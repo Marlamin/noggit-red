@@ -38,12 +38,12 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
   int n_selected = selection.size();
 
-  if (!n_selected || (n_selected == 1 & selection[0].which() != eEntry_Object))
+  if (!n_selected || (n_selected == 1 & selection[0].index() != eEntry_Object))
     return;
 
   if (n_selected == 1)
   {
-    gizmo_selection_type = boost::get<selected_object_type>(selection[0])->which() == eMODEL ? GizmoInternalMode::MODEL : GizmoInternalMode::WMO;
+    gizmo_selection_type = std::get<selected_object_type>(selection[0])->which() == eMODEL ? GizmoInternalMode::MODEL : GizmoInternalMode::WMO;
   }
   else
   {
@@ -76,7 +76,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     case MODEL:
     case WMO:
     {
-      obj_instance = boost::get<selected_object_type>(selection[0]);
+      obj_instance = std::get<selected_object_type>(selection[0]);
       obj_instance->recalcExtents();
       object_matrix = obj_instance->transformMatrix();
       ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, glm::value_ptr(object_matrix), glm::value_ptr(delta_matrix), nullptr);
@@ -106,10 +106,10 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     for (auto& selected : selection)
     {
 
-      if (selected.which() != eEntry_Object)
+      if (selected.index() != eEntry_Object)
         continue;
 
-      obj_instance = boost::get<selected_object_type>(selected);
+      obj_instance = std::get<selected_object_type>(selected);
       NOGGIT_CUR_ACTION->registerObjectTransformed(obj_instance);
 
       obj_instance->recalcExtents();
@@ -224,10 +224,10 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
   {
     for (auto& selected : selection)
     {
-      if (selected.which() != eEntry_Object)
+      if (selected.index() != eEntry_Object)
         continue;
 
-      obj_instance = boost::get<selected_object_type>(selected);
+      obj_instance = std::get<selected_object_type>(selected);
       NOGGIT_CUR_ACTION->registerObjectTransformed(obj_instance);
 
       obj_instance->recalcExtents();

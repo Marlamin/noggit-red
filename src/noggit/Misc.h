@@ -15,8 +15,17 @@
 
 // namespace for static helper functions.
 
+
+//This can be moved somewhere lated, replaces Boost::variant::type() which returnes typeid of active indexed variant
+//https://stackoverflow.com/questions/53696720/get-currently-held-typeid-of-stdvariant-like-boostvariant-type
+template<class V>
+std::type_info const& var_type(V const& v) {
+    return std::visit([](auto&& x)->decltype(auto) { return typeid(x); }, v);
+}
+
 namespace misc
 {
+  
   void find_and_replace(std::string& source, const std::string& find, const std::string& replace);
   float frand();
   float randfloat(float lower, float upper);
