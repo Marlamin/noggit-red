@@ -8,10 +8,9 @@
 #include <noggit/World.h>
 #include <noggit/texture_set.hpp>
 #include <ClientFile.hpp>
-
 #include <algorithm>    // std::min
 #include <array>
-#include <boost/format.hpp>
+#include <sstream>
 
 TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
                         , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
@@ -111,7 +110,10 @@ void TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to
     // prevent texture duplication
     if (replacement_texture_level != -1 && replacement_texture_level != texture_to_replace_level)
     {
-      std::string fallback_tex_name = (boost::format("error_%d.blp") % replacement_texture_level).str();
+        auto sstream = std::stringstream();
+        sstream << "error_" << replacement_texture_level << ".blp";
+
+      std::string fallback_tex_name = sstream.str();
       auto fallback = scoped_blp_texture_reference(fallback_tex_name, _context);
 
       textures[replacement_texture_level] = std::move(fallback);

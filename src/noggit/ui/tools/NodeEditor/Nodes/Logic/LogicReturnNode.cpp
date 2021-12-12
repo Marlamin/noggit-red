@@ -78,10 +78,9 @@ NodeValidationState LogicReturnNode::validate()
     {
       setValidationState(NodeValidationState::Error);
 
-      auto message = boost::format("Error: Failed to evaluate input of type <%s> at port %d.")
-          % _in_ports[i].data_type->type().name.toStdString() % i;
-
-      setValidationMessage(message.str().c_str());
+      auto sstream = std::stringstream();
+      sstream << "Error: Failed to evaluate input of type <"<< _in_ports[i].data_type->type().name.toStdString() << "> at port " << i << ".";
+      setValidationMessage(sstream.str().c_str());
       return _validation_state;
     }
   }
