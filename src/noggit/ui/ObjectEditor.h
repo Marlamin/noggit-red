@@ -10,8 +10,6 @@
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
 
-#include <boost/optional.hpp>
-
 class MapView;
 class QButtonGroup;
 class World;
