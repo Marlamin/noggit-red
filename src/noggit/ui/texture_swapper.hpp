@@ -26,7 +26,7 @@ namespace noggit
                       , MapView* map_view
                       );
 
-      boost::optional<scoped_blp_texture_reference> const& texture_to_swap() const
+      std::optional<scoped_blp_texture_reference> const& texture_to_swap() const
       {
         return _texture_to_swap;
       }
@@ -53,7 +53,7 @@ namespace noggit
       current_texture* const texture_display() { return _texture_to_swap_display; }
 
     private:
-      boost::optional<scoped_blp_texture_reference> _texture_to_swap;
+      std::optional<scoped_blp_texture_reference> _texture_to_swap;
       float _radius;
 
     private:

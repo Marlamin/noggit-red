@@ -514,11 +514,11 @@ namespace noggit
         {
           if (_texture_switcher->brush_mode())
           {
-            world->replaceTexture(pos, _texture_switcher->radius(), to_swap.get(), texture);
+            world->replaceTexture(pos, _texture_switcher->radius(), to_swap.value(), texture);
           }
           else
           {
-            world->overwriteTextureAtCurrentChunk(pos, to_swap.get(), texture);
+            world->overwriteTextureAtCurrentChunk(pos, to_swap.value(), texture);
           }          
         }
       }
@@ -619,8 +619,8 @@ namespace noggit
       json["spray_size"] = _spray_size_spin->value();
       json["spray_pressure"] = _spray_pressure_spin->value();
 
-      if (_texture_switcher->texture_to_swap().is_initialized())
-        json["texture_to_swap"] = _texture_switcher->texture_to_swap().get()->file_key().filepath().c_str();
+      if (_texture_switcher->texture_to_swap().has_value())
+          json["texture_to_swap"] = _texture_switcher->texture_to_swap().value()->file_key().filepath().c_str();
       else
         json["texture_to_swap"] = "";
 

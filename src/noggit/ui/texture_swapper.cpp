@@ -69,7 +69,7 @@ namespace noggit
         _texture_to_swap = selected_texture::get();
         if (_texture_to_swap)
         {
-          _texture_to_swap_display->set_texture(_texture_to_swap.get()->file_key().filepath());
+          _texture_to_swap_display->set_texture(_texture_to_swap.value()->file_key().filepath());
         }
       });
 
@@ -77,7 +77,7 @@ namespace noggit
         if (_texture_to_swap)
         {
           ActionManager::instance()->beginAction(map_view, ActionFlags::eCHUNKS_TEXTURE);
-          _world->swapTexture (*camera_pos, _texture_to_swap.get());
+          _world->swapTexture (*camera_pos, _texture_to_swap.value());
           ActionManager::instance()->endAction();
         }
       });
