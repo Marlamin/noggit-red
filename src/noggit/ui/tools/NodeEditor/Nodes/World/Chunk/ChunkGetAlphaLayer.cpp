@@ -59,7 +59,7 @@ void ChunkGetAlphaLayerNode::compute()
   texture_set->apply_alpha_changes();
   auto alphamaps = texture_set->getAlphamaps();
 
-  auto alpha_layer = alphamaps->at(layer - 1).get();
+  auto alpha_layer = alphamaps->at(layer - 1).value();
 
   QImage image(64, 64, QImage::Format_RGBA8888);
 

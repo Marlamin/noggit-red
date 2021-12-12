@@ -1813,7 +1813,7 @@ QImage MapChunk::getAlphamapImage(unsigned layer)
   texture_set->apply_alpha_changes();
   auto alphamaps = texture_set->getAlphamaps();
 
-  auto alpha_layer = alphamaps->at(layer - 1).get();
+  auto alpha_layer = alphamaps->at(layer - 1).value();
 
   QImage image(64, 64, QImage::Format_RGBA8888);
 
@@ -1888,7 +1888,7 @@ void MapChunk::setAlphamapImage(const QImage &image, unsigned int layer)
     return;
 
   texture_set->create_temporary_alphamaps_if_needed();
-  auto& temp_alphamaps = texture_set->getTempAlphamaps()->get();
+  auto& temp_alphamaps = texture_set->getTempAlphamaps()->value();
 
   for (int i = 0; i < 64; ++i)
   {

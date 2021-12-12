@@ -1535,7 +1535,7 @@ QImage MapTile::getAlphamapImage(unsigned layer)
       chunk->texture_set->apply_alpha_changes();
       auto alphamaps = chunk->texture_set->getAlphamaps();
 
-      auto alpha_layer = alphamaps->at(layer - 1).get();
+      auto alpha_layer = alphamaps->at(layer - 1).value();
 
       for (int k = 0; k < 64; ++k)
       {
@@ -1576,7 +1576,7 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
       chunk->texture_set->apply_alpha_changes();
       auto alphamaps = chunk->texture_set->getAlphamaps();
 
-      auto alpha_layer = alphamaps->at(layer - 1).get();
+      auto alpha_layer = alphamaps->at(layer - 1).value();
 
       for (int k = 0; k < 64; ++k)
       {
@@ -1686,7 +1686,7 @@ void MapTile::setAlphaImage(QImage const& image, unsigned layer)
         continue;
 
       chunk->texture_set->create_temporary_alphamaps_if_needed();
-      auto& temp_alphamaps = chunk->texture_set->getTempAlphamaps()->get();
+      auto& temp_alphamaps = chunk->texture_set->getTempAlphamaps()->value();
 
       for (int i = 0; i < 64; ++i)
       {
