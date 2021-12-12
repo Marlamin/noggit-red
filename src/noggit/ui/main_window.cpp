@@ -125,7 +125,7 @@ namespace noggit
             file.write(data);
             file.close();
 
-            boost::filesystem::path pluginPath = boost::filesystem::path(lib_dir.absoluteFilePath("noggit").toStdString());
+            std::filesystem::path pluginPath = std::filesystem::path(lib_dir.absoluteFilePath("noggit").toStdString());
 
             typedef boost::shared_ptr<Plugin>(PluginCreate)();
             boost::function <PluginCreate> pluginCreator;

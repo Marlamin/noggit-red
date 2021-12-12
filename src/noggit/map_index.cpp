@@ -445,7 +445,7 @@ void MapIndex::saveTile(const tile_index& tile, World* world, bool save_unloaded
 	if (save_unloaded)
   {
     QSettings settings;
-    auto filepath = boost::filesystem::path (settings.value ("project/path").toString().toStdString())
+    auto filepath = std::filesystem::path (settings.value ("project/path").toString().toStdString())
                     / BlizzardArchive::ClientData::normalizeFilenameInternal (mTiles[tile.z][tile.x].tile->file_key().filepath());
 
     QFile file(filepath.string().c_str());
@@ -488,7 +488,7 @@ void MapIndex::saveChanged (World* world, bool save_unloaded)
         }
 
         QSettings settings;
-        auto filepath = boost::filesystem::path (settings.value ("project/path").toString().toStdString())
+        auto filepath = std::filesystem::path (settings.value ("project/path").toString().toStdString())
                         / BlizzardArchive::ClientData::normalizeFilenameInternal (mTiles[i][j].tile->file_key().filepath());
 
         if (mTiles[i][j].flags & 0x1)

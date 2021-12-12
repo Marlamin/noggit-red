@@ -6,7 +6,6 @@
 #include <opengl/texture.hpp>
 #include <noggit/Misc.h>
 #include <glm/vec3.hpp>
-#include <boost/filesystem/string_file.hpp>
 
 #include <QFile>
 #include <QTextStream>

@@ -24,13 +24,11 @@
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
-
 #include <noggit/ActionManager.hpp>
 
 #include <external/PNG2BLP/Png2Blp.h>
 #include <external/tracy/Tracy.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/pool/pool_alloc.hpp>
 

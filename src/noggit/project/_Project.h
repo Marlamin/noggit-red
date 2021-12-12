@@ -1,7 +1,7 @@
 //Folder to contain all of the project related files
-#include <boost/filesystem/directory.hpp>
 #include <noggit/Log.h>
 #include <nlohmann/json.hpp>
+#include <fstream>
 
 namespace noggit::project
 {
@@ -39,28 +39,28 @@ namespace noggit::project
 
 			//START - maybe handle noggit settings and paths within noggit applications?
 
-			auto currentPath = boost::filesystem::current_path();
+			auto currentPath = std::filesystem::current_path();
 			auto projectDirectoryPath = currentPath.append("/projects");
 
-			if (!boost::filesystem::exists(projectDirectoryPath))
+			if (!std::filesystem::exists(projectDirectoryPath))
 			{
 				LogDebug << "Creating project folder as none existed: " << projectDirectoryPath << std::endl;
 
-				boost::filesystem::create_directory(projectDirectoryPath);
+				std::filesystem::create_directory(projectDirectoryPath);
 			}
 
 			//END
 
 			auto currentProjectDirectoryPath = currentPath.append("/projects/").append(projectName);
 
-			if (!boost::filesystem::exists(currentProjectDirectoryPath))
+			if (!std::filesystem::exists(currentProjectDirectoryPath))
 			{
 				LogDebug << "Creating new project folder as none existed: " << currentProjectDirectoryPath << std::endl;
 
-				boost::filesystem::create_directory(currentProjectDirectoryPath);
+				std::filesystem::create_directory(currentProjectDirectoryPath);
 			}
 
-			if (boost::filesystem::is_empty(currentProjectDirectoryPath))
+			if (std::filesystem::is_empty(currentProjectDirectoryPath))
 			{
 				LogDebug << "Project directory is empty! Generating essential files." << std::endl;
 				//Create project Json
@@ -70,7 +70,7 @@ namespace noggit::project
 				configuration.gameClientVersion = gameClientVersion;
 				configuration.gameClientPath = gameClientPath;
 
-				auto fileStream = boost::filesystem::ofstream(projectPath + "/project.json");
+				auto fileStream = std::ofstream(projectPath + "/project.json");
 				fileStream << configuration.Serialise();
 				fileStream.close();
 			}

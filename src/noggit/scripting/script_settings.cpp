@@ -5,7 +5,8 @@
 #include <noggit/scripting/script_context.hpp>
 
 #include <sol/sol.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
+#include <fstream>
 #include <nlohmann/json.hpp>
 
 #include <iomanip>
@@ -310,7 +311,7 @@ namespace noggit
 
     void script_settings::load_json()
     {
-      if (!boost::filesystem::exists(SCRIPT_FILE))
+      if (!std::filesystem::exists(SCRIPT_FILE))
       {
         return;
       }
@@ -321,18 +322,18 @@ namespace noggit
       }
       catch (std::exception err)
       {
-        if (!boost::filesystem::exists(SCRIPT_FILE))
+        if (!std::filesystem::exists(SCRIPT_FILE))
         {
           return;
         }
         // back up broken script settings, since they won't be read and will be overwritten.
         std::string backup_file = std::string(SCRIPT_FILE) + ".backup";
         int i = 0;
-        while (boost::filesystem::exists(backup_file + std::to_string(i)))
+        while (std::filesystem::exists(backup_file + std::to_string(i)))
         {
           ++i;
         }
-        boost::filesystem::copy(SCRIPT_FILE, backup_file + std::to_string(i));
+        std::filesystem::copy(SCRIPT_FILE, backup_file + std::to_string(i));
         // Add a message box here
       }
     }

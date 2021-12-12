@@ -7,7 +7,6 @@
 #include <noggit/Misc.h>
 #include <ClientFile.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <algorithm>

@@ -4,7 +4,7 @@
 #define NOGGIT_APPLICATION_HPP
 
 #include <memory>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <ClientData.hpp>
 #include <noggit/ui/main_window.hpp>
 #include <noggit/application/NoggitApplication.hpp>
@@ -26,7 +26,7 @@
 #include <QSplashScreen>
 #include <codecvt>
 #include <string>
-#include "revision.h"
+#include <revision.h>
 
 namespace noggit::application {
 
@@ -51,7 +51,7 @@ namespace noggit::application {
         std::unique_ptr<noggit::ui::main_window> main_window;
         std::unique_ptr<BlizzardArchive::ClientData> _client_data;
 
-        boost::filesystem::path wowpath;
+        std::filesystem::path wowpath;
         std::string project_path;
 
         bool fullscreen;
