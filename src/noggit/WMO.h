@@ -11,8 +11,7 @@
 #include <noggit/ContextObject.hpp>
 #include <opengl/primitives.hpp>
 #include <ClientFile.hpp>
-
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <map>
 #include <set>
@@ -349,7 +348,7 @@ public:
 
   std::vector<WMODoodadSet> doodadsets;
 
-  boost::optional<scoped_model_reference> skybox;
+  std::optional<scoped_model_reference> skybox;
 
   noggit::NoggitRenderContext _context;
 
