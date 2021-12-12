@@ -2238,11 +2238,11 @@ void World::blurTerrain(glm::vec3 const& pos, float remain, float radius, int Br
                                   , radius
                                   , BrushType
                                   , mode
-                                  , [this] (float x, float z) -> boost::optional<float>
+                                  , [this] (float x, float z) -> std::optional<float>
                                     {
                                       glm::vec3 vec;
                                       auto res (GetVertex (x, z, &vec));
-                                      return boost::make_optional (res, vec.y);
+                                      return res ? std::optional<float>(vec.y) : std::nullopt;
                                     }
                                   );
       }

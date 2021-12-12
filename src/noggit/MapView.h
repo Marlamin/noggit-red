@@ -21,8 +21,7 @@
 #include <external/QtAdvancedDockingSystem/src/DockManager.h>
 #include <opengl/texture.hpp>
 #include <opengl/scoped.hpp>
-
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QSettings>
