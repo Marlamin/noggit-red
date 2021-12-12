@@ -480,7 +480,7 @@ bool WMO::draw_skybox (glm::mat4x4 const& model_view
 
     if (math::is_inside_of(camera_pos, extent.first, extent.second))
     {
-      ModelInstance sky(skybox.get()->_file_key.filepath(), _context);
+      ModelInstance sky(skybox.get()->file_key().filepath(), _context);
       sky.pos = camera_pos;
       sky.scale = 2.f;
       sky.recalcExtents();
@@ -916,7 +916,7 @@ void WMOGroup::load()
   std::stringstream curNum;
   curNum << "_" << std::setw (3) << std::setfill ('0') << num;
 
-  std::string fname = wmo->_file_key.filepath();
+  std::string fname = wmo->file_key().filepath();
   fname.insert (fname.find (".wmo"), curNum.str ());
 
   BlizzardArchive::ClientFile f(fname, NOGGIT_APP->clientData());

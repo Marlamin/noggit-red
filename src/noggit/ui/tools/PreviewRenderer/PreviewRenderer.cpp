@@ -194,11 +194,17 @@ void PreviewRenderer::draw()
             , false, std::vector<selection_type>(), 0, false, display_mode::in_3D, true
         );
 
-        for (auto& pair : *wmo_instance.get_doodads(true))
+        auto doodads = wmo_instance.get_doodads(true);
+
+        if (doodads)
         {
-          for (auto& doodad : pair.second)
-            _wmo_doodads[doodad.model->_file_key.filepath()].push_back(&doodad);
+          for (auto& pair : *doodads)
+          {
+            for (auto& doodad : pair.second)
+              _wmo_doodads[doodad.model->file_key().filepath()].push_back(&doodad);
+          }
         }
+
      }
 
     }

@@ -681,7 +681,7 @@ namespace noggit
         if (obj->which() == eMODEL)
         {
           auto original = static_cast<ModelInstance*>(obj);
-          auto clone = new ModelInstance(original->model->_file_key.filepath(), _map_view->getRenderContext());
+          auto clone = new ModelInstance(original->model->file_key().filepath(), _map_view->getRenderContext());
           
           clone->scale = original->scale;
           clone->dir = original->dir;
@@ -693,7 +693,7 @@ namespace noggit
         else if (obj->which() == eWMO)
         {
           auto original = static_cast<WMOInstance*>(obj);
-          auto clone = new WMOInstance(original->wmo->_file_key.filepath(), _map_view->getRenderContext());
+          auto clone = new WMOInstance(original->wmo->file_key().filepath(), _map_view->getRenderContext());
           clone->dir = original->dir;
           clone->pos = pivot ? original->pos - pivot.get() : glm::vec3();
 

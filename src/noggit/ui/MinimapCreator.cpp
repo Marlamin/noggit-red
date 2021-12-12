@@ -438,7 +438,7 @@ namespace noggit
 
                     if (obj->which() == eMODEL)
                     {
-                      includeM2Model(static_cast<ModelInstance*>(obj)->model->_file_key.filepath());
+                      includeM2Model(static_cast<ModelInstance*>(obj)->model->file_key().filepath());
                     }
 
                   }
@@ -470,7 +470,7 @@ namespace noggit
 
                   if (obj->which() == eMODEL)
                   {
-                    unincludeM2Model(static_cast<ModelInstance*>(obj)->model->_file_key.filepath());
+                    unincludeM2Model(static_cast<ModelInstance*>(obj)->model->file_key().filepath());
                   }
 
                 }
@@ -570,7 +570,7 @@ namespace noggit
 
                   if (obj->which() == eWMO)
                   {
-                    excludeWMOModel(static_cast<WMOInstance*>(obj)->wmo->_file_key.filepath());
+                    excludeWMOModel(static_cast<WMOInstance*>(obj)->wmo->file_key().filepath());
                   }
 
                 }
@@ -603,7 +603,7 @@ namespace noggit
 
                   if (obj->which() == eWMO)
                   {
-                    unexcludeWMOModel(static_cast<WMOInstance*>(obj)->wmo->_file_key.filepath());
+                    unexcludeWMOModel(static_cast<WMOInstance*>(obj)->wmo->file_key().filepath());
                   }
 
                 }

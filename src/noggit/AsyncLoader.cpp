@@ -2,6 +2,7 @@
 
 #include <noggit/AsyncLoader.h>
 #include <noggit/errorHandling.h>
+#include <Exception.hpp>
 
 #include <QtCore/QSettings>
 
@@ -61,8 +62,8 @@ void AsyncLoader::process()
       if (additional_log)
       {
         std::lock_guard<std::mutex> const lock(_guard);
-        LogDebug << "Loading file '" << (object->_file_key.hasFilepath() ? object->_file_key.filepath()
-          : std::to_string(object->_file_key.fileDataID()))<< "'" << std::endl;
+        LogDebug << "Loading file '" << (object->file_key().hasFilepath() ? object->file_key().filepath()
+          : std::to_string(object->file_key().fileDataID()))<< "'" << std::endl;
       }
 
       object->finishLoading();
@@ -70,8 +71,8 @@ void AsyncLoader::process()
       if (additional_log)
       {
         std::lock_guard<std::mutex> const lock(_guard);
-        LogDebug << "Loaded  file '" << (object->_file_key.hasFilepath() ? object->_file_key.filepath()
-        : std::to_string(object->_file_key.fileDataID())) << "'" << std::endl;
+        LogDebug << "Loaded  file '" << (object->file_key().hasFilepath() ? object->file_key().filepath()
+        : std::to_string(object->file_key().fileDataID())) << "'" << std::endl;
       }
 
       {
@@ -79,6 +80,19 @@ void AsyncLoader::process()
         _currently_loading.remove (object);
         _state_changed.notify_all();
       }
+    }
+    catch (BlizzardArchive::Exceptions::FileReadFailedError const&)
+    {
+      std::lock_guard<std::mutex> const lock(_guard);
+
+      object->error_on_loading();
+
+      if (object->is_required_when_saving())
+      {
+        _important_object_failed_loading = true;
+      }
+
+      _currently_loading.remove(object);
     }
     catch (...)
     {

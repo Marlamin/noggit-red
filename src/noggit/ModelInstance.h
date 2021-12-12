@@ -125,7 +125,7 @@ public:
       , noggit::NoggitRenderContext context );
 
   wmo_doodad_instance(wmo_doodad_instance const& other)
-  : ModelInstance(other.model->_file_key.filepath(), other._context)
+  : ModelInstance(other.model->file_key().filepath(), other._context)
   , doodad_orientation(other.doodad_orientation)
   , world_pos(other.world_pos)
   , _need_matrix_update(other._need_matrix_update)

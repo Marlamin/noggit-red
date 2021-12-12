@@ -36,7 +36,7 @@ void selected_chunk_type::updateDetails(noggit::ui::detail_infos* detail_widget)
     if (error)
       select_info << "<font color=\"Red\">";
 
-    select_info << "<b>" << (counter + 1) << ":</b> " << tex->_file_key.stringRepr();
+    select_info << "<b>" << (counter + 1) << ":</b> " << tex->file_key().stringRepr();
 
     if (stuck || error)
       select_info << "</font>";

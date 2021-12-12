@@ -637,13 +637,13 @@ scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& f
 {}
 
 scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_reference const& other)
-  : _blp_texture(other._blp_texture ? TextureManager::_.emplace(other._blp_texture->_file_key.filepath(), other._context) : nullptr)
+  : _blp_texture(other._blp_texture ? TextureManager::_.emplace(other._blp_texture->file_key().filepath(), other._context) : nullptr)
   , _context(other._context)
 {}
 
 void scoped_blp_texture_reference::Deleter::operator() (blp_texture* texture) const
 {
-  TextureManager::_.erase(texture->_file_key.filepath(), texture->getContext());
+  TextureManager::_.erase(texture->file_key().filepath(), texture->getContext());
 }
 
 blp_texture* scoped_blp_texture_reference::operator->() const

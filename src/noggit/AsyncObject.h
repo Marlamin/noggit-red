@@ -22,15 +22,20 @@ class AsyncObject
 {
 private: 
   bool _loading_failed = false;
+
 protected:
   std::atomic<bool> finished = {false};
   std::mutex _mutex;
   std::condition_variable _state_changed;
 
+  BlizzardArchive::Listfile::FileKey _file_key;
+
   AsyncObject(BlizzardArchive::Listfile::FileKey file_key) : _file_key(std::move(file_key)) {}
 
 public:
-  BlizzardArchive::Listfile::FileKey _file_key;
+
+  [[nodiscard]]
+  BlizzardArchive::Listfile::FileKey const& file_key() const { return _file_key; };
 
   AsyncObject() = delete;
   virtual ~AsyncObject() = default;
@@ -81,6 +86,7 @@ public:
     return false;
   }
 
+  [[nodiscard]]
   virtual async_priority loading_priority() const
   {
     return async_priority::medium;

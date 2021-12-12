@@ -92,7 +92,7 @@ namespace noggit
       assert(id < _textures.size());
 
       emit set_texture(_textures[id]);
-      current_texture_window->set_texture (_textures[id]->_file_key.filepath());
+      current_texture_window->set_texture (_textures[id]->file_key().filepath());
     }
 
     void texture_picker::shiftSelectedTextureLeft()
@@ -139,7 +139,7 @@ namespace noggit
       for (; index < _chunk->texture_set->num(); ++index)
       {
         _textures.push_back(_chunk->texture_set->texture(index));
-        _labels[index]->set_texture(_textures[index]->_file_key.filepath());
+        _labels[index]->set_texture(_textures[index]->file_key().filepath());
         _labels[index]->show();
       }
 

@@ -262,7 +262,7 @@ bool TextureSet::canPaintTexture(scoped_blp_texture_reference const& texture)
 
 const std::string& TextureSet::filename(size_t id)
 {
-  return textures[id]->_file_key.filepath();
+  return textures[id]->file_key().filepath();
 }
 
 bool TextureSet::eraseUnusedTextures()

@@ -1287,7 +1287,7 @@ void MapView::setupAssistMenu()
 
     if (!!noggit::ui::selected_texture::get())
     {
-      _world->exportADTAlphamap(_camera.position, noggit::ui::selected_texture::get()->get()->_file_key.filepath());
+      _world->exportADTAlphamap(_camera.position, noggit::ui::selected_texture::get()->get()->file_key().filepath());
     }
 
   }
@@ -1679,7 +1679,7 @@ void MapView::setupAssistMenu()
 
       if (!!noggit::ui::selected_texture::get())
       {
-        _world->exportAllADTsAlphamap(noggit::ui::selected_texture::get()->get()->_file_key.filepath());
+        _world->exportAllADTsAlphamap(noggit::ui::selected_texture::get()->get()->file_key().filepath());
       }
     )
   }
@@ -3828,7 +3828,7 @@ void MapView::tick (float dt)
           _status_selection->setText
               ( QString ("%1: %2")
                     . arg (instance->uid)
-                    . arg (QString::fromStdString (instance->model->_file_key.stringRepr()))
+                    . arg (QString::fromStdString (instance->model->file_key().stringRepr()))
               );
         }
         else if (obj->which() == eWMO)
@@ -3837,7 +3837,7 @@ void MapView::tick (float dt)
           _status_selection->setText
               ( QString ("%1: %2")
                     . arg (instance->uid)
-                    . arg (QString::fromStdString (instance->wmo->_file_key.stringRepr()))
+                    . arg (QString::fromStdString (instance->wmo->file_key().stringRepr()))
               );
         }
 

@@ -3681,7 +3681,7 @@ void World::update_models_by_filename()
 
   _model_instance_storage.for_each_m2_instance([&] (ModelInstance& model_instance)
   {
-    _models_by_filename[model_instance.model->_file_key.filepath()].push_back(&model_instance);
+    _models_by_filename[model_instance.model->file_key().filepath()].push_back(&model_instance);
     // to make sure the transform matrix are up to date
     model_instance.recalcExtents();
   });

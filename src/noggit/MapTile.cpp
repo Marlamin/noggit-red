@@ -965,9 +965,9 @@ void MapTile::saveTile(World* world)
 
   for (auto const& model : lModelInstances)
   {
-    if (lModels.find(model.model->_file_key.filepath()) == lModels.end())
+    if (lModels.find(model.model->file_key().filepath()) == lModels.end())
     {
-      lModels.emplace (model.model->_file_key.filepath(), nullyThing);
+      lModels.emplace (model.model->file_key().filepath(), nullyThing);
     }
   }
 
@@ -981,9 +981,9 @@ void MapTile::saveTile(World* world)
 
   for (auto const& object : lObjectInstances)
   {
-    if (lObjects.find(object.wmo->_file_key.filepath()) == lObjects.end())
+    if (lObjects.find(object.wmo->file_key().filepath()) == lObjects.end())
     {
-      lObjects.emplace (object.wmo->_file_key.filepath(), nullyThing);
+      lObjects.emplace (object.wmo->file_key().filepath(), nullyThing);
     }
   }
 
@@ -1159,7 +1159,7 @@ void MapTile::saveTile(World* world)
   lID = 0;
   for (auto const& model : lModelInstances)
   {
-    auto filename_to_offset_and_name = lModels.find(model.model->_file_key.filepath());
+    auto filename_to_offset_and_name = lModels.find(model.model->file_key().filepath());
     if (filename_to_offset_and_name == lModels.end())
     {
       LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -1195,7 +1195,7 @@ void MapTile::saveTile(World* world)
   lID = 0;
   for (auto const& object : lObjectInstances)
   {
-    auto filename_to_offset_and_name = lObjects.find(object.wmo->_file_key.filepath());
+    auto filename_to_offset_and_name = lObjects.find(object.wmo->file_key().filepath());
     if (filename_to_offset_and_name == lObjects.end())
     {
       LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
