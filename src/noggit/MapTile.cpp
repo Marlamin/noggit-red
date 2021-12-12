@@ -937,16 +937,16 @@ void MapTile::saveTile(World* world)
     }
     else
     {
-      if (model.get().which() == eEntry_Object)
+      if (model.value().which() == eEntry_Object)
       {
-        auto which = boost::get<selected_object_type>(model.get())->which();
+        auto which = boost::get<selected_object_type>(model.value())->which();
         if (which == eWMO)
         {
-          lObjectInstances.emplace_back(*static_cast<WMOInstance*>(boost::get<selected_object_type>(model.get())));
+          lObjectInstances.emplace_back(*static_cast<WMOInstance*>(boost::get<selected_object_type>(model.value())));
         }
         else if (which == eMODEL)
         {
-          lModelInstances.emplace_back(*static_cast<ModelInstance*>(boost::get<selected_object_type>(model.get())));
+          lModelInstances.emplace_back(*static_cast<ModelInstance*>(boost::get<selected_object_type>(model.value())));
         }
 
       }
@@ -1321,7 +1321,7 @@ void MapTile::remove_model(uint32_t uid)
   {
     uids.erase(it);
 
-    auto& obj = _world->get_model(uid).get();
+    const auto& obj = _world->get_model(uid).value();
     auto instance = boost::get<selected_object_type>(obj);
 
     auto& instances = object_instances[instance->instance_model()];
@@ -1378,7 +1378,7 @@ void MapTile::add_model(uint32_t uid)
   {
     uids.push_back(uid);
 
-    auto& obj = _world->get_model(uid).get();
+    const auto& obj = _world->get_model(uid).value();
     auto instance = boost::get<selected_object_type>(obj);
     object_instances[instance->instance_model()].push_back(instance);
 

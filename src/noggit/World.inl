@@ -38,7 +38,7 @@ void World::for_chunk_at(glm::vec3 const& pos, Fun&& fun)
 }
 
 template<typename Fun>
-auto World::for_maybe_chunk_at(glm::vec3 const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>
+auto World::for_maybe_chunk_at(glm::vec3 const& pos, Fun&& fun) -> std::optional<decltype (fun (nullptr))>
 {
   MapTile* tile (mapIndex.getTile (pos));
   if (tile && tile->finishedLoading())
@@ -47,7 +47,7 @@ auto World::for_maybe_chunk_at(glm::vec3 const& pos, Fun&& fun) -> boost::option
   }
   else
   {
-    return boost::none;
+    return std::nullopt;
   }
 }
 

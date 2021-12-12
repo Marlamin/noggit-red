@@ -3071,8 +3071,8 @@ void MapView::paintGL()
     _transform_gizmo.setCurrentGizmoMode(_gizmo_mode);
     _transform_gizmo.setUseMultiselectionPivot(_use_median_pivot_point.get());
 
-    auto pivot = _world->multi_select_pivot().is_initialized() ?
-        _world->multi_select_pivot().get() : glm::vec3(0.f, 0.f, 0.f);
+    auto pivot = _world->multi_select_pivot().has_value() ?
+        _world->multi_select_pivot().value() : glm::vec3(0.f, 0.f, 0.f);
 
     _transform_gizmo.setMultiselectionPivot(pivot);
 

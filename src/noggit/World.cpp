@@ -153,7 +153,7 @@ void World::update_selection_pivot()
   }
   else
   {
-    _multi_select_pivot = boost::none;
+    _multi_select_pivot = std::nullopt;
   }
 }
 
@@ -233,7 +233,7 @@ bool World::is_selected(std::uint32_t uid) const
   return false;
 }
 
-boost::optional<selection_type> World::get_last_selected_model() const
+std::optional<selection_type> World::get_last_selected_model() const
 {
   ZoneScoped;
   auto const it
@@ -247,7 +247,7 @@ boost::optional<selection_type> World::get_last_selected_model() const
     );
 
   return it == _current_selection.rend()
-    ? boost::optional<selection_type>() : boost::optional<selection_type> (*it);
+    ? std::optional<selection_type>() : std::optional<selection_type> (*it);
 }
 
 glm::vec3 getBarycentricCoordinatesAt(
@@ -505,7 +505,7 @@ void World::set_current_selection(selection_type entry)
   ZoneScoped;
   _current_selection.clear();
   _current_selection.push_back(entry);
-  _multi_select_pivot = boost::none;
+  _multi_select_pivot = std::nullopt;
 
   _selected_model_count = entry.which() == eEntry_MapChunk ? 0 : 1;
 }
@@ -567,7 +567,7 @@ void World::reset_selection()
 {
   ZoneScoped;
   _current_selection.clear();
-  _multi_select_pivot = boost::none;
+  _multi_select_pivot = std::nullopt;
   _selected_model_count = 0;
 }
 
@@ -709,7 +709,7 @@ void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
   // move models relative to the pivot when several are selected
   if (has_multiple_model_selected())
   {
-    glm::vec3 diff = pos - _multi_select_pivot.get();
+    glm::vec3 diff = pos - _multi_select_pivot.value();
 
     if (change_height)
     {
@@ -767,7 +767,7 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
     {
       glm::vec3& pos = obj->pos;
       math::degrees::vec3& dir = obj->dir;
-      glm::vec3 diff_pos = pos - _multi_select_pivot.get();
+      glm::vec3 diff_pos = pos - _multi_select_pivot.value();
 
       glm::quat rotationQuat = glm::quat(glm::vec3(glm::radians(rx._), glm::radians(ry._), glm::radians(rz._)));
       glm::vec3 rot_result = glm::toMat4(rotationQuat) * glm::vec4(diff_pos,0);
@@ -1355,8 +1355,8 @@ void World::draw (glm::mat4x4 const& model_view
     ZoneScopedN("World::draw() : Draw pivot point");
     opengl::scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
 
-    float dist = glm::distance(camera_pos, _multi_select_pivot.get());
-    _sphere_render.draw(mvp, _multi_select_pivot.get(), cursor_color, std::min(2.f, std::max(0.15f, dist * 0.02f)));
+    float dist = glm::distance(camera_pos, _multi_select_pivot.value());
+    _sphere_render.draw(mvp, _multi_select_pivot.value(), cursor_color, std::min(2.f, std::max(0.15f, dist * 0.02f)));
   }
 
   if (use_ref_pos)
@@ -1986,7 +1986,7 @@ void World::update_models_emitters(float dt)
 unsigned int World::getAreaID (glm::vec3 const& pos)
 {
   ZoneScoped;
-  return for_maybe_chunk_at (pos, [&] (MapChunk* chunk) { return chunk->getAreaID(); }).get_value_or (-1);
+  return for_maybe_chunk_at (pos, [&] (MapChunk* chunk) { return chunk->getAreaID(); }).value_or(-1);
 }
 
 void World::clearHeight(glm::vec3 const& pos)
@@ -2724,7 +2724,7 @@ void World::addM2 ( BlizzardArchive::Listfile::FileKey const& file_key
 
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
 
-  _models_by_filename[file_key.filepath()].push_back(_model_instance_storage.get_model_instance(uid).get());
+  _models_by_filename[file_key.filepath()].push_back(_model_instance_storage.get_model_instance(uid).value());
 }
 
 ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
@@ -2773,7 +2773,7 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
 
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
 
-  auto instance = _model_instance_storage.get_model_instance(uid).get();
+  auto instance = _model_instance_storage.get_model_instance(uid).value();
   _models_by_filename[file_key.filepath()].push_back(instance);
 
   return instance;
@@ -2816,7 +2816,7 @@ WMOInstance* World::addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey co
 
   std::uint32_t uid = _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
 
-  return _model_instance_storage.get_wmo_instance(uid).get();
+  return _model_instance_storage.get_wmo_instance(uid).value();
 }
 
 
@@ -2832,7 +2832,7 @@ std::uint32_t World::add_wmo_instance(WMOInstance wmo_instance, bool from_reload
   return _model_instance_storage.add_wmo_instance(std::move(wmo_instance), from_reloading);
 }
 
-boost::optional<selection_type> World::get_model(std::uint32_t uid)
+std::optional<selection_type> World::get_model(std::uint32_t uid)
 {
   ZoneScoped;
   return _model_instance_storage.get_instance(uid);
@@ -3713,9 +3713,9 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
       {
         auto instance = _model_instance_storage.get_instance(uid);
 
-        if (instance && instance.get().which() == eEntry_Object)
+        if (instance && instance.value().which() == eEntry_Object)
         {
-          auto obj = boost::get<selected_object_type>(instance.get());
+          auto obj = boost::get<selected_object_type>(instance.value());
 
           if (glm::distance(obj->pos, pos) <= radius && is_selected(obj))
           {
@@ -3731,9 +3731,9 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
       {
         auto instance = _model_instance_storage.get_instance(uid);
 
-        if (instance && instance.get().which() == eEntry_Object)
+        if (instance && instance.value().which() == eEntry_Object)
         {
-          auto obj = boost::get<selected_object_type>(instance.get());
+          auto obj = boost::get<selected_object_type>(instance.value());
 
           if (glm::distance(obj->pos, pos) <= radius && !is_selected(obj))
           {
@@ -3761,9 +3761,9 @@ float World::getMaxTileHeight(const tile_index& tile)
   {
     auto instance = _model_instance_storage.get_instance(uid);
 
-    if (instance.get().which() == eEntry_Object)
+    if (instance.value().which() == eEntry_Object)
     {
-      auto obj = boost::get<selected_object_type>(instance.get());
+      auto obj = boost::get<selected_object_type>(instance.value());
       obj->ensureExtents();
       max_height = std::max(max_height, std::max(obj->extents[0].y, obj->extents[1].y));
     }
@@ -3781,9 +3781,9 @@ SceneObject* World::getObjectInstance(std::uint32_t uid)
   if (!instance)
     return nullptr;
 
-  if (instance.get().which() == eEntry_Object)
+  if (instance.value().which() == eEntry_Object)
   {
-    return boost::get<selected_object_type>(instance.get());
+    return boost::get<selected_object_type>(instance.value());
   }
 
   return nullptr;

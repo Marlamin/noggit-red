@@ -524,7 +524,7 @@ namespace noggit
         case PASTE_ON_SELECTION:
           if (last_entry)
           {
-            glm::vec3 last_entry_pos =  boost::get<selected_object_type>(last_entry.get())->pos;
+            glm::vec3 last_entry_pos =  boost::get<selected_object_type>(last_entry.value())->pos;
 
             pos = last_entry_pos + model_pos;
           }
@@ -685,7 +685,7 @@ namespace noggit
           
           clone->scale = original->scale;
           clone->dir = original->dir;
-          clone->pos = pivot ? original->pos - pivot.get() : glm::vec3();
+          clone->pos = pivot ? original->pos - pivot.value() : glm::vec3();
 
           selected_model.push_back(clone);
           _model_instance_created.push_back(clone);
@@ -695,7 +695,7 @@ namespace noggit
           auto original = static_cast<WMOInstance*>(obj);
           auto clone = new WMOInstance(original->wmo->file_key().filepath(), _map_view->getRenderContext());
           clone->dir = original->dir;
-          clone->pos = pivot ? original->pos - pivot.get() : glm::vec3();
+          clone->pos = pivot ? original->pos - pivot.value() : glm::vec3();
 
           selected_model.push_back(clone);
           _model_instance_created.push_back(clone);
