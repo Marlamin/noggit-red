@@ -14,8 +14,6 @@
 #include <noggit/ui/tools/UiCommon/expanderwidget.h>
 #include <util/qt/overload.hpp>
 
-#include <boost/algorithm/string/predicate.hpp>
-
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
@@ -637,7 +635,7 @@ namespace Noggit
 
       std::vector<selection_type> selected_model;
 
-      if (boost::ends_with (filename, ".m2"))
+      if (filename.ends_with(".m2"))
       {
         ModelInstance* mi = new ModelInstance(filename, _map_view->getRenderContext());
 
@@ -646,7 +644,7 @@ namespace Noggit
         selected_model.push_back(mi);
         replace_selection(selected_model);
       }
-      else if (boost::ends_with (filename, ".wmo"))
+      else if (filename.ends_with(".wmo"))
       {
         WMOInstance* wi = new WMOInstance(filename, _map_view->getRenderContext());
 

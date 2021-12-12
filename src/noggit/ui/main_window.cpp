@@ -32,7 +32,6 @@
 #include <QSysInfo>
 #include <QStandardPaths>
 #include <QDir>
-#include <boost/format.hpp>
 
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
@@ -127,7 +126,7 @@ namespace Noggit
             try
             {
               pluginCreator = std::dll::import_alias<PluginCreate>(pluginPath,
-                                                                   "create_plugin", boost::dll::load_mode::append_decorations);
+                                                                   "create_plugin", std::dll::load_mode::append_decorations);
             }
             catch (const std::system::system_error &err)
             {
