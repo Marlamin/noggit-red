@@ -83,7 +83,7 @@ void LiquidTextureManager::upload()
     {
       for (int j = 0; j < mip_level; ++j)
       {
-        gl.compressedTexImage3D(GL_TEXTURE_2D_ARRAY, j, tex.compression_format().get(), width_, height_, N_FRAMES,
+        gl.compressedTexImage3D(GL_TEXTURE_2D_ARRAY, j, tex.compression_format().value(), width_, height_, N_FRAMES,
                                 0, tex.compressed_data()[j].size() * N_FRAMES, nullptr);
 
         width_ = std::max(width_ >> 1, 1);

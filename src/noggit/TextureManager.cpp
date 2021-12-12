@@ -149,9 +149,6 @@ struct BLPHeader
 };
 #pragma pack(pop)
 
-#include <boost/thread.hpp>
-
-
 void blp_texture::bind()
 {
   if (!finished)
@@ -191,7 +188,7 @@ void blp_texture::uploadToArray(unsigned layer)
   {
     for (int i = 0; i < _compressed_data.size(); ++i)
     {
-      gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, layer, width, height, 1, _compression_format.get(), _compressed_data[i].size(), _compressed_data[i].data());
+      gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, layer, width, height, 1, _compression_format.value(), _compressed_data[i].size(), _compressed_data[i].data());
 
       width = std::max(width >> 1, 1);
       height = std::max(height >> 1, 1);
@@ -244,7 +241,7 @@ void blp_texture::upload()
   }
   else
   {
-    auto& params = TextureManager::get_tex_array(_compression_format.get(), _width, _height, _compressed_data.size(), _compressed_data, _context);
+    auto& params = TextureManager::get_tex_array(_compression_format.value(), _width, _height, _compressed_data.size(), _compressed_data, _context);
 
     int index_x = params.n_used / n_layers;
     int index_y = params.n_used % n_layers;
@@ -254,7 +251,7 @@ void blp_texture::upload()
 
     for (int i = 0; i < _compressed_data.size(); ++i)
     {
-      gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, index_y, width, height, 1, _compression_format.get(), _compressed_data[i].size(), _compressed_data[i].data());
+      gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, index_y, width, height, 1, _compression_format.value(), _compressed_data[i].size(), _compressed_data[i].data());
 
       width = std::max(width >> 1, 1);
       height = std::max(height >> 1, 1);

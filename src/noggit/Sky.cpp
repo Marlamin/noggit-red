@@ -498,7 +498,7 @@ bool Skies::draw(glm::mat4x4 const& model_view
     {
       has_skybox = true;
 
-      auto& model = sky.skybox.get();
+      auto& model = sky.skybox.value();
       model.model->trans = sky.weight;
       model.pos = camera_pos;
       model.scale = 0.1f;
