@@ -1,0 +1,411 @@
+$window = #2e2b35;
+$bright_window = #504d55;
+$darken = #28252e;
+$lighten = #383440;
+$highlight =  #be3b29;
+
+$alternate = #424242;
+$text = #d7d7d7;
+$hovered_text =  #ffffff;
+$disabled = #7f7f7f;
+$shadow = #1b1922;
+
+
+QWidget {
+	background: $window;
+	border: none;
+	color: $text;
+	shadow: none;
+}
+QDockWidget::title {
+	background: $window;
+	padding-left: 12px;
+}
+QDockWidget::close-button, QDockWidget::float-button {
+    border: 1px solid $window;
+    background: $bright_window;
+
+}
+
+
+QMenu {
+    background-color: $window; /* sets background of the menu */
+    border: none;
+}
+QMenu::item {
+    /* sets background of menu item. set this to something non-transparent
+        if you want menu color and menu item color to be different */
+    background-color: transparent;
+}
+QMenu::item:selected { /* when user selects item using mouse or keyboard */
+    background-color: $bright_window;
+}
+
+
+
+
+
+QMenuBar {
+    background-color: $window;
+}
+QMenuBar::item {
+    padding: 1px 10px;
+}
+
+QMenuBar::item:selected { /* when selected using mouse or keyboard */
+    background: $bright_window;
+}
+
+QMenuBar::item:pressed {
+    background: $darken;
+}
+
+
+
+QToolBar {
+    background: $window;
+    spacing: 3px; /* spacing between items in the tool bar */
+}
+QToolBar::separator {
+    background: $lighten;
+	width: 2px;
+}
+QToolBar::handle:horizontal {
+    border-left: 2px solid $lighten;
+	 border-right: 2px solid $lighten;
+	width: 2px;
+	background: $darken;
+	margin-left: 4px;
+	margin-right: 4px;
+}
+QToolBar::handle:vertical {
+    border-top: 2px solid $lighten;
+	 border-bottom: 2px solid $lighten;
+	height: 2px;
+	background: $darken;
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+
+
+
+
+
+
+
+QLineEdit {
+	color: $text;
+    padding: 0 8px;
+    background: $darken;
+    selection-background-color: $highlight;
+}
+QLineEdit:read-only {
+    background: $window;
+}
+QFrame {
+	background: $darken;
+}
+QLabel {
+	background: $window;
+	padding: 2px 4px;
+}
+QGroupBox::indicator {
+	width: 16px;
+	height: 16px;
+	margin-top: 1px;
+}
+QGroupBox::indicator:unchecked {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_unchecked.png);
+}
+QGroupBox::indicator:unchecked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_unchecked_hover.png);
+}
+QGroupBox::indicator:checked {
+	image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked.png);
+}
+QGroupBox::indicator:checked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked_hover.png);
+}
+
+QGroupBox {
+	font-weight: bold;
+	border: 1px solid $lighten;
+	padding-top: 28px;
+	padding-left: 12px;
+	padding-right: 12px;
+	padding-bottom: 4px;
+	border-bottom: 1px solid $lighten;
+	margin-bottom: 15px;
+}
+QGroupBox::title {
+	border-bottom: 1px solid $highlight;
+	border-top: 1px solid $lighten;
+	subcontrol-origin: margin;
+	subcontrol-position: top center;
+	padding: 6px 8px 6px 8px;
+}
+
+QListView {
+  border: none;
+  outline: none;
+}
+QListView::item:selected {
+	background: $highlight;
+}
+QTabBar::tab {
+	background: $lighten;
+	border: 1px solid $window;
+	border-bottom: none;
+	min-width: 55px;
+	padding: 4px 6px;
+}
+QTabBar::tab:hover {
+	background: $bright_window;
+	border-top: 1px solid $highlight;
+}
+QTabBar::tab:selected {
+	background: $window;
+	border-top: 3px solid $highlight;
+}
+
+
+
+QCheckBox {
+    spacing: 8px;
+}
+QCheckBox:hover {
+	color: $hovered_text;
+}
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+}
+QCheckBox::indicator:unchecked {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_unchecked.png);
+}
+QCheckBox::indicator:unchecked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_unchecked_hover.png);
+}
+QCheckBox::indicator:unchecked:disabled {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_unchecked_disabled.png);
+}
+QCheckBox::indicator:checked {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked.png);
+}
+QCheckBox::indicator:checked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked_hover.png);
+}
+QCheckBox::indicator:checked:disabled {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_checked_disabled.png);
+}
+QCheckBox::indicator:indeterminate:disabled {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_checkbox_indeterminate_pressed.png);
+}
+
+
+QRadioButton {
+	spacing: 8px;
+}
+
+QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+}
+QRadioButton:hover {
+	color: $hovered_text;
+}
+QRadioButton::indicator::unchecked {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_unchecked.png);
+}
+
+QRadioButton::indicator:unchecked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_unchecked_hover.png);
+}
+
+QRadioButton::indicator:unchecked:disabled {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_unchecked_disabled.png);
+}
+
+QRadioButton::indicator:checked {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_checked.png);
+}
+
+QRadioButton::indicator:checked:hover {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_checked_hover.png);
+}
+
+QRadioButton::indicator:checked:disabled {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/icon_radiobutton_checked_disabled.png);
+}
+
+
+
+
+
+QScrollBar:horizontal {
+	background: $lighten;
+    height: 12px;
+}
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal, QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: $bright_window;
+}
+QScrollBar::handle:horizontal {
+    background: $darken;
+    min-width: 20px;
+}
+QScrollBar:vertical {
+	background: $lighten;
+    width: 12px;
+}
+QScrollBar::handle:vertical {
+    background: $darken;
+    min-height: 20px;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    background: $window;
+	width: 0px;
+}
+ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical  {
+     background: $window;
+	 height: 0px;
+ }
+
+
+
+
+
+QToolButton {
+    background-color: $window;
+}
+
+QToolButton[popupMode="1"] { /* only for MenuButtonPopup */
+    padding-right: 26px; /* make way for the popup button */
+	padding-left: 4px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+QToolButton:pressed {
+    background-color: $lighten;
+}
+
+/* the subcontrols below are used only in the MenuButtonPopup mode */
+QToolButton::menu-button {
+    border: 1px solid $lighten;
+    width: 16px;
+}
+
+
+QDialogButtonBox QPushButton {
+	min-width: 60px;
+}
+ QDialogButtonBox {
+	min-width: 150px;
+	min-height: 30px;
+}
+
+QPushButton {
+	 background-color: $lighten;
+	 border: none;
+	 border-radius: 1px;
+	 padding: 6px 0px;
+ }
+QPushButton:hover {
+	background-color: $bright_window;
+ }
+QPushButton:pressed {
+	background-color: $darken;
+ }
+QPushButton:disabled {
+	background-color: $darken;
+	color: $bright_window;
+ }
+
+
+
+
+
+
+
+QAbstractSpinBox {
+    padding-right: 15px; /* make room for the arrows */
+}
+QAbstractSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right; /* position at the top right corner */
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/spinup.png) 1;
+}
+QAbstractSpinBox::up-button:pressed, QAbstractSpinBox::up-button:off {
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/spinup_pressed.png) 1;
+}
+QAbstractSpinBox::up-arrow {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/up_arrow.png);
+}
+QAbstractSpinBox::up-arrow:disabled, QAbstractSpinBox::up-arrow:off { /* off state when value is max */
+   image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/down_arrow_disabled.png);
+}
+QAbstractSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right; /* position at bottom right corner */
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/spindown.png) 1;
+}
+QAbstractSpinBox::down-button:pressed, QAbstractSpinBox::down-button:off {
+    border-image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/spindown_pressed.png) 1;
+}
+QAbstractSpinBox::down-arrow {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/down_arrow.png);
+}
+QAbstractSpinBox::down-arrow:disabled, QAbstractSpinBox::down-arrow:off { /* off state when value in min */
+   image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/up_arrow_disabled.png);
+}
+
+
+
+QComboBox {
+    border: none;
+    padding: 3px 18px 3px 6px;
+    min-width: 6em;
+}
+QComboBox:editable {
+    background: $darken;
+}
+QComboBox:!editable, QComboBox::drop-down:editable {
+     background: $lighten;
+}
+/* QComboBox gets the "on" state when the popup is open */
+QComboBox:!editable:on, QComboBox::drop-down:editable:on {
+    background: $bright_window;
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 18px;
+    border: none;
+}
+QComboBox::down-arrow {
+    image: url(C:/Work/NoggitRed/binaries/bin/Release/themes/dark/images/down_arrow.png);
+}
+
+
+QSlider::groove:horizontal {
+    height: 6px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+    background: $darken;
+	border: 1px solid $lighten;
+}
+
+QSlider::handle:horizontal {
+    background: $bright_window;
+    width: 11px;
+    margin: -6px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 2px;
+	border: 1px solid $darken;
+}
+
+
+
+QStatusBar {
+    background: $window;
+}
+QStatusBar::item {
+    border-left: 1px solid $lighten;
+}
