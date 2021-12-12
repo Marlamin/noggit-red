@@ -110,7 +110,7 @@ FIND_PACKAGE(FastNoise2 REQUIRED)
 FIND_PACKAGE(StormLib REQUIRED)
 FIND_PACKAGE(CascLib REQUIRED)
 FIND_PACKAGE(Sol2 REQUIRED)
-FIND_PACKAGE(Boost 1.60 COMPONENTS thread filesystem system REQUIRED)
+FIND_PACKAGE(Boost 1.60 COMPONENTS thread system REQUIRED)
 FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml REQUIRED)
 
 IF(USE_SQL)
@@ -352,7 +352,6 @@ TARGET_LINK_LIBRARIES (noggit
   StormLib
   CascLib
   Boost::thread
-  Boost::filesystem
   Boost::system
   Qt5::Widgets
   Qt5::OpenGL
