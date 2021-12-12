@@ -216,10 +216,10 @@ unsigned noggit::Action::handleObjectAdded(unsigned uid, bool redo)
     {
       unsigned old_uid = pair.first;
       SceneObject* obj;
-      if (pair.second.filename.ends_with(".wmo"))
-        obj = _map_view->getWorld()->addWMOAndGetInstance(pair.second.filename, pair.second.pos, pair.second.dir);
+      if (pair.second.type == ActionObjectTypes::WMO)
+        obj = _map_view->getWorld()->addWMOAndGetInstance(pair.second.file_key, pair.second.pos, pair.second.dir);
       else
-        obj = _map_view->getWorld()->addM2AndGetInstance(pair.second.filename, pair.second.pos,
+        obj = _map_view->getWorld()->addM2AndGetInstance(pair.second.file_key, pair.second.pos,
                                                          pair.second.scale,  pair.second.dir, nullptr);
 
       obj->instance_model()->wait_until_loaded();
@@ -258,10 +258,7 @@ unsigned noggit::Action::handleObjectAdded(unsigned uid, bool redo)
     }
     else
     {
-      if (pair.second.filename.ends_with(".wmo"))
-        _map_view->getWorld()->deleteWMOInstance(pair.first);
-      else
-        _map_view->getWorld()->deleteModelInstance(pair.first);
+      _map_view->getWorld()->deleteInstance(pair.first);
     }
 
     return new_uid;
@@ -283,10 +280,10 @@ unsigned noggit::Action::handleObjectRemoved(unsigned uid, bool redo)
     {
       unsigned old_uid = pair.first;
       SceneObject* obj;
-      if (pair.second.filename.ends_with(".wmo"))
-        obj = _map_view->getWorld()->addWMOAndGetInstance(pair.second.filename, pair.second.pos, pair.second.dir);
+      if (pair.second.type == ActionObjectTypes::WMO)
+        obj = _map_view->getWorld()->addWMOAndGetInstance(pair.second.file_key, pair.second.pos, pair.second.dir);
       else
-        obj = _map_view->getWorld()->addM2AndGetInstance(pair.second.filename, pair.second.pos,
+        obj = _map_view->getWorld()->addM2AndGetInstance(pair.second.file_key, pair.second.pos,
                                                          pair.second.scale,  pair.second.dir, nullptr);
 
       obj->instance_model()->wait_until_loaded();
@@ -325,10 +322,7 @@ unsigned noggit::Action::handleObjectRemoved(unsigned uid, bool redo)
     }
     else
     {
-      if (pair.second.filename.ends_with(".wmo"))
-        _map_view->getWorld()->deleteWMOInstance(pair.first);
-      else
-        _map_view->getWorld()->deleteModelInstance(pair.first);
+        _map_view->getWorld()->deleteInstance(pair.first);
     }
 
     return new_uid;
@@ -621,8 +615,13 @@ void noggit::Action::registerObjectTransformed(SceneObject* obj)
 
   _object_operations[obj->uid].emplace_back(ActionFlags::eOBJECTS_TRANSFORMED);
 
+  ActionObjectTypes type = obj->which() == eWMO ? ActionObjectTypes::WMO : ActionObjectTypes::M2;
   _transformed_objects_pre.emplace_back(std::make_pair(obj->uid,
-                                             ObjectInstanceCache{obj->getFilename(), obj->pos, obj->dir, obj->scale}));
+                                             ObjectInstanceCache{obj->instance_model()->file_key()
+                                                                 , type
+                                                                 , obj->pos
+                                                                 , obj->dir
+                                                                 , obj->scale}));
 }
 
 void noggit::Action::registerObjectAdded(SceneObject* obj)
@@ -637,8 +636,14 @@ void noggit::Action::registerObjectAdded(SceneObject* obj)
 
   _object_operations[obj->uid].emplace_back(ActionFlags::eOBJECTS_ADDED);
 
+  ActionObjectTypes type = obj->which() == eWMO ? ActionObjectTypes::WMO : ActionObjectTypes::M2;
   _added_objects_pre.emplace_back(std::make_pair(obj->uid,
-                                       ObjectInstanceCache{obj->getFilename(), obj->pos, obj->dir, obj->scale}));
+                                       ObjectInstanceCache{obj->instance_model()->file_key()
+                                                           , type
+                                                           , obj->pos
+                                                           , obj->dir
+                                                           , obj->scale}
+                                                           ));
 }
 
 void noggit::Action::registerObjectRemoved(SceneObject* obj)
@@ -653,8 +658,14 @@ void noggit::Action::registerObjectRemoved(SceneObject* obj)
 
   _object_operations[obj->uid].emplace_back(ActionFlags::eOBJECTS_REMOVED);
 
+  ActionObjectTypes type = obj->which() == eWMO ? ActionObjectTypes::WMO : ActionObjectTypes::M2;
   _removed_objects_pre.emplace_back(std::make_pair(obj->uid,
-                                         ObjectInstanceCache{obj->getFilename(), obj->pos, obj->dir, obj->scale}));
+                                         ObjectInstanceCache{obj->instance_model()->file_key()
+                                                             , type
+                                                             , obj->pos
+                                                             , obj->dir
+                                                             , obj->scale}
+                                                             ));
 }
 
 void noggit::Action::registerChunkHoleChange(MapChunk* chunk)

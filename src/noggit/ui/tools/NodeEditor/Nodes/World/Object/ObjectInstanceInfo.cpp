@@ -75,7 +75,7 @@ void ObjectInstanceInfoNode::compute()
 
   if (_out_ports[6].connected)
   {
-    _out_ports[6].out_value = std::make_shared<StringData>(obj->getFilename());
+    _out_ports[6].out_value = std::make_shared<StringData>(obj->instance_model()->file_key().filepath());
 
     _node->onDataUpdated(6);
   }

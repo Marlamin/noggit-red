@@ -22,9 +22,8 @@
 #include <vector>
 
 
-WMO::WMO(const std::string& filenameArg, noggit::NoggitRenderContext context)
-  : AsyncObject(filenameArg)
-  , _finished_upload(false)
+WMO::WMO(BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
+  : AsyncObject(file_key)
   , _context(context)
 {
 }

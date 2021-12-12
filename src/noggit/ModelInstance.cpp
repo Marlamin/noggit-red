@@ -13,30 +13,24 @@
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
-ModelInstance::ModelInstance(std::string const& filename, noggit::NoggitRenderContext context)
-  : SceneObject(SceneObjectTypes::eMODEL, context, filename)
-  , model (filename, context)
+ModelInstance::ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
+                             , noggit::NoggitRenderContext context)
+  : SceneObject(SceneObjectTypes::eMODEL, context)
+  , model(file_key, context)
 {
 }
 
-ModelInstance::ModelInstance(std::string const& filename, ENTRY_MDDF const*d, noggit::NoggitRenderContext context)
-  : SceneObject(SceneObjectTypes::eMODEL, context, filename)
-  , model (filename, context)
+ModelInstance::ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
+                             , ENTRY_MDDF const*d, noggit::NoggitRenderContext context)
+  : SceneObject(SceneObjectTypes::eMODEL, context)
+  , model(file_key, context)
 {
 	uid = d->uniqueID;
 	pos = glm::vec3(d->pos[0], d->pos[1], d->pos[2]);
     dir = math::degrees::vec3( math::degrees(d->rot[0])._, math::degrees(d->rot[1])._, math::degrees(d->rot[2])._);
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	scale = d->scale / 1024.0f;
-
-  if (model->finishedLoading())
-  {
-    recalcExtents();
-  }
-  else
-  {
-    _need_recalc_extents = true;
-  }
+  _need_recalc_extents = true;
 }
 
 
@@ -197,7 +191,7 @@ void ModelInstance::recalcExtents()
   auto transposedMat = _transform_mat;
   for (auto const& point : corners_in_world)
   {
-    rotated_corners_in_world.push_back(transposedMat * glm::vec4(point, 1.f));
+    rotated_corners_in_world.emplace_back(transposedMat * glm::vec4(point, 1.f));
   }
 
   math::aabb const bounding_of_rotated_points (rotated_corners_in_world);
@@ -265,8 +259,10 @@ void ModelInstance::updateDetails(noggit::ui::detail_infos* detail_widget)
   detail_widget->setText(select_info.str());
 }
 
-wmo_doodad_instance::wmo_doodad_instance(std::string const& filename, BlizzardArchive::ClientFile* f, noggit::NoggitRenderContext context)
-  : ModelInstance(filename, context)
+wmo_doodad_instance::wmo_doodad_instance(BlizzardArchive::Listfile::FileKey const& file_key
+                                         , BlizzardArchive::ClientFile* f
+                                         , noggit::NoggitRenderContext context)
+  : ModelInstance(file_key, context)
 {
   float ff[4];
 

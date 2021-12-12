@@ -553,7 +553,7 @@ namespace noggit
             rotation = obj->dir;
           }
 
-          auto new_obj = world->addM2AndGetInstance( obj->getFilename()
+          auto new_obj = world->addM2AndGetInstance( obj->instance_model()->file_key()
                         , pos
                         , scale
                         , rotation
@@ -574,7 +574,7 @@ namespace noggit
             rotation = obj->dir;
           }
 
-          auto new_obj = world->addWMOAndGetInstance(obj->getFilename(), pos, rotation);
+          auto new_obj = world->addWMOAndGetInstance(obj->instance_model()->file_key(), pos, rotation);
           new_obj->wmo->wait_until_loaded();
           new_obj->wmo->waitForChildrenLoaded();
           new_obj->recalcExtents();
@@ -606,7 +606,7 @@ namespace noggit
         auto selectedObject = new_selection.front();
         if (selectedObject.which() == eEntry_Object)
         {
-          ss << boost::get<selected_object_type>(selectedObject)->getFilename();
+          ss << boost::get<selected_object_type>(selectedObject)->instance_model()->file_key().filepath();
         }
         else
         {
@@ -719,7 +719,7 @@ namespace noggit
           continue;
         }
 
-        std::string path = boost::get<selected_object_type>(selection)->getFilename();
+        std::string path = boost::get<selected_object_type>(selection)->instance_model()->file_key().filepath();
 
         stream << path << std::endl;
       }

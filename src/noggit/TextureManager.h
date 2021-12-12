@@ -45,7 +45,7 @@ struct scoped_blp_texture_reference;
 struct blp_texture : public AsyncObject
 {
   blp_texture (BlizzardArchive::Listfile::FileKey const& filename, noggit::NoggitRenderContext context);
-  void finishLoading();
+  void finishLoading() override;
   virtual void waitForChildrenLoaded() override {};
 
   void loadFromUncompressedData(BLPHeader const* lHeader, char const* lData);
@@ -70,7 +70,8 @@ struct blp_texture : public AsyncObject
 
   noggit::NoggitRenderContext getContext() { return _context; };
 
-  virtual async_priority loading_priority() const
+  [[nodiscard]]
+  async_priority loading_priority() const override
   {
     return async_priority::high;
   }

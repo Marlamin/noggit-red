@@ -11,9 +11,9 @@
 #include <opengl/primitives.hpp>
 #include <opengl/scoped.hpp>
 
-WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggit::NoggitRenderContext context)
-  : SceneObject(SceneObjectTypes::eWMO, context, filename)
-  , wmo(filename, context)
+WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, noggit::NoggitRenderContext context)
+  : SceneObject(SceneObjectTypes::eWMO, context)
+  , wmo(file_key, context)
   , mFlags(d->flags)
   , mUnknown(d->unknown), mNameset(d->nameSet)
   , _doodadset(d->doodadSet)
@@ -30,9 +30,9 @@ WMOInstance::WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggi
   change_doodadset(_doodadset);
 }
 
-WMOInstance::WMOInstance(std::string const& filename, noggit::NoggitRenderContext context)
-  : SceneObject(SceneObjectTypes::eWMO, context, filename)
-  , wmo(filename, context)
+WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
+  : SceneObject(SceneObjectTypes::eWMO, context)
+  , wmo(file_key, context)
   , mFlags(0)
   , mUnknown(0)
   , mNameset(0)

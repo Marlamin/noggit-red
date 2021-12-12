@@ -73,7 +73,7 @@ namespace noggit
 
     std::string model::get_filename()
     {
-      return _object->getFilename();
+      return _object->instance_model()->file_key().filepath();
     }
 
     bool model::has_filename(std::string const& name)

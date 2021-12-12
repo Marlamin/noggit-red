@@ -31,15 +31,15 @@ private:
   bool _need_doodadset_update = true;
 
 public:
-  WMOInstance(std::string const& filename, ENTRY_MODF const* d, noggit::NoggitRenderContext context);
+  WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, noggit::NoggitRenderContext context);
 
-  explicit WMOInstance(std::string const& filename, noggit::NoggitRenderContext context);
+  explicit WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context);
 
   WMOInstance(WMOInstance const& other) = default;
   WMOInstance& operator=(WMOInstance const& other) = default;
 
   WMOInstance (WMOInstance&& other)
-    : SceneObject(other._type, other._context, other._filename)
+    : SceneObject(other._type, other._context)
     , wmo (std::move (other.wmo))
     , group_extents(other.group_extents)
     , mFlags (other.mFlags)
@@ -76,7 +76,6 @@ public:
     std::swap(_transform_mat, other._transform_mat);
     std::swap(_transform_mat_inverted, other._transform_mat_inverted);
     std::swap(_context, other._context);
-    std::swap(_filename, other._filename);
     return *this;
   }
 
@@ -104,7 +103,7 @@ public:
   virtual void updateDetails(noggit::ui::detail_infos* detail_widget) override;
 
   [[nodiscard]]
-  AsyncObject* instance_model() override { return wmo.get(); };
+  AsyncObject* instance_model() const override { return wmo.get(); };
 
   std::vector<wmo_doodad_instance*> get_visible_doodads( math::frustum const& frustum
                                                        , float const& cull_distance
