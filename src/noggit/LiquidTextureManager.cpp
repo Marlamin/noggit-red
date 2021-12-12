@@ -4,7 +4,7 @@
 
 #include <opengl/context.inl>
 #include <noggit/DBC.h>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <boost/format.hpp>
 #include <glm/vec2.hpp>
 

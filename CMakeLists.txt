@@ -193,9 +193,15 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/blizzard-databas
 INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/blizzard-archive-library/include")
 INCLUDE_DIRECTORIES(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
+#Load noggit source files
 collect_files(noggit_root_sources src/noggit FALSE "*.cpp" "")
+collect_files(noggit_application_sources src/noggit/application FALSE "*.cpp" "")
+collect_files(noggit_data_sources src/noggit/data FALSE "*.cpp" "")
+collect_files(noggit_simulation_sources src/noggit/simulation FALSE "*.cpp" "")
+collect_files(noggit_project_sources src/noggit/project FALSE "*.cpp" "")
 collect_files(noggit_ui_sources src/noggit/ui FALSE "*.cpp" "")
 collect_files(noggit_scripting_sources src/noggit/scripting TRUE "*.cpp" "")
+
 collect_files(math_sources src/math FALSE "*.cpp" "")
 collect_files(opengl_sources src/opengl FALSE "*.cpp" "")
 
@@ -215,8 +221,13 @@ collect_files(archive_sources src/external/blizzard-archive-library/src FALSE "*
 SET(util_sources src/util/exception_to_string.cpp)
 
 collect_files(noggit_root_headers src/noggit FALSE "*.h;*.hpp;*.inl" "")
+collect_files(noggit_application_headers src/noggit/application FALSE "*.h;*.hpp" "")
+collect_files(noggit_data_sources src/noggit/data FALSE "*.h;*.hpp" "")
+collect_files(noggit_simulation_sources src/noggit/simulation FALSE "*.h;*.hpp" "")
+collect_files(noggit_project_sources src/noggit/project FALSE "*.h;*.hpp" "")
 collect_files(noggit_ui_headers src/noggit/ui FALSE "*.h;*.hpp" "")
 collect_files(noggit_scripting_headers src/noggit/scripting TRUE "*.h;*.hpp" "")
+
 collect_files(math_headers src/math FALSE "*.h;*.hpp" "")
 collect_files(opengl_headers src/opengl FALSE "*.h;*.hpp" "")
 collect_files(shaders src/glsl FALSE "*.glsl" "")
@@ -245,6 +256,14 @@ collect_files(ui_files src TRUE "*.ui" "")
 qt5_wrap_ui(compiled_ui_files ${ui_files})
 
 assign_source_group(
+  ${noggit_application_sources}
+  ${noggit_application_headers}
+  ${noggit_simulation_sources}
+  ${noggit_simulation_headers}
+  ${noggit_data_sources}
+  ${noggit_data_headers}
+  ${noggit_project_sources}
+  ${noggit_project_headers}
   ${noggit_root_sources} 
   ${noggit_root_headers}
   ${noggit_ui_sources}
@@ -280,6 +299,14 @@ assign_source_group(
 ADD_EXECUTABLE(noggit
   WIN32
   MACOSX_BUNDLE
+  ${noggit_application_sources}
+  ${noggit_application_headers}
+  ${noggit_simulation_sources}
+  ${noggit_simulation_headers}
+  ${noggit_data_sources}
+  ${noggit_data_headers}
+  ${noggit_project_sources}
+  ${noggit_project_headers}
   ${noggit_root_sources}
   ${noggit_ui_sources}
   ${noggit_scripting_sources}

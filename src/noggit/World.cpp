@@ -20,7 +20,7 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/TexturingGUI.h>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 

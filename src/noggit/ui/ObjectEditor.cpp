@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/MapView.h>
-#include <noggit/application.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h> // WMOInstance
