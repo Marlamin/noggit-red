@@ -4,9 +4,6 @@
 
 #include <opengl/shader.fwd.hpp>
 #include <opengl/types.hpp>
-
-#include <boost/optional.hpp>
-
 #include <initializer_list>
 #include <map>
 #include <set>
@@ -72,7 +69,7 @@ namespace opengl
 
     friend struct scoped::use_program;
 
-    boost::optional<GLuint> _handle;
+    std::optional<GLuint> _handle;
 
     tsl::robin_map<std::string, GLuint> _uniforms;
     tsl::robin_map<std::string, GLuint> _attribs;

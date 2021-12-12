@@ -112,7 +112,7 @@ namespace opengl
 #endif
   }
   program::program (program&& other)
-    : _handle (boost::none)
+    : _handle (std::nullopt)
   {
     std::swap (_handle, other._handle);
   }
@@ -240,7 +240,7 @@ namespace opengl
 
     void use_program::bind_uniform_block(std::string const& name, unsigned target)
     {
-      gl.uniformBlockBinding(_program._handle.get(), uniform_block_location(name), target);
+        gl.uniformBlockBinding(_program._handle.value() , uniform_block_location(name), target);
     }
     void use_program::uniform (std::string const& name, std::vector<int> const& value)
     {
