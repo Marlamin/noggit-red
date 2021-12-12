@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
 #include <noggit/AsyncLoader.h>
 #include <noggit/AsyncObject.h>
 #include <noggit/ContextObject.hpp>
@@ -9,8 +8,7 @@
 
 #include <ClientData.hpp>
 #include <Listfile.hpp>
-
-#include <boost/thread.hpp>
+#include <thread>
 
 #include <functional>
 #include <map>
@@ -56,7 +54,7 @@ namespace noggit
       //LogDebug << "Emplacing " << normalized << " into context" << context << std::endl;
 
       {
-        boost::mutex::scoped_lock const lock(_mutex);
+        std::scoped_lock const lock(_mutex);
 
         if ([&] { return _counts[pair]++; }())
         {
@@ -67,7 +65,7 @@ namespace noggit
 
       T* const obj ( [&]
                      {
-                       boost::mutex::scoped_lock const lock(_mutex);
+                       std::scoped_lock const lock(_mutex);
                        return &_elements.emplace ( std::piecewise_construct
                                                  , std::forward_as_tuple (pair)
                                                  , std::forward_as_tuple (file_key.filepath(), context, args...)
@@ -87,7 +85,7 @@ namespace noggit
       AsyncObject* obj = nullptr;
 
       {
-        boost::mutex::scoped_lock lock(_mutex);
+        std::scoped_lock lock(_mutex);
 
         if (--_counts.at(pair) == 0)
         {
@@ -104,7 +102,7 @@ namespace noggit
         }
 
         {
-          boost::mutex::scoped_lock lock(_mutex);
+          std::scoped_lock lock(_mutex);
           _elements.erase(pair);
           _counts.erase(pair);
         }
@@ -112,7 +110,7 @@ namespace noggit
     }
     void apply (std::function<void (BlizzardArchive::Listfile::FileKey const&, T&)> fun)
     {
-      boost::mutex::scoped_lock lock(_mutex);
+      std::scoped_lock lock(_mutex);
 
       for (auto& element : _elements)
       {
@@ -121,7 +119,7 @@ namespace noggit
     }
     void apply (std::function<void (BlizzardArchive::Listfile::FileKey const&, T const&)> fun) const
     {
-      boost::mutex::scoped_lock lock(_mutex);
+      std::scoped_lock lock(_mutex);
       for (auto const& element : _elements)
       {
         fun (element.first.second, element.second);
@@ -130,7 +128,7 @@ namespace noggit
 
     void context_aware_apply(std::function<void (BlizzardArchive::Listfile::FileKey const&, T&)> fun, noggit::NoggitRenderContext context)
     {
-      boost::mutex::scoped_lock lock(_mutex);
+      std::scoped_lock lock(_mutex);
 
       for (auto& element : _elements)
       {
@@ -142,7 +140,7 @@ namespace noggit
     }
     void context_aware_apply(std::function<void (BlizzardArchive::Listfile::FileKey const&, T const&)> fun, noggit::NoggitRenderContext context) const
     {
-      boost::mutex::scoped_lock lock(_mutex);
+      std::scoped_lock lock(_mutex);
       for (auto const& element : _elements)
       {
         if (element.first.first != context)
@@ -155,7 +153,7 @@ namespace noggit
   private:
     std::map<std::pair<int, BlizzardArchive::Listfile::FileKey>, T> _elements;
     std::unordered_map<std::pair<int, BlizzardArchive::Listfile::FileKey>, std::size_t, pair_hash> _counts;
-    boost::mutex mutable _mutex;
+    std::mutex mutable _mutex;
   };
 
 }
