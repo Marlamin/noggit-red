@@ -8,8 +8,7 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
-
-#include <boost/optional.hpp>
+#include <optional>
 
 class World;
 class MapView;
