@@ -9,7 +9,7 @@
 #include <set>
 #include <algorithm>
 #include <external/tsl/robin_map.h>
-#include <boost/optional.hpp>
+#include <optional>
 #include <noggit/TextureManager.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/SceneObject.hpp>
@@ -66,8 +66,8 @@ namespace Noggit
     {
       size_t n_textures;
       std::vector<std::string> textures;
-      std::array<boost::optional<Alphamap>, 3> alphamaps;
-      boost::optional<tmp_edit_alpha_values> tmp_edit_values;
+      std::array<std::optional<Alphamap>, 3> alphamaps;
+      std::optional<tmp_edit_alpha_values> tmp_edit_values;
       ENTRY_MCLY layers_info[4];
     };
 

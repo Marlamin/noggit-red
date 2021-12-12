@@ -47,7 +47,7 @@ TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t 
       if (_layers_info[layer].flags & 0x100)
       {
         f->seek (alpha_base + _layers_info[layer].ofsAlpha);
-        alphamaps[layer - 1] = boost::in_place (f, _layers_info[layer].flags, use_big_alphamaps, do_not_fix_alpha_map);
+        alphamaps[layer - 1].emplace(f, _layers_info[layer].flags, use_big_alphamaps, do_not_fix_alpha_map);
       }
     }
 
@@ -75,12 +75,12 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
 
     if (texLevel)
     {
-      alphamaps[texLevel - 1] = boost::in_place();
+        alphamaps[texLevel - 1].emplace();
     }
 
     if (tmp_edit_values && nTextures == 1)
     {
-      tmp_edit_values.get()[0].fill(255.f);
+      tmp_edit_values.value()[0].fill(255.f);
     }
   }
 
@@ -182,7 +182,7 @@ void TextureSet::eraseTextures()
   {
     if (i > 0)
     {
-      alphamaps[i - 1] = boost::none;
+      alphamaps[i - 1] = std::nullopt;
     }
     _layers_info[i] = ENTRY_MCLY();
   }
@@ -194,7 +194,7 @@ void TextureSet::eraseTextures()
   _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true;
 
-  tmp_edit_values = boost::none;
+  tmp_edit_values = std::nullopt;
 }
 
 void TextureSet::eraseTexture(size_t id)
@@ -209,13 +209,13 @@ void TextureSet::eraseTexture(size_t id)
   {
     if (i)
     {
-      alphamaps[i - 1] = boost::none;
+      alphamaps[i - 1] = std::nullopt;
       std::swap (alphamaps[i - 1], alphamaps[i]);
     }
 
     if (tmp_edit_values)
     {
-      tmp_edit_values.get()[i].swap(tmp_edit_values.get()[i+1]);
+      tmp_edit_values.value()[i].swap(tmp_edit_values.value()[i+1]);
     }
 
     _layers_info[i] = _layers_info[i + 1];
@@ -223,7 +223,7 @@ void TextureSet::eraseTexture(size_t id)
 
   if (nTextures > 1)
   {
-    alphamaps[nTextures - 2] = boost::none;
+    alphamaps[nTextures - 2] = std::nullopt;
   }
 
   textures.erase(textures.begin()+id);
@@ -235,7 +235,7 @@ void TextureSet::eraseTexture(size_t id)
   // set the default values for the temporary alphamap too
   if (tmp_edit_values)
   {
-    tmp_edit_values.get()[nTextures].fill(0.f);
+    tmp_edit_values.value()[nTextures].fill(0.f);
   }
 
   _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
@@ -276,7 +276,7 @@ bool TextureSet::eraseUnusedTextures()
 
   if (tmp_edit_values)
   {
-    auto& amaps = tmp_edit_values.get();
+    auto& amaps = tmp_edit_values.value();
 
     for (int i = 0; i < 4096 && visible_tex.size() < nTextures; ++i)
     {
@@ -384,7 +384,7 @@ bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush*
   radius = brush->getRadius();
 
   create_temporary_alphamaps_if_needed();
-  auto& amaps = tmp_edit_values.get();
+  auto& amaps = tmp_edit_values.value();
 
   zPos = zbase;
 
@@ -676,7 +676,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
   }
 
   create_temporary_alphamaps_if_needed();
-  auto& amaps = tmp_edit_values.get();
+  auto& amaps = tmp_edit_values.value();
 
   zPos = zbase;
 
@@ -865,7 +865,7 @@ bool TextureSet::replace_texture( float xbase
   }
 
   create_temporary_alphamaps_if_needed();
-  auto& amap = tmp_edit_values.get();
+  auto& amap = tmp_edit_values.value();
 
   for (int j = 0; j < 64; j++)
   {
@@ -1131,7 +1131,7 @@ void TextureSet::merge_layers(size_t id1, size_t id2)
 
   create_temporary_alphamaps_if_needed();
 
-  auto& amap = tmp_edit_values.get();
+  auto& amap = tmp_edit_values.value();
 
   for (int i = 0; i < 64 * 64; ++i)
   {
@@ -1175,7 +1175,7 @@ void TextureSet::uploadAlphamapData()
 
   if (tmp_edit_values)
   {
-    auto& tmp_amaps = tmp_edit_values.get();
+    auto& tmp_amaps = tmp_edit_values.value();
 
     for (int i = 0; i < 64 * 64; ++i)
     {
@@ -1215,12 +1215,12 @@ void TextureSet::uploadAlphamapData()
 namespace
 {
   misc::max_capacity_stack_vector<std::size_t, 4> current_layer_values
-    (std::uint8_t nTextures, boost::optional<Alphamap> const* alphamaps, std::size_t pz, std::size_t px)
+    (std::uint8_t nTextures, std::optional<Alphamap> const* alphamaps, std::size_t pz, std::size_t px)
   {
     misc::max_capacity_stack_vector<std::size_t, 4> values (nTextures, 0xFF);
     for (std::uint8_t i = 1; i < nTextures; ++i)
     {
-      values[i] = alphamaps[i - 1].get().getAlpha(64 * pz + px);
+      values[i] = alphamaps[i - 1].value().getAlpha(64 * pz + px);
       values[0] -= values[i];
     }
     return values;
@@ -1282,11 +1282,11 @@ bool TextureSet::apply_alpha_changes()
 {
   if (!tmp_edit_values || nTextures < 2)
   {
-    tmp_edit_values = boost::none;
+      tmp_edit_values = std::nullopt;
     return false;
   }
 
-  auto& new_amaps = tmp_edit_values.get();
+  auto& new_amaps = tmp_edit_values.value();
   std::array<std::uint16_t, 64 * 64> totals;
   totals.fill(0);
 
@@ -1313,7 +1313,7 @@ bool TextureSet::apply_alpha_changes()
   _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP); 
   _need_lod_texture_map_update = true;
 
-  tmp_edit_values = boost::none;
+  tmp_edit_values = std::nullopt;
 
   return true;
 }
@@ -1327,7 +1327,7 @@ void TextureSet::create_temporary_alphamaps_if_needed()
 
   tmp_edit_values.emplace();
 
-  tmp_edit_alpha_values& values = tmp_edit_values.get();
+  tmp_edit_alpha_values& values = tmp_edit_values.value();
 
   for (int i = 0; i < 64 * 64; ++i)
   {

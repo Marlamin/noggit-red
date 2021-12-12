@@ -14,9 +14,7 @@
 #include <QtGui/QOffscreenSurface>
 #include <QtGui/QOpenGLFramebufferObjectFormat>
 #include <QtOpenGL/QGLPixelBuffer>
-
-#include <boost/optional.hpp>
-
+#include <optional>
 #include <map>
 #include <unordered_map>
 #include <string>
@@ -66,7 +64,7 @@ struct blp_texture : public AsyncObject
 
   std::map<int, std::vector<uint32_t>>& data() { return _data;};
   std::map<int, std::vector<uint8_t>>& compressed_data() { return _compressed_data; };
-  boost::optional<GLint> const& compression_format() { return _compression_format; };
+  std::optional<GLint> const& compression_format() { return _compression_format; };
 
   Noggit::NoggitRenderContext getContext() { return _context; };
 
@@ -90,7 +88,7 @@ private:
 private:
   std::map<int, std::vector<uint32_t>> _data;
   std::map<int, std::vector<uint8_t>> _compressed_data;
-  boost::optional<GLint> _compression_format;
+  std::optional<GLint> _compression_format;
   int _array_index = -1;
   GLuint _texture_array = 0;
 };

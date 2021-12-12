@@ -50,7 +50,7 @@ struct SkyFloatParam
 class Sky 
 {
 public:
-  boost::optional<ModelInstance> skybox;
+  std::optional<ModelInstance> skybox;
 
   glm::vec3 pos;
   float r1, r2;

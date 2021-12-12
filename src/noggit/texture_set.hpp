@@ -89,8 +89,8 @@ public:
 
   std::array<std::uint16_t, 8> lod_texture_map();
 
-  std::array<boost::optional<Alphamap>, 3>* getAlphamaps() { return &alphamaps; };
-  boost::optional<tmp_edit_alpha_values>* getTempAlphamaps() { return &tmp_edit_values; };
+  std::array<std::optional<Alphamap>, 3>* getAlphamaps() { return &alphamaps; };
+  std::optional<tmp_edit_alpha_values>* getTempAlphamaps() { return &tmp_edit_values; };
 
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
   auto getDoodadMappingBase(void) -> std::uint16_t* { return _doodadMapping.data(); }
@@ -113,7 +113,7 @@ private:
   MapTile* _tile;
 
   std::vector<scoped_blp_texture_reference> textures;
-  std::array<boost::optional<Alphamap>, 3> alphamaps;
+  std::array<std::optional<Alphamap>, 3> alphamaps;
   size_t nTextures;
 
   std::array<std::uint16_t, 8> _doodadMapping;
@@ -122,7 +122,7 @@ private:
 
   ENTRY_MCLY _layers_info[4];
 
-  boost::optional<tmp_edit_alpha_values> tmp_edit_values;
+  std::optional<tmp_edit_alpha_values> tmp_edit_values;
 
   bool _do_not_convert_alphamaps;
 
