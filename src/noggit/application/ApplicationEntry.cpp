@@ -21,7 +21,7 @@
 #include <codecvt>
 #include <string>
 
-namespace
+namespace noggit::application
 {
     void noggit_terminate_handler()
     {
@@ -39,6 +39,7 @@ namespace
 
         LogError << "std::terminate: " << reason << std::endl;
     }
+
 
     struct application_with_exception_printer_on_notify : QApplication
     {
@@ -61,7 +62,7 @@ namespace
 int main(int argc, char *argv[])
 {
   noggit::RegisterErrorHandlers();
-  std::set_terminate(noggit_terminate_handler);
+  std::set_terminate(noggit::application::noggit_terminate_handler);
 
   QApplication::setStyle(QStyleFactory::create("Fusion"));
   //QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);

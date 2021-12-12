@@ -28,40 +28,38 @@
 #include <string>
 #include "revision.h"
 
-namespace noggit {
-	namespace application {
+namespace noggit::application {
 
-		class Noggit
+    class Noggit
+    {
+    public:
+        static Noggit* instance(int argc, char* argv[])
         {
-        public:
-            static Noggit* instance(int argc, char* argv[])
-            {
-                static Noggit inst{ argc, argv };
-                return &inst;
-            }
+            static Noggit inst{ argc, argv };
+            return &inst;
+        }
 
-            BlizzardArchive::ClientData* clientData() { return _client_data.get(); };
+        BlizzardArchive::ClientData* clientData() { return _client_data.get(); };
 
-            void start();
+        void start();
 
-        private:
-            Noggit(int argc, char* argv[]);
+    private:
+        Noggit(int argc, char* argv[]);
 
-            static void initPath(char* argv[]);
+        static void initPath(char* argv[]);
 
-            std::unique_ptr<noggit::ui::main_window> main_window;
-            std::unique_ptr<BlizzardArchive::ClientData> _client_data;
+        std::unique_ptr<noggit::ui::main_window> main_window;
+        std::unique_ptr<BlizzardArchive::ClientData> _client_data;
 
-            boost::filesystem::path wowpath;
-            std::string project_path;
+        boost::filesystem::path wowpath;
+        std::string project_path;
 
-            bool fullscreen;
-            bool doAntiAliasing;
-        };
+        bool fullscreen;
+        bool doAntiAliasing;
+    };
+
+}
 
 #define NOGGIT_APP noggit::application::Noggit::instance(0, nullptr)
-	
-}}
-
 
 #endif //NOGGIT_APPLICATION_HPP
