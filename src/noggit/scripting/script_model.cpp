@@ -3,15 +3,11 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_exception.hpp>
-
 #include <noggit/World.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/ui/ObjectEditor.h>
-
 #include <sol/sol.hpp>
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/algorithm/string/case_conv.hpp>
 
 namespace Noggit
 {
@@ -79,7 +75,10 @@ namespace Noggit
     bool model::has_filename(std::string const& name)
     {
       std::string copy = std::string(name);
-      boost::to_lower(copy);
+
+      std::transform(copy.begin(), copy.end(), copy.begin(),
+          [](unsigned char c) { return std::tolower(c); });
+
       std::replace(copy.begin(),copy.end(),'\\','/');
       return copy == get_filename();
     }
@@ -99,7 +98,7 @@ namespace Noggit
 
       remove();
 
-      if (boost::ends_with(filename, ".wmo"))
+      if (filename.ends_with(".wmo"))
       {
         _object = 
           world()->addWMOAndGetInstance(filename, get_pos(), math::degrees::vec3 {get_rot()});

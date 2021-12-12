@@ -58,8 +58,6 @@
 
 #include "revision.h"
 
-#include <boost/algorithm/string/predicate.hpp>
-
 #include <QtCore/QTimer>
 #include <QtGui/QMouseEvent>
 #include <QtWidgets/QApplication>
