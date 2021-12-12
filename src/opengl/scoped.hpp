@@ -1,13 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
 #include <opengl/texture.hpp>
-
-#include <boost/optional.hpp>
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
-
+#include <optional>
 #include <stdexcept>
 
 namespace opengl
@@ -85,7 +82,7 @@ namespace opengl
 
     private:
       GLuint _buffer;
-      boost::optional<buffer_binder<GL_ELEMENT_ARRAY_BUFFER>> _impl;
+      std::optional<buffer_binder<GL_ELEMENT_ARRAY_BUFFER>> _impl;
     };
 
     template<std::size_t count>
