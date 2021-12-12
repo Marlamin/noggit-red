@@ -4,8 +4,6 @@
 #include <noggit/TextureManager.h>
 #include <opengl/scoped.hpp>
 
-#include <boost/optional.hpp>
-
 #include <memory>
 
 namespace BlizzardArchive
