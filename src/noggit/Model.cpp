@@ -788,7 +788,7 @@ bool ModelRenderPass::prepare_draw(opengl::scoped::use_program& m2_shader, Model
   }
   
 
-  GLint ps = static_cast<GLint>(pixel_shader.get());
+  GLint ps = static_cast<GLint>(pixel_shader.value());
   if (model_render_state.pixel_shader != ps)
   {
     m2_shader.uniform("pixel_shader", ps);
@@ -935,14 +935,14 @@ namespace
 {
 
 // https://wowdev.wiki/M2/.skin/WotLK_shader_selection
-boost::optional<ModelPixelShader> GetPixelShader(uint16_t texture_count, uint16_t shader_id)
+std::optional<ModelPixelShader> GetPixelShader(uint16_t texture_count, uint16_t shader_id)
 {
   uint16_t texture1_fragment_mode = (shader_id >> 4) & 7;
   uint16_t texture2_fragment_mode = shader_id & 7;
   // uint16_t texture1_env_map = (shader_id >> 4) & 8;
   // uint16_t texture2_env_map = shader_id & 8;
 
-  boost::optional<ModelPixelShader> pixel_shader;
+  std::optional<ModelPixelShader> pixel_shader;
 
   if (texture_count == 1)
   {
@@ -1039,9 +1039,9 @@ boost::optional<ModelPixelShader> GetPixelShader(uint16_t texture_count, uint16_
   return pixel_shader;
 }
 
-boost::optional<ModelPixelShader> M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
+std::optional<ModelPixelShader> M2GetPixelShaderID (uint16_t texture_count, uint16_t shader_id)
 {
-  boost::optional<ModelPixelShader> pixel_shader;
+    std::optional<ModelPixelShader> pixel_shader;
 
   if (!(shader_id & 0x8000))
   {
@@ -1703,7 +1703,7 @@ std::vector<float> Model::intersect (glm::mat4x4 const& model_view, math::ray co
 
   if (use_fake_geometry())
   {
-    auto& fake_geom = _fake_geometry.get();
+    auto& fake_geom = _fake_geometry.value();
 
     for (size_t i = 0; i < fake_geom.indices.size(); i += 3)
     {

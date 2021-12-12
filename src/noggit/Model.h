@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
 #include <math/frustum.hpp>
 #include <glm/mat4x4.hpp>
 #include <math/ray.hpp>
@@ -15,7 +14,7 @@
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
 #include <ClientFile.hpp>
-
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -156,7 +155,7 @@ struct ModelRenderPass : ModelTexUnit
   texture_unit_lookup tu_lookups[2];
   uint16_t textures[2];
   uint16_t uv_animations[2];
-  boost::optional<ModelPixelShader> pixel_shader;
+  std::optional<ModelPixelShader> pixel_shader;
 
 
   bool prepare_draw(opengl::scoped::use_program& m2_shader, Model *m, opengl::M2RenderState& model_render_state);
@@ -356,7 +355,7 @@ private:
   std::vector<uint16_t> _indices;
 
   std::vector<ModelRenderPass> _render_passes;
-  boost::optional<FakeGeometry> _fake_geometry;
+  std::optional<FakeGeometry> _fake_geometry;
 
   // ===============================
   // Animation
