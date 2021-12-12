@@ -143,7 +143,7 @@ namespace Animation
           }
         }
 
-        if (_interpolationType == Animation::Interpolation::Type::NONE)
+        if (pos == timestampVector.size() - 1 || _interpolationType == Animation::Interpolation::Type::NONE)
         {
           result = dataVector[pos];
         }
