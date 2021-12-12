@@ -292,23 +292,23 @@ public:
 
   void notifyTileRendererOnSelectedTextureChange();
 
-  void addM2 ( std::string const& filename
+  void addM2 ( BlizzardArchive::Listfile::FileKey const& file_key
              , glm::vec3 newPos
              , float scale, math::degrees::vec3 rotation
              , noggit::object_paste_params*
              );
-  void addWMO ( std::string const& filename
+  void addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
               , glm::vec3 newPos
               , math::degrees::vec3 rotation
               );
 
-  ModelInstance* addM2AndGetInstance ( std::string const& filename
+  ModelInstance* addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
       , glm::vec3 newPos
       , float scale, math::degrees::vec3 rotation
       , noggit::object_paste_params*
   );
 
-  WMOInstance* addWMOAndGetInstance ( std::string const& filename
+  WMOInstance* addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
       , glm::vec3 newPos
       , math::degrees::vec3 rotation
   );
@@ -340,8 +340,9 @@ public:
       , MinimapRenderSettings* settings
   );
 
-  void deleteModelInstance(int pUniqueID);
-  void deleteWMOInstance(int pUniqueID);
+  void deleteModelInstance(int uid);
+  void deleteWMOInstance(int uid);
+  void deleteInstance(int uid);
 
   bool uid_duplicates_found() const;
   void delete_duplicate_model_and_wmo_instances();

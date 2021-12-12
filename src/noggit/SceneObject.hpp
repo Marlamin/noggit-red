@@ -11,6 +11,11 @@
 #include <unordered_set>
 #include <array>
 
+namespace BlizzardArchive::Listfile
+{
+  class FileKey;
+}
+
 class AsyncObject;
 
 enum SceneObjectTypes
@@ -24,7 +29,7 @@ class MapTile;
 class SceneObject : public Selectable
 {
 public:
-  SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context, std::string filename = "");
+  SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context);
 
   [[nodiscard]]
   bool isInsideRect(std::array<glm::vec3, 2> const* rect) const;
@@ -36,6 +41,8 @@ public:
 
   virtual void recalcExtents() = 0;
   virtual void ensureExtents() = 0;
+
+  [[nodiscard]]
   virtual bool finishedLoading() = 0;
 
   void resetDirection();
@@ -46,16 +53,19 @@ public:
   [[nodiscard]]
   glm::mat4x4 transformMatrixInverted() const { return _transform_mat_inverted; };
 
+  [[nodiscard]]
   SceneObjectTypes which() const { return _type; };
-
-  std::string const& getFilename() const { return _filename; };
 
   void refTile(MapTile* tile);
   void derefTile(MapTile* tile);
-  std::vector<MapTile*> const& getTiles() { return _tiles; };
 
-  virtual AsyncObject* instance_model() = 0;
+  [[nodiscard]]
+  std::vector<MapTile*> const& getTiles() const { return _tiles; };
 
+  [[nodiscard]]
+  virtual AsyncObject* instance_model() const = 0;
+
+  [[nodiscard]]
   std::array<glm::vec3, 2> const& getExtents() { ensureExtents(); return extents; }
 
 public:
@@ -73,8 +83,6 @@ protected:
   glm::mat4x4 _transform_mat_inverted = glm::mat4x4();
 
   noggit::NoggitRenderContext _context;
-
-  std::string _filename;
 
   std::vector<MapTile*> _tiles;
 };

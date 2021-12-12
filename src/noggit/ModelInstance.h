@@ -3,7 +3,7 @@
 #pragma once
 
 #include <math/ray.hpp>
-#include <ClientFile.hpp> // BlizzardArchive::ClientFile
+#include <ClientFile.hpp>
 #include <noggit/MapHeaders.h> // ENTRY_MDDF
 #include <noggit/ModelManager.h>
 #include <noggit/Selection.h>
@@ -33,15 +33,17 @@ public:
   // longest side of an AABB transformed model's bounding box from the M2 header
   float size_cat;
 
-  explicit ModelInstance(std::string const& filename, noggit::NoggitRenderContext context);
+  explicit ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
+                         , noggit::NoggitRenderContext context);
 
-  explicit ModelInstance(std::string const& filename, ENTRY_MDDF const*d, noggit::NoggitRenderContext context);
+  explicit ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
+                         , ENTRY_MDDF const*d, noggit::NoggitRenderContext context);
 
   ModelInstance(ModelInstance const& other) = default;
   ModelInstance& operator= (ModelInstance const& other) = default;
 
   ModelInstance (ModelInstance&& other)
-    : SceneObject(other._type, other._context, other._filename)
+    : SceneObject(other._type, other._context)
     , model (std::move (other.model))
     , light_color (other.light_color)
     , size_cat (other.size_cat)
@@ -57,7 +59,7 @@ public:
     uid = other.uid;
   }
 
-  ModelInstance& operator= (ModelInstance&& other)
+  ModelInstance& operator= (ModelInstance&& other) noexcept
   {
     std::swap (model, other.model);
     std::swap (pos, other.pos);
@@ -100,9 +102,9 @@ public:
   virtual bool isWMODoodad() const { return false; };
 
   [[nodiscard]]
-  AsyncObject* instance_model() override { return model.get(); };
+  AsyncObject* instance_model() const override { return model.get(); };
 
-  virtual void updateDetails(noggit::ui::detail_infos* detail_widget) override;
+  void updateDetails(noggit::ui::detail_infos* detail_widget) override;
 
   [[nodiscard]]
   std::uint32_t gpuTransformUid() const { return _gpu_transform_uid; }
@@ -120,12 +122,12 @@ public:
   glm::quat doodad_orientation;
   glm::vec3 world_pos;
 
-  explicit wmo_doodad_instance(std::string const& filename
+  explicit wmo_doodad_instance(BlizzardArchive::Listfile::FileKey const& file_key
       , BlizzardArchive::ClientFile* f
       , noggit::NoggitRenderContext context );
 
   wmo_doodad_instance(wmo_doodad_instance const& other)
-  : ModelInstance(other.model->file_key().filepath(), other._context)
+  : ModelInstance(other.model->file_key(), other._context)
   , doodad_orientation(other.doodad_orientation)
   , world_pos(other.world_pos)
   , _need_matrix_update(other._need_matrix_update)
@@ -135,7 +137,7 @@ public:
 
   wmo_doodad_instance& operator= (wmo_doodad_instance const& other) = delete;
 
-  wmo_doodad_instance(wmo_doodad_instance&& other)
+  wmo_doodad_instance(wmo_doodad_instance&& other) noexcept
     : ModelInstance(reinterpret_cast<ModelInstance&&>(other))
     , doodad_orientation(other.doodad_orientation)
     , world_pos(other.world_pos)
@@ -157,10 +159,11 @@ public:
 
   void update_transform_matrix_wmo(WMOInstance* wmo);
 
-  virtual glm::vec3 const& get_pos() const override { return world_pos; };
+  [[nodiscard]]
+  glm::vec3 const& get_pos() const override { return world_pos; };
 
   [[nodiscard]]
-  virtual bool isWMODoodad() const override { return true; };
+  bool isWMODoodad() const override { return true; };
 
 protected:
   // to avoid redefining recalcExtents

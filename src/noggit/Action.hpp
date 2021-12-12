@@ -16,6 +16,7 @@
 #include <noggit/liquid_layer.hpp>
 #include <noggit/ChunkWater.hpp>
 #include <QObject>
+#include <ClientData.hpp>
 
 class MapView;
 class MapChunk;
@@ -55,6 +56,12 @@ namespace noggit
         eNUM         = 0x100
     };
 
+    enum class ActionObjectTypes
+    {
+      WMO,
+      M2
+    };
+
     struct TextureChangeCache
     {
       size_t n_textures;
@@ -66,7 +73,8 @@ namespace noggit
 
     struct ObjectInstanceCache
     {
-      std::string filename;
+      BlizzardArchive::Listfile::FileKey file_key;
+      ActionObjectTypes type;
       glm::vec3 pos;
       math::degrees::vec3 dir;
       float scale;

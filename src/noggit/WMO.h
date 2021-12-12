@@ -291,7 +291,7 @@ static_assert ( sizeof (mohd_flags) == sizeof (std::uint16_t)
 class WMO : public AsyncObject
 {
 public:
-  explicit WMO(const std::string& name, noggit::NoggitRenderContext context );
+  explicit WMO(BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context );
 
   void draw ( opengl::scoped::use_program& wmo_shader
             , glm::mat4x4 const& model_view
@@ -320,19 +320,17 @@ public:
                   , std::map<int, std::pair<glm::vec3, glm::vec3>> const& group_extents
                   ) const;
 
+  [[nodiscard]]
   std::vector<float> intersect (math::ray const&) const;
 
-  void finishLoading();
+  void finishLoading() override;
 
-  virtual void waitForChildrenLoaded() override;
+  void waitForChildrenLoaded() override;
 
   void unload();
 
+  [[nodiscard]]
   std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads_per_group(uint16_t doodadset) const;
-
-  bool draw_group_boundingboxes;
-
-  bool _finished_upload;
 
   std::vector<WMOGroup> groups;
   std::vector<WMOMaterial> materials;
@@ -355,11 +353,14 @@ public:
 
   noggit::NoggitRenderContext _context;
 
+  [[nodiscard]]
   bool is_hidden() const { return _hidden; }
+
   void toggle_visibility() { _hidden = !_hidden; }
   void show() { _hidden = false ; }
 
-  virtual bool is_required_when_saving() const
+  [[nodiscard]]
+  bool is_required_when_saving()  const override
   {
     return true;
   }
@@ -381,31 +382,31 @@ private:
 
 struct scoped_wmo_reference
 {
-  scoped_wmo_reference (std::string const& filename, noggit::NoggitRenderContext context)
+  scoped_wmo_reference (BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
     : _valid(true)
-    , _filename(filename)
+    , _file_key(file_key)
     , _context(context)
-    , _wmo (WMOManager::_.emplace(_filename, context))
+    , _wmo (WMOManager::_.emplace(file_key, context))
   {}
 
   scoped_wmo_reference (scoped_wmo_reference const& other)
     : _valid(other._valid)
-    , _filename(other._filename)
-    , _wmo(WMOManager::_.emplace(_filename, other._context))
+    , _file_key(other._file_key)
+    , _wmo(WMOManager::_.emplace(_file_key, other._context))
     , _context(other._context)
   {}
   scoped_wmo_reference& operator= (scoped_wmo_reference const& other)
   {
     _valid = other._valid;
-    _filename = other._filename;
-    _wmo = WMOManager::_.emplace(_filename, other._context);
+    _file_key = other._file_key;
+    _wmo = WMOManager::_.emplace(_file_key, other._context);
     _context = other._context;
     return *this;
   }
 
   scoped_wmo_reference (scoped_wmo_reference&& other)
     : _valid (other._valid)
-    , _filename (other._filename)
+    , _file_key (other._file_key)
     , _wmo (other._wmo)
     , _context (other._context)
   {
@@ -414,7 +415,7 @@ struct scoped_wmo_reference
   scoped_wmo_reference& operator= (scoped_wmo_reference&& other)
   {
     std::swap(_valid, other._valid);
-    std::swap(_filename, other._filename);
+    std::swap(_file_key, other._file_key);
     std::swap(_wmo, other._wmo);
     std::swap(_context, other._context);
     other._valid = false;
@@ -425,7 +426,7 @@ struct scoped_wmo_reference
   {
     if (_valid)
     {
-      WMOManager::_.erase(_filename, _context);
+      WMOManager::_.erase(_file_key, _context);
     }
   }
 
@@ -433,6 +434,8 @@ struct scoped_wmo_reference
   {
     return _wmo;
   }
+
+  [[nodiscard]]
   WMO* get() const
   {
     return _wmo;
@@ -441,7 +444,7 @@ struct scoped_wmo_reference
 private:  
   bool _valid;
 
-  std::string _filename;
+  BlizzardArchive::Listfile::FileKey _file_key;
   WMO* _wmo;
   noggit::NoggitRenderContext _context;
 };

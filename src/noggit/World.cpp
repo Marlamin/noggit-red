@@ -2614,27 +2614,40 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
   return true;
 }
 
-void World::deleteModelInstance(int pUniqueID)
+void World::deleteModelInstance(int uid)
 {
   ZoneScoped;
-  auto instance = _model_instance_storage.get_model_instance(pUniqueID);
+  auto instance = _model_instance_storage.get_model_instance(uid);
 
   if (instance)
   {
-    _model_instance_storage.delete_instance(pUniqueID);
+    _model_instance_storage.delete_instance(uid);
     need_model_updates = true;
     reset_selection();
   }
 }
 
-void World::deleteWMOInstance(int pUniqueID)
+void World::deleteWMOInstance(int uid)
 {
   ZoneScoped;
-  auto instance = _model_instance_storage.get_wmo_instance(pUniqueID);
+  auto instance = _model_instance_storage.get_wmo_instance(uid);
 
   if (instance)
   {
-    _model_instance_storage.delete_instance(pUniqueID);
+    _model_instance_storage.delete_instance(uid);
+    need_model_updates = true;
+    reset_selection();
+  }
+}
+
+void World::deleteInstance(int uid)
+{
+  ZoneScoped;
+  auto instance = _model_instance_storage.get_instance(uid);
+
+  if (instance)
+  {
+    _model_instance_storage.delete_instance(uid);
     need_model_updates = true;
     reset_selection();
   }
@@ -2665,7 +2678,7 @@ void World::unload_every_model_and_wmo_instance()
   _models_by_filename.clear();
 }
 
-void World::addM2 ( std::string const& filename
+void World::addM2 ( BlizzardArchive::Listfile::FileKey const& file_key
                   , glm::vec3 newPos
                   , float scale
                   , glm::vec3 rotation
@@ -2673,7 +2686,7 @@ void World::addM2 ( std::string const& filename
                   )
 {
   ZoneScoped;
-  ModelInstance model_instance = ModelInstance(filename, _context);
+  ModelInstance model_instance = ModelInstance(file_key, _context);
 
   model_instance.uid = mapIndex.newGUID();
   model_instance.pos = newPos;
@@ -2711,10 +2724,10 @@ void World::addM2 ( std::string const& filename
 
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
 
-  _models_by_filename[filename].push_back(_model_instance_storage.get_model_instance(uid).get());
+  _models_by_filename[file_key.filepath()].push_back(_model_instance_storage.get_model_instance(uid).get());
 }
 
-ModelInstance* World::addM2AndGetInstance ( std::string const& filename
+ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
     , glm::vec3 newPos
     , float scale
     , math::degrees::vec3 rotation
@@ -2722,7 +2735,7 @@ ModelInstance* World::addM2AndGetInstance ( std::string const& filename
 )
 {
   ZoneScoped;
-  ModelInstance model_instance = ModelInstance(filename, _context);
+  ModelInstance model_instance = ModelInstance(file_key, _context);
 
   model_instance.uid = mapIndex.newGUID();
   model_instance.pos = newPos;
@@ -2761,18 +2774,18 @@ ModelInstance* World::addM2AndGetInstance ( std::string const& filename
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
 
   auto instance = _model_instance_storage.get_model_instance(uid).get();
-  _models_by_filename[filename].push_back(instance);
+  _models_by_filename[file_key.filepath()].push_back(instance);
 
   return instance;
 }
 
-void World::addWMO ( std::string const& filename
+void World::addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
                    , glm::vec3 newPos
                    , math::degrees::vec3 rotation
                    )
 {
   ZoneScoped;
-  WMOInstance wmo_instance(filename, _context);
+  WMOInstance wmo_instance(file_key, _context);
 
   wmo_instance.uid = mapIndex.newGUID();
   wmo_instance.pos = newPos;
@@ -2785,13 +2798,13 @@ void World::addWMO ( std::string const& filename
   _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
 }
 
-WMOInstance* World::addWMOAndGetInstance ( std::string const& filename
+WMOInstance* World::addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
     , glm::vec3 newPos
     , math::degrees::vec3 rotation
 )
 {
   ZoneScoped;
-  WMOInstance wmo_instance(filename, _context);
+  WMOInstance wmo_instance(file_key, _context);
 
   wmo_instance.uid = mapIndex.newGUID();
   wmo_instance.pos = newPos;

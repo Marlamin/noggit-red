@@ -251,16 +251,20 @@ public:
 
   void updateEmitters(float dt);
 
-  virtual void finishLoading();
-  virtual void waitForChildrenLoaded() override;
+  void finishLoading() override;
+  void waitForChildrenLoaded() override;
 
+  [[nodiscard]]
   bool is_hidden() const { return _hidden; }
+
   void toggle_visibility() { _hidden = !_hidden; }
   void show() { _hidden = false ; }
 
+  [[nodiscard]]
   bool use_fake_geometry() const { return !!_fake_geometry; }
 
-  virtual bool is_required_when_saving() const
+  [[nodiscard]]
+  bool is_required_when_saving() const override
   {
     return true;
   }

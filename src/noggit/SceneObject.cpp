@@ -2,15 +2,16 @@
 
 #include "SceneObject.hpp"
 
+#include <ClientData.hpp>
+#include <noggit/AsyncObject.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/euler_angles.hpp>
 #include <noggit/Misc.h>
 #include <math/trig.hpp>
 #include <limits>
 
-SceneObject::SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context, std::string filename)
+SceneObject::SceneObject(SceneObjectTypes type, noggit::NoggitRenderContext context)
 : _type(type)
-, _filename(filename)
 , _context(context)
 , pos(0.f, 0.f, 0.f)
 , dir(0.f, 0.f, 0.f)
@@ -27,8 +28,22 @@ bool SceneObject::isInsideRect(std::array<glm::vec3, 2> const* rect) const
 
 bool SceneObject::isDuplicateOf(SceneObject const& other)
 {
-  return _filename == other._filename
-         && misc::vec3d_equals(pos, other.pos)
+  auto a_obj_this = instance_model();
+  auto a_obj_other = other.instance_model();
+
+  if ((a_obj_this && a_obj_other) && a_obj_this->file_key() != a_obj_other->file_key())
+  {
+    return false;
+  }
+
+  // if one SceneObject has an AsyncObject bound and ther other is not,
+  // there is no point in comparing further
+  if (static_cast<bool>(a_obj_this) != static_cast<bool>(a_obj_other))
+  {
+    return false;
+  }
+
+  return misc::vec3d_equals(pos, other.pos)
          && misc::deg_vec3d_equals(dir, other.dir)
          && misc::float_equals(scale, other.scale);
 }

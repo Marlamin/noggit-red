@@ -5,6 +5,7 @@
 #include <noggit/Model.h>
 #include <noggit/AsyncObjectMultimap.hpp>
 #include <noggit/ContextObject.hpp>
+#include <ClientData.hpp>
 
 #include <map>
 #include <string>
@@ -30,33 +31,33 @@ private:
 struct scoped_model_reference
 {
   scoped_model_reference (
-      std::string const& filename, noggit::NoggitRenderContext context)
+      BlizzardArchive::Listfile::FileKey const& file_key, noggit::NoggitRenderContext context)
 
     : _valid(true)
-    , _filename(filename)
-    , _model(ModelManager::_.emplace (_filename, context))
+    , _file_key(file_key)
+    , _model(ModelManager::_.emplace (_file_key, context))
     , _context(context)
 
   {}
 
   scoped_model_reference (scoped_model_reference const& other)
     : _valid (other._valid)
-    , _filename (other._filename)
-    , _model (ModelManager::_.emplace(_filename, other._context))
+    , _file_key (other._file_key)
+    , _model (ModelManager::_.emplace(_file_key, other._context))
     , _context(other._context)
   {}
   scoped_model_reference& operator= (scoped_model_reference const& other)
   {
     _valid = other._valid;
-    _filename = other._filename;
-    _model = ModelManager::_.emplace (_filename, other._context);
+    _file_key = other._file_key;
+    _model = ModelManager::_.emplace (_file_key, other._context);
     _context = other._context;
     return *this;
   }
 
   scoped_model_reference (scoped_model_reference&& other)
     : _valid(other._valid)
-    , _filename(other._filename)
+    , _file_key(other._file_key)
     , _model(other._model)
     , _context(other._context)
   {
@@ -65,7 +66,7 @@ struct scoped_model_reference
   scoped_model_reference& operator= (scoped_model_reference&& other)
   {
     std::swap(_valid, other._valid);
-    std::swap(_filename, other._filename);
+    std::swap(_file_key, other._file_key);
     std::swap(_model, other._model);
     std::swap(_context, other._context);
     other._valid = false;
@@ -76,7 +77,7 @@ struct scoped_model_reference
   {
     if (_valid)
     {
-      ModelManager::_.erase(_filename, _context);
+      ModelManager::_.erase(_file_key, _context);
     }
   }
 
@@ -84,6 +85,8 @@ struct scoped_model_reference
   {
     return _model;
   }
+
+  [[nodiscard]]
   Model* get() const
   {
     return _model;
@@ -91,7 +94,7 @@ struct scoped_model_reference
 
 private:
   bool _valid;
-  std::string _filename;
+  BlizzardArchive::Listfile::FileKey _file_key;
   Model* _model;
   noggit::NoggitRenderContext _context;
 };
