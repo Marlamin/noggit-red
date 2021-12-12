@@ -74,9 +74,9 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
                            std::find_if(selection.begin(), selection.end(),
                                         [id](selection_type type)
                                         {
-                                          return type.type() == typeid(selected_object_type)
-                                          && boost::get<selected_object_type>(type)->which() == SceneObjectTypes::eWMO
-                                          && static_cast<WMOInstance*>(boost::get<selected_object_type>(type))->uid == id;
+                                          return var_type(type) == typeid(selected_object_type)
+                                          && std::get<selected_object_type>(type)->which() == SceneObjectTypes::eWMO
+                                          && static_cast<WMOInstance*>(std::get<selected_object_type>(type))->uid == id;
                                         }) != selection.end();
 
   {

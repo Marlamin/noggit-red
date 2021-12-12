@@ -22,11 +22,8 @@
 #include <opengl/shader.fwd.hpp>
 #include <opengl/types.hpp>
 #include <noggit/LiquidTextureManager.hpp>
-
-#include <boost/optional/optional.hpp>
-
+#include <optional>
 #include <QtCore/QSettings>
-
 #include <map>
 #include <string>
 #include <unordered_set>
@@ -49,6 +46,7 @@ static const float modeldrawdistance = 384.0f;
 static const float doodaddrawdistance = 64.0f;
 
 using StripType = uint16_t;
+
 
 class World
 {
@@ -151,19 +149,19 @@ public:
 private:
   // Information about the currently selected model / WMO / triangle.
   int _selected_model_count = 0;
-  boost::optional<glm::vec3> _multi_select_pivot;
+  std::optional<glm::vec3> _multi_select_pivot;
 public:
 
   void unload_shaders();
 
   void update_selection_pivot();
-  boost::optional<glm::vec3> const& multi_select_pivot() const { return _multi_select_pivot; }
+  std::optional<glm::vec3> const& multi_select_pivot() const { return _multi_select_pivot; }
 
   // Selection related methods.
   bool is_selected(selection_type selection) const;
   bool is_selected(std::uint32_t uid) const;
   std::vector<selection_type> const& current_selection() const { return _current_selection; }
-  boost::optional<selection_type> get_last_selected_model() const;
+  std::optional<selection_type> get_last_selected_model() const;
   bool has_selection() const { return !_current_selection.empty(); }
   bool has_multiple_model_selected() const { return _selected_model_count > 1; }
   int get_selected_model_count() const { return _selected_model_count; }
@@ -238,7 +236,7 @@ public:
   template<typename Fun>
     void for_chunk_at(glm::vec3 const& pos, Fun&& fun);
   template<typename Fun>
-    auto for_maybe_chunk_at (glm::vec3 const& pos, Fun&& fun) -> boost::optional<decltype (fun (nullptr))>;
+    auto for_maybe_chunk_at (glm::vec3 const& pos, Fun&& fun) -> std::optional<decltype (fun (nullptr))>;
 
   template<typename Fun>
     void for_tile_at(const tile_index& pos, Fun&&);
@@ -321,7 +319,7 @@ public:
   // add a wmo instance to the world (needs to be positioned already), return the uid
   std::uint32_t add_wmo_instance(WMOInstance wmo_instance, bool from_reloading);
 
-  boost::optional<selection_type> get_model(std::uint32_t uid);
+  std::optional<selection_type> get_model(std::uint32_t uid);
   void remove_models_if_needed(std::vector<uint32_t> const& uids);
 
   void reload_tile(tile_index const& tile);

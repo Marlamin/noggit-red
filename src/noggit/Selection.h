@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
-#include <boost/variant.hpp>
+#include <variant>
 #include <noggit/ui/DetailInfos.h>
 #include <glm/vec3.hpp>
 #include <string>
@@ -40,9 +40,7 @@ struct selected_chunk_type : Selectable
 };
 
 using selected_object_type = SceneObject*;
-using selection_type = boost::variant < selected_object_type
-                                      , selected_chunk_type
-                                      >;
+using selection_type = std::variant<selected_object_type, selected_chunk_type>;
 //! \note Keep in same order as variant!
 enum eSelectionEntryTypes
 {

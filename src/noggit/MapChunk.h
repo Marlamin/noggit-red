@@ -13,7 +13,7 @@
 #include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
 #include <noggit/Misc.h>
-
+#include <optional>
 #include <map>
 #include <memory>
 #include <array>
@@ -143,7 +143,7 @@ public:
   bool changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius);
   bool flattenTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const glm::vec3& origin, math::degrees angle, math::degrees orientation);
   bool blurTerrain ( glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode
-                   , std::function<boost::optional<float> (float, float)> height
+                   , std::function<std::optional<float> (float, float)> height
                    );
 
   bool changeTerrainProcessVertex(glm::vec3 const& pos, glm::vec3 const& vertex, float& dt, float radiusOuter, float radiusInner, int brushType);

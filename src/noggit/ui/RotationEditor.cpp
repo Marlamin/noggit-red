@@ -239,7 +239,7 @@ namespace Noggit
 
       if (world->has_multiple_model_selected())
       {
-        glm::vec3 const& p = world->multi_select_pivot().get();
+        glm::vec3 const& p = world->multi_select_pivot().value();
 
         _position_x->setValue(p.x);
         _position_y->setValue(p.y);
@@ -264,9 +264,9 @@ namespace Noggit
 
         if (entry)
         {
-          selection_type selection = entry.get();
+          selection_type selection = entry.value();
 
-          auto obj = boost::get<selected_object_type>(selection);
+          auto obj = std::get<selected_object_type>(selection);
 
           _scale->setEnabled(obj->which() != eWMO);
 

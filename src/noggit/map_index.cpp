@@ -1,8 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/AsyncLoader.h>
-
-#include <noggit/MapChunk.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
@@ -22,8 +20,6 @@
 #include <QTextStream>
 #include <QRegExp>
 #include <QFile>
-
-#include <boost/range/adaptor/map.hpp>
 
 #include <forward_list>
 #include <cstdlib>

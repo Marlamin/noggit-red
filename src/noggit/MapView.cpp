@@ -45,6 +45,8 @@
 #include <external/glm/gtc/type_ptr.hpp>
 #include <opengl/types.hpp>
 #include <limits>
+#include <variant>
+#include <noggit/Selection.h>
 
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_settings.hpp>
@@ -324,10 +326,10 @@ void MapView::ResetSelectedObjectRotation()
 
   for (auto& selection : _world->current_selection())
   {
-    if (selection.which() != eEntry_Object)
+    if (selection.index() != eEntry_Object)
       continue;
 
-    auto obj = boost::get<selected_object_type>(selection);
+    auto obj = std::get<selected_object_type>(selection);
 
     if (obj->which() == eWMO)
     {
@@ -979,11 +981,11 @@ void MapView::updateDetailInfos(bool no_sel_change_check)
     {
       selection_type& last_selection = const_cast<selection_type&>(current_selection.at(current_selection.size() - 1));
 
-      switch (last_selection.which())
+      switch (last_selection.index())
       {
         case eEntry_Object:
         {
-          auto obj = boost::get<selected_object_type>(last_selection);
+          auto obj = std::get<selected_object_type>(last_selection);
 
           if (no_sel_change_check || reinterpret_cast<std::uintptr_t>(obj) != last_sel || NOGGIT_CUR_ACTION)
           {
@@ -994,7 +996,7 @@ void MapView::updateDetailInfos(bool no_sel_change_check)
         }
         case eEntry_MapChunk:
         {
-          selected_chunk_type& chunk_sel(boost::get<selected_chunk_type>(last_selection));
+          selected_chunk_type& chunk_sel(std::get<selected_chunk_type>(last_selection));
 
           if (no_sel_change_check || reinterpret_cast<std::uintptr_t>(chunk_sel.chunk) != last_sel || NOGGIT_CUR_ACTION)
           {
@@ -2213,10 +2215,10 @@ void MapView::setupHotkeys()
                 {
                   for (auto& selection : _world->current_selection())
                   {
-                    if (selection.which() != eEntry_Object)
+                    if (selection.index() != eEntry_Object)
                       continue;
 
-                    auto obj = boost::get<selected_object_type>(selection);
+                    auto obj = std::get<selected_object_type>(selection);
 
                     if (obj->which() == eMODEL)
                     {
@@ -3071,8 +3073,8 @@ void MapView::paintGL()
     _transform_gizmo.setCurrentGizmoMode(_gizmo_mode);
     _transform_gizmo.setUseMultiselectionPivot(_use_median_pivot_point.get());
 
-    auto pivot = _world->multi_select_pivot().is_initialized() ?
-        _world->multi_select_pivot().get() : glm::vec3(0.f, 0.f, 0.f);
+    auto pivot = _world->multi_select_pivot().has_value() ?
+        _world->multi_select_pivot().value() : glm::vec3(0.f, 0.f, 0.f);
 
     _transform_gizmo.setMultiselectionPivot(pivot);
 
@@ -3466,12 +3468,12 @@ void MapView::tick (float dt)
 
     for (auto& selection : currentSelection)
     {
-      if (selection.which() == eEntry_MapChunk && terrainMode == editing_mode::scripting)
+      if (selection.index() == eEntry_MapChunk && terrainMode == editing_mode::scripting)
       {
         scriptingTool->sendBrushEvent(_cursor_pos, 7.5f * dt);
       }
 
-      if (leftMouse && selection.which() == eEntry_MapChunk)
+      if (leftMouse && selection.index() == eEntry_MapChunk)
       {
         bool underMap = _world->isUnderMap(_cursor_pos);
         auto cur_action = NOGGIT_CUR_ACTION;
@@ -3605,7 +3607,7 @@ void MapView::tick (float dt)
             else if (_mod_ctrl_down)
             {
               // pick areaID from chunk
-              MapChunk* chnk(boost::get<selected_chunk_type>(selection).chunk);
+              MapChunk* chnk(std::get<selected_chunk_type>(selection).chunk);
               int newID = chnk->getAreaID();
               _selected_area_id = newID;
               ZoneIDBrowser->setZoneID(newID);
@@ -3816,11 +3818,11 @@ void MapView::tick (float dt)
   }
   else if (currentSelection.size() == 1)
   {
-    switch (currentSelection.begin()->which())
+    switch (currentSelection.begin()->index())
     {
     case eEntry_Object:
       {
-        auto obj = boost::get<selected_object_type>(*currentSelection.begin());
+        auto obj = std::get<selected_object_type>(*currentSelection.begin());
 
         if (obj->which() == eMODEL)
         {
@@ -3845,7 +3847,7 @@ void MapView::tick (float dt)
       }
     case eEntry_MapChunk:
       {
-      auto chunk(boost::get<selected_chunk_type>(*currentSelection.begin()).chunk);
+      auto chunk(std::get<selected_chunk_type>(*currentSelection.begin()).chunk);
         _status_selection->setText
           (QString ("%1, %2").arg (chunk->px).arg (chunk->py));
         break;
@@ -3994,7 +3996,7 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
 
       if (_mod_shift_down)
       {
-        if (hit.which() == eEntry_Object)
+        if (hit.index() == eEntry_Object)
         {
           if (!_world->is_selected(hit))
           {
@@ -4005,14 +4007,14 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
             _world->remove_from_selection(hit);
           }
         }
-        else if (hit.which() == eEntry_MapChunk)
+        else if (hit.index() == eEntry_MapChunk)
         {
           _world->range_add_to_selection(_cursor_pos, radius, false);
         }
       }
       else if (_mod_ctrl_down)
       {
-        if (hit.which() == eEntry_MapChunk)
+        if (hit.index() == eEntry_MapChunk)
         {
           _world->range_add_to_selection(_cursor_pos, radius, true);
         }
@@ -4023,7 +4025,7 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
         _world->add_to_selection(hit);
       }
     }
-    else if (hit.which() == eEntry_MapChunk && !mouseMove)
+    else if (hit.index() == eEntry_MapChunk && !mouseMove)
     {
       _world->reset_selection();
       _world->add_to_selection(hit);
@@ -4033,8 +4035,8 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
 
     if (!action || (!action->getBlockCursor()) || !_locked_cursor_mode.get())
     {
-      _cursor_pos = hit.which() == eEntry_Object ? boost::get<selected_object_type>(hit)->pos
-                                                 : hit.which() == eEntry_MapChunk ? boost::get<selected_chunk_type>(hit).position
+      _cursor_pos = hit.index() == eEntry_Object ? std::get<selected_object_type>(hit)->pos
+                                                 : hit.index() == eEntry_MapChunk ? std::get<selected_chunk_type>(hit).position
                                                                                   : throw std::logic_error("bad variant");
     }
 
@@ -4099,7 +4101,7 @@ void MapView::update_cursor_pos()
   {
     auto const& hit(results.front().second);
     // hit cannot be something else than a chunk
-    auto const& chunkHit = boost::get<selected_chunk_type>(hit);
+    auto const& chunkHit = std::get<selected_chunk_type>(hit);
     _cursor_pos = chunkHit.position;
 
   }
@@ -4786,32 +4788,14 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   _last_mouse_pos = event->pos();
 }
 
-void MapView::selectModel(std::string const& model)
-{
-  if (boost::ends_with (model, ".m2"))
-  {
-    ModelInstance mi(model, _context);
-    _world->set_current_selection(boost::get<selected_object_type>(&mi));
-
-  }
-  else if (boost::ends_with (model, ".wmo"))
-  {
-    WMOInstance wi(model, _context);
-    _world->set_current_selection(boost::get<selected_object_type>(&wi));
-  }
-
-  objectEditor->copy_current_selection(_world.get());
-  _rotation_editor_need_update = true;
-}
-
 void MapView::change_selected_wmo_doodadset(int set)
 {
   for (auto& selection : _world->current_selection())
   {
-    if (selection.which() != eEntry_Object)
+    if (selection.index() != eEntry_Object)
       continue;
 
-    auto obj = boost::get<selected_object_type>(selection);
+    auto obj = std::get<selected_object_type>(selection);
 
     if (obj->which() == eWMO)
     {

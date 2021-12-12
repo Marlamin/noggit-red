@@ -40,7 +40,7 @@ void GetObjectInstanceByUIDNode::compute()
     return;
   }
 
-  SceneObject* obj = boost::get<selected_object_type>(obj_optional.get());
+  SceneObject* obj = std::get<selected_object_type>(obj_optional.value());
 
   NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 

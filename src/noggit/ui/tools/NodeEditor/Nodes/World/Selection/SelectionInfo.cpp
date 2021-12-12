@@ -55,7 +55,7 @@ void SelectionInfoNode::compute()
       return;
     }
 
-    auto pivot_val = pivot.get();
+    auto pivot_val = pivot.value();
 
     _out_ports[3].out_value = std::make_shared<Vector3DData>(glm::vec3(pivot_val.x, pivot_val.y, pivot_val.z));
     _node->onDataUpdated(3);

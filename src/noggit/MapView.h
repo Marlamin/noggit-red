@@ -21,8 +21,7 @@
 #include <external/QtAdvancedDockingSystem/src/DockManager.h>
 #include <opengl/texture.hpp>
 #include <opengl/scoped.hpp>
-
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <QtCore/QElapsedTimer>
 #include <QtCore/QSettings>
@@ -237,7 +236,6 @@ public:
   ~MapView();
 
   void tick (float dt);
-  void selectModel(std::string const& model);
   void change_selected_wmo_doodadset(int set);
   void saveMinimap(MinimapRenderSettings* settings);
   void initMinimapSave() { saving_minimap = true; };

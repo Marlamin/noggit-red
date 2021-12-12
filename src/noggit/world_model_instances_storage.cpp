@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/world_model_instances_storage.hpp>
-
 #include <noggit/World.h>
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
@@ -39,7 +38,7 @@ namespace Noggit
     if (existing_instance)
     {
       // instance already loaded
-      if (existing_instance.get()->isDuplicateOf(instance))
+      if (existing_instance.value()->isDuplicateOf(instance))
       {
         _instance_count_per_uid[uid]++;
         return uid;
@@ -87,7 +86,7 @@ namespace Noggit
     if (existing_instance)
     {
       // instance already loaded
-      if (existing_instance.get()->isDuplicateOf(instance))
+      if (existing_instance.value()->isDuplicateOf(instance))
       {
         _instance_count_per_uid[uid]++;
 
@@ -152,10 +151,10 @@ namespace Noggit
 
     for (auto& it : instances)
     {
-      if (it.which() != eEntry_Object)
+      if (it.index() != eEntry_Object)
         continue;
 
-      auto obj = boost::get<selected_object_type>(it);
+      auto obj = std::get<selected_object_type>(it);
 
       if (NOGGIT_CUR_ACTION)
         NOGGIT_CUR_ACTION->registerObjectRemoved(obj);
@@ -187,8 +186,8 @@ namespace Noggit
 
     if (auto instance = get_instance(uid, false))
     {
-      _world->updateTilesEntry(instance.get(), model_update::remove);
-      auto obj = boost::get<selected_object_type>(instance.get());
+      _world->updateTilesEntry(instance.value(), model_update::remove);
+      auto obj = std::get<selected_object_type>(instance.value());
 
       if (NOGGIT_CUR_ACTION)
       {
@@ -230,12 +229,12 @@ namespace Noggit
     _wmos.clear();
   }
 
-  boost::optional<ModelInstance*> world_model_instances_storage::get_model_instance(std::uint32_t uid)
+  std::optional<ModelInstance*> world_model_instances_storage::get_model_instance(std::uint32_t uid)
   {
     std::unique_lock<std::mutex> const lock (_mutex);
     return unsafe_get_model_instance(uid);
   }
-  boost::optional<ModelInstance*> world_model_instances_storage::unsafe_get_model_instance(std::uint32_t uid)
+  std::optional<ModelInstance*> world_model_instances_storage::unsafe_get_model_instance(std::uint32_t uid)
   {
     auto it = _m2s.find(uid);
 
@@ -245,16 +244,16 @@ namespace Noggit
     }
     else
     {
-      return boost::none;
+      return std::nullopt;
     }
   }
 
-  boost::optional<WMOInstance*> world_model_instances_storage::get_wmo_instance(std::uint32_t uid)
+  std::optional<WMOInstance*> world_model_instances_storage::get_wmo_instance(std::uint32_t uid)
   {
     std::unique_lock<std::mutex> const lock (_mutex);
     return unsafe_get_wmo_instance(uid);
   }
-  boost::optional<WMOInstance*> world_model_instances_storage::unsafe_get_wmo_instance(std::uint32_t uid)
+  std::optional<WMOInstance*> world_model_instances_storage::unsafe_get_wmo_instance(std::uint32_t uid)
   {
     auto it = _wmos.find(uid);
 
@@ -264,11 +263,11 @@ namespace Noggit
     }
     else
     {
-      return boost::none;
+      return std::nullopt;
     }
   }
 
-  boost::optional<selection_type> world_model_instances_storage::get_instance(std::uint32_t uid, bool lock)
+  std::optional<selection_type> world_model_instances_storage::get_instance(std::uint32_t uid, bool lock)
   {
     if (lock)
     {
@@ -290,7 +289,7 @@ namespace Noggit
         }
         else
         {
-          return boost::none;
+          return std::nullopt;
         }
       }
     }
@@ -312,7 +311,7 @@ namespace Noggit
         }
         else
         {
-          return boost::none;
+            return std::nullopt;
         }
       }
     }

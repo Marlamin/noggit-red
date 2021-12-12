@@ -479,7 +479,7 @@ bool WMO::draw_skybox (glm::mat4x4 const& model_view
 
     if (math::is_inside_of(camera_pos, extent.first, extent.second))
     {
-      ModelInstance sky(skybox.get()->file_key().filepath(), _context);
+      ModelInstance sky(skybox.value()->file_key().filepath(), _context);
       sky.pos = camera_pos;
       sky.scale = 2.f;
       sky.recalcExtents();

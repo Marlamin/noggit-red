@@ -17,7 +17,6 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QScrollBar>
 #include <QtWidgets/QCheckBox>
-#include <boost/thread.hpp>
 
 #include <cmath>
 

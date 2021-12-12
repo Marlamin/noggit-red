@@ -32,10 +32,7 @@
 #include <QSysInfo>
 #include <QStandardPaths>
 #include <QDir>
-#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
-#include <boost/dll/import.hpp>
-#include <boost/filesystem.hpp>
 
 #include <boost/format.hpp>
 

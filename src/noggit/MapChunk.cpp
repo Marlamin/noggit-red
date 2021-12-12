@@ -1053,7 +1053,7 @@ bool MapChunk::blurTerrain ( glm::vec3 const& pos
                            , float radius
                            , int BrushType
                            , flatten_mode const& mode
-                           , std::function<boost::optional<float> (float, float)> height
+                           , std::function<std::optional<float> (float, float)> height
                            )
 {
   bool changed (false);
@@ -1087,7 +1087,7 @@ bool MapChunk::blurTerrain ( glm::vec3 const& pos
         auto h (height (tx, tz));
         if (h)
         {
-          TotalHeight += (1.0f - dist2 / radius) * h.get();
+          TotalHeight += (1.0f - dist2 / radius) * h.value();
           TotalWeight += (1.0f - dist2 / radius);
         }
       }
