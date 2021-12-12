@@ -5,7 +5,6 @@
 #include <external/NodeEditor/include/nodes/NodeData>
 #include <external/NodeEditor/include/nodes/Node>
 #include <external/NodeEditor/include/nodes/Connection>
-#include <boost/variant.hpp>
 
 #include <vector>
 #include <memory>

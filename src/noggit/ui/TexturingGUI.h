@@ -1,12 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-
 #include <noggit/TextureManager.h>
 #include <noggit/ui/widget.hpp>
-
-#include <boost/optional.hpp>
-
+#include <optional>
 
 class QMouseEvent;
 class QListView;
@@ -33,8 +30,8 @@ namespace Noggit
     {
     public:
       static void set(scoped_blp_texture_reference t);
-      static boost::optional<scoped_blp_texture_reference> get();
-      static boost::optional<scoped_blp_texture_reference> texture;
+      static std::optional<scoped_blp_texture_reference> get();
+      static std::optional<scoped_blp_texture_reference> texture;
     };
   }
 }

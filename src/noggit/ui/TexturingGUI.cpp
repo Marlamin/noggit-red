@@ -220,9 +220,9 @@ namespace Noggit
     }
 
     // selected_texture:
-    boost::optional<scoped_blp_texture_reference> selected_texture::texture = boost::none;
+    std::optional<scoped_blp_texture_reference> selected_texture::texture = std::nullopt;
 
-    boost::optional<scoped_blp_texture_reference> selected_texture::get()
+    std::optional<scoped_blp_texture_reference> selected_texture::get()
     {
       return selected_texture::texture; // TODO: something performance-hungry is going on here
     }
