@@ -9,7 +9,7 @@
 #include "noggit/ui/tools/NodeEditor/Nodes/Widgets/ProcedureSelector.hpp"
 
 #include <noggit/ui/tools/NodeEditor/NodeRegistry.hpp>
-#include <boost/format.hpp>
+#include <sstream>
 
 #include <QComboBox>
 #include <QDir>
@@ -120,10 +120,10 @@ void LogicProcedureNode::compute()
       {
         setValidationState(NodeValidationState::Error);
 
-        auto message = boost::format("Error: Value of type <%s> at port %d was not returned by a function.")
-                       % _out_ports[i].data_type->type().name.toStdString() % i;
+        auto sstream = std::stringstream();
+        sstream << "Error: Value of type <" << _out_ports[i].data_type->type().name.toStdString() << "> at port " << i << " was not returned by a function.";
 
-        setValidationMessage(message.str().c_str());
+        setValidationMessage(sstream.str().c_str());
         delete _scene;
         _scene = nullptr;
 

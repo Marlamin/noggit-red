@@ -2,7 +2,7 @@
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include "boost/format.hpp"
+#include <sstream>
 
 #include <QInputDialog>
 
@@ -55,12 +55,10 @@ void LogicBeginNode::compute()
       {
         setValidationState(NodeValidationState::Error);
 
+        auto sstream = std::stringstream();
+        sstream << "Error: Argument of type <" << _out_ports[i].data_type->type().name.toStdString() << "> at port " << i << " does not have a default valueand was not passed.";
 
-
-        auto message = boost::format("Error: Argument of type <%s> at port %d does not have a default value and was not passed.")
-            % _out_ports[i].data_type->type().name.toStdString() % i;
-
-        setValidationMessage(message.str().c_str());
+        setValidationMessage(sstream.str().c_str());
         return;
       }
     }

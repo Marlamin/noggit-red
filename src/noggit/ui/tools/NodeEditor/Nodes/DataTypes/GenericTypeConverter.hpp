@@ -2,7 +2,7 @@
 #define NOGGIT_GENERICTYPECONVERTER_HPP
 
 #include <external/NodeEditor/include/nodes/NodeDataModel>
-#include <boost/format.hpp>
+#include <sstream>
 #include "GenericData.hpp"
 
 using QtNodes::PortType;
@@ -108,7 +108,12 @@ struct ColorDecimalConverter
 
 struct ColorStringConverter
 {
-    static std::string convert(glm::vec4 const& value) { return (boost::format("Color<%d, %d, %d, %d>") % value[0] % value[1] % value[2] % value[3]).str(); }
+    static std::string convert(glm::vec4 const& value) {
+
+        auto sstream = std::stringstream();
+        sstream << "Color<" << value[0] << "," << value[1] << "," << value[2] << "," << value[3] << ">";
+        return sstream.str();
+    }
 };
 
 struct ColorVector4DConverter
