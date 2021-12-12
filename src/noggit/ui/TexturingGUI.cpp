@@ -25,10 +25,6 @@
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QVBoxLayout>
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/path.hpp>
-#include <boost/range/iterator_range.hpp>
-
 namespace noggit
 {
   namespace ui
@@ -94,15 +90,14 @@ namespace noggit
 
       {
         QSettings settings;
-        auto const prefix
-          (boost::filesystem::path (settings.value("project/path").toString().toStdString()));
+        auto const prefix (std::filesystem::path (settings.value("project/path").toString().toStdString()));
         auto const prefix_size (prefix.string().length());
 
-        if (boost::filesystem::exists (prefix))
+        if (std::filesystem::exists (prefix))
         {
           for ( auto const& entry_abs
               : boost::make_iterator_range
-                  (boost::filesystem::recursive_directory_iterator (prefix), {})
+                  (std::filesystem::recursive_directory_iterator (prefix), {})
               )
           {
             auto entry ( BlizzardArchive::ClientData::normalizeFilenameInternal

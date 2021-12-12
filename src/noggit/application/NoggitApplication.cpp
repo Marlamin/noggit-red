@@ -76,19 +76,19 @@ namespace noggit::application {
     {
         try
         {
-            boost::filesystem::path startupPath(argv[0]);
+            std::filesystem::path startupPath(argv[0]);
             startupPath.remove_filename();
 
             if (startupPath.is_relative())
             {
-                boost::filesystem::current_path(boost::filesystem::current_path() / startupPath);
+                std::filesystem::current_path(std::filesystem::current_path() / startupPath);
             }
             else
             {
-                boost::filesystem::current_path(startupPath);
+                std::filesystem::current_path(startupPath);
             }
         }
-        catch (const boost::filesystem::filesystem_error& ex)
+        catch (const std::filesystem::filesystem_error& ex)
         {
             LogError << ex.what() << std::endl;
         }

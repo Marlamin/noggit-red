@@ -6,7 +6,7 @@
 
 namespace math
 {
-  boost::optional<float> ray::intersect_bounds
+  std::optional<float> ray::intersect_bounds
     (glm::vec3 const& min, glm::vec3 const& max) const
   {
     float tmin (std::numeric_limits<float>::lowest());
@@ -44,10 +44,10 @@ namespace math
       return tmin;
     }
 
-    return boost::none;
+    return std::nullopt;
   }
 
-  boost::optional<float> ray::intersect_triangle
+  std::optional<float> ray::intersect_triangle
     (glm::vec3 const& v0, glm::vec3 const& v1, glm::vec3 const& v2) const
   {
       glm::vec3 e1 (v1 - v0);
@@ -59,7 +59,7 @@ namespace math
 
     if (det == 0.0f)
     {
-      return boost::none;
+      return std::nullopt;
     }
 
     glm::vec3 const T (_origin - v0);
@@ -67,7 +67,7 @@ namespace math
 
     if (dotu < 0.0f || dotu > 1.0f)
     {
-      return boost::none;
+      return std::nullopt;
     }
 
     glm::vec3 const Q (glm::cross(T, e1));
@@ -75,7 +75,7 @@ namespace math
 
     if (dotv < 0.0f || dotu + dotv > 1.0f)
     {
-      return boost::none;
+      return std::nullopt;
     }
 
     float const dott = glm::dot(e2 , Q) / det;
@@ -85,6 +85,6 @@ namespace math
       return dott;
     }
 
-    return boost::none;
+    return std::nullopt;
   }
 }

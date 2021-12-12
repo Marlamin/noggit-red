@@ -9,7 +9,6 @@
 #include <opengl/context.inl>
 #include <opengl/shader.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <algorithm>

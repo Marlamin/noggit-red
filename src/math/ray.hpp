@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 #include <glm/mat4x4.hpp>
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 namespace math
 {
@@ -17,9 +17,9 @@ namespace math
             )
     {}
 
-    boost::optional<float> intersect_bounds
+    std::optional<float> intersect_bounds
       (glm::vec3 const& _min, glm::vec3 const& _max) const;
-    boost::optional<float> intersect_triangle
+    std::optional<float> intersect_triangle
       (glm::vec3 const& _v0, glm::vec3 const& _v1, glm::vec3 const& _v2) const;
 
     glm::vec3 position (float distance) const
