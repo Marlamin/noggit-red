@@ -3,9 +3,6 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/scripting/script_context.hpp>
-
-#include <boost/algorithm/string.hpp>
-
 namespace Noggit
 {
   namespace Scripting
@@ -106,8 +103,11 @@ namespace Noggit
       _start_y = start_y;
       _size = width*height;
       _noise.resize(_size);
-      auto upper = boost::algorithm::to_upper_copy<std::string>(algorithm);
 
+      auto upper = std::string();
+      for (auto const& character : algorithm)
+          upper += std::toupper(character);
+ 
       FastNoise::SmartNode<> generator = nullptr;
       if(upper=="SIMPLEX")
       {
