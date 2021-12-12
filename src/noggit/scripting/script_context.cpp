@@ -7,11 +7,6 @@
 
 #include <noggit/MapView.h>
 #include <noggit/World.h>
-#include <noggit/camera.hpp>
-
-#include <boost/algorithm/string/predicate.hpp>
-
-#include <noggit/Log.h>
 
 #include <vector>
 namespace noggit
@@ -68,7 +63,8 @@ namespace noggit
       for (std::filesystem::recursive_directory_iterator dir("scripts"); dir != end; ++dir)
       {
         std::string file = dir->path().string();
-        if (!boost::ends_with(file, ".lua") || boost::ends_with(file, ".spec.lua"))
+
+        if (!(dir->path().extension().string() == ".lua") || (dir->path().extension().string() == ".spec.lua"))
         {
           continue;
         }

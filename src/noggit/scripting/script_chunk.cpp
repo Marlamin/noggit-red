@@ -12,7 +12,6 @@
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <noggit/ContextObject.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 
 namespace noggit
 {
