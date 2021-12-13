@@ -5,7 +5,6 @@
 #include <noggit/MapView.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/ContextObject.hpp>
-#include <boost/range/adaptor/reversed.hpp>
 #include <noggit/Log.h>
 #include <cstring>
 
@@ -133,9 +132,9 @@ void Noggit::Action::undo(bool redo)
       else
       {
         unsigned uid = pair.first;
-        for (unsigned token : boost::adaptors::reverse(pair.second))
+        for (auto it = pair.second.rbegin(); it !=  pair.second.rend(); ++it)
         {
-          switch (token)
+          switch (*it)
           {
             case ActionFlags::eOBJECTS_ADDED:
               uid = handleObjectAdded(uid, redo);
