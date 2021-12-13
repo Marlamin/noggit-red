@@ -11,8 +11,6 @@
 #include <noggit/application/NoggitApplication.hpp>
 #include <opengl/scoped.hpp>
 
-#include <boost/algorithm/string.hpp>
-
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -172,7 +170,13 @@ void WMO::finishLoading ()
   if (size > 4)
   {
     std::string path = BlizzardArchive::ClientData::normalizeFilenameInternal(std::string (reinterpret_cast<char const*>(f.getPointer ())));
-    boost::replace_all(path, "mdx", "m2");
+    auto from = std::string("mdx");
+    auto to = std::string("m2");
+    size_t start_pos = 0;
+    while ((start_pos = path.find(from, start_pos)) != std::string::npos) {
+        path.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
 
     if (path.length())
     {

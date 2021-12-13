@@ -95,10 +95,7 @@ namespace Noggit
 
         if (std::filesystem::exists (prefix))
         {
-          for ( auto const& entry_abs
-              : boost::make_iterator_range
-                  (std::filesystem::recursive_directory_iterator (prefix), {})
-              )
+          for ( auto const& entry_abs : std::filesystem::recursive_directory_iterator (prefix))
           {
             auto entry ( BlizzardArchive::ClientData::normalizeFilenameInternal
                           (entry_abs.path().string().substr (prefix_size))
