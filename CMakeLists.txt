@@ -95,20 +95,14 @@ IF(VALIDATE_OPENGL_PROGRAMS)
 ENDIF()
 
 includePlatform("prefind")
-
-# Dependency: Lua
 FIND_PACKAGE(Lua REQUIRED)
-ADD_LIBRARY(Lua-Lua INTERFACE)
-ADD_LIBRARY(Lua::Lua ALIAS Lua-Lua)
-TARGET_LINK_LIBRARIES(Lua-Lua INTERFACE ${LUA_LIBRARIES})
-TARGET_INCLUDE_DIRECTORIES(Lua-Lua INTERFACE ${LUA_INCLUDE_DIR})
-
+FIND_PACKAGE(StormLib REQUIRED)
+FIND_PACKAGE(CascLib REQUIRED)
+#External packages
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(Json REQUIRED)
 FIND_PACKAGE(lodepng REQUIRED)
 FIND_PACKAGE(FastNoise2 REQUIRED)
-FIND_PACKAGE(StormLib REQUIRED)
-FIND_PACKAGE(CascLib REQUIRED)
 FIND_PACKAGE(Sol2 REQUIRED)
 FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml REQUIRED)
 
@@ -136,7 +130,6 @@ ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/qtimgui")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/QtAdvancedDockingSystem")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/NodeEditor")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/libnoise")
-ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/blizzard-database-library")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/glm")
 
 # Add the found include directories to our include list.
@@ -251,7 +244,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 collect_files(resource_files resources FALSE "*.qrc" "")
-qt5_add_resources (compiled_resource_files ${resource_files})
+qt5_add_resources(compiled_resource_files ${resource_files})
 collect_files(ui_files src TRUE "*.ui" "")
 qt5_wrap_ui(compiled_ui_files ${ui_files})
 
