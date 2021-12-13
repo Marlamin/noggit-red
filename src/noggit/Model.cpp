@@ -11,6 +11,7 @@
 #include <opengl/shader.hpp>
 #include <external/tracy/Tracy.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <util/CurrentFunction.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -1563,7 +1564,7 @@ void Model::draw (glm::mat4x4 const& model_view
                  , bool no_cull
                  )
 {
-  ZoneScopedN(BOOST_CURRENT_FUNCTION);
+  ZoneScopedN(NOGGIT_CURRENT_FUNCTION);
 
   {
     ZoneScopedN("Model::draw() : uploads")

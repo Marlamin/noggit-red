@@ -17,6 +17,7 @@
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 #include <external/tracy/Tracy.hpp>
+#include <util/CurrentFunction.hpp>
 
 
 #include <QtCore/QSettings>
@@ -427,7 +428,7 @@ void MapTile::draw (OpenGL::Scoped::use_program& mcnk_shader
                    , bool is_selected
                    )
 {
-  ZoneScopedN(BOOST_CURRENT_FUNCTION);
+  ZoneScopedN(NOGGIT_CURRENT_FUNCTION);
 
   static constexpr unsigned NUM_SAMPLERS = 11;
 
