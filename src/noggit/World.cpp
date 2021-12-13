@@ -23,12 +23,10 @@
 #include <noggit/application/NoggitApplication.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
-
 #include <noggit/ActionManager.hpp>
-
 #include <external/PNG2BLP/Png2Blp.h>
 #include <external/tracy/Tracy.hpp>
-
+#include <sstream>
 #include <QtWidgets/QMessageBox>
 #include <QDir>
 #include <QBuffer>
@@ -36,7 +34,6 @@
 #include <QPixmap>
 #include <QImage>
 #include <QTransform>
-
 #include <algorithm>
 #include <cassert>
 #include <ctime>
@@ -1684,7 +1681,7 @@ void World::draw (glm::mat4x4 const& model_view
 
     models_to_draw.clear();
     wmos_to_draw.clear();
-
+   
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
       OpenGL::Scoped::use_program m2_box_shader{ *_m2_box_program.get() };
@@ -2590,15 +2587,10 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     // Register in md5translate.trs
     std::string map_name = gMapDB.getByID(mapIndex._map_id).getString(MapDB::InternalName);
 
-    std::stringstream ss;
-    ss << map_name;
-    ss << "\\map";
-    ss << std::setw(2) << std::setfill('0') << tile_idx.x;
-    ss << "_";
-    ss << std::setw(2) << std::setfill('0') << tile_idx.z;
-    ss << ".blp";
-
-    mapIndex._minimap_md5translate[map_name][ss.str()] = tex_name;
+    auto sstream = std::stringstream();
+    sstream << map_name << "\\map" << std::setfill('0') << std::setw(2) << tile_idx.x << "_" << std::setfill('0') << std::setw(2) << tile_idx.z << ".blp";
+    std::string tilename_left = sstream.str();
+    mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
 
     if (unload)
     {
