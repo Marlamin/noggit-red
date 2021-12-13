@@ -7,7 +7,7 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/Misc.h>
 #include <noggit/World.h>
-#include <noggit/alphamap.hpp>
+#include <noggit/Alphamap.hpp>
 #include <noggit/texture_set.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/TexturingGUI.h>

@@ -5,9 +5,6 @@
 #include <opengl/context.inl>
 #include <noggit/DBC.h>
 #include <noggit/application/NoggitApplication.hpp>
-#include <boost/format.hpp>
-#include <glm/vec2.hpp>
-
 
 LiquidTextureManager::LiquidTextureManager(Noggit::NoggitRenderContext context)
   : _context(context)
@@ -46,7 +43,7 @@ void LiquidTextureManager::upload()
       }
       catch (...) // fallback for malformed DBC
       {
-        filename = "XTextures\\river\\lake_a.%d.blp";
+        filename = "XTextures\\river\\lake_a.";
       }
 
     }
@@ -57,7 +54,7 @@ void LiquidTextureManager::upload()
 
     // init 2D texture array
     // loading a texture is required to get its dimensions and format
-    blp_texture tex(boost::str(boost::format(filename) % 1), _context);
+    blp_texture tex(filename + "1.blp", _context);
     tex.finishLoading();
 
     int width_ = tex.width();
@@ -94,13 +91,13 @@ void LiquidTextureManager::upload()
     unsigned n_frames = 30;
     for (int j = 0; j < N_FRAMES; ++j)
     {
-      if (!NOGGIT_APP->clientData()->exists(boost::str(boost::format(filename) % (j + 1))))
+      if (!NOGGIT_APP->clientData()->exists(filename + std::to_string((j + 1)) + ".blp"))
       {
         n_frames = j;
         break;
       }
 
-      blp_texture tex_frame(boost::str(boost::format(filename) % (j + 1)), _context);
+      blp_texture tex_frame(filename + std::to_string(j + 1) + ".blp", _context);
       tex_frame.finishLoading();
 
       // error checking

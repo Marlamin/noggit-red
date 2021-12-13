@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <noggit/alphamap.hpp>
+#include <noggit/Alphamap.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/ContextObject.hpp>
 

@@ -19,9 +19,12 @@ public:
   void setAlpha(size_t offset, unsigned char value);
   void setAlpha(unsigned char *pAmap);
 
+  [[nodiscard]]
   unsigned char getAlpha(size_t offset) const;
+
   const unsigned char *getAlpha();
 
+  [[nodiscard]]
   std::vector<uint8_t> compress() const;
 
 private:

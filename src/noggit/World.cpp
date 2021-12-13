@@ -29,9 +29,6 @@
 #include <external/PNG2BLP/Png2Blp.h>
 #include <external/tracy/Tracy.hpp>
 
-#include <boost/format.hpp>
-#include <boost/pool/pool_alloc.hpp>
-
 #include <QtWidgets/QMessageBox>
 #include <QDir>
 #include <QBuffer>
@@ -57,8 +54,6 @@
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
-
-#define BOOST_POOL_NO_MT
 
 bool World::IsEditableWorld(int pMapId)
 {
@@ -1381,8 +1376,8 @@ void World::draw (glm::mat4x4 const& model_view
 
   std::unordered_map<Model*, std::size_t> model_with_particles;
 
-  tsl::robin_map<Model*, std::vector<glm::mat4x4, boost::pool_allocator<glm::mat4x4>>> models_to_draw;
-  std::vector<WMOInstance*, boost::pool_allocator<WMOInstance*>> wmos_to_draw;
+  tsl::robin_map<Model*, std::vector<glm::mat4x4>> models_to_draw;
+  std::vector<WMOInstance*> wmos_to_draw;
 
   static int frame = 0;
 
@@ -1689,11 +1684,6 @@ void World::draw (glm::mat4x4 const& model_view
 
     models_to_draw.clear();
     wmos_to_draw.clear();
-    boost::singleton_pool<boost::pool_allocator_tag
-    , sizeof(std::vector<glm::mat4x4, boost::pool_allocator<glm::mat4x4>>)>::purge_memory();
-
-    boost::singleton_pool<boost::pool_allocator_tag
-        , sizeof(std::vector<WMOInstance*, boost::pool_allocator<WMOInstance*>>)>::purge_memory();
 
     if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
     {
@@ -2599,8 +2589,16 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
 
     // Register in md5translate.trs
     std::string map_name = gMapDB.getByID(mapIndex._map_id).getString(MapDB::InternalName);
-    std::string tilename_left = (boost::format("%s\\map%02d_%02d.blp") % map_name % tile_idx.x % tile_idx.z).str();
-    mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
+
+    std::stringstream ss;
+    ss << map_name;
+    ss << "\\map";
+    ss << std::setw(2) << std::setfill('0') << tile_idx.x;
+    ss << "_";
+    ss << std::setw(2) << std::setfill('0') << tile_idx.z;
+    ss << ".blp";
+
+    mapIndex._minimap_md5translate[map_name][ss.str()] = tex_name;
 
     if (unload)
     {
@@ -4608,4 +4606,3 @@ void World::setupOccluderBuffers()
 
 }
 
-#undef BOOST_POOL_NO_MT
