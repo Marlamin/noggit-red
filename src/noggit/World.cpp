@@ -23,14 +23,10 @@
 #include <noggit/application/NoggitApplication.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
-
 #include <noggit/ActionManager.hpp>
-
 #include <external/PNG2BLP/Png2Blp.h>
 #include <external/tracy/Tracy.hpp>
-
-#include <boost/format.hpp>
-
+#include <sstream>
 #include <QtWidgets/QMessageBox>
 #include <QDir>
 #include <QBuffer>
@@ -38,7 +34,6 @@
 #include <QPixmap>
 #include <QImage>
 #include <QTransform>
-
 #include <algorithm>
 #include <cassert>
 #include <ctime>
@@ -56,8 +51,6 @@
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
-
-#define BOOST_POOL_NO_MT
 
 bool World::IsEditableWorld(int pMapId)
 {
@@ -2593,7 +2586,10 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
 
     // Register in md5translate.trs
     std::string map_name = gMapDB.getByID(mapIndex._map_id).getString(MapDB::InternalName);
-    std::string tilename_left = (boost::format("%s\\map%02d_%02d.blp") % map_name % tile_idx.x % tile_idx.z).str();
+
+    auto sstream = std::stringstream();
+    sstream << map_name << "\\map" << std::setfill('0') << std::setw(2) << tile_idx.x << "_" << std::setfill('0') << std::setw(2) << tile_idx.z << ".blp";
+    std::string tilename_left = sstream.str();
     mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
 
     if (unload)
