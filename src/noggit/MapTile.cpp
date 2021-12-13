@@ -9,7 +9,7 @@
 #include <noggit/TileWater.hpp>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
-#include <noggit/alphamap.hpp>
+#include <noggit/Alphamap.hpp>
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/application/NoggitApplication.hpp>

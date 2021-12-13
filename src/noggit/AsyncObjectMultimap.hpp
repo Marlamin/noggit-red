@@ -21,7 +21,7 @@ struct pair_hash
   std::size_t operator() (const std::pair<int, BlizzardArchive::Listfile::FileKey> &p) const noexcept
   {
     auto h1 = std::hash<int>{}(p.first);
-    auto h2 = std::hash<std::string>{}(p.second.filepath());
+    auto h2 = std::hash<std::string>{}(p.second.hasFilepath() ? p.second.filepath() : "");
     auto h3 = std::hash<int>{}(p.second.fileDataID());
 
     return h1 ^ h2 ^ h3;

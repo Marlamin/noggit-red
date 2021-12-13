@@ -4598,4 +4598,3 @@ void World::setupOccluderBuffers()
 
 }
 
-#undef BOOST_POOL_NO_MT
