@@ -8,7 +8,7 @@
 #include <QtWidgets/QToolBar>
 
 #include <noggit/tool_enums.hpp>
-#include <noggit/ui/font_noggit.hpp>
+#include <noggit/ui/FontNoggit.hpp>
 
 namespace Noggit
 {
@@ -25,7 +25,7 @@ namespace Noggit
       std::function<void (editing_mode)> _set_editing_mode;
       QActionGroup _tool_group;
 
-      void add_tool_icon(editing_mode mode, const QString& name, const font_noggit::icons& icon);
+      void add_tool_icon(editing_mode mode, const QString& name, const FontNoggit::Icons& icon);
     };
   }
 }

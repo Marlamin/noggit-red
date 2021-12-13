@@ -48,7 +48,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
             switch (_add_operation_combo->currentIndex())
             {
               case eTools::eRaiseLower:
-                brush_stack_item->setTool(new Noggit::Ui::terrain_tool(_map_view, this, true));
+                brush_stack_item->setTool(new Noggit::Ui::TerrainTool(_map_view, this, true));
                 break;
               case eTools::eFlattenBlur:
                 brush_stack_item->setTool(new Noggit::Ui::flatten_blur_tool(this));
@@ -57,7 +57,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
                 brush_stack_item->setTool(new Noggit::Ui::texturing_tool(&_map_view->getCamera()->position, _map_view, nullptr, this));
                 break;
               case eTools::eShader:
-                brush_stack_item->setTool(new Noggit::Ui::shader_tool(_map_view, this));
+                brush_stack_item->setTool(new Noggit::Ui::ShaderTool(_map_view, this));
                 break;
             }
 
@@ -329,7 +329,7 @@ void BrushStack::fromJSON(const QJsonObject& json)
 
     if (type == "TERRAIN")
     {
-      brush_stack_item->setTool(new Noggit::Ui::terrain_tool(_map_view, this, true));
+      brush_stack_item->setTool(new Noggit::Ui::TerrainTool(_map_view, this, true));
     }
     else if (type == "FLATTEN_BLUR")
     {
@@ -341,7 +341,7 @@ void BrushStack::fromJSON(const QJsonObject& json)
     }
     else if (type == "SHADER")
     {
-      brush_stack_item->setTool(new Noggit::Ui::shader_tool(_map_view, this));
+      brush_stack_item->setTool(new Noggit::Ui::ShaderTool(_map_view, this));
     }
     else
     {

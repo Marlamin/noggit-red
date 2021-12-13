@@ -10,9 +10,9 @@ namespace Noggit
 {
   namespace Ui
   {
-    struct font_awesome
+    struct FontAwesome
     {
-      enum icons
+      enum Icons
       {
         ad                               = 0xf641,
         addressbook                      = 0xf2b9,
@@ -973,28 +973,29 @@ namespace Noggit
       };
     };
 
-    class font_awesome_button_style : public QWidget
+    class FontAwesomeButtonStyle : public QWidget
     {
     public:
-        font_awesome_button_style(QWidget* parent = nullptr) : QWidget(parent) { setAccessibleName("font_noggit_button_style");};
+        FontAwesomeButtonStyle(QWidget* parent = nullptr) : QWidget(parent) { setAccessibleName("FontNoggitButtonStyle");};
     };
 
-    class font_awesome_icon : public QIcon
+    class FontAwesomeIcon : public QIcon
     {
     public:
-      font_awesome_icon (font_awesome::icons const&);
+      FontAwesomeIcon (FontAwesome::Icons const&);
     };
 
-    class font_awesome_icon_engine : public QIconEngine
+    class FontAwesomeIconEngine : public QIconEngine
     {
     public:
-      font_awesome_icon_engine(const QString& text);
+      FontAwesomeIconEngine(const QString& text);
 
-      virtual font_awesome_icon_engine* clone() const override;
+      [[nodiscard]]
+      FontAwesomeIconEngine* clone() const override;
 
-      virtual void paint(QPainter* painter, QRect const& rect, QIcon::Mode mode, QIcon::State state) override;
+      void paint(QPainter* painter, QRect const& rect, QIcon::Mode mode, QIcon::State state) override;
 
-      virtual QPixmap pixmap(QSize const& size, QIcon::Mode mode, QIcon::State state) override;
+      QPixmap pixmap(QSize const& size, QIcon::Mode mode, QIcon::State state) override;
 
 
     private:

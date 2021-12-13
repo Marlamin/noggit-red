@@ -12,7 +12,7 @@
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/uid_storage.hpp>
 #include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/tools/UiCommon/StackedWidget.hpp>
 #include <BlizzardDatabase.h>

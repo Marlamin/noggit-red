@@ -2,7 +2,7 @@
 
 #include <noggit/ui/tools/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/ui/tools/ActionHistoryNavigator/ActionHistoryNavigator.hpp>
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 #include <QSlider>
 
 using namespace Noggit::Ui;
@@ -15,29 +15,29 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
   setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
-  add_tool_icon(&mapView->_draw_models, tr("Doodads"), font_noggit::VISIBILITY_DOODADS);
-  add_tool_icon(&mapView->_draw_wmo, tr("WMOs"), font_noggit::VISIBILITY_WMO);
-  add_tool_icon(&mapView->_draw_wmo_doodads, tr("WMO doodads"), font_noggit::VISIBILITY_WMO_DOODADS);
-  add_tool_icon(&mapView->_draw_terrain, tr("Terrain"), font_noggit::VISIBILITY_TERRAIN);
-  add_tool_icon(&mapView->_draw_water, tr("Water"), font_noggit::VISIBILITY_WATER);
+  add_tool_icon(&mapView->_draw_models, tr("Doodads"), FontNoggit::VISIBILITY_DOODADS);
+  add_tool_icon(&mapView->_draw_wmo, tr("WMOs"), FontNoggit::VISIBILITY_WMO);
+  add_tool_icon(&mapView->_draw_wmo_doodads, tr("WMO doodads"), FontNoggit::VISIBILITY_WMO_DOODADS);
+  add_tool_icon(&mapView->_draw_terrain, tr("Terrain"), FontNoggit::VISIBILITY_TERRAIN);
+  add_tool_icon(&mapView->_draw_water, tr("Water"), FontNoggit::VISIBILITY_WATER);
   
   addSeparator();
 
-  add_tool_icon(&mapView->_draw_lines, tr("Lines"), font_noggit::VISIBILITY_LINES);
-  add_tool_icon(&mapView->_draw_hole_lines, tr("Hole lines"), font_noggit::VISIBILITY_HOLE_LINES);
-  add_tool_icon(&mapView->_draw_wireframe, tr("Wireframe"), font_noggit::VISIBILITY_WIREFRAME);
-  add_tool_icon(&mapView->_draw_contour, tr("Contours"), font_noggit::VISIBILITY_CONTOURS);
+  add_tool_icon(&mapView->_draw_lines, tr("Lines"), FontNoggit::VISIBILITY_LINES);
+  add_tool_icon(&mapView->_draw_hole_lines, tr("Hole lines"), FontNoggit::VISIBILITY_HOLE_LINES);
+  add_tool_icon(&mapView->_draw_wireframe, tr("Wireframe"), FontNoggit::VISIBILITY_WIREFRAME);
+  add_tool_icon(&mapView->_draw_contour, tr("Contours"), FontNoggit::VISIBILITY_CONTOURS);
   
   addSeparator();
 
   // Animation
-  add_tool_icon(&mapView->_draw_fog, tr("Fog"), font_noggit::VISIBILITY_FOG);
-  add_tool_icon(&mapView->_draw_mfbo, tr("Flight bounds"), font_noggit::VISIBILITY_FLIGHT_BOUNDS);
+  add_tool_icon(&mapView->_draw_fog, tr("Fog"), FontNoggit::VISIBILITY_FOG);
+  add_tool_icon(&mapView->_draw_mfbo, tr("Flight bounds"), FontNoggit::VISIBILITY_FLIGHT_BOUNDS);
   addSeparator();
 
   // Hole lines always on
-  add_tool_icon(&mapView->_draw_models_with_box, tr("Models with box"), font_noggit::VISIBILITY_WITH_BOX);
-  add_tool_icon(&mapView->_draw_hidden_models, tr("Hidden models"), font_noggit::VISIBILITY_HIDDEN_MODELS);
+  add_tool_icon(&mapView->_draw_models_with_box, tr("Models with box"), FontNoggit::VISIBILITY_WITH_BOX);
+  add_tool_icon(&mapView->_draw_hidden_models, tr("Hidden models"), FontNoggit::VISIBILITY_HIDDEN_MODELS);
   addSeparator();
   /*
   auto tablet_sensitivity = new QSlider(this);
@@ -46,7 +46,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
    */
 
   auto undo_stack_btn = new QPushButton(this);
-  undo_stack_btn->setIcon(font_awesome_icon(font_awesome::undo));
+  undo_stack_btn->setIcon(FontAwesomeIcon(FontAwesome::undo));
   undo_stack_btn->setToolTip("History");
   addWidget(undo_stack_btn);
 
@@ -85,9 +85,9 @@ ViewToolbar::ViewToolbar(MapView* mapView)
 
 }
 
-void ViewToolbar::add_tool_icon(Noggit::bool_toggle_property* view_state, const QString& name, const font_noggit::icons& icon)
+void ViewToolbar::add_tool_icon(Noggit::bool_toggle_property* view_state, const QString& name, const FontNoggit::Icons& icon)
 {
-  auto action = addAction(font_noggit_icon{icon}, name);
+  auto action = addAction(FontNoggitIcon{icon}, name);
 
   connect (action, &QAction::triggered, [this, action, view_state] () {
     action->setChecked(!view_state->get());

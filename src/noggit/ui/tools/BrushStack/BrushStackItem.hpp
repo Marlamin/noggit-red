@@ -14,11 +14,11 @@
 
 #include <noggit/ui/tools/UiCommon/ReorderableVerticalBox.hpp>
 
-#include <noggit/ui/terrain_tool.hpp>
+#include <noggit/ui/TerrainTool.hpp>
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/hole_tool.hpp>
-#include <noggit/ui/shader_tool.hpp>
+#include <noggit/ui/ShaderTool.hpp>
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/Water.h>
 #include <noggit/ui/TexturingGUI.h>
@@ -28,10 +28,10 @@ class World;
 namespace Noggit::Ui::Tools
 {
   using operation_type = std::variant
-    < Noggit::Ui::terrain_tool*
+    < Noggit::Ui::TerrainTool*
     , Noggit::Ui::flatten_blur_tool*
     , Noggit::Ui::texturing_tool*
-    , Noggit::Ui::shader_tool*
+    , Noggit::Ui::ShaderTool*
   >;
 
   //! \note Keep in same order as variant!

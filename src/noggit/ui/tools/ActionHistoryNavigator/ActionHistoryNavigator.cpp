@@ -3,7 +3,7 @@
 #include "ActionHistoryNavigator.hpp"
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 #include <QVBoxLayout>
 #include <QRadioButton>
 #include <QDateTime>

@@ -8,7 +8,7 @@
 #include <QtWidgets/QToolBar>
 
 #include <noggit/MapView.h>
-#include <noggit/ui/font_noggit.hpp>
+#include <noggit/ui/FontNoggit.hpp>
 #include <noggit/bool_toggle_property.hpp>
 
 namespace Noggit
@@ -22,7 +22,7 @@ namespace Noggit
 
     private:
       QActionGroup _tool_group;
-      void add_tool_icon(Noggit::bool_toggle_property* view_state, const QString& name, const Noggit::Ui::font_noggit::icons& icon);
+      void add_tool_icon(Noggit::bool_toggle_property* view_state, const QString& name, const Noggit::Ui::FontNoggit::Icons& icon);
     };
   }
 }

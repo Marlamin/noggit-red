@@ -1,8 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "BrushStackItem.hpp"
-#include <noggit/ui/font_awesome.hpp>
-#include <noggit/ui/font_noggit.hpp>
+#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/FontNoggit.hpp>
 #include <noggit/World.h>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ActionManager.hpp>
@@ -18,8 +18,8 @@ BrushStackItem::BrushStackItem(QWidget* parent)
   layout()->setAlignment(Qt::AlignTop);
 
   // expander
-  _collapsed_icon = Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::caretright);
-  _expanded_icon = Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::caretdown);
+  _collapsed_icon = Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::caretright);
+  _expanded_icon = Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::caretdown);
   _ui.expanderButton->setIcon(_expanded_icon);
   connect(_ui.expanderButton, &QPushButton::clicked,
           [=](bool state)
@@ -29,8 +29,8 @@ BrushStackItem::BrushStackItem(QWidget* parent)
           });
 
   // visibility
-  _enabled_icon = Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::eye);
-  _disabled_icon = Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::eyeslash);
+  _enabled_icon = Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::eye);
+  _disabled_icon = Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::eyeslash);
   _ui.enabledButton->setIcon(_enabled_icon);
   connect(_ui.enabledButton, &QPushButton::clicked,
           [=](bool state)
@@ -69,7 +69,7 @@ BrushStackItem::BrushStackItem(QWidget* parent)
   _settings_popup->repaint();
   _settings_popup->setVisible(false);
 
-  _ui.settingsButton->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::wrench));
+  _ui.settingsButton->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::wrench));
   connect(_ui.settingsButton, &QPushButton::clicked,
           [this]()
           {
@@ -87,7 +87,7 @@ BrushStackItem::BrushStackItem(QWidget* parent)
           });
 
   // Delete
-  _ui.deleteButton->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::times));
+  _ui.deleteButton->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::times));
   connect(_ui.deleteButton, &QPushButton::clicked, [=]{ emit requestDelete(this); });
 
   connect(_ui.brushNameLabel, &QToolButton::clicked, [=](bool checked) { if (checked) emit activated(this);});
@@ -103,18 +103,18 @@ void BrushStackItem::setTool(operation_type tool)
   switch(_tool_widget.index())
   {
     case eRaiseLower:
-      _ui.contentWidget->layout()->addWidget(std::get<Noggit::Ui::terrain_tool*>(_tool_widget));
-      _ui.brushNameLabel->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::TOOL_RAISE_LOWER));
+      _ui.contentWidget->layout()->addWidget(std::get<Noggit::Ui::TerrainTool*>(_tool_widget));
+      _ui.brushNameLabel->setIcon(Noggit::Ui::FontNoggitIcon(Noggit::Ui::FontNoggit::TOOL_RAISE_LOWER));
       _ui.brushNameLabel->setToolTip("Raise | Lower");
       break;
     case eFlattenBlur:
       _ui.contentWidget->layout()->addWidget(std::get<Noggit::Ui::flatten_blur_tool*>(_tool_widget));
-      _ui.brushNameLabel->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::TOOL_FLATTEN_BLUR));
+      _ui.brushNameLabel->setIcon(Noggit::Ui::FontNoggitIcon(Noggit::Ui::FontNoggit::TOOL_FLATTEN_BLUR));
       _ui.brushNameLabel->setToolTip("Flatten | Blur");
       break;
     case eTexturing:
       _ui.contentWidget->layout()->addWidget(std::get<Noggit::Ui::texturing_tool*>(_tool_widget));
-      _ui.brushNameLabel->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::TOOL_TEXTURE_PAINT));
+      _ui.brushNameLabel->setIcon(Noggit::Ui::FontNoggitIcon(Noggit::Ui::FontNoggit::TOOL_TEXTURE_PAINT));
       _ui.brushNameLabel->setToolTip("Texture");
 
       _texture_palette = new Noggit::Ui::tileset_chooser(this);
@@ -135,8 +135,8 @@ void BrushStackItem::setTool(operation_type tool)
 
       break;
     case eShader:
-      _ui.contentWidget->layout()->addWidget(std::get<Noggit::Ui::shader_tool*>(_tool_widget));
-      _ui.brushNameLabel->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::TOOL_VERTEX_PAINT));
+      _ui.contentWidget->layout()->addWidget(std::get<Noggit::Ui::ShaderTool*>(_tool_widget));
+      _ui.brushNameLabel->setIcon(Noggit::Ui::FontNoggitIcon(Noggit::Ui::FontNoggit::TOOL_VERTEX_PAINT));
       _ui.brushNameLabel->setToolTip("Shader");
       break;
   }
@@ -148,13 +148,13 @@ QWidget* BrushStackItem::getTool()
   switch(_tool_widget.index())
   {
     case eRaiseLower:
-      return std::get<Noggit::Ui::terrain_tool*>(_tool_widget);
+      return std::get<Noggit::Ui::TerrainTool*>(_tool_widget);
     case eFlattenBlur:
       return std::get<Noggit::Ui::flatten_blur_tool*>(_tool_widget);
     case eTexturing:
       return std::get<Noggit::Ui::texturing_tool*>(_tool_widget);
     case eShader:
-      return std::get<Noggit::Ui::shader_tool*>(_tool_widget);
+      return std::get<Noggit::Ui::ShaderTool*>(_tool_widget);
   }
 
   return nullptr;
@@ -165,13 +165,13 @@ void BrushStackItem::setBrushMode(bool sculpt)
   switch(_tool_widget.index())
   {
     case eRaiseLower:
-      std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
+      std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
       break;
     case eTexturing:
       std::get<Noggit::Ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
       break;
     case eShader:
-      std::get<Noggit::Ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
+      std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(sculpt);
       break;
   }
 }
@@ -182,7 +182,7 @@ QJsonObject BrushStackItem::toJSON()
   {
     case eRaiseLower:
     {
-      return std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->toJSON();
+      return std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->toJSON();
     }
     case eFlattenBlur:
     {
@@ -194,7 +194,7 @@ QJsonObject BrushStackItem::toJSON()
     }
     case eShader:
     {
-      return std::get<Noggit::Ui::shader_tool*>(_tool_widget)->toJSON();
+      return std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->toJSON();
     }
   }
 
@@ -207,7 +207,7 @@ void BrushStackItem::fromJSON(QJsonObject const& json)
   {
     case eRaiseLower:
     {
-      return std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->fromJSON(json);
+      return std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->fromJSON(json);
     }
     case eFlattenBlur:
     {
@@ -219,7 +219,7 @@ void BrushStackItem::fromJSON(QJsonObject const& json)
     }
     case eShader:
     {
-      return std::get<Noggit::Ui::shader_tool*>(_tool_widget)->fromJSON(json);
+      return std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->fromJSON(json);
     }
   }
 }
@@ -230,27 +230,27 @@ void BrushStackItem::syncSliders(double radius, double inner_radius, double spee
   {
       case eRaiseLower:
       {
-        auto rad_slider = std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->getRadiusSlider();
+        auto rad_slider = std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->getRadiusSlider();
         rad_slider->setEnabled(!_is_radius_affecting->isChecked());
 
         if (_is_radius_affecting->isChecked())
           rad_slider->setValue(radius);
 
-        auto inner_rad_slider = std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->getInnerRadiusSlider();
+        auto inner_rad_slider = std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->getInnerRadiusSlider();
         inner_rad_slider->setEnabled(!_is_inner_radius_affecting->isChecked());
 
         if (_is_inner_radius_affecting->isChecked())
           inner_rad_slider->setValue(inner_radius);
 
-        auto speed_slider = std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->getSpeedSlider();
+        auto speed_slider = std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->getSpeedSlider();
         speed_slider->setEnabled(!_is_speed_affecting->isChecked());
 
         if (_is_speed_affecting->isChecked())
           speed_slider->setValue(speed);
         
-        std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
+        std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
 
-        std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
+        std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
 
         break;
 
@@ -300,21 +300,21 @@ void BrushStackItem::syncSliders(double radius, double inner_radius, double spee
       }
       case eShader:
       {
-        auto rad_slider = std::get<Noggit::Ui::shader_tool*>(_tool_widget)->getRadiusSlider();
+        auto rad_slider = std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->getRadiusSlider();
         rad_slider->setEnabled(!_is_radius_affecting->isChecked());
 
         if (_is_radius_affecting->isChecked())
           rad_slider->setValue(radius);
 
-        auto speed_slider = std::get<Noggit::Ui::shader_tool*>(_tool_widget)->getSpeedSlider();
+        auto speed_slider = std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->getSpeedSlider();
         speed_slider->setEnabled(!_is_speed_affecting->isChecked());
 
         if (_is_speed_affecting->isChecked())
           speed_slider->setValue(speed);
 
-        std::get<Noggit::Ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
+        std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->getImageMaskSelector()->enableControls(_is_mask_rotation_affecting->isChecked());
 
-        std::get<Noggit::Ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
+        std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->getImageMaskSelector()->setBrushMode(brushMode);
 
         break;
       }
@@ -326,7 +326,7 @@ void BrushStackItem::setRadius(float radius)
   switch(_tool_widget.index())
   {
     case eRaiseLower:
-      std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->setRadius(radius);
+      std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->setRadius(radius);
       break;
     case eFlattenBlur:
       std::get<Noggit::Ui::flatten_blur_tool*>(_tool_widget)->setRadius(radius);
@@ -335,7 +335,7 @@ void BrushStackItem::setRadius(float radius)
       std::get<Noggit::Ui::texturing_tool*>(_tool_widget)->setRadius(radius);
       break;
     case eShader:
-      std::get<Noggit::Ui::shader_tool*>(_tool_widget)->setRadius(radius);
+      std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->setRadius(radius);
       break;
   }
 }
@@ -345,7 +345,7 @@ void BrushStackItem::setInnerRadius(float inner_radius)
   switch(_tool_widget.index())
   {
     case eRaiseLower:
-      std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->setInnerRadius(inner_radius);
+      std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->setInnerRadius(inner_radius);
       break;
     case eTexturing:
       std::get<Noggit::Ui::texturing_tool*>(_tool_widget)->setHardness(inner_radius);
@@ -358,7 +358,7 @@ void BrushStackItem::setSpeed(float speed)
   switch(_tool_widget.index())
   {
     case eRaiseLower:
-      std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->setSpeed(speed * 1000.f);
+      std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->setSpeed(speed * 1000.f);
       break;
     case eFlattenBlur:
       std::get<Noggit::Ui::flatten_blur_tool*>(_tool_widget)->setSpeed(speed * 10.f);
@@ -367,7 +367,7 @@ void BrushStackItem::setSpeed(float speed)
       std::get<Noggit::Ui::texturing_tool*>(_tool_widget)->set_pressure(speed);
       break;
     case eShader:
-      std::get<Noggit::Ui::shader_tool*>(_tool_widget)->setSpeed(speed * 10.f);
+      std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->setSpeed(speed * 10.f);
       break;
   }
 }
@@ -377,13 +377,13 @@ void BrushStackItem::setMaskRotation(int rot)
   switch(_tool_widget.index())
   {
     case eRaiseLower:
-      std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
+      std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
       break;
     case eTexturing:
       std::get<Noggit::Ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
       break;
     case eShader:
-      std::get<Noggit::Ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
+      std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->getImageMaskSelector()->setRotationRaw(rot);
       break;
   }
 }
@@ -396,9 +396,9 @@ void BrushStackItem::execute(glm::vec3 const& cursor_pos, World* world, float dt
   {
     case eRaiseLower:
       if (mod_shift_down)
-        std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->changeTerrain(world, cursor_pos, 7.5f * dt);
+        std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->changeTerrain(world, cursor_pos, 7.5f * dt);
       else if (mod_ctrl_down)
-        std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->changeTerrain(world, cursor_pos, -7.5f * dt);
+        std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->changeTerrain(world, cursor_pos, -7.5f * dt);
       break;
     case eFlattenBlur:
       if (mod_shift_down)
@@ -436,25 +436,25 @@ void BrushStackItem::execute(glm::vec3 const& cursor_pos, World* world, float dt
       break;
     case eShader:
 
-      auto tool = std::get<Noggit::Ui::shader_tool*>(_tool_widget);
+      auto tool = std::get<Noggit::Ui::ShaderTool*>(_tool_widget);
       if (tool->getImageMaskSelector()->isEnabled() && !tool->getImageMaskSelector()->getBrushMode())
       {
         if (action->checkAdressTag(reinterpret_cast<std::uintptr_t>(tool)))
           break;
 
         if (mod_shift_down)
-          std::get<Noggit::Ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, 1000.f, true);
+          std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->changeShader(world, cursor_pos, 1000.f, true);
         else if (mod_ctrl_down)
-          std::get<Noggit::Ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, 1000.f, false);
+          std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->changeShader(world, cursor_pos, 1000.f, false);
 
         action->tagAdress(reinterpret_cast<std::uintptr_t>(tool));
       }
       else
       {
         if (mod_shift_down)
-          std::get<Noggit::Ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, true);
+          std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->changeShader(world, cursor_pos, dt, true);
         else if (mod_ctrl_down)
-          std::get<Noggit::Ui::shader_tool*>(_tool_widget)->changeShader(world, cursor_pos, dt, false);
+          std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->changeShader(world, cursor_pos, dt, false);
       }
   }
 }
@@ -464,13 +464,13 @@ bool BrushStackItem::isMaskEnabled()
   switch(_tool_widget.index())
   {
     case eRaiseLower:
-      return std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
+      return std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
     case eFlattenBlur:
       return false;
     case eTexturing:
       return std::get<Noggit::Ui::texturing_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
     case eShader:
-      return std::get<Noggit::Ui::shader_tool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
+      return std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->getImageMaskSelector()->isEnabled();
   }
 }
 
@@ -479,7 +479,7 @@ void BrushStackItem::updateMask()
   switch(_tool_widget.index())
   {
     case eRaiseLower:
-      std::get<Noggit::Ui::terrain_tool*>(_tool_widget)->updateMaskImage();
+      std::get<Noggit::Ui::TerrainTool*>(_tool_widget)->updateMaskImage();
       break;
     case eFlattenBlur:
       break;
@@ -487,7 +487,7 @@ void BrushStackItem::updateMask()
       std::get<Noggit::Ui::texturing_tool*>(_tool_widget)->updateMaskImage();
       break;
     case eShader:
-      std::get<Noggit::Ui::shader_tool*>(_tool_widget)->updateMaskImage();
+      std::get<Noggit::Ui::ShaderTool*>(_tool_widget)->updateMaskImage();
       break;
   }
 }

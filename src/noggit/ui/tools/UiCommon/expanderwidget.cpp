@@ -2,7 +2,7 @@
 #include <QVBoxLayout>
 #include <QStackedWidget>
 #include <QSettings>
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 
 #include "expanderwidget.h"
 
@@ -12,8 +12,8 @@ ExpanderWidget::ExpanderWidget(QWidget *parent, bool in_designer)
 	m_in_designer = in_designer;
 	m_expanded = true;
 
-	m_collapsedIcon=Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::caretright);
-	m_expandedIcon=Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::caretdown);
+	m_collapsedIcon=Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::caretright);
+	m_expandedIcon=Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::caretdown);
 
     m_button = new QPushButton();
     m_button->setObjectName("__qt__passive_button");

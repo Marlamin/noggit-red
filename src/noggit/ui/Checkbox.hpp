@@ -10,10 +10,10 @@ namespace Noggit
 {
   namespace Ui
   {
-    class checkbox : public QCheckBox
+    class CheckBox : public QCheckBox
     {
     public:
-      checkbox ( QString label
+      CheckBox ( QString label
                , bool_toggle_property* prop
                , QWidget* parent = nullptr
                )

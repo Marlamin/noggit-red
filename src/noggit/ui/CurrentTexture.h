@@ -3,7 +3,7 @@
 #pragma once
 
 #include <noggit/TextureManager.h>
-#include <noggit/ui/clickable_label.hpp>
+#include <noggit/ui/ClickableLabel.hpp>
 #include <noggit/tool_enums.hpp>
 
 #include <QtWidgets/QWidget>
@@ -21,7 +21,7 @@ namespace Noggit
   {
     class texture_swapper;
 
-    class current_texture : public clickable_label
+    class current_texture : public ClickableLabel
     {
       Q_OBJECT
     private:

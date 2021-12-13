@@ -779,16 +779,16 @@ QPushButton[accessibleName="titlebar_close"]:pressed{
   background-color: $half_dark;
 }
 
-QWidget[accessibleName="font_noggit_button_style"]{
+QWidget[accessibleName="FontNoggitButtonStyle"]{
   color: $highlight;
 }
-QWidget[accessibleName="font_noggit_button_style"]:disabled{
+QWidget[accessibleName="FontNoggitButtonStyle"]:disabled{
   color: $text;
 }
-QWidget[accessibleName="font_awesome_button_style"]{
+QWidget[accessibleName="FontAwesomeButtonStyle"]{
   color: $highlight;
 }
-QWidget[accessibleName="font_awesome_button_style"]:disabled{
+QWidget[accessibleName="FontAwesomeButtonStyle"]:disabled{
   color: $text;
 }
 QWidget[accessibleName="main_menu_minimap_holder"]{

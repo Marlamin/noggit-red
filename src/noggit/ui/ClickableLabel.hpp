@@ -8,12 +8,12 @@ namespace Noggit
 {
   namespace Ui
   {
-    class clickable_label : public QLabel
+    class ClickableLabel : public QLabel
     {
       Q_OBJECT
 
     public:
-      clickable_label(QWidget* parent=nullptr);
+      ClickableLabel(QWidget* parent=nullptr);
 
     signals:
       void clicked();

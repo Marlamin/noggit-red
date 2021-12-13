@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "ExtendedSlider.hpp"
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 #include <cfloat>
 
 #include <QPushButton>
@@ -27,14 +27,14 @@ ExtendedSlider::ExtendedSlider(QWidget* parent)
   auto tablet_enabled = new QCheckBox(_tablet_popup);
   tablet_enabled->setText("Use Tablet");
   layout->addWidget(tablet_enabled);
-  _ui.tabletControlMenuButton->setIcon(font_awesome_icon(font_awesome::icons::pen));
+  _ui.tabletControlMenuButton->setIcon(FontAwesomeIcon(FontAwesome::Icons::pen));
 
   connect(tablet_enabled, &QCheckBox::stateChanged,
           [=](int state)
           {
             _is_tablet_affecting = state;
-            _ui.tabletControlMenuButton->setIcon(font_awesome_icon(
-                state ? font_awesome::icons::edit : font_awesome::icons::pen));
+            _ui.tabletControlMenuButton->setIcon(FontAwesomeIcon(
+                state ? FontAwesome::Icons::edit : FontAwesome::Icons::pen));
 
             _ui.pressureBar->setVisible(state);
           });

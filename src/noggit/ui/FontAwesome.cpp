@@ -7,7 +7,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QWidget>
 
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 #include <noggit/Log.h>
 
 namespace Noggit
@@ -15,17 +15,17 @@ namespace Noggit
   namespace Ui
   {
 
-    font_awesome_icon_engine::font_awesome_icon_engine (const QString& text)
+    FontAwesomeIconEngine::FontAwesomeIconEngine (const QString& text)
       : QIconEngine()
       ,_text (text)
     {}
 
-    font_awesome_icon_engine* font_awesome_icon_engine::clone() const
+    FontAwesomeIconEngine* FontAwesomeIconEngine::clone() const
     {
-      return new font_awesome_icon_engine(_text);
+      return new FontAwesomeIconEngine(_text);
     }
 
-    void font_awesome_icon_engine::paint ( QPainter* painter
+    void FontAwesomeIconEngine::paint ( QPainter* painter
                                          , QRect const& rect
                                          , QIcon::Mode mode
                                          , QIcon::State state
@@ -33,7 +33,7 @@ namespace Noggit
     {
     painter->save();
       {
-        auto temp_btn = new font_awesome_button_style();
+        auto temp_btn = new FontAwesomeButtonStyle();
 
         temp_btn->ensurePolished();
 
@@ -75,7 +75,7 @@ namespace Noggit
       painter->restore();
     }
 
-    QPixmap font_awesome_icon_engine::pixmap ( QSize const& size
+    QPixmap FontAwesomeIconEngine::pixmap ( QSize const& size
                                              , QIcon::Mode mode
                                              , QIcon::State state
                                              ) 
@@ -90,10 +90,10 @@ namespace Noggit
     }
 
 
-    std::map<int, QFont> font_awesome_icon_engine::_fonts = {};
+    std::map<int, QFont> FontAwesomeIconEngine::_fonts = {};
 
-    font_awesome_icon::font_awesome_icon (font_awesome::icons const& icon)
-      : QIcon (new font_awesome_icon_engine (QString (QChar (icon))))
+    FontAwesomeIcon::FontAwesomeIcon (FontAwesome::Icons const& icon)
+      : QIcon (new FontAwesomeIconEngine (QString (QChar (icon))))
     {}
 
     

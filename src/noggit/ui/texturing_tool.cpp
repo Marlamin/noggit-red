@@ -7,7 +7,7 @@
 #include <noggit/World.h>
 #include <noggit/MapView.h>
 #include <noggit/tool_enums.hpp>
-#include <noggit/ui/checkbox.hpp>
+#include <noggit/ui/Checkbox.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/texture_swapper.hpp>
 #include <util/qt/overload.hpp>
@@ -195,7 +195,7 @@ namespace Noggit
 
       anim_layout->addRow(_anim_group);
 
-      auto overbright_cb = new checkbox("Overbright", &_overbright_prop, anim_widget);
+      auto overbright_cb = new CheckBox("Overbright", &_overbright_prop, anim_widget);
       anim_layout->addRow(overbright_cb);
 
       tabs->addTab(tool_widget, "Paint");

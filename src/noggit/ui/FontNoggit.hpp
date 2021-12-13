@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 
 #include <QtGui/QIcon>
 
@@ -11,9 +11,9 @@ namespace Noggit
 {
   namespace Ui
   {
-    struct font_noggit
+    struct FontNoggit
     {
-      enum icons
+      enum Icons
       {
         rmb = 0xf868,
         lmb = 0xf864,
@@ -126,26 +126,26 @@ namespace Noggit
       };
     };
 
-    class font_noggit_button_style : public QWidget
+    class FontNoggitButtonStyle : public QWidget
     {
     public:
-        font_noggit_button_style(QWidget* parent = nullptr) : QWidget(parent) { setAccessibleName("font_noggit_button_style"); };
+        FontNoggitButtonStyle(QWidget* parent = nullptr) : QWidget(parent) { setAccessibleName("FontNoggitButtonStyle"); };
     };
 
-    class font_noggit_icon : public QIcon
+    class FontNoggitIcon : public QIcon
     {
     public:
-      font_noggit_icon(font_noggit::icons const&);
+      FontNoggitIcon(FontNoggit::Icons const&);
     };
 
-    class font_noggit_icon_engine : public font_awesome_icon_engine
-    {
+    class FontNoggitIconEngine : public FontAwesomeIconEngine    {
     public:
-      font_noggit_icon_engine(const QString& text);
+      FontNoggitIconEngine(const QString& text);
 
-      virtual font_noggit_icon_engine* clone() const override;
+      [[nodiscard]]
+      FontNoggitIconEngine* clone() const override;
 
-      virtual void paint(QPainter* painter, QRect const& rect, QIcon::Mode mode, QIcon::State state) override;
+      void paint(QPainter* painter, QRect const& rect, QIcon::Mode mode, QIcon::State state) override;
 
 
     private:

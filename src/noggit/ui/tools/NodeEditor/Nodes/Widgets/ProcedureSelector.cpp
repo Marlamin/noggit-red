@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "ProcedureSelector.hpp"
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 
 #include <QDir>
 #include <QHBoxLayout>
@@ -25,7 +25,7 @@ ProcedureSelector::ProcedureSelector(QWidget *parent)
 
   auto search_button = new QPushButton("None", this);
   layout->addWidget(search_button);
-  search_button->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::icons::networkwired));
+  search_button->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::Icons::networkwired));
   search_button->setToolTip("Select procedure");
   search_button->adjustSize();
 

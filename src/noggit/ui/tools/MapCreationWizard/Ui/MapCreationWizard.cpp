@@ -2,7 +2,7 @@
 
 #include "MapCreationWizard.hpp"
 
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/main_window.hpp>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
@@ -86,13 +86,13 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : Noggit::Ui::widget(paren
   }
 
   auto add_btn = new QPushButton("New",this);
-  add_btn->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::plus));
+  add_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus));
   layout_selector->addWidget(add_btn);
 
   add_btn->setAccessibleName("map_wizard_add_button");
 
   auto remove_btn = new QPushButton("Remove",this);
-  remove_btn->setIcon(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::times));
+  remove_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::times));
   layout_selector->addWidget(remove_btn);
   
   remove_btn->setAccessibleName("map_wizard_remove_button");

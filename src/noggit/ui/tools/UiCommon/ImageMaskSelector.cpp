@@ -2,7 +2,7 @@
 
 #include "ImageMaskSelector.hpp"
 #include <noggit/MapView.h>
-#include <noggit/ui/terrain_tool.hpp>
+#include <noggit/ui/TerrainTool.hpp>
 
 using namespace Noggit::Ui::Tools;
 
@@ -24,7 +24,7 @@ ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
   _ui.curImageLabel->setPixmap(_pixmap);
   _ui.curImageLabel->setToolTip("No image");
 
-  connect(_ui.curImageLabel, &Noggit::Ui::clickable_label::clicked,
+  connect(_ui.curImageLabel, &Noggit::Ui::ClickableLabel::clicked,
           [this]()
           {
 

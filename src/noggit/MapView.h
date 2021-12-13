@@ -71,8 +71,8 @@ namespace Noggit
     class flatten_blur_tool;
     class help;
     class minimap_widget;
-    class shader_tool;
-    class terrain_tool;
+    class ShaderTool;
+    class TerrainTool;
     class texture_picker;
     class texturing_tool;
     class toolbar;
@@ -365,8 +365,8 @@ private:
   Noggit::Ui::water* guiWater;
   Noggit::Ui::object_editor* objectEditor;
   Noggit::Ui::flatten_blur_tool* flattenTool;
-  Noggit::Ui::terrain_tool* terrainTool;
-  Noggit::Ui::shader_tool* shaderTool;
+  Noggit::Ui::TerrainTool* terrainTool;
+  Noggit::Ui::ShaderTool* shaderTool;
   Noggit::Ui::texturing_tool* texturingTool;
   Noggit::Ui::hole_tool* holeTool;
   Noggit::Ui::MinimapCreator* minimapTool;

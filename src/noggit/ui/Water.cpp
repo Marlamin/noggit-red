@@ -152,8 +152,8 @@ namespace Noggit
       auto override_group (new QGroupBox ("Override", this));
       auto override_layout (new QFormLayout (override_group));
 
-      override_layout->addWidget (new checkbox ("Liquid ID", &_override_liquid_id, this));
-      override_layout->addWidget (new checkbox ("Height", &_override_height, this));
+      override_layout->addWidget (new CheckBox ("Liquid ID", &_override_liquid_id, this));
+      override_layout->addWidget (new CheckBox ("Height", &_override_height, this));
 
       layout->addRow(override_group);
 
@@ -212,7 +212,7 @@ namespace Noggit
       auto layer_group (new QGroupBox ("Layers", this));
       auto layer_layout (new QFormLayout (layer_group));
 
-      layer_layout->addRow (new checkbox("Show all layers", display_all_layers));
+      layer_layout->addRow (new CheckBox("Show all layers", display_all_layers));
       layer_layout->addRow (new QLabel("Current layer:", this));
 
       waterLayer = new QSpinBox (this);

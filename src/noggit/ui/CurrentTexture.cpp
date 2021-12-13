@@ -17,7 +17,7 @@ namespace Noggit
   namespace Ui
   {
     current_texture::current_texture(bool accept_drop, QWidget* parent)
-      : clickable_label (parent)
+      : ClickableLabel (parent)
       , _filename("tileset\\generic\\black.blp")
       , _need_update(true)
     {
@@ -69,12 +69,12 @@ namespace Noggit
         _start_pos = event->pos();
       }
 
-      clickable_label::mousePressEvent(event);
+      ClickableLabel::mousePressEvent(event);
     }
 
     void current_texture::mouseMoveEvent(QMouseEvent* event)
     {
-      clickable_label::mouseMoveEvent(event);
+      ClickableLabel::mouseMoveEvent(event);
 
       if (!(event->buttons() & Qt::LeftButton))
       {

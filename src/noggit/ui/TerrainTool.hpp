@@ -22,12 +22,12 @@ namespace Noggit
 
   namespace Ui
   {
-    class terrain_tool : public QWidget
+    class TerrainTool : public QWidget
     {
       Q_OBJECT
 
     public:
-      terrain_tool(MapView* map_view, QWidget* parent = nullptr, bool stamp = false);
+      TerrainTool(MapView* map_view, QWidget* parent = nullptr, bool stamp = false);
 
       void changeTerrain (World*, glm::vec3 const& pos, float dt);
 

@@ -11,7 +11,7 @@
 #include <external/qt-color-widgets/qt-color-widgets/color_selector.hpp>
 #include <external/libnoise/src/noise/noise.h>
 
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/SceneObject.hpp>

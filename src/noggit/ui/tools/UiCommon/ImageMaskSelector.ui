@@ -78,7 +78,7 @@
        </layout>
       </item>
       <item alignment="Qt::AlignHCenter|Qt::AlignTop">
-       <widget class="Noggit::Ui::clickable_label" name="curImageLabel">
+       <widget class="Noggit::Ui::ClickableLabel" name="curImageLabel">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -145,9 +145,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>Noggit::Ui::clickable_label</class>
+   <class>Noggit::Ui::ClickableLabel</class>
    <extends>QLabel</extends>
-   <header location="global">noggit/ui/clickable_label.hpp</header>
+   <header location="global">noggit/ui/ClickableLabel.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

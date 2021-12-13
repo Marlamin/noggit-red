@@ -2,8 +2,8 @@
 
 #include <noggit/ui/TexturePicker.h>
 
-#include <noggit/ui/font_awesome.hpp>
-#include <noggit/ui/font_noggit.hpp>
+#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/FontNoggit.hpp>
 #include <noggit/Selection.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/CurrentTexture.h>
@@ -32,7 +32,7 @@ namespace Noggit
       for (int i = 0; i < 4; i++)
       {
         current_texture* click_label = new current_texture(false, this);
-        connect ( click_label, &clickable_label::clicked
+        connect ( click_label, &ClickableLabel::clicked
                 , [=]
                   {
                     setTexture(i, current_texture_window);
@@ -45,8 +45,8 @@ namespace Noggit
 
       QPushButton* btn_left = new QPushButton (this);
       QPushButton* btn_right = new QPushButton (this);
-      btn_left->setIcon(font_awesome_icon(font_awesome::angledoubleleft));
-      btn_right->setIcon(font_awesome_icon(font_awesome::angledoubleright));
+      btn_left->setIcon(FontAwesomeIcon(FontAwesome::angledoubleleft));
+      btn_right->setIcon(FontAwesomeIcon(FontAwesome::angledoubleright));
 
       btn_left->setMinimumHeight(16);
       btn_right->setMinimumHeight(16);

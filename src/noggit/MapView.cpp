@@ -24,8 +24,8 @@
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/main_window.hpp>
 #include <noggit/ui/minimap_widget.hpp>
-#include <noggit/ui/shader_tool.hpp>
-#include <noggit/ui/terrain_tool.hpp>
+#include <noggit/ui/ShaderTool.hpp>
+#include <noggit/ui/TerrainTool.hpp>
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/hole_tool.hpp>
@@ -54,7 +54,7 @@
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
 
-#include <noggit/ui/font_noggit.hpp>
+#include <noggit/ui/FontNoggit.hpp>
 
 #include "revision.h"
 
@@ -410,11 +410,11 @@ void MapView::setupViewportOverlay()
   _overlay_widget->setMouseTracking(true);
   _overlay_widget->setGeometry(0,0, width(), height());
 
-  _viewport_overlay_ui->gizmoVisibleButton->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::icons::GIZMO_VISIBILITY));
-  _viewport_overlay_ui->gizmoModeButton->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::icons::GIZMO_LOCAL));
-  _viewport_overlay_ui->gizmoRotateButton->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::icons::GIZMO_ROTATE));
-  _viewport_overlay_ui->gizmoScaleButton->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::icons::GIZMO_SCALE));
-  _viewport_overlay_ui->gizmoTranslateButton->setIcon(Noggit::Ui::font_noggit_icon(Noggit::Ui::font_noggit::icons::GIZMO_TRANSLATE));
+  _viewport_overlay_ui->gizmoVisibleButton->setIcon(Noggit::Ui::FontNoggitIcon(Noggit::Ui::FontNoggit::Icons::GIZMO_VISIBILITY));
+  _viewport_overlay_ui->gizmoModeButton->setIcon(Noggit::Ui::FontNoggitIcon(Noggit::Ui::FontNoggit::Icons::GIZMO_LOCAL));
+  _viewport_overlay_ui->gizmoRotateButton->setIcon(Noggit::Ui::FontNoggitIcon(Noggit::Ui::FontNoggit::Icons::GIZMO_ROTATE));
+  _viewport_overlay_ui->gizmoScaleButton->setIcon(Noggit::Ui::FontNoggitIcon(Noggit::Ui::FontNoggit::Icons::GIZMO_SCALE));
+  _viewport_overlay_ui->gizmoTranslateButton->setIcon(Noggit::Ui::FontNoggitIcon(Noggit::Ui::FontNoggit::Icons::GIZMO_TRANSLATE));
 
   connect(this, &MapView::resized
     ,[this]()
@@ -475,11 +475,11 @@ void MapView::setupViewportOverlay()
 
 void MapView::setupRaiseLowerUi()
 {
-  terrainTool = new Noggit::Ui::terrain_tool(this, this);
+  terrainTool = new Noggit::Ui::TerrainTool(this, this);
   _tool_panel_dock->registerTool("Raise | Lower", terrainTool);
 
   connect(terrainTool
-    , &Noggit::Ui::terrain_tool::updateVertices
+    , &Noggit::Ui::TerrainTool::updateVertices
     , [this](int vertex_mode, math::degrees const& angle, math::degrees const& orientation)
           {
             makeCurrent();
@@ -762,7 +762,7 @@ void MapView::setupWaterEditorUi()
 }
 void MapView::setupVertexPainterUi()
 {
-  shaderTool = new Noggit::Ui::shader_tool(this, this);
+  shaderTool = new Noggit::Ui::ShaderTool(this, this);
   _tool_panel_dock->registerTool("Vertex Painter", shaderTool);
 }
 

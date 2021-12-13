@@ -23,7 +23,7 @@ namespace Noggit
 {
   namespace Ui
   {
-    class checkbox;
+    class CheckBox;
     class current_texture;
     class texture_swapper;
 

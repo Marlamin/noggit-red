@@ -2,7 +2,7 @@
 
 #include <noggit/ui/texture_palette_small.hpp>
 
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/CurrentTexture.h>
 
@@ -100,12 +100,12 @@ namespace Noggit
       QVBoxLayout* button_layout = new QVBoxLayout(this);
 
       _add_button = new QPushButton(this);
-      _add_button->setIcon(font_awesome_icon(font_awesome::plus));
+      _add_button->setIcon(FontAwesomeIcon(FontAwesome::plus));
       button_layout->addWidget(_add_button);
       connect(_add_button, &QAbstractButton::clicked, this, &texture_palette_small::addTexture);
 
       _remove_button = new QPushButton(this);
-      _remove_button->setIcon(font_awesome_icon(font_awesome::times));
+      _remove_button->setIcon(FontAwesomeIcon(FontAwesome::times));
       button_layout->addWidget(_remove_button);
       connect(_remove_button, &QAbstractButton::clicked, this, &texture_palette_small::removeSelectedTexture);
 

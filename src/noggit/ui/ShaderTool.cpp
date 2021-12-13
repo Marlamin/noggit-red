@@ -2,9 +2,9 @@
 
 #include <noggit/World.h>
 #include <noggit/MapView.h>
-#include <noggit/ui/shader_tool.hpp>
+#include <noggit/ui/ShaderTool.hpp>
 #include <util/qt/overload.hpp>
-#include <noggit/ui/font_awesome.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 
 #include <qt-color-widgets/color_selector.hpp>
 #include <qt-color-widgets/color_wheel.hpp>
@@ -27,7 +27,7 @@ namespace Noggit
 {
   namespace Ui
   {
-    shader_tool::shader_tool(MapView* map_view, QWidget* parent)
+    ShaderTool::ShaderTool(MapView* map_view, QWidget* parent)
       : QWidget(parent)
       , _map_view(map_view)
       , _color(1.f, 1.f, 1.f, 1.f)
@@ -108,9 +108,9 @@ namespace Noggit
 
       layout->addRow(info_label);
 
-      QObject::connect(_slide_saturation, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
-      QObject::connect(_slide_value, &color_widgets::GradientSlider::valueChanged, this, &shader_tool::set_hsv);
-      QObject::connect(_slide_hue, &color_widgets::HueSlider::valueChanged, this, &shader_tool::set_hsv);
+      QObject::connect(_slide_saturation, &color_widgets::GradientSlider::valueChanged, this, &ShaderTool::set_hsv);
+      QObject::connect(_slide_value, &color_widgets::GradientSlider::valueChanged, this, &ShaderTool::set_hsv);
+      QObject::connect(_slide_hue, &color_widgets::HueSlider::valueChanged, this, &ShaderTool::set_hsv);
 
       QObject::connect(_slide_saturation, SIGNAL(valueChanged(int)), _spin_saturation, SLOT(setValue(int)));
       QObject::connect(_slide_value, SIGNAL(valueChanged(int)), _spin_value, SLOT(setValue(int)));
@@ -120,8 +120,8 @@ namespace Noggit
       QObject::connect(_spin_hue, SIGNAL(valueChanged(int)), _slide_hue, SLOT(setValue(int)));
       QObject::connect(_spin_value, SIGNAL(valueChanged(int)), _slide_value, SLOT(setValue(int)));
 
-      QObject::connect(color_wheel, &color_widgets::ColorWheel::colorSelected, this, &shader_tool::update_color_widgets);
-      QObject::connect(color_picker, &color_widgets::ColorSelector::colorChanged, this, &shader_tool::update_color_widgets);
+      QObject::connect(color_wheel, &color_widgets::ColorWheel::colorSelected, this, &ShaderTool::update_color_widgets);
+      QObject::connect(color_picker, &color_widgets::ColorSelector::colorChanged, this, &ShaderTool::update_color_widgets);
 
 
       connect ( _color_palette, &color_widgets::ColorListWidget::color_added
@@ -152,15 +152,15 @@ namespace Noggit
                });
 
 
-      connect (_image_mask_group, &Noggit::Ui::Tools::ImageMaskSelector::rotationUpdated, this, &shader_tool::updateMaskImage);
-      connect (_radius_slider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged, this, &shader_tool::updateMaskImage);
-      connect(_image_mask_group, &Noggit::Ui::Tools::ImageMaskSelector::pixmapUpdated, this, &shader_tool::updateMaskImage);
+      connect (_image_mask_group, &Noggit::Ui::Tools::ImageMaskSelector::rotationUpdated, this, &ShaderTool::updateMaskImage);
+      connect (_radius_slider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged, this, &ShaderTool::updateMaskImage);
+      connect(_image_mask_group, &Noggit::Ui::Tools::ImageMaskSelector::pixmapUpdated, this, &ShaderTool::updateMaskImage);
 
       setMinimumWidth(250);
       setMaximumWidth(250);
     }
 
-    void shader_tool::changeShader
+    void ShaderTool::changeShader
       (World* world, glm::vec3 const& pos, float dt, bool add)
     {
       if (!_image_mask_group->isEnabled())
@@ -174,27 +174,27 @@ namespace Noggit
 
     }
 
-    void shader_tool::changeRadius(float change)
+    void ShaderTool::changeRadius(float change)
     {
       _radius_slider->setValue (_radius_slider->value() + change);
     }
 
-    void shader_tool::setRadius(float radius)
+    void ShaderTool::setRadius(float radius)
     {
       _radius_slider->setValue(radius);
     }
 
-    void shader_tool::changeSpeed(float change)
+    void ShaderTool::changeSpeed(float change)
     {
       _speed_slider->setValue(_speed_slider->value() + change);
     }
 
-    void shader_tool::setSpeed(float speed)
+    void ShaderTool::setSpeed(float speed)
     {
       _speed_slider->setValue(speed);
     }
 
-    void shader_tool::pickColor(World* world, glm::vec3 const& pos)
+    void ShaderTool::pickColor(World* world, glm::vec3 const& pos)
     {
       glm::vec3 color = world->pickShaderColor(pos);
 
@@ -204,12 +204,12 @@ namespace Noggit
 
     }
 
-    void shader_tool::addColorToPalette()
+    void ShaderTool::addColorToPalette()
     {
       _color_palette->append();
     }
 
-    void shader_tool::set_hsv()
+    void ShaderTool::set_hsv()
     {
       if (!signalsBlocked())
       {
@@ -222,7 +222,7 @@ namespace Noggit
       }
     }
 
-    void shader_tool::update_color_widgets()
+    void ShaderTool::update_color_widgets()
     {
       bool blocked = signalsBlocked();
       blockSignals(true);
@@ -252,12 +252,12 @@ namespace Noggit
 
     }
 
-    QSize shader_tool::sizeHint() const
+    QSize ShaderTool::sizeHint() const
     {
       return QSize(215, height());
     }
 
-    void shader_tool::updateMaskImage()
+    void ShaderTool::updateMaskImage()
     {
 
       QPixmap* pixmap = _image_mask_group->getPixmap();
@@ -270,7 +270,7 @@ namespace Noggit
         _map_view->setBrushTexture(&_mask_image);
     }
 
-    QJsonObject shader_tool::toJSON()
+    QJsonObject ShaderTool::toJSON()
     {
       QJsonObject json;
 
@@ -293,7 +293,7 @@ namespace Noggit
       return json;
     }
 
-    void shader_tool::fromJSON(QJsonObject const& json)
+    void ShaderTool::fromJSON(QJsonObject const& json)
     {
       _radius_slider->setValue(json["radius"].toDouble());
       _speed_slider->setValue(json["speed"].toDouble());

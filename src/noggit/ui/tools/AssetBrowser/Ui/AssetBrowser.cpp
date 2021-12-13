@@ -3,7 +3,7 @@
 #include <noggit/Log.h>
 #include <noggit/ContextObject.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
-#include <noggit/ui/font_noggit.hpp>
+#include <noggit/ui/FontNoggit.hpp>
 #include <noggit/MapView.h>
 #include <noggit/application/NoggitApplication.hpp>
 
@@ -58,12 +58,12 @@ AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
       }
   );
 
-  viewport_overlay_ui->toggleAnimationButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_ANIMATION));
-  viewport_overlay_ui->toggleModelsButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_DOODADS));
-  viewport_overlay_ui->toggleParticlesButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_PARTICLES));
-  viewport_overlay_ui->toggleBoundingBoxButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_WITH_BOX));
-  viewport_overlay_ui->toggleWMOButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_WMO));
-  viewport_overlay_ui->toggleGridButton->setIcon(font_noggit_icon(font_noggit::icons::VISIBILITY_LINES));
+  viewport_overlay_ui->toggleAnimationButton->setIcon(FontNoggitIcon(FontNoggit::Icons::VISIBILITY_ANIMATION));
+  viewport_overlay_ui->toggleModelsButton->setIcon(FontNoggitIcon(FontNoggit::Icons::VISIBILITY_DOODADS));
+  viewport_overlay_ui->toggleParticlesButton->setIcon(FontNoggitIcon(FontNoggit::Icons::VISIBILITY_PARTICLES));
+  viewport_overlay_ui->toggleBoundingBoxButton->setIcon(FontNoggitIcon(FontNoggit::Icons::VISIBILITY_WITH_BOX));
+  viewport_overlay_ui->toggleWMOButton->setIcon(FontNoggitIcon(FontNoggit::Icons::VISIBILITY_WMO));
+  viewport_overlay_ui->toggleGridButton->setIcon(FontNoggitIcon(FontNoggit::Icons::VISIBILITY_LINES));
 
   ui->viewport->installEventFilter(overlay);
   overlay->show();

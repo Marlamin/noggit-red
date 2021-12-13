@@ -10,7 +10,7 @@
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
-#include <noggit/ui/checkbox.hpp>
+#include <noggit/ui/Checkbox.hpp>
 #include <noggit/ui/tools/UiCommon/expanderwidget.h>
 #include <util/qt/overload.hpp>
 
@@ -174,26 +174,26 @@ namespace Noggit
       auto object_movement_layout = new QFormLayout (object_movement_box);
 
       // single model selection
-      auto object_movement_cb ( new checkbox ( "Mouse move follow\ncursor on the ground"
+      auto object_movement_cb ( new CheckBox ( "Mouse move follow\ncursor on the ground"
                                              , move_model_to_cursor_position
                                              , this
                                              )
                               );
 
 
-      auto object_rotateground_cb(new checkbox("Rotate following cursor"
+      auto object_rotateground_cb(new CheckBox("Rotate following cursor"
           , rotate_along_ground
           , this
                                   )
       );
 
-      auto object_rotategroundsmooth_cb(new checkbox("Smooth follow rotation"
+      auto object_rotategroundsmooth_cb(new CheckBox("Smooth follow rotation"
           , rotate_along_ground_smooth
           , this
                                         )
       );
 
-      auto object_rotategroundrandom_cb(new checkbox("Random rot/tilt/scale\n on rotate"
+      auto object_rotategroundrandom_cb(new CheckBox("Random rot/tilt/scale\n on rotate"
           , rotate_along_ground_random
           , this
                                         )
@@ -208,13 +208,13 @@ namespace Noggit
       auto multi_select_movement_box(new QGroupBox("Multi Selection Movement", this));
       auto multi_select_movement_layout = new QFormLayout(multi_select_movement_box);
 
-      auto multi_select_movement_cb ( new checkbox( "Mouse move snap\nmodels to the ground"
+      auto multi_select_movement_cb ( new CheckBox( "Mouse move snap\nmodels to the ground"
                                                   , snap_multi_selection_to_ground
                                                   , this
                                                   )
                                     );
 
-      auto object_median_pivot_point (new checkbox ("Rotate around pivot point"
+      auto object_median_pivot_point (new CheckBox ("Rotate around pivot point"
                                                    , use_median_pivot_point
                                                    , this
                                                    )

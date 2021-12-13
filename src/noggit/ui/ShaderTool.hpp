@@ -23,11 +23,11 @@ namespace Noggit
 {
   namespace Ui
   {
-    class shader_tool : public QWidget
+    class ShaderTool : public QWidget
     {
       Q_OBJECT
     public:
-      shader_tool(MapView* map_view, QWidget* parent = nullptr);
+      ShaderTool(MapView* map_view, QWidget* parent = nullptr);
 
       void changeShader (World*, glm::vec3 const& pos, float dt, bool add);
       void pickColor(World* world, glm::vec3 const& pos);

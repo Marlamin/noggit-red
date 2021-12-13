@@ -6,8 +6,8 @@
 #include <QtGui/QPainter>
 #include <QtWidgets/QMessageBox>
 
-#include <noggit/ui/font_noggit.hpp>
-#include <noggit/ui/font_noggit.hpp>
+#include <noggit/ui/FontNoggit.hpp>
+#include <noggit/ui/FontNoggit.hpp>
 #include <noggit/Log.h>
 
 namespace Noggit
@@ -15,17 +15,17 @@ namespace Noggit
   namespace Ui
   {
 
-      font_noggit_icon_engine::font_noggit_icon_engine(const QString& text)
-        : font_awesome_icon_engine(text)
+      FontNoggitIconEngine::FontNoggitIconEngine(const QString& text)
+        : FontAwesomeIconEngine(text)
         , _text(text)
       {}
 
-      font_noggit_icon_engine* font_noggit_icon_engine::clone() const
+      FontNoggitIconEngine* FontNoggitIconEngine::clone() const
       {
-        return new font_noggit_icon_engine(_text);
+        return new FontNoggitIconEngine(_text);
       }
 
-      void font_noggit_icon_engine::paint(QPainter* painter
+      void FontNoggitIconEngine::paint(QPainter* painter
         , QRect const& rect
         , QIcon::Mode mode
         , QIcon::State state
@@ -33,7 +33,7 @@ namespace Noggit
       {
         painter->save();
         {
-          auto temp_btn = new font_noggit_button_style();
+          auto temp_btn = new FontNoggitButtonStyle();
 
           temp_btn->ensurePolished();
 
@@ -75,10 +75,10 @@ namespace Noggit
         painter->restore();
       }
 
-      std::map<int, QFont> font_noggit_icon_engine::_fonts = {};
+      std::map<int, QFont> FontNoggitIconEngine::_fonts = {};
 
-      font_noggit_icon::font_noggit_icon(font_noggit::icons const& icon)
-        : QIcon(new font_noggit_icon_engine(QString(QChar(icon))))
+      FontNoggitIcon::FontNoggitIcon(FontNoggit::Icons const& icon)
+        : QIcon(new FontNoggitIconEngine(QString(QChar(icon))))
       {}
 
   }

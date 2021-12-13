@@ -20,7 +20,7 @@
  *
  */
 #include "qt-color-widgets/abstract_widget_list.hpp"
-#include <../../noggit/ui/font_awesome.hpp>
+#include <../../noggit/ui/FontAwesome.hpp>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QHeaderView>
@@ -64,7 +64,7 @@ AbstractWidgetList::AbstractWidgetList(QWidget *parent) :
     p->table->verticalHeader()->hide();
     p->table->setShowGrid(false);
 
-    QPushButton* add_button = new QPushButton(Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::plus),
+    QPushButton* add_button = new QPushButton(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus),
                                               tr("Add Color"));
 
     verticalLayout->addWidget(add_button);
@@ -116,9 +116,9 @@ void AbstractWidgetList::appendWidget(QWidget *w)
     int row = count();
     p->table->insertRow(row);
 
-    QWidget* b_up = create_button(w,&p->mapper_up, Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::chevronup),tr(""), tr("Move Up"));
-    QWidget* b_down = create_button(w,&p->mapper_down, Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::chevrondown),tr(""), tr("Move Down"));
-    QWidget* b_remove = create_button(w,&p->mapper_remove, Noggit::Ui::font_awesome_icon(Noggit::Ui::font_awesome::times),tr(""), tr("Remove"));
+    QWidget* b_up = create_button(w, &p->mapper_up, Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::chevronup), tr(""), tr("Move Up"));
+    QWidget* b_down = create_button(w, &p->mapper_down, Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::chevrondown), tr(""), tr("Move Down"));
+    QWidget* b_remove = create_button(w, &p->mapper_remove, Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::times), tr(""), tr("Remove"));
 
     QPalette pal = b_up->palette();
     pal.setColor(QPalette::Window, Qt::black);
