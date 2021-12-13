@@ -216,6 +216,7 @@ collect_files(imguipiemenu_sources src/external/imguipiemenu FALSE "*.c;*.cpp;" 
 collect_files(gradienteditor_sources src/external/qtgradienteditor FALSE "*.c;*.cpp;" "")
 collect_files(tracy_sources src/external/tracy FALSE "*.c;*.cpp;" "")
 collect_files(archive_sources src/external/blizzard-archive-library/src FALSE "*.c;*.cpp;" "")
+collect_files(database_sources src/external/blizzard-database-library/src TRUE "*.c;*.cpp;" "")
 
 SET(util_sources src/util/exception_to_string.cpp)
 
@@ -243,7 +244,7 @@ collect_files(imguipiemenu_headers src/external/imguipiemenu FALSE "*.h;*.hpp" "
 collect_files(gradienteditor_headers src/external/qtgradienteditor FALSE "*.h;*.hpp" "")
 collect_files(tracy_headers src/external/tracy FALSE "*.h;*.hpp" "")
 collect_files(archive_headers src/external/blizzard-archive-library/include FALSE "*.h;*.hpp" "")
-
+collect_files(database_headers src/external/blizzard-database-library/include TRUE "*.h;*.hpp" "")
 IF(WIN32)
   SET(os_sources include/win/StackWalker.cpp)
   SET(os_headers include/win/StackWalker.h)
@@ -293,6 +294,8 @@ assign_source_group(
   ${tracy_headers}
   ${archive_sources}
   ${archive_headers}
+  ${database_sources}
+  ${database_headers}
 )
 
 ADD_EXECUTABLE(noggit
@@ -310,6 +313,8 @@ ADD_EXECUTABLE(noggit
   ${noggit_ui_sources}
   ${noggit_scripting_sources}
   ${opengl_sources}
+  ${database_sources}
+  ${database_headers}
   ${math_sources}
   ${external_sources}
   ${mysql_sources}
@@ -347,7 +352,6 @@ ADD_EXECUTABLE(noggit
 
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
-  BlizzardDatabaseLib
   StormLib
   CascLib
   Qt5::Widgets
