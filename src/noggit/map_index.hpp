@@ -48,8 +48,8 @@ class MapIndex
 {
 public:
   template<bool Load>
-    struct tile_iterator
-      : std::iterator<std::forward_iterator_tag, MapTile*, std::ptrdiff_t, MapTile**, MapTile* const&>
+  struct tile_iterator
+  : std::iterator<std::forward_iterator_tag, MapTile*, std::ptrdiff_t, MapTile**, MapTile* const&>
   {
     template<typename Pred>
       tile_iterator (MapIndex* index, tile_index tile, Pred pred)
@@ -125,9 +125,25 @@ public:
   };
 
   template<bool Load>
+  struct TileRange
+  {
+    TileRange(tile_iterator<Load>&& begin, tile_iterator<Load>&& end)
+    : _begin(std::move(begin))
+    , _end(std::move(end))
+    {
+    };
+
+    tile_iterator<Load>& begin() { return _begin; }
+    tile_iterator<Load>& end() { return _end; }
+
+    tile_iterator<Load> _begin;
+    tile_iterator<Load> _end;
+  };
+
+  template<bool Load>
     auto tiles (std::function<bool (tile_index const&, MapTile*)> pred= [] (tile_index const&, MapTile*) { return true; } )
   {
-        return  std::ranges::subrange(tile_iterator<Load> {this, { 0, 0 }, pred}, tile_iterator<Load>{});
+        return  TileRange<Load>(tile_iterator<Load> {this, { 0, 0 }, pred}, tile_iterator<Load>{});
   }
 
   auto loaded_tiles()
