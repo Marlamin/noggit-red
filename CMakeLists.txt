@@ -83,6 +83,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 SET(EXECUTABLE_OUTPUT_PATH bin)
 SET(LIBARY_OUTPUT_PATH bin)
 SET(EXTERNAL_SOURCE_DIR src/external)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 OPTION(USE_SQL "Enable sql uid save ? (require mysql installed)" OFF)
 OPTION(VALIDATE_OPENGL_PROGRAMS "Validate Opengl programs" OFF)
