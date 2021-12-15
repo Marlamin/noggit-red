@@ -211,8 +211,8 @@ collect_files(gradienteditor_sources src/external/qtgradienteditor FALSE "*.c;*.
 collect_files(tracy_sources src/external/tracy FALSE "*.c;*.cpp;" "")
 collect_files(archive_sources src/external/blizzard-archive-library/src FALSE "*.c;*.cpp;" "")
 collect_files(database_sources src/external/blizzard-database-library/src TRUE "*.c;*.cpp;" "")
-
-SET(util_sources src/util/exception_to_string.cpp)
+collect_files(util_sources src/util TRUE "*.c;*.cpp;" "")
+collect_files(util_headers src/util TRUE "*.h;*.hpp" "")
 
 collect_files(noggit_root_headers src/noggit FALSE "*.h;*.hpp;*.inl" "")
 collect_files(noggit_application_headers src/noggit/application FALSE "*.h;*.hpp" "")
@@ -239,15 +239,21 @@ collect_files(gradienteditor_headers src/external/qtgradienteditor FALSE "*.h;*.
 collect_files(tracy_headers src/external/tracy FALSE "*.h;*.hpp" "")
 collect_files(archive_headers src/external/blizzard-archive-library/include FALSE "*.h;*.hpp" "")
 collect_files(database_headers src/external/blizzard-database-library/include TRUE "*.h;*.hpp" "")
+
 IF(WIN32)
-  SET(os_sources include/win/StackWalker.cpp)
-  SET(os_headers include/win/StackWalker.h)
+  collect_files(os_sources include/win FALSE "*.c;*.cpp;" "")
+  collect_files(os_headers include/win FALSE "*.h;*.hpp" "")
 ENDIF(WIN32)
 
 collect_files(resource_files resources FALSE "*.qrc" "")
 qt5_add_resources(compiled_resource_files ${resource_files})
 collect_files(ui_files src TRUE "*.ui" "")
 qt5_wrap_ui(compiled_ui_files ${ui_files})
+
+assign_specific_source_group("noggit/ui/generated" ${compiled_ui_files})
+assign_specific_source_group("util/win" ${os_sources} ${os_headers})
+assign_specific_source_group("resources" ${ResFiles})
+assign_specific_source_group("resources" ${compiled_resource_files})
 
 assign_source_group(
   ${noggit_application_sources}
@@ -270,9 +276,8 @@ assign_source_group(
   ${math_headers}
   ${external_sources} 
   ${external_headers}
-  ${os_sources} 
-  ${os_headers}
   ${util_sources}
+  ${util_headers}
   ${shaders}
   ${red_headers} 
   ${red_sources}
@@ -290,7 +295,12 @@ assign_source_group(
   ${archive_headers}
   ${database_sources}
   ${database_headers}
+  ${imguipiemenu_sources}
+  ${imguipiemenu_headers}
 )
+
+
+MESSAGE(STATUS ${moced})
 
 ADD_EXECUTABLE(noggit
   WIN32
@@ -314,6 +324,7 @@ ADD_EXECUTABLE(noggit
   ${mysql_sources}
   ${os_sources}
   ${util_sources}
+  ${util_headers}
   ${red_sources}
   ${png_blp_sources}
   ${imguizmo_sources}
@@ -331,7 +342,7 @@ ADD_EXECUTABLE(noggit
   ${os_headers}
   ${png_blp_headers}
   ${ResFiles}
-  ${moced}
+  #${moced}
   ${red_headers}
   ${imguizmo_headers}
   ${imguipiemenu_headers}
