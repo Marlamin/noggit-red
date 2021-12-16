@@ -292,7 +292,7 @@ void AssetBrowserWidget::recurseDirectory(Model::TreeManager& tree_mgr, const QS
 void AssetBrowserWidget::updateModelData()
 {
   Model::TreeManager tree_mgr =  Model::TreeManager(_model);
-  for (auto& key_pair : NOGGIT_APP->clientData()->listfile()->pathToFileDataIDMap())
+  for (auto& key_pair : Noggit::Application::Noggit::instance()->clientData()->listfile()->pathToFileDataIDMap())
   {
     std::string const& filename = key_pair.first;
 

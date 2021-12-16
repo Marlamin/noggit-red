@@ -396,7 +396,7 @@ blp_texture::blp_texture(BlizzardArchive::Listfile::FileKey const& file_key, Nog
 
 void blp_texture::finishLoading()
 {
-  bool exists = NOGGIT_APP->clientData()->exists( _file_key.filepath());
+  bool exists = Noggit::Application::Noggit::instance()->clientData()->exists( _file_key.filepath());
   if (!exists)
   {
     LogError << "file not found: '" <<  _file_key.stringRepr() << "'" << std::endl;
@@ -410,7 +410,7 @@ void blp_texture::finishLoading()
     _is_tileset = true;
 
     spec_filename = _file_key.filepath().substr(0, _file_key.filepath().find_last_of(".")) + "_s.blp";
-    has_specular = NOGGIT_APP->clientData()->exists(spec_filename);
+    has_specular = Noggit::Application::Noggit::instance()->clientData()->exists(spec_filename);
 
     if (has_specular)
     {
@@ -420,7 +420,7 @@ void blp_texture::finishLoading()
 
   BlizzardArchive::ClientFile f(
       exists ? (has_specular ? spec_filename : _file_key.filepath()) : "textures/shanecube.blp"
-      , NOGGIT_APP->clientData());
+      , Noggit::Application::Noggit::instance()->clientData());
   if (f.isEof())
   {
     finished = true;

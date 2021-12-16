@@ -70,13 +70,13 @@ bool World::IsEditableWorld(int pMapId)
   std::stringstream ssfilename;
   ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
 
-  if (!NOGGIT_APP->clientData()->exists(ssfilename.str()))
+  if (!Noggit::Application::Noggit::instance()->clientData()->exists(ssfilename.str()))
   {
     Log << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
     return false;
   }
 
-  BlizzardArchive::ClientFile mf(ssfilename.str(), NOGGIT_APP->clientData());
+  BlizzardArchive::ClientFile mf(ssfilename.str(), Noggit::Application::Noggit::instance()->clientData());
 
   //sometimes, wdts don't open, so ignore them...
   if (mf.isEof())

@@ -96,13 +96,13 @@ map_horizon::map_horizon(const std::string& basename, const MapIndex * const ind
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl";
   _filename = filename.str();
 
-  if (!NOGGIT_APP->clientData()->exists(_filename))
+  if (!Application::Noggit::instance()->clientData()->exists(_filename))
   {
     LogError << "file \"World\\Maps\\" << basename << "\\" << basename << ".wdl\" does not exist." << std::endl;
     return;
   }
 
-  BlizzardArchive::ClientFile wdl_file (_filename, NOGGIT_APP->clientData());
+  BlizzardArchive::ClientFile wdl_file (_filename, Application::Noggit::instance()->clientData());
 
   uint32_t fourcc;
   uint32_t size;

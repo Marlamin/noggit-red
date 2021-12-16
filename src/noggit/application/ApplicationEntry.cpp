@@ -39,24 +39,6 @@ namespace Noggit::application
 
         LogError << "std::terminate: " << reason << std::endl;
     }
-
-
-    struct application_with_exception_printer_on_notify : QApplication
-    {
-        using QApplication::QApplication;
-
-        virtual bool notify(QObject* object, QEvent* event) override
-        {
-            try
-            {
-                return QApplication::notify(object, event);
-            }
-            catch (...)
-            {
-                std::terminate();
-            }
-        }
-    };
 }
 
 int main(int argc, char *argv[])
@@ -71,8 +53,9 @@ int main(int argc, char *argv[])
   qapp.setApplicationName ("Noggit");
   qapp.setOrganizationName ("Noggit");
 
-  auto noggit = Noggit::Application::Noggit::instance(argc, argv);
-  noggit->start();
+  auto noggit = Noggit::Application::Noggit::instance();
+  noggit->Initalize(argc, argv);
+  noggit->Start();
 
   return qapp.exec();
 }

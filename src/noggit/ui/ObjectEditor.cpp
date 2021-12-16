@@ -622,7 +622,7 @@ namespace Noggit
 
     void object_editor::copy(std::string const& filename)
     {
-      if (!NOGGIT_APP->clientData()->exists(filename))
+      if (!Noggit::Application::Noggit::instance()->clientData()->exists(filename))
       {
         QMessageBox::warning
           ( nullptr

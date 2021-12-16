@@ -28,7 +28,7 @@ WMO::WMO(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRende
 
 void WMO::finishLoading ()
 {
-  BlizzardArchive::ClientFile f(_file_key.filepath(), NOGGIT_APP->clientData());
+  BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::Noggit::instance()->clientData());
   if (f.isEof()) {
     LogError << "Error loading WMO \"" << _file_key.stringRepr() << "\"." << std::endl;
     return;
@@ -180,7 +180,7 @@ void WMO::finishLoading ()
 
     if (path.length())
     {
-      if (NOGGIT_APP->clientData()->exists(path))
+      if (Noggit::Application::Noggit::instance()->clientData()->exists(path))
       {
         skybox = scoped_model_reference(path, _context);
       }
@@ -922,7 +922,7 @@ void WMOGroup::load()
   std::string fname = wmo->file_key().filepath();
   fname.insert (fname.find (".wmo"), curNum.str ());
 
-  BlizzardArchive::ClientFile f(fname, NOGGIT_APP->clientData());
+  BlizzardArchive::ClientFile f(fname, Noggit::Application::Noggit::instance()->clientData());
   if (f.isEof()) {
     LogError << "Error loading WMO \"" << fname << "\"." << std::endl;
     return;

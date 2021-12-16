@@ -66,7 +66,7 @@ namespace Noggit
       std::vector<std::string> tilesets;
       std::unordered_set<std::string> tilesets_with_specular_variant;
 
-      for (auto const& entry_pair : NOGGIT_APP->clientData()->listfile()->pathToFileDataIDMap())
+      for (auto const& entry_pair : Application::Noggit::instance()->clientData()->listfile()->pathToFileDataIDMap())
       {
         std::string const& filepath = entry_pair.first;
 

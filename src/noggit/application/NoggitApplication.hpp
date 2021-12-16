@@ -8,11 +8,6 @@
 #include <ClientData.hpp>
 #include <noggit/ui/main_window.hpp>
 #include <noggit/application/NoggitApplication.hpp>
-#include <noggit/DBC.h>
-#include <noggit/Log.h>
-#include <noggit/ui/main_window.hpp>
-#include <opengl/context.hpp>
-#include <util/exception_to_string.hpp>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -24,7 +19,6 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
 #include <QSplashScreen>
-#include <codecvt>
 #include <string>
 #include <revision.h>
 
@@ -33,22 +27,20 @@ namespace Noggit::Application {
     class Noggit
     {
     public:
-        static Noggit* instance(int argc, char* argv[])
+        static Noggit* instance()
         {
-            static Noggit inst{ argc, argv };
+            static Noggit inst{};
             return &inst;
         }
 
         BlizzardArchive::ClientData* clientData() { return _client_data.get(); };
 
-        void start();
-
+        void Start();
+        void Initalize(int argc, char* argv[]);
     private:
-        Noggit(int argc, char* argv[]);
+        Noggit();
 
-        static void initPath(char* argv[]);
-
-        std::unique_ptr<::Noggit::Ui::main_window> main_window;
+        std::unique_ptr<Ui::main_window> main_window;
         std::unique_ptr<BlizzardArchive::ClientData> _client_data;
 
         std::filesystem::path wowpath;
@@ -59,7 +51,5 @@ namespace Noggit::Application {
     };
 
 }
-
-#define NOGGIT_APP Noggit::Application::Noggit::instance(0, nullptr)
 
 #endif //NOGGIT_APPLICATION_HPP
