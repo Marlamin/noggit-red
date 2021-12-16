@@ -8,8 +8,12 @@
 #include <ClientData.hpp>
 #include <noggit/ui/main_window.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfigurationReader.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfigurationWriter.hpp>
 #include <memory>
 #include <string>
+#include <vector>
 #include <string_view>
 #include <QtCore/QSettings>
 #include <QtGui/QOffscreenSurface>
@@ -19,6 +23,8 @@
 #include <QtWidgets/QFileDialog>
 #include <QtWidgets/QMessageBox>
 #include <QSplashScreen>
+#include <QJsonObject>
+#include <QJsonDocument>
 #include <string>
 #include <revision.h>
 
@@ -47,9 +53,8 @@ namespace Noggit::Application {
         std::string project_path;
 
         bool fullscreen;
-        bool doAntiAliasing;
     };
 
 }
 
-#endif //NOGGIT_APPLICATION_HPP
+#endif NOGGIT_APPLICATION_HPP

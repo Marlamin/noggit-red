@@ -188,7 +188,7 @@ INCLUDE_DIRECTORIES(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 #Load noggit source files
 collect_files(noggit_root_sources src/noggit FALSE "*.cpp" "")
-collect_files(noggit_application_sources src/noggit/application FALSE "*.cpp" "")
+collect_files(noggit_application_sources src/noggit/application TRUE "*.cpp" "")
 collect_files(noggit_data_sources src/noggit/data FALSE "*.cpp" "")
 collect_files(noggit_simulation_sources src/noggit/simulation FALSE "*.cpp" "")
 collect_files(noggit_project_sources src/noggit/project FALSE "*.cpp" "")
@@ -215,7 +215,7 @@ collect_files(util_sources src/util TRUE "*.c;*.cpp;" "")
 collect_files(util_headers src/util TRUE "*.h;*.hpp" "")
 
 collect_files(noggit_root_headers src/noggit FALSE "*.h;*.hpp;*.inl" "")
-collect_files(noggit_application_headers src/noggit/application FALSE "*.h;*.hpp" "")
+collect_files(noggit_application_headers src/noggit/application TRUE "*.h;*.hpp" "")
 collect_files(noggit_data_sources src/noggit/data FALSE "*.h;*.hpp" "")
 collect_files(noggit_simulation_sources src/noggit/simulation FALSE "*.h;*.hpp" "")
 collect_files(noggit_project_sources src/noggit/project FALSE "*.h;*.hpp" "")

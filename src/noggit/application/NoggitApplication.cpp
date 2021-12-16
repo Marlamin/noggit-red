@@ -7,7 +7,6 @@ namespace Noggit::Application
 
   Noggit::Noggit()
   : fullscreen(false)
-  , doAntiAliasing(true)
   {
   
   }
@@ -15,34 +14,84 @@ namespace Noggit::Application
   void Noggit::Initalize(int argc, char* argv[])
   {
 	  InitLogging();
-	  assert(argc >= 1);
-	  (void)argc;
 
-	  try
-	  {
-		  std::filesystem::path startupPath(argv[0]);
-		  startupPath.remove_filename();
-
-		  if (startupPath.is_relative())
-		  {
-			  std::filesystem::current_path(std::filesystem::current_path() / startupPath);
-		  }
-		  else
-		  {
-			  std::filesystem::current_path(startupPath);
-		  }
-	  }
-	  catch (const std::filesystem::filesystem_error& ex)
-	  {
-		  LogError << ex.what() << std::endl;
-	  }
-
+	 //Locate application relative path
 	  Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
 
-	  QSettings settings;
-	  doAntiAliasing = settings.value("antialiasing", false).toBool();
-	  fullscreen = settings.value("fullscreen", false).toBool();
+	  auto applicationLocation = std::filesystem::path(argv[0]);
+	  Log << "Noggit Application Path: " << applicationLocation << std::endl;
 
+	  auto applicationExecutionLocation = std::filesystem::current_path();
+	  Log << "Noggit Execution Path: " << applicationExecutionLocation << std::endl;
+
+	  if (applicationLocation.remove_filename().is_relative())
+	  {
+		  std::filesystem::current_path(std::filesystem::current_path() / applicationLocation);
+	  }
+	  else
+	  {
+		  std::filesystem::current_path(applicationLocation);
+	  }
+
+	  auto applicationCurrentPath = std::filesystem::current_path();
+	  Log << "Noggit Relative Path: " << applicationCurrentPath << std::endl;
+
+	  //Locate application configuration file
+	  auto nogginConfigurationPath = applicationCurrentPath / "noggit.json";
+	
+	  if(!std::filesystem::exists(nogginConfigurationPath))
+	  {
+		  //Create Default config file
+		  Log << "Noggit Configuration File Not Found! Creating New File: " << nogginConfigurationPath << std::endl;
+
+		  auto configurationFileStream = QFile(QString::fromStdString(nogginConfigurationPath.generic_string()));
+		  auto configurationFileWriter = NoggitApplicationConfigurationWriter();
+		  configurationFileWriter.PersistDefaultConfigurationState(configurationFileStream);
+		  configurationFileStream.close();
+	  }
+
+	  //Read config file
+	  auto configurationFileStream = QFile(QString::fromStdString( nogginConfigurationPath.generic_string()));
+	  auto configurationFileReader = NoggitApplicationConfigurationReader();
+	  auto applicationConfiguration = configurationFileReader.ReadConfigurationState(configurationFileStream);
+
+	  configurationFileStream.close();
+
+	  Log << "Noggit Configuration File Loaded! Creating New File: " << nogginConfigurationPath << std::endl;
+
+	  //Initalise OpenGL Context
+	  if (!QGLFormat::hasOpenGL())
+	  {
+		  throw std::runtime_error(
+			  "Your system does not support OpenGL. Sorry, this application can't run without it.");
+	  }
+
+	  QSurfaceFormat format;
+	  format.setRenderableType(QSurfaceFormat::OpenGL);
+	  format.setVersion(4, 1);
+	  format.setProfile(QSurfaceFormat::CoreProfile);
+	  format.setSwapBehavior(applicationConfiguration.GraphicsConfiguration.SwapChainDepth);
+	  format.setSwapInterval(applicationConfiguration.GraphicsConfiguration.SwapChainInternal);
+	  format.setDepthBufferSize(applicationConfiguration.GraphicsConfiguration.DepthBufferSize);
+	  format.setSamples(applicationConfiguration.GraphicsConfiguration.SamplesCount);
+
+	  QSurfaceFormat::setDefaultFormat(format);
+	  QOpenGLContext context;
+	  context.create();
+
+	  QOffscreenSurface surface;
+	  surface.create();
+
+	  context.makeCurrent(&surface);
+
+	  OpenGL::context::scoped_setter const _(::gl, &context);
+
+	  LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
+	  LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
+	  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
+
+	  //All of the below should be Project Initalisation 
+	  QSettings settings;
 
 	  srand(::time(nullptr));
 	  QDir path(settings.value("project/game_path").toString());
@@ -58,43 +107,6 @@ namespace Noggit::Application
 
 	  settings.setValue("project/game_path", path.absolutePath());
 	  settings.setValue("project/path", QString::fromStdString(project_path));
-
-	  if (!QGLFormat::hasOpenGL())
-	  {
-		  throw std::runtime_error(
-			  "Your system does not support OpenGL. Sorry, this application can't run without it.");
-	  }
-
-	  QSurfaceFormat format;
-
-	  format.setRenderableType(QSurfaceFormat::OpenGL);
-	  format.setVersion(4, 1);
-	  format.setProfile(QSurfaceFormat::CoreProfile);
-	  //format.setOption(QSurfaceFormat::ResetNotification, true);
-	  format.setSwapBehavior(QSurfaceFormat::TripleBuffer);
-	  format.setSwapInterval(0);
-	  format.setRenderableType(QSurfaceFormat::OpenGL);
-	  format.setDepthBufferSize(16);
-	  format.setSamples(0);
-
-	  if (doAntiAliasing)
-	  {
-		  format.setSamples(4);
-	  }
-
-	  QSurfaceFormat::setDefaultFormat(format);
-
-	  QOpenGLContext context;
-	  context.create();
-	  QOffscreenSurface surface;
-	  surface.create();
-	  context.makeCurrent(&surface);
-
-	  OpenGL::context::scoped_setter const _(::gl, &context);
-
-	  LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
-	  LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
-	  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
   }
 
   void Noggit::Start()
