@@ -57,4 +57,4 @@ namespace Noggit::Application {
 
 }
 
-#endif NOGGIT_APPLICATION_HPP
+#endif //NOGGIT_APPLICATION_HPP
