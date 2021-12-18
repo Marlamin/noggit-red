@@ -627,7 +627,7 @@ glm::vec3 MapChunk::getNeighborVertex(int i, unsigned dir)
   float vertex_x = mVertices[i].x + xdiff[dir];
   float vertex_z = mVertices[i].z + zdiff[dir];
 
-  tile_index tile({vertex_x, 0, vertex_z});
+  TileIndex tile({vertex_x, 0, vertex_z});
   glm::vec3 result{};
 
   if (tile.x == mt->index.x && tile.z == mt->index.z)

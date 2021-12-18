@@ -7,7 +7,7 @@
 #include <external/imguizmo/ImGuizmo.h>
 #include <noggit/ui/tools/ViewportGizmo/ViewportGizmo.hpp>
 #include <noggit/World.h>
-#include <noggit/camera.hpp>
+#include <noggit/Camera.hpp>
 
 
 
@@ -22,13 +22,13 @@ namespace Noggit
 
         void loadWorldUnderlay(std::string const& internal_name, int map_id);
         World* getWorld() { return _world.get(); };
-        Noggit::camera* getCamera() { return &_camera; };
-        Noggit::camera* getWorldCamera() { return &_world_camera; };
+        Noggit::Camera* getCamera() { return &_camera; };
+        Noggit::Camera* getWorldCamera() { return &_world_camera; };
 
     private:
         std::unique_ptr<World> _world;
 
-        Noggit::camera _world_camera;
+        Noggit::Camera _world_camera;
 
         void paintGL() override;
         void initializeGL() override;
@@ -44,7 +44,7 @@ namespace Noggit
         ImGuiContext* _imgui_context;
         ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
         ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
-        Noggit::bool_toggle_property _gizmo_on = {true};
+        Noggit::BoolToggleProperty _gizmo_on = {true};
 
 
     };

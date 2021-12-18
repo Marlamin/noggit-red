@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include <noggit/bool_toggle_property.hpp>
-#include <noggit/tile_index.hpp>
+#include <noggit/BoolToggleProperty.hpp>
+#include <noggit/TileIndex.hpp>
 #include <noggit/ui/Checkbox.hpp>
 #include <noggit/unsigned_int_property.hpp>
 
@@ -25,11 +25,11 @@ namespace Noggit
 
     public:
       water ( unsigned_int_property* current_layer
-            , bool_toggle_property* display_all_layers
+            , BoolToggleProperty* display_all_layers
             , QWidget* parent = nullptr
             );
 
-      void updatePos(tile_index const& newTile);
+      void updatePos(TileIndex const& newTile);
       void updateData();
 
       void changeWaterType(int waterint);
@@ -68,11 +68,11 @@ namespace Noggit
       float _angle;
       float _orientation;
 
-      bool_toggle_property _locked;
-      bool_toggle_property _angled_mode;
+      BoolToggleProperty _locked;
+      BoolToggleProperty _angled_mode;
 
-      bool_toggle_property _override_liquid_id;
-      bool_toggle_property _override_height;
+      BoolToggleProperty _override_liquid_id;
+      BoolToggleProperty _override_height;
 
       int _opacity_mode;
       float _custom_opacity_factor;
@@ -90,7 +90,7 @@ namespace Noggit
       QComboBox* waterType;
       QSpinBox* waterLayer;
 
-      tile_index tile;
+      TileIndex tile;
     };
   }
 }

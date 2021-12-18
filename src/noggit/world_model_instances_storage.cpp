@@ -109,13 +109,13 @@ namespace Noggit
     return unsafe_add_wmo_instance_no_world_upd(std::move(instance));
   }
 
-  void world_model_instances_storage::delete_instances_from_tile(tile_index const& tile)
+  void world_model_instances_storage::delete_instances_from_tile(TileIndex const& tile)
   {
     std::unique_lock<std::mutex> const lock (_mutex);
 
     for (auto it = _m2s.begin(); it != _m2s.end();)
     {
-      if (tile_index(it->second.pos) == tile)
+      if (TileIndex(it->second.pos) == tile)
       {
         if (NOGGIT_CUR_ACTION)
           NOGGIT_CUR_ACTION->registerObjectRemoved(&it->second);
@@ -130,7 +130,7 @@ namespace Noggit
     }
     for (auto it = _wmos.begin(); it != _wmos.end();)
     {
-      if (tile_index(it->second.pos) == tile)
+      if (TileIndex(it->second.pos) == tile)
       {
         if (NOGGIT_CUR_ACTION)
           NOGGIT_CUR_ACTION->registerObjectRemoved(&it->second);

@@ -1,13 +1,13 @@
 #ifndef NOGGIT_PREVIEWRENDERER_HPP
 #define NOGGIT_PREVIEWRENDERER_HPP
 
-#include <noggit/camera.hpp>
+#include <noggit/Camera.hpp>
 #include <noggit/WMOInstance.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/WMO.h>
 #include <noggit/Model.h>
 #include <noggit/ContextObject.hpp>
-#include <noggit/bool_toggle_property.hpp>
+#include <noggit/BoolToggleProperty.hpp>
 #include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
 #include <opengl/primitives.hpp>
 #include <noggit/LiquidTextureManager.hpp>
@@ -41,19 +41,19 @@ class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport
 
     void setLightDirection(float y, float z);
 
-    bool_toggle_property _draw_models = {true};
-    bool_toggle_property _draw_wmo = {true};
-    bool_toggle_property _draw_particles = {true};
-    bool_toggle_property _draw_animated = {true};
-    bool_toggle_property _draw_boxes = {false};
-    bool_toggle_property _draw_grid = {false};
+    BoolToggleProperty _draw_models = {true};
+    BoolToggleProperty _draw_wmo = {true};
+    BoolToggleProperty _draw_particles = {true};
+    BoolToggleProperty _draw_animated = {true};
+    BoolToggleProperty _draw_boxes = {false};
+    BoolToggleProperty _draw_grid = {false};
 
     ~PreviewRenderer();
 
   protected:
 
     bool _offscreen_mode = true;
-    Noggit::camera _camera;
+    Noggit::Camera _camera;
     QSettings* _settings;
     std::string _filename;
 

@@ -7,12 +7,12 @@
 namespace Noggit
 {
   //! \todo there should be a seperate class for tile mode
-  class camera
+  class Camera
   {
   public:
-    camera ( glm::vec3 const& position
-           , math::degrees yaw_
-           , math::degrees pitch_
+    Camera (glm::vec3 const& position
+            , math::degrees yaw_
+            , math::degrees pitch_
            );
 
     math::degrees yaw() const;

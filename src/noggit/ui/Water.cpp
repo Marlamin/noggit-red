@@ -23,7 +23,7 @@ namespace Noggit
   namespace Ui
   {
     water::water ( unsigned_int_property* current_layer
-                 , bool_toggle_property* display_all_layers
+                 , BoolToggleProperty* display_all_layers
                  , QWidget* parent
                  )
       : QWidget (parent)
@@ -84,11 +84,11 @@ namespace Noggit
       angle_group->setChecked (_angled_mode.get());
       
       
-      connect ( &_angled_mode, &bool_toggle_property::changed
+      connect ( &_angled_mode, &BoolToggleProperty::changed
               , angle_group, &QGroupBox::setChecked
               );
       connect ( angle_group, &QGroupBox::toggled
-              , &_angled_mode, &bool_toggle_property::set
+              , &_angled_mode, &BoolToggleProperty::set
               );
       auto angle_layout (new QFormLayout (angle_group));
 
@@ -140,11 +140,11 @@ namespace Noggit
               , [&] (float f) { _lock_pos.y = f; }
               );
 
-      connect ( &_locked, &bool_toggle_property::changed
+      connect ( &_locked, &BoolToggleProperty::changed
               , lock_group, &QGroupBox::setChecked
               );
       connect ( lock_group, &QGroupBox::toggled
-              , &_locked, &bool_toggle_property::set
+              , &_locked, &BoolToggleProperty::set
               );
 
       layout->addRow(lock_group);
@@ -233,7 +233,7 @@ namespace Noggit
 
     }
 
-    void water::updatePos(tile_index const& newTile)
+    void water::updatePos(TileIndex const& newTile)
     {
       if (newTile == tile) return;
 

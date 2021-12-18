@@ -12,4 +12,4 @@ namespace Noggit::Application {
         NoggitApplicationConfiguration ReadConfigurationState(QFile& inputFile);
     };
 }
-#endif NOGGIT_APPLICATION_CONFIGURATION_READER_HPP
+#endif //NOGGIT_APPLICATION_CONFIGURATION_READER_HPP

@@ -12,7 +12,7 @@
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QStringList>
-#include <noggit/camera.hpp>
+#include <noggit/Camera.hpp>
 #include <noggit/WMOInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/WMO.h>

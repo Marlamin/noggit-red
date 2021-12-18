@@ -29,13 +29,13 @@ namespace Noggit
     {
       instance->instance_model()->wait_until_loaded();
       auto& extents(instance->getExtents());
-      tile_index start(extents[0]), end(extents[1]);
+      TileIndex start(extents[0]), end(extents[1]);
 
       for (int z = start.z; z <= end.z; ++z)
       {
         for (int x = start.x; x <= end.x; ++x)
         {
-          world->mapIndex.update_model_tile(tile_index(x, z), update_type, instance);
+          world->mapIndex.update_model_tile(TileIndex(x, z), update_type, instance);
         }
       }
     }

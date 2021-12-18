@@ -250,16 +250,16 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : Noggit::Ui::widget(paren
             {
               for (int j = 0; j < 3; ++j)
               {
-                if (!_world->mapIndex.hasTile(tile_index(x + i, y + j)))
+                if (!_world->mapIndex.hasTile(TileIndex(x + i, y + j)))
                 {
                   if (!QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
                   {
-                    _world->mapIndex.addTile(tile_index(x + i, y + j));
+                    _world->mapIndex.addTile(TileIndex(x + i, y + j));
                   }
                 }
                 else if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
                 {
-                  _world->mapIndex.removeTile(tile_index(x + i, y + j));
+                  _world->mapIndex.removeTile(TileIndex(x + i, y + j));
                 }
               }
             }
@@ -269,16 +269,16 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : Noggit::Ui::widget(paren
             int x = tile.x();
             int y = tile.y();
 
-            if (!_world->mapIndex.hasTile(tile_index(x, y)))
+            if (!_world->mapIndex.hasTile(TileIndex(x, y)))
             {
               if (!QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
               {
-                _world->mapIndex.addTile(tile_index(x, y));
+                _world->mapIndex.addTile(TileIndex(x, y));
               }
             }
             else if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
             {
-              _world->mapIndex.removeTile(tile_index(x, y));
+              _world->mapIndex.removeTile(TileIndex(x, y));
             }
           }
 

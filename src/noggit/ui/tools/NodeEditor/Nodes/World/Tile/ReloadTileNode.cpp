@@ -31,14 +31,14 @@ void ReloadTileNode::compute()
   glm::vec2 const& xy = xy_data->value();
 
 
-  if (!world->mapIndex.hasTile(tile_index(xy.x, xy.y)))
+  if (!world->mapIndex.hasTile(TileIndex(xy.x, xy.y)))
   {
     setValidationState(NodeValidationState::Error);
     setValidationMessage("Error: tile index is out of range or tile does not exist.");
     return;
   }
 
-  world->reload_tile(tile_index(xy.x, xy.y));
+  world->reload_tile(TileIndex(xy.x, xy.y));
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

@@ -15,7 +15,7 @@ class World;
 //! \todo add adt coordinates/name on mouseover
 namespace Noggit
 {
-  class camera;
+  class Camera;
 
   namespace Ui
   {
@@ -45,7 +45,7 @@ namespace Noggit
       { _use_selection = selection_; _selected_tiles = selection_; update(); return _selected_tiles; }
       inline const std::array<bool, 4096>* selection() const { return _selected_tiles; }
 
-      inline void camera (Noggit::camera* camera) { _camera = camera; }
+      inline void camera (Noggit::Camera* camera) { _camera = camera; }
       void set_resizeable(bool state) { _resizeable = state; };
 
     protected:
@@ -65,7 +65,7 @@ namespace Noggit
 
     private:
       World* _world;
-      Noggit::camera* _camera;
+      Noggit::Camera* _camera;
       std::array<bool, 4096>* _selected_tiles;
 
       bool _draw_skies;

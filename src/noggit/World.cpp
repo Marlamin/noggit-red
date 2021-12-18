@@ -1914,7 +1914,7 @@ selection_result World::intersect (glm::mat4x4 const& model_view
       if (!tile)
         break;
 
-      tile_index index{ static_cast<std::size_t>(pair.first.first)
+      TileIndex index{ static_cast<std::size_t>(pair.first.first)
                         , static_cast<std::size_t>(pair.first.second) };
 
       // handle tiles that got unloaded mid-frame to avoid illegal access
@@ -1989,14 +1989,14 @@ void World::clearHeight(glm::vec3 const& pos)
   });
 }
 
-void World::clearAllModelsOnADT(tile_index const& tile)
+void World::clearAllModelsOnADT(TileIndex const& tile)
 {
   ZoneScoped;
   _model_instance_storage.delete_instances_from_tile(tile);
   update_models_by_filename();
 }
 
-void World::CropWaterADT(const tile_index& pos)
+void World::CropWaterADT(const TileIndex& pos)
 {
   ZoneScoped;
   for_tile_at(pos, [](MapTile* tile)
@@ -2049,7 +2049,7 @@ void World::setAreaID(glm::vec3 const& pos, int id, bool adt, float radius)
 bool World::GetVertex(float x, float z, glm::vec3 *V) const
 {
   ZoneScoped;
-  tile_index tile({x, 0, z});
+  TileIndex tile({x, 0, z});
 
   if (!mapIndex.tileLoaded(tile))
   {
@@ -2139,7 +2139,7 @@ auto World::stamp(glm::vec3 const& pos, float dt, QImage const* img, float radiu
 
                                 if (new_chunk_x < 0 || new_chunk_z < 0 || new_chunk_x == 16 || new_chunk_z == 16)
                                 {
-                                  tile_index index(chunk->mt->index.x + px, chunk->mt->index.z + py);
+                                  TileIndex index(chunk->mt->index.x + px, chunk->mt->index.z + py);
                                   if (index.x != std::numeric_limits<std::size_t>::max()
                                   && index.z != std::numeric_limits<std::size_t>::max()
                                   && index.x != 64
@@ -2358,7 +2358,7 @@ void World::loadAllTiles()
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       MapTile* mTile = mapIndex.loadTile(tile);
 
@@ -2383,7 +2383,7 @@ void World::convert_alphamap(bool to_big_alpha)
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
@@ -2419,7 +2419,7 @@ void World::drawMinimap ( MapTile *tile
   ZoneScoped;
 
   // Also load a tile above the current one to correct the lookat approximation
-  tile_index m_tile = tile_index(camera_pos);
+  TileIndex m_tile = TileIndex(camera_pos);
   m_tile.z -= 1;
 
   bool unload = !mapIndex.has_unsaved_changes(m_tile);
@@ -2443,7 +2443,7 @@ void World::drawMinimap ( MapTile *tile
   }
 }
 
-bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* settings, std::optional<QImage>& combined_image)
+bool World::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* settings, std::optional<QImage>& combined_image)
 {
   ZoneScoped;
   // Setup framebuffer
@@ -2852,7 +2852,7 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
   update_models_by_filename();
 }
 
-void World::reload_tile(tile_index const& tile)
+void World::reload_tile(TileIndex const& tile)
 {
   ZoneScoped;
   reset_selection();
@@ -3367,7 +3367,7 @@ void World::paintLiquid( glm::vec3 const& pos
   });
 }
 
-void World::setWaterType(const tile_index& pos, int type, int layer)
+void World::setWaterType(const TileIndex& pos, int type, int layer)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -3382,7 +3382,7 @@ void World::setWaterType(const tile_index& pos, int type, int layer)
               );
 }
 
-int World::getWaterType(const tile_index& tile, int layer)
+int World::getWaterType(const TileIndex& tile, int layer)
 {
   ZoneScoped;
   if (mapIndex.tileLoaded(tile))
@@ -3395,7 +3395,7 @@ int World::getWaterType(const tile_index& tile, int layer)
   }
 }
 
-void World::autoGenWaterTrans(const tile_index& pos, float factor)
+void World::autoGenWaterTrans(const TileIndex& pos, float factor)
 {
   ZoneScoped;
   for_tile_at(pos, [&](MapTile* tile)
@@ -3493,7 +3493,7 @@ void World::fixAllGaps()
 bool World::isUnderMap(glm::vec3 const& pos)
 {
   ZoneScoped;
-  tile_index const tile (pos);
+  TileIndex const tile (pos);
 
   if (mapIndex.tileLoaded(tile))
   {
@@ -3735,7 +3735,7 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
   });
 }
 
-float World::getMaxTileHeight(const tile_index& tile)
+float World::getMaxTileHeight(const TileIndex& tile)
 {
   ZoneScoped;
   MapTile* m_tile = mapIndex.getTile(tile);
@@ -3840,7 +3840,7 @@ void World::exportAllADTsAlphamap()
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
@@ -3883,7 +3883,7 @@ void World::exportAllADTsAlphamap(const std::string& filename)
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
@@ -3949,7 +3949,7 @@ void World::exportAllADTsHeightmap()
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
@@ -3979,7 +3979,7 @@ void World::exportAllADTsHeightmap()
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
@@ -4019,7 +4019,7 @@ void World::exportAllADTsVertexColorMap()
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
@@ -4065,7 +4065,7 @@ void World::importAllADTsAlphamaps()
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
@@ -4124,7 +4124,7 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
@@ -4179,7 +4179,7 @@ void World::importAllADTVertexColorMaps(unsigned int mode)
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
@@ -4233,7 +4233,7 @@ void World::ensureAllTilesetsAllADTs()
   {
     for (size_t x = 0; x < 64; x++)
     {
-      tile_index tile(x, z);
+      TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);

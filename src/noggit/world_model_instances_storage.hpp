@@ -3,7 +3,7 @@
 #pragma once
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
-#include <noggit/tile_index.hpp>
+#include <noggit/TileIndex.hpp>
 #include <noggit/WMOInstance.h>
 #include <opengl/scoped.hpp>
 #include <variant>
@@ -40,7 +40,7 @@ namespace Noggit
     std::optional<WMOInstance*> get_wmo_instance(std::uint32_t uid);
     std::optional<selection_type> get_instance(std::uint32_t uid, bool lock=true);
 
-    void delete_instances_from_tile(tile_index const& tile);
+    void delete_instances_from_tile(TileIndex const& tile);
     void delete_instances(std::vector<selection_type> const& instances);
     void delete_instance(std::uint32_t uid);
     void unload_instance_and_remove_from_selection_if_necessary(std::uint32_t uid);

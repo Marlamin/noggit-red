@@ -4,7 +4,7 @@
 #include <noggit/scripting/script_profiles.hpp>
 #include <noggit/scripting/script_settings.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
-#include <noggit/camera.hpp>
+#include <noggit/Camera.hpp>
 #include <noggit/Log.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/World.h>

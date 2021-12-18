@@ -26,7 +26,7 @@ namespace Noggit
   {
     texturing_tool::texturing_tool ( const glm::vec3* camera_pos
                                    , MapView* map_view
-                                   , bool_toggle_property* show_quick_palette
+                                   , BoolToggleProperty* show_quick_palette
                                    , QWidget* parent
                                    )
       : QWidget(parent)

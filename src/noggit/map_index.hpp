@@ -6,7 +6,7 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
-#include <noggit/tile_index.hpp>
+#include <noggit/TileIndex.hpp>
 #include <noggit/ContextObject.hpp>
 
 #include <ranges>
@@ -52,7 +52,7 @@ public:
   : std::iterator<std::forward_iterator_tag, MapTile*, std::ptrdiff_t, MapTile**, MapTile* const&>
   {
     template<typename Pred>
-      tile_iterator (MapIndex* index, tile_index tile, Pred pred)
+      tile_iterator (MapIndex* index, TileIndex tile, Pred pred)
         : _index (index)
         , _tile (std::move (tile))
         , _pred (std::move (pred))
@@ -66,7 +66,7 @@ public:
     tile_iterator()
       : _index (nullptr)
       , _tile (0, 0)
-      , _pred ([] (tile_index const&, MapTile*) { return false; })
+      , _pred ([] (TileIndex const&, MapTile*) { return false; })
     {}
 
     bool operator== (tile_iterator const& other) const
@@ -120,8 +120,8 @@ public:
     }
 
     MapIndex* _index;
-    tile_index _tile;
-    std::function<bool (tile_index const&, MapTile*)> _pred;
+    TileIndex _tile;
+    std::function<bool (TileIndex const&, MapTile*)> _pred;
   };
 
   template<bool Load>
@@ -141,7 +141,7 @@ public:
   };
 
   template<bool Load>
-    auto tiles (std::function<bool (tile_index const&, MapTile*)> pred= [] (tile_index const&, MapTile*) { return true; } )
+    auto tiles (std::function<bool (TileIndex const&, MapTile*)> pred= [] (TileIndex const&, MapTile*) { return true; } )
   {
         return  TileRange<Load>(tile_iterator<Load> {this, { 0, 0 }, pred}, tile_iterator<Load>{});
   }
@@ -149,13 +149,13 @@ public:
   auto loaded_tiles()
   {
     return tiles<false>
-      ([] (tile_index const&, MapTile* tile) { return !!tile && tile->finishedLoading(); });
+      ([] (TileIndex const&, MapTile* tile) { return !!tile && tile->finishedLoading(); });
   }
 
   auto tiles_in_range (glm::vec3 const& pos, float radius)
   {
     return tiles<true>
-      ( [this, pos, radius] (tile_index const& index, MapTile*)
+      ( [this, pos, radius] (TileIndex const& index, MapTile*)
         {
           return hasTile(index) && misc::getShortestDist
             (pos.x, pos.z, index.x * TILESIZE, index.z * TILESIZE, TILESIZE) <= radius;
@@ -169,7 +169,7 @@ public:
     glm::vec2 r_chunk{pos.x + radius, pos.z + radius};
 
     return tiles<true>
-      ( [this, pos, radius, l_chunk, r_chunk] (tile_index const& index, MapTile*)
+      ( [this, pos, radius, l_chunk, r_chunk] (TileIndex const& index, MapTile*)
         {
           if (!hasTile(index) || radius == 0.f)
             return false;
@@ -186,30 +186,30 @@ public:
 
   void set_basename(const std::string& pBasename);
 
-  void enterTile(const tile_index& tile);
-  MapTile *loadTile(const tile_index& tile, bool reloading = false);
+  void enterTile(const TileIndex& tile);
+  MapTile *loadTile(const TileIndex& tile, bool reloading = false);
 
-  void update_model_tile(const tile_index& tile, model_update type, SceneObject* instance);
+  void update_model_tile(const TileIndex& tile, model_update type, SceneObject* instance);
 
-  void setChanged(const tile_index& tile);
+  void setChanged(const TileIndex& tile);
   void setChanged(MapTile* tile);
 
-  void unsetChanged(const tile_index& tile);
+  void unsetChanged(const TileIndex& tile);
   void setFlag(bool to, glm::vec3 const& pos, uint32_t flag);
-  bool has_unsaved_changes(const tile_index& tile) const;
+  bool has_unsaved_changes(const TileIndex& tile) const;
 
-  void saveTile(const tile_index& tile, World*, bool save_unloaded = false);
+  void saveTile(const TileIndex& tile, World*, bool save_unloaded = false);
   void saveChanged (World*, bool save_unloaded = false);
-  void reloadTile(const tile_index& tile);
-  void unloadTiles(const tile_index& tile);  // unloads all tiles more then x adts away from given
-  void unloadTile(const tile_index& tile);  // unload given tile
-  void markOnDisc(const tile_index& tile, bool mto);
-  bool isTileExternal(const tile_index& tile) const;
+  void reloadTile(const TileIndex& tile);
+  void unloadTiles(const TileIndex& tile);  // unloads all tiles more then x adts away from given
+  void unloadTile(const TileIndex& tile);  // unload given tile
+  void markOnDisc(const TileIndex& tile, bool mto);
+  bool isTileExternal(const TileIndex& tile) const;
 
   bool hasAGlobalWMO();
-  bool hasTile(const tile_index& index) const;
-  bool tileAwaitingLoading(const tile_index& tile) const;
-  bool tileLoaded(const tile_index& tile) const;
+  bool hasTile(const TileIndex& index) const;
+  bool tileAwaitingLoading(const TileIndex& tile) const;
+  bool tileLoaded(const TileIndex& tile) const;
 
   bool hasAdt();
   void setAdt(bool value);
@@ -217,10 +217,10 @@ public:
   void save();
   void saveall (World*);
 
-  MapTile* getTile(const tile_index& tile) const;
+  MapTile* getTile(const TileIndex& tile) const;
   MapTile* getTileAbove(MapTile* tile) const;
   MapTile* getTileLeft(MapTile* tile) const;
-  uint32_t getFlag(const tile_index& tile) const;
+  uint32_t getFlag(const TileIndex& tile) const;
 
   void convert_alphamap(bool to_big_alpha);
   bool hasBigAlpha() const { return mBigAlpha; }
@@ -237,8 +237,8 @@ public:
   void saveMaxUID();
   void loadMaxUID();
 
-  void addTile(const tile_index& tile);
-  void removeTile(const tile_index& tile);
+  void addTile(const TileIndex& tile);
+  void removeTile(const TileIndex& tile);
 
   unsigned getNumExistingTiles();
 

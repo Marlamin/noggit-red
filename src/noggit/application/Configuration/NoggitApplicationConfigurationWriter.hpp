@@ -13,4 +13,4 @@ namespace Noggit::Application {
         void PersistConfigurationState(QFile& outputFile, const NoggitApplicationConfiguration& configuration);
     };
 }
-#endif NOGGIT_APPLICATION_CONFIGURATION_WRITER_HPP
+#endif // NOGGIT_APPLICATION_CONFIGURATION_WRITER_HPP

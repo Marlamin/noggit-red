@@ -11,7 +11,7 @@
 
 #include <noggit/Sky.h>
 #include <noggit/World.h>
-#include <noggit/camera.hpp>
+#include <noggit/Camera.hpp>
 #include <QTransform>
 
 namespace Noggit
@@ -48,7 +48,7 @@ namespace Noggit
             {
               for (int j = 0; j < 3; ++j)
               {
-                if (_world->mapIndex.hasTile(tile_index(x + i, y + j)))
+                if (_world->mapIndex.hasTile(TileIndex(x + i, y + j)))
                 {
                   (*_selected_tiles)[64 * (x + i) + (y + j)]
                     = !QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
@@ -59,7 +59,7 @@ namespace Noggit
           }
           else
           {
-            if (_world->mapIndex.hasTile(tile_index(tile.x(), tile.y())))
+            if (_world->mapIndex.hasTile(TileIndex(tile.x(), tile.y())))
             {
               (*_selected_tiles)[64 * tile.x() + tile.y()]
                 = !QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
@@ -145,7 +145,7 @@ namespace Noggit
           {
             for (size_t j (0); j < 64; ++j)
             {
-              tile_index const tile (i, j);
+              TileIndex const tile (i, j);
               bool changed = false;
 
               if (world()->mapIndex.hasTile (tile))
@@ -276,7 +276,7 @@ namespace Noggit
 
       QPoint tile = locateTile(event);
 
-      if (!world()->mapIndex.hasTile (tile_index (tile.x(), tile.y())))
+      if (!world()->mapIndex.hasTile (TileIndex (tile.x(), tile.y())))
       {
         event->ignore();
         return;

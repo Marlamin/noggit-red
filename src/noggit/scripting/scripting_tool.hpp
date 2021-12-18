@@ -23,7 +23,7 @@ class MapView;
 
 namespace Noggit
 {
-  class camera;
+  class Camera;
   namespace Scripting
   {
     class script_context;

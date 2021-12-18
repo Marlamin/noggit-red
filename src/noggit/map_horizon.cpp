@@ -196,7 +196,7 @@ map_horizon::map_horizon(const std::string& basename, const MapIndex * const ind
         }
       }
       // the adt exist but there's no data in the wdl
-      else if (index->hasTile(tile_index(x, y)))
+      else if (index->hasTile(TileIndex(x, y)))
       {
         for (size_t j(0); j < 16; ++j)
         {
@@ -305,7 +305,7 @@ void map_horizon::render::draw( glm::mat4x4 const& model_view
 {
   std::vector<uint32_t> indices;
 
-  const tile_index current_index(camera);
+  const TileIndex current_index(camera);
   const int lrr = 2;
 
   for (size_t y (current_index.z - lrr); y <= current_index.z + lrr; ++y)

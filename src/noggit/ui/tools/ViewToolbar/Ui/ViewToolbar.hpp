@@ -9,7 +9,7 @@
 
 #include <noggit/MapView.h>
 #include <noggit/ui/FontNoggit.hpp>
-#include <noggit/bool_toggle_property.hpp>
+#include <noggit/BoolToggleProperty.hpp>
 
 namespace Noggit
 {
@@ -22,7 +22,7 @@ namespace Noggit
 
     private:
       QActionGroup _tool_group;
-      void add_tool_icon(Noggit::bool_toggle_property* view_state, const QString& name, const Noggit::Ui::FontNoggit::Icons& icon);
+      void add_tool_icon(Noggit::BoolToggleProperty* view_state, const QString& name, const Noggit::Ui::FontNoggit::Icons& icon);
     };
   }
 }

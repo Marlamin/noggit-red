@@ -5,8 +5,8 @@
 #include <math/ray.hpp>
 #include <noggit/Misc.h>
 #include <noggit/Selection.h>
-#include <noggit/bool_toggle_property.hpp>
-#include <noggit/camera.hpp>
+#include <noggit/BoolToggleProperty.hpp>
+#include <noggit/Camera.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/MinimapCreator.hpp>
@@ -64,7 +64,7 @@ namespace Noggit
     class scripting_tool;
   }
 
-  class camera;
+  class Camera;
   namespace Ui
   {
     class detail_infos;
@@ -108,7 +108,7 @@ public:
   bool  rightMouse = false;
 
   std::unique_ptr<World> _world;
-  Noggit::camera _camera;
+  Noggit::Camera _camera;
 
 private:
 
@@ -123,21 +123,21 @@ private:
   bool _camera_moved_since_last_draw = true;
 
 public:
-  Noggit::bool_toggle_property _draw_contour = {false};
-  Noggit::bool_toggle_property _draw_mfbo = {false};
-  Noggit::bool_toggle_property _draw_wireframe = {false};
-  Noggit::bool_toggle_property _draw_lines = {false};
-  Noggit::bool_toggle_property _draw_terrain = {true};
-  Noggit::bool_toggle_property _draw_wmo = {true};
-  Noggit::bool_toggle_property _draw_water = {true};
-  Noggit::bool_toggle_property _draw_wmo_doodads = {true};
-  Noggit::bool_toggle_property _draw_models = {true};
-  Noggit::bool_toggle_property _draw_model_animations = {false};
-  Noggit::bool_toggle_property _draw_hole_lines = {false};
-  Noggit::bool_toggle_property _draw_models_with_box = {false};
-  Noggit::bool_toggle_property _draw_fog = {false};
-  Noggit::bool_toggle_property _draw_hidden_models = {false};
-  Noggit::bool_toggle_property _draw_occlusion_boxes = {false};
+  Noggit::BoolToggleProperty _draw_contour = {false};
+  Noggit::BoolToggleProperty _draw_mfbo = {false};
+  Noggit::BoolToggleProperty _draw_wireframe = {false};
+  Noggit::BoolToggleProperty _draw_lines = {false};
+  Noggit::BoolToggleProperty _draw_terrain = {true};
+  Noggit::BoolToggleProperty _draw_wmo = {true};
+  Noggit::BoolToggleProperty _draw_water = {true};
+  Noggit::BoolToggleProperty _draw_wmo_doodads = {true};
+  Noggit::BoolToggleProperty _draw_models = {true};
+  Noggit::BoolToggleProperty _draw_model_animations = {false};
+  Noggit::BoolToggleProperty _draw_hole_lines = {false};
+  Noggit::BoolToggleProperty _draw_models_with_box = {false};
+  Noggit::BoolToggleProperty _draw_fog = {false};
+  Noggit::BoolToggleProperty _draw_hidden_models = {false};
+  Noggit::BoolToggleProperty _draw_occlusion_boxes = {false};
 private:
 
   int _selected_area_id = -1;
@@ -241,7 +241,7 @@ public:
   void initMinimapSave() { saving_minimap = true; };
   auto populateImageModel(QStandardItemModel* model) const -> void;
   auto setBrushTexture(QImage const* img) -> void;
-  Noggit::camera* getCamera() { return &_camera; };
+  Noggit::Camera* getCamera() { return &_camera; };
   void randomizeTerrainRotation();
   void randomizeTexturingRotation();
   void randomizeShaderRotation();
@@ -323,26 +323,26 @@ private:
   QLabel* _status_fps;
   QLabel* _status_culling;
 
-  Noggit::bool_toggle_property _locked_cursor_mode = {false};
-  Noggit::bool_toggle_property _move_model_to_cursor_position = {true};
-  Noggit::bool_toggle_property _snap_multi_selection_to_ground = {false};
-  Noggit::bool_toggle_property _rotate_along_ground = { true };
-  Noggit::bool_toggle_property _rotate_along_ground_smooth = { true };
-  Noggit::bool_toggle_property _rotate_along_ground_random = { false };
-  Noggit::bool_toggle_property _use_median_pivot_point = {true};
-  Noggit::bool_toggle_property _display_all_water_layers = {true};
+  Noggit::BoolToggleProperty _locked_cursor_mode = {false};
+  Noggit::BoolToggleProperty _move_model_to_cursor_position = {true};
+  Noggit::BoolToggleProperty _snap_multi_selection_to_ground = {false};
+  Noggit::BoolToggleProperty _rotate_along_ground = {true };
+  Noggit::BoolToggleProperty _rotate_along_ground_smooth = {true };
+  Noggit::BoolToggleProperty _rotate_along_ground_random = {false };
+  Noggit::BoolToggleProperty _use_median_pivot_point = {true};
+  Noggit::BoolToggleProperty _display_all_water_layers = {true};
   Noggit::unsigned_int_property _displayed_water_layer = {0};
   Noggit::object_paste_params _object_paste_params;
 
-  Noggit::bool_toggle_property _show_detail_info_window = {false};
-  Noggit::bool_toggle_property _show_minimap_window = {false};
-  Noggit::bool_toggle_property _show_node_editor = {false};
-  Noggit::bool_toggle_property _show_minimap_borders = {true};
-  Noggit::bool_toggle_property _show_minimap_skies = {false};
-  Noggit::bool_toggle_property _show_keybindings_window = {false};
-  Noggit::bool_toggle_property _show_texture_palette_window = {false};
-  Noggit::bool_toggle_property _show_texture_palette_small_window = {false};
-  Noggit::bool_toggle_property _showStampPalette{false};
+  Noggit::BoolToggleProperty _show_detail_info_window = {false};
+  Noggit::BoolToggleProperty _show_minimap_window = {false};
+  Noggit::BoolToggleProperty _show_node_editor = {false};
+  Noggit::BoolToggleProperty _show_minimap_borders = {true};
+  Noggit::BoolToggleProperty _show_minimap_skies = {false};
+  Noggit::BoolToggleProperty _show_keybindings_window = {false};
+  Noggit::BoolToggleProperty _show_texture_palette_window = {false};
+  Noggit::BoolToggleProperty _show_texture_palette_small_window = {false};
+  Noggit::BoolToggleProperty _showStampPalette{false};
 
   Noggit::Ui::minimap_widget* _minimap;
   QDockWidget* _minimap_dock;
@@ -389,7 +389,7 @@ private:
   ::Ui::MapViewOverlay* _viewport_overlay_ui;
   ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
   ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
-  Noggit::bool_toggle_property _gizmo_on = {true};
+  Noggit::BoolToggleProperty _gizmo_on = {true};
   QMetaObject::Connection _gl_guard_connection;
   bool _gl_initialized = false;
   bool _destroying = false;

@@ -6,7 +6,7 @@
 
 namespace Noggit
 {
-  struct bool_toggle_property : QObject
+  struct BoolToggleProperty : QObject
   {
   private:
     Q_OBJECT
@@ -34,7 +34,7 @@ namespace Noggit
       set(!_value);
     }
   public:
-    bool_toggle_property (bool value)
+    BoolToggleProperty (bool value)
       : _value (value)
     {}
   };

@@ -8,7 +8,7 @@
 #include <noggit/MapHeaders.h>
 #include <noggit/Selection.h>
 #include <noggit/TileWater.hpp>
-#include <noggit/tile_index.hpp>
+#include <noggit/TileIndex.hpp>
 #include <noggit/tool_enums.hpp>
 #include <opengl/shader.fwd.hpp>
 #include <noggit/ContextObject.hpp>
@@ -81,7 +81,7 @@ public:
   std::vector<MapChunk*> chunks_in_range (glm::vec3 const& pos, float radius) const;
   std::vector<MapChunk*> chunks_in_rect (glm::vec3 const& pos, float radius) const;
 
-  const tile_index index;
+  const TileIndex index;
   float xbase, zbase;
 
   std::atomic<bool> changed;

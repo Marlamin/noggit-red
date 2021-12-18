@@ -2,7 +2,7 @@
 
 #pragma once
 #include <noggit/Selection.h>
-#include <noggit/bool_toggle_property.hpp>
+#include <noggit/BoolToggleProperty.hpp>
 
 #include <QLabel>
 #include <QWidget>
@@ -51,13 +51,13 @@ namespace Noggit
     public:
       object_editor ( MapView*
                     , World*
-                    , bool_toggle_property* move_model_to_cursor_position
-                    , bool_toggle_property* snap_multi_selection_to_ground
-                    , bool_toggle_property* use_median_pivot_point
+                    , BoolToggleProperty* move_model_to_cursor_position
+                    , BoolToggleProperty* snap_multi_selection_to_ground
+                    , BoolToggleProperty* use_median_pivot_point
                     , object_paste_params*
-                    , bool_toggle_property* rotate_along_ground
-                    , bool_toggle_property* rotate_along_ground_smooth
-                    , bool_toggle_property* rotate_along_ground_random
+                    , BoolToggleProperty* rotate_along_ground
+                    , BoolToggleProperty* rotate_along_ground_smooth
+                    , BoolToggleProperty* rotate_along_ground_random
                     , QWidget* parent = nullptr
                     );
 

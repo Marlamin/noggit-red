@@ -43,7 +43,7 @@ MapTile::MapTile( int pX
                 , tile_mode mode
                 )
   : AsyncObject(pFilename)
-  , index(tile_index(pX, pZ))
+  , index(TileIndex(pX, pZ))
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
   , changed(false)

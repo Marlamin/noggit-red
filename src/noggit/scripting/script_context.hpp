@@ -13,7 +13,7 @@ class World;
 
 namespace Noggit
 {
-  class camera;
+  class Camera;
   namespace Scripting
   {
     class scripting_tool;

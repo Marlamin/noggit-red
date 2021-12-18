@@ -136,8 +136,8 @@ void ModelViewer::tick(float dt)
 {
   if (_world)
   {
-    _world->mapIndex.enterTile (tile_index (_world_camera.position));
-    _world->mapIndex.unloadTiles (tile_index (_world_camera.position));
+    _world->mapIndex.enterTile (TileIndex (_world_camera.position));
+    _world->mapIndex.unloadTiles (TileIndex (_world_camera.position));
   }
 
   AssetBrowser::ModelViewer::tick(dt);

@@ -3,7 +3,7 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/World.h>
-#include <noggit/camera.hpp>
+#include <noggit/Camera.hpp>
 #include <noggit/Brush.h>
 #include <noggit/ContextObject.hpp>
 

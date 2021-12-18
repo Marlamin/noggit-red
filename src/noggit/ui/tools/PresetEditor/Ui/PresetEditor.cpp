@@ -207,17 +207,17 @@ void PresetEditorWidget::setupConnectsCommon()
   connect(viewport_overlay_ui->toggleGridButton, &QPushButton::clicked,
           [this]() {ui->viewport->_draw_grid.toggle();});
 
-  connect(&ui->viewport->_draw_wmo, &bool_toggle_property::changed,
+  connect(&ui->viewport->_draw_wmo, &BoolToggleProperty::changed,
           [this](bool state) {ui->viewport->_draw_wmo.set(state);});
-  connect(&ui->viewport->_draw_boxes, &bool_toggle_property::changed,
+  connect(&ui->viewport->_draw_boxes, &BoolToggleProperty::changed,
           [this](bool state) {ui->viewport->_draw_boxes.set(state);});
-  connect(&ui->viewport->_draw_particles, &bool_toggle_property::changed,
+  connect(&ui->viewport->_draw_particles, &BoolToggleProperty::changed,
           [this](bool state) {ui->viewport->_draw_particles.set(state);});
-  connect(&ui->viewport->_draw_models, &bool_toggle_property::changed,
+  connect(&ui->viewport->_draw_models, &BoolToggleProperty::changed,
           [this](bool state) {ui->viewport->_draw_models.set(state);});
-  connect(&ui->viewport->_draw_animated, &bool_toggle_property::changed,
+  connect(&ui->viewport->_draw_animated, &BoolToggleProperty::changed,
           [this](bool state) {ui->viewport->_draw_animated.set(state);});
-  connect(&ui->viewport->_draw_grid, &bool_toggle_property::changed,
+  connect(&ui->viewport->_draw_grid, &BoolToggleProperty::changed,
           [this](bool state) {ui->viewport->_draw_grid.set(state);});
 }
 

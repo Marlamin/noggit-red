@@ -4,7 +4,7 @@
 
 #include <math/frustum.hpp>
 #include <math/trig.hpp>
-#include <noggit/cursor_render.hpp>
+#include <noggit/CursorRender.hpp>
 #include <noggit/Misc.h>
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
@@ -12,7 +12,7 @@
 #include <noggit/WMO.h> // WMOManager
 #include <noggit/map_horizon.h>
 #include <noggit/map_index.hpp>
-#include <noggit/tile_index.hpp>
+#include <noggit/TileIndex.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/world_tile_update_queue.hpp>
 #include <noggit/world_model_instances_storage.hpp>
@@ -239,7 +239,7 @@ public:
     auto for_maybe_chunk_at (glm::vec3 const& pos, Fun&& fun) -> std::optional<decltype (fun (nullptr))>;
 
   template<typename Fun>
-    void for_tile_at(const tile_index& pos, Fun&&);
+    void for_tile_at(const TileIndex& pos, Fun&&);
 
   void changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius);
   void changeShader(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode);
@@ -322,7 +322,7 @@ public:
   std::optional<selection_type> get_model(std::uint32_t uid);
   void remove_models_if_needed(std::vector<uint32_t> const& uids);
 
-  void reload_tile(tile_index const& tile);
+  void reload_tile(TileIndex const& tile);
 
   void updateTilesEntry(selection_type const& entry, model_update type);
   void updateTilesEntry(SceneObject* entry, model_update type);
@@ -330,7 +330,7 @@ public:
   void updateTilesModel(ModelInstance* m2, model_update type);
   void wait_for_all_tile_updates();
 
-  bool saveMinimap (tile_index const& tile_idx, MinimapRenderSettings* settings, std::optional<QImage>& combined_image);
+  bool saveMinimap (TileIndex const& tile_idx, MinimapRenderSettings* settings, std::optional<QImage>& combined_image);
   void drawMinimap ( MapTile *tile
       , glm::mat4x4 const& model_view
       , glm::mat4x4 const& projection
@@ -350,7 +350,7 @@ public:
 	static bool IsEditableWorld(int pMapId);
 
   void clearHeight(glm::vec3 const& pos);
-  void clearAllModelsOnADT(tile_index const& tile);
+  void clearAllModelsOnADT(TileIndex const& tile);
 
   // liquids
   void paintLiquid( glm::vec3 const& pos
@@ -365,10 +365,10 @@ public:
                   , bool override_liquid_id
                   , float opacity_factor
                   );
-  void CropWaterADT(const tile_index& pos);
-  void setWaterType(const tile_index& pos, int type, int layer);
-  int getWaterType(const tile_index& tile, int layer);
-  void autoGenWaterTrans(const tile_index&, float factor);
+  void CropWaterADT(const TileIndex& pos);
+  void setWaterType(const TileIndex& pos, int type, int layer);
+  int getWaterType(const TileIndex& tile, int layer);
+  void autoGenWaterTrans(const TileIndex&, float factor);
 
 
   void fixAllGaps();
@@ -390,7 +390,7 @@ public:
 
   void deleteObjects(std::vector<selection_type> const& types);
 
-  float getMaxTileHeight(const tile_index& tile);
+  float getMaxTileHeight(const TileIndex& tile);
 
   glm::vec3 const& vertexCenter();
 
@@ -456,7 +456,7 @@ private:
   std::unique_ptr<OpenGL::program> _liquid_program;
   std::unique_ptr<OpenGL::program> _occluder_program;
 
-  Noggit::cursor_render _cursor_render;
+  Noggit::CursorRender _cursor_render;
   OpenGL::primitives::sphere _sphere_render;
   OpenGL::primitives::square _square_render;
 

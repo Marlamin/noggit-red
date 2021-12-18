@@ -1,12 +1,12 @@
 ﻿// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/cursor_render.hpp>
+#include <noggit/CursorRender.hpp>
 #include "math/trig.hpp"
 #include <opengl/shader.hpp>
 
 namespace Noggit
 {
-  void cursor_render::draw(mode cursor_mode, glm::mat4x4 const& mvp, glm::vec4 color, glm::vec3 const& pos, float radius, float inner_radius_ratio)
+  void CursorRender::draw(Mode cursor_mode, glm::mat4x4 const& mvp, glm::vec4 color, glm::vec3 const& pos, float radius, float inner_radius_ratio)
   {
     if (!_uploaded)
     {
@@ -31,7 +31,7 @@ namespace Noggit
     }
   }
 
-  void cursor_render::upload()
+  void CursorRender::upload()
   {
     _vaos.upload();
     _vbos.upload();
@@ -53,7 +53,7 @@ namespace Noggit
     _uploaded = true;
   }
 
-  void cursor_render::create_circle_buffer(OpenGL::Scoped::use_program& shader)
+  void CursorRender::create_circle_buffer(OpenGL::Scoped::use_program& shader)
   {
     std::vector<glm::vec3> vertices;
     std::vector<std::uint16_t> indices;
@@ -69,9 +69,9 @@ namespace Noggit
       indices.emplace_back((i + 1) % segment);
     }
 
-    _indices_count[mode::circle] = indices.size();
+    _indices_count[Mode::circle] = indices.size();
 
-    int id = static_cast<int>(mode::circle);
+    int id = static_cast<int>(Mode::circle);
 
     gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
@@ -88,7 +88,7 @@ namespace Noggit
     }
   }
 
-  void cursor_render::create_sphere_buffer(OpenGL::Scoped::use_program& shader)
+  void CursorRender::create_sphere_buffer(OpenGL::Scoped::use_program& shader)
   {
     std::vector<glm::vec3> vertices;
     std::vector<std::uint16_t> indices;
@@ -133,9 +133,9 @@ namespace Noggit
       }
     }    
 
-    _indices_count[mode::sphere] = indices.size();
+    _indices_count[Mode::sphere] = indices.size();
 
-    int id = static_cast<int>(mode::sphere);
+    int id = static_cast<int>(Mode::sphere);
 
     gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
@@ -152,7 +152,7 @@ namespace Noggit
     }
   }
 
-  void cursor_render::create_square_buffer(OpenGL::Scoped::use_program& shader)
+  void CursorRender::create_square_buffer(OpenGL::Scoped::use_program& shader)
   {
     std::vector<glm::vec3> vertices = 
     {
@@ -164,9 +164,9 @@ namespace Noggit
 
     std::vector<std::uint16_t> indices = {0,1, 1,2 ,2,3 ,3,0};    
 
-    _indices_count[mode::square] = indices.size();
+    _indices_count[Mode::square] = indices.size();
 
-    int id = static_cast<int>(mode::square);
+    int id = static_cast<int>(Mode::square);
 
     gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
@@ -185,7 +185,7 @@ namespace Noggit
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
-  void cursor_render::create_cube_buffer(OpenGL::Scoped::use_program& shader)
+  void CursorRender::create_cube_buffer(OpenGL::Scoped::use_program& shader)
   {
     std::vector<glm::vec3> vertices =
     {
@@ -206,9 +206,9 @@ namespace Noggit
       , 4,5, 5,6 ,6,7 ,7,4
     };
 
-    _indices_count[mode::cube] = indices.size();
+    _indices_count[Mode::cube] = indices.size();
 
-    int id = static_cast<int>(mode::cube);
+    int id = static_cast<int>(Mode::cube);
 
     gl.bufferData<GL_ARRAY_BUFFER>(_vbos[id * 2], vertices.size() * sizeof(*vertices.data()), vertices.data(), GL_STATIC_DRAW);
     gl.bufferData<GL_ELEMENT_ARRAY_BUFFER>(_vbos[id * 2 + 1], indices.size() * sizeof(*indices.data()), indices.data(), GL_STATIC_DRAW);
@@ -227,7 +227,7 @@ namespace Noggit
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   }
 
-    void cursor_render::unload()
+    void CursorRender::unload()
     {
       _vaos.unload();
       _vbos.unload();

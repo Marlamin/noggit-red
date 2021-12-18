@@ -85,7 +85,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
 
 }
 
-void ViewToolbar::add_tool_icon(Noggit::bool_toggle_property* view_state, const QString& name, const FontNoggit::Icons& icon)
+void ViewToolbar::add_tool_icon(Noggit::BoolToggleProperty* view_state, const QString& name, const FontNoggit::Icons& icon)
 {
   auto action = addAction(FontNoggitIcon{icon}, name);
 
@@ -94,7 +94,7 @@ void ViewToolbar::add_tool_icon(Noggit::bool_toggle_property* view_state, const 
     view_state->set(!view_state->get());
   });
 
-  connect (view_state, &Noggit::bool_toggle_property::changed, [this, action, view_state] () {
+  connect (view_state, &Noggit::BoolToggleProperty::changed, [this, action, view_state] () {
     action->setChecked(view_state->get());
   });
 

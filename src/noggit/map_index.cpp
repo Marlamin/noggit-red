@@ -260,7 +260,7 @@ void MapIndex::save()
   changed = false;
 }
 
-void MapIndex::enterTile(const tile_index& tile)
+void MapIndex::enterTile(const TileIndex& tile)
 {
   if (!hasTile(tile))
   {
@@ -276,12 +276,12 @@ void MapIndex::enterTile(const tile_index& tile)
   {
     for (int px = std::max(cx - 1, 0); px < std::min(cx + 2, 63); ++px)
     {
-      loadTile(tile_index(px, pz));
+      loadTile(TileIndex(px, pz));
     }
   }
 }
 
-void MapIndex::update_model_tile(const tile_index& tile, model_update type, SceneObject* instance)
+void MapIndex::update_model_tile(const TileIndex& tile, model_update type, SceneObject* instance)
 {
   MapTile* adt = loadTile(tile);
 
@@ -301,7 +301,7 @@ void MapIndex::update_model_tile(const tile_index& tile, model_update type, Scen
   }
 }
 
-void MapIndex::setChanged(const tile_index& tile)
+void MapIndex::setChanged(const TileIndex& tile)
 {
   MapTile* mTile = loadTile(tile);
 
@@ -316,7 +316,7 @@ void MapIndex::setChanged(MapTile* tile)
   setChanged(tile->index);
 }
 
-void MapIndex::unsetChanged(const tile_index& tile)
+void MapIndex::unsetChanged(const TileIndex& tile)
 {
   // change the changed flag of the map tile
   if (hasTile(tile))
@@ -325,14 +325,14 @@ void MapIndex::unsetChanged(const tile_index& tile)
   }
 }
 
-bool MapIndex::has_unsaved_changes(const tile_index& tile) const
+bool MapIndex::has_unsaved_changes(const TileIndex& tile) const
 {
   return (tileLoaded(tile) ? getTile(tile)->changed.load() : false);
 }
 
 void MapIndex::setFlag(bool to, glm::vec3 const& pos, uint32_t flag)
 {
-  tile_index tile(pos);
+  TileIndex tile(pos);
 
   if (tileLoaded(tile))
   {
@@ -347,7 +347,7 @@ void MapIndex::setFlag(bool to, glm::vec3 const& pos, uint32_t flag)
   }
 }
 
-MapTile* MapIndex::loadTile(const tile_index& tile, bool reloading)
+MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading)
 {
   if (!hasTile(tile))
   {
@@ -379,7 +379,7 @@ MapTile* MapIndex::loadTile(const tile_index& tile, bool reloading)
   return adt;
 }
 
-void MapIndex::reloadTile(const tile_index& tile)
+void MapIndex::reloadTile(const TileIndex& tile)
 {
   if (tileLoaded(tile))
   {
@@ -388,7 +388,7 @@ void MapIndex::reloadTile(const tile_index& tile)
   }
 }
 
-void MapIndex::unloadTiles(const tile_index& tile)
+void MapIndex::unloadTiles(const TileIndex& tile)
 {
   if (((clock() / CLOCKS_PER_SEC) - _last_unload_time) > _unload_interval)
   {
@@ -408,7 +408,7 @@ void MapIndex::unloadTiles(const tile_index& tile)
   }
 }
 
-void MapIndex::unloadTile(const tile_index& tile)
+void MapIndex::unloadTile(const TileIndex& tile)
 {
   // unloads a tile with givn cords
   if (tileLoaded(tile))
@@ -419,7 +419,7 @@ void MapIndex::unloadTile(const tile_index& tile)
   }
 }
 
-void MapIndex::markOnDisc(const tile_index& tile, bool mto)
+void MapIndex::markOnDisc(const TileIndex& tile, bool mto)
 {
   if(tile.is_valid())
   {
@@ -427,13 +427,13 @@ void MapIndex::markOnDisc(const tile_index& tile, bool mto)
   }
 }
 
-bool MapIndex::isTileExternal(const tile_index& tile) const
+bool MapIndex::isTileExternal(const TileIndex& tile) const
 {
   // is onDisc
   return tile.is_valid() && mTiles[tile.z][tile.x].onDisc;
 }
 
-void MapIndex::saveTile(const tile_index& tile, World* world, bool save_unloaded)
+void MapIndex::saveTile(const TileIndex& tile, World* world, bool save_unloaded)
 {
   world->wait_for_all_tile_updates();
 
@@ -522,17 +522,17 @@ bool MapIndex::hasAGlobalWMO()
 }
 
 
-bool MapIndex::hasTile(const tile_index& tile) const
+bool MapIndex::hasTile(const TileIndex& tile) const
 {
   return tile.is_valid() && (mTiles[tile.z][tile.x].flags & 1);
 }
 
-bool MapIndex::tileAwaitingLoading(const tile_index& tile) const
+bool MapIndex::tileAwaitingLoading(const TileIndex& tile) const
 {
   return hasTile(tile) && mTiles[tile.z][tile.x].tile && !mTiles[tile.z][tile.x].tile->finishedLoading();
 }
 
-bool MapIndex::tileLoaded(const tile_index& tile) const
+bool MapIndex::tileLoaded(const TileIndex& tile) const
 {
   return hasTile(tile) && mTiles[tile.z][tile.x].tile && mTiles[tile.z][tile.x].tile->finishedLoading();
 }
@@ -547,14 +547,14 @@ void MapIndex::setAdt(bool value)
   noadt = value;
 }
 
-MapTile* MapIndex::getTile(const tile_index& tile) const
+MapTile* MapIndex::getTile(const TileIndex& tile) const
 {
   return (tile.is_valid() ? mTiles[tile.z][tile.x].tile.get() : nullptr);
 }
 
 MapTile* MapIndex::getTileAbove(MapTile* tile) const
 {
-  tile_index above(tile->index.x, tile->index.z - 1);
+  TileIndex above(tile->index.x, tile->index.z - 1);
   if (tile->index.z == 0 || (!tileLoaded(above) && !tileAwaitingLoading(above)))
   {
     return nullptr;
@@ -568,7 +568,7 @@ MapTile* MapIndex::getTileAbove(MapTile* tile) const
 
 MapTile* MapIndex::getTileLeft(MapTile* tile) const
 {
-  tile_index left(tile->index.x - 1, tile->index.z);
+  TileIndex left(tile->index.x - 1, tile->index.z);
   if (tile->index.x == 0 || (!tileLoaded(left) && !tileAwaitingLoading(left)))
   {
     return nullptr;
@@ -580,7 +580,7 @@ MapTile* MapIndex::getTileLeft(MapTile* tile) const
   return tile_left;
 }
 
-uint32_t MapIndex::getFlag(const tile_index& tile) const
+uint32_t MapIndex::getFlag(const TileIndex& tile) const
 {
   return (tile.is_valid() ? mTiles[tile.z][tile.x].flags : 0);
 }
@@ -1132,7 +1132,7 @@ void MapIndex::saveMinimapMD5translate()
 
 }
 
-void MapIndex::addTile(const tile_index& tile)
+void MapIndex::addTile(const TileIndex& tile)
 {
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
@@ -1146,7 +1146,7 @@ void MapIndex::addTile(const tile_index& tile)
   changed = true;
 }
 
-void MapIndex::removeTile(const tile_index &tile)
+void MapIndex::removeTile(const TileIndex &tile)
 {
   mTiles[tile.z][tile.x].flags &= ~0x1;
 
@@ -1169,7 +1169,7 @@ unsigned MapIndex::getNumExistingTiles()
   _n_existing_tiles = 0;
   for (int i = 0; i < 4096; ++i)
   {
-    tile_index index(i / 64, i % 64);
+    TileIndex index(i / 64, i % 64);
 
     if (hasTile(index))
     {

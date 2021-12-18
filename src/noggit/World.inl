@@ -52,7 +52,7 @@ auto World::for_maybe_chunk_at(glm::vec3 const& pos, Fun&& fun) -> std::optional
 }
 
 template<typename Fun>
-void World::for_tile_at(tile_index const& pos, Fun&& fun)
+void World::for_tile_at(TileIndex const& pos, Fun&& fun)
 {
   MapTile* tile(mapIndex.getTile(pos));
   if (tile && tile->finishedLoading())

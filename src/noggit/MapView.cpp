@@ -114,9 +114,9 @@ ACTION_CODE                                                                     
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &Noggit::bool_toggle_property::set      \
+            , &property_, &Noggit::BoolToggleProperty::set      \
             );                                                    \
-    connect ( &property_, &Noggit::bool_toggle_property::changed  \
+    connect ( &property_, &Noggit::BoolToggleProperty::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
   }                                                               \
@@ -131,9 +131,9 @@ ACTION_CODE                                                                     
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &Noggit::bool_toggle_property::set      \
+            , &property_, &Noggit::BoolToggleProperty::set      \
             );                                                    \
-    connect ( &property_, &Noggit::bool_toggle_property::changed  \
+    connect ( &property_, &Noggit::BoolToggleProperty::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
   }                                                               \
@@ -149,13 +149,13 @@ ACTION_CODE                                                                     
     action->setChecked (property_.get());                         \
     menu_->addAction (action);                                    \
     connect ( action, &QAction::toggled                           \
-            , &property_, &Noggit::bool_toggle_property::set      \
+            , &property_, &Noggit::BoolToggleProperty::set      \
             );                                                    \
-    connect ( &property_, &Noggit::bool_toggle_property::changed  \
+    connect ( &property_, &Noggit::BoolToggleProperty::changed  \
             , action, &QAction::setChecked                        \
             );                                                    \
     connect ( action, &QAction::toggled, post_);                  \
-    connect ( &property_, &Noggit::bool_toggle_property::changed, \
+    connect ( &property_, &Noggit::BoolToggleProperty::changed, \
     post_);                                                       \
   }                                                               \
   while (false)
@@ -430,7 +430,7 @@ void MapView::setupViewportOverlay()
           }
   );
 
-  connect(&_gizmo_on, &Noggit::bool_toggle_property::changed
+  connect(&_gizmo_on, &Noggit::BoolToggleProperty::changed
     ,[this](bool state)
           {
             _viewport_overlay_ui->gizmoVisibleButton->setChecked(state);
@@ -582,10 +582,10 @@ void MapView::setupTexturePainterUi()
   );
 
   connect ( TexturePalette, &Noggit::Ui::widget::visibilityChanged
-    , &_show_texture_palette_window, &Noggit::bool_toggle_property::set
+    , &_show_texture_palette_window, &Noggit::BoolToggleProperty::set
   );
 
-  connect ( &_show_texture_palette_window, &Noggit::bool_toggle_property::changed
+  connect ( &_show_texture_palette_window, &Noggit::BoolToggleProperty::changed
     ,  [this]
             {
               if ((terrainMode == editing_mode::paint || terrainMode == editing_mode::stamp)  && !ui_hidden)
@@ -639,7 +639,7 @@ void MapView::setupTexturePainterUi()
   );
   connect(this, &QObject::destroyed, _texture_palette_small, &QObject::deleteLater);
 
-  connect(&_show_texture_palette_small_window, &Noggit::bool_toggle_property::changed
+  connect(&_show_texture_palette_small_window, &Noggit::BoolToggleProperty::changed
     , _texture_palette_dock, [this]
           {
             QSignalBlocker const blocker(_show_texture_palette_small_window);
@@ -654,7 +654,7 @@ void MapView::setupTexturePainterUi()
           }
   );
   connect(_texture_palette_dock, &QDockWidget::visibilityChanged
-    , &_show_texture_palette_small_window, &Noggit::bool_toggle_property::set
+    , &_show_texture_palette_small_window, &Noggit::BoolToggleProperty::set
   );
 
   connect(texturingTool->_current_texture, &Noggit::Ui::current_texture::texture_updated
@@ -861,7 +861,7 @@ void MapView::setupNodeEditor()
 
   connect(this, &QObject::destroyed, _node_editor_dock, &QObject::deleteLater);
 
-  connect ( &_show_node_editor, &Noggit::bool_toggle_property::changed
+  connect ( &_show_node_editor, &Noggit::BoolToggleProperty::changed
     , _node_editor_dock, [this]
             {
               if (!ui_hidden)
@@ -870,7 +870,7 @@ void MapView::setupNodeEditor()
   );
 
   connect ( _node_editor_dock, &QDockWidget::visibilityChanged
-    , &_show_node_editor, &Noggit::bool_toggle_property::set
+    , &_show_node_editor, &Noggit::BoolToggleProperty::set
   );
 
 }
@@ -935,7 +935,7 @@ void MapView::setupDetailInfos()
   connect(this, &QObject::destroyed, guidetailInfos, &QObject::deleteLater);
 
 
-  connect ( &_show_detail_info_window, &Noggit::bool_toggle_property::changed
+  connect ( &_show_detail_info_window, &Noggit::BoolToggleProperty::changed
     , guidetailInfos, [this]
             {
               if (!ui_hidden)
@@ -944,7 +944,7 @@ void MapView::setupDetailInfos()
   );
 
   connect ( guidetailInfos, &Noggit::Ui::widget::visibilityChanged
-    , &_show_detail_info_window, &Noggit::bool_toggle_property::set
+    , &_show_detail_info_window, &Noggit::BoolToggleProperty::set
   );
 
   connect(NOGGIT_ACTION_MGR, &Noggit::ActionManager::onActionBegin,
@@ -1035,12 +1035,12 @@ void MapView::setupKeybindingsGui()
   _keybindings->hide();
   connect(this, &QObject::destroyed, _keybindings, &QObject::deleteLater);
 
-  connect ( &_show_keybindings_window, &Noggit::bool_toggle_property::changed
+  connect ( &_show_keybindings_window, &Noggit::BoolToggleProperty::changed
     , _keybindings, &QWidget::setVisible
   );
 
   connect ( _keybindings, &Noggit::Ui::widget::visibilityChanged
-    , &_show_keybindings_window, &Noggit::bool_toggle_property::set
+    , &_show_keybindings_window, &Noggit::BoolToggleProperty::set
   );
 }
 
@@ -2432,7 +2432,7 @@ void MapView::setupMinimap()
   connect(this, &QObject::destroyed, _minimap_dock, &QObject::deleteLater);
   connect(this, &QObject::destroyed, _minimap, &QObject::deleteLater);
 
-  connect ( &_show_minimap_window, &Noggit::bool_toggle_property::changed
+  connect ( &_show_minimap_window, &Noggit::BoolToggleProperty::changed
     , _minimap_dock, [this]
             {
               if (!ui_hidden)
@@ -2442,17 +2442,17 @@ void MapView::setupMinimap()
 
 
   connect ( _minimap_dock, &QDockWidget::visibilityChanged
-    , &_show_minimap_window, &Noggit::bool_toggle_property::set
+    , &_show_minimap_window, &Noggit::BoolToggleProperty::set
   );
 
-  connect ( &_show_minimap_borders, &Noggit::bool_toggle_property::changed
+  connect ( &_show_minimap_borders, &Noggit::BoolToggleProperty::changed
     , [this]
             {
               _minimap->draw_boundaries(_show_minimap_borders.get());
             }
   );
 
-  connect ( &_show_minimap_skies, &Noggit::bool_toggle_property::changed
+  connect ( &_show_minimap_skies, &Noggit::BoolToggleProperty::changed
     , [this]
             {
               _minimap->draw_skies(_show_minimap_skies.get());
@@ -2772,7 +2772,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
   {
     case MinimapGenMode::CURRENT_ADT:
     {
-      tile_index tile = tile_index(_camera.position);
+      TileIndex tile = TileIndex(_camera.position);
 
       if (_world->mapIndex.hasTile(tile))
       {
@@ -2831,7 +2831,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
       if (_mmap_async_index < 4096 && _mmap_render_index < progress->maximum())
       {
-        tile_index tile = tile_index(_mmap_async_index / 64, _mmap_async_index % 64);
+        TileIndex tile = TileIndex(_mmap_async_index / 64, _mmap_async_index % 64);
 
         if (_world->mapIndex.hasTile(tile))
         {
@@ -2939,7 +2939,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
       {
         if (selected_tiles->at(_mmap_async_index))
         {
-          tile_index tile = tile_index(_mmap_async_index / 64, _mmap_async_index % 64);
+          TileIndex tile = TileIndex(_mmap_async_index / 64, _mmap_async_index % 64);
 
           if (_world->mapIndex.hasTile(tile))
           {
@@ -3224,8 +3224,8 @@ void MapView::tick (float dt)
   NOGGIT_ACTION_MGR->endActionOnModalityMismatch(action_modality);
 
   // start unloading tiles
-  _world->mapIndex.enterTile (tile_index (_camera.position));
-  _world->mapIndex.unloadTiles (tile_index (_camera.position));
+  _world->mapIndex.enterTile (TileIndex (_camera.position));
+  _world->mapIndex.unloadTiles (TileIndex (_camera.position));
 
   dt = std::min(dt, 1.0f);
 
@@ -4072,7 +4072,7 @@ void MapView::update_cursor_pos()
       glm::vec3 objcoord = glm::unProject(wincoord, model_view_,projection_, viewport);
 
 
-      tile_index tile({objcoord.x, objcoord.y, objcoord.z});
+      TileIndex tile({objcoord.x, objcoord.y, objcoord.z});
 
       if (!_world->mapIndex.tileLoaded(tile))
       {
@@ -4400,7 +4400,7 @@ void MapView::keyPressEvent (QKeyEvent *event)
 
   if (_display_mode == display_mode::in_2D)
   {
-    tile_index cur_tile = tile_index(_camera.position);
+    TileIndex cur_tile = TileIndex(_camera.position);
 
     if (event->key() == Qt::Key_Up)
     {
@@ -5029,7 +5029,7 @@ void MapView::save(save_mode mode)
 
     switch (mode)
     {
-    case save_mode::current: _world->mapIndex.saveTile(tile_index(_camera.position), _world.get()); break;
+    case save_mode::current: _world->mapIndex.saveTile(TileIndex(_camera.position), _world.get()); break;
     case save_mode::changed: _world->mapIndex.saveChanged(_world.get()); break;
     case save_mode::all:     _world->mapIndex.saveall(_world.get()); break;
     }    

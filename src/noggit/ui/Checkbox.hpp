@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <noggit/bool_toggle_property.hpp>
+#include <noggit/BoolToggleProperty.hpp>
 
 #include <QtWidgets/QCheckBox>
 
@@ -14,15 +14,15 @@ namespace Noggit
     {
     public:
       CheckBox ( QString label
-               , bool_toggle_property* prop
+               , BoolToggleProperty* prop
                , QWidget* parent = nullptr
                )
         : QCheckBox (label, parent)
       {
         connect ( this, &QCheckBox::toggled
-                , prop, &bool_toggle_property::set
+                , prop, &BoolToggleProperty::set
                 );
-        connect ( prop, &bool_toggle_property::changed
+        connect ( prop, &BoolToggleProperty::changed
                 , this, &QCheckBox::setChecked
                 );
         setChecked (prop->get());

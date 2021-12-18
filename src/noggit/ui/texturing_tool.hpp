@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-#include <noggit/bool_toggle_property.hpp>
+#include <noggit/BoolToggleProperty.hpp>
 #include <noggit/Brush.h>
 #include <noggit/TextureManager.h>
 #include <noggit/unsigned_int_property.hpp>
@@ -39,7 +39,7 @@ namespace Noggit
     public:
       texturing_tool ( const glm::vec3* camera_pos
                      , MapView* map_view
-                     , bool_toggle_property* show_quick_palette
+                     , BoolToggleProperty* show_quick_palette
                      , QWidget* parent = nullptr
                      );
 
@@ -111,10 +111,10 @@ namespace Noggit
       float _spray_size;
       float _spray_pressure;
 
-      bool_toggle_property _anim_prop;
+      BoolToggleProperty _anim_prop;
       unsigned_int_property _anim_speed_prop;
       unsigned_int_property _anim_rotation_prop;
-      bool_toggle_property _overbright_prop;
+      BoolToggleProperty _overbright_prop;
 
       texturing_mode _texturing_mode;
 

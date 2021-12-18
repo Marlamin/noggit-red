@@ -34,6 +34,6 @@ void HasTileAtNode::compute()
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
 
-  _out_ports[1].out_value = std::make_shared<BooleanData>(world->mapIndex.hasTile(tile_index(xy.x, xy.y)));
+  _out_ports[1].out_value = std::make_shared<BooleanData>(world->mapIndex.hasTile(TileIndex(xy.x, xy.y)));
   _node->onDataUpdated(1);
 }
