@@ -30,4 +30,4 @@ namespace Noggit::Application {
     };
 }
 
-#endif NOGGIT_APPLICATION_CONFIGURATION_HPP
+#endif // NOGGIT_APPLICATION_CONFIGURATION_HPP
