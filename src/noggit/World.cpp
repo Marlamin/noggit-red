@@ -2570,15 +2570,13 @@ bool World::saveMinimap(tile_index const& tile_idx, MinimapRenderSettings* setti
     // Write combined file
     if (settings->combined_minimap && combined_image.has_value())
     {
-      QImage& combined_image = combined_image;
-
       QImage scaled_image = image.scaled(128, 128,  Qt::KeepAspectRatio);
 
       for (int i = 0; i < 128; ++i)
       {
         for (int j = 0; j < 128; ++j)
         {
-          combined_image.setPixelColor(tile_idx.x * 128 + j, tile_idx.z * 128 + i, scaled_image.pixelColor(j, i));
+          combined_image->setPixelColor(tile_idx.x * 128 + j, tile_idx.z * 128 + i, scaled_image.pixelColor(j, i));
         }
       }
 
