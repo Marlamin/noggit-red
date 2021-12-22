@@ -8,3 +8,15 @@
 	path = cmake
 	url = https://gitlab.com/prophecy-rp/build-dependencies.git
 	branch = dep-cmake
+[submodule "dist/listfile"]
+	path = dist/listfile
+	url = https://gitlab.com/prophecy-rp/build-dependencies.git
+	branch = dist-listfile
+[submodule "dist/definitions"]
+	path = dist/definitions
+	url = https://gitlab.com/prophecy-rp/build-dependencies.git
+	branch = dist-definitions
+[submodule "dist/themes"]
+	path = dist/themes
+	url = https://gitlab.com/prophecy-rp/build-dependencies.git
+	branch = dist-themes
