@@ -60,6 +60,9 @@ namespace Noggit::Ui::Windows
                 auto projectPath = std::filesystem::path(applicationProjectsFolderPath / projectName);
                 _selectedProject = applicationProjectService.LoadProject(projectPath, projectName);
 
+                //This to not be static, but its hard to remove
+                Noggit::Application::NoggitApplication::instance()->clientData(_selectedProject->ClientData);
+
                 close();
                 projectSelectionPage = std::make_unique<Noggit::Ui::main_window>(_noggitApplication->GetConfiguration(), _selectedProject);
                 projectSelectionPage->showMaximized();

@@ -34,12 +34,12 @@ namespace Noggit
 
       void prompt_exit(QCloseEvent* event);
       void prompt_uid_fix_failure();
-      void build_map_lists(bool isShadowlands);
+      void build_map_lists();
 
       QMenuBar* _menuBar;
 
       std::unordered_set<QWidget*> displayed_widgets;
-      void build_menu(bool isShadowlands);
+      void build_menu();
     signals:
       void exit_prompt_opened();
       void map_selected(int map_id);

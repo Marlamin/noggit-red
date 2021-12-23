@@ -6,8 +6,8 @@
 using namespace Noggit::Ui::Tools::PresetEditor::Ui;
 using namespace Noggit::Ui;
 
-PresetEditorWidget::PresetEditorWidget(QWidget *parent)
-: QMainWindow(parent, Qt::Window)
+PresetEditorWidget::PresetEditorWidget(std::shared_ptr<Project::NoggitProject> project, QWidget *parent)
+: QMainWindow(parent, Qt::Window), _project(project)
 {
   setWindowTitle("Preset Editor");
 
@@ -72,24 +72,30 @@ PresetEditorWidget::PresetEditorWidget(QWidget *parent)
   // Fill selector combo
   ui->worldSelector->addItem("None");
   ui->worldSelector->setItemData(0, QVariant(-1));
+
+  const auto& table = std::string("map");
+  auto mapTable = _project->ClientDatabase->LoadTable(table);
+
   int count = 1;
-  for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
+  auto iterator = mapTable.Records();
+  while (iterator.HasRecords())
   {
-    int map_id = i->getInt(MapDB::MapID);
-    std::string name = i->getLocalizedString(MapDB::Name);
-    int area_type = i->getUInt(MapDB::AreaType);
+      auto record = iterator.Next();
 
-    if (area_type < 0 || area_type > 4 || !World::IsEditableWorld(map_id))
-      continue;
+      int map_id = record.RecordId;
+      std::string name = record.Columns["MapName_lang"].Value;
+      int area_type = std::stoi(record.Columns["InstanceType"].Value);
 
-    ui->worldSelector->addItem(QString::number(map_id) + " - " + QString::fromUtf8 (name.c_str()));
-    ui->worldSelector->setItemData(count, QVariant(map_id), Qt::UserRole);
+      if (area_type < 0 || area_type > 4 || !World::IsEditableWorld(record))
+          continue;
 
-    auto map_internal_name = i->getString(MapDB::InternalName);
-    ui->worldSelector->setItemData(count, QVariant(QString::fromStdString(map_internal_name)), Qt::UserRole + 1);
+      ui->worldSelector->addItem(QString::number(map_id) + " - " + QString::fromUtf8(name.c_str()));
+      ui->worldSelector->setItemData(count, QVariant(map_id), Qt::UserRole);
 
-    count++;
+      auto map_internal_name = record.Columns["Directory"].Value;
+      ui->worldSelector->setItemData(count, QVariant(QString::fromStdString(map_internal_name)), Qt::UserRole + 1);
 
+      count++;
   }
 
   // Handle minimap widget

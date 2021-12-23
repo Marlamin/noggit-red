@@ -29,9 +29,8 @@
 
 using namespace Noggit::Ui::Tools::MapCreationWizard::Ui;
 
-MapCreationWizard::MapCreationWizard(QWidget* parent) : Noggit::Ui::widget(parent)
+MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> project, QWidget* parent) : Noggit::Ui::widget(parent), _project(project)
 {
-
   auto layout = new QHBoxLayout(this);
 
   // Left side
@@ -69,20 +68,27 @@ MapCreationWizard::MapCreationWizard(QWidget* parent) : Noggit::Ui::widget(paren
   _corpse_map_id->setItemData(0, QVariant (-1));
 
   // Fill selector combo
+
+  const auto& table = std::string("map");
+  auto mapTable = _project->ClientDatabase->LoadTable(table);
+
   int count = 0;
-  for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
+  auto iterator = mapTable.Records();
+  while (iterator.HasRecords())
   {
-    int map_id = i->getInt(MapDB::MapID);
-    std::string name = i->getLocalizedString(MapDB::Name);
-    int area_type = i->getUInt(MapDB::AreaType);
+      auto record = iterator.Next();
 
-    if (area_type < 0 || area_type > 4 || !World::IsEditableWorld(map_id))
-      continue;
+      int map_id =  record.RecordId;
+      std::string name = record.Columns["MapName_lang"].Value;
+      int area_type = std::stoi(record.Columns["InstanceType"].Value);
 
-    _corpse_map_id->addItem(QString::number(map_id) + " - " + QString::fromUtf8 (name.c_str()));
-    _corpse_map_id->setItemData(count + 1, QVariant (map_id));
+      if (area_type < 0 || area_type > 4 || !World::IsEditableWorld(record))
+          continue;
 
-    count++;
+      _corpse_map_id->addItem(QString::number(map_id) + " - " + QString::fromUtf8(name.c_str()));
+      _corpse_map_id->setItemData(count + 1, QVariant(map_id));
+
+      count++;
   }
 
   auto add_btn = new QPushButton("New",this);
