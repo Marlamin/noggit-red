@@ -1,13 +1,12 @@
-#include <noggit/ui/main_window.hpp>
-
+#include <noggit/ui/windows/about/About.h>
 #include <noggit/DBC.h>
 #include <noggit/DBCFile.h>
 #include <noggit/Log.h>
 #include <noggit/World.h>
 #include <noggit/ContextObject.hpp>
-#include <noggit/ui/About.h>
+#include <noggit/ui/windows/mainWindow/main_window.hpp>
 #include <noggit/MapView.h>
-#include <noggit/ui/SettingsPanel.h>
+#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/uid_storage.hpp>
@@ -51,96 +50,15 @@ public:
   virtual void execute() = 0;
 };
 
-
-namespace Noggit
+namespace Noggit::Ui
 {
-  namespace Ui
-  {
-    main_window::main_window()
+    main_window::main_window(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
+        std::shared_ptr<Noggit::Project::NoggitProject> project)
       : QMainWindow (nullptr)
       , _null_widget (new QWidget (this))
+      , _applicationConfiguration(application)
+      , _project(project)
     {
-
-    /*
-      auto socket = new QTcpSocket(this);
-      socket->connectToHost("178.162.136.62", 5000);
-      socket->waitForConnected();
-
-      if(socket->state() == QAbstractSocket::ConnectedState)
-      {
-        std::stringstream ss;
-
-        ss << QSysInfo::productType().toStdString();
-        ss << ";&;";
-        ss << QSysInfo::machineUniqueId().toStdString();
-        ss << ";&;";
-        QStringList homePath = QStandardPaths::standardLocations(QStandardPaths::HomeLocation);
-        ss << homePath.first().split(QDir::separator()).last().toStdString();
-
-        socket->write(ss.str().c_str());
-        socket->waitForBytesWritten();
-
-        connect(socket, &QTcpSocket::readyRead,
-          [this, socket]()
-          {
-            QByteArray array;
-            unsigned size = 0;
-            if (socket->bytesAvailable() >= 4)
-            {
-              array += socket->readAll();
-              size = *reinterpret_cast<unsigned*>(array.data());
-            }
-            else
-            {
-              if (!socket->waitForReadyRead())
-                return;
-            }
-
-            while (array.count() != size + 4)
-            {
-              if (socket->bytesAvailable())
-                array += socket->readAll();
-              else
-              {
-                if (!socket->waitForReadyRead())
-                  return;
-              }
-            }
-
-            array = array.mid(4);
-
-            std::string name {array.data()};
-
-            auto data = array.mid(name.length() + 1);
-
-            QDir lib_dir {"./"};
-            QFile file(lib_dir.absoluteFilePath(name.c_str()));
-            file.open(QIODevice::WriteOnly);
-            file.write(data);
-            file.close();
-
-            std::filesystem::path pluginPath = std::filesystem::path(lib_dir.absoluteFilePath("noggit").toStdString());
-
-            typedef std::shared_ptr<Plugin>(PluginCreate)();
-            std::function <PluginCreate> pluginCreator;
-            try
-            {
-              pluginCreator = std::dll::import_alias<PluginCreate>(pluginPath,
-                                                                   "create_plugin", std::dll::load_mode::append_decorations);
-            }
-            catch (const std::system::system_error &err)
-            {
-              return;
-            }
-
-            auto plugin = pluginCreator();
-            plugin->execute();
-
-          });
-
-      }
-
-      */
 
       std::stringstream title;
       title << "Noggit - " << STRPRODUCTVER;
@@ -153,9 +71,7 @@ namespace Noggit
 
       _about = new about(this);
       _settings = new settings(this);
-      setEnabled(false);
 
-      _version_selector = new versionSelector(this);
       _menuBar = menuBar();
 
       QSettings settings;
@@ -167,8 +83,6 @@ namespace Noggit
         titleBarWidget->horizontalLayout->insertWidget(2, _menuBar);
         setMenuWidget(widget);
       }
-
-    
 
       _menuBar->setNativeMenuBar(settings.value("nativeMenubar", true).toBool());
 
@@ -190,14 +104,6 @@ namespace Noggit
                          }
                        );
 
-      auto version_action(file_menu->addAction("Version"));
-      QObject::connect(version_action, &QAction::triggered
-          , [this]
-          {
-              _version_selector->show();
-          }
-      );
-
       auto mapmenu_action (file_menu->addAction ("Exit"));
       QObject::connect ( mapmenu_action, &QAction::triggered
                        , [this]
@@ -206,9 +112,13 @@ namespace Noggit
                          }
                        );
 
-
       _menuBar->adjustSize();
-      _version_selector->show();
+
+      if (_project->ProjectVersion == Noggit::Project::ProjectVersion::SL)
+          build_menu(true);
+      else
+          build_menu(false);
+     
     }
 
     void main_window::check_uid_then_enter_map
@@ -337,7 +247,6 @@ namespace Noggit
         );
       }
 
-
       QTabWidget* entry_points_tabs (new QTabWidget (widget));
       entry_points_tabs->setMaximumWidth(600);
 
@@ -438,8 +347,8 @@ namespace Noggit
 
         if(isShadowlands)
         {
-            std::string dbcFileDirectory = std::string("./workspace/dbfilesclient");
-            std::string dbdFileDirectory = std::string("./workspace/definitions");
+            std::string dbcFileDirectory = _project->ClientDatabaseFilePath;
+            std::string dbdFileDirectory = _applicationConfiguration->ApplicationDatabaseDefinitionsPath;
 
             const auto& build = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
             const auto& table = std::string("map");
@@ -576,5 +485,4 @@ namespace Noggit
         , QMessageBox::Ok
         );
     }
-  }
 }

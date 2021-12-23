@@ -9,6 +9,8 @@ namespace Noggit::Application {
         auto noggitApplicationConfiguration = NoggitApplicationConfiguration();
         noggitApplicationConfiguration.ApplicationProjectPath = std::string("projects");
         noggitApplicationConfiguration.ApplicationThemePath = std::string("themes");
+        noggitApplicationConfiguration.ApplicationDatabaseDefinitionsPath = std::string("definitions");
+        noggitApplicationConfiguration.ApplicationListFilePath = std::string("listfile.csv");
 
         noggitApplicationConfiguration.GraphicsConfiguration = NoggitApplicationGraphicsConfiguration();
         noggitApplicationConfiguration.GraphicsConfiguration.SwapChainDepth = QSurfaceFormat::TripleBuffer;
@@ -22,6 +24,7 @@ namespace Noggit::Application {
 
         PersistConfigurationState(outputFile, noggitApplicationConfiguration);
     }
+
     void NoggitApplicationConfigurationWriter::PersistConfigurationState(QFile& outputFile, const NoggitApplicationConfiguration& configuration)
     {
         outputFile.open(QIODevice::WriteOnly);
@@ -52,6 +55,8 @@ namespace Noggit::Application {
 
         rootConfiguration.insert("ApplicationProjectPath", configuration.ApplicationProjectPath.c_str());
         rootConfiguration.insert("ApplicationThemePath", configuration.ApplicationThemePath.c_str());
+        rootConfiguration.insert("ApplicationDatabaseDefinitionsPath", configuration.ApplicationDatabaseDefinitionsPath.c_str());
+        rootConfiguration.insert("ApplicationListFilePath", configuration.ApplicationListFilePath.c_str());
         rootConfiguration.insert("GraphicsConfiguration", graphicsConfiguration);
         rootConfiguration.insert("LoggingConfiguration", loggingConfiguration);
 

@@ -1,13 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/Log.h>
-
 #include <noggit/errorHandling.h>
-#include <noggit/ui/main_window.hpp>
 #include <opengl/context.hpp>
 #include <util/exception_to_string.hpp>
-
 #include <external/framelesshelper/framelesswindowsmanager.h>
 #include <string>
 #include <string_view>
@@ -21,41 +17,20 @@
 #include <codecvt>
 #include <string>
 
-namespace Noggit::application
-{
-    void noggit_terminate_handler()
-    {
-        std::string const reason{ util::exception_to_string(std::current_exception()) };
-
-        if (qApp)
-        {
-            QMessageBox::critical(nullptr
-                , "std::terminate"
-                , QString::fromStdString(reason)
-                , QMessageBox::Close
-                , QMessageBox::Close
-            );
-        }
-
-        LogError << "std::terminate: " << reason << std::endl;
-    }
-}
-
 int main(int argc, char *argv[])
 {
   Noggit::RegisterErrorHandlers();
-  std::set_terminate(Noggit::application::noggit_terminate_handler);
+  std::set_terminate(Noggit::Application::NoggitApplication::TerminationHandler);
 
   QApplication::setStyle(QStyleFactory::create("Fusion"));
-  //QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-  QApplication qapp (argc, argv);
-  qapp.setApplicationName ("Noggit");
-  qapp.setOrganizationName ("Noggit");
+  QApplication qApplication (argc, argv);
+  qApplication.setApplicationName ("Noggit");
+  qApplication.setOrganizationName ("Noggit");
 
-  auto noggit = Noggit::Application::Noggit::instance();
+  auto noggit = Noggit::Application::NoggitApplication::instance();
   noggit->Initalize(argc, argv);
   noggit->Start();
 
-  return qapp.exec();
+  return qApplication.exec();
 }

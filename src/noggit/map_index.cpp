@@ -67,7 +67,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << ".wdt";
 
-  BlizzardArchive::ClientFile theFile(filename.str(), Noggit::Application::Noggit::instance()->clientData());
+  BlizzardArchive::ClientFile theFile(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData());
 
   uint32_t fourcc;
   uint32_t size;
@@ -252,7 +252,7 @@ void MapIndex::save()
     //  }
   }
 
-  BlizzardArchive::ClientFile f(filename.str(), Noggit::Application::Noggit::instance()->clientData());
+  BlizzardArchive::ClientFile f(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData());
   f.setBuffer(wdtFile.data);
   f.save();
   f.close();
@@ -362,7 +362,7 @@ MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading)
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
-  if (!Noggit::Application::Noggit::instance()->clientData()->exists(filename.str()))
+  if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists(filename.str()))
   {
     LogError << "The requested tile \"" << filename.str() << "\" does not exist! Oo" << std::endl;
     return nullptr;
@@ -603,7 +603,7 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 {
 	uint32_t highGUID = 0;
 
-    BlizzardArchive::ClientFile theFile(pFilename, Noggit::Application::Noggit::instance()->clientData());
+    BlizzardArchive::ClientFile theFile(pFilename, Noggit::Application::NoggitApplication::instance()->clientData());
     if (theFile.isEof())
     {
       return highGUID;
@@ -718,7 +718,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
       std::stringstream filename;
       filename << "World\\Maps\\" << basename << "\\" << basename << "_" << x << "_" << z << ".adt";
-      BlizzardArchive::ClientFile file(filename.str(), Noggit::Application::Noggit::instance()->clientData());
+      BlizzardArchive::ClientFile file(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData());
 
       if (file.isEof())
       {
@@ -1049,14 +1049,14 @@ void MapIndex::loadMaxUID()
 
 void MapIndex::loadMinimapMD5translate()
 {
-  if (!Noggit::Application::Noggit::instance()->clientData()->exists("textures/minimap/md5translate.trs"))
+  if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists("textures/minimap/md5translate.trs"))
   {
     LogError << "md5translate.trs was not found. "
                 "Noggit will generate a new one in the project directory on minimap save." << std::endl;
     return;
   }
 
-  BlizzardArchive::ClientFile md5trs_file("textures/minimap/md5translate.trs", Noggit::Application::Noggit::instance()->clientData());
+  BlizzardArchive::ClientFile md5trs_file("textures/minimap/md5translate.trs", Noggit::Application::NoggitApplication::instance()->clientData());
 
   size_t size = md5trs_file.getSize();
   void* buffer_raw = std::malloc(size);

@@ -90,7 +90,7 @@ void LiquidTextureManager::upload()
     unsigned n_frames = 30;
     for (int j = 0; j < N_FRAMES; ++j)
     {
-      if (!Noggit::Application::Noggit::instance()->clientData()->exists(filename + std::to_string((j + 1)) + ".blp"))
+      if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists(filename + std::to_string((j + 1)) + ".blp"))
       {
         n_frames = j;
         break;

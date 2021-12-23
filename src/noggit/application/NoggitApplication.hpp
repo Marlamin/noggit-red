@@ -6,11 +6,11 @@
 #include <memory>
 #include <filesystem>
 #include <ClientData.hpp>
-#include <noggit/ui/main_window.hpp>
-#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/ui/windows/mainWindow/main_window.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfigurationReader.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfigurationWriter.hpp>
+#include <noggit/ui/windows/projectSelection/noggitredprojectpage.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -27,15 +27,21 @@
 #include <QJsonDocument>
 #include <string>
 #include <revision.h>
+#include <util/exception_to_string.hpp>
+
+namespace Noggit::Ui::Windows
+{
+    class noggitRedProjectPage;
+}
 
 namespace Noggit::Application {
 
-    class Noggit
+    class NoggitApplication
     {
     public:
-        static Noggit* instance()
+        static NoggitApplication* instance()
         {
-            static Noggit inst{};
+            static NoggitApplication inst{};
             return &inst;
         }
 
@@ -43,16 +49,17 @@ namespace Noggit::Application {
 
         void Start();
         void Initalize(int argc, char* argv[]);
+        std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> GetConfiguration();
+        static void TerminationHandler();
     private:
-        Noggit();
+        NoggitApplication() = default;
 
-        std::unique_ptr<Ui::main_window> main_window;
+        std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> _applicationConfiguration;
+        std::unique_ptr<Noggit::Ui::Windows::noggitRedProjectPage> projectSelectionPage;
         std::unique_ptr<BlizzardArchive::ClientData> _client_data;
 
         std::filesystem::path wowpath;
         std::string project_path;
-
-        bool fullscreen;
     };
 
 }

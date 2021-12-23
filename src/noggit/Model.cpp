@@ -31,7 +31,7 @@ Model::Model(const std::string& filename, Noggit::NoggitRenderContext context)
 
 void Model::finishLoading()
 {
-  BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::Noggit::instance()->clientData());
+  BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::NoggitApplication::instance()->clientData());
 
   if (f.isEof() || !f.getSize())
   {
@@ -284,7 +284,7 @@ void Model::initCommon(const BlizzardArchive::ClientFile& f)
     // indices - allocate space, too
     std::string lodname = _file_key.filepath().substr(0, _file_key.filepath().length() - 3);
     lodname.append("00.skin");
-    BlizzardArchive::ClientFile g(lodname, Noggit::Application::Noggit::instance()->clientData());
+    BlizzardArchive::ClientFile g(lodname, Noggit::Application::NoggitApplication::instance()->clientData());
     if (g.isEof()) {
       LogError << "loading skinfile " << lodname << std::endl;
       g.close();
@@ -1101,10 +1101,10 @@ void Model::initAnimated(const BlizzardArchive::ClientFile& f)
       std::string lodname = _file_key.filepath().substr(0, _file_key.filepath().length() - 3);
       std::stringstream tempname;
       tempname << lodname << anim.animID << "-" << anim.subAnimID << ".anim";
-      if (Noggit::Application::Noggit::instance()->clientData()->exists(tempname.str()))
+      if (Noggit::Application::NoggitApplication::instance()->clientData()->exists(tempname.str()))
       {
         animation_files.push_back(std::make_unique<BlizzardArchive::ClientFile>(tempname.str(),
-            Noggit::Application::Noggit::instance()->clientData()));
+            Noggit::Application::NoggitApplication::instance()->clientData()));
       }
     }
   }

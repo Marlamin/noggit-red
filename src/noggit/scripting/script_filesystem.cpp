@@ -4,7 +4,7 @@
 #include <noggit/scripting/script_filesystem.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_context.hpp>
-#include <noggit/ui/SettingsPanel.h>
+#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
 
 #include <fstream>
 #include <QtWidgets/QMessageBox>

@@ -19,12 +19,15 @@ namespace Noggit::Application {
                 noggitApplicationConfiguration.ApplicationProjectPath = noggitConfiguration["ApplicationProjectPath"].toString().toStdString();
             if (noggitConfiguration.contains("ApplicationThemePath"))
                 noggitApplicationConfiguration.ApplicationThemePath = noggitConfiguration["ApplicationThemePath"].toString().toStdString();
+            if (noggitConfiguration.contains("ApplicationDatabaseDefinitionsPath"))
+                noggitApplicationConfiguration.ApplicationDatabaseDefinitionsPath = noggitConfiguration["ApplicationDatabaseDefinitionsPath"].toString().toStdString();
+            if (noggitConfiguration.contains("ApplicationListFilePath"))
+                noggitApplicationConfiguration.ApplicationListFilePath = noggitConfiguration["ApplicationListFilePath"].toString().toStdString();
 
             if (noggitConfiguration.contains("GraphicsConfiguration") && noggitConfiguration["GraphicsConfiguration"].isObject())
             {
                 auto noggitGraphicsConfiguration = noggitConfiguration["GraphicsConfiguration"].toObject();
                 noggitApplicationConfiguration.GraphicsConfiguration = NoggitApplicationGraphicsConfiguration();
-
 
                 if (noggitGraphicsConfiguration.contains("SwapChainDepth"))
                 {

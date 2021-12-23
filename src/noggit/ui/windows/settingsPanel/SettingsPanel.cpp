@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ui/SettingsPanel.h>
+#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
 #include <noggit/Log.h>
 
 #include <noggit/TextureManager.h>

@@ -22,7 +22,7 @@
 #include <noggit/ui/Toolbar.h> // Noggit::Ui::toolbar
 #include <noggit/ui/Water.h>
 #include <noggit/ui/ZoneIDBrowser.h>
-#include <noggit/ui/main_window.hpp>
+#include <noggit/ui/windows/mainWindow/main_window.hpp>
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/ShaderTool.hpp>
 #include <noggit/ui/TerrainTool.hpp>

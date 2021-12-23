@@ -4,16 +4,17 @@
 #include <noggit/MapView.h>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
-
+#include <noggit/ui/windows/versionSelection/VersionSelector.h>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/project/ApplicationProject.h>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QStackedWidget>
-
 #include <string>
+#include <memory>
 #include <unordered_set>
 
-#include <noggit/ui/VersionSelector.h>
-
 class StackedWidget;
+
 
 namespace Noggit
 {
@@ -28,7 +29,8 @@ namespace Noggit
       Q_OBJECT
 
     public:
-      main_window();
+      main_window(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
+          std::shared_ptr<Noggit::Project::NoggitProject> project);
 
       void prompt_exit(QCloseEvent* event);
       void prompt_uid_fix_failure();
@@ -43,6 +45,9 @@ namespace Noggit
       void map_selected(int map_id);
 
     private:
+      std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> _applicationConfiguration;
+      std::shared_ptr<Noggit::Project::NoggitProject> _project;
+
       void loadMap (int mapID);
 
       void check_uid_then_enter_map ( glm::vec3 pos
@@ -85,7 +90,6 @@ namespace Noggit
       QWidget* _null_widget;
       MapView* _map_view;
       StackedWidget* _stack_widget;
-      versionSelector* _version_selector;
 
       Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard* _map_creation_wizard;
       QMetaObject::Connection _map_wizard_connection;

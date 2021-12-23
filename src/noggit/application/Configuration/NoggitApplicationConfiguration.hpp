@@ -25,6 +25,8 @@ namespace Noggit::Application {
     {
         std::string ApplicationProjectPath;
         std::string ApplicationThemePath;
+        std::string ApplicationListFilePath;
+        std::string ApplicationDatabaseDefinitionsPath;
         NoggitApplicationGraphicsConfiguration GraphicsConfiguration;
         NoggitApplicationLoggingConfiguration LoggingConfiguration;
     };

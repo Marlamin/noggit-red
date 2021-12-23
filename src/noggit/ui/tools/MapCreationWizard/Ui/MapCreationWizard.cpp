@@ -3,7 +3,7 @@
 #include "MapCreationWizard.hpp"
 
 #include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/main_window.hpp>
+#include <noggit/ui/windows/mainWindow/main_window.hpp>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <noggit/Log.h>

@@ -192,9 +192,9 @@ collect_files(noggit_application_sources src/noggit/application TRUE "*.cpp" "")
 collect_files(noggit_data_sources src/noggit/data FALSE "*.cpp" "")
 collect_files(noggit_simulation_sources src/noggit/simulation FALSE "*.cpp" "")
 collect_files(noggit_project_sources src/noggit/project FALSE "*.cpp" "")
-collect_files(noggit_ui_sources src/noggit/ui FALSE "*.cpp" "")
+collect_files(noggit_ui_sources src/noggit/ui TRUE "*.cpp" "")
 collect_files(noggit_scripting_sources src/noggit/scripting TRUE "*.cpp" "")
-
+collect_files(noggit_services_sources src/noggit/services TRUE "*.cpp" "")
 collect_files(math_sources src/math FALSE "*.cpp" "")
 collect_files(opengl_sources src/opengl FALSE "*.cpp" "")
 
@@ -219,9 +219,9 @@ collect_files(noggit_application_headers src/noggit/application TRUE "*.h;*.hpp"
 collect_files(noggit_data_sources src/noggit/data FALSE "*.h;*.hpp" "")
 collect_files(noggit_simulation_sources src/noggit/simulation FALSE "*.h;*.hpp" "")
 collect_files(noggit_project_sources src/noggit/project FALSE "*.h;*.hpp" "")
-collect_files(noggit_ui_headers src/noggit/ui FALSE "*.h;*.hpp" "")
+collect_files(noggit_ui_headers src/noggit/ui TRUE "*.h;*.hpp" "")
 collect_files(noggit_scripting_headers src/noggit/scripting TRUE "*.h;*.hpp" "")
-
+collect_files(noggit_services_headers src/noggit/services TRUE "*.h;*.hpp" "")
 collect_files(math_headers src/math FALSE "*.h;*.hpp" "")
 collect_files(opengl_headers src/opengl FALSE "*.h;*.hpp" "")
 collect_files(shaders src/glsl FALSE "*.glsl" "")
@@ -268,6 +268,8 @@ assign_source_group(
   ${noggit_root_headers}
   ${noggit_ui_sources}
   ${noggit_ui_headers}
+  ${noggit_services_sources}
+  ${noggit_services_headers}
   ${noggit_scripting_sources} 
   ${noggit_scripting_headers}
   ${opengl_sources} 
@@ -316,6 +318,8 @@ ADD_EXECUTABLE(noggit
   ${noggit_root_sources}
   ${noggit_ui_sources}
   ${noggit_scripting_sources}
+  ${noggit_services_sources}
+  ${noggit_services_headers}
   ${opengl_sources}
   ${database_sources}
   ${database_headers}
@@ -377,11 +381,29 @@ TARGET_LINK_LIBRARIES (noggit
   sol2::sane
 )
 
-# deploy additional resources
+#add distribution themes
 add_custom_command(TARGET noggit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${PROJECT_SOURCE_DIR}/dist/themes"
-        $<TARGET_FILE_DIR:noggit>/themes)
+        $<TARGET_FILE_DIR:noggit>/themes
+        COMMAND ${CMAKE_COMMAND} -E remove -f 
+        $<TARGET_FILE_DIR:noggit>/themes/.git)
+
+#add distribution definitions
+add_custom_command(TARGET noggit POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/dist/listfile"
+        $<TARGET_FILE_DIR:noggit>
+        COMMAND ${CMAKE_COMMAND} -E remove -f 
+        $<TARGET_FILE_DIR:noggit>/.git )
+
+#add distribution listfile
+add_custom_command(TARGET noggit POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/dist/definitions"
+        $<TARGET_FILE_DIR:noggit>/definitions
+        COMMAND ${CMAKE_COMMAND} -E remove -f 
+        $<TARGET_FILE_DIR:noggit>/definitions/.git)
 
 SET_PROPERTY(TARGET noggit PROPERTY AUTOMOC ON)
 

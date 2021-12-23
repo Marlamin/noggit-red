@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ui/VersionSelector.h>
-#include <noggit/ui/main_window.hpp>
+#include <noggit/ui/windows/versionSelection/VersionSelector.h>
+#include <noggit/ui/windows/mainWindow/main_window.hpp>
 namespace Noggit
 {
   namespace Ui

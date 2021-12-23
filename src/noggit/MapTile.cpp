@@ -106,7 +106,7 @@ void MapTile::finishLoading()
   if (finished)
     return;
 
-  BlizzardArchive::ClientFile theFile(_file_key, Noggit::Application::Noggit::instance()->clientData());
+  BlizzardArchive::ClientFile theFile(_file_key, Noggit::Application::NoggitApplication::instance()->clientData());
 
   Log << "Opening tile " << index.x << ", " << index.z << " (\"" << _file_key.stringRepr() << "\") from " << (theFile.isExternal() ? "disk" : "MPQ") << "." << std::endl;
 
@@ -1290,7 +1290,7 @@ void MapTile::saveTile(World* world)
 
 
   {
-    BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::Noggit::instance()->clientData());
+    BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::NoggitApplication::instance()->clientData());
     f.setBuffer(lADTFile.data);
     f.save();
   }

@@ -1,17 +1,9 @@
 #include <noggit/application/NoggitApplication.hpp>
-
-#include "noggit/project/_Project.h"
+#include <noggit/project/ApplicationProject.h>
 
 namespace Noggit::Application
 {
-
-  Noggit::Noggit()
-  : fullscreen(false)
-  {
-  
-  }
-
-  void Noggit::Initalize(int argc, char* argv[])
+  void NoggitApplication::Initalize(int argc, char* argv[])
   {
 	  InitLogging();
 
@@ -59,6 +51,29 @@ namespace Noggit::Application
 
 	  Log << "Noggit Configuration File Loaded! Creating New File: " << nogginConfigurationPath << std::endl;
 
+	  auto noggitProjectPath = applicationConfiguration.ApplicationProjectPath;
+	  if (!std::filesystem::exists(noggitProjectPath))
+	  {
+		  std::filesystem::create_directory(noggitProjectPath);
+		  Log << "Noggit Project Folder Not Loaded! Creating..." << std::endl;
+	  }
+
+	  auto listFilePath = applicationConfiguration.ApplicationListFilePath;
+	  if (!std::filesystem::exists(listFilePath))
+	  {
+		  LogError << "Unable to find listfile! please reinstall Noggit Red, or download from wow.tools" << std::endl;
+	  }
+
+	  Log << "Listfile found! : " << listFilePath << std::endl;
+
+	  auto databaseDefinitionPath = applicationConfiguration.ApplicationDatabaseDefinitionsPath;
+	  if (!std::filesystem::exists(databaseDefinitionPath))
+	  {
+		  LogError << "Unable to find database definitions! please reinstall Noggit Red, or download from wow.tools" << std::endl;
+	  }
+
+	  Log << "Database Definitions found! : " << databaseDefinitionPath << std::endl;
+
 	  //Initalise OpenGL Context
 	  if (!QGLFormat::hasOpenGL())
 	  {
@@ -90,10 +105,12 @@ namespace Noggit::Application
 	  LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
 	  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
 
-	  //All of the below should be Project Initalisation 
-	  QSettings settings;
 
+	  _applicationConfiguration = std::make_shared<Noggit::Application::NoggitApplicationConfiguration>(applicationConfiguration);
+	  //All of the below should be Project Initalisation
 	  srand(::time(nullptr));
+
+	  QSettings settings;
 	  QDir path(settings.value("project/game_path").toString());
 
 	  wowpath = path.absolutePath().toStdString();
@@ -109,22 +126,35 @@ namespace Noggit::Application
 	  settings.setValue("project/path", QString::fromStdString(project_path));
   }
 
-  void Noggit::Start()
+  void NoggitApplication::Start()
   {
       _client_data = std::make_unique<BlizzardArchive::ClientData>(wowpath.string(), BlizzardArchive::ClientVersion::WOTLK, BlizzardArchive::Locale::AUTO, project_path);
 
       OpenDBs();
 
-      main_window = std::make_unique<Ui::main_window>();
+	  projectSelectionPage = std::make_unique<Noggit::Ui::Windows::noggitRedProjectPage>(this);
+	  projectSelectionPage->show();
+  }
 
-      if (fullscreen)
-      {
-          main_window->showFullScreen();
-      }
-      else
-      {
-          main_window->showMaximized();
-      }
+  std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> NoggitApplication::GetConfiguration()
+  {
+	  return _applicationConfiguration;
+  }
+
+  void NoggitApplication::TerminationHandler()
+  {
+	  std::string const reason{ ::util::exception_to_string(std::current_exception()) };
+
+	  if (qApp)
+	  {
+		  QMessageBox::critical(nullptr
+			  , "std::terminate"
+			  , QString::fromStdString(reason)
+			  , QMessageBox::Close
+			  , QMessageBox::Close
+		  );
+	  }
+	  LogError << "std::terminate: " << reason << std::endl;
   }
 }
 
