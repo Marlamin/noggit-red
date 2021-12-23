@@ -380,7 +380,7 @@ TARGET_LINK_LIBRARIES (noggit
 # deploy additional resources
 add_custom_command(TARGET noggit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/resources/themes"
+        "${PROJECT_SOURCE_DIR}/dist/themes"
         $<TARGET_FILE_DIR:noggit>/themes)
 
 SET_PROPERTY(TARGET noggit PROPERTY AUTOMOC ON)
