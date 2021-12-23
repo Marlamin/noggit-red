@@ -7,7 +7,7 @@
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
-#include <Qfile>
+#include <QFile>
 #include <ui_DownloadFileDialog.h>
 
 namespace Noggit::Ui
