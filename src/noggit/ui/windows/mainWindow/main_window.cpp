@@ -345,14 +345,8 @@ namespace Noggit::Ui
 
         if(isShadowlands)
         {
-            std::string dbcFileDirectory = _project->ClientDatabaseFilePath;
-            std::string dbdFileDirectory = _applicationConfiguration->ApplicationDatabaseDefinitionsPath;
-
-            const auto& build = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
             const auto& table = std::string("map");
-
-            auto blizzardDatabase = BlizzardDatabaseLib::BlizzardDatabase(dbcFileDirectory, dbdFileDirectory, build);
-            auto mapTable = blizzardDatabase.LoadTable(table);
+            auto mapTable = _project->ClientDatabase->LoadTable(table);
 
             auto iterator = mapTable.Records();
             while (iterator.HasRecords())

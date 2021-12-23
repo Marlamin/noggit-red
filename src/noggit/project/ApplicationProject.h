@@ -4,6 +4,7 @@
 #include <memory>
 #include <blizzard-archive-library/include/CASCArchive.hpp>
 #include <blizzard-archive-library/include/ClientFile.hpp>
+#include <blizzard-database-library/include/BlizzardDatabase.h>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/ui/windows/downloadFileDialog/DownloadFileDialog.h>
 #include <QJsonDocument>
@@ -46,8 +47,8 @@ namespace Noggit::Project
     {
     public:
         std::string ProjectName;
-        std::string ClientDatabaseFilePath;
         ProjectVersion ProjectVersion;
+        std::shared_ptr<BlizzardDatabaseLib::BlizzardDatabase> ClientDatabase;
     };
 
     class ApplicationProject
@@ -76,7 +77,7 @@ namespace Noggit::Project
             project.Client.ClientVersion = clientVersion;
             project.Client.ClientPath = clientPath.generic_string();
 
-            auto projectConfigurationFilePath = (projectPath / (projectName + std::string(".json")));
+            auto projectConfigurationFilePath = (projectPath / (projectName + std::string(".noggitproj")));
             auto projectConfigurationFile = QFile(QString::fromStdString(projectConfigurationFilePath.generic_string()));
             projectConfigurationFile.open(QIODevice::WriteOnly);
 
@@ -179,7 +180,7 @@ namespace Noggit::Project
 
         std::shared_ptr<NoggitProject> LoadProject(std::filesystem::path projectPath, std::string projectName)
         {
-            auto projectConfigurationFilePath = (projectPath / (projectName + std::string(".json")));
+            auto projectConfigurationFilePath = (projectPath / (projectName + std::string(".noggitproj")));
 
             QFile inputFile(QString::fromStdString(projectConfigurationFilePath.generic_string()));
             inputFile.open(QIODevice::ReadOnly);
@@ -202,17 +203,27 @@ namespace Noggit::Project
                         auto clientVersion = projectClientConfiguration["ClientVersion"].toString().toStdString();
 
                         auto clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
+                        auto clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
                         if (clientVersion == std::string("Shadowlands"))
+                        {
                             clientVersionEnum = Noggit::Project::ProjectVersion::SL;
+                            clientBuild = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
+                        }
+                          
                         if (clientVersion == std::string("Wrath Of The Lich King"))
+                        {
                             clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
-         
+                            clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
+                        }
+
                         project.ProjectVersion = clientVersionEnum;
-                        
+
+                        std::string dbcFileDirectory = (projectPath / "workspace" / "DBFilesClient").generic_string();
+                        std::string dbdFileDirectory = _configuration->ApplicationDatabaseDefinitionsPath;
+
+                        project.ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(dbcFileDirectory, dbdFileDirectory, clientBuild);
                     }
                 }
-
-                project.ClientDatabaseFilePath = (projectPath / "workspace" / "DBFilesClient").generic_string();
             }
 
             return std::make_shared<NoggitProject>(project);
