@@ -29,6 +29,7 @@
 #include <unordered_set>
 #include <vector>
 #include <array>
+#include <noggit/project/ApplicationProject.h>
 
 namespace Noggit
 {
@@ -347,7 +348,7 @@ public:
   // used after the uid fix all
   void unload_every_model_and_wmo_instance();
 
-	static bool IsEditableWorld(int pMapId);
+	static bool IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
 
   void clearHeight(glm::vec3 const& pos);
   void clearAllModelsOnADT(TileIndex const& tile);

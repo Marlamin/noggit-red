@@ -30,7 +30,9 @@ int main(int argc, char *argv[])
 
   auto noggit = Noggit::Application::NoggitApplication::instance();
   noggit->Initalize(argc, argv);
-  noggit->Start();
+
+  auto projectSelectionPage = std::make_unique<Noggit::Ui::Windows::noggitRedProjectPage>(noggit);
+  projectSelectionPage->show();
 
   return qApplication.exec();
 }

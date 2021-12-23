@@ -112,12 +112,6 @@ namespace Noggit::Application
 
   }
 
-  void NoggitApplication::Start()
-  {
-	  projectSelectionPage = std::make_unique<Noggit::Ui::Windows::noggitRedProjectPage>(this);
-	  projectSelectionPage->show();
-  }
-
   std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> NoggitApplication::GetConfiguration()
   {
 	  return _applicationConfiguration;

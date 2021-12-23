@@ -19,12 +19,12 @@ namespace Noggit
       class PresetEditorWidget : public QMainWindow
       {
       public:
-        PresetEditorWidget(QWidget* parent = nullptr);
+        PresetEditorWidget(std::shared_ptr<Project::NoggitProject> project, QWidget* parent = nullptr);
         ~PresetEditorWidget();
 
       private:
         void setupConnectsCommon();
-
+        std::shared_ptr<Project::NoggitProject> _project;
         ::Ui::PresetEditor* ui;
         ::Ui::PresetEditorOverlay* viewport_overlay_ui;
         QFileSystemModel* _model;

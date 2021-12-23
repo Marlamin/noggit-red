@@ -45,10 +45,9 @@ namespace Noggit::Application {
             return &inst;
         }
 
-        BlizzardArchive::ClientData* clientData() { return _client_data.get(); };
-        void clientData(std::shared_ptr<BlizzardArchive::ClientData> data) { _client_data = data;  };
+        BlizzardArchive::ClientData* clientData() { return _client_data.get(); }
+        void clientData(std::shared_ptr<BlizzardArchive::ClientData> data) { _client_data = data; }
 
-        void Start();
         void Initalize(int argc, char* argv[]);
         std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> GetConfiguration();
         static void TerminationHandler();

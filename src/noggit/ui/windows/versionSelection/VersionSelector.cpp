@@ -19,7 +19,7 @@ namespace Noggit
           , [=]
           {
               parent->setEnabled(true);
-              parent->build_menu(true);
+              parent->build_menu();
               hide();
           }
       );
@@ -28,7 +28,7 @@ namespace Noggit
           , [=]
           {
               parent->setEnabled(true);
-              parent->build_menu(false);
+              parent->build_menu();
               hide();
           }
       );

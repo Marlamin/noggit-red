@@ -51,28 +51,19 @@
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <blizzard-database-library/include/BlizzardDatabaseRecord.h>
 
-bool World::IsEditableWorld(int pMapId)
+bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record)
 {
   ZoneScoped;
-  std::string lMapName;
-  try
-  {
-    DBCFile::Record map = gMapDB.getByID((unsigned int)pMapId);
-    lMapName = map.getString(MapDB::InternalName);
-  }
-  catch (int)
-  {
-    LogError << "Did not find map with id " << pMapId << ". This is NOT editable.." << std::endl;
-    return false;
-  }
+  std::string lMapName = record.Columns["Directory"].Value;
 
   std::stringstream ssfilename;
   ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
 
   if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists(ssfilename.str()))
   {
-    Log << "World " << pMapId << ": " << lMapName << " has no WDT file!" << std::endl;
+    Log << "World " << record.RecordId << ": " << lMapName << " has no WDT file!" << std::endl;
     return false;
   }
 

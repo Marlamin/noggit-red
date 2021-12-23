@@ -81,7 +81,7 @@ namespace Noggit
       Q_OBJECT
 
     public:
-      MapCreationWizard(QWidget *parent = nullptr);
+      MapCreationWizard(std::shared_ptr<Project::NoggitProject> project, QWidget *parent = nullptr);
       ~MapCreationWizard();
 
       void wheelEvent(QWheelEvent *event) override;
@@ -91,6 +91,7 @@ namespace Noggit
       void map_dbc_updated();
 
     private:
+        std::shared_ptr<Project::NoggitProject> _project;
       Noggit::Ui::minimap_widget* _minimap_widget;
       int _selected_map;
       QGroupBox* _map_settings;

@@ -65,7 +65,7 @@ namespace Noggit::Ui
       setWindowTitle (QString::fromStdString (title.str()));
       setWindowIcon (QIcon (":/icon"));
 
-      OpenDBs();
+      //OpenDBs();
 
       setCentralWidget (_null_widget);
       createBookmarkList();
@@ -115,11 +115,7 @@ namespace Noggit::Ui
 
       _menuBar->adjustSize();
 
-      if (_project->ProjectVersion == Noggit::Project::ProjectVersion::SL)
-          build_menu(true);
-      else
-          build_menu(false);
-     
+    	build_menu();
     }
 
     void main_window::check_uid_then_enter_map
@@ -199,6 +195,9 @@ namespace Noggit::Ui
 
       _world.reset();
 
+      auto table = _project->ClientDatabase->LoadTable("Map");
+      auto record = table.Record(mapID);
+
       for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
       {
         if (it->getInt(MapDB::MapID) == mapID)
@@ -214,7 +213,7 @@ namespace Noggit::Ui
       LogError << "Map with ID " << mapID << " not found. Failed loading." << std::endl;
     }
 
-    void main_window::build_menu(bool isShadowlands)
+    void main_window::build_menu()
     {
       _stack_widget = new StackedWidget(this);
       _stack_widget->setAutoResize(true);
@@ -259,7 +258,7 @@ namespace Noggit::Ui
 
       layout->addWidget (entry_points_tabs);
 
-      build_map_lists(isShadowlands);
+      build_map_lists();
 
       qulonglong bookmark_index (0);
       for (auto entry : mBookmarks)
@@ -315,12 +314,12 @@ namespace Noggit::Ui
       right_side->addTab(minimap_holder, "Enter map");
       minimap_holder->setAccessibleName("main_menu_minimap_holder");
 
-      _map_creation_wizard = new Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard(this);
+      _map_creation_wizard = new Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard(_project,this);
 
       _map_wizard_connection = connect(_map_creation_wizard, &Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated
           ,[=]
           {
-            build_map_lists(isShadowlands);
+            build_map_lists();
           }
       );
 
@@ -333,55 +332,37 @@ namespace Noggit::Ui
       _minimap->adjustSize();
     }
 
-    void Noggit::Ui::main_window::build_map_lists(bool isShadowlands)
+    void Noggit::Ui::main_window::build_map_lists()
     {
+	    std::array<QListWidget*, 5> type_to_table
+		    {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table}};
 
-      std::array<QListWidget*, 5> type_to_table
-          {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table}};
+	    for (auto& table : type_to_table)
+	    {
+		    table->clear();
+	    }
 
-      for (auto& table : type_to_table)
-      {
-        table->clear();
-      }
+	    const auto& table = std::string("map");
+	    auto mapTable = _project->ClientDatabase->LoadTable(table);
 
-        if(isShadowlands)
-        {
-            const auto& table = std::string("map");
-            auto mapTable = _project->ClientDatabase->LoadTable(table);
+	    auto iterator = mapTable.Records();
+	    while (iterator.HasRecords())
+	    {
+		    auto record = iterator.Next();
+		    MapEntry e;
+		    e.mapID = record.RecordId;
+		    e.name = record.Columns["MapName_lang"].Value;
+		    e.areaType = std::stoi(record.Columns["InstanceType"].Value);
 
-            auto iterator = mapTable.Records();
-            while (iterator.HasRecords())
-            {
+		    if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(record))
+			    continue;
 
-                auto record = iterator.Next();
-                MapEntry e;
-                e.mapID = record.RecordId;
-                e.name = record.Columns["MapName_lang"].Value;
-                e.areaType = std::stoi(record.Columns["InstanceType"].Value);
+		    auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()),
+		                                  type_to_table[e.areaType]));
+		    item->setData(Qt::UserRole, QVariant(e.mapID));
+	    }
 
-                if (e.areaType < 0 || e.areaType > 4)
-                    continue;
-
-                auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()), type_to_table[e.areaType]));
-                item->setData(Qt::UserRole, QVariant(e.mapID));
-            }
-        }
-    	else
-      {
-          for (DBCFile::Iterator i = gMapDB.begin(); i != gMapDB.end(); ++i)
-          {
-              MapEntry e;
-              e.mapID = i->getInt(MapDB::MapID);
-              e.name = i->getLocalizedString(MapDB::Name);
-              e.areaType = i->getUInt(MapDB::AreaType);
-
-              if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(e.mapID))
-                  continue;
-
-              auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()), type_to_table[e.areaType]));
-              item->setData(Qt::UserRole, QVariant(e.mapID));
-          }
-      }
+        _project->ClientDatabase->UnloadTable(table);
     }
 
 
