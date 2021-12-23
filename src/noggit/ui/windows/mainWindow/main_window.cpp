@@ -202,8 +202,7 @@ namespace Noggit::Ui
       {
         if (it->getInt(MapDB::MapID) == mapID)
         {
-          _world = std::make_unique<World> (it->getString(MapDB::InternalName), mapID,
-                                            Noggit::NoggitRenderContext::MAP_VIEW);
+          _world = std::make_unique<World> (it->getString(MapDB::InternalName), mapID, Noggit::NoggitRenderContext::MAP_VIEW);
           _minimap->world (_world.get());
           emit map_selected(mapID);
 
@@ -297,8 +296,7 @@ namespace Noggit::Ui
       _minimap = new minimap_widget (this);
       _minimap->draw_boundaries (true);
 
-      QObject::connect
-        ( _minimap,  &minimap_widget::map_clicked
+      QObject::connect( _minimap,  &minimap_widget::map_clicked
         , [this] (::glm::vec3 const& pos)
           {
             check_uid_then_enter_map(pos, math::degrees(30.f), math::degrees(90.f));
@@ -353,8 +351,8 @@ namespace Noggit::Ui
             const auto& build = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
             const auto& table = std::string("map");
 
-            auto blizzardDatabase = BlizzardDatabaseLib::BlizzardDatabase(dbcFileDirectory, dbdFileDirectory);
-            auto mapTable = blizzardDatabase.LoadTable(table, build);
+            auto blizzardDatabase = BlizzardDatabaseLib::BlizzardDatabase(dbcFileDirectory, dbdFileDirectory, build);
+            auto mapTable = blizzardDatabase.LoadTable(table);
 
             auto iterator = mapTable.Records();
             while (iterator.HasRecords())
