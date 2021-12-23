@@ -65,8 +65,9 @@ namespace Noggit::Ui
       setWindowTitle (QString::fromStdString (title.str()));
       setWindowIcon (QIcon (":/icon"));
 
-      setCentralWidget (_null_widget);
+      OpenDBs();
 
+      setCentralWidget (_null_widget);
       createBookmarkList();
 
       _about = new about(this);

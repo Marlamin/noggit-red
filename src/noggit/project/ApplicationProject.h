@@ -47,8 +47,10 @@ namespace Noggit::Project
     {
     public:
         std::string ProjectName;
+        std::string ClientPath;
         ProjectVersion ProjectVersion;
         std::shared_ptr<BlizzardDatabaseLib::BlizzardDatabase> ClientDatabase;
+        std::shared_ptr<BlizzardArchive::ClientData> ClientData;
     };
 
     class ApplicationProject
@@ -198,22 +200,34 @@ namespace Noggit::Project
                 if (projectConfiguration.contains("Client") && projectConfiguration["Client"].isObject())
                 {
                     auto projectClientConfiguration = projectConfiguration["Client"].toObject();
+
+                    if (projectClientConfiguration.contains("ClientPath"))
+                    {
+                        project.ClientPath = projectClientConfiguration["ClientPath"].toString().toStdString();
+                    }
+
                     if (projectClientConfiguration.contains("ClientVersion"))
                     {
                         auto clientVersion = projectClientConfiguration["ClientVersion"].toString().toStdString();
 
                         auto clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
                         auto clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
+                        auto clientArchiveVersion = BlizzardArchive::ClientVersion::WOTLK;
+                        auto clientArchiveLocale = BlizzardArchive::Locale::AUTO;
                         if (clientVersion == std::string("Shadowlands"))
                         {
                             clientVersionEnum = Noggit::Project::ProjectVersion::SL;
+                            clientArchiveVersion = BlizzardArchive::ClientVersion::SL;
                             clientBuild = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
+                            clientArchiveLocale = BlizzardArchive::Locale::enUS;
                         }
                           
                         if (clientVersion == std::string("Wrath Of The Lich King"))
                         {
                             clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
+                            clientArchiveVersion = BlizzardArchive::ClientVersion::WOTLK;
                             clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
+                            clientArchiveLocale = BlizzardArchive::Locale::AUTO;
                         }
 
                         project.ProjectVersion = clientVersionEnum;
@@ -222,6 +236,7 @@ namespace Noggit::Project
                         std::string dbdFileDirectory = _configuration->ApplicationDatabaseDefinitionsPath;
 
                         project.ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(dbcFileDirectory, dbdFileDirectory, clientBuild);
+                        project.ClientData = std::make_shared<BlizzardArchive::ClientData>(project.ClientPath, clientArchiveVersion, clientArchiveLocale, std::string(""));
                     }
                 }
             }

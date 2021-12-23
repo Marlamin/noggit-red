@@ -46,6 +46,7 @@ namespace Noggit::Application {
         }
 
         BlizzardArchive::ClientData* clientData() { return _client_data.get(); };
+        void clientData(std::shared_ptr<BlizzardArchive::ClientData> data) { _client_data = data;  };
 
         void Start();
         void Initalize(int argc, char* argv[]);
@@ -56,10 +57,8 @@ namespace Noggit::Application {
 
         std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> _applicationConfiguration;
         std::unique_ptr<Noggit::Ui::Windows::noggitRedProjectPage> projectSelectionPage;
-        std::unique_ptr<BlizzardArchive::ClientData> _client_data;
+        std::shared_ptr<BlizzardArchive::ClientData> _client_data;
 
-        std::filesystem::path wowpath;
-        std::string project_path;
     };
 
 }

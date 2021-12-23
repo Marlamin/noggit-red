@@ -110,28 +110,10 @@ namespace Noggit::Application
 	  //All of the below should be Project Initalisation
 	  srand(::time(nullptr));
 
-	  QSettings settings;
-	  QDir path(settings.value("project/game_path").toString());
-
-	  wowpath = path.absolutePath().toStdString();
-
-	  Log << "Game path: " << wowpath << std::endl;
-
-	  project_path = settings.value("project/path", path.absolutePath()).toString().toStdString();
-	  settings.setValue("project/path", QString::fromStdString(project_path));
-
-	  Log << "Project path: " << project_path << std::endl;
-
-	  settings.setValue("project/game_path", path.absolutePath());
-	  settings.setValue("project/path", QString::fromStdString(project_path));
   }
 
   void NoggitApplication::Start()
   {
-      _client_data = std::make_unique<BlizzardArchive::ClientData>(wowpath.string(), BlizzardArchive::ClientVersion::WOTLK, BlizzardArchive::Locale::AUTO, project_path);
-
-      OpenDBs();
-
 	  projectSelectionPage = std::make_unique<Noggit::Ui::Windows::noggitRedProjectPage>(this);
 	  projectSelectionPage->show();
   }
