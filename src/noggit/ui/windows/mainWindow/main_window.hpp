@@ -4,7 +4,6 @@
 #include <noggit/MapView.h>
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
-#include <noggit/ui/windows/versionSelection/VersionSelector.h>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/project/ApplicationProject.h>
 #include <QtWidgets/QMainWindow>
