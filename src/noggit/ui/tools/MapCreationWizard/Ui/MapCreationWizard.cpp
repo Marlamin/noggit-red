@@ -91,6 +91,8 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
       count++;
   }
 
+  _project->ClientDatabase->UnloadTable("map");
+
   auto add_btn = new QPushButton("New",this);
   add_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus));
   layout_selector->addWidget(add_btn);
@@ -298,7 +300,9 @@ void MapCreationWizard::selectMap(int map_id)
 {
   _is_new_record = false;
 
-  DBCFile::Record record = gMapDB.getByID(map_id);
+  auto table = _project->ClientDatabase->LoadTable("map");
+  auto record = table.Record(map_id);
+
   _cur_map_id = map_id;
 
   if (_world)
@@ -306,10 +310,21 @@ void MapCreationWizard::selectMap(int map_id)
     delete _world;
   }
 
-  _world = new World(record.getString(MapDB::InternalName), map_id, Noggit::NoggitRenderContext::MAP_VIEW);
+  auto directoryName = record.Columns["Directory"].Value;
+  auto instanceType = record.Columns["InstanceType"].Value;
+  auto mapName = record.Columns["MapName_lang"].Value;
+  auto areaTableId = record.Columns["AreaTableID"].Value;
+  auto loadingScreenId = record.Columns["LoadingScreenID"].Value;
+  auto minimapIconScale = record.Columns["MinimapIconScale"].Value;
+  auto corpseMapId = record.Columns["CorpseMapID"].Value;
+  auto corpseCoords = record.Columns["Corpse"].Values;
+  auto expansionId = record.Columns["ExpansionID"].Value;
+  auto maxPlayers = record.Columns["MaxPlayers"].Value;
+  auto timeOffset = record.Columns["TimeOffset"].Value;
+  _world = new World(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW);
   _minimap_widget->world(_world);
 
-  _directory->setText(record.getString(1));
+  _directory->setText(QString::fromStdString(directoryName));
   _directory->setEnabled(false);
 
   _is_big_alpha->setChecked(_world->mapIndex.hasBigAlpha());
@@ -317,19 +332,19 @@ void MapCreationWizard::selectMap(int map_id)
 
   _sort_by_size_cat->setChecked(_world->mapIndex.sort_models_by_size_class());
 
-  _instance_type->setCurrentIndex(record.getInt(2));
+  _instance_type->setCurrentIndex(std::atoi(instanceType.c_str()));
 
-  _map_name->fill(record, 5);
+  //_map_name->fill(record, 5);
 
-  _area_table_id->setValue(record.getInt(22));
+  _area_table_id->setValue(std::atoi(areaTableId.c_str()));
 
-  _map_desc_alliance->fill(record, 23);
-  _map_desc_horde->fill(record, 40);
+  //_map_desc_alliance->fill(record, 23);
+  //_map_desc_horde->fill(record, 40);
 
-  _loading_screen->setValue(record.getInt(57));
-  _minimap_icon_scale->setValue(record.getFloat(58));
+  _loading_screen->setValue(std::atoi(loadingScreenId.c_str()));
+  _minimap_icon_scale->setValue(std::atof(minimapIconScale.c_str()));
 
-  int corpse_map_idx = record.getInt(59);
+  int corpse_map_idx = std::atoi(corpseMapId.c_str());
   for (int i = 0; i < _corpse_map_id->count(); ++i)
   {
     if (_corpse_map_id->itemData(i) == corpse_map_idx)
@@ -338,12 +353,20 @@ void MapCreationWizard::selectMap(int map_id)
     }
   }
 
-  _corpse_x->setValue(record.getFloat(60));
-  _corpse_y->setValue(record.getFloat(61));
-  _time_of_day_override->setValue(record.getInt(62));
-  _expansion_id->setCurrentIndex(record.getInt(63));
-  _raid_offset->setValue(record.getInt(64));
-  _max_players->setValue(record.getInt(65));
+  if(corpseCoords.size() > 0)
+  {
+      _corpse_x->setValue(std::atoi(corpseCoords[0].c_str()));
+      _corpse_y->setValue(std::atoi(corpseCoords[1].c_str()));
+  }
+
+  _time_of_day_override->setValue(std::atoi(timeOffset.c_str()));
+  _expansion_id->setCurrentIndex(std::atoi(expansionId.c_str()));
+
+  //_raid_offset->setValue(record.getInt(64)); only ever used in 2 places? not sure what for
+
+  _max_players->setValue(std::atoi(maxPlayers.c_str()));
+
+  _project->ClientDatabase->UnloadTable("map");
 }
 
 void MapCreationWizard::wheelEvent(QWheelEvent* event)

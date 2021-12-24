@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <algorithm>
+#include <blizzard-archive-library/include/ClientData.hpp>
 
 class DBCFile
 {
@@ -15,7 +16,7 @@ public:
   explicit DBCFile(const std::string& filename);
 
   // Open database. It must be openened before it can be used.
-  void open();
+  void open(std::shared_ptr<BlizzardArchive::ClientData> clientData);
   void save();
 
   class NotFound : public std::runtime_error

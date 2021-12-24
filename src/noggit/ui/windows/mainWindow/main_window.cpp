@@ -65,7 +65,10 @@ namespace Noggit::Ui
       setWindowTitle (QString::fromStdString (title.str()));
       setWindowIcon (QIcon (":/icon"));
 
-      //OpenDBs();
+        if(project->ProjectVersion == Project::ProjectVersion::WOTLK)
+        {
+            OpenDBs(project->ClientData);
+        }
 
       setCentralWidget (_null_widget);
       createBookmarkList();
@@ -195,11 +198,14 @@ namespace Noggit::Ui
 
       _world.reset();
 
-      auto table = _project->ClientDatabase->LoadTable("Map");
+      auto table = _project->ClientDatabase->LoadTable("map");
       auto record = table.Record(mapID);
 
       _world = std::make_unique<World>(record.Columns["Directory"].Value, mapID, Noggit::NoggitRenderContext::MAP_VIEW);
       _minimap->world(_world.get());
+
+      _project->ClientDatabase->UnloadTable("map");
+
       emit map_selected(mapID);
 
     }
@@ -345,7 +351,7 @@ namespace Noggit::Ui
 		    e.name = record.Columns["MapName_lang"].Value;
 		    e.areaType = std::stoi(record.Columns["InstanceType"].Value);
 
-		    if (e.areaType < 0 || e.areaType > 4 || !World::IsEditableWorld(record))
+		    if (e.areaType < 0 || e.areaType > 4  || !World::IsEditableWorld(record))
 			    continue;
 
 		    auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()),

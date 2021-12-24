@@ -184,7 +184,7 @@ public:
   static std::string getLiquidName(int pID);
 };
 
-void OpenDBs();
+void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData);
 
 const char * getGroundEffectDoodad(unsigned int effectID, int DoodadNum);
 

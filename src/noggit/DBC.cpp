@@ -3,7 +3,7 @@
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
 #include <noggit/Misc.h>
-
+#include <blizzard-archive-library/include/ClientData.hpp>
 #include <string>
 
 AreaDB gAreaDB;
@@ -18,19 +18,19 @@ GroundEffectDoodadDB gGroundEffectDoodadDB;
 GroundEffectTextureDB gGroundEffectTextureDB;
 LiquidTypeDB gLiquidTypeDB;
 
-void OpenDBs()
+void OpenDBs(std:: shared_ptr<BlizzardArchive::ClientData> clientData)
 {
-  gAreaDB.open();
-  gMapDB.open();
-  gLoadingScreensDB.open();
-  gLightDB.open();
-  gLightParamsDB.open();
-  gLightSkyboxDB.open();
-  gLightIntBandDB.open();
-  gLightFloatBandDB.open();
-  gGroundEffectDoodadDB.open();
-  gGroundEffectTextureDB.open();
-  gLiquidTypeDB.open();
+  gAreaDB.open(clientData);
+  gMapDB.open(clientData);
+  gLoadingScreensDB.open(clientData);
+  gLightDB.open(clientData);
+  gLightParamsDB.open(clientData);
+  gLightSkyboxDB.open(clientData);
+  gLightIntBandDB.open(clientData);
+  gLightFloatBandDB.open(clientData);
+  gGroundEffectDoodadDB.open(clientData);
+  gGroundEffectTextureDB.open(clientData);
+  gLiquidTypeDB.open(clientData);
 }
 
 

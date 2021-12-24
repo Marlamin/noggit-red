@@ -24,9 +24,9 @@ DBCFile::DBCFile(const std::string& _filename)
   : filename(_filename)
 {}
 
-void DBCFile::open()
+void DBCFile::open(std::shared_ptr<BlizzardArchive::ClientData> clientData)
 {
-  BlizzardArchive::ClientFile f (filename, Noggit::Application::NoggitApplication::instance()->clientData());
+  BlizzardArchive::ClientFile f (filename, clientData.get());
 
   if (f.isEof())
   {
