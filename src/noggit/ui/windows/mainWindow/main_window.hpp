@@ -69,6 +69,7 @@ namespace Noggit
         int mapID;
         std::string name;
         int areaType;
+        int expansion;
       };
 
       struct BookmarkEntry

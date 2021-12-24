@@ -22,6 +22,12 @@ namespace Noggit::Ui::Windows
         auto applicationProjectsFolderPath = std::filesystem::path(applicationConfiguration->ApplicationProjectPath);
         auto existingProjects = _existingProjectEnumerationComponent->EnumerateExistingProjects(applicationProjectsFolderPath);
 
+        for (const auto& dirEntry : std::filesystem::directory_iterator(applicationConfiguration->ApplicationProjectPath))
+        {
+            auto item = new QListWidgetItem(QString::fromStdString(dirEntry.path().filename().generic_string()), ui->listView);
+            item->setData(Qt::UserRole, QVariant());
+        }
+
         _projectListModel = new QStringListModel(this);
         _projectListModel->setStringList(existingProjects);
 
@@ -69,7 +75,7 @@ namespace Noggit::Ui::Windows
             }
         );
       
-        ui->listView->setModel(_projectListModel);
+        //ui->listView->setModel(_projectListModel);
     }
 
     noggitRedProjectPage::~noggitRedProjectPage()

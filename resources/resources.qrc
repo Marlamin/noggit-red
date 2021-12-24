@@ -13,8 +13,15 @@
     <qresource prefix="/">
         <file alias="icon">../media/noggit_icon.png</file>
         <file alias="splash">../media/splash.png</file>
-       <file alias="wrath_logo">../media/WrathLogo.png</file>
-       <file alias="shadowlands_logo">../media/wow-sl.png</file>
+        <file alias="icon-classic">../media/project-icon-classic.png</file>
+        <file alias="icon-burning">../media/project-icon-burning.png</file>
+        <file alias="icon-wrath">../media/project-icon-wrath.png</file>
+        <file alias="icon-cata">../media/project-icon-cata.png</file>
+        <file alias="icon-panda">../media/project-icon-panda.png</file>
+        <file alias="icon-warlords">../media/project-icon-warlords.png</file>
+        <file alias="icon-legion">../media/project-icon-legion.png</file>
+        <file alias="icon-battle">../media/project-icon-battle.png</file>
+        <file alias="icon-shadow">../media/project-icon-shadow.png</file>
     </qresource>
     <qresource prefix="/shader">
       <file alias="m2_vs">../src/glsl/m2_vert.glsl</file>

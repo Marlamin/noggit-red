@@ -31,6 +31,7 @@
 #include <QSysInfo>
 #include <QStandardPaths>
 #include <QDir>
+#include <QIcon>
 
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
@@ -352,15 +353,31 @@ namespace Noggit::Ui
 		    e.mapID = record.RecordId;
 		    e.name = record.Columns["MapName_lang"].Value;
 		    e.areaType = std::stoi(record.Columns["InstanceType"].Value);
-
+            e.expansion =  std::stoi(record.Columns["ExpansionID"].Value);
 		    if (e.areaType < 0 || e.areaType > 5  || !World::IsEditableWorld(record))
 			    continue;
 
-		    auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()),
-		                                  type_to_table[e.areaType]));
+            auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()), type_to_table[e.areaType]));
+            if (e.expansion == 0)
+                item->setIcon(QIcon(":/icon-classic"));
+            if (e.expansion == 1)
+                item->setIcon(QIcon(":/icon-burning"));
+            if (e.expansion == 2)
+                item->setIcon(QIcon(":/icon-wrath"));
+            if (e.expansion == 3)
+                item->setIcon(QIcon(":/icon-cata"));
+            if (e.expansion == 4)
+                item->setIcon(QIcon(":/icon-panda"));
+            if (e.expansion == 5)
+                item->setIcon(QIcon(":/icon-warlords"));
+            if (e.expansion == 6)
+                item->setIcon(QIcon(":/icon-legion"));
+            if (e.expansion == 7)
+                item->setIcon(QIcon(":/icon-battle"));
+            if (e.expansion == 8)
+                item->setIcon(QIcon(":/icon-shadow"));
 		    item->setData(Qt::UserRole, QVariant(e.mapID));
 	    }
-
         _project->ClientDatabase->UnloadTable(table);
     }
 
