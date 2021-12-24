@@ -229,9 +229,10 @@ namespace Noggit::Ui
       _raids_table = new QListWidget (widget);
       _battlegrounds_table = new QListWidget (widget);
       _arenas_table = new QListWidget (widget);
+      _scenarios_table = new QListWidget(widget);
 
-      std::array<QListWidget*, 5> type_to_table
-          {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table}};
+      std::array<QListWidget*, 6> type_to_table
+          {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table, _scenarios_table}};
 
       for (auto& table : type_to_table)
       {
@@ -251,6 +252,7 @@ namespace Noggit::Ui
       entry_points_tabs->addTab (_raids_table, "Raids");
       entry_points_tabs->addTab (_battlegrounds_table, "Battlegrounds");
       entry_points_tabs->addTab (_arenas_table, "Arenas");
+      entry_points_tabs->addTab (_scenarios_table, "Scenarios");
       entry_points_tabs->addTab (bookmarks_table, "Bookmarks");
 
       layout->addWidget (entry_points_tabs);
@@ -331,8 +333,8 @@ namespace Noggit::Ui
 
     void Noggit::Ui::main_window::build_map_lists()
     {
-	    std::array<QListWidget*, 5> type_to_table
-		    {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table}};
+	    std::array<QListWidget*, 6> type_to_table
+		    {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table, _scenarios_table}};
 
 	    for (auto& table : type_to_table)
 	    {
@@ -351,7 +353,7 @@ namespace Noggit::Ui
 		    e.name = record.Columns["MapName_lang"].Value;
 		    e.areaType = std::stoi(record.Columns["InstanceType"].Value);
 
-		    if (e.areaType < 0 || e.areaType > 4  || !World::IsEditableWorld(record))
+		    if (e.areaType < 0 || e.areaType > 5  || !World::IsEditableWorld(record))
 			    continue;
 
 		    auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()),

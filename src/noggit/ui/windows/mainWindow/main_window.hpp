@@ -98,6 +98,7 @@ namespace Noggit
       QListWidget* _raids_table;
       QListWidget* _battlegrounds_table;
       QListWidget* _arenas_table;
+      QListWidget* _scenarios_table;
 
       std::unique_ptr<World> _world;
 
