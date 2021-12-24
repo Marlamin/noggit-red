@@ -198,19 +198,10 @@ namespace Noggit::Ui
       auto table = _project->ClientDatabase->LoadTable("Map");
       auto record = table.Record(mapID);
 
-      for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
-      {
-        if (it->getInt(MapDB::MapID) == mapID)
-        {
-          _world = std::make_unique<World> (it->getString(MapDB::InternalName), mapID, Noggit::NoggitRenderContext::MAP_VIEW);
-          _minimap->world (_world.get());
-          emit map_selected(mapID);
+      _world = std::make_unique<World>(record.Columns["Directory"].Value, mapID, Noggit::NoggitRenderContext::MAP_VIEW);
+      _minimap->world(_world.get());
+      emit map_selected(mapID);
 
-          return;
-        }
-      }
-
-      LogError << "Map with ID " << mapID << " not found. Failed loading." << std::endl;
     }
 
     void main_window::build_menu()
