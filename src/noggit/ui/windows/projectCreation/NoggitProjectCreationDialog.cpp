@@ -4,8 +4,9 @@
 #include <QSettings>
 
 NoggitProjectCreationDialog::NoggitProjectCreationDialog(ProjectInformation& projectInformation, QWidget *parent) :
-    QDialog(parent),
-    ui(new ::Ui::NoggitProjectCreationDialog), _projectInformation(projectInformation)
+    QDialog(parent)
+	, ui(new ::Ui::NoggitProjectCreationDialog)
+	, _projectInformation(projectInformation)
 {
     ui->setupUi(this);
 
@@ -16,7 +17,7 @@ NoggitProjectCreationDialog::NoggitProjectCreationDialog(ProjectInformation& pro
             auto defaultPath = settings.value("project/game_path").toString();
             ui->game_client_apth->setText(defaultPath);
 
-            QString folderName = QFileDialog::getExistingDirectory(this, "Select Client Directory", defaultPath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+            QString folderName = QFileDialog::getExistingDirectory(parent, "Select Client Directory", defaultPath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
             ui->game_client_apth->setText(folderName);
         }
     );

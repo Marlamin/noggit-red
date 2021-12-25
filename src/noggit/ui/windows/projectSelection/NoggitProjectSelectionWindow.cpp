@@ -20,10 +20,10 @@ namespace Noggit::Ui::Windows
         ui->setupUi(this);
 
     	ui->label->setObjectName("title");
-        ui->label->setStyleSheet("QLabel#title { font-size: 18px; }");
+        ui->label->setStyleSheet("QLabel#title { font-size: 18px; padding: 0px; }");
 
         ui->label_2->setObjectName("title");
-        ui->label_2->setStyleSheet("QLabel#title { font-size: 18px; }");
+        ui->label_2->setStyleSheet("QLabel#title { font-size: 18px; padding: 0px; }");
 
         _settings = new Noggit::Ui::settings(this);
 
@@ -37,7 +37,7 @@ namespace Noggit::Ui::Windows
             , [=,this]
             {
                 auto projectReference = ProjectInformation();
-                auto projectCreationDialog = NoggitProjectCreationDialog(projectReference);
+                auto projectCreationDialog = NoggitProjectCreationDialog(projectReference,this);
                 projectCreationDialog.exec();
 
                 _createProjectComponent->CreateProject(this,projectReference);
