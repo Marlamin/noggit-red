@@ -23,6 +23,9 @@ namespace Noggit::Ui::Component
                 auto projectReader = Noggit::Project::ApplicationProjectReader();
                 auto project = projectReader.ReadProject(dirEntry);
 
+                if(!project.has_value())
+                    continue;
+
                 auto projectData = Noggit::Ui::Widget::ProjectListItemData();
                 projectData.ProjectVersion = project.ProjectVersion;
                 projectData.ProjectDirectory = QString::fromStdString(dirEntry.path().generic_string());
