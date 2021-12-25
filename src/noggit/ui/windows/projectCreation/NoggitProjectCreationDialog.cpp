@@ -8,6 +8,8 @@ NoggitProjectCreationDialog::NoggitProjectCreationDialog(ProjectInformation& pro
 	, ui(new ::Ui::NoggitProjectCreationDialog)
 	, _projectInformation(projectInformation)
 {
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+
     ui->setupUi(this);
 
     QObject::connect(ui->button_folder_select, &QPushButton::clicked
