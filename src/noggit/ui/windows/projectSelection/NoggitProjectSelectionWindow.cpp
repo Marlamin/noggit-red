@@ -19,6 +19,12 @@ namespace Noggit::Ui::Windows
 
         ui->setupUi(this);
 
+    	ui->label->setObjectName("title");
+        ui->label->setStyleSheet("QLabel#title { font-size: 16px; }");
+
+        ui->label_2->setObjectName("title");
+        ui->label_2->setStyleSheet("QLabel#title { font-size: 16px; }");
+
         _settings = new Noggit::Ui::settings(this);
 
         _existingProjectEnumerationComponent = std::make_unique<Component::ExistingProjectEnumerationComponent>();

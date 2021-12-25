@@ -110,7 +110,7 @@
           <number>10</number>
          </property>
          <item row="3" column="0">
-          <widget class="QToolButton" name="button_convert_project">
+          <widget class="QPushButton" name="button_convert_project">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -192,7 +192,7 @@
           </spacer>
          </item>
          <item row="1" column="0">
-          <widget class="QToolButton" name="button_create_new_project">
+          <widget class="QPushButton" name="button_create_new_project">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -231,7 +231,7 @@
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QToolButton" name="button_open_existing_project">
+          <widget class="QPushButton" name="button_open_existing_project">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
