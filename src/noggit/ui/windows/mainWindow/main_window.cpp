@@ -357,7 +357,7 @@ namespace Noggit::Ui
 		    if (e.areaType < 0 || e.areaType > 5  || !World::IsEditableWorld(record))
 			    continue;
 
-            auto item(new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()), type_to_table[e.areaType]));
+            auto item = new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()), type_to_table[e.areaType]);
             if (e.expansion == 0)
                 item->setIcon(QIcon(":/icon-classic"));
             if (e.expansion == 1)
@@ -376,7 +376,8 @@ namespace Noggit::Ui
                 item->setIcon(QIcon(":/icon-battle"));
             if (e.expansion == 8)
                 item->setIcon(QIcon(":/icon-shadow"));
-		    item->setData(Qt::UserRole, QVariant(e.mapID));
+
+            item->setData(Qt::UserRole, QVariant(e.mapID));
 	    }
         _project->ClientDatabase->UnloadTable(table);
     }

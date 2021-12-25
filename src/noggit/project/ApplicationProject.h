@@ -53,6 +53,65 @@ namespace Noggit::Project
         std::shared_ptr<BlizzardArchive::ClientData> ClientData;
     };
 
+    class ApplicationProjectReader
+    {
+    public:
+        ApplicationProjectReader() = default;
+
+        NoggitProject ReadProject(std::filesystem::path projectPath)
+        {
+            for (const auto& entry : std::filesystem::directory_iterator(projectPath))
+            {
+                if(entry.path().extension() == std::string(".noggitproj"))
+                {
+                    QFile inputFile(QString::fromStdString(entry.path().generic_string()));
+                    inputFile.open(QIODevice::ReadOnly);
+
+                    auto document = QJsonDocument().fromJson(inputFile.readAll());
+                    auto root = document.object();
+
+                    auto project = NoggitProject();
+                    if (root.contains("Project") && root["Project"].isObject())
+                    {
+                        auto projectConfiguration = root["Project"].toObject();
+                        if (projectConfiguration.contains("ProjectName"))
+                            project.ProjectName = projectConfiguration["ProjectName"].toString().toStdString();
+
+                        if (projectConfiguration.contains("Client") && projectConfiguration["Client"].isObject())
+                        {
+                            auto projectClientConfiguration = projectConfiguration["Client"].toObject();
+
+                            if (projectClientConfiguration.contains("ClientPath"))
+                            {
+                                project.ClientPath = projectClientConfiguration["ClientPath"].toString().toStdString();
+                            }
+
+                            if (projectClientConfiguration.contains("ClientVersion"))
+                            {
+                                auto clientVersion = projectClientConfiguration["ClientVersion"].toString().toStdString();
+
+                                auto clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
+                                if (clientVersion == std::string("Shadowlands"))
+                                {
+                                    clientVersionEnum = Noggit::Project::ProjectVersion::SL;
+                                }
+
+                                if (clientVersion == std::string("Wrath Of The Lich King"))
+                                {
+                                    clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
+                                }
+
+                                project.ProjectVersion = clientVersionEnum;
+                            }
+                        }
+                    }
+
+                    return project;
+                }
+            }
+        }
+    };
+
     class ApplicationProject
     {
         std::shared_ptr<NoggitProject> _activeProject;
@@ -180,66 +239,36 @@ namespace Noggit::Project
             }
         }
 
-        std::shared_ptr<NoggitProject> LoadProject(std::filesystem::path projectPath, std::string projectName)
+        std::shared_ptr<NoggitProject> LoadProject(std::filesystem::path projectPath)
         {
-            auto projectConfigurationFilePath = (projectPath / (projectName + std::string(".noggitproj")));
+            auto projectReader = ApplicationProjectReader();
+            auto project = projectReader.ReadProject(projectPath);
 
-            QFile inputFile(QString::fromStdString(projectConfigurationFilePath.generic_string()));
-            inputFile.open(QIODevice::ReadOnly);
+            std::string dbcFileDirectory = (projectPath / "workspace" / "DBFilesClient").generic_string();
+            std::string dbdFileDirectory = _configuration->ApplicationDatabaseDefinitionsPath;
 
-            auto document = QJsonDocument().fromJson(inputFile.readAll());
-            auto root = document.object();
-
-            auto project = NoggitProject();
-            if (root.contains("Project") && root["Project"].isObject())
+            auto clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
+            auto clientArchiveVersion = BlizzardArchive::ClientVersion::WOTLK;
+            auto clientArchiveLocale = BlizzardArchive::Locale::AUTO;
+            if (project.ProjectVersion == ProjectVersion::SL)
             {
-                auto projectConfiguration = root["Project"].toObject();
-                if (projectConfiguration.contains("ProjectName"))
-                    project.ProjectName = projectConfiguration["ProjectName"].toString().toStdString();
-
-                if (projectConfiguration.contains("Client") && projectConfiguration["Client"].isObject())
-                {
-                    auto projectClientConfiguration = projectConfiguration["Client"].toObject();
-
-                    if (projectClientConfiguration.contains("ClientPath"))
-                    {
-                        project.ClientPath = projectClientConfiguration["ClientPath"].toString().toStdString();
-                    }
-
-                    if (projectClientConfiguration.contains("ClientVersion"))
-                    {
-                        auto clientVersion = projectClientConfiguration["ClientVersion"].toString().toStdString();
-
-                        auto clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
-                        auto clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
-                        auto clientArchiveVersion = BlizzardArchive::ClientVersion::WOTLK;
-                        auto clientArchiveLocale = BlizzardArchive::Locale::AUTO;
-                        if (clientVersion == std::string("Shadowlands"))
-                        {
-                            clientVersionEnum = Noggit::Project::ProjectVersion::SL;
-                            clientArchiveVersion = BlizzardArchive::ClientVersion::SL;
-                            clientBuild = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
-                            clientArchiveLocale = BlizzardArchive::Locale::enUS;
-                        }
-                          
-                        if (clientVersion == std::string("Wrath Of The Lich King"))
-                        {
-                            clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
-                            clientArchiveVersion = BlizzardArchive::ClientVersion::WOTLK;
-                            clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
-                            clientArchiveLocale = BlizzardArchive::Locale::AUTO;
-                        }
-
-                        project.ProjectVersion = clientVersionEnum;
-
-                        std::string dbcFileDirectory = (projectPath / "workspace" / "DBFilesClient").generic_string();
-                        std::string dbdFileDirectory = _configuration->ApplicationDatabaseDefinitionsPath;
-
-                        project.ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(dbcFileDirectory, dbdFileDirectory, clientBuild);
-                        project.ClientData = std::make_shared<BlizzardArchive::ClientData>(project.ClientPath, clientArchiveVersion, clientArchiveLocale, std::string(""));
-                    }
-                }
+                clientArchiveVersion = BlizzardArchive::ClientVersion::SL;
+                clientBuild = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
+                clientArchiveLocale = BlizzardArchive::Locale::enUS;
             }
+
+            if (project.ProjectVersion == ProjectVersion::WOTLK)
+            {
+                clientArchiveVersion = BlizzardArchive::ClientVersion::WOTLK;
+                clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
+                clientArchiveLocale = BlizzardArchive::Locale::AUTO;
+            }
+
+            project.ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(
+	            dbcFileDirectory, dbdFileDirectory, clientBuild);
+            project.ClientData = std::make_shared<BlizzardArchive::ClientData>(
+	            project.ClientPath, clientArchiveVersion, clientArchiveLocale, std::string(""));
+           
 
             return std::make_shared<NoggitProject>(project);
         }

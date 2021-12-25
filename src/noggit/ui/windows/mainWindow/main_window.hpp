@@ -11,6 +11,7 @@
 #include <string>
 #include <memory>
 #include <unordered_set>
+#include <QWidget>
 
 class StackedWidget;
 
@@ -19,6 +20,7 @@ namespace Noggit
 {
   namespace Ui
   {
+      
     class minimap_widget;
     class settings;
     class about;
