@@ -3,7 +3,6 @@
 #include <noggit/ui/windows/projectSelection/components/CreateProjectComponent.hpp>
 #include "ui_NoggitProjectSelectionWindow.h"
 #include <filesystem>
-#include <qstringlistmodel.h>
 #include <QString>
 
 #include "components/LoadProjectComponent.hpp"
@@ -57,7 +56,7 @@ namespace Noggit::Ui::Windows
             {
                 auto selectedProject = _loadProjectComponent->LoadProject(this);
 
-                projectSelectionPage = std::make_unique<Noggit::Ui::main_window>(_noggitApplication->GetConfiguration(), selectedProject);
+                projectSelectionPage = std::make_unique<Noggit::Ui::NoggitWindow>(_noggitApplication->GetConfiguration(), selectedProject);
                 projectSelectionPage->showMaximized();
 
                 close();

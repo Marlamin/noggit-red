@@ -25,12 +25,12 @@ namespace Noggit
     class settings;
     class about;
 
-    struct main_window : QMainWindow
+    struct NoggitWindow : QMainWindow
     {
       Q_OBJECT
 
     public:
-      main_window(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
+      NoggitWindow(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
           std::shared_ptr<Noggit::Project::NoggitProject> project);
 
       void prompt_exit(QCloseEvent* event);

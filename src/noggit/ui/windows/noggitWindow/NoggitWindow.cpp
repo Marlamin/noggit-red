@@ -4,7 +4,7 @@
 #include <noggit/Log.h>
 #include <noggit/World.h>
 #include <noggit/ContextObject.hpp>
-#include <noggit/ui/windows/mainWindow/main_window.hpp>
+#include <noggit/ui/windows/NoggitWindow/NoggitWindow.hpp>
 #include <noggit/MapView.h>
 #include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
 #include <noggit/ui/minimap_widget.hpp>
@@ -53,7 +53,7 @@ public:
 
 namespace Noggit::Ui
 {
-    main_window::main_window(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
+    NoggitWindow::NoggitWindow(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
         std::shared_ptr<Noggit::Project::NoggitProject> project)
       : QMainWindow (nullptr)
       , _null_widget (new QWidget (this))
@@ -122,7 +122,7 @@ namespace Noggit::Ui
     	build_menu();
     }
 
-    void main_window::check_uid_then_enter_map
+    void NoggitWindow::check_uid_then_enter_map
                         ( glm::vec3 pos
                         , math::degrees camera_pitch
                         , math::degrees camera_yaw
@@ -174,7 +174,7 @@ namespace Noggit::Ui
       }
     }
 
-    void main_window::enterMapAt ( glm::vec3 pos
+    void NoggitWindow::enterMapAt ( glm::vec3 pos
                                  , math::degrees camera_pitch
                                  , math::degrees camera_yaw
                                  , uid_fix_mode uid_fix
@@ -193,7 +193,7 @@ namespace Noggit::Ui
 
     }
 
-    void main_window::loadMap(int mapID)
+    void NoggitWindow::loadMap(int mapID)
     {
       _minimap->world (nullptr);
 
@@ -211,7 +211,7 @@ namespace Noggit::Ui
 
     }
 
-    void main_window::build_menu()
+    void NoggitWindow::build_menu()
     {
       _stack_widget = new StackedWidget(this);
       _stack_widget->setAutoResize(true);
@@ -332,7 +332,7 @@ namespace Noggit::Ui
       _minimap->adjustSize();
     }
 
-    void Noggit::Ui::main_window::build_map_lists()
+    void Noggit::Ui::NoggitWindow::build_map_lists()
     {
 	    std::array<QListWidget*, 6> type_to_table
 		    {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table, _scenarios_table}};
@@ -383,7 +383,7 @@ namespace Noggit::Ui
     }
 
 
-    void main_window::createBookmarkList()
+    void NoggitWindow::createBookmarkList()
     {
       mBookmarks.clear();
 
@@ -414,7 +414,7 @@ namespace Noggit::Ui
       f.close();
     }
 
-    void main_window::closeEvent (QCloseEvent* event)
+    void NoggitWindow::closeEvent (QCloseEvent* event)
     {
       if (map_loaded)
       {
@@ -427,7 +427,7 @@ namespace Noggit::Ui
       }
     }
 
-    void main_window::prompt_exit(QCloseEvent* event)
+    void NoggitWindow::prompt_exit(QCloseEvent* event)
     {
       emit exit_prompt_opened();
 
@@ -464,7 +464,7 @@ namespace Noggit::Ui
       }
     }
 
-    void main_window::prompt_uid_fix_failure()
+    void NoggitWindow::prompt_uid_fix_failure()
     {
       _stack_widget->setCurrentIndex(0);
 

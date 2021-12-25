@@ -6,7 +6,7 @@
 #include <memory>
 #include <filesystem>
 #include <ClientData.hpp>
-#include <noggit/ui/windows/mainWindow/main_window.hpp>
+#include <noggit/ui/windows/NoggitWindow/NoggitWindow.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfigurationReader.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfigurationWriter.hpp>

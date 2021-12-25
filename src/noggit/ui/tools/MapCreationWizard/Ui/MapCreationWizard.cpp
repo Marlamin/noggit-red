@@ -3,7 +3,7 @@
 #include "MapCreationWizard.hpp"
 
 #include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/windows/mainWindow/main_window.hpp>
+#include <noggit/ui/windows/NoggitWindow/NoggitWindow.hpp>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <noggit/Log.h>
@@ -235,8 +235,8 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
             removeMap();
           });
 
-  _connection = connect(reinterpret_cast<Noggit::Ui::main_window*>(parent),
-                        QOverload<int>::of(&Noggit::Ui::main_window::map_selected)
+  _connection = connect(reinterpret_cast<Noggit::Ui::NoggitWindow*>(parent),
+                        QOverload<int>::of(&Noggit::Ui::NoggitWindow::map_selected)
                         , [&] (int index)
                               {
                                 selectMap(index);

@@ -7,7 +7,7 @@
         <x>0</x>
         <y>0</y>
         <width>390</width>
-        <height>275</height>
+        <height>200</height>
       </rect>
     </property>
     <property name="windowTitle">
@@ -18,73 +18,140 @@
         <normalon>:/icon</normalon>
       </iconset>
     </property>
-    <widget class="QWidget" name="verticalLayoutWidget">
+    <widget class="QGroupBox" name="groupBox_2">
+      <property name="title">
+        <string>New Project Settings</string>
+      </property>
       <property name="geometry">
         <rect>
-          <x>10</x>
-          <y>40</y>
-          <width>371</width>
-          <height>181</height>
+          <x>0</x>
+          <y>0</y>
+          <width>390</width>
+          <height>150</height>
         </rect>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="alignment">
+        <set>Qt::AlignHCenter|Qt::AlignTop</set>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_16">
         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <layout class="QHBoxLayout" name="horizontalLayout_17">
             <item>
-              <widget class="QLabel" name="label_2">
-                <property name="text">
-                  <string>Project Name</string>
-                </property>
-              </widget>
-            </item>
-            <item>
-              <widget class="QLineEdit" name="project_name"/>
-            </item>
-          </layout>
-        </item>
-        <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
-            <item>
-              <widget class="QLabel" name="label_3">
-                <property name="text">
-                  <string>Game Client Directory</string>
-                </property>
-              </widget>
-            </item>
-            <item>
-              <widget class="QLineEdit" name="game_client_apth"/>
-            </item>
-            <item>
-              <widget class="QPushButton" name="button_folder_select">
-                <property name="text">
-                  <string>...</string>
-                </property>
-              </widget>
-            </item>
-          </layout>
-        </item>
-        <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-              <widget class="QLabel" name="label">
-                <property name="text">
-                  <string>Project Expansion</string>
-                </property>
-              </widget>
-            </item>
-            <item>
-              <widget class="QComboBox" name="project_expansion">
+              <layout class="QVBoxLayout" name="verticalLayout_21">
                 <item>
-                  <property name="text">
-                    <string>Wrath Of The Lich King</string>
-                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_24">
+                    <property name="spacing">
+                      <number>6</number>
+                    </property>
+                    <item>
+                      <widget class="QLabel" name="labelx">
+                        <property name="minimumSize">
+                          <size>
+                            <width>100</width>
+                            <height>0</height>
+                          </size>
+                        </property>
+                        <property name="text">
+                          <string>Project Name</string>
+                        </property>
+                        <property name="alignment">
+                          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                        </property>
+                      </widget>
+                    </item>
+                    <item>
+                      <widget class="QLineEdit" name="projectName">
+                        <property name="alignment">
+                          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                        </property>
+                      </widget>
+                    </item>
+                  </layout>
                 </item>
                 <item>
-                  <property name="text">
-                    <string>Shadowlands</string>
-                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_25">
+                    <item>
+                      <widget class="QLabel" name="label_26">
+                        <property name="minimumSize">
+                          <size>
+                            <width>100</width>
+                            <height>0</height>
+                          </size>
+                        </property>
+                        <property name="text">
+                          <string>Game Client Path</string>
+                        </property>
+                      </widget>
+                    </item>
+                    <item>
+                      <widget class="QLineEdit" name="projectPathField"/>
+                    </item>
+                    <item>
+                      <widget class="QPushButton" name="projectPathField_browse">
+                        <property name="minimumSize">
+                          <size>
+                            <width>32</width>
+                            <height>0</height>
+                          </size>
+                        </property>
+                        <property name="text">
+                          <string>...</string>
+                        </property>
+                      </widget>
+                    </item>
+                  </layout>
                 </item>
-              </widget>
+                <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_36">
+                    <item>
+                      <widget class="QLabel" name="label_27">
+                        <property name="alignment">
+                          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                        </property>
+                        <property name="minimumSize">
+                          <size>
+                            <width>100</width>
+                            <height>0</height>
+                          </size>
+                        </property>
+                        <property name="text">
+                          <string>Project Expansion</string>
+                        </property>
+                      </widget>
+                    </item>
+                    <item>
+                      <widget class="QComboBox" name="project_expansion">
+                        <property name="sizePolicy">
+                          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                          </sizepolicy>
+                        </property>
+                        <item>
+                        <property name="text">
+                          <string>Wrath Of The Lich King</string>
+                        </property>
+                          </item>
+                        <item>
+                        <property name="text">
+                          <string>Shadowlands</string>
+                        </property>
+                        </item>
+                      </widget>
+                    </item>
+                    <item>
+                      <widget class="QLabel" name="expansion_icon">
+                        <property name="minimumSize">
+                          <size>
+                            <width>32</width>
+                            <height>0</height>
+                          </size>
+                        </property>
+                      </widget>
+                    </item>
+                  </layout>
+                </item>
+              </layout>
             </item>
           </layout>
         </item>
@@ -94,9 +161,9 @@
       <property name="geometry">
         <rect>
           <x>310</x>
-          <y>230</y>
-          <width>71</width>
-          <height>31</height>
+          <y>160</y>
+          <width>70</width>
+          <height>30</height>
         </rect>
       </property>
       <property name="text">
@@ -107,9 +174,9 @@
       <property name="geometry">
         <rect>
           <x>240</x>
-          <y>230</y>
-          <width>61</width>
-          <height>31</height>
+          <y>160</y>
+          <width>60</width>
+          <height>30</height>
         </rect>
       </property>
       <property name="text">
@@ -117,6 +184,4 @@
       </property>
     </widget>
   </widget>
-  <resources/>
-  <connections/>
 </ui>

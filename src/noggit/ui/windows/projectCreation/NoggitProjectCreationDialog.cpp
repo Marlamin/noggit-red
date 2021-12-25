@@ -12,29 +12,50 @@ NoggitProjectCreationDialog::NoggitProjectCreationDialog(ProjectInformation& pro
 
     ui->setupUi(this);
 
-    QObject::connect(ui->button_folder_select, &QPushButton::clicked
+    QIcon icon = QIcon(":/icon-wrath");
+    ui->expansion_icon->setPixmap(icon.pixmap(QSize(32, 32)));
+	ui->expansion_icon->setObjectName("icon");
+    ui->expansion_icon->setStyleSheet("QLabel#icon { padding: 0px }");
+    ui->projectPathField_browse->setObjectName("icon");
+
+    QObject::connect(ui->project_expansion, QOverload<int>::of(&QComboBox::currentIndexChanged)
+        , [&](int index)
+        {
+           auto versionSelected =  ui->project_expansion->currentText().toStdString();
+
+           QIcon icon;
+           if (versionSelected == "Wrath Of The Lich King")
+               icon = QIcon(":/icon-wrath");
+           if (versionSelected == "Shadowlands")
+               icon = QIcon(":/icon-shadow");
+
+           ui->expansion_icon->setPixmap(icon.pixmap(QSize(32, 32)));
+        }
+    );
+
+    QObject::connect(ui->projectPathField_browse, &QPushButton::clicked
         , [&]
         {
             QSettings settings;
             auto defaultPath = settings.value("project/game_path").toString();
-            ui->game_client_apth->setText(defaultPath);
-
+            ui->projectPathField->setText(defaultPath);
+    
             QString folderName = QFileDialog::getExistingDirectory(parent, "Select Client Directory", defaultPath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-            ui->game_client_apth->setText(folderName);
+            ui->projectPathField->setText(folderName);
         }
     );
-
+    
     QObject::connect(ui->button_ok, &QPushButton::clicked
         , [&]
         {
-            projectInformation.ProjectName = ui->project_name->text().toStdString();
-            projectInformation.GameClientPath = ui->game_client_apth->text().toStdString();
+            projectInformation.ProjectName = ui->projectName->text().toStdString();
+            projectInformation.GameClientPath = ui->projectPathField->text().toStdString();
             projectInformation.GameClientVersion = ui->project_expansion->currentText().toStdString();
-
+    
             close();
         }
     );
-
+    
     QObject::connect(ui->button_cancel, &QPushButton::clicked
         , [&]
         {

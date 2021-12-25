@@ -22,7 +22,7 @@
 #include <noggit/ui/Toolbar.h> // Noggit::Ui::toolbar
 #include <noggit/ui/Water.h>
 #include <noggit/ui/ZoneIDBrowser.h>
-#include <noggit/ui/windows/mainWindow/main_window.hpp>
+#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/ShaderTool.hpp>
 #include <noggit/ui/TerrainTool.hpp>
@@ -2502,7 +2502,7 @@ void MapView::createGUI()
   setupHelpMenu();
   setupHotkeys();
 
-  connect(_main_window, &Noggit::Ui::main_window::exit_prompt_opened, this, &MapView::on_exit_prompt);
+  connect(_main_window, &Noggit::Ui::NoggitWindow::exit_prompt_opened, this, &MapView::on_exit_prompt);
 
   set_editing_mode (editing_mode::ground);
 }
@@ -2525,7 +2525,7 @@ void MapView::on_exit_prompt()
 MapView::MapView( math::degrees camera_yaw0
                 , math::degrees camera_pitch0
                 , glm::vec3 camera_pos
-                , Noggit::Ui::main_window* main_window
+                , Noggit::Ui::NoggitWindow* NoggitWindow
                 , std::unique_ptr<World> world
                 , uid_fix_mode uid_fix
                 , bool from_bookmark
@@ -2537,7 +2537,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _settings (new QSettings (this))
   , cursor_color (1.f, 1.f, 1.f, 1.f)
   , _cursorType{CursorType::CIRCLE}
-  , _main_window (main_window)
+  , _main_window (NoggitWindow)
   , _world (std::move (world))
   , _status_position (new QLabel (this))
   , _status_selection (new QLabel (this))

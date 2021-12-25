@@ -8,7 +8,7 @@
 #include <qgraphicseffect.h>
 #include <QString>
 #include <noggit/application/NoggitApplication.hpp>
-#include <noggit/ui/windows/mainWindow/main_window.hpp>
+#include <noggit/ui/windows/NoggitWindow/NoggitWindow.hpp>
 #include <noggit/ui/windows/projectCreation/NoggitProjectCreationDialog.h>
 
 QT_BEGIN_NAMESPACE
@@ -44,7 +44,7 @@ namespace Noggit::Ui::Windows
         ::Ui::NoggitProjectSelectionWindow* ui;
         Noggit::Ui::settings* _settings;
 
-        std::unique_ptr<Noggit::Ui::main_window> projectSelectionPage;
+        std::unique_ptr<Noggit::Ui::NoggitWindow> projectSelectionPage;
 
         std::unique_ptr<Component::ExistingProjectEnumerationComponent> _existingProjectEnumerationComponent;
         std::unique_ptr<Component::CreateProjectComponent> _createProjectComponent;

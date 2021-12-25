@@ -80,7 +80,7 @@ namespace Noggit
     class zone_id_browser;
     class texture_palette_small;
     class hole_tool;
-    struct main_window;
+    struct NoggitWindow;
     struct tileset_chooser;
     class ObjectPalette;
   }
@@ -228,7 +228,7 @@ public:
   MapView ( math::degrees ah0
           , math::degrees av0
           , glm::vec3 camera_pos
-          , Noggit::Ui::main_window*
+          , Noggit::Ui::NoggitWindow*
           , std::unique_ptr<World>
           , uid_fix_mode uid_fix = uid_fix_mode::none
           , bool from_bookmark = false
@@ -309,7 +309,7 @@ private:
   virtual void focusOutEvent (QFocusEvent*) override;
   virtual void enterEvent(QEvent*) override;
 
-  Noggit::Ui::main_window* _main_window;
+  Noggit::Ui::NoggitWindow* _main_window;
 
   glm::vec4 normalized_device_coords (int x, int y) const;
   float aspect_ratio() const;
