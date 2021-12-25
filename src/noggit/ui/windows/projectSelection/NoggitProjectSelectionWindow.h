@@ -9,7 +9,7 @@
 #include <QString>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/ui/windows/mainWindow/main_window.hpp>
-#include <noggit/ui/windows/projectCreation/projectcreationdialog.h>
+#include <noggit/ui/windows/projectCreation/NoggitProjectCreationDialog.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class NoggitProjectSelectionWindow; }

@@ -37,7 +37,7 @@ namespace Noggit::Ui::Windows
             , [=,this]
             {
                 auto projectReference = ProjectInformation();
-                auto projectCreationDialog = ProjectCreationDialog(projectReference);
+                auto projectCreationDialog = NoggitProjectCreationDialog(projectReference);
                 projectCreationDialog.exec();
 
                 _createProjectComponent->CreateProject(this,projectReference);

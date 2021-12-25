@@ -1,11 +1,11 @@
-#include "projectcreationdialog.h"
-#include <ui_projectcreationdialog.h>
+#include <noggit/ui/windows/projectCreation/NoggitProjectCreationDialog.h>
+#include <ui_NoggitProjectCreationDialog.h>
 #include <QFileDialog>
 #include <QSettings>
 
-ProjectCreationDialog::ProjectCreationDialog(ProjectInformation& projectInformation, QWidget *parent) :
+NoggitProjectCreationDialog::NoggitProjectCreationDialog(ProjectInformation& projectInformation, QWidget *parent) :
     QDialog(parent),
-    ui(new ::Ui::ProjectCreationDialog), _projectInformation(projectInformation)
+    ui(new ::Ui::NoggitProjectCreationDialog), _projectInformation(projectInformation)
 {
     ui->setupUi(this);
 
@@ -40,7 +40,7 @@ ProjectCreationDialog::ProjectCreationDialog(ProjectInformation& projectInformat
     );
 }
 
-ProjectCreationDialog::~ProjectCreationDialog()
+NoggitProjectCreationDialog::~NoggitProjectCreationDialog()
 {
     delete ui;
 }
