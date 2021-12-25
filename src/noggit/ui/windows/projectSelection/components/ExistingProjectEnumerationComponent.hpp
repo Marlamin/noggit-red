@@ -1,5 +1,5 @@
-#ifndef NOGGIT_COMPONENT_PROJECT_LIST_ITEM_HPP
-#define NOGGIT_COMPONENT_PROJECT_LIST_ITEM_HPP
+#ifndef NOGGIT_COMPONENT_EXISTING_PROJECT_ENUMERATION_HPP
+#define NOGGIT_COMPONENT_EXISTING_PROJECT_ENUMERATION_HPP
 
 #include <noggit/project/ApplicationProject.h>
 #include <noggit/ui/windows/projectSelection/widgets/ProjectListItem.hpp>
@@ -42,4 +42,4 @@ namespace Noggit::Ui::Component
 	};
 }
 
-#endif //NOGGIT_COMPONENT_PROJECT_LIST_ITEM_HPP
+#endif //NOGGIT_COMPONENT_EXISTING_PROJECT_ENUMERATION_HPP

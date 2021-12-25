@@ -1,9 +1,12 @@
 #include <noggit/ui/windows/projectSelection/noggitredprojectpage.h>
 #include <noggit/ui/windows/projectSelection/components/ExistingProjectEnumerationComponent.hpp>
+#include <noggit/ui/windows/projectSelection/components/CreateProjectComponent.hpp>
 #include "ui_noggit-red-project-page.h"
 #include <filesystem>
 #include <qstringlistmodel.h>
 #include <QString>
+
+#include "components/LoadProjectComponent.hpp"
 
 namespace Noggit::Ui::Windows
 {
@@ -16,12 +19,9 @@ namespace Noggit::Ui::Windows
 
         ui->setupUi(this);
 
-        auto applicationConfiguration = _noggitApplication->GetConfiguration();
-        auto applicationProjectsFolderPath = std::filesystem::path(applicationConfiguration->ApplicationProjectPath);
-
         _existingProjectEnumerationComponent = std::make_unique<Component::ExistingProjectEnumerationComponent>();
-
-       //_settings = new Noggit::Ui::settings(this);
+        _createProjectComponent = std::make_unique<Component::CreateProjectComponent>();
+        _loadProjectComponent = std::make_unique<Component::LoadProjectComponent>();
 
         _existingProjectEnumerationComponent->BuildExistingProjectList(this);
 
@@ -32,13 +32,7 @@ namespace Noggit::Ui::Windows
                 auto projectCreationDialog = ProjectCreationDialog(projectReference);
                 projectCreationDialog.exec();
 
-                auto applicationProjectService = Noggit::Project::ApplicationProject(applicationConfiguration);
-                auto projectPath = std::filesystem::path(applicationProjectsFolderPath / projectReference.ProjectName);
-                if (!std::filesystem::exists(projectPath))
-                {
-                    applicationProjectService.CreateProject(projectPath, projectReference.GameClientPath, projectReference.GameClientVersion, projectReference.ProjectName);
-                }
-
+                _createProjectComponent->CreateProject(this,projectReference);
                 _existingProjectEnumerationComponent->BuildExistingProjectList(this);
             }
         );
@@ -46,26 +40,19 @@ namespace Noggit::Ui::Windows
         QObject::connect(ui->button_open_existing_project, &QPushButton::clicked
             , [=]
             {
-                //_settings->show();
+                return;
             }
         );
 
         QObject::connect(ui->listView, &QListView::doubleClicked
             , [=]
             {
-                QModelIndex index = ui->listView->currentIndex();
-                auto projectName = index.data(Qt::UserRole).toString().toStdString();
-                auto applicationProjectService = Noggit::Project::ApplicationProject(applicationConfiguration);
-                auto projectPath = std::filesystem::path(applicationProjectsFolderPath / projectName);
-                auto selectedProject = applicationProjectService.LoadProject(projectPath);
-
-                //This to not be static, but its hard to remove
-                Noggit::Application::NoggitApplication::instance()->clientData(selectedProject->ClientData);
-
-                close();
+                auto selectedProject = _loadProjectComponent->LoadProject(this);
 
                 projectSelectionPage = std::make_unique<Noggit::Ui::main_window>(_noggitApplication->GetConfiguration(), selectedProject);
                 projectSelectionPage->showMaximized();
+
+                close();
             }
         );
     }

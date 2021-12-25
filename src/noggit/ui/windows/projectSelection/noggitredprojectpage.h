@@ -18,9 +18,12 @@ QT_END_NAMESPACE
 namespace Noggit::Ui::Component
 {
     class ExistingProjectEnumerationComponent;
+    class CreateProjectComponent;
+    class LoadProjectComponent;
 }
 
-namespace Noggit::Application {
+namespace Noggit::Application
+{
     class NoggitApplication;
 }
 
@@ -30,6 +33,8 @@ namespace Noggit::Ui::Windows
     {
         Q_OBJECT
     	friend Component::ExistingProjectEnumerationComponent;
+        friend Component::CreateProjectComponent;
+        friend Component::LoadProjectComponent;
     public:
         noggitRedProjectPage(Noggit::Application::NoggitApplication* noggitApplication, QWidget* parent = nullptr);
         ~noggitRedProjectPage();
@@ -42,6 +47,8 @@ namespace Noggit::Ui::Windows
         std::unique_ptr<Noggit::Ui::main_window> projectSelectionPage;
 
         std::unique_ptr<Component::ExistingProjectEnumerationComponent> _existingProjectEnumerationComponent;
+        std::unique_ptr<Component::CreateProjectComponent> _createProjectComponent;
+        std::unique_ptr<Component::LoadProjectComponent> _loadProjectComponent;
     };
 }
 #endif // NOGGITREDPROJECTPAGE_H
