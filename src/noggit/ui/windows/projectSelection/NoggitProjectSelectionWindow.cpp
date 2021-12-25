@@ -19,6 +19,8 @@ namespace Noggit::Ui::Windows
 
         ui->setupUi(this);
 
+        _settings = new Noggit::Ui::settings(this);
+
         _existingProjectEnumerationComponent = std::make_unique<Component::ExistingProjectEnumerationComponent>();
         _createProjectComponent = std::make_unique<Component::CreateProjectComponent>();
         _loadProjectComponent = std::make_unique<Component::LoadProjectComponent>();
