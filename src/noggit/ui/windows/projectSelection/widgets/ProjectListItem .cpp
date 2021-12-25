@@ -1,6 +1,6 @@
 #include <noggit/ui/windows/projectSelection/widgets/ProjectListItem.hpp>
 
-namespace Noggit::Ui::Component
+namespace Noggit::Ui::Widget
 {
     ProjectListItem::ProjectListItem(const ProjectListItemData& data, QWidget* parent = nullptr) : QWidget(parent)
     {

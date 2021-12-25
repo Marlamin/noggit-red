@@ -1,15 +1,15 @@
-#ifndef NOGGIT_COMPONENT_PROJECT_LIST_ITEM_HPP
-#define NOGGIT_COMPONENT_PROJECT_LIST_ITEM_HPP
+#ifndef NOGGIT_WIGDET_PROJECT_LIST_ITEM_HPP
+#define NOGGIT_WIGDET_PROJECT_LIST_ITEM_HPP
 
 #include <QMenuBar>
 #include <QAction>
 #include <qgraphicseffect.h>
+#include <QGridLayout>
 #include <QString>
 #include <QWidget>
-#include <noggit/application/NoggitApplication.hpp>
-#include <noggit/ui/windows/mainWindow/main_window.hpp>
+#include <noggit/project/ApplicationProject.h>
 
-namespace Noggit::Ui::Component
+namespace Noggit::Ui::Widget
 {
     struct ProjectListItemData
     {
@@ -36,4 +36,4 @@ namespace Noggit::Ui::Component
     };
 }
 
-#endif //NOGGIT_COMPONENT_PROJECT_LIST_ITEM_HPP
+#endif //NOGGIT_WIGDET_PROJECT_LIST_ITEM_HPP

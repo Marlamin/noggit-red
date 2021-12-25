@@ -1,9 +1,9 @@
 #include <noggit/ui/windows/projectSelection/noggitredprojectpage.h>
+#include <noggit/ui/windows/projectSelection/components/ExistingProjectEnumerationComponent.hpp>
 #include "ui_noggit-red-project-page.h"
 #include <filesystem>
 #include <qstringlistmodel.h>
 #include <QString>
-#include <noggit/project/ApplicationProject.h>
 
 namespace Noggit::Ui::Windows
 {
@@ -16,15 +16,17 @@ namespace Noggit::Ui::Windows
 
         ui->setupUi(this);
 
-        _settings = new Noggit::Ui::settings(this);
-
-        auto applicationConfiguration = _noggitApplication->GetConfiguration(); 
+        auto applicationConfiguration = _noggitApplication->GetConfiguration();
         auto applicationProjectsFolderPath = std::filesystem::path(applicationConfiguration->ApplicationProjectPath);
-      
-        BuildExistingProjectList();
+
+        _existingProjectEnumerationComponent = std::make_unique<Component::ExistingProjectEnumerationComponent>();
+
+       //_settings = new Noggit::Ui::settings(this);
+
+        _existingProjectEnumerationComponent->BuildExistingProjectList(this);
 
         QObject::connect(ui->button_create_new_project, &QPushButton::clicked
-            , [=]
+            , [=,this]
             {
                 auto projectReference = ProjectInformation();
                 auto projectCreationDialog = ProjectCreationDialog(projectReference);
@@ -37,15 +39,14 @@ namespace Noggit::Ui::Windows
                     applicationProjectService.CreateProject(projectPath, projectReference.GameClientPath, projectReference.GameClientVersion, projectReference.ProjectName);
                 }
 
-                BuildExistingProjectList();
+                _existingProjectEnumerationComponent->BuildExistingProjectList(this);
             }
         );
 
         QObject::connect(ui->button_open_existing_project, &QPushButton::clicked
             , [=]
             {
-                _settings->show();
-                return;
+                //_settings->show();
             }
         );
 
@@ -56,14 +57,14 @@ namespace Noggit::Ui::Windows
                 auto projectName = index.data(Qt::UserRole).toString().toStdString();
                 auto applicationProjectService = Noggit::Project::ApplicationProject(applicationConfiguration);
                 auto projectPath = std::filesystem::path(applicationProjectsFolderPath / projectName);
-                _selectedProject = applicationProjectService.LoadProject(projectPath);
+                auto selectedProject = applicationProjectService.LoadProject(projectPath);
 
                 //This to not be static, but its hard to remove
-                Noggit::Application::NoggitApplication::instance()->clientData(_selectedProject->ClientData);
+                Noggit::Application::NoggitApplication::instance()->clientData(selectedProject->ClientData);
 
                 close();
 
-                projectSelectionPage = std::make_unique<Noggit::Ui::main_window>(_noggitApplication->GetConfiguration(), _selectedProject);
+                projectSelectionPage = std::make_unique<Noggit::Ui::main_window>(_noggitApplication->GetConfiguration(), selectedProject);
                 projectSelectionPage->showMaximized();
             }
         );
@@ -72,30 +73,5 @@ namespace Noggit::Ui::Windows
     noggitRedProjectPage::~noggitRedProjectPage()
     {
         delete ui;
-    }
-
-    void noggitRedProjectPage::BuildExistingProjectList()
-    {
-        ui->listView->clear();
-
-        auto applicationConfiguration = _noggitApplication->GetConfiguration();
-        for (const auto& dirEntry : std::filesystem::directory_iterator(applicationConfiguration->ApplicationProjectPath))
-        {
-            auto item = new QListWidgetItem(ui->listView);
-            auto projectReader = Noggit::Project::ApplicationProjectReader();
-            auto project = projectReader.ReadProject(dirEntry);
-
-            auto projectData = Noggit::Ui::Component::ProjectListItemData();
-            projectData.ProjectVersion = project.ProjectVersion;
-            projectData.ProjectDirectory = QString::fromStdString(dirEntry.path().generic_string());
-            projectData.ProjectName = QString::fromStdString(project.ProjectName);
-            projectData.ProjectLastEdited = QDateTime::currentDateTime().date().toString();
-
-            auto projectListItem = new Noggit::Ui::Component::ProjectListItem(projectData, ui->listView);
-
-            item->setData(Qt::UserRole, QVariant(projectData.ProjectName));
-            item->setSizeHint(projectListItem->minimumSizeHint());
-            ui->listView->setItemWidget(item, projectListItem);
-        }
     }
 }
