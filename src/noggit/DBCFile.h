@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <algorithm>
+#include <memory>
 #include <blizzard-archive-library/include/ClientData.hpp>
 
 class DBCFile

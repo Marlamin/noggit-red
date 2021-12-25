@@ -58,7 +58,7 @@ namespace Noggit::Project
     public:
         ApplicationProjectReader() = default;
 
-        NoggitProject ReadProject(std::filesystem::path projectPath)
+        NoggitProject ReadProject(std::filesystem::path const& projectPath)
         {
             for (const auto& entry : std::filesystem::directory_iterator(projectPath))
             {
@@ -123,7 +123,8 @@ namespace Noggit::Project
             _configuration = configuration;
         }
 
-        void CreateProject(std::filesystem::path projectPath, std::filesystem::path clientPath, std::string clientVersion, std::string projectName)
+        void CreateProject(std::filesystem::path const& projectPath, std::filesystem::path const& clientPath,
+                           std::string const& clientVersion, std::string const& projectName)
         {
             std::filesystem::create_directory(projectPath);
 
@@ -239,7 +240,7 @@ namespace Noggit::Project
             }
         }
 
-        std::shared_ptr<NoggitProject> LoadProject(std::filesystem::path projectPath)
+        std::shared_ptr<NoggitProject> LoadProject(std::filesystem::path const& projectPath)
         {
             auto projectReader = ApplicationProjectReader();
             auto project = projectReader.ReadProject(projectPath);
