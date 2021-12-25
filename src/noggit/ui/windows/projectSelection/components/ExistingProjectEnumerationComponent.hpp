@@ -27,9 +27,9 @@ namespace Noggit::Ui::Component
                     continue;
 
                 auto projectData = Noggit::Ui::Widget::ProjectListItemData();
-                projectData.ProjectVersion = project.ProjectVersion;
+                projectData.ProjectVersion = project->ProjectVersion;
                 projectData.ProjectDirectory = QString::fromStdString(dirEntry.path().generic_string());
-                projectData.ProjectName = QString::fromStdString(project.ProjectName);
+                projectData.ProjectName = QString::fromStdString(project->ProjectName);
                 projectData.ProjectLastEdited = QDateTime::currentDateTime().date().toString();
 
                 auto projectListItem = new Noggit::Ui::Widget::ProjectListItem(projectData, parent->ui->listView);
