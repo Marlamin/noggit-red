@@ -2,15 +2,15 @@
 #define NOGGIT_COMPONENT_CREATE_PROJECT_HPP
 
 #include <noggit/project/ApplicationProject.h>
-#include <noggit/ui/windows/projectSelection/noggitredprojectpage.h>
+#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.h>
 
 namespace Noggit::Ui::Component
 {
 	class CreateProjectComponent
 	{
-        friend Windows::noggitRedProjectPage;
+        friend Windows::NoggitProjectSelectionWindow;
 	public:
-        void CreateProject(Noggit::Ui::Windows::noggitRedProjectPage* parent, ProjectInformation& projectInformation)
+        void CreateProject(Noggit::Ui::Windows::NoggitProjectSelectionWindow* parent, ProjectInformation& projectInformation)
         {
             auto applicationConfiguration = parent->_noggitApplication->GetConfiguration();
             auto applicationProjectsFolderPath = std::filesystem::path(applicationConfiguration->ApplicationProjectPath);

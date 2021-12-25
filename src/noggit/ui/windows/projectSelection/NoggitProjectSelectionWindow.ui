@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>noggitRedProjectPage</class>
- <widget class="QMainWindow" name="noggitRedProjectPage">
+ <class>NoggitProjectSelectionWindow</class>
+ <widget class="QMainWindow" name="NoggitProjectSelectionWindow">
   <property name="windowModality">
    <enum>Qt::NonModal</enum>
   </property>

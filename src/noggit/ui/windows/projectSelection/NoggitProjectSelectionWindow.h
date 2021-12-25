@@ -12,7 +12,7 @@
 #include <noggit/ui/windows/projectCreation/projectcreationdialog.h>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class noggitRedProjectPage; }
+namespace Ui { class NoggitProjectSelectionWindow; }
 QT_END_NAMESPACE
 
 namespace Noggit::Ui::Component
@@ -29,19 +29,19 @@ namespace Noggit::Application
 
 namespace Noggit::Ui::Windows
 {
-    class noggitRedProjectPage : public QMainWindow
+    class NoggitProjectSelectionWindow : public QMainWindow
     {
         Q_OBJECT
     	friend Component::ExistingProjectEnumerationComponent;
         friend Component::CreateProjectComponent;
         friend Component::LoadProjectComponent;
     public:
-        noggitRedProjectPage(Noggit::Application::NoggitApplication* noggitApplication, QWidget* parent = nullptr);
-        ~noggitRedProjectPage();
+        NoggitProjectSelectionWindow(Noggit::Application::NoggitApplication* noggitApplication, QWidget* parent = nullptr);
+        ~NoggitProjectSelectionWindow();
 
     private:
         Noggit::Application::NoggitApplication* _noggitApplication;
-        ::Ui::noggitRedProjectPage* ui;
+        ::Ui::NoggitProjectSelectionWindow* ui;
         Noggit::Ui::settings* _settings;
 
         std::unique_ptr<Noggit::Ui::main_window> projectSelectionPage;

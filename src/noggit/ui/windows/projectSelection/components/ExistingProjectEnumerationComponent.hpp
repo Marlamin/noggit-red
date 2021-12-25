@@ -3,16 +3,16 @@
 
 #include <noggit/project/ApplicationProject.h>
 #include <noggit/ui/windows/projectSelection/widgets/ProjectListItem.hpp>
-#include <noggit/ui/windows/projectSelection/noggitredprojectpage.h>
+#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.h>
 #include "ui_noggit-red-project-page.h"
 
 namespace Noggit::Ui::Component
 {
 	class ExistingProjectEnumerationComponent
 	{
-        friend Windows::noggitRedProjectPage;
+        friend Windows::NoggitProjectSelectionWindow;
 	public:
-        void BuildExistingProjectList(Noggit::Ui::Windows::noggitRedProjectPage* parent)
+        void BuildExistingProjectList(Noggit::Ui::Windows::NoggitProjectSelectionWindow* parent)
         {
         	parent->ui->listView->clear();
 

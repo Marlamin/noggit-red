@@ -1,4 +1,4 @@
-#include <noggit/ui/windows/projectSelection/noggitredprojectpage.h>
+#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.h>
 #include <noggit/ui/windows/projectSelection/components/ExistingProjectEnumerationComponent.hpp>
 #include <noggit/ui/windows/projectSelection/components/CreateProjectComponent.hpp>
 #include "ui_noggit-red-project-page.h"
@@ -10,9 +10,9 @@
 
 namespace Noggit::Ui::Windows
 {
-    noggitRedProjectPage::noggitRedProjectPage(Noggit::Application::NoggitApplication* noggitApplication, QWidget* parent)
+    NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::NoggitApplication* noggitApplication, QWidget* parent)
         : QMainWindow(parent)
-        , ui(new ::Ui::noggitRedProjectPage),
+        , ui(new ::Ui::NoggitProjectSelectionWindow),
         _noggitApplication(noggitApplication)
     {
         setWindowFlags(Qt::Window | Qt::MSWindowsFixedSizeDialogHint);
@@ -57,7 +57,7 @@ namespace Noggit::Ui::Windows
         );
     }
 
-    noggitRedProjectPage::~noggitRedProjectPage()
+    NoggitProjectSelectionWindow::~NoggitProjectSelectionWindow()
     {
         delete ui;
     }

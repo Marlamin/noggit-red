@@ -10,7 +10,7 @@
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfigurationReader.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfigurationWriter.hpp>
-#include <noggit/ui/windows/projectSelection/noggitredprojectpage.h>
+#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -31,7 +31,7 @@
 
 namespace Noggit::Ui::Windows
 {
-    class noggitRedProjectPage;
+    class NoggitProjectSelectionWindow;
 }
 
 namespace Noggit::Application {
@@ -55,7 +55,7 @@ namespace Noggit::Application {
         NoggitApplication() = default;
 
         std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> _applicationConfiguration;
-        std::unique_ptr<Noggit::Ui::Windows::noggitRedProjectPage> projectSelectionPage;
+        std::unique_ptr<Noggit::Ui::Windows::NoggitProjectSelectionWindow> projectSelectionPage;
         std::shared_ptr<BlizzardArchive::ClientData> _client_data;
 
     };

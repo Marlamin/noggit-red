@@ -2,15 +2,15 @@
 #define NOGGIT_COMPONENT_LOAD_PROJECT_HPP
 
 #include <noggit/project/ApplicationProject.h>
-#include <noggit/ui/windows/projectSelection/noggitredprojectpage.h>
+#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.h>
 
 namespace Noggit::Ui::Component
 {
 	class LoadProjectComponent
 	{
-        friend Windows::noggitRedProjectPage;
+        friend Windows::NoggitProjectSelectionWindow;
 	public:
-        std::shared_ptr<Project::NoggitProject> LoadProject(Noggit::Ui::Windows::noggitRedProjectPage* parent)
+        std::shared_ptr<Project::NoggitProject> LoadProject(Noggit::Ui::Windows::NoggitProjectSelectionWindow* parent)
         {
             QModelIndex index = parent->ui->listView->currentIndex();
             auto applicationConfiguration = parent->_noggitApplication->GetConfiguration();
