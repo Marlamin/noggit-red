@@ -81,14 +81,18 @@ namespace Noggit::Ui::Windows
         auto applicationConfiguration = _noggitApplication->GetConfiguration();
         for (const auto& dirEntry : std::filesystem::directory_iterator(applicationConfiguration->ApplicationProjectPath))
         {
-            auto item = new QListWidgetItem(ui->listView);
             auto projectReader = Noggit::Project::ApplicationProjectReader();
             auto project = projectReader.ReadProject(dirEntry);
 
+            if (!project.has_value())
+              continue;
+
+            auto item = new QListWidgetItem(ui->listView);
+
             auto projectData = Noggit::Ui::Component::ProjectListItemData();
-            projectData.ProjectVersion = project.ProjectVersion;
+            projectData.ProjectVersion = project->ProjectVersion;
             projectData.ProjectDirectory = QString::fromStdString(dirEntry.path().generic_string());
-            projectData.ProjectName = QString::fromStdString(project.ProjectName);
+            projectData.ProjectName = QString::fromStdString(project->ProjectName);
             projectData.ProjectLastEdited = QDateTime::currentDateTime().date().toString();
 
             auto projectListItem = new Noggit::Ui::Component::ProjectListItem(projectData, ui->listView);
