@@ -65,7 +65,7 @@ namespace Noggit::Ui::Windows
             project_name_label->setStyleSheet("QLabel#project-title-label { font-size: 15px; }");
 
             project_directory_label = new QLabel(data.ProjectDirectory, parent);
-            project_directory_label->setGeometry(48, 35, 125, 20);
+            project_directory_label->setGeometry(48, 20, 125, 20);
             project_directory_label->setObjectName("project-information");
             project_directory_label->setStyleSheet("QLabel#project-information { font-size: 10px; }");
 
@@ -82,7 +82,7 @@ namespace Noggit::Ui::Windows
                 version = "Shadowlands";
 
         	project_version_label = new QLabel(version, parent);
-            project_version_label->setGeometry(48, 20, 125, 20);
+            project_version_label->setGeometry(48, 35, 125, 20);
             project_version_label->setObjectName("project-information");
             project_version_label->setStyleSheet("QLabel#project-information { font-size: 10px; }");
 
