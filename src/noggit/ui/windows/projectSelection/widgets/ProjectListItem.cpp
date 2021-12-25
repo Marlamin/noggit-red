@@ -15,15 +15,16 @@ namespace Noggit::Ui::Widget
         project_version_icon->setPixmap(icon.pixmap(QSize(48, 48)));
         project_version_icon->setGeometry(0, 5, 64, 48);
 
+        auto maxWidth = parent->sizeHint().width();
 
         auto projectName = toCamelCase(QString(data.ProjectName));
         project_name_label = new QLabel(projectName, parent);
-        project_name_label->setGeometry(45, 5, 125, 20);
+        project_name_label->setGeometry(45, 5, maxWidth, 20);
         project_name_label->setObjectName("project-title-label");
         project_name_label->setStyleSheet("QLabel#project-title-label { font-size: 15px; }");
 
         project_directory_label = new QLabel(data.ProjectDirectory, parent);
-        project_directory_label->setGeometry(48, 20, 125, 20);
+        project_directory_label->setGeometry(48, 20, maxWidth, 20);
         project_directory_label->setObjectName("project-information");
         project_directory_label->setStyleSheet("QLabel#project-information { font-size: 10px; }");
 
@@ -40,7 +41,7 @@ namespace Noggit::Ui::Widget
             version = "Shadowlands";
 
         project_version_label = new QLabel(version, parent);
-        project_version_label->setGeometry(48, 35, 125, 20);
+        project_version_label->setGeometry(48, 35, maxWidth, 20);
         project_version_label->setObjectName("project-information");
         project_version_label->setStyleSheet("QLabel#project-information { font-size: 10px; }");
 
@@ -50,9 +51,9 @@ namespace Noggit::Ui::Widget
         project_version_label->setGraphicsEffect(versionEffect);
         project_version_label->setAutoFillBackground(true);
 
-        auto width = parent->sizeHint().width();
+      
         project_last_edited_label = new QLabel(data.ProjectLastEdited, parent);
-        project_last_edited_label->setGeometry(width, 35, 125, 20);
+        project_last_edited_label->setGeometry(maxWidth, 35, 125, 20);
         project_last_edited_label->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
         project_last_edited_label->setObjectName("project-information");
         project_last_edited_label->setStyleSheet("QLabel#project-information { font-size: 10px; }");
