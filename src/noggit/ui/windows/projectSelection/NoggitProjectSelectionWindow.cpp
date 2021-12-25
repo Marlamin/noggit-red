@@ -2,6 +2,7 @@
 #include <noggit/ui/windows/projectSelection/components/ExistingProjectEnumerationComponent.hpp>
 #include <noggit/ui/windows/projectSelection/components/CreateProjectComponent.hpp>
 #include "ui_noggit-red-project-page.h"
+#include "ui_NoggitProjectSelectionWindow.h"
 #include <filesystem>
 #include <qstringlistmodel.h>
 #include <QString>

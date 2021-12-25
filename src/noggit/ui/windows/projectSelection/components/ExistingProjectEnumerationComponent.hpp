@@ -5,6 +5,7 @@
 #include <noggit/ui/windows/projectSelection/widgets/ProjectListItem.hpp>
 #include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.h>
 #include "ui_noggit-red-project-page.h"
+#include "ui_NoggitProjectSelectionWindow.h"
 
 namespace Noggit::Ui::Component
 {
