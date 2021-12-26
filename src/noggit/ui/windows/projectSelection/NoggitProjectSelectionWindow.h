@@ -8,7 +8,7 @@
 #include <qgraphicseffect.h>
 #include <QString>
 #include <noggit/application/NoggitApplication.hpp>
-#include <noggit/ui/windows/NoggitWindow/NoggitWindow.hpp>
+#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/ui/windows/projectCreation/NoggitProjectCreationDialog.h>
 
 QT_BEGIN_NAMESPACE

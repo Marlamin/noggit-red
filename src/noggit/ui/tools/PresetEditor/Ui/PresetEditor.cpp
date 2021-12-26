@@ -73,7 +73,7 @@ PresetEditorWidget::PresetEditorWidget(std::shared_ptr<Project::NoggitProject> p
   ui->worldSelector->addItem("None");
   ui->worldSelector->setItemData(0, QVariant(-1));
 
-  const auto& table = std::string("map");
+  const auto& table = std::string("Map");
   auto mapTable = _project->ClientDatabase->LoadTable(table);
 
   int count = 1;

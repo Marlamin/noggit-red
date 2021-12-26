@@ -165,17 +165,17 @@ namespace Noggit::Project
 
             auto listOfDbcPaths = std::vector<std::string>
             {
-                "DBFilesClient\\AreaTable.dbc",
-                "DBFilesClient\\Map.dbc",
-                "DBFilesClient\\LoadingScreens.dbc",
-                "DBFilesClient\\Light.dbc",
-                "DBFilesClient\\LightParams.dbc",
-                "DBFilesClient\\LightSkybox.dbc",
-                "DBFilesClient\\LightIntBand.dbc",
-                "DBFilesClient\\LightFloatBand.dbc",
-                "DBFilesClient\\GroundEffectTexture.dbc",
-                "DBFilesClient\\GroundEffectDoodad.dbc",
-                "DBFilesClient\\LiquidType.dbc",
+                "DBFilesClient/AreaTable.dbc",
+                "DBFilesClient/Map.dbc",
+                "DBFilesClient/LoadingScreens.dbc",
+                "DBFilesClient/Light.dbc",
+                "DBFilesClient/LightParams.dbc",
+                "DBFilesClient/LightSkybox.dbc",
+                "DBFilesClient/LightIntBand.dbc",
+                "DBFilesClient/LightFloatBand.dbc",
+                "DBFilesClient/GroundEffectTexture.dbc",
+                "DBFilesClient/GroundEffectDoodad.dbc",
+                "DBFilesClient/LiquidType.dbc",
             };
 
             if (project.Client.ClientVersion == "Wrath Of The Lich King")
@@ -199,22 +199,24 @@ namespace Noggit::Project
                     stream.write(buffer, fileSize);
                     stream.flush();
                     stream.close();
+
+                    delete[] buffer;
                 }
             }
 
             auto listOfDb2Paths = std::vector<std::string>
             {
-                //"DBFilesClient\\AreaTable.db2",
-                "DBFilesClient\\Map.db2",
-                //"DBFilesClient\\LoadingScreens.db2",
-                //"DBFilesClient\\Light.db2",
-                //"DBFilesClient\\LightParams.db2",
-                //"DBFilesClient\\LightSkybox.db2",
-                //"DBFilesClient\\LightIntBand.db2",
-                //"DBFilesClient\\LightFloatBand.db2",
-                //"DBFilesClient\\GroundEffectTexture.db2",
-                //"DBFilesClient\\GroundEffectDoodad.db2",
-                //"DBFilesClient\\LiquidType.db2",
+                //"DBFilesClient/AreaTable.db2",
+                "DBFilesClient/Map.db2",
+                //"DBFilesClient/LoadingScreens.db2",
+                //"DBFilesClient/Light.db2",
+                //"DBFilesClient/LightParams.db2",
+                //"DBFilesClient/LightSkybox.db2",
+                //"DBFilesClient/LightIntBand.db2",
+                //"DBFilesClient/LightFloatBand.db2",
+                //"DBFilesClient/GroundEffectTexture.db2",
+                //"DBFilesClient/GroundEffectDoodad.db2",
+                //"DBFilesClient/LiquidType.db2",
             };
 
             if (project.Client.ClientVersion == "Shadowlands")
@@ -238,6 +240,8 @@ namespace Noggit::Project
                     stream.write(buffer, fileSize);
                     stream.flush();
                     stream.close();
+
+                    delete[] buffer;
                 }
             }
         }

@@ -3,7 +3,7 @@
 #include "MapCreationWizard.hpp"
 
 #include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/windows/NoggitWindow/NoggitWindow.hpp>
+#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <noggit/Log.h>
@@ -69,7 +69,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
   // Fill selector combo
 
-  const auto& table = std::string("map");
+  const auto& table = std::string("Map");
   auto mapTable = _project->ClientDatabase->LoadTable(table);
 
   int count = 0;
@@ -91,7 +91,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
       count++;
   }
 
-  _project->ClientDatabase->UnloadTable("map");
+  _project->ClientDatabase->UnloadTable("Map");
 
   auto add_btn = new QPushButton("New",this);
   add_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus));
@@ -300,7 +300,7 @@ void MapCreationWizard::selectMap(int map_id)
 {
   _is_new_record = false;
 
-  auto table = _project->ClientDatabase->LoadTable("map");
+  auto table = _project->ClientDatabase->LoadTable("Map");
   auto record = table.Record(map_id);
 
   _cur_map_id = map_id;
@@ -366,7 +366,7 @@ void MapCreationWizard::selectMap(int map_id)
 
   _max_players->setValue(std::atoi(maxPlayers.c_str()));
 
-  _project->ClientDatabase->UnloadTable("map");
+  _project->ClientDatabase->UnloadTable("Map");
 }
 
 void MapCreationWizard::wheelEvent(QWheelEvent* event)

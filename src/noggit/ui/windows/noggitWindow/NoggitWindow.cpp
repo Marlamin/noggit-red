@@ -4,7 +4,7 @@
 #include <noggit/Log.h>
 #include <noggit/World.h>
 #include <noggit/ContextObject.hpp>
-#include <noggit/ui/windows/NoggitWindow/NoggitWindow.hpp>
+#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/MapView.h>
 #include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
 #include <noggit/ui/minimap_widget.hpp>
@@ -199,13 +199,13 @@ namespace Noggit::Ui
 
       _world.reset();
 
-      auto table = _project->ClientDatabase->LoadTable("map");
+      auto table = _project->ClientDatabase->LoadTable("Map");
       auto record = table.Record(mapID);
 
       _world = std::make_unique<World>(record.Columns["Directory"].Value, mapID, Noggit::NoggitRenderContext::MAP_VIEW);
       _minimap->world(_world.get());
 
-      _project->ClientDatabase->UnloadTable("map");
+      _project->ClientDatabase->UnloadTable("Map");
 
       emit map_selected(mapID);
 
@@ -342,7 +342,7 @@ namespace Noggit::Ui
 		    table->clear();
 	    }
 
-	    const auto& table = std::string("map");
+	    const auto& table = std::string("Map");
 	    auto mapTable = _project->ClientDatabase->LoadTable(table);
 
 	    auto iterator = mapTable.Records();
