@@ -28,7 +28,7 @@ void LiquidTextureManager::upload()
     // procedural water hack fix
     if (shader_type == 3)
     {
-      filename = "XTextures\\river\\lake_a.%d.blp";
+      filename = "XTextures\\river\\lake_a.";
       // default param for water
       anim = glm::vec2(1.f, 0.f);
     }
@@ -38,7 +38,8 @@ void LiquidTextureManager::upload()
       // TODO: why even try-catching there? empty string? BARE_EXCEPT_INV
       try
       {
-        filename = record.getString(LiquidTypeDB::TextureFilenames);
+        std::string db_string_template = record.getString(LiquidTypeDB::TextureFilenames);
+        filename = db_string_template.substr(0, db_string_template.length() - 6);
       }
       catch (...) // fallback for malformed DBC
       {
