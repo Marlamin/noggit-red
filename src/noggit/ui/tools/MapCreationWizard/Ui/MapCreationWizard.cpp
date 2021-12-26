@@ -655,9 +655,18 @@ void LocaleDBCEntry::fill(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& 
 {
     auto columnValues = record.Columns[columnName].Values;
     auto columnFlagsValue = record.Columns[columnName + "_flags"].Value;
-    for (int loc = 0; loc < 16; ++loc)
+
+    if(columnValues.size() == 0)
     {
-        setValue(columnValues[loc], loc);
+        auto singleValue = record.Columns[columnName].Value;
+        setValue(singleValue, 0);
+    }
+    else
+    {
+        for (int loc = 0; loc < 16; ++loc)
+        {
+            setValue(columnValues[loc], loc);
+        }
     }
 
     _flags->setValue(std::atoi(columnFlagsValue.c_str()));
