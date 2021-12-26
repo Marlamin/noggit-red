@@ -97,6 +97,8 @@ PresetEditorWidget::PresetEditorWidget(std::shared_ptr<Project::NoggitProject> p
 
       count++;
   }
+  _project->ClientDatabase->UnloadTable("map");
+
 
   // Handle minimap widget
   ui->minimapWidget->draw_boundaries(true);

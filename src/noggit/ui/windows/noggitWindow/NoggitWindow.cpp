@@ -25,7 +25,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QStackedWidget>
-
+#include <noggit/ui//windows/noggitWindow/widgets/MapListItem.hpp>
 #include <QtNetwork/QTcpSocket>
 #include <sstream>
 #include <QSysInfo>
@@ -66,7 +66,7 @@ namespace Noggit::Ui
       setWindowTitle (QString::fromStdString (title.str()));
       setWindowIcon (QIcon (":/icon"));
 
-        if(project->ProjectVersion == Project::ProjectVersion::WOTLK)
+    	if(project->ProjectVersion == Project::ProjectVersion::WOTLK)
         {
             OpenDBs(project->ClientData);
         }
@@ -223,39 +223,21 @@ namespace Noggit::Ui
 
       auto layout (new QHBoxLayout (widget));
       layout->setAlignment(Qt::AlignLeft);
-
       QListWidget* bookmarks_table (new QListWidget (widget));
       _continents_table = new QListWidget (widget);
-      _dungeons_table = new QListWidget (widget);
-      _raids_table = new QListWidget (widget);
-      _battlegrounds_table = new QListWidget (widget);
-      _arenas_table = new QListWidget (widget);
-      _scenarios_table = new QListWidget(widget);
-
-      std::array<QListWidget*, 6> type_to_table
-          {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table, _scenarios_table}};
-
-      for (auto& table : type_to_table)
-      {
-        QObject::connect ( table, &QListWidget::itemClicked
+    	QObject::connect (_continents_table, &QListWidget::itemClicked
             , [this] (QListWidgetItem* item)
                            {
                              loadMap (item->data (Qt::UserRole).toInt());
                            }
         );
-      }
+      
 
       QTabWidget* entry_points_tabs (new QTabWidget (widget));
       entry_points_tabs->setMaximumWidth(600);
-
-      entry_points_tabs->addTab (_continents_table, "Continents");
-      entry_points_tabs->addTab (_dungeons_table, "Dungeons");
-      entry_points_tabs->addTab (_raids_table, "Raids");
-      entry_points_tabs->addTab (_battlegrounds_table, "Battlegrounds");
-      entry_points_tabs->addTab (_arenas_table, "Arenas");
-      entry_points_tabs->addTab (_scenarios_table, "Scenarios");
+      entry_points_tabs->addTab (_continents_table, "Maps");
       entry_points_tabs->addTab (bookmarks_table, "Bookmarks");
-
+      entry_points_tabs->setFixedWidth(300);
       layout->addWidget (entry_points_tabs);
 
       build_map_lists();
@@ -334,13 +316,7 @@ namespace Noggit::Ui
 
     void Noggit::Ui::NoggitWindow::build_map_lists()
     {
-	    std::array<QListWidget*, 6> type_to_table
-		    {{_continents_table, _dungeons_table, _raids_table, _battlegrounds_table, _arenas_table, _scenarios_table}};
-
-	    for (auto& table : type_to_table)
-	    {
-		    table->clear();
-	    }
+    	_continents_table->clear();
 
 	    const auto& table = std::string("Map");
 	    auto mapTable = _project->ClientDatabase->LoadTable(table);
@@ -357,27 +333,18 @@ namespace Noggit::Ui
 		    if (e.areaType < 0 || e.areaType > 5  || !World::IsEditableWorld(record))
 			    continue;
 
-            auto item = new QListWidgetItem(QString::number(e.mapID) + " - " + QString::fromUtf8(e.name.c_str()), type_to_table[e.areaType]);
-            if (e.expansion == 0)
-                item->setIcon(QIcon(":/icon-classic"));
-            if (e.expansion == 1)
-                item->setIcon(QIcon(":/icon-burning"));
-            if (e.expansion == 2)
-                item->setIcon(QIcon(":/icon-wrath"));
-            if (e.expansion == 3)
-                item->setIcon(QIcon(":/icon-cata"));
-            if (e.expansion == 4)
-                item->setIcon(QIcon(":/icon-panda"));
-            if (e.expansion == 5)
-                item->setIcon(QIcon(":/icon-warlords"));
-            if (e.expansion == 6)
-                item->setIcon(QIcon(":/icon-legion"));
-            if (e.expansion == 7)
-                item->setIcon(QIcon(":/icon-battle"));
-            if (e.expansion == 8)
-                item->setIcon(QIcon(":/icon-shadow"));
+            auto item = new QListWidgetItem(_continents_table);
+            auto mapListData = Noggit::Ui::Widget::MapListData();
+            mapListData.MapName = QString::fromUtf8(e.name.c_str());
+            mapListData.MapId = e.mapID;
+            mapListData.MapTypeId = e.areaType;
+            mapListData.ExpansionId = e.expansion;
 
+            auto mapListItem = new Noggit::Ui::Widget::MapListItem(mapListData, _continents_table);
+
+            item->setSizeHint(mapListItem->minimumSizeHint());
             item->setData(Qt::UserRole, QVariant(e.mapID));
+            _continents_table->setItemWidget(item, mapListItem);
 	    }
         _project->ClientDatabase->UnloadTable(table);
     }

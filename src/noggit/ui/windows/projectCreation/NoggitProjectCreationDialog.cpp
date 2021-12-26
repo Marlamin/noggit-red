@@ -8,7 +8,7 @@ NoggitProjectCreationDialog::NoggitProjectCreationDialog(ProjectInformation& pro
 	, ui(new ::Ui::NoggitProjectCreationDialog)
 	, _projectInformation(projectInformation)
 {
-    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+    setWindowFlags(Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint | Qt::WindowSystemMenuHint | Qt::WindowTitleHint);
 
     ui->setupUi(this);
 

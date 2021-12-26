@@ -27,7 +27,14 @@ namespace Noggit::Project
 {
     enum class ProjectVersion
     {
+        VANILLA,
+        BC,
         WOTLK,
+        CATA,
+        PANDARIA,
+        WOD,
+        LEGION,
+        BFA,
         SL
     };
 
