@@ -4,6 +4,7 @@
 
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <blizzard-database-library/include/structures/Types.h>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <noggit/Log.h>
@@ -312,7 +313,7 @@ void MapCreationWizard::selectMap(int map_id)
 
   auto directoryName = record.Columns["Directory"].Value;
   auto instanceType = record.Columns["InstanceType"].Value;
-  auto mapName = record.Columns["MapName_lang"].Value;
+
   auto areaTableId = record.Columns["AreaTableID"].Value;
   auto loadingScreenId = record.Columns["LoadingScreenID"].Value;
   auto minimapIconScale = record.Columns["MinimapIconScale"].Value;
@@ -321,6 +322,7 @@ void MapCreationWizard::selectMap(int map_id)
   auto expansionId = record.Columns["ExpansionID"].Value;
   auto maxPlayers = record.Columns["MaxPlayers"].Value;
   auto timeOffset = record.Columns["TimeOffset"].Value;
+
   _world = new World(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW);
   _minimap_widget->world(_world);
 
@@ -334,12 +336,11 @@ void MapCreationWizard::selectMap(int map_id)
 
   _instance_type->setCurrentIndex(std::atoi(instanceType.c_str()));
 
-  //_map_name->fill(record, 5);
+  _map_name->fill(record, "MapName_lang");
+  _map_desc_alliance->fill(record, "MapDescription0_lang");
+  _map_desc_horde->fill(record, "MapDescription1_lang");
 
   _area_table_id->setValue(std::atoi(areaTableId.c_str()));
-
-  //_map_desc_alliance->fill(record, 23);
-  //_map_desc_horde->fill(record, 40);
 
   _loading_screen->setValue(std::atoi(loadingScreenId.c_str()));
   _minimap_icon_scale->setValue(std::atof(minimapIconScale.c_str()));
@@ -648,6 +649,18 @@ void LocaleDBCEntry::fill(DBCFile::Record& record, size_t field)
   }
 
   _flags->setValue(record.getInt(field + 16));
+}
+
+void LocaleDBCEntry::fill(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record, std::string columnName)
+{
+    auto columnValues = record.Columns[columnName].Values;
+    auto columnFlagsValue = record.Columns[columnName + "_flags"].Value;
+    for (int loc = 0; loc < 16; ++loc)
+    {
+        setValue(columnValues[loc], loc);
+    }
+
+    _flags->setValue(std::atoi(columnFlagsValue.c_str()));
 }
 
 void LocaleDBCEntry::toRecord(DBCFile::Record &record, size_t field)

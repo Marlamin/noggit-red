@@ -45,6 +45,7 @@ namespace Noggit
         std::string getValue(int locale) { return  _widget_map.at(_locale_names[locale])->text().toStdString(); };
 
         void fill(DBCFile::Record& record, size_t field);
+        void fill(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record, std::string columnName);
         void clear();
         void toRecord(DBCFile::Record& record, size_t field);
 
