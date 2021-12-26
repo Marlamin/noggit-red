@@ -337,8 +337,8 @@ void MapCreationWizard::selectMap(int map_id)
   _instance_type->setCurrentIndex(std::atoi(instanceType.c_str()));
 
   _map_name->fill(record, "MapName_lang");
-  _map_desc_alliance->fill(record, "MapDescription0_lang");
-  _map_desc_horde->fill(record, "MapDescription1_lang");
+  _map_desc_alliance->fill(record, "MapDescription1_lang");
+  _map_desc_horde->fill(record, "MapDescription0_lang");
 
   _area_table_id->setValue(std::atoi(areaTableId.c_str()));
 
