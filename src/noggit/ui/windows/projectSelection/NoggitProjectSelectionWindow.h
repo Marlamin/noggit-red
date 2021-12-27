@@ -40,11 +40,11 @@ namespace Noggit::Ui::Windows
         ~NoggitProjectSelectionWindow();
 
     private:
-        Noggit::Application::NoggitApplication* _noggitApplication;
         ::Ui::NoggitProjectSelectionWindow* ui;
+        Noggit::Application::NoggitApplication* _noggitApplication;
         Noggit::Ui::settings* _settings;
 
-        std::unique_ptr<Noggit::Ui::NoggitWindow> projectSelectionPage;
+        std::unique_ptr<Noggit::Ui::Windows::NoggitWindow> projectSelectionPage;
 
         std::unique_ptr<Component::ExistingProjectEnumerationComponent> _existingProjectEnumerationComponent;
         std::unique_ptr<Component::CreateProjectComponent> _createProjectComponent;

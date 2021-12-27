@@ -1,11 +1,11 @@
 #include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.h>
 #include <noggit/ui/windows/projectSelection/components/ExistingProjectEnumerationComponent.hpp>
 #include <noggit/ui/windows/projectSelection/components/CreateProjectComponent.hpp>
-#include "ui_NoggitProjectSelectionWindow.h"
+#include <noggit/ui/windows/projectSelection/components/LoadProjectComponent.hpp>
 #include <filesystem>
 #include <QString>
 
-#include "components/LoadProjectComponent.hpp"
+#include "ui_NoggitProjectSelectionWindow.h"
 
 namespace Noggit::Ui::Windows
 {
@@ -56,7 +56,7 @@ namespace Noggit::Ui::Windows
             {
                 auto selectedProject = _loadProjectComponent->LoadProject(this);
 
-                projectSelectionPage = std::make_unique<Noggit::Ui::NoggitWindow>(_noggitApplication->GetConfiguration(), selectedProject);
+                projectSelectionPage = std::make_unique<Noggit::Ui::Windows::NoggitWindow>(_noggitApplication->GetConfiguration(), selectedProject);
                 projectSelectionPage->showMaximized();
 
                 close();

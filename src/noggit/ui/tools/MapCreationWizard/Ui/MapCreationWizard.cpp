@@ -236,8 +236,8 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
             removeMap();
           });
 
-  _connection = connect(reinterpret_cast<Noggit::Ui::NoggitWindow*>(parent),
-                        QOverload<int>::of(&Noggit::Ui::NoggitWindow::map_selected)
+  _connection = connect(reinterpret_cast<Noggit::Ui::Windows::NoggitWindow*>(parent),
+                        QOverload<int>::of(&Noggit::Ui::Windows::NoggitWindow::map_selected)
                         , [&] (int index)
                               {
                                 selectMap(index);

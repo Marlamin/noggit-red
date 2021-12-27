@@ -1,4 +1,6 @@
-#pragma once
+#ifndef NOGGIT_WINDOW_NOGGIT_HPP
+#define NOGGIT_WINDOW_NOGGIT_HPP
+
 #include <math/trig.hpp>
 #include <noggit/World.h>
 #include <noggit/MapView.h>
@@ -15,27 +17,32 @@
 
 class StackedWidget;
 
-
-namespace Noggit
+namespace Noggit::Ui::Component
 {
-  namespace Ui
-  {
-      
+    class BuildMapListComponent;
+}
+
+namespace Noggit::Ui
+{
     class minimap_widget;
     class settings;
     class about;
 
-    struct NoggitWindow : QMainWindow
-    {
-      Q_OBJECT
+}
 
+namespace Noggit::Ui::Windows
+{
+    class NoggitWindow : public QMainWindow
+    {
+        Q_OBJECT
+
+    	friend Component::BuildMapListComponent;
     public:
       NoggitWindow(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
           std::shared_ptr<Noggit::Project::NoggitProject> project);
 
       void prompt_exit(QCloseEvent* event);
       void prompt_uid_fix_failure();
-      void build_map_lists();
 
       QMenuBar* _menuBar;
 
@@ -46,8 +53,9 @@ namespace Noggit
       void map_selected(int map_id);
 
     private:
-      std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> _applicationConfiguration;
-      std::shared_ptr<Noggit::Project::NoggitProject> _project;
+    	std::unique_ptr<Component::BuildMapListComponent> _buildMapListComponent;
+      std::shared_ptr<Application::NoggitApplicationConfiguration> _applicationConfiguration;
+      std::shared_ptr<Project::NoggitProject> _project;
 
       void loadMap (int mapID);
 
@@ -66,14 +74,6 @@ namespace Noggit
 
       void createBookmarkList();
 
-      struct MapEntry
-      {
-        int mapID;
-        std::string name;
-        int areaType;
-        int expansion;
-      };
-
       struct BookmarkEntry
       {
         int mapID;
@@ -83,7 +83,6 @@ namespace Noggit
         float camera_pitch;
       };
 
-      std::vector<MapEntry> mMaps;
       std::vector<BookmarkEntry> mBookmarks;
 
       minimap_widget* _minimap;
@@ -97,11 +96,6 @@ namespace Noggit
       QMetaObject::Connection _map_wizard_connection;
 
       QListWidget* _continents_table;
-      QListWidget* _dungeons_table;
-      QListWidget* _raids_table;
-      QListWidget* _battlegrounds_table;
-      QListWidget* _arenas_table;
-      QListWidget* _scenarios_table;
 
       std::unique_ptr<World> _world;
 
@@ -109,5 +103,5 @@ namespace Noggit
 
       virtual void closeEvent (QCloseEvent*) override;
     };
-  }
 }
+#endif // NOGGIT_WINDOW_NOGGIT_HPP

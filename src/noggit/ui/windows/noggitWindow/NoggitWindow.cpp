@@ -32,6 +32,7 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QIcon>
+#include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
 
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
@@ -44,14 +45,7 @@
 #include "ui_TitleBar.h"
 #include <external/framelesshelper/framelesswindowsmanager.h>
 
-
-class Plugin
-{
-public:
-  virtual void execute() = 0;
-};
-
-namespace Noggit::Ui
+namespace Noggit::Ui::Windows
 {
     NoggitWindow::NoggitWindow(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
         std::shared_ptr<Noggit::Project::NoggitProject> project)
@@ -118,6 +112,8 @@ namespace Noggit::Ui
                        );
 
       _menuBar->adjustSize();
+
+      _buildMapListComponent = std::make_unique<Component::BuildMapListComponent>();
 
     	build_menu();
     }
@@ -239,7 +235,7 @@ namespace Noggit::Ui
       entry_points_tabs->setFixedWidth(300);
       layout->addWidget (entry_points_tabs);
 
-      build_map_lists();
+      _buildMapListComponent->BuildMapList(this);
 
       qulonglong bookmark_index (0);
       for (auto entry : mBookmarks)
@@ -300,7 +296,7 @@ namespace Noggit::Ui
       _map_wizard_connection = connect(_map_creation_wizard, &Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated
           ,[=]
           {
-            build_map_lists();
+              _buildMapListComponent->BuildMapList(this);
           }
       );
 
@@ -312,37 +308,6 @@ namespace Noggit::Ui
 
       _minimap->adjustSize();
     }
-
-    void Noggit::Ui::NoggitWindow::build_map_lists()
-    {
-    	_continents_table->clear();
-
-	    const auto& table = std::string("Map");
-	    auto mapTable = _project->ClientDatabase->LoadTable(table);
-
-	    auto iterator = mapTable.Records();
-	    while (iterator.HasRecords())
-	    {
-		    auto record = iterator.Next();
-         
-            auto mapListData = Noggit::Ui::Widget::MapListData();
-            mapListData.MapName = QString::fromUtf8(record.Columns["MapName_lang"].Value.c_str());
-            mapListData.MapId = record.RecordId;
-            mapListData.MapTypeId = std::stoi(record.Columns["InstanceType"].Value);
-            mapListData.ExpansionId = std::stoi(record.Columns["ExpansionID"].Value);
-
-            if (mapListData.MapTypeId < 0 || mapListData.MapTypeId > 5 || !World::IsEditableWorld(record))
-                continue;
-
-            auto mapListItem = new Noggit::Ui::Widget::MapListItem(mapListData, _continents_table);
-            auto item = new QListWidgetItem(_continents_table);
-            item->setSizeHint(mapListItem->minimumSizeHint());
-            item->setData(Qt::UserRole, QVariant(mapListData.MapId));
-            _continents_table->setItemWidget(item, mapListItem);
-	    }
-        _project->ClientDatabase->UnloadTable(table);
-    }
-
 
     void NoggitWindow::createBookmarkList()
     {

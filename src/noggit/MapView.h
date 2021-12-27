@@ -45,6 +45,11 @@
 
 class World;
 
+namespace Noggit::Ui::Windows
+{
+    class NoggitWindow;
+}
+
 namespace Noggit
 {
 
@@ -65,6 +70,8 @@ namespace Noggit
   }
 
   class Camera;
+
+	
   namespace Ui
   {
     class detail_infos;
@@ -80,7 +87,6 @@ namespace Noggit
     class zone_id_browser;
     class texture_palette_small;
     class hole_tool;
-    struct NoggitWindow;
     struct tileset_chooser;
     class ObjectPalette;
   }
@@ -228,7 +234,7 @@ public:
   MapView ( math::degrees ah0
           , math::degrees av0
           , glm::vec3 camera_pos
-          , Noggit::Ui::NoggitWindow*
+          , Noggit::Ui::Windows::NoggitWindow*
           , std::unique_ptr<World>
           , uid_fix_mode uid_fix = uid_fix_mode::none
           , bool from_bookmark = false
@@ -309,7 +315,7 @@ private:
   virtual void focusOutEvent (QFocusEvent*) override;
   virtual void enterEvent(QEvent*) override;
 
-  Noggit::Ui::NoggitWindow* _main_window;
+  Noggit::Ui::Windows::NoggitWindow* _main_window;
 
   glm::vec4 normalized_device_coords (int x, int y) const;
   float aspect_ratio() const;
