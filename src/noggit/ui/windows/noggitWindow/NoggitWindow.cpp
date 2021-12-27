@@ -234,7 +234,6 @@ namespace Noggit::Ui
       
 
       QTabWidget* entry_points_tabs (new QTabWidget (widget));
-      entry_points_tabs->setMaximumWidth(600);
       entry_points_tabs->addTab (_continents_table, "Maps");
       entry_points_tabs->addTab (bookmarks_table, "Bookmarks");
       entry_points_tabs->setFixedWidth(300);
@@ -325,25 +324,20 @@ namespace Noggit::Ui
 	    while (iterator.HasRecords())
 	    {
 		    auto record = iterator.Next();
-		    MapEntry e;
-		    e.mapID = record.RecordId;
-		    e.name = record.Columns["MapName_lang"].Value;
-		    e.areaType = std::stoi(record.Columns["InstanceType"].Value);
-            e.expansion =  std::stoi(record.Columns["ExpansionID"].Value);
-		    if (e.areaType < 0 || e.areaType > 5  || !World::IsEditableWorld(record))
-			    continue;
-
-            auto item = new QListWidgetItem(_continents_table);
+         
             auto mapListData = Noggit::Ui::Widget::MapListData();
-            mapListData.MapName = QString::fromUtf8(e.name.c_str());
-            mapListData.MapId = e.mapID;
-            mapListData.MapTypeId = e.areaType;
-            mapListData.ExpansionId = e.expansion;
+            mapListData.MapName = QString::fromUtf8(record.Columns["MapName_lang"].Value.c_str());
+            mapListData.MapId = record.RecordId;
+            mapListData.MapTypeId = std::stoi(record.Columns["InstanceType"].Value);
+            mapListData.ExpansionId = std::stoi(record.Columns["ExpansionID"].Value);
+
+            if (mapListData.MapTypeId < 0 || mapListData.MapTypeId > 5 || !World::IsEditableWorld(record))
+                continue;
 
             auto mapListItem = new Noggit::Ui::Widget::MapListItem(mapListData, _continents_table);
-
+            auto item = new QListWidgetItem(_continents_table);
             item->setSizeHint(mapListItem->minimumSizeHint());
-            item->setData(Qt::UserRole, QVariant(e.mapID));
+            item->setData(Qt::UserRole, QVariant(mapListData.MapId));
             _continents_table->setItemWidget(item, mapListItem);
 	    }
         _project->ClientDatabase->UnloadTable(table);
