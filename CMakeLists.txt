@@ -187,14 +187,7 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/blizzard-archive
 INCLUDE_DIRECTORIES(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 #Load noggit source files
-collect_files(noggit_root_sources src/noggit FALSE "*.cpp" "")
-collect_files(noggit_application_sources src/noggit/application TRUE "*.cpp" "")
-collect_files(noggit_data_sources src/noggit/data FALSE "*.cpp" "")
-collect_files(noggit_simulation_sources src/noggit/simulation FALSE "*.cpp" "")
-collect_files(noggit_project_sources src/noggit/project FALSE "*.cpp" "")
-collect_files(noggit_ui_sources src/noggit/ui TRUE "*.cpp" "")
-collect_files(noggit_scripting_sources src/noggit/scripting TRUE "*.cpp" "")
-collect_files(noggit_services_sources src/noggit/services TRUE "*.cpp" "")
+collect_files(noggit_root_sources src/noggit TRUE "*.cpp" "")
 collect_files(math_sources src/math FALSE "*.cpp" "")
 collect_files(opengl_sources src/opengl FALSE "*.cpp" "")
 
@@ -214,14 +207,7 @@ collect_files(database_sources src/external/blizzard-database-library/src TRUE "
 collect_files(util_sources src/util TRUE "*.c;*.cpp;" "")
 collect_files(util_headers src/util TRUE "*.h;*.hpp" "")
 
-collect_files(noggit_root_headers src/noggit FALSE "*.h;*.hpp;*.inl" "")
-collect_files(noggit_application_headers src/noggit/application TRUE "*.h;*.hpp" "")
-collect_files(noggit_data_sources src/noggit/data FALSE "*.h;*.hpp" "")
-collect_files(noggit_simulation_sources src/noggit/simulation FALSE "*.h;*.hpp" "")
-collect_files(noggit_project_sources src/noggit/project FALSE "*.h;*.hpp" "")
-collect_files(noggit_ui_headers src/noggit/ui TRUE "*.h;*.hpp" "")
-collect_files(noggit_scripting_headers src/noggit/scripting TRUE "*.h;*.hpp" "")
-collect_files(noggit_services_headers src/noggit/services TRUE "*.h;*.hpp" "")
+collect_files(noggit_root_headers src/noggit TRUE "*.h;*.hpp;*.inl" "")
 collect_files(math_headers src/math FALSE "*.h;*.hpp" "")
 collect_files(opengl_headers src/opengl FALSE "*.h;*.hpp" "")
 collect_files(shaders src/glsl FALSE "*.glsl" "")
@@ -256,22 +242,8 @@ assign_specific_source_group("resources" ${ResFiles})
 assign_specific_source_group("resources" ${compiled_resource_files})
 
 assign_source_group(
-  ${noggit_application_sources}
-  ${noggit_application_headers}
-  ${noggit_simulation_sources}
-  ${noggit_simulation_headers}
-  ${noggit_data_sources}
-  ${noggit_data_headers}
-  ${noggit_project_sources}
-  ${noggit_project_headers}
   ${noggit_root_sources} 
   ${noggit_root_headers}
-  ${noggit_ui_sources}
-  ${noggit_ui_headers}
-  ${noggit_services_sources}
-  ${noggit_services_headers}
-  ${noggit_scripting_sources} 
-  ${noggit_scripting_headers}
   ${opengl_sources} 
   ${opengl_headers}
   ${math_sources} 
@@ -307,19 +279,7 @@ MESSAGE(STATUS ${moced})
 ADD_EXECUTABLE(noggit
   WIN32
   MACOSX_BUNDLE
-  ${noggit_application_sources}
-  ${noggit_application_headers}
-  ${noggit_simulation_sources}
-  ${noggit_simulation_headers}
-  ${noggit_data_sources}
-  ${noggit_data_headers}
-  ${noggit_project_sources}
-  ${noggit_project_headers}
   ${noggit_root_sources}
-  ${noggit_ui_sources}
-  ${noggit_scripting_sources}
-  ${noggit_services_sources}
-  ${noggit_services_headers}
   ${opengl_sources}
   ${database_sources}
   ${database_headers}
@@ -337,8 +297,6 @@ ADD_EXECUTABLE(noggit
   ${tracy_sources}
   ${archive_sources}
   ${noggit_root_headers}
-  ${noggit_ui_headers}
-  ${noggit_scripting_headers}
   ${opengl_headers}
   ${math_headers}
   ${external_headers}
