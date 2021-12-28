@@ -17,6 +17,8 @@ namespace Noggit::Ui::Component
             auto mapTable = parent->_project->ClientDatabase->LoadTable(table);
 
             auto iterator = mapTable.Records();
+            auto pinnedMaps = std::vector<Widget::MapListData>();
+            auto maps = std::vector<Widget::MapListData>();
             while (iterator.HasRecords())
             {
                 auto record = iterator.Next();
@@ -30,12 +32,30 @@ namespace Noggit::Ui::Component
                 if (mapListData.MapTypeId < 0 || mapListData.MapTypeId > 5 || !World::IsEditableWorld(record))
                     continue;
 
-                auto mapListItem = new Widget::MapListItem(mapListData, parent->_continents_table);
+                if (mapListData.Pinned)
+                {
+                    pinnedMaps.push_back(mapListData);
+                }
+                else
+                {
+                    maps.push_back(mapListData);
+                }
+            }
+
+            pinnedMaps.insert(pinnedMaps.end(), maps.begin(), maps.end());
+
+            for(auto const & map : pinnedMaps)
+            {
+                auto mapListItem = new Widget::MapListItem(map, parent->_continents_table);
                 auto item = new QListWidgetItem(parent->_continents_table);
                 item->setSizeHint(mapListItem->minimumSizeHint());
-                item->setData(Qt::UserRole, QVariant(mapListData.MapId));
+                item->setData(Qt::UserRole, QVariant(map.MapId));
                 parent->_continents_table->setItemWidget(item, mapListItem);
+
+
+
             }
+
             parent->_project->ClientDatabase->UnloadTable(table);
         }
     };

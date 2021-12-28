@@ -17,6 +17,7 @@ namespace Noggit::Ui::Widget
         int MapId;
         int MapTypeId;
         int ExpansionId;
+        bool Pinned;
     };
 
     class MapListItem : public QWidget
@@ -28,6 +29,7 @@ namespace Noggit::Ui::Widget
         QLabel* project_directory_label;
         QLabel* project_version_label;
         QLabel* project_last_edited_label;
+        QLabel* map_pinned_label;
         int _maxWidth;
     public:
         MapListItem(const MapListData& data, QWidget* parent);
