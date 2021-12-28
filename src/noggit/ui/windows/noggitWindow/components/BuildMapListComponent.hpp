@@ -1,11 +1,6 @@
 #ifndef NOGGIT_COMPONENT_BUILD_MAP_LIST_HPP
 #define NOGGIT_COMPONENT_BUILD_MAP_LIST_HPP
 
-namespace Noggit::Ui::Windows
-{
-  class NoggitWindow;
-}
-
 namespace Noggit::Ui::Component
 {
     class BuildMapListComponent
