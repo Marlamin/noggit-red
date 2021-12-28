@@ -1,4 +1,5 @@
 #include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 
 namespace Noggit::Ui::Widget
 {
@@ -74,6 +75,25 @@ namespace Noggit::Ui::Widget
 
         project_last_edited_label->setGraphicsEffect(lastEditedEffect);
         project_last_edited_label->setAutoFillBackground(true);
+
+        if(data.Pinned)
+        {
+            map_pinned_label = new QLabel("", this);
+            map_pinned_label->setPixmap(FontAwesomeIcon(FontAwesome::star).pixmap(QSize(16,16)));
+            map_pinned_label->setGeometry(150, 0, 125, 20);
+            map_pinned_label->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+            map_pinned_label->setObjectName("project-pinned");
+            map_pinned_label->setStyleSheet("QLabel#project-pinned { font-size: 10px; }");
+
+            auto colour = new QGraphicsColorizeEffect(this);
+            colour->setColor(QColor(255,204,0));
+            colour->setStrength(1.0f);
+
+            map_pinned_label->setGraphicsEffect(colour);
+            map_pinned_label->setAutoFillBackground(true);
+
+            layout.addWidget(map_pinned_label);
+        }
 
         layout.addWidget(project_version_icon);
         layout.addWidget(project_name_label);
