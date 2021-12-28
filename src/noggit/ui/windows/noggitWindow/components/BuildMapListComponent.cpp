@@ -19,7 +19,16 @@ void BuildMapListComponent::BuildMapList(Noggit::Ui::Windows::NoggitWindow* pare
     auto record = iterator.Next();
 
     auto mapListData = Widget::MapListData();
-    mapListData.MapName = QString::fromUtf8(record.Columns["MapName_lang"].Value.c_str());
+
+    for (auto const& value : record.Columns["MapName_lang"].Values)
+    {
+      if (value.empty())
+        continue;
+
+      mapListData.MapName = QString::fromUtf8(value.c_str());
+      break;
+    }
+
     mapListData.MapId = record.RecordId;
     mapListData.MapTypeId = std::stoi(record.Columns["InstanceType"].Value);
     mapListData.ExpansionId = std::stoi(record.Columns["ExpansionID"].Value);
