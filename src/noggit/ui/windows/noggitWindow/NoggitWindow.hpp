@@ -7,6 +7,7 @@
 #include <noggit/ui/uid_fix_window.hpp>
 #include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
 #include <noggit/project/ApplicationProject.h>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QStackedWidget>
@@ -16,11 +17,6 @@
 #include <QWidget>
 
 class StackedWidget;
-
-namespace Noggit::Ui::Component
-{
-    class BuildMapListComponent;
-}
 
 namespace Noggit::Ui
 {
@@ -34,9 +30,9 @@ namespace Noggit::Ui::Windows
 {
     class NoggitWindow : public QMainWindow
     {
-        Q_OBJECT
+      Q_OBJECT
+    	friend class Noggit::Ui::Component::BuildMapListComponent;
 
-    	friend Component::BuildMapListComponent;
     public:
       NoggitWindow(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
           std::shared_ptr<Noggit::Project::NoggitProject> project);
