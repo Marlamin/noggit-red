@@ -22,6 +22,7 @@
 #include <QString>
 #include <thread>
 #include <chrono>
+#include <cassert>
 #include <glm/vec3.hpp>
 
 #include "ApplicationProjectReader.h"
@@ -50,6 +51,8 @@ namespace Noggit::Project
                 return ProjectVersion::WOTLK;
             if (projectVersion == "Shadowlands")
                 return ProjectVersion::SL;
+
+            assert(false);
         }
 
         static std::string MapToStringVersion(ProjectVersion const& projectVersion)
@@ -58,6 +61,8 @@ namespace Noggit::Project
                 return std::string("Wrath Of The Lich King");
             if(projectVersion == ProjectVersion::SL)
                 return std::string("Shadowlands");
+
+            assert(false);
         }
     };
 

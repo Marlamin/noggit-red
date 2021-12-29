@@ -2,6 +2,7 @@
 #define NOGGIT_APPLICATION_PROJECT_READER_HPP
 
 #include <filesystem>
+#include <optional>
 
 namespace Noggit::Project
 {
