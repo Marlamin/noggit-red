@@ -25,7 +25,8 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QStackedWidget>
-#include <noggit/ui//windows/noggitWindow/widgets/MapListItem.hpp>
+#include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
+#include <noggit/ui/windows/noggitWindow/widgets/MapBookmarkListItem.hpp>
 #include <QtNetwork/QTcpSocket>
 #include <sstream>
 #include <QSysInfo>
@@ -239,8 +240,17 @@ namespace Noggit::Ui::Windows
       qulonglong bookmark_index (0);
       for (auto entry : _project->Bookmarks)
       {
-        auto item (new QListWidgetItem (entry.Name.c_str(), bookmarks_table));
+        auto item = new QListWidgetItem(bookmarks_table);
+
+        auto mapBookmarkData = Widget::MapListBookmarkData();
+        mapBookmarkData.MapName = QString::fromStdString(entry.Name);
+        mapBookmarkData.Position = entry.Position;
+
+        auto mapBookmarkItem = new Widget::MapListBookmarkItem(mapBookmarkData, bookmarks_table);
+
         item->setData (Qt::UserRole, QVariant (bookmark_index++));
+        item->setSizeHint(mapBookmarkItem->minimumSizeHint());
+        bookmarks_table->setItemWidget(item, mapBookmarkItem);
       }
 
       QObject::connect ( bookmarks_table, &QListWidget::itemDoubleClicked
