@@ -28,54 +28,54 @@ namespace Noggit::Ui::Widget
         if (data.ExpansionId == 8)
              icon = QIcon(":/icon-shadow");
 
-        project_version_icon = new QLabel("", parent);
-        project_version_icon->setPixmap(icon.pixmap(QSize(32, 32)));
-        project_version_icon->setGeometry(0, 0, 32, 32);
-        project_version_icon->setObjectName("project-icon-label");
-        project_version_icon->setStyleSheet("QLabel#project-icon-label { font-size: 12px; padding: 0px;}");
+        map_icon = new QLabel("", parent);
+        map_icon->setPixmap(icon.pixmap(QSize(32, 32)));
+        map_icon->setGeometry(0, 0, 32, 32);
+        map_icon->setObjectName("project-icon-label");
+        map_icon->setStyleSheet("QLabel#project-icon-label { font-size: 12px; padding: 0px;}");
 
         auto projectName = toCamelCase(QString(data.MapName));
-        project_name_label = new QLabel(projectName, parent);
-        project_name_label->setGeometry(32, 0, 300, 20);
-        project_name_label->setObjectName("project-title-label");
-        project_name_label->setStyleSheet("QLabel#project-title-label { font-size: 12px; }");
+        map_name = new QLabel(projectName, parent);
+        map_name->setGeometry(32, 0, 300, 20);
+        map_name->setObjectName("project-title-label");
+        map_name->setStyleSheet("QLabel#project-title-label { font-size: 12px; }");
 
-        project_directory_label = new QLabel(QString::number(data.MapId), parent);
-        project_directory_label->setGeometry(32, 15, 300, 20);
-        project_directory_label->setObjectName("project-information");
-        project_directory_label->setStyleSheet("QLabel#project-information { font-size: 10px; }");
+        map_id = new QLabel(QString::number(data.MapId), parent);
+        map_id->setGeometry(32, 15, 300, 20);
+        map_id->setObjectName("project-information");
+        map_id->setStyleSheet("QLabel#project-information { font-size: 10px; }");
 
         auto directoryEffect = new QGraphicsOpacityEffect(this);
         directoryEffect->setOpacity(0.5);
 
-        auto instanceType = QString("Unknown");
-        if(data.MapTypeId == 0)
-            instanceType = QString("Continent");
-        if(data.MapTypeId == 1)
-            instanceType = QString("Dungeon");
-    	if(data.MapTypeId == 2)
-    		instanceType = QString("Raid");
-        if(data.MapTypeId == 3)
-            instanceType = QString("Battleground");
-        if(data.MapTypeId == 4)
-            instanceType = QString("Arena");
-        if(data.MapTypeId == 5)
-            instanceType = QString("Scenario");
+        map_id->setGraphicsEffect(directoryEffect);
+        map_id->setAutoFillBackground(true);
 
-        project_directory_label->setGraphicsEffect(directoryEffect);
-        project_directory_label->setAutoFillBackground(true);
+        auto instanceType = QString("Unknown");
+        if (data.MapTypeId == 0)
+            instanceType = QString("Continent");
+        if (data.MapTypeId == 1)
+            instanceType = QString("Dungeon");
+        if (data.MapTypeId == 2)
+            instanceType = QString("Raid");
+        if (data.MapTypeId == 3)
+            instanceType = QString("Battleground");
+        if (data.MapTypeId == 4)
+            instanceType = QString("Arena");
+        if (data.MapTypeId == 5)
+            instanceType = QString("Scenario");
       
-        project_last_edited_label = new QLabel( instanceType,this);
-        project_last_edited_label->setGeometry(150, 15, 125, 20);
-        project_last_edited_label->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
-        project_last_edited_label->setObjectName("project-information");
-        project_last_edited_label->setStyleSheet("QLabel#project-information { font-size: 10px; }");
+        map_instance_type = new QLabel( instanceType,this);
+        map_instance_type->setGeometry(150, 15, 125, 20);
+        map_instance_type->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+        map_instance_type->setObjectName("project-information");
+        map_instance_type->setStyleSheet("QLabel#project-information { font-size: 10px; }");
 
         auto lastEditedEffect = new QGraphicsOpacityEffect(this);
         lastEditedEffect->setOpacity(0.5);
 
-        project_last_edited_label->setGraphicsEffect(lastEditedEffect);
-        project_last_edited_label->setAutoFillBackground(true);
+        map_instance_type->setGraphicsEffect(lastEditedEffect);
+        map_instance_type->setAutoFillBackground(true);
 
         if(data.Pinned)
         {
@@ -98,10 +98,10 @@ namespace Noggit::Ui::Widget
 
         setContextMenuPolicy(Qt::CustomContextMenu);
 
-        layout.addWidget(project_version_icon);
-        layout.addWidget(project_name_label);
-        layout.addWidget(project_directory_label);
-        layout.addWidget(project_last_edited_label);
+        layout.addWidget(map_icon);
+        layout.addWidget(map_name);
+        layout.addWidget(map_id);
+        layout.addWidget(map_instance_type);
         setLayout(layout.layout());
     }
 

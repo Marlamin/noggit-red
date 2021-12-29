@@ -69,7 +69,7 @@ namespace Noggit::Ui::Windows
         QMessageBox prompt;
         prompt.setWindowIcon(QIcon(":/icon"));
         prompt.setWindowTitle("Delete Project");
-        prompt.setIcon(QMessageBox::Critical);
+        prompt.setIcon(QMessageBox::Warning);
         prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
         prompt.setText("Deleting project will remove all saved data.");
         prompt.addButton("Accept", QMessageBox::AcceptRole);

@@ -24,11 +24,10 @@ namespace Noggit::Ui::Widget
     {
         Q_OBJECT
     private:
-        QLabel* project_version_icon;
-        QLabel* project_name_label;
-        QLabel* project_directory_label;
-        QLabel* project_version_label;
-        QLabel* project_last_edited_label;
+        QLabel* map_icon;
+        QLabel* map_name;
+        QLabel* map_id;
+        QLabel* map_instance_type;
         QLabel* map_pinned_label;
         int _maxWidth;
     public:
