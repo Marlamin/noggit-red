@@ -22,6 +22,10 @@
 #include <QString>
 #include <thread>
 #include <chrono>
+#include <glm/vec3.hpp>
+
+#include "ApplicationProjectReader.h"
+#include "ApplicationProjectWriter.h"
 
 namespace Noggit::Project
 {
@@ -38,86 +42,101 @@ namespace Noggit::Project
         SL
     };
 
-    struct Client
+    struct ClientVersionFactory
     {
-        std::string ClientPath;
-        std::string ClientVersion;
+        static ProjectVersion MapToEnumVersion(std::string const& projectVersion)
+        {
+            if (projectVersion == "Wrath Of The Lich King")
+                return ProjectVersion::WOTLK;
+            if (projectVersion == "Shadowlands")
+                return ProjectVersion::SL;
+        }
+
+        static std::string MapToStringVersion(ProjectVersion const& projectVersion)
+        {
+            if(projectVersion == ProjectVersion::WOTLK)
+                return std::string("Wrath Of The Lich King");
+            if(projectVersion == ProjectVersion::SL)
+                return std::string("Shadowlands");
+        }
     };
 
-    struct Project
+    struct NoggitProjectBookmarkMap
     {
-        std::string ProjectName;
-        Client Client;
+        int MapID;
+        std::string Name;
+        glm::vec3 Position;
+        float CameraYaw;
+        float CameraPitch;
+    };
+
+    struct NoggitProjectPinnedMap
+    {
+        int MapId;
+        std::string MapName;
     };
 
     class NoggitProject
     {
+        std::shared_ptr<ApplicationProjectWriter> _projectWriter;
     public:
+        std::string ProjectPath;
         std::string ProjectName;
         std::string ClientPath;
         ProjectVersion ProjectVersion;
+        std::vector<NoggitProjectPinnedMap> PinnedMaps;
+        std::vector<NoggitProjectBookmarkMap> Bookmarks;
         std::shared_ptr<BlizzardDatabaseLib::BlizzardDatabase> ClientDatabase;
         std::shared_ptr<BlizzardArchive::ClientData> ClientData;
-    };
 
-    class ApplicationProjectReader
-    {
-    public:
-        ApplicationProjectReader() = default;
-
-        std::optional<NoggitProject> ReadProject(std::filesystem::path const& projectPath)
+        NoggitProject()
         {
-            for (const auto& entry : std::filesystem::directory_iterator(projectPath))
+            PinnedMaps = std::vector<NoggitProjectPinnedMap>();
+            Bookmarks = std::vector<NoggitProjectBookmarkMap>();
+            _projectWriter = std::make_shared<ApplicationProjectWriter>();
+        }
+
+        void CreateBookmark(NoggitProjectBookmarkMap bookmark)
+        {
+            Bookmarks.push_back(bookmark);
+
+            _projectWriter->SaveProject(this, std::filesystem::path(ProjectPath));
+        }
+
+        void DeleteBookmark()
+        {
+	        
+        }
+
+        void PinMap(int mapId, std::string MapName)
+        {
+            auto pinnedMap = NoggitProjectPinnedMap();
+            pinnedMap.MapName = MapName;
+            pinnedMap.MapId = mapId;
+
+            auto pinnedMapFound = std::find_if(std::begin(PinnedMaps), std::end(PinnedMaps), [&](Project::NoggitProjectPinnedMap pinnedMap)
             {
-                if(entry.path().extension() == std::string(".noggitproj"))
+            	return pinnedMap.MapId == mapId;
+            });
+
+            if (pinnedMapFound != std::end(PinnedMaps))
+                return;
+
+            PinnedMaps.push_back(pinnedMap);
+
+            _projectWriter->SaveProject(this, std::filesystem::path(ProjectPath));
+        }
+
+        void UnpinMap(int mapId)
+        {
+            PinnedMaps.erase(std::remove_if(PinnedMaps.begin(),PinnedMaps.end(),
+                [=](NoggitProjectPinnedMap pinnedMap)
                 {
-                    QFile inputFile(QString::fromStdString(entry.path().generic_string()));
-                    inputFile.open(QIODevice::ReadOnly);
+                    return pinnedMap.MapId == mapId;
+                }),
+                PinnedMaps.end());
 
-                    auto document = QJsonDocument().fromJson(inputFile.readAll());
-                    auto root = document.object();
-
-                    auto project = NoggitProject();
-                    if (root.contains("Project") && root["Project"].isObject())
-                    {
-                        auto projectConfiguration = root["Project"].toObject();
-                        if (projectConfiguration.contains("ProjectName"))
-                            project.ProjectName = projectConfiguration["ProjectName"].toString().toStdString();
-
-                        if (projectConfiguration.contains("Client") && projectConfiguration["Client"].isObject())
-                        {
-                            auto projectClientConfiguration = projectConfiguration["Client"].toObject();
-
-                            if (projectClientConfiguration.contains("ClientPath"))
-                            {
-                                project.ClientPath = projectClientConfiguration["ClientPath"].toString().toStdString();
-                            }
-
-                            if (projectClientConfiguration.contains("ClientVersion"))
-                            {
-                                auto clientVersion = projectClientConfiguration["ClientVersion"].toString().toStdString();
-
-                                auto clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
-                                if (clientVersion == std::string("Shadowlands"))
-                                {
-                                    clientVersionEnum = Noggit::Project::ProjectVersion::SL;
-                                }
-
-                                if (clientVersion == std::string("Wrath Of The Lich King"))
-                                {
-                                    clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
-                                }
-
-                                project.ProjectVersion = clientVersionEnum;
-                            }
-                        }
-                    }
-
-                    return project;
-                }
-            }
-
-            return {};
+            _projectWriter->SaveProject(this, std::filesystem::path(ProjectPath));
         }
     };
 
@@ -142,33 +161,13 @@ namespace Noggit::Project
             std::filesystem::create_directory(workspaceDirectory);
             std::filesystem::create_directory(projectPath / std::string("export"));
 
-            auto project = Project();
+            auto project = NoggitProject();
             project.ProjectName = projectName;
-            project.Client = Client();
-            project.Client.ClientVersion = clientVersion;
-            project.Client.ClientPath = clientPath.generic_string();
+            project.ProjectVersion = ClientVersionFactory::MapToEnumVersion(clientVersion);
+            project.ClientPath = clientPath.generic_string();
 
-            auto projectConfigurationFilePath = (projectPath / (projectName + std::string(".noggitproj")));
-            auto projectConfigurationFile = QFile(QString::fromStdString(projectConfigurationFilePath.generic_string()));
-            projectConfigurationFile.open(QIODevice::WriteOnly);
-
-            auto document = QJsonDocument();
-            auto root = QJsonObject();
-            auto projectConfiguration = QJsonObject();
-
-            auto clientConfiguration = QJsonObject();
-
-            clientConfiguration.insert("ClientPath", project.Client.ClientPath.c_str());
-            clientConfiguration.insert("ClientVersion", project.Client.ClientVersion.c_str());
-
-            projectConfiguration.insert("ProjectName", project.ProjectName.c_str());
-            projectConfiguration.insert("Client", clientConfiguration);
-
-            root.insert("Project", projectConfiguration);
-            document.setObject(root);
-
-            projectConfigurationFile.write(document.toJson(QJsonDocument::Indented));
-            projectConfigurationFile.close();
+            auto projectWriter = ApplicationProjectWriter();
+            projectWriter.SaveProject(&project,projectPath);
 
             auto listOfDbcPaths = std::vector<std::string>
             {
@@ -185,7 +184,7 @@ namespace Noggit::Project
                 "DBFilesClient/LiquidType.dbc",
             };
 
-            if (project.Client.ClientVersion == "Wrath Of The Lich King")
+            if (project.ProjectVersion == ProjectVersion::WOTLK)
             {
                 auto clientData = BlizzardArchive::ClientData(clientPath.generic_string(), BlizzardArchive::ClientVersion::WOTLK,
                     BlizzardArchive::Locale::AUTO, workspaceDirectory.generic_string());
@@ -226,7 +225,7 @@ namespace Noggit::Project
                 //"DBFilesClient/LiquidType.db2",
             };
 
-            if (project.Client.ClientVersion == "Shadowlands")
+            if (project.ProjectVersion == ProjectVersion::SL)
             {
                 auto clientData = BlizzardArchive::ClientData(clientPath.generic_string(), BlizzardArchive::ClientVersion::SL,
                     BlizzardArchive::Locale::enUS, std::string(""));

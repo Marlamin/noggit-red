@@ -1,3 +1,4 @@
+#include <QListWidget>
 #include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
 #include <noggit/ui/FontAwesome.hpp>
 
@@ -94,6 +95,8 @@ namespace Noggit::Ui::Widget
 
             layout.addWidget(map_pinned_label);
         }
+
+        setContextMenuPolicy(Qt::CustomContextMenu);
 
         layout.addWidget(project_version_icon);
         layout.addWidget(project_name_label);

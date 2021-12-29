@@ -1073,17 +1073,19 @@ void MapView::setupFileMenu()
   ADD_ACTION ( file_menu
   , "Add bookmark"
   , Qt::Key_F5
-  , [this]
-               {
-                 std::ofstream f ("bookmarks.txt", std::ios_base::app);
-                 f << _world->getMapID() << " "
-                   << _camera.position.x << " "
-                   << _camera.position.y << " "
-                   << _camera.position.z << " "
-                   << _camera.yaw()._ << " "
-                   << _camera.pitch()._ << " "
-                   << _world->getAreaID (_camera.position) << std::endl;
-               }
+      , [this]
+      {
+
+          auto bookmark = Noggit::Project::NoggitProjectBookmarkMap();
+          bookmark.Position = _camera.position;
+          bookmark.CameraPitch = _camera.pitch()._;
+          bookmark.CameraYaw = _camera.yaw()._;
+          bookmark.MapID = _world->getMapID();
+          bookmark.Name = gAreaDB.getAreaName(_world->getAreaID(_camera.position));
+
+          _project->CreateBookmark(bookmark);
+
+      }
   );
 
   ADD_ACTION ( file_menu
@@ -2526,6 +2528,7 @@ MapView::MapView( math::degrees camera_yaw0
                 , math::degrees camera_pitch0
                 , glm::vec3 camera_pos
                 , Noggit::Ui::Windows::NoggitWindow* NoggitWindow
+				, std::shared_ptr<Noggit::Project::NoggitProject> Project
                 , std::unique_ptr<World> world
                 , uid_fix_mode uid_fix
                 , bool from_bookmark
@@ -2547,7 +2550,8 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_culling (new QLabel (this))
   , _texBrush{new OpenGL::texture{}}
   , _transform_gizmo(Noggit::Ui::Tools::ViewportGizmo::GizmoContext::MAP_VIEW)
-  , _tablet_manager(Noggit::TabletManager::instance())
+  , _tablet_manager(Noggit::TabletManager::instance()),
+    _project(Project)
 {
   setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
   setFocusPolicy (Qt::StrongFocus);

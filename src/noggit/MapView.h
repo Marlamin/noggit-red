@@ -188,7 +188,7 @@ private:
   // Vars for the ground editing toggle mode store the status of some
   // view settings when the ground editing mode is switched on to
   // restore them if switch back again
-
+  std::shared_ptr<Noggit::Project::NoggitProject> _project;
   bool  alloff = true;
   bool  alloff_models = false;
   bool  alloff_doodads = false;
@@ -235,6 +235,7 @@ public:
           , math::degrees av0
           , glm::vec3 camera_pos
           , Noggit::Ui::Windows::NoggitWindow*
+          , std::shared_ptr<Noggit::Project::NoggitProject> Project
           , std::unique_ptr<World>
           , uid_fix_mode uid_fix = uid_fix_mode::none
           , bool from_bookmark = false

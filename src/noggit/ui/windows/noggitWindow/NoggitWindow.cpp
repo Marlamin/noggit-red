@@ -66,7 +66,6 @@ namespace Noggit::Ui::Windows
         }
 
       setCentralWidget (_null_widget);
-      createBookmarkList();
 
       _about = new about(this);
       _settings = new settings(this);
@@ -178,7 +177,7 @@ namespace Noggit::Ui::Windows
                                  )
     {
       _map_creation_wizard->destroyFakeWorld();
-      _map_view =  (new MapView (camera_yaw, camera_pitch, pos, this, std::move (_world), uid_fix, from_bookmark));
+      _map_view =  (new MapView (camera_yaw, camera_pitch, pos, this,_project, std::move (_world), uid_fix, from_bookmark));
       connect(_map_view, &MapView::uid_fix_failed, [this]() { prompt_uid_fix_failure(); });
       connect(_settings, &settings::saved, [this]() { if (_map_view) _map_view->onSettingsSave(); });
 
@@ -238,31 +237,31 @@ namespace Noggit::Ui::Windows
       _buildMapListComponent->BuildMapList(this);
 
       qulonglong bookmark_index (0);
-      for (auto entry : mBookmarks)
+      for (auto entry : _project->Bookmarks)
       {
-        auto item (new QListWidgetItem (entry.name.c_str(), bookmarks_table));
+        auto item (new QListWidgetItem (entry.Name.c_str(), bookmarks_table));
         item->setData (Qt::UserRole, QVariant (bookmark_index++));
       }
 
       QObject::connect ( bookmarks_table, &QListWidget::itemDoubleClicked
                        , [this] (QListWidgetItem* item)
                          {
-                           auto& entry (mBookmarks.at (item->data (Qt::UserRole).toInt()));
+                       		
+                           auto& entry (_project->Bookmarks.at (item->data (Qt::UserRole).toInt()));
 
                            _world.reset();
 
                            for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
                            {
-                             if (it->getInt(MapDB::MapID) == entry.mapID)
+                             if (it->getInt(MapDB::MapID) == entry.MapID)
                              {
                                _world = std::make_unique<World> (it->getString(MapDB::InternalName),
-                                                                 entry.mapID, Noggit::NoggitRenderContext::MAP_VIEW);
-                               check_uid_then_enter_map ( entry.pos
-                                                        , math::degrees (entry.camera_pitch)
-                                                        , math::degrees (entry.camera_yaw)
+                                                                 entry.MapID, Noggit::NoggitRenderContext::MAP_VIEW);
+                               check_uid_then_enter_map ( entry.Position
+                                                        , math::degrees (entry.CameraPitch)
+                                                        , math::degrees (entry.CameraYaw)
                                                         , true
                                                         );
-
                                return;
                              }
                            }
@@ -309,37 +308,6 @@ namespace Noggit::Ui::Windows
       _minimap->adjustSize();
     }
 
-    void NoggitWindow::createBookmarkList()
-    {
-      mBookmarks.clear();
-
-      std::ifstream f("bookmarks.txt");
-      if (!f.is_open())
-      {
-        LogDebug << "No bookmarks file." << std::endl;
-        return;
-      }
-
-      std::string basename;
-      std::size_t areaID;
-      BookmarkEntry b;
-      int mapID = -1;
-      while (f >> mapID >> b.pos.x >> b.pos.y >> b.pos.z >> b.camera_yaw >> b.camera_pitch >> areaID)
-      {
-        if (mapID == -1)
-        {
-          continue;
-        }
-
-        std::stringstream temp;
-        temp << MapDB::getMapName(mapID) << ": " << AreaDB::getAreaName(areaID);
-        b.name = temp.str();
-        b.mapID = mapID;
-        mBookmarks.push_back(b);
-      }
-      f.close();
-    }
-
     void NoggitWindow::closeEvent (QCloseEvent* event)
     {
       if (map_loaded)
@@ -351,6 +319,18 @@ namespace Noggit::Ui::Windows
       {
         event->accept();
       }
+    }
+
+    void NoggitWindow::HandleEventMapListContextMenuPinMap(int mapId, std::string MapName)
+    {
+        _project->PinMap(mapId, MapName);
+        _buildMapListComponent->BuildMapList(this);
+    }
+
+    void NoggitWindow::HandleEventMapListContextMenuUnpinMap(int mapId)
+    {
+        _project->UnpinMap(mapId);
+        _buildMapListComponent->BuildMapList(this);
     }
 
     void NoggitWindow::prompt_exit(QCloseEvent* event)

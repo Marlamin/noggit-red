@@ -23,7 +23,6 @@ namespace Noggit::Ui
     class minimap_widget;
     class settings;
     class about;
-
 }
 
 namespace Noggit::Ui::Windows
@@ -48,10 +47,16 @@ namespace Noggit::Ui::Windows
       void exit_prompt_opened();
       void map_selected(int map_id);
 
+
     private:
     	std::unique_ptr<Component::BuildMapListComponent> _buildMapListComponent;
-      std::shared_ptr<Application::NoggitApplicationConfiguration> _applicationConfiguration;
-      std::shared_ptr<Project::NoggitProject> _project;
+        std::shared_ptr<Application::NoggitApplicationConfiguration> _applicationConfiguration;
+        std::shared_ptr<Project::NoggitProject> _project;
+
+
+        void HandleEventMapListContextMenuPinMap(int mapId, std::string MapName);
+        void HandleEventMapListContextMenuUnpinMap(int mapId);
+
 
       void loadMap (int mapID);
 
@@ -67,19 +72,6 @@ namespace Noggit::Ui::Windows
                       , uid_fix_mode uid_fix = uid_fix_mode::none
                       , bool from_bookmark = false
                       );
-
-      void createBookmarkList();
-
-      struct BookmarkEntry
-      {
-        int mapID;
-        std::string name;
-        glm::vec3 pos;
-        float camera_yaw;
-        float camera_pitch;
-      };
-
-      std::vector<BookmarkEntry> mBookmarks;
 
       minimap_widget* _minimap;
       settings* _settings;
