@@ -49,6 +49,8 @@ namespace Noggit::Ui::Windows
         std::unique_ptr<Component::ExistingProjectEnumerationComponent> _existingProjectEnumerationComponent;
         std::unique_ptr<Component::CreateProjectComponent> _createProjectComponent;
         std::unique_ptr<Component::LoadProjectComponent> _loadProjectComponent;
+
+        void HandleContextMenuProjectListItemDelete(std::string projectPath);
     };
 }
 #endif // NOGGITREDPROJECTPAGE_H

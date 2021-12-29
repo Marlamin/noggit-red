@@ -64,6 +64,8 @@ namespace Noggit::Ui::Widget
         project_last_edited_label->setGraphicsEffect(lastEditedEffect);
         project_last_edited_label->setAutoFillBackground(true);
 
+        setContextMenuPolicy(Qt::CustomContextMenu);
+
         layout.addWidget(project_version_icon);
         layout.addWidget(project_name_label);
         layout.addWidget(project_directory_label);

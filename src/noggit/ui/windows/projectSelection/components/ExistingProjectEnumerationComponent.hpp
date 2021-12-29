@@ -36,6 +36,27 @@ namespace Noggit::Ui::Component
 
                 item->setData(Qt::UserRole, QVariant(projectData.ProjectName));
                 item->setSizeHint(projectListItem->minimumSizeHint());
+
+                QObject::connect(projectListItem, &QListWidget::customContextMenuRequested,
+                    [=](const QPoint& pos)
+                    {
+                        QMenu contextMenu(projectListItem->tr("Context menu"), projectListItem);
+
+                        QAction action1("Delete Project", projectListItem);
+                        auto icon = QIcon();
+                        icon.addPixmap(FontAwesomeIcon(FontAwesome::trash).pixmap(QSize(16, 16)));
+                        action1.setIcon(icon);
+
+                        QObject::connect(&action1, &QAction::triggered, [=]()
+                        {
+                        	parent->HandleContextMenuProjectListItemDelete(projectData.ProjectDirectory.toStdString());
+                        });
+
+                        contextMenu.addAction(&action1);
+                        contextMenu.exec(projectListItem->mapToGlobal(pos));
+                    });
+
+
                 parent->ui->listView->setItemWidget(item, projectListItem);
             }
         }

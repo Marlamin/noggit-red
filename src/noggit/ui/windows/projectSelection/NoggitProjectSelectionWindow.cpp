@@ -64,6 +64,34 @@ namespace Noggit::Ui::Windows
         );
     }
 
+    void NoggitProjectSelectionWindow::HandleContextMenuProjectListItemDelete(std::string projectPath)
+    {
+        QMessageBox prompt;
+        prompt.setWindowIcon(QIcon(":/icon"));
+        prompt.setWindowTitle("Delete Project");
+        prompt.setIcon(QMessageBox::Critical);
+        prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
+        prompt.setText("Deleting project will remove all saved data.");
+        prompt.addButton("Accept", QMessageBox::AcceptRole);
+        prompt.setDefaultButton(prompt.addButton("Cancel", QMessageBox::RejectRole));
+        prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+
+        prompt.exec();
+
+        switch (prompt.buttonRole(prompt.clickedButton()))
+        {
+        case QMessageBox::AcceptRole:
+            std::filesystem::remove_all(projectPath);
+            break;
+        case QMessageBox::DestructiveRole:
+            break;
+        default:
+            break;
+        }
+
+        _existingProjectEnumerationComponent->BuildExistingProjectList(this);
+    }
+
     NoggitProjectSelectionWindow::~NoggitProjectSelectionWindow()
     {
         delete ui;
