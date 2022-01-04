@@ -26,7 +26,7 @@ private:
   std::vector<OutdoorLightStats> lightStats;
 
 public:
-  explicit OutdoorLighting(const std::string& fname);
+  OutdoorLighting();
 
   OutdoorLightStats getLightStats(int time);
 };

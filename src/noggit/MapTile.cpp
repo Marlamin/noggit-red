@@ -812,7 +812,6 @@ void MapTile::drawMFBO (OpenGL::Scoped::use_program& mfbo_shader)
 }
 
 void MapTile::drawWater ( math::frustum const& frustum
-                        , const float& cull_distance
                         , const glm::vec3& camera
                         , bool camera_moved
                         , OpenGL::Scoped::use_program& water_shader
@@ -829,7 +828,6 @@ void MapTile::drawWater ( math::frustum const& frustum
 
   // process water bounds
   Water.draw ( frustum
-             , cull_distance
              , camera
              , camera_moved
              , water_shader

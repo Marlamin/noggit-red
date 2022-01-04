@@ -99,7 +99,6 @@ public:
 
   bool intersect (math::ray const&, selection_result*) const;
   void drawWater ( math::frustum const& frustum
-                 , const float& cull_distance
                  , const glm::vec3& camera
                  , bool camera_moved
                  , OpenGL::Scoped::use_program& water_shader

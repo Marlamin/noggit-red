@@ -113,8 +113,8 @@ namespace Noggit
 
       connect(_show_unpaintable_chunks_cb, &QCheckBox::toggled, [=](bool checked)
       {
-        _map_view->getWorld()->getTerrainParamsUniformBlock()->draw_paintability_overlay = checked;
-        _map_view->getWorld()->markTerrainParamsUniformBlockDirty();
+        _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = checked;
+        _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
       });
 
       // spray

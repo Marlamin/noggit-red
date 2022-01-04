@@ -777,7 +777,7 @@ void OutdoorLightStats::interpolate(OutdoorLightStats *a, OutdoorLightStats *b, 
   nightIntensity = a->nightIntensity * ir + b->nightIntensity * progressDayAndNight;
 }
 
-OutdoorLighting::OutdoorLighting(const std::string& fname)
+OutdoorLighting::OutdoorLighting()
 {
 
   static constexpr std::array<int, 24> night_hours =

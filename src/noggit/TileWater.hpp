@@ -44,7 +44,6 @@ public:
   void saveToFile(sExtendableArray& lADTFile, int& lMHDR_Position, int& lCurrentPosition);
 
   void draw ( math::frustum const& frustum
-            , const float& cull_distance
             , const glm::vec3& camera
             , bool camera_moved
             , OpenGL::Scoped::use_program& water_shader

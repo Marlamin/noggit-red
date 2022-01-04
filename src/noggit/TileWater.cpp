@@ -42,7 +42,6 @@ void TileWater::readFromFile(BlizzardArchive::ClientFile &theFile, size_t basePo
 }
 
 void TileWater::draw ( math::frustum const& frustum
-                     , const float& cull_distance
                      , const glm::vec3& camera
                      , bool camera_moved
                      , OpenGL::Scoped::use_program& water_shader

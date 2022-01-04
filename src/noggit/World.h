@@ -30,11 +30,17 @@
 #include <vector>
 #include <array>
 #include <noggit/project/ApplicationProject.h>
+#include <noggit/rendering/WorldRender.hpp>
 
 namespace Noggit
 {
   struct object_paste_params;
   struct VertexSelectionCache;
+
+  namespace Rendering
+  {
+    class WorldRender;
+  }
 }
 
 class Brush;
@@ -42,16 +48,15 @@ class MapTile;
 class QPixmap;
 
 static const float detail_size = 8.0f;
-static const float highresdistance = 384.0f;
-static const float modeldrawdistance = 384.0f;
-static const float doodaddrawdistance = 64.0f;
 
 using StripType = uint16_t;
 
 
 class World
 {
-private:
+  friend class Noggit::Rendering::WorldRender;
+
+protected:
   std::vector<selection_type> _current_selection;
   std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
   Noggit::world_model_instances_storage _model_instance_storage;
@@ -83,52 +88,13 @@ public:
 
   std::unique_ptr<Skies> skies;
 
-  OutdoorLightStats outdoorLightStats;
-
   explicit World(const std::string& name, int map_id, Noggit::NoggitRenderContext context, bool create_empty = false);
 
   void setBasename(const std::string& name);
 
   SceneObject* getObjectInstance(std::uint32_t uid);
 
-  void initDisplay();
-
   void update_models_emitters(float dt);
-  void draw (glm::mat4x4 const& model_view
-            , glm::mat4x4 const& projection
-            , glm::vec3 const& cursor_pos
-            , float cursorRotation
-            , glm::vec4 const& cursor_color
-            , CursorType cursor_type
-            , float brush_radius
-            , bool show_unpaintable_chunks
-            , float inner_radius_ratio
-            , glm::vec3 const& ref_pos
-            , float angle
-            , float orientation
-            , bool use_ref_pos
-            , bool angled_mode
-            , bool draw_paintability_overlay
-            , editing_mode terrainMode
-            , glm::vec3 const& camera_pos
-            , bool camera_moved
-            , bool draw_mfbo
-            , bool draw_terrain
-            , bool draw_wmo
-            , bool draw_water
-            , bool draw_wmo_doodads
-            , bool draw_models
-            , bool draw_model_animations
-            , bool draw_models_with_box
-            , bool draw_hidden_models
-            , MinimapRenderSettings* minimap_render_settings
-            , bool draw_fog
-            , eTerrainType ground_editing_brush
-            , int water_layer
-            , display_mode display
-            , bool draw_occlusion_boxes = false
-            , bool minimap_render = false
-            );
 
   unsigned int getAreaID (glm::vec3 const&);
   void setAreaID(glm::vec3 const& pos, int id, bool adt,  float radius = -1.0f);
@@ -147,13 +113,13 @@ public:
 
   MapChunk* getChunkAt(glm::vec3 const& pos);
 
-private:
+protected:
   // Information about the currently selected model / WMO / triangle.
   int _selected_model_count = 0;
   std::optional<glm::vec3> _multi_select_pivot;
 public:
 
-  void unload_shaders();
+  Noggit::Rendering::WorldRender* renderer() { return &_renderer; }
 
   void update_selection_pivot();
   std::optional<glm::vec3> const& multi_select_pivot() const { return _multi_select_pivot; }
@@ -207,16 +173,16 @@ public:
   bool isUnderMap(glm::vec3 const& pos);
 
   template<typename Fun>
-    bool for_all_chunks_in_range ( glm::vec3 const& pos
-                                 , float radius
-                                 , Fun&& /* MapChunk* -> bool changed */
-                                 );
+  bool for_all_chunks_in_range ( glm::vec3 const& pos
+                               , float radius
+                               , Fun&& /* MapChunk* -> bool changed */
+                               );
   template<typename Fun, typename Post>
-    bool for_all_chunks_in_range ( glm::vec3 const& pos
-                                 , float radius
-                                 , Fun&& /* MapChunk* -> bool changed */
-                                 , Post&& /* MapChunk* -> void; called for all changed chunks */
-                                 );
+  bool for_all_chunks_in_range ( glm::vec3 const& pos
+                               , float radius
+                               , Fun&& /* MapChunk* -> bool changed */
+                               , Post&& /* MapChunk* -> void; called for all changed chunks */
+                               );
 
   template<typename Fun>
   bool for_all_chunks_in_rect ( glm::vec3 const& pos
@@ -331,14 +297,6 @@ public:
   void updateTilesModel(ModelInstance* m2, model_update type);
   void wait_for_all_tile_updates();
 
-  bool saveMinimap (TileIndex const& tile_idx, MinimapRenderSettings* settings, std::optional<QImage>& combined_image);
-  void drawMinimap ( MapTile *tile
-      , glm::mat4x4 const& model_view
-      , glm::mat4x4 const& projection
-      , glm::vec3 const& camera_pos
-      , MinimapRenderSettings* settings
-  );
-
   void deleteModelInstance(int uid);
   void deleteWMOInstance(int uid);
   void deleteInstance(int uid);
@@ -395,8 +353,6 @@ public:
 
   glm::vec3 const& vertexCenter();
 
-  void initShaders();
-
   void recalc_norms (MapChunk*) const;
 
   Noggit::VertexSelectionCache getVertexSelectionCache();
@@ -404,30 +360,14 @@ public:
 
   bool need_model_updates = false;
 
-  OpenGL::TerrainParamsUniformBlock* getTerrainParamsUniformBlock() { return &_terrain_params_ubo_data; };
-  void updateTerrainParamsUniformBlock();
-  void markTerrainParamsUniformBlockDirty() { _need_terrain_params_ubo_update = true; };
-
-  LiquidTextureManager* getLiquidTextureManager() { return &_liquid_texture_manager; };
   void loadAllTiles();
   unsigned getNumLoadedTiles() { return _n_loaded_tiles; };
   unsigned getNumRenderedTiles() { return _n_rendered_tiles; };
 
-private:
+protected:
   void update_models_by_filename();
 
-  void updateMVPUniformBlock(const glm::mat4x4& model_view, const glm::mat4x4& projection);
-  void updateLightingUniformBlock(bool draw_fog, glm::vec3 const& camera_pos);
-  void updateLightingUniformBlockMinimap(MinimapRenderSettings* settings);
-
-
   std::unordered_set<MapChunk*>& vertexBorderChunks();
-
-  void setupChunkVAO(OpenGL::Scoped::use_program& mcnk_shader);
-  void setupLiquidChunkVAO(OpenGL::Scoped::use_program& water_shader);
-  void setupOccluderBuffers();
-  void setupChunkBuffers();
-  void setupLiquidChunkBuffers();
 
   std::unordered_set<MapTile*> _vertex_tiles;
   std::unordered_set<MapChunk*> _vertex_chunks;
@@ -437,57 +377,15 @@ private:
   bool _vertex_center_updated = false;
   bool _vertex_border_updated = false;
 
-  std::unique_ptr<Noggit::map_horizon::render> _horizon_render;
-
-  bool _display_initialized = false;
-  bool _global_vbos_initialized = false;
-
   QSettings* _settings;
 
   float _view_distance;
 
-  std::unique_ptr<OpenGL::program> _mcnk_program;;
-  std::unique_ptr<OpenGL::program> _mfbo_program;
-  std::unique_ptr<OpenGL::program> _m2_program;
-  std::unique_ptr<OpenGL::program> _m2_instanced_program;
-  std::unique_ptr<OpenGL::program> _m2_particles_program;
-  std::unique_ptr<OpenGL::program> _m2_ribbons_program;
-  std::unique_ptr<OpenGL::program> _m2_box_program;
-  std::unique_ptr<OpenGL::program> _wmo_program;
-  std::unique_ptr<OpenGL::program> _liquid_program;
-  std::unique_ptr<OpenGL::program> _occluder_program;
-
-  Noggit::CursorRender _cursor_render;
-  OpenGL::primitives::sphere _sphere_render;
-  OpenGL::primitives::square _square_render;
-
   Noggit::NoggitRenderContext _context;
-
-  OpenGL::Scoped::deferred_upload_buffers<8> _buffers;
-  GLuint const& _mvp_ubo = _buffers[0];
-  GLuint const& _lighting_ubo = _buffers[1];
-  GLuint const& _terrain_params_ubo = _buffers[2];
-
-  OpenGL::MVPUniformBlock _mvp_ubo_data;
-  OpenGL::LightingUniformBlock _lighting_ubo_data;
-  OpenGL::TerrainParamsUniformBlock _terrain_params_ubo_data;
-
-  GLuint const& _mapchunk_vertex = _buffers[3];
-  GLuint const& _mapchunk_index = _buffers[4];
-  GLuint const& _mapchunk_texcoord = _buffers[5];
-  GLuint const& _liquid_chunk_vertex = _buffers[6];
-  GLuint const& _occluder_index = _buffers[7];
-
-  OpenGL::Scoped::deferred_upload_vertex_arrays<3> _vertex_arrays;
-  GLuint const& _mapchunk_vao = _vertex_arrays[0];
-  GLuint const& _liquid_chunk_vao = _vertex_arrays[1];
-  GLuint const& _occluder_vao = _vertex_arrays[2];
-
-  LiquidTextureManager _liquid_texture_manager;
 
   std::array<std::pair<std::pair<int, int>, MapTile*>, 64 * 64 > _loaded_tiles_buffer;
 
-  bool _need_terrain_params_ubo_update = false;
+  Noggit::Rendering::WorldRender _renderer;
 
   // Debug metrics
   unsigned _n_loaded_tiles;

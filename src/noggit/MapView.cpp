@@ -225,10 +225,10 @@ void MapView::set_editing_mode (editing_mode mode)
 
   if (context() && context()->isValid())
   {
-    _world->getTerrainParamsUniformBlock()->draw_areaid_overlay = false;
-    _world->getTerrainParamsUniformBlock()->draw_impass_overlay = false;
-    _world->getTerrainParamsUniformBlock()->draw_paintability_overlay = false;
-    _world->getTerrainParamsUniformBlock()->draw_selection_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_areaid_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_impass_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_selection_overlay = false;
     _minimap->use_selection(nullptr);
 
     switch (mode)
@@ -246,7 +246,7 @@ void MapView::set_editing_mode (editing_mode mode)
         }
         if (texturingTool->show_unpaintable_chunks())
         {
-          _world->getTerrainParamsUniformBlock()->draw_paintability_overlay = true;
+          _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = true;
         }
         break;
       case editing_mode::mccv:
@@ -262,13 +262,13 @@ void MapView::set_editing_mode (editing_mode mode)
         }
         break;
       case editing_mode::areaid:
-        _world->getTerrainParamsUniformBlock()->draw_areaid_overlay = true;
+        _world->renderer()->getTerrainParamsUniformBlock()->draw_areaid_overlay = true;
         break;
       case editing_mode::flags:
-        _world->getTerrainParamsUniformBlock()->draw_impass_overlay = true;
+        _world->renderer()->getTerrainParamsUniformBlock()->draw_impass_overlay = true;
         break;
       case editing_mode::minimap:
-        _world->getTerrainParamsUniformBlock()->draw_selection_overlay = true;
+        _world->renderer()->getTerrainParamsUniformBlock()->draw_selection_overlay = true;
         _minimap->use_selection(minimapTool->getSelectedTiles());
         break;
       default:
@@ -289,7 +289,7 @@ void MapView::set_editing_mode (editing_mode mode)
   _toolbar->check_tool (mode);
   this->activateWindow();
 
-  _world->markTerrainParamsUniformBlockDirty();
+  _world->renderer()->markTerrainParamsUniformBlockDirty();
 }
 
 void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
@@ -1802,22 +1802,22 @@ void MapView::setupViewMenu()
   ADD_TOGGLE_POST (view_menu, "Lines", Qt::Key_F7, _draw_lines,
                    [=]
                    {
-                     _world->getTerrainParamsUniformBlock()->draw_lines = _draw_lines.get();
-                     _world->markTerrainParamsUniformBlockDirty();
+                     _world->renderer()->getTerrainParamsUniformBlock()->draw_lines = _draw_lines.get();
+                     _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
   ADD_TOGGLE_POST (view_menu, "Contours", Qt::Key_F9, _draw_contour,
                    [=]
                    {
-                     _world->getTerrainParamsUniformBlock()->draw_terrain_height_contour = _draw_contour.get();
-                     _world->markTerrainParamsUniformBlockDirty();
+                     _world->renderer()->getTerrainParamsUniformBlock()->draw_terrain_height_contour = _draw_contour.get();
+                     _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
   ADD_TOGGLE_POST (view_menu, "Wireframe", Qt::Key_F10, _draw_wireframe,
                    [=]
                    {
-                     _world->getTerrainParamsUniformBlock()->draw_wireframe = _draw_wireframe.get();
-                     _world->markTerrainParamsUniformBlockDirty();
+                     _world->renderer()->getTerrainParamsUniformBlock()->draw_wireframe = _draw_wireframe.get();
+                     _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
   ADD_TOGGLE (view_menu, "Toggle Animation", Qt::Key_F11, _draw_model_animations);
@@ -1827,8 +1827,8 @@ void MapView::setupViewMenu()
   ADD_TOGGLE_POST (view_menu, "Hole lines", "Shift+F7", _draw_hole_lines,
                    [=]
                    {
-                     _world->getTerrainParamsUniformBlock()->draw_hole_lines = _draw_hole_lines.get();
-                     _world->markTerrainParamsUniformBlockDirty();
+                     _world->renderer()->getTerrainParamsUniformBlock()->draw_hole_lines = _draw_hole_lines.get();
+                     _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
   ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
@@ -2333,8 +2333,6 @@ void MapView::setupHotkeys()
     , [this] { return terrainMode == editing_mode::paint && !NOGGIT_CUR_ACTION; }
   );
 
-  addHotkey (Qt::Key_Plus, MOD_shift, [this] { _world->fogdistance += 60.0f; });
-
   addHotkey (Qt::Key_Minus, MOD_alt, [this] { terrainTool->changeRadius(-0.01f); }
     , [this] { return terrainMode == editing_mode::ground && !NOGGIT_CUR_ACTION; });
 
@@ -2349,8 +2347,6 @@ void MapView::setupHotkeys()
               }
     , [this] { return terrainMode == editing_mode::paint && !NOGGIT_CUR_ACTION; }
   );
-
-  addHotkey (Qt::Key_Minus, MOD_shift, [this] { _world->fogdistance -= 60.0f; });
 
   addHotkey (Qt::Key_1, MOD_shift, [this] { _camera.move_speed = 15.0f; });
   addHotkey (Qt::Key_2, MOD_shift, [this] { _camera.move_speed = 50.0f; });
@@ -2750,7 +2746,7 @@ void MapView::initializeGL()
 
   _last_opengl_context = context();
 
-  _world->initShaders();
+  _world->renderer()->upload();
   onSettingsSave();
 
   _buffers.upload();
@@ -2780,7 +2776,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
       if (_world->mapIndex.hasTile(tile))
       {
-        mmap_render_success = _world->saveMinimap(tile, settings, _mmap_combined_image);
+        mmap_render_success = _world->renderer()->saveMinimap(tile, settings, _mmap_combined_image);
       }
 
       if (mmap_render_success)
@@ -2841,7 +2837,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
         {
           OpenGL::context::scoped_setter const _(::gl, context());
           makeCurrent();
-          mmap_render_success = _world->saveMinimap(tile, settings, _mmap_combined_image);
+          mmap_render_success = _world->renderer()->saveMinimap(tile, settings, _mmap_combined_image);
 
           _mmap_render_index++;
           emit updateProgress(_mmap_render_index);
@@ -2947,7 +2943,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
           if (_world->mapIndex.hasTile(tile))
           {
-            mmap_render_success = _world->saveMinimap(tile, settings, _mmap_combined_image);
+            mmap_render_success = _world->renderer()->saveMinimap(tile, settings, _mmap_combined_image);
             _mmap_render_index++;
 
             emit updateProgress(_mmap_render_index);
@@ -4223,7 +4219,8 @@ void MapView::draw_map()
   }
 
 
-  _world->draw ( model_view()
+  _world->renderer()->draw (
+                 model_view()
                , projection()
                , _cursor_pos
                , _cursorRotation
@@ -5138,7 +5135,7 @@ void MapView::unloadOpenglData(bool from_manager)
     }
   }
 
-  _world->unload_shaders();
+  _world->renderer()->unload();
 
   if (!from_manager)
     Noggit::Ui::Tools::ViewportManager::ViewportManager::unloadOpenglData(this);
@@ -5162,7 +5159,7 @@ QWidget* MapView::getActiveStampModeItem()
 
 void MapView::onSettingsSave()
 {
-  OpenGL::TerrainParamsUniformBlock* params = _world->getTerrainParamsUniformBlock();
+  OpenGL::TerrainParamsUniformBlock* params = _world->renderer()->getTerrainParamsUniformBlock();
   params->wireframe_type = _settings->value("wireframe/type", 0).toInt();
   params->wireframe_radius = _settings->value("wireframe/radius", 1.5f).toFloat();
   params->wireframe_width = _settings->value ("wireframe/width", 1.f).toFloat();
@@ -5171,5 +5168,5 @@ void MapView::onSettingsSave()
   glm::vec4 wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
   params->wireframe_color = wireframe_color;
 
-  _world->markTerrainParamsUniformBlockDirty();
+  _world->renderer()->markTerrainParamsUniformBlockDirty();
 }

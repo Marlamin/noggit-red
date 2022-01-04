@@ -30,7 +30,7 @@ void ModelViewer::paintGL()
 
   if (_world)
   {
-    _world->draw(world_model_view()
+    _world->renderer()->draw(world_model_view()
         , world_projection()
         , glm::vec3(0.f, 0.f, 0.f)
         , 0.f

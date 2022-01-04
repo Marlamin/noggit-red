@@ -55,8 +55,12 @@ ImageBrowser::ImageBrowser(QWidget* parent)
   setWindowFlag(Qt::WindowStaysOnTopHint);
   _ui.setupUi(this);
   _model = new ImageBrowserFilesystemModel(this);
-  auto samples_path = QDir::cleanPath(QCoreApplication::applicationDirPath() + QDir::separator() + "samples");
-  _model->setRootPath(samples_path);
+  auto samples_path = QDir(QDir::cleanPath(QCoreApplication::applicationDirPath() + QDir::separator() + "samples"));
+
+  if (!samples_path.exists())
+      samples_path.mkpath(".");
+
+  _model->setRootPath(samples_path.absolutePath());
   _model->setFilter(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Files);
 
   QStringList filters;
@@ -73,26 +77,26 @@ ImageBrowser::ImageBrowser(QWidget* parent)
   _dir_proxy_model->setSourceModel(_model);
 
   _ui.treeView->setModel(_dir_proxy_model);
-  _ui.treeView->setRootIndex(_dir_proxy_model->mapFromSource(_model->index(samples_path)));
+  _ui.treeView->setRootIndex(_dir_proxy_model->mapFromSource(_model->index(samples_path.absolutePath())));
   _ui.treeView->hideColumn(1);
   _ui.treeView->hideColumn(2);
   _ui.treeView->hideColumn(3);
   _ui.treeView->setIconSize(QSize(64, 64));
-  _ui.treeView->expandRecursively(_dir_proxy_model->mapFromSource(_model->index(samples_path)));
+  _ui.treeView->expandRecursively(_dir_proxy_model->mapFromSource(_model->index(samples_path.absolutePath())));
 
 
   connect(_ui.treeView, &QTreeView::clicked,
           [=](const QModelIndex &index)
           {
            auto path = _model->fileInfo(_dir_proxy_model->mapToSource(index)).absoluteFilePath();
-            _ui.treeView->setRootIndex(_dir_proxy_model->mapFromSource(_model->index(samples_path)));
+            _ui.treeView->setRootIndex(_dir_proxy_model->mapFromSource(_model->index(samples_path.absolutePath())));
           });
 
   connect(_ui.searchButton, &QPushButton::clicked
     ,[this, samples_path]()
           {
             _dir_proxy_model->setFilterFixedString(_ui.searchField->text());
-            _ui.treeView->setRootIndex(_dir_proxy_model->mapFromSource(_model->index(samples_path)));
+            _ui.treeView->setRootIndex(_dir_proxy_model->mapFromSource(_model->index(samples_path.absolutePath())));
           }
 
   );
