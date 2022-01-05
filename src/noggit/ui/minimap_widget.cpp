@@ -205,9 +205,9 @@ namespace Noggit
           }
         }
 
-        if (draw_skies() && world()->skies)
+        if (draw_skies() && _world->renderer()->skies())
         {
-          foreach (Sky sky, world()->skies->skies)
+          foreach (Sky sky, _world->renderer()->skies()->skies)
           {
             //! \todo Get actual color from sky.
             //! \todo Get actual radius.

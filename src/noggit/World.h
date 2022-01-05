@@ -61,7 +61,6 @@ protected:
   std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
   Noggit::world_model_instances_storage _model_instance_storage;
   Noggit::world_tile_update_queue _tile_update_queue;
-  std::mutex _guard;
 
 public:
   MapIndex mapIndex;
@@ -71,22 +70,14 @@ public:
   std::string mWmoFilename;
   ENTRY_MODF mWmoEntry;
 
-  // The lighting used.
-  std::unique_ptr<OutdoorLighting> ol;
-
   unsigned int getMapID();
+
   // Time of the day.
   float animtime;
   float time;
 
   //! \brief Name of this map.
   std::string basename;
-
-  // Dynamic distances for rendering. Actually, these should be the same..
-  float fogdistance;
-  float culldistance;
-
-  std::unique_ptr<Skies> skies;
 
   explicit World(const std::string& name, int map_id, Noggit::NoggitRenderContext context, bool create_empty = false);
 

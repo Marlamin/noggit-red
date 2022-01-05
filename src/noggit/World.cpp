@@ -83,16 +83,11 @@ World::World(const std::string& name, int map_id, Noggit::NoggitRenderContext co
     , horizon(name, &mapIndex)
     , mWmoFilename("")
     , mWmoEntry(ENTRY_MODF())
-    , ol(nullptr)
     , animtime(0)
     , time(1450)
     , basename(name)
-    , fogdistance(777.0f)
-    , culldistance(fogdistance)
-    , skies(nullptr)
     , _current_selection()
     , _settings(new QSettings())
-    , _view_distance(_settings->value("view_distance", 1000.f).toFloat())
     , _context(context)
 {
   LogDebug << "Loading world \"" << name << "\"." << std::endl;

@@ -16,6 +16,8 @@ WorldRender::WorldRender(World* world)
 : BaseRender()
 , _world(world)
 , _liquid_texture_manager(world->_context)
+, _view_distance(world->_settings->value("view_distance", 1000.f).toFloat())
+, _cull_distance(0.f)
 {
 }
 
@@ -191,7 +193,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
                       , camera_pos
                       , m2_shader
                       , frustum
-                      , _world->culldistance
+                      , _cull_distance
                       , _world->animtime
                       , draw_model_animations
                       , wmo.extents[0]
@@ -207,25 +209,25 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
     if (!hadSky)
     {
-      _world->skies->draw( model_view
+      _skies->draw( model_view
           , projection
           , camera_pos
           , m2_shader
           , frustum
-          , _world->culldistance
+          , _cull_distance
           , _world->animtime
           , _outdoor_light_stats
       );
     }
   }
 
-  _world->culldistance = draw_fog ? _world->fogdistance : _world->_view_distance;
+  _cull_distance= draw_fog ? _skies->fog_distance_end() : _world->_view_distance;
 
   // Draw verylowres heightmap
   if (draw_fog && draw_terrain)
   {
     ZoneScopedN("World::draw() : Draw horizon");
-    _horizon_render->draw (model_view, projection, &_world->mapIndex, _world->skies->color_set[FOG_COLOR], _world->culldistance, frustum, camera_pos, display);
+    _horizon_render->draw (model_view, projection, &_world->mapIndex, _skies->color_set[FOG_COLOR], _cull_distance, frustum, camera_pos, display);
   }
 
   gl.enable(GL_DEPTH_TEST);
@@ -359,7 +361,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
     // early dist check
     // TODO: optional
-    if (tile->camDist() > _world->culldistance)
+    if (tile->camDist() > _cull_distance)
       continue;
 
     for (auto& pair : tile->getObjectInstances())
@@ -393,7 +395,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           auto m2_instance = static_cast<ModelInstance*>(instance);
 
-          if ((tile->objects_frustum_cull_test > 1 || m2_instance->isInFrustum(frustum)) && m2_instance->isInRenderDist(_world->culldistance, camera_pos, display))
+          if ((tile->objects_frustum_cull_test > 1 || m2_instance->isInFrustum(frustum)) && m2_instance->isInRenderDist(_cull_distance, camera_pos, display))
           {
             instances.push_back(m2_instance->transformMatrix());
           }
@@ -456,14 +458,14 @@ void WorldRender::draw (glm::mat4x4 const& model_view
               , model_view
               , projection
               , frustum
-              , _world->culldistance
+              , _cull_distance
               , camera_pos
               , is_hidden
               , draw_wmo_doodads
               , draw_fog
               , _world->current_selection()
               , _world->animtime
-              , _world->skies->hasSkies()
+              , _skies->hasSkies()
               , display
           );
         }
@@ -580,7 +582,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
                 , m2_shader
                 , model_render_state
                 , frustum
-                , _world->culldistance
+                , _cull_distance
                 , camera_pos
                 , _world->animtime
                 , draw_models_with_box
@@ -669,7 +671,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
           continue;
 
         auto model = static_cast<ModelInstance*>(obj);
-        if (model->isInFrustum(frustum) && model->isInRenderDist(_world->culldistance, camera_pos, display))
+        if (model->isInFrustum(frustum) && model->isInRenderDist(_cull_distance, camera_pos, display))
         {
           model->draw_box(model_view, projection, false); // make optional!
         }
@@ -860,7 +862,7 @@ void WorldRender::upload()
     _horizon_render = std::make_unique<Noggit::map_horizon::render>(_world->horizon);
   }
 
-  _world->skies = std::make_unique<Skies> (_world->mapIndex._map_id, _world->_context);
+  _skies = std::make_unique<Skies>(_world->mapIndex._map_id, _world->_context);
 
   _outdoor_lighting = std::make_unique<OutdoorLighting>();
 
@@ -1098,7 +1100,7 @@ void WorldRender::unload()
 
   _liquid_texture_manager.unload();
 
-  _world->skies->unload();
+  _skies->unload();
 
   _buffers.unload();
   _vertex_arrays.unload();
@@ -1123,26 +1125,26 @@ void WorldRender::updateLightingUniformBlock(bool draw_fog, glm::vec3 const& cam
 
   int daytime = static_cast<int>(_world->time) % 2880;
 
-  _world->skies->update_sky_colors(camera_pos, daytime);
+  _skies->update_sky_colors(camera_pos, daytime);
   _outdoor_light_stats = _outdoor_lighting->getLightStats(static_cast<int>(_world->time));
 
-  glm::vec3 diffuse = _world->skies->color_set[LIGHT_GLOBAL_DIFFUSE];
-  glm::vec3 ambient = _world->skies->color_set[LIGHT_GLOBAL_AMBIENT];
-  glm::vec3 fog_color = _world->skies->color_set[FOG_COLOR];
-  glm::vec3 ocean_color_light = _world->skies->color_set[OCEAN_COLOR_LIGHT];
-  glm::vec3 ocean_color_dark = _world->skies->color_set[OCEAN_COLOR_DARK];
-  glm::vec3 river_color_light = _world->skies->color_set[RIVER_COLOR_LIGHT];
-  glm::vec3 river_color_dark = _world->skies->color_set[RIVER_COLOR_DARK];
+  glm::vec3 diffuse = _skies->color_set[LIGHT_GLOBAL_DIFFUSE];
+  glm::vec3 ambient = _skies->color_set[LIGHT_GLOBAL_AMBIENT];
+  glm::vec3 fog_color = _skies->color_set[FOG_COLOR];
+  glm::vec3 ocean_color_light = _skies->color_set[OCEAN_COLOR_LIGHT];
+  glm::vec3 ocean_color_dark = _skies->color_set[OCEAN_COLOR_DARK];
+  glm::vec3 river_color_light = _skies->color_set[RIVER_COLOR_LIGHT];
+  glm::vec3 river_color_dark = _skies->color_set[RIVER_COLOR_DARK];
 
 
-  _lighting_ubo_data.DiffuseColor_FogStart = {diffuse.x,diffuse.y,diffuse.z, _world->skies->fog_distance_start()};
-  _lighting_ubo_data.AmbientColor_FogEnd = {ambient.x,ambient.y,ambient.z, _world->skies->fog_distance_end()};
+  _lighting_ubo_data.DiffuseColor_FogStart = {diffuse.x,diffuse.y,diffuse.z, _skies->fog_distance_start()};
+  _lighting_ubo_data.AmbientColor_FogEnd = {ambient.x,ambient.y,ambient.z, _skies->fog_distance_end()};
   _lighting_ubo_data.FogColor_FogOn = {fog_color.x,fog_color.y,fog_color.z, static_cast<float>(draw_fog)};
-  _lighting_ubo_data.LightDir_FogRate = {_outdoor_light_stats.dayDir.x, _outdoor_light_stats.dayDir.y, _outdoor_light_stats.dayDir.z, _world->skies->fogRate()};
-  _lighting_ubo_data.OceanColorLight = { ocean_color_light.x,ocean_color_light.y,ocean_color_light.z, _world->skies->ocean_shallow_alpha()};
-  _lighting_ubo_data.OceanColorDark = { ocean_color_dark.x,ocean_color_dark.y,ocean_color_dark.z, _world->skies->ocean_deep_alpha()};
-  _lighting_ubo_data.RiverColorLight = { river_color_light.x,river_color_light.y,river_color_light.z, _world->skies->river_shallow_alpha()};
-  _lighting_ubo_data.RiverColorDark = { river_color_dark.x,river_color_dark.y,river_color_dark.z, _world->skies->river_deep_alpha()};
+  _lighting_ubo_data.LightDir_FogRate = {_outdoor_light_stats.dayDir.x, _outdoor_light_stats.dayDir.y, _outdoor_light_stats.dayDir.z, _skies->fogRate()};
+  _lighting_ubo_data.OceanColorLight = { ocean_color_light.x,ocean_color_light.y,ocean_color_light.z, _skies->ocean_shallow_alpha()};
+  _lighting_ubo_data.OceanColorDark = { ocean_color_dark.x,ocean_color_dark.y,ocean_color_dark.z, _skies->ocean_deep_alpha()};
+  _lighting_ubo_data.RiverColorLight = { river_color_light.x,river_color_light.y,river_color_light.z, _skies->river_shallow_alpha()};
+  _lighting_ubo_data.RiverColorDark = { river_color_dark.x,river_color_dark.y,river_color_dark.z, _skies->river_deep_alpha()};
 
   gl.bindBuffer(GL_UNIFORM_BUFFER, _lighting_ubo);
   gl.bufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(OpenGL::LightingUniformBlock), &_lighting_ubo_data);
@@ -1158,7 +1160,7 @@ void WorldRender::updateLightingUniformBlockMinimap(MinimapRenderSettings* setti
   _lighting_ubo_data.DiffuseColor_FogStart = { diffuse, 0 };
   _lighting_ubo_data.AmbientColor_FogEnd = { ambient, 0 };
   _lighting_ubo_data.FogColor_FogOn = { 0, 0, 0, 0 };
-  _lighting_ubo_data.LightDir_FogRate = { _outdoor_light_stats.dayDir.x, _outdoor_light_stats.dayDir.y, _outdoor_light_stats.dayDir.z, _world->skies->fogRate() };
+  _lighting_ubo_data.LightDir_FogRate = { _outdoor_light_stats.dayDir.x, _outdoor_light_stats.dayDir.y, _outdoor_light_stats.dayDir.z, _skies->fogRate() };
   _lighting_ubo_data.OceanColorLight = settings->ocean_color_light;
   _lighting_ubo_data.OceanColorDark = settings->ocean_color_dark;
   _lighting_ubo_data.RiverColorLight = settings->river_color_light;

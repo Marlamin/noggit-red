@@ -78,8 +78,7 @@ namespace Noggit::Rendering
     void updateTerrainParamsUniformBlock();
     void markTerrainParamsUniformBlockDirty() { _need_terrain_params_ubo_update = true; };
 
-    [[nodiscard]]
-    LiquidTextureManager* getLiquidTextureManager() { return &_liquid_texture_manager; };
+    [[nodiscard]] std::unique_ptr<Skies>& skies() { return _skies; };
 
   private:
 
@@ -102,6 +101,8 @@ namespace Noggit::Rendering
     void setupLiquidChunkBuffers();
 
     World* _world;
+    float _cull_distance;
+    float _view_distance;
 
     // shaders
     std::unique_ptr<OpenGL::program> _mcnk_program;;
@@ -119,6 +120,7 @@ namespace Noggit::Rendering
     std::unique_ptr<Noggit::map_horizon::render> _horizon_render;
     std::unique_ptr<OutdoorLighting> _outdoor_lighting;
     OutdoorLightStats _outdoor_light_stats;
+    std::unique_ptr<Skies> _skies;
 
     // cursor
     Noggit::CursorRender _cursor_render;
