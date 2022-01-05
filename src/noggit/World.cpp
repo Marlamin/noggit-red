@@ -2956,7 +2956,7 @@ void World::notifyTileRendererOnSelectedTextureChange()
 
   for (MapTile* tile : mapIndex.loaded_tiles())
   {
-    tile->notifyTileRendererOnSelectedTextureChange();
+    tile->renderer()->notifyTileRendererOnSelectedTextureChange();
   }
 }
 

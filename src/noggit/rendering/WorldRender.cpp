@@ -103,9 +103,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     {
       auto& tile_extents = tile->getCombinedExtents();
       tile->calcCamDist(camera_pos);
-      tile->tile_frustum_culled = false;
-      tile->objects_frustum_cull_test = 2;
-      tile->tile_occluded = false;
+      tile->renderer()->setFrustumCulled(false);
+      tile->renderer()->setObjectsFrustumCullTest(2);
+      tile->renderer()->setOccluded(false);
       _world->_loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(tile->index.x, tile->index.z), tile);
 
       tile_counter++;
@@ -119,27 +119,27 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       tile->calcCamDist(camera_pos);
       _world->_loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(tile->index.x, tile->index.z), tile);
 
-      tile->objects_frustum_cull_test = 1;
+      tile->renderer()->setObjectsFrustumCullTest(1);
       if (frustum.contains(tile_extents[0]) && frustum.contains(tile_extents[1]))
       {
-        tile->objects_frustum_cull_test++;
+        tile->renderer()->setObjectsFrustumCullTest( tile->renderer()->objectsFrustumCullTest() + 1);
       }
 
-      if (tile->tile_frustum_culled)
+      if (tile->renderer()->isFrustumCulled())
       {
-        tile->tile_occlusion_cull_override = true;
-        tile->discardTileOcclusionQuery();
-        tile->tile_occluded = false;
+        tile->renderer()->setOverrideOcclusionCulling(true);
+        tile->renderer()->discardTileOcclusionQuery();
+        tile->renderer()->setOccluded(false);
       }
 
-      tile->tile_frustum_culled = false;
+      tile->renderer()->setFrustumCulled(false);
 
       tile_counter++;
     }
     else
     {
-      tile->tile_frustum_culled = true;
-      tile->objects_frustum_cull_test = 0;
+      tile->renderer()->setFrustumCulled(true);
+      tile->renderer()->setObjectsFrustumCullTest(0);
     }
 
     _world->_n_loaded_tiles++;
@@ -277,12 +277,13 @@ void WorldRender::draw (glm::mat4x4 const& model_view
         }
 
         if (minimap_render)
-          tile->tile_occluded = false;
+          tile->renderer()->setOccluded(false);
 
-        if (tile->tile_occluded && !tile->getChunkUpdateFlags() && !tile->tile_occlusion_cull_override)
+        if (tile->renderer()->isOccluded() && !tile->getChunkUpdateFlags() && !tile->renderer()->isOverridingOcclusionCulling())
           continue;
 
-        tile->draw (mcnk_shader
+        tile->renderer()->draw(
+            mcnk_shader
             , camera_pos
             , show_unpaintable_chunks
             , draw_paintability_overlay
@@ -354,9 +355,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
 
     if (minimap_render)
-      tile->tile_occluded = false;
+      tile->renderer()->setOccluded(false);
 
-    if (tile->tile_occluded && !tile->getChunkUpdateFlags() && !tile->tile_occlusion_cull_override)
+    if (tile->renderer()->isOccluded() && !tile->getChunkUpdateFlags() && !tile->renderer()->isOverridingOcclusionCulling())
       continue;
 
     // early dist check
@@ -373,7 +374,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
         // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
         // otherwise we only allocate for a half
 
-        if (tile->objects_frustum_cull_test > 1)
+        if (tile->renderer()->objectsFrustumCullTest() > 1)
         {
           instances.reserve(instances.size() + pair.second.size());
         }
@@ -395,7 +396,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           auto m2_instance = static_cast<ModelInstance*>(instance);
 
-          if ((tile->objects_frustum_cull_test > 1 || m2_instance->isInFrustum(frustum)) && m2_instance->isInRenderDist(_cull_distance, camera_pos, display))
+          if ((tile->renderer()->objectsFrustumCullTest() > 1 || m2_instance->isInFrustum(frustum)) && m2_instance->isInRenderDist(_cull_distance, camera_pos, display))
           {
             instances.push_back(m2_instance->transformMatrix());
           }
@@ -408,7 +409,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
         // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
         // otherwise we only allocate for a half
 
-        if (tile->objects_frustum_cull_test > 1)
+        if (tile->renderer()->objectsFrustumCullTest() > 1)
         {
           wmos_to_draw.reserve(wmos_to_draw.size() + pair.second.size());
         }
@@ -429,7 +430,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           auto wmo_instance = static_cast<WMOInstance*>(instance);
 
-          if (tile->objects_frustum_cull_test > 1 || frustum.intersects(wmo_instance->extents[1], wmo_instance->extents[0]))
+          if (tile->renderer()->objectsFrustumCullTest() > 1 || frustum.intersects(wmo_instance->extents[1], wmo_instance->extents[0]))
           {
             wmos_to_draw.push_back(wmo_instance);
           }
@@ -498,8 +499,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
         break;
       }
 
-      tile->tile_occluded = !tile->getTileOcclusionQueryResult(camera_pos);
-      tile->doTileOcclusionQuery(occluder_shader);
+      tile->renderer()->setOccluded(!tile->renderer()->getTileOcclusionQueryResult(camera_pos));
+      tile->renderer()->doTileOcclusionQuery(occluder_shader);
     }
 
     gl.enable(GL_CULL_FACE);
@@ -752,7 +753,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       if (!tile)
         break;
 
-      if (tile->tile_occluded && !tile->Water.needsUpdate() && !tile->tile_occlusion_cull_override)
+      if (tile->renderer()->isOccluded() && !tile->Water.needsUpdate() && !tile->renderer()->isOverridingOcclusionCulling())
         continue;
 
       tile->drawWater ( frustum

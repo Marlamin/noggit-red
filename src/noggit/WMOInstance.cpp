@@ -86,11 +86,11 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
     {
       for (auto& tile : getTiles())
       {
-        if (tile->objects_frustum_cull_test && !tile->tile_occluded)
+        if (tile->renderer()->objectsFrustumCullTest() && !tile->renderer()->isOccluded())
         {
-          region_visible = tile->objects_frustum_cull_test;
+          region_visible = tile->renderer()->objectsFrustumCullTest();
 
-          if (tile->objects_frustum_cull_test > 1)
+          if (tile->renderer()->objectsFrustumCullTest() > 1)
             break;
         }
       }

@@ -352,8 +352,8 @@ public:
   bool need_model_updates = false;
 
   void loadAllTiles();
-  unsigned getNumLoadedTiles() { return _n_loaded_tiles; };
-  unsigned getNumRenderedTiles() { return _n_rendered_tiles; };
+  unsigned getNumLoadedTiles() const { return _n_loaded_tiles; };
+  unsigned getNumRenderedTiles() const { return _n_rendered_tiles; };
 
 protected:
   void update_models_by_filename();
