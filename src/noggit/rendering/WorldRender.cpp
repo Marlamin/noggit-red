@@ -221,7 +221,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
   }
 
-  _cull_distance= draw_fog ? _skies->fog_distance_end() : _world->_view_distance;
+  _cull_distance= draw_fog ? _skies->fog_distance_end() : _view_distance;
 
   // Draw verylowres heightmap
   if (draw_fog && draw_terrain)
@@ -866,99 +866,75 @@ void WorldRender::upload()
 
   _outdoor_lighting = std::make_unique<OutdoorLighting>();
 
-  if (!_m2_program)
-  {
-    _m2_program.reset
-        ( new OpenGL::program
-              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_vs") }
-                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_fs") }
-              }
-        );
-  }
-  if (!_m2_instanced_program)
-  {
-    _m2_instanced_program.reset
-        ( new OpenGL::program
-              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_vs", {"instanced"}) }
-                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_fs") }
-              }
-        );
-  }
-  if (!_m2_box_program)
-  {
-    _m2_box_program.reset
-        ( new OpenGL::program
-              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_box_vs") }
-                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_box_fs") }
-              }
-        );
-  }
-  if (!_m2_ribbons_program)
-  {
-    _m2_ribbons_program.reset
-        ( new OpenGL::program
-              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("ribbon_vs") }
-                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("ribbon_fs") }
-              }
-        );
-  }
-  if (!_m2_particles_program)
-  {
-    _m2_particles_program.reset
-        ( new OpenGL::program
-              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("particle_vs") }
-                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("particle_fs") }
-              }
-        );
-  }
-  if (!_mcnk_program)
-  {
-    _mcnk_program.reset
-        ( new OpenGL::program
-              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("terrain_vs") }
-                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("terrain_fs") }
-              }
-        );
-  }
-  if (!_mfbo_program)
-  {
-    _mfbo_program.reset
-        ( new OpenGL::program
-              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("mfbo_vs") }
-                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("mfbo_fs") }
-              }
-        );
-  }
-
-  if (!_wmo_program)
-  {
-    _wmo_program.reset
-        ( new OpenGL::program
-              { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("wmo_vs") }
-                  , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("wmo_fs") }
-              }
-        );
-  }
-
-  if (!_liquid_program)
-  {
-    _liquid_program.reset(
-        new OpenGL::program
-            { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("liquid_vs") }
-                , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("liquid_fs") }
-            }
+  _m2_program.reset
+    ( new OpenGL::program
+          { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_vs") }
+              , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_fs") }
+          }
     );
-  }
 
-  if (!_occluder_program)
-  {
-    _occluder_program.reset(
-        new OpenGL::program
-            { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("occluder_vs") }
-                , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("occluder_fs") }
+  _m2_instanced_program.reset
+      ( new OpenGL::program
+            { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_vs", {"instanced"}) }
+                , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_fs") }
             }
-    );
-  }
+      );
+
+  _m2_box_program.reset
+      ( new OpenGL::program
+            { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("m2_box_vs") }
+                , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("m2_box_fs") }
+            }
+      );
+
+  _m2_ribbons_program.reset
+      ( new OpenGL::program
+            { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("ribbon_vs") }
+                , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("ribbon_fs") }
+            }
+      );
+
+  _m2_particles_program.reset
+      ( new OpenGL::program
+            { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("particle_vs") }
+                , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("particle_fs") }
+            }
+      );
+
+  _mcnk_program.reset
+      ( new OpenGL::program
+            { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("terrain_vs") }
+                , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("terrain_fs") }
+            }
+      );
+
+  _mfbo_program.reset
+      ( new OpenGL::program
+            { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("mfbo_vs") }
+                , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("mfbo_fs") }
+            }
+      );
+
+  _wmo_program.reset
+      ( new OpenGL::program
+            { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("wmo_vs") }
+                , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("wmo_fs") }
+            }
+      );
+
+  _liquid_program.reset(
+      new OpenGL::program
+          { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("liquid_vs") }
+              , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("liquid_fs") }
+          }
+  );
+
+  _occluder_program.reset(
+      new OpenGL::program
+          { { GL_VERTEX_SHADER,   OpenGL::shader::src_from_qrc("occluder_vs") }
+              , { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("occluder_fs") }
+          }
+  );
 
   _liquid_texture_manager.upload();
 

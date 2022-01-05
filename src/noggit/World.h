@@ -370,8 +370,6 @@ protected:
 
   QSettings* _settings;
 
-  float _view_distance;
-
   Noggit::NoggitRenderContext _context;
 
   std::array<std::pair<std::pair<int, int>, MapTile*>, 64 * 64 > _loaded_tiles_buffer;
