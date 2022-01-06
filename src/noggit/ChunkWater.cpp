@@ -45,19 +45,15 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
     switch (mclq_liquid_type)
     {
       case 1:
-        _water_tile->registerNewChunk(_layers.size());
         _layers.emplace_back(this, pos, liquid, 2);
         break;
       case 3:
-        _water_tile->registerNewChunk(_layers.size());
         _layers.emplace_back(this, pos, liquid, 4);
         break;
       case 4:
-        _water_tile->registerNewChunk(_layers.size());
         _layers.emplace_back(this, pos, liquid, 1);
         break;
       case 6:
-        _water_tile->registerNewChunk(_layers.size());
         _layers.emplace_back(this, pos, liquid, (_use_mclq_green_lava ? 15 : 3));
 
         break;
@@ -65,6 +61,7 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
         LogError << "Invalid/unhandled MCLQ liquid type" << std::endl;
         break;
     }
+    _water_tile->tagUpdate();
   }
   update_layers();
 }
@@ -106,7 +103,7 @@ void ChunkWater::fromFile(BlizzardArchive::ClientFile &f, size_t basePos)
     }
 
     glm::vec3 pos(xbase, 0.0f, zbase);
-    _water_tile->registerNewChunk(_layers.size());
+    _water_tile->tagUpdate();
     _layers.emplace_back(this, f, basePos, pos, info, infoMask);
   }
 
@@ -177,7 +174,7 @@ void ChunkWater::setType(int type, size_t layer)
   {
     _layers[layer].changeLiquidID(type);
   }
-  _water_tile->updateLayer(layer);
+  _water_tile->tagUpdate();
 }
 
 bool ChunkWater::is_visible ( const float& cull_distance
@@ -212,7 +209,7 @@ void ChunkWater::update_layers()
     extents[0].y = std::min(extents[0].y, vmin.y);
     extents[1].y = std::max(extents[1].y, vmax.y);
 
-    _water_tile->updateLayer(count);
+    _water_tile->tagUpdate();
     count++;
   }
 
@@ -258,7 +255,7 @@ void ChunkWater::paintLiquid( glm::vec3 const& pos
     {
       liquid_layer layer(this, glm::vec3(xbase, 0.0f, zbase), pos.y, liquid_id);
       copy_height_to_layer(layer, pos, radius);
-      _water_tile->registerNewChunk(_layers.size());
+      _water_tile->tagUpdate();
       _layers.push_back(layer);
     }
   }
@@ -292,14 +289,14 @@ void ChunkWater::paintLiquid( glm::vec3 const& pos
     layer.clear(); // remove the liquid to not override the other layer
     layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
     layer.changeLiquidID(liquid_id);
-    _water_tile->registerNewChunk(_layers.size());
+    _water_tile->tagUpdate();
     _layers.push_back(layer);
   }
   else
   {
     liquid_layer layer(this, glm::vec3(xbase, 0.0f, zbase), pos.y, liquid_id);
     layer.paintLiquid(pos, radius, true, angle, orientation, lock, origin, override_height, chunk, opacity_factor);
-    _water_tile->registerNewChunk(_layers.size());
+    _water_tile->tagUpdate();
     _layers.push_back(layer);
   }
 
@@ -313,7 +310,7 @@ void ChunkWater::cleanup()
     if (_layers[i].empty())
     {
       _layers.erase(_layers.begin() + i);
-      _water_tile->unregisterChunk(i);
+      _water_tile->tagUpdate();
     }
   }
 }

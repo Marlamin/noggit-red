@@ -44,6 +44,7 @@ MapTile::MapTile( int pX
                 )
   : AsyncObject(pFilename)
   , _renderer(this)
+  , _fl_bounds_render(this)
   , index(TileIndex(pX, pZ))
   , xbase(pX * TILESIZE)
   , zbase(pZ * TILESIZE)
@@ -436,94 +437,6 @@ bool MapTile::intersect (math::ray const& ray, selection_result* results) const
     }
   }
   return false;
-}
-
-
-void MapTile::drawMFBO (OpenGL::Scoped::use_program& mfbo_shader)
-{
-  static std::vector<std::uint8_t> const indices = {4, 1, 2, 5, 8, 7, 6, 3, 0, 1, 0, 3, 6, 7, 8, 5, 2, 1};
-
-  if (!_mfbo_buffer_are_setup)
-  {
-    _mfbo_vbos.upload();
-    _mfbo_vaos.upload();
-
-    
-
-    gl.bufferData<GL_ARRAY_BUFFER>( _mfbo_bottom_vbo
-                                  , 9 * sizeof(glm::vec3)
-                                  , mMinimumValues
-                                  , GL_STATIC_DRAW
-                                  );
-    gl.bufferData<GL_ARRAY_BUFFER>( _mfbo_top_vbo
-                                  , 9 * sizeof(glm::vec3)
-                                  , mMaximumValues
-                                  , GL_STATIC_DRAW
-                                  );    
-
-    {
-      OpenGL::Scoped::vao_binder const _ (_mfbo_bottom_vao);
-      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder (_mfbo_bottom_vbo);
-      mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-    }
-
-    {
-      OpenGL::Scoped::vao_binder const _(_mfbo_top_vao);
-      OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vbo_binder(_mfbo_top_vbo);
-      mfbo_shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
-    }
-
-    {
-      OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
-      gl.bufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint16_t), indices.data(), GL_STATIC_DRAW);
-    }
-
-    _mfbo_buffer_are_setup = true;
-  }
-
-  {
-    OpenGL::Scoped::vao_binder const _(_mfbo_bottom_vao);
-    OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
-
-    mfbo_shader.uniform("color", glm::vec4(1.0f, 1.0f, 0.0f, 0.2f));
-    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, nullptr);
-  }
-
-  {
-    OpenGL::Scoped::vao_binder const _(_mfbo_top_vao);
-    OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
-
-    mfbo_shader.uniform("color", glm::vec4(0.0f, 1.0f, 1.0f, 0.2f));
-    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, nullptr);
-  }
-
-}
-
-void MapTile::drawWater ( math::frustum const& frustum
-                        , const glm::vec3& camera
-                        , bool camera_moved
-                        , OpenGL::Scoped::use_program& water_shader
-                        , int animtime
-                        , int layer
-                        , display_mode display
-                        , LiquidTextureManager* tex_manager
-                        )
-{
-  if (!Water.hasData())
-  {
-    return; //no need to draw water on tile without water =)
-  }
-
-  // process water bounds
-  Water.draw ( frustum
-             , camera
-             , camera_moved
-             , water_shader
-             , animtime
-             , layer
-             , display
-             , tex_manager
-             );
 }
 
 MapChunk* MapTile::getChunk(unsigned int x, unsigned int z)

@@ -756,7 +756,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       if (tile->renderer()->isOccluded() && !tile->Water.needsUpdate() && !tile->renderer()->isOverridingOcclusionCulling())
         continue;
 
-      tile->drawWater ( frustum
+      tile->Water.renderer()->draw(
+          frustum
           , camera_pos
           , camera_moved
           , water_shader
@@ -831,7 +832,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
     for (MapTile* tile : _world->mapIndex.loaded_tiles())
     {
-      tile->drawMFBO(mfbo_shader);
+      tile->flightBoundsRenderer()->draw(mfbo_shader);
     }
   }
 

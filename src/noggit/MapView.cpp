@@ -5124,7 +5124,7 @@ void MapView::unloadOpenglData(bool from_manager)
   for (MapTile* tile : _world->mapIndex.loaded_tiles())
   {
     tile->renderer()->unload();
-    tile->Water.unload();
+    tile->Water.renderer()->unload();
 
     for (int i = 0; i < 16; ++i)
     {

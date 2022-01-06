@@ -15,6 +15,7 @@
 #include <noggit/Misc.h>
 #include <external/tsl/robin_map.h>
 #include <noggit/rendering/TileRender.hpp>
+#include <noggit/rendering/FlightBoundsRender.hpp>
 
 #include <map>
 #include <string>
@@ -30,6 +31,7 @@ namespace math
 namespace Noggit::Rendering
 {
   class TileRender;
+  class FlightBoundsRender;
 }
 
 class World;
@@ -38,6 +40,7 @@ class World;
 class MapTile : public AsyncObject
 {
   friend class Noggit::Rendering::TileRender;
+  friend class Noggit::Rendering::FlightBoundsRender;
   friend class MapChunk;
   friend class TextureSet;
 
@@ -99,17 +102,6 @@ public:
 
   bool intersect (math::ray const&, selection_result*) const;
 
-  void drawWater ( math::frustum const& frustum
-                 , const glm::vec3& camera
-                 , bool camera_moved
-                 , OpenGL::Scoped::use_program& water_shader
-                 , int animtime
-                 , int layer
-                 , display_mode display
-                 , LiquidTextureManager* tex_manager
-                 );
-
-  void drawMFBO (OpenGL::Scoped::use_program&);
 
   bool GetVertex(float x, float z, glm::vec3 *V);
   void getVertexInternal(float x, float z, glm::vec3* v);
@@ -173,6 +165,7 @@ public:
   void tagCombinedExtents(bool state) { _combined_extents_dirty = state; };
 
   Noggit::Rendering::TileRender* renderer() { return &_renderer; };
+  Noggit::Rendering::FlightBoundsRender* flightBoundsRenderer() { return &_fl_bounds_render; };
 
 private:
 
@@ -214,16 +207,9 @@ private:
   bool _load_models;
   World* _world;
 
-  bool _mfbo_buffer_are_setup = false;
-  OpenGL::Scoped::deferred_upload_vertex_arrays<2> _mfbo_vaos;
-  GLuint const& _mfbo_bottom_vao = _mfbo_vaos[0];
-  GLuint const& _mfbo_top_vao = _mfbo_vaos[1];
-  OpenGL::Scoped::deferred_upload_buffers<3> _mfbo_vbos;
-  GLuint const& _mfbo_bottom_vbo = _mfbo_vbos[0];
-  GLuint const& _mfbo_top_vbo = _mfbo_vbos[1];
-  GLuint const& _mfbo_indices = _mfbo_vbos[2];
 
   Noggit::Rendering::TileRender _renderer;
+  Noggit::Rendering::FlightBoundsRender _fl_bounds_render;
 
   Noggit::NoggitRenderContext _context;
 
