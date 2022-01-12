@@ -560,7 +560,7 @@ void FlowView::paintEvent(QPaintEvent *event)
     return;
   }
 
-  QCoreApplication::processEvents();
+  //QCoreApplication::processEvents();
 
   for(auto& pair : _scene->nodes())
   {

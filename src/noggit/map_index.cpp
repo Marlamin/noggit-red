@@ -123,7 +123,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
       adt_filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
 
       mTiles[j][i].tile = nullptr;
-      mTiles[j][i].onDisc = BlizzardArchive::ClientData::existsOnDisk(adt_filename.str());
+      mTiles[j][i].onDisc = Noggit::Application::NoggitApplication::instance()->clientData()->existsOnDisk(adt_filename.str());
 
 			if (mTiles[j][i].onDisc && !(mTiles[j][i].flags & 1))
 			{

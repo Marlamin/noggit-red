@@ -93,7 +93,6 @@ namespace Noggit::Rendering
     void updateLightingUniformBlock(bool draw_fog, glm::vec3 const& camera_pos);
     void updateLightingUniformBlockMinimap(MinimapRenderSettings* settings);
 
-
     void setupChunkVAO(OpenGL::Scoped::use_program& mcnk_shader);
     void setupLiquidChunkVAO(OpenGL::Scoped::use_program& water_shader);
     void setupOccluderBuffers();

@@ -287,7 +287,7 @@ namespace Noggit::Project
             project->ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(
 	            dbcFileDirectory, dbdFileDirectory, clientBuild);
             project->ClientData = std::make_shared<BlizzardArchive::ClientData>(
-	            project->ClientPath, clientArchiveVersion, clientArchiveLocale, std::string(""));
+	            project->ClientPath, clientArchiveVersion, clientArchiveLocale, std::string((projectPath / "export").generic_string()));
 
 
             return std::make_shared<NoggitProject>(project.value());

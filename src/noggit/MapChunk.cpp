@@ -211,7 +211,7 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
     }
   }
   // - MCSH ----------------------------------------------
-  if(header.ofsShadow && header.sizeShadow)
+  if((header_flags.flags.has_mcsh) && header.ofsShadow && header.sizeShadow)
   {
     f->seek(base + header.ofsShadow);
     f->read(&fourcc, 4);
@@ -219,14 +219,14 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
 
     assert(fourcc == 'MCSH');
 
-
-    uint8_t compressed_shadow_map[64 * 64 / 8];
+    char compressed_shadow_map[64 * 64 / 8];
 
     // shadow map 64 x 64
-    f->read(compressed_shadow_map, 0x200);
+    f->read(&compressed_shadow_map, 0x200);
     f->seekRelative(-0x200);
 
-    uint8_t *p, *c;
+    uint8_t *p;
+    char *c;
     p = _shadow_map;
     c = compressed_shadow_map;
     for (int i = 0; i<64 * 8; ++i)

@@ -2815,7 +2815,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
         _main_window->statusBar()->addPermanentWidget(cancel_btn);
 
-        connect(this, &MapView::updateProgress, progress, &QProgressBar::setValue);
+        //connect(this, &MapView::updateProgress, progress, &QProgressBar::setValue);
       
         // setup combined image if necessary
         if (settings->combined_minimap)

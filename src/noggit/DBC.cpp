@@ -18,7 +18,7 @@ GroundEffectDoodadDB gGroundEffectDoodadDB;
 GroundEffectTextureDB gGroundEffectTextureDB;
 LiquidTypeDB gLiquidTypeDB;
 
-void OpenDBs(std:: shared_ptr<BlizzardArchive::ClientData> clientData)
+void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData)
 {
   gAreaDB.open(clientData);
   gMapDB.open(clientData);

@@ -65,7 +65,7 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
 
   static constexpr unsigned NUM_SAMPLERS = 11;
 
-  if (!_map_tile->finished)
+  if (!_map_tile->finished.load())
   [[unlikely]]
   {
     return;

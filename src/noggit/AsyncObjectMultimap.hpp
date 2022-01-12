@@ -50,22 +50,19 @@ namespace Noggit
     template<typename... Args>
       T* emplace (BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context, Args&&... args)
     {
+      std::scoped_lock const lock(_mutex);
       auto pair = std::make_pair(context, file_key);
       //LogDebug << "Emplacing " << normalized << " into context" << context << std::endl;
 
       {
-        std::scoped_lock const lock(_mutex);
-
         if ([&] { return _counts[pair]++; }())
         {
           return &_elements.at (pair);
         }
       }
-        
 
       T* const obj ( [&]
                      {
-                       std::scoped_lock const lock(_mutex);
                        return &_elements.emplace ( std::piecewise_construct
                                                  , std::forward_as_tuple (pair)
                                                  , std::forward_as_tuple (file_key.filepath(), context, args...)
@@ -151,7 +148,7 @@ namespace Noggit
     }
 
   private:
-    std::map<std::pair<int, BlizzardArchive::Listfile::FileKey>, T> _elements;
+    std::unordered_map<std::pair<int, BlizzardArchive::Listfile::FileKey>, T, pair_hash> _elements;
     std::unordered_map<std::pair<int, BlizzardArchive::Listfile::FileKey>, std::size_t, pair_hash> _counts;
     std::mutex mutable _mutex;
   };

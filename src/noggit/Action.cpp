@@ -736,7 +736,7 @@ void Noggit::Action::registerChunkShadowChange(MapChunk *chunk)
       return;
   }
 
-  std::array<uint8_t , 64 * 64> data;
+  std::array<uint8_t, 64 * 64> data;
   std::memcpy(data.data(), &chunk->_shadow_map, 64 * 64 * sizeof(std::uint8_t));
   _chunk_shadow_map_pre.emplace_back(std::make_pair(chunk, std::move(data)));
 }
