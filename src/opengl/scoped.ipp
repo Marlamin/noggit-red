@@ -118,9 +118,11 @@ namespace OpenGL
       gl.bindBuffer (type, _old);
     }
 
-    inline index_buffer_manual_binder::index_buffer_manual_binder (GLuint buffer)
-      : _buffer (buffer)
-    {}
+    inline index_buffer_manual_binder::index_buffer_manual_binder(GLuint buffer)
+    : _buffer (buffer)
+    {
+        
+    }
 
     inline void index_buffer_manual_binder::bind()
     {

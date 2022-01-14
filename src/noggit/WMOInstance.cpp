@@ -103,7 +103,7 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
 
     wmo_shader.uniform("transform", _transform_mat);
 
-    wmo->draw ( wmo_shader
+    wmo->renderer()->draw( wmo_shader
               , model_view
               , projection
               , _transform_mat
@@ -278,6 +278,9 @@ void WMOInstance::update_doodads()
   {
     for (auto& doodad : group_doodads.second)
     {
+      if (!doodad.need_matrix_update())
+        continue;
+
       doodad.update_transform_matrix_wmo(this);
     }
   }
@@ -348,7 +351,7 @@ std::map<uint32_t, std::vector<wmo_doodad_instance>>* WMOInstance::get_doodads(b
     {
       for (auto& doodad : _doodads_per_group[i])
       {
-        if (doodad.need_matrix_update())
+        if (doodad.finishedLoading() && doodad.need_matrix_update())
         {
           doodad.update_transform_matrix_wmo(this);
         }

@@ -651,7 +651,7 @@ bool ModelRenderPass::prepare_draw(OpenGL::Scoped::use_program& m2_shader, Model
   }
 
   // opacity
-  if (transparency_combo_index != 0xFFFF)
+  if (transparency_combo_index != 0xFFFF && transparency_combo_index < m->_transparency_lookup.size())
   {
     auto& transparency (m->_transparency[m->_transparency_lookup[transparency_combo_index]].trans);
     if (transparency.uses (0))

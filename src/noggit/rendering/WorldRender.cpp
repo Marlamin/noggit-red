@@ -189,7 +189,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
                     wmo.recalcExtents();
                   }
 
-                  hadSky = wmo.wmo->draw_skybox( model_view
+                  hadSky = wmo.wmo->renderer()->drawSkybox(model_view
                       , camera_pos
                       , m2_shader
                       , frustum
@@ -334,6 +334,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   tsl::robin_map<Model*, std::vector<glm::mat4x4>> models_to_draw;
   std::vector<WMOInstance*> wmos_to_draw;
 
+  // frame counter loop. pretty hacky but works
+  // this is used to make sure no object is processed more than once within a frame
   static int frame = 0;
 
   if (frame == std::numeric_limits<int>::max())
@@ -365,6 +367,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     if (tile->camDist() > _cull_distance)
       continue;
 
+
+    // TODO: subject to potential generalization
     for (auto& pair : tile->getObjectInstances())
     {
       if (pair.second[0]->which() == eMODEL)
@@ -453,6 +457,48 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       {
         bool is_hidden = instance->wmo->is_hidden();
 
+        bool is_exclusion_filtered = false;
+
+        // minimap render exclusion filters
+        // per-model
+        if (minimap_render && minimap_render_settings->use_filters)
+        {
+          if (instance->instance_model()->file_key().hasFilepath())
+          {
+            for(int i = 0; i < minimap_render_settings->wmo_model_filter_exclude->count(); ++i)
+            {
+              auto item = reinterpret_cast<Ui::MinimapWMOModelFilterEntry*>(
+                  minimap_render_settings->wmo_model_filter_exclude->itemWidget(
+                  minimap_render_settings->wmo_model_filter_exclude->item(i)));
+
+              if (item->getFileName().toStdString() == instance->instance_model()->file_key().filepath())
+              {
+                is_exclusion_filtered = true;
+                break;
+              }
+            }
+          }
+
+          // per-instance
+          for(int i = 0; i < minimap_render_settings->wmo_instance_filter_exclude->count(); ++i)
+          {
+            auto item = reinterpret_cast<Ui::MinimapInstanceFilterEntry*>(
+                minimap_render_settings->wmo_instance_filter_exclude->itemWidget(
+                minimap_render_settings->wmo_instance_filter_exclude->item(i)));
+
+            if (item->getUid() == instance->uid)
+            {
+              is_exclusion_filtered = true;
+              break;
+            }
+          }
+
+          // skip model rendering if excluded by filter
+          if (is_exclusion_filtered)
+            continue;
+        }
+
+
         if (draw_hidden_models || !is_hidden)
         {
           instance->draw(wmo_program
@@ -538,7 +584,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
   bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
   // M2s / models
-  if (draw_models || draw_doodads_wmo)
+  if (draw_models || draw_doodads_wmo || (minimap_render && minimap_render_settings->use_filters))
   {
     ZoneScopedN("World::draw() : Draw M2s");
 
@@ -555,7 +601,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 
     {
-      if (draw_models)
+      if (draw_models || (minimap_render && minimap_render_settings->use_filters))
       {
         OpenGL::Scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
@@ -576,10 +622,37 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
         for (auto& pair : models_to_draw)
         {
+          bool is_inclusion_filtered = false;
+
+          // minimap render inclusion filters
+          // per-model
+          if (minimap_render && minimap_render_settings->use_filters)
+          {
+            if (pair.first->file_key().hasFilepath())
+            {
+              for(int i = 0; i < minimap_render_settings->m2_model_filter_include->count(); ++i)
+              {
+                auto item = reinterpret_cast<Ui::MinimapM2ModelFilterEntry*>(
+                    minimap_render_settings->m2_model_filter_include->itemWidget(
+                    minimap_render_settings->m2_model_filter_include->item(i)));
+
+                if (item->getFileName().toStdString() == pair.first->file_key().filepath())
+                {
+                  is_inclusion_filtered = true;
+                  break;
+                }
+              }
+            }
+
+            // skip model rendering if excluded by filter
+            if (!is_inclusion_filtered)
+              continue;
+          }
+
           if (draw_hidden_models || !pair.first->is_hidden())
           {
             pair.first->draw( model_view
-                , reinterpret_cast<std::vector<glm::mat4x4> const&>(pair.second)
+                , pair.second
                 , m2_shader
                 , model_render_state
                 , frustum

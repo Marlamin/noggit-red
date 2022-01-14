@@ -9,6 +9,8 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/wmo_liquid.hpp>
 #include <noggit/ContextObject.hpp>
+#include <noggit/rendering/WMOGroupRender.hpp>
+#include <noggit/rendering/WMORender.hpp>
 #include <opengl/primitives.hpp>
 #include <ClientFile.hpp>
 #include <optional>
@@ -27,35 +29,12 @@ class WMOManager;
 class wmo_liquid;
 class Model;
 
-struct WMORenderBatch
+namespace Noggit::Rendering
 {
-  std::uint32_t flags;
-  std::uint32_t shader;
-  std::uint32_t tex_array0;
-  std::uint32_t tex_array1;
-  std::uint32_t tex0;
-  std::uint32_t tex1;
-  std::uint32_t alpha_test_mode;
-  std::uint32_t _pad1;
-};
+  class WMOGroupRender;
+  class WMORender;
+}
 
-enum WMORenderBatchFlags
-{
-  eWMOBatch_ExteriorLit = 0x1,
-  eWMOBatch_HasMOCV = 0x2,
-  eWMOBatch_Unlit = 0x4,
-  eWMOBatch_Unfogged = 0x8,
-  eWMOBatch_Collision = 0x10
-};
-
-struct WMOCombinedDrawCall
-{
-  std::vector<int> samplers;
-  std::uint32_t index_start = 0;
-  std::uint32_t index_count = 0;
-  std::uint32_t n_used_samplers = 0;
-  bool backface_cull = false;
-};
 
 struct wmo_batch
 {
@@ -131,19 +110,13 @@ struct wmo_group_header
 
 class WMOGroup 
 {
+  friend class Noggit::Rendering::WMOGroupRender;
+
 public:
   WMOGroup(WMO *wmo, BlizzardArchive::ClientFile* f, int num, char const* names);
   WMOGroup(WMOGroup const&);
 
   void load();
-
-  void draw( OpenGL::Scoped::use_program& wmo_shader
-           , math::frustum const& frustum
-           , const float& cull_distance
-           , const glm::vec3& camera
-           , bool draw_fog
-           , bool world_has_skies
-           );
 
   /*
   void drawLiquid ( glm::mat4x4 const& transform
@@ -159,6 +132,7 @@ public:
   void intersect (math::ray const&, std::vector<float>* results) const;
 
   // todo: portal culling
+  [[nodiscard]]
   bool is_visible( glm::mat4x4 const& transform_matrix
                  , math::frustum const& frustum
                  , float const& cull_distance
@@ -166,6 +140,7 @@ public:
                  , display_mode display
                  ) const;
 
+  [[nodiscard]]
   std::vector<uint16_t> doodad_ref() const { return _doodad_ref; }
 
   glm::vec3 BoundingBoxMin;
@@ -176,9 +151,12 @@ public:
   bool use_outdoor_lights;
   std::string name;
 
+  [[nodiscard]]
   bool has_skybox() const { return header.flags.skybox; }
 
-  void unload();
+  [[nodiscard]]
+  Noggit::Rendering::WMOGroupRender* renderer() { return &_renderer; };
+
 
 private:
   void load_mocv(BlizzardArchive::ClientFile& f, uint32_t size);
@@ -200,31 +178,9 @@ private:
   std::vector<glm::vec2> _texcoords;
   std::vector<glm::vec2> _texcoords_2;
   std::vector<glm::vec4> _vertex_colors;
-  std::vector<unsigned> _render_batch_mapping;
   std::vector<uint16_t> _indices;
-  std::vector<WMORenderBatch> _render_batches;
-  std::vector<WMOCombinedDrawCall> _draw_calls;
 
-  OpenGL::Scoped::deferred_upload_vertex_arrays<1> _vertex_array;
-  GLuint const& _vao = _vertex_array[0];
-  OpenGL::Scoped::deferred_upload_buffers<8> _buffers;
-  GLuint const& _vertices_buffer = _buffers[0];
-  GLuint const& _normals_buffer = _buffers[1];
-  GLuint const& _texcoords_buffer = _buffers[2];
-  GLuint const& _texcoords_buffer_2 = _buffers[3];
-  GLuint const& _vertex_colors_buffer = _buffers[4];
-  GLuint const& _indices_buffer = _buffers[5];
-  GLuint const& _render_batch_mapping_buffer = _buffers[6];
-  GLuint const& _render_batch_tex_buffer = _buffers[7];
-
-  GLuint _render_batch_tex;
-
-  bool _uploaded = false;
-  bool _vao_is_setup = false;
-
-  void upload();
-
-  void setup_vao(OpenGL::Scoped::use_program& wmo_shader);
+  Noggit::Rendering::WMOGroupRender _renderer;
 };
 
 struct WMOLight {
@@ -289,35 +245,10 @@ static_assert ( sizeof (mohd_flags) == sizeof (std::uint16_t)
 
 class WMO : public AsyncObject
 {
+  friend class WMORender;
+
 public:
   explicit WMO(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context );
-
-  void draw ( OpenGL::Scoped::use_program& wmo_shader
-            , glm::mat4x4 const& model_view
-            , glm::mat4x4 const& projection
-            , glm::mat4x4 const& transform_matrix
-            , bool boundingbox
-            , math::frustum const& frustum
-            , const float& cull_distance
-            , const glm::vec3& camera
-            , bool draw_doodads
-            , bool draw_fog
-            , int animtime
-            , bool world_has_skies
-            , display_mode display
-            );
-
-  bool draw_skybox(glm::mat4x4 const& model_view
-                  , glm::vec3 const& camera_pos
-                  , OpenGL::Scoped::use_program& m2_shader
-                  , math::frustum const& frustum
-                  , const float& cull_distance
-                  , int animtime
-                  , bool draw_particles
-                  , glm::vec3 aabb_min
-                  , glm::vec3 aabb_max
-                  , std::map<int, std::pair<glm::vec3, glm::vec3>> const& group_extents
-                  ) const;
 
   [[nodiscard]]
   std::vector<float> intersect (math::ray const&) const;
@@ -325,8 +256,6 @@ public:
   void finishLoading() override;
 
   void waitForChildrenLoaded() override;
-
-  void unload();
 
   [[nodiscard]]
   std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads_per_group(uint16_t doodadset) const;
@@ -364,8 +293,13 @@ public:
     return true;
   }
 
+  [[nodiscard]]
+  Noggit::Rendering::WMORender* renderer() { return &_renderer; }
+
 private:
   bool _hidden = false;
+
+  Noggit::Rendering::WMORender _renderer;
 };
 
 class WMOManager

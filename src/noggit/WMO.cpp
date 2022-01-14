@@ -23,6 +23,7 @@
 WMO::WMO(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context)
   : AsyncObject(file_key)
   , _context(context)
+  , _renderer(this)
 {
 }
 
@@ -352,87 +353,6 @@ void WMO::waitForChildrenLoaded()
   }
 }
 
-void WMO::draw ( OpenGL::Scoped::use_program& wmo_shader
-               , glm::mat4x4 const& model_view
-               , glm::mat4x4 const& projection
-               , glm::mat4x4 const& transform_matrix
-               , bool boundingbox
-               , math::frustum const& frustum
-               , const float& cull_distance
-               , const glm::vec3& camera
-               , bool // draw_doodads
-               , bool draw_fog
-               , int animtime
-               , bool world_has_skies
-               , display_mode display
-               )
-{
-
-  if (!finishedLoading())
-  [[unlikely]]
-  {
-    return;
-  }
-
-  wmo_shader.uniform("ambient_color",glm::vec3(ambient_light_color));
-
-  for (auto& group : groups)
-  {
-
-
-    /*
-    if (!group.is_visible(transform_matrix, frustum, cull_distance, camera, display))
-    {
-      continue;
-    }
-
-     */
-
-    group.draw ( wmo_shader
-               , frustum
-               , cull_distance
-               , camera
-               , draw_fog
-               , world_has_skies
-               );
-
-    /*
-    group.drawLiquid ( transform_matrix_transposed
-                     , render
-                     , draw_fog
-                     , animtime
-                     );
-
-                     */
-  }
-
-  if (boundingbox)
-  {
-    //OpenGL::Scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
-    //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    for (auto& group : groups)
-    {
-      OpenGL::primitives::wire_box::getInstance(_context).draw( model_view
-       , projection
-       , transform_matrix
-       , {1.0f, 1.0f, 1.0f, 1.0f}
-       , group.BoundingBoxMin
-       , group.BoundingBoxMax
-       );
-    }
-
-    OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
-      , projection
-      , transform_matrix
-      , {1.0f, 0.0f, 0.0f, 1.0f}
-      , glm::vec3(extents[0].x, extents[0].z, -extents[0].y)
-      , glm::vec3(extents[1].x, extents[1].z, -extents[1].y)
-      );
-
-  }
-}
-
 std::vector<float> WMO::intersect (math::ray const& ray) const
 {
   std::vector<float> results;
@@ -450,66 +370,7 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
   return results;
 }
 
-bool WMO::draw_skybox (glm::mat4x4 const& model_view
-                      , glm::vec3 const& camera_pos
-                      , OpenGL::Scoped::use_program& m2_shader
-                      , math::frustum const& frustum
-                      , const float& cull_distance
-                      , int animtime
-                      , bool draw_particles
-                      , glm::vec3 aabb_min
-                      , glm::vec3 aabb_max
-                      , std::map<int, std::pair<glm::vec3, glm::vec3>> const& group_extents
-                      ) const
-{
 
-
-
-  if (!skybox || !math::is_inside_of(camera_pos,aabb_min, aabb_max))
-  {
-    return false;
-  }
-
-  for (int i=0; i<groups.size(); ++i)
-  {
-    auto const& g = groups[i];
-
-    if (!g.has_skybox())
-    {
-      continue;
-    }
-
-    auto& extent(group_extents.at(i));
-
-    if (math::is_inside_of(camera_pos, extent.first, extent.second))
-    {
-      ModelInstance sky(skybox.value()->file_key().filepath(), _context);
-      sky.pos = camera_pos;
-      sky.scale = 2.f;
-      sky.recalcExtents();
-
-      OpenGL::M2RenderState model_render_state;
-      model_render_state.tex_arrays = {0, 0};
-      model_render_state.tex_indices = {0, 0};
-      model_render_state.tex_unit_lookups = {-1, -1};
-      gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      gl.disable(GL_BLEND);
-      gl.depthMask(GL_TRUE);
-      m2_shader.uniform("blend_mode", 0);
-      m2_shader.uniform("unfogged", static_cast<int>(model_render_state.unfogged));
-      m2_shader.uniform("unlit",  static_cast<int>(model_render_state.unlit));
-      m2_shader.uniform("tex_unit_lookup_1", 0);
-      m2_shader.uniform("tex_unit_lookup_2", 0);
-      m2_shader.uniform("pixel_shader", 0);
-
-      skybox->get()->draw(model_view, sky, m2_shader, model_render_state, frustum, cull_distance, camera_pos, animtime, display_mode::in_3D);
-
-      return true;
-    }
-  }  
-
-  return false;
-}
 
 std::map<uint32_t, std::vector<wmo_doodad_instance>> WMO::doodads_per_group(uint16_t doodadset) const
 {
@@ -536,14 +397,6 @@ std::map<uint32_t, std::vector<wmo_doodad_instance>> WMO::doodads_per_group(uint
   }
 
   return doodads;
-}
-
-void WMO::unload()
-{
-  for (auto& group : groups)
-  {
-    group.unload();
-  }
 }
 
 void WMOLight::init(BlizzardArchive::ClientFile* f)
@@ -599,6 +452,7 @@ void WMOLight::setupOnce(GLint, glm::vec3, glm::vec3)
 WMOGroup::WMOGroup(WMO *_wmo, BlizzardArchive::ClientFile* f, int _num, char const* names)
   : wmo(_wmo)
   , num(_num)
+  , _renderer(this)
 {
   // extract group info from f
   std::uint32_t flags; // not used, the flags are in the group header
@@ -639,8 +493,7 @@ WMOGroup::WMOGroup(WMOGroup const& other)
   , _texcoords_2(other._texcoords_2)
   , _vertex_colors(other._vertex_colors)
   , _indices(other._indices)
-  , _render_batch_mapping(other._render_batch_mapping)
-  , _render_batches(other._render_batches)
+  , _renderer(this)
 {
   if (other.lq)
   {
@@ -661,257 +514,6 @@ namespace
   }
 }
 
-void WMOGroup::upload()
-{
-  // render batches
-
-  bool texture_not_uploaded = false;
-
-  std::size_t batch_counter = 0;
-  for (auto& batch : _batches)
-  {
-    WMOMaterial const& mat (wmo->materials.at (batch.texture));
-
-    auto& tex1 = wmo->textures.at(mat.texture1);
-    
-    tex1->wait_until_loaded();
-    tex1->upload();
-
-    std::uint32_t tex_array0 = tex1->texture_array();
-    std::uint32_t array_index0 = tex1->array_index();
-
-    std::uint32_t tex_array1 = 0;
-    std::uint32_t array_index1 = 0;
-    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
-
-    if (use_tex2)
-    {
-      auto& tex2 = wmo->textures.at(mat.texture2);
-      tex2->wait_until_loaded();
-      tex2->upload();
-
-      tex_array1 = tex2->texture_array();
-      array_index1 = tex2->array_index();
-    }
-
-    _render_batches[batch_counter].tex_array0 = tex_array0;
-    _render_batches[batch_counter].tex_array1 = tex_array1;
-    _render_batches[batch_counter].tex0 = array_index0;
-    _render_batches[batch_counter].tex1 = array_index1;
-
-    batch_counter++;
-  }
-
-  if (texture_not_uploaded)
-  {
-    return;
-  }
-
-  _draw_calls.clear();
-  WMOCombinedDrawCall* draw_call = nullptr;
-  std::vector<WMORenderBatch*> _used_batches;
-
-  batch_counter = 0;
-  for (auto& batch : _batches)
-  {
-    WMOMaterial& mat = wmo->materials.at(batch.texture);
-    bool backface_cull = !mat.flags.unculled;
-    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
-
-    bool create_draw_call = false;
-    if (draw_call && draw_call->backface_cull == backface_cull && batch.index_start == draw_call->index_start + draw_call->index_count)
-    {
-      // identify if we can fit this batch into current draw_call
-      unsigned n_required_slots = use_tex2 ? 2 : 1;
-      unsigned n_avaliable_slots = draw_call->samplers.size() - draw_call->n_used_samplers;
-      unsigned n_slots_to_be_occupied = 0;
-
-      std::vector<int>::iterator it2;
-      auto it = std::find(draw_call->samplers.begin(), draw_call->samplers.end(), _render_batches[batch_counter].tex_array0);
-
-      if (it == draw_call->samplers.end())
-      {
-        if (n_avaliable_slots)
-          n_slots_to_be_occupied++;
-        else
-          create_draw_call = true;
-      }
- 
-
-      if (!create_draw_call && use_tex2)
-      {
-         it2 = std::find(draw_call->samplers.begin(), draw_call->samplers.end(), _render_batches[batch_counter].tex_array1);
-
-         if (it2 == draw_call->samplers.end())
-         {
-           if (n_slots_to_be_occupied < n_avaliable_slots)
-             n_slots_to_be_occupied++;
-           else
-             create_draw_call = true;
-         }
-
-      }
-
-      if (!create_draw_call)
-      {
-        if (it != draw_call->samplers.end())
-        {
-          _render_batches[batch_counter].tex_array0 = it - draw_call->samplers.begin();
-        }
-        else
-        {
-          draw_call->samplers[draw_call->n_used_samplers] = _render_batches[batch_counter].tex_array0;
-          _render_batches[batch_counter].tex_array0 = draw_call->n_used_samplers;
-          draw_call->n_used_samplers++;
-        }
-
-        if (use_tex2)
-        {
-          if (it2 != draw_call->samplers.end())
-          {
-            _render_batches[batch_counter].tex_array1 = it2 - draw_call->samplers.begin();
-          }
-          else
-          {
-            draw_call->samplers[draw_call->n_used_samplers] = _render_batches[batch_counter].tex_array1;
-            _render_batches[batch_counter].tex_array1 = draw_call->n_used_samplers;
-            draw_call->n_used_samplers++;
-          }
-        }
-      }
-
-    }
-    else
-    {
-      create_draw_call = true;
-    }
-    
-    if (create_draw_call)
-    {
-      // create new combined draw call
-      draw_call = &_draw_calls.emplace_back();
-      draw_call->samplers = std::vector<int>{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
-      draw_call->index_start = batch.index_start;
-      draw_call->index_count = 0;
-      draw_call->n_used_samplers = use_tex2 ? 2 : 1;
-      draw_call->backface_cull = backface_cull;
-
-      draw_call->samplers[0] = _render_batches[batch_counter].tex_array0;
-      _render_batches[batch_counter].tex_array0 = 0;
-
-      if (use_tex2)
-      [[unlikely]]
-      {
-        draw_call->samplers[1] = _render_batches[batch_counter].tex_array1;
-        _render_batches[batch_counter].tex_array1 = 1;
-      }
-
-    }
-
-    draw_call->index_count += batch.index_count;
-
-    batch_counter++;
-  }
-
-  // opengl resources
-  _vertex_array.upload();
-  _buffers.upload();
-  gl.genTextures(1, &_render_batch_tex);
-
-  gl.bufferData<GL_ARRAY_BUFFER> ( _vertices_buffer
-                                 , _vertices.size() * sizeof (*_vertices.data())
-                                 , _vertices.data()
-                                 , GL_STATIC_DRAW
-                                 );
-
-  gl.bufferData<GL_ARRAY_BUFFER> ( _normals_buffer
-                                 , _normals.size() * sizeof (*_normals.data())
-                                 , _normals.data()
-                                 , GL_STATIC_DRAW
-                                 );
-
-  gl.bufferData<GL_ARRAY_BUFFER> ( _texcoords_buffer
-                                 , _texcoords.size() * sizeof (*_texcoords.data())
-                                 , _texcoords.data()
-                                 , GL_STATIC_DRAW
-                                 );
-
-  gl.bufferData<GL_ARRAY_BUFFER> ( _render_batch_mapping_buffer
-      , _render_batch_mapping.size() * sizeof(unsigned)
-      , _render_batch_mapping.data()
-      , GL_STATIC_DRAW
-  );
-
-  gl.bindBuffer(GL_TEXTURE_BUFFER, _render_batch_tex_buffer);
-  gl.bufferData(GL_TEXTURE_BUFFER, _render_batches.size() * sizeof(WMORenderBatch),_render_batches.data(), GL_STATIC_DRAW);
-  gl.bindTexture(GL_TEXTURE_BUFFER, _render_batch_tex);
-  gl.texBuffer(GL_TEXTURE_BUFFER,  GL_RGBA32UI, _render_batch_tex_buffer);
-
-  gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_buffer, _indices, GL_STATIC_DRAW);
-  
-  if (header.flags.has_two_motv)
-  {
-    gl.bufferData<GL_ARRAY_BUFFER, glm::vec2> ( _texcoords_buffer_2
-                                                    , _texcoords_2
-                                                    , GL_STATIC_DRAW
-                                                    );
-  }
-
-  gl.bufferData<GL_ARRAY_BUFFER> ( _vertex_colors_buffer
-                                 , _vertex_colors.size() * sizeof (*_vertex_colors.data())
-                                 , _vertex_colors.data()
-                                 , GL_STATIC_DRAW
-                                 );
-
-  // free unused data
-  _normals.clear();
-  _texcoords.clear();
-  _texcoords_2.clear();
-  _vertex_colors.clear();
-  _render_batches.clear();
-  _render_batch_mapping.clear();
-
-  _uploaded = true;
-}
-
-void WMOGroup::unload()
-{
-  _vertex_array.unload();
-  _buffers.unload();
-
-  gl.deleteTextures(1, &_render_batch_tex);
-
-  _uploaded = false;
-  _vao_is_setup = false;
-}
-
-void WMOGroup::setup_vao(OpenGL::Scoped::use_program& wmo_shader)
-{
-  OpenGL::Scoped::index_buffer_manual_binder indices (_indices_buffer);
-  {
-    OpenGL::Scoped::vao_binder const _ (_vao);
-
-    wmo_shader.attrib("position", _vertices_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    wmo_shader.attrib("normal", _normals_buffer, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    wmo_shader.attrib("texcoord", _texcoords_buffer, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    wmo_shader.attribi("batch_mapping", _render_batch_mapping_buffer, 1, GL_UNSIGNED_INT, 0, 0);
-
-    if (header.flags.has_two_motv)
-    {
-      wmo_shader.attrib("texcoord_2", _texcoords_buffer_2, 2, GL_FLOAT, GL_FALSE, 0, 0);
-    }
-
-    // even if the 2 flags are set there's only one vertex color vector, the 2nd chunk is used for alpha only
-    if (header.flags.has_vertex_color || header.flags.use_mocv2_for_texture_blending)
-    {
-      wmo_shader.attrib("vertex_color", _vertex_colors_buffer, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    }
-
-    indices.bind();
-  }
-
-  _vao_is_setup = true;
-}
 
 void WMOGroup::load()
 {
@@ -1059,66 +661,7 @@ void WMOGroup::load()
   _batches.resize (size / sizeof (wmo_batch));
   f.read (_batches.data (), size);
 
-  _render_batch_mapping.resize(_vertices.size());
-  std::fill(_render_batch_mapping.begin(), _render_batch_mapping.end(), 0);
-
-  _render_batches.resize(_batches.size());
-
-  std::size_t batch_counter = 0;
-  for (auto& batch : _batches)
-  {
-    for (std::size_t i = 0; i < (batch.vertex_end - batch.vertex_start + 1); ++i)
-    {
-      _render_batch_mapping[batch.vertex_start + i] = batch_counter + 1;
-    }
-
-    std::uint32_t flags = 0;
-
-    if (header.flags.exterior_lit || header.flags.exterior)
-    {
-      flags |= WMORenderBatchFlags::eWMOBatch_ExteriorLit;
-    }
-    if (header.flags.has_vertex_color || header.flags.use_mocv2_for_texture_blending)
-    {
-      flags |= WMORenderBatchFlags::eWMOBatch_HasMOCV;
-    }
-
-    WMOMaterial const& mat (wmo->materials.at (batch.texture));
-
-    if (mat.flags.unlit)
-    {
-      flags |= WMORenderBatchFlags::eWMOBatch_Unlit;
-    }
-
-    if (mat.flags.unfogged)
-    {
-      flags |= WMORenderBatchFlags::eWMOBatch_Unfogged;
-    }
-
-    std::uint32_t alpha_test;
-
-    switch (mat.blend_mode)
-    {
-      case 1:
-        alpha_test = 1; // 224/255
-        break;
-      case 2:
-      case 3:
-      case 4:
-      case 5:
-      case 6:
-        alpha_test = 2;
-        break;
-      case 0:
-      default:
-        alpha_test = 0;
-        break;
-    }
-
-    _render_batches[batch_counter] = WMORenderBatch{flags, mat.shader, 0, 0, 0, 0, alpha_test, 0};
-
-    batch_counter++;
-  }
+  _renderer.initRenderBatches();
 
   // - MOLR ----------------------------------------------
   if (header.flags.has_light)
@@ -1528,70 +1071,6 @@ bool WMOGroup::is_visible( glm::mat4x4 const& transform
   return (dist < cull_distance);
 }
 
-void WMOGroup::draw( OpenGL::Scoped::use_program& wmo_shader
-                   , math::frustum const& // frustum
-                   , const float& //cull_distance
-                   , const glm::vec3& //camera
-                   , bool // draw_fog
-                   , bool // world_has_skies
-                   )
-{
-  if (!_uploaded)
-  [[unlikely]]
-  {
-    upload();
-
-    if (!_uploaded)
-    [[unlikely]]
-    {
-      return;
-    }
-  }
-
-  if (!_vao_is_setup)
-  [[unlikely]]
-  {
-    setup_vao(wmo_shader);
-  }
-
-  OpenGL::Scoped::vao_binder const _ (_vao);
-
-  gl.activeTexture(GL_TEXTURE0);
-  gl.bindTexture(GL_TEXTURE_BUFFER, _render_batch_tex);
-
-  bool backface_cull = true;
-  gl.enable(GL_CULL_FACE);
-
-  for (auto& draw_call : _draw_calls)
-  {
-    if (backface_cull != draw_call.backface_cull)
-    {
-      if (draw_call.backface_cull)
-      {
-        gl.enable(GL_CULL_FACE);
-      }
-      else
-      {
-        gl.disable(GL_CULL_FACE);
-      }
-
-      backface_cull = draw_call.backface_cull;
-    }
-
-    for(std::size_t i = 0; i < draw_call.samplers.size(); ++i)
-    {
-      if (draw_call.samplers[i] < 0)
-        break;
-
-      gl.activeTexture(GL_TEXTURE0 + 1 + i);
-      gl.bindTexture(GL_TEXTURE_2D_ARRAY, draw_call.samplers[i]);
-    }
-
-    gl.drawElements (GL_TRIANGLES, draw_call.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(sizeof(std::uint16_t)*draw_call.index_start));
-
-  }
-
-}
 
 void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) const
 {
@@ -1694,7 +1173,7 @@ void WMOManager::unload_all(Noggit::NoggitRenderContext context)
     _.context_aware_apply(
         [&] (BlizzardArchive::Listfile::FileKey const&, WMO& wmo)
         {
-            wmo.unload();
+            wmo.renderer()->unload();
         }
         , context
     );

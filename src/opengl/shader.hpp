@@ -4,6 +4,7 @@
 
 #include <opengl/shader.fwd.hpp>
 #include <opengl/types.hpp>
+#include <opengl/texture.hpp>
 #include <initializer_list>
 #include <map>
 #include <set>
@@ -11,6 +12,7 @@
 #include <vector>
 #include <array>
 #include <cstdint>
+#include <optional>
 #include <unordered_map>
 #include <external/tsl/robin_map.h>
 #include <glm/vec2.hpp>
