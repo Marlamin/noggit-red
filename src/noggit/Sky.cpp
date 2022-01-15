@@ -518,7 +518,7 @@ bool Skies::draw(glm::mat4x4 const& model_view
       m2_shader.uniform("tex_unit_lookup_2", 0);
       m2_shader.uniform("pixel_shader", 0);
 
-      model.model->draw(model_view, model, m2_shader, model_render_state, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
+      model.model->renderer()->draw(model_view, model, m2_shader, model_render_state, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
     }
   }
   // if it's night, draw the stars
@@ -543,7 +543,7 @@ bool Skies::draw(glm::mat4x4 const& model_view
     m2_shader.uniform("tex_unit_lookup_2", 0);
     m2_shader.uniform("pixel_shader", 0);
 
-    stars.model->draw(model_view, stars, m2_shader, model_render_state, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
+    stars.model->renderer()->draw(model_view, stars, m2_shader, model_render_state, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
   }
 
   return true;

@@ -17,12 +17,19 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <noggit/rendering/ModelRender.hpp>
 
 class Bone;
 class Model;
 class ModelInstance;
 class ParticleSystem;
 class RibbonEmitter;
+
+namespace Noggit::Rendering
+{
+  class ModelRender;
+  struct ModelRenderPass;
+}
 
 
 glm::vec3 fixCoordSystem(glm::vec3 v);
@@ -97,89 +104,6 @@ struct ModelTransparency {
 };
 
 
-enum class M2Blend : uint16_t
-{
-  Opaque,
-  Alpha_Key,
-  Alpha,
-  No_Add_Alpha,
-  Add,
-  Mod,
-  Mod2x
-};
-
-enum class ModelPixelShader : uint16_t
-{
-  Combiners_Opaque,
-  Combiners_Decal,
-  Combiners_Add,
-  Combiners_Mod2x,
-  Combiners_Fade,
-  Combiners_Mod,
-  Combiners_Opaque_Opaque,
-  Combiners_Opaque_Add,
-  Combiners_Opaque_Mod2x,
-  Combiners_Opaque_Mod2xNA,
-  Combiners_Opaque_AddNA,
-  Combiners_Opaque_Mod,
-  Combiners_Mod_Opaque,
-  Combiners_Mod_Add,
-  Combiners_Mod_Mod2x,
-  Combiners_Mod_Mod2xNA,
-  Combiners_Mod_AddNA,
-  Combiners_Mod_Mod,
-  Combiners_Add_Mod,
-  Combiners_Mod2x_Mod2x,
-  Combiners_Opaque_Mod2xNA_Alpha,
-  Combiners_Opaque_AddAlpha,
-  Combiners_Opaque_AddAlpha_Alpha,
-};
-
-enum class texture_unit_lookup : int
-{
-  environment,
-  t1,
-  t2,
-  none
-};
-
-
-struct ModelRenderPass : ModelTexUnit
-{
-  ModelRenderPass() = delete;
-  ModelRenderPass(ModelTexUnit const& tex_unit, Model* m);
-
-  float ordering_thingy = 0.f;
-  uint16_t index_start = 0, index_count = 0, vertex_start = 0, vertex_end = 0;
-  uint16_t blend_mode = 0;
-  texture_unit_lookup tu_lookups[2];
-  uint16_t textures[2];
-  uint16_t uv_animations[2];
-  std::optional<ModelPixelShader> pixel_shader;
-
-
-  bool prepare_draw(OpenGL::Scoped::use_program& m2_shader, Model *m, OpenGL::M2RenderState& model_render_state);
-  void after_draw();
-  void bind_texture(size_t index, Model* m, OpenGL::M2RenderState& model_render_state, OpenGL::Scoped::use_program& m2_shader);
-  void init_uv_types(Model* m);
-
-  bool operator< (const ModelRenderPass &m) const
-  {
-    if (priority_plane < m.priority_plane)
-    {
-      return true;
-    }
-    else if (priority_plane > m.priority_plane) 
-    { 
-      return false; 
-    }
-    else
-    {
-      return blend_mode == m.blend_mode ? (ordering_thingy < m.ordering_thingy) : blend_mode < m.blend_mode;
-    }
-  }
-};
-
 struct FakeGeometry
 {
   FakeGeometry(Model* m);
@@ -202,6 +126,9 @@ struct ModelLight {
 
 class Model : public AsyncObject
 {
+  friend class Noggit::Rendering::ModelRender;
+  friend struct Noggit::Rendering::ModelRenderPass;
+
 public:
   template<typename T>
   static std::vector<T> M2Array(BlizzardArchive::ClientFile const& f, uint32_t offset, uint32_t count)
@@ -211,40 +138,6 @@ public:
   }
 
   Model(const std::string& name, Noggit::NoggitRenderContext context );
-
-  void draw(glm::mat4x4 const& model_view
-           , ModelInstance& instance
-           , OpenGL::Scoped::use_program& m2_shader
-            , OpenGL::M2RenderState& model_render_state
-           , math::frustum const& frustum
-           , const float& cull_distance
-           , const glm::vec3& camera
-           , int animtime
-           , display_mode display
-           , bool no_cull = false
-           );
-  void draw (glm::mat4x4 const& model_view
-            , std::vector<glm::mat4x4> const& instances
-            , OpenGL::Scoped::use_program& m2_shader
-            , OpenGL::M2RenderState& model_render_state
-            , math::frustum const& frustum
-            , const float& cull_distance
-            , const glm::vec3& camera
-            , int animtime
-            , bool all_boxes
-            , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
-            , display_mode display
-            , bool no_cull = false
-            );
-  void draw_particles( glm::mat4x4 const& model_view
-                     , OpenGL::Scoped::use_program& particles_shader
-                     , std::size_t instance_count
-                     );
-  void draw_ribbons( OpenGL::Scoped::use_program& ribbons_shader
-                   , std::size_t instance_count
-                   );
-
-  void draw_box (OpenGL::Scoped::use_program& m2_box_shader, std::size_t box_count);
 
   std::vector<float> intersect (glm::mat4x4 const& model_view, math::ray const&, int animtime);
 
@@ -267,6 +160,9 @@ public:
   {
     return true;
   }
+
+  [[nodiscard]]
+  Noggit::Rendering::ModelRender* renderer() { return &_renderer; }
 
   // ===============================
   // Toggles
@@ -295,8 +191,6 @@ public:
   float trans;
   bool animcalc;
 
-  void unload();
-
 private:
   bool _per_instance_animation;
   int _current_anim_seq;
@@ -309,41 +203,11 @@ private:
   bool isAnimated(const BlizzardArchive::ClientFile& f);
   void initAnimated(const BlizzardArchive::ClientFile& f);
 
-  void fix_shader_id_blend_override();
-  void fix_shader_id_layer();
-  void compute_pixel_shader_ids();
-
   void animate(glm::mat4x4 const& model_view, int anim_id, int anim_time);
   void calcBones(glm::mat4x4 const& model_view, int anim, int time, int animation_time);
 
   void lightsOn(OpenGL::light lbase);
   void lightsOff(OpenGL::light lbase);
-
-  void upload();
-  void setupVAO(OpenGL::Scoped::use_program& m2_shader);
-
-  bool _finished_upload = false;
-  bool _vao_setup = false;
-
-  std::vector<glm::vec3> _vertex_box_points;
-
-  // buffers
-  OpenGL::Scoped::deferred_upload_buffers<6> _buffers;
-  OpenGL::Scoped::deferred_upload_vertex_arrays<2> _vertex_arrays;
-
-  std::vector<uint16_t> const _box_indices = {5, 7, 3, 2, 0, 1, 3, 1, 5, 4, 0, 4, 6, 2, 6, 7};
-
-  GLuint const& _vao = _vertex_arrays[0];
-  GLuint const& _transform_buffer = _buffers[0];
-  GLuint const& _vertices_buffer = _buffers[1];
-  GLuint const& _indices_buffer = _buffers[3];
-  GLuint const& _box_indices_buffer = _buffers[4];
-  GLuint const& _bone_matrices_buffer = _buffers[5];
-
-  GLuint const& _box_vao = _vertex_arrays[1];
-  GLuint const& _box_vbo = _buffers[2];
-
-  GLuint _bone_matrices_buf_tex;
 
   // ===============================
   // Geometry
@@ -354,7 +218,6 @@ private:
 
   std::vector<uint16_t> _indices;
 
-  std::vector<ModelRenderPass> _render_passes;
   std::optional<FakeGeometry> _fake_geometry;
 
   // ===============================
@@ -384,8 +247,8 @@ private:
   std::vector<int16_t> _transparency_lookup;
   std::vector<ModelLight> _lights;
 
-  bool _hidden = false;
+  Noggit::Rendering::ModelRender _renderer;
 
-  friend struct ModelRenderPass;
+  bool _hidden = false;
 };
 

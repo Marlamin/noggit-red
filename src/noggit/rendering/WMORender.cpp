@@ -148,7 +148,7 @@ bool WMORender::drawSkybox(const glm::mat4x4& model_view, const glm::vec3& camer
       m2_shader.uniform("tex_unit_lookup_2", 0);
       m2_shader.uniform("pixel_shader", 0);
 
-      _wmo->skybox->get()->draw(model_view, sky, m2_shader, model_render_state, frustum, cull_distance, camera_pos, animtime, display_mode::in_3D);
+      _wmo->skybox->get()->renderer()->draw(model_view, sky, m2_shader, model_render_state, frustum, cull_distance, camera_pos, animtime, display_mode::in_3D);
 
       return true;
     }

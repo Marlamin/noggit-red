@@ -245,7 +245,7 @@ void PreviewRenderer::draw()
       instance[0] = &model_instance;
       instance_mtx[0] = model_instance.transformMatrix();
 
-      model_instance.model->draw(
+      model_instance.model->renderer()->draw(
         mv
         , instance_mtx
         , m2_shader
@@ -269,7 +269,7 @@ void PreviewRenderer::draw()
         instance_mtx.push_back(instance->transformMatrix());
       }
 
-      it.second[0]->model->draw(
+      it.second[0]->model->renderer()->draw(
           mv
           , instance_mtx
           , m2_shader
@@ -303,7 +303,7 @@ void PreviewRenderer::draw()
         ;
 
         m2_box_shader.uniform("color", color);
-        it.first->draw_box(m2_box_shader, it.second);
+        it.first->renderer()->drawBox(m2_box_shader, it.second);
       }
     }
   }

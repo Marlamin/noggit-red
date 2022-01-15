@@ -2815,7 +2815,12 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
         _main_window->statusBar()->addPermanentWidget(cancel_btn);
 
-        //connect(this, &MapView::updateProgress, progress, &QProgressBar::setValue);
+        connect(this, &MapView::updateProgress,
+                [=](int value)
+                {
+
+                  progress->setValue(value);
+                });
       
         // setup combined image if necessary
         if (settings->combined_minimap)
@@ -2920,7 +2925,15 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
         _main_window->statusBar()->addPermanentWidget(cancel_btn);
 
-        connect(this, &MapView::updateProgress, progress, &QProgressBar::setValue);
+        connect(this, &MapView::updateProgress,
+                [=](int value)
+                {
+                  // This weirdness is required due to a bug on Linux when QT repaint crashes due to too many events
+                  // being passed through. TODO: this potentially only masks the issue, which may reappear on faster
+                  // hardware.
+                  if (progress->value() != value)
+                    progress->setValue(value);
+                });
 
         // setup combined image if necessary
         if (settings->combined_minimap)

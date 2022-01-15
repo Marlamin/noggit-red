@@ -651,7 +651,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           if (draw_hidden_models || !pair.first->is_hidden())
           {
-            pair.first->draw( model_view
+            pair.first->renderer()->draw( model_view
                 , pair.second
                 , m2_shader
                 , model_render_state
@@ -731,7 +731,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
         ;
 
         m2_box_shader.uniform("color", color);
-        it.first->draw_box(m2_box_shader, it.second);
+        it.first->renderer()->drawBox(m2_box_shader, it.second);
       }
     }
 

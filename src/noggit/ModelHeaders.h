@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
 #include <cstdint>
-#include <glm/vec2.hpp>
+#include <glm/glm.hpp>
 
 #pragma pack(push,1)
 
