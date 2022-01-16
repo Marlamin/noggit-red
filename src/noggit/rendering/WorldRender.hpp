@@ -9,13 +9,13 @@
 #include <math/trig.hpp>
 
 #include <noggit/tool_enums.hpp>
-#include <noggit/CursorRender.hpp>
-#include <noggit/LiquidTextureManager.hpp>
+#include <noggit/rendering/CursorRender.hpp>
+#include <noggit/rendering/LiquidTextureManager.hpp>
 #include <noggit/map_horizon.h>
 #include <noggit/Sky.h>
 
 #include <opengl/shader.hpp>
-#include <opengl/primitives.hpp>
+#include <noggit/rendering/Primitives.hpp>
 
 #include <memory>
 
@@ -123,8 +123,8 @@ namespace Noggit::Rendering
 
     // cursor
     Noggit::CursorRender _cursor_render;
-    OpenGL::primitives::sphere _sphere_render;
-    OpenGL::primitives::square _square_render;
+    Noggit::Rendering::Primitives::Sphere _sphere_render;
+    Noggit::Rendering::Primitives::Square _square_render;
 
     // buffers
     OpenGL::Scoped::deferred_upload_buffers<8> _buffers;

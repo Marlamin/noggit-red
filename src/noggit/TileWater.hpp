@@ -5,7 +5,7 @@
 #include <noggit/tool_enums.hpp>
 #include <opengl/context.hpp>
 #include <opengl/types.hpp>
-#include <noggit/LiquidTextureManager.hpp>
+#include <noggit/rendering/LiquidTextureManager.hpp>
 #include <noggit/rendering/LiquidRender.hpp>
 
 #include <memory>

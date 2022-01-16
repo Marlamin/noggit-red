@@ -3,12 +3,12 @@
 #ifndef NOGGIT_LIQUIDTEXTUREMANAGER_HPP
 #define NOGGIT_LIQUIDTEXTUREMANAGER_HPP
 
-#include <noggit/TextureManager.h>
-#include <noggit/ContextObject.hpp>
-#include <external/tsl/robin_map.h>
+#include "noggit/TextureManager.h"
+#include "noggit/ContextObject.hpp"
+#include "external/tsl/robin_map.h"
 
 #include <tuple>
-#include <glm/vec2.hpp>
+#include "external/glm/vec2.hpp"
 
 template<typename ... Args>
 std::string string_format(const std::string& format, Args ... args)

@@ -9,8 +9,8 @@
 #include <noggit/ContextObject.hpp>
 #include <noggit/BoolToggleProperty.hpp>
 #include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
-#include <opengl/primitives.hpp>
-#include <noggit/LiquidTextureManager.hpp>
+#include <noggit/rendering/Primitives.hpp>
+#include "noggit/rendering/LiquidTextureManager.hpp"
 
 #include <QOpenGLWidget>
 #include <QSettings>
@@ -68,7 +68,7 @@ class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport
     std::vector<ModelInstance> _model_instances;
     std::vector<WMOInstance> _wmo_instances;
 
-    OpenGL::primitives::grid _grid;
+    Noggit::Rendering::Primitives::Grid _grid;
 
     float _animtime = 0.f;
 

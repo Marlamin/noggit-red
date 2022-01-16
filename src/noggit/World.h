@@ -4,7 +4,7 @@
 
 #include <math/frustum.hpp>
 #include <math/trig.hpp>
-#include <noggit/CursorRender.hpp>
+#include <noggit/rendering/CursorRender.hpp>
 #include <noggit/Misc.h>
 #include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
@@ -18,10 +18,10 @@
 #include <noggit/world_model_instances_storage.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
 #include <noggit/ContextObject.hpp>
-#include <opengl/primitives.hpp>
+#include <noggit/rendering/Primitives.hpp>
 #include <opengl/shader.fwd.hpp>
 #include <opengl/types.hpp>
-#include <noggit/LiquidTextureManager.hpp>
+#include <noggit/rendering/LiquidTextureManager.hpp>
 #include <optional>
 #include <QtCore/QSettings>
 #include <map>

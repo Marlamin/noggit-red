@@ -7,7 +7,7 @@
 #include <noggit/TileWater.hpp>
 #include <noggit/liquid_layer.hpp>
 #include <noggit/World.h>
-#include <noggit/LiquidTextureManager.hpp>
+#include <noggit/rendering/LiquidTextureManager.hpp>
 #include <ClientFile.hpp>
 
 #include <stdexcept>
