@@ -11,7 +11,7 @@
 #include <noggit/ContextObject.hpp>
 #include <noggit/rendering/WMOGroupRender.hpp>
 #include <noggit/rendering/WMORender.hpp>
-#include <opengl/primitives.hpp>
+#include <noggit/rendering/Primitives.hpp>
 #include <ClientFile.hpp>
 #include <optional>
 

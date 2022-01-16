@@ -1,7 +1,7 @@
 #include "PreviewRenderer.hpp"
 
 #include <opengl/scoped.hpp>
-#include <opengl/primitives.hpp>
+#include <noggit/rendering/Primitives.hpp>
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/AsyncLoader.h>

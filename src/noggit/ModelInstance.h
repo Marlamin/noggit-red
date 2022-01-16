@@ -8,10 +8,10 @@
 #include <noggit/ModelManager.h>
 #include <noggit/Selection.h>
 #include <noggit/SceneObject.hpp>
+#include <noggit/rendering/Primitives.hpp>
 #include <noggit/TileIndex.hpp>
 #include <noggit/tool_enums.hpp>
 #include <opengl/shader.fwd.hpp>
-#include <opengl/primitives.hpp>
 #include <optional>
 #include <cstdint>
 

@@ -3,9 +3,9 @@
 #include <noggit/DBCFile.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/ContextObject.hpp>
+#include <noggit/rendering/Primitives.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
-#include <opengl/primitives.hpp>
 
 #include <memory>
 #include <string>
@@ -223,5 +223,5 @@ private:
 
   Noggit::NoggitRenderContext _context;
 
-  OpenGL::primitives::sphere _sphere_render;
+  Noggit::Rendering::Primitives::Sphere _sphere_render;
 };

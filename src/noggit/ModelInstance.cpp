@@ -9,7 +9,7 @@
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/ContextObject.hpp>
-#include <opengl/primitives.hpp>
+#include <noggit/rendering/Primitives.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
@@ -44,7 +44,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
 
   if (is_current_selection)
   {
-    OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
+    Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
       , projection
       , transformMatrix()
       , { 1.0f, 1.0f, 0.0f, 1.0f }
@@ -52,7 +52,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , misc::transform_model_box_coords(model->header.collision_box_max)
       );
 
-    OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
+    Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
       , projection
       , transformMatrix()
       , {1.0f, 1.0f, 1.0f, 1.0f}
@@ -60,7 +60,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , misc::transform_model_box_coords(model->header.bounding_box_max)
       );
 
-    OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
+    Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
       , projection
       , glm::mat4x4(1)
       , {0.0f, 1.0f, 0.0f, 1.0f}
@@ -70,7 +70,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
   }
   else
   {
-    OpenGL::primitives::wire_box::getInstance(_context).draw ( model_view
+    Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
       , projection
       , transformMatrix()
       , {0.5f, 0.5f, 0.5f, 1.0f}

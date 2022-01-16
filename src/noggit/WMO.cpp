@@ -7,7 +7,7 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/WMO.h>
 #include <noggit/World.h>
-#include <opengl/primitives.hpp>
+#include <noggit/rendering/Primitives.hpp>
 #include <noggit/application/NoggitApplication.hpp>
 #include <opengl/scoped.hpp>
 

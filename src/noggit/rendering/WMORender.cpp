@@ -84,7 +84,7 @@ void WMORender::draw(OpenGL::Scoped::use_program& wmo_shader
 
     for (auto& group : _wmo->groups)
     {
-      OpenGL::primitives::wire_box::getInstance(_wmo->_context).draw( model_view
+      Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context).draw( model_view
           , projection
           , transform_matrix
           , {1.0f, 1.0f, 1.0f, 1.0f}
@@ -93,7 +93,7 @@ void WMORender::draw(OpenGL::Scoped::use_program& wmo_shader
       );
     }
 
-    OpenGL::primitives::wire_box::getInstance(_wmo->_context).draw ( model_view
+    Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context).draw ( model_view
         , projection
         , transform_matrix
         , {1.0f, 0.0f, 0.0f, 1.0f}

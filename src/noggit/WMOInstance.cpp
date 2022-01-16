@@ -8,7 +8,7 @@
 #include <noggit/WMO.h> // WMO
 #include <noggit/MapTile.h>
 #include <noggit/WMOInstance.h>
-#include <opengl/primitives.hpp>
+#include <noggit/rendering/Primitives.hpp>
 #include <opengl/scoped.hpp>
 
 WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, Noggit::NoggitRenderContext context)
@@ -127,7 +127,7 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
     glm::vec4 color = force_box ? glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)
         : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
-    OpenGL::primitives::wire_box::getInstance(_context).draw(model_view
+    Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw(model_view
        , projection
        , glm::mat4x4(glm::mat4x4(1))
        , color

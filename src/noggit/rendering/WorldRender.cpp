@@ -572,7 +572,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
       glm::mat4x4 identity_mtx = glm::mat4x4{1};
       auto& extents = tile->getCombinedExtents();
-      OpenGL::primitives::wire_box::getInstance(_world->_context).draw ( model_view
+      Noggit::Rendering::Primitives::WireBox::getInstance(_world->_context).draw ( model_view
           , projection
           , identity_mtx
           , { 1.0f, 1.0f, 0.0f, 1.0f }
