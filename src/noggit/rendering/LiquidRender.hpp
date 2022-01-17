@@ -15,11 +15,11 @@ namespace math
 }
 
 class MapTile;
-class LiquidTextureManager;
 
 
 namespace Noggit::Rendering
 {
+  class LiquidTextureManager;
 
   struct LiquidLayerDrawCallData
   {

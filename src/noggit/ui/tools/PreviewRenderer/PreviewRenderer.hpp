@@ -87,7 +87,7 @@ class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport
 
     void unload();
 
-    void unloadOpenglData(bool from_manager = false) override;
+    void unloadOpenglData() override;
 
     void updateLightingUniformBlock();
 
@@ -115,7 +115,7 @@ class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport
     OpenGL::MVPUniformBlock _mvp_ubo_data;
     OpenGL::LightingUniformBlock _lighting_ubo_data;
 
-    LiquidTextureManager _liquid_texture_manager;
+    Noggit::Rendering::LiquidTextureManager _liquid_texture_manager;
 
     bool _uploaded = false;
     bool _lighting_needs_update = true;

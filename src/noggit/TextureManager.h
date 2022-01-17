@@ -144,20 +144,22 @@ namespace Noggit
   class BLPRenderer
   {
   private:
-    BLPRenderer();
+    BLPRenderer() = default;
 
-    BLPRenderer( const BLPRenderer&);
-    BLPRenderer& operator=( BLPRenderer& );
+    BLPRenderer( const BLPRenderer&) = delete;
+    BLPRenderer& operator=( BLPRenderer& ) = delete;
 
     std::map<std::tuple<std::string, int, int>, QPixmap> _cache;
 
-    QOpenGLContext _context;
-    QOpenGLFramebufferObjectFormat _fmt;
-    QOffscreenSurface _surface;
+    std::unique_ptr<QOpenGLContext> _context;
+    std::unique_ptr<QOpenGLFramebufferObjectFormat> _fmt;
+    std::unique_ptr<QOffscreenSurface> _surface;
     std::unique_ptr<OpenGL::program> _program;
 
     OpenGL::Scoped::deferred_upload_vertex_arrays<1> _vao;
     OpenGL::Scoped::deferred_upload_buffers<3> _buffers;
+
+    bool _uploaded = false;
 
   public:
     static BLPRenderer& getInstance()
@@ -166,9 +168,9 @@ namespace Noggit
       return instance;
     }
 
-    ~BLPRenderer();
-
     QPixmap* render_blp_to_pixmap ( std::string const& blp_filename, int width = -1, int height = -1);
+    void unload();
+    void upload();
 
   };
 

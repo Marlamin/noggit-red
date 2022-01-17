@@ -48,7 +48,7 @@ public:
             , int animtime
             , int layer
             , display_mode display
-            , LiquidTextureManager* tex_manager
+            , Noggit::Rendering::LiquidTextureManager* tex_manager
             );
   bool hasData(size_t layer);
   bool hasData() { return _has_data; };

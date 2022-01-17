@@ -921,7 +921,7 @@ void MapTile::remove_model(uint32_t uid)
   {
     uids.erase(it);
 
-    const auto& obj = _world->get_model(uid).value();
+    const auto obj = _world->get_model(uid).value();
     auto instance = std::get<selected_object_type>(obj);
 
     auto& instances = object_instances[instance->instance_model()];

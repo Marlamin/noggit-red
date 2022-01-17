@@ -18,7 +18,6 @@
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
 #include <noggit/TabletManager.hpp>
 #include <external/qtimgui/QtImGui.h>
-#include <external/QtAdvancedDockingSystem/src/DockManager.h>
 #include <opengl/texture.hpp>
 #include <opengl/scoped.hpp>
 #include <optional>
@@ -148,6 +147,7 @@ private:
 
   int _selected_area_id = -1;
 
+  [[nodiscard]]
   math::ray intersect_ray() const;
   selection_result intersect_result(bool terrain_only);
   void doSelection(bool selectTerrainOnly, bool mouseMove = false);
@@ -155,7 +155,10 @@ private:
 
   display_mode _display_mode;
 
+  [[nodiscard]]
   glm::mat4x4 model_view() const;
+
+  [[nodiscard]]
   glm::mat4x4 projection() const;
 
   void draw_map();
@@ -246,7 +249,6 @@ public:
   void change_selected_wmo_doodadset(int set);
   void saveMinimap(MinimapRenderSettings* settings);
   void initMinimapSave() { saving_minimap = true; };
-  auto populateImageModel(QStandardItemModel* model) const -> void;
   auto setBrushTexture(QImage const* img) -> void;
   Noggit::Camera* getCamera() { return &_camera; };
   void randomizeTerrainRotation();
@@ -254,17 +256,29 @@ public:
   void randomizeShaderRotation();
   void randomizeStampRotation();
   void onSettingsSave();
+
+  [[nodiscard]]
   Noggit::Ui::minimap_widget* getMinimapWidget() const { return _minimap;  }
 
   void set_editing_mode (editing_mode);
   editing_mode get_editing_mode() { return terrainMode; };
 
+  [[nodiscard]]
   QWidget* getActiveStampModeItem();
 
+  [[nodiscard]]
   Noggit::NoggitRenderContext getRenderContext() { return _context; };
+
+  [[nodiscard]]
   World* getWorld() { return _world.get(); };
+
+  [[nodiscard]]
   QDockWidget* getAssetBrowser() {return _asset_browser_dock; };
+
+  [[nodiscard]]
   Noggit::Ui::object_editor* getObjectEditor() { return objectEditor; };
+
+  [[nodiscard]]
   QDockWidget* getObjectPalette() { return _object_palette_dock; };
 
 
@@ -360,7 +374,7 @@ private:
 
   void setToolPropertyWidgetVisibility(editing_mode mode);
 
-  void unloadOpenglData(bool from_manager = false) override;
+  void unloadOpenglData() override;
 
   Noggit::Ui::help* _keybindings;
   Noggit::Ui::tileset_chooser* TexturePalette;
@@ -397,7 +411,7 @@ private:
   ImGuizmo::MODE _gizmo_mode = ImGuizmo::MODE::WORLD;
   ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
   Noggit::BoolToggleProperty _gizmo_on = {true};
-  QMetaObject::Connection _gl_guard_connection;
+
   bool _gl_initialized = false;
   bool _destroying = false;
   bool _needs_redraw = false;

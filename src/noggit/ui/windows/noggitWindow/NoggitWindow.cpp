@@ -45,6 +45,7 @@
 
 #include "ui_TitleBar.h"
 #include <external/framelesshelper/framelesswindowsmanager.h>
+#include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
 
 namespace Noggit::Ui::Windows
 {
@@ -371,6 +372,7 @@ namespace Noggit::Ui::Windows
           map_loaded = false;
           break;
         case QMessageBox::DestructiveRole:
+          Noggit::Ui::Tools::ViewportManager::ViewportManager::unloadAll();
           setCentralWidget(_null_widget = new QWidget(this));
           event->accept();
           break;

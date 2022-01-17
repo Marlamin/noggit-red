@@ -529,21 +529,7 @@ PreviewRenderer::~PreviewRenderer()
     _m2_box_program.reset();
     _wmo_program.reset();
 
-  }
-  else
-  {
-    makeCurrent();
-    OpenGL::context::scoped_setter const context_set (::gl, context());
-
-    _model_instances.clear();
-    _wmo_instances.clear();
-
-    _m2_program.reset();
-    _m2_instanced_program.reset();
-    _m2_particles_program.reset();
-    _m2_ribbons_program.reset();
-    _m2_box_program.reset();
-    _wmo_program.reset();
+    unload();
   }
 
 }
@@ -708,12 +694,11 @@ void PreviewRenderer::unload()
 
 }
 
-void PreviewRenderer::unloadOpenglData(bool from_manager)
+void PreviewRenderer::unloadOpenglData()
 {
   if (_offscreen_mode)
     return;
 
-  LogDebug << "Changing context of Asset Browser / Preset Editor." << std::endl;
   makeCurrent();
   OpenGL::context::scoped_setter const _ (::gl, context());
 
@@ -722,11 +707,6 @@ void PreviewRenderer::unloadOpenglData(bool from_manager)
   TextureManager::unload_all(_context);
 
   unload();
-
-  LogDebug << "Changed context of Asset Browser / Preset Editor.." << std::endl;
-
-  if (!from_manager)
-    ViewportManager::ViewportManager::unloadOpenglData(this);
 }
 
 void Noggit::Ui::Tools::PreviewRenderer::updateLightingUniformBlock()

@@ -2686,12 +2686,6 @@ void MapView::on_uid_fix_fail()
 
 void MapView::initializeGL()
 {
-  _gl_guard_connection = connect(context(), &QOpenGLContext::aboutToBeDestroyed,
-                                 [this]()
-                                 {
-                                     unloadOpenglData();
-                                 });
-
   bool uid_warning = false;
 
   OpenGL::context::scoped_setter const _ (::gl, context());
@@ -2753,6 +2747,8 @@ void MapView::initializeGL()
 
   gl.bufferData<GL_PIXEL_PACK_BUFFER>(_buffers[0], 4, nullptr, GL_DYNAMIC_READ);
   gl.bufferData<GL_PIXEL_PACK_BUFFER>(_buffers[1], 4, nullptr, GL_DYNAMIC_READ);
+
+  connect(context(), &QOpenGLContext::aboutToBeDestroyed, [this](){ emit aboutToLooseContext(); });
 
   _gl_initialized = true;
 }
@@ -3205,8 +3201,6 @@ MapView::~MapView()
   ModelManager::report();
   TextureManager::report();
   WMOManager::report();
-
-  disconnect(_gl_guard_connection);
 }
 
 void MapView::tick (float dt)
@@ -5122,11 +5116,8 @@ void MapView::randomizeStampRotation()
   stampTool->changeRotation(uid(gen));
 }
 
-void MapView::unloadOpenglData(bool from_manager)
+void MapView::unloadOpenglData()
 {
-
-  LogDebug << "Changing context of MapView." << std::endl;
-
   makeCurrent();
   OpenGL::context::scoped_setter const _ (::gl, context());
 
@@ -5150,15 +5141,8 @@ void MapView::unloadOpenglData(bool from_manager)
 
   _world->renderer()->unload();
 
-  if (!from_manager)
-    Noggit::Ui::Tools::ViewportManager::ViewportManager::unloadOpenglData(this);
-
   _buffers.unload();
-
-  disconnect(_gl_guard_connection);
   _gl_initialized = false;
-
-  LogDebug << "Changed context of MapView." << std::endl;
 }
 
 QWidget* MapView::getActiveStampModeItem()

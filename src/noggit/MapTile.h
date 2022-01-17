@@ -111,7 +111,7 @@ public:
 
   bool isTile(int pX, int pZ);
 
-  virtual async_priority loading_priority() const
+  async_priority loading_priority() const override
   {
     return async_priority::high;
   }

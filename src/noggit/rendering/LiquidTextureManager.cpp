@@ -5,6 +5,8 @@
 #include "noggit/DBC.h"
 #include "noggit/application/NoggitApplication.hpp"
 
+using namespace Noggit::Rendering;
+
 LiquidTextureManager::LiquidTextureManager(Noggit::NoggitRenderContext context)
   : _context(context)
 {

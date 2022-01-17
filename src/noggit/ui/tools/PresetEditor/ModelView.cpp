@@ -184,6 +184,11 @@ void ModelViewer::initializeGL()
   AssetBrowser::ModelViewer::initializeGL();
   _imgui_context = QtImGui::initialize(this);
 
+  connect(context(), &QOpenGLContext::aboutToBeDestroyed, [=]()
+  {
+    emit aboutToLooseContext();
+  });
+
 }
 
 
