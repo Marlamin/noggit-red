@@ -13,6 +13,8 @@
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 
+#include <sstream>
+
 ModelInstance::ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
                              , Noggit::NoggitRenderContext context)
   : SceneObject(SceneObjectTypes::eMODEL, context)

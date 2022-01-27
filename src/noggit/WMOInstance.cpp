@@ -11,6 +11,8 @@
 #include <noggit/rendering/Primitives.hpp>
 #include <opengl/scoped.hpp>
 
+#include <sstream>
+
 WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, Noggit::NoggitRenderContext context)
   : SceneObject(SceneObjectTypes::eWMO, context)
   , wmo(file_key, context)

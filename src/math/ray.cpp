@@ -3,6 +3,7 @@
 #include <math/ray.hpp>
 
 #include <limits>
+#include <algorithm>
 
 namespace math
 {

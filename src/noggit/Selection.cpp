@@ -2,6 +2,8 @@
 #include <noggit/MapChunk.h>
 #include <noggit/DBC.h>
 
+#include <sstream>
+
 
 void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 {

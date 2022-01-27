@@ -6,6 +6,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
 #include <QInputDialog>
+#include <sstream>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 

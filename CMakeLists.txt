@@ -366,8 +366,8 @@ add_custom_command(TARGET noggit POST_BUILD
 SET_PROPERTY(TARGET noggit PROPERTY AUTOMOC ON)
 
 IF(APPLE)
-  TARGET_INCLUDE_DIRECTORIES(noggit PRIVATE /usr/local/Cellar/llvm/12.0.1/include/c++/v1/)
-  TARGET_LINK_LIBRARIES(noggit /usr/local/Cellar/llvm/12.0.1/lib/libc++.1.0.dylib)
+  TARGET_INCLUDE_DIRECTORIES(noggit PRIVATE /usr/local/Cellar/llvm/13.0.0_2/include/c++/v1/)
+  TARGET_LINK_LIBRARIES(noggit /usr/local/Cellar/llvm/13.0.0_2/lib/libc++.1.0.dylib)
 ENDIF()
 
 SET(_noggit_revision_output_dir "${CMAKE_BINARY_DIR}/revision_output")

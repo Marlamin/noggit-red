@@ -34,13 +34,13 @@ NoggitProjectCreationDialog::NoggitProjectCreationDialog(ProjectInformation& pro
     );
 
     QObject::connect(ui->projectPathField_browse, &QPushButton::clicked
-        , [&]
+        , [this]
         {
             QSettings settings;
             auto defaultPath = settings.value("project/game_path").toString();
             ui->projectPathField->setText(defaultPath);
     
-            QString folderName = QFileDialog::getExistingDirectory(parent, "Select Client Directory", defaultPath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+            QString folderName = QFileDialog::getExistingDirectory(this, "Select Client Directory", defaultPath, QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
             ui->projectPathField->setText(folderName);
         }
     );
