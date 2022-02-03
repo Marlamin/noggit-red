@@ -413,8 +413,8 @@ void MapIndex::unloadTile(const TileIndex& tile)
   // unloads a tile with givn cords
   if (tileLoaded(tile))
   {
-    mTiles[tile.z][tile.x].tile = nullptr;
     Log << "Unload Tile " << tile.x << "-" << tile.z << std::endl;
+    mTiles[tile.z][tile.x].tile = nullptr;
     _n_loaded_tiles--;
   }
 }
