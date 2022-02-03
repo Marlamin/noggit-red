@@ -363,6 +363,12 @@ add_custom_command(TARGET noggit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove -f 
         $<TARGET_FILE_DIR:noggit>/definitions/.git)
 
+# deploy for Qt on Windows
+IF(WIN32)
+  include(windeployqt)
+  windeployqt(noggit)
+ENDIF()
+
 SET_PROPERTY(TARGET noggit PROPERTY AUTOMOC ON)
 
 IF(APPLE)
@@ -422,3 +428,4 @@ IF(NOGGIT_LOGTOCONSOLE AND WIN32)
 ENDIF()
 
 includePlatform("pack")
+

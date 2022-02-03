@@ -245,7 +245,7 @@ static_assert ( sizeof (mohd_flags) == sizeof (std::uint16_t)
 
 class WMO : public AsyncObject
 {
-  friend class WMORender;
+  friend class Noggit::Rendering::WMORender;
 
 public:
   explicit WMO(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context );
