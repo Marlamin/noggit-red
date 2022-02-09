@@ -133,32 +133,3 @@ namespace Noggit::Application
 	  LogError << "std::terminate: " << reason << std::endl;
   }
 }
-
-
-/* I wonder if you would correctly guess the reason of this being here... */
-template < typename Char >
-requires (std::is_same_v<Char, wchar_t> || std::is_same_v<Char, char>)
-auto convert
-(
-    Char const* src,
-    std::string* dst
-)
--> char const*
-{
-    if constexpr (std::is_same_v<Char, char>)
-    {
-        *dst = src;
-        return dst->c_str();
-    }
-
-    std::string mbc(MB_CUR_MAX, '\0');
-    dst->clear();
-
-    while (*src)
-    {
-        std::wctomb(mbc.data(), *src++);
-        dst->append(mbc.c_str());
-    }
-
-    return dst->c_str();
-}

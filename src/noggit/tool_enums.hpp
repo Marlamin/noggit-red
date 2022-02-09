@@ -74,7 +74,8 @@ enum class editing_mode
   minimap = 9,
   stamp = 10,
   light = 11,
-  scripting = 12
+  scripting = 12,
+  chunk = 13
 };
 
 enum water_opacity

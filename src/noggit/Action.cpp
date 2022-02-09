@@ -752,7 +752,6 @@ void Noggit::Action::registerAllChunkChanges(MapChunk* chunk)
   registerChunkLiquidChange(chunk);
   registerVertexSelectionChange();
   registerChunkShadowChange(chunk);
-  registerAllChunkChanges(chunk);
 }
 
 Noggit::Action::~Action()

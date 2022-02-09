@@ -39,6 +39,7 @@
 #include <noggit/ui/tools/UiCommon/ImageBrowser.hpp>
 #include <noggit/ui/tools/BrushStack/BrushStack.hpp>
 #include <noggit/ui/tools/LightEditor/LightEditor.hpp>
+#include <noggit/ui/tools/ChunkManipulator/ChunkManipulator.hpp>
 #include <external/imguipiemenu/PieMenu.hpp>
 #include <external/tracy/Tracy.hpp>
 #include <noggit/ui/object_palette.hpp>
@@ -204,7 +205,7 @@ ACTION_CODE                                                                     
 static const float XSENS = 15.0f;
 static const float YSENS = 15.0f;
 
-void MapView::set_editing_mode (editing_mode mode)
+void MapView::set_editing_mode(editing_mode mode)
 {
 
   {
@@ -833,6 +834,12 @@ void MapView::setupLightEditorUi()
 {
   lightEditor = new Noggit::Ui::Tools::LightEditor(this, this);
   _tool_panel_dock->registerTool("Light Editor", lightEditor);
+}
+
+void MapView::setupChunkManipulatorUi()
+{
+  _chunk_manipulator = new Noggit::Ui::Tools::ChunkManipulator(this, this);
+  _tool_panel_dock->registerTool("Chunk Manipulator", _chunk_manipulator);
 }
 
 void MapView::setupNodeEditor()
@@ -2470,6 +2477,9 @@ void MapView::createGUI()
   connect(this, &QObject::destroyed, _tool_panel_dock, &QObject::deleteLater);
   _main_window->addDockWidget(Qt::RightDockWidgetArea, _tool_panel_dock);
 
+  // These calls need to be correctly ordered in order to work with the toolbar.
+  // TODO: fix
+
   setupRaiseLowerUi();
   setupFlattenBlurUi();
   setupTexturePainterUi();
@@ -2482,6 +2492,7 @@ void MapView::createGUI()
   setupMinimapEditorUi();
   setupStampUi();
   setupLightEditorUi();
+  setupChunkManipulatorUi();
   setupScriptingUi();
   // End combined dock
 
