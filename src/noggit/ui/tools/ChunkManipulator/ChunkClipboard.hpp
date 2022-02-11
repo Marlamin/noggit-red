@@ -11,6 +11,7 @@
 #include <vector>
 #include <cstdint>
 #include <optional>
+#include <tuple>
 
 #include <noggit/TileIndex.hpp>
 #include <noggit/Alphamap.hpp>
@@ -81,7 +82,12 @@ namespace Noggit::Ui::Tools::ChunkManipulator
     unsigned x;
     unsigned z;
 
-    SelectedChunkIndex(TileIndex tile_index_, unsigned x_, unsigned z_) : tile_index(tile_index_), x(x_), z(z_) {}
+    SelectedChunkIndex(TileIndex tile_index_, unsigned x_, unsigned z_) : tile_index(tile_index_), x(x_), z(z_) {};
+
+    friend bool operator<(SelectedChunkIndex const& lhs, SelectedChunkIndex const& rhs)
+    {
+      return std::tie(lhs.tile_index, lhs.x, lhs.z) < std::tie(rhs.tile_index, rhs.x, rhs.z);
+    }
   };
 
   struct ChunkCache

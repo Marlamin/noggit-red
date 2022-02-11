@@ -39,7 +39,7 @@
 #include <noggit/ui/tools/UiCommon/ImageBrowser.hpp>
 #include <noggit/ui/tools/BrushStack/BrushStack.hpp>
 #include <noggit/ui/tools/LightEditor/LightEditor.hpp>
-#include <noggit/ui/tools/ChunkManipulator/ChunkManipulator.hpp>
+#include <noggit/ui/tools/ChunkManipulator/ChunkManipulatorPanel.hpp>
 #include <external/imguipiemenu/PieMenu.hpp>
 #include <external/tracy/Tracy.hpp>
 #include <noggit/ui/object_palette.hpp>
@@ -838,7 +838,7 @@ void MapView::setupLightEditorUi()
 
 void MapView::setupChunkManipulatorUi()
 {
-  _chunk_manipulator = new Noggit::Ui::Tools::ChunkManipulator(this, this);
+  _chunk_manipulator = new Noggit::Ui::Tools::ChunkManipulator::ChunkManipulatorPanel(this, this);
   _tool_panel_dock->registerTool("Chunk Manipulator", _chunk_manipulator);
 }
 

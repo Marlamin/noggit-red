@@ -61,7 +61,11 @@ namespace Noggit
   {
     class BrushStack;
     class LightEditor;
-    class ChunkManipulator;
+
+    namespace ChunkManipulator
+    {
+      class ChunkManipulatorPanel;
+    }
   }
 
   namespace Scripting
@@ -394,7 +398,7 @@ private:
   Noggit::Ui::MinimapCreator* minimapTool;
   Noggit::Ui::Tools::BrushStack* stampTool;
   Noggit::Ui::Tools::LightEditor* lightEditor;
-  Noggit::Ui::Tools::ChunkManipulator* _chunk_manipulator;
+  Noggit::Ui::Tools::ChunkManipulator::ChunkManipulatorPanel* _chunk_manipulator;
   Noggit::Scripting::scripting_tool* scriptingTool;
 
   OpenGL::texture* const _texBrush;

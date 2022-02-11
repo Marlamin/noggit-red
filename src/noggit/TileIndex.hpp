@@ -13,6 +13,11 @@ struct TileIndex
     return std::tie (lhs.x, lhs.z) == std::tie (rhs.x, rhs.z);
   }
 
+  friend bool operator< (TileIndex const& lhs, TileIndex const& rhs)
+  {
+    return std::tie (lhs.x, lhs.z) < std::tie (rhs.x, rhs.z);
+  }
+
   bool is_valid() const
   {
     // x and z are unsigned so negative signed int value are positive and > 63

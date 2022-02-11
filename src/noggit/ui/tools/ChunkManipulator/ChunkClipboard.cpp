@@ -4,6 +4,7 @@
 
 #include "ChunkClipboard.hpp"
 #include <noggit/World.h>
+#include <noggit/World.inl>
 
 #include <cassert>
 
@@ -23,19 +24,22 @@ void ChunkClipboard::selectRange(glm::vec3 const& cursor_pos, float radius, Chun
   {
     case ChunkSelectionMode::SELECT:
     {
-      _world->for_all_chunks_in_range(cursor_pos, radius, [this](MapChunk* chunk)
+      _world->for_all_chunks_in_range(cursor_pos, radius, [this](MapChunk* chunk) -> bool
       {
         _selected_chunks.emplace(SelectedChunkIndex{TileIndex{glm::vec3{chunk->xbase, 0.f, chunk->zbase}},
                                                     static_cast<unsigned>(chunk->px), static_cast<unsigned>(chunk->py)});
-      });
+        return true;
+      }
+      );
       break;
     }
     case ChunkSelectionMode::DESELECT:
     {
-      _world->for_all_chunks_in_range(cursor_pos, radius, [this](MapChunk* chunk)
+      _world->for_all_chunks_in_range(cursor_pos, radius, [this](MapChunk* chunk) -> bool
       {
         _selected_chunks.erase(SelectedChunkIndex{TileIndex{glm::vec3{chunk->xbase, 0.f, chunk->zbase}},
                                                     static_cast<unsigned>(chunk->px), static_cast<unsigned>(chunk->py)});
+        return true;
       });
       break;
     }
@@ -52,19 +56,21 @@ void ChunkClipboard::selectChunk(glm::vec3 const& pos, ChunkSelectionMode mode)
   {
     case ChunkSelectionMode::SELECT:
     {
-      _world->for_chunk_at(pos, [this](MapChunk* chunk)
+      _world->for_chunk_at(pos, [this](MapChunk* chunk) -> bool
       {
         _selected_chunks.emplace(SelectedChunkIndex{TileIndex{glm::vec3{chunk->xbase, 0.f, chunk->zbase}},
                                                     static_cast<unsigned>(chunk->px), static_cast<unsigned>(chunk->py)});
+        return true;
       });
       break;
     }
     case ChunkSelectionMode::DESELECT:
     {
-      _world->for_chunk_at(pos, [this](MapChunk* chunk)
+      _world->for_chunk_at(pos, [this](MapChunk* chunk) -> bool
       {
         _selected_chunks.erase(SelectedChunkIndex{TileIndex{glm::vec3{chunk->xbase, 0.f, chunk->zbase}},
                                                     static_cast<unsigned>(chunk->px), static_cast<unsigned>(chunk->py)});
+        return true;
       });
       break;
     }

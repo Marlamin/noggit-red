@@ -5,6 +5,7 @@
 #include <noggit/Alphamap.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/ContextObject.hpp>
+#include <noggit/TextureManager.h>
 
 #include <cstdint>
 #include <array>
