@@ -995,6 +995,9 @@
             <layout class="QVBoxLayout" name="verticalLayout_32">
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_33">
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
                <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_57">
                  <item>
@@ -1185,6 +1188,72 @@
                  </item>
                  <item>
                   <spacer name="horizontalSpacer_56">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayout_9">
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <spacer name="horizontalSpacer_2">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_8">
+                   <property name="minimumSize">
+                    <size>
+                     <width>134</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Keyboard locale</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="_keyboard_locale">
+                   <property name="minimumSize">
+                    <size>
+                     <width>80</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>QWERTY</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>AZERTY</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_3">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
                    </property>

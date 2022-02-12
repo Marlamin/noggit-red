@@ -132,6 +132,9 @@ private:
 
   bool _camera_moved_since_last_draw = true;
 
+  std::array<Qt::Key, 6> _inputs = {Qt::Key_W, Qt::Key_S, Qt::Key_D, Qt::Key_A, Qt::Key_Q, Qt::Key_E};
+  void checkInputsSettings();
+
 public:
   Noggit::BoolToggleProperty _draw_contour = {false};
   Noggit::BoolToggleProperty _draw_mfbo = {false};
