@@ -3,14 +3,20 @@ This software is open source software licensed under GPL3, as found in
 the COPYING file.
 
 # BUILDING #
-This project requires CMake to be built. It also requires the
+This project requires CMake to be built. 
+
+It also requires the
 following libraries:
 
 * OpenGL
 * StormLib (by Ladislav Zezula)
 * CascLib (by Ladislav Zezula)
-* Boost
-* Qt 5
+* Qt5
+* Lua5.x
+
+On Windows you only need to install Qt5 yourself, the rest of the depencies are pulled through FetchContent automatically.
+Supporting for Linux and Mac for this feature is coming in the future.
+In case FetchContent is not available (e.g. no internet connection), the find scripts will look for system installed libraries.
 
 Further following libraries are required for MySQL GUID Storage builds:
 
@@ -29,14 +35,6 @@ corresponding versions for other dependencies.
 ### CMake ###
 Any recent CMake 3.x version should work. Just take the latest.
 
-### Boost ###
-Install boost to `<boost-install>`. The easiest is to download a pre-built
-package from https://sourceforge.net/projects/boost/files/boost-binaries/.
-
-* Any version from the last years should work, 1.60 at least.
-* Be sure to pick the right compiler version!
-* CMake may not support the latest version yet, if you have bad timing, try picking the second newest if configuring fails.
-
 ### Qt5 ###
 Install Qt5 to `<Qt-install>`, downloading a pre-built package from
 https://www.qt.io/download-open-source/#section-2.
@@ -46,6 +44,7 @@ also only **one** compiler version. If download size is noticably large
 (more than a few hundred MB), you're probably downloading way too much.
 
 ### StormLib ###
+This step is only required if pulling the dependency from FetchContent is not available.
 Download StormLib from https://github.com/ladislav-zezula/StormLib (any
 recent version).
 
