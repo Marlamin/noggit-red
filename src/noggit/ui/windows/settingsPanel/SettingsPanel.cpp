@@ -225,6 +225,7 @@ namespace Noggit
       ui->_nativeMenubar->setChecked(_settings->value("nativeMenubar", true).toBool());
       ui->_additional_file_loading_log->setChecked(
           _settings->value("additional_file_loading_log", false).toBool());
+      ui->_keyboard_locale->setCurrentText(_settings->value("keyboard_locale", "QWERTY").toString());
       ui->_theme->setCurrentText(_settings->value("theme", "Dark").toString());
 
       ui->assetBrowserBgCol->setColor(_settings->value("assetBrowser/background_color",
@@ -284,6 +285,7 @@ namespace Noggit
       _settings->setValue("unload_interval", ui->_adt_unload_check_interval->value());
       _settings->setValue("uid_startup_check", ui->_uid_cb->isChecked());
       _settings->setValue("additional_file_loading_log", ui->_additional_file_loading_log->isChecked());
+      _settings->setValue("keyboard_locale", ui->_keyboard_locale->currentText());
       _settings->setValue("systemWindowFrame", ui->_systemWindowFrame->isChecked());
       _settings->setValue("nativeMenubar", ui->_nativeMenubar->isChecked());
 
