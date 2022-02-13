@@ -103,7 +103,10 @@ FIND_PACKAGE(CascLib REQUIRED)
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(Json REQUIRED)
 FIND_PACKAGE(lodepng REQUIRED)
+
+set(FASTNOISE2_NOISETOOL OFF CACHE BOOL "")
 FIND_PACKAGE(FastNoise2 REQUIRED)
+
 FIND_PACKAGE(Sol2 REQUIRED)
 FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml REQUIRED)
 
@@ -142,7 +145,7 @@ IF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
   ADD_DEFINITIONS(-DDO_NOT_BUILD_NODES )
 ENDIF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
 
-OPTION(NOGGIT_ENABLE_TRACY_PROFILER "Enable tracy profiler" ON)
+OPTION(NOGGIT_ENABLE_TRACY_PROFILER "Enable tracy profiler" OFF)
 IF(NOGGIT_ENABLE_TRACY_PROFILER)
   MESSAGE(STATUS "Tracy profiler enabled." )
   ADD_DEFINITIONS(-DTRACY_ENABLE )
@@ -187,14 +190,13 @@ INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/${EXTERNAL_SOURCE_DIR}/blizzard-archive
 INCLUDE_DIRECTORIES(${Qt5Gui_PRIVATE_INCLUDE_DIRS})
 
 #Load noggit source files
-collect_files(noggit_root_sources src/noggit TRUE "*.cpp" "")
 collect_files(math_sources src/math FALSE "*.cpp" "")
 collect_files(opengl_sources src/opengl FALSE "*.cpp" "")
 
 IF(NOT NOGGIT_BUILD_NODE_DATAMODELS)
-  collect_files(red_sources src/noggit/ui/tools TRUE "*.cpp" "NodeEditor/Nodes/Containers;NodeEditor/Nodes/Data;NodeEditor/Nodes/Functions;NodeEditor/Nodes/Math;NodeEditor/Nodes/World")
+  collect_files(noggit_root_sources src/noggit TRUE "*.cpp" "NodeEditor/Nodes/Containers;NodeEditor/Nodes/Data;NodeEditor/Nodes/Functions;NodeEditor/Nodes/Math;NodeEditor/Nodes/World")
 ELSE()
-  collect_files(red_sources src/noggit/ui/tools TRUE "*.cpp" "")
+  collect_files(noggit_root_sources src/noggit TRUE "*.cpp" "")
 ENDIF()
 
 collect_files(png_blp_sources src/external/PNG2BLP TRUE "*.c;*.cpp;" "")

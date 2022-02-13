@@ -1155,6 +1155,8 @@ void WorldRender::unload()
 
   _buffers.unload();
   _vertex_arrays.unload();
+
+  Noggit::Rendering::Primitives::WireBox::getInstance(_world->_context).unload();
 }
 
 
