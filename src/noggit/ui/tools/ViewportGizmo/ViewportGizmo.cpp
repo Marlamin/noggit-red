@@ -150,7 +150,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
         }
         case ImGuizmo::ROTATE:
         {
-          auto rot_euler = glm::degrees(glm::eulerAngles(new_orientation));
+          auto rot_euler = glm::degrees(glm::eulerAngles(new_orientation).operator*=(-1.f));
           auto rot_euler_pivot = glm::eulerAngles(new_orientation);
 
           if (!_use_multiselection_pivot)
@@ -160,7 +160,22 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
           else
           {
             //LogDebug << rot_euler.x << " " << rot_euler.y << " " << rot_euler.z << std::endl;
-            rotation.y += math::degrees(rot_euler.y)._;
+
+            /*float alpha = math::degrees(rot_euler.x)._;
+            float beta = math::degrees(rot_euler.y)._;
+            float gamma = math::degrees(rot_euler.z)._;
+
+            glm::mat3 rotation_matrix = glm::mat3(
+                        cos(beta)*cos(gamma),                                    -cos(beta)*sin(gamma),                                   sin(beta),
+                        cos(alpha)*sin(gamma) + cos(gamma)*sin(alpha)*sin(beta), cos(alpha)*cos(gamma) - sin(alpha)*sin(beta)*sin(gamma), -cos(beta)*sin(alpha),
+                        sin(alpha)*sin(gamma) - cos(alpha)*cos(gamma)*sin(beta), cos(gamma)*sin(alpha) + cos(alpha)*sin(beta)*sin(gamma), cos(alpha)*cos(beta)
+                        );
+
+            rotation.x += atan(-rotation_matrix[1].z / rotation_matrix[2].z);
+            rotation.z += atan(-rotation_matrix[0].y / rotation_matrix[0].x);*/
+
+            float beta = math::degrees(rot_euler.y)._;
+            rotation.y += atan(sin(beta) / (sqrt(1 - pow(sin(beta), 2))));
 
             // building model matrix
             glm::mat4 model_transform = object_matrix;
@@ -171,7 +186,8 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
             // model matrix relative to translated pivot
             glm::mat4 model_transform_rel = glm::inverse(transformed_pivot) * model_transform;
 
-            glm::mat4 gizmo_rotation = glm::mat4_cast(new_orientation);
+            // rotate multiselection in same direction as user want
+            glm::mat4 gizmo_rotation = glm::mat4_cast(glm::quat(new_orientation.w, glm::eulerAngles(new_orientation).operator*=(-1.f)));
 
             glm::mat4 _transformed_pivot_rot = transformed_pivot * gizmo_rotation;
 
@@ -270,7 +286,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
         }
         case ImGuizmo::ROTATE:
         {
-          auto rot_euler = glm::eulerAngles(new_orientation) * 57.2957795f;
+          auto rot_euler = glm::eulerAngles(new_orientation).operator*=(-1.f) * 57.2957795f;
           rotation += glm::vec3(math::degrees(rot_euler.x)._, math::degrees(rot_euler.y)._, math::degrees(rot_euler.z)._);
           break;
         }
