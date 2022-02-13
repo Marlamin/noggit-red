@@ -14,7 +14,7 @@ following libraries:
 * Qt5
 * Lua5.x
 
-On Windows you only need to install Qt5 yourself, the rest of the depencies are pulled through FetchContent automatically.
+On Windows you only need to install Qt5 yourself, the rest of the dependencies are pulled through FetchContent automatically.
 Supporting for Linux and Mac for this feature is coming in the future.
 In case FetchContent is not available (e.g. no internet connection), the find scripts will look for system installed libraries.
 
