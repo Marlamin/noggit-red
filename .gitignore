@@ -8,6 +8,7 @@
 !/sql/**
 !/src/**
 !/test/**
+!/.idea/**
 !.gitignore
 !.CMakeLists.txt
 !COPYING
