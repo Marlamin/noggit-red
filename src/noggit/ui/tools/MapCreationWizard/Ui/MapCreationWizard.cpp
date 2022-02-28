@@ -148,7 +148,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
   _area_table_id = new QSpinBox(_map_settings);
   map_settings_layout->addRow("Area ID:",_area_table_id);
-  _area_table_id->setMaximum(INT32_MAX);
+  _area_table_id->setMaximum(std::numeric_limits<std::int32_t>::max());
 
   _map_desc_alliance = new LocaleDBCEntry(_map_settings);
   map_settings_layout->addRow("Description (Alliance):",_map_desc_alliance);
@@ -158,7 +158,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
   _loading_screen  = new QSpinBox(_map_settings);
   map_settings_layout->addRow("Loading screen:",_loading_screen);
-  _loading_screen->setMaximum(INT32_MAX);
+  _loading_screen->setMaximum(std::numeric_limits<std::int32_t>::max());
 
    _minimap_icon_scale = new QDoubleSpinBox(_map_settings);
   map_settings_layout->addRow("Minimap icon scale:",_minimap_icon_scale);
@@ -197,11 +197,11 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   map_settings_layout->addRow("Expansion:",_expansion_id);
 
   _raid_offset = new QSpinBox(_map_settings);
-  _raid_offset->setMaximum(INT32_MAX);
+  _raid_offset->setMaximum(std::numeric_limits<std::int32_t>::max());
   map_settings_layout->addRow("Raid offset:",_raid_offset);
 
   _max_players = new QSpinBox(_map_settings);
-  _max_players->setMaximum(INT32_MAX);
+  _max_players->setMaximum(std::numeric_limits<std::int32_t>::max());
   map_settings_layout->addRow("Max players:",_max_players);
 
   // Bottom row
