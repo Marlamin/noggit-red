@@ -421,6 +421,9 @@ private:
   ImGuizmo::OPERATION _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
   Noggit::BoolToggleProperty _gizmo_on = {true};
 
+  bool _change_operation_mode = false;
+  void updateGizmoOverlay(ImGuizmo::OPERATION operation);
+
   bool _gl_initialized = false;
   bool _destroying = false;
   bool _needs_redraw = false;

@@ -438,40 +438,61 @@ void MapView::setupViewportOverlay()
           }
   );
 
-  connect(_viewport_overlay_ui->gizmoModeButton, &QPushButton::clicked
-    ,[this]()
-          {
-            if (_viewport_overlay_ui->gizmoVisibleButton->isChecked())
-            {
-              _gizmo_mode = ImGuizmo::MODE::WORLD;
-            }
-            else
-            {
-              _gizmo_mode = ImGuizmo::MODE::LOCAL;
-            }
-          }
-  );
+  connect(_viewport_overlay_ui->gizmoModeButton, &QPushButton::clicked, [this]()
+  {
+      if (_viewport_overlay_ui->gizmoModeButton->isChecked())
+      {
+          _gizmo_mode = ImGuizmo::MODE::WORLD;
+      }
+      else
+      {
+          _gizmo_mode = ImGuizmo::MODE::LOCAL;
+      }
+  });
 
-  connect(_viewport_overlay_ui->gizmoTranslateButton, &QPushButton::clicked
-    ,[this]()
-          {
-            _gizmo_operation = ImGuizmo::OPERATION::TRANSLATE;
-          }
-  );
+  connect(_viewport_overlay_ui->gizmoTranslateButton, &QPushButton::clicked, [this]() {
+      updateGizmoOverlay(ImGuizmo::OPERATION::TRANSLATE);
+    });
 
-  connect(_viewport_overlay_ui->gizmoRotateButton, &QPushButton::clicked
-    ,[this]()
-          {
-            _gizmo_operation = ImGuizmo::OPERATION::ROTATE;
-          }
-  );
+  connect(_viewport_overlay_ui->gizmoRotateButton, &QPushButton::clicked, [this]() {
+      updateGizmoOverlay(ImGuizmo::OPERATION::ROTATE);
+    });
 
-  connect(_viewport_overlay_ui->gizmoScaleButton, &QPushButton::clicked
-    ,[this]()
-          {
-            _gizmo_operation = ImGuizmo::OPERATION::SCALE;
-          }
-  );
+  connect(_viewport_overlay_ui->gizmoScaleButton, &QPushButton::clicked, [this]() {
+      updateGizmoOverlay(ImGuizmo::OPERATION::SCALE);
+    });
+}
+
+void MapView::updateGizmoOverlay(ImGuizmo::OPERATION operation)
+{
+  if (operation == ImGuizmo::OPERATION::TRANSLATE)
+  {
+    _viewport_overlay_ui->gizmoRotateButton->setChecked(false);
+    _viewport_overlay_ui->gizmoScaleButton->setChecked(false);
+
+    if (!_viewport_overlay_ui->gizmoTranslateButton->isChecked())
+      _viewport_overlay_ui->gizmoTranslateButton->setChecked(true);
+  }
+
+  if (operation == ImGuizmo::OPERATION::ROTATE)
+  {
+    _viewport_overlay_ui->gizmoTranslateButton->setChecked(false);
+    _viewport_overlay_ui->gizmoScaleButton->setChecked(false);
+
+    if (!_viewport_overlay_ui->gizmoRotateButton->isChecked())
+      _viewport_overlay_ui->gizmoRotateButton->setChecked(true);
+  }
+
+  if (operation == ImGuizmo::OPERATION::SCALE)
+  {
+    _viewport_overlay_ui->gizmoTranslateButton->setChecked(false);
+    _viewport_overlay_ui->gizmoRotateButton->setChecked(false);
+
+    if (!_viewport_overlay_ui->gizmoScaleButton->isChecked())
+      _viewport_overlay_ui->gizmoScaleButton->setChecked(true);
+  }
+
+  _gizmo_operation = operation;
 }
 
 void MapView::setupRaiseLowerUi()
@@ -4453,12 +4474,35 @@ void MapView::keyPressEvent (QKeyEvent *event)
 
   }
 
+  if (_gizmo_on.get())
+  {
+    if (!_change_operation_mode && event->key() == Qt::Key_Space)
+    {
+      if (_gizmo_operation == ImGuizmo::OPERATION::TRANSLATE)
+      {
+        updateGizmoOverlay(ImGuizmo::OPERATION::ROTATE);
+      }
+      else if (_gizmo_operation == ImGuizmo::OPERATION::ROTATE)
+      {
+        updateGizmoOverlay(ImGuizmo::OPERATION::SCALE);
+      }
+      else
+      {
+        updateGizmoOverlay(ImGuizmo::OPERATION::TRANSLATE);
+      }
+
+      _change_operation_mode = true;
+    }
+  }
 }
 
 void MapView::keyReleaseEvent (QKeyEvent* event)
 {
   if (event->key() == Qt::Key_Space)
     _mod_space_down = false;
+
+  if (_change_operation_mode && event->key() == Qt::Key_Space)
+    _change_operation_mode = false;
 
   checkInputsSettings();
 
