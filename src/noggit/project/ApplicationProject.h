@@ -88,7 +88,7 @@ namespace Noggit::Project
         std::string ProjectPath;
         std::string ProjectName;
         std::string ClientPath;
-        ProjectVersion ProjectVersion;
+        ProjectVersion projectVersion;
         std::vector<NoggitProjectPinnedMap> PinnedMaps;
         std::vector<NoggitProjectBookmarkMap> Bookmarks;
         std::shared_ptr<BlizzardDatabaseLib::BlizzardDatabase> ClientDatabase;
@@ -168,7 +168,7 @@ namespace Noggit::Project
 
             auto project = NoggitProject();
             project.ProjectName = projectName;
-            project.ProjectVersion = ClientVersionFactory::MapToEnumVersion(clientVersion);
+            project.projectVersion = ClientVersionFactory::MapToEnumVersion(clientVersion);
             project.ClientPath = clientPath.generic_string();
 
             auto projectWriter = ApplicationProjectWriter();
@@ -189,7 +189,7 @@ namespace Noggit::Project
                 "DBFilesClient/LiquidType.dbc",
             };
 
-            if (project.ProjectVersion == ProjectVersion::WOTLK)
+            if (project.projectVersion == ProjectVersion::WOTLK)
             {
                 auto clientData = BlizzardArchive::ClientData(clientPath.generic_string(), BlizzardArchive::ClientVersion::WOTLK,
                     BlizzardArchive::Locale::AUTO, workspaceDirectory.generic_string());
@@ -230,7 +230,7 @@ namespace Noggit::Project
                 //"DBFilesClient/LiquidType.db2",
             };
 
-            if (project.ProjectVersion == ProjectVersion::SL)
+            if (project.projectVersion == ProjectVersion::SL)
             {
                 auto clientData = BlizzardArchive::ClientData(clientPath.generic_string(), BlizzardArchive::ClientVersion::SL,
                     BlizzardArchive::Locale::enUS, std::string(""));
@@ -270,14 +270,14 @@ namespace Noggit::Project
             auto clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
             auto clientArchiveVersion = BlizzardArchive::ClientVersion::WOTLK;
             auto clientArchiveLocale = BlizzardArchive::Locale::AUTO;
-            if (project->ProjectVersion == ProjectVersion::SL)
+            if (project->projectVersion == ProjectVersion::SL)
             {
                 clientArchiveVersion = BlizzardArchive::ClientVersion::SL;
                 clientBuild = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
                 clientArchiveLocale = BlizzardArchive::Locale::enUS;
             }
 
-            if (project->ProjectVersion == ProjectVersion::WOTLK)
+            if (project->projectVersion == ProjectVersion::WOTLK)
             {
                 clientArchiveVersion = BlizzardArchive::ClientVersion::WOTLK;
                 clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");

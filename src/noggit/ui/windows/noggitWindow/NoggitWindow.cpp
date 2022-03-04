@@ -62,7 +62,7 @@ namespace Noggit::Ui::Windows
       setWindowTitle (QString::fromStdString (title.str()));
       setWindowIcon (QIcon (":/icon"));
 
-    	if(project->ProjectVersion == Project::ProjectVersion::WOTLK)
+    	if(project->projectVersion == Project::ProjectVersion::WOTLK)
         {
             OpenDBs(project->ClientData);
         }

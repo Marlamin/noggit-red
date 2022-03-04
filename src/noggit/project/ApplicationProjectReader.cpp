@@ -90,7 +90,7 @@ namespace Noggit::Project
                                 clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
                             }
 
-                            project.ProjectVersion = clientVersionEnum;
+                            project.projectVersion = clientVersionEnum;
                         }
                     }
                 }
