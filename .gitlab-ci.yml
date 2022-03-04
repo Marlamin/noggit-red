@@ -18,7 +18,7 @@ build:
     - cmake -version  
     - mkdir build
     - cd build
-    - cmake .. -DWITH_SDL2APPLICATION=Flase
+    - cmake .. -DCMAKE_BUILD_TYPE=Release -DNOGGIT_OPENGL_ERROR_CHECK=OFF -DNOGGIT_ENABLE_TRACY_PROFILER=OFF -DFASTNOISE2_NOISETOOL=OFF
     - make
   artifacts:
     paths:
