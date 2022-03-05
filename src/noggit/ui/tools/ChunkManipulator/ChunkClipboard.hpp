@@ -82,12 +82,23 @@ namespace Noggit::Ui::Tools::ChunkManipulator
     unsigned x;
     unsigned z;
 
-    SelectedChunkIndex(TileIndex tile_index_, unsigned x_, unsigned z_) : tile_index(tile_index_), x(x_), z(z_) {};
-
     friend bool operator<(SelectedChunkIndex const& lhs, SelectedChunkIndex const& rhs)
     {
       return std::tie(lhs.tile_index, lhs.x, lhs.z) < std::tie(rhs.tile_index, rhs.x, rhs.z);
     }
+  };
+
+  struct SelectedChunkIndexRelative : public SelectedChunkIndex
+  {
+    int rel_x;
+    int rel_z;
+
+    friend bool operator<(SelectedChunkIndexRelative const& lhs, SelectedChunkIndexRelative const& rhs)
+    {
+      return std::tie(lhs.tile_index, lhs.x, lhs.z, lhs.rel_x, lhs.rel_z)
+        < std::tie(rhs.tile_index, rhs.x, rhs.z, rhs.rel_x, rhs.rel_z);
+    }
+
   };
 
   struct ChunkCache
@@ -111,7 +122,7 @@ namespace Noggit::Ui::Tools::ChunkManipulator
     void selectRange(glm::vec3 const& cursor_pos, float radius, ChunkSelectionMode mode);
     void selectChunk(glm::vec3 const& pos, ChunkSelectionMode mode);
     void selectChunk(TileIndex const& tile_index, unsigned x, unsigned z, ChunkSelectionMode mode);
-    void copySelected(ChunkCopyFlags flags);
+    void copySelected(glm::vec3 const& pos, ChunkCopyFlags flags);
     void clearSelection();
     void pasteSelection(glm::vec3 const& pos, ChunkPasteFlags flags);
 
@@ -129,7 +140,7 @@ namespace Noggit::Ui::Tools::ChunkManipulator
 
   private:
     std::set<SelectedChunkIndex> _selected_chunks;
-    std::vector<std::pair<SelectedChunkIndex, ChunkCache>> _cached_chunks;
+    std::vector<std::pair<SelectedChunkIndexRelative, ChunkCache>> _cached_chunks;
     World* _world;
     ChunkCopyFlags _copy_flags;
 

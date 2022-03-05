@@ -108,12 +108,28 @@ void ChunkClipboard::selectChunk(TileIndex const& tile_index, unsigned x, unsign
   emit selectionChanged(_selected_chunks);
 }
 
-void ChunkClipboard::copySelected(ChunkCopyFlags flags)
+void ChunkClipboard::copySelected(glm::vec3 const& pos, ChunkCopyFlags flags)
 {
   _cached_chunks.clear();
 
+  MapTile* pivot_tile = _world->mapIndex.loadTile({pos});
+
+  if (!pivot_tile)
+    return;
+
+  pivot_tile->wait_until_loaded();
+
+  auto pivot_chunk = _world->getChunkAt(pos);
+  assert(pivot_chunk);
+
   for (auto const& index : _selected_chunks)
   {
+    //float rel_tile_x = pivot_chunk->xbase - index.
+
+
+    //SelectedChunkIndexRelative selected_index{index.tile_index, index.x, index.z, };
+
+
     ChunkCache chunk_cache;
     MapTile* tile = _world->mapIndex.loadTile(index.tile_index);
     assert(tile);
