@@ -6,6 +6,7 @@
 #include <noggit/World.h>
 #include <external/PNG2BLP/Png2Blp.h>
 #include <noggit/DBC.h>
+#include <noggit/project/CurrentProject.hpp>
 
 #include <QDir>
 #include <QBuffer>
@@ -1592,7 +1593,7 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
     image = image.convertToFormat(QImage::Format_RGBA8888);
 
     QSettings app_settings;
-    QString str = app_settings.value ("project/path").toString();
+    QString str = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
     if (!(str.endsWith('\\') || str.endsWith('/')))
     {
       str += "/";

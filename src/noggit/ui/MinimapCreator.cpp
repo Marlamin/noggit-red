@@ -6,6 +6,7 @@
 #include <noggit/MapView.h>
 #include <noggit/World.h>
 #include <noggit/Log.h>
+#include <noggit/project/CurrentProject.hpp>
 
 #include <util/qt/overload.hpp>
 
@@ -1027,8 +1028,7 @@ namespace Noggit
 
     void MinimapCreator::loadFiltersFromJSON()
     {
-      QSettings settings;
-      QString str = settings.value ("project/path").toString();
+      QString str = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
       if (!(str.endsWith('\\') || str.endsWith('/')))
       {
         str += "/";
@@ -1096,8 +1096,7 @@ namespace Noggit
 
     void MinimapCreator::saveFiltersToJSON()
     {
-      QSettings settings;
-      QString str = settings.value ("project/path").toString();
+      QString str = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
       if (!(str.endsWith('\\') || str.endsWith('/')))
       {
         str += "/";

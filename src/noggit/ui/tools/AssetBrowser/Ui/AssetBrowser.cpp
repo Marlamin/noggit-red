@@ -6,6 +6,7 @@
 #include <noggit/ui/FontNoggit.hpp>
 #include <noggit/MapView.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/project/CurrentProject.hpp>
 
 #include <QStandardItemModel>
 #include <QItemSelectionModel>
@@ -307,7 +308,7 @@ void AssetBrowserWidget::updateModelData()
 
 
   QSettings settings;
-  QString project_dir = settings.value("project/path").toString();
+  QString project_dir = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
   recurseDirectory(tree_mgr, project_dir, project_dir);
 
   _sort_model->setSortRole(Qt::UserRole);

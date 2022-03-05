@@ -18,6 +18,7 @@
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/project/CurrentProject.hpp>
 #include <noggit/ActionManager.hpp>
 #include <external/tracy/Tracy.hpp>
 #include <QByteArray>
@@ -1638,7 +1639,7 @@ void World::exportADTAlphamap(glm::vec3 const& pos)
   for_tile_at ( pos
     , [&] (MapTile* tile)
     {
-      QString path = _settings->value("project/path").toString();
+      QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
       if (!(path.endsWith('\\') || path.endsWith('/')))
       {
         path += "/";
@@ -1666,7 +1667,7 @@ void World::exportADTNormalmap(glm::vec3 const& pos)
   for_tile_at ( pos
     , [&] (MapTile* tile)
       {
-        QString path = _settings->value("project/path").toString();
+        QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
         if (!(path.endsWith('\\') || path.endsWith('/')))
         {
           path += "/";
@@ -1690,7 +1691,7 @@ void World::exportADTAlphamap(glm::vec3 const& pos, std::string const& filename)
   for_tile_at ( pos
     , [&] (MapTile* tile)
     {
-      QString path = _settings->value("project/path").toString();
+      QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
       if (!(path.endsWith('\\') || path.endsWith('/')))
       {
         path += "/";
@@ -1716,7 +1717,7 @@ void World::exportADTHeightmap(glm::vec3 const& pos, float min_height, float max
   for_tile_at ( pos
     , [&] (MapTile* tile)
                 {
-                  QString path = _settings->value("project/path").toString();
+                  QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
                   if (!(path.endsWith('\\') || path.endsWith('/')))
                   {
                     path += "/";
@@ -1742,7 +1743,7 @@ void World::exportADTVertexColorMap(glm::vec3 const& pos)
   for_tile_at ( pos
     , [&] (MapTile* tile)
                 {
-                  QString path = _settings->value("project/path").toString();
+                  QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
                   if (!(path.endsWith('\\') || path.endsWith('/')))
                   {
                     path += "/";
@@ -1802,7 +1803,7 @@ void World::importADTAlphamap(glm::vec3 const& pos)
     NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
   });
 
-  QString path = _settings->value("project/path").toString();
+  QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
   if (!(path.endsWith('\\') || path.endsWith('/')))
   {
     path += "/";
@@ -1871,7 +1872,7 @@ void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned 
     , [&] (MapTile* tile)
     {
 
-      QString path = _settings->value("project/path").toString();
+      QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
       if (!(path.endsWith('\\') || path.endsWith('/')))
       {
         path += "/";
@@ -1908,7 +1909,7 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, int mode)
     , [&] (MapTile* tile)
       {
 
-        QString path = _settings->value("project/path").toString();
+        QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
         if (!(path.endsWith('\\') || path.endsWith('/')))
         {
           path += "/";
@@ -2526,7 +2527,7 @@ void World::exportAllADTsAlphamap()
       {
         mTile->wait_until_loaded();
 
-        QString path = _settings->value("project/path").toString();
+        QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
         if (!(path.endsWith('\\') || path.endsWith('/')))
         {
           path += "/";
@@ -2591,7 +2592,7 @@ void World::exportAllADTsAlphamap(const std::string& filename)
         if (!found)
           continue;
 
-        QString path = _settings->value("project/path").toString();
+        QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
         if (!(path.endsWith('\\') || path.endsWith('/')))
         {
           path += "/";
@@ -2665,7 +2666,7 @@ void World::exportAllADTsHeightmap()
       {
         mTile->wait_until_loaded();
 
-        QString path = _settings->value("project/path").toString();
+        QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
         if (!(path.endsWith('\\') || path.endsWith('/')))
         {
           path += "/";
@@ -2705,7 +2706,7 @@ void World::exportAllADTsVertexColorMap()
       {
         mTile->wait_until_loaded();
 
-        QString path = _settings->value("project/path").toString();
+        QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
         if (!(path.endsWith('\\') || path.endsWith('/')))
         {
           path += "/";
@@ -2732,7 +2733,7 @@ void World::exportAllADTsVertexColorMap()
 void World::importAllADTsAlphamaps()
 {
   ZoneScoped;
-  QString path = _settings->value("project/path").toString();
+  QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
   if (!(path.endsWith('\\') || path.endsWith('/')))
   {
     path += "/";
@@ -2791,7 +2792,7 @@ void World::importAllADTsAlphamaps()
 void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
 {
   ZoneScoped;
-  QString path = _settings->value("project/path").toString();
+  QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
   if (!(path.endsWith('\\') || path.endsWith('/')))
   {
     path += "/";
@@ -2846,7 +2847,7 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
 void World::importAllADTVertexColorMaps(unsigned int mode)
 {
   ZoneScoped;
-  QString path = _settings->value("project/path").toString();
+  QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
   if (!(path.endsWith('\\') || path.endsWith('/')))
   {
     path += "/";

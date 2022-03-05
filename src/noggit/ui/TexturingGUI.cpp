@@ -15,6 +15,7 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/ui/TextureList.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/project/CurrentProject.hpp>
 
 #include <unordered_set>
 
@@ -89,8 +90,8 @@ namespace Noggit
       }
 
       {
-        QSettings settings;
-        auto const prefix (std::filesystem::path (settings.value("project/path").toString().toStdString()));
+
+        auto const prefix (std::filesystem::path ( Noggit::Project::CurrentProject::get()->ProjectPath ));
         auto const prefix_size (prefix.string().length());
 
         if (std::filesystem::exists (prefix))

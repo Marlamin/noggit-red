@@ -3,6 +3,7 @@
 #include <noggit/DBCFile.h>
 #include <noggit/Log.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/project/CurrentProject.hpp>
 #include <ClientFile.hpp>
 
 #include <string>
@@ -60,8 +61,7 @@ void DBCFile::open(std::shared_ptr<BlizzardArchive::ClientData> clientData)
 
 void DBCFile::save()
 {
-  QSettings app_settings;
-  QString str = app_settings.value ("project/path").toString();
+  QString str = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
   if (!(str.endsWith('\\') || str.endsWith('/')))
   {
     str += "/";

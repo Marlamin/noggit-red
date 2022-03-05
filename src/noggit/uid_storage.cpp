@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/uid_storage.hpp>
+#include <noggit/project/CurrentProject.hpp>
 
 #include <QtCore/QSettings>
 
@@ -8,8 +9,7 @@ namespace
 {
   QString uid_file_path()
   {
-    QSettings settings;
-    QString str = settings.value ("project/path").toString();
+    QString str = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
     if (!(str.endsWith('\\') || str.endsWith('/')))
     {
       str += "/";

@@ -2,6 +2,8 @@
 #include <noggit/ui/windows/projectSelection/components/ExistingProjectEnumerationComponent.hpp>
 #include <noggit/ui/windows/projectSelection/components/CreateProjectComponent.hpp>
 #include <noggit/ui/windows/projectSelection/components/LoadProjectComponent.hpp>
+#include <noggit/project/CurrentProject.hpp>
+
 #include <filesystem>
 #include <QString>
 
@@ -55,6 +57,8 @@ namespace Noggit::Ui::Windows
             , [=]
             {
                 auto selectedProject = _loadProjectComponent->LoadProject(this);
+
+                Noggit::Project::CurrentProject::initialize(selectedProject.get());
 
                 projectSelectionPage = std::make_unique<Noggit::Ui::Windows::NoggitWindow>(_noggitApplication->GetConfiguration(), selectedProject);
                 projectSelectionPage->showMaximized();

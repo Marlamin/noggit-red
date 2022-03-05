@@ -31,6 +31,7 @@
 #include <noggit/ui/hole_tool.hpp>
 #include <noggit/ui/texture_palette_small.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
+#include <noggit/project/CurrentProject.hpp>
 #include <opengl/scoped.hpp>
 #include <noggit/ui/tools/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
@@ -955,12 +956,10 @@ void MapView::setupDetailInfos()
   _main_window->addDockWidget(Qt::BottomDockWidgetArea, _detail_infos_dock);
   _detail_infos_dock->setFloating(true);
   _detail_infos_dock->hide();
-  connect(this, &QObject::destroyed, _detail_infos_dock, &QObject::deleteLater);
   // End Dock
 
   guidetailInfos = new Noggit::Ui::detail_infos(this);
-  _detail_infos_dock->setWidget(guidetailInfos);
-  connect(this, &QObject::destroyed, guidetailInfos, &QObject::deleteLater);
+  _detail_infos_dock->setWidget(guidetailInfos);;
 
 
   connect ( &_show_detail_info_window, &Noggit::BoolToggleProperty::changed
@@ -2556,7 +2555,7 @@ MapView::MapView( math::degrees camera_yaw0
                 , math::degrees camera_pitch0
                 , glm::vec3 camera_pos
                 , Noggit::Ui::Windows::NoggitWindow* NoggitWindow
-				, std::shared_ptr<Noggit::Project::NoggitProject> Project
+				        , std::shared_ptr<Noggit::Project::NoggitProject> Project
                 , std::unique_ptr<World> world
                 , uid_fix_mode uid_fix
                 , bool from_bookmark
@@ -2596,9 +2595,6 @@ MapView::MapView( math::degrees camera_yaw0
   _main_window->setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
   _main_window->setCorner(Qt::TopRightCorner, Qt::RightDockWidgetArea);
   _main_window->setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
-
-  if(QString pathProject{_settings->value("project/path").toString()}; !(pathProject.endsWith('\\') || pathProject.endsWith('/')))
-    _settings->setValue("project/path", pathProject.append('/'));
 
   _main_window->statusBar()->addWidget (_status_position);
   connect ( this
@@ -2897,7 +2893,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
         {
           QString image_path = QString(std::string(_world->basename + "_combined_minimap.png").c_str());
           QSettings app_settings;
-          QString str = app_settings.value("project/path").toString();
+          QString str = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());;
           if (!(str.endsWith('\\') || str.endsWith('/')))
           {
             str += "/";
@@ -3012,8 +3008,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
         if (settings->combined_minimap)
         {
           QString image_path = QString(std::string(_world->basename + "_combined_minimap.png").c_str());
-          QSettings app_settings;
-          QString str = app_settings.value("project/path").toString();
+          QString str = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
           if (!(str.endsWith('\\') || str.endsWith('/')))
           {
             str += "/";
@@ -3233,6 +3228,8 @@ MapView::~MapView()
   ModelManager::report();
   TextureManager::report();
   WMOManager::report();
+
+  NOGGIT_ACTION_MGR->disconnect();
 }
 
 void MapView::tick (float dt)

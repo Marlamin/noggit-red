@@ -4,6 +4,7 @@
 
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <noggit/project/CurrentProject.hpp>
 #include <blizzard-database-library/include/structures/Types.h>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
@@ -432,8 +433,7 @@ void MapCreationWizard::saveCurrentEntry()
     std::stringstream filename;
     filename << "World\\Maps\\" << map_internal_name << "\\" << map_internal_name << ".wdt";
 
-    QSettings settings;
-    auto project_path = std::filesystem::path (settings.value ("project/path").toString().toStdString());
+    auto project_path = std::filesystem::path(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
 
     QDir dir((project_path / "/world/maps/" / map_internal_name).string().c_str());
 

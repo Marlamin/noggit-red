@@ -7,6 +7,7 @@
 #include <noggit/World.h>
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
+#include <noggit/project/CurrentProject.hpp>
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
 #endif
@@ -440,8 +441,7 @@ void MapIndex::saveTile(const TileIndex& tile, World* world, bool save_unloaded)
 	// save given tile
 	if (save_unloaded)
   {
-    QSettings settings;
-    auto filepath = std::filesystem::path (settings.value ("project/path").toString().toStdString())
+    auto filepath = std::filesystem::path (Noggit::Project::CurrentProject::get()->ProjectPath)
                     / BlizzardArchive::ClientData::normalizeFilenameInternal (mTiles[tile.z][tile.x].tile->file_key().filepath());
 
     QFile file(filepath.string().c_str());
@@ -483,8 +483,7 @@ void MapIndex::saveChanged (World* world, bool save_unloaded)
           continue;
         }
 
-        QSettings settings;
-        auto filepath = std::filesystem::path (settings.value ("project/path").toString().toStdString())
+        auto filepath = std::filesystem::path (Noggit::Project::CurrentProject::get()->ProjectPath)
                         / BlizzardArchive::ClientData::normalizeFilenameInternal (mTiles[i][j].tile->file_key().filepath());
 
         if (mTiles[i][j].flags & 0x1)
@@ -1096,8 +1095,7 @@ void MapIndex::loadMinimapMD5translate()
 
 void MapIndex::saveMinimapMD5translate()
 {
-  QSettings settings;
-  QString str = settings.value ("project/path").toString();
+  QString str = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
   if (!(str.endsWith('\\') || str.endsWith('/')))
   {
     str += "/";
