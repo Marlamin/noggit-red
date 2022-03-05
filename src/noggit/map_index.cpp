@@ -253,7 +253,8 @@ void MapIndex::save()
     //  }
   }
 
-  BlizzardArchive::ClientFile f(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData());
+  BlizzardArchive::ClientFile f(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData(),
+                                BlizzardArchive::ClientFile::NEW_FILE);
   f.setBuffer(wdtFile.data);
   f.save();
   f.close();

@@ -889,7 +889,8 @@ void MapTile::saveTile(World* world)
 
 
   {
-    BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::NoggitApplication::instance()->clientData());
+    BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::NoggitApplication::instance()->clientData()
+      , BlizzardArchive::ClientFile::NEW_FILE);
     f.setBuffer(lADTFile.data);
     f.save();
   }
