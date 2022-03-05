@@ -185,6 +185,7 @@ void Noggit::Action::undo(bool redo)
       auto liquid_chunk = pair.first->liquid_chunk();
       *liquid_chunk->getLayers() = pair.second;
       liquid_chunk->update_layers();
+      liquid_chunk->tagUpdate();
     }
   }
   if (_flags & ActionFlags::eVERTEX_SELECTION)

@@ -44,6 +44,7 @@ public:
   void setType(int type, size_t layer);
   int getType(size_t layer) const;
   bool hasData(size_t layer) const;
+  void tagUpdate();
 
   std::vector<liquid_layer>* getLayers() { return &_layers; };
 

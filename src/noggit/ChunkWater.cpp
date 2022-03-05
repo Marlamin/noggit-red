@@ -340,3 +340,8 @@ void ChunkWater::copy_height_to_layer(liquid_layer& target, glm::vec3 const& pos
   }
 }
 
+void ChunkWater::tagUpdate()
+{
+  _water_tile->tagUpdate();
+}
+
