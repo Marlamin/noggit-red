@@ -148,6 +148,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
   _area_table_id = new QSpinBox(_map_settings);
   map_settings_layout->addRow("Area ID:",_area_table_id);
+  _area_table_id->setMaximum(std::numeric_limits<std::int32_t>::max());
 
   _map_desc_alliance = new LocaleDBCEntry(_map_settings);
   map_settings_layout->addRow("Description (Alliance):",_map_desc_alliance);
@@ -157,6 +158,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
   _loading_screen  = new QSpinBox(_map_settings);
   map_settings_layout->addRow("Loading screen:",_loading_screen);
+  _loading_screen->setMaximum(std::numeric_limits<std::int32_t>::max());
 
    _minimap_icon_scale = new QDoubleSpinBox(_map_settings);
   map_settings_layout->addRow("Minimap icon scale:",_minimap_icon_scale);
@@ -166,12 +168,17 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
   _corpse_x = new QDoubleSpinBox(_map_settings);
   map_settings_layout->addRow("Corpse X:",_corpse_x);
+  _corpse_x->setMinimum(-17066.66656); // map size
+  _corpse_x->setMaximum(17066.66656);
 
   _corpse_y = new QDoubleSpinBox(_map_settings);
   map_settings_layout->addRow("Corpse Y:",_corpse_y);
+  _corpse_y->setMinimum(-17066.66656); // map size
+  _corpse_y->setMaximum(17066.66656);
 
   _time_of_day_override = new QSpinBox(_map_settings);
   _time_of_day_override->setMinimum(-1);
+  _time_of_day_override->setMaximum(2880); // Time Values from 0 to 2880 where each number represents a half minute from midnight to midnight 
   _time_of_day_override->setValue(-1);
 
   map_settings_layout->addRow("Daytime override:",_time_of_day_override);
@@ -190,9 +197,11 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   map_settings_layout->addRow("Expansion:",_expansion_id);
 
   _raid_offset = new QSpinBox(_map_settings);
+  _raid_offset->setMaximum(std::numeric_limits<std::int32_t>::max());
   map_settings_layout->addRow("Raid offset:",_raid_offset);
 
   _max_players = new QSpinBox(_map_settings);
+  _max_players->setMaximum(std::numeric_limits<std::int32_t>::max());
   map_settings_layout->addRow("Max players:",_max_players);
 
   // Bottom row
