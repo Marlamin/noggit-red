@@ -319,6 +319,12 @@ ADD_EXECUTABLE(noggit
   ${force_update_file}
 )
 
+if (UNIX)
+  FIND_PACKAGE(BZip2 REQUIRED)
+  TARGET_LINK_LIBRARIES (noggit BZip2::BZip2)
+ENDIF()
+
+
 TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   StormLib
@@ -412,11 +418,6 @@ ENDIF()
 
 IF(APPLE)
   TARGET_LINK_LIBRARIES (noggit "-framework Cocoa" "-framework AppKit" "-framework Foundation")
-ENDIF()
-
-if (UNIX)
-  FIND_PACKAGE(BZip2 REQUIRED)
-  TARGET_LINK_LIBRARIES (noggit BZip2::BZip2)
 ENDIF()
 
 IF(MYSQL_LIBRARY AND MYSQLCPPCONN_LIBRARY AND MYSQLCPPCONN_INCLUDE)
