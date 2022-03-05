@@ -321,7 +321,15 @@ ADD_EXECUTABLE(noggit
 
 if (UNIX)
   FIND_PACKAGE(BZip2 REQUIRED)
-  TARGET_LINK_LIBRARIES (noggit BZip2::BZip2)
+
+  MESSAGE(-- ---------------------------------------------)
+  If(NOT BZIP2_FOUND)
+    MESSAGE("-- BZip2 was not found. Linking Stormlib is likely to fail.")
+  ELSE()
+    MESSAGE("-- Bzip2 found.")
+  ENDIF()
+
+  TARGET_LINK_LIBRARIES (noggit ${BZIP2_LIBRARIES})
 ENDIF()
 
 
