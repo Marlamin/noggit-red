@@ -553,6 +553,7 @@ bool MapChunk::intersect (math::ray const& ray, selection_result* results)
     110, 118, 110, 109, 135, 126, 143, 135, 143, 144, 135, 144, 127, 135, 127, 126
   };
 
+  bool intersection_found = false;
   for (int i (0); i < indices.size(); i += 3)
   {
     if ( auto distance = ray.intersect_triangle ( mVertices[indices[i + 0]]
@@ -564,11 +565,11 @@ bool MapChunk::intersect (math::ray const& ray, selection_result* results)
       results->emplace_back
           (*distance, selected_chunk_type (this, std::make_tuple(indices[i], indices[i + 1],
                                                                  indices[i + 2]), ray.position (*distance)));
-      return true;
+      intersection_found = true;
     }
   }
 
-  return false;
+  return intersection_found;
 }
 
 void MapChunk::updateVerticesData()
