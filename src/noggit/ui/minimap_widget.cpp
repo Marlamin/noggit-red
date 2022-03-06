@@ -290,6 +290,13 @@ namespace Noggit
 
     void minimap_widget::mousePressEvent(QMouseEvent* event)
     {
+      if (!_world)
+      {
+        event->ignore();
+        return;
+      }
+
+
       if (event->button() == Qt::RightButton)
       {
         _is_selecting = false;
@@ -307,28 +314,37 @@ namespace Noggit
 
     void minimap_widget::mouseReleaseEvent(QMouseEvent* event)
     {
+
+      if (!_world)
+      {
+        event->ignore();
+        return;
+      }
+
       _is_selecting = false;
       update();
     }
 
     void minimap_widget::mouseMoveEvent(QMouseEvent* event)
     {
-      if (_world)
+      if (!_world)
       {
-        QPoint tile = locateTile(event);
-
-        std::string str("ADT: " + std::to_string(tile.x()) + "_" + std::to_string(tile.y()));
-
-        QToolTip::showText(mapToGlobal(QPoint(event->pos().x(), event->pos().y() + 5)), QString::fromStdString(str));
-
-        if (_is_selecting)
-        {
-          emit tile_clicked(tile);
-        }
-
-        update();
-
+        event->ignore();
+        return;
       }
+
+      QPoint tile = locateTile(event);
+
+      std::string str("ADT: " + std::to_string(tile.x()) + "_" + std::to_string(tile.y()));
+
+      QToolTip::showText(mapToGlobal(QPoint(event->pos().x(), event->pos().y() + 5)), QString::fromStdString(str));
+
+      if (_is_selecting)
+      {
+        emit tile_clicked(tile);
+      }
+
+      update();
     }
   }
 }

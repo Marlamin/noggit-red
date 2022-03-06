@@ -269,16 +269,22 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
             {
               for (int j = 0; j < 3; ++j)
               {
-                if (!_world->mapIndex.hasTile(TileIndex(x + i, y + j)))
+                int x_final = x + i;
+                int y_final = y + j;
+
+                if (x_final < 0 || x_final > 63 || y_final < 0 || y_final > 63)
+                  continue;
+
+                if (!_world->mapIndex.hasTile(TileIndex(x_final, y_final)))
                 {
                   if (!QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
                   {
-                    _world->mapIndex.addTile(TileIndex(x + i, y + j));
+                    _world->mapIndex.addTile(TileIndex(x_final, y_final));
                   }
                 }
                 else if (QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
                 {
-                  _world->mapIndex.removeTile(TileIndex(x + i, y + j));
+                  _world->mapIndex.removeTile(TileIndex(x_final, y_final));
                 }
               }
             }
@@ -287,6 +293,9 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
           {
             int x = tile.x();
             int y = tile.y();
+
+            if (x < 0 || x > 63 || y < 0 || y > 63)
+              return;
 
             if (!_world->mapIndex.hasTile(TileIndex(x, y)))
             {
