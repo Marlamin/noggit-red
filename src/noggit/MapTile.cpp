@@ -1172,19 +1172,29 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
       }
 
       if (!layer)
-        continue;
-
-      chunk->texture_set->apply_alpha_changes();
-      auto alphamaps = chunk->texture_set->getAlphamaps();
-
-      auto alpha_layer = alphamaps->at(layer - 1).value();
-
-      for (int k = 0; k < 64; ++k)
       {
-        for (int l = 0; l < 64; ++l)
+        for (int k = 0; k < 64; ++k)
         {
-          int value = alpha_layer.getAlpha(64 * l + k);
-          image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
+          for (int l = 0; l < 64; ++l)
+          {
+            image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(255, 255, 255, 255));
+          }
+        }
+      }
+      else
+      {
+        chunk->texture_set->apply_alpha_changes();
+        auto alphamaps = chunk->texture_set->getAlphamaps();
+
+        auto alpha_layer = alphamaps->at(layer - 1).value();
+
+        for (int k = 0; k < 64; ++k)
+        {
+          for (int l = 0; l < 64; ++l)
+          {
+            int value = alpha_layer.getAlpha(64 * l + k);
+            image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
+          }
         }
       }
     }
