@@ -13,6 +13,7 @@
 #include <glm/vec4.hpp>
 #include <noggit/Selection.h>
 
+
 // namespace for static helper functions.
 
 

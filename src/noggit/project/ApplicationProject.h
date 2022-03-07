@@ -161,100 +161,14 @@ namespace Noggit::Project
         {
             std::filesystem::create_directory(projectPath);
 
-            auto workspaceDirectory = projectPath / std::string("workspace");
-
-            std::filesystem::create_directory(workspaceDirectory);
-            std::filesystem::create_directory(projectPath / std::string("export"));
-
             auto project = NoggitProject();
             project.ProjectName = projectName;
             project.projectVersion = ClientVersionFactory::MapToEnumVersion(clientVersion);
             project.ClientPath = clientPath.generic_string();
 
             auto projectWriter = ApplicationProjectWriter();
-            projectWriter.SaveProject(&project,projectPath);
+            projectWriter.SaveProject(&project, projectPath);
 
-            auto listOfDbcPaths = std::vector<std::string>
-            {
-                "DBFilesClient/AreaTable.dbc",
-                "DBFilesClient/Map.dbc",
-                "DBFilesClient/LoadingScreens.dbc",
-                "DBFilesClient/Light.dbc",
-                "DBFilesClient/LightParams.dbc",
-                "DBFilesClient/LightSkybox.dbc",
-                "DBFilesClient/LightIntBand.dbc",
-                "DBFilesClient/LightFloatBand.dbc",
-                "DBFilesClient/GroundEffectTexture.dbc",
-                "DBFilesClient/GroundEffectDoodad.dbc",
-                "DBFilesClient/LiquidType.dbc",
-            };
-
-            if (project.projectVersion == ProjectVersion::WOTLK)
-            {
-                auto clientData = BlizzardArchive::ClientData(clientPath.generic_string(), BlizzardArchive::ClientVersion::WOTLK,
-                    BlizzardArchive::Locale::AUTO, workspaceDirectory.generic_string());
-
-                std::filesystem::create_directory(workspaceDirectory / "DBFilesClient");
-
-                for (auto& path : listOfDbcPaths)
-                {
-                    BlizzardArchive::ClientFile f(path, &clientData);
-                    auto fileSize = f.getSize();
-
-                    auto buffer = new char[fileSize];
-
-                    auto filePath = std::filesystem::absolute(workspaceDirectory / path).generic_string();
-                    auto stream = std::fstream();
-                    stream.open(filePath, std::ios::out | std::ios::binary);
-                    f.read(buffer, fileSize);
-                    stream.write(buffer, fileSize);
-                    stream.flush();
-                    stream.close();
-
-                    delete[] buffer;
-                }
-            }
-
-            auto listOfDb2Paths = std::vector<std::string>
-            {
-                //"DBFilesClient/AreaTable.db2",
-                "DBFilesClient/Map.db2",
-                //"DBFilesClient/LoadingScreens.db2",
-                //"DBFilesClient/Light.db2",
-                //"DBFilesClient/LightParams.db2",
-                //"DBFilesClient/LightSkybox.db2",
-                //"DBFilesClient/LightIntBand.db2",
-                //"DBFilesClient/LightFloatBand.db2",
-                //"DBFilesClient/GroundEffectTexture.db2",
-                //"DBFilesClient/GroundEffectDoodad.db2",
-                //"DBFilesClient/LiquidType.db2",
-            };
-
-            if (project.projectVersion == ProjectVersion::SL)
-            {
-                auto clientData = BlizzardArchive::ClientData(clientPath.generic_string(), BlizzardArchive::ClientVersion::SL,
-                    BlizzardArchive::Locale::enUS, std::string(""));
-
-                std::filesystem::create_directory(workspaceDirectory / "DBFilesClient");
-
-                for (auto& path : listOfDb2Paths)
-                {
-                    BlizzardArchive::ClientFile f(path, &clientData);
-                    auto fileSize = f.getSize();
-
-                    auto buffer = new char[fileSize];
-
-                    auto filePath = std::filesystem::absolute(workspaceDirectory / path).generic_string();
-                    auto stream = std::fstream();
-                    stream.open(filePath, std::ios::out | std::ios::binary);
-                    f.read(buffer, fileSize);
-                    stream.write(buffer, fileSize);
-                    stream.flush();
-                    stream.close();
-
-                    delete[] buffer;
-                }
-            }
         }
 
         std::shared_ptr<NoggitProject> LoadProject(std::filesystem::path const& projectPath)
@@ -264,7 +178,6 @@ namespace Noggit::Project
 
             assert (project.has_value());
 
-            std::string dbcFileDirectory = (projectPath / "workspace" / "DBFilesClient").generic_string();
             std::string dbdFileDirectory = _configuration->ApplicationDatabaseDefinitionsPath;
 
             auto clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
@@ -284,10 +197,9 @@ namespace Noggit::Project
                 clientArchiveLocale = BlizzardArchive::Locale::AUTO;
             }
 
-            project->ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(
-	            dbcFileDirectory, dbdFileDirectory, clientBuild);
+            project->ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(dbdFileDirectory, clientBuild);
             project->ClientData = std::make_shared<BlizzardArchive::ClientData>(
-	            project->ClientPath, clientArchiveVersion, clientArchiveLocale, std::string((projectPath / "export").generic_string()));
+	            project->ClientPath, clientArchiveVersion, clientArchiveLocale, projectPath.generic_string());
 
 
             return std::make_shared<NoggitProject>(project.value());

@@ -3,6 +3,7 @@
 #include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
 #include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <noggit/application/Utils.hpp>
 #include <QMenuBar>
 #include <QAction>
 #include <QObject>
@@ -14,7 +15,7 @@ void BuildMapListComponent::BuildMapList(Noggit::Ui::Windows::NoggitWindow* pare
   parent->_continents_table->clear();
 
   const auto& table = std::string("Map");
-  auto mapTable = parent->_project->ClientDatabase->LoadTable(table);
+  auto mapTable = parent->_project->ClientDatabase->LoadTable(table, readFileAsIMemStream);
 
   auto iterator = mapTable.Records();
   auto pinnedMaps = std::vector<Widget::MapListData>();

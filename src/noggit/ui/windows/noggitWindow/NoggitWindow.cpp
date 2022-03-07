@@ -34,6 +34,7 @@
 #include <QDir>
 #include <QIcon>
 #include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
+#include <noggit/application/Utils.hpp>
 
 #ifdef USE_MYSQL_UID_STORAGE
   #include <mysql/mysql.h>
@@ -196,7 +197,7 @@ namespace Noggit::Ui::Windows
 
       _world.reset();
 
-      auto table = _project->ClientDatabase->LoadTable("Map");
+      auto table = _project->ClientDatabase->LoadTable("Map", readFileAsIMemStream);
       auto record = table.Record(mapID);
 
       _world = std::make_unique<World>(record.Columns["Directory"].Value, mapID, Noggit::NoggitRenderContext::MAP_VIEW);

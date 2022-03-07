@@ -8,6 +8,7 @@
 #include <blizzard-database-library/include/structures/Types.h>
 #include <noggit/MapView.h>
 #include <noggit/World.h>
+#include <noggit/application/Utils.hpp>
 #include <noggit/Log.h>
 
 #include <util/qt/overload.hpp>
@@ -72,7 +73,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   // Fill selector combo
 
   const auto& table = std::string("Map");
-  auto mapTable = _project->ClientDatabase->LoadTable(table);
+  auto mapTable = _project->ClientDatabase->LoadTable(table, readFileAsIMemStream);
 
   int count = 0;
   auto iterator = mapTable.Records();
@@ -320,7 +321,7 @@ void MapCreationWizard::selectMap(int map_id)
 {
   _is_new_record = false;
 
-  auto table = _project->ClientDatabase->LoadTable("Map");
+  auto table = _project->ClientDatabase->LoadTable("Map", readFileAsIMemStream);
   auto record = table.Record(map_id);
 
   _cur_map_id = map_id;

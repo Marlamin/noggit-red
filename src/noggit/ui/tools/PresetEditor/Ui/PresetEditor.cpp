@@ -2,6 +2,7 @@
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/FontNoggit.hpp>
 #include <noggit/DBC.h>
+#include <noggit/application/Utils.hpp>
 
 using namespace Noggit::Ui::Tools::PresetEditor::Ui;
 using namespace Noggit::Ui;
@@ -74,7 +75,7 @@ PresetEditorWidget::PresetEditorWidget(std::shared_ptr<Project::NoggitProject> p
   ui->worldSelector->setItemData(0, QVariant(-1));
 
   const auto& table = std::string("Map");
-  auto mapTable = _project->ClientDatabase->LoadTable(table);
+  auto mapTable = _project->ClientDatabase->LoadTable(table, readFileAsIMemStream);
 
   int count = 1;
   auto iterator = mapTable.Records();

@@ -4,6 +4,7 @@
 #include <noggit/Selection.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h>
+#include <ClientData.hpp>
 
 #include <iomanip>
 #include <map>
@@ -207,6 +208,4 @@ void SetChunkHeader(sExtendableArray& pArray, int pPosition, int pMagix, int pSi
   Header->mMagic = pMagix;
   Header->mSize = pSize;
 }
-
-
 
