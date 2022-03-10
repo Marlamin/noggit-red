@@ -68,17 +68,17 @@ namespace Noggit
               }
       );
 
-      connect(ui->projectPathField, &QLineEdit::textChanged, [&](QString value)
+      connect(ui->clientPathField, &QLineEdit::textChanged, [&](QString value)
               {
                 _settings->setValue("project/path", value);
               }
       );
 
 
-      connect(ui->projectPathField_browse, &QPushButton::clicked, [=]
+      connect(ui->clientPathField_browse, &QPushButton::clicked, [=]
               {
                 auto result(QFileDialog::getExistingDirectory(
-                    nullptr, "Project Path", ui->projectPathField->text()));
+                    nullptr, "Project Path", ui->clientPathField->text()));
 
                 if (!result.isNull())
                 {
@@ -87,7 +87,7 @@ namespace Noggit
                     result += "/";
                   }
 
-                  ui->projectPathField->setText(result);
+                  ui->clientPathField->setText(result);
                 }
               }
       );
@@ -206,7 +206,7 @@ namespace Noggit
     void settings::discard_changes()
     {
       ui->gamePathField->setText(_settings->value("project/game_path").toString());
-      ui->projectPathField->setText(_settings->value("project/path").toString());
+      ui->clientPathField->setText(_settings->value("project/path").toString());
       ui->importPathField->setText(_settings->value("project/import_file", "import.txt").toString());
       ui->wmvLogPathField->setText(_settings->value("project/wmv_log_file").toString());
       ui->viewDistanceField->setValue(_settings->value("view_distance", 1000.f).toFloat());
@@ -270,7 +270,7 @@ namespace Noggit
     void settings::save_changes()
     {
       _settings->setValue("project/game_path", ui->gamePathField->text());
-      _settings->setValue("project/path", ui->projectPathField->text());
+      _settings->setValue("project/path", ui->clientPathField->text());
       _settings->setValue("project/import_file", ui->importPathField->text());
       _settings->setValue("project/wmv_log_file", ui->wmvLogPathField->text());
       _settings->setValue("farZ", ui->farZField->value());

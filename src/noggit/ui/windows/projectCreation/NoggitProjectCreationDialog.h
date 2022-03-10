@@ -11,6 +11,7 @@ class NoggitProjectCreationDialog;
 struct ProjectInformation
 {
     std::string ProjectName;
+    std::string ProjectPath;
     std::string GameClientPath;
     std::string GameClientVersion;
 };
@@ -20,7 +21,7 @@ class NoggitProjectCreationDialog : public QDialog
     Q_OBJECT
 
 public:
-    NoggitProjectCreationDialog(ProjectInformation& projectInformation, QWidget *parent = nullptr);
+    NoggitProjectCreationDialog(ProjectInformation& project_information, QWidget *parent = nullptr);
     ~NoggitProjectCreationDialog();
 
 private:

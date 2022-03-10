@@ -11,55 +11,56 @@
 
 namespace Noggit::Project
 {
-    void ApplicationProjectWriter::SaveProject(NoggitProject* project, std::filesystem::path const& projectPath)
-	{
-        auto projectConfigurationFilePath = (projectPath / (project->ProjectName + std::string(".noggitproj")));
-        auto projectConfigurationFile = QFile(QString::fromStdString(projectConfigurationFilePath.generic_string()));
-        projectConfigurationFile.open(QIODevice::WriteOnly);
+  void ApplicationProjectWriter::saveProject(NoggitProject* project, std::filesystem::path const& project_path)
+  {
+    auto project_configuration_file_path = (project_path / (project->ProjectName + std::string(".noggitproj")));
+    auto project_configuration_file = QFile(QString::fromStdString(project_configuration_file_path.generic_string()));
+    project_configuration_file.open(QIODevice::WriteOnly);
 
-        auto document = QJsonDocument();
-        auto root = QJsonObject();
-        auto projectConfiguration = QJsonObject();
-        auto clientConfiguration = QJsonObject();
+    auto document = QJsonDocument();
+    auto root = QJsonObject();
+    auto project_configuration = QJsonObject();
+    auto client_configuration = QJsonObject();
 
-        clientConfiguration.insert("ClientPath", project->ClientPath.c_str());
-        clientConfiguration.insert("ClientVersion", ClientVersionFactory::MapToStringVersion(project->projectVersion).c_str());
+    client_configuration.insert("ClientPath", project->ClientPath.c_str());
+    client_configuration.insert("ClientVersion",
+                                ClientVersionFactory::MapToStringVersion(project->projectVersion).c_str());
 
-        auto pinnedMaps = QJsonArray();
-        for(auto const &pinnedMap : project->PinnedMaps)
-        {
-            auto jsonPinnedMap = QJsonObject();
-            jsonPinnedMap.insert("MapName", pinnedMap.MapName.c_str());
-            jsonPinnedMap.insert("MapId", pinnedMap.MapId);
-            pinnedMaps.push_back(jsonPinnedMap);
-        }
+    auto pinned_maps = QJsonArray();
+    for (auto const& pinnedMap: project->PinnedMaps)
+    {
+      auto json_pinned_map = QJsonObject();
+      json_pinned_map.insert("MapName", pinnedMap.MapName.c_str());
+      json_pinned_map.insert("MapId", pinnedMap.MapId);
+      pinned_maps.push_back(json_pinned_map);
+    }
 
-        auto bookmarks = QJsonArray();
-        for (auto const& bookmark : project->Bookmarks)
-        {
-            auto jsonPosition = QJsonObject();
-            jsonPosition.insert("X", bookmark.Position.x);
-            jsonPosition.insert("Y", bookmark.Position.y);
-            jsonPosition.insert("Z", bookmark.Position.z);
+    auto bookmarks = QJsonArray();
+    for (auto const& bookmark: project->Bookmarks)
+    {
+      auto json_position = QJsonObject();
+      json_position.insert("X", bookmark.position.x);
+      json_position.insert("Y", bookmark.position.y);
+      json_position.insert("Z", bookmark.position.z);
 
-            auto jsonBookmark = QJsonObject();
-            jsonBookmark.insert("BookmarkName", bookmark.Name.c_str());
-        	jsonBookmark.insert("MapId", bookmark.MapID);
-            jsonBookmark.insert("CameraPitch", bookmark.CameraPitch);
-            jsonBookmark.insert("CameraYaw", bookmark.CameraYaw);
-            jsonBookmark.insert("Position", jsonPosition);
-            bookmarks.push_back(jsonBookmark);
-        }
+      auto json_bookmark = QJsonObject();
+      json_bookmark.insert("BookmarkName", bookmark.name.c_str());
+      json_bookmark.insert("MapId", bookmark.map_id);
+      json_bookmark.insert("CameraPitch", bookmark.camera_pitch);
+      json_bookmark.insert("CameraYaw", bookmark.camera_yaw);
+      json_bookmark.insert("Position", json_position);
+      bookmarks.push_back(json_bookmark);
+    }
 
-        projectConfiguration.insert("PinnedMaps", pinnedMaps);
-        projectConfiguration.insert("Bookmarks", bookmarks);
-        projectConfiguration.insert("ProjectName", project->ProjectName.c_str());
-        projectConfiguration.insert("Client", clientConfiguration);
+    project_configuration.insert("PinnedMaps", pinned_maps);
+    project_configuration.insert("Bookmarks", bookmarks);
+    project_configuration.insert("ProjectName", project->ProjectName.c_str());
+    project_configuration.insert("Client", client_configuration);
 
-        root.insert("Project", projectConfiguration);
-        document.setObject(root);
+    root.insert("Project", project_configuration);
+    document.setObject(root);
 
-        projectConfigurationFile.write(document.toJson(QJsonDocument::Indented));
-        projectConfigurationFile.close();
-	}
+    project_configuration_file.write(document.toJson(QJsonDocument::Indented));
+    project_configuration_file.close();
+  }
 }

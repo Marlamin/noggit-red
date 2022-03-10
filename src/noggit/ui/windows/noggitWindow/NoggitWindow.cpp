@@ -245,8 +245,8 @@ namespace Noggit::Ui::Windows
         auto item = new QListWidgetItem(bookmarks_table);
 
         auto mapBookmarkData = Widget::MapListBookmarkData();
-        mapBookmarkData.MapName = QString::fromStdString(entry.Name);
-        mapBookmarkData.Position = entry.Position;
+        mapBookmarkData.MapName = QString::fromStdString(entry.name);
+        mapBookmarkData.Position = entry.position;
 
         auto mapBookmarkItem = new Widget::MapListBookmarkItem(mapBookmarkData, bookmarks_table);
 
@@ -265,13 +265,13 @@ namespace Noggit::Ui::Windows
 
                            for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
                            {
-                             if (it->getInt(MapDB::MapID) == entry.MapID)
+                             if (it->getInt(MapDB::MapID) == entry.map_id)
                              {
                                _world = std::make_unique<World> (it->getString(MapDB::InternalName),
-                                                                 entry.MapID, Noggit::NoggitRenderContext::MAP_VIEW);
-                               check_uid_then_enter_map ( entry.Position
-                                                        , math::degrees (entry.CameraPitch)
-                                                        , math::degrees (entry.CameraYaw)
+                                                                 entry.map_id, Noggit::NoggitRenderContext::MAP_VIEW);
+                               check_uid_then_enter_map ( entry.position
+                                                        , math::degrees (entry.camera_pitch)
+                                                        , math::degrees (entry.camera_yaw)
                                                         , true
                                                         );
                                return;
@@ -335,13 +335,13 @@ namespace Noggit::Ui::Windows
 
     void NoggitWindow::HandleEventMapListContextMenuPinMap(int mapId, std::string MapName)
     {
-        _project->PinMap(mapId, MapName);
+      _project->pinMap(mapId, MapName);
         _buildMapListComponent->BuildMapList(this);
     }
 
     void NoggitWindow::HandleEventMapListContextMenuUnpinMap(int mapId)
     {
-        _project->UnpinMap(mapId);
+      _project->unpinMap(mapId);
         _buildMapListComponent->BuildMapList(this);
     }
 

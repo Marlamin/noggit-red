@@ -12,7 +12,7 @@ namespace Noggit::Project
 	public:
 		ApplicationProjectWriter() = default;
 
-		void SaveProject(NoggitProject* project, std::filesystem::path const& projectPath);
+		void saveProject(NoggitProject* project, std::filesystem::path const& project_path);
 	};
 }
 

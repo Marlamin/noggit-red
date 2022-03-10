@@ -2,7 +2,6 @@
 #define NOGGITREDPROJECTPAGE_H
 
 #include <QMainWindow>
-#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
 #include <QMenuBar>
 #include <QAction>
 #include <qgraphicseffect.h>
@@ -10,6 +9,8 @@
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/ui/windows/projectCreation/NoggitProjectCreationDialog.h>
+#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
+#include <ui_NoggitProjectSelectionWindow.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class NoggitProjectSelectionWindow; }
@@ -17,7 +18,7 @@ QT_END_NAMESPACE
 
 namespace Noggit::Ui::Component
 {
-    class ExistingProjectEnumerationComponent;
+    class RecentProjectsComponent;
     class CreateProjectComponent;
     class LoadProjectComponent;
 }
@@ -32,25 +33,23 @@ namespace Noggit::Ui::Windows
     class NoggitProjectSelectionWindow : public QMainWindow
     {
         Q_OBJECT
-    	friend Component::ExistingProjectEnumerationComponent;
+    	  friend Component::RecentProjectsComponent;
         friend Component::CreateProjectComponent;
         friend Component::LoadProjectComponent;
     public:
-        NoggitProjectSelectionWindow(Noggit::Application::NoggitApplication* noggitApplication, QWidget* parent = nullptr);
+        NoggitProjectSelectionWindow(Noggit::Application::NoggitApplication* noggit_app, QWidget* parent = nullptr);
         ~NoggitProjectSelectionWindow();
 
     private:
-        ::Ui::NoggitProjectSelectionWindow* ui;
-        Noggit::Application::NoggitApplication* _noggitApplication;
+        ::Ui::NoggitProjectSelectionWindow* _ui;
+        Noggit::Application::NoggitApplication* _noggit_application;
         Noggit::Ui::settings* _settings;
 
-        std::unique_ptr<Noggit::Ui::Windows::NoggitWindow> projectSelectionPage;
+        std::unique_ptr<Noggit::Ui::Windows::NoggitWindow> _project_selection_page;
+        std::unique_ptr<Component::CreateProjectComponent> _create_project_component;
+        std::unique_ptr<Component::LoadProjectComponent> _load_project_component;
 
-        std::unique_ptr<Component::ExistingProjectEnumerationComponent> _existingProjectEnumerationComponent;
-        std::unique_ptr<Component::CreateProjectComponent> _createProjectComponent;
-        std::unique_ptr<Component::LoadProjectComponent> _loadProjectComponent;
-
-        void HandleContextMenuProjectListItemDelete(std::string projectPath);
+        void handleContextMenuProjectListItemDelete(std::string const& project_path);
     };
 }
 #endif // NOGGITREDPROJECTPAGE_H

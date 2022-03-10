@@ -16,12 +16,12 @@
   <property name="windowTitle">
    <string>Noggit Red Project Selection</string>
   </property>
-   <property name="windowIcon">
-     <iconset>
-       <normalon>:/icon</normalon>
-     </iconset>
-   </property>
-   <widget class="QWidget" name="centralwidget">
+  <property name="windowIcon">
+   <iconset>
+    <normalon>:/icon</normalon>
+   </iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
@@ -70,7 +70,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Projects</string>
+          <string>Recent Projects</string>
          </property>
         </widget>
        </item>
@@ -208,10 +208,10 @@
          </item>
          <item row="2" column="0">
           <widget class="QPushButton" name="button_open_existing_project">
-            <property name="enabled">
-              <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>

@@ -112,7 +112,7 @@ namespace Noggit::Application
 
   }
 
-  std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> NoggitApplication::GetConfiguration()
+  std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> NoggitApplication::getConfiguration()
   {
 	  return _applicationConfiguration;
   }

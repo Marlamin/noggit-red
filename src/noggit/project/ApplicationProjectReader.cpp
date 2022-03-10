@@ -38,16 +38,16 @@ namespace Noggit::Project
                         for (auto const& jsonBookmark : projectBookmarks)
                         {
                             auto bookmark = NoggitProjectBookmarkMap();
-                            bookmark.MapID = jsonBookmark.toObject().value("MapId").toInt();
-                            bookmark.Name = jsonBookmark.toObject().value("BookmarkName").toString().toStdString();
-                            bookmark.CameraPitch = jsonBookmark.toObject().value("CameraPitch").toDouble();
-                            bookmark.CameraYaw = jsonBookmark.toObject().value("CameraYaw").toDouble();
+                            bookmark.map_id = jsonBookmark.toObject().value("MapId").toInt();
+                            bookmark.name = jsonBookmark.toObject().value("BookmarkName").toString().toStdString();
+                            bookmark.camera_pitch = jsonBookmark.toObject().value("CameraPitch").toDouble();
+                            bookmark.camera_yaw = jsonBookmark.toObject().value("CameraYaw").toDouble();
 
                             auto bookmarkPosition = jsonBookmark.toObject().value("Position");
                             auto bookmarkPositionX = bookmarkPosition.toObject().value("X").toDouble();
                             auto bookmarkPositionY = bookmarkPosition.toObject().value("Y").toDouble();
                             auto bookmarkPositionZ = bookmarkPosition.toObject().value("Z").toDouble();
-                            bookmark.Position = glm::vec3(bookmarkPositionX, bookmarkPositionY, bookmarkPositionZ);
+                            bookmark.position = glm::vec3(bookmarkPositionX, bookmarkPositionY, bookmarkPositionZ);
 
                             project.Bookmarks.push_back(bookmark);
                         }

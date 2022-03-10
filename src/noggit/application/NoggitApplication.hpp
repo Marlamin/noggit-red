@@ -10,7 +10,7 @@
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfigurationReader.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfigurationWriter.hpp>
-#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.h>
+#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -49,7 +49,7 @@ namespace Noggit::Application {
         void clientData(std::shared_ptr<BlizzardArchive::ClientData> data) { _client_data = data; }
 
         void Initalize(int argc, char* argv[]);
-        std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> GetConfiguration();
+        std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> getConfiguration();
         static void TerminationHandler();
     private:
         NoggitApplication() = default;

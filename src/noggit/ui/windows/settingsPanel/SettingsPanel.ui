@@ -160,10 +160,10 @@
                       </widget>
                      </item>
                      <item>
-                      <widget class="QLineEdit" name="projectPathField"/>
+                      <widget class="QLineEdit" name="clientPathField"/>
                      </item>
                      <item>
-                      <widget class="QPushButton" name="projectPathField_browse">
+                      <widget class="QPushButton" name="clientPathField_browse">
                        <property name="text">
                         <string>Browse</string>
                        </property>

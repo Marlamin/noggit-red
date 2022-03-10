@@ -1104,13 +1104,13 @@ void MapView::setupFileMenu()
       {
 
           auto bookmark = Noggit::Project::NoggitProjectBookmarkMap();
-          bookmark.Position = _camera.position;
-          bookmark.CameraPitch = _camera.pitch()._;
-          bookmark.CameraYaw = _camera.yaw()._;
-          bookmark.MapID = _world->getMapID();
-          bookmark.Name = gAreaDB.getAreaName(_world->getAreaID(_camera.position));
+          bookmark.position = _camera.position;
+          bookmark.camera_pitch = _camera.pitch()._;
+          bookmark.camera_yaw = _camera.yaw()._;
+          bookmark.map_id = _world->getMapID();
+          bookmark.name = gAreaDB.getAreaName(_world->getAreaID(_camera.position));
 
-          _project->CreateBookmark(bookmark);
+        _project->createBookmark(bookmark);
 
       }
   );
