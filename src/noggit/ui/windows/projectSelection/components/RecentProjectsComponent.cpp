@@ -39,7 +39,7 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
 
     auto project_list_item = new Noggit::Ui::Widget::ProjectListItem(project_data, parent->_ui->listView);
 
-    item->setData(Qt::UserRole, QVariant(QString(project_path.c_str())));
+    item->setData(Qt::UserRole, QVariant(QString(project_path.string().c_str())));
     item->setSizeHint(project_list_item->minimumSizeHint());
 
     QObject::connect(project_list_item, &QListWidget::customContextMenuRequested,

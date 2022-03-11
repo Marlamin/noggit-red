@@ -52,7 +52,7 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
 
                      QString proj_file = QFileDialog::getOpenFileName(this, "Open File",
                                                                      "/",
-                                                                     "Noggit Project (*.noggitproj");
+                                                                     "*.noggitproj");
 
                      if (proj_file.isEmpty())
                        return;
@@ -67,7 +67,7 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
                        return;
                      }
 
-                     Component::RecentProjectsComponent::registerProjectChange(filepath.parent_path());
+                     Component::RecentProjectsComponent::registerProjectChange(filepath.parent_path().string());
 
                      auto application_configuration = _noggit_application->getConfiguration();
                      auto application_projects_folder_path = std::filesystem::path(application_configuration->ApplicationProjectPath);
