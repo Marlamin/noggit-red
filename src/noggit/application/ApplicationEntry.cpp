@@ -20,7 +20,7 @@
 int main(int argc, char *argv[])
 {
   Noggit::RegisterErrorHandlers();
-  std::set_terminate(Noggit::Application::NoggitApplication::TerminationHandler);
+  std::set_terminate(Noggit::Application::NoggitApplication::terminationHandler);
 
   QApplication::setStyle(QStyleFactory::create("Fusion"));
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
   qApplication.setOrganizationName ("Noggit");
 
   auto noggit = Noggit::Application::NoggitApplication::instance();
-  noggit->Initalize(argc, argv);
+  noggit->initalize(argc, argv);
 
   auto projectSelectionPage = std::make_unique<Noggit::Ui::Windows::NoggitProjectSelectionWindow>(noggit);
   projectSelectionPage->show();

@@ -48,7 +48,41 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
 
   QObject::connect(_ui->button_open_existing_project, &QPushButton::clicked, [=]
                    {
-                     return;
+                     auto project_reader = Noggit::Project::ApplicationProjectReader();
+
+                     QString proj_file = QFileDialog::getOpenFileName(this, "Open File",
+                                                                     "/",
+                                                                     "Noggit Project (*.noggitproj");
+
+                     if (proj_file.isEmpty())
+                       return;
+
+                     std::filesystem::path filepath(proj_file.toStdString());
+
+                     auto project = project_reader.ReadProject(filepath.parent_path());
+
+                     if (!project.has_value())
+                     {
+                       QMessageBox::critical(this, "Error", "Failed to read project");
+                       return;
+                     }
+
+                     Component::RecentProjectsComponent::registerProjectChange(filepath.parent_path());
+
+                     auto application_configuration = _noggit_application->getConfiguration();
+                     auto application_projects_folder_path = std::filesystem::path(application_configuration->ApplicationProjectPath);
+                     auto application_project_service = Noggit::Project::ApplicationProject(application_configuration);
+                     auto project_to_launch = application_project_service.loadProject(filepath.parent_path());
+                     Noggit::Application::NoggitApplication::instance()->setClientData(project_to_launch->ClientData);
+
+                     Noggit::Project::CurrentProject::initialize(project_to_launch.get());
+
+                     _project_selection_page = std::make_unique<Noggit::Ui::Windows::NoggitWindow>(
+                         _noggit_application->getConfiguration(),
+                         project_to_launch);
+                     _project_selection_page->showMaximized();
+
+                     close();
                    }
   );
 

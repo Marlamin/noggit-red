@@ -48,7 +48,7 @@ NoggitProjectCreationDialog::NoggitProjectCreationDialog(ProjectInformation& pro
   QObject::connect(ui->projectPathField_browse, &QPushButton::clicked, [this]
                    {
                      QString folder_name = QFileDialog::getExistingDirectory(this
-                         , "Select Client Directory"
+                         , "Select Project Directory"
                          , "/"
                          , QFileDialog::ShowDirsOnly |
                            QFileDialog::DontResolveSymlinks);

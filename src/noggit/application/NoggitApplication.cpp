@@ -3,7 +3,7 @@
 
 namespace Noggit::Application
 {
-  void NoggitApplication::Initalize(int argc, char* argv[])
+  void NoggitApplication::initalize(int argc, char* argv[])
   {
 	  InitLogging();
 
@@ -106,7 +106,7 @@ namespace Noggit::Application
 	  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
 
 
-	  _applicationConfiguration = std::make_shared<Noggit::Application::NoggitApplicationConfiguration>(applicationConfiguration);
+    _application_configuration = std::make_shared<Noggit::Application::NoggitApplicationConfiguration>(applicationConfiguration);
 	  //All of the below should be Project Initalisation
 	  srand(::time(nullptr));
 
@@ -114,10 +114,10 @@ namespace Noggit::Application
 
   std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> NoggitApplication::getConfiguration()
   {
-	  return _applicationConfiguration;
+	  return _application_configuration;
   }
 
-  void NoggitApplication::TerminationHandler()
+  void NoggitApplication::terminationHandler()
   {
 	  std::string const reason{ ::util::exception_to_string(std::current_exception()) };
 

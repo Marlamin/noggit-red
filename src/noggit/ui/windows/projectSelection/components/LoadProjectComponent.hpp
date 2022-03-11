@@ -21,7 +21,7 @@ namespace Noggit::Ui::Component
       auto project = application_project_service.loadProject(project_path);
 
       //This to not be static, but its hard to remove
-      Noggit::Application::NoggitApplication::instance()->clientData(project->ClientData);
+      Noggit::Application::NoggitApplication::instance()->setClientData(project->ClientData);
 
       return project;
     }

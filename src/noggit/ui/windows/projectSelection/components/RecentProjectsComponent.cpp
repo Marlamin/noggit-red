@@ -2,6 +2,9 @@
 
 #include "RecentProjectsComponent.hpp"
 
+#include <QList>
+
+
 using namespace Noggit::Ui::Component;
 
 
@@ -64,4 +67,45 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
   }
 
   settings.endArray();
+}
+
+void RecentProjectsComponent::registerProjectChange(std::string const& project_path)
+{
+  QSettings settings;
+  settings.sync();
+
+  QList<QString> recent_projects;
+
+  std::size_t size = settings.beginReadArray("recent_projects");
+  for (int i = 0; i < size; ++i)
+  {
+    settings.setArrayIndex(i);
+    recent_projects.append(settings.value("project_path").toString());
+  }
+  settings.endArray();
+
+  // remove duplicates
+  auto it = std::find(recent_projects.begin(), recent_projects.end(), project_path.c_str());
+
+  if (it != recent_projects.end())
+  {
+    recent_projects.erase(it);
+    size--;
+  }
+
+  settings.remove("recent_projects");
+  settings.beginWriteArray("recent_projects");
+
+  settings.setArrayIndex(0);
+  settings.setValue("project_path", QString(project_path.c_str()));
+
+  for (int i = 0; i < size; ++i)
+  {
+    settings.setArrayIndex(i + 1);
+    settings.setValue("project_path", recent_projects[i]);
+  }
+  settings.endArray();
+
+  settings.sync();
+
 }
