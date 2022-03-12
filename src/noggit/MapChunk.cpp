@@ -1488,8 +1488,8 @@ void MapChunk::save(sExtendableArray& lADTFile
     int pixel_start = chunk_start + i * 4;
 
     lNormals[i * 3 + 0] = static_cast<char>(tile_buffer[pixel_start] * 127);
-    lNormals[i * 3 + 1] = static_cast<char>(tile_buffer[pixel_start + 1] * 127);
-    lNormals[i * 3 + 2] = static_cast<char>(tile_buffer[pixel_start + 2] * 127);
+    lNormals[i * 3 + 1] = static_cast<char>(tile_buffer[pixel_start + 2] * 127);
+    lNormals[i * 3 + 2] = static_cast<char>(tile_buffer[pixel_start + 1] * 127);
   }
 
   lCurrentPosition += 8 + lMCNR_Size;
