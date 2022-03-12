@@ -294,7 +294,7 @@ namespace Noggit
       connect ( _spray_mode_group, &QGroupBox::toggled
               , [&] (bool b)
                 {
-                  _spray_content->setVisible(b);
+                  _spray_content->setEnabled(b);
                 }
               );
 
