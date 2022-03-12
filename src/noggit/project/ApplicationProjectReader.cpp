@@ -15,7 +15,7 @@ namespace Noggit::Project
     {
         for (const auto& entry : std::filesystem::directory_iterator(project_path))
         {
-            if (entry.path().extension() == std::string(".noggitproj"))
+            if (entry.path().extension() == ".noggitproj")
             {
                 QFile input_file(QString::fromStdString(entry.path().generic_string()));
                 input_file.open(QIODevice::ReadOnly);

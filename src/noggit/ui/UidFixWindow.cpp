@@ -1,6 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ui/uid_fix_window.hpp>
+#include <noggit/ui/UidFixWindow.hpp>
 
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QFormLayout>
@@ -12,7 +12,7 @@ namespace Noggit
 {
   namespace Ui
   {
-    uid_fix_window::uid_fix_window ( glm::vec3 pos
+    UidFixWindow::UidFixWindow (glm::vec3 pos
                                    , math::degrees camera_pitch
                                    , math::degrees camera_yaw
                                    )

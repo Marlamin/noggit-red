@@ -13,23 +13,23 @@ namespace Noggit::Ui::Widget
 {
     struct MapListData
     {
-        QString MapName;
-        int MapId;
-        int MapTypeId;
-        int ExpansionId;
-        bool Pinned;
+        QString map_name;
+        int map_id;
+        int map_type_id;
+        int expansion_id;
+        bool pinned;
     };
 
     class MapListItem : public QWidget
     {
         Q_OBJECT
     private:
-        QLabel* map_icon;
-        QLabel* map_name;
-        QLabel* map_id;
-        QLabel* map_instance_type;
-        QLabel* map_pinned_label;
-        int _maxWidth;
+        QLabel* _map_icon;
+        QLabel* _map_name;
+        QLabel* _map_id;
+        QLabel* _map_instance_type;
+        QLabel* _map_pinned_label;
+        int _max_width;
     public:
         MapListItem(const MapListData& data, QWidget* parent);
         QSize minimumSizeHint() const override;

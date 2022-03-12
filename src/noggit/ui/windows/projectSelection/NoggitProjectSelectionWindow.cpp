@@ -29,20 +29,27 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
 
   _settings = new Noggit::Ui::settings(this);
 
-  _create_project_component = std::make_unique<Component::CreateProjectComponent>();
   _load_project_component = std::make_unique<Component::LoadProjectComponent>();
 
   Component::RecentProjectsComponent::buildRecentProjectsList(this);
 
   QObject::connect(_ui->button_create_new_project, &QPushButton::clicked, [=, this]
                    {
-                     auto project_reference = ProjectInformation();
-                     auto project_creation_dialog = NoggitProjectCreationDialog(project_reference, this);
+                     ProjectInformation project_reference;
+                     NoggitProjectCreationDialog project_creation_dialog(project_reference, this);
+
+                     QObject::connect(&project_creation_dialog,  &QDialog::finished, [&project_reference, this](int result)
+                     {
+                       if (result != QDialog::Accepted)
+                         return;
+
+                       Component::CreateProjectComponent::createProject(this, project_reference);
+                       Component::RecentProjectsComponent::buildRecentProjectsList(this);
+                     });
+
                      project_creation_dialog.exec();
                      project_creation_dialog.setFixedSize(project_creation_dialog.size());
 
-                     _create_project_component->createProject(this, project_reference);
-                     Component::RecentProjectsComponent::buildRecentProjectsList(this);
                    }
   );
 
@@ -72,7 +79,14 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
                      auto application_configuration = _noggit_application->getConfiguration();
                      auto application_projects_folder_path = std::filesystem::path(application_configuration->ApplicationProjectPath);
                      auto application_project_service = Noggit::Project::ApplicationProject(application_configuration);
+
                      auto project_to_launch = application_project_service.loadProject(filepath.parent_path());
+
+                     if (!project_to_launch)
+                     {
+                       return;
+                     }
+
                      Noggit::Application::NoggitApplication::instance()->setClientData(project_to_launch->ClientData);
 
                      Noggit::Project::CurrentProject::initialize(project_to_launch.get());
@@ -89,6 +103,9 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
   QObject::connect(_ui->listView, &QListView::doubleClicked, [=]
                    {
                      auto selected_project = _load_project_component->loadProject(this);
+
+                     if (!selected_project)
+                       return;
 
                      Noggit::Project::CurrentProject::initialize(selected_project.get());
 
@@ -119,7 +136,35 @@ void NoggitProjectSelectionWindow::handleContextMenuProjectListItemDelete(std::s
   switch (prompt.buttonRole(prompt.clickedButton()))
   {
     case QMessageBox::AcceptRole:
+      Component::RecentProjectsComponent::registerProjectRemove(project_path);
       std::filesystem::remove_all(project_path);
+      break;
+    case QMessageBox::DestructiveRole:
+    default:
+      break;
+  }
+
+  Component::RecentProjectsComponent::buildRecentProjectsList(this);
+}
+
+void NoggitProjectSelectionWindow::handleContextMenuProjectListItemForget(std::string const& project_path)
+{
+  QMessageBox prompt;
+  prompt.setWindowIcon(QIcon(":/icon"));
+  prompt.setWindowTitle("Forget Project");
+  prompt.setIcon(QMessageBox::Warning);
+  prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
+  prompt.setText("Data on the disk will not be removed. Continue?.");
+  prompt.addButton("Accept", QMessageBox::AcceptRole);
+  prompt.setDefaultButton(prompt.addButton("Cancel", QMessageBox::RejectRole));
+  prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+
+  prompt.exec();
+
+  switch (prompt.buttonRole(prompt.clickedButton()))
+  {
+    case QMessageBox::AcceptRole:
+      Component::RecentProjectsComponent::registerProjectRemove(project_path);
       break;
     case QMessageBox::DestructiveRole:
     default:

@@ -10,108 +10,107 @@
 
 using namespace Noggit::Ui::Component;
 
-void BuildMapListComponent::BuildMapList(Noggit::Ui::Windows::NoggitWindow* parent)
+void BuildMapListComponent::buildMapList(Noggit::Ui::Windows::NoggitWindow* parent)
 {
   parent->_continents_table->clear();
 
   const auto& table = std::string("Map");
-  auto mapTable = parent->_project->ClientDatabase->LoadTable(table, readFileAsIMemStream);
+  auto map_table = parent->_project->ClientDatabase->LoadTable(table, readFileAsIMemStream);
 
-  auto iterator = mapTable.Records();
-  auto pinnedMaps = std::vector<Widget::MapListData>();
+  auto iterator = map_table.Records();
+  auto pinned_maps = std::vector<Widget::MapListData>();
   auto maps = std::vector<Widget::MapListData>();
   while (iterator.HasRecords())
   {
     auto record = iterator.Next();
 
-    auto mapListData = Widget::MapListData();
+    Widget::MapListData map_list_data{};
 
-    for (auto const& value : record.Columns["MapName_lang"].Values)
+    for (auto const& value: record.Columns["MapName_lang"].Values)
     {
       if (value.empty())
         continue;
 
-      mapListData.MapName = QString::fromUtf8(value.c_str());
+      map_list_data.map_name = QString::fromUtf8(value.c_str());
       break;
     }
 
-    mapListData.MapId = record.RecordId;
-    mapListData.MapTypeId = std::stoi(record.Columns["InstanceType"].Value);
-    mapListData.ExpansionId = std::stoi(record.Columns["ExpansionID"].Value);
+    map_list_data.map_id = record.RecordId;
+    map_list_data.map_type_id = std::stoi(record.Columns["InstanceType"].Value);
+    map_list_data.expansion_id = std::stoi(record.Columns["ExpansionID"].Value);
 
-    if (mapListData.MapTypeId < 0 || mapListData.MapTypeId > 5 || !World::IsEditableWorld(record))
+    if (map_list_data.map_type_id < 0 || map_list_data.map_type_id > 5 || !World::IsEditableWorld(record))
       continue;
 
-    auto projectPinnedMaps = parent->_project->PinnedMaps;
+    auto project_pinned_maps = parent->_project->PinnedMaps;
 
-    auto pinnedMapFound = std::find_if(std::begin(projectPinnedMaps), std::end(projectPinnedMaps), [&](Project::NoggitProjectPinnedMap pinnedMap)
-    {
-    	return pinnedMap.MapId == mapListData.MapId;
-    });
+    auto pinned_map_found = std::find_if(std::begin(project_pinned_maps), std::end(project_pinned_maps),
+                                         [&](Project::NoggitProjectPinnedMap pinned_map)
+                                       {
+                                         return pinned_map.MapId == map_list_data.map_id;
+                                       });
 
-    if (pinnedMapFound != std::end(projectPinnedMaps))
+    if (pinned_map_found != std::end(project_pinned_maps))
     {
-    	mapListData.Pinned = true;
-      pinnedMaps.push_back(mapListData);
-    }
-    else
+      map_list_data.pinned = true;
+      pinned_maps.push_back(map_list_data);
+    } else
     {
-      maps.push_back(mapListData);
+      maps.push_back(map_list_data);
     }
   }
 
-  pinnedMaps.insert(pinnedMaps.end(), maps.begin(), maps.end());
+  pinned_maps.insert(pinned_maps.end(), maps.begin(), maps.end());
 
-  for(auto const & map : pinnedMaps)
+  for (auto const& map: pinned_maps)
   {
-    auto mapListItem = new Widget::MapListItem(map, parent->_continents_table);
+    auto map_list_item = new Widget::MapListItem(map, parent->_continents_table);
     auto item = new QListWidgetItem(parent->_continents_table);
 
-    if (map.Pinned)
+    if (map.pinned)
     {
-        QObject::connect(mapListItem, &QListWidget::customContextMenuRequested,
-            [=](const QPoint& pos)
-            {
-                QMenu contextMenu(mapListItem->tr("Context menu"), mapListItem);
+      QObject::connect(map_list_item, &QListWidget::customContextMenuRequested,
+                       [=](const QPoint& pos)
+                       {
+                         QMenu context_menu(map_list_item->tr("Context menu"), map_list_item);
 
-                QAction action1("Unpin Map", mapListItem);
-                auto icon = QIcon();
-                icon.addPixmap(FontAwesomeIcon(FontAwesome::star).pixmap(QSize(16, 16)));
-                action1.setIcon(icon);
+                         QAction action_1("Unpin Map", map_list_item);
+                         auto icon = QIcon();
+                         icon.addPixmap(FontAwesomeIcon(FontAwesome::star).pixmap(QSize(16, 16)));
+                         action_1.setIcon(icon);
 
-                QObject::connect(&action1, &QAction::triggered, [=]()
-                {
-                	parent->HandleEventMapListContextMenuUnpinMap(map.MapId);
-                });
+                         QObject::connect(&action_1, &QAction::triggered, [=]()
+                         {
+                           parent->handleEventMapListContextMenuUnpinMap(map.map_id);
+                         });
 
-                contextMenu.addAction(&action1);
-                contextMenu.exec(mapListItem->mapToGlobal(pos));
-            });
-    }
-    else
+                         context_menu.addAction(&action_1);
+                         context_menu.exec(map_list_item->mapToGlobal(pos));
+                       });
+    } else
     {
-        QObject::connect(mapListItem, &QListWidget::customContextMenuRequested,
-            [=](const QPoint& pos)
-            {
-                QMenu contextMenu(mapListItem->tr("Context menu"), mapListItem);
-                QAction action1("Pin Map", mapListItem);
-                auto icon = QIcon();
-                icon.addPixmap(FontAwesomeIcon(FontAwesome::star).pixmap(QSize(16, 16)));
-                action1.setIcon(icon);
+      QObject::connect(map_list_item, &QListWidget::customContextMenuRequested,
+                       [=](const QPoint& pos)
+                       {
+                         QMenu context_menu(map_list_item->tr("Context menu"), map_list_item);
+                         QAction action_1("Pin Map", map_list_item);
+                         auto icon = QIcon();
+                         icon.addPixmap(FontAwesomeIcon(FontAwesome::star).pixmap(QSize(16, 16)));
+                         action_1.setIcon(icon);
 
-                QObject::connect(&action1, &QAction::triggered, [=]()
-                {
-                	parent->HandleEventMapListContextMenuPinMap(map.MapId, map.MapName.toStdString());
-                });
+                         QObject::connect(&action_1, &QAction::triggered, [=]()
+                         {
+                           parent->handleEventMapListContextMenuPinMap(map.map_id, map.map_name.toStdString());
+                         });
 
-                contextMenu.addAction(&action1);
-                contextMenu.exec(mapListItem->mapToGlobal(pos));
-            });
+                         context_menu.addAction(&action_1);
+                         context_menu.exec(map_list_item->mapToGlobal(pos));
+                       });
     }
 
-    item->setSizeHint(mapListItem->minimumSizeHint());
-    item->setData(Qt::UserRole, QVariant(map.MapId));
-    parent->_continents_table->setItemWidget(item, mapListItem);
+    item->setSizeHint(map_list_item->minimumSizeHint());
+    item->setData(Qt::UserRole, QVariant(map.map_id));
+    parent->_continents_table->setItemWidget(item, map_list_item);
   }
 
   parent->_project->ClientDatabase->UnloadTable(table);

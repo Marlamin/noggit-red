@@ -13,21 +13,21 @@ namespace Noggit::Ui::Widget
 {
     struct ProjectListItemData
     {
-        QString ProjectName;
-        QString ProjectDirectory;
-        QString ProjectLastEdited;
-        Project::ProjectVersion ProjectVersion;
+        QString project_name;
+        QString project_directory;
+        QString project_last_edited;
+        Project::ProjectVersion project_version;
     };
 
     class ProjectListItem : public QWidget
     {
         Q_OBJECT
     private:
-        QLabel* project_version_icon;
-        QLabel* project_name_label;
-        QLabel* project_directory_label;
-        QLabel* project_version_label;
-        QLabel* project_last_edited_label;
+        QLabel* _project_version_icon;
+        QLabel* _project_name_label;
+        QLabel* _project_directory_label;
+        QLabel* _project_version_label;
+        QLabel* _project_last_edited_label;
     public:
         ProjectListItem(const ProjectListItemData& data, QWidget* parent);
         QSize minimumSizeHint() const override;

@@ -2531,7 +2531,7 @@ void MapView::createGUI()
   setupHelpMenu();
   setupHotkeys();
 
-  connect(_main_window, &Noggit::Ui::Windows::NoggitWindow::exit_prompt_opened, this, &MapView::on_exit_prompt);
+  connect(_main_window, &Noggit::Ui::Windows::NoggitWindow::exitPromptOpened, this, &MapView::on_exit_prompt);
 
   set_editing_mode (editing_mode::ground);
 }

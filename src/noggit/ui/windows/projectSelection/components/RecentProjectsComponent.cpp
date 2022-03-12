@@ -34,10 +34,10 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
       continue;
 
     auto project_data = Noggit::Ui::Widget::ProjectListItemData();
-    project_data.ProjectVersion = project->projectVersion;
-    project_data.ProjectDirectory = QString::fromStdString(project_path.generic_string());
-    project_data.ProjectName = QString::fromStdString(project->ProjectName);
-    project_data.ProjectLastEdited = QDateTime::currentDateTime().date().toString();
+    project_data.project_version = project->projectVersion;
+    project_data.project_directory = QString::fromStdString(project_path.generic_string());
+    project_data.project_name = QString::fromStdString(project->ProjectName);
+    project_data.project_last_edited = QDateTime::currentDateTime().date().toString();
 
     auto project_list_item = new Noggit::Ui::Widget::ProjectListItem(project_data, parent->_ui->listView);
 
@@ -50,16 +50,25 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
       QMenu context_menu(project_list_item->tr("Context menu"), project_list_item);
 
       QAction action_1("Delete Project", project_list_item);
-      auto icon = QIcon();
-      icon.addPixmap(FontAwesomeIcon(FontAwesome::trash).pixmap(QSize(16, 16)));
-      action_1.setIcon(icon);
+      action_1.setIcon(FontAwesomeIcon(FontAwesome::trash).pixmap(QSize(16, 16)));
 
       QObject::connect(&action_1, &QAction::triggered, [=]()
       {
-        parent->handleContextMenuProjectListItemDelete(project_data.ProjectDirectory.toStdString());
+        parent->handleContextMenuProjectListItemDelete(project_data.project_directory.toStdString());
       });
 
       context_menu.addAction(&action_1);
+
+      QAction action_2("Forget Project", project_list_item);
+      action_2.setIcon(FontAwesomeIcon(FontAwesome::cloud).pixmap(QSize(16, 16)));
+
+      QObject::connect(&action_2, &QAction::triggered, [=]()
+      {
+        parent->handleContextMenuProjectListItemForget(project_data.project_directory.toStdString());
+      });
+
+      context_menu.addAction(&action_2);
+
       context_menu.exec(project_list_item->mapToGlobal(pos));
     });
 
@@ -111,3 +120,43 @@ void RecentProjectsComponent::registerProjectChange(std::string const& project_p
   settings.sync();
 
 }
+
+void RecentProjectsComponent::registerProjectRemove(std::string const& project_path)
+{
+  QSettings settings;
+  settings.sync();
+
+  QList<QString> recent_projects;
+
+  std::size_t size = settings.beginReadArray("recent_projects");
+  for (int i = 0; i < size; ++i)
+  {
+    settings.setArrayIndex(i);
+    recent_projects.append(settings.value("project_path").toString());
+  }
+  settings.endArray();
+
+  auto it = std::find(recent_projects.begin(), recent_projects.end(), project_path.c_str());
+
+  if (it != recent_projects.end())
+  {
+    recent_projects.erase(it);
+    size--;
+
+    settings.remove("recent_projects");
+    settings.beginWriteArray("recent_projects");
+
+
+    for (int i = 0; i < size; ++i)
+    {
+      settings.setArrayIndex(i);
+      settings.setValue("project_path", recent_projects[i]);
+    }
+    settings.endArray();
+
+    settings.sync();
+  }
+
+
+}
+

@@ -14,11 +14,11 @@ namespace Noggit::Ui::Component
     {
          friend class Noggit::Ui::Windows::NoggitWindow;
     public:
-        void BuildMapList(Noggit::Ui::Windows::NoggitWindow* parent);
+        void buildMapList(Noggit::Ui::Windows::NoggitWindow* parent);
 
     private:
-        void BuildPinMapContextMenu(const QPoint& pos);
-        void BuildUnPinMapContextMenu(const QPoint& pos);
+        void buildPinMapContextMenu(const QPoint& pos);
+        void buildUnPinMapContextMenu(const QPoint& pos);
     };
 }
 #endif //NOGGIT_COMPONENT_BUILD_MAP_LIST_HPP
