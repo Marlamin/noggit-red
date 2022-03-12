@@ -244,15 +244,15 @@ namespace Noggit::Ui::Windows
       {
         auto item = new QListWidgetItem(bookmarks_table);
 
-        auto mapBookmarkData = Widget::MapListBookmarkData();
-        mapBookmarkData.MapName = QString::fromStdString(entry.name);
-        mapBookmarkData.Position = entry.position;
+        auto bookmark_data = Widget::MapListBookmarkData();
+        bookmark_data.MapName = QString::fromStdString(entry.name);
+        bookmark_data.Position = entry.position;
 
-        auto mapBookmarkItem = new Widget::MapListBookmarkItem(mapBookmarkData, bookmarks_table);
+        auto map_bookmark_item = new Widget::MapListBookmarkItem(bookmark_data, bookmarks_table);
 
         item->setData (Qt::UserRole, QVariant (bookmark_index++));
-        item->setSizeHint(mapBookmarkItem->minimumSizeHint());
-        bookmarks_table->setItemWidget(item, mapBookmarkItem);
+        item->setSizeHint(map_bookmark_item->minimumSizeHint());
+        bookmarks_table->setItemWidget(item, map_bookmark_item);
       }
 
       QObject::connect ( bookmarks_table, &QListWidget::itemDoubleClicked
@@ -283,6 +283,7 @@ namespace Noggit::Ui::Windows
 
       _minimap = new minimap_widget (this);
       _minimap->draw_boundaries (true);
+      //_minimap->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
       QObject::connect( _minimap,  &minimap_widget::map_clicked
         , [this] (::glm::vec3 const& pos)
@@ -293,12 +294,11 @@ namespace Noggit::Ui::Windows
 
       auto right_side = new QTabWidget(this);
 
-      auto minimap_holder = new QWidget(this);
-      minimap_holder->setContentsMargins(0, 0, 0, 0);
-      auto minimap_holder_layout = new QHBoxLayout(this);
-      minimap_holder->setLayout(minimap_holder_layout);
-      minimap_holder_layout->addWidget(_minimap);
-      minimap_holder_layout->setAlignment(Qt::AlignCenter);
+      auto minimap_holder = new QScrollArea(this);
+      minimap_holder->setWidgetResizable(true);
+      minimap_holder->setAlignment(Qt::AlignCenter);
+      minimap_holder->setWidget(_minimap);
+
       right_side->addTab(minimap_holder, "Enter map");
       minimap_holder->setAccessibleName("main_menu_minimap_holder");
 
