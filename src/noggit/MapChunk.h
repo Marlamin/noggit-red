@@ -184,7 +184,12 @@ public:
   void clearHeight();
 
   //! \todo this is ugly create a build struct or sth
-  void save(sExtendableArray &lADTFile, int &lCurrentPosition, int &lMCIN_Position, std::map<std::string, int> &lTextures, std::vector<WMOInstance> &lObjectInstances, std::vector<ModelInstance>& lModelInstances);
+  void save(sExtendableArray &lADTFile
+            , int &lCurrentPosition
+            , int &lMCIN_Position
+            , std::map<std::string, int> &lTextures
+            , std::vector<WMOInstance*> &lObjectInstances
+            , std::vector<ModelInstance*>& lModelInstances);
 
   // fix the gaps with the chunk to the left
   bool fixGapLeft(const MapChunk* chunk);

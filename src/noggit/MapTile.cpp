@@ -517,8 +517,8 @@ void MapTile::saveTile(World* world)
   Log << "Saving ADT \"" << _file_key.stringRepr() << "\"." << std::endl;
 
   int lID;  // This is a global counting variable. Do not store something in here you need later.
-  std::vector<WMOInstance> lObjectInstances;
-  std::vector<ModelInstance> lModelInstances;
+  std::vector<WMOInstance*> lObjectInstances;
+  std::vector<ModelInstance*> lModelInstances;
 
   // Check which doodads and WMOs are on this ADT.
   glm::vec3 lTileExtents[2];
@@ -542,11 +542,11 @@ void MapTile::saveTile(World* world)
         auto which = std::get<selected_object_type>(model.value())->which();
         if (which == eWMO)
         {
-          lObjectInstances.emplace_back(*static_cast<WMOInstance*>(std::get<selected_object_type>(model.value())));
+          lObjectInstances.emplace_back(static_cast<WMOInstance*>(std::get<selected_object_type>(model.value())));
         }
         else if (which == eMODEL)
         {
-          lModelInstances.emplace_back(*static_cast<ModelInstance*>(std::get<selected_object_type>(model.value())));
+          lModelInstances.emplace_back(static_cast<ModelInstance*>(std::get<selected_object_type>(model.value())));
         }
 
       }
@@ -565,9 +565,9 @@ void MapTile::saveTile(World* world)
 
   for (auto const& model : lModelInstances)
   {
-    if (lModels.find(model.model->file_key().filepath()) == lModels.end())
+    if (lModels.find(model->model->file_key().filepath()) == lModels.end())
     {
-      lModels.emplace (model.model->file_key().filepath(), nullyThing);
+      lModels.emplace (model->model->file_key().filepath(), nullyThing);
     }
   }
 
@@ -581,9 +581,9 @@ void MapTile::saveTile(World* world)
 
   for (auto const& object : lObjectInstances)
   {
-    if (lObjects.find(object.wmo->file_key().filepath()) == lObjects.end())
+    if (lObjects.find(object->wmo->file_key().filepath()) == lObjects.end())
     {
-      lObjects.emplace (object.wmo->file_key().filepath(), nullyThing);
+      lObjects.emplace(object->wmo->file_key().filepath(), nullyThing);
     }
   }
 
@@ -750,16 +750,16 @@ void MapTile::saveTile(World* world)
 
   if(world->mapIndex.sort_models_by_size_class())
   {
-    std::sort(lModelInstances.begin(), lModelInstances.end(), [](ModelInstance const& m1, ModelInstance const& m2)
+    std::sort(lModelInstances.begin(), lModelInstances.end(), [](ModelInstance* m1, ModelInstance* m2)
     {
-      return m1.size_cat > m2.size_cat;
+      return m1->size_cat > m2->size_cat;
     });
   }
 
   lID = 0;
   for (auto const& model : lModelInstances)
   {
-    auto filename_to_offset_and_name = lModels.find(model.model->file_key().filepath());
+    auto filename_to_offset_and_name = lModels.find(model->model->file_key().filepath());
     if (filename_to_offset_and_name == lModels.end())
     {
       LogError << "There is a problem with saving the doodads. We have a doodad that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -767,14 +767,14 @@ void MapTile::saveTile(World* world)
     }
 
     lMDDF_Data[lID].nameID = filename_to_offset_and_name->second.nameID;
-    lMDDF_Data[lID].uniqueID = model.uid;
-    lMDDF_Data[lID].pos[0] = model.pos.x;
-    lMDDF_Data[lID].pos[1] = model.pos.y;
-    lMDDF_Data[lID].pos[2] = model.pos.z;
-    lMDDF_Data[lID].rot[0] = model.dir.x;
-    lMDDF_Data[lID].rot[1] = model.dir.y;
-    lMDDF_Data[lID].rot[2] = model.dir.z;
-    lMDDF_Data[lID].scale = (uint16_t)(model.scale * 1024);
+    lMDDF_Data[lID].uniqueID = model->uid;
+    lMDDF_Data[lID].pos[0] = model->pos.x;
+    lMDDF_Data[lID].pos[1] = model->pos.y;
+    lMDDF_Data[lID].pos[2] = model->pos.z;
+    lMDDF_Data[lID].rot[0] = model->dir.x;
+    lMDDF_Data[lID].rot[1] = model->dir.y;
+    lMDDF_Data[lID].rot[2] = model->dir.z;
+    lMDDF_Data[lID].scale = (uint16_t)(model->scale * 1024);
     lMDDF_Data[lID].flags = 0;
     lID++;
   }
@@ -795,7 +795,7 @@ void MapTile::saveTile(World* world)
   lID = 0;
   for (auto const& object : lObjectInstances)
   {
-    auto filename_to_offset_and_name = lObjects.find(object.wmo->file_key().filepath());
+    auto filename_to_offset_and_name = lObjects.find(object->wmo->file_key().filepath());
     if (filename_to_offset_and_name == lObjects.end())
     {
       LogError << "There is a problem with saving the objects. We have an object that somehow changed the name during the saving function. However this got produced, you can get a reward from schlumpf by pasting him this line." << std::endl;
@@ -803,27 +803,27 @@ void MapTile::saveTile(World* world)
     }
 
     lMODF_Data[lID].nameID = filename_to_offset_and_name->second.nameID;
-    lMODF_Data[lID].uniqueID = object.uid;
-    lMODF_Data[lID].pos[0] = object.pos.x;
-    lMODF_Data[lID].pos[1] = object.pos.y;
-    lMODF_Data[lID].pos[2] = object.pos.z;
+    lMODF_Data[lID].uniqueID = object->uid;
+    lMODF_Data[lID].pos[0] = object->pos.x;
+    lMODF_Data[lID].pos[1] = object->pos.y;
+    lMODF_Data[lID].pos[2] = object->pos.z;
 
-    lMODF_Data[lID].rot[0] = object.dir.x;
-    lMODF_Data[lID].rot[1] = object.dir.y;
-    lMODF_Data[lID].rot[2] = object.dir.z;
+    lMODF_Data[lID].rot[0] = object->dir.x;
+    lMODF_Data[lID].rot[1] = object->dir.y;
+    lMODF_Data[lID].rot[2] = object->dir.z;
 
-    lMODF_Data[lID].extents[0][0] = object.extents[0].x;
-    lMODF_Data[lID].extents[0][1] = object.extents[0].y;
-    lMODF_Data[lID].extents[0][2] = object.extents[0].z;
+    lMODF_Data[lID].extents[0][0] = object->extents[0].x;
+    lMODF_Data[lID].extents[0][1] = object->extents[0].y;
+    lMODF_Data[lID].extents[0][2] = object->extents[0].z;
 
-    lMODF_Data[lID].extents[1][0] = object.extents[1].x;
-    lMODF_Data[lID].extents[1][1] = object.extents[1].y;
-    lMODF_Data[lID].extents[1][2] = object.extents[1].z;
+    lMODF_Data[lID].extents[1][0] = object->extents[1].x;
+    lMODF_Data[lID].extents[1][1] = object->extents[1].y;
+    lMODF_Data[lID].extents[1][2] = object->extents[1].z;
 
-    lMODF_Data[lID].flags = object.mFlags;
-    lMODF_Data[lID].doodadSet = object.doodadset();
-    lMODF_Data[lID].nameSet = object.mNameset;
-    lMODF_Data[lID].unknown = object.mUnknown;
+    lMODF_Data[lID].flags = object->mFlags;
+    lMODF_Data[lID].doodadSet = object->doodadset();
+    lMODF_Data[lID].nameSet = object->mNameset;
+    lMODF_Data[lID].unknown = object->mUnknown;
     lID++;
   }
 
