@@ -79,7 +79,7 @@
          <string/>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <property name="tabBarAutoHide">
          <bool>false</bool>
@@ -108,68 +108,7 @@
                  <item>
                   <layout class="QVBoxLayout" name="verticalLayout_21">
                    <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_24">
-                     <property name="spacing">
-                      <number>6</number>
-                     </property>
-                     <item>
-                      <widget class="QLabel" name="label_25">
-                       <property name="minimumSize">
-                        <size>
-                         <width>90</width>
-                         <height>0</height>
-                        </size>
-                       </property>
-                       <property name="text">
-                        <string>Game Path</string>
-                       </property>
-                       <property name="alignment">
-                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="gamePathField">
-                       <property name="alignment">
-                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="gamePathField_browse">
-                       <property name="text">
-                        <string>Browse</string>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
-                   </item>
-                   <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_25">
-                     <item>
-                      <widget class="QLabel" name="label_26">
-                       <property name="minimumSize">
-                        <size>
-                         <width>90</width>
-                         <height>0</height>
-                        </size>
-                       </property>
-                       <property name="text">
-                        <string>Project Path</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item>
-                      <widget class="QLineEdit" name="clientPathField"/>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="clientPathField_browse">
-                       <property name="text">
-                        <string>Browse</string>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
+                    <layout class="QHBoxLayout" name="horizontalLayout_25"/>
                    </item>
                    <item>
                     <layout class="QHBoxLayout" name="horizontalLayout_36">
