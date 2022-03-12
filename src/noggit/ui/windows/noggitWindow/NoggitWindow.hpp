@@ -4,7 +4,7 @@
 #include <math/trig.hpp>
 #include <noggit/World.h>
 #include <noggit/MapView.h>
-#include <noggit/ui/uid_fix_window.hpp>
+#include <noggit/ui/UidFixWindow.hpp>
 #include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
@@ -36,16 +36,16 @@ namespace Noggit::Ui::Windows
       NoggitWindow(std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> application,
           std::shared_ptr<Noggit::Project::NoggitProject> project);
 
-      void prompt_exit(QCloseEvent* event);
-      void prompt_uid_fix_failure();
+      void promptExit(QCloseEvent* event);
+      void promptUidFixFailure();
 
       QMenuBar* _menuBar;
 
       std::unordered_set<QWidget*> displayed_widgets;
-      void build_menu();
+      void buildMenu();
     signals:
-      void exit_prompt_opened();
-      void map_selected(int map_id);
+      void exitPromptOpened();
+      void mapSelected(int map_id);
 
 
     private:
@@ -54,11 +54,11 @@ namespace Noggit::Ui::Windows
         std::shared_ptr<Project::NoggitProject> _project;
 
 
-        void HandleEventMapListContextMenuPinMap(int mapId, std::string MapName);
-        void HandleEventMapListContextMenuUnpinMap(int mapId);
+        void handleEventMapListContextMenuPinMap(int mapId, std::string MapName);
+        void handleEventMapListContextMenuUnpinMap(int mapId);
 
 
-      void loadMap (int mapID);
+      void loadMap (int map_id);
 
       void check_uid_then_enter_map ( glm::vec3 pos
                                     , math::degrees camera_pitch

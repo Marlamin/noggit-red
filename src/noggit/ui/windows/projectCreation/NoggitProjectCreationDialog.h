@@ -10,10 +10,10 @@ class NoggitProjectCreationDialog;
 
 struct ProjectInformation
 {
-    std::string ProjectName;
-    std::string ProjectPath;
-    std::string GameClientPath;
-    std::string GameClientVersion;
+    std::string project_name;
+    std::string project_path;
+    std::string game_client_path;
+    std::string game_client_version;
 };
 
 class NoggitProjectCreationDialog : public QDialog
@@ -26,7 +26,7 @@ public:
 
 private:
     ::Ui::NoggitProjectCreationDialog*ui;
-    ProjectInformation& _projectInformation;
+    ProjectInformation& _project_information;
 };
 
 #endif //NOGGIT_PROJECT_CREATION_DIALOG_HPP

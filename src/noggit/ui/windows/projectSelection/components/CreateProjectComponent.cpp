@@ -11,18 +11,23 @@ void CreateProjectComponent::createProject(Noggit::Ui::Windows::NoggitProjectSel
   auto application_configuration = parent->_noggit_application->getConfiguration();
   auto application_project_service = Noggit::Project::ApplicationProject(application_configuration);
 
-  if (!std::filesystem::exists(project_information.ProjectPath)
-      || std::filesystem::is_empty(project_information.ProjectPath))
+  if (std::filesystem::exists(project_information.project_path))
   {
-    application_project_service.createProject(project_information.ProjectPath,
-                                              project_information.GameClientPath,
-                                              project_information.GameClientVersion,
-                                              project_information.ProjectName);
+    for (const auto& entry : std::filesystem::directory_iterator(project_information.project_path))
+    {
+      if (entry.path().extension() == ".noggitproj")
+      {
+        QMessageBox::critical(parent, "Error", "Selected already contains an existing project.");
+        return;
+      }
+    }
+  }
 
-    RecentProjectsComponent::registerProjectChange(project_information.ProjectPath);
-  }
-  else
-  {
-    QMessageBox::critical(parent, "Error", "Selected directory is not empty.");
-  }
+  application_project_service.createProject(project_information.project_path,
+                                            project_information.game_client_path,
+                                            project_information.game_client_version,
+                                            project_information.project_name);
+
+  RecentProjectsComponent::registerProjectChange(project_information.project_path);
+
 }

@@ -10,7 +10,7 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/MinimapCreator.hpp>
-#include <noggit/ui/uid_fix_window.hpp>
+#include <noggit/ui/UidFixWindow.hpp>
 #include <noggit/unsigned_int_property.hpp>
 #include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/ui/tools/ViewportGizmo/ViewportGizmo.hpp>

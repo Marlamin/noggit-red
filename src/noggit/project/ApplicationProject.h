@@ -5,10 +5,12 @@
 #include <memory>
 #include <blizzard-archive-library/include/CASCArchive.hpp>
 #include <blizzard-archive-library/include/ClientFile.hpp>
+#include <blizzard-archive-library/include/Exception.hpp>
 #include <blizzard-database-library/include/BlizzardDatabase.h>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/ui/windows/downloadFileDialog/DownloadFileDialog.h>
 #include <QJsonDocument>
+#include <QMessageBox>
 #include <QJsonObject>
 #include <QFile>
 #include <filesystem>
@@ -149,12 +151,12 @@ namespace Noggit::Project
 
   class ApplicationProject
   {
-    std::shared_ptr<NoggitProject> _activeProject;
+    std::shared_ptr<NoggitProject> _active_project;
     std::shared_ptr<Application::NoggitApplicationConfiguration> _configuration;
   public:
     ApplicationProject(std::shared_ptr<Application::NoggitApplicationConfiguration> configuration)
     {
-      _activeProject = nullptr;
+      _active_project = nullptr;
       _configuration = configuration;
     }
 
@@ -178,14 +180,14 @@ namespace Noggit::Project
 
     std::shared_ptr<NoggitProject> loadProject(std::filesystem::path const& project_path)
     {
-      auto project_reader = ApplicationProjectReader();
+      ApplicationProjectReader project_reader{};
       auto project = project_reader.readProject(project_path);
 
       assert(project.has_value());
 
       std::string dbd_file_directory = _configuration->ApplicationDatabaseDefinitionsPath;
 
-      auto client_build = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
+      BlizzardDatabaseLib::Structures::Build client_build("3.3.5.12340");
       auto client_archive_version = BlizzardArchive::ClientVersion::WOTLK;
       auto client_archive_locale = BlizzardArchive::Locale::AUTO;
       if (project->projectVersion == ProjectVersion::SL)
@@ -203,9 +205,17 @@ namespace Noggit::Project
       }
 
       project->ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(dbd_file_directory, client_build);
-      project->ClientData = std::make_shared<BlizzardArchive::ClientData>(
-          project->ClientPath, client_archive_version, client_archive_locale, project_path.generic_string());
 
+      try
+      {
+        project->ClientData = std::make_shared<BlizzardArchive::ClientData>(
+            project->ClientPath, client_archive_version, client_archive_locale, project_path.generic_string());
+      }
+      catch (BlizzardArchive::Exceptions::Locale::LocaleNotFoundError& e)
+      {
+        QMessageBox::critical(nullptr, "Error", "The client does not appear to be valid.");
+        return {};
+      }
 
       return std::make_shared<NoggitProject>(project.value());
     }

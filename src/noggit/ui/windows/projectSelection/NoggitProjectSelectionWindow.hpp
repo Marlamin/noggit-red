@@ -46,10 +46,10 @@ namespace Noggit::Ui::Windows
         Noggit::Ui::settings* _settings;
 
         std::unique_ptr<Noggit::Ui::Windows::NoggitWindow> _project_selection_page;
-        std::unique_ptr<Component::CreateProjectComponent> _create_project_component;
         std::unique_ptr<Component::LoadProjectComponent> _load_project_component;
 
         void handleContextMenuProjectListItemDelete(std::string const& project_path);
+        void handleContextMenuProjectListItemForget(std::string const& project_path);
     };
 }
 #endif // NOGGITREDPROJECTPAGE_H
