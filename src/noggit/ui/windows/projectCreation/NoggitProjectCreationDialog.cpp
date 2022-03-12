@@ -14,7 +14,6 @@ NoggitProjectCreationDialog::NoggitProjectCreationDialog(ProjectInformation& pro
   ui->expansion_icon->setPixmap(icon.pixmap(QSize(32, 32)));
   ui->expansion_icon->setObjectName("icon");
   ui->expansion_icon->setStyleSheet("QLabel#icon { padding: 0px }");
-  ui->clientPathField_browse->setObjectName("icon");
 
   QObject::connect(ui->project_expansion, QOverload<int>::of(&QComboBox::currentIndexChanged), [&](int index)
                    {
@@ -23,8 +22,9 @@ NoggitProjectCreationDialog::NoggitProjectCreationDialog(ProjectInformation& pro
                      QIcon icon;
                      if (version_selected == "Wrath Of The Lich King")
                        icon = QIcon(":/icon-wrath");
-                     if (version_selected == "Shadowlands");
-
+                     else if (version_selected == "Shadowlands")
+                       icon = QIcon(":/icon-shadow");
+                      
                      ui->expansion_icon->setPixmap(icon.pixmap(QSize(32, 32)));
                    }
   );
