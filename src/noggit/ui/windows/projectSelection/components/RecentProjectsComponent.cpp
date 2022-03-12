@@ -25,8 +25,10 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
     auto item = new QListWidgetItem(parent->_ui->listView);
     auto project_reader = Noggit::Project::ApplicationProjectReader();
 
-    auto project = project_reader.ReadProject(project_path);
+    if (!std::filesystem::exists(project_path) || !std::filesystem::is_directory(project_path))
+      continue;
 
+    auto project = project_reader.readProject(project_path);
 
     if (!project.has_value())
       continue;

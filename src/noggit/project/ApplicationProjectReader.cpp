@@ -11,88 +11,96 @@
 
 namespace Noggit::Project
 {
-    std::optional<NoggitProject> ApplicationProjectReader::ReadProject(std::filesystem::path const& projectPath)
+    std::optional<NoggitProject> ApplicationProjectReader::readProject(std::filesystem::path const& project_path)
     {
-        for (const auto& entry : std::filesystem::directory_iterator(projectPath))
+        for (const auto& entry : std::filesystem::directory_iterator(project_path))
         {
             if (entry.path().extension() == std::string(".noggitproj"))
             {
-                QFile inputFile(QString::fromStdString(entry.path().generic_string()));
-                inputFile.open(QIODevice::ReadOnly);
+                QFile input_file(QString::fromStdString(entry.path().generic_string()));
+                input_file.open(QIODevice::ReadOnly);
 
-                auto document = QJsonDocument().fromJson(inputFile.readAll());
+                auto document = QJsonDocument().fromJson(input_file.readAll());
                 auto root = document.object();
 
                 auto project = NoggitProject();
-                project.ProjectPath = projectPath.generic_string();
+                project.ProjectPath = project_path.generic_string();
                 if (root.contains("Project") && root["Project"].isObject())
                 {
-                    auto projectConfiguration = root["Project"].toObject();
-                    if (projectConfiguration.contains("ProjectName"))
-                        project.ProjectName = projectConfiguration["ProjectName"].toString().toStdString();
+                    auto project_configuration = root["Project"].toObject();
+                    if (project_configuration.contains("ProjectName"))
+                        project.ProjectName = project_configuration["ProjectName"].toString().toStdString();
 
-                    if (projectConfiguration.contains("Bookmarks") && projectConfiguration["Bookmarks"].isArray())
+                    if (project_configuration.contains("Bookmarks") && project_configuration["Bookmarks"].isArray())
                     {
-                        auto projectBookmarks = projectConfiguration["Bookmarks"].toArray();
+                        auto project_bookmarks = project_configuration["Bookmarks"].toArray();
 
-                        for (auto const& jsonBookmark : projectBookmarks)
+                        for (auto const& json_bookmark : project_bookmarks)
                         {
                             auto bookmark = NoggitProjectBookmarkMap();
-                            bookmark.map_id = jsonBookmark.toObject().value("MapId").toInt();
-                            bookmark.name = jsonBookmark.toObject().value("BookmarkName").toString().toStdString();
-                            bookmark.camera_pitch = jsonBookmark.toObject().value("CameraPitch").toDouble();
-                            bookmark.camera_yaw = jsonBookmark.toObject().value("CameraYaw").toDouble();
+                            bookmark.map_id = json_bookmark.toObject().value("MapId").toInt();
+                            bookmark.name = json_bookmark.toObject().value("BookmarkName").toString().toStdString();
+                            bookmark.camera_pitch = json_bookmark.toObject().value("CameraPitch").toDouble();
+                            bookmark.camera_yaw = json_bookmark.toObject().value("CameraYaw").toDouble();
 
-                            auto bookmarkPosition = jsonBookmark.toObject().value("Position");
-                            auto bookmarkPositionX = bookmarkPosition.toObject().value("X").toDouble();
-                            auto bookmarkPositionY = bookmarkPosition.toObject().value("Y").toDouble();
-                            auto bookmarkPositionZ = bookmarkPosition.toObject().value("Z").toDouble();
-                            bookmark.position = glm::vec3(bookmarkPositionX, bookmarkPositionY, bookmarkPositionZ);
+                            auto bookmark_position = json_bookmark.toObject().value("Position");
+                            auto bookmark_position_x = bookmark_position.toObject().value("X").toDouble();
+                            auto bookmark_position_y = bookmark_position.toObject().value("Y").toDouble();
+                            auto bookmark_position_z = bookmark_position.toObject().value("Z").toDouble();
+                            bookmark.position = glm::vec3(bookmark_position_x, bookmark_position_y, bookmark_position_z);
 
                             project.Bookmarks.push_back(bookmark);
                         }
                     }
 
-                    if (projectConfiguration.contains("PinnedMaps") && projectConfiguration["PinnedMaps"].isArray())
+                    if (project_configuration.contains("PinnedMaps") && project_configuration["PinnedMaps"].isArray())
                     {
-                        auto projectPinnedMaps = projectConfiguration["PinnedMaps"].toArray();
+                        auto project_pinned_maps = project_configuration["PinnedMaps"].toArray();
 
-                        for(auto const &jsonPinnedMap : projectPinnedMaps)
+                        for(auto const &json_pinned_map : project_pinned_maps)
                         {
-                            auto pinnedMap = NoggitProjectPinnedMap();
-                            pinnedMap.MapId = jsonPinnedMap.toObject().value("MapId").toInt();
-                            pinnedMap.MapName = jsonPinnedMap.toObject().value("MapName").toString().toStdString();
-                            project.PinnedMaps.push_back(pinnedMap);
+                            auto pinned_map = NoggitProjectPinnedMap();
+                          pinned_map.MapId = json_pinned_map.toObject().value("MapId").toInt();
+                          pinned_map.MapName = json_pinned_map.toObject().value("MapName").toString().toStdString();
+                            project.PinnedMaps.push_back(pinned_map);
                         }
                     }
 
-                    if (projectConfiguration.contains("Client") && projectConfiguration["Client"].isObject())
+                    if (project_configuration.contains("Client") && project_configuration["Client"].isObject())
                     {
-                        auto projectClientConfiguration = projectConfiguration["Client"].toObject();
+                        auto project_client_configuration = project_configuration["Client"].toObject();
 
-                        if (projectClientConfiguration.contains("ClientPath"))
+                        if (project_client_configuration.contains("ClientPath"))
                         {
-                            project.ClientPath = projectClientConfiguration["ClientPath"].toString().toStdString();
+                            project.ClientPath = project_client_configuration["ClientPath"].toString().toStdString();
                         }
 
-                        if (projectClientConfiguration.contains("ClientVersion"))
+                        if (project_client_configuration.contains("ClientVersion"))
                         {
-                            auto clientVersion = projectClientConfiguration["ClientVersion"].toString().toStdString();
+                            auto client_version = project_client_configuration["ClientVersion"].toString().toStdString();
 
-                            auto clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
-                            if (clientVersion == std::string("Shadowlands"))
+                            auto client_version_enum = Noggit::Project::ProjectVersion::WOTLK;
+                            if (client_version == std::string("Shadowlands"))
                             {
-                                clientVersionEnum = Noggit::Project::ProjectVersion::SL;
+                              client_version_enum = Noggit::Project::ProjectVersion::SL;
                             }
 
-                            if (clientVersion == std::string("Wrath Of The Lich King"))
+                            if (client_version == std::string("Wrath Of The Lich King"))
                             {
-                                clientVersionEnum = Noggit::Project::ProjectVersion::WOTLK;
+                              client_version_enum = Noggit::Project::ProjectVersion::WOTLK;
                             }
 
-                            project.projectVersion = clientVersionEnum;
+                            project.projectVersion = client_version_enum;
                         }
                     }
+                    else
+                    {
+                      return {};
+                    }
+                }
+                else
+                {
+                  return {};
                 }
 
                 return project;

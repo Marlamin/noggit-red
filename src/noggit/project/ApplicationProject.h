@@ -179,7 +179,7 @@ namespace Noggit::Project
     std::shared_ptr<NoggitProject> loadProject(std::filesystem::path const& projectPath)
     {
       auto projectReader = ApplicationProjectReader();
-      auto project = projectReader.ReadProject(projectPath);
+      auto project = projectReader.readProject(projectPath);
 
       assert (project.has_value());
 

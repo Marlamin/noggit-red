@@ -59,7 +59,7 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
 
                      std::filesystem::path filepath(proj_file.toStdString());
 
-                     auto project = project_reader.ReadProject(filepath.parent_path());
+                     auto project = project_reader.readProject(filepath.parent_path());
 
                      if (!project.has_value())
                      {

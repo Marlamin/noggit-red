@@ -13,7 +13,7 @@ namespace Noggit::Project
 	public:
 		ApplicationProjectReader() = default;
 
-		std::optional<NoggitProject> ReadProject(std::filesystem::path const& projectPath);
+		std::optional<NoggitProject> readProject(std::filesystem::path const& project_path);
 	};
 }
 
