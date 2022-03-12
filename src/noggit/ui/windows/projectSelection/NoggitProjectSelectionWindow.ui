@@ -222,7 +222,7 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Open an exsisting project</string>
+             <string>Open an existing project</string>
             </property>
             <property name="iconSize">
              <size>
