@@ -206,8 +206,8 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
       f->read(nor, 3);
       int pixel_start = chunk_start + i * 4;
       tile_buffer[pixel_start] = nor[0] / 127.0f;
-      tile_buffer[pixel_start + 1] = nor[1] / 127.0f;
-      tile_buffer[pixel_start + 2] = nor[2] / 127.0f;
+      tile_buffer[pixel_start + 1] = nor[2] / 127.0f;
+      tile_buffer[pixel_start + 2] = nor[1] / 127.0f;
     }
   }
   // - MCSH ----------------------------------------------
