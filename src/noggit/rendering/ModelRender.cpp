@@ -472,7 +472,11 @@ void ModelRender::fixShaderIDLayer()
           {
             some_flags &= 0xFF00;
           }
-          else  if (_model->_transparency_lookup[pass.transparency_combo_index] == _model->_transparency_lookup[first_pass->transparency_combo_index])
+          // tod
+          else  if ((_model->_transparency_lookup.size() > pass.transparency_combo_index
+          && _model->_transparency_lookup.size() > first_pass->transparency_combo_index)
+          && _model->_transparency_lookup[pass.transparency_combo_index]
+            == _model->_transparency_lookup[first_pass->transparency_combo_index])
           {
             pass.shader_id = 0x8000;
             first_pass->shader_id = _model->_render_flags[pass.renderflag_index].blend != 4 ? 0xE : 0x8002;

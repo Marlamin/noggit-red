@@ -30,8 +30,7 @@ private:
 
 struct scoped_model_reference
 {
-  scoped_model_reference (
-      BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context)
+  scoped_model_reference(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context)
 
     : _valid(true)
     , _file_key(file_key)
@@ -40,13 +39,13 @@ struct scoped_model_reference
 
   {}
 
-  scoped_model_reference (scoped_model_reference const& other)
+  scoped_model_reference(scoped_model_reference const& other)
     : _valid (other._valid)
     , _file_key (other._file_key)
     , _model (ModelManager::_.emplace(_file_key, other._context))
     , _context(other._context)
   {}
-  scoped_model_reference& operator= (scoped_model_reference const& other)
+  scoped_model_reference& operator=(scoped_model_reference const& other)
   {
     _valid = other._valid;
     _file_key = other._file_key;
@@ -55,7 +54,7 @@ struct scoped_model_reference
     return *this;
   }
 
-  scoped_model_reference (scoped_model_reference&& other)
+  scoped_model_reference(scoped_model_reference&& other)
     : _valid(other._valid)
     , _file_key(other._file_key)
     , _model(other._model)
@@ -63,7 +62,7 @@ struct scoped_model_reference
   {
     other._valid = false;
   }
-  scoped_model_reference& operator= (scoped_model_reference&& other)
+  scoped_model_reference& operator=(scoped_model_reference&& other)
   {
     std::swap(_valid, other._valid);
     std::swap(_file_key, other._file_key);
