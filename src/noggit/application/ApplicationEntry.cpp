@@ -24,15 +24,15 @@ int main(int argc, char *argv[])
 
   QApplication::setStyle(QStyleFactory::create("Fusion"));
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-  QApplication qApplication (argc, argv);
-  qApplication.setApplicationName ("Noggit");
-  qApplication.setOrganizationName ("Noggit");
+  QApplication q_application (argc, argv);
+  q_application.setApplicationName ("Noggit");
+  q_application.setOrganizationName ("Noggit");
 
   auto noggit = Noggit::Application::NoggitApplication::instance();
   noggit->initalize(argc, argv);
 
-  auto projectSelectionPage = std::make_unique<Noggit::Ui::Windows::NoggitProjectSelectionWindow>(noggit);
-  projectSelectionPage->show();
+  auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
+  project_selection->show();
 
-  return qApplication.exec();
+  return q_application.exec();
 }

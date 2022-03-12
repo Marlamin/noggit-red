@@ -98,8 +98,8 @@ namespace Noggit
         {
           for ( auto const& entry_abs : std::filesystem::recursive_directory_iterator (prefix))
           {
-            auto entry ( BlizzardArchive::ClientData::normalizeFilenameInternal
-                          (entry_abs.path().string().substr (prefix_size))
+            auto entry ( BlizzardArchive::ClientData::normalizeFilenameInternal(
+                entry_abs.path().string().substr(prefix_size))
                        );
 
             if ( entry.find ("tileset") != std::string::npos

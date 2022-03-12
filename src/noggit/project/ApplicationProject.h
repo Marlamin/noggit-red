@@ -176,35 +176,35 @@ namespace Noggit::Project
 
     }
 
-    std::shared_ptr<NoggitProject> loadProject(std::filesystem::path const& projectPath)
+    std::shared_ptr<NoggitProject> loadProject(std::filesystem::path const& project_path)
     {
-      auto projectReader = ApplicationProjectReader();
-      auto project = projectReader.readProject(projectPath);
+      auto project_reader = ApplicationProjectReader();
+      auto project = project_reader.readProject(project_path);
 
-      assert (project.has_value());
+      assert(project.has_value());
 
-      std::string dbdFileDirectory = _configuration->ApplicationDatabaseDefinitionsPath;
+      std::string dbd_file_directory = _configuration->ApplicationDatabaseDefinitionsPath;
 
-      auto clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
-      auto clientArchiveVersion = BlizzardArchive::ClientVersion::WOTLK;
-      auto clientArchiveLocale = BlizzardArchive::Locale::AUTO;
+      auto client_build = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
+      auto client_archive_version = BlizzardArchive::ClientVersion::WOTLK;
+      auto client_archive_locale = BlizzardArchive::Locale::AUTO;
       if (project->projectVersion == ProjectVersion::SL)
       {
-        clientArchiveVersion = BlizzardArchive::ClientVersion::SL;
-        clientBuild = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
-        clientArchiveLocale = BlizzardArchive::Locale::enUS;
+        client_archive_version = BlizzardArchive::ClientVersion::SL;
+        client_build = BlizzardDatabaseLib::Structures::Build("9.1.0.39584");
+        client_archive_locale = BlizzardArchive::Locale::enUS;
       }
 
       if (project->projectVersion == ProjectVersion::WOTLK)
       {
-        clientArchiveVersion = BlizzardArchive::ClientVersion::WOTLK;
-        clientBuild = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
-        clientArchiveLocale = BlizzardArchive::Locale::AUTO;
+        client_archive_version = BlizzardArchive::ClientVersion::WOTLK;
+        client_build = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
+        client_archive_locale = BlizzardArchive::Locale::AUTO;
       }
 
-      project->ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(dbdFileDirectory, clientBuild);
+      project->ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(dbd_file_directory, client_build);
       project->ClientData = std::make_shared<BlizzardArchive::ClientData>(
-          project->ClientPath, clientArchiveVersion, clientArchiveLocale, projectPath.generic_string());
+          project->ClientPath, client_archive_version, client_archive_locale, project_path.generic_string());
 
 
       return std::make_shared<NoggitProject>(project.value());
