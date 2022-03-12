@@ -3230,6 +3230,9 @@ MapView::~MapView()
   WMOManager::report();
 
   NOGGIT_ACTION_MGR->disconnect();
+
+  _buffers.unload();
+
 }
 
 void MapView::tick (float dt)
