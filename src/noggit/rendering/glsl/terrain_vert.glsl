@@ -1,6 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #version 410 core
 
+const double TILESIZE = 533.33333;
+const double CHUNKSIZE = TILESIZE / 16.0;
+
 in vec2 position;
 in vec2 texcoord;
 
@@ -18,7 +21,7 @@ struct ChunkInstanceData
   ivec4 ChunkTexDoAnim;
   ivec4 ChunkTexAnimSpeed;
   ivec4 AreaIDColor_Pad2_DrawSelection;
-  vec4  ChunkXYZBase_Pad1;
+  ivec4 ChunkXZ_TileXZ;
   ivec4 ChunkTexAnimDir;
 };
 
@@ -150,22 +153,31 @@ vec2 animUVOffset(int do_animate, int spd, int dir)
 
 void main()
 {
-  int t_i = gl_InstanceID / 16;
-  int t_y = gl_InstanceID % 16;
+  int t_x = gl_InstanceID / 16;
+  int t_z = gl_InstanceID % 16;
 
-  instanceID = base_instance + (t_i * 16 + t_y);
+  instanceID = base_instance + (t_x * 16 + t_z);
   vec4 normal_pos = texelFetch(heightmap, ivec2(gl_VertexID, instanceID), 0);
-  vec3 pos_base = instances[instanceID].ChunkXYZBase_Pad1.xyz;
-  vec3 pos = vec3(position.x + pos_base.x, pos_base.y + normal_pos.a, position.y + pos_base.z);
+  vec3 pos_base = instances[instanceID].ChunkXZ_TileXZ.xyz;
+
+  dvec3 pos = dvec3(double(instances[instanceID].ChunkXZ_TileXZ.z * TILESIZE)
+                      + double(instances[instanceID].ChunkXZ_TileXZ.x * CHUNKSIZE)
+                      + double(position.x)
+                    , double(normal_pos.a)
+                    , double(instances[instanceID].ChunkXZ_TileXZ.w * TILESIZE)
+                      + double(instances[instanceID].ChunkXZ_TileXZ.y * CHUNKSIZE)
+                      + double(position.y)
+                    );
 
   bool is_hole = isHoleVertex(gl_VertexID, instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.r);
 
   float NaN = makeNaN(1);
 
-  gl_Position = projection * model_view * (is_hole ? vec4(NaN, NaN, NaN, 1.0) : vec4(pos, 1.0));
+  dvec4 pos_after_hole_check = (is_hole ? dvec4(NaN, NaN, NaN, 1.0) : dvec4(pos, 1.0));
+  gl_Position = projection * model_view * vec4(pos_after_hole_check);
 
   vary_normal = normal_pos.rgb;
-  vary_position = pos;
+  vary_position = vec3(pos);
   vary_mccv = texelFetch(mccv, ivec2(gl_VertexID, instanceID), 0).rgb;
 
   vary_t0_uv = texcoord + animUVOffset(instances[instanceID].ChunkTexDoAnim.r,

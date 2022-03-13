@@ -38,7 +38,7 @@ struct ChunkInstanceData
   ivec4 ChunkTexDoAnim;
   ivec4 ChunkTexAnimSpeed;
   ivec4 AreaIDColor_Pad2_DrawSelection;
-  vec4  ChunkXYZBase_Pad1;
+  ivec4 ChunkXZ_TileXZ;
   ivec4 ChunkTexAnimDir;
 };
 

@@ -134,7 +134,10 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
 
       auto& chunk = _map_tile->mChunks[chunk_y][chunk_x];
 
-      _chunk_instance_data[i].ChunkXYZBase_Pad1 = {chunk->xbase, chunk->ybase, chunk->zbase, 1.0};
+      _chunk_instance_data[i].ChunkXZ_TileXZ[0] = chunk->px;
+      _chunk_instance_data[i].ChunkXZ_TileXZ[1] = chunk->py;
+      _chunk_instance_data[i].ChunkXZ_TileXZ[2] = static_cast<int>(_map_tile->index.x);
+      _chunk_instance_data[i].ChunkXZ_TileXZ[3] = static_cast<int>(_map_tile->index.z);
 
       unsigned flags = chunk->getUpdateFlags();
 
