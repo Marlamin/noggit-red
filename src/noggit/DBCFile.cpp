@@ -67,7 +67,7 @@ void DBCFile::save()
     str += "/";
   }
 
-  std::string filename_proj = BlizzardArchive::ClientData::normalizeFilenameInternal(str.toStdString() + filename);
+  std::string filename_proj = BlizzardArchive::ClientData::normalizeFilenameUnix(str.toStdString() + filename);
   QDir dir(str + "/DBFilesClient/");
   if (!dir.exists())
     dir.mkpath(".");
