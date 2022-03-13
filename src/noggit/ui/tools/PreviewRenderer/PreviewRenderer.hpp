@@ -48,7 +48,7 @@ class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport
     BoolToggleProperty _draw_boxes = {false};
     BoolToggleProperty _draw_grid = {false};
 
-    ~PreviewRenderer();
+    void unloadOpenglData() override;
 
   protected:
 
@@ -72,8 +72,6 @@ class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport
 
     float _animtime = 0.f;
 
-    bool _destroying = false;
-
     std::vector<glm::vec3> calcSceneExtents();
     virtual void draw();
     virtual void tick(float dt);
@@ -86,8 +84,6 @@ class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport
     void upload();
 
     void unload();
-
-    void unloadOpenglData() override;
 
     void updateLightingUniformBlock();
 

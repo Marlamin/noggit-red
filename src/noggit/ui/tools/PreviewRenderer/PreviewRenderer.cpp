@@ -509,30 +509,6 @@ void PreviewRenderer::tick(float dt)
   }
 }
 
-PreviewRenderer::~PreviewRenderer()
-{
-  _destroying = true;
-
-  if (_offscreen_mode)
-  {
-    OpenGL::context::save_current_context const context_save (::gl);
-    _offscreen_context.makeCurrent(&_offscreen_surface);
-    OpenGL::context::scoped_setter const context_set (::gl, &_offscreen_context);
-
-    _model_instances.clear();
-    _wmo_instances.clear();
-
-    _m2_program.reset();
-    _m2_instanced_program.reset();
-    _m2_particles_program.reset();
-    _m2_ribbons_program.reset();
-    _m2_box_program.reset();
-    _wmo_program.reset();
-
-    unload();
-  }
-
-}
 
 void PreviewRenderer::upload()
 {
@@ -690,6 +666,9 @@ void PreviewRenderer::unload()
   _liquid_program.reset();
   _liquid_texture_manager.unload();
 
+  _model_instances.clear();
+  _wmo_instances.clear();
+
   _uploaded = false;
 
 }
@@ -697,7 +676,14 @@ void PreviewRenderer::unload()
 void PreviewRenderer::unloadOpenglData()
 {
   if (_offscreen_mode)
+  {
+    OpenGL::context::save_current_context const context_save (::gl);
+    _offscreen_context.makeCurrent(&_offscreen_surface);
+    OpenGL::context::scoped_setter const context_set (::gl, &_offscreen_context);
+
+    unload();
     return;
+  }
 
   makeCurrent();
   OpenGL::context::scoped_setter const _ (::gl, context());

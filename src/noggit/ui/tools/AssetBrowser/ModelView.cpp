@@ -278,6 +278,5 @@ void ModelViewer::setActiveDoodadSet(const std::string& filename, const std::str
 
 ModelViewer::~ModelViewer()
 {
-  _destroying = true;
   disconnect(_gl_guard_connection);
 }
