@@ -156,16 +156,17 @@ void main()
   instanceID = base_instance + (t_i * 16 + t_y);
   vec4 normal_pos = texelFetch(heightmap, ivec2(gl_VertexID, instanceID), 0);
   vec3 pos_base = instances[instanceID].ChunkXYZBase_Pad1.xyz;
-  vec3 pos = vec3(position.x + pos_base.x, pos_base.y + normal_pos.a, position.y + pos_base.z);
+  dvec3 pos = dvec3(position.x + pos_base.x, pos_base.y + normal_pos.a, position.y + pos_base.z);
 
   bool is_hole = isHoleVertex(gl_VertexID, instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.r);
 
   float NaN = makeNaN(1);
 
-  gl_Position = projection * model_view * (is_hole ? vec4(NaN, NaN, NaN, 1.0) : vec4(pos, 1.0));
+  dvec4 pos_after_holecheck = (is_hole ? dvec4(NaN, NaN, NaN, 1.0) : dvec4(pos, 1.0));
+  gl_Position = projection * model_view * vec4(pos_after_holecheck);
 
   vary_normal = normal_pos.rgb;
-  vary_position = pos;
+  vary_position = vec3(pos);
   vary_mccv = texelFetch(mccv, ivec2(gl_VertexID, instanceID), 0).rgb;
 
   vary_t0_uv = texcoord + animUVOffset(instances[instanceID].ChunkTexDoAnim.r,
