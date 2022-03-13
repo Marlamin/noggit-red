@@ -172,7 +172,6 @@ void main()
 
   float NaN = makeNaN(1);
 
-
   dvec4 pos_after_holecheck = (is_hole ? dvec4(NaN, NaN, NaN, 1.0) : dvec4(pos, 1.0));
   gl_Position = projection * model_view * vec4(pos_after_holecheck);
 

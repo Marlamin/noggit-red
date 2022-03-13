@@ -845,8 +845,6 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     gl.bindVertexArray(0);
   }
 
-  gl.disable(GL_BLEND);
-
   if (angled_mode || use_ref_pos)
   {
     ZoneScopedN("World::draw() : Draw angles");
