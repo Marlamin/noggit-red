@@ -158,7 +158,6 @@ void main()
 
   instanceID = base_instance + (t_x * 16 + t_z);
   vec4 normal_pos = texelFetch(heightmap, ivec2(gl_VertexID, instanceID), 0);
-  vec3 pos_base = instances[instanceID].ChunkXZ_TileXZ.xyz;
 
   dvec3 pos = dvec3(double(instances[instanceID].ChunkXZ_TileXZ.z * TILESIZE)
                       + double(instances[instanceID].ChunkXZ_TileXZ.x * CHUNKSIZE)
@@ -173,8 +172,9 @@ void main()
 
   float NaN = makeNaN(1);
 
-  dvec4 pos_after_hole_check = (is_hole ? dvec4(NaN, NaN, NaN, 1.0) : dvec4(pos, 1.0));
-  gl_Position = projection * model_view * vec4(pos_after_hole_check);
+
+  dvec4 pos_after_holecheck = (is_hole ? dvec4(NaN, NaN, NaN, 1.0) : dvec4(pos, 1.0));
+  gl_Position = projection * model_view * vec4(pos_after_holecheck);
 
   vary_normal = normal_pos.rgb;
   vary_position = vec3(pos);

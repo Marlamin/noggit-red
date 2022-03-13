@@ -64,7 +64,7 @@ namespace OpenGL
     int ChunkTexDoAnim[4];
     int ChunkTexAnimSpeed[4];
     int AreaIDColor_Pad2_DrawSelection[4];
-    glm::vec4 ChunkXYZBase_Pad1;
+    int ChunkXZ_TileXZ[4];
     int ChunkTexAnimDir[4];
   };
 
