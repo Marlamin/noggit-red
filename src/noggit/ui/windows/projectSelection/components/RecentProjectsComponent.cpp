@@ -3,7 +3,7 @@
 #include "RecentProjectsComponent.hpp"
 
 #include <QList>
-
+#include <filesystem>
 
 using namespace Noggit::Ui::Component;
 
@@ -22,16 +22,17 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
     settings.setArrayIndex(i);
     std::filesystem::path project_path = settings.value("project_path").toString().toStdString().c_str();
 
-    auto item = new QListWidgetItem(parent->_ui->listView);
-    auto project_reader = Noggit::Project::ApplicationProjectReader();
-
     if (!std::filesystem::exists(project_path) || !std::filesystem::is_directory(project_path))
       continue;
+
+    auto project_reader = Noggit::Project::ApplicationProjectReader();
 
     auto project = project_reader.readProject(project_path);
 
     if (!project.has_value())
       continue;
+
+    auto item = new QListWidgetItem(parent->_ui->listView);
 
     auto project_data = Noggit::Ui::Widget::ProjectListItemData();
     project_data.project_version = project->projectVersion;
@@ -91,7 +92,19 @@ void RecentProjectsComponent::registerProjectChange(std::string const& project_p
   for (int i = 0; i < size; ++i)
   {
     settings.setArrayIndex(i);
-    recent_projects.append(settings.value("project_path").toString());
+    QString p_path = settings.value("project_path").toString();
+
+    std::string std_project_path = p_path.toStdString();
+
+    if (std::filesystem::exists(std_project_path)
+      && std::filesystem::is_directory(std_project_path))
+    {
+      recent_projects.append(p_path);
+    }
+    else
+    {
+      size--;
+    }
   }
   settings.endArray();
 
