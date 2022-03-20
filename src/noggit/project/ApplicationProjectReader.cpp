@@ -13,6 +13,10 @@ namespace Noggit::Project
 {
   std::optional<NoggitProject> ApplicationProjectReader::readProject(std::filesystem::path const& project_path)
   {
+
+    if (!std::filesystem::exists(project_path) || !std::filesystem::is_directory(project_path))
+      return {};
+
     for (const auto& entry: std::filesystem::directory_iterator(project_path))
     {
       if (entry.path().extension() == ".noggitproj")

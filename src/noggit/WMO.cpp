@@ -633,7 +633,7 @@ void WMOGroup::load()
 
   _normals.resize (size / sizeof (::glm::vec3));
 
-  f.read (_normals.data (), size);
+  f.read (_normals.data(), size);
 
   for (auto& n : _normals)
   {

@@ -1213,6 +1213,8 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
     {
       MapChunk* chunk = getChunk(k, l);
 
+      chunk->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+
       glm::vec3* heightmap = chunk->getHeightmap();
 
       for (unsigned y = 0; y < SUM; ++y)
@@ -1229,6 +1231,8 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
 
           switch (image.depth())
           {
+            case 8:
+            case 16:
             case 32:
             {
               switch (mode)

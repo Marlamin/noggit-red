@@ -15,7 +15,7 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
                                                            QWidget* parent)
   : QMainWindow(parent)
   , _ui(new ::Ui::NoggitProjectSelectionWindow)
-  ,_noggit_application(noggit_app)
+  , _noggit_application(noggit_app)
 {
   setWindowFlags(Qt::Window | Qt::MSWindowsFixedSizeDialogHint);
 
@@ -126,7 +126,7 @@ void NoggitProjectSelectionWindow::handleContextMenuProjectListItemDelete(std::s
   prompt.setWindowTitle("Delete Project");
   prompt.setIcon(QMessageBox::Warning);
   prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
-  prompt.setText("Deleting project will remove all saved data.");
+  prompt.setText("Deleting a project will remove all saved data. Do you want to continue?");
   prompt.addButton("Accept", QMessageBox::AcceptRole);
   prompt.setDefaultButton(prompt.addButton("Cancel", QMessageBox::RejectRole));
   prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);

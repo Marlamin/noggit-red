@@ -183,7 +183,8 @@ namespace Noggit::Project
       ApplicationProjectReader project_reader{};
       auto project = project_reader.readProject(project_path);
 
-      assert(project.has_value());
+      if(!project.has_value())
+        return {};
 
       std::string dbd_file_directory = _configuration->ApplicationDatabaseDefinitionsPath;
 

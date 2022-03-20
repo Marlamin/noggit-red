@@ -101,10 +101,6 @@ void RecentProjectsComponent::registerProjectChange(std::string const& project_p
     {
       recent_projects.append(p_path);
     }
-    else
-    {
-      size--;
-    }
   }
   settings.endArray();
 
@@ -114,7 +110,6 @@ void RecentProjectsComponent::registerProjectChange(std::string const& project_p
   if (it != recent_projects.end())
   {
     recent_projects.erase(it);
-    size--;
   }
 
   settings.remove("recent_projects");
@@ -123,11 +118,14 @@ void RecentProjectsComponent::registerProjectChange(std::string const& project_p
   settings.setArrayIndex(0);
   settings.setValue("project_path", QString(project_path.c_str()));
 
-  for (int i = 0; i < size; ++i)
+  int index_counter = 1;
+  for (auto& p_path : recent_projects)
   {
-    settings.setArrayIndex(i + 1);
-    settings.setValue("project_path", recent_projects[i]);
+    settings.setArrayIndex(index_counter);
+    settings.setValue("project_path", p_path);
+    index_counter++;
   }
+
   settings.endArray();
 
   settings.sync();
@@ -158,7 +156,6 @@ void RecentProjectsComponent::registerProjectRemove(std::string const& project_p
 
     settings.remove("recent_projects");
     settings.beginWriteArray("recent_projects");
-
 
     for (int i = 0; i < size; ++i)
     {

@@ -54,7 +54,8 @@ void BuildMapListComponent::buildMapList(Noggit::Ui::Windows::NoggitWindow* pare
     {
       map_list_data.pinned = true;
       pinned_maps.push_back(map_list_data);
-    } else
+    }
+    else
     {
       maps.push_back(map_list_data);
     }
@@ -87,7 +88,8 @@ void BuildMapListComponent::buildMapList(Noggit::Ui::Windows::NoggitWindow* pare
                          context_menu.addAction(&action_1);
                          context_menu.exec(map_list_item->mapToGlobal(pos));
                        });
-    } else
+    }
+    else
     {
       QObject::connect(map_list_item, &QListWidget::customContextMenuRequested,
                        [=](const QPoint& pos)
