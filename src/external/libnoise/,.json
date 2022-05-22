@@ -1,0 +1,169 @@
+{
+	"DealerId": "32807",
+	"SystemKey": "Codeweavers",
+	"CustomerParameters": {
+		"MinimumPayment": 0.0,
+		"MaximumPayment": 500.0,
+		"SortBy": 1,
+		"PageNumber": 1,
+		"ResultsPerPage": 500,
+		"ProductKeys": [
+			"PCP"
+		],
+		"ReturnErrors": false,
+		"UseDefaultBackendBonuses": false,
+		"MaximumTerm": 48,
+		"CashDeposit": 17.5,
+		"PartExchange": 0.0,
+		"Settlement": 0.0,
+		"AnnualMileage": {
+			"Value": 1000,
+			"Unit": 0
+		},
+		"DepositType": 2,
+		"CalculationType": null,
+		"RegularPayment": 0.0,
+		"SellOut": null,
+		"AdditionalAdvance": 0.0,
+		"Age": 0,
+		"Postcode": null,
+		"IncludeTelematicInsurance": false,
+		"SpecificProductType": null,
+		"ValueAddedProducts": [],
+		"CalculationTime": "2022-03-16T09:32:41.11182+00:00",
+		"DoNotSaveQuote": false,
+		"DepositContributions": [],
+		"CashPriceDiscounts": [],
+		"NetMonthlyIncome": 0.0,
+		"CreditScore": 0.0,
+		"TerminalPauses": 0,
+		"DisableCalculationCapping": false,
+		"Entity": null,
+		"DealerBaseRateOverrides": [],
+		"IsPersonalised": null,
+		"IsCalculateForOptions": false,
+		"PartExchangeReference": null,
+		"DeliveryDate": null,
+		"CashValuesAreVatExclusive": false,
+		"CustomerSelectedCreditTier": 0,
+		"IncludeNoFinanceOption": false,
+		"LegacyOfferCode": null,
+		"PartExchangeOfferReference": null,
+		"ConsumerScore": 0
+	},
+	"VehicleRequests": [
+		{
+			"Id": "d668780a-08f4-4c51-af4e-e115dce3fbb2",
+			"Dealer": "GS0015407",
+			"Vehicle": {
+				"DealerAccessories": [],
+				"IsNew": true,
+				"Identifier": "d668780a-08f4-4c51-af4e-e115dce3fbb2",
+				"IdentifierType": 18,
+				"DealerStockId": "W1K2062042F045245",
+				"Type": 1,
+				"IsVatQualifying": false,
+				"ImageLink": null,
+				"DealerVehicleLink": "https://osp-fe-mb-cli.publicis-tech.io/vehicle-detail/c-220-d-amg-line-premium-estate/W1K2062042F045245/91",
+				"Description": "C 220 d AMG Line Premium Estate",
+				"Colour": "",
+				"FuelType": "Diesel",
+				"Transmission": "Automatic",
+				"ManualResidual": null,
+				"Doors": 0,
+				"BodyStye": "Estate",
+				"StockDate": "2022-02-08T06:31:08.2996915+00:00",
+				"Manufacturer": "Mercedes-Benz",
+				"Vin": "W1K2062042F045245",
+				"CarbonDioxideEmissions": null,
+				"EngineCapacity": 1993,
+				"YearOfManufacture": 0,
+				"CostBreakdown": {
+					"RoadFundLicence": 180.0,
+					"RegistrationFee": 55.0,
+					"BasePrice": 45964.99,
+					"Delivery": 805.0,
+					"RetailerDiscount": 0.0,
+					"BrandDiscount": 0.0,
+					"AccessoriesTotal": 0.0,
+					"GovernmentGrant": 0.0,
+					"EquipmentOptionsTotal": 0.0
+				},
+				"Model": "C-Class",
+				"Variant": "C 220 D AMG LINE PREMIUM",
+				"Trim": "C 220 D AMG LINE PREMIUM",
+				"SubsequentRoadFundLicence": 490.0,
+				"ManufacturerDelivery": 0.0,
+				"Identifiers": [
+					{
+						"Code": "141215",
+						"Type": 16
+					},
+					{
+						"Code": "206204",
+						"Type": 42
+					},
+					{
+						"Code": "CDI11110302",
+						"Type": 29
+					}
+				],
+				"Valuations": [],
+				"DiscontinuedDate": null,
+				"P11DExemptPrice": 0.0,
+				"SixMonthsSubsequentRoadFundLicence": 0.0,
+				"IsApprovedUsed": false,
+				"IsFranchiseApproved": false,
+				"VehicleTag": null,
+				"RoadTaxCode": null,
+				"CurrentMileage": {
+					"Value": 0,
+					"Unit": 0
+				},
+				"ModelYear": null,
+				"Registration": {
+					"RegistrationNumber": "",
+					"DateRegisteredWithDvla": null,
+					"CountryCode": "GB"
+				},
+				"Options": [
+					{
+						"Identifier": "MET",
+						"Description": null,
+						"Price": 0.0,
+						"Discount": 0.0,
+						"IsP11DExempt": false,
+						"PackCode": null,
+						"IsStandard": false,
+						"Category": null,
+						"CapOptionId": 0,
+						"IsFeatured": false,
+						"PriceExcludingFees": 0.0,
+						"DiscountExcludingFees": 0.0
+					}
+				],
+				"VatStatus": 1,
+				"EnvironmentalData": null,
+				"State": 4,
+				"IsRde2Compliant": false,
+				"P11DValue": 46650.0,
+				"VehicleReference": "NotSaved"
+			},
+			"Products": [],
+			"IsCombinedResults": false,
+			"CodeweaversStockId": "d668780a-08f4-4c51-af4e-e115dce3fbb2",
+			"VehicleParameters": null,
+			"AdditionalQuoteData": {},
+			"DealerId": null,
+			"Channel": null,
+			"OrganisationReferences": {},
+			"FinanceParameters": null,
+			"RetailerStockLocation": "cb082ae7-e390-41f5-abe8-c31fbf926a38",
+			"DebugInfo": "UsedVehicleRequestMapper.MapRequest"
+		}
+	],
+	"User" : {
+		"SystemDatabaseKey" : "Codeweavers",
+		"SystemId": 1
+	}
+}
