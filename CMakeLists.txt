@@ -135,7 +135,6 @@ ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/QtAdvancedDockingSystem")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/NodeEditor")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/libnoise")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/glm")
-ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/SQLiteCpp")
 
 # Add the found include directories to our include list.
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_SOURCE_DIR}/include/")
@@ -354,7 +353,6 @@ TARGET_LINK_LIBRARIES (noggit
   FastNoise
   nlohmann_json::nlohmann_json
   sol2::sane
-  SQLiteCpp
 )
 
 #add distribution themes
