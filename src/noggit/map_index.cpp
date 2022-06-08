@@ -209,7 +209,8 @@ void MapIndex::save()
   SetChunkHeader(wdtFile, curPos, 'MPHD', sizeof(MPHD));
   curPos += 8;
 
-  wdtFile.Insert(curPos, sizeof(MPHD), (char*)&mphd);
+  // todo : wdt flags?
+  wdtFile.Extend(32);
   curPos += sizeof(MPHD);
   //  }
 
