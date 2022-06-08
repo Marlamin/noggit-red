@@ -542,14 +542,14 @@ void MapCreationWizard::addNewMap()
   _map_desc_horde->clear();
 
   _loading_screen->setValue(0);
-  _minimap_icon_scale->setValue(0.0f);
+  _minimap_icon_scale->setValue(1.0f);
 
   _corpse_map_id->setCurrentIndex(0);
 
 
   _corpse_x->setValue(0.0f);
   _corpse_y->setValue(0.0f);
-  _time_of_day_override->setValue(0);
+  _time_of_day_override->setValue(-1);
   _expansion_id->setCurrentIndex(0);
   _raid_offset->setValue(0);
   _max_players->setValue(0);
