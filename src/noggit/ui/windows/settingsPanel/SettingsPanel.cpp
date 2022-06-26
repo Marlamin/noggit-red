@@ -135,6 +135,12 @@ namespace Noggit
               }
       );
 
+      connect(ui->_fps_limit_slider, &QSlider::valueChanged, [&](int value)
+              {
+                  ui->_fps_limit_current_label->setText(
+                      QString(tr("FPS limitation, current : %1")).arg(value));
+              });
+
       ui->_wireframe_color->setColor(Qt::white);
 
       connect(ui->saveButton, &QPushButton::clicked, [this]
@@ -215,6 +221,7 @@ namespace Noggit
       ui->_wireframe_radius->setValue(_settings->value("wireframe/radius", 1.5f).toFloat());
       ui->_wireframe_width->setValue(_settings->value("wireframe/width", 1.f).toFloat());
       ui->_wireframe_color->setColor(_settings->value("wireframe/color").value<QColor>());
+      ui->_fps_limit_slider->setValue(_settings->value("fps_limit", 60).toInt());
     }
 
     void settings::save_changes()
@@ -257,6 +264,7 @@ namespace Noggit
       _settings->setValue("assetBrowser/default_model", ui->assetBrowserDefaultModel->text());
       _settings->setValue("assetBrowser/move_sensitivity", ui->assetBrowserMoveSensitivity->value());
       _settings->setValue("assetBrowser/render_asset_preview", ui->assetBrowserRenderAssetPreview->isChecked());
+      _settings->setValue("fps_limit", ui->_fps_limit_slider->value());
 
       _settings->sync();
 
