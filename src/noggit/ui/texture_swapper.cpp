@@ -51,6 +51,11 @@ namespace Noggit
       auto brush_layout (new QFormLayout(brush_content));
       _brush_mode_group->setLayout(brush_layout);
 
+      _swap_entire_chunk = new QCheckBox(brush_content);
+      _swap_entire_chunk->setText(tr("Entire chunk"));
+      _swap_entire_chunk->setCheckState(Qt::CheckState::Unchecked);
+      brush_layout->addRow(_swap_entire_chunk);
+
       _radius_spin = new QDoubleSpinBox(brush_content);
       _radius_spin->setRange (0.f, 100.f);
       _radius_spin->setDecimals (2);

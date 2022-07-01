@@ -55,6 +55,7 @@ public:
                       , float radius
                       , scoped_blp_texture_reference const& texture_to_replace
                       , scoped_blp_texture_reference replacement_texture
+                      , bool entire_chunk = false
                       );
   bool canPaintTexture(scoped_blp_texture_reference const& texture);
 

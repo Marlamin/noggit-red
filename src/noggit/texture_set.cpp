@@ -817,6 +817,7 @@ bool TextureSet::replace_texture( float xbase
                                 , float radius
                                 , scoped_blp_texture_reference const& texture_to_replace
                                 , scoped_blp_texture_reference replacement_texture
+                                , bool entire_chunk
                                 )
 {
   float dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
@@ -824,6 +825,14 @@ bool TextureSet::replace_texture( float xbase
   if (dist > radius)
   {
     return false;
+  }
+
+  if (entire_chunk)
+  {
+      replace_texture(texture_to_replace, std::move (replacement_texture));
+      _chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
+      _need_lod_texture_map_update = true;
+      return true;
   }
 
   // if the chunk is fully inside the brush, just swap the 2 textures

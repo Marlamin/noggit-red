@@ -6,6 +6,7 @@
 
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QGroupBox>
+#include <QtWidgets/QCheckBox>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 #include <optional>
@@ -35,6 +36,11 @@ namespace Noggit
         return _radius;
       }
 
+      bool entireChunk() const
+      {
+          return _swap_entire_chunk->isChecked();
+      }
+
       void change_radius(float change);
 
       bool brush_mode() const
@@ -60,6 +66,7 @@ namespace Noggit
 
       QGroupBox* _brush_mode_group;
       QSlider* _radius_slider;
+      QCheckBox* _swap_entire_chunk;
       QDoubleSpinBox* _radius_spin;
       World* _world;
     };

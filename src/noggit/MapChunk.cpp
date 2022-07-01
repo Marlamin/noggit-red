@@ -1285,9 +1285,9 @@ bool MapChunk::stampTexture(glm::vec3 const& pos, Brush *brush, float strength, 
   return texture_set->stampTexture(xbase, zbase, pos.x, pos.z, brush, strength, pressure, std::move (texture), img, paint);
 }
 
-bool MapChunk::replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture)
+bool MapChunk::replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture, bool entire_chunk)
 {
-  return texture_set->replace_texture(xbase, zbase, pos.x, pos.z, radius, old_texture, std::move (new_texture));
+  return texture_set->replace_texture(xbase, zbase, pos.x, pos.z, radius, old_texture, std::move (new_texture), entire_chunk);
 }
 
 bool MapChunk::canPaintTexture(scoped_blp_texture_reference texture)
