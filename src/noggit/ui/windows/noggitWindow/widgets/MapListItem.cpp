@@ -4,28 +4,30 @@
 
 namespace Noggit::Ui::Widget
 {
-  MapListItem::MapListItem(const MapListData& data, QWidget* parent = nullptr) : QWidget(parent)
+  MapListItem::MapListItem(const MapListData& data, QWidget* parent = nullptr)
+    : QWidget(parent)
+    , _map_data(data)
   {
     auto layout = QGridLayout();
 
     QIcon icon;
-    if (data.expansion_id == 0)
+    if (_map_data.expansion_id == 0)
       icon = QIcon(":/icon-classic");
-    if (data.expansion_id == 1)
+    if (_map_data.expansion_id == 1)
       icon = QIcon(":/icon-burning");
-    if (data.expansion_id == 2)
+    if (_map_data.expansion_id == 2)
       icon = QIcon(":/icon-wrath");
-    if (data.expansion_id == 3)
+    if (_map_data.expansion_id == 3)
       icon = QIcon(":/icon-cata");
-    if (data.expansion_id == 4)
+    if (_map_data.expansion_id == 4)
       icon = QIcon(":/icon-panda");
-    if (data.expansion_id == 5)
+    if (_map_data.expansion_id == 5)
       icon = QIcon(":/icon-warlords");
-    if (data.expansion_id == 6)
+    if (_map_data.expansion_id == 6)
       icon = QIcon(":/icon-legion");
-    if (data.expansion_id == 7)
+    if (_map_data.expansion_id == 7)
       icon = QIcon(":/icon-battle");
-    if (data.expansion_id == 8)
+    if (_map_data.expansion_id == 8)
       icon = QIcon(":/icon-shadow");
 
     _map_icon = new QLabel("", parent);
@@ -34,13 +36,13 @@ namespace Noggit::Ui::Widget
     _map_icon->setObjectName("project-icon-label");
     _map_icon->setStyleSheet("QLabel#project-icon-label { font-size: 12px; padding: 0px;}");
 
-    auto project_name = toCamelCase(QString(data.map_name));
+    auto project_name = toCamelCase(QString(_map_data.map_name));
     _map_name = new QLabel(project_name, parent);
     _map_name->setGeometry(32, 0, 300, 20);
     _map_name->setObjectName("project-title-label");
     _map_name->setStyleSheet("QLabel#project-title-label { font-size: 12px; }");
 
-    _map_id = new QLabel(QString::number(data.map_id), parent);
+    _map_id = new QLabel(QString::number(_map_data.map_id), parent);
     _map_id->setGeometry(32, 15, 300, 20);
     _map_id->setObjectName("project-information");
     _map_id->setStyleSheet("QLabel#project-information { font-size: 10px; }");
@@ -52,17 +54,17 @@ namespace Noggit::Ui::Widget
     _map_id->setAutoFillBackground(true);
 
     auto instance_type = QString("Unknown");
-    if (data.map_type_id == 0)
+    if (_map_data.map_type_id == 0)
       instance_type = QString("Continent");
-    if (data.map_type_id == 1)
+    if (_map_data.map_type_id == 1)
       instance_type = QString("Dungeon");
-    if (data.map_type_id == 2)
+    if (_map_data.map_type_id == 2)
       instance_type = QString("Raid");
-    if (data.map_type_id == 3)
+    if (_map_data.map_type_id == 3)
       instance_type = QString("Battleground");
-    if (data.map_type_id == 4)
+    if (_map_data.map_type_id == 4)
       instance_type = QString("Arena");
-    if (data.map_type_id == 5)
+    if (_map_data.map_type_id == 5)
       instance_type = QString("Scenario");
 
     _map_instance_type = new QLabel(instance_type, this);
@@ -77,7 +79,7 @@ namespace Noggit::Ui::Widget
     _map_instance_type->setGraphicsEffect(last_edited_effect);
     _map_instance_type->setAutoFillBackground(true);
 
-    if (data.pinned)
+    if (_map_data.pinned)
     {
       _map_pinned_label = new QLabel("", this);
       _map_pinned_label->setPixmap(FontAwesomeIcon(FontAwesome::star).pixmap(QSize(16, 16)));

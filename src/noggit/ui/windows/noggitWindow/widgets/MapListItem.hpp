@@ -30,9 +30,17 @@ namespace Noggit::Ui::Widget
         QLabel* _map_instance_type;
         QLabel* _map_pinned_label;
         int _max_width;
+        MapListData _map_data;
+
     public:
         MapListItem(const MapListData& data, QWidget* parent);
         QSize minimumSizeHint() const override;
+
+        const QString name() { return _map_data.map_name; };
+        int id() { return _map_data.map_id; };
+        int type() { return _map_data.map_type_id; };
+        int expansion() { return _map_data.expansion_id; };
+
     private:
         QString toCamelCase(const QString& s);
     };

@@ -25,6 +25,7 @@
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QComboBox>
 #include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
 #include <noggit/ui/windows/noggitWindow/widgets/MapBookmarkListItem.hpp>
 #include <QtNetwork/QTcpSocket>
@@ -179,6 +180,37 @@ namespace Noggit::Ui::Windows
 
   }
 
+  void NoggitWindow::applyFilterSearch(const QString &name, int type, int expansion)
+  {
+      for (int i = 0; i < _continents_table->count(); ++i)
+      {
+          auto item_widget = _continents_table->item(i);
+          auto widget = qobject_cast<Noggit::Ui::Widget::MapListItem*>(_continents_table->itemWidget(item_widget));
+
+          if (!widget)
+              continue;
+
+          item_widget->setHidden(false);
+
+          if (!widget->name().contains(name, Qt::CaseInsensitive))
+          {
+              item_widget->setHidden(true);
+              continue;
+          }
+
+          if (!(widget->type() == (type - 2)) && type != 0)
+          {
+              item_widget->setHidden(true);
+              continue;
+          }
+
+          if (!(widget->expansion() == (expansion - 1)) && expansion != 0)
+          {
+              item_widget->setHidden(true);
+          }
+      }
+  }
+
   void NoggitWindow::loadMap(int map_id)
   {
     _minimap->world(nullptr);
@@ -219,9 +251,73 @@ namespace Noggit::Ui::Windows
 
 
     QTabWidget* entry_points_tabs(new QTabWidget(widget));
-    entry_points_tabs->addTab(_continents_table, "Maps");
+    //entry_points_tabs->addTab(_continents_table, "Maps");
+
+    /* set-up widget for seaching etc... through _continents_table */
+    {
+        QWidget* _first_tab = new QWidget(this);
+        QVBoxLayout* _first_tab_layout = new QVBoxLayout();
+        _first_tab->setLayout(_first_tab_layout);
+
+        QGroupBox* _group_search = new QGroupBox(tr("Search"), this);
+
+        QLineEdit* _line_edit_search = new QLineEdit(this);
+        QComboBox* _combo_search = new QComboBox(this);
+        _combo_search->addItems(QStringList() <<
+                                tr("All") <<
+                                tr("Unknown") <<
+                                tr("Continent") <<
+                                tr("Dungeon") <<
+                                tr("Raid") <<
+                                tr("Battleground") <<
+                                tr("Arena") <<
+                                tr("Scenario"));
+        _combo_search->setCurrentIndex(0);
+
+        QComboBox* _combo_exp_search = new QComboBox(this);
+        _combo_exp_search->addItem(tr("All"));
+        _combo_exp_search->addItem(QIcon(":/icon-classic"), tr("Classic"));
+        _combo_exp_search->addItem(QIcon(":/icon-burning"), tr("Burning Cursade"));
+        _combo_exp_search->addItem(QIcon(":/icon-wrath"), tr("Wrath of the Lich King"));
+        _combo_exp_search->addItem(QIcon(":/icon-cata"), tr("Cataclism"));
+        _combo_exp_search->addItem(QIcon(":/icon-panda"), tr("Mist of Pandaria"));
+        _combo_exp_search->addItem(QIcon(":/icon-warlords"), tr("Warlords of Draenor"));
+        _combo_exp_search->addItem(QIcon(":/icon-legion"), tr("Legion"));
+        _combo_exp_search->addItem(QIcon(":/icon-battle"), tr("Battle for Azeroth"));
+        _combo_exp_search->addItem(QIcon(":/icon-shadow"), tr("Shadowlands"));
+        _combo_exp_search->setCurrentIndex(0);
+
+        QObject::connect(_line_edit_search, QOverload<const QString&>::of(&QLineEdit::textChanged), [this, _combo_search, _combo_exp_search](const QString &name)
+                         {
+                             applyFilterSearch(name, _combo_search->currentIndex(), _combo_exp_search->currentIndex());
+                         });
+
+        QObject::connect(_combo_search, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, _line_edit_search, _combo_exp_search](int index)
+                         {
+                             applyFilterSearch(_line_edit_search->text(), index, _combo_exp_search->currentIndex());
+                         });
+
+        QObject::connect(_combo_exp_search, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, _line_edit_search, _combo_search](int index)
+                         {
+                             applyFilterSearch(_line_edit_search->text(), _combo_search->currentIndex(), index);
+                         });
+
+
+        QFormLayout* _group_layout = new QFormLayout();
+        _group_layout->addRow(tr("Name : "), _line_edit_search);
+        _group_layout->addRow(tr("Type : "), _combo_search);
+        _group_layout->addRow(tr("Expansion : "), _combo_exp_search);
+        _group_search->setLayout(_group_layout);
+
+        _first_tab_layout->addWidget(_group_search);
+        _first_tab_layout->addSpacing(12);
+        _first_tab_layout->addWidget(_continents_table);
+
+        entry_points_tabs->addTab(_first_tab, tr("Maps"));
+    }
+
     entry_points_tabs->addTab(bookmarks_table, "Bookmarks");
-    entry_points_tabs->setFixedWidth(300);
+    entry_points_tabs->setFixedWidth(310);
     layout->addWidget(entry_points_tabs);
 
     _buildMapListComponent->buildMapList(this);
