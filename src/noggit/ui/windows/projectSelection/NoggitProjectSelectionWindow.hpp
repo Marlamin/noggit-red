@@ -6,6 +6,7 @@
 #include <QAction>
 #include <qgraphicseffect.h>
 #include <QString>
+#include <QToolButton>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/ui/windows/projectCreation/NoggitProjectCreationDialog.h>

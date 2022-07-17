@@ -6,8 +6,10 @@
 
 #include <filesystem>
 #include <QString>
+#include <noggit/ui/FontNoggit.hpp>
 
 #include "ui_NoggitProjectSelectionWindow.h"
+
 
 using namespace Noggit::Ui::Windows;
 
@@ -31,7 +33,16 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
 
   _load_project_component = std::make_unique<Component::LoadProjectComponent>();
 
+  _ui->settings_button->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::Icons::cog));
+  _ui->settings_button->setIconSize(QSize(20,20));
+
   Component::RecentProjectsComponent::buildRecentProjectsList(this);
+
+  QObject::connect(_ui->settings_button, &QToolButton::clicked, [&]
+      {
+          _settings->show();
+      }
+  );
 
   QObject::connect(_ui->button_create_new_project, &QPushButton::clicked, [=, this]
                    {
