@@ -2031,6 +2031,21 @@ void World::swapTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex)
   }
 }
 
+void World::removeTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex)
+{
+    ZoneScoped;
+    if (!!Noggit::Ui::selected_texture::get())
+    {
+        for_all_chunks_on_tile(pos, [&](MapChunk* chunk)
+            {
+                NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
+                // chunk->switchTexture(tex, *Noggit::Ui::selected_texture::get());
+                chunk->eraseTexture(tex);
+            });
+    }
+}
+
+
 void World::removeTexDuplicateOnADT(glm::vec3 const& pos)
 {
   ZoneScoped;
