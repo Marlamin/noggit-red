@@ -36,7 +36,7 @@ namespace Noggit
 
       QPushButton* select = new QPushButton("Select", this);
       QPushButton* swap_adt = new QPushButton("Swap ADT", this);
-      QPushButton* remove_text_adt = new QPushButton("Remove this texture from ADT", this);
+      QPushButton* remove_text_adt = new QPushButton(tr("Remove this texture from ADT"), this);
 
       layout->addRow(new QLabel("Texture to swap"));
       layout->addRow(_texture_to_swap_display);
