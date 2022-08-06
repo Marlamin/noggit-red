@@ -859,6 +859,16 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
     float radius = 1.2f * brush_radius;
 
+    if (angled_mode && terrainMode == editing_mode::flatten_blur)
+    {
+        if (angle > 57.2958f) // 1 radian
+        {
+            color.x = 1.f;
+            color.y = 0.f;
+            color.z = 0.f;
+        }
+    }
+
     if (angled_mode && !use_ref_pos)
     {
       glm::vec3 pos = cursor_pos;

@@ -74,6 +74,8 @@ namespace Noggit
       QGroupBox* _angle_group;
       QSlider* _angle_slider;
       QDial* _orientation_dial;
+      QLabel* _orientation_info;
+      QLabel* _angle_info;
 
       QGroupBox* _lock_group;
       QDoubleSpinBox* _lock_x;
