@@ -25,6 +25,7 @@ namespace Noggit
       : widget (parent, Qt::Window)
       , layout (new ::QGridLayout(this))
       , _chunk (nullptr)
+      , _main_texture_window(current_texture_window)
     {
       setWindowTitle ("Texture Picker");
       setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -32,12 +33,50 @@ namespace Noggit
       for (int i = 0; i < 4; i++)
       {
         current_texture* click_label = new current_texture(false, this);
-        connect ( click_label, &ClickableLabel::clicked
-                , [=]
+        connect ( click_label, &ClickableLabel::leftClicked
+                , [=]()
                   {
+                    if (click_label->_is_swap_selected)
+                        return;
+
                     setTexture(i, current_texture_window);
+
+                    for (unsigned long long i = 0; i < _labels.size(); ++i)
+                    {
+
+                        _labels[i]->unselect();
+
+                        if (_labels[i] == click_label && !_labels[i]->_is_swap_selected)
+                            _labels[i]->select();
+                    }
                   }
                 );
+
+        connect(click_label, &ClickableLabel::rightClicked, [=]()
+                {
+                    if (click_label->_is_selected)
+                        return;
+
+                    if (click_label->_is_swap_selected)
+                    {
+                        click_label->_is_swap_selected = false;
+                        click_label->unselectSwap();
+                        return;
+                    }
+
+                    for (unsigned long long i = 0; i < _labels.size(); ++i)
+                    {
+                        _labels[i]->unselectSwap();
+
+                        if (_labels[i] == click_label && !_labels[i]->_is_selected)
+                        {
+                            _labels[i]->selectSwap();
+                        }
+                    }
+                });
+
+        if (click_label->filename() == current_texture_window->filename())
+            click_label->select();
 
         layout->addWidget(click_label, 0, i);
         _labels.push_back(click_label);
@@ -74,6 +113,21 @@ namespace Noggit
       adjustSize();
       setFixedSize(size());
 
+    }
+
+    void texture_picker::updateSelection()
+    {
+        for (size_t index; index < _chunk->texture_set->num(); ++index)
+        {
+            _labels[index]->unselect();
+            if (_main_texture_window->filename() == _labels[index]->filename())
+                _labels[index]->select();
+        }
+    }
+
+    void texture_picker::setMainTexture(current_texture *tex)
+    {
+        _main_texture_window = tex;
     }
 
     void texture_picker::getTextures(selection_type lSelection)
@@ -138,9 +192,13 @@ namespace Noggit
 
       for (; index < _chunk->texture_set->num(); ++index)
       {
+        _labels[index]->unselect();
         _textures.push_back(_chunk->texture_set->texture(index));
         _labels[index]->set_texture(_textures[index]->file_key().filepath());
         _labels[index]->show();
+
+        if (_main_texture_window->filename() == _labels[index]->filename())
+            _labels[index]->select();
       }
 
       for (; index < 4U; ++index)

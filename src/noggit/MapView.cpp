@@ -601,6 +601,8 @@ void MapView::setupTexturePainterUi()
 
             Noggit::Ui::selected_texture::set({filename, _context});
             texturingTool->_current_texture->set_texture(filename);
+            TexturePicker->setMainTexture(texturingTool->_current_texture);
+            TexturePicker->updateSelection();
           }
   );
 
@@ -3616,6 +3618,7 @@ void MapView::tick (float dt)
           {
             // Pick texture
             _texture_picker_dock->setVisible(true);
+            TexturePicker->setMainTexture(texturingTool->_current_texture);
             TexturePicker->getTextures(selection);
           }
           else  if (_mod_shift_down && !!Noggit::Ui::selected_texture::get())

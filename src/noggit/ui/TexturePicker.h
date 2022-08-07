@@ -23,6 +23,8 @@ namespace Noggit
     public:
       texture_picker (current_texture*, QWidget* parent = nullptr);
 
+      void updateSelection();
+      void setMainTexture(current_texture* tex);
       void getTextures(selection_type lSelection);
       void setTexture(size_t id, current_texture*);
       void shiftSelectedTextureLeft();
@@ -36,6 +38,7 @@ namespace Noggit
       std::vector<current_texture*> _labels;
       std::vector<scoped_blp_texture_reference> _textures;
       MapChunk* _chunk;
+      current_texture* _main_texture_window;
 
     signals:
       void set_texture(scoped_blp_texture_reference texture);

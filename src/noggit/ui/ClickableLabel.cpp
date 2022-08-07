@@ -8,9 +8,18 @@ namespace Noggit
   {
     ClickableLabel::ClickableLabel(QWidget * parent) : QLabel(parent){}
 
-    void ClickableLabel::mouseReleaseEvent (QMouseEvent*)
+    void ClickableLabel::mouseReleaseEvent (QMouseEvent* event)
     {
-      emit clicked();
+        emit clicked();
+
+        if (event->button() == Qt::MiddleButton)
+            emit middleClicked();
+
+        if (event->button() == Qt::LeftButton)
+            emit leftClicked();
+
+        if (event->button() == Qt::RightButton)
+            emit rightClicked();
     }
   }
 }

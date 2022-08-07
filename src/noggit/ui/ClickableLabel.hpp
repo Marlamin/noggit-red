@@ -3,6 +3,7 @@
 #pragma once
 
 #include <QtWidgets/QLabel>
+#include <QMouseEvent>
 
 namespace Noggit
 {
@@ -17,6 +18,9 @@ namespace Noggit
 
     signals:
       void clicked();
+      void leftClicked();
+      void rightClicked();
+      void middleClicked();
 
     protected:
       virtual void mouseReleaseEvent (QMouseEvent* event) override;
