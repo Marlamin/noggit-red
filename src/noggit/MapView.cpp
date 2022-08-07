@@ -3402,6 +3402,10 @@ void MapView::tick (float dt)
                                                          | Noggit::ActionModalityControllers::eMMB );
           _world->move_selected_models(0.f, mv*80.f, 0.f);
         }
+        else if (_mod_ctrl_down)
+        {
+            // do nothing
+        }
         else
         {
           bool snapped = false;
@@ -3423,7 +3427,12 @@ void MapView::tick (float dt)
             {
               NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                                    Noggit::ActionModalityControllers::eMMB );
-              _world->move_selected_models((mv * dirUp - mh * dirRight)*80.f);
+
+              if ((mh <= 0.01f && mh >= -0.01f) && (mv <= 0.01f && mv >= -0.01f))
+              {
+                  glm::vec3 _vec = (mh * dirUp + mv * dirRight);
+                  _world->move_selected_models(_vec * 500.f);
+              }
             }
             else
             {
