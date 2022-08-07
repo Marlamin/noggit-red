@@ -136,6 +136,7 @@ private:
   void checkInputsSettings();
 
 public:
+  Noggit::BoolToggleProperty _draw_climb = {false};
   Noggit::BoolToggleProperty _draw_contour = {false};
   Noggit::BoolToggleProperty _draw_mfbo = {false};
   Noggit::BoolToggleProperty _draw_wireframe = {false};
@@ -208,6 +209,7 @@ private:
   bool  alloff_detailselect = false;
   bool  alloff_fog = false;
   bool  alloff_terrain = false;
+  bool  alloff_climb = false;
 
   editing_mode terrainMode = editing_mode::ground;
   editing_mode saveterrainMode = terrainMode;
@@ -224,6 +226,7 @@ private:
 
   Noggit::Ui::toolbar* _toolbar;
   Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar* _view_toolbar;
+  Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar* _secondary_toolbar;
 
   void save(save_mode mode);
 
@@ -270,6 +273,9 @@ public:
 
   void set_editing_mode (editing_mode);
   editing_mode get_editing_mode() { return terrainMode; };
+
+  [[nodiscard]]
+  QWidget *getSecondaryToolBar();
 
   [[nodiscard]]
   QWidget* getActiveStampModeItem();

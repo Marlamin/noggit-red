@@ -1049,11 +1049,20 @@ void MapView::setupToolbars()
   right_toolbar_layout->setContentsMargins(0, 5, 0,5);
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
 
-  _view_toolbar = new Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar(this);
-  auto top_toolbar_layout = new QHBoxLayout(_viewport_overlay_ui->upperToolbarHolder);
-  top_toolbar_layout->addWidget( _view_toolbar);
+  auto top_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->upperToolbarHolder);
   top_toolbar_layout->setContentsMargins(5, 0, 5, 0);
+  auto sec_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->secondaryToolbarHolder);
+  sec_toolbar_layout->setContentsMargins(0, 0, 0, 0);
+
+  _viewport_overlay_ui->secondaryToolbarHolder->hide();
+  _secondary_toolbar = new Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar(this);
+  connect (this, &QObject::destroyed, _secondary_toolbar, &QObject::deleteLater);
+
+  _view_toolbar = new Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar(this, _secondary_toolbar);
   connect (this, &QObject::destroyed, _view_toolbar, &QObject::deleteLater);
+
+  top_toolbar_layout->addWidget( _view_toolbar);
+  sec_toolbar_layout->addWidget( _secondary_toolbar);
 }
 
 void MapView::setupKeybindingsGui()
@@ -1840,6 +1849,13 @@ void MapView::setupViewMenu()
                      _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
+  ADD_TOGGLE_POST(view_menu, "Climb", Qt::Key_F12, _draw_climb,
+                  [=]
+                  {
+                      _world->renderer()->getTerrainParamsUniformBlock()->draw_impassible_climb = _draw_climb.get();
+                      _world->renderer()->markTerrainParamsUniformBlockDirty();
+                  });
+
   ADD_TOGGLE_POST (view_menu, "Wireframe", Qt::Key_F10, _draw_wireframe,
                    [=]
                    {
@@ -2055,6 +2071,7 @@ void MapView::setupHotkeys()
                   alloff_models = _draw_models.get();
                   alloff_doodads = _draw_wmo_doodads.get();
                   alloff_contour = _draw_contour.get();
+                  alloff_climb = _draw_climb.get();
                   alloff_wmo = _draw_wmo.get();
                   alloff_fog = _draw_fog.get();
                   alloff_terrain = _draw_terrain.get();
@@ -2062,6 +2079,7 @@ void MapView::setupHotkeys()
                   _draw_models.set (false);
                   _draw_wmo_doodads.set (false);
                   _draw_contour.set (true);
+                  _draw_climb.set (false);
                   _draw_wmo.set (false);
                   _draw_terrain.set (true);
                   _draw_fog.set (false);
@@ -2071,6 +2089,7 @@ void MapView::setupHotkeys()
                   _draw_models.set (alloff_models);
                   _draw_wmo_doodads.set (alloff_doodads);
                   _draw_contour.set (alloff_contour);
+                  _draw_climb.set(alloff_climb);
                   _draw_wmo.set (alloff_wmo);
                   _draw_terrain.set (alloff_terrain);
                   _draw_fog.set (alloff_fog);
@@ -4262,7 +4281,6 @@ void MapView::draw_map()
     doSelection(true);
   }
 
-
   _world->renderer()->draw (
                  model_view()
                , projection()
@@ -5221,6 +5239,11 @@ void MapView::unloadOpenglData()
   _gl_initialized = false;
 }
 
+QWidget* MapView::getSecondaryToolBar()
+{
+    return _viewport_overlay_ui->secondaryToolbarHolder;
+}
+
 QWidget* MapView::getActiveStampModeItem()
 {
   auto item = stampTool->getActiveBrushItem();
@@ -5236,6 +5259,9 @@ void MapView::onSettingsSave()
   params->wireframe_type = _settings->value("wireframe/type", 0).toInt();
   params->wireframe_radius = _settings->value("wireframe/radius", 1.5f).toFloat();
   params->wireframe_width = _settings->value ("wireframe/width", 1.f).toFloat();
+
+  /* temporaryyyyyy */
+  params->climb_value = 1.0f;
 
   QColor c = _settings->value("wireframe/color").value<QColor>();
   glm::vec4 wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());

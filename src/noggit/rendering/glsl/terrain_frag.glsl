@@ -28,6 +28,10 @@ layout (std140) uniform overlay_params
   int draw_paintability_overlay;
   int draw_selection_overlay;
   vec4 wireframe_color;
+  int draw_impassible_climb;
+  int climb_use_output_angle;
+  int climb_use_smooth_interpolation;
+  float climb_value;
 };
 
 struct ChunkInstanceData
@@ -69,6 +73,7 @@ in vec2 vary_t3_uv;
 in vec3 vary_normal;
 in vec3 vary_mccv;
 flat in int instanceID;
+flat in vec3 triangle_normal;
 
 out vec4 out_color;
 
@@ -354,6 +359,46 @@ void main()
 		  alpha = max(alpha, 1.0 - smoothstep(0.0, d, diff));
           out_color.rgb = mix(out_color.rgb, wireframe_color.rgb, wireframe_color.a *alpha);
 	  }
+  }
+
+  if (draw_impassible_climb != 0)
+  {
+      vec4 color = vec4(out_color.r, out_color.g, out_color.b, 0.5);
+      vec3 use_normal;
+
+      if (climb_use_smooth_interpolation != 0)
+      {
+          use_normal = vary_normal;
+      }
+      else
+      {
+          use_normal = triangle_normal;
+      }
+
+      float d1 = use_normal.y;
+      float d2 = sqrt(use_normal.x * use_normal.x +
+                      use_normal.y * use_normal.y +
+                      use_normal.z * use_normal.z);
+
+      if (d2 > 0.0)
+      {
+          float normal_angle = acos(d1/d2);
+
+          if (climb_use_output_angle != 0)
+          {
+              color.r = normal_angle;
+          }
+          else
+          {
+              if (normal_angle > climb_value)
+              {
+                  color.r = 1.0;
+              }
+          }
+      }
+
+
+      out_color.rgb = mix(out_color.rgb, color.rgb, color.a);
   }
 
   if(draw_cursor_circle == 1)

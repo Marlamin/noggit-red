@@ -53,7 +53,10 @@ namespace OpenGL
     int draw_paintability_overlay = false;
     int draw_selection_overlay = false;
     glm::vec4 wireframe_color;
-
+    int draw_impassible_climb = false;
+    int climb_use_output_angle = false;
+    int climb_use_smooth_interpolation = false;
+    float climb_value;
   };
 
   struct ChunkInstanceDataUniformBlock

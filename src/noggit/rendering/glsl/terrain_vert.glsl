@@ -45,6 +45,7 @@ out vec2 vary_t3_uv;
 out vec3 vary_mccv;
 out vec3 vary_normal;
 flat out int instanceID;
+flat out vec3 triangle_normal;
 
 bool isHoleVertex(uint vertexId, uint hole)
 {
@@ -176,6 +177,7 @@ void main()
   gl_Position = projection * model_view * vec4(pos_after_holecheck);
 
   vary_normal = normal_pos.rgb;
+  triangle_normal = normal_pos.rgb;
   vary_position = vec3(pos);
   vary_mccv = texelFetch(mccv, ivec2(gl_VertexID, instanceID), 0).rgb;
 
