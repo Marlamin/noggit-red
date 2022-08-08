@@ -1115,7 +1115,7 @@ void MapView::setupFileMenu()
 
   ADD_ACTION ( file_menu
   , "Add bookmark"
-  , Qt::Key_F5
+  , Qt::CTRL | Qt::Key_F5
       , [this]
       {
 
@@ -1836,50 +1836,50 @@ void MapView::setupViewMenu()
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Drawing"));
   view_menu->addSeparator();
-  ADD_TOGGLE (view_menu, "Doodads", Qt::Key_F1, _draw_models);
-  ADD_TOGGLE (view_menu, "WMO doodads", Qt::Key_F2, _draw_wmo_doodads);
-  ADD_TOGGLE (view_menu, "Terrain", Qt::Key_F3, _draw_terrain);
-  ADD_TOGGLE (view_menu, "Water", Qt::Key_F4, _draw_water);
-  ADD_TOGGLE (view_menu, "WMOs", Qt::Key_F6, _draw_wmo);
+  ADD_TOGGLE (view_menu, "Doodads",     Qt::Key_F1, _draw_models);
+  ADD_TOGGLE (view_menu, "WMOs",        Qt::Key_F2, _draw_wmo);
+  ADD_TOGGLE (view_menu, "WMO doodads", Qt::Key_F3, _draw_wmo_doodads);
+  ADD_TOGGLE (view_menu, "Terrain",     Qt::Key_F4, _draw_terrain);
+  ADD_TOGGLE (view_menu, "Water",       Qt::Key_F5, _draw_water);
 
-  ADD_TOGGLE_POST (view_menu, "Lines", Qt::Key_F7, _draw_lines,
+  ADD_TOGGLE_POST (view_menu, "Lines", Qt::SHIFT | Qt::Key_F1, _draw_lines,
                    [=]
                    {
                      _world->renderer()->getTerrainParamsUniformBlock()->draw_lines = _draw_lines.get();
                      _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
-  ADD_TOGGLE_POST (view_menu, "Contours", Qt::Key_F9, _draw_contour,
+  ADD_TOGGLE_POST (view_menu, "Hole lines", Qt::SHIFT | Qt::Key_F2, _draw_hole_lines,
                    [=]
                    {
-                     _world->renderer()->getTerrainParamsUniformBlock()->draw_terrain_height_contour = _draw_contour.get();
+                     _world->renderer()->getTerrainParamsUniformBlock()->draw_hole_lines = _draw_hole_lines.get();
                      _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
-  ADD_TOGGLE_POST(view_menu, "Climb", Qt::Key_F12, _draw_climb,
-                  [=]
-                  {
-                      _world->renderer()->getTerrainParamsUniformBlock()->draw_impassible_climb = _draw_climb.get();
-                      _world->renderer()->markTerrainParamsUniformBlockDirty();
-                  });
-
-  ADD_TOGGLE_POST (view_menu, "Wireframe", Qt::Key_F10, _draw_wireframe,
+  ADD_TOGGLE_POST (view_menu, "Wireframe", Qt::SHIFT | Qt::Key_F3, _draw_wireframe,
                    [=]
                    {
                      _world->renderer()->getTerrainParamsUniformBlock()->draw_wireframe = _draw_wireframe.get();
                      _world->renderer()->markTerrainParamsUniformBlockDirty();
                    });
 
+  ADD_TOGGLE_POST (view_menu, "Contours", Qt::SHIFT | Qt::Key_F4, _draw_contour,
+                   [=]
+                   {
+                     _world->renderer()->getTerrainParamsUniformBlock()->draw_terrain_height_contour = _draw_contour.get();
+                     _world->renderer()->markTerrainParamsUniformBlockDirty();
+                   });
+
+  ADD_TOGGLE_POST(view_menu, "Climb", Qt::SHIFT | Qt::Key_F5, _draw_climb,
+                  [=]
+                  {
+                      _world->renderer()->getTerrainParamsUniformBlock()->draw_impassible_climb = _draw_climb.get();
+                      _world->renderer()->markTerrainParamsUniformBlockDirty();
+                  });
+
   ADD_TOGGLE (view_menu, "Toggle Animation", Qt::Key_F11, _draw_model_animations);
   ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
   ADD_TOGGLE_NS (view_menu, "Flight Bounds", _draw_mfbo);
-
-  ADD_TOGGLE_POST (view_menu, "Hole lines", "Shift+F7", _draw_hole_lines,
-                   [=]
-                   {
-                     _world->renderer()->getTerrainParamsUniformBlock()->draw_hole_lines = _draw_hole_lines.get();
-                     _world->renderer()->markTerrainParamsUniformBlockDirty();
-                   });
 
   ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
   //! \todo space+h in object mode
