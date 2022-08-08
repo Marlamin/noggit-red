@@ -27,7 +27,6 @@ namespace Noggit
       void blur (World* world, glm::vec3 const& cursor_pos, float dt);
 
       void nextFlattenType();
-      void nextFlattenMode();
       void toggleFlattenAngle();
       void toggleFlattenLock();
       void lockPos (glm::vec3 const& cursor_pos);
@@ -53,6 +52,7 @@ namespace Noggit
       Noggit::Ui::Tools::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
 
       QSize sizeHint() const override;
+      flatten_mode _flatten_mode;
 
       QJsonObject toJSON();
       void fromJSON(QJsonObject const& json);
@@ -64,7 +64,6 @@ namespace Noggit
       glm::vec3 _lock_pos;
 
       int _flatten_type;
-      flatten_mode _flatten_mode;
 
     private:
       QButtonGroup* _type_button_box;

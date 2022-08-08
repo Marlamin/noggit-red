@@ -2202,7 +2202,7 @@ void MapView::setupHotkeys()
     , MOD_space
     , [&]
               {
-                flattenTool->nextFlattenMode();
+                _left_sec_toolbar->nextFlattenMode(this);
               }
     , [&] { return terrainMode == editing_mode::flatten_blur && !NOGGIT_CUR_ACTION; }
   );

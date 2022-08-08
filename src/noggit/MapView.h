@@ -285,6 +285,9 @@ public:
   QWidget* getActiveStampModeItem();
 
   [[nodiscard]]
+  Noggit::Ui::flatten_blur_tool* getFlattenTool() { return flattenTool; };
+
+  [[nodiscard]]
   Noggit::NoggitRenderContext getRenderContext() { return _context; };
 
   [[nodiscard]]

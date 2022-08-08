@@ -70,22 +70,6 @@ namespace Noggit
 
       layout->addWidget(settings_group);
 
-      QGroupBox* flatten_blur_group = new QGroupBox("Flatten/Blur", this);
-      flatten_blur_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-      auto flatten_blur_layout = new QGridLayout(flatten_blur_group);
-
-      flatten_blur_layout->addWidget(_lock_up_checkbox = new QCheckBox(this), 0, 0);
-      flatten_blur_layout->addWidget(_lock_down_checkbox = new QCheckBox(this), 0, 1);
-
-      _lock_up_checkbox->setChecked(_flatten_mode.raise);
-      _lock_up_checkbox->setText("Raise");
-      _lock_up_checkbox->setToolTip("Raise the terrain when using the tool");
-      _lock_down_checkbox->setChecked(_flatten_mode.lower);
-      _lock_down_checkbox->setText("Lower");
-      _lock_down_checkbox->setToolTip("Lower the terrain when using the tool");
-
-      layout->addWidget(flatten_blur_group);
-
       QGroupBox* flatten_only_group = new QGroupBox("Flatten only", this);
       auto flatten_only_layout = new QVBoxLayout(flatten_only_group);
 
@@ -149,20 +133,6 @@ namespace Noggit
                   _flatten_type = id;
                 }
               );
-
-      connect( _lock_up_checkbox, &QCheckBox::stateChanged
-               , [&] (int state)
-                 {
-                   _flatten_mode.raise = state;
-                 }
-             );
-
-      connect( _lock_down_checkbox, &QCheckBox::stateChanged
-               , [&] (int state)
-                 {
-                   _flatten_mode.lower = state;
-                 }
-             );
 
       connect ( _angle_slider, &QSlider::valueChanged
                 , [&] (int v)
@@ -229,16 +199,6 @@ namespace Noggit
     {
       _flatten_type = ( ++_flatten_type ) % eFlattenType_Count;
       _type_button_box->button (_flatten_type)->toggle();
-    }
-
-    void flatten_blur_tool::nextFlattenMode()
-    {
-      _flatten_mode.next();
-
-      QSignalBlocker const up_lock(_lock_up_checkbox);
-      QSignalBlocker const down_lock(_lock_down_checkbox);
-      _lock_up_checkbox->setChecked(_flatten_mode.raise);
-      _lock_down_checkbox->setChecked(_flatten_mode.lower);
     }
 
     void flatten_blur_tool::toggleFlattenAngle()

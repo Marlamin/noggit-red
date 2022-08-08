@@ -11,6 +11,7 @@
 #include <noggit/MapView.h>
 #include <noggit/ui/FontNoggit.hpp>
 #include <noggit/BoolToggleProperty.hpp>
+#include <noggit/ui/FlattenTool.hpp>
 
 namespace Noggit
 {
@@ -31,12 +32,17 @@ namespace Noggit
 
       /*secondary left tool*/
       bool showUnpaintableChunk();
+      void nextFlattenMode(MapView* mapView);
+
+      QVector<QWidgetAction*> _flatten_secondary_tool;
       QVector<QWidgetAction*> _texture_secondary_tool;
 
     private:
       QActionGroup _tool_group;
       editing_mode current_mode;
 
+      int raise_index = -1;
+      int lower_index = -1;
       int unpaintable_chunk_index = -1;
 
       void add_tool_icon(MapView* mapView,

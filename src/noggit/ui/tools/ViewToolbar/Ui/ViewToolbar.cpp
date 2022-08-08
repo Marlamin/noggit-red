@@ -141,10 +141,36 @@ ViewToolbar::ViewToolbar(MapView* mapView, editing_mode mode)
 
     {
         /*
+         * FLATTEN/BLUE SECONDARY TOOL 
+         */
+
+        IconAction* _icon = new IconAction(FontNoggitIcon{ FontNoggit::TOOL_FLATTEN_BLUR });
+
+        CheckBoxAction* _raise = new CheckBoxAction(tr("Raise"));
+        _raise->setChecked(true);
+        connect(_raise->checkbox(), &QCheckBox::stateChanged, [mapView](int state)
+            {
+                mapView->getFlattenTool()->_flatten_mode.raise = state;
+            });
+
+        CheckBoxAction* _lower = new CheckBoxAction(tr("Lower"));
+        _lower->setChecked(true);
+        connect(_lower->checkbox(), &QCheckBox::stateChanged, [mapView](int state)
+            {
+                mapView->getFlattenTool()->_flatten_mode.lower = state;
+            });
+
+        _flatten_secondary_tool.push_back(_icon);
+        _flatten_secondary_tool.push_back(_raise); raise_index = 1;
+        _flatten_secondary_tool.push_back(_lower); lower_index = 2;
+    }
+
+    {
+        /*
          * TEXTURE PAINTER SECONDARY TOOL
          */
 
-        IconAction* _icon = new IconAction(FontNoggitIcon{FontNoggit::TOOL_TEXTURE_PAINT});
+        IconAction* _icon = new IconAction(FontNoggitIcon{ FontNoggit::TOOL_TEXTURE_PAINT });
 
         CheckBoxAction* _unpaintable_chunk = new CheckBoxAction(tr("Unpaintable chunk"));
         _unpaintable_chunk->setChecked(false);
@@ -169,6 +195,11 @@ void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
     case editing_mode::ground:
         break;
     case editing_mode::flatten_blur:
+        if (_flatten_secondary_tool.size() > 0)
+        {
+            setupWidget(_flatten_secondary_tool);
+            mapView->getLeftSecondaryToolbar()->show();
+        }
         break;
     case editing_mode::paint:
         if (_texture_secondary_tool.size() > 0)
@@ -232,4 +263,15 @@ bool ViewToolbar::showUnpaintableChunk()
         return false;
 
     return _texture_secondary_tool[unpaintable_chunk_index];
+}
+
+void ViewToolbar::nextFlattenMode(MapView* mapView)
+{
+    mapView->getFlattenTool()->_flatten_mode.next();
+
+    QSignalBlocker const raise_lock(_flatten_secondary_tool[raise_index]);
+    QSignalBlocker const lower_lock(_flatten_secondary_tool[lower_index]);
+
+    _flatten_secondary_tool[raise_index]->setChecked(true);
+    _flatten_secondary_tool[lower_index]->setChecked(true);
 }
