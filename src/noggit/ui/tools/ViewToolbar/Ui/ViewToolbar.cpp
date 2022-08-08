@@ -19,17 +19,17 @@ ViewToolbar::ViewToolbar(MapView* mapView)
 
   CheckBoxAction* climb_use_output_color_angle = new CheckBoxAction(tr("Display all angle color"));
   climb_use_output_color_angle->checkbox()->setChecked(false);
-  connect(climb_use_output_color_angle->checkbox(), &QCheckBox::stateChanged, [mapView, climb_use_output_color_angle]()
+  connect(climb_use_output_color_angle->checkbox(), &QCheckBox::toggled, [mapView](bool checked)
           {
-              mapView->getWorld()->renderer()->getTerrainParamsUniformBlock()->climb_use_output_angle = climb_use_output_color_angle->checkbox()->isChecked();
+              mapView->getWorld()->renderer()->getTerrainParamsUniformBlock()->climb_use_output_angle = checked;
               mapView->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
           });
 
   CheckBoxAction* climb_use_smooth_interpolation = new CheckBoxAction(tr("Smooth"));
   climb_use_smooth_interpolation->setChecked(false);
-  connect(climb_use_smooth_interpolation->checkbox(), &QCheckBox::stateChanged, [mapView, climb_use_smooth_interpolation]()
+  connect(climb_use_smooth_interpolation->checkbox(), &QCheckBox::toggled, [mapView](bool checked)
           {
-              mapView->getWorld()->renderer()->getTerrainParamsUniformBlock()->climb_use_smooth_interpolation = climb_use_smooth_interpolation->checkbox()->isChecked();
+              mapView->getWorld()->renderer()->getTerrainParamsUniformBlock()->climb_use_smooth_interpolation = checked;
               mapView->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
           });
 
@@ -44,7 +44,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   PushButtonAction* climb_reset_slider = new PushButtonAction(tr("Reset"));
   connect(climb_reset_slider->pushbutton(), &QPushButton::clicked, [climb_value]()
           {
-              climb_value->slider()->setValue(1000);
+              climb_value->slider()->setValue(855);
           });
 
   _climb_secondary_tool.push_back(climb_icon);
@@ -54,44 +54,9 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   _climb_secondary_tool.push_back(climb_reset_slider);
 }
 
-void ViewToolbar::add_tool_icon(MapView* mapView,
-                                Noggit::BoolToggleProperty* view_state,
-                                const QString& name,
-                                const FontNoggit::Icons& icon,
-                                ViewToolbar* sec_tool_bar,
-                                QVector<QWidgetAction*> sec_action_bar)
-{
-    auto action = addAction(FontNoggitIcon{icon}, name);
-    connect (action, &QAction::triggered, [action, view_state] () {
-        action->setChecked(!view_state->get());
-        view_state->set(!view_state->get());
-    });
-
-    connect (action, &QAction::hovered, [mapView, sec_tool_bar, sec_action_bar] () {
-        sec_tool_bar->clear();
-        mapView->getSecondaryToolBar()->hide();
-
-        if (sec_action_bar.size() > 0)
-        {
-            sec_tool_bar->setupWidget(sec_action_bar);
-            mapView->getSecondaryToolBar()->show();
-        }
-    });
-
-    connect (view_state, &Noggit::BoolToggleProperty::changed, [action, view_state] () {
-        action->setChecked(view_state->get());
-    });
-
-    action->setCheckable(true);
-    action->setChecked(view_state->get());
-}
-
-
 ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     : _tool_group(this)
 {
-    Q_UNUSED(tb);
-
     setContextMenuPolicy(Qt::PreventContextMenu);
     setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
@@ -165,6 +130,90 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
             });
 }
 
+ViewToolbar::ViewToolbar(MapView* mapView, editing_mode mode)
+    : _tool_group(this)
+    , current_mode(mode)
+{
+    setContextMenuPolicy(Qt::PreventContextMenu);
+    setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+    mapView->getLeftSecondaryToolbar()->hide();
+
+    {
+        /*
+         * TEXTURE PAINTER SECONDARY TOOL
+         */
+
+        IconAction* _icon = new IconAction(FontNoggitIcon{FontNoggit::TOOL_TEXTURE_PAINT});
+
+        CheckBoxAction* _unpaintable_chunk = new CheckBoxAction(tr("Unpaintable chunk"));
+        _unpaintable_chunk->setChecked(false);
+        connect(_unpaintable_chunk->checkbox(), &QCheckBox::toggled, [mapView](bool checked)
+                {
+                    mapView->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = checked;
+                    mapView->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
+                });
+
+        _texture_secondary_tool.push_back(_icon);
+        _texture_secondary_tool.push_back(_unpaintable_chunk); unpaintable_chunk_index = 1;
+    }
+}
+
+void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
+{
+    mapView->getLeftSecondaryToolbar()->hide();
+    current_mode = mode;
+
+    switch (current_mode)
+    {
+    case editing_mode::ground:
+        break;
+    case editing_mode::flatten_blur:
+        break;
+    case editing_mode::paint:
+        if (_texture_secondary_tool.size() > 0)
+        {
+            setupWidget(_texture_secondary_tool);
+            mapView->getLeftSecondaryToolbar()->show();
+        }
+        break;
+    default:
+        break;
+    }
+}
+
+void ViewToolbar::add_tool_icon(MapView* mapView,
+                                Noggit::BoolToggleProperty* view_state,
+                                const QString& name,
+                                const FontNoggit::Icons& icon,
+                                ViewToolbar* sec_tool_bar,
+                                QVector<QWidgetAction*> sec_action_bar)
+{
+    auto action = addAction(FontNoggitIcon{icon}, name);
+    connect (action, &QAction::triggered, [action, view_state] () {
+        action->setChecked(!view_state->get());
+        view_state->set(!view_state->get());
+    });
+
+    connect (action, &QAction::hovered, [mapView, sec_tool_bar, sec_action_bar] () {
+        sec_tool_bar->clear();
+        mapView->getSecondaryToolBar()->hide();
+
+        if (sec_action_bar.size() > 0)
+        {
+            sec_tool_bar->setupWidget(sec_action_bar);
+            mapView->getSecondaryToolBar()->show();
+        }
+    });
+
+    connect (view_state, &Noggit::BoolToggleProperty::changed, [action, view_state] () {
+        action->setChecked(view_state->get());
+    });
+
+    action->setCheckable(true);
+    action->setChecked(view_state->get());
+}
+
 void ViewToolbar::setupWidget(QVector<QWidgetAction *> _to_setup)
 {
     clear();
@@ -173,4 +222,14 @@ void ViewToolbar::setupWidget(QVector<QWidgetAction *> _to_setup)
         addAction(_to_setup[i]);
         (i == _to_setup.size() - 1) ? NULL : addSeparator();
     }
+}
+
+bool ViewToolbar::showUnpaintableChunk()
+{
+    if ((unpaintable_chunk_index >= _texture_secondary_tool.size()) ||
+        (unpaintable_chunk_index < 0) ||
+        (current_mode != editing_mode::paint))
+        return false;
+
+    return _texture_secondary_tool[unpaintable_chunk_index];
 }

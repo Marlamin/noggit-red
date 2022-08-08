@@ -31,7 +31,6 @@ namespace Noggit
                                    )
       : QWidget(parent)
       , _brush_level(255)
-      , _show_unpaintable_chunks(false)
       , _spray_size(1.0f)
       , _spray_pressure(2.0f)
       , _anim_prop(true)
@@ -106,16 +105,6 @@ namespace Noggit
       _brush_level_spin->setValue(_brush_level);
       _brush_level_spin->setSingleStep(5);
       slider_layout_right->addWidget(_brush_level_spin);
-
-      _show_unpaintable_chunks_cb = new QCheckBox("Show unpaintable chunks", tool_widget);
-      _show_unpaintable_chunks_cb->setChecked(false);
-      tool_layout->addWidget(_show_unpaintable_chunks_cb);
-
-      connect(_show_unpaintable_chunks_cb, &QCheckBox::toggled, [=](bool checked)
-      {
-        _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = checked;
-        _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
-      });
 
       // spray
       _spray_mode_group = new QGroupBox("Spray", tool_widget);
@@ -243,13 +232,6 @@ namespace Noggit
                   QSignalBlocker const blocker (_brush_level_spin);
                   _brush_level = v;
                   _brush_level_spin->setValue(v);
-                }
-              );
-
-      connect ( _show_unpaintable_chunks_cb, &QCheckBox::stateChanged
-              , [&] (int state)
-                {
-                  _show_unpaintable_chunks = state;
                 }
               );
 
@@ -492,11 +474,6 @@ namespace Noggit
       }
     }
 
-    bool texturing_tool::show_unpaintable_chunks() const
-    { 
-      return _show_unpaintable_chunks && _texturing_mode == texturing_mode::paint; 
-    }
-
     void texturing_tool::paint (World* world, glm::vec3 const& pos, float dt, scoped_blp_texture_reference texture)
     {
       if (TabletManager::instance()->isActive())
@@ -602,7 +579,6 @@ namespace Noggit
       json["radius"] = _radius_slider->rawValue();
       json["brush_level"] = _brush_level_spin->value();
       json["texturing_mode"] = static_cast<int>(_texturing_mode);
-      json["show_unpaintable_chunks"] = _show_unpaintable_chunks_cb->isChecked();
 
       json["anim"] = _anim_prop.get();
       json["anim_speed"] = static_cast<int>(_anim_speed_prop.get());
@@ -637,7 +613,6 @@ namespace Noggit
       _brush_level_spin->setValue(json["brush_level"].toInt());
 
       tabs->setCurrentIndex(json["texturing_mode"].toInt());
-      _show_unpaintable_chunks_cb->setChecked(json["show_unpaintable_chunks"].toBool());
 
       _anim_prop.set(json["anim"].toBool());
       _anim_speed_prop.set(json["anim_speed"].toInt());

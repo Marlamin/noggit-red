@@ -21,12 +21,24 @@ namespace Noggit
     public:
       ViewToolbar(MapView* mapView);
       ViewToolbar(MapView* mapView, ViewToolbar* tb);
+      ViewToolbar(MapView* mapView, editing_mode mode);
 
+      void setCurrentMode(MapView* mapView, editing_mode mode);
       void setupWidget(QVector<QWidgetAction*> _to_setup);
+
+      /*secondary top tool*/
       QVector<QWidgetAction*> _climb_secondary_tool;
+
+      /*secondary left tool*/
+      bool showUnpaintableChunk();
+      QVector<QWidgetAction*> _texture_secondary_tool;
 
     private:
       QActionGroup _tool_group;
+      editing_mode current_mode;
+
+      int unpaintable_chunk_index = -1;
+
       void add_tool_icon(MapView* mapView,
                          Noggit::BoolToggleProperty* view_state,
                          const QString& name,
@@ -45,13 +57,13 @@ namespace Noggit
             QWidget* _widget = new QWidget(NULL);
             QHBoxLayout* _layout = new QHBoxLayout();
             QLabel* _label = new QLabel(title);
-            QLabel* _display = new QLabel(tr("57 degrees"));
+            QLabel* _display = new QLabel(tr("49 degrees"));
 
             _slider = new QSlider(NULL);
             _slider->setOrientation(Qt::Horizontal);
             _slider->setMinimum(0);
             _slider->setMaximum(1570);
-            _slider->setValue(1000);
+            _slider->setValue(855);
 
             connect(_slider, &QSlider::valueChanged, [_display](int value)
                     {

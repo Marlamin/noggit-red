@@ -861,7 +861,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
     if (angled_mode && terrainMode == editing_mode::flatten_blur)
     {
-        if (angle > 57.2958f) // 1 radian
+        if (angle > 49.0f) // 0.855 radian
         {
             color.x = 1.f;
             color.y = 0.f;

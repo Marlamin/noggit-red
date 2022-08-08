@@ -227,6 +227,7 @@ private:
   Noggit::Ui::toolbar* _toolbar;
   Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar* _view_toolbar;
   Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar* _secondary_toolbar;
+  Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar* _left_sec_toolbar;
 
   void save(save_mode mode);
 
@@ -276,6 +277,9 @@ public:
 
   [[nodiscard]]
   QWidget *getSecondaryToolBar();
+
+  [[nodiscard]]
+  QWidget *getLeftSecondaryToolbar();
 
   [[nodiscard]]
   QWidget* getActiveStampModeItem();

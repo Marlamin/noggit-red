@@ -45,7 +45,6 @@ namespace Noggit
 
       float brush_radius() const;
       float hardness() const;
-      bool show_unpaintable_chunks() const;
 
       void set_brush_level (float level);
 
@@ -106,7 +105,6 @@ namespace Noggit
       Brush _spray_brush;
 
       int _brush_level;
-      bool _show_unpaintable_chunks;
 
       float _spray_size;
       float _spray_pressure;
@@ -124,8 +122,6 @@ namespace Noggit
       Noggit::Ui::Tools::UiCommon::ExtendedSlider* _radius_slider;
       Noggit::Ui::Tools::UiCommon::ExtendedSlider* _pressure_slider;
       QSpinBox* _brush_level_spin;
-
-      QCheckBox* _show_unpaintable_chunks_cb;
 
       QGroupBox* _spray_mode_group;
       QWidget* _spray_content;

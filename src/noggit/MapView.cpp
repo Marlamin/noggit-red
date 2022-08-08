@@ -225,18 +225,20 @@ void MapView::set_editing_mode(editing_mode mode)
     _viewport_overlay_ui->gizmoBar->hide();
   }
 
+  _left_sec_toolbar->setCurrentMode(this, mode);
+
   if (context() && context()->isValid())
   {
     _world->renderer()->getTerrainParamsUniformBlock()->draw_areaid_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_impass_overlay = false;
-    _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = _left_sec_toolbar->showUnpaintableChunk();
     _world->renderer()->getTerrainParamsUniformBlock()->draw_selection_overlay = false;
     _minimap->use_selection(nullptr);
 
     switch (mode)
     {
       case editing_mode::ground:
-        if (terrainTool->_edit_type != eTerrainType_Vertex || terrainTool->_edit_type != eTerrainType_Script && terrainTool->getImageMaskSelector()->isEnabled())
+        if (terrainTool->_edit_type != eTerrainType_Vertex || (terrainTool->_edit_type != eTerrainType_Script && terrainTool->getImageMaskSelector()->isEnabled()))
         {
           terrainTool->updateMaskImage();
         }
@@ -245,10 +247,6 @@ void MapView::set_editing_mode(editing_mode mode)
         if (texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::paint && texturingTool->getImageMaskSelector()->isEnabled())
         {
           texturingTool->updateMaskImage();
-        }
-        if (texturingTool->show_unpaintable_chunks())
-        {
-          _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = true;
         }
         break;
       case editing_mode::mccv:
@@ -1048,13 +1046,20 @@ void MapView::setupToolbars()
   auto right_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->leftToolbarHolder);
   right_toolbar_layout->addWidget( _toolbar);
   right_toolbar_layout->setDirection(QBoxLayout::LeftToRight);
-  right_toolbar_layout->setContentsMargins(0, 5, 0,5);
+  right_toolbar_layout->setContentsMargins(0, 5, 0, 5);
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
+
+  auto left_sec_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->leftSecondaryToolbarHolder);
+  left_sec_toolbar_layout->setContentsMargins(5, 0, 5, 0);
+
+  _left_sec_toolbar = new Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar(this, terrainMode);
+  connect(this, &QObject::destroyed, _left_sec_toolbar, &QObject::deleteLater);
+  left_sec_toolbar_layout->addWidget( _left_sec_toolbar);
 
   auto top_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->upperToolbarHolder);
   top_toolbar_layout->setContentsMargins(5, 0, 5, 0);
   auto sec_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->secondaryToolbarHolder);
-  sec_toolbar_layout->setContentsMargins(0, 0, 0, 0);
+  sec_toolbar_layout->setContentsMargins(5, 0, 5, 0);
 
   _viewport_overlay_ui->secondaryToolbarHolder->hide();
   _secondary_toolbar = new Noggit::Ui::Tools::ViewToolbar::Ui::ViewToolbar(this);
@@ -4301,7 +4306,7 @@ void MapView::draw_map()
                , terrainMode == editing_mode::mccv ? shaderTool->shaderColor() : cursor_color
                , _cursorType
                , radius
-               , texturingTool->show_unpaintable_chunks()
+               , _left_sec_toolbar->showUnpaintableChunk()
                , inner_radius
                , ref_pos
                , angle
@@ -5254,6 +5259,11 @@ void MapView::unloadOpenglData()
 QWidget* MapView::getSecondaryToolBar()
 {
     return _viewport_overlay_ui->secondaryToolbarHolder;
+}
+
+QWidget* MapView::getLeftSecondaryToolbar()
+{
+    return _viewport_overlay_ui->leftSecondaryToolbarHolder;
 }
 
 QWidget* MapView::getActiveStampModeItem()
