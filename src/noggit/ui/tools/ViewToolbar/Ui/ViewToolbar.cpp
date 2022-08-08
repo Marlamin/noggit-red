@@ -44,7 +44,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   PushButtonAction* climb_reset_slider = new PushButtonAction(tr("Reset"));
   connect(climb_reset_slider->pushbutton(), &QPushButton::clicked, [climb_value]()
           {
-              climb_value->slider()->setValue(855);
+              climb_value->slider()->setValue(856);
           });
 
   _climb_secondary_tool.push_back(climb_icon);

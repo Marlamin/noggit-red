@@ -63,7 +63,7 @@ namespace Noggit
             _slider->setOrientation(Qt::Horizontal);
             _slider->setMinimum(0);
             _slider->setMaximum(1570);
-            _slider->setValue(855);
+            _slider->setValue(856);
 
             connect(_slider, &QSlider::valueChanged, [_display](int value)
                     {
