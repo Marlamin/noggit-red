@@ -136,7 +136,8 @@ ViewToolbar::ViewToolbar(MapView* mapView, editing_mode mode)
 {
     setContextMenuPolicy(Qt::PreventContextMenu);
     setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
+    setOrientation(Qt::Vertical);
     mapView->getLeftSecondaryToolbar()->hide();
 
     {
@@ -144,25 +145,31 @@ ViewToolbar::ViewToolbar(MapView* mapView, editing_mode mode)
          * FLATTEN/BLUE SECONDARY TOOL 
          */
 
-        IconAction* _icon = new IconAction(FontNoggitIcon{ FontNoggit::TOOL_FLATTEN_BLUR });
+        SubToolBarAction* _toolbar = new SubToolBarAction();
 
-        CheckBoxAction* _raise = new CheckBoxAction(tr("Raise"));
-        _raise->setChecked(true);
-        connect(_raise->checkbox(), &QCheckBox::stateChanged, [mapView](int state)
-            {
-                mapView->getFlattenTool()->_flatten_mode.raise = state;
-            });
+        {
+            IconAction* _icon = new IconAction(FontNoggitIcon{ FontNoggit::TOOL_FLATTEN_BLUR });
 
-        CheckBoxAction* _lower = new CheckBoxAction(tr("Lower"));
-        _lower->setChecked(true);
-        connect(_lower->checkbox(), &QCheckBox::stateChanged, [mapView](int state)
-            {
-                mapView->getFlattenTool()->_flatten_mode.lower = state;
-            });
+            CheckBoxAction* _raise = new CheckBoxAction(tr("Raise"), true);
+            connect(_raise->checkbox(), &QCheckBox::stateChanged, [mapView](int state)
+                {
+                    mapView->getFlattenTool()->_flatten_mode.raise = state;
+                });
 
-        _flatten_secondary_tool.push_back(_icon);
-        _flatten_secondary_tool.push_back(_raise); raise_index = 1;
-        _flatten_secondary_tool.push_back(_lower); lower_index = 2;
+            CheckBoxAction* _lower = new CheckBoxAction(tr("Lower"), true);
+            connect(_lower->checkbox(), &QCheckBox::stateChanged, [mapView](int state)
+                {
+                    mapView->getFlattenTool()->_flatten_mode.lower = state;
+                });
+
+
+            _toolbar->ADD_ACTION(_icon);
+            _toolbar->ADD_ACTION(_raise); raise_index = 1;
+            _toolbar->ADD_ACTION(_lower); lower_index = 2;
+            _toolbar->SETUP_WIDGET(false);
+        }
+
+        _flatten_secondary_tool.push_back(_toolbar);
     }
 
     {
@@ -170,18 +177,66 @@ ViewToolbar::ViewToolbar(MapView* mapView, editing_mode mode)
          * TEXTURE PAINTER SECONDARY TOOL
          */
 
-        IconAction* _icon = new IconAction(FontNoggitIcon{ FontNoggit::TOOL_TEXTURE_PAINT });
+        SubToolBarAction* _toolbar = new SubToolBarAction();
 
-        CheckBoxAction* _unpaintable_chunk = new CheckBoxAction(tr("Unpaintable chunk"));
-        _unpaintable_chunk->setChecked(false);
-        connect(_unpaintable_chunk->checkbox(), &QCheckBox::toggled, [mapView](bool checked)
-                {
-                    mapView->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = checked;
-                    mapView->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
-                });
+        {
+            IconAction* _icon = new IconAction(FontNoggitIcon{ FontNoggit::TOOL_TEXTURE_PAINT });
 
-        _texture_secondary_tool.push_back(_icon);
-        _texture_secondary_tool.push_back(_unpaintable_chunk); unpaintable_chunk_index = 1;
+            CheckBoxAction* _unpaintable_chunk = new CheckBoxAction(tr("Unpaintable chunk"));
+            connect(_unpaintable_chunk->checkbox(), &QCheckBox::toggled, [mapView](bool checked)
+                    {
+                        mapView->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = checked;
+                        mapView->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
+                    });
+
+            _toolbar->ADD_ACTION(_icon);
+            _toolbar->ADD_ACTION(_unpaintable_chunk); unpaintable_chunk_index = 1;
+            _toolbar->SETUP_WIDGET(false);
+        }
+
+        _texture_secondary_tool.push_back(_toolbar);
+    }
+
+    {
+        /*
+         * OBJECT SECONDARY TOOL 
+         */
+
+        SubToolBarAction* _up_toolbar = new SubToolBarAction();
+
+        {
+            QVector<QWidgetAction*> _up_temp;
+
+            IconAction* _icon = new IconAction(FontNoggitIcon{ FontNoggit::TOOL_OBJECT_EDITOR });
+            CheckBoxAction* _rotate_follow_cursor = new CheckBoxAction(tr("Rotate following cursor"), true);
+            CheckBoxAction* _smooth_follow_rotation = new CheckBoxAction(tr("Smooth follow rotation"), true);
+            CheckBoxAction* _random_all_on_rotation = new CheckBoxAction(tr("Random Rotation/Tilt/Scale on Rotation"));
+            CheckBoxAction* _magnetic_to_ground = new CheckBoxAction(tr("Magnetic to ground when dragging"));
+
+            _up_toolbar->ADD_ACTION(_icon);
+            _up_toolbar->ADD_ACTION(_rotate_follow_cursor);
+            _up_toolbar->ADD_ACTION(_smooth_follow_rotation);
+            _up_toolbar->ADD_ACTION(_random_all_on_rotation);
+            _up_toolbar->ADD_ACTION(_magnetic_to_ground);
+            _up_toolbar->SETUP_WIDGET(false);
+        }
+
+        SubToolBarAction* _down_toolbar = new SubToolBarAction();
+
+        {
+            QVector<QWidgetAction*> _down_temp;
+
+            CheckBoxAction* _magnetic_to_ground = new CheckBoxAction(tr("Magnetic to ground when dragging"));
+            CheckBoxAction* _rotation_around_pivot = new CheckBoxAction(tr("Rotate around pivot"), true);
+
+            _down_toolbar->ADD_ACTION(_magnetic_to_ground);
+            _down_toolbar->ADD_ACTION(_rotation_around_pivot);
+            _down_toolbar->SETUP_WIDGET(true);
+        }
+
+
+        _object_secondary_tool.push_back(_up_toolbar);
+        _object_secondary_tool.push_back(_down_toolbar);
     }
 }
 
@@ -208,6 +263,12 @@ void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
             mapView->getLeftSecondaryToolbar()->show();
         }
         break;
+    case editing_mode::object:
+        if (_object_secondary_tool.size() > 0)
+        {
+            //setupWidget(_object_secondary_tool, true);
+            //mapView->getLeftSecondaryToolbar()->show();
+        }
     default:
         break;
     }
@@ -245,33 +306,31 @@ void ViewToolbar::add_tool_icon(MapView* mapView,
     action->setChecked(view_state->get());
 }
 
-void ViewToolbar::setupWidget(QVector<QWidgetAction *> _to_setup)
+void ViewToolbar::setupWidget(QVector<QWidgetAction *> _to_setup, bool ignoreSeparator)
 {
     clear();
     for (int i = 0; i < _to_setup.size(); ++i)
     {
         addAction(_to_setup[i]);
-        (i == _to_setup.size() - 1) ? NULL : addSeparator();
+        (i == _to_setup.size() - 1) ? NULL : (ignoreSeparator) ? NULL : addSeparator();
     }
 }
 
 bool ViewToolbar::showUnpaintableChunk()
 {
-    if ((unpaintable_chunk_index >= _texture_secondary_tool.size()) ||
-        (unpaintable_chunk_index < 0) ||
-        (current_mode != editing_mode::paint))
-        return false;
-
-    return _texture_secondary_tool[unpaintable_chunk_index];
+    return static_cast<SubToolBarAction*>(_texture_secondary_tool[0])->GET<CheckBoxAction*>(unpaintable_chunk_index)->checkbox()->isChecked() && current_mode == editing_mode::paint;
 }
 
 void ViewToolbar::nextFlattenMode(MapView* mapView)
 {
     mapView->getFlattenTool()->_flatten_mode.next();
 
-    QSignalBlocker const raise_lock(_flatten_secondary_tool[raise_index]);
-    QSignalBlocker const lower_lock(_flatten_secondary_tool[lower_index]);
+    CheckBoxAction* _raise_option = static_cast<SubToolBarAction*>(_flatten_secondary_tool[0])->GET<CheckBoxAction*>(raise_index);
+    CheckBoxAction* _lower_option = static_cast<SubToolBarAction*>(_flatten_secondary_tool[0])->GET<CheckBoxAction*>(lower_index);
 
-    _flatten_secondary_tool[raise_index]->setChecked(true);
-    _flatten_secondary_tool[lower_index]->setChecked(true);
+    QSignalBlocker const raise_lock(_raise_option);
+    QSignalBlocker const lower_lock(_lower_option);
+
+    _raise_option->setChecked(true);
+    _lower_option->setChecked(true);
 }

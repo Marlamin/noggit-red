@@ -25,7 +25,6 @@ namespace Noggit
       ViewToolbar(MapView* mapView, editing_mode mode);
 
       void setCurrentMode(MapView* mapView, editing_mode mode);
-      void setupWidget(QVector<QWidgetAction*> _to_setup);
 
       /*secondary top tool*/
       QVector<QWidgetAction*> _climb_secondary_tool;
@@ -36,6 +35,7 @@ namespace Noggit
 
       QVector<QWidgetAction*> _flatten_secondary_tool;
       QVector<QWidgetAction*> _texture_secondary_tool;
+      QVector<QWidgetAction*> _object_secondary_tool;
 
     private:
       QActionGroup _tool_group;
@@ -45,6 +45,7 @@ namespace Noggit
       int lower_index = -1;
       int unpaintable_chunk_index = -1;
 
+      void setupWidget(QVector<QWidgetAction*> _to_setup, bool ignoreSeparator = false);
       void add_tool_icon(MapView* mapView,
                          Noggit::BoolToggleProperty* view_state,
                          const QString& name,
@@ -62,6 +63,8 @@ namespace Noggit
         {
             QWidget* _widget = new QWidget(NULL);
             QHBoxLayout* _layout = new QHBoxLayout();
+            _layout->setSpacing(3);
+            _layout->setMargin(0);
             QLabel* _label = new QLabel(title);
             QLabel* _display = new QLabel(tr("49 degrees"));
 
@@ -100,6 +103,7 @@ namespace Noggit
         {
             QWidget* _widget = new QWidget(NULL);
             QHBoxLayout* _layout = new QHBoxLayout();
+            _layout->setMargin(0);
 
             _push = new QPushButton(text);
 
@@ -118,13 +122,15 @@ namespace Noggit
     class CheckBoxAction : public QWidgetAction
     {
     public:
-        CheckBoxAction (const QString& text)
+        CheckBoxAction (const QString& text, bool checked = false)
             : QWidgetAction(NULL)
         {
             QWidget* _widget = new QWidget(NULL);
             QHBoxLayout* _layout = new QHBoxLayout();
+            _layout->setMargin(0);
 
             _checkbox = new QCheckBox(text);
+            _checkbox->setChecked(checked);
 
             _layout->addWidget(_checkbox);
             _widget->setLayout(_layout);
@@ -146,13 +152,13 @@ namespace Noggit
         {
             QWidget* _widget = new QWidget(NULL);
             QHBoxLayout* _layout = new QHBoxLayout();
+            _layout->setMargin(0);
 
             _icon = new QLabel();
-            _icon->setPixmap(icon.pixmap(QSize(24,24)));
+            _icon->setPixmap(icon.pixmap(QSize(22,22)));
 
             _layout->addWidget(_icon);
             _widget->setLayout(_layout);
-
             setDefaultWidget(_widget);
         }
 
@@ -160,6 +166,88 @@ namespace Noggit
 
     private:
         QLabel *_icon;
+    };
+
+    class SpacerAction : public QWidgetAction
+    {
+    public:
+        SpacerAction(Qt::Orientation orientation)
+            : QWidgetAction(NULL)
+        {
+            QWidget* _widget = new QWidget(NULL);
+            QHBoxLayout* _layout = new QHBoxLayout();
+            _layout->setMargin(0);
+
+            if (orientation == Qt::Vertical)
+                _layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));
+            
+            if (orientation == Qt::Horizontal)
+                _layout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+            _widget->setLayout(_layout);
+            setDefaultWidget(_widget);
+        }
+    };
+
+    class SubToolBarAction : public QWidgetAction
+    {
+    public:
+        SubToolBarAction()
+            : QWidgetAction(NULL)
+        {
+            QWidget* _widget = new QWidget(NULL);
+            QHBoxLayout* _layout = new QHBoxLayout();
+            _layout->setSpacing(5);
+            _layout->setMargin(0);
+
+            _toolbar = new QToolBar();
+            _toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
+            _toolbar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+            _toolbar->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+            _toolbar->setOrientation(Qt::Horizontal);
+
+            _layout->addWidget(_toolbar);
+            _widget->setLayout(_layout);
+
+            setDefaultWidget(_widget);
+        };
+
+        QToolBar* toolbar() { return _toolbar; };
+
+        template <typename T>
+        T GET(int index)
+        {
+            if (index >= 0 && index < _actions.size())
+                return static_cast<T>(_actions[index]);
+
+            return T();
+        }
+
+        void ADD_ACTION(QWidgetAction* _act) { _actions.push_back(_act); };
+        void SETUP_WIDGET(bool forceSpacer, Qt::Orientation orientation = Qt::Horizontal) {
+            _toolbar->clear();
+            for (int i = 0; i < _actions.size(); ++i)
+            {
+                _toolbar->addAction(_actions[i]);
+                if (i == _actions.size() - 1)
+                {
+                    if (forceSpacer)
+                    {
+                        /* TODO: fix this spacer */
+
+                        _toolbar->addAction(new SpacerAction(orientation));
+                    }
+                }
+                else
+                {
+                    _toolbar->addSeparator();
+                }
+            }
+        };
+
+    private:
+        QToolBar* _toolbar;
+        QVector<QWidgetAction*> _actions;
     };
   }
 }
