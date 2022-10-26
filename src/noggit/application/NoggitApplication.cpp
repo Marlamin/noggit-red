@@ -3,9 +3,10 @@
 
 namespace Noggit::Application
 {
-  void NoggitApplication::initalize(int argc, char* argv[])
+  void NoggitApplication::initalize(int argc, char* argv[], std::vector<bool> Parser)
   {
 	  InitLogging();
+	  Command = Parser;
 
 	 //Locate application relative path
 	  Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
@@ -131,5 +132,13 @@ namespace Noggit::Application
 		  );
 	  }
 	  LogError << "std::terminate: " << reason << std::endl;
+  }
+
+  bool NoggitApplication::GetCommand(int index)
+  {
+	  if (index >= 0 && index < Command.size())
+		  return Command[index];
+
+	  return false;
   }
 }

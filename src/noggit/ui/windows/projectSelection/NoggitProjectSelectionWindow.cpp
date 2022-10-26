@@ -129,13 +129,24 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
                    }
   );
 
-  _updater = new Noggit::Ui::CUpdater(this);
+  // disable-update
+  if (!_noggit_application->GetCommand(0))
+  {
+      _updater = new Noggit::Ui::CUpdater(this);
 
-  QObject::connect(_updater, &CUpdater::OpenUpdater, [=]()
-      {
-          _updater->setModal(true);
-          _updater->show();
-      });
+      QObject::connect(_updater, &CUpdater::OpenUpdater, [=]()
+          {
+              _updater->setModal(true);
+              _updater->show();
+          });
+  }
+
+  // force-changelog
+  if (_noggit_application->GetCommand(1))
+  {
+
+  }
+  
 }
 
 void NoggitProjectSelectionWindow::handleContextMenuProjectListItemDelete(std::string const& project_path)
