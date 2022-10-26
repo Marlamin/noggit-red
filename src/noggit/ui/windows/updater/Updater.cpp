@@ -168,7 +168,7 @@ namespace Noggit
             if (NeedUpdate)
             {
                 ui->ProgressFile->setMaximum(FileNeededCount);
-                ui->ProgressFile->setFormat(QString("File %v/%1").arg(FileNeededCount));
+                ui->ProgressFile->setFormat(QString(tr("File %v/%1")).arg(FileNeededCount));
                 ui->ProgressFile->show();
 
                 emit OpenUpdater();
@@ -198,7 +198,7 @@ namespace Noggit
             QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
 
             ui->ProgressFile->setValue(ui->ProgressFile->value() + 1);
-            ui->FileList->append(QString("Downloading : %1 (%2 mb)").arg(FileNeeded[0]).arg(reply->size() / pow(10,6)));
+            ui->FileList->append(QString(tr("Downloading : %1 (%2 mb)")).arg(FileNeeded[0]).arg(reply->size() / pow(10,6)));
 
             if (!reply || reply->size() == 0xE)
             {
@@ -246,24 +246,14 @@ namespace Noggit
 
         void CUpdater::StartExternalUpdater()
         {
-
-            Log << "Start External 0" << std::endl;
-
             if (!NeedUpdate)
                 return;
-
-            Log << "Start External 1" << std::endl;
 
             if (FileNeededCount == FileMissingCount)
                 return;
 
-            Log << "Start External 2" << std::endl;
-
             {
                 QString exec(QDir::currentPath() + ExternalProcess);
-
-                Log << "Start External - " << exec.toStdString() << std::endl;
-
                 QProcess process;
                 process.setProgram(exec);
                 process.startDetached();
