@@ -11,6 +11,7 @@
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/ui/windows/projectCreation/NoggitProjectCreationDialog.h>
 #include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
+#include <noggit/ui/windows/updater/Updater.h>
 #include <ui_NoggitProjectSelectionWindow.h>
 
 QT_BEGIN_NAMESPACE
@@ -45,6 +46,7 @@ namespace Noggit::Ui::Windows
         ::Ui::NoggitProjectSelectionWindow* _ui;
         Noggit::Application::NoggitApplication* _noggit_application;
         Noggit::Ui::settings* _settings;
+        Noggit::Ui::CUpdater* _updater;
 
         std::unique_ptr<Noggit::Ui::Windows::NoggitWindow> _project_selection_page;
         std::unique_ptr<Component::LoadProjectComponent> _load_project_component;

@@ -341,6 +341,7 @@ TARGET_LINK_LIBRARIES (noggit
   Qt5::OpenGL
   Qt5::OpenGLExtensions
   Qt5::Xml
+  Qt5::Network
   ColorWidgets-qt5
   FramelessHelper
   qt_imgui_widgets
