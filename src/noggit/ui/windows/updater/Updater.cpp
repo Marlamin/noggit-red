@@ -1,6 +1,5 @@
 #include "Updater.h"
 #include "ui_Updater.h"
-#include <noggit/Log.h>
 
 namespace Noggit
 {
@@ -191,6 +190,8 @@ namespace Noggit
                 });
 
             connect(reply, SIGNAL(finished()), this, SLOT(GetOnlineFile()));
+
+            ui->FileList->append(QString(tr("Downloading : %1")).arg(FileNeeded[0]));
         }
 
         void CUpdater::GetOnlineFile()
@@ -198,7 +199,6 @@ namespace Noggit
             QNetworkReply* reply = qobject_cast<QNetworkReply*>(sender());
 
             ui->ProgressFile->setValue(ui->ProgressFile->value() + 1);
-            ui->FileList->append(QString(tr("Downloading : %1 (%2 mb)")).arg(FileNeeded[0]).arg(reply->size() / pow(10,6)));
 
             if (!reply || reply->size() == 0xE)
             {
