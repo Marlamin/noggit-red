@@ -57,6 +57,8 @@ namespace OpenGL
     int climb_use_output_angle = false;
     int climb_use_smooth_interpolation = false;
     float climb_value;
+    int draw_vertex_color = true;
+    int padding[3];
   };
 
   struct ChunkInstanceDataUniformBlock

@@ -74,6 +74,7 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     add_tool_icon(mapView, &mapView->_draw_wireframe, tr("Wireframe"), FontNoggit::VISIBILITY_WIREFRAME, tb);
     add_tool_icon(mapView, &mapView->_draw_contour, tr("Contours"), FontNoggit::VISIBILITY_CONTOURS, tb);
     add_tool_icon(mapView, &mapView->_draw_climb, tr("Climb"), FontNoggit::FAVORITE, tb, tb->_climb_secondary_tool);
+    add_tool_icon(mapView, &mapView->_draw_vertex_color, tr("Vertex Color"), FontNoggit::FAVORITE, tb);
 
     addSeparator();
 

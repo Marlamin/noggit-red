@@ -32,6 +32,8 @@ layout (std140) uniform overlay_params
   int climb_use_output_angle;
   int climb_use_smooth_interpolation;
   float climb_value;
+  int draw_vertex_color;
+  int padding[3];
 };
 
 struct ChunkInstanceData
@@ -253,7 +255,10 @@ void main()
   out_color.a = 1.0;
 
   // apply vertex color
-  out_color.rgb *= vary_mccv;
+  if (draw_vertex_color != 0)
+  {
+    out_color.rgb *= vary_mccv;
+  }
 
   // apply world lighting
   out_color.rgb = clamp(out_color.rgb * (currColor + lDiffuse + spc), 0.0, 1.0);
