@@ -278,6 +278,14 @@ namespace OpenGL
 
       gl.uniform3fv (loc, value.size(), glm::value_ptr(value[0]));
     }
+    void use_program::uniform(std::string const& name, std::vector<glm::vec4> const& value)
+    {
+        GLuint loc = uniform_location(name);
+        if (loc < 0)
+            return;
+
+        gl.uniform4fv(loc, value.size(), glm::value_ptr(value[0]));
+    }
     void use_program::uniform_chunk_textures (std::string const& name, std::array<std::array<std::array<int, 2>, 4>, 256> const& value)
     {
       GLuint loc = uniform_location (name);
@@ -289,6 +297,10 @@ namespace OpenGL
     void use_program::uniform (GLint pos, std::vector<glm::vec3> const& value)
     {
       gl.uniform3fv (pos, value.size(),glm::value_ptr(value[0]));
+    }
+    void use_program::uniform(GLint pos, std::vector<glm::vec4> const& value)
+    {
+        gl.uniform4fv(pos, value.size(), glm::value_ptr(value[0]));
     }
     void use_program::uniform (std::string const& name, glm::vec2 const& value)
     {
