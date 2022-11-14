@@ -17,11 +17,24 @@ public:
   static const size_t AreaID = 0;    // uint
   static const size_t Continent = 1;  // uint
   static const size_t Region = 2;    // uint [AreaID]
+  static const size_t AreaBit = 3;    // uint 
   static const size_t Flags = 4;    // bit field
+  static const size_t SoundProviderPreferences = 5;    // uint 
+  static const size_t UnderwaterSoundProviderPreferences = 6;    // uint 
+  static const size_t SoundAmbience = 7;    // uint 
+  static const size_t ZoneMusic = 8;    // uint 
+  static const size_t ZoneIntroMusicTable = 9;    // uint 
+  static const size_t ExplorationLevel = 10;    // int
   static const size_t Name = 11;    // localisation string
+  static const size_t FactionGroup = 28;    // uint
+  static const size_t LiquidType = 29;    // uint[4]
+  static const size_t MinElevation = 33;    // float
+  static const size_t AmbientMultiplier = 34;    // float
+  static const size_t LightId = 35;    // int
 
   static std::string getAreaName(int pAreaID);
   static std::uint32_t get_area_parent(int area_id);
+  static std::uint32_t get_new_areabit();
 };
 
 class MapDB : public DBCFile
@@ -184,6 +197,87 @@ public:
   static std::string getLiquidName(int pID);
 };
 
+class SoundProviderPreferencesDB : public DBCFile
+{
+public:
+    SoundProviderPreferencesDB() :
+        DBCFile("DBFilesClient\\SoundProviderPreferences.dbc")
+    { }
+
+    /// Fields
+    static const size_t ID = 0;        // uint
+    static const size_t Description = 1;    // string
+};
+
+class SoundAmbienceDB : public DBCFile
+{
+public:
+    SoundAmbienceDB() :
+        DBCFile("DBFilesClient\\SoundAmbience.dbc")
+    { }
+
+    /// Fields
+    static const size_t ID = 0;        // uint
+    static const size_t SoundEntry_day = 1;        // uint
+    static const size_t SoundEntry_night = 2;        // uint
+};
+
+class ZoneMusicDB : public DBCFile
+{
+public:
+    ZoneMusicDB() :
+        DBCFile("DBFilesClient\\ZoneMusic.dbc")
+    { }
+
+    /// Fields
+    static const size_t ID = 0;        // uint
+    static const size_t Name = 1;    // string
+    static const size_t SilenceIntervalMinDay = 2;        // uint
+    static const size_t SilenceIntervalMinNight = 3;        // uint
+    static const size_t SilenceIntervalMaxDay = 4;        // uint
+    static const size_t SilenceIntervalMaxNight = 5;        // uint
+    static const size_t DayMusic = 6;        // uint [soundEntries]
+    static const size_t NightMusic = 7;        // uint [soundEntries]
+};
+
+class ZoneIntroMusicTableDB : public DBCFile
+{
+public:
+    ZoneIntroMusicTableDB() :
+        DBCFile("DBFilesClient\\ZoneIntroMusicTable.dbc")
+    { }
+
+    /// Fields
+    static const size_t ID = 0;        // uint
+    static const size_t Name = 1;    // string
+    static const size_t SoundId = 2;        // uint
+    static const size_t Priority = 3;        // uint
+    static const size_t MinDelayMinutes = 4;        // uint
+};
+
+class SoundEntriesDB : public DBCFile
+{
+public:
+    SoundEntriesDB() :
+        DBCFile("DBFilesClient\\SoundEntries.dbc")
+    { }
+
+    /// Fields
+    static const size_t ID = 0;        // uint
+    static const size_t SoundType = 1;        // uint
+    static const size_t Name = 2;    // string
+    static const size_t Filenames = 3;        // string[10]
+    static const size_t Freq = 13;        // uint[10)
+    static const size_t FilePath = 23;        // string[10)
+    static const size_t Volume = 24;        // float
+    static const size_t Flags = 25;        // int
+    static const size_t minDistance = 26;        // float
+    static const size_t distanceCutoff = 27;        // float
+    static const size_t EAXDef = 28;        // int
+    static const size_t soundEntriesAdvancedID = 29;        // int
+
+};
+
 void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData);
 
 const char * getGroundEffectDoodad(unsigned int effectID, int DoodadNum);
@@ -199,3 +293,8 @@ extern LightFloatBandDB gLightFloatBandDB;
 extern GroundEffectDoodadDB gGroundEffectDoodadDB;
 extern GroundEffectTextureDB gGroundEffectTextureDB;
 extern LiquidTypeDB gLiquidTypeDB;
+extern SoundProviderPreferencesDB gSoundProviderPreferencesDB;
+extern SoundAmbienceDB gSoundAmbienceDB;
+extern ZoneMusicDB gZoneMusicDB;
+extern ZoneIntroMusicTableDB gZoneIntroMusicTableDB;
+extern SoundEntriesDB gSoundEntriesDB;

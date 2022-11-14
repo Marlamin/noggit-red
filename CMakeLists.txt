@@ -108,7 +108,7 @@ set(FASTNOISE2_NOISETOOL OFF CACHE BOOL "")
 FIND_PACKAGE(FastNoise2 REQUIRED)
 
 FIND_PACKAGE(Sol2 REQUIRED)
-FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml REQUIRED)
+FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml Multimedia REQUIRED)
 
 IF(USE_SQL)
   FIND_LIBRARY(MYSQL_LIBRARY NAMES libmysql
@@ -342,6 +342,7 @@ TARGET_LINK_LIBRARIES (noggit
   Qt5::OpenGLExtensions
   Qt5::Xml
   Qt5::Network
+  Qt5::Multimedia
   ColorWidgets-qt5
   FramelessHelper
   qt_imgui_widgets
