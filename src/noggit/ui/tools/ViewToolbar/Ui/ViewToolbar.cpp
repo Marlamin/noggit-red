@@ -33,7 +33,13 @@ ViewToolbar::ViewToolbar(MapView* mapView)
               mapView->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
           });
 
-  SliderAction* climb_value = new SliderAction(tr("Configure climb maximum value"));
+  SliderAction* climb_value = new SliderAction(tr("Configure climb maximum value"), 0, 1570, 856, tr("degrees"),
+      std::function<int(int v)>() = [&](int v) {
+          float radian = float(v) / 1000.f;
+          float degrees = radian * (180.0 / 3.141592653589793238463);
+          return int(degrees);
+      });
+
   connect(climb_value->slider(), &QSlider::valueChanged, [mapView](int value)
           {
               float radian = float(value) / 1000.0f;
@@ -239,6 +245,32 @@ ViewToolbar::ViewToolbar(MapView* mapView, editing_mode mode)
         _object_secondary_tool.push_back(_up_toolbar);
         _object_secondary_tool.push_back(_down_toolbar);
     }
+
+    {
+        /*
+         * LIGHT SECONDARY TOOL 
+         */
+
+        SubToolBarAction* _toolbar = new SubToolBarAction();
+
+        {
+            IconAction* _icon = new IconAction(FontNoggitIcon{ FontNoggit::TOOL_STAMP });
+            CheckBoxAction* _draw_only_inside = new CheckBoxAction(tr("Draw current only"));
+            CheckBoxAction* _draw_wireframe = new CheckBoxAction(tr("Draw wireframe"));
+            SliderAction* _alpha_value = new SliderAction(tr("Alpha"), 0, 100, 30, "",
+                std::function<float(float v)>() = [&](float v) {
+                    return v / 100.f;
+                });
+
+            _toolbar->ADD_ACTION(_icon);
+            _toolbar->ADD_ACTION(_draw_only_inside); sphere_light_inside_index = 1;
+            _toolbar->ADD_ACTION(_draw_wireframe); sphere_light_wireframe_index = 2;
+            _toolbar->ADD_ACTION(_alpha_value); sphere_light_alpha_index = 3;
+            _toolbar->SETUP_WIDGET(false);
+        }
+
+        _light_secondary_tool.push_back(_toolbar);
+    }
 }
 
 void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
@@ -270,6 +302,14 @@ void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
             //setupWidget(_object_secondary_tool, true);
             //mapView->getLeftSecondaryToolbar()->show();
         }
+        break;
+    case editing_mode::light:
+        if (_light_secondary_tool.size() > 0)
+        {
+            setupWidget(_light_secondary_tool, true);
+            mapView->getLeftSecondaryToolbar()->show();
+        }
+        break;
     default:
         break;
     }
@@ -334,4 +374,22 @@ void ViewToolbar::nextFlattenMode(MapView* mapView)
 
     _raise_option->setChecked(true);
     _lower_option->setChecked(true);
+}
+
+bool ViewToolbar::drawOnlyInsideSphereLight()
+{
+    return static_cast<SubToolBarAction*>(_light_secondary_tool[0])->GET<CheckBoxAction*>(sphere_light_inside_index)->checkbox()->isChecked() && current_mode == editing_mode::light;
+}
+
+bool ViewToolbar::drawWireframeSphereLight()
+{
+    return static_cast<SubToolBarAction*>(_light_secondary_tool[0])->GET<CheckBoxAction*>(sphere_light_wireframe_index)->checkbox()->isChecked() && current_mode == editing_mode::light;
+}
+
+float ViewToolbar::getAlphaSphereLight()
+{
+    auto toolbar = static_cast<SubToolBarAction*>(_light_secondary_tool[0]);
+    auto slider = toolbar->GET<SliderAction*>(sphere_light_alpha_index)->slider();
+
+    return float(slider->value()) / 100.f;
 }
