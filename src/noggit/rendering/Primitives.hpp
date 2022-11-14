@@ -16,6 +16,7 @@ namespace math
   struct vector_4d;
 }
 
+class World;
 namespace Noggit::Rendering::Primitives
 {
   class WireBox
@@ -86,17 +87,22 @@ namespace Noggit::Rendering::Primitives
   class Sphere
   {
   public:
-    void draw(glm::mat4x4 const& mvp
-             , glm::vec3 const& pos
-             , glm::vec4  const& color
-             , float radius
+      void draw(glm::mat4x4 const& mvp
+          , glm::vec3 const& pos
+          , glm::vec4  const& color
+          , float radius
+          , int longitude = 32
+          , int latitude = 18
+          , float alpha = 1.f
+          , bool wireframe = false
+          , bool both = false
              );
     void unload();
 
   private:
     bool _buffers_are_setup = false;
 
-    void setup_buffers();
+    void setup_buffers(int longitude, int latitude);
 
     int _indice_count = 0;
 
@@ -128,6 +134,24 @@ namespace Noggit::Rendering::Primitives
     GLuint const& _vertices_vbo = _buffers[0];
     GLuint const& _indices_vbo = _buffers[1];
     std::unique_ptr<OpenGL::program> _program;
+  };
+
+  class Cylinder
+  {
+  public:
+      void draw(glm::mat4x4 const& mvp, glm::vec3 const& pos, const glm::vec4 color, float radius, int precision, World* world, int height = 10);
+      void unload();
+
+  private:
+      bool _buffers_are_setup = false;
+      void setup_buffers(int precision, World* world, int height);
+      int _indice_count = 0;
+
+      OpenGL::Scoped::deferred_upload_vertex_arrays<1> _vao;
+      OpenGL::Scoped::deferred_upload_buffers<2> _buffers;
+      GLuint const& _vertices_vbo = _buffers[0];
+      GLuint const& _indices_vbo = _buffers[1];
+      std::unique_ptr<OpenGL::program> _program;
   };
 
 }

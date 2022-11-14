@@ -54,5 +54,7 @@
       <file alias="sphere_fs">../src/noggit/rendering/glsl/sphere_frag.glsl</file>
       <file alias="square_vs">../src/noggit/rendering/glsl/square_vert.glsl</file>
       <file alias="square_fs">../src/noggit/rendering/glsl/square_frag.glsl</file>
+      <file alias="cylinder_vs">../src/noggit/rendering/glsl/cylinder_vert.glsl</file>
+      <file alias="cylinder_fs">../src/noggit/rendering/glsl/cylinder_frag.glsl</file>
     </qresource>
 </RCC>

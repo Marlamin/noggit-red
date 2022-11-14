@@ -7,10 +7,13 @@
 #include <opengl/scoped.hpp>
 #include <opengl/context.hpp>
 #include <opengl/types.hpp>
+#include <noggit/World.h>
 
+#include <numbers>
 #include <array>
 #include <vector>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace Noggit::Rendering::Primitives;
 
@@ -198,15 +201,12 @@ void WireBox::setup_buffers()
   }
 
 
-  void Sphere::draw(glm::mat4x4 const& mvp
-                 , glm::vec3 const& pos
-                 , glm::vec4  const& color
-                 , float radius
-                 )
+  void Sphere::draw(glm::mat4x4 const& mvp, glm::vec3 const& pos, glm::vec4  const& color
+      , float radius, int longitude, int latitude, float alpha, bool wireframe, bool drawBoth)
 {
   if (!_buffers_are_setup)
   {
-    setup_buffers();
+    setup_buffers(longitude, latitude);
   }
 
   OpenGL::Scoped::use_program sphere_shader {*_program.get()};
@@ -214,17 +214,37 @@ void WireBox::setup_buffers()
   sphere_shader.uniform("model_view_projection", mvp);
   sphere_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
   sphere_shader.uniform("radius", radius);
-  sphere_shader.uniform("color", color);
+  sphere_shader.uniform("color", glm::vec4(color.r, color.g, color.b, alpha));
 
   OpenGL::Scoped::vao_binder const _(_vao[0]);
-  gl.drawElements(GL_TRIANGLES, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
+  if (drawBoth)
+  {
+      gl.drawElements(GL_TRIANGLES, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
+      sphere_shader.uniform("color", glm::vec4(1.f, 1.f, 1.f, 1.f));
+      gl.drawElements(GL_LINE_STRIP, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
+      return;
+  }
+
+  if (!wireframe)
+  {
+        gl.drawElements(GL_TRIANGLES, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
+  }
+  else
+  {
+        gl.drawElements(GL_LINE_STRIP, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
+  }
 }
 
 
-void Sphere::setup_buffers()
+void Sphere::setup_buffers(int longitude, int latitude)
 {
   _vao.upload();
   _buffers.upload();
+
+  const int na = longitude;
+  const int nb = latitude;
+  const int na3 = na * 3;
+  const int nn = nb * na3;
 
   std::vector<glm::vec3> vertices;
   std::vector<std::uint16_t> indices;
@@ -235,37 +255,47 @@ void Sphere::setup_buffers()
                , OpenGL::shader::src_from_qrc("sphere_fs")
                }}));
 
+  float x, y, z, a, b, da, db, r = 3.5f;
+  int ia, ib, ix, iy;
+  da = glm::two_pi<float>() / float(na);
+  db = glm::pi<float>() / float(nb - 1);
 
-  int segment = 27;
-
-  // add overlapping vertices at the end for an easier vertices generations
-  for (int rotation_step = 0; rotation_step <= segment; ++rotation_step)
+  for (ix = 0, b = -glm::half_pi<float>(), ib = 0; ib < nb; ib++, b += db)
   {
-    math::degrees rotation(360.f*rotation_step / static_cast<float>(segment));
-    auto rotationQuat = glm::angleAxis(rotation._, glm::vec3(0, 0, 1));
-    for (int i = 0; i < segment; ++i)
-    {
-      float x = glm::cos(math::radians(math::degrees(i * 360 / segment))._);
-      float z = glm::sin(math::radians(math::degrees(i * 360 / segment))._);
-
-      glm::vec4 v(x, 0.f, z,0.0f);
-
-      vertices.emplace_back(glm::toMat4(rotationQuat) * v);
-
-      if (rotation_step < segment)
+      for (a = 0.f, ia = 0; ia < na; ia++, a += da, ix += 3)
       {
-        indices.emplace_back(i + rotation_step*segment);
-        indices.emplace_back(((i + 1) % segment) + rotation_step * segment);
-        indices.emplace_back(i + (rotation_step+1) * segment);
+          x = cos(b) * cos(a);
+          z = cos(b) * sin(a);
+          y = sin(b);
 
-        indices.emplace_back(i + (rotation_step+1) * segment);
-        indices.emplace_back(((i + 1) % segment) + rotation_step * segment);
-        indices.emplace_back(((i + 1) % segment) + (rotation_step+1) * segment);
+          vertices.emplace_back(x, y, z);
       }
-    }
   }
 
-  _indice_count = indices.size();
+  for (ix = 0, iy = 0, ib = 1; ib < nb; ib++)
+  {
+      for (ia = 1; ia < na; ia++, iy++)
+      {
+          indices.push_back(iy); ix++;
+          indices.push_back(iy + 1); ix++;
+          indices.push_back(iy + na); ix++;
+
+          indices.push_back(iy + na); ix++;
+          indices.push_back(iy + 1); ix++;
+          indices.push_back(iy + na + 1); ix++;
+      }
+
+      indices.push_back(iy); ix++;
+      indices.push_back(iy + 1 - na); ix++;
+      indices.push_back(iy + na); ix++;
+
+      indices.push_back(iy + na); ix++;
+      indices.push_back(iy - na + 1); ix++;
+      indices.push_back(iy + 1); ix++;
+      iy++;
+  }
+
+  _indice_count = (int)indices.size();
 
   gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>
     (_vertices_vbo, vertices, GL_STATIC_DRAW);
@@ -297,7 +327,6 @@ void Sphere::setup_buffers()
 
     _buffers_are_setup = false;
   }
-
 
   void Square::draw(glm::mat4x4 const& mvp
                  , glm::vec3 const& pos
@@ -379,3 +408,97 @@ void Square::setup_buffers()
 
   }
 
+  void Cylinder::draw(glm::mat4x4 const& mvp, glm::vec3 const& pos, const glm::vec4 color, float radius, int precision, World* world, int height)
+  {
+      if (!_buffers_are_setup)
+      {
+          setup_buffers(precision, world, height);
+      }
+
+      OpenGL::Scoped::use_program cylinder_shader {*_program.get()};
+
+      cylinder_shader.uniform("model_view_projection", mvp);
+      cylinder_shader.uniform("origin", glm::vec3(pos.x,pos.y,pos.z));
+      cylinder_shader.uniform("radius", radius);
+      cylinder_shader.uniform("color", color);
+      cylinder_shader.uniform("height", height);
+
+      OpenGL::Scoped::vao_binder const _(_vao[0]);
+
+      gl.drawElements(GL_TRIANGLES, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
+  }
+
+  void Cylinder::unload()
+  {
+    _vao.unload();
+    _buffers.unload();
+    _program.reset();
+
+    _buffers_are_setup = false;
+  }
+
+  void Cylinder::setup_buffers(int precision, World* world, int height)
+  {
+      if (height <= 10.f)
+          height = 10.f;
+
+      _vao.upload();
+      _buffers.upload();
+
+      std::vector<glm::vec3> vertices;
+      std::vector<std::uint16_t> indices;
+
+      _program.reset(new OpenGL::program({
+          { GL_VERTEX_SHADER, OpenGL::shader::src_from_qrc("cylinder_vs")},
+          { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("cylinder_fs")}
+      }));
+
+      int num = (precision + 1) * 2;
+      int numi = precision * 6;
+
+      vertices.resize(num);
+      indices.resize(numi);
+
+      for (int i = 0; i <= 1; i++)
+      {
+          for (int j = 0; j <= precision; j++)
+          {
+              float y = (i == 0) ? 0.f : float(height);
+              float x = -(float)cos(j * glm::two_pi<float>() / precision);
+              float z = (float)sin(j * glm::two_pi<float>() / precision);
+
+              vertices[i * (precision + 1) + j] = glm::vec3(x, y, z);
+          }
+      }
+
+      for (int i = 0; i < 1; i++)
+      {
+          for (int j = 0; j < precision; j++)
+          {
+              indices[6 * (i * precision + j) + 0] = i * (precision + 1) + j;
+              indices[6 * (i * precision + j) + 1] = i * (precision + 1) + j + 1;
+              indices[6 * (i * precision + j) + 2] = (i + 1) * (precision + 1) + j;
+              indices[6 * (i * precision + j) + 3] = i * (precision + 1) + j + 1;
+              indices[6 * (i * precision + j) + 4] = (i + 1) * (precision + 1) + j + 1;
+              indices[6 * (i * precision + j) + 5] = (i + 1) * (precision + 1) + j;
+          }
+      }
+
+      _indice_count = (int)indices.size();
+
+      gl.bufferData<GL_ARRAY_BUFFER, glm::vec3> (_vertices_vbo, vertices, GL_STATIC_DRAW);
+      gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t> (_indices_vbo, indices, GL_STATIC_DRAW);
+
+
+      OpenGL::Scoped::index_buffer_manual_binder indices_binder(_indices_vbo);
+      OpenGL::Scoped::use_program shader (*_program.get());
+
+      {
+          OpenGL::Scoped::vao_binder const _ (_vao[0]);
+          OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder (_vertices_vbo);
+          shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+          indices_binder.bind();
+      }
+
+      _buffers_are_setup = true;
+  }
