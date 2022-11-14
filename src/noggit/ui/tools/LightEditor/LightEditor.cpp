@@ -6,7 +6,6 @@
 // #include <iostream>
 #include <string>
 #include <map>
-#include "LightColorEditor.h"
 #include <noggit/World.h>
 #include <noggit/MapView.h>
 #include <QtWidgets/QGridLayout>
