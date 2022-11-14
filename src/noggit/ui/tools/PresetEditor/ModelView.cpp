@@ -38,6 +38,9 @@ void ModelViewer::paintGL()
         , CursorType::CIRCLE
         , 0.f
         , false
+        , false
+        , false
+        , 0.3f
         , 0.f
         , glm::vec3(0.f, 0.f, 0.f)
         , 0.f

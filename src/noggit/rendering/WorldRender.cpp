@@ -30,6 +30,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     , CursorType cursor_type
     , float brush_radius
     , bool show_unpaintable_chunks
+    , bool draw_only_inside_light_sphere
+    , bool draw_wireframe_light_sphere
+    , float alpha_light_sphere
     , float inner_radius_ratio
     , glm::vec3 const& ref_pos
     , float angle
@@ -918,16 +921,46 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
   }
 
-  /*
-  skies->drawLightingSphereHandles(model_view
-                                  , projection
-                                  , camera_pos
-                                  , frustum
-                                  , culldistance
-                                  , false);
+  if (terrainMode == editing_mode::light)
+  {
+      Sky* CurrentSky = skies()->findClosestSkyByDistance(camera_pos);
+      if (!CurrentSky)
+          return;
 
-                                  */
+      int CurrentSkyID = CurrentSky->Id;
+          
+      const int MAX_TIME_VALUE = 2880;
+      const int CurrenTime = static_cast<int>(_world->time) % MAX_TIME_VALUE;
 
+      glCullFace(GL_FRONT);
+      for (Sky& sky : skies()->skies)
+      {
+          if (CurrentSkyID > 1 && draw_only_inside_light_sphere)
+              break;
+
+          if (CurrentSkyID == sky.Id)
+              continue;
+
+          if (glm::distance(sky.pos, camera_pos) <= _cull_distance) // TODO: frustum cull here
+          {
+              glm::vec4 diffuse = { sky.colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.f };
+              glm::vec4 ambient = { sky.colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.f };
+
+              _sphere_render.draw(mvp, sky.pos, ambient, sky.r1, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+              _sphere_render.draw(mvp, sky.pos, diffuse, sky.r2, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+          }
+      }
+
+      glCullFace(GL_BACK);
+      if (CurrentSky && draw_only_inside_light_sphere)
+      {
+          glm::vec4 diffuse = { CurrentSky->colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.f };
+          glm::vec4 ambient = { CurrentSky->colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.f };
+
+          _sphere_render.draw(mvp, CurrentSky->pos, ambient, CurrentSky->r1, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+          _sphere_render.draw(mvp, CurrentSky->pos, diffuse, CurrentSky->r2, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+      }
+  }
 }
 
 void WorldRender::upload()
@@ -1156,6 +1189,7 @@ void WorldRender::unload()
   _cursor_render.unload();
   _sphere_render.unload();
   _square_render.unload();
+  _cylinder_render.unload();
   _horizon_render.reset();
 
   _liquid_texture_manager.unload();
@@ -1508,7 +1542,7 @@ void WorldRender::drawMinimap ( MapTile *tile
   }
 
   draw(model_view, projection, glm::vec3(), 0, glm::vec4(),
-       CursorType::NONE, 0.f, false, 0.f, glm::vec3(), 0.f, 0.f, false, false, false, editing_mode::minimap, camera_pos, true, false, true, settings->draw_wmo, settings->draw_water, false, settings->draw_m2, false, false, true, settings, false, eTerrainType::eTerrainType_Linear, 0, display_mode::in_3D, false, true);
+       CursorType::NONE, 0.f, false, false, false, 0.3f, 0.f, glm::vec3(), 0.f, 0.f, false, false, false, editing_mode::minimap, camera_pos, true, false, true, settings->draw_wmo, settings->draw_water, false, settings->draw_m2, false, false, true, settings, false, eTerrainType::eTerrainType_Linear, 0, display_mode::in_3D, false, true);
 
 
   if (unload)

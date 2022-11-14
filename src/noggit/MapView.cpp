@@ -1429,7 +1429,6 @@ void MapView::setupAssistMenu()
       }
   );
 
-
   auto cur_adt_import_menu(assist_menu->addMenu("Import"));
 
 
@@ -3872,6 +3871,8 @@ void MapView::tick (float dt)
   _world->time += this->mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
 
+  lightEditor->UpdateWorldTime();
+
   if (_draw_model_animations.get())
   {
     _world->update_models_emitters(dt);
@@ -4217,6 +4218,7 @@ glm::mat4x4 MapView::model_view() const
     return _camera.look_at_matrix();
   }
 }
+
 glm::mat4x4 MapView::projection() const
 {
   float far_z = _settings->value("farZ", 2048).toFloat();
@@ -4321,6 +4323,9 @@ void MapView::draw_map()
                , _cursorType
                , radius
                , _left_sec_toolbar->showUnpaintableChunk()
+               , _left_sec_toolbar->drawOnlyInsideSphereLight()
+               , _left_sec_toolbar->drawWireframeSphereLight()
+               , _left_sec_toolbar->getAlphaSphereLight()
                , inner_radius
                , ref_pos
                , angle
