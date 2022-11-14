@@ -428,14 +428,14 @@ namespace Noggit::Ui::Windows
     emit exitPromptOpened();
 
     QMessageBox prompt;
+    prompt.setModal(true);
     prompt.setIcon(QMessageBox::Warning);
-    prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
     prompt.setText("Exit?");
     prompt.setInformativeText("Any unsaved changes will be lost.");
     prompt.addButton("Exit", QMessageBox::DestructiveRole);
     prompt.addButton("Return to menu", QMessageBox::AcceptRole);
     prompt.setDefaultButton(prompt.addButton("Cancel", QMessageBox::RejectRole));
-    prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
 
     prompt.exec();
 
