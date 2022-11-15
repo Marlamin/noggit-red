@@ -2976,3 +2976,72 @@ void World::notifyTileRendererOnSelectedTextureChange()
   }
 }
 
+void World::select_objects_in_area(
+    const std::array<glm::vec2, 2> selection_box, 
+    bool reset_selection,
+    glm::mat4x4 view,
+    glm::mat4x4 projection,
+    int viewport_width, 
+    int viewport_height,
+    float user_depth,
+    glm::vec3 camera_position)
+{
+    ZoneScoped;
+    
+    if (reset_selection)
+    {
+        this->reset_selection();
+    }
+
+    for (auto& map_object : _loaded_tiles_buffer)
+    {
+        MapTile* tile = map_object.second;
+
+        if (!tile)
+        {
+            break;
+        }
+
+        for (auto& pair : tile->getObjectInstances())
+        {
+            if (pair.second[0]->which() == eMODEL)
+            {
+                for (auto& instance : pair.second)
+                {
+                    auto model = instance->transformMatrix();
+                    glm::mat4 VPmatrix = projection * view;
+                    glm::vec4 screenPos = VPmatrix * glm::vec4(instance->pos, 1.0f);
+                    screenPos.x /= screenPos.w;
+                    screenPos.y /= screenPos.w;
+
+                    screenPos.x = (screenPos.x + 1.0f) / 2.0f;
+                    screenPos.y = (screenPos.y + 1.0f) / 2.0f;
+                    screenPos.y = 1 - screenPos.y;
+
+                    screenPos.x *= viewport_width;
+                    screenPos.y *= viewport_height;
+                    
+                    auto depth = glm::distance(camera_position, instance->pos);
+                    if (depth <= user_depth)
+                    {
+                        const glm::vec2 screenPos2D = glm::vec2(screenPos);
+                        if (misc::pointInside(screenPos2D, selection_box))
+                        {
+                            auto uid = instance->uid;
+                            auto modelInstance = _model_instance_storage.get_instance(uid);
+                            if (modelInstance && modelInstance.value().index() == eEntry_Object) {
+                                auto obj = std::get<selected_object_type>(modelInstance.value());
+                                auto model_instance = static_cast<ModelInstance*>(obj);
+
+                                if (!is_selected(obj) && !model_instance->model->is_hidden())
+                                {
+                                    this->add_to_selection(obj);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

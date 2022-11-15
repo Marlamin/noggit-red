@@ -356,6 +356,17 @@ public:
   unsigned getNumLoadedTiles() const { return _n_loaded_tiles; };
   unsigned getNumRenderedTiles() const { return _n_rendered_tiles; };
 
+  void select_objects_in_area(
+      const std::array<glm::vec2, 2> selection_box, 
+      bool reset_selection,
+      glm::mat4x4 view,
+      glm::mat4x4 projection,
+      int viewport_width,
+      int viewport_height,
+      float user_depth,
+      glm::vec3 camera_position
+  );
+
 protected:
   void update_models_by_filename();
 
