@@ -17,6 +17,11 @@ LightFloatBandDB gLightFloatBandDB;
 GroundEffectDoodadDB gGroundEffectDoodadDB;
 GroundEffectTextureDB gGroundEffectTextureDB;
 LiquidTypeDB gLiquidTypeDB;
+SoundProviderPreferencesDB gSoundProviderPreferencesDB;
+SoundAmbienceDB gSoundAmbienceDB;
+ZoneMusicDB gZoneMusicDB;
+ZoneIntroMusicTableDB gZoneIntroMusicTableDB;
+SoundEntriesDB gSoundEntriesDB;
 
 void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData)
 {
@@ -31,6 +36,11 @@ void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData)
   gGroundEffectDoodadDB.open(clientData);
   gGroundEffectTextureDB.open(clientData);
   gLiquidTypeDB.open(clientData);
+  gSoundProviderPreferencesDB.open(clientData);
+  gSoundAmbienceDB.open(clientData);
+  gZoneMusicDB.open(clientData);
+  gZoneIntroMusicTableDB.open(clientData);
+  gSoundEntriesDB.open(clientData);
 }
 
 
@@ -87,6 +97,18 @@ std::uint32_t AreaDB::get_area_parent(int area_id)
   {
     return 0;
   }
+}
+
+std::uint32_t AreaDB::get_new_areabit()
+{
+    unsigned int areabit = 0;
+
+    for (Iterator i = gAreaDB.begin(); i != gAreaDB.end(); ++i)
+    {
+        areabit = std::max(i->getUInt(AreaDB::AreaBit), areabit);
+    }
+
+    return static_cast<int>(++areabit);
 }
 
 std::string MapDB::getMapName(int pMapID)
