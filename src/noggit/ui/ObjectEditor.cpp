@@ -73,9 +73,25 @@ namespace Noggit
       _radius_slider->setRange (0, 100);
       _radius_slider->setSliderPosition (_radius);
 
-      radius_layout->addRow (_radius_slider);
+      radius_layout->addRow(_radius_slider);
       radius_layout->addRow(_radius_spin);
       layout->addWidget(radius_group);
+
+      QGroupBox* drag_selection_depth_group = new QGroupBox("Drag Selection Depth");
+      auto drag_selection_depth_layout = new QFormLayout(drag_selection_depth_group);
+
+      _drag_selection_depth_spin = new QDoubleSpinBox(this);
+      _drag_selection_depth_spin->setRange(1.0f, 3000.0f);
+      _drag_selection_depth_spin->setDecimals(2);
+      _drag_selection_depth_spin->setValue(_drag_selection_depth);
+
+      _drag_selection_depth_slider = new QSlider(Qt::Orientation::Horizontal, this);
+      _drag_selection_depth_slider->setRange(1.0f, 3000.0f);
+      _drag_selection_depth_slider->setSliderPosition(_drag_selection_depth);
+
+      drag_selection_depth_layout->addRow(_drag_selection_depth_slider);
+      drag_selection_depth_layout->addRow(_drag_selection_depth_spin);
+      layout->addWidget(drag_selection_depth_group);
 
       auto *copyBox = new ExpanderWidget( this);
       copyBox->setExpanderTitle("Copy options");
@@ -224,7 +240,7 @@ namespace Noggit
       multi_select_movement_layout->addRow(multi_select_movement_cb);
       multi_select_movement_layout->addRow(object_median_pivot_point);
 
-      auto *selectionOptionsBox = new ExpanderWidget( this);
+      auto *selectionOptionsBox = new ExpanderWidget(this);
       selectionOptionsBox->setExpanderTitle("Movement Options");
       selectionOptionsBox->setExpanded(_settings->value ("object_editor/movement_options", false).toBool());
 
@@ -345,6 +361,23 @@ namespace Noggit
                   QSignalBlocker const blocker(_radius_spin);
                   _radius_spin->setValue(v);
                 }
+      );
+
+      connect(_drag_selection_depth_spin, qOverload<double>(&QDoubleSpinBox::valueChanged)
+          , [&] (double v)
+              {
+                _drag_selection_depth = v;
+                QSignalBlocker const blocker(_drag_selection_depth_slider);
+                _drag_selection_depth_slider->setSliderPosition((int)std::round(v));
+              }
+      );
+      connect(_drag_selection_depth_slider, &QSlider::valueChanged
+          , [&](int v)
+              {
+                _drag_selection_depth = v;
+                QSignalBlocker const blocker(_drag_selection_depth_spin);
+                _drag_selection_depth_spin->setValue(v);
+              }
       );
 
       connect ( rotRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)

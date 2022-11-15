@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <glm/vec4.hpp>
+#include <glm/vec2.hpp>
 #include <noggit/Selection.h>
 
 
@@ -55,6 +56,7 @@ namespace misc
   bool deg_vec3d_equals(math::degrees::vec3 const& v1, math::degrees::vec3 const& v2);
 
   bool pointInside(glm::vec3 point, std::array<glm::vec3, 2> const& extents);
+  bool pointInside(glm::vec2 point, std::array<glm::vec2, 2> const& extents);
   void minmax(glm::vec3* a, glm::vec3* b);
 
   inline int rounded_int_div(int value, int div)

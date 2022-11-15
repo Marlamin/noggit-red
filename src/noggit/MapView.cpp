@@ -817,6 +817,9 @@ void MapView::setupObjectEditorUi()
 
   /* Additional tools */
 
+  /* Area selection */
+  _area_selection = new QRubberBand(QRubberBand::Rectangle, this);
+
   /* Object Palette */
   _object_palette = new Noggit::Ui::ObjectPalette(this, this);
   _object_palette->hide();
@@ -4910,6 +4913,12 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
 
   }
 
+  if (leftMouse && terrainMode == editing_mode::object && _display_mode == display_mode::in_3D && !ImGuizmo::IsUsing())
+  {
+      _needs_redraw = true;
+      _area_selection->setGeometry(QRect(_drag_start_pos, event->pos()).normalized());
+  }
+
   if (_display_mode == display_mode::in_2D && leftMouse && _mod_alt_down && _mod_shift_down)
   {
     strafing = ((relative_movement.dx() / XSENS) / -1) * 5.0f;
@@ -4978,18 +4987,15 @@ void MapView::mousePressEvent(QMouseEvent* event)
     break;
   }
 
-  if (leftMouse)
+  if (leftMouse && ((terrainMode == editing_mode::object || terrainMode == editing_mode::minimap) && !_mod_ctrl_down))
   {
-    if ((terrainMode == editing_mode::object || terrainMode == editing_mode::minimap)  && !_mod_ctrl_down)
-    {
-      doSelection(false);
-    }
-    else
-    {
-      doSelection(true);
-    }
+      _drag_start_pos = event->pos();
+      _needs_redraw = true;
+      _area_selection->setGeometry(QRect(_drag_start_pos, QSize()));
+      _area_selection->show();
   }
-  else if (rightMouse)
+
+  if (rightMouse)
   {
     look = true;
   }
@@ -5075,6 +5081,32 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
       strafing = 0;
       moving = 0;
     }
+
+    if ((terrainMode == editing_mode::object || terrainMode == editing_mode::minimap) && !_mod_ctrl_down)
+    {
+        auto drag_end_pos = event->pos();
+
+        if (_drag_start_pos != drag_end_pos && !ImGuizmo::IsUsing())
+        {
+            const std::array<glm::vec2, 2> selection_box
+            {
+                glm::vec2(std::min(_drag_start_pos.x(), drag_end_pos.x()), std::min(_drag_start_pos.y(), drag_end_pos.y())),
+                glm::vec2(std::max(_drag_start_pos.x(), drag_end_pos.x()), std::max(_drag_start_pos.y(), drag_end_pos.y()))
+            };
+            _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), objectEditor->drag_selection_depth(), _camera.position);
+        }
+        else // Do normal selection when we just clicked
+        {
+            doSelection(false);
+        }
+        
+        _area_selection->hide();
+    }
+    else 
+    {
+        doSelection(true);
+    }
+
     break;
 
   case Qt::RightButton:

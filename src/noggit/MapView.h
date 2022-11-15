@@ -126,6 +126,7 @@ private:
   float moving, strafing, updown, mousedir, turn, lookat;
   CursorType _cursorType;
   glm::vec3 _cursor_pos;
+  QPoint _drag_start_pos;
   float _cursorRotation;
   bool look, freelook;
   bool ui_hidden = false;
@@ -448,6 +449,8 @@ private:
   std::optional<QImage> _mmap_combined_image;
 
   OpenGL::Scoped::deferred_upload_buffers<2> _buffers;
+
+  QRubberBand* _area_selection;
 
 public:
 
