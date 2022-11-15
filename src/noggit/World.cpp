@@ -3004,7 +3004,8 @@ void World::select_objects_in_area(
 
         for (auto& pair : tile->getObjectInstances())
         {
-            if (pair.second[0]->which() == eMODEL)
+            auto objectType = pair.second[0]->which();
+            if (objectType == eMODEL || objectType == eWMO)
             {
                 for (auto& instance : pair.second)
                 {
@@ -3031,11 +3032,24 @@ void World::select_objects_in_area(
                             auto modelInstance = _model_instance_storage.get_instance(uid);
                             if (modelInstance && modelInstance.value().index() == eEntry_Object) {
                                 auto obj = std::get<selected_object_type>(modelInstance.value());
-                                auto model_instance = static_cast<ModelInstance*>(obj);
-
-                                if (!is_selected(obj) && !model_instance->model->is_hidden())
+                                auto which = std::get<selected_object_type>(modelInstance.value())->which();
+                                if (which == eWMO)
                                 {
-                                    this->add_to_selection(obj);
+                                    auto model_instance = static_cast<WMOInstance*>(obj);
+
+                                    if (!is_selected(obj) && !model_instance->wmo->is_hidden())
+                                    {
+                                        this->add_to_selection(obj);
+                                    }
+                                }
+                                else if (which == eMODEL)
+                                {
+                                    auto model_instance = static_cast<ModelInstance*>(obj);
+
+                                    if (!is_selected(obj) && !model_instance->model->is_hidden())
+                                    {
+                                        this->add_to_selection(obj);
+                                    }
                                 }
                             }
                         }
