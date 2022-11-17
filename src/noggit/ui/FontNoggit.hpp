@@ -122,7 +122,10 @@ namespace Noggit
         GIZMO_VISIBILITY = 0xf8cc,
         GIZMO_GLOBAL = 0xf8cd,
         GIZMO_LOCAL = 0xf8ce,
-        GIZMO_VISIBILITY_ALL = 0xf8cf
+        GIZMO_VISIBILITY_ALL = 0xf8cf,
+        TOOL_LIGHT = 0xf8d0,
+        VISIBILITY_VERTEX_PAINTER = 0xf8d1,
+        VISIBILITY_CLIMB = 0xf8d2
       };
     };
 

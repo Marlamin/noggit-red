@@ -15,7 +15,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
   setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
-  IconAction* climb_icon = new IconAction(FontNoggitIcon{FontNoggit::FAVORITE});
+  IconAction* climb_icon = new IconAction(FontNoggitIcon{FontNoggit::VISIBILITY_CLIMB });
 
   CheckBoxAction* climb_use_output_color_angle = new CheckBoxAction(tr("Display all angle color"));
   climb_use_output_color_angle->checkbox()->setChecked(false);
@@ -79,8 +79,8 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     add_tool_icon(mapView, &mapView->_draw_hole_lines, tr("Hole lines"), FontNoggit::VISIBILITY_HOLE_LINES, tb);
     add_tool_icon(mapView, &mapView->_draw_wireframe, tr("Wireframe"), FontNoggit::VISIBILITY_WIREFRAME, tb);
     add_tool_icon(mapView, &mapView->_draw_contour, tr("Contours"), FontNoggit::VISIBILITY_CONTOURS, tb);
-    add_tool_icon(mapView, &mapView->_draw_climb, tr("Climb"), FontNoggit::FAVORITE, tb, tb->_climb_secondary_tool);
-    add_tool_icon(mapView, &mapView->_draw_vertex_color, tr("Vertex Color"), FontNoggit::FAVORITE, tb);
+    add_tool_icon(mapView, &mapView->_draw_climb, tr("Climb"), FontNoggit::VISIBILITY_CLIMB, tb, tb->_climb_secondary_tool);
+    add_tool_icon(mapView, &mapView->_draw_vertex_color, tr("Vertex Color"), FontNoggit::VISIBILITY_VERTEX_PAINTER, tb);
 
     addSeparator();
 

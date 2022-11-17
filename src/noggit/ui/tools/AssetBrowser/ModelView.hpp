@@ -80,6 +80,9 @@ namespace Noggit
       void keyPressEvent(QKeyEvent* event) override;
       void focusOutEvent(QFocusEvent* event) override;
 
+    private:
+        std::array<Qt::Key, 6> _inputs = { Qt::Key_W, Qt::Key_S, Qt::Key_D, Qt::Key_A, Qt::Key_Q, Qt::Key_E };
+        void checkInputsSettings();
     };
   }
 }
