@@ -422,7 +422,7 @@ IF(FALSE) # GIT_FOUND
 ELSE()
   MESSAGE(WARNING "Failed to find a Git executable, will NOT produce a useful version string. Crash logs will be useless. Do NOT distribute.")
 
-  SET(NOGGIT_GIT_VERSION_STRING "UNKNOWN")
+  SET(NOGGIT_GIT_VERSION_STRING "1.00")
   CONFIGURE_FILE("${_noggit_revision_template_file}" "${_noggit_revision_output_file}" @ONLY)
 ENDIF()
 
