@@ -344,6 +344,26 @@ void MapCreationWizard::selectMap(int map_id)
   auto timeOffset = record.Columns["TimeOffset"].Value;
 
   _world = new World(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW);
+
+  // check if map has a wdl and prompt to create a new one
+  std::stringstream filename;
+  filename << "World\\Maps\\" << _world->basename << "\\" << _world->basename << ".wdl";
+  if (!Application::NoggitApplication::instance()->clientData()->exists(filename.str()))
+  {
+     QMessageBox prompt;
+     prompt.setText(std::string("This map has no existing horizon data (.wdl file).").c_str());
+     prompt.setInformativeText(std::string("Do you want to generate a new .wdl file ?").c_str());
+     prompt.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+     prompt.setDefaultButton(QMessageBox::Yes);
+     bool answer = prompt.exec() == QMessageBox::StandardButton::Yes;
+     if (answer)
+     {
+        _world->horizon.save_wdl(_world, true);
+        _world->horizon.set_minimap(&_world->mapIndex);
+        // _world = new World(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW); // refresh minimap
+     }
+  }
+
   _minimap_widget->world(_world);
 
   _directory->setText(QString::fromStdString(directoryName));
@@ -458,11 +478,15 @@ void MapCreationWizard::saveCurrentEntry()
   }
 
   // Save ADTs and WDT to disk
+  // _world->mapIndex.create_empty_wdl();
   _world->mapIndex.setBigAlpha(_is_big_alpha->isChecked());
   _world->setBasename(_directory->text().toStdString());
   _world->mapIndex.set_sort_models_by_size_class(_sort_by_size_cat->isChecked());
   _world->mapIndex.saveChanged(_world, true);
-  _world->mapIndex.save();
+  _world->mapIndex.save(); // save wdt file
+  // create default wdl
+  if (_is_new_record)
+      _world->mapIndex.create_empty_wdl();
 
   // Save Map.dbc record
   DBCFile::Record record = _is_new_record ? gMapDB.addRecord(_cur_map_id) : gMapDB.getByID(_cur_map_id);

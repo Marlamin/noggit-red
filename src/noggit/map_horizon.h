@@ -15,6 +15,9 @@
 #include <memory>
 
 class MapIndex;
+class MapTile;
+class MapView;
+class World;
 
 namespace Noggit
 {
@@ -23,6 +26,7 @@ struct map_horizon_tile
 {
     int16_t height_17[17][17];
     int16_t height_16[16][16];
+    int16_t holes[16];
 };
 
 struct map_horizon_batch
@@ -76,10 +80,23 @@ public:
 
   map_horizon(const std::string& basename, const MapIndex * const index);
 
+  void set_minimap(const MapIndex* const index);
+
+  Noggit::map_horizon_tile* get_horizon_tile(int y, int x);
+
   QImage _qt_minimap;
 
+  void update_horizon_tile(MapTile* mTile);
+
+  void save_wdl(World* world, bool regenerate = false);
+
 private:
+  int16_t getWdlheight(MapTile* tile, float x, float y);
+
   std::string _filename;
+
+  std::vector<std::string> mWMOFilenames;
+  // std::vector<ENTRY_MODF> lWMOInstances;
 
   std::unique_ptr<map_horizon_tile> _tiles[64][64];
 };
