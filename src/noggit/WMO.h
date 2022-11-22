@@ -271,6 +271,8 @@ public:
   std::vector<WMOLight> lights;
   glm::vec4 ambient_light_color;
 
+  uint32_t WmoId;
+
   mohd_flags flags;
 
   std::vector<WMOFog> fogs;

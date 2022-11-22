@@ -61,7 +61,7 @@ void WMO::finishLoading ()
   assert (fourcc == 'MOHD');
 
   CArgb ambient_color;
-  unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
+  unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets;
   // header
   f.read (&nTextures, 4);
   f.read (&nGroups, 4);
@@ -71,7 +71,7 @@ void WMO::finishLoading ()
   f.read (&nDoodads, 4);
   f.read (&nDoodadSets, 4);
   f.read (&ambient_color, 4);
-  f.read (&nX, 4);
+  f.read (&WmoId, 4);
   f.read (ff, 12);
   extents[0] = ::glm::vec3 (ff[0], ff[1], ff[2]);
   f.read (ff, 12);

@@ -164,11 +164,13 @@ void WMOInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   std::stringstream select_info;
 
   select_info << "<b>filename: </b>" << wmo->file_key().filepath()
-    << "<br><b>FileDataID: </b>" << wmo->file_key().fileDataID()
+    // << "<br><b>FileDataID: </b>" << wmo->file_key().fileDataID() not in wrath
     << "<br><b>unique ID: </b>" << uid
     << "<br><b>position X/Y/Z: </b>{" << pos.x << ", " << pos.y << ", " << pos.z << "}"
     << "<br><b>rotation X/Y/Z: </b>{" << dir.x << ", " << dir.y << ", " << dir.z << "}"
+    << "<br><b>WMO Id: </b>" << wmo->WmoId
     << "<br><b>doodad set: </b>" << doodadset()
+    << "<br><b>name set: </b>" << mNameset
     << "<br><b>textures used: </b>" << wmo->textures.size()
     << "<span>";
 
