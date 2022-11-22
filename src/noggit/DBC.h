@@ -275,7 +275,31 @@ public:
     static const size_t distanceCutoff = 27;        // float
     static const size_t EAXDef = 28;        // int
     static const size_t soundEntriesAdvancedID = 29;        // int
+};
 
+class WMOAreaTableDB : public DBCFile
+{
+public:
+    WMOAreaTableDB() :
+        DBCFile("DBFilesClient\\WMOAreaTable.dbc")
+    { }
+
+    /// Fields
+    static const size_t ID = 0;    // uint
+    static const size_t WmoId = 1;  // uint
+    static const size_t NameSetId = 2;    // uint [AreaID]
+    static const size_t WMOGroupID= 3;    // uint 
+    static const size_t SoundProviderPreferences = 4;    // uint 
+    static const size_t UnderwaterSoundProviderPreferences = 5;    // uint 
+    static const size_t SoundAmbience = 6;    // uint 
+    static const size_t ZoneMusic = 7;    // uint 
+    static const size_t ZoneIntroMusicTable = 8;    // uint 
+    static const size_t Flags = 9;    // int CWorldMap::QueryOutdoors: rec.flags & 4 || rec.flags & 2. &0x18: Minimap::s_singleExterior = true unless groupRec::flags & 0x20
+    static const size_t AreaTableRefId = 10;    // uint
+    static const size_t Name = 11;    // localisation string
+
+    static std::string getWMOAreaName(int WMOId, int namesetId);
+    static std::vector<std::string> getWMOAreaNames(int WMOId);
 };
 
 void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData);
@@ -298,3 +322,4 @@ extern SoundAmbienceDB gSoundAmbienceDB;
 extern ZoneMusicDB gZoneMusicDB;
 extern ZoneIntroMusicTableDB gZoneIntroMusicTableDB;
 extern SoundEntriesDB gSoundEntriesDB;
+extern WMOAreaTableDB gWMOAreaTableDB;

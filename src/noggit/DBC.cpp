@@ -22,6 +22,7 @@ SoundAmbienceDB gSoundAmbienceDB;
 ZoneMusicDB gZoneMusicDB;
 ZoneIntroMusicTableDB gZoneIntroMusicTableDB;
 SoundEntriesDB gSoundEntriesDB;
+WMOAreaTableDB gWMOAreaTableDB;
 
 void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData)
 {
@@ -41,6 +42,7 @@ void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData)
   gZoneMusicDB.open(clientData);
   gZoneIntroMusicTableDB.open(clientData);
   gSoundEntriesDB.open(clientData);
+  gWMOAreaTableDB.open(clientData);
 }
 
 
@@ -184,4 +186,71 @@ std::string  LiquidTypeDB::getLiquidName(int pID)
   }
 
   return type;
+}
+
+std::string WMOAreaTableDB::getWMOAreaName(int WMOId, int namesetId)
+{
+    if (WMOId == -1)
+    {
+        return "Unknown location";
+    }
+
+    for (Iterator i = gWMOAreaTableDB.begin(); i != gWMOAreaTableDB.end(); ++i)
+    {
+        if (i->getUInt(WMOAreaTableDB::WmoId) == WMOId && i->getUInt(WMOAreaTableDB::NameSetId) == namesetId && i->getUInt(WMOAreaTableDB::WMOGroupID) == -1)
+        {
+            // wmoareatableid = i->getUInt(WMOAreaTableDB::ID);
+            std::string areaName = i->getLocalizedString(WMOAreaTableDB::Name);
+
+            if (!areaName.empty())
+                return areaName;
+            else
+            {   // get name from area instead
+                int areatableid = i->getUInt(WMOAreaTableDB::AreaTableRefId);
+                if (areatableid)
+                {
+                    auto rec = gAreaDB.getByID(areatableid);
+                    return rec.getLocalizedString(AreaDB::Name);
+                }
+                else
+                    return "Unknown location"; // nullptr? need to get it from terrain
+            }
+        }
+    }
+    throw NotFound();
+}
+
+std::vector<std::string> WMOAreaTableDB::getWMOAreaNames(int WMOId)
+{
+    std::vector<std::string> areanamesvect;
+
+    if (WMOId == -1)
+    {
+        return areanamesvect;
+    }
+
+    for (Iterator i = gWMOAreaTableDB.begin(); i != gWMOAreaTableDB.end(); ++i)
+    {
+        if (i->getUInt(WMOAreaTableDB::WmoId) == WMOId && i->getUInt(WMOAreaTableDB::WMOGroupID) == -1)
+        {
+            // wmoareatableid = i->getUInt(WMOAreaTableDB::ID);
+            std::string areaName = i->getLocalizedString(WMOAreaTableDB::Name);
+
+            if (!areaName.empty())
+                areanamesvect.push_back(areaName);
+            else
+            {   // get name from area instead
+                int areatableid = i->getUInt(WMOAreaTableDB::AreaTableRefId);
+                if (areatableid)
+                {
+                    auto rec = gAreaDB.getByID(areatableid);
+                    areanamesvect.push_back(rec.getLocalizedString(AreaDB::Name));
+                }
+                else
+                    areanamesvect.push_back(""); // nullptr? need to get it from terrain
+            }
+        }
+        // could optimise and break when iterator WmoId is higher than the Wmodid, but this wouldn't support unordered DBCs.
+    }
+    return areanamesvect;
 }

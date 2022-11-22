@@ -4117,6 +4117,7 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
       }
       else if (!_mod_space_down && !_mod_alt_down && !_mod_ctrl_down)
       {
+        // objectEditor->update_selection(_world.get());
         _world->reset_selection();
         _world->add_to_selection(hit);
       }
@@ -4139,6 +4140,8 @@ void MapView::doSelection (bool selectTerrainOnly, bool mouseMove)
   }
 
   _rotation_editor_need_update = true;
+  objectEditor->update_selection(_world.get()); 
+
 }
 
 void MapView::update_cursor_pos()
