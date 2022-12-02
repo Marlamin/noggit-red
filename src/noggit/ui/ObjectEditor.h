@@ -9,6 +9,8 @@
 #include <QSettings>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
+#include <QtWidgets/qcombobox.h>
+#include <QtWidgets/qgroupbox.h>
 
 class MapView;
 class QButtonGroup;
@@ -84,6 +86,8 @@ namespace Noggit
       helper_models* helper_models_widget;
       QSize sizeHint() const override;
 
+      void update_selection(World* world);
+
     private:
       float _radius = 0.01f;
       float _drag_selection_depth = 100.0f;
@@ -94,6 +98,10 @@ namespace Noggit
       QDoubleSpinBox* _radius_spin;
       QSlider* _drag_selection_depth_slider;
       QDoubleSpinBox* _drag_selection_depth_spin;
+
+      QGroupBox* _wmo_group;
+      QComboBox* _doodadSetSelector;
+      QComboBox* _nameSetSelector;
 
       QSettings* _settings;
 

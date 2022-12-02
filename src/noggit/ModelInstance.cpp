@@ -229,7 +229,7 @@ void ModelInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   std::stringstream select_info;
 
   select_info << "<b>filename:</b> " << model->file_key().filepath()
-    << "<br><b>FileDataID:</b> " << model->file_key().fileDataID()
+    // << "<br><b>FileDataID:</b> " << model->file_key().fileDataID() // not in WOTLK
     << "<br><b>unique ID:</b> " << uid
     << "<br><b>position X/Y/Z:</b> {" << pos.x << " , " << pos.y << " , " << pos.z << "}"
     << "<br><b>rotation X/Y/Z:</b> {" << dir.x << " , " << dir.y << " , " << dir.z << "}"
