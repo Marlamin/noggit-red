@@ -186,6 +186,8 @@ public:
 
   void set_basename(const std::string& pBasename);
 
+  void create_empty_wdl();
+
   void enterTile(const TileIndex& tile);
   MapTile *loadTile(const TileIndex& tile, bool reloading = false);
 
