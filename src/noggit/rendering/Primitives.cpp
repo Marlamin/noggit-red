@@ -502,3 +502,69 @@ void Square::setup_buffers()
 
       _buffers_are_setup = true;
   }
+
+  void Line::draw(glm::mat4x4 const& mvp
+      , glm::vec3 const& from
+      , glm::vec3 const& to
+      , glm::vec4 const& color
+  )
+  {
+      if (!_buffers_are_setup)
+      {
+          setup_buffers(from, to);
+      }
+
+      OpenGL::Scoped::use_program line_shader{ *_program.get() };
+
+      line_shader.uniform("model_view_projection", mvp);
+      line_shader.uniform("origin", glm::vec3(from.x, from.y, from.z));
+      line_shader.uniform("color", color);
+
+      OpenGL::Scoped::vao_binder const _(_vao[0]);
+      gl.drawElements(GL_LINES, _indices_vbo, 2, GL_UNSIGNED_SHORT, nullptr);
+  }
+
+
+  void Line::setup_buffers(glm::vec3 const& from, glm::vec3 const& to)
+  {
+      _vao.upload();
+      _buffers.upload();
+
+      std::vector<glm::vec3> vertices = { {0, 0, 0}, (to - from) };
+      std::vector<std::uint16_t> indices = { 0,1 };
+
+      _program.reset(new OpenGL::program(
+          {
+              { GL_VERTEX_SHADER, OpenGL::shader::src_from_qrc("line_vs") },
+              { GL_FRAGMENT_SHADER, OpenGL::shader::src_from_qrc("line_fs") }
+          }
+      ));
+
+
+      gl.bufferData<GL_ARRAY_BUFFER, glm::vec3> (_vertices_vbo, vertices, GL_STATIC_DRAW);
+      gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t> (_indices_vbo, indices, GL_STATIC_DRAW);
+
+
+      OpenGL::Scoped::index_buffer_manual_binder indices_binder(_indices_vbo);
+      OpenGL::Scoped::use_program shader(*_program.get());
+
+      {
+          OpenGL::Scoped::vao_binder const _(_vao[0]);
+
+          OpenGL::Scoped::buffer_binder<GL_ARRAY_BUFFER> const vertices_binder(_vertices_vbo);
+          shader.attrib("position", 3, GL_FLOAT, GL_FALSE, 0, 0);
+          indices_binder.bind();
+      }
+
+      _buffers_are_setup = true;
+  }
+
+  void Line::unload()
+  {
+      _vao.unload();
+      _buffers.unload();
+      _program.reset();
+
+      _buffers_are_setup = false;
+
+  }

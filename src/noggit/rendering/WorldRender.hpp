@@ -129,6 +129,7 @@ namespace Noggit::Rendering
     Noggit::Rendering::Primitives::Sphere _sphere_render;
     Noggit::Rendering::Primitives::Square _square_render;
     Noggit::Rendering::Primitives::Cylinder _cylinder_render;
+    Noggit::Rendering::Primitives::Line _line_render;
 
     // buffers
     OpenGL::Scoped::deferred_upload_buffers<8> _buffers;
