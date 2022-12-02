@@ -1,8 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #version 410 core
 
-const double TILESIZE = 533.33333;
-const double CHUNKSIZE = TILESIZE / 16.0;
+const float TILESIZE = 533.33333;
+const float CHUNKSIZE = 533.33333 / 16.0;
 
 in vec2 position;
 in vec2 texcoord;
@@ -160,25 +160,25 @@ void main()
   instanceID = base_instance + (t_x * 16 + t_z);
   vec4 normal_pos = texelFetch(heightmap, ivec2(gl_VertexID, instanceID), 0);
 
-  dvec3 pos = dvec3(double(instances[instanceID].ChunkXZ_TileXZ.z * TILESIZE)
-                      + double(instances[instanceID].ChunkXZ_TileXZ.x * CHUNKSIZE)
-                      + double(position.x)
-                    , double(normal_pos.a)
-                    , double(instances[instanceID].ChunkXZ_TileXZ.w * TILESIZE)
-                      + double(instances[instanceID].ChunkXZ_TileXZ.y * CHUNKSIZE)
-                      + double(position.y)
+  vec3 pos = vec3(instances[instanceID].ChunkXZ_TileXZ.z * TILESIZE
+                      + instances[instanceID].ChunkXZ_TileXZ.x * CHUNKSIZE
+                      + position.x
+                    , normal_pos.a
+                    , instances[instanceID].ChunkXZ_TileXZ.w * TILESIZE
+                      + instances[instanceID].ChunkXZ_TileXZ.y * CHUNKSIZE
+                      + position.y
                     );
 
   bool is_hole = isHoleVertex(gl_VertexID, instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.r);
 
   float NaN = makeNaN(1);
 
-  dvec4 pos_after_holecheck = (is_hole ? dvec4(NaN, NaN, NaN, 1.0) : dvec4(pos, 1.0));
-  gl_Position = projection * model_view * vec4(pos_after_holecheck);
+  vec4 pos_after_holecheck = (is_hole ? vec4(NaN, NaN, NaN, 1.0) : vec4(pos, 1.0));
+  gl_Position = projection * model_view * pos_after_holecheck;
 
   vary_normal = normal_pos.rgb;
   triangle_normal = normal_pos.rgb;
-  vary_position = vec3(pos);
+  vary_position = pos;
   vary_mccv = texelFetch(mccv, ivec2(gl_VertexID, instanceID), 0).rgb;
 
   vary_t0_uv = texcoord + animUVOffset(instances[instanceID].ChunkTexDoAnim.r,
