@@ -531,6 +531,7 @@ namespace Noggit
             layout->addRow("Zone Intro Music:", _zone_intro_music_button);
             layout->addRow("Sound Ambience Day:", _sound_ambiance_day_button);
             layout->addRow("Sound Ambience Night:", _sound_ambiance_night_button);
+            layout->addRow(new QLabel("If only day or night is set but not the other, the other will be saved as the same sound."));
 
             layout->addRow(AdvancedOptionsBox);
             layout->addRow(save_area_button);
@@ -757,28 +758,44 @@ namespace Noggit
             // Just iterate the DBC to see if an entry with our settings already exists, if not create it.
             // The reasoning for not having a selector/picker with the existing pairs is that it has less freedom, is harder to use and it's ugly if they don't have a name.
             // This doesn't have the option to edit that entry for all its users though.
-            bool sound_ambiance_exists {false};
-            for (DBCFile::Iterator i = gSoundAmbienceDB.begin(); i != gSoundAmbienceDB.end(); ++i)
+
+            int soundambience_day = _sound_ambiance_day_button->property("id").toInt();
+            int soundambience_night = _sound_ambiance_night_button->property("id").toInt();
+
+            if (soundambience_day && !soundambience_night) // if day is set but not night, set night to day
+                soundambience_night = soundambience_day;
+            else if (!soundambience_day && soundambience_night) // night to day
+                soundambience_night = soundambience_day;
+
+            if (soundambience_day && soundambience_night) // check if both day and night are set
             {
-                int day_id = i->getInt(SoundAmbienceDB::SoundEntry_day);
-                int night_id = i->getInt(SoundAmbienceDB::SoundEntry_night);
-                if (day_id == _sound_ambiance_day_button->property("id").toInt() && night_id == _sound_ambiance_night_button->property("id").toInt())
+                bool sound_ambiance_exists {false};
+                for (DBCFile::Iterator i = gSoundAmbienceDB.begin(); i != gSoundAmbienceDB.end(); ++i)
                 {
-                    record.write(AreaDB::SoundAmbience, i->getInt(SoundAmbienceDB::ID));
-                    sound_ambiance_exists = true;
-                    break;
+                    int day_id = i->getInt(SoundAmbienceDB::SoundEntry_day);
+                    int night_id = i->getInt(SoundAmbienceDB::SoundEntry_night);
+                    if (day_id == soundambience_day && night_id == soundambience_night)
+                    {
+                        record.write(AreaDB::SoundAmbience, i->getInt(SoundAmbienceDB::ID));
+                        sound_ambiance_exists = true;
+                        break;
+                    }
+                }
+                if (!sound_ambiance_exists)
+                {
+                    // create new sond entry record with the two ids
+                    auto new_id = gSoundAmbienceDB.getEmptyRecordID();
+                    auto new_record = gSoundAmbienceDB.addRecord(new_id);
+
+                    new_record.write(SoundAmbienceDB::SoundEntry_day, soundambience_day);
+                    new_record.write(SoundAmbienceDB::SoundEntry_night, soundambience_night);
+                    gSoundAmbienceDB.save();
+                    record.write(AreaDB::SoundAmbience, new_id);
                 }
             }
-            if (!sound_ambiance_exists)
-            {
-                // create new sond entry record
-                auto new_id = gSoundAmbienceDB.getEmptyRecordID();
-                auto new_record = gSoundAmbienceDB.addRecord(new_id);
+            else
+                record.write(AreaDB::SoundAmbience, 0); // if night or day isn't set, set to 0
 
-                new_record.write(SoundAmbienceDB::SoundEntry_day, _sound_ambiance_day_button->property("id").toInt());
-                new_record.write(SoundAmbienceDB::SoundEntry_night, _sound_ambiance_night_button->property("id").toInt());
-                gSoundAmbienceDB.save();
-            }
 
             record.write(AreaDB::ZoneMusic, _zone_music_button->property("id").toInt());
             record.write(AreaDB::ZoneIntroMusicTable, _zone_intro_music_button->property("id").toInt());
@@ -786,6 +803,13 @@ namespace Noggit
             record.write(AreaDB::ExplorationLevel, _exploration_level_spinbox->value());
 
             _area_name->toRecord(record, AreaDB::Name);
+            // update name in the tree
+            auto parent = static_cast<zone_id_browser*>(this->parentWidget());
+            auto item = parent->create_or_get_tree_widget_item(_area_id_label->text().toInt());
+            std::stringstream ss;
+            std::string areaName = record.getLocalizedString(AreaDB::Name);
+            ss << _area_id_label->text().toInt() << "-" << areaName;
+            item->setText(0, QString(ss.str().c_str()));
 
             record.write(AreaDB::FactionGroup, _faction_group_combobox->currentIndex() * 2);
             record.write(AreaDB::MinElevation, static_cast<float>(_min_elevation_spinbox->value()));
@@ -793,6 +817,8 @@ namespace Noggit
             record.write(AreaDB::LightId, 0); // never used
 
             gAreaDB.save();
+
+            load_area(_area_id_label->text().toInt()); // reload ui, especially for night/day ambience
         }
 
     }
