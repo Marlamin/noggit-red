@@ -117,6 +117,9 @@ namespace Noggit
 
     void texture_picker::updateSelection()
     {
+        if (!_chunk)
+            return;
+
         for (size_t index = 0; index < _chunk->texture_set->num(); ++index)
         {
             _labels[index]->unselect();
