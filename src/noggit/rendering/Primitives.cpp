@@ -408,7 +408,7 @@ void Square::setup_buffers()
 
   }
 
-  void Cylinder::draw(glm::mat4x4 const& mvp, glm::vec3 const& pos, const glm::vec4 color, float radius, int precision, World* world, int height)
+  /*void Cylinder::draw(glm::mat4x4 const& mvp, glm::vec3 const& pos, const glm::vec4 color, float radius, int precision, World* world, int height)
   {
       if (!_buffers_are_setup)
       {
@@ -501,38 +501,42 @@ void Square::setup_buffers()
       }
 
       _buffers_are_setup = true;
-  }
+  }*/
 
   void Line::draw(glm::mat4x4 const& mvp
-      , glm::vec3 const& from
-      , glm::vec3 const& to
+      , std::vector<glm::vec3> const points
       , glm::vec4 const& color
   )
   {
-      if (!_buffers_are_setup)
-      {
-          setup_buffers(from, to);
-      }
+      if (points.size() < 2)
+          return;
+
+      setup_buffers(points);
 
       OpenGL::Scoped::use_program line_shader{ *_program.get() };
 
       line_shader.uniform("model_view_projection", mvp);
-      line_shader.uniform("origin", glm::vec3(from.x, from.y, from.z));
       line_shader.uniform("color", color);
 
       OpenGL::Scoped::vao_binder const _(_vao[0]);
-      gl.drawElements(GL_LINES, _indices_vbo, 2, GL_UNSIGNED_SHORT, nullptr);
+      gl.drawElements(GL_LINE_STRIP, _indices_vbo, _indice_count, GL_UNSIGNED_SHORT, nullptr);
   }
 
 
-  void Line::setup_buffers(glm::vec3 const& from, glm::vec3 const& to)
+  void Line::setup_buffers(std::vector<glm::vec3> const points)
   {
       _vao.upload();
       _buffers.upload();
 
-      std::vector<glm::vec3> vertices = { {0, 0, 0}, (to - from) };
-      std::vector<std::uint16_t> indices = { 0,1 };
+      std::vector<glm::vec3> vertices = points;
+      std::vector<std::uint16_t> indices;
 
+      for (int i = 0; i < points.size(); ++i)
+      {
+          indices.push_back(i);
+      }
+
+      _indice_count = (int)indices.size();
       _program.reset(new OpenGL::program(
           {
               { GL_VERTEX_SHADER, OpenGL::shader::src_from_qrc("line_vs") },
@@ -540,10 +544,8 @@ void Square::setup_buffers()
           }
       ));
 
-
       gl.bufferData<GL_ARRAY_BUFFER, glm::vec3> (_vertices_vbo, vertices, GL_STATIC_DRAW);
       gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t> (_indices_vbo, indices, GL_STATIC_DRAW);
-
 
       OpenGL::Scoped::index_buffer_manual_binder indices_binder(_indices_vbo);
       OpenGL::Scoped::use_program shader(*_program.get());

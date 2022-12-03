@@ -1189,7 +1189,6 @@ void WorldRender::unload()
   _cursor_render.unload();
   _sphere_render.unload();
   _square_render.unload();
-  _cylinder_render.unload();
   _line_render.unload();
   _horizon_render.reset();
 
