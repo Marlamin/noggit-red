@@ -157,14 +157,20 @@ namespace Noggit::Rendering::Primitives
   class Line
   {
   public:
-      void draw(glm::mat4x4 const& mvp, std::vector<glm::vec3> const points, glm::vec4 const& color);
+      void initSpline();
+      void draw(glm::mat4x4 const& mvp, std::vector<glm::vec3> const points, glm::vec4 const& color, bool spline);
       void unload();
 
   private:
       bool _buffers_are_setup = false;
       void setup_buffers(std::vector<glm::vec3> const points);
+
+      void setup_buffers_interpolated(std::vector<glm::vec3> const points);
+      glm::vec3 interpolate(float t, glm::vec3 p0, glm::vec3 p1, glm::vec3 m0, glm::vec3 m1);
+
       int _indice_count = 0;
 
+      void setup_shader(std::vector<glm::vec3> vertices, std::vector<std::uint16_t> indices);
       OpenGL::Scoped::deferred_upload_vertex_arrays<1> _vao;
       OpenGL::Scoped::deferred_upload_buffers<2> _buffers;
       GLuint const& _vertices_vbo = _buffers[0];
