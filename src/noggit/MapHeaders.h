@@ -6,7 +6,7 @@
 
 union mcnk_flags
 {
-  uint32_t value;
+  uint32_t value = 0;
   struct
   {
     uint32_t has_mcsh : 1;
@@ -112,42 +112,42 @@ struct ENTRY_MODF
 };
 
 struct MapChunkHeader {
-  uint32_t flags;
+  uint32_t flags = 0;
   uint32_t ix;
   uint32_t iy;
-  uint32_t nLayers;
-  uint32_t nDoodadRefs;
-  uint32_t ofsHeight;
-  uint32_t ofsNormal;
-  uint32_t ofsLayer;
-  uint32_t ofsRefs;
-  uint32_t ofsAlpha;
-  uint32_t sizeAlpha;
-  uint32_t ofsShadow;
-  uint32_t sizeShadow;
-  uint32_t areaid;
-  uint32_t nMapObjRefs;
-  uint32_t holes;
-  std::uint16_t doodadMapping[8];
-  std::uint8_t doodadStencil[8];
-  uint32_t ofsSndEmitters;
-  uint32_t nSndEmitters;
-  uint32_t ofsLiquid;
-  uint32_t sizeLiquid;
+  uint32_t nLayers = 0;
+  uint32_t nDoodadRefs = 0;
+  uint32_t ofsHeight = 0;
+  uint32_t ofsNormal = 0;
+  uint32_t ofsLayer = 0;
+  uint32_t ofsRefs = 0;
+  uint32_t ofsAlpha = 0;
+  uint32_t sizeAlpha = 0;
+  uint32_t ofsShadow = 0;
+  uint32_t sizeShadow = 0;
+  uint32_t areaid = 0;
+  uint32_t nMapObjRefs = 0;
+  uint32_t holes = 0;
+  std::uint16_t doodadMapping[8]{ 0 };
+  std::uint8_t doodadStencil[8]{ 0 };
+  uint32_t ofsSndEmitters = 0;
+  uint32_t nSndEmitters = 0;
+  uint32_t ofsLiquid = 0;
+  uint32_t sizeLiquid = 0;
   float  zpos;
   float  xpos;
   float  ypos;
-  uint32_t ofsMCCV;
-  uint32_t unused1;
-  uint32_t unused2;
+  uint32_t ofsMCCV = 0;
+  uint32_t unused1 = 0;
+  uint32_t unused2 = 0;
 };
 
 struct MCCV
 {
-  uint32_t  textureID;
-  uint32_t  flags;
-  uint32_t  ofsAlpha;
-  uint32_t  effectID;
+  uint32_t  textureID = 0;
+  uint32_t  flags = 0;
+  uint32_t  ofsAlpha = 0;
+  uint32_t  effectID = 0;
 };
 
 struct MCLYFlags
@@ -166,9 +166,9 @@ struct MCLYFlags
 
 struct ENTRY_MCLY
 {
-  uint32_t  textureID;
-  uint32_t  flags;
-  uint32_t  ofsAlpha;
+  uint32_t  textureID = 0;
+  uint32_t  flags = 0;
+  uint32_t  ofsAlpha = 0;
   uint32_t  effectID = 0xFFFF; // default value, see https://wowdev.wiki/ADT/v18#MCLY_sub-chunk
 };
 
