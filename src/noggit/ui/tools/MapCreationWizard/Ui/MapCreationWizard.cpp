@@ -111,8 +111,21 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   _map_settings = new QGroupBox("Map settings", this);
   layout_right->addWidget(_map_settings);
 
-  auto map_settings_layout = new QFormLayout(_map_settings);
-  _map_settings->setLayout(map_settings_layout);
+  auto box_map_settings_layout = new QVBoxLayout(_map_settings);
+  _map_settings->setLayout(box_map_settings_layout);
+
+
+  _tabs = new QTabWidget(_map_settings);
+
+  auto map_settings_widget(new QWidget(this));
+  auto map_difficulty_widget(new QWidget(this));
+
+  _tabs->addTab(map_settings_widget, "Map Settings");
+  _tabs->addTab(map_difficulty_widget, "Map Difficulty Settings");
+
+  box_map_settings_layout->addWidget(_tabs);
+
+  auto map_settings_layout = new QFormLayout(map_settings_widget);
 
   _directory = new QLineEdit(_map_settings);
   map_settings_layout->addRow("Map directory:", _directory);
@@ -206,6 +219,33 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   _max_players->setMaximum(std::numeric_limits<std::int32_t>::max());
   map_settings_layout->addRow("Max players:",_max_players);
 
+  // difficulty tab
+  auto difficulty_settings_layout = new QFormLayout(map_difficulty_widget);
+  _map_settings->setLayout(difficulty_settings_layout);
+
+  _difficulty_type = new QComboBox(_map_settings);
+
+  difficulty_settings_layout->addRow("Difficulty Index", _difficulty_type);
+
+  _difficulty_req_message = new LocaleDBCEntry(_map_settings);
+  _difficulty_req_message->setDisabled(true); // disable them until they're actually saveable, only "display" it for now
+  difficulty_settings_layout->addRow("Requirement Message", _difficulty_req_message);
+
+  _difficulty_raid_duration = new QSpinBox(_map_settings);
+  _difficulty_raid_duration->setDisabled(true);
+  _difficulty_raid_duration->setRange(0, 7);
+  difficulty_settings_layout->addRow("Instance Duration(days)", _difficulty_raid_duration);
+
+  _difficulty_max_players = new QSpinBox(_map_settings);
+  _difficulty_max_players->setDisabled(true);
+  difficulty_settings_layout->addRow("Max Players", _difficulty_max_players);
+
+  _difficulty_string = new QLineEdit(_map_settings);
+  _difficulty_string->setDisabled(true);
+  difficulty_settings_layout->addRow("Difficulty String", _difficulty_string);
+
+  difficulty_settings_layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));
+
   // Bottom row
   auto bottom_row_wgt = new QWidget(layout_right_holder);
   auto btn_row_layout = new QHBoxLayout(layout_right_holder);
@@ -254,6 +294,10 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
                                 selectMap(index);
                               }
   );
+
+  connect(_difficulty_type, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
+      selectMapDifficulty();
+      });
 
   // Selection
 
@@ -317,6 +361,40 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
 }
 
+std::string MapCreationWizard::getDifficultyString()
+{
+    if (_instance_type->itemData(_instance_type->currentIndex()).toInt() == 1 && _difficulty_max_players->value() == 5) // dungeon
+    {
+        if (_difficulty_type->currentIndex() == 0)
+            return "DUNGEON_DIFFICULTY_5PLAYER";
+        else
+            return "DUNGEON_DIFFICULTY_5PLAYER_HEROIC";
+    }
+    else if (_instance_type->itemData(_instance_type->currentIndex()).toInt() == 2)
+    {
+        switch (_difficulty_max_players->value())
+        {
+        case 10:
+            if (_difficulty_type->currentIndex() == 0)
+                return "RAID_DIFFICULTY_10PLAYER";
+            else
+                return "RAID_DIFFICULTY_10PLAYER_HEROIC";
+        case 20:
+            if (_difficulty_type->currentIndex() == 0)
+                return "RAID_DIFFICULTY_20PLAYER";
+        case 25:
+            // in BC 25men was difficulty 0, after the 10men mode in wrath it is difficulty 1
+            if (_difficulty_type->currentIndex() == (0 || 1)) // maybe instead check if a difficulty 25 already exists
+                return "RAID_DIFFICULTY_25PLAYER";
+            else
+                return "RAID_DIFFICULTY_25PLAYER_HEROIC";
+        case 40:
+            return "RAID_DIFFICULTY_40PLAYER";
+        }
+    }
+    return "";
+}
+
 void MapCreationWizard::selectMap(int map_id)
 {
   _is_new_record = false;
@@ -342,6 +420,7 @@ void MapCreationWizard::selectMap(int map_id)
   auto expansionId = record.Columns["ExpansionID"].Value;
   auto maxPlayers = record.Columns["MaxPlayers"].Value;
   auto timeOffset = record.Columns["TimeOffset"].Value;
+  auto raidOffset = record.Columns["RaidOffset"].Value;
 
   _world = new World(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW);
 
@@ -403,11 +482,60 @@ void MapCreationWizard::selectMap(int map_id)
   _time_of_day_override->setValue(std::atoi(timeOffset.c_str()));
   _expansion_id->setCurrentIndex(std::atoi(expansionId.c_str()));
 
-  //_raid_offset->setValue(record.getInt(64)); only ever used in 2 places? not sure what for
+  _raid_offset->setValue(std::atoi(raidOffset.c_str())); // only ever used in 2 places? not sure what for
 
   _max_players->setValue(std::atoi(maxPlayers.c_str()));
 
   _project->ClientDatabase->UnloadTable("Map");
+
+  auto difficulty_table = _project->ClientDatabase->LoadTable("MapDifficulty", readFileAsIMemStream);
+
+  auto iterator = difficulty_table.Records();
+
+  QSignalBlocker const difficulty_type_blocker(_difficulty_type);
+  _difficulty_type->clear();
+
+  while (iterator.HasRecords())
+  {
+      auto record = iterator.Next();
+
+      // auto difficulty_id = std::atoi(record.Columns["ID"].Value.c_str());
+      auto record_id = record.RecordId;
+      auto diff_mapId = std::atoi(record.Columns["MapID"].Value.c_str());
+      auto difficulty_type = std::atoi(record.Columns["Difficulty"].Value.c_str());
+      if (diff_mapId == map_id)
+      {
+          std::string diff_text = "Difficulty " + record.Columns["Difficulty"].Value;
+          _difficulty_type->insertItem(difficulty_type, diff_text.c_str(), QVariant(record_id));
+      }
+  }
+  _project->ClientDatabase->UnloadTable("MapDifficulty");
+  _difficulty_type->setCurrentIndex(0);
+  selectMapDifficulty();
+}
+
+void MapCreationWizard::selectMapDifficulty()
+{
+    if (!_difficulty_type->count())
+        return;
+
+    auto selected_difficulty_id = _difficulty_type->itemData(_difficulty_type->currentIndex()).toInt();
+    if (!selected_difficulty_id)
+        return;
+
+    auto difficulty_table = _project->ClientDatabase->LoadTable("MapDifficulty", readFileAsIMemStream);
+    auto record = difficulty_table.Record(selected_difficulty_id);
+
+    //_difficulty_type;
+    _difficulty_req_message->fill(record, "Message_lang");
+    
+    auto raid_duration = std::atoi(record.Columns["RaidDuration"].Value.c_str());
+    _difficulty_raid_duration->setValue(raid_duration / 60 / 60 / 24); // convert from seconds to days
+
+    _difficulty_max_players->setValue(std::atoi(record.Columns["MaxPlayers"].Value.c_str()));
+    _difficulty_string->setText(record.Columns["Difficultystring"].Value.c_str());
+
+    _project->ClientDatabase->UnloadTable("MapDifficulty");
 }
 
 void MapCreationWizard::wheelEvent(QWheelEvent* event)

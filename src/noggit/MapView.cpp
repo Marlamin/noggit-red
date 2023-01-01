@@ -75,6 +75,7 @@
 #include <QCursor>
 #include <QFileDialog>
 #include <QProgressDialog>
+#include <QClipboard>
 
 #include <algorithm>
 #include <cmath>
@@ -1153,17 +1154,22 @@ void MapView::setupFileMenu()
       }
   );
 
-  ADD_ACTION ( file_menu
-  , "Write coordinates to port.txt"
-  , Qt::Key_G
-  , [this]
-               {
+  ADD_ACTION(file_menu
+      , "Write coordinates to port.txt and copy to clipboard"
+      , Qt::Key_G
+      , [this]
+      {
+                 std::stringstream port_command;
+                 port_command << ".go XYZ " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID();
                  std::ofstream f("ports.txt", std::ios_base::app);
                  f << "Map: " << gAreaDB.getAreaName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
-                 f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID() << std::endl;
-                 f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
+                 f << "Trinity/AC:" << std::endl << port_command.str() << std::endl;
+                 // f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
                  f.close();
+                 QClipboard* clipboard = QGuiApplication::clipboard();
+                 clipboard->setText(port_command.str().c_str(), QClipboard::Clipboard);
                }
+
   );
 
 }
