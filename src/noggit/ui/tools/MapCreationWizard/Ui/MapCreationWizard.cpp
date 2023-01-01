@@ -118,9 +118,6 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   _tabs = new QTabWidget(_map_settings);
 
   auto map_settings_widget(new QWidget(this));
-  // map_settings_widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-  // auto tool_layout(new QVBoxLayout(tool_widget));
-  // tool_layout->setAlignment(Qt::AlignTop);
   auto map_difficulty_widget(new QWidget(this));
 
   _tabs->addTab(map_settings_widget, "Map Settings");
@@ -128,10 +125,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
   box_map_settings_layout->addWidget(_tabs);
 
-
-  // auto map_settings_layout = new QFormLayout(_map_settings);
   auto map_settings_layout = new QFormLayout(map_settings_widget);
-  // _map_settings->setLayout(map_settings_layout);
 
   _directory = new QLineEdit(_map_settings);
   map_settings_layout->addRow("Map directory:", _directory);
@@ -230,8 +224,6 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   _map_settings->setLayout(difficulty_settings_layout);
 
   _difficulty_type = new QComboBox(_map_settings);
-  // _difficulty_type->addItem("Difficulty 1"); // fill it when loading ?
-  // _difficulty_type->setItemData(0, QVariant(0));
 
   difficulty_settings_layout->addRow("Difficulty Index", _difficulty_type);
 
@@ -533,7 +525,6 @@ void MapCreationWizard::selectMapDifficulty()
 
     auto difficulty_table = _project->ClientDatabase->LoadTable("MapDifficulty", readFileAsIMemStream);
     auto record = difficulty_table.Record(selected_difficulty_id);
-    /* $id$ID<32> MapID<32> Difficulty<32> Message_lang RaidDuration<32> MaxPlayers<32> Difficultystring*/
 
     //_difficulty_type;
     _difficulty_req_message->fill(record, "Message_lang");
