@@ -5095,6 +5095,9 @@ void MapView::wheelEvent (QWheelEvent* event)
 
 void MapView::mouseReleaseEvent (QMouseEvent* event)
 {
+  makeCurrent();
+  OpenGL::context::scoped_setter const _(::gl, context());
+
   switch (event->button())
   {
   case Qt::LeftButton:
