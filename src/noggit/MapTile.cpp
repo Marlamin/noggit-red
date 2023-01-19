@@ -1300,6 +1300,8 @@ void MapTile::setAlphaImage(QImage const& image, unsigned layer)
       if (layer >= chunk->texture_set->num())
         continue;
 
+      chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
+
       chunk->texture_set->create_temporary_alphamaps_if_needed();
       auto& temp_alphamaps = chunk->texture_set->getTempAlphamaps()->value();
 
@@ -1365,6 +1367,8 @@ void MapTile::setVertexColorImage(QImage const& image, int mode)
     for (int l = 0; l < 16; ++l)
     {
       MapChunk* chunk = getChunk(k, l);
+
+      chunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
 
       glm::vec3* colors = chunk->getVertexColors();
 
