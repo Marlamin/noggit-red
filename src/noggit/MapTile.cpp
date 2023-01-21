@@ -1314,8 +1314,10 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
   }
 }
 
-void MapTile::setAlphaImage(QImage const& image, unsigned layer)
+void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer)
 {
+  auto image = baseimage.convertToFormat(QImage::Format_RGBA8888);
+
   for (int k = 0; k < 16; ++k)
   {
     for (int l = 0; l < 16; ++l)
@@ -1383,8 +1385,10 @@ QImage MapTile::getVertexColorsImage()
   return std::move(image);
 }
 
-void MapTile::setVertexColorImage(QImage const& image, int mode)
+void MapTile::setVertexColorImage(QImage const& baseimage, int mode)
 {
+  QImage image = baseimage.convertToFormat(QImage::Format_RGBA8888);
+
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
   for (int k = 0; k < 16; ++k)
@@ -1453,9 +1457,6 @@ void MapTile::setVertexColorImage(QImage const& image, int mode)
     }
   }
 }
-
-
-
 
 void MapTile::recalcExtents()
 {
