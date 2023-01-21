@@ -26,6 +26,23 @@ void World::for_all_chunks_on_tile (glm::vec3 const& pos, Fun&& fun)
 }
 
 template<typename Fun>
+void World::for_all_chunks_on_tile(MapTile* tile, Fun&& fun)
+{
+    if (tile && tile->finishedLoading())
+    {
+        mapIndex.setChanged(tile);
+
+        for (size_t ty = 0; ty < 16; ++ty)
+        {
+            for (size_t tx = 0; tx < 16; ++tx)
+            {
+                fun(tile->getChunk(ty, tx));
+            }
+        }
+    }
+}
+
+template<typename Fun>
 void World::for_chunk_at(glm::vec3 const& pos, Fun&& fun)
 {
   MapTile* tile(mapIndex.getTile(pos));

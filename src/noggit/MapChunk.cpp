@@ -1280,10 +1280,13 @@ int MapChunk::addTexture(scoped_blp_texture_reference texture)
   return texture_set->addTexture(std::move (texture));
 }
 
-void MapChunk::switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
+bool MapChunk::switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
 {
-  texture_set->replace_texture(oldTexture, std::move (newTexture));
-  registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
+  bool changed = texture_set->replace_texture(oldTexture, std::move (newTexture));
+  if (changed)
+    registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
+
+  return changed;
 }
 
 bool MapChunk::paintTexture(glm::vec3 const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
