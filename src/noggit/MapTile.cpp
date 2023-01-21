@@ -1203,8 +1203,11 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
   return std::move(image);
 }
 
-void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
+void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int mode) // image
 {
+  // convert to RGBA64 to properly load all type of images (grayscales don't load properly otherwise)
+  auto image = baseimage.convertToFormat(QImage::Format_RGBA64);
+
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
   for (int k = 0; k < 16; ++k)
