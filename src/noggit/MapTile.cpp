@@ -1049,7 +1049,8 @@ void MapTile::initEmptyChunks()
 
 QImage MapTile::getHeightmapImage(float min_height, float max_height)
 {
-  QImage image(257, 257, QImage::Format_RGBA64);
+  // QImage image(257, 257, QImage::Format_RGBA64);
+    QImage image(257, 257, QImage::Format_Grayscale16);
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
@@ -1121,7 +1122,8 @@ QImage MapTile::getNormalmapImage()
 
 QImage MapTile::getAlphamapImage(unsigned layer)
 {
-  QImage image(1024, 1024, QImage::Format_RGBA8888);
+  // QImage image(1024, 1024, QImage::Format_RGBA8888);
+  QImage image(1024, 1024, QImage::Format_Grayscale8);
   image.fill(Qt::black);
 
   for (int i = 0; i < 16; ++i)
@@ -1154,7 +1156,8 @@ QImage MapTile::getAlphamapImage(unsigned layer)
 
 QImage MapTile::getAlphamapImage(std::string const& filename)
 {
-  QImage image(1024, 1024, QImage::Format_RGBA8888);
+  // QImage image(1024, 1024, QImage::Format_RGBA8888);
+  QImage image(1024, 1024, QImage::Format_Grayscale8);
   image.fill(Qt::black);
 
   for (int i = 0; i < 16; ++i)
@@ -1228,7 +1231,8 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
 void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int mode) // image
 {
   // convert to RGBA64 to properly load all type of images (grayscales don't load properly otherwise)
-  auto image = baseimage.convertToFormat(QImage::Format_RGBA64);
+  // auto image = baseimage.convertToFormat(QImage::Format_RGBA64);
+  auto image = baseimage.convertToFormat(QImage::Format_Grayscale16);
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
@@ -1316,7 +1320,8 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
 
 void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer)
 {
-  auto image = baseimage.convertToFormat(QImage::Format_RGBA8888);
+  // auto image = baseimage.convertToFormat(QImage::Format_RGBA8888);
+  auto image = baseimage.convertToFormat(QImage::Format_Grayscale8);
 
   for (int k = 0; k < 16; ++k)
   {
