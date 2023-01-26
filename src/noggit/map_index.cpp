@@ -1094,6 +1094,13 @@ void MapIndex::loadMinimapMD5translate()
 
     QStringList line_split = line.split(QRegExp("[\t]"));
 
+    if (line_split.length() < 2)
+    {
+        std::string text = "Failed to read md5translate.trs.\nLine \"" + line.toStdString() + "\n has no tab spacing. Spacing must be only a tab character and not spaces.";
+        LogError << text << std::endl;
+        throw  std::logic_error(text);
+    }
+
     if (cur_dir.length())
     {
       _minimap_md5translate[cur_dir.toStdString()][line_split[0].toStdString()] = line_split[1].toStdString();
