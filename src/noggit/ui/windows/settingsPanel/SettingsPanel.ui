@@ -1295,6 +1295,26 @@
                    </item>
                   </layout>
                  </item>
+				 <item>
+				 	<layout class="QHBoxLayout" name="horizontalLayout_66">
+				 		<item>
+				 			<widget class="QLabel" name="label_48">
+				 				<property name="minimumSize">
+				 					<size>
+				 						<width>60</width>
+				 						<height>0</height>
+				 					</size>
+				 				</property>
+				 				<property name="text">
+				 					<string>Port</string>
+				 				</property>
+				 			</widget>
+				 		</item>
+				 		<item>
+				 			<widget class="QSpinBox" name="_mysql_port_field"/>
+				 		</item>
+				 	</layout>
+				 </item>
                  <item>
                   <widget class="QLabel" name="mysql_warning">
                    <property name="minimumSize">

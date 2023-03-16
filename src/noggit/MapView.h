@@ -367,6 +367,7 @@ private:
   QLabel* _status_time;
   QLabel* _status_fps;
   QLabel* _status_culling;
+  QLabel* _status_database;
 
   Noggit::BoolToggleProperty _locked_cursor_mode = {false};
   Noggit::BoolToggleProperty _move_model_to_cursor_position = {true};
