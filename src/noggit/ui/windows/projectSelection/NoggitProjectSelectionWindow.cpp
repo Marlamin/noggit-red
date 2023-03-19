@@ -6,6 +6,7 @@
 
 #include <filesystem>
 #include <QString>
+#include <QFile>
 #include <noggit/ui/FontNoggit.hpp>
 
 #include "ui_NoggitProjectSelectionWindow.h"
@@ -189,9 +190,13 @@ void NoggitProjectSelectionWindow::handleContextMenuProjectListItemDelete(std::s
   switch (prompt.buttonRole(prompt.clickedButton()))
   {
     case QMessageBox::AcceptRole:
+    {
       Component::RecentProjectsComponent::registerProjectRemove(project_path);
-      std::filesystem::remove_all(project_path);
+      // std::filesystem::remove_all(project_path);
+      QFile folder(project_path.c_str());
+      folder.moveToTrash();
       break;
+    }
     case QMessageBox::DestructiveRole:
     default:
       break;
