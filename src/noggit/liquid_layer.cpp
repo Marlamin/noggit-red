@@ -27,6 +27,9 @@ liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, float heigh
   , pos(base)
   , _chunk(chunk)
 {
+  if (!gLiquidTypeDB.CheckIfIdExists(_liquid_id))
+    _liquid_id = 1;
+
   for (int z = 0; z < 9; ++z)
   {
     for (int x = 0; x < 9; ++x)
@@ -54,6 +57,9 @@ liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, mclq& liqui
   , pos(base)
   , _chunk(chunk)
 {
+  if (!gLiquidTypeDB.CheckIfIdExists(_liquid_id))
+    _liquid_id = 1;
+
   changeLiquidID(_liquid_id);
 
   for (int z = 0; z < 8; ++z)
@@ -107,6 +113,10 @@ liquid_layer::liquid_layer(ChunkWater* chunk
   , pos(base)
   , _chunk(chunk)
 {
+  // check if liquid id is valid or some downported maps will crash
+  if (!gLiquidTypeDB.CheckIfIdExists(_liquid_id))
+    _liquid_id = 1;
+
   int offset = 0;
   for (int z = 0; z < info.height; ++z)
   {

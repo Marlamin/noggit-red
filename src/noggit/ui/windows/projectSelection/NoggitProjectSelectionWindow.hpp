@@ -48,8 +48,8 @@ namespace Noggit::Ui::Windows
         ::Ui::NoggitProjectSelectionWindow* _ui;
         Noggit::Application::NoggitApplication* _noggit_application;
         Noggit::Ui::settings* _settings;
-        Noggit::Ui::CUpdater* _updater;
-        Noggit::Ui::CChangelog* _changelog;
+        //Noggit::Ui::CUpdater* _updater;
+        //Noggit::Ui::CChangelog* _changelog;
 
         std::unique_ptr<Noggit::Ui::Windows::NoggitWindow> _project_selection_page;
         std::unique_ptr<Component::LoadProjectComponent> _load_project_component;

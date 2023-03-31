@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <set>
+#include <optional>
 
 class sExtendableArray;
 class MapChunk;
@@ -83,7 +84,7 @@ private:
   void copy_height_to_layer(liquid_layer& target, glm::vec3 const& pos, float radius);
 
 
-  MH2O_Render Render;
+  std::optional<MH2O_Render> Render;
 
   std::vector<liquid_layer> _layers;
   MapChunk* _chunk;

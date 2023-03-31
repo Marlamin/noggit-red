@@ -8,7 +8,7 @@ namespace Noggit
         CUpdater::CUpdater(QWidget* parent) :
             QDialog(parent)
         {
-            setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+            /*setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
             ui = new ::Ui::Updater;
             ui->setupUi(this);
 
@@ -36,7 +36,7 @@ namespace Noggit
             QNetworkReply* reply = (new QNetworkAccessManager)->get(request);
             connect(reply, SIGNAL(finished()), this, SLOT(GenerateOnlineMD5()));
 
-            GenerateLocalMD5();
+            GenerateLocalMD5();*/
         }
 
         QByteArray CUpdater::FileMD5(const QString& filename, QCryptographicHash::Algorithm algo)

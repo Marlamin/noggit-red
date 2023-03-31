@@ -190,7 +190,7 @@ private:
   unsigned _chunk_update_flags;
 
   // MHDR:
-  int mFlags;
+  int mFlags = 0;
   bool mBigAlpha;
 
   // Data to be loaded and later unloaded.

@@ -75,6 +75,7 @@
 #include <QCursor>
 #include <QFileDialog>
 #include <QProgressDialog>
+#include <QClipboard>
 
 #include <algorithm>
 #include <cmath>
@@ -1102,6 +1103,21 @@ void MapView::setupFileMenu()
   ADD_ACTION (file_menu, "Save current tile", "Ctrl+Shift+S", [this] { save(save_mode::current); emit saved();});
   ADD_ACTION (file_menu, "Save changed tiles", QKeySequence::Save, [this] { save(save_mode::changed); emit saved(); });
   ADD_ACTION (file_menu, "Save all tiles", "Ctrl+Shift+A", [this] { save(save_mode::all); emit saved(); });
+  ADD_ACTION(file_menu, "Generate new WDL", "", [this] 
+      { 
+     QMessageBox prompt;
+    prompt.setIcon(QMessageBox::Warning);
+    prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
+     prompt.setText(std::string("Warning!\nThis will attempt to load all tiles in the map to generate a new WDL."
+         "\nThis is likely to crash if there is any issue with any tile, it is recommended that you save your work first. Only use this if you really need a fresh WDL.").c_str());
+     prompt.setInformativeText(std::string("Are you sure ?").c_str());
+     prompt.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+     prompt.setDefaultButton(QMessageBox::No);
+     bool answer = prompt.exec() == QMessageBox::StandardButton::Yes;
+     if (answer)
+         _world->horizon.save_wdl(_world.get(), true);
+      }
+  );
 
   ADD_ACTION ( file_menu
   , "Reload tile"
@@ -1138,17 +1154,22 @@ void MapView::setupFileMenu()
       }
   );
 
-  ADD_ACTION ( file_menu
-  , "Write coordinates to port.txt"
-  , Qt::Key_G
-  , [this]
-               {
+  ADD_ACTION(file_menu
+      , "Write coordinates to port.txt and copy to clipboard"
+      , Qt::Key_G
+      , [this]
+      {
+                 std::stringstream port_command;
+                 port_command << ".go XYZ " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID();
                  std::ofstream f("ports.txt", std::ios_base::app);
                  f << "Map: " << gAreaDB.getAreaName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
-                 f << "Trinity:" << std::endl << ".go " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID() << std::endl;
-                 f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
+                 f << "Trinity/AC:" << std::endl << port_command.str() << std::endl;
+                 // f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
                  f.close();
+                 QClipboard* clipboard = QGuiApplication::clipboard();
+                 clipboard->setText(port_command.str().c_str(), QClipboard::Clipboard);
                }
+
   );
 
 }
@@ -5074,6 +5095,9 @@ void MapView::wheelEvent (QWheelEvent* event)
 
 void MapView::mouseReleaseEvent (QMouseEvent* event)
 {
+  makeCurrent();
+  OpenGL::context::scoped_setter const _(::gl, context());
+
   switch (event->button())
   {
   case Qt::LeftButton:
@@ -5205,7 +5229,10 @@ void MapView::save(save_mode mode)
     case save_mode::current: _world->mapIndex.saveTile(TileIndex(_camera.position), _world.get()); break;
     case save_mode::changed: _world->mapIndex.saveChanged(_world.get()); break;
     case save_mode::all:     _world->mapIndex.saveall(_world.get()); break;
-    }    
+    }
+    // write wdl, we update wdl data prior in the mapIndex saving fucntions above
+    _world->horizon.save_wdl(_world.get());
+
 
     NOGGIT_ACTION_MGR->purge();
     AsyncLoader::instance().reset_object_fail();

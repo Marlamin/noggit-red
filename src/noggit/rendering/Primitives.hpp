@@ -136,7 +136,7 @@ namespace Noggit::Rendering::Primitives
     std::unique_ptr<OpenGL::program> _program;
   };
 
-  class Cylinder
+  /*class Cylinder
   {
   public:
       void draw(glm::mat4x4 const& mvp, glm::vec3 const& pos, const glm::vec4 color, float radius, int precision, World* world, int height = 10);
@@ -147,6 +147,30 @@ namespace Noggit::Rendering::Primitives
       void setup_buffers(int precision, World* world, int height);
       int _indice_count = 0;
 
+      OpenGL::Scoped::deferred_upload_vertex_arrays<1> _vao;
+      OpenGL::Scoped::deferred_upload_buffers<2> _buffers;
+      GLuint const& _vertices_vbo = _buffers[0];
+      GLuint const& _indices_vbo = _buffers[1];
+      std::unique_ptr<OpenGL::program> _program;
+  };*/
+
+  class Line
+  {
+  public:
+      void initSpline();
+      void draw(glm::mat4x4 const& mvp, std::vector<glm::vec3> const points, glm::vec4 const& color, bool spline);
+      void unload();
+
+  private:
+      bool _buffers_are_setup = false;
+      void setup_buffers(std::vector<glm::vec3> const points);
+
+      void setup_buffers_interpolated(std::vector<glm::vec3> const points);
+      glm::vec3 interpolate(float t, glm::vec3 p0, glm::vec3 p1, glm::vec3 m0, glm::vec3 m1);
+
+      int _indice_count = 0;
+
+      void setup_shader(std::vector<glm::vec3> vertices, std::vector<std::uint16_t> indices);
       OpenGL::Scoped::deferred_upload_vertex_arrays<1> _vao;
       OpenGL::Scoped::deferred_upload_buffers<2> _buffers;
       GLuint const& _vertices_vbo = _buffers[0];

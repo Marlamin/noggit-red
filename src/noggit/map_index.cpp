@@ -177,6 +177,7 @@ void MapIndex::saveall (World* world)
 
   for (MapTile* tile : loaded_tiles())
   {
+    world->horizon.update_horizon_tile(tile);
     tile->saveTile(world);
     tile->changed = false;
   }
@@ -462,6 +463,7 @@ void MapIndex::saveTile(const TileIndex& tile, World* world, bool save_unloaded)
 	if (tileLoaded(tile))
 	{
     saveMaxUID();
+    world->horizon.update_horizon_tile(mTiles[tile.z][tile.x].tile.get());
 		mTiles[tile.z][tile.x].tile->saveTile(world);
 	}
 }
@@ -516,6 +518,7 @@ void MapIndex::saveChanged (World* world, bool save_unloaded)
   {
     if (tile->changed.load())
     {
+      world->horizon.update_horizon_tile(tile);
       tile->saveTile(world);
       tile->changed = false;
     }
@@ -1204,4 +1207,112 @@ void MapIndex::set_basename(const std::string &pBasename)
       mTiles[z][x].tile->setFilename(filename.str());
     }
   }
+}
+
+void MapIndex::create_empty_wdl()
+{
+    // for new map creation, creates a new WDL with all heights as 0
+    std::stringstream filename;
+    filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl"; // mapIndex.basename ? 
+    //Log << "Saving WDL \"" << filename << "\"." << std::endl;
+
+    sExtendableArray wdlFile = sExtendableArray();
+    int curPos = 0;
+
+    // MVER
+    //  {
+    wdlFile.Extend(8 + 0x4);
+    SetChunkHeader(wdlFile, curPos, 'MVER', 4);
+
+    // MVER data
+    *(wdlFile.GetPointer<int>(8)) = 18; // write version 18
+    curPos += 8 + 0x4;
+    //  }
+
+    // MWMO
+    //  {
+    wdlFile.Extend(8);
+    SetChunkHeader(wdlFile, curPos, 'MWMO', 0);
+
+    curPos += 8;
+    //  }
+
+    // MWID
+    //  {
+    wdlFile.Extend(8);
+    SetChunkHeader(wdlFile, curPos, 'MWID', 0);
+
+    curPos += 8;
+    //  }
+
+    // MODF
+    //  {
+    wdlFile.Extend(8);
+    SetChunkHeader(wdlFile, curPos, 'MODF', 0);
+
+    curPos += 8;
+    //  }
+
+    uint32_t mare_offsets[4096] = { 0 }; // [64][64];
+    // MAOF
+    //  {
+    wdlFile.Extend(8);
+    SetChunkHeader(wdlFile, curPos, 'MAOF', 64 * 64 * 4);
+    curPos += 8;
+
+    uint32_t mareoffset = curPos + 64 * 64 * 4;
+
+    for (int y = 0; y < 64; ++y)
+    {
+        for (int x = 0; x < 64; ++x)
+        {
+            TileIndex index(x, y);
+
+            bool has_tile = hasTile(index);
+
+            // if (tile_exists)
+            if (has_tile) // TODO check if tile exists
+            {
+                // write offset in MAOF entry
+                wdlFile.Insert(curPos, 4, (char*)&mareoffset);
+                mare_offsets[y * 64 + x] = mareoffset;
+                mareoffset += 1138; // mare + maho
+            }
+            else
+                wdlFile.Extend(4);
+            curPos += 4;
+
+        }
+    }
+
+    for (auto offset : mare_offsets)
+    {
+        if (!offset)
+            continue;
+
+        // MARE
+        //  {
+        wdlFile.Extend(8);
+        SetChunkHeader(wdlFile, curPos, 'MARE', (2 * (17 * 17)) + (2 * (16 * 16))); // outer heights+inner heights
+        curPos += 8;
+
+        // write inner and outer heights
+        wdlFile.Extend((2 * (17 * 17)) + (2 * (16 * 16)));
+        curPos += (2 * (17 * 17)) + (2 * (16 * 16));
+        //  }
+
+        // MAHO (maparea holes)
+        //  {
+        wdlFile.Extend(8);
+        SetChunkHeader(wdlFile, curPos, 'MAHO', 2 * 16); // 1 hole mask for each chunk
+        curPos += 8;
+
+        wdlFile.Extend(32);
+        curPos += 32;
+    }
+    BlizzardArchive::ClientFile f(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData(),
+    BlizzardArchive::ClientFile::NEW_FILE);
+    f.setBuffer(wdlFile.data);
+    f.save();
+    f.close();
 }
