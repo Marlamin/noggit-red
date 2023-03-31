@@ -155,8 +155,11 @@ public:
   bool has_skybox() const { return header.flags.skybox; }
 
   [[nodiscard]]
-  Noggit::Rendering::WMOGroupRender* renderer() { return &_renderer; };
+  bool is_indoor() const { return header.flags.indoor; }
 
+  [[nodiscard]]
+  Noggit::Rendering::WMOGroupRender* renderer() { return &_renderer; };
+  ::glm::vec3 center;
 
 private:
   void load_mocv(BlizzardArchive::ClientFile& f, uint32_t size);
@@ -164,7 +167,6 @@ private:
 
   WMO *wmo;
   wmo_group_header header;
-  ::glm::vec3 center;
   float rad;
   int32_t num;
   int32_t fog;

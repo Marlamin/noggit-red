@@ -826,7 +826,7 @@ void WMOGroup::load()
 
       lq = std::make_unique<wmo_liquid> ( &f
           , hlq
-          , wmo->materials[hlq.material_id]
+          // , wmo->materials[hlq.material_id] // some models have mat_id = -1, eg "world/wmo/dungeon/md_fishinghole/md_fishingholeice_001.wmo"
           , header.group_liquid
           , (bool)wmo->flags.use_liquid_type_dbc_id
           , (bool)header.flags.ocean

@@ -64,6 +64,7 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
                        , bool world_has_skies
                        , display_mode display
                        , bool no_cull
+                       , bool draw_exterior
                        )
 {
   if (!wmo->finishedLoading() || wmo->loading_failed())
@@ -118,6 +119,7 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
               , animtime
               , world_has_skies
               , display
+              , !draw_exterior
               );
   }
 
