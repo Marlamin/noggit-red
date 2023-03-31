@@ -104,6 +104,8 @@ public:
 
   MapChunk* getChunkAt(glm::vec3 const& pos);
 
+  bool isInIndoorWmoGroup(glm::vec3 const& pos);
+
 protected:
   // Information about the currently selected model / WMO / triangle.
   int _selected_model_count = 0;

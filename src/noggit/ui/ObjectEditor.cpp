@@ -629,7 +629,19 @@ namespace Noggit
           LogDebug << "object_editor::pasteObject: unknown paste mode " << pasteMode << std::endl;
           break;
         }
-        
+
+        // check if pos is valid
+        bool is_indoor = world->isInIndoorWmoGroup(pos);
+        if (is_indoor)
+        {
+            QMessageBox::warning
+            (nullptr
+                , "Warning"
+                , "You can't place M2 models inside WMO models interiors, they will not render."
+                "\nTo place objects inside WMOs, use server side gameobjects or modify the WMO doodads(with wow blender studio)."
+            );
+        }
+
         if (obj->which() == eMODEL)
         {
           float scale(1.f);

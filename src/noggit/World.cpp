@@ -788,6 +788,56 @@ MapChunk* World::getChunkAt(glm::vec3 const& pos)
   return nullptr;
 }
 
+bool World::isInIndoorWmoGroup(glm::vec3 const& pos)
+{
+    bool is_indoor = false;
+    _model_instance_storage.for_each_wmo_instance([&](WMOInstance& wmo_instance)
+        {
+
+            if (pos.x >= wmo_instance.extents[0].x && pos.y >= wmo_instance.extents[0].y && pos.z >= wmo_instance.extents[0].z
+                && pos.x <= wmo_instance.extents[1].x && pos.y <= wmo_instance.extents[1].y && pos.z <= wmo_instance.extents[1].z)
+            {
+                for (auto wmo_group_it = wmo_instance.wmo->groups.begin(); wmo_group_it != wmo_instance.wmo->groups.end(); ++wmo_group_it)
+                {
+                    if (wmo_group_it->is_indoor())
+                    {
+                        // glm::vec3 obj_pos = wmo_instance.pos + wmo_group_it->VertexBoxMax;
+
+                        glm::vec3 obj_pos = wmo_instance.transformMatrix() * glm::vec4(wmo_group_it->center, 0);
+                        obj_pos += wmo_instance.pos;
+                        // glm::vec3 obj_pos = wmo_instance.transformMatrix() * glm::vec4(wmo_instance.pos, 0);
+
+                        // glm::vec3 obj_pos = wmo_instance.pos;
+
+                        bool in_inf_x = pos.x >= obj_pos.x + wmo_group_it->VertexBoxMin.x;
+                        // bool in_inf_y = pos.y >= obj_pos.y + wmo_group_it->VertexBoxMin.y;
+                        bool in_inf_y = true;
+                        bool in_inf_z = pos.z >= obj_pos.z + wmo_group_it->VertexBoxMin.z;
+                        // bool in_bbinf_x = pos.x >= obj_pos.x + wmo_group_it->BoundingBoxMin.x;
+                        // bool in_bbinf_y = pos.y >= obj_pos.y + wmo_group_it->BoundingBoxMin.y;
+                        // bool in_bbinf_z = pos.z >= obj_pos.z + wmo_group_it->BoundingBoxMin.z;
+
+                        bool in_sup_x = pos.x <= obj_pos.x + wmo_group_it->VertexBoxMax.x;
+                        bool in_sup_y = pos.y <= obj_pos.y + wmo_group_it->VertexBoxMax.y;
+                        bool in_sup_z = pos.z <= obj_pos.z + wmo_group_it->VertexBoxMax.z;
+
+                        bool in_inf = in_inf_x && in_inf_y && in_inf_z;
+                        bool in_sup = in_sup_x && in_sup_y && in_sup_z;
+
+                        // if (wmo_group_it->VertexBoxMin)
+                        if (in_inf && in_sup)
+                        {
+                            is_indoor = true;
+                            return true;
+                        }
+                    }
+                }
+            }
+        });
+
+    return is_indoor;
+}
+
 selection_result World::intersect (glm::mat4x4 const& model_view
                                   , math::ray const& ray
                                   , bool pOnlyMap
