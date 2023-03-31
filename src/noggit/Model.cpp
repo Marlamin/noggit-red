@@ -33,7 +33,7 @@ void Model::finishLoading()
 {
   BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::NoggitApplication::instance()->clientData());
 
-  if (f.isEof() || !f.getSize())
+  if (f.isEof() || f.getSize()< 0x130)
   {
     LogError << "Error loading file \"" << _file_key.stringRepr() << "\". Aborting to load model." << std::endl;
     finished = true;
