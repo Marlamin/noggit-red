@@ -59,6 +59,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     , display_mode display
     , bool draw_occlusion_boxes
     , bool minimap_render
+    , bool draw_wmo_exterior
 )
 {
 
@@ -518,6 +519,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
               , _world->animtime
               , _skies->hasSkies()
               , display
+              , false
+              , draw_wmo_exterior
+
           );
         }
       }

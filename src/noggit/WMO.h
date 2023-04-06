@@ -49,6 +49,59 @@ struct wmo_batch
   uint8_t texture;
 };
 
+union wmo_mopy_flags
+{
+    int8_t value;
+    struct
+    {
+        int8_t flag_0x01 : 1; // 0x1
+        int8_t no_cam_collide : 1; // 0x2
+        int8_t detail : 1; // 0x4
+        int8_t collision : 1; // 0x8
+        int8_t hint : 1;
+        int8_t render : 1;
+        int8_t flag_0x40 : 1; // 0x40
+        int8_t collide_hit : 1; // 0x80
+
+    };
+};
+static_assert (sizeof(wmo_mopy_flags) == sizeof(std::int8_t)
+    , "bitfields shall be implemented packed"
+    );
+
+struct wmo_triangle_material_info
+{
+    wmo_mopy_flags flags;
+    uint8_t texture;
+
+    bool isTransFace() { return flags.flag_0x01 && (flags.detail || flags.render); }
+    bool isColor() { return !flags.collision; }
+    bool isRenderFace() { return flags.render && !flags.detail; }
+    bool isCollidable() { return flags.collision || isRenderFace(); }
+
+    bool isCollision() { return texture == 0xff; }
+};
+
+enum wmo_mobn_flags
+{
+    Flag_XAxis = 0x0,
+    Flag_YAxis = 0x1,
+    Flag_ZAxis = 0x2,
+    Flag_AxisMask = 0x3,
+    Flag_Leaf = 0x4,
+    Flag_NoChild = 0xFFFF,
+};
+
+struct wmo_bsp_node
+{
+    uint16_t flags;
+    int16_t negChild;      // index of bsp child node (right in this array)
+    int16_t posChild;
+    uint16_t nFaces;       // num of triangle faces in MOBR
+    uint32_t faceStart;    // index of the first triangle index(in MOBR)
+    float planeDist;
+};
+
 union wmo_group_flags
 {
   uint32_t value;
@@ -173,6 +226,7 @@ private:
   std::vector<uint16_t> _doodad_ref;
   std::unique_ptr<wmo_liquid> lq;
 
+  std::vector <wmo_triangle_material_info> _material_infos;
   std::vector<wmo_batch> _batches;
 
   std::vector<::glm::vec3> _vertices;
@@ -181,6 +235,9 @@ private:
   std::vector<glm::vec2> _texcoords_2;
   std::vector<glm::vec4> _vertex_colors;
   std::vector<uint16_t> _indices;
+
+  std::optional<std::vector<wmo_bsp_node>> _bsp_tree_nodes;
+  std::optional<std::vector<uint16_t>> _bsp_indices;
 
   Noggit::Rendering::WMOGroupRender _renderer;
 };
@@ -253,7 +310,7 @@ public:
   explicit WMO(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context );
 
   [[nodiscard]]
-  std::vector<float> intersect (math::ray const&) const;
+  std::vector<float> intersect (math::ray const&, bool do_exterior = true) const;
 
   void finishLoading() override;
 

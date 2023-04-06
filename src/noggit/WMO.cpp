@@ -353,7 +353,7 @@ void WMO::waitForChildrenLoaded()
   }
 }
 
-std::vector<float> WMO::intersect (math::ray const& ray) const
+std::vector<float> WMO::intersect (math::ray const& ray, bool do_exterior) const
 {
   std::vector<float> results;
 
@@ -364,7 +364,25 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
 
   for (auto& group : groups)
   {
+    if (!do_exterior && !group.is_indoor())
+          continue;
+
     group.intersect (ray, &results);
+  }
+
+  if (!do_exterior && results.size())
+  {
+      // dirty way to find the furthest face and ignore invisible faces, cleaner way would be to do a direction check on faces
+      // float max = *std::max_element(std::begin(results), std::end(results));
+      // results.clear();
+      // results.push_back(max);
+
+      // other way, ignore the closest intersect, works well
+      if (results.size() > 1)
+      {
+        auto it = std::min_element(results.begin(), results.end());
+        results.erase(it);
+      }
   }
 
   return results;
@@ -575,6 +593,9 @@ void WMOGroup::load()
 
   assert (fourcc == 'MOPY');
 
+  // _material_infos.resize(size / sizeof(wmo_triangle_material_info));
+  // f.read(_material_infos.data(), size);
+
   f.seekRelative (size);
 
   // - MOVI ----------------------------------------------
@@ -711,7 +732,11 @@ void WMOGroup::load()
     }
     else
     {
-      f.seekRelative (size);
+      f.seekRelative(size);
+      // std::vector<wmo_bsp_node> bps_tree_nodes;
+      // bps_tree_nodes.resize(size / sizeof(wmo_bsp_node));
+      // f.read(bps_tree_nodes.data(), size);
+      //_bsp_tree_nodes = bps_tree_nodes;
     }
 
   }
@@ -729,6 +754,10 @@ void WMOGroup::load()
     else
     {
       f.seekRelative (size);
+      // std::vector<uint16_t> bsp_indices;
+      // bsp_indices.resize(size / sizeof(uint16_t));
+      // f.read(bsp_indices.data(), size);
+      // _bsp_indices = bsp_indices;
     }
   }
   
@@ -1084,6 +1113,8 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
   {
     for (size_t i (batch.index_start); i < batch.index_start + batch.index_count; i += 3)
     {
+      // TODO : only intersect visible triangles
+      // TODO : option to only check collision
       if ( auto&& distance
          = ray.intersect_triangle ( _vertices[_indices[i + 0]]
                                   , _vertices[_indices[i + 1]]

@@ -140,7 +140,7 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
   }
 }
 
-void WMOInstance::intersect (math::ray const& ray, selection_result* results)
+void WMOInstance::intersect (math::ray const& ray, selection_result* results, bool do_exterior)
 {
   if (!ray.intersect_bounds (extents[0], extents[1]))
   {
@@ -149,7 +149,7 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results)
 
   math::ray subray(_transform_mat_inverted, ray);
 
-  for (auto&& result : wmo->intersect(subray))
+  for (auto&& result : wmo->intersect(subray, do_exterior))
   {
     results->emplace_back (result, this);
   }
@@ -242,13 +242,14 @@ void WMOInstance::recalcExtents()
 
     points.insert(points.end(), adjustedGroupPoints.begin(), adjustedGroupPoints.end());
 
-    if (group.has_skybox())
+    if (group.has_skybox() || _update_group_extents)
     {
       math::aabb const group_aabb(adjustedGroupPoints);
 
       group_extents[i] = {group_aabb.min, group_aabb.max};
     }
   }
+  _update_group_extents = false;
 
   math::aabb const wmo_aabb(points);
 

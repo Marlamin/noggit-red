@@ -22,6 +22,9 @@ public:
   uint16_t doodadset() const { return _doodadset; }
   void change_doodadset(uint16_t doodad_set);
 
+  [[nodiscard]]
+  std::map<int, std::pair<glm::vec3, glm::vec3>> const& getGroupExtents() { _update_group_extents = true; ensureExtents(); return group_extents; }
+
 private:
   void update_doodads();
 
@@ -29,6 +32,7 @@ private:
 
   std::map<uint32_t, std::vector<wmo_doodad_instance>> _doodads_per_group;
   bool _need_doodadset_update = true;
+  bool _update_group_extents = false;
 
 public:
   WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, Noggit::NoggitRenderContext context);
@@ -96,7 +100,7 @@ public:
             , bool draw_exterior = true
             );
 
-  void intersect (math::ray const&, selection_result*);
+  void intersect (math::ray const&, selection_result*, bool do_exterior = true);
 
   void recalcExtents() override;
   void ensureExtents() override;

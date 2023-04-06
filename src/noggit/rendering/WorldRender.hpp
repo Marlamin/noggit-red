@@ -69,6 +69,7 @@ namespace Noggit::Rendering
         , display_mode display
         , bool draw_occlusion_boxes = false
         , bool minimap_render = false
+        , bool draw_wmo_exterior = true
     );
 
     bool saveMinimap (TileIndex const& tile_idx

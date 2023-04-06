@@ -82,12 +82,13 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
   }
 }
 
-void ModelInstance::intersect (glm::mat4x4 const& model_view
+std::vector<std::tuple<int, int, int>> ModelInstance::intersect (glm::mat4x4 const& model_view
                               , math::ray const& ray
                               , selection_result* results
                               , int animtime
                               )
-{
+{  
+  std::vector<std::tuple<int, int, int>> triangle_indices;
   math::ray subray (_transform_mat_inverted, ray);
 
   if ( !subray.intersect_bounds ( fixCoordSystem (model->header.bounding_box_min)
@@ -95,15 +96,17 @@ void ModelInstance::intersect (glm::mat4x4 const& model_view
                                 )
      )
   {
-    return;
+    return triangle_indices;
   }
 
   for (auto&& result : model->intersect (model_view, subray, animtime))
   {
     //! \todo why is only sc important? these are relative to subray,
     //! so should be inverted by model_matrix?
-    results->emplace_back (result * scale, this);
+    results->emplace_back (result.first * scale, this);
+    triangle_indices.emplace_back(result.second);
   }
+  return triangle_indices;
 }
 
 

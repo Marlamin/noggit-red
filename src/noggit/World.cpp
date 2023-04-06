@@ -321,6 +321,125 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
   }
 }
 
+void World::rotate_selected_models_to_object_normal(bool smoothNormals, selected_object_type object_hit, glm::vec3 hit_pos, glm::mat4x4 modelview, bool follow_wmos)
+{
+    // TODO, doesn't work
+
+    ZoneScoped;
+
+    // only iterate 1st object for now
+    if (!_current_selection.size() || _current_selection.size() > 1)
+        return;
+    auto& entry = _current_selection.front();
+    auto type = entry.index();
+    if (type != eEntry_Object)
+    {
+        return;
+    }
+
+    auto& selection_obj = std::get<selected_object_type>(entry);
+    NOGGIT_CUR_ACTION->registerObjectTransformed(selection_obj);
+
+    updateTilesEntry(entry, model_update::remove);
+
+    glm::vec3 rayPos = selection_obj->pos;
+    math::degrees::vec3& dir = selection_obj->dir;
+
+    // auto const& hitChunkInfo = std::get<selected_chunk_type>(results.front().second);
+
+    glm::quat q;
+    glm::vec3 varnormal;
+
+    // Surface Normal
+
+    auto obj_hit_type = object_hit->which();
+
+    glm::vec3 p0;
+    glm::vec3 p1;
+    glm::vec3 p2;
+
+   // only do M2s for now
+    if (obj_hit_type == eMODEL)
+    {
+        auto m2_model_hit = static_cast<ModelInstance*>(object_hit);
+
+        selection_result results;
+
+        math::ray intersect_ray(rayPos, glm::vec3(0.f, -1.f, 0.f));
+        auto triangle_indices = m2_model_hit->intersect(modelview, intersect_ray, &results, 0);
+
+        // object is below ground
+        if (results.empty())
+        {
+            math::ray intersect_ray(rayPos, glm::vec3(0.f, 1.f, 0.f));
+            triangle_indices = m2_model_hit->intersect(modelview, intersect_ray, &results, 0);
+        }
+
+        if (triangle_indices.empty())
+            return;
+
+        std::tuple<int, int, int> closest_triangle = triangle_indices.front();
+
+        float closest_intersect = results.front().first;
+        for (int i = 0; i < results.size(); i++)
+        {
+            if (results[i].first < closest_intersect)
+            {
+                closest_intersect = results[i].first;
+                closest_triangle = triangle_indices[i];
+            }
+        }
+        auto first_triangle_indices = triangle_indices.front();
+
+        p0 = m2_model_hit->model->_vertices[m2_model_hit->model->_indices[std::get<0>(closest_triangle)]].position;
+        p1 = m2_model_hit->model->_vertices[m2_model_hit->model->_indices[std::get<1>(closest_triangle)]].position;
+        p2 = m2_model_hit->model->_vertices[m2_model_hit->model->_indices[std::get<2>(closest_triangle)]].position;
+    }
+    auto transform = object_hit->transformMatrix();
+
+    p0 = transform * glm::vec4(p0, 1.f);
+    p1 = transform * glm::vec4(p1, 1.f);
+    p2 = transform * glm::vec4(p2, 1.f);
+
+    glm::vec3 v1 = p1 - p0;
+    glm::vec3 v2 = p2 - p0;
+
+    auto tmpVec = glm::cross(v2, v1);
+    varnormal.x = tmpVec.z;
+    varnormal.y = tmpVec.y;
+    varnormal.z = tmpVec.x;
+
+    // Smooth option, gradient the normal towards closest vertex
+    if (smoothNormals) // Vertex Normal
+    {
+        // todo
+    }
+    glm::vec3 worldUp = glm::vec3(0, 1, 0);
+    glm::vec3 a = glm::cross(worldUp, varnormal);
+
+    q.x = a.x;
+    q.y = a.y;
+    q.z = a.z;
+
+    auto worldLengthSqrd = glm::length(worldUp) * glm::length(worldUp);
+    auto normalLengthSqrd = glm::length(varnormal) * glm::length(varnormal);
+    auto worldDotNormal = glm::dot(worldUp, varnormal);
+
+    q.w = std::sqrt((worldLengthSqrd * normalLengthSqrd) + (worldDotNormal));
+
+    auto normalizedQ = glm::normalize(q);
+
+    math::degrees::vec3 new_dir;
+
+    auto eulerAngles = glm::eulerAngles(normalizedQ);
+    dir.x = math::degrees(math::radians(eulerAngles.z))._; //Roll
+    dir.y = math::degrees(math::radians(eulerAngles.x))._; //Pitch
+    dir.z = math::degrees(math::radians(eulerAngles.y))._; //Yaw
+
+    std::get<selected_object_type>(entry)->recalcExtents();
+    updateTilesEntry(entry, model_update::add);
+}
+
 
 void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 {
@@ -788,48 +907,43 @@ MapChunk* World::getChunkAt(glm::vec3 const& pos)
   return nullptr;
 }
 
-bool World::isInIndoorWmoGroup(glm::vec3 const& pos)
+bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds)
 {
     bool is_indoor = false;
+    // check if model bounds is within wmo bounds then check each indor wmo group bounds
     _model_instance_storage.for_each_wmo_instance([&](WMOInstance& wmo_instance)
         {
+            auto wmo_extents = wmo_instance.getExtents();
 
-            if (pos.x >= wmo_instance.extents[0].x && pos.y >= wmo_instance.extents[0].y && pos.z >= wmo_instance.extents[0].z
-                && pos.x <= wmo_instance.extents[1].x && pos.y <= wmo_instance.extents[1].y && pos.z <= wmo_instance.extents[1].z)
+
+            if (obj_bounds[1].x >= wmo_extents[0].x
+                && obj_bounds[1].y >= wmo_extents[0].y
+                && obj_bounds[1].z >= wmo_extents[0].z
+                && wmo_extents[1].x >= obj_bounds[0].x
+                && wmo_extents[1].y >= obj_bounds[0].y
+                && wmo_extents[1].z >= obj_bounds[0].z)
+
             {
-                for (auto wmo_group_it = wmo_instance.wmo->groups.begin(); wmo_group_it != wmo_instance.wmo->groups.end(); ++wmo_group_it)
+                for (int i = 0; i < (int)wmo_instance.wmo->groups.size(); ++i)
                 {
-                    if (wmo_group_it->is_indoor())
+                    auto const& group = wmo_instance.wmo->groups[i];
+
+                    if (group.is_indoor())
                     {
-                        // glm::vec3 obj_pos = wmo_instance.pos + wmo_group_it->VertexBoxMax;
+                        // must call getGroupExtent() to initialize wmo_instance.group_extents
+                        // TODO : clear group extents to free memory ?
+                        auto& group_extents = wmo_instance.getGroupExtents().at(i);
 
-                        glm::vec3 obj_pos = wmo_instance.transformMatrix() * glm::vec4(wmo_group_it->center, 0);
-                        obj_pos += wmo_instance.pos;
-                        // glm::vec3 obj_pos = wmo_instance.transformMatrix() * glm::vec4(wmo_instance.pos, 0);
+                        // TODO : do a precise calculation instead of using axis aligned bounding boxes.
+                        auto test = obj_bounds[1].x >= group_extents.first.x
+                            && obj_bounds[1].y >= group_extents.first.y
+                            && obj_bounds[1].z >= group_extents.first.z
+                            && group_extents.second.x >= obj_bounds[0].x
+                            && group_extents.second.y >= obj_bounds[0].y
+                            && group_extents.second.z >= obj_bounds[0].z;
 
-                        // glm::vec3 obj_pos = wmo_instance.pos;
-
-                        bool in_inf_x = pos.x >= obj_pos.x + wmo_group_it->VertexBoxMin.x;
-                        // bool in_inf_y = pos.y >= obj_pos.y + wmo_group_it->VertexBoxMin.y;
-                        bool in_inf_y = true;
-                        bool in_inf_z = pos.z >= obj_pos.z + wmo_group_it->VertexBoxMin.z;
-                        // bool in_bbinf_x = pos.x >= obj_pos.x + wmo_group_it->BoundingBoxMin.x;
-                        // bool in_bbinf_y = pos.y >= obj_pos.y + wmo_group_it->BoundingBoxMin.y;
-                        // bool in_bbinf_z = pos.z >= obj_pos.z + wmo_group_it->BoundingBoxMin.z;
-
-                        bool in_sup_x = pos.x <= obj_pos.x + wmo_group_it->VertexBoxMax.x;
-                        bool in_sup_y = pos.y <= obj_pos.y + wmo_group_it->VertexBoxMax.y;
-                        bool in_sup_z = pos.z <= obj_pos.z + wmo_group_it->VertexBoxMax.z;
-
-                        bool in_inf = in_inf_x && in_inf_y && in_inf_z;
-                        bool in_sup = in_sup_x && in_sup_y && in_sup_z;
-
-                        // if (wmo_group_it->VertexBoxMin)
-                        if (in_inf && in_sup)
-                        {
-                            is_indoor = true;
-                            return true;
-                        }
+                        is_indoor = test;
+                        return;
                     }
                 }
             }
@@ -846,6 +960,7 @@ selection_result World::intersect (glm::mat4x4 const& model_view
                                   , bool draw_wmo
                                   , bool draw_models
                                   , bool draw_hidden_models
+                                  , bool draw_wmo_exterior
                                   )
 {
   ZoneScopedN("World::intersect()");
@@ -898,7 +1013,7 @@ selection_result World::intersect (glm::mat4x4 const& model_view
       {
         if (draw_hidden_models || !wmo_instance.wmo->is_hidden())
         {
-          wmo_instance.intersect(ray, &results);
+          wmo_instance.intersect(ray, &results, draw_wmo_exterior);
         }
       });
     }
