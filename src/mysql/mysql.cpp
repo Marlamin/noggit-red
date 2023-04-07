@@ -87,10 +87,32 @@ namespace mysql
 	  sql::SQLString password = settings.value("project/mysql/pwd").toString().toStdString();
 	  sql::SQLString schema = settings.value("project/mysql/db").toString().toStdString();
 
+
 	  QMessageBox prompt;
 	  prompt.setWindowFlag(Qt::WindowStaysOnTopHint);
 	  try
 	  {
+		  /*
+		  try 
+		  {
+			// For some reasons sometimes it gets std::bad_alloc especially in debug mode (edit : solution : use debug connector binaries)
+			auto con = get_driver_instance()->connect(hostname, userName, password);
+		  }
+		  catch (std::bad_alloc& exception)
+		  {
+			  std::cerr << "bad_alloc detected: " << exception.what();
+			  prompt.setIcon(QMessageBox::Warning);
+			  prompt.setText("Failed to load MySQL database.");
+			  prompt.setWindowTitle("Noggit MYSQL Error");
+			  std::stringstream promptText;
+			  promptText << "\n# ERR: " << exception.what();
+			  promptText << "\nFailed to allocate memory to connect to the database";
+			  prompt.setInformativeText(promptText.str().c_str());
+			  prompt.exec();
+
+			  return false;
+		  }*/
+
 		  std::unique_ptr<sql::Connection> Con(get_driver_instance()->connect(hostname, userName, password));
 
 		  prompt.setIcon(QMessageBox::Information);

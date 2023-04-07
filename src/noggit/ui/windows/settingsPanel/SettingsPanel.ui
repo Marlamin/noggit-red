@@ -1201,7 +1201,7 @@
                <bool>false</bool>
               </property>
               <property name="title">
-               <string>MySQL</string>
+               <string>MySQL (Noggit UID storage)</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
@@ -1295,26 +1295,36 @@
                    </item>
                   </layout>
                  </item>
-				 <item>
-				 	<layout class="QHBoxLayout" name="horizontalLayout_66">
-				 		<item>
-				 			<widget class="QLabel" name="label_48">
-				 				<property name="minimumSize">
-				 					<size>
-				 						<width>60</width>
-				 						<height>0</height>
-				 					</size>
-				 				</property>
-				 				<property name="text">
-				 					<string>Port</string>
-				 				</property>
-				 			</widget>
-				 		</item>
-				 		<item>
-				 			<widget class="QSpinBox" name="_mysql_port_field"/>
-				 		</item>
-				 	</layout>
-				 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_66">
+                   <item>
+                    <widget class="QLabel" name="label_48">
+                     <property name="minimumSize">
+                      <size>
+                       <width>60</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>Port</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QSpinBox" name="_mysql_port_field">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="maximum">
+                      <number>65535</number>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
                  <item>
                   <widget class="QLabel" name="mysql_warning">
                    <property name="minimumSize">
@@ -1330,6 +1340,36 @@
                     <set>Qt::AlignCenter</set>
                    </property>
                   </widget>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="horizontalLayout_12">
+                   <item>
+                    <spacer name="horizontalSpacer_5">
+                     <property name="orientation">
+                      <enum>Qt::Horizontal</enum>
+                     </property>
+                     <property name="sizeHint" stdset="0">
+                      <size>
+                       <width>40</width>
+                       <height>20</height>
+                      </size>
+                     </property>
+                    </spacer>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="mysql_connect_test">
+                     <property name="minimumSize">
+                      <size>
+                       <width>93</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>Test Connection</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </item>
                 </layout>
                </item>
