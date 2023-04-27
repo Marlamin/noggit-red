@@ -1049,7 +1049,6 @@ void MapTile::initEmptyChunks()
 
 QImage MapTile::getHeightmapImage(float min_height, float max_height)
 {
-  // QImage image(257, 257, QImage::Format_RGBA64);
     QImage image(257, 257, QImage::Format_Grayscale16);
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
@@ -1122,7 +1121,6 @@ QImage MapTile::getNormalmapImage()
 
 QImage MapTile::getAlphamapImage(unsigned layer)
 {
-  // QImage image(1024, 1024, QImage::Format_RGBA8888);
   QImage image(1024, 1024, QImage::Format_Grayscale8);
   image.fill(Qt::black);
 
