@@ -25,7 +25,7 @@ namespace
 	{
 		std::unique_ptr<sql::Connection> Con(get_driver_instance()->connect(hostname, userName, password));
 
-		// crete database if it deosn't exist
+		// crete database if it doesn't exist
 		std::string createdb_statement = "CREATE DATABASE IF NOT EXISTS " + schema;
 		std::unique_ptr<sql::PreparedStatement> dbpstmt(Con->prepareStatement(createdb_statement));
 		std::unique_ptr<sql::ResultSet> res(dbpstmt->executeQuery());
@@ -40,35 +40,10 @@ namespace
 											") ENGINE = InnoDB DEFAULT CHARSET = latin1;"));
 		std::unique_ptr<sql::ResultSet> tableres(tablepstmt->executeQuery());
 
-		// std::unique_ptr<sql::PreparedStatement> alterpstmt(Con->prepareStatement("ALTER TABLE `UIDs` ADD PRIMARY KEY(`_map_id`);"));
-		// std::unique_ptr<sql::ResultSet> altres(alterpstmt->executeQuery());
-
 		return Con;
 	}
 	catch (sql::SQLException& e)
 	{
-		/* 
-		// prompt would pop on every model spawn
-		QMessageBox prompt;
-		prompt.setIcon(QMessageBox::Warning);
-		prompt.setText("Failed to load MySQL database, check your settings.");
-		prompt.setWindowTitle("Noggit Database Error");
-		std::stringstream promptText;
-
-		promptText << "\n# ERR: " << e.what();
-		promptText << "\n (MySQL error code: " << e.getErrorCode();
-
-		prompt.setInformativeText(promptText.str().c_str());
-		prompt.exec();
-		*/
-
-		std::stringstream test3;
-		// test1  << "\n# ERR: SQLException in " << __FILE__;
-		// test2 << "\n(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-		// /* what() (derived from std::runtime_error) fetches error message */
-		test3 << "\n# ERR: " << e.what();
-		// test4 << "\n (MySQL error code: " << e.getErrorCode();
-		// test5 << "\n, SQLState: " << e.getSQLState() << " )" << endl;
 
 		return nullptr;
 	}
@@ -81,7 +56,6 @@ namespace mysql
   {
 	  QSettings settings;
 	  // if using release SQL binaries in debug mode it will crash https://bugs.mysql.com/bug.php?id=91238 unless using sql strings
-	  // tcp://127.0.0.1:3306
 	  sql::SQLString hostname = "tcp://" + settings.value("project/mysql/server").toString().toStdString() + ":" + settings.value("project/mysql/port", "3306").toString().toStdString();
 	  sql::SQLString userName = settings.value("project/mysql/user").toString().toStdString();
 	  sql::SQLString password = settings.value("project/mysql/pwd").toString().toStdString();
@@ -92,27 +66,6 @@ namespace mysql
 	  prompt.setWindowFlag(Qt::WindowStaysOnTopHint);
 	  try
 	  {
-		  /*
-		  try 
-		  {
-			// For some reasons sometimes it gets std::bad_alloc especially in debug mode (edit : solution : use debug connector binaries)
-			auto con = get_driver_instance()->connect(hostname, userName, password);
-		  }
-		  catch (std::bad_alloc& exception)
-		  {
-			  std::cerr << "bad_alloc detected: " << exception.what();
-			  prompt.setIcon(QMessageBox::Warning);
-			  prompt.setText("Failed to load MySQL database.");
-			  prompt.setWindowTitle("Noggit MYSQL Error");
-			  std::stringstream promptText;
-			  promptText << "\n# ERR: " << exception.what();
-			  promptText << "\nFailed to allocate memory to connect to the database";
-			  prompt.setInformativeText(promptText.str().c_str());
-			  prompt.exec();
-
-			  return false;
-		  }*/
-
 		  std::unique_ptr<sql::Connection> Con(get_driver_instance()->connect(hostname, userName, password));
 
 		  prompt.setIcon(QMessageBox::Information);
