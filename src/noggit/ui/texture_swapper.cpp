@@ -94,9 +94,8 @@ namespace Noggit
       connect(swap_global, &QPushButton::clicked, [this, camera_pos, map_view]() {
           if (_texture_to_swap)
           {
-              // ActionManager::instance()->beginAction(map_view, ActionFlags::eCHUNKS_TEXTURE);
+            // TODO : action manager
               _world->swapTextureGlobal(_texture_to_swap.value());
-              // ActionManager::instance()->endAction();
           }
           });
 
