@@ -4000,18 +4000,6 @@ void MapView::tick (float dt)
 
   updateDetailInfos();
 
-  /*
-// do we need to do this every tick ?
-#ifdef USE_MYSQL_UID_STORAGE
-  if (_settings->value("project/mysql/enabled").toBool())
-  {
-      _status_database->setText("MySQL UID sync enabled: "
-          + _settings->value("project/mysql/server").toString() + ":"
-          + _settings->value("project/mysql/port").toString());
-  }
-#endif
-*/
-
   _status_area->setText
     (QString::fromStdString (gAreaDB.getAreaName (_world->getAreaID (_camera.position))));
 
