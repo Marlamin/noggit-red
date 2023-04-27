@@ -345,8 +345,6 @@ void World::rotate_selected_models_to_object_normal(bool smoothNormals, selected
     glm::vec3 rayPos = selection_obj->pos;
     math::degrees::vec3& dir = selection_obj->dir;
 
-    // auto const& hitChunkInfo = std::get<selected_chunk_type>(results.front().second);
-
     glm::quat q;
     glm::vec3 varnormal;
 

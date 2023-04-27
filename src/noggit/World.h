@@ -156,7 +156,6 @@ public:
   void set_selected_models_pos(glm::vec3 const& pos, bool change_height = true);
   void rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot);
   void rotate_selected_models_randomly(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
-  void rotate_selected_models_to_object_normal(bool smoothNormals, selected_object_type object_hit, glm::vec3 hit_pos, glm::mat4x4 modelview, bool follow_wmos);
   void set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz);
 
   // Checks the normal of the terrain on model origin and rotates to that spot.

@@ -3534,8 +3534,9 @@ void MapView::tick (float dt)
                             auto hit_pos = intersect_ray().position(result->first);
                             _cursor_pos = hit_pos;
                             snapped_to_object = true;
-                            if (_rotate_doodads_along_doodads.get()) // TODO
-                              _world->rotate_selected_models_to_object_normal(_rotate_along_ground_smooth.get(), obj_hit, hit_pos, glm::transpose(model_view()), _rotate_doodads_along_wmos.get());
+                            // TODO : rotate objects to objects normal
+                            // if (_rotate_doodads_along_doodads.get())
+                            //    _world->rotate_selected_models_to_object_normal(_rotate_along_ground_smooth.get(), obj_hit, hit_pos, glm::transpose(model_view()), _rotate_doodads_along_wmos.get());
                             break;
                         }
                     }
