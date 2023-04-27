@@ -57,8 +57,8 @@ recent version).
 * build INSTALL
 * Repeat for both release and debug.
 
-### MySQL (Optionnal) ###
-Optionnal, required for MySQL GUID Storage builds.
+### MySQL (Optional) ###
+Optional, required for MySQL GUID Storage builds.
 download MySQL server https://dev.mysql.com/downloads/installer/
 and MySQL C++ Connector https://dev.mysql.com/downloads/connector/cpp/
 * open CMake GUI
