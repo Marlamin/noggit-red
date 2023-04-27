@@ -592,10 +592,6 @@ void WMOGroup::load()
   f.read (&size, 4);
 
   assert (fourcc == 'MOPY');
-
-  // _material_infos.resize(size / sizeof(wmo_triangle_material_info));
-  // f.read(_material_infos.data(), size);
-
   f.seekRelative (size);
 
   // - MOVI ----------------------------------------------
@@ -733,10 +729,6 @@ void WMOGroup::load()
     else
     {
       f.seekRelative(size);
-      // std::vector<wmo_bsp_node> bps_tree_nodes;
-      // bps_tree_nodes.resize(size / sizeof(wmo_bsp_node));
-      // f.read(bps_tree_nodes.data(), size);
-      //_bsp_tree_nodes = bps_tree_nodes;
     }
 
   }
