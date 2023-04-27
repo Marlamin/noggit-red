@@ -192,7 +192,6 @@ void NoggitProjectSelectionWindow::handleContextMenuProjectListItemDelete(std::s
     case QMessageBox::AcceptRole:
     {
       Component::RecentProjectsComponent::registerProjectRemove(project_path);
-      // std::filesystem::remove_all(project_path);
       QFile folder(project_path.c_str());
       folder.moveToTrash();
       break;
