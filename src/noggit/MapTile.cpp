@@ -31,6 +31,16 @@
 #include <limits>
 
 
+texture_heightmapping_data getHeightMappingdataForTexture(std::string x)
+{
+    texture_heightmapping_data retVal;
+    // VTODO: Load something here
+    if(x == "tileset/7.0/highmountain/data/7hm_rock01_1024.blp")
+        retVal.uvScale = 4;
+    return retVal;
+}
+
+
 MapTile::MapTile( int pX
                 , int pZ
                 , std::string const& pFilename
@@ -173,8 +183,12 @@ void MapTile::finishLoading()
 
     while (lCurPos < lEnd)
     {
-      mTextureFilenames.push_back(BlizzardArchive::ClientData::normalizeFilenameInternal(std::string(lCurPos)));
+      std::string fileName = BlizzardArchive::ClientData::normalizeFilenameInternal(std::string(lCurPos));
+      mTextureFilenames.push_back(fileName);
       lCurPos += strlen(lCurPos) + 1;
+
+      // Mists Heightmapping
+      mTextureHeightData.emplace(fileName, getHeightMappingdataForTexture(fileName));
     }
   }
 
@@ -1512,6 +1526,18 @@ void MapTile::recalcObjectInstanceExtents()
 void MapTile::calcCamDist(glm::vec3 const& camera)
 {
   _cam_dist = glm::distance(camera, _center);
+}
+
+const texture_heightmapping_data& MapTile::GetTextureHeightMappingData(const std::string& name) const
+{
+    static texture_heightmapping_data defaultValue;
+
+    auto foundVal = mTextureHeightData.find(name);
+    if (foundVal != mTextureHeightData.end())
+    {
+        return foundVal.value();
+    }
+    return defaultValue;
 }
 
 void MapTile::recalcCombinedExtents()

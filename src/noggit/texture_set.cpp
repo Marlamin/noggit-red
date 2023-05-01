@@ -12,6 +12,8 @@
 #include <array>
 #include <sstream>
 
+
+
 TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
                         , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
                         , Noggit::NoggitRenderContext context)

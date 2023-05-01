@@ -472,18 +472,23 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
 
   static constexpr unsigned NUM_SAMPLERS = 11;
 
-  _chunk_instance_data[chunk_index].ChunkTextureSamplers[0] = 0;
-  _chunk_instance_data[chunk_index].ChunkTextureSamplers[1] = 0;
-  _chunk_instance_data[chunk_index].ChunkTextureSamplers[2] = 0;
-  _chunk_instance_data[chunk_index].ChunkTextureSamplers[3] = 0;
+  for (int i = 0; i < 4; i++)
+  {
+      _chunk_instance_data[chunk_index].ChunkTextureSamplers[i] = 0;
+      _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[i] = -1;
 
-  _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[0] = -1;
-  _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[1] = -1;
-  _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[2] = -1;
-  _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[3] = -1;
+      // Mists Heightmapping
+      _chunk_instance_data[chunk_index].ChunkHeightTextureSamplers[i] = 0;
+      _chunk_instance_data[chunk_index].ChunkTextureUVScale[i] = 0;
+      _chunk_instance_data[chunk_index].ChunkTextureHeightScale[i] = 0;
+      _chunk_instance_data[chunk_index].ChunkTextureHeightOffset[i] = 1.0f;
+  }
 
 
   auto& chunk_textures = (*chunk->texture_set->getTextures());
+
+
+
   for (int k = 0; k < chunk->texture_set->num(); ++k)
   {
     chunk_textures[k]->upload();
@@ -493,6 +498,24 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
       _texture_not_loaded = true;
       continue;
     }
+
+    auto heightRef = chunk_textures[k]->getHeightMap();
+    if (chunk_textures[k]->hasHeightMap() && heightRef)
+    {
+        heightRef->upload();
+
+        if(!heightRef->is_uploaded())
+        {
+            _texture_not_loaded = true;
+            continue;
+        }
+    }
+
+    // Mists Heightmapping
+    auto hData = chunk->mt->GetTextureHeightMappingData(chunk_textures[k]->file_key().filepath());
+    _chunk_instance_data[chunk_index].ChunkTextureUVScale[k] = hData.uvScale;
+    _chunk_instance_data[chunk_index].ChunkTextureHeightScale[k] = hData.heightScale;
+    _chunk_instance_data[chunk_index].ChunkTextureHeightOffset[k] = hData.heightOffset;
 
     GLuint tex_array = (*chunk->texture_set->getTextures())[k]->texture_array();
     int tex_index = (*chunk->texture_set->getTextures())[k]->array_index();
@@ -524,7 +547,35 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
 
     _chunk_instance_data[chunk_index].ChunkTextureSamplers[k] = sampler_id;
     _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[k] = (*chunk->texture_set->getTextures())[k]->is_specular() ? tex_index : -tex_index;
+    
+    if(heightRef)
+    {
+        GLuint hTex_array = (*chunk->texture_set->getTextures())[k]->getHeightMap()->texture_array();
 
+        sampler_id = -1;
+        for (int n = 0; n < draw_call.samplers.size(); ++n)
+        {
+            if (draw_call.samplers[n] == hTex_array)
+            {
+                sampler_id = n;
+                break;
+            }
+            else if (draw_call.samplers[n] < 0)
+            {
+                draw_call.samplers[n] = hTex_array;
+                sampler_id = n;
+                break;
+            }
+        }
+
+        if (sampler_id < 0)
+            [[unlikely]]
+        {
+          return false;
+        }
+
+        _chunk_instance_data[chunk_index].ChunkHeightTextureSamplers[k] = sampler_id;
+    }
   }
 
   return true;

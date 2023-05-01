@@ -23,6 +23,14 @@ struct ChunkInstanceData
   ivec4 AreaIDColor_Pad2_DrawSelection;
   ivec4 ChunkXZ_TileXZ;
   ivec4 ChunkTexAnimDir;
+
+  // Mists Heightmapping
+
+  ivec4 ChunkHeightTextureSamplers;
+  ivec4 ChunkTextureUVScale;
+  vec4 ChunkTextureHeightScale;
+  vec4 ChunkTextureHeightOffset;
+
 };
 
 layout (std140) uniform chunk_instances

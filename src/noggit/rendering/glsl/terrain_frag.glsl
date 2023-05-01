@@ -46,6 +46,14 @@ struct ChunkInstanceData
   ivec4 AreaIDColor_Pad2_DrawSelection;
   ivec4 ChunkXZ_TileXZ;
   ivec4 ChunkTexAnimDir;
+
+  // Mists Heightmapping
+
+  ivec4 ChunkHeightTextureSamplers;
+  ivec4 ChunkTextureUVScale;
+  vec4 ChunkTextureHeightScale;
+  vec4 ChunkTextureHeightOffset;
+
 };
 
 layout (std140) uniform chunk_instances
@@ -196,16 +204,17 @@ vec4 texture_blend()
   float a1 = alpha.g;
   float a2 = alpha.b;
 
-  vec4 t0 = get_tex_color(vary_t0_uv, instances[instanceID].ChunkTextureSamplers.x, abs(instances[instanceID].ChunkTextureArrayIDs.x));
+  vec4 t0 = get_tex_color(vary_t0_uv / (1 << instances[instanceID].ChunkTextureUVScale.x), instances[instanceID].ChunkTextureSamplers.x, abs(instances[instanceID].ChunkTextureArrayIDs.x));
   t0.a = mix(t0.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.x < 0));
 
-  vec4 t1 = get_tex_color(vary_t1_uv, instances[instanceID].ChunkTextureSamplers.y, abs(instances[instanceID].ChunkTextureArrayIDs.y));
+  vec4 t1 = get_tex_color(vary_t1_uv / (1 << instances[instanceID].ChunkTextureUVScale.y), instances[instanceID].ChunkTextureSamplers.y, abs(instances[instanceID].ChunkTextureArrayIDs.y));
+  //vec4 t1 = get_tex_color(vary_t1_uv / 5 , instances[instanceID].ChunkTextureSamplers.y, abs(instances[instanceID].ChunkTextureArrayIDs.y));
   t1.a = mix(t1.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.y < 0));
 
-  vec4 t2 = get_tex_color(vary_t2_uv, instances[instanceID].ChunkTextureSamplers.z, abs(instances[instanceID].ChunkTextureArrayIDs.z));
+  vec4 t2 = get_tex_color(vary_t2_uv / (1 << instances[instanceID].ChunkTextureUVScale.z), instances[instanceID].ChunkTextureSamplers.z, abs(instances[instanceID].ChunkTextureArrayIDs.z));
   t2.a = mix(t2.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.z < 0));
 
-  vec4 t3 = get_tex_color(vary_t3_uv, instances[instanceID].ChunkTextureSamplers.w, abs(instances[instanceID].ChunkTextureArrayIDs.w));
+  vec4 t3 = get_tex_color(vary_t3_uv / (1 << instances[instanceID].ChunkTextureUVScale.w), instances[instanceID].ChunkTextureSamplers.w, abs(instances[instanceID].ChunkTextureArrayIDs.w));
   t3.a = mix(t3.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.w < 0));
 
   return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2);
