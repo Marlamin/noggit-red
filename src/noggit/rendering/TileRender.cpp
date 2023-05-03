@@ -12,7 +12,6 @@ using namespace Noggit::Rendering;
 TileRender::TileRender(MapTile* map_tile)
 : _map_tile(map_tile)
 {
-
 }
 
 void TileRender::upload()
@@ -502,9 +501,9 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
     auto heightRef = chunk_textures[k]->getHeightMap();
     if (chunk_textures[k]->hasHeightMap() && heightRef)
     {
-        heightRef->upload();
+        heightRef->get()->upload();
 
-        if(!heightRef->is_uploaded())
+        if(!heightRef->get()->is_uploaded())
         {
             _texture_not_loaded = true;
             continue;
@@ -550,7 +549,7 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
     
     if(heightRef)
     {
-        GLuint hTex_array = (*chunk->texture_set->getTextures())[k]->getHeightMap()->texture_array();
+        GLuint hTex_array = (*chunk->texture_set->getTextures())[k]->getHeightMap()->get()->texture_array();
 
         sampler_id = -1;
         for (int n = 0; n < draw_call.samplers.size(); ++n)

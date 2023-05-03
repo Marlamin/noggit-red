@@ -35,8 +35,31 @@ texture_heightmapping_data getHeightMappingdataForTexture(std::string x)
 {
     texture_heightmapping_data retVal;
     // VTODO: Load something here
-    if(x == "tileset/7.0/highmountain/data/7hm_rock01_1024.blp")
+    if (x == "tileset/expansion06/highmountain/7hm_rock01_1024.blp")
+    {
         retVal.uvScale = 4;
+        retVal.heightOffset = 1.0f;
+        retVal.heightScale = 2.0f;
+    }
+    else if (x == "tileset/expansion06/highmountain/7hm_dirt04_512.blp")
+    {
+        retVal.uvScale = 1;
+        retVal.heightOffset = 1.0f;
+        retVal.heightScale = 10.0f;
+    }
+    else if (x == "tileset/expansion06/highmountain/7hm_mulch01_512.blp")
+    {
+        retVal.uvScale = 1;
+        retVal.heightOffset = 1.0f;
+        retVal.heightScale = 10.0f;
+    }
+    else if (x == "tileset/expansion06/highmountain/7hm_snow01_512.blp")
+    {
+        retVal.uvScale = 2;
+        retVal.heightOffset = 1.0f;
+        retVal.heightScale = 1.6f;
+    }
+
     return retVal;
 }
 

@@ -422,7 +422,7 @@ void blp_texture::finishLoading()
     if (has_height)
     {
         _has_heightmap = true;
-        heightMap = std::make_unique<blp_texture>(height_filename,_context);
+        heightMap = std::make_unique<scoped_blp_texture_reference>(height_filename,_context);
     }
   }
 

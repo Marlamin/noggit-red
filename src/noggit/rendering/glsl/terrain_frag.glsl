@@ -190,6 +190,34 @@ vec4 get_tex_color(vec2 tex_coord, int tex_sampler, int array_index)
 
 }
 
+/*vec2 getAdjustedUV(vec2 uv, float scale) {
+    // Calculate the world position in the XZ plane
+    vec2 worldPosXZ = vary_position.xz;
+
+    // Scale the world position by the desired scale factor
+    vec2 scaledWorldPos = (worldPosXZ / 16.0f) / (scale);
+
+    // Calculate the new UV coordinates by adding the original UV and scaled world position
+    vec2 scaledUV = (uv / scale) + scaledWorldPos;
+
+    return scaledUV;
+}*/
+
+const int numChunks = 16;
+const int numTiles = 64;
+
+vec2 getAdjustedUV(vec2 uv, int textureScale) {
+
+    vec2 worldOffset = (numChunks * instances[instanceID].ChunkXZ_TileXZ.zw) + 
+                                instances[instanceID].ChunkXZ_TileXZ.xy;
+
+    // Scale the UV coordinates. Wow Interprets texture scaling this way.
+    vec2 combinedUV = fract((uv + worldOffset) / ((1 << textureScale) / 8.0f));
+
+    return combinedUV;
+
+}
+
 vec4 texture_blend()
 {
   vec3 alpha = texture(alphamap, vec3(vary_texcoord / 8.0, instanceID)).rgb;
@@ -204,17 +232,23 @@ vec4 texture_blend()
   float a1 = alpha.g;
   float a2 = alpha.b;
 
-  vec4 t0 = get_tex_color(vary_t0_uv / (1 << instances[instanceID].ChunkTextureUVScale.x), instances[instanceID].ChunkTextureSamplers.x, abs(instances[instanceID].ChunkTextureArrayIDs.x));
+  vec2 worldScaled_vary_t0_uv = getAdjustedUV(vary_t0_uv/8.0, instances[instanceID].ChunkTextureUVScale.x);
+  vec2 worldScaled_vary_t1_uv = getAdjustedUV(vary_t1_uv/8.0, instances[instanceID].ChunkTextureUVScale.y);
+  vec2 worldScaled_vary_t2_uv = getAdjustedUV(vary_t2_uv/8.0, instances[instanceID].ChunkTextureUVScale.z);
+  vec2 worldScaled_vary_t3_uv = getAdjustedUV(vary_t3_uv/8.0, instances[instanceID].ChunkTextureUVScale.w);
+
+
+  vec4 t0 = get_tex_color(worldScaled_vary_t0_uv, instances[instanceID].ChunkTextureSamplers.x, abs(instances[instanceID].ChunkTextureArrayIDs.x));
   t0.a = mix(t0.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.x < 0));
 
-  vec4 t1 = get_tex_color(vary_t1_uv / (1 << instances[instanceID].ChunkTextureUVScale.y), instances[instanceID].ChunkTextureSamplers.y, abs(instances[instanceID].ChunkTextureArrayIDs.y));
+  vec4 t1 = get_tex_color(worldScaled_vary_t1_uv, instances[instanceID].ChunkTextureSamplers.y, abs(instances[instanceID].ChunkTextureArrayIDs.y));
   //vec4 t1 = get_tex_color(vary_t1_uv / 5 , instances[instanceID].ChunkTextureSamplers.y, abs(instances[instanceID].ChunkTextureArrayIDs.y));
   t1.a = mix(t1.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.y < 0));
 
-  vec4 t2 = get_tex_color(vary_t2_uv / (1 << instances[instanceID].ChunkTextureUVScale.z), instances[instanceID].ChunkTextureSamplers.z, abs(instances[instanceID].ChunkTextureArrayIDs.z));
+  vec4 t2 = get_tex_color(worldScaled_vary_t2_uv, instances[instanceID].ChunkTextureSamplers.z, abs(instances[instanceID].ChunkTextureArrayIDs.z));
   t2.a = mix(t2.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.z < 0));
 
-  vec4 t3 = get_tex_color(vary_t3_uv / (1 << instances[instanceID].ChunkTextureUVScale.w), instances[instanceID].ChunkTextureSamplers.w, abs(instances[instanceID].ChunkTextureArrayIDs.w));
+  vec4 t3 =get_tex_color(worldScaled_vary_t3_uv, instances[instanceID].ChunkTextureSamplers.w, abs(instances[instanceID].ChunkTextureArrayIDs.w));
   t3.a = mix(t3.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.w < 0));
 
   return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2);

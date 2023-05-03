@@ -84,7 +84,7 @@ struct blp_texture : public AsyncObject
     // Mists HeightMapping
     bool hasHeightMap() {return _has_heightmap; };
 
-    blp_texture* getHeightMap() { return heightMap.get(); };
+    scoped_blp_texture_reference* getHeightMap() { return heightMap.get(); };
 private:
   bool _uploaded = false;
 
@@ -104,7 +104,7 @@ private:
   int _array_index = -1;
   GLuint _texture_array = 0;
 
-  std::unique_ptr<blp_texture> heightMap;
+  std::unique_ptr<scoped_blp_texture_reference> heightMap;
 };
 
 struct TexArrayParams
