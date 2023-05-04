@@ -13,6 +13,7 @@
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/project/CurrentProject.hpp>
 #include <ClientFile.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
@@ -29,39 +30,6 @@
 #include <utility>
 #include <vector>
 #include <limits>
-
-
-texture_heightmapping_data getHeightMappingdataForTexture(std::string x)
-{
-    texture_heightmapping_data retVal;
-    // VTODO: Load something here
-    if (x == "tileset/expansion06/highmountain/7hm_rock01_1024.blp")
-    {
-        retVal.uvScale = 4;
-        retVal.heightOffset = 1.0f;
-        retVal.heightScale = 2.0f;
-    }
-    else if (x == "tileset/expansion06/highmountain/7hm_dirt04_512.blp")
-    {
-        retVal.uvScale = 1;
-        retVal.heightOffset = 1.0f;
-        retVal.heightScale = 10.0f;
-    }
-    else if (x == "tileset/expansion06/highmountain/7hm_mulch01_512.blp")
-    {
-        retVal.uvScale = 1;
-        retVal.heightOffset = 1.0f;
-        retVal.heightScale = 10.0f;
-    }
-    else if (x == "tileset/expansion06/highmountain/7hm_snow01_512.blp")
-    {
-        retVal.uvScale = 2;
-        retVal.heightOffset = 1.0f;
-        retVal.heightScale = 1.6f;
-    }
-
-    return retVal;
-}
 
 
 MapTile::MapTile( int pX
@@ -209,9 +177,6 @@ void MapTile::finishLoading()
       std::string fileName = BlizzardArchive::ClientData::normalizeFilenameInternal(std::string(lCurPos));
       mTextureFilenames.push_back(fileName);
       lCurPos += strlen(lCurPos) + 1;
-
-      // Mists Heightmapping
-      mTextureHeightData.emplace(fileName, getHeightMappingdataForTexture(fileName));
     }
   }
 
@@ -1553,14 +1518,7 @@ void MapTile::calcCamDist(glm::vec3 const& camera)
 
 const texture_heightmapping_data& MapTile::GetTextureHeightMappingData(const std::string& name) const
 {
-    static texture_heightmapping_data defaultValue;
-
-    auto foundVal = mTextureHeightData.find(name);
-    if (foundVal != mTextureHeightData.end())
-    {
-        return foundVal.value();
-    }
-    return defaultValue;
+    return Noggit::Project::CurrentProject::get()->ExtraMapData.GetTextureHeightDataForADT(_world->mapIndex._map_id, index,name);
 }
 
 void MapTile::recalcCombinedExtents()
@@ -1589,5 +1547,3 @@ void MapTile::recalcCombinedExtents()
 
   _combined_extents_dirty = false;
 }
-
-
