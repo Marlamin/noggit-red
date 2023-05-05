@@ -62,18 +62,16 @@ namespace Noggit::Project
                     }
                     else
                     {
-                        auto mapName = entry.path().stem().string(); 
-
-                        std::string file_name = "NAME_1_34";
+                        std::string file_name = entry.path().stem().string();
                         std::regex pattern(R"(([A-Za-z]+)_([0-9]+)_([0-9]+))");
                         std::smatch matches;
 
                         if (std::regex_search(file_name, matches, pattern)) {
-                            std::string name = matches[1].str();
+                            std::string mapName = matches[1].str();
                             int xx = std::stoi(matches[2].str());
                             int yy = std::stoi(matches[3].str());
                             
-                            std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+                            std::transform(mapName.begin(), mapName.end(), mapName.begin(), ::tolower);
 
                             auto mapIsLoaded = MapNameToID.find(mapName);
 
