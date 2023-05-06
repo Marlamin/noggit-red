@@ -11,7 +11,7 @@
 #include <noggit/ui/windows/downloadFileDialog/DownloadFileDialog.h>
 #include <noggit/TextureManager.h>
 #include <external/tsl/robin_map.h>
-#include "noggit/TileIndex.hpp"
+#include <noggit/World.h>
 #include <QJsonDocument>
 #include <QMessageBox>
 #include <QJsonObject>
@@ -96,8 +96,12 @@ namespace Noggit::Project
       // MapID,TileX,TileY, SMTextureParams for this specific ADT, fallback to global otherwise.
       tsl::robin_map<int, 
             tsl::robin_map< int, tsl::robin_map<int , tsl::robin_map<std::string, texture_heightmapping_data> >>> TextureHeightData_ADT;
+      
+      void SetTextureHeightData_Global(const std::string& texture, texture_heightmapping_data data, World* worldToUpdate = nullptr); 
+      void SetTextureHeightDataForADT(int mapID, const TileIndex& ti, const std::string& texture, texture_heightmapping_data data, World* worldToUpdate = nullptr);
 
       const texture_heightmapping_data GetTextureHeightDataForADT(int mapID, const TileIndex& ti, const std::string& texture) const;
+
   };
 
   class NoggitProject

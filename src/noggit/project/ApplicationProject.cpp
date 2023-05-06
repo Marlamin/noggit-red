@@ -1,5 +1,5 @@
 #include "ApplicationProject.h"
-#include "noggit/TileIndex.hpp"
+#include <noggit/World.h>
 
 namespace Noggit::Project
 {
@@ -57,7 +57,7 @@ namespace Noggit::Project
                             newData.uvScale = root[entry].toObject()["Scale"].toInt();
                             newData.heightOffset = root[entry].toObject()["HeightOffset"].toDouble();
                             newData.heightScale = root[entry].toObject()["HeightScale"].toDouble();
-                            project.ExtraMapData.TextureHeightData_Global.emplace(entry.toStdString(), newData);
+                            project.ExtraMapData.SetTextureHeightData_Global(entry.toStdString(), newData);
                         }
                     }
                     else
@@ -84,7 +84,7 @@ namespace Noggit::Project
                                     newData.heightOffset = root[entry].toObject()["HeightOffset"].toDouble();
                                     newData.heightScale = root[entry].toObject()["HeightScale"].toDouble();
 
-                                    project.ExtraMapData.TextureHeightData_ADT[mapIsLoaded.value()][xx][yy].emplace(entry.toStdString(), newData);
+                                    project.ExtraMapData.SetTextureHeightDataForADT(mapIsLoaded.value(), TileIndex(xx, yy), entry.toStdString(), newData);
                                 }
                             }
                             
@@ -93,6 +93,30 @@ namespace Noggit::Project
 
                 }
             }
+        }
+    }
+    void NoggitExtraMapData::SetTextureHeightData_Global(const std::string& texture, texture_heightmapping_data data, World* worldToUpdate)
+    {
+        TextureHeightData_Global[texture] = data;
+        if (worldToUpdate)
+        {
+            for (MapTile* tile : worldToUpdate->mapIndex.loaded_tiles())
+            {
+                tile->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
+                tile->forceAlphaUpdate();
+                tile->forceRecalcExtents();
+            }
+        }
+    }
+    void NoggitExtraMapData::SetTextureHeightDataForADT(int mapID, const TileIndex& ti, const std::string& texture, texture_heightmapping_data data, World* worldToUpdate)
+    {
+        TextureHeightData_ADT[mapID][ti.x][ti.z][texture] = data;
+        if (worldToUpdate)
+        {
+            MapTile* tile = worldToUpdate->mapIndex.getTile(ti);
+            tile->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
+            tile->forceAlphaUpdate();
+            tile->forceRecalcExtents();
         }
     }
     const texture_heightmapping_data NoggitExtraMapData::GetTextureHeightDataForADT(int mapID, const TileIndex& tileIndex, const std::string& texture) const

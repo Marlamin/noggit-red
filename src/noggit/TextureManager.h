@@ -25,6 +25,12 @@
 
 struct texture_heightmapping_data
 {
+    texture_heightmapping_data(uint32_t scale = 0, float heightscale = 0, float heightoffset = 1.0f)
+    {
+        uvScale = scale;
+        heightScale = heightscale;
+        heightOffset = heightoffset;
+    }
     uint32_t uvScale = 0;
     float heightScale = 0.0f;
     float heightOffset = 1.0f;

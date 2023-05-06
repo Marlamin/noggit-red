@@ -565,6 +565,32 @@ void MapView::setupTexturePainterUi()
           }
   );
 
+  connect(texturingTool->heightmappingApplyGlobalButton(), &QPushButton::pressed
+      , [=]()
+  {
+      if (texturingTool->_current_texture && !texturingTool->_current_texture->filename().empty())
+      {
+          auto proj = Noggit::Project::CurrentProject::get();
+          
+          proj->ExtraMapData.SetTextureHeightData_Global(texturingTool->_current_texture->filename(),
+              texturingTool->getCurrentHeightMappingSetting(), _world.get());
+      }
+  }
+  );
+
+  connect(texturingTool->heightmappingApplyAdtButton(), &QPushButton::pressed
+      , [=]()
+  {
+      if (texturingTool->_current_texture && !texturingTool->_current_texture->filename().empty())
+      {
+          auto proj = Noggit::Project::CurrentProject::get();
+
+          proj->ExtraMapData.SetTextureHeightDataForADT(_world->mapIndex._map_id, TileIndex(_camera.position), texturingTool->_current_texture->filename(),
+              texturingTool->getCurrentHeightMappingSetting(), _world.get());
+      }
+  }
+  );
+
   /* Additional tools */
 
   /* Texture Browser */
@@ -5305,3 +5331,4 @@ void MapView::onSettingsSave()
 
   _world->renderer()->markTerrainParamsUniformBlockDirty();
 }
+

@@ -1521,6 +1521,19 @@ const texture_heightmapping_data& MapTile::GetTextureHeightMappingData(const std
     return Noggit::Project::CurrentProject::get()->ExtraMapData.GetTextureHeightDataForADT(_world->mapIndex._map_id, index,name);
 }
 
+void MapTile::forceAlphaUpdate()
+{
+    for (int i = 0; i < 16; ++i)
+    {
+        for (int j = 0; j < 16; ++j)
+        {
+            auto chunk = mChunks[i][j].get();
+            auto texSet = chunk->getTextureSet();
+            texSet->markDirty();
+        }
+    }
+}
+
 void MapTile::recalcCombinedExtents()
 {
   if (!_combined_extents_dirty)
