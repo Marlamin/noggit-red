@@ -339,6 +339,7 @@ void MapView::ResetSelectedObjectRotation()
       WMOInstance* wmo = static_cast<WMOInstance*>(obj);
       _world->updateTilesWMO(wmo, model_update::remove);
       wmo->resetDirection();
+      wmo->recalcExtents();
       _world->updateTilesWMO(wmo, model_update::add);
     }
     else if (obj->which() == eMODEL)
@@ -3417,7 +3418,7 @@ void MapView::tick (float dt)
 
       if (keys != 0.f)
       {
-        _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
+        _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::object_scaling_type::add);
         _rotation_editor_need_update = true;
       }
       if (keyr != 0.f)
@@ -3437,7 +3438,7 @@ void MapView::tick (float dt)
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                          Noggit::ActionModalityControllers::eALT
                                                          | Noggit::ActionModalityControllers::eMMB );
-          _world->scale_selected_models(std::pow(2.f, mv*4.f), World::m2_scaling_type::mult);
+          _world->scale_selected_models(std::pow(2.f, mv*4.f), World::object_scaling_type::mult);
         }
         else if (_mod_shift_down)
         {
@@ -3521,7 +3522,7 @@ void MapView::tick (float dt)
                 float min = _object_paste_params.minScale;
                 float max = _object_paste_params.maxScale;
 
-                _world->scale_selected_models(misc::randfloat(min, max), World::m2_scaling_type::set);
+                _world->scale_selected_models(misc::randfloat(min, max), World::object_scaling_type::set);
               }
             }
           }

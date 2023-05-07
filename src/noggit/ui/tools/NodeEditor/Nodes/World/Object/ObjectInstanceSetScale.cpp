@@ -39,7 +39,7 @@ void ObjectInstanceSetScaleNode::compute()
     return;
   }
 
-  obj->scale = obj->which() == eMODEL ? scale : 1.0;
+  obj->scale = scale;
 
   obj->recalcExtents();
 

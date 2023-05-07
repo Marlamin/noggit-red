@@ -217,7 +217,7 @@ unsigned Noggit::Action::handleObjectAdded(unsigned uid, bool redo)
       unsigned old_uid = pair.first;
       SceneObject* obj;
       if (pair.second.type == ActionObjectTypes::WMO)
-        obj = _map_view->getWorld()->addWMOAndGetInstance(pair.second.file_key, pair.second.pos, pair.second.dir);
+        obj = _map_view->getWorld()->addWMOAndGetInstance(pair.second.file_key, pair.second.pos, pair.second.dir, pair.second.scale);
       else
         obj = _map_view->getWorld()->addM2AndGetInstance(pair.second.file_key, pair.second.pos,
                                                          pair.second.scale,  pair.second.dir, nullptr);
@@ -281,7 +281,7 @@ unsigned Noggit::Action::handleObjectRemoved(unsigned uid, bool redo)
       unsigned old_uid = pair.first;
       SceneObject* obj;
       if (pair.second.type == ActionObjectTypes::WMO)
-        obj = _map_view->getWorld()->addWMOAndGetInstance(pair.second.file_key, pair.second.pos, pair.second.dir);
+        obj = _map_view->getWorld()->addWMOAndGetInstance(pair.second.file_key, pair.second.pos, pair.second.dir, pair.second.scale);
       else
         obj = _map_view->getWorld()->addM2AndGetInstance(pair.second.file_key, pair.second.pos,
                                                          pair.second.scale,  pair.second.dir, nullptr);

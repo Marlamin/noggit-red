@@ -823,7 +823,7 @@ void MapTile::saveTile(World* world)
     lMODF_Data[lID].flags = object->mFlags;
     lMODF_Data[lID].doodadSet = object->doodadset();
     lMODF_Data[lID].nameSet = object->mNameset;
-    lMODF_Data[lID].unknown = object->mUnknown;
+    lMODF_Data[lID].scale = (uint16_t)(object->scale * 1024);
     lID++;
   }
 

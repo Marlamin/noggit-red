@@ -16,7 +16,6 @@ public:
   scoped_wmo_reference wmo;
   std::map<int, std::pair<glm::vec3, glm::vec3>> group_extents;
   uint16_t mFlags;
-  uint16_t mUnknown;
   uint16_t mNameset; 
 
   uint16_t doodadset() const { return _doodadset; }
@@ -43,7 +42,6 @@ public:
     , wmo (std::move (other.wmo))
     , group_extents(other.group_extents)
     , mFlags (other.mFlags)
-    , mUnknown (other.mUnknown)
     , mNameset (other.mNameset)
     , _doodadset (other._doodadset)
     , _doodads_per_group(other._doodads_per_group)
@@ -51,6 +49,7 @@ public:
   {
     std::swap (extents, other.extents);
     pos = other.pos;
+    scale = other.scale;
     dir = other.dir;
     _context = other._context;
     uid = other.uid;
@@ -67,8 +66,8 @@ public:
     std::swap(group_extents, other.group_extents);
     std::swap(dir, other.dir);
     std::swap(uid, other.uid);
+    std::swap(scale, other.scale);
     std::swap(mFlags, other.mFlags);
-    std::swap(mUnknown, other.mUnknown);
     std::swap(mNameset, other.mNameset);
     std::swap(_doodadset, other._doodadset);
     std::swap(_doodads_per_group, other._doodads_per_group);

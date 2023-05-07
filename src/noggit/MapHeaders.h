@@ -108,7 +108,7 @@ struct ENTRY_MODF
   uint16_t  flags;
   uint16_t  doodadSet;
   uint16_t  nameSet;
-  uint16_t  unknown;
+  uint16_t  scale;
 };
 
 struct MapChunkHeader {

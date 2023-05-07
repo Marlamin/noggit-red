@@ -199,7 +199,7 @@ namespace Noggit
                   {
                     NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
                                                                    Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
-                    world->scale_selected_models(v, World::m2_scaling_type::set);
+                    world->scale_selected_models(v, World::object_scaling_type::set);
                     NOGGIT_ACTION_MGR->endAction();
                   }
                 }
@@ -214,7 +214,7 @@ namespace Noggit
                     {
                       NOGGIT_ACTION_MGR->beginAction(reinterpret_cast<MapView*>(parent),
                                                                      Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
-                      world->scale_selected_models(_scale->value(), World::m2_scaling_type::mult);
+                      world->scale_selected_models(_scale->value(), World::object_scaling_type::mult);
                       NOGGIT_ACTION_MGR->endAction();
                     }
                     else // reset value
@@ -268,7 +268,8 @@ namespace Noggit
 
           auto obj = std::get<selected_object_type>(selection);
 
-          _scale->setEnabled(obj->which() != eWMO);
+          //_scale->setEnabled(obj->which() != eWMO);
+          _scale->setEnabled(true);
 
           _position_x->setValue(obj->pos.x);
           _position_y->setValue(obj->pos.y);

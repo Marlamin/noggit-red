@@ -119,8 +119,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
-      float wmo_scale = 0.f;
-      float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
+      float& scale = obj_instance->scale;
 
       glm::vec3 new_scale;
       glm::quat new_orientation;
@@ -254,8 +253,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
-      float wmo_scale = 0.f;
-      float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
+      float& scale = obj_instance->scale;
 
       glm::vec3 new_scale;
       glm::quat new_orientation;
