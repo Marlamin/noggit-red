@@ -302,6 +302,26 @@ public:
     static std::vector<std::string> getWMOAreaNames(int WMOId);
 };
 
+class GameObjectDisplayInfoDB : public DBCFile
+{
+public:
+    GameObjectDisplayInfoDB() :
+        DBCFile("DBFilesClient\\GameObjectDisplayInfo.dbc")
+    { }
+
+    /// Fields
+    static const size_t ID = 0;        // uint
+    static const size_t ModelName = 1;        // string
+    static const size_t Sounds = 2;    // int[10]
+    static const size_t GeoBoxMinX = 12;        // float
+    static const size_t GeoBoxMinY = 13;        // float
+    static const size_t GeoBoxMinZ = 14;        // float
+    static const size_t GeoBoxMaxX = 15;        // float
+    static const size_t GeoBoxMaxY = 16;        // float
+    static const size_t GeoBoxMaxZ = 17;        // float
+    static const size_t ObjectEffectPackageID = 18;        // int
+};
+
 void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData);
 
 const char * getGroundEffectDoodad(unsigned int effectID, int DoodadNum);
@@ -323,3 +343,4 @@ extern ZoneMusicDB gZoneMusicDB;
 extern ZoneIntroMusicTableDB gZoneIntroMusicTableDB;
 extern SoundEntriesDB gSoundEntriesDB;
 extern WMOAreaTableDB gWMOAreaTableDB;
+extern GameObjectDisplayInfoDB gGameObjectDisplayInfoDB;

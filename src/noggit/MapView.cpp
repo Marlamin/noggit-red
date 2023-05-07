@@ -50,6 +50,12 @@
 #include <variant>
 #include <noggit/Selection.h>
 
+#ifdef USE_MYSQL_UID_STORAGE
+#include <mysql/mysql.h>
+
+#include <QtCore/QSettings>
+#endif
+
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_settings.hpp>
 
@@ -2597,6 +2603,19 @@ void MapView::createGUI()
   connect(_main_window, &Noggit::Ui::Windows::NoggitWindow::exitPromptOpened, this, &MapView::on_exit_prompt);
 
   set_editing_mode (editing_mode::ground);
+
+  // do we need to do this every tick ?
+#ifdef USE_MYSQL_UID_STORAGE
+  if (_settings->value("project/mysql/enabled").toBool())
+  {
+      if (mysql::hasMaxUIDStoredDB(_world->getMapID()))
+      {
+        _status_database->setText("MySQL UID sync enabled: "
+            + _settings->value("project/mysql/server").toString() + ":"
+            + _settings->value("project/mysql/port").toString());
+      }
+  }
+#endif
 }
 
 void MapView::on_exit_prompt()
@@ -2638,6 +2657,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_time (new QLabel (this))
   , _status_fps (new QLabel (this))
   , _status_culling (new QLabel (this))
+  , _status_database(new QLabel(this))
   , _texBrush{new OpenGL::texture{}}
   , _transform_gizmo(Noggit::Ui::Tools::ViewportGizmo::GizmoContext::MAP_VIEW)
   , _tablet_manager(Noggit::TabletManager::instance()),
@@ -2694,6 +2714,12 @@ MapView::MapView( math::degrees camera_yaw0
       , &QObject::destroyed
       , _main_window
       , [=] { _main_window->statusBar()->removeWidget (_status_culling); }
+  );
+  _main_window->statusBar()->addWidget(_status_database);
+  connect(this
+      , &QObject::destroyed
+      , _main_window
+      , [=] { _main_window->statusBar()->removeWidget(_status_database); }
   );
 
   moving = strafing = updown = lookat = turn = 0.0f;
