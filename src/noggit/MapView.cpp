@@ -1596,7 +1596,7 @@ void MapView::setupAssistMenu()
 
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
           _world->importADTHeightmap(_camera.position, adt_import_height_params_multiplier->value(),
-                                     adt_import_height_params_mode->currentIndex());
+                                     adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
         }
       }
@@ -1665,7 +1665,7 @@ void MapView::setupAssistMenu()
           OpenGL::context::scoped_setter const _(::gl, context());
 
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
-          _world->importADTVertexColorMap(_camera.position, adt_import_vcol_params_mode->currentIndex());
+          _world->importADTVertexColorMap(_camera.position, adt_import_vcol_params_mode->currentIndex(), adt_import_vcol_params_mode_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
         }
       }
@@ -1820,7 +1820,7 @@ void MapView::setupAssistMenu()
             makeCurrent();
             OpenGL::context::scoped_setter const _(::gl, context());
             NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
-            _world->importAllADTsHeightmaps(adt_import_height_params_multiplier->value(), adt_import_height_params_mode->currentIndex());
+            _world->importAllADTsHeightmaps(adt_import_height_params_multiplier->value(), adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
             NOGGIT_ACTION_MGR->endAction();
         )
 
@@ -1839,7 +1839,7 @@ void MapView::setupAssistMenu()
           makeCurrent();
           OpenGL::context::scoped_setter const _(::gl, context());
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
-          _world->importAllADTVertexColorMaps(adt_import_vcol_params_mode->currentIndex());
+          _world->importAllADTVertexColorMaps(adt_import_vcol_params_mode->currentIndex(), adt_import_vcol_params_mode_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
       )
 
