@@ -143,7 +143,7 @@ public:
   QImage getNormalmapImage();
   void setHeightmapImage(QImage const& image, float multiplier, int mode, bool tiledEdges);
   void setAlphaImage(QImage const& image, unsigned layer);
-  void setVertexColorImage(QImage const& image, int mode);
+  void setVertexColorImage(QImage const& image, int mode, bool tiledEdges);
   void registerChunkUpdate(unsigned flags) { _chunk_update_flags |= flags; };
   void endChunkUpdates() { _chunk_update_flags = 0; };
   std::array<float, 145 * 256 * 4>& getChunkHeightmapBuffer() { return _chunk_heightmap_buffer; };

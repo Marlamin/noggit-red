@@ -1612,6 +1612,9 @@ void MapView::setupAssistMenu()
   adt_import_vcol_params_layout->addWidget(adt_import_vcol_params_mode);
   adt_import_vcol_params_mode->addItems({"Set", "Add", "Subtract", "Multiply"});
 
+  QCheckBox* adt_import_vcol_params_mode_tiled_edges = new QCheckBox("Tiled Edges", adt_import_vcol_params);
+  adt_import_vcol_params_layout->addWidget(adt_import_vcol_params_mode_tiled_edges);
+
   QPushButton* adt_import_vcol_params_okay = new QPushButton("Okay", adt_import_vcol_params);
   adt_import_vcol_params_layout->addWidget(adt_import_vcol_params_okay);
 
@@ -1646,7 +1649,7 @@ void MapView::setupAssistMenu()
         img.load(filepath, "PNG");
 
         NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
-        _world->importADTVertexColorMap(_camera.position, img, adt_import_vcol_params_mode->currentIndex());
+        _world->importADTVertexColorMap(_camera.position, img, adt_import_vcol_params_mode->currentIndex(), adt_import_vcol_params_mode_tiled_edges->isChecked());
         NOGGIT_ACTION_MGR->endAction();
       }
     }

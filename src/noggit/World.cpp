@@ -1934,7 +1934,7 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, int mode)
         if (img.width() != 257 || img.height() != 257)
           img = img.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
 
-        tile->setVertexColorImage(img, mode);
+        tile->setVertexColorImage(img, mode, false);
 
       }
   );
@@ -1964,7 +1964,7 @@ void World::ensureAllTilesetsADT(glm::vec3 const& pos)
   });
 }
 
-void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode)
+void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode, bool tiledEdges)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -1972,14 +1972,16 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, i
     NOGGIT_CUR_ACTION->registerChunkVertexColorChange(chunk);
   });
 
-  if (image.width() != 257 || image.height() != 257)
+  int desiredDimensions = tiledEdges ? 256 : 257;
+
+  if (image.width() != desiredDimensions || image.height() != desiredDimensions)
   {
-    QImage scaled = image.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+    QImage scaled = image.scaled(desiredDimensions, desiredDimensions, Qt::AspectRatioMode::IgnoreAspectRatio);
 
     for_tile_at ( pos
       , [&] (MapTile* tile)
         {
-          tile->setVertexColorImage(scaled, mode);
+          tile->setVertexColorImage(scaled, mode, tiledEdges);
         }
     );
 
@@ -1989,7 +1991,7 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, i
     for_tile_at ( pos
       , [&] (MapTile* tile)
         {
-          tile->setVertexColorImage(image, mode);
+          tile->setVertexColorImage(image, mode, tiledEdges);
         }
     );
   }
@@ -2895,11 +2897,11 @@ void World::importAllADTVertexColorMaps(unsigned int mode)
         if (img.width() != 257 || img.height() != 257)
         {
           QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
-          mTile->setVertexColorImage(scaled, mode);
+          mTile->setVertexColorImage(scaled, mode, false);
         }
         else
         {
-          mTile->setVertexColorImage(img, mode);
+          mTile->setVertexColorImage(img, mode, false);
         }
 
         mTile->saveTile(this);

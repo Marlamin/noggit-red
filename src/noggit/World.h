@@ -238,7 +238,7 @@ public:
   void importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode, bool tiledEdges);
   void importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode);
   void importADTVertexColorMap(glm::vec3 const& pos, int mode);
-  void importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode);
+  void importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode, bool tiledEdges);
 
   void importAllADTsAlphamaps();
   void importAllADTsHeightmaps(float multiplier, unsigned mode);

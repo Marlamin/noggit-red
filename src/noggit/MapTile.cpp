@@ -1420,7 +1420,7 @@ QImage MapTile::getVertexColorsImage()
   return std::move(image);
 }
 
-void MapTile::setVertexColorImage(QImage const& image, int mode)
+void MapTile::setVertexColorImage(QImage const& image, int mode, bool tiledEdges)
 {
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
@@ -1443,6 +1443,11 @@ void MapTile::setVertexColorImage(QImage const& image, int mode)
 
           bool const erp = plain % DSUM / SUM;
           unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+
+          if (tiledEdges && ((y == 16 && l == 15) || (x == 16 && k == 15)))
+          {
+              continue;
+          }
 
           switch (mode)
           {
@@ -1483,8 +1488,68 @@ void MapTile::setVertexColorImage(QImage const& image, int mode)
           }
 
         }
-
       chunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+    }
+  }
+
+  if (tiledEdges)
+  {
+    if (index.z > 0)
+    {
+      getWorld()->for_tile_at(TileIndex{ index.x, index.z-1}
+        , [&](MapTile* tile)
+        {
+          for (int chunk_x = 0; chunk_x < 16; ++chunk_x)
+          {
+            MapChunk* targetChunk = tile->getChunk(chunk_x, 15);
+            MapChunk* sourceChunk = this->getChunk(chunk_x, 0);
+            targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+            for (int vert_x = 0; vert_x < 9; ++vert_x)
+            {
+                int target_vert = 136 + vert_x;
+                int source_vert = vert_x;
+
+                targetChunk->getVertexColors()[target_vert] = sourceChunk->getVertexColors()[source_vert];
+            }
+          }
+          tile->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+        }
+      );
+    }
+
+    if (index.x > 1)
+    {
+      getWorld()->for_tile_at(TileIndex{ index.x-1, index.z}
+        , [&](MapTile* tile)
+        {
+          for (int chunk_y = 0; chunk_y < 16; ++chunk_y)
+          {
+            MapChunk* targetChunk = tile->getChunk(15, chunk_y);
+            MapChunk* sourceChunk = this->getChunk(0, chunk_y);
+            targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+            for (int vert_y = 0; vert_y < 9; ++vert_y)
+            {
+                int target_vert = vert_y * 17 + 8;
+                int source_vert = vert_y * 17;
+                targetChunk->getVertexColors()[target_vert] = sourceChunk->getVertexColors()[source_vert];
+            }
+          }
+          tile->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+        }
+      );
+    }
+
+    if (index.x > 1 && index.z > 1)
+    {
+      getWorld()->for_tile_at(TileIndex { index.x-1, index.z-1 }
+        , [&] (MapTile* tile)
+        {
+          MapChunk* targetChunk = tile->getChunk(15, 15);
+          targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+          tile->getChunk(15,15)->getVertexColors()[144] = this->getChunk(0,0)->getVertexColors()[0];
+          tile->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+        }
+      );
     }
   }
 }
