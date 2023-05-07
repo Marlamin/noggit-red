@@ -818,6 +818,7 @@ void MapView::setupObjectEditorUi()
     , &_rotate_along_ground
     , &_rotate_along_ground_smooth
     , &_rotate_along_ground_random
+    , &_move_model_snap_to_objects
     , this
   );
   _tool_panel_dock->registerTool("Object Editor", objectEditor);
@@ -3479,6 +3480,7 @@ void MapView::tick (float dt)
         else
         {
           bool snapped = false;
+          bool snapped_to_object = false;
           if (_world->has_multiple_model_selected())
           {
             NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
@@ -3508,14 +3510,74 @@ void MapView::tick (float dt)
             {
               NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                              Noggit::ActionModalityControllers::eMMB );
-              _world->set_selected_models_pos(_cursor_pos, false);
-              snapped = true;
+
+              if (_move_model_to_cursor_position.get() || _move_model_snap_to_objects.get())
+              {
+                selection_result results(intersect_result(false));
+
+                if (!results.empty())
+                {
+                    for (auto result = results.begin(); result != results.end(); result++)
+                    {
+                        auto const& hit(result->second);
+                        bool is_selected_model = false;
+
+                        // if a terrain is found first use that (terrain cursor pos position updated on move already)
+                        if (hit.index() == eEntry_MapChunk && _move_model_to_cursor_position.get())
+                        {
+                            break;
+                        }
+
+                        if (hit.index() == eEntry_Object && _move_model_snap_to_objects.get())
+                        {
+                            auto obj_hit = std::get<selected_object_type>(hit);
+                            auto obj_hit_type = obj_hit->which();
+
+                            // don't snap to animated models
+                            if (obj_hit_type == eMODEL)
+                            {
+                                auto m2_model_hit = static_cast<ModelInstance*>(obj_hit);
+                                if (m2_model_hit->model->animated_mesh())
+                                    continue;
+                            }
+
+                            // find and ignore current object/selected models or it will keep snaping to itself
+                            for (auto& entry : _world->current_selection())
+                            {
+                                auto type = entry.index();
+                                if (type == eEntry_Object)
+                                {
+                                    auto& selection_obj = std::get<selected_object_type>(entry);
+                                    if (selection_obj->uid == obj_hit->uid)
+                                    {
+                                        is_selected_model = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (is_selected_model)
+                                continue;
+                            auto hit_pos = intersect_ray().position(result->first);
+                            _cursor_pos = hit_pos;
+                            snapped_to_object = true;
+                            // TODO : rotate objects to objects normal
+                            // if (_rotate_doodads_along_doodads.get())
+                            //    _world->rotate_selected_models_to_object_normal(_rotate_along_ground_smooth.get(), obj_hit, hit_pos, glm::transpose(model_view()), _rotate_doodads_along_wmos.get());
+                            break;
+                        }
+                    }
+                }
+                _world->set_selected_models_pos(_cursor_pos, false);
+                snapped = true;
+              }
             }
           }
 
           if (snapped && _rotate_along_ground.get())
           {
-            _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
+            if (!snapped_to_object)
+              _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
+
             if (_rotate_along_ground_random.get())
             {
               float minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
@@ -4091,6 +4153,7 @@ selection_result MapView::intersect_result(bool terrain_only)
     , _draw_wmo.get()
     , _draw_models.get()
     , _draw_hidden_models.get()
+    , _draw_wmo_exterior.get()
     )
   );
 
@@ -4404,6 +4467,8 @@ void MapView::draw_map()
                , _display_all_water_layers.get() ? -1 : _displayed_water_layer.get()
                , _display_mode
                , _draw_occlusion_boxes.get()
+               ,false
+               , _draw_wmo_exterior.get()
                );
 
   // reset after each world::draw call

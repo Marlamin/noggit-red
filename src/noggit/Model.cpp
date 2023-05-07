@@ -33,7 +33,7 @@ void Model::finishLoading()
 {
   BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::NoggitApplication::instance()->clientData());
 
-  if (f.isEof() || !f.getSize())
+  if (f.isEof() || f.getSize() < sizeof(ModelHeader))
   {
     LogError << "Error loading file \"" << _file_key.stringRepr() << "\". Aborting to load model." << std::endl;
     finished = true;
@@ -755,9 +755,9 @@ void Bone::calcMatrix(glm::mat4x4 const& model_view
 }
 
 
-std::vector<float> Model::intersect (glm::mat4x4 const& model_view, math::ray const& ray, int animtime)
+std::vector<std::pair<float, std::tuple<int, int, int>>> Model::intersect (glm::mat4x4 const& model_view, math::ray const& ray, int animtime)
 {
-  std::vector<float> results;
+  std::vector<std::pair<float, std::tuple<int, int, int>>> results;
 
   if (!finishedLoading() || loading_failed())
   {
@@ -782,7 +782,7 @@ std::vector<float> Model::intersect (glm::mat4x4 const& model_view, math::ray co
           fake_geom.vertices[fake_geom.indices[i + 2]])
         )
       {
-        results.emplace_back (*distance);
+        results.emplace_back (*distance, std::make_tuple(i, i+1, 1+2));
         return results;
       }
     }
@@ -800,7 +800,7 @@ std::vector<float> Model::intersect (glm::mat4x4 const& model_view, math::ray co
                                     _vertices[_indices[i + 2]].position)
           )
       {
-        results.emplace_back (*distance);
+        results.emplace_back (*distance, std::make_tuple(i, i + 1, 1 + 2));
       }
     }
   }

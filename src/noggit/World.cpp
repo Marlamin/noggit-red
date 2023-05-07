@@ -788,6 +788,51 @@ MapChunk* World::getChunkAt(glm::vec3 const& pos)
   return nullptr;
 }
 
+bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds)
+{
+    bool is_indoor = false;
+    // check if model bounds is within wmo bounds then check each indor wmo group bounds
+    _model_instance_storage.for_each_wmo_instance([&](WMOInstance& wmo_instance)
+        {
+            auto wmo_extents = wmo_instance.getExtents();
+
+
+            if (obj_bounds[1].x >= wmo_extents[0].x
+                && obj_bounds[1].y >= wmo_extents[0].y
+                && obj_bounds[1].z >= wmo_extents[0].z
+                && wmo_extents[1].x >= obj_bounds[0].x
+                && wmo_extents[1].y >= obj_bounds[0].y
+                && wmo_extents[1].z >= obj_bounds[0].z)
+
+            {
+                for (int i = 0; i < (int)wmo_instance.wmo->groups.size(); ++i)
+                {
+                    auto const& group = wmo_instance.wmo->groups[i];
+
+                    if (group.is_indoor())
+                    {
+                        // must call getGroupExtent() to initialize wmo_instance.group_extents
+                        // TODO : clear group extents to free memory ?
+                        auto& group_extents = wmo_instance.getGroupExtents().at(i);
+
+                        // TODO : do a precise calculation instead of using axis aligned bounding boxes.
+                        auto test = obj_bounds[1].x >= group_extents.first.x
+                            && obj_bounds[1].y >= group_extents.first.y
+                            && obj_bounds[1].z >= group_extents.first.z
+                            && group_extents.second.x >= obj_bounds[0].x
+                            && group_extents.second.y >= obj_bounds[0].y
+                            && group_extents.second.z >= obj_bounds[0].z;
+
+                        is_indoor = test;
+                        return;
+                    }
+                }
+            }
+        });
+
+    return is_indoor;
+}
+
 selection_result World::intersect (glm::mat4x4 const& model_view
                                   , math::ray const& ray
                                   , bool pOnlyMap
@@ -796,6 +841,7 @@ selection_result World::intersect (glm::mat4x4 const& model_view
                                   , bool draw_wmo
                                   , bool draw_models
                                   , bool draw_hidden_models
+                                  , bool draw_wmo_exterior
                                   )
 {
   ZoneScopedN("World::intersect()");
@@ -848,7 +894,7 @@ selection_result World::intersect (glm::mat4x4 const& model_view
       {
         if (draw_hidden_models || !wmo_instance.wmo->is_hidden())
         {
-          wmo_instance.intersect(ray, &results);
+          wmo_instance.intersect(ray, &results, draw_wmo_exterior);
         }
       });
     }

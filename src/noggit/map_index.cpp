@@ -93,9 +93,9 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
 
   theFile.read(&mphd, sizeof(MPHD));
 
-  mHasAGlobalWMO = mphd.flags & 1;
-  mBigAlpha = (mphd.flags & 4) != 0;
-  _sort_models_by_size_class = mphd.flags & 0x8;
+  mHasAGlobalWMO = mphd.flags & FLAG_GLOBAL_OBJECT;
+  mBigAlpha = mphd.flags & FLAG_BIG_ALPHA;
+  _sort_models_by_size_class = mphd.flags & FLAG_DOODADS_SORT;
 
   if (!(mphd.flags & FLAG_SHADING))
   {
@@ -212,10 +212,14 @@ void MapIndex::save()
 
   mphd.flags = 0;
   mphd.something = 0;
+  if (mHasAGlobalWMO)
+      mphd.flags |= FLAG_GLOBAL_OBJECT;
   if (mBigAlpha)
-      mphd.flags |= 4;
+      mphd.flags |= FLAG_BIG_ALPHA;
   if (_sort_models_by_size_class)
-      mphd.flags |= 8;
+      mphd.flags |= FLAG_DOODADS_SORT;
+
+  mphd.flags |= FLAG_SHADING;
 
   wdtFile.Insert(curPos, sizeof(MPHD), (char*)&mphd);
   curPos += sizeof(MPHD);

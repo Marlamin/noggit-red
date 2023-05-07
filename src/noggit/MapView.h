@@ -147,6 +147,7 @@ public:
   Noggit::BoolToggleProperty _draw_wmo = {true};
   Noggit::BoolToggleProperty _draw_water = {true};
   Noggit::BoolToggleProperty _draw_wmo_doodads = {true};
+  Noggit::BoolToggleProperty _draw_wmo_exterior = { true };
   Noggit::BoolToggleProperty _draw_models = {true};
   Noggit::BoolToggleProperty _draw_model_animations = {false};
   Noggit::BoolToggleProperty _draw_hole_lines = {false};
@@ -371,8 +372,11 @@ private:
 
   Noggit::BoolToggleProperty _locked_cursor_mode = {false};
   Noggit::BoolToggleProperty _move_model_to_cursor_position = {true};
+  Noggit::BoolToggleProperty _move_model_snap_to_objects = { true };
   Noggit::BoolToggleProperty _snap_multi_selection_to_ground = {false};
   Noggit::BoolToggleProperty _rotate_along_ground = {true };
+  Noggit::BoolToggleProperty _rotate_doodads_along_doodads = { false };
+  Noggit::BoolToggleProperty _rotate_doodads_along_wmos = { false };
   Noggit::BoolToggleProperty _rotate_along_ground_smooth = {true };
   Noggit::BoolToggleProperty _rotate_along_ground_random = {false };
   Noggit::BoolToggleProperty _use_median_pivot_point = {true};

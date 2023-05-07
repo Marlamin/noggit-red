@@ -657,7 +657,7 @@ namespace Noggit
             _ambiant_multiplier->setValue(record.getFloat(AreaDB::AmbientMultiplier) * 100);
 
             int sound_provider_id = record.getInt(AreaDB::SoundProviderPreferences);
-            if (sound_provider_id != 0)
+            if (sound_provider_id != 0 && gSoundProviderPreferencesDB.CheckIfIdExists(sound_provider_id))
             {
                 int row_id = gSoundProviderPreferencesDB.getRecordRowId(sound_provider_id);
                 _sound_provider_preferences_cbbox->setCurrentIndex(row_id + 1); // index 0 = "None"
@@ -666,7 +666,7 @@ namespace Noggit
                 _sound_provider_preferences_cbbox->setCurrentIndex(0);
 
             int underwater_sound_provider_id = record.getInt(AreaDB::UnderwaterSoundProviderPreferences);
-            if (underwater_sound_provider_id != 0)
+            if (underwater_sound_provider_id != 0 && gSoundProviderPreferencesDB.CheckIfIdExists(underwater_sound_provider_id))
             {
                 int row_id = gSoundProviderPreferencesDB.getRecordRowId(underwater_sound_provider_id);
                 _underwater_sound_provider_preferences_cbbox->setCurrentIndex(row_id + 1); // index 0 = "None"
@@ -675,49 +675,69 @@ namespace Noggit
                 _underwater_sound_provider_preferences_cbbox->setCurrentIndex(0);
 
             int zone_music_id = record.getInt(AreaDB::ZoneMusic);
-            _zone_music_button->setProperty("id", zone_music_id);
-            if (zone_music_id != 0)
+            if (zone_music_id != 0 && gZoneMusicDB.CheckIfIdExists(zone_music_id))
             {
+                _zone_music_button->setProperty("id", zone_music_id);
                 auto zone_music_record = gZoneMusicDB.getByID(zone_music_id);
                 std::stringstream ss;
                 ss << zone_music_id << "-" << zone_music_record.getString(ZoneMusicDB::Name);
                 _zone_music_button->setText(ss.str().c_str());
             }
             else
+            {
                 _zone_music_button->setText("-NONE-");
-
+                _zone_music_button->setProperty("id", 0);
+            }
 
             int zone_intro_music_id = record.getInt(AreaDB::ZoneIntroMusicTable);
-            _zone_intro_music_button->setProperty("id", zone_intro_music_id);
-            if (zone_intro_music_id != 0)
+            if (zone_intro_music_id != 0 && gZoneIntroMusicTableDB.CheckIfIdExists(zone_intro_music_id))
             {
+                _zone_intro_music_button->setProperty("id", zone_intro_music_id);
                 auto zone_intro_music_record = gZoneIntroMusicTableDB.getByID(zone_intro_music_id);
                 std::stringstream ss;
                 ss << zone_intro_music_id << "-" << zone_intro_music_record.getString(ZoneIntroMusicTableDB::Name);
                 _zone_intro_music_button->setText(ss.str().c_str());
             }
             else
+            {
+                _zone_intro_music_button->setProperty("id", 0);
                 _zone_intro_music_button->setText("-NONE-");
+            }
 
             int sound_ambiance_id = record.getInt(AreaDB::SoundAmbience);
-            if (sound_ambiance_id != 0)
+            if (sound_ambiance_id != 0 && gSoundAmbienceDB.CheckIfIdExists(sound_ambiance_id))
             {
                 auto sound_ambiance_record = gSoundAmbienceDB.getByID(sound_ambiance_id);
 
                 int day_sound_id = sound_ambiance_record.getInt(SoundAmbienceDB::SoundEntry_day);
-                auto sound_entry_day_record = gSoundEntriesDB.getByID(day_sound_id);
+                if (day_sound_id != 0 && gSoundEntriesDB.CheckIfIdExists(day_sound_id))
+                {
+                    auto sound_entry_day_record = gSoundEntriesDB.getByID(day_sound_id);
+                    std::stringstream ss_day;
+                    ss_day << day_sound_id << "-" << sound_entry_day_record.getString(SoundEntriesDB::Name);
+                    _sound_ambiance_day_button->setText(ss_day.str().c_str());
+                    _sound_ambiance_day_button->setProperty("id", day_sound_id);
+                }
+                else
+                {
+                    _sound_ambiance_day_button->setText("-NONE-");
+                    _sound_ambiance_day_button->setProperty("id", 0);
+                }
+
                 int night_sound_id = sound_ambiance_record.getInt(SoundAmbienceDB::SoundEntry_night);
-                auto sound_entry_night_record = gSoundEntriesDB.getByID(night_sound_id);
-
-                std::stringstream ss_day;
-                ss_day << day_sound_id << "-" << sound_entry_day_record.getString(SoundEntriesDB::Name);
-                _sound_ambiance_day_button->setText(ss_day.str().c_str());
-                _sound_ambiance_day_button->setProperty("id", day_sound_id);
-
-                std::stringstream ss_night;
-                ss_night << night_sound_id << "-" << sound_entry_night_record.getString(SoundEntriesDB::Name);
-                _sound_ambiance_night_button->setText(ss_night.str().c_str());
-                _sound_ambiance_night_button->setProperty("id", night_sound_id);
+                if (night_sound_id != 0 && gSoundEntriesDB.CheckIfIdExists(night_sound_id))
+                {
+                    auto sound_entry_night_record = gSoundEntriesDB.getByID(night_sound_id);
+                    std::stringstream ss_night;
+                    ss_night << night_sound_id << "-" << sound_entry_night_record.getString(SoundEntriesDB::Name);
+                    _sound_ambiance_night_button->setText(ss_night.str().c_str());
+                    _sound_ambiance_night_button->setProperty("id", night_sound_id);
+                }
+                else
+                {
+                    _sound_ambiance_night_button->setText("-NONE-");
+                    _sound_ambiance_night_button->setProperty("id", 0);
+                }
             }
             else
             {

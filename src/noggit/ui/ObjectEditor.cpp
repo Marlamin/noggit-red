@@ -46,6 +46,7 @@ namespace Noggit
                                  , BoolToggleProperty* rotate_along_ground
                                  , BoolToggleProperty* rotate_along_ground_smooth
                                  , BoolToggleProperty* rotate_along_ground_random
+                                 , BoolToggleProperty* move_model_snap_to_objects
                                  , QWidget* parent
                                  )
             : QWidget(parent)
@@ -214,6 +215,11 @@ namespace Noggit
                                              )
                               );
 
+      auto object_movement_snap_cb(new CheckBox("Mouse move snaps\nto objects"
+          , move_model_snap_to_objects
+          , this
+      )
+      );
 
       auto object_rotateground_cb(new CheckBox("Rotate following cursor"
           , rotate_along_ground
@@ -237,6 +243,7 @@ namespace Noggit
       object_movement_layout->addRow(object_rotategroundsmooth_cb);
       object_movement_layout->addRow(object_rotategroundrandom_cb);
       object_movement_layout->addRow(object_movement_cb);
+      object_movement_layout->addRow(object_movement_snap_cb);
 
       // multi model selection
       auto multi_select_movement_box(new QGroupBox("Multi Selection Movement", this));
@@ -629,9 +636,13 @@ namespace Noggit
           LogDebug << "object_editor::pasteObject: unknown paste mode " << pasteMode << std::endl;
           break;
         }
-        
+
+
+
         if (obj->which() == eMODEL)
         {
+          auto model_instance = static_cast<ModelInstance*>(obj);
+
           float scale(1.f);
           math::degrees::vec3 rotation(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
 
@@ -653,6 +664,18 @@ namespace Noggit
           new_obj->model->waitForChildrenLoaded();
           new_obj->recalcExtents();
 
+          // check if pos is valid (not in an interior) wmo group
+          bool is_indoor = world->isInIndoorWmoGroup(new_obj->extents);
+          if (is_indoor)
+          {
+              QMessageBox::warning
+              (nullptr
+                  , "Warning"
+                  , "You can't place M2 models inside WMO models interiors, they will not render."
+                  "\nTo place objects inside WMOs, use server side gameobjects or modify the WMO doodads(with wow blender studio)."
+              );
+          }
+
         }
         else if (obj->which() == eWMO)
         {
@@ -668,7 +691,7 @@ namespace Noggit
           new_obj->wmo->waitForChildrenLoaded();
           new_obj->recalcExtents();
         }        
-      }
+}
     }
 
     void object_editor::togglePasteMode()

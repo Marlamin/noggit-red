@@ -100,9 +100,12 @@ public:
                              , bool draw_wmo
                              , bool draw_models
                              , bool draw_hidden_models
+                             , bool draw_wmo_exterior
                              );
 
   MapChunk* getChunkAt(glm::vec3 const& pos);
+
+  bool isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds);
 
 protected:
   // Information about the currently selected model / WMO / triangle.

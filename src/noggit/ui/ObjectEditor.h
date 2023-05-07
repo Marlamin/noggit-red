@@ -60,6 +60,7 @@ namespace Noggit
                     , BoolToggleProperty* rotate_along_ground
                     , BoolToggleProperty* rotate_along_ground_smooth
                     , BoolToggleProperty* rotate_along_ground_random
+                    , BoolToggleProperty* move_model_snap_to_objects
                     , QWidget* parent = nullptr
                     );
 
