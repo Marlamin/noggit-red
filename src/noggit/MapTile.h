@@ -141,7 +141,7 @@ public:
   QImage getAlphamapImage(std::string const& filename);
   QImage getVertexColorsImage();
   QImage getNormalmapImage();
-  void setHeightmapImage(QImage const& image, float multiplier, int mode);
+  void setHeightmapImage(QImage const& image, float multiplier, int mode, bool tiledEdges);
   void setAlphaImage(QImage const& image, unsigned layer);
   void setVertexColorImage(QImage const& image, int mode);
   void registerChunkUpdate(unsigned flags) { _chunk_update_flags |= flags; };

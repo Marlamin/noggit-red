@@ -19,7 +19,7 @@
 #include <external/tracy/Tracy.hpp>
 #include <util/CurrentFunction.hpp>
 
-
+#include <noggit/World.inl>
 #include <QtCore/QSettings>
 
 #include <cassert>
@@ -1203,10 +1203,9 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
   return std::move(image);
 }
 
-void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
+void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode, bool tiledEdges)
 {
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
-
   for (int k = 0; k < 16; ++k)
   {
     for (int l = 0; l < 16; ++l)
@@ -1228,6 +1227,11 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
 
           bool const erp = plain % DSUM / SUM;
           unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+
+          if (tiledEdges && ((y == 16 && l == 15) || (x == 16 && k == 15)))
+          {
+              continue;
+          }
 
           switch (image.depth())
           {
@@ -1285,6 +1289,66 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
         }
 
       registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+    }
+  }
+
+  if (tiledEdges) // resize + fit
+  {
+    if (index.z > 0)
+    {
+      getWorld()->for_tile_at(TileIndex{ index.x, index.z-1}
+        , [&](MapTile* tile)
+        {
+          for (int chunk_x = 0; chunk_x < 16; ++chunk_x)
+          {
+            MapChunk* targetChunk = tile->getChunk(chunk_x, 15);
+            MapChunk* sourceChunk = this->getChunk(chunk_x, 0);
+            targetChunk->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+            for (int vert_x = 0; vert_x < 9; ++vert_x)
+            {
+                int target_vert = 136 + vert_x;
+                int source_vert = vert_x;
+                targetChunk->getHeightmap()[target_vert].y = sourceChunk->getHeightmap()[source_vert].y;
+            }
+          }
+          tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+        }
+      );
+    }
+
+    if (index.x > 1)
+    {
+      getWorld()->for_tile_at(TileIndex{ index.x-1, index.z}
+        , [&](MapTile* tile)
+        {
+          for (int chunk_y = 0; chunk_y < 16; ++chunk_y)
+          {
+            MapChunk* targetChunk = tile->getChunk(15, chunk_y);
+            MapChunk* sourceChunk = this->getChunk(0, chunk_y);
+            targetChunk->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+            for (int vert_y = 0; vert_y < 9; ++vert_y)
+            {
+                int target_vert = vert_y * 17 + 8;
+                int source_vert = vert_y * 17;
+                targetChunk->getHeightmap()[target_vert].y = sourceChunk->getHeightmap()[source_vert].y;
+            }
+          }
+          tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+        }
+      );
+    }
+
+    if (index.x > 1 && index.z > 1)
+    {
+      getWorld()->for_tile_at(TileIndex { index.x-1, index.z-1 }
+        , [&] (MapTile* tile)
+        {
+          MapChunk* targetChunk = tile->getChunk(15, 15);
+          targetChunk->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+          tile->getChunk(15,15)->getHeightmap()[144].y = this->getChunk(0,0)->getHeightmap()[0].y;
+          tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+        }
+      );
     }
   }
 }

@@ -1834,22 +1834,23 @@ void World::importADTAlphamap(glm::vec3 const& pos)
   );
 }
 
-void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode)
+void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
+  int desired_dimensions = tiledEdges ? 256 : 257;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
   });
 
-  if (image.width() != 257 || image.height() != 257)
+  if (image.width() != desired_dimensions || image.height() != desired_dimensions)
   {
-    QImage scaled = image.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+    QImage scaled = image.scaled(desired_dimensions, desired_dimensions, Qt::AspectRatioMode::IgnoreAspectRatio);
 
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setHeightmapImage(scaled, multiplier, mode);
+        tile->setHeightmapImage(scaled, multiplier, mode, tiledEdges);
       }
     );
 
@@ -1859,7 +1860,7 @@ void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float 
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setHeightmapImage(image, multiplier, mode);
+        tile->setHeightmapImage(image, multiplier, mode, tiledEdges);
       }
     );
   }
@@ -1896,7 +1897,7 @@ void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned 
       if (img.width() != 257 || img.height() != 257)
         img = img.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
 
-      tile->setHeightmapImage(img, multiplier, mode);
+      tile->setHeightmapImage(img, multiplier, mode, false);
 
     }
   );
@@ -2839,11 +2840,11 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
         if (img.width() != 257 || img.height() != 257)
         {
           QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
-          mTile->setHeightmapImage(scaled, multiplier, mode);
+          mTile->setHeightmapImage(scaled, multiplier, mode, false);
         }
         else
         {
-          mTile->setHeightmapImage(img, multiplier, mode);
+          mTile->setHeightmapImage(img, multiplier, mode, false);
         }
 
         mTile->saveTile(this);
