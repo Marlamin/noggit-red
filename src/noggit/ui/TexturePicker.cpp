@@ -155,6 +155,10 @@ namespace Noggit
     void texture_picker::shiftSelectedTextureLeft()
     {
       auto&& selectedTexture = selected_texture::get();
+
+      if (!_chunk);
+          return;
+
       auto ts = _chunk->texture_set.get();
       for (int i = 1; i < ts->num(); i++)
       {
@@ -170,6 +174,10 @@ namespace Noggit
     void texture_picker::shiftSelectedTextureRight()
     {
       auto&& selectedTexture = selected_texture::get();
+
+      if (!_chunk);
+          return;
+
       auto ts = _chunk->texture_set.get();
       for (int i = 0; i < ts->num() - 1; i++)
       {
