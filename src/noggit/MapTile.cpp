@@ -1517,7 +1517,7 @@ void MapTile::setVertexColorImage(QImage const& image, int mode, bool tiledEdges
       );
     }
 
-    if (index.x > 1)
+    if (index.x > 0)
     {
       getWorld()->for_tile_at(TileIndex{ index.x-1, index.z}
         , [&](MapTile* tile)
@@ -1539,7 +1539,7 @@ void MapTile::setVertexColorImage(QImage const& image, int mode, bool tiledEdges
       );
     }
 
-    if (index.x > 1 && index.z > 1)
+    if (index.x > 0 && index.z > 0)
     {
       getWorld()->for_tile_at(TileIndex { index.x-1, index.z-1 }
         , [&] (MapTile* tile)
