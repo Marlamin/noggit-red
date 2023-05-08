@@ -2905,7 +2905,7 @@ void World::importAllADTVertexColorMaps(unsigned int mode, bool tiledEdges)
         }
         else
         {
-          mTile->setVertexColorImage(img, mode, false);
+          mTile->setVertexColorImage(img, mode, tiledEdges);
         }
 
         mTile->saveTile(this);
