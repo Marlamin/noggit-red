@@ -1296,7 +1296,7 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode,
   {
     if (index.z > 0)
     {
-      getWorld()->for_tile_at(TileIndex{ index.x, index.z-1}
+      getWorld()->for_tile_at_force(TileIndex{ index.x, index.z-1}
         , [&](MapTile* tile)
         {
           for (int chunk_x = 0; chunk_x < 16; ++chunk_x)
@@ -1318,7 +1318,7 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode,
 
     if (index.x > 0)
     {
-      getWorld()->for_tile_at(TileIndex{ index.x-1, index.z}
+      getWorld()->for_tile_at_force(TileIndex{ index.x-1, index.z}
         , [&](MapTile* tile)
         {
           for (int chunk_y = 0; chunk_y < 16; ++chunk_y)
@@ -1340,7 +1340,7 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode,
 
     if (index.x > 0 && index.z > 0)
     {
-      getWorld()->for_tile_at(TileIndex { index.x-1, index.z-1 }
+      getWorld()->for_tile_at_force(TileIndex { index.x-1, index.z-1 }
         , [&] (MapTile* tile)
         {
           MapChunk* targetChunk = tile->getChunk(15, 15);
@@ -1496,7 +1496,7 @@ void MapTile::setVertexColorImage(QImage const& image, int mode, bool tiledEdges
   {
     if (index.z > 0)
     {
-      getWorld()->for_tile_at(TileIndex{ index.x, index.z-1}
+      getWorld()->for_tile_at_force(TileIndex{ index.x, index.z-1}
         , [&](MapTile* tile)
         {
           for (int chunk_x = 0; chunk_x < 16; ++chunk_x)
@@ -1519,7 +1519,7 @@ void MapTile::setVertexColorImage(QImage const& image, int mode, bool tiledEdges
 
     if (index.x > 0)
     {
-      getWorld()->for_tile_at(TileIndex{ index.x-1, index.z}
+      getWorld()->for_tile_at_force(TileIndex{ index.x-1, index.z}
         , [&](MapTile* tile)
         {
           for (int chunk_y = 0; chunk_y < 16; ++chunk_y)
@@ -1541,7 +1541,7 @@ void MapTile::setVertexColorImage(QImage const& image, int mode, bool tiledEdges
 
     if (index.x > 0 && index.z > 0)
     {
-      getWorld()->for_tile_at(TileIndex { index.x-1, index.z-1 }
+      getWorld()->for_tile_at_force(TileIndex { index.x-1, index.z-1 }
         , [&] (MapTile* tile)
         {
           MapChunk* targetChunk = tile->getChunk(15, 15);

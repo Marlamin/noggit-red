@@ -199,6 +199,9 @@ public:
   template<typename Fun>
     void for_tile_at(const TileIndex& pos, Fun&&);
 
+  template<typename Fun>
+    void for_tile_at_force(const TileIndex& pos, Fun&&);
+
   void changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius);
   void changeShader(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode);
   void stampShader(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors);
