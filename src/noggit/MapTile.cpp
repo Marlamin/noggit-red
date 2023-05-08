@@ -1316,7 +1316,7 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode,
       );
     }
 
-    if (index.x > 1)
+    if (index.x > 0)
     {
       getWorld()->for_tile_at(TileIndex{ index.x-1, index.z}
         , [&](MapTile* tile)
@@ -1338,7 +1338,7 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode,
       );
     }
 
-    if (index.x > 1 && index.z > 1)
+    if (index.x > 0 && index.z > 0)
     {
       getWorld()->for_tile_at(TileIndex { index.x-1, index.z-1 }
         , [&] (MapTile* tile)
