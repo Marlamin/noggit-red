@@ -257,6 +257,10 @@ void WMOInstance::recalcExtents()
   extents[1] = wmo_aabb.max;
 }
 
+void WMOInstance::change_nameset(uint16_t name_set)
+{
+    mNameset = name_set;
+}
 
 void WMOInstance::change_doodadset(uint16_t doodad_set)
 {

@@ -5022,6 +5022,30 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   _last_mouse_pos = event->pos();
 }
 
+void MapView::change_selected_wmo_nameset(int set)
+{
+    auto last_entry = _world->get_last_selected_model();
+    if (last_entry)
+    {
+        if (last_entry.value().index() != eEntry_Object)
+        {
+            return;
+        }
+        auto obj = std::get<selected_object_type>(last_entry.value());
+        if (obj->which() == eWMO)
+        {
+            WMOInstance* wmo = static_cast<WMOInstance*>(obj);
+            wmo->change_nameset(set);
+            _world->updateTilesWMO(wmo, model_update::none); // needed?
+            auto tiles = wmo->getTiles();
+            for (auto tile : tiles)
+            {
+                tile->changed = true;
+            }
+        }
+    }
+}
+
 void MapView::change_selected_wmo_doodadset(int set)
 {
   for (auto& selection : _world->current_selection())
@@ -5036,6 +5060,11 @@ void MapView::change_selected_wmo_doodadset(int set)
       auto wmo = static_cast<WMOInstance*>(obj);
       wmo->change_doodadset(set);
       _world->updateTilesWMO(wmo, model_update::none);
+      auto tiles = wmo->getTiles();
+      for (auto tile : tiles)
+      {
+        tile->changed = true;
+      }
     }
   }
 }

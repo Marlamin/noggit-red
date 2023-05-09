@@ -262,6 +262,7 @@ public:
   ~MapView();
 
   void tick (float dt);
+  void change_selected_wmo_nameset(int set);
   void change_selected_wmo_doodadset(int set);
   void saveMinimap(MinimapRenderSettings* settings);
   void initMinimapSave() { saving_minimap = true; };
