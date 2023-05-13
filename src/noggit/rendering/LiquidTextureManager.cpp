@@ -68,7 +68,7 @@ void LiquidTextureManager::upload()
 
     if (is_uncompressed)
     {
-      for (int j = 0; j < mip_level; ++j)
+      for (unsigned int j = 0; j < mip_level; ++j)
       {
         gl.texImage3D(GL_TEXTURE_2D_ARRAY, j, GL_RGBA8, width_, height_, N_FRAMES, 0, GL_RGBA, GL_UNSIGNED_BYTE,
                       nullptr);
@@ -80,10 +80,10 @@ void LiquidTextureManager::upload()
     else
     [[likely]]
     {
-      for (int j = 0; j < mip_level; ++j)
+      for (unsigned int j = 0; j < mip_level; ++j)
       {
         gl.compressedTexImage3D(GL_TEXTURE_2D_ARRAY, j, tex.compression_format().value(), width_, height_, N_FRAMES,
-                                0, tex.compressed_data()[j].size() * N_FRAMES, nullptr);
+                                0, static_cast<GLsizei>(tex.compressed_data()[j].size() * N_FRAMES), nullptr);
 
         width_ = std::max(width_ >> 1, 1);
         height_ = std::max(height_ >> 1, 1);

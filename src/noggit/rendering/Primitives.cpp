@@ -167,7 +167,7 @@ void WireBox::setup_buffers()
       }
     }
 
-    _indice_count = indices.size();
+    _indice_count = static_cast<int>(indices.size());
 
     gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>
         (_vertices_vbo, vertices, GL_STATIC_DRAW);

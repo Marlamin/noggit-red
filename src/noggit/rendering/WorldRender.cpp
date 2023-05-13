@@ -111,7 +111,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       tile->renderer()->setFrustumCulled(false);
       tile->renderer()->setObjectsFrustumCullTest(2);
       tile->renderer()->setOccluded(false);
-      _world->_loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(tile->index.x, tile->index.z), tile);
+      _world->_loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(static_cast<int>(tile->index.x), static_cast<int>(tile->index.z)), tile);
 
       tile_counter++;
       _world->_n_loaded_tiles++;
@@ -122,7 +122,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     if (frustum.intersects(tile_extents[1], tile_extents[0]) || tile->getChunkUpdateFlags())
     {
       tile->calcCamDist(camera_pos);
-      _world->_loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(tile->index.x, tile->index.z), tile);
+      _world->_loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(static_cast<int>(tile->index.x), static_cast<int>(tile->index.z)), tile);
 
       tile->renderer()->setObjectsFrustumCullTest(1);
       if (frustum.contains(tile_extents[0]) && frustum.contains(tile_extents[1]))
@@ -1687,7 +1687,7 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
       {
         for (int j = 0; j < 128; ++j)
         {
-          combined_image->setPixelColor(tile_idx.x * 128 + j, tile_idx.z * 128 + i, scaled_image.pixelColor(j, i));
+          combined_image->setPixelColor(static_cast<int>(tile_idx.x) * 128 + j, static_cast<int>(tile_idx.z) * 128 + i, scaled_image.pixelColor(j, i));
         }
       }
 

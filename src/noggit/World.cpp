@@ -428,7 +428,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 
     auto normalizedQ = glm::normalize(q);
 
-    math::degrees::vec3 new_dir;
+    //math::degrees::vec3 new_dir;
     // To euler, because wow
       /*
       // roll (x-axis rotation)
@@ -1942,7 +1942,7 @@ void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned 
 
       size_t desiredSize = tiledEdges ? 256 : 257;
       if (img.width() != desiredSize || img.height() != desiredSize)
-        img = img.scaled(desiredSize, desiredSize, Qt::AspectRatioMode::IgnoreAspectRatio);
+        img = img.scaled(static_cast<int>(desiredSize), static_cast<int>(desiredSize), Qt::AspectRatioMode::IgnoreAspectRatio);
 
       tile->setHeightmapImage(img, multiplier, mode, tiledEdges);
 
@@ -1980,7 +1980,7 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, int mode, bool tiledEd
 
         size_t desiredSize = tiledEdges ? 256 : 257;
         if (img.width() != desiredSize || img.height() != desiredSize)
-          img = img.scaled(desiredSize, desiredSize, Qt::AspectRatioMode::IgnoreAspectRatio);
+          img = img.scaled(static_cast<int>(desiredSize), static_cast<int>(desiredSize), Qt::AspectRatioMode::IgnoreAspectRatio);
 
         tile->setVertexColorImage(img, mode, tiledEdges);
 
@@ -2024,7 +2024,7 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, i
 
   if (image.width() != desiredDimensions || image.height() != desiredDimensions)
   {
-    QImage scaled = image.scaled(desiredDimensions, desiredDimensions, Qt::AspectRatioMode::IgnoreAspectRatio);
+    QImage scaled = image.scaled(static_cast<int>(desiredDimensions), static_cast<int>(desiredDimensions), Qt::AspectRatioMode::IgnoreAspectRatio);
 
     for_tile_at ( pos
       , [&] (MapTile* tile)
@@ -2195,7 +2195,7 @@ void World::fixAllGaps()
     // fix the gaps with the adt at the left of the current one
     if (left)
     {
-      for (size_t ty = 0; ty < 16; ty++)
+      for (unsigned ty = 0; ty < 16; ty++)
       {
         MapChunk* chunk = tile->getChunk(0, ty);
         NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
@@ -2210,7 +2210,7 @@ void World::fixAllGaps()
     // fix the gaps with the adt above the current one
     if (above)
     {
-      for (size_t tx = 0; tx < 16; tx++)
+      for (unsigned tx = 0; tx < 16; tx++)
       {
         MapChunk* chunk = tile->getChunk(tx, 0);
         NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
@@ -2223,9 +2223,9 @@ void World::fixAllGaps()
     }
 
     // fix gaps within the adt
-    for (size_t ty = 0; ty < 16; ty++)
+    for (unsigned ty = 0; ty < 16; ty++)
     {
-      for (size_t tx = 0; tx < 16; tx++)
+      for (unsigned tx = 0; tx < 16; tx++)
       {
         MapChunk* chunk = tile->getChunk(tx, ty);
         NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
@@ -2269,8 +2269,8 @@ bool World::isUnderMap(glm::vec3 const& pos)
 
   if (mapIndex.tileLoaded(tile))
   {
-    size_t chnkX = (pos.x / CHUNKSIZE) - tile.x * 16;
-    size_t chnkZ = (pos.z / CHUNKSIZE) - tile.z * 16;
+    unsigned chnkX = (pos.x / CHUNKSIZE) - tile.x * 16;
+    unsigned chnkZ = (pos.z / CHUNKSIZE) - tile.z * 16;
 
     // check using the cursor height
     return (mapIndex.getTile(tile)->getChunk(chnkX, chnkZ)->getMinHeight()) > pos.y + 2.0f;

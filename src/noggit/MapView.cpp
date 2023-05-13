@@ -2959,7 +2959,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
       if (!saving_minimap)
         return;
 
-      if (_mmap_async_index < 4096 && _mmap_render_index < progress->maximum())
+      if (_mmap_async_index < 4096 && static_cast<int>(_mmap_render_index) < progress->maximum())
       {
         TileIndex tile = TileIndex(_mmap_async_index / 64, _mmap_async_index % 64);
 
@@ -3073,7 +3073,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
         return;
 
 
-      if (_mmap_async_index < 4096 && _mmap_render_index < progress->maximum())
+      if (_mmap_async_index < 4096 && static_cast<int>(_mmap_render_index) < progress->maximum())
       {
         if (selected_tiles->at(_mmap_async_index))
         {

@@ -73,7 +73,7 @@ void WMOGroupRender::upload()
     {
       // identify if we can fit this batch into current draw_call
       unsigned n_required_slots = use_tex2 ? 2 : 1;
-      unsigned n_avaliable_slots = draw_call->samplers.size() - draw_call->n_used_samplers;
+      unsigned n_avaliable_slots = static_cast<unsigned>(draw_call->samplers.size()) - draw_call->n_used_samplers;
       unsigned n_slots_to_be_occupied = 0;
 
       std::vector<int>::iterator it2;
@@ -318,7 +318,7 @@ void WMOGroupRender::draw(OpenGL::Scoped::use_program& wmo_shader
       if (draw_call.samplers[i] < 0)
         break;
 
-      gl.activeTexture(GL_TEXTURE0 + 1 + i);
+      gl.activeTexture(static_cast<GLenum>(GL_TEXTURE0 + 1 + i));
       gl.bindTexture(GL_TEXTURE_2D_ARRAY, draw_call.samplers[i]);
     }
 
@@ -340,7 +340,7 @@ void WMOGroupRender::initRenderBatches()
   {
     for (std::size_t i = 0; i < (batch.vertex_end - batch.vertex_start + 1); ++i)
     {
-      _render_batch_mapping[batch.vertex_start + i] = batch_counter + 1;
+      _render_batch_mapping[batch.vertex_start + i] = static_cast<unsigned>(batch_counter + 1);
     }
 
     std::uint32_t flags = 0;

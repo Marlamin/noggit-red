@@ -32,7 +32,7 @@ void ImageGaussianBlurNode::compute()
   QImage* image = static_cast<ImageData*>(_in_ports[1].in_value.lock().get())->value_ptr();
 
   QImage new_image = *image;
-  for (int i = 0; i < defaultPortData<UnsignedIntegerData>(PortType::In, 3)->value(); ++i)
+  for (unsigned i = 0; i < defaultPortData<UnsignedIntegerData>(PortType::In, 3)->value(); ++i)
   {
     GaussianBlur blur(5.0,
                       std::max(defaultPortData<DecimalData>(PortType::In, 2)->value(), 1.0));

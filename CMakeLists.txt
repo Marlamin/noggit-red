@@ -134,7 +134,6 @@ ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/qtimgui")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/QtAdvancedDockingSystem")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/NodeEditor")
 option(BUILD_LIBNOISE_EXAMPLES "Build libnoise examples" OFF)
-option(BUILD_LIBNOISE_UTILS "Build libnoise utils" OFF)
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/libnoise")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/glm")
 
@@ -444,3 +443,24 @@ ENDIF()
 
 includePlatform("pack")
 
+# Disable warnings
+if(WIN32)
+  target_compile_options(lodepng PRIVATE /wd4334 /wd4267)
+  target_compile_options(FramelessHelper PRIVATE /wd4996)
+  target_compile_options(ColorWidgets-qt5 PRIVATE /wd4996)
+  target_compile_options(qtadvanceddocking PRIVATE /wd4996)
+  target_compile_options(nodes PRIVATE /wd4100 /wd4267 /wd4456 /wd4101 /wd5054 /wd4458 /wd4018 /wd4189)
+  target_compile_options(noiseutils-static PRIVATE /wd4244)
+
+  foreach(file ${png_blp_sources})
+    set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS "/wd4244 /wd4819 /wd4018 /wd4996 /wd4267 /wd4305")
+  endforeach()
+
+  foreach(file ${imguipiemenu_sources})
+    set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS "/wd4244 /wd4267")
+  endforeach()
+
+  foreach(file ${gradienteditor_sources})
+  set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS "/wd4996")
+  endforeach()
+endif()

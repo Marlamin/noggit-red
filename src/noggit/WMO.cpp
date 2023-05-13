@@ -105,7 +105,9 @@ void WMO::finishLoading ()
   std::size_t const num_materials (size / 0x40);
   materials.resize (num_materials);
 
-  std::map<std::uint32_t, std::size_t> texture_offset_to_inmem_index;
+  // note: used to map to size_t, but our other values don't support that.
+  //std::map<std::uint32_t, std::size_t> texture_offset_to_inmem_index;
+  std::map<std::uint32_t, std::uint32_t> texture_offset_to_inmem_index;
 
   auto load_texture
     ( [&] (std::uint32_t ofs)
@@ -114,7 +116,7 @@ void WMO::finishLoading ()
           (texbuf[ofs] ? &texbuf[ofs] : "textures/shanecube.blp");
 
         auto const mapping
-          (texture_offset_to_inmem_index.emplace(ofs, textures.size()));
+          (texture_offset_to_inmem_index.emplace(ofs, static_cast<std::uint32_t>(textures.size())));
 
         if (mapping.second)
         {
@@ -157,7 +159,7 @@ void WMO::finishLoading ()
   assert (fourcc == 'MOGI');
 
   groups.reserve(nGroups);
-  for (size_t i (0); i < nGroups; ++i) {
+  for (int i (0); i < nGroups; ++i) {
     groups.emplace_back (this, &f, i, groupnames);
   }
 

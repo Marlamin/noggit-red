@@ -91,7 +91,7 @@ bool LogicBranch::executeNode(Node* node, Node* source_node)
     return false;
 
   // Handle dependant nodes
-  for (int i = 0; i < model->nPorts(PortType::Out); ++i)
+  for (int i = 0; i < static_cast<int>(model->nPorts(PortType::Out)); ++i)
   {
     // we do not process dependant data nodes here, discard them
     if (model->dataType(PortType::Out, i).id != "logic")
@@ -180,7 +180,7 @@ bool LogicBranch::executeNodeLeaves(Node* node, Node* source_node)
   if (model->isComputed())
     return true;
 
-  for (int i = 0; i < model->nPorts(PortType::In); ++i)
+  for (int i = 0; i < static_cast<int>(model->nPorts(PortType::In)); ++i)
   {
     auto const& connections = nodeState.connectionsRef(PortType::In, i);
 
@@ -221,7 +221,7 @@ void LogicBranch::markNodesComputed(Node* start_node, bool state)
   model->setComputed(state);
   markNodeLeavesComputed(start_node, start_node, state);
 
-  for (int i = 0; i < model->nPorts(PortType::Out); ++i)
+  for (int i = 0; i < static_cast<int>(model->nPorts(PortType::Out)); ++i)
   {
     auto const& connections = nodeState.connectionsRef(PortType::Out, i);
 
@@ -247,7 +247,7 @@ void LogicBranch::markNodeLeavesComputed(Node* start_node, Node* source_node, bo
 
   model->setComputed(state);
 
-  for (int i = 0; i < model->nPorts(PortType::In); ++i)
+  for (int i = 0; i < static_cast<int>(model->nPorts(PortType::In)); ++i)
   {
     auto const& connections = nodeState.connectionsRef(PortType::In, i);
 

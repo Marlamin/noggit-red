@@ -101,7 +101,7 @@ void LightViewPreview::SetPreview(std::vector<SkyColor>& data)
 
 void LightViewPreview::UpdatePixmap(const QPixmap Updated)
 {
-	Preview->setPixmap(Updated.scaled(Preview->pixmap()->size(), Qt::IgnoreAspectRatio));
+	Preview->setPixmap(Updated.scaled(Preview->pixmap(Qt::ReturnByValueConstant{}).size(), Qt::IgnoreAspectRatio));
 }
 
 LightViewPixmap::LightViewPixmap(QSize Size, QWidget* parent)

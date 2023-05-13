@@ -69,7 +69,7 @@ Action* ActionManager::beginAction(MapView* map_view
     // clean canceled actions
     if (_undo_index)
     {
-      for (int i = 0; i < _undo_index; ++i)
+      for (unsigned i = 0; i < _undo_index; ++i)
       {
         delete _action_stack.back();
         _action_stack.pop_back();
@@ -151,7 +151,7 @@ void ActionManager::undo()
   if (_action_stack.empty())
     return;
 
-  int index = _action_stack.size() - _undo_index - 1;
+  int index = static_cast<int>(_action_stack.size()) - static_cast<int>(_undo_index) - 1;
 
   if (index < 0)
     return;
@@ -173,7 +173,7 @@ void ActionManager::redo()
   if (!_undo_index)
     return;
 
-  unsigned index = _action_stack.size() - _undo_index;
+  unsigned index = static_cast<int>(_action_stack.size()) - static_cast<int>(_undo_index);
 
   Action* action = _action_stack.at(index);
   action->undo(true);

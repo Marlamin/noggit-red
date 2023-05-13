@@ -99,7 +99,7 @@ DBCFile::Record DBCFile::addRecord(size_t id, size_t id_field)
 
   size_t old_size = data.size();
   data.resize(old_size + recordSize);
-  *reinterpret_cast<unsigned int*>(data.data() + old_size + id_field * sizeof(std::uint32_t)) = id;
+  *reinterpret_cast<unsigned int*>(data.data() + old_size + id_field * sizeof(std::uint32_t)) = static_cast<unsigned int>(id);
 
   return Record(*this, data.data() + old_size);
 }
@@ -137,7 +137,7 @@ DBCFile::Record DBCFile::addRecordCopy(size_t id, size_t id_from, size_t id_fiel
 
   Record record_from = getRecord(from_idx);
   std::copy(data.data() + from_idx * recordSize, data.data() + from_idx * recordSize + recordSize, data.data() + old_size);
-  *reinterpret_cast<unsigned int*>(data.data() + old_size + id_field * sizeof(std::uint32_t)) = id;
+  *reinterpret_cast<unsigned int*>(data.data() + old_size + id_field * sizeof(std::uint32_t)) = static_cast<unsigned int>(id);
 
   return Record(*this, data.data() + old_size);
 }
