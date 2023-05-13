@@ -513,45 +513,18 @@ namespace Noggit
       connect(_doodadSetSelector
           , qOverload<int>(&QComboBox::currentIndexChanged)
           , [this](int index) {
-              auto last_entry = _map_view->_world->get_last_selected_model();
-            if (last_entry)
-            {
-                if (last_entry.value().index() != eEntry_Object)
-                {
-                    return;
-                }
-                auto obj = std::get<selected_object_type>(last_entry.value());
-                if (obj->which() == eWMO)
-                {
-                    // use actions or directly call updateDetailInfos() ?
-                    WMOInstance* wi = static_cast<WMOInstance*>(obj);
-                    NOGGIT_ACTION_MGR->beginAction(_map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
-                    wi->change_doodadset(index);
-                    NOGGIT_ACTION_MGR->endAction();
-                }
-            }
+              NOGGIT_ACTION_MGR->beginAction(_map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+              _map_view->change_selected_wmo_doodadset(index);
+              NOGGIT_ACTION_MGR->endAction();
           });
 
       connect(_nameSetSelector
           , qOverload<int>(&QComboBox::currentIndexChanged)
           , [this](int index) {
-              auto last_entry = _map_view->_world->get_last_selected_model();
-            if (last_entry)
-            {
-                if (last_entry.value().index() != eEntry_Object)
-                {
-                    return;
-                }
-                auto obj = std::get<selected_object_type>(last_entry.value());
-                if (obj->which() == eWMO)
-                {
-                    WMOInstance* wi = static_cast<WMOInstance*>(obj);
-                    NOGGIT_ACTION_MGR->beginAction(_map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
-                    wi->mNameset = index;
-                    NOGGIT_ACTION_MGR->endAction();
 
-                }
-            }
+              NOGGIT_ACTION_MGR->beginAction(_map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+              _map_view->change_selected_wmo_nameset(index);
+              NOGGIT_ACTION_MGR->endAction();
           });
 
       auto mv_pos = mapView->pos();

@@ -103,6 +103,7 @@ public:
   void intersect (math::ray const&, selection_result*, bool do_exterior = true);
 
   void recalcExtents() override;
+  void change_nameset(uint16_t name_set);
   void ensureExtents() override;
   bool finishedLoading() override { return wmo->finishedLoading(); };
   virtual void updateDetails(Noggit::Ui::detail_infos* detail_widget) override;
