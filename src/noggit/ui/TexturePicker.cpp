@@ -156,7 +156,7 @@ namespace Noggit
     {
       auto&& selectedTexture = selected_texture::get();
 
-      if (!_chunk);
+      if (!_chunk)
           return;
 
       auto ts = _chunk->texture_set.get();
@@ -175,7 +175,7 @@ namespace Noggit
     {
       auto&& selectedTexture = selected_texture::get();
 
-      if (!_chunk);
+      if (!_chunk)
           return;
 
       auto ts = _chunk->texture_set.get();
