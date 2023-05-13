@@ -28,6 +28,7 @@
 
 
 #include <algorithm>
+#include <qmessagebox.h>
 
 
 namespace Noggit
@@ -164,8 +165,10 @@ namespace Noggit
 
       connect(ui->mysql_connect_test, &QPushButton::clicked, [this]
           {
-              save_changes();
-              mysql::testConnection();
+              QMessageBox::warning(
+                  this,
+                  tr("Not implemented"),
+                  tr("This is not implemented, i don't know what it is or what it does but it didn't comppile."));
           }
       );
 
