@@ -1880,22 +1880,23 @@ void World::importADTAlphamap(glm::vec3 const& pos)
   );
 }
 
-void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode)
+void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
+  int desired_dimensions = tiledEdges ? 256 : 257;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
   });
 
-  if (image.width() != 257 || image.height() != 257)
+  if (image.width() != desired_dimensions || image.height() != desired_dimensions)
   {
-    QImage scaled = image.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+    QImage scaled = image.scaled(desired_dimensions, desired_dimensions, Qt::AspectRatioMode::IgnoreAspectRatio);
 
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setHeightmapImage(scaled, multiplier, mode);
+        tile->setHeightmapImage(scaled, multiplier, mode, tiledEdges);
       }
     );
 
@@ -1905,13 +1906,13 @@ void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float 
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setHeightmapImage(image, multiplier, mode);
+        tile->setHeightmapImage(image, multiplier, mode, tiledEdges);
       }
     );
   }
 }
 
-void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode)
+void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -1939,16 +1940,17 @@ void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned 
       QImage img;
       img.load(filename, "PNG");
 
-      if (img.width() != 257 || img.height() != 257)
-        img = img.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+      size_t desiredSize = tiledEdges ? 256 : 257;
+      if (img.width() != desiredSize || img.height() != desiredSize)
+        img = img.scaled(desiredSize, desiredSize, Qt::AspectRatioMode::IgnoreAspectRatio);
 
-      tile->setHeightmapImage(img, multiplier, mode);
+      tile->setHeightmapImage(img, multiplier, mode, tiledEdges);
 
     }
   );
 }
 
-void World::importADTVertexColorMap(glm::vec3 const& pos, int mode)
+void World::importADTVertexColorMap(glm::vec3 const& pos, int mode, bool tiledEdges)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -1976,10 +1978,11 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, int mode)
         QImage img;
         img.load(filename, "PNG");
 
-        if (img.width() != 257 || img.height() != 257)
-          img = img.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+        size_t desiredSize = tiledEdges ? 256 : 257;
+        if (img.width() != desiredSize || img.height() != desiredSize)
+          img = img.scaled(desiredSize, desiredSize, Qt::AspectRatioMode::IgnoreAspectRatio);
 
-        tile->setVertexColorImage(img, mode);
+        tile->setVertexColorImage(img, mode, tiledEdges);
 
       }
   );
@@ -2009,7 +2012,7 @@ void World::ensureAllTilesetsADT(glm::vec3 const& pos)
   });
 }
 
-void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode)
+void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode, bool tiledEdges)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -2017,14 +2020,16 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, i
     NOGGIT_CUR_ACTION->registerChunkVertexColorChange(chunk);
   });
 
-  if (image.width() != 257 || image.height() != 257)
+  size_t desiredDimensions = tiledEdges ? 256 : 257;
+
+  if (image.width() != desiredDimensions || image.height() != desiredDimensions)
   {
-    QImage scaled = image.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+    QImage scaled = image.scaled(desiredDimensions, desiredDimensions, Qt::AspectRatioMode::IgnoreAspectRatio);
 
     for_tile_at ( pos
       , [&] (MapTile* tile)
         {
-          tile->setVertexColorImage(scaled, mode);
+          tile->setVertexColorImage(scaled, mode, tiledEdges);
         }
     );
 
@@ -2034,7 +2039,7 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, i
     for_tile_at ( pos
       , [&] (MapTile* tile)
         {
-          tile->setVertexColorImage(image, mode);
+          tile->setVertexColorImage(image, mode, tiledEdges);
         }
     );
   }
@@ -2850,7 +2855,7 @@ void World::importAllADTsAlphamaps()
   }
 }
 
-void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
+void World::importAllADTsHeightmaps(float multiplier, unsigned int mode, bool tiledEdges)
 {
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
@@ -2882,14 +2887,15 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
         QImage img;
         img.load(filename, "PNG");
 
-        if (img.width() != 257 || img.height() != 257)
+        size_t desiredSize = tiledEdges ? 256 : 257;
+        if (img.width() != desiredSize || img.height() != desiredSize)
         {
           QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
-          mTile->setHeightmapImage(scaled, multiplier, mode);
+          mTile->setHeightmapImage(scaled, multiplier, mode, tiledEdges);
         }
         else
         {
-          mTile->setHeightmapImage(img, multiplier, mode);
+          mTile->setHeightmapImage(img, multiplier, mode, tiledEdges);
         }
 
         mTile->saveTile(this);
@@ -2905,7 +2911,7 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
   }
 }
 
-void World::importAllADTVertexColorMaps(unsigned int mode)
+void World::importAllADTVertexColorMaps(unsigned int mode, bool tiledEdges)
 {
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
@@ -2937,14 +2943,15 @@ void World::importAllADTVertexColorMaps(unsigned int mode)
         QImage img;
         img.load(filename, "PNG");
 
-        if (img.width() != 257 || img.height() != 257)
+        size_t desiredSize = tiledEdges ? 256 : 257;
+        if (img.width() != desiredSize || img.height() != desiredSize)
         {
           QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
-          mTile->setVertexColorImage(scaled, mode);
+          mTile->setVertexColorImage(scaled, mode, tiledEdges);
         }
         else
         {
-          mTile->setVertexColorImage(img, mode);
+          mTile->setVertexColorImage(img, mode, tiledEdges);
         }
 
         mTile->saveTile(this);

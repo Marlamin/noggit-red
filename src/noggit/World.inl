@@ -63,6 +63,30 @@ void World::for_tile_at(TileIndex const& pos, Fun&& fun)
 }
 
 template<typename Fun>
+void World::for_tile_at_force(TileIndex const& pos, Fun&& fun)
+{
+    bool unload = !mapIndex.tileLoaded(pos) && !mapIndex.tileAwaitingLoading(pos);
+    MapTile* tile = mapIndex.loadTile(pos);
+    if (tile)
+    {
+        tile->wait_until_loaded();
+        mapIndex.setChanged(tile);
+        fun(tile);
+    }
+
+    if (unload)
+    {
+        if (tile)
+        {
+            tile->saveTile(this);
+        }
+        mapIndex.markOnDisc(pos, true);
+        mapIndex.unsetChanged(pos);
+        mapIndex.unloadTile(pos);
+    }
+}
+
+template<typename Fun>
 bool World::for_all_chunks_in_range (glm::vec3 const& pos, float radius, Fun&& fun)
 {
   bool changed (false);
