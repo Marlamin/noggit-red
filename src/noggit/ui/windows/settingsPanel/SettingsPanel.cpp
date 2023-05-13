@@ -165,7 +165,9 @@ namespace Noggit
       connect(ui->mysql_connect_test, &QPushButton::clicked, [this]
           {
               save_changes();
+              #ifdef USE_MYSQL_UID_STORAGE
               mysql::testConnection();
+              #endif
           }
       );
 
