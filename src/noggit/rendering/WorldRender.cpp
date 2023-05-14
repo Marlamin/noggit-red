@@ -933,8 +933,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
       int CurrentSkyID = CurrentSky->Id;
           
-      const int MAX_TIME_VALUE = 2880;
-      const int CurrenTime = static_cast<int>(_world->time) % MAX_TIME_VALUE;
+      const int MAX_TIME_VALUE_C = 2880;
+      const int CurrenTime = static_cast<int>(_world->time) % MAX_TIME_VALUE_C;
 
       glCullFace(GL_FRONT);
       for (Sky& sky : skies()->skies)

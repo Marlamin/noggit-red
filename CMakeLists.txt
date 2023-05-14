@@ -15,6 +15,8 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 INCLUDE(CheckCXXCompilerFlag)
 INCLUDE(cmake/cmake_function.cmake)
 INCLUDE(cmake/cmake_macro.cmake)
+option(FAST_BUILD_FETCHCONTENT "Skip FetchContent check when for existing source directories (WARNING: This means dependencies aren't updated)" OFF)
+INCLUDE(cmake/FetchContentFast.cmake)
 INCLUDE(FetchContent)
 
 #Project name
@@ -268,10 +270,6 @@ assign_source_group(
   ${ui_files}
   ${tracy_sources}
   ${tracy_headers}
-  ${archive_sources}
-  ${archive_headers}
-  ${database_sources}
-  ${database_headers}
   ${imguipiemenu_sources}
   ${imguipiemenu_headers}
 )
@@ -284,8 +282,6 @@ ADD_EXECUTABLE(noggit
   MACOSX_BUNDLE
   ${noggit_root_sources}
   ${opengl_sources}
-  ${database_sources}
-  ${database_headers}
   ${math_sources}
   ${external_sources}
   ${mysql_sources}
@@ -298,7 +294,6 @@ ADD_EXECUTABLE(noggit
   ${imguipiemenu_sources}
   ${gradienteditor_sources}
   ${tracy_sources}
-  ${archive_sources}
   ${noggit_root_headers}
   ${opengl_headers}
   ${math_headers}
@@ -313,12 +308,15 @@ ADD_EXECUTABLE(noggit
   ${imguipiemenu_headers}
   ${gradienteditor_headers}
   ${tracy_headers}
-  ${archive_headers}
   ${compiled_resource_files}
   ${compiled_ui_files}
   ${shaders}
   ${force_update_file}
 )
+
+add_library(blizzard-archive-library STATIC ${archive_sources} ${archive_headers})
+add_library(blizzard-database-library STATIC ${database_sources} ${database_headers})
+target_link_libraries(blizzard-archive-library StormLib CascLib)
 
 if (UNIX)
   FIND_PACKAGE(BZip2 REQUIRED)
@@ -356,6 +354,8 @@ TARGET_LINK_LIBRARIES (noggit
   FastNoise
   nlohmann_json::nlohmann_json
   sol2::sane
+  blizzard-archive-library
+  blizzard-database-library
 )
 
 #add distribution themes
@@ -455,12 +455,57 @@ if(WIN32)
   foreach(file ${png_blp_sources})
     set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS "/wd4244 /wd4819 /wd4018 /wd4996 /wd4267 /wd4305")
   endforeach()
+endif()
 
-  foreach(file ${imguipiemenu_sources})
-    set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS "/wd4244 /wd4267")
-  endforeach()
+option(FAST_BUILD_LIB_PCH "Use precompiled headers for libraries" OFF)
+option(FAST_BUILD_LIB_JUMBO "Use jumbo/unity builds for libraries" OFF)
 
-  foreach(file ${gradienteditor_sources})
-  set_source_files_properties(${file} PROPERTIES COMPILE_FLAGS "/wd4996")
-  endforeach()
+option(FAST_BUILD_NOGGIT_PCH "Use precompiled headers for noggit" OFF)
+option(FAST_BUILD_NOGGIT_JUMBO "Use jumbo/unity builds for noggit" OFF)
+
+if(${FAST_BUILD_LIB_PCH})
+  target_precompile_headers(FastNoise PRIVATE
+    "${fastnoise2_SOURCE_DIR}/src/FastSIMD/Internal/AVX.h"
+    "${fastnoise2_SOURCE_DIR}/src/FastSIMD/Internal/SSE.h"
+  )
+
+  file(GLOB_RECURSE NODE_EDITOR_HEADERS src/external/NodeEditor/include/nodes/internal/*.hpp)
+  target_precompile_headers(nodes PRIVATE
+    "$<$<COMPILE_LANGUAGE:CXX>:${NODE_EDITOR_HEADERS}>"
+  )
+endif()
+
+if(${FAST_BUILD_LIB_JUMBO})
+  set_target_properties(noise-static PROPERTIES UNITY_BUILD ON)
+  set_target_properties(noiseutils-static PROPERTIES UNITY_BUILD ON)
+  set_target_properties(qt_imgui_quick PROPERTIES UNITY_BUILD ON)
+  set_target_properties(qt_imgui_widgets PROPERTIES UNITY_BUILD ON)
+  set_target_properties(qtadvanceddocking PROPERTIES UNITY_BUILD ON)
+  set_target_properties(FramelessHelper PROPERTIES UNITY_BUILD ON)
+  set_target_properties(imgui PROPERTIES UNITY_BUILD ON)
+  set_target_properties(ColorWidgets-qt5 PROPERTIES UNITY_BUILD ON)
+  set_target_properties(blizzard-archive-library PROPERTIES UNITY_BUILD ON)
+  set_target_properties(blizzard-database-library PROPERTIES UNITY_BUILD ON)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/external/blizzard-archive-library/src/Listfile.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+endif()
+
+if(${FAST_BUILD_NOGGIT_PCH})
+  set(NOGGIT_ALL_PCH "${math_headers};${noggit_root_headers};${archive_headers};${database_headers}")
+  list(REMOVE_ITEM NOGGIT_ALL_PCH "${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/ui/TextureList.hpp")
+  target_precompile_headers(noggit PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${NOGGIT_ALL_PCH}>")
+endif()
+
+if(${FAST_BUILD_NOGGIT_JUMBO})
+  set_target_properties(noggit PROPERTIES UNITY_BUILD ON)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/ui/tools/MapCreationWizard/ui/MapCreationWizard.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/ui/TexturingGUI.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/ui/TextureList.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/ui/tools/ViewToolbar/Ui/ViewToolbar.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/ui/tools/ViewportGizmo/ViewportGizmo.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/ui/tools/ViewportManager/ViewportManager.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/external/tracy/TracyClient.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/include/win/StackWalker.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/external/imguizmo/ImGuizmo.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/external/imguizmo/ImSequencer.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
+  set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/noggit/rendering/WorldRender.cpp" PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 endif()
