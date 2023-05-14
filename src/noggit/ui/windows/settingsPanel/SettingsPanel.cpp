@@ -165,10 +165,10 @@ namespace Noggit
 
       connect(ui->mysql_connect_test, &QPushButton::clicked, [this]
           {
-              QMessageBox::warning(
-                  this,
-                  tr("Not implemented"),
-                  tr("This is not implemented, i don't know what it is or what it does but it didn't compile."));
+              save_changes();
+              #ifdef USE_MYSQL_UID_STORAGE
+              mysql::testConnection();
+              #endif
           }
       );
 
