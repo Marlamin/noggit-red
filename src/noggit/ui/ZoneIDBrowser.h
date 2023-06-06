@@ -37,7 +37,7 @@ namespace Noggit
         {7 , "Free For All PvP"},
         {8 , "Linked Chat (Set in cities)"},
         {9 , "Linked Chat Special Area"},
-        // {10, "Force this area when on a Dynamic Transport"}, // From Classic TBC definitions, probably chanegd around CATA
+        // {10, "Force this area when on a Dynamic Transport"}, // From Classic TBC definitions, probably changed around CATA
         {10, "Allow Flying"}, // in 3.3.5
         {11, "No PvP"},
         {12, "No Ghost on Release"},
