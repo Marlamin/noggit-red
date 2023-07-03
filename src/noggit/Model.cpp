@@ -474,7 +474,7 @@ void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
 
   for (auto const& sub_animation : _animations_seq_per_id[anim_id])
   {
-    if (sub_animation.second.length > time_for_anim)
+    if (static_cast<int>(sub_animation.second.length) > time_for_anim)
     {
       current_sub_anim = sub_animation.first;
       break;
@@ -782,7 +782,7 @@ std::vector<std::pair<float, std::tuple<int, int, int>>> Model::intersect (glm::
           fake_geom.vertices[fake_geom.indices[i + 2]])
         )
       {
-        results.emplace_back (*distance, std::make_tuple(i, i+1, 1+2));
+        results.emplace_back (*distance, std::make_tuple(static_cast<int>(i), static_cast<int>(i+1), 1+2));
         return results;
       }
     }
@@ -792,12 +792,12 @@ std::vector<std::pair<float, std::tuple<int, int, int>>> Model::intersect (glm::
 
   for (auto const& pass : _renderer.renderPasses())
   {
-    for (size_t i (pass.index_start); i < pass.index_start + pass.index_count; i += 3)
+    for (int i (pass.index_start); i < pass.index_start + pass.index_count; i += 3)
     {
       if ( auto distance
-          = ray.intersect_triangle( _vertices[_indices[i + 0]].position,
-                                    _vertices[_indices[i + 1]].position,
-                                    _vertices[_indices[i + 2]].position)
+          = ray.intersect_triangle( _vertices[_indices[static_cast<std::size_t>(i + 0)]].position,
+                                    _vertices[_indices[static_cast<std::size_t>(i + 1)]].position,
+                                    _vertices[_indices[static_cast<std::size_t>(i + 2)]].position)
           )
       {
         results.emplace_back (*distance, std::make_tuple(i, i + 1, 1 + 2));

@@ -99,10 +99,10 @@ public:
       }
 
       size_t old_size = file.stringTable.size();
-      *reinterpret_cast<unsigned int*>(offset + field * 4) = file.stringTable.size();
+      *reinterpret_cast<unsigned int*>(offset + field * 4) = static_cast<unsigned int>(file.stringTable.size());
       file.stringTable.resize(old_size + val.size() + 1);
       std::copy(val.c_str(), val.c_str() + val.size() + 1, file.stringTable.data() + old_size);
-      file.stringSize += val.size() + 1;
+      file.stringSize += static_cast<std::uint32_t>(val.size() + 1);
     }
 
     void writeLocalizedString(size_t field, const std::string& val, int locale)
@@ -116,10 +116,10 @@ public:
       }
 
       size_t old_size = file.stringTable.size();
-      *reinterpret_cast<unsigned int*>(offset + ((field + locale) * 4)) = file.stringTable.size();
+      *reinterpret_cast<unsigned int*>(offset + ((field + locale) * 4)) = static_cast<unsigned int>(file.stringTable.size());
       file.stringTable.resize(old_size + val.size() + 1);
       std::copy(val.c_str(), val.c_str() + val.size() + 1, file.stringTable.data() + old_size);
-      file.stringSize += val.size() + 1;
+      file.stringSize += static_cast<std::uint32_t>(val.size() + 1);
     }
 
   private:

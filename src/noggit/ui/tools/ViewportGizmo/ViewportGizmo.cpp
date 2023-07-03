@@ -36,7 +36,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
   auto model_view_trs = model_view;
   auto projection_trs = projection;
 
-  int n_selected = selection.size();
+  int n_selected = static_cast<int>(selection.size());
 
   if (!n_selected || (n_selected == 1 & selection[0].index() != eEntry_Object))
     return;

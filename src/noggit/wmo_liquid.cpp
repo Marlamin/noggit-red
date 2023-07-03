@@ -206,7 +206,7 @@ int wmo_liquid::initGeometry(BlizzardArchive::ClientFile* f)
     }
   }
 
-  _indices_count = indices.size();
+  _indices_count = static_cast<int>(indices.size());
 
   return last_liquid_id;
 }

@@ -63,7 +63,7 @@ void LiquidRender::draw(math::frustum const& frustum
         if (samplers_upload_buf[j] < 0)
           break;
 
-        gl.activeTexture(GL_TEXTURE0 + 2 + j);
+        gl.activeTexture(static_cast<GLenum>(GL_TEXTURE0 + 2 + j));
         gl.bindTexture(GL_TEXTURE_2D_ARRAY, samplers_upload_buf[j]);
       }
 
@@ -138,7 +138,7 @@ void LiquidRender::updateLayerData(LiquidTextureManager* tex_manager)
           }
           else
           {
-            sampler_index = layer_params.texture_samplers.size();
+            sampler_index = static_cast<unsigned int>(layer_params.texture_samplers.size());
             layer_params.texture_samplers.emplace_back(std::get<0>(tex_profile));
           }
 
@@ -177,7 +177,7 @@ void LiquidRender::updateLayerData(LiquidTextureManager* tex_manager)
 
       if (!n_chunks) // break and clean-up
       {
-        if (long diff = _render_layers.size() - layer_counter; diff > 0)
+        if (long diff = static_cast<long>(_render_layers.size() - layer_counter); diff > 0)
         {
           for (int i = 0; i < diff; ++i)
           {
@@ -195,7 +195,7 @@ void LiquidRender::updateLayerData(LiquidTextureManager* tex_manager)
       else
       {
         auto& layer_params = _render_layers[layer_counter];
-        layer_params.n_used_chunks = n_chunks;
+        layer_params.n_used_chunks = static_cast<unsigned int>(n_chunks);
 
         gl.bindTexture(GL_TEXTURE_2D_ARRAY, layer_params.vertex_data_tex);
         gl.bindBuffer(GL_UNIFORM_BUFFER, layer_params.chunk_data_buf);

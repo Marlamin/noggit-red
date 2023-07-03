@@ -233,7 +233,7 @@ void ModelRender::draw(glm::mat4x4 const& model_view
     {
       if (p.prepareDraw(m2_shader, _model, model_render_state))
       {
-        gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(p.index_start * sizeof(GLushort)), instances.size());
+        gl.drawElementsInstanced(GL_TRIANGLES, p.index_count, GL_UNSIGNED_SHORT, reinterpret_cast<void*>(p.index_start * sizeof(GLushort)), static_cast<GLsizei>(instances.size()));
         //p.after_draw();
       }
     }
@@ -248,7 +248,7 @@ void ModelRender::drawParticles(glm::mat4x4 const& model_view
 {
   for (auto& p : _model->_particles)
   {
-    p.draw(model_view, particles_shader, _transform_buffer, instance_count);
+    p.draw(model_view, particles_shader, _transform_buffer, static_cast<int>(instance_count));
   }
 }
 
@@ -258,7 +258,7 @@ void ModelRender::drawRibbons( OpenGL::Scoped::use_program& ribbons_shader
 {
   for (auto& r : _model->_ribbons)
   {
-    r.draw(ribbons_shader, _transform_buffer, instance_count);
+    r.draw(ribbons_shader, _transform_buffer, static_cast<int>(instance_count));
   }
 }
 
@@ -279,7 +279,7 @@ void ModelRender::drawBox(OpenGL::Scoped::use_program& m2_box_shader, std::size_
 
   OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_box_indices_buffer);
 
-  gl.drawElementsInstanced (GL_LINE_STRIP, _box_indices.size(), GL_UNSIGNED_SHORT, nullptr, box_count);
+  gl.drawElementsInstanced (GL_LINE_STRIP, static_cast<GLsizei>(_box_indices.size()), GL_UNSIGNED_SHORT, nullptr, static_cast<GLsizei>(box_count));
 }
 
 void ModelRender::setupVAO(OpenGL::Scoped::use_program& m2_shader)
@@ -965,7 +965,7 @@ void ModelRenderPass::bindTexture(size_t index, Model* m, OpenGL::M2RenderState&
     GLuint tex_array = texture->texture_array();
     int tex_index = texture->array_index();
 
-    gl.activeTexture(GL_TEXTURE0 + index + 1);
+    gl.activeTexture(static_cast<GLenum>(GL_TEXTURE0 + index + 1));
     gl.bindTexture(GL_TEXTURE_2D_ARRAY, tex_array);
     /*
     if (model_render_state.tex_arrays[index] != tex_array)
@@ -995,7 +995,7 @@ void ModelRenderPass::bindTexture(size_t index, Model* m, OpenGL::M2RenderState&
     GLuint tex_array = texture->texture_array();
     int tex_index = texture->array_index();
 
-    gl.activeTexture(GL_TEXTURE0 + index + 1);
+    gl.activeTexture(static_cast<GLenum>(GL_TEXTURE0 + index + 1));
     gl.bindTexture(GL_TEXTURE_2D_ARRAY, tex_array);
 
     /*

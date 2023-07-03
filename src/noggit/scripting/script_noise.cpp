@@ -145,7 +145,7 @@ namespace Noggit
         , width
         , height
         , frequency
-        , std::hash<std::string>()(std::string(seed))
+        , static_cast<std::int32_t>(std::hash<std::string>()(std::string(seed)))
       );
     }
 

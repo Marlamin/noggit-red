@@ -32,8 +32,8 @@ QImage LightViewWidget::FillImagePart(QImage Image, int X, QColor Color)
 
 int LightViewWidget::ClampColor(int Value)
 {
-	if (Value < 0) Value == 0;
-	if (Value > 255) Value == 255;
+	if (Value < 0) Value = 0;
+	if (Value > 255) Value = 255;
 
 	return Value;
 }
@@ -101,7 +101,7 @@ void LightViewPreview::SetPreview(std::vector<SkyColor>& data)
 
 void LightViewPreview::UpdatePixmap(const QPixmap Updated)
 {
-	Preview->setPixmap(Updated.scaled(Preview->pixmap()->size(), Qt::IgnoreAspectRatio));
+	Preview->setPixmap(Updated.scaled(Preview->pixmap(Qt::ReturnByValueConstant{}).size(), Qt::IgnoreAspectRatio));
 }
 
 LightViewPixmap::LightViewPixmap(QSize Size, QWidget* parent)

@@ -89,12 +89,12 @@ void Noggit::Ui::Tools::NodeEditor::Nodes::BaseNode::addPortDefault(PortType por
 
   if (port_type == PortType::In)
   {
-    PortIndex index = _in_ports.size() - 1;
+    PortIndex index = static_cast<PortIndex>(_in_ports.size() - 1);
     addDefaultWidget(_in_ports[index].data_type->default_widget(&_embedded_widget), port_type, index);
   }
   else if (port_type == PortType::Out)
   {
-    PortIndex index = _out_ports.size() - 1;
+    PortIndex index = static_cast<PortIndex>(_out_ports.size() - 1);
     addDefaultWidget(_out_ports[index].data_type->default_widget(&_embedded_widget), port_type, index);
   }
   else

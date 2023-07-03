@@ -60,7 +60,7 @@ struct blp_texture : public AsyncObject
   GLuint texture_array() { return _texture_array; };
   int array_index() { return _array_index; };
   bool is_specular() { return _is_specular; };
-  unsigned mip_level() { return !_compression_format ? _data.size() : _compressed_data.size(); };
+  unsigned mip_level() { return static_cast<unsigned>(!_compression_format ? _data.size() : _compressed_data.size()); };
 
   std::map<int, std::vector<uint32_t>>& data() { return _data;};
   std::map<int, std::vector<uint8_t>>& compressed_data() { return _compressed_data; };

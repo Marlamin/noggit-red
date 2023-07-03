@@ -368,7 +368,7 @@ glm::vec3 Sky::colorFor(int r, int t) const
   }
   glm::vec3 c1, c2;
   int t1, t2;
-  int last = sky_param->colorRows[r].size() - 1;
+  int last = static_cast<int>(sky_param->colorRows[r].size()) - 1;
 
   if (last == 0)
   {
@@ -875,7 +875,7 @@ void main()
 
     for (int v = 0; v < cnum - 1; v++)
     {
-      int start = vertices.size();
+      int start = static_cast<int>(vertices.size());
 
       vertices.push_back(basepos2[v]);
       vertices.push_back(basepos1[v]);
@@ -895,7 +895,7 @@ void main()
   gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>(_vertices_vbo, vertices, GL_STATIC_DRAW);
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STATIC_DRAW);
 
-  _indices_count = indices.size();
+  _indices_count = static_cast<int>(indices.size());
 
   _uploaded = true;
   _need_vao_update = true;
@@ -1080,7 +1080,7 @@ void Sky::save_to_dbc()
             {
                 DBCFile::Record rec = is_new_record ? gLightIntBandDB.addRecord(light_int_start + i) : gLightIntBandDB.getByID(light_int_start + i);
                 // int entries = rec.getInt(LightIntBandDB::Entries);
-                int entries = skyParams[param_id]->colorRows[i].size();
+                int entries = static_cast<int>(skyParams[param_id]->colorRows[i].size());
 
                 rec.write(LightIntBandDB::Entries, entries); // nb of entries
 
@@ -1115,7 +1115,7 @@ void Sky::save_to_dbc()
             try
             {
                 DBCFile::Record rec = is_new_record ? gLightFloatBandDB.addRecord(light_float_start + i) : gLightFloatBandDB.getByID(light_float_start + i);
-                int entries = skyParams[param_id]->floatParams[i].size();
+                int entries = static_cast<int>(skyParams[param_id]->floatParams[i].size());
 
                 rec.write(LightFloatBandDB::Entries, entries); // nb of entries
 

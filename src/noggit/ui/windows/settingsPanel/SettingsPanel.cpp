@@ -28,6 +28,7 @@
 
 
 #include <algorithm>
+#include <qmessagebox.h>
 
 
 namespace Noggit

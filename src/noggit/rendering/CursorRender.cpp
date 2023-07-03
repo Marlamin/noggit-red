@@ -69,7 +69,7 @@ namespace Noggit
       indices.emplace_back((i + 1) % segment);
     }
 
-    _indices_count[Mode::circle] = indices.size();
+    _indices_count[Mode::circle] = static_cast<int>(indices.size());
 
     int id = static_cast<int>(Mode::circle);
 
@@ -133,7 +133,7 @@ namespace Noggit
       }
     }    
 
-    _indices_count[Mode::sphere] = indices.size();
+    _indices_count[Mode::sphere] = static_cast<int>(indices.size());
 
     int id = static_cast<int>(Mode::sphere);
 
@@ -164,7 +164,7 @@ namespace Noggit
 
     std::vector<std::uint16_t> indices = {0,1, 1,2 ,2,3 ,3,0};    
 
-    _indices_count[Mode::square] = indices.size();
+    _indices_count[Mode::square] = static_cast<int>(indices.size());
 
     int id = static_cast<int>(Mode::square);
 
@@ -206,7 +206,7 @@ namespace Noggit
       , 4,5, 5,6 ,6,7 ,7,4
     };
 
-    _indices_count[Mode::cube] = indices.size();
+    _indices_count[Mode::cube] = static_cast<int>(indices.size());
 
     int id = static_cast<int>(Mode::cube);
 

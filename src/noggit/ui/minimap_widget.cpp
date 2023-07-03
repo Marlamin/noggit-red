@@ -141,9 +141,9 @@ namespace Noggit
         {
           //! \todo Draw non-existing tiles aswell?
           painter.setBrush (QColor (255, 255, 255, 30));
-          for (size_t i (0); i < 64; ++i)
+          for (int i (0); i < 64; ++i)
           {
-            for (size_t j (0); j < 64; ++j)
+            for (int j (0); j < 64; ++j)
             {
               TileIndex const tile (i, j);
               bool changed = false;
