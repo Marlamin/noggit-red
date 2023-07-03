@@ -50,7 +50,7 @@ void LogicReturnNode::restore(const QJsonObject& json_obj)
   for (int i = 0; i < json_obj["n_dynamic_ports"].toInt(); ++i)
   {
     addPort<AnyData>(PortType::In, "Any", true);
-    emit portAdded(PortType::In, _in_ports.size() - 1);
+    emit portAdded(PortType::In, static_cast<QtNodes::PortIndex>(_in_ports.size() - 1));
   }
 
 }
@@ -109,7 +109,7 @@ void LogicReturnNode::inputConnectionCreated(const Connection& connection)
   if (_in_ports[_in_ports.size() - 1].connected)
   {
     addPort<AnyData>(PortType::In, "Any", true);
-    emit portAdded(PortType::In, _in_ports.size() - 1);
+    emit portAdded(PortType::In, static_cast<QtNodes::PortIndex>(_in_ports.size() - 1));
   }
 }
 
@@ -133,7 +133,7 @@ void LogicReturnNode::inputConnectionDeleted(const Connection& connection)
     else
     {
       addPort<AnyData>(PortType::In, "Any", true);
-      emit portAdded(PortType::In, _in_ports.size() - 1);
+      emit portAdded(PortType::In, static_cast<QtNodes::PortIndex>(_in_ports.size() - 1));
       break;
     }
   }
@@ -141,7 +141,7 @@ void LogicReturnNode::inputConnectionDeleted(const Connection& connection)
   if (_in_ports[_in_ports.size() - 1].connected)
   {
     addPort<AnyData>(PortType::In, "Any", true);
-    emit portAdded(PortType::In, _in_ports.size() - 1);
+    emit portAdded(PortType::In, static_cast<QtNodes::PortIndex>(_in_ports.size() - 1));
   }
 
 }

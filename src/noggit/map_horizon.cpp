@@ -220,18 +220,18 @@ void map_horizon::set_minimap(const MapIndex* const index)
     _qt_minimap = QImage(16 * 64, 16 * 64, QImage::Format_ARGB32);
     _qt_minimap.fill(Qt::transparent);
 
-    for (size_t y(0); y < 64; ++y)
+    for (int y(0); y < 64; ++y)
     {
-        for (size_t x(0); x < 64; ++x)
+        for (int x(0); x < 64; ++x)
         {
             if (_tiles[y][x])
             {
                 //! \todo There also is a second heightmap appended which has additional 16*16 pixels.
                 //! \todo There also is MAHO giving holes into this heightmap.
 
-                for (size_t j(0); j < 16; ++j)
+                for (int j(0); j < 16; ++j)
                 {
-                    for (size_t i(0); i < 16; ++i)
+                    for (int i(0); i < 16; ++i)
                     {
                         //! \todo R and B are inverted here
                         _qt_minimap.setPixel(x * 16 + i, y * 16 + j, color_for_height(_tiles[y][x]->height_17[j][i]));
@@ -241,9 +241,9 @@ void map_horizon::set_minimap(const MapIndex* const index)
             // the adt exist but there's no data in the wdl
             else if (index->hasTile(TileIndex(x, y)))
             {
-                for (size_t j(0); j < 16; ++j)
+                for (int j(0); j < 16; ++j)
                 {
-                    for (size_t i(0); i < 16; ++i)
+                    for (int i(0); i < 16; ++i)
                     {
                         _qt_minimap.setPixel(x * 16 + i, y * 16 + j, color(200, 100, 25));
                     }
@@ -494,7 +494,7 @@ map_horizon::render::render(const map_horizon& horizon)
       if (!horizon._tiles[y][x])
         continue;
 
-      _batches[y][x] = map_horizon_batch (vertices.size(), 17 * 17 + 16 * 16);
+      _batches[y][x] = map_horizon_batch (static_cast<std::uint32_t>(vertices.size()), 17 * 17 + 16 * 16);
 
       for (size_t j (0); j < 17; ++j)
       {
@@ -563,9 +563,9 @@ void map_horizon::render::draw( glm::mat4x4 const& model_view
       if (batch.vertex_count == 0)
         continue;
 
-      for (size_t j (0); j < 16; ++j)
+      for (int j (0); j < 16; ++j)
       {
-        for (size_t i (0); i < 16; ++i)
+        for (int i (0); i < 16; ++i)
         {
           // do not draw over visible chunks
 
@@ -629,7 +629,7 @@ void map_horizon::render::draw( glm::mat4x4 const& model_view
   OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder (_index_buffer);
 
   
-  gl.drawElements (GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+  gl.drawElements (GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, nullptr);
 }
 
 }

@@ -105,7 +105,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 
 	// global settings ********************************************************************************************** //
 	// TODO : name lights on laoding instead
-	light_editing_layout->addWidget(new QLabel("Selected Light :", this), 0, 0);
+	light_editing_layout->addWidget(new QLabel("Selected Light :", this), 0);
 	auto lightid_label = new QLabel("No light selected", this);
 	light_editing_layout->addWidget(lightid_label);
 
@@ -147,7 +147,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 	
 	global_values_layout->addWidget(new QLabel("Inner Radius:", this),4,0);
 	auto inner_radius_spin = new QDoubleSpinBox(this);
-	inner_radius_spin->setRange(0, 100000); // max seen in dbc is 3871 (139363 ÷ 36 )
+	inner_radius_spin->setRange(0, 100000); // max seen in dbc is 3871 (139363 E36 )
 	inner_radius_spin->setValue(0);
 	inner_radius_spin->setSingleStep(50);
 	inner_radius_spin->setEnabled(false);
@@ -155,7 +155,7 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 
 	global_values_layout->addWidget(new QLabel("Outer Radius:", this),5,0);
 	auto outer_radius_spin = new QDoubleSpinBox(this);
-	outer_radius_spin->setRange(0, 100000); // max seen in dbc is 3871 (139363 ÷ 36 )
+	outer_radius_spin->setRange(0, 100000); // max seen in dbc is 3871 (139363 E36 )
 	outer_radius_spin->setValue(0);
 	outer_radius_spin->setSingleStep(50);
 	outer_radius_spin->setEnabled(false);

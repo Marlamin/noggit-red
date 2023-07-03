@@ -166,7 +166,7 @@ QTextStream &operator << (QTextStream &stream, const GaussianBlur &blur) {
     for (int i = 0; i < blur.size_; i++) {
         for (int j = 0; j < blur.size_; j++)
             stream << blur.matrix_[i][j] << " ";
-        stream << endl;
+        stream << Qt::endl;
     }
     return stream;
 }

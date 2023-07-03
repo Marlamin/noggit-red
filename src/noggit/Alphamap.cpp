@@ -64,7 +64,7 @@ void Alphamap::readCompressed(BlizzardArchive::ClientFile *f)
     if (offset_output + count > 4096)
     {
       LogError << "Invalid MCAL, uncompressed size is greater than 4096" << std::endl;
-      count = 4096 - offset_output;
+      count = static_cast<int>(4096 - offset_output);
     }
 
     ++input;

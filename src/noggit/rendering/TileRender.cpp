@@ -148,7 +148,7 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
         alphamap_bound = true;
         chunk->texture_set->uploadAlphamapData();
 
-        if (!_split_drawcall && !fillSamplers(chunk.get(), i, _draw_calls.size() - 1))
+        if (!_split_drawcall && !fillSamplers(chunk.get(), i, static_cast<unsigned int>(_draw_calls.size() - 1)))
         {
           _split_drawcall = true;
         }
@@ -238,7 +238,7 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
       {
         auto& chunk = _map_tile->mChunks[i % 16][i / 16];
 
-        if (!fillSamplers(chunk.get(), i, _draw_calls.size() - 1))
+        if (!fillSamplers(chunk.get(), i, static_cast<unsigned int>(_draw_calls.size() - 1)))
         {
           MapTileDrawCall& previous_draw_call = _draw_calls[_draw_calls.size() - 1];
           unsigned new_start = previous_draw_call.start_chunk + previous_draw_call.n_chunks;
@@ -248,7 +248,7 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
           new_draw_call.start_chunk = new_start;
           new_draw_call.n_chunks = 1;
 
-          fillSamplers(chunk.get(), i, _draw_calls.size() - 1);
+          fillSamplers(chunk.get(), i, static_cast<unsigned int>(_draw_calls.size() - 1));
         }
         else
         {
@@ -468,7 +468,7 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
 {
   MapTileDrawCall& draw_call = _draw_calls[draw_call_index];
 
-  _chunk_instance_data[chunk_index].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[2] = chunk->texture_set->num();
+  _chunk_instance_data[chunk_index].ChunkHoles_DrawImpass_TexLayerCount_CantPaint[2] = static_cast<int>(chunk->texture_set->num());
 
   static constexpr unsigned NUM_SAMPLERS = 11;
 
@@ -536,7 +536,7 @@ void TileRender::initChunkData(MapChunk* chunk)
 
   chunk_render_instance.ChunkHoles_DrawImpass_TexLayerCount_CantPaint[0] = chunk->holes;
   chunk_render_instance.ChunkHoles_DrawImpass_TexLayerCount_CantPaint[1] = chunk->header_flags.flags.impass;
-  chunk_render_instance.ChunkHoles_DrawImpass_TexLayerCount_CantPaint[2] = chunk->texture_set->num();
+  chunk_render_instance.ChunkHoles_DrawImpass_TexLayerCount_CantPaint[2] = static_cast<int>(chunk->texture_set->num());
   chunk_render_instance.ChunkHoles_DrawImpass_TexLayerCount_CantPaint[3] = 0;
   chunk_render_instance.AreaIDColor_Pad2_DrawSelection[0] = chunk->areaID;
   chunk_render_instance.AreaIDColor_Pad2_DrawSelection[3] = 0;

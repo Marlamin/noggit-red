@@ -620,7 +620,7 @@ void OpenGL::context::compile_shader (GLuint shader)
   if (get_shader (shader, GL_COMPILE_STATUS) != GL_TRUE)
   {
     std::vector<char> log (get_shader (shader, GL_INFO_LOG_LENGTH));
-    _current_context->functions()->glGetShaderInfoLog (shader, log.size(), nullptr, log.data());
+    _current_context->functions()->glGetShaderInfoLog (shader, static_cast<GLsizei>(log.size()), nullptr, log.data());
     LogDebug << std::string (log.data ()) << std::endl;
     throw std::runtime_error ("compiling shader failed: " + std::string (log.data()));
   }
@@ -729,7 +729,7 @@ std::string OpenGL::context::get_program_info_log(GLuint program)
     return "<empty log>";
   }
 
-  _current_context->functions()->glGetProgramInfoLog(program, log.size(), nullptr, log.data());
+  _current_context->functions()->glGetProgramInfoLog(program, static_cast<GLsizei>(log.size()), nullptr, log.data());
 
   return std::string(log.data());
 }

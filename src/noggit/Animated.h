@@ -204,19 +204,19 @@ namespace Animation
       const AnimationBlockHeader* timestampHeaders = file.get<AnimationBlockHeader>(animationBlock.ofsTimes);
       const AnimationBlockHeader* keyHeaders = file.get<AnimationBlockHeader>(animationBlock.ofsKeys);
 
-      for (size_t j = 0; j < animationBlock.nTimes; ++j)
+      for (std::uint32_t j = 0; j < animationBlock.nTimes; ++j)
       {
         const TimestampType* timestamps = j < animation_files.size() && animation_files[j] ?
           animation_files[j]->get<TimestampType>(timestampHeaders[j].ofsEntries) :
           file.get<TimestampType>(timestampHeaders[j].ofsEntries);
 
-        for (size_t i = 0; i < timestampHeaders[j].nEntries; ++i)
+        for (std::uint32_t i = 0; i < timestampHeaders[j].nEntries; ++i)
         {
           times[j].push_back(timestamps[i]);
         }
       }
 
-      for (size_t j = 0; j < animationBlock.nKeys; ++j)
+      for (std::uint32_t j = 0; j < animationBlock.nKeys; ++j)
       {
         const DataType* keys = j < animation_files.size() && animation_files[j] ?
           animation_files[j]->get<DataType>(keyHeaders[j].ofsEntries) :
@@ -226,14 +226,14 @@ namespace Animation
         {
         case Animation::Interpolation::Type::NONE:
         case Animation::Interpolation::Type::LINEAR:
-          for (size_t i = 0; i < keyHeaders[j].nEntries; ++i)
+          for (std::uint32_t i = 0; i < keyHeaders[j].nEntries; ++i)
           {
             data[j].push_back(_conversion(keys[i]));
           }
           break;
 
         case Animation::Interpolation::Type::HERMITE:
-          for (size_t i = 0; i < keyHeaders[j].nEntries; ++i)
+          for (std::uint32_t i = 0; i < keyHeaders[j].nEntries; ++i)
           {
             data[j].push_back(_conversion(keys[i * 3]));
             in[j].push_back(_conversion(keys[i * 3 + 1]));
@@ -250,9 +250,9 @@ namespace Animation
       {
       case Animation::Interpolation::Type::NONE:
       case Animation::Interpolation::Type::LINEAR:
-        for (size_t i = 0; i < data.size(); ++i)
+        for (std::uint32_t i = 0; i < data.size(); ++i)
         {
-          for (size_t j = 0; j < data[i].size(); ++j)
+          for (std::uint32_t j = 0; j < data[i].size(); ++j)
           {
             data[i][j] = function(data[i][j]);
           }
@@ -260,9 +260,9 @@ namespace Animation
         break;
 
       case Animation::Interpolation::Type::HERMITE:
-        for (size_t i = 0; i < data.size(); ++i)
+        for (std::uint32_t i = 0; i < data.size(); ++i)
         {
-          for (size_t j = 0; j < data[i].size(); ++j)
+          for (std::uint32_t j = 0; j < data[i].size(); ++j)
           {
             data[i][j] = function(data[i][j]);
             in[i][j] = function(in[i][j]);

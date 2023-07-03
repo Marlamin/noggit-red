@@ -63,7 +63,7 @@ namespace Noggit
     int image::get_index(int x, int y) const
     {
       int index = ((x + y * _width) * 4);
-      if(index<0||index>=_size)
+      if(index<0 || index >= static_cast<int>(_size))
       {
         throw script_exception(
           "img_get_index",

@@ -246,11 +246,11 @@ void MapIndex::save()
     // MWMO
     //  {
     wdtFile.Extend(8);
-    SetChunkHeader(wdtFile, curPos, 'MWMO', globalWMOName.size());
+    SetChunkHeader(wdtFile, curPos, 'MWMO', static_cast<int>(globalWMOName.size()));
     curPos += 8;
 
-    wdtFile.Insert(curPos, globalWMOName.size(), globalWMOName.data());
-    curPos += globalWMOName.size();
+    wdtFile.Insert(curPos, static_cast<unsigned long>(globalWMOName.size()), globalWMOName.data());
+    curPos += static_cast<int>(globalWMOName.size());
     //  }
 
     // MODF
@@ -282,8 +282,8 @@ void MapIndex::enterTile(const TileIndex& tile)
   }
 
   noadt = false;
-  int cx = tile.x;
-  int cz = tile.z;
+  int cx = static_cast<int>(tile.x);
+  int cz = static_cast<int>(tile.z);
 
   for (int pz = std::max(cz - 1, 0); pz < std::min(cz + 2, 63); ++pz)
   {
@@ -381,7 +381,7 @@ MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading)
     return nullptr;
   }
 
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(),
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
      mBigAlpha, true, use_mclq_green_lava(), reloading, _world, _context);
 
   MapTile* adt = mTiles[tile.z][tile.x].tile.get();
@@ -1075,7 +1075,7 @@ void MapIndex::loadMinimapMD5translate()
   void* buffer_raw = std::malloc(size);
   md5trs_file.read(buffer_raw, size);
 
-  QByteArray md5trs_bytes(static_cast<char*>(buffer_raw), size);
+  QByteArray md5trs_bytes(static_cast<char*>(buffer_raw), static_cast<int>(size));
 
   QTextStream md5trs_stream(md5trs_bytes, QIODevice::ReadOnly);
 
@@ -1149,7 +1149,7 @@ void MapIndex::addTile(const TileIndex& tile)
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(),
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
       mBigAlpha, true, use_mclq_green_lava(), false, _world, _context);
 
   mTiles[tile.z][tile.x].flags |= 0x1;
@@ -1164,7 +1164,7 @@ void MapIndex::removeTile(const TileIndex &tile)
 
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(),
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
      mBigAlpha, true, use_mclq_green_lava(), false, _world, _context);
 
   mTiles[tile.z][tile.x].tile->changed = true;
