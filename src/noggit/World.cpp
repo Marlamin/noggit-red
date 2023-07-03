@@ -542,6 +542,34 @@ void World::delete_selected_models()
   reset_selection();
 }
 
+glm::vec3 World::get_ground_height(glm::vec3 pos)
+{
+    selection_result hits;
+    
+    for_chunk_at(pos, [&](MapChunk* chunk)
+    {
+        {
+            math::ray intersect_ray(pos, glm::vec3(0.f, -1.f, 0.f));
+            chunk->intersect(intersect_ray, &hits);
+        }
+        // object is below ground
+        if (hits.empty())
+        {
+            math::ray intersect_ray(pos, glm::vec3(0.f, 1.f, 0.f));
+            chunk->intersect(intersect_ray, &hits);
+        }
+    });
+
+    // this should never happen
+    if (hits.empty())
+    {
+        LogError << "Snap to ground ray intersection failed" << std::endl;
+        return glm::vec3(0);
+    }
+
+    return std::get<selected_chunk_type>(hits[0].second).position;
+}
+
 void World::snap_selected_models_to_the_ground()
 {
   ZoneScoped;
@@ -557,32 +585,8 @@ void World::snap_selected_models_to_the_ground()
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
     glm::vec3& pos = obj->pos;
 
-    selection_result hits;
-
-
-    for_chunk_at(pos, [&] (MapChunk* chunk)
-    {
-      {
-        math::ray intersect_ray(pos, glm::vec3(0.f, -1.f, 0.f));
-        chunk->intersect(intersect_ray, &hits);
-      }
-      // object is below ground
-      if (hits.empty())
-      {
-        math::ray intersect_ray(pos, glm::vec3(0.f, 1.f, 0.f));
-        chunk->intersect(intersect_ray, &hits);
-      }
-    });
-
-    // this should never happen
-    if (hits.empty())
-    {
-      LogError << "Snap to ground ray intersection failed" << std::endl;
-      continue;
-    }
-
     // the ground can only be intersected once
-    pos.y = std::get<selected_chunk_type>(hits[0].second).position.y;
+    pos.y = get_ground_height(pos).y;
 
     std::get<selected_object_type>(entry)->recalcExtents();
 

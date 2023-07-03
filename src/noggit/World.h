@@ -132,6 +132,7 @@ public:
   void remove_from_selection(std::uint32_t uid);
   void reset_selection();
   void delete_selected_models();
+  glm::vec3 get_ground_height(glm::vec3 pos);
   void range_add_to_selection(glm::vec3 const& pos, float radius, bool remove);
   Noggit::world_model_instances_storage& getModelInstanceStorage() { return _model_instance_storage; };
 

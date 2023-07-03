@@ -36,6 +36,8 @@ namespace Noggit
 
     void move_forward_factor (float sign, float factor);
 
+    void move_forward_normalized(float sign, float dt);
+
     void reset(float x, float y, float z, float roll, float yaw, float pitch);
 
     glm::vec3 position;

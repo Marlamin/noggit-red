@@ -1932,6 +1932,8 @@ void MapView::setupViewMenu()
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Hidden models", _draw_hidden_models);
 
+  ADD_TOGGLE_NS(view_menu, "Game Mode", _game_mode_camera);
+
   auto debug_menu (view_menu->addMenu ("Debug"));
   ADD_TOGGLE_NS (debug_menu, "Occlusion boxes", _draw_occlusion_boxes);
 
@@ -3947,20 +3949,54 @@ void MapView::tick (float dt)
       _camera.add_to_pitch(math::degrees(lookat));
       _camera_moved_since_last_draw = true;
     }
-    if (moving)
+
+    if (_game_mode_camera.get())
     {
-      _camera.move_forward(moving, dt);
-      _camera_moved_since_last_draw = true;
+        if (moving)
+        {
+            _camera.move_forward(moving, dt);
+            // TODO use normalized speed (doesn't slow down when looking up)
+            // _camera.move_forward_normalized(moving, dt);
+        }
+        if (strafing)
+        {
+            _camera.move_horizontal(strafing, dt);
+        }
+
+        // get ground z position
+        // can be optimized by calling this only when moving/strafing or changing camera mode.
+        auto ground_pos = _world.get()->get_ground_height(_camera.position);
+        _camera.position.y = ground_pos.y + 2;
+        _camera_moved_since_last_draw = true;
+
     }
-    if (strafing)
+    else
     {
-      _camera.move_horizontal(strafing, dt);
-      _camera_moved_since_last_draw = true;
-    }
-    if (updown)
-    {
-      _camera.move_vertical(updown, dt);
-      _camera_moved_since_last_draw = true;
+
+      if (moving)
+      {
+        _camera.move_forward(moving, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      if (strafing)
+      {
+        _camera.move_horizontal(strafing, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      if (updown)
+      {
+        _camera.move_vertical(updown, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      // camera collision to ground
+      /*
+      auto ground_height = _world.get()->get_ground_height(_camera.position).y;
+      if (_camera.position.y < ground_height)
+      {
+          _camera.position.y = ground_height + 3;
+      }
+      */
+
     }
   }
   else
