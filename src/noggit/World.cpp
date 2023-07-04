@@ -670,6 +670,31 @@ void World::move_selected_models(float dx, float dy, float dz)
   update_selection_pivot();
 }
 
+void World::move_model(selection_type entry, float dx, float dy, float dz)
+{
+    ZoneScoped;
+    auto type = entry.index();
+    if (type == eEntry_MapChunk)
+    {
+        return;
+    }
+
+    auto& obj = std::get<selected_object_type>(entry);
+    NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
+    glm::vec3& pos = obj->pos;
+
+    updateTilesEntry(entry, model_update::remove);
+
+    pos.x += dx;
+    pos.y += dy;
+    pos.z += dz;
+
+    std::get<selected_object_type>(entry)->recalcExtents();
+
+    updateTilesEntry(entry, model_update::add);
+
+}
+
 void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
 {
   ZoneScoped;
@@ -709,6 +734,25 @@ void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
   }
 
   update_selection_pivot();
+}
+
+void World::set_model_pos(selection_type entry, glm::vec3 const& pos, bool change_height)
+{
+  ZoneScoped;
+  auto type = entry.index();
+  if (type == eEntry_MapChunk)
+  {
+      return;
+  }
+  
+  updateTilesEntry(entry, model_update::remove);
+  
+  auto& obj = std::get<selected_object_type>(entry);
+  NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
+  obj->pos = pos;
+  obj->recalcExtents();
+  
+  updateTilesEntry(entry, model_update::add);
 }
 
 void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
@@ -1126,9 +1170,81 @@ auto World::stamp(glm::vec3 const& pos, float dt, QImage const* img, float radiu
 }
 
 
+void World::changeObjectsWithTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius, bool iter_wmos_, bool iter_m2s)
+{
+    // applies the terrain brush to the terrain objects hit
+    ZoneScoped;
+
+  // Identical code to chunk->changeTerrain()
+  //    if (_snap_m2_objects_chkbox->isChecked() || _snap_wmo_objects_chkbox->isChecked()) {
+  auto objects_hit = getObjectsInRange(pos, radius, true, iter_wmos_, iter_m2s);
+
+  for (auto obj : objects_hit)
+  {
+
+    float dt = change;
+
+    float dist, xdiff, zdiff;
+    bool changed = false;
+
+    xdiff = obj->pos.x - pos.x;
+    zdiff = obj->pos.z - pos.z;
+
+    if (BrushType == eTerrainType_Quadra)
+    {
+        if ((std::abs(xdiff) < std::abs(radius / 2)) && (std::abs(zdiff) < std::abs(radius / 2)))
+        {
+            dist = std::sqrt(xdiff * xdiff + zdiff * zdiff);
+            dt = dt * (1.0f - dist * inner_radius / radius);
+            changed = true;
+        }
+    }
+    else
+    {
+        dist = std::sqrt(xdiff * xdiff + zdiff * zdiff);
+        if (dist < radius)
+        {
+            changed = true;
+
+            switch (BrushType)
+            {
+            case eTerrainType_Flat:
+                break;
+            case eTerrainType_Linear:
+                dt = dt * (1.0f - dist * (1.0f - inner_radius) / radius);
+                break;
+            case eTerrainType_Smooth:
+                dt = dt / (1.0f + dist / radius);
+                break;
+            case eTerrainType_Polynom:
+                dt = dt * ((dist / radius) * (dist / radius) + dist / radius + 1.0f);
+                break;
+            case eTerrainType_Trigo:
+                dt = dt * cos(dist / radius);
+                break;
+            case eTerrainType_Gaussian:
+                dt = dist < radius * inner_radius ? dt * std::exp(-(std::pow(radius * inner_radius / radius, 2) / (2 * std::pow(0.39f, 2)))) : dt * std::exp(-(std::pow(dist / radius, 2) / (2 * std::pow(0.39f, 2))));
+
+                break;
+            default:
+                LogError << "Invalid terrain edit type (" << inner_radius << ")" << std::endl;
+                changed = false;
+                break;
+            }
+        }
+    }
+    if (changed)
+    {
+        move_model(obj, 0.0f, dt, 0.0f);
+        // set_model_pos(obj, glm::vec3(obj->pos.x, obj->pos.y + dt, obj->pos.z));
+    }
+  }
+}
+
 void World::changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius)
 {
   ZoneScoped;
+
   for_all_chunks_in_range
     ( pos, radius
     , [&] (MapChunk* chunk)
@@ -1141,6 +1257,64 @@ void World::changeTerrain(glm::vec3 const& pos, float change, float radius, int 
         recalc_norms (chunk);
       }
     );
+}
+
+std::vector<selected_object_type> World::getObjectsInRange(glm::vec3 const& pos, float radius, bool ignore_height, bool iter_wmos_, bool iter_m2s)
+{
+    // ignores height by default
+
+    std::vector<selected_object_type> objects_hit_list;
+
+    /* This causes duplicates at tile edges
+    for (MapTile* tile : mapIndex.tiles_in_range(pos, radius))
+    {
+        if (!tile->finishedLoading())
+        {
+            continue;
+        }
+
+        std::vector<uint32_t>* uids = tile->get_uids();
+
+        for (uint32_t uid : *uids)
+        {
+            auto instance = _model_instance_storage.get_instance(uid);
+
+            */
+    if (iter_m2s)
+    {
+        _model_instance_storage.for_each_m2_instance([&](ModelInstance& model_instance)
+            {
+                selected_object_type obj = &model_instance;
+                auto obj_pos = obj->pos;
+                if (ignore_height)
+                {
+                    obj_pos = glm::vec3(obj->pos.x, pos.y, obj->pos.z);
+                }
+                if (glm::distance(obj_pos, pos) <= radius) // this is just origin point
+                {
+                    objects_hit_list.push_back(obj);
+                }
+            });
+    }
+
+    if (iter_wmos_)
+    {
+        _model_instance_storage.for_each_wmo_instance([&](WMOInstance& wmo_instance)
+            {
+                selected_object_type obj = &wmo_instance;
+                auto obj_pos = obj->pos;
+                if (ignore_height)
+                {
+                    obj_pos = glm::vec3(obj->pos.x, pos.y, obj->pos.z);
+                }
+                if (glm::distance(obj_pos, pos) <= radius)
+                {
+                    objects_hit_list.push_back(obj);
+                }
+            });
+    }
+
+    return objects_hit_list;
 }
 
 void World::flattenTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const glm::vec3& origin, math::degrees angle, math::degrees orientation)
@@ -1158,6 +1332,24 @@ void World::flattenTerrain(glm::vec3 const& pos, float remain, float radius, int
         recalc_norms (chunk);
       }
     );
+}
+
+std::vector<std::pair<SceneObject*, float>> World::getObjectsGroundDistance(glm::vec3 const& pos, float radius, bool iter_wmos_, bool iter_m2s)
+{
+    std::vector<std::pair<SceneObject*, float>> objects_ground_distance;
+
+    auto objects_hit = getObjectsInRange(pos, radius, true
+        , iter_wmos_, iter_m2s);
+
+    for (auto obj : objects_hit)
+    {
+        if ((obj->which() == eMODEL && !iter_m2s) || (obj->which() == eWMO && !iter_wmos_))
+            continue;
+        float height_diff = obj->pos.y - get_ground_height(obj->pos).y;
+        objects_ground_distance.push_back(std::pair<SceneObject*, float>(obj, height_diff));
+    }
+
+    return objects_ground_distance;
 }
 
 void World::blurTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode)
