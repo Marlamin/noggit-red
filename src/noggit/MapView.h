@@ -138,6 +138,7 @@ private:
 
 public:
   Noggit::BoolToggleProperty _draw_vertex_color = {true};
+  Noggit::BoolToggleProperty _draw_baked_shadows = { true };
   Noggit::BoolToggleProperty _draw_climb = {false};
   Noggit::BoolToggleProperty _draw_contour = {false};
   Noggit::BoolToggleProperty _draw_mfbo = {false};
@@ -218,6 +219,7 @@ private:
   bool  alloff_terrain = false;
   bool  alloff_climb = false;
   bool  alloff_vertex_color = false;
+  bool  alloff_baked_shadows = false;
 
   editing_mode terrainMode = editing_mode::ground;
   editing_mode saveterrainMode = terrainMode;

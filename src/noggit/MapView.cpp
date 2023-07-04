@@ -1924,6 +1924,13 @@ void MapView::setupViewMenu()
           _world->renderer()->markTerrainParamsUniformBlockDirty();
       });
 
+  ADD_TOGGLE_POST(view_menu, "Baked Shadows", Qt::SHIFT | Qt::Key_F7, _draw_baked_shadows,
+      [=]
+      {
+          _world->renderer()->getTerrainParamsUniformBlock()->draw_shadows = _draw_baked_shadows.get();
+          _world->renderer()->markTerrainParamsUniformBlockDirty();
+      });
+
   ADD_TOGGLE (view_menu, "Toggle Animation", Qt::Key_F11, _draw_model_animations);
   ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
   ADD_TOGGLE_NS (view_menu, "Flight Bounds", _draw_mfbo);
@@ -2129,6 +2136,7 @@ void MapView::setupHotkeys()
                   alloff_contour = _draw_contour.get();
                   alloff_climb = _draw_climb.get();
                   alloff_vertex_color = _draw_vertex_color.get();
+                  alloff_baked_shadows = _draw_baked_shadows.get();
                   alloff_wmo = _draw_wmo.get();
                   alloff_fog = _draw_fog.get();
                   alloff_terrain = _draw_terrain.get();
@@ -2138,6 +2146,7 @@ void MapView::setupHotkeys()
                   _draw_contour.set (true);
                   _draw_climb.set (false);
                   _draw_vertex_color.set(true);
+                  _draw_baked_shadows.set(true);
                   _draw_wmo.set (false);
                   _draw_terrain.set (true);
                   _draw_fog.set (false);
@@ -2149,6 +2158,7 @@ void MapView::setupHotkeys()
                   _draw_contour.set (alloff_contour);
                   _draw_climb.set(alloff_climb);
                   _draw_vertex_color.set(alloff_vertex_color);
+                  _draw_baked_shadows.set(alloff_baked_shadows);
                   _draw_wmo.set (alloff_wmo);
                   _draw_terrain.set (alloff_terrain);
                   _draw_fog.set (alloff_fog);
