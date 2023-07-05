@@ -96,7 +96,7 @@ namespace Noggit
         VISIBILITY_FOG = 0xf8b2,
         VISIBILITY_WATER = 0xf8b3,
         VISIBILITY_GROUNDEFFECTS= 0xf8b4,
-        VISIBILITY_FLIGHT_BOUNDS = 0xf8b5,
+        // VISIBILITY_FLIGHT_BOUNDS = 0xf8b5,
         VISIBILITY_HIDDEN_MODELS = 0xf8b6,
         VISIBILITY_HOLE_LINES = 0xf8b7,
         VISIBILITY_ANIMATION = 0xf8b8,
@@ -125,7 +125,21 @@ namespace Noggit
         GIZMO_VISIBILITY_ALL = 0xf8cf,
         TOOL_LIGHT = 0xf8d0,
         VISIBILITY_VERTEX_PAINTER = 0xf8d1,
-        VISIBILITY_CLIMB = 0xf8d2
+        VISIBILITY_CLIMB = 0xf8d2,
+        VISIBILITY_BAKED_SHADOWS = 0xf8d3,
+        DOODAD = 0xf8d4,
+        CHARACTER_RADIUS = 0xf8d5,
+        SUN = 0xf8d6,
+        CHARACTER = 0xf8d7,
+        VIEW_MODE_GAME = 0xf8d8,
+        SOUND = 0xf8d9, // use for sound points
+        CUBE = 0xf8da,
+        POINTER = 0xf8db,
+        CREATURE = 0xf8dc,
+        CAMERA = 0xf8dd,
+        WINDOW = 0xf8de,
+        VISIBILITY_FLIGHT_BOUNDS = 0xf8df,
+
       };
     };
 

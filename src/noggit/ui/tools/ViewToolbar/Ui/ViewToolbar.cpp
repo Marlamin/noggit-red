@@ -94,7 +94,7 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     add_tool_icon(mapView, &mapView->_draw_models, tr("Doodads"), FontNoggit::VISIBILITY_DOODADS, tb);
     add_tool_icon(mapView, &mapView->_draw_wmo, tr("WMOs"), FontNoggit::VISIBILITY_WMO, tb);
     add_tool_icon(mapView, &mapView->_draw_wmo_doodads, tr("WMO doodads"), FontNoggit::VISIBILITY_WMO_DOODADS, tb);
-    add_tool_icon(mapView, &mapView->_draw_wmo_exterior, tr("WMO exterior"), FontNoggit::GIZMO_VISIBILITY, tb);
+    add_tool_icon(mapView, &mapView->_draw_wmo_exterior, tr("WMO exterior"), FontNoggit::UI_TOGGLE, tb);
     add_tool_icon(mapView, &mapView->_draw_terrain, tr("Terrain"), FontNoggit::VISIBILITY_TERRAIN, tb);
     add_tool_icon(mapView, &mapView->_draw_water, tr("Water"), FontNoggit::VISIBILITY_WATER, tb);
 
@@ -106,7 +106,7 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     add_tool_icon(mapView, &mapView->_draw_contour, tr("Contours"), FontNoggit::VISIBILITY_CONTOURS, tb);
     add_tool_icon(mapView, &mapView->_draw_climb, tr("Climb"), FontNoggit::VISIBILITY_CLIMB, tb, tb->_climb_secondary_tool);
     add_tool_icon(mapView, &mapView->_draw_vertex_color, tr("Vertex Color"), FontNoggit::VISIBILITY_VERTEX_PAINTER, tb);
-    add_tool_icon(mapView, &mapView->_draw_baked_shadows, tr("Baked Shadows"), FontNoggit::TOOL_AREA_DESIGNATOR, tb); // TODO : better icon
+    add_tool_icon(mapView, &mapView->_draw_baked_shadows, tr("Baked Shadows"), FontNoggit::VISIBILITY_BAKED_SHADOWS, tb); // TODO : better icon
 
     addSeparator();
 
@@ -131,7 +131,7 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
 
     // normal view mode icon, and make them only 1 at a time out of the 3 view modes? 
     // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Normal view"), FontNoggit::VIEW_AXIS, tb);
-    add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Game view"), FontNoggit::VISIBILITY_UNUSED, tb);
+    add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Game view"), FontNoggit::VIEW_MODE_GAME, tb);
     // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Tile view"), FontNoggit::VIEW_MODE_2D, tb);
     addSeparator();
 
