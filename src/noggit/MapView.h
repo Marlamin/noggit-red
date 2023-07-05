@@ -279,6 +279,7 @@ public:
   void randomizeShaderRotation();
   void randomizeStampRotation();
   void onSettingsSave();
+  void updateRotationEditor() { _rotation_editor_need_update = true; };
 
   [[nodiscard]]
   Noggit::Ui::minimap_widget* getMinimapWidget() const { return _minimap;  }

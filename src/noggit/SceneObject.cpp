@@ -65,6 +65,25 @@ void SceneObject::resetDirection()
   recalcExtents();
 }
 
+void SceneObject::normalizeDirection()
+{
+    //! [-180, 180)
+    while (dir.x >= 180.0f)
+        dir.x -= 360.0f;
+    while (dir.x < -180.0f)
+        dir.x += 360.0f;
+
+    while (dir.y >= 180.0f)
+        dir.y -= 360.0f;
+    while (dir.y < -180.0f)
+        dir.y += 360.0f;
+
+    while (dir.z >= 180.0f)
+        dir.z -= 360.0f;
+    while (dir.z < -180.0f)
+        dir.z += 360.0f;
+}
+
 void SceneObject::refTile(MapTile* tile)
 {
   auto it = std::find(_tiles.begin(), _tiles.end(), tile);
