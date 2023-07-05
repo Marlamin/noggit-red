@@ -300,7 +300,16 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
           throw std::logic_error("Bounds are not supported by this gizmo.");
         }
       }
+
+      obj_instance->normalizeDirection();
+
       obj_instance->recalcExtents();
+
+
+      if (map_view)
+      {
+          map_view->updateRotationEditor();
+      }
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::add);
