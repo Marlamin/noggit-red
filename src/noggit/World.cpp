@@ -2659,48 +2659,20 @@ void World::update_models_by_filename()
 void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remove)
 {
   ZoneScoped;
-  for_tile_at(pos, [this, pos, radius, remove](MapTile* tile)
+
+  auto objects_in_range = getObjectsInRange(pos, radius);
+
+  for (auto obj : objects_in_range)
   {
-    std::vector<uint32_t>* uids = tile->get_uids();
-
-    if (remove)
-    {
-      for (uint32_t uid : *uids)
+      if (remove)
       {
-        auto instance = _model_instance_storage.get_instance(uid);
-
-        if (instance && instance.value().index() == eEntry_Object)
-        {
-          auto obj = std::get<selected_object_type>(instance.value());
-
-          if (glm::distance(obj->pos, pos) <= radius && is_selected(obj))
-          {
-            remove_from_selection(obj);
-          }
-
-        }
+          remove_from_selection(obj);
       }
-    }
-    else
-    {
-      for (uint32_t uid : *uids)
+      else
       {
-        auto instance = _model_instance_storage.get_instance(uid);
-
-        if (instance && instance.value().index() == eEntry_Object)
-        {
-          auto obj = std::get<selected_object_type>(instance.value());
-
-          if (glm::distance(obj->pos, pos) <= radius && !is_selected(obj))
-          {
-            add_to_selection(obj);
-          }
-
-        }
+          add_to_selection(obj);
       }
-    }
-    
-  });
+  }
 }
 
 float World::getMaxTileHeight(const TileIndex& tile)
