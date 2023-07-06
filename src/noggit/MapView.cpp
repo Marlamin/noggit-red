@@ -3442,31 +3442,34 @@ void MapView::tick (float dt)
       // reset numpad_moveratio when no numpad key is pressed
       if (!(keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
       {
-        numpad_moveratio = 0.001f;
+        numpad_moveratio = 0.5f;
       }
       else // Set move scale and rotate for numpad keys
       {
         if (_mod_ctrl_down && _mod_shift_down)
         {
-          numpad_moveratio += 0.1f;
+          numpad_moveratio += 0.5f;
         }
         else if (_mod_shift_down)
         {
-          numpad_moveratio += 0.01f;
+          numpad_moveratio += 0.05f;
         }
         else if (_mod_ctrl_down)
         {
-          numpad_moveratio += 0.0005f;
+          numpad_moveratio += 0.005f;
         }
       }
 
       if (keys != 0.f)
       {
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
         _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
+        // NOGGIT_ACTION_MGR->endAction();
         _rotation_editor_need_update = true;
       }
       if (keyr != 0.f)
       {
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
         _world->rotate_selected_models( math::degrees(0.f)
                                       , math::degrees(keyr * numpad_moveratio * 5.f)
                                       , math::degrees(0.f)
