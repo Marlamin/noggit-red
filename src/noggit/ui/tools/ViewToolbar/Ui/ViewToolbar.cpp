@@ -33,7 +33,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
               mapView->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
           });
 
-  SliderAction* climb_value = new SliderAction(tr("Configure climb maximum value"), 0, 1570, 856, tr("degrees"),
+  SliderAction* climb_value = new SliderAction(tr("Climb maximum value"), 0, 1570, 856, tr("degrees"),
       std::function<int(int v)>() = [&](int v) {
           float radian = float(v) / 1000.f;
           float degrees = radian * (180.0 / 3.141592653589793238463);
@@ -58,6 +58,30 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   _climb_secondary_tool.push_back(climb_use_output_color_angle);
   _climb_secondary_tool.push_back(climb_value);
   _climb_secondary_tool.push_back(climb_reset_slider);
+
+
+  // Time toolbar
+  IconAction* time_icon = new IconAction(FontNoggitIcon{ FontNoggit::TIME_PAUSE });
+
+  PushButtonAction* pause_time = new PushButtonAction(tr("Pause Time"));
+  connect(pause_time->pushbutton(), &QPushButton::clicked, [pause_time]()
+      {
+
+      });
+
+  PushButtonAction* speed_up_time = new PushButtonAction(tr("Increase Time speed"));
+  connect(climb_reset_slider->pushbutton(), &QPushButton::clicked, [pause_time]()
+      {
+
+      });
+
+  _time_secondary_tool.push_back(time_icon);
+  /*
+  ADD_ACTION(view_menu, "Increase time speed", Qt::Key_N, [this] { mTimespeed += 90.0f; });
+  ADD_ACTION(view_menu, "Decrease time speed", Qt::Key_B, [this] { mTimespeed = std::max(0.0f, mTimespeed - 90.0f); });
+  ADD_ACTION(view_menu, "Pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
+  */
+
 }
 
 ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
@@ -70,7 +94,7 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     add_tool_icon(mapView, &mapView->_draw_models, tr("Doodads"), FontNoggit::VISIBILITY_DOODADS, tb);
     add_tool_icon(mapView, &mapView->_draw_wmo, tr("WMOs"), FontNoggit::VISIBILITY_WMO, tb);
     add_tool_icon(mapView, &mapView->_draw_wmo_doodads, tr("WMO doodads"), FontNoggit::VISIBILITY_WMO_DOODADS, tb);
-    add_tool_icon(mapView, &mapView->_draw_wmo_exterior, tr("WMO exterior"), FontNoggit::GIZMO_VISIBILITY, tb);
+    add_tool_icon(mapView, &mapView->_draw_wmo_exterior, tr("WMO exterior"), FontNoggit::UI_TOGGLE, tb);
     add_tool_icon(mapView, &mapView->_draw_terrain, tr("Terrain"), FontNoggit::VISIBILITY_TERRAIN, tb);
     add_tool_icon(mapView, &mapView->_draw_water, tr("Water"), FontNoggit::VISIBILITY_WATER, tb);
 
@@ -82,12 +106,14 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     add_tool_icon(mapView, &mapView->_draw_contour, tr("Contours"), FontNoggit::VISIBILITY_CONTOURS, tb);
     add_tool_icon(mapView, &mapView->_draw_climb, tr("Climb"), FontNoggit::VISIBILITY_CLIMB, tb, tb->_climb_secondary_tool);
     add_tool_icon(mapView, &mapView->_draw_vertex_color, tr("Vertex Color"), FontNoggit::VISIBILITY_VERTEX_PAINTER, tb);
+    add_tool_icon(mapView, &mapView->_draw_baked_shadows, tr("Baked Shadows"), FontNoggit::VISIBILITY_BAKED_SHADOWS, tb); // TODO : better icon
 
     addSeparator();
 
-    // Animation
+    add_tool_icon(mapView, &mapView->_draw_model_animations, tr("Animations"), FontNoggit::VISIBILITY_ANIMATION, tb);
     add_tool_icon(mapView, &mapView->_draw_fog, tr("Fog"), FontNoggit::VISIBILITY_FOG, tb);
     add_tool_icon(mapView, &mapView->_draw_mfbo, tr("Flight bounds"), FontNoggit::VISIBILITY_FLIGHT_BOUNDS, tb);
+    // add_tool_icon(mapView, &mapView->_draw_lights_zones, tr("Light zones"), FontNoggit::VISIBILITY_LIGHT, tb);
     addSeparator();
 
     // Hole lines always on
@@ -99,6 +125,27 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     tablet_sensitivity->setOrientation(Qt::Horizontal);
     addWidget(tablet_sensitivity);
    */
+
+    // some unused icons : 
+    // VISIBILITY_LIGHT VISIBILITY_GROUNDEFFECTS CAMERA_TURN CAMERA_SPEED_FASTER.. INFO TIME_NORMAL VIEW_AXIS VISIBILITY_UNUSED SETTINGS
+
+    // normal view mode icon, and make them only 1 at a time out of the 3 view modes? 
+    // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Normal view"), FontNoggit::VIEW_AXIS, tb);
+    add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Game view"), FontNoggit::VIEW_MODE_GAME, tb);
+    // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Tile view"), FontNoggit::VIEW_MODE_2D, tb);
+    addSeparator();
+
+    add_tool_icon(mapView, &mapView->_show_detail_info_window, tr("Details info"), FontNoggit::INFO, tb);
+
+    // TODO : will open a panel with time controls, or use 2n toolbar
+    //add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Time speed"), FontNoggit::TIME_NORMAL, tb, _time_secondary_tool);
+
+    /*
+    auto tile_view_btn = new QPushButton(this);
+    tile_view_btn->setIcon(FontNoggitIcon{ FontNoggit::VIEW_MODE_2D });
+    tile_view_btn->setToolTip("2D View");
+    addWidget(tile_view_btn);
+    */
 
     auto undo_stack_btn = new QPushButton(this);
     undo_stack_btn->setIcon(FontAwesomeIcon(FontAwesome::undo));

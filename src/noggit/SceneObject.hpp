@@ -47,6 +47,8 @@ public:
 
   void resetDirection();
 
+  void normalizeDirection();
+
   [[nodiscard]]
   glm::mat4x4 transformMatrix() const { return _transform_mat; };
 

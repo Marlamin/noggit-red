@@ -1924,6 +1924,13 @@ void MapView::setupViewMenu()
           _world->renderer()->markTerrainParamsUniformBlockDirty();
       });
 
+  ADD_TOGGLE_POST(view_menu, "Baked Shadows", Qt::SHIFT | Qt::Key_F7, _draw_baked_shadows,
+      [=]
+      {
+          _world->renderer()->getTerrainParamsUniformBlock()->draw_shadows = _draw_baked_shadows.get();
+          _world->renderer()->markTerrainParamsUniformBlockDirty();
+      });
+
   ADD_TOGGLE (view_menu, "Toggle Animation", Qt::Key_F11, _draw_model_animations);
   ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
   ADD_TOGGLE_NS (view_menu, "Flight Bounds", _draw_mfbo);
@@ -1931,6 +1938,8 @@ void MapView::setupViewMenu()
   ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Hidden models", _draw_hidden_models);
+
+  ADD_TOGGLE_NS(view_menu, "Game Mode", _game_mode_camera);
 
   auto debug_menu (view_menu->addMenu ("Debug"));
   ADD_TOGGLE_NS (debug_menu, "Occlusion boxes", _draw_occlusion_boxes);
@@ -2127,6 +2136,7 @@ void MapView::setupHotkeys()
                   alloff_contour = _draw_contour.get();
                   alloff_climb = _draw_climb.get();
                   alloff_vertex_color = _draw_vertex_color.get();
+                  alloff_baked_shadows = _draw_baked_shadows.get();
                   alloff_wmo = _draw_wmo.get();
                   alloff_fog = _draw_fog.get();
                   alloff_terrain = _draw_terrain.get();
@@ -2136,6 +2146,7 @@ void MapView::setupHotkeys()
                   _draw_contour.set (true);
                   _draw_climb.set (false);
                   _draw_vertex_color.set(true);
+                  _draw_baked_shadows.set(true);
                   _draw_wmo.set (false);
                   _draw_terrain.set (true);
                   _draw_fog.set (false);
@@ -2147,6 +2158,7 @@ void MapView::setupHotkeys()
                   _draw_contour.set (alloff_contour);
                   _draw_climb.set(alloff_climb);
                   _draw_vertex_color.set(alloff_vertex_color);
+                  _draw_baked_shadows.set(alloff_baked_shadows);
                   _draw_wmo.set (alloff_wmo);
                   _draw_terrain.set (alloff_terrain);
                   _draw_fog.set (alloff_fog);
@@ -3430,31 +3442,34 @@ void MapView::tick (float dt)
       // reset numpad_moveratio when no numpad key is pressed
       if (!(keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
       {
-        numpad_moveratio = 0.001f;
+        numpad_moveratio = 0.5f;
       }
       else // Set move scale and rotate for numpad keys
       {
         if (_mod_ctrl_down && _mod_shift_down)
         {
-          numpad_moveratio += 0.1f;
+          numpad_moveratio += 0.5f;
         }
         else if (_mod_shift_down)
         {
-          numpad_moveratio += 0.01f;
+          numpad_moveratio += 0.05f;
         }
         else if (_mod_ctrl_down)
         {
-          numpad_moveratio += 0.0005f;
+          numpad_moveratio += 0.005f;
         }
       }
 
       if (keys != 0.f)
       {
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
         _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
+        // NOGGIT_ACTION_MGR->endAction();
         _rotation_editor_need_update = true;
       }
       if (keyr != 0.f)
       {
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
         _world->rotate_selected_models( math::degrees(0.f)
                                       , math::degrees(keyr * numpad_moveratio * 5.f)
                                       , math::degrees(0.f)
@@ -3947,20 +3962,54 @@ void MapView::tick (float dt)
       _camera.add_to_pitch(math::degrees(lookat));
       _camera_moved_since_last_draw = true;
     }
-    if (moving)
+
+    if (_game_mode_camera.get())
     {
-      _camera.move_forward(moving, dt);
-      _camera_moved_since_last_draw = true;
+        if (moving)
+        {
+            _camera.move_forward(moving, dt);
+            // TODO use normalized speed (doesn't slow down when looking up)
+            // _camera.move_forward_normalized(moving, dt);
+        }
+        if (strafing)
+        {
+            _camera.move_horizontal(strafing, dt);
+        }
+
+        // get ground z position
+        // can be optimized by calling this only when moving/strafing or changing camera mode.
+        auto ground_pos = _world.get()->get_ground_height(_camera.position);
+        _camera.position.y = ground_pos.y + 2;
+        _camera_moved_since_last_draw = true;
+
     }
-    if (strafing)
+    else
     {
-      _camera.move_horizontal(strafing, dt);
-      _camera_moved_since_last_draw = true;
-    }
-    if (updown)
-    {
-      _camera.move_vertical(updown, dt);
-      _camera_moved_since_last_draw = true;
+
+      if (moving)
+      {
+        _camera.move_forward(moving, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      if (strafing)
+      {
+        _camera.move_horizontal(strafing, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      if (updown)
+      {
+        _camera.move_vertical(updown, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      // camera collision to ground
+      /*
+      auto ground_height = _world.get()->get_ground_height(_camera.position).y;
+      if (_camera.position.y < ground_height)
+      {
+          _camera.position.y = ground_height + 3;
+      }
+      */
+
     }
   }
   else
@@ -5246,7 +5295,8 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
                 glm::vec2(std::min(_drag_start_pos.x(), drag_end_pos.x()), std::min(_drag_start_pos.y(), drag_end_pos.y())),
                 glm::vec2(std::max(_drag_start_pos.x(), drag_end_pos.x()), std::max(_drag_start_pos.y(), drag_end_pos.y()))
             };
-            _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), objectEditor->drag_selection_depth(), _camera.position);
+            // _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), objectEditor->drag_selection_depth(), _camera.position);
+            _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), 3000.0f, _camera.position);
         }
         else // Do normal selection when we just clicked
         {

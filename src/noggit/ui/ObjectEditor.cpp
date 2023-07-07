@@ -65,7 +65,7 @@ namespace Noggit
       auto layout = new QVBoxLayout (this);
       layout->setAlignment(Qt::AlignTop);
 
-      QGroupBox* radius_group = new QGroupBox("Radius");
+      QGroupBox* radius_group = new QGroupBox("Selection Brush Radius");
       auto radius_layout = new QFormLayout(radius_group);
 
       _radius_spin = new QDoubleSpinBox (this);
@@ -81,6 +81,7 @@ namespace Noggit
       radius_layout->addRow(_radius_spin);
       layout->addWidget(radius_group);
 
+      /*
       QGroupBox* drag_selection_depth_group = new QGroupBox("Drag Selection Depth");
       auto drag_selection_depth_layout = new QFormLayout(drag_selection_depth_group);
 
@@ -92,10 +93,11 @@ namespace Noggit
       _drag_selection_depth_slider = new QSlider(Qt::Orientation::Horizontal, this);
       _drag_selection_depth_slider->setRange(1.0f, 3000.0f);
       _drag_selection_depth_slider->setSliderPosition(_drag_selection_depth);
+      
 
       drag_selection_depth_layout->addRow(_drag_selection_depth_slider);
       drag_selection_depth_layout->addRow(_drag_selection_depth_spin);
-      layout->addWidget(drag_selection_depth_group);
+      layout->addWidget(drag_selection_depth_group);*/
 
       QPushButton* asset_browser_btn = new QPushButton("Asset browser", this);
       layout->addWidget(asset_browser_btn);
@@ -384,6 +386,7 @@ namespace Noggit
                 }
       );
 
+      /*
       connect(_drag_selection_depth_spin, qOverload<double>(&QDoubleSpinBox::valueChanged)
           , [&] (double v)
               {
@@ -399,7 +402,7 @@ namespace Noggit
                 QSignalBlocker const blocker(_drag_selection_depth_spin);
                 _drag_selection_depth_spin->setValue(v);
               }
-      );
+      );*/
 
       connect ( rotRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
