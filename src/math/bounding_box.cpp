@@ -22,9 +22,9 @@ namespace
   glm::vec3 max_per_dimension(std::vector<glm::vec3> const& points)
   {
     auto max(glm::vec3(
-        std::numeric_limits<float>::min(),
-        std::numeric_limits<float>::min(),
-        std::numeric_limits<float>::min()
+        std::numeric_limits<float>::lowest(),
+        std::numeric_limits<float>::lowest(),
+        std::numeric_limits<float>::lowest()
     ));
     for (auto const& point : points)
     {

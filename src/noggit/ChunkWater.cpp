@@ -122,7 +122,7 @@ void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int&
 
   if (hasData(0))
   {
-    header.nLayers = _layers.size();
+    header.nLayers = static_cast<std::uint32_t>(_layers.size());
 
     if (Render.has_value())
     {
@@ -139,9 +139,9 @@ void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int&
     int info_pos = current_pos;
 
     std::size_t info_size = sizeof(MH2O_Information) * _layers.size();
-    current_pos += info_size;
+    current_pos += static_cast<std::uint32_t>(info_size);
 
-    adt.Extend(info_size);
+    adt.Extend(static_cast<long>(info_size));
 
     for (liquid_layer& layer : _layers)
     {
@@ -315,7 +315,7 @@ void ChunkWater::paintLiquid( glm::vec3 const& pos
 
 void ChunkWater::cleanup()
 {
-  for (int i = _layers.size() - 1; i >= 0; --i)
+  for (int i = static_cast<int>(_layers.size() - 1); i >= 0; --i)
   {
     if (_layers[i].empty())
     {

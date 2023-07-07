@@ -11,7 +11,7 @@ class StackedWidget : public QWidget
 Q_OBJECT
 
 public:
-  StackedWidget(QWidget * = 0, Qt::WindowFlags = 0);
+  StackedWidget(QWidget * = 0, Qt::WindowFlags = Qt::WindowFlags{});
 
   void addWidget(QWidget *);
   void removeLast();

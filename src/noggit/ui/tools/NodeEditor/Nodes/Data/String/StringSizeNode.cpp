@@ -20,7 +20,7 @@ StringSizeNode::StringSizeNode()
 
 void StringSizeNode::compute()
 {
-  _out_ports[0].out_value = std::make_shared<UnsignedIntegerData>(static_cast<StringData*>(_in_ports[0].in_value.lock().get())->value().size());
+  _out_ports[0].out_value = std::make_shared<UnsignedIntegerData>(static_cast<unsigned>(static_cast<StringData*>(_in_ports[0].in_value.lock().get())->value().size()));
 
   _node->onDataUpdated(0);
 }

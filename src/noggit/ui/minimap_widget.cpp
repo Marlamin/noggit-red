@@ -141,9 +141,9 @@ namespace Noggit
         {
           //! \todo Draw non-existing tiles aswell?
           painter.setBrush (QColor (255, 255, 255, 30));
-          for (size_t i (0); i < 64; ++i)
+          for (int i (0); i < 64; ++i)
           {
-            for (size_t j (0); j < 64; ++j)
+            for (int j (0); j < 64; ++j)
             {
               TileIndex const tile (i, j);
               bool changed = false;
@@ -227,14 +227,21 @@ namespace Noggit
         {
           painter.setPen (Qt::red);
 
+          // hackfix
+          auto yaw = _camera->yaw();
+          yaw._ -= 90.0f;
+
+          while (yaw._ < -180.0f)
+              yaw._ += 360.0f;
+
           QLineF camera_vector ( QPointF ( _camera->position.x * scale_factor
                                          , _camera->position.z * scale_factor
                                          )
                                , QPointF ( _camera->position.x * scale_factor
                                          , _camera->position.z * scale_factor
                                          )
-                               + QPointF ( glm::cos(math::radians(_camera->yaw())._) * scale_factor
-                                         , -glm::sin(math::radians(_camera->yaw())._) * scale_factor
+                               + QPointF ( glm::cos(math::radians(yaw)._) * scale_factor
+                                         , -glm::sin(math::radians(yaw)._) * scale_factor
                                          )
                                );
           camera_vector.setLength (15.0);

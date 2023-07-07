@@ -49,8 +49,13 @@ class MapIndex
 public:
   template<bool Load>
   struct tile_iterator
-  : std::iterator<std::forward_iterator_tag, MapTile*, std::ptrdiff_t, MapTile**, MapTile* const&>
   {
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = MapTile*;
+    using difference_type = std::ptrdiff_t;
+    using pointer = MapTile**;
+    using reference = MapTile* const&;
+
     template<typename Pred>
       tile_iterator (MapIndex* index, TileIndex tile, Pred pred)
         : _index (index)

@@ -101,7 +101,7 @@ void LogicBeginNode::restore(const QJsonObject& json_obj)
   {
     addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
     addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, 2 + i);
-    emit portAdded(PortType::Out, _out_ports.size() - 1);
+    emit portAdded(PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
   }
 
 }
@@ -132,8 +132,8 @@ void LogicBeginNode::outputConnectionCreated(const Connection& connection)
   if (_out_ports[_out_ports.size() - 1].connected)
   {
     addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
-    addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, _out_ports.size() - 1);
-    emit portAdded(PortType::Out, _out_ports.size() - 1);
+    addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
+    emit portAdded(PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
   }
 
   emit visualsNeedUpdate();
@@ -163,8 +163,8 @@ void LogicBeginNode::outputConnectionDeleted(const Connection& connection)
     else
     {
       addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
-      addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, _out_ports.size() - 1);
-      emit portAdded(PortType::Out, _out_ports.size() - 1);
+      addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
+      emit portAdded(PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
       break;
     }
   }
@@ -172,8 +172,8 @@ void LogicBeginNode::outputConnectionDeleted(const Connection& connection)
   if (_out_ports[_out_ports.size() - 1].connected)
   {
     addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
-    addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, _out_ports.size() - 1);
-    emit portAdded(PortType::Out, _out_ports.size() - 1);
+    addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
+    emit portAdded(PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
   }
 
   emit visualsNeedUpdate();
@@ -203,8 +203,8 @@ void LogicBeginNode::restorePostConnection(const QJsonObject& json_obj)
     else
     {
       addPort<AnyData>(PortType::Out, "Any", true, ConnectionPolicy::One);
-      addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, _out_ports.size() - 1);
-      emit portAdded(PortType::Out, _out_ports.size() - 1);
+      addDefaultWidget(new QLabel(&_embedded_widget), PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
+      emit portAdded(PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
       break;
     }
 

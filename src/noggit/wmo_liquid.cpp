@@ -57,7 +57,7 @@ namespace
 }
 
 // todo: use material
-wmo_liquid::wmo_liquid(BlizzardArchive::ClientFile* f, WMOLiquidHeader const& header, WMOMaterial const&, int group_liquid, bool use_dbc_type, bool is_ocean)
+wmo_liquid::wmo_liquid(BlizzardArchive::ClientFile* f, WMOLiquidHeader const& header, int group_liquid, bool use_dbc_type, bool is_ocean)
   : pos(glm::vec3(header.pos.x, header.pos.z, -header.pos.y))
   , xtiles(header.A)
   , ytiles(header.B)
@@ -206,7 +206,7 @@ int wmo_liquid::initGeometry(BlizzardArchive::ClientFile* f)
     }
   }
 
-  _indices_count = indices.size();
+  _indices_count = static_cast<int>(indices.size());
 
   return last_liquid_id;
 }

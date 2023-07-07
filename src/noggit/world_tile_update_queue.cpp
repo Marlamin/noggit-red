@@ -31,9 +31,9 @@ namespace Noggit
       auto& extents(instance->getExtents());
       TileIndex start(extents[0]), end(extents[1]);
 
-      for (int z = start.z; z <= end.z; ++z)
+      for (size_t z = start.z; z <= end.z; ++z)
       {
-        for (int x = start.x; x <= end.x; ++x)
+        for (size_t x = start.x; x <= end.x; ++x)
         {
           world->mapIndex.update_model_tile(TileIndex(x, z), update_type, instance);
         }

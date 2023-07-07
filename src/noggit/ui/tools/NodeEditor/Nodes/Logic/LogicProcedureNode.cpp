@@ -184,13 +184,13 @@ void LogicProcedureNode::restore(const QJsonObject& json_obj)
   for (int i = 0; i < json_obj["n_dynamic_in_ports"].toInt(); ++i)
   {
     addPort<LogicData>(PortType::In, json_obj[("in_port_" + std::to_string(i + 2) + "_caption").c_str()].toString(), true);
-    addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, _in_ports.size() - 1);
+    addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, static_cast<QtNodes::PortIndex>(_in_ports.size() - 1));
 
     std::unique_ptr<NodeData> type;
     type.reset(TypeFactory::create(json_obj[("in_port_" + std::to_string(i + 2)).c_str()].toString().toStdString()));
 
     _in_ports[_in_ports.size() - 1].data_type = std::move(type);
-    emit portAdded(PortType::In, _in_ports.size() - 1);
+    emit portAdded(PortType::In, static_cast<QtNodes::PortIndex>(_in_ports.size() - 1));
   }
 
   for (int i = 0; i < json_obj["n_dynamic_out_ports"].toInt(); ++i)
@@ -201,7 +201,7 @@ void LogicProcedureNode::restore(const QJsonObject& json_obj)
     type.reset(TypeFactory::create(json_obj[("out_port_" + std::to_string(i + 1)).c_str()].toString().toStdString()));
 
     _out_ports[_out_ports.size() - 1].data_type = std::move(type);
-    emit portAdded(PortType::Out, _out_ports.size() - 1);
+    emit portAdded(PortType::Out, static_cast<QtNodes::PortIndex>(_out_ports.size() - 1));
   }
 
 }
@@ -236,12 +236,12 @@ NodeValidationState LogicProcedureNode::validate()
 
 void LogicProcedureNode::clearDynamicPorts()
 {
-  for (int i = _in_ports.size() - 1; i != 1 ; --i)
+  for (int i = static_cast<int>(_in_ports.size() - 1); i != 1 ; --i)
   {
     deletePort(PortType::In, i);
   }
 
-  for (int i = _out_ports.size() - 1; i != 0 ; --i)
+  for (int i = static_cast<int>(_out_ports.size() - 1); i != 0 ; --i)
   {
     deletePort(PortType::Out, i);
   }
@@ -284,7 +284,7 @@ void LogicProcedureNode::setProcedure(const QString& path)
       continue;
 
     addPort<LogicData>(PortType::In, port.caption, true);
-    int port_idx = _in_ports.size() - 1;
+    int port_idx = static_cast<int>(_in_ports.size() - 1);
     addDefaultWidget(new QLabel(&_embedded_widget), PortType::In, port_idx);
 
     _in_ports[port_idx].data_type = port.data_type->instantiate();
@@ -305,7 +305,7 @@ void LogicProcedureNode::setProcedure(const QString& path)
         continue;
 
       addPort<LogicData>(PortType::Out, port.caption, true);
-      int port_idx = _out_ports.size() - 1;
+      int port_idx = static_cast<int>(_out_ports.size() - 1);
       _out_ports[port_idx].data_type = port.data_type->instantiate();
       _out_ports[port_idx].data_type->set_parameter_type(port.data_type->type().parameter_type_id);
       emit portAdded(PortType::Out, port_idx);

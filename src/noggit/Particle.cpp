@@ -208,7 +208,7 @@ void ParticleSystem::update(float dt)
       int tospawn = (int)ftospawn;
 
       if ((tospawn + particles.size()) > MAX_PARTICLES) // Error check to prevent the program from trying to load insane amounts of particles.
-        tospawn = particles.size() - MAX_PARTICLES;
+        tospawn = static_cast<int>(particles.size()) - MAX_PARTICLES;
 
       rem = ftospawn - static_cast<float>(tospawn);
 
@@ -499,7 +499,7 @@ void ParticleSystem::draw( glm::mat4x4 const& model_view
   }
 
   OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder (_indices_vbo);
-  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
+  gl.drawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_SHORT, nullptr, instances_count);
 
 }
 
@@ -991,7 +991,7 @@ void RibbonEmitter::draw( OpenGL::Scoped::use_program& shader
   }
 
   OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> const indices_binder(_indices_vbo);
-  gl.drawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, nullptr, instances_count);
+  gl.drawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_SHORT, nullptr, instances_count);
 }
 
 void RibbonEmitter::upload()

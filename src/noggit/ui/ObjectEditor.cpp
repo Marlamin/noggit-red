@@ -46,6 +46,7 @@ namespace Noggit
                                  , BoolToggleProperty* rotate_along_ground
                                  , BoolToggleProperty* rotate_along_ground_smooth
                                  , BoolToggleProperty* rotate_along_ground_random
+                                 , BoolToggleProperty* move_model_snap_to_objects
                                  , QWidget* parent
                                  )
             : QWidget(parent)
@@ -64,7 +65,7 @@ namespace Noggit
       auto layout = new QVBoxLayout (this);
       layout->setAlignment(Qt::AlignTop);
 
-      QGroupBox* radius_group = new QGroupBox("Radius");
+      QGroupBox* radius_group = new QGroupBox("Selection Brush Radius");
       auto radius_layout = new QFormLayout(radius_group);
 
       _radius_spin = new QDoubleSpinBox (this);
@@ -80,6 +81,7 @@ namespace Noggit
       radius_layout->addRow(_radius_spin);
       layout->addWidget(radius_group);
 
+      /*
       QGroupBox* drag_selection_depth_group = new QGroupBox("Drag Selection Depth");
       auto drag_selection_depth_layout = new QFormLayout(drag_selection_depth_group);
 
@@ -91,10 +93,11 @@ namespace Noggit
       _drag_selection_depth_slider = new QSlider(Qt::Orientation::Horizontal, this);
       _drag_selection_depth_slider->setRange(1.0f, 3000.0f);
       _drag_selection_depth_slider->setSliderPosition(_drag_selection_depth);
+      
 
       drag_selection_depth_layout->addRow(_drag_selection_depth_slider);
       drag_selection_depth_layout->addRow(_drag_selection_depth_spin);
-      layout->addWidget(drag_selection_depth_group);
+      layout->addWidget(drag_selection_depth_group);*/
 
       QPushButton* asset_browser_btn = new QPushButton("Asset browser", this);
       layout->addWidget(asset_browser_btn);
@@ -214,6 +217,11 @@ namespace Noggit
                                              )
                               );
 
+      auto object_movement_snap_cb(new CheckBox("Mouse move snaps\nto objects"
+          , move_model_snap_to_objects
+          , this
+      )
+      );
 
       auto object_rotateground_cb(new CheckBox("Rotate following cursor"
           , rotate_along_ground
@@ -237,6 +245,7 @@ namespace Noggit
       object_movement_layout->addRow(object_rotategroundsmooth_cb);
       object_movement_layout->addRow(object_rotategroundrandom_cb);
       object_movement_layout->addRow(object_movement_cb);
+      object_movement_layout->addRow(object_movement_snap_cb);
 
       // multi model selection
       auto multi_select_movement_box(new QGroupBox("Multi Selection Movement", this));
@@ -377,6 +386,7 @@ namespace Noggit
                 }
       );
 
+      /*
       connect(_drag_selection_depth_spin, qOverload<double>(&QDoubleSpinBox::valueChanged)
           , [&] (double v)
               {
@@ -392,7 +402,7 @@ namespace Noggit
                 QSignalBlocker const blocker(_drag_selection_depth_spin);
                 _drag_selection_depth_spin->setValue(v);
               }
-      );
+      );*/
 
       connect ( rotRangeStart, qOverload<double> (&QDoubleSpinBox::valueChanged)
               , [=] (double v)
@@ -506,45 +516,18 @@ namespace Noggit
       connect(_doodadSetSelector
           , qOverload<int>(&QComboBox::currentIndexChanged)
           , [this](int index) {
-              auto last_entry = _map_view->_world->get_last_selected_model();
-            if (last_entry)
-            {
-                if (last_entry.value().index() != eEntry_Object)
-                {
-                    return;
-                }
-                auto obj = std::get<selected_object_type>(last_entry.value());
-                if (obj->which() == eWMO)
-                {
-                    // use actions or directly call updateDetailInfos() ?
-                    WMOInstance* wi = static_cast<WMOInstance*>(obj);
-                    NOGGIT_ACTION_MGR->beginAction(_map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
-                    wi->change_doodadset(index);
-                    NOGGIT_ACTION_MGR->endAction();
-                }
-            }
+              NOGGIT_ACTION_MGR->beginAction(_map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+              _map_view->change_selected_wmo_doodadset(index);
+              NOGGIT_ACTION_MGR->endAction();
           });
 
       connect(_nameSetSelector
           , qOverload<int>(&QComboBox::currentIndexChanged)
           , [this](int index) {
-              auto last_entry = _map_view->_world->get_last_selected_model();
-            if (last_entry)
-            {
-                if (last_entry.value().index() != eEntry_Object)
-                {
-                    return;
-                }
-                auto obj = std::get<selected_object_type>(last_entry.value());
-                if (obj->which() == eWMO)
-                {
-                    WMOInstance* wi = static_cast<WMOInstance*>(obj);
-                    NOGGIT_ACTION_MGR->beginAction(_map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
-                    wi->mNameset = index;
-                    NOGGIT_ACTION_MGR->endAction();
 
-                }
-            }
+              NOGGIT_ACTION_MGR->beginAction(_map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+              _map_view->change_selected_wmo_nameset(index);
+              NOGGIT_ACTION_MGR->endAction();
           });
 
       auto mv_pos = mapView->pos();
@@ -629,9 +612,13 @@ namespace Noggit
           LogDebug << "object_editor::pasteObject: unknown paste mode " << pasteMode << std::endl;
           break;
         }
-        
+
+
+
         if (obj->which() == eMODEL)
         {
+          auto model_instance = static_cast<ModelInstance*>(obj);
+
           float scale(1.f);
           math::degrees::vec3 rotation(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
 
@@ -653,6 +640,18 @@ namespace Noggit
           new_obj->model->waitForChildrenLoaded();
           new_obj->recalcExtents();
 
+          // check if pos is valid (not in an interior) wmo group
+          bool is_indoor = world->isInIndoorWmoGroup(new_obj->extents);
+          if (is_indoor)
+          {
+              QMessageBox::warning
+              (nullptr
+                  , "Warning"
+                  , "You can't place M2 models inside WMO models interiors, they will not render."
+                  "\nTo place objects inside WMOs, use server side gameobjects or modify the WMO doodads(with wow blender studio)."
+              );
+          }
+
         }
         else if (obj->which() == eWMO)
         {
@@ -668,7 +667,7 @@ namespace Noggit
           new_obj->wmo->waitForChildrenLoaded();
           new_obj->recalcExtents();
         }        
-      }
+}
     }
 
     void object_editor::togglePasteMode()

@@ -22,6 +22,7 @@ Further following libraries are required for MySQL GUID Storage builds:
 
 * LibMySQL
 * MySQLCPPConn
+See below for detailed instructions
 
 ## Windows ##
 Text in `<brackets>` below are up to your choice but shall be replaced
@@ -55,6 +56,20 @@ recent version).
 * build ALL_BUILD
 * build INSTALL
 * Repeat for both release and debug.
+
+### MySQL (Optional) ###
+Optional, required for MySQL GUID Storage builds.
+download MySQL server https://dev.mysql.com/downloads/installer/
+and MySQL C++ Connector https://dev.mysql.com/downloads/connector/cpp/
+* open CMake GUI
+* enable `USE_SQL`
+* set `MYSQL_LIBRARY` (path) to `libmysql.lib` from your MYSQL server install.
+e.g `"C:/Program Files/MySQL/MySQL Server 8.0/lib/libmysql.lib"`
+* set `MYSQLCPPCONN_INCLUDE` (path) to the folder containing `cppconn/driver.h` from your MYSQL Connector C++ install.
+e.g `"C:/Program Files/MySQL/Connector C++ 8.0/include/jdbc"`
+* set `MYSQLCPPCONN_LIBRARY` (path) to `mysqlcppconn.lib` from your MYSQL Connector C++ install.
+e.g `"C:/Program Files/MySQL/Connector C++ 8.0/lib64/vs14/mysqlcppconn.lib"`
+* Don't forget to set your SQL settings and enable the feature in the noggit settings menu to use it.
 
 ### Noggit ###
 * open CMake GUI

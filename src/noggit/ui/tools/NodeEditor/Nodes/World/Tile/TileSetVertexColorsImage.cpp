@@ -50,7 +50,7 @@ void TileSetVertexColorsImageNode::compute()
     image_to_use = &scaled;
   }
 
-  tile->setVertexColorImage(*image_to_use, _operation->currentIndex());
+  tile->setVertexColorImage(*image_to_use, _operation->currentIndex(), false);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
