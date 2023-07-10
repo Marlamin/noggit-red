@@ -1225,7 +1225,7 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
   return std::move(image);
 }
 
-<<<<<<<<< Temporary merge branch 1
+void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges) // image
 {
   auto image = baseimage.convertToFormat(QImage::Format_Grayscale16);
 
@@ -1448,7 +1448,7 @@ QImage MapTile::getVertexColorsImage()
   return std::move(image);
 }
 
-<<<<<<<<< Temporary merge branch 1
+void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledEdges)
 {
   QImage image = baseimage.convertToFormat(QImage::Format_RGBA8888);
 
