@@ -59,7 +59,7 @@ void TileSetHeightmapImageNode::compute()
     return;
   }
 
-  tile->setHeightmapImage(*image_to_use, static_cast<float>(multiplier), _operation->currentIndex());
+  tile->setHeightmapImage(*image_to_use, static_cast<float>(multiplier), _operation->currentIndex(), false);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

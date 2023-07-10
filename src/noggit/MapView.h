@@ -138,6 +138,7 @@ private:
 
 public:
   Noggit::BoolToggleProperty _draw_vertex_color = {true};
+  Noggit::BoolToggleProperty _draw_baked_shadows = { true };
   Noggit::BoolToggleProperty _draw_climb = {false};
   Noggit::BoolToggleProperty _draw_contour = {false};
   Noggit::BoolToggleProperty _draw_mfbo = {false};
@@ -147,13 +148,18 @@ public:
   Noggit::BoolToggleProperty _draw_wmo = {true};
   Noggit::BoolToggleProperty _draw_water = {true};
   Noggit::BoolToggleProperty _draw_wmo_doodads = {true};
+  Noggit::BoolToggleProperty _draw_wmo_exterior = { true };
   Noggit::BoolToggleProperty _draw_models = {true};
-  Noggit::BoolToggleProperty _draw_model_animations = {false};
+  Noggit::BoolToggleProperty _draw_model_animations = {true};
   Noggit::BoolToggleProperty _draw_hole_lines = {false};
   Noggit::BoolToggleProperty _draw_models_with_box = {false};
   Noggit::BoolToggleProperty _draw_fog = {false};
   Noggit::BoolToggleProperty _draw_hidden_models = {false};
   Noggit::BoolToggleProperty _draw_occlusion_boxes = {false};
+  Noggit::BoolToggleProperty _game_mode_camera = { false };
+  Noggit::BoolToggleProperty _draw_lights_zones = { false };
+  Noggit::BoolToggleProperty _show_detail_info_window = { false };
+  Noggit::BoolToggleProperty _show_minimap_window = { false };
 private:
 
   int _selected_area_id = -1;
@@ -213,6 +219,7 @@ private:
   bool  alloff_terrain = false;
   bool  alloff_climb = false;
   bool  alloff_vertex_color = false;
+  bool  alloff_baked_shadows = false;
 
   editing_mode terrainMode = editing_mode::ground;
   editing_mode saveterrainMode = terrainMode;
@@ -261,6 +268,7 @@ public:
   ~MapView();
 
   void tick (float dt);
+  void change_selected_wmo_nameset(int set);
   void change_selected_wmo_doodadset(int set);
   void saveMinimap(MinimapRenderSettings* settings);
   void initMinimapSave() { saving_minimap = true; };
@@ -271,6 +279,7 @@ public:
   void randomizeShaderRotation();
   void randomizeStampRotation();
   void onSettingsSave();
+  void updateRotationEditor() { _rotation_editor_need_update = true; };
 
   [[nodiscard]]
   Noggit::Ui::minimap_widget* getMinimapWidget() const { return _minimap;  }
@@ -367,11 +376,15 @@ private:
   QLabel* _status_time;
   QLabel* _status_fps;
   QLabel* _status_culling;
+  QLabel* _status_database;
 
   Noggit::BoolToggleProperty _locked_cursor_mode = {false};
   Noggit::BoolToggleProperty _move_model_to_cursor_position = {true};
+  Noggit::BoolToggleProperty _move_model_snap_to_objects = { true };
   Noggit::BoolToggleProperty _snap_multi_selection_to_ground = {false};
   Noggit::BoolToggleProperty _rotate_along_ground = {true };
+  Noggit::BoolToggleProperty _rotate_doodads_along_doodads = { false };
+  Noggit::BoolToggleProperty _rotate_doodads_along_wmos = { false };
   Noggit::BoolToggleProperty _rotate_along_ground_smooth = {true };
   Noggit::BoolToggleProperty _rotate_along_ground_random = {false };
   Noggit::BoolToggleProperty _use_median_pivot_point = {true};
@@ -379,8 +392,6 @@ private:
   Noggit::unsigned_int_property _displayed_water_layer = {0};
   Noggit::object_paste_params _object_paste_params;
 
-  Noggit::BoolToggleProperty _show_detail_info_window = {false};
-  Noggit::BoolToggleProperty _show_minimap_window = {false};
   Noggit::BoolToggleProperty _show_node_editor = {false};
   Noggit::BoolToggleProperty _show_minimap_borders = {true};
   Noggit::BoolToggleProperty _show_minimap_skies = {false};

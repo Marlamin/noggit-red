@@ -11,6 +11,7 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
+#include <QtWidgets/qcheckbox.h>
 #include <QImage>
 #include <QJsonObject>
 
@@ -99,6 +100,8 @@ namespace Noggit
       Noggit::Ui::Tools::UiCommon::ExtendedSlider* _radius_slider;
       Noggit::Ui::Tools::UiCommon::ExtendedSlider* _inner_radius_slider;
       Noggit::Ui::Tools::UiCommon::ExtendedSlider* _speed_slider;
+      QCheckBox* _snap_m2_objects_chkbox;
+      QCheckBox* _snap_wmo_objects_chkbox;
 
       QSlider* _angle_slider;
       QDial* _orientation_dial;

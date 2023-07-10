@@ -50,6 +50,12 @@
 #include <variant>
 #include <noggit/Selection.h>
 
+#ifdef USE_MYSQL_UID_STORAGE
+#include <mysql/mysql.h>
+
+#include <QtCore/QSettings>
+#endif
+
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_settings.hpp>
 
@@ -812,6 +818,7 @@ void MapView::setupObjectEditorUi()
     , &_rotate_along_ground
     , &_rotate_along_ground_smooth
     , &_rotate_along_ground_random
+    , &_move_model_snap_to_objects
     , this
   );
   _tool_panel_dock->registerTool("Object Editor", objectEditor);
@@ -1540,7 +1547,10 @@ void MapView::setupAssistMenu()
   adt_import_height_params_layout->addWidget(new QLabel("Mode:", adt_import_height_params));
   QComboBox* adt_import_height_params_mode = new QComboBox(adt_import_height_params);
   adt_import_height_params_layout->addWidget(adt_import_height_params_mode);
-  adt_import_height_params_mode->addItems({"Set", "Add", "Subtract", "Multiply"});
+  adt_import_height_params_mode->addItems({"Set", "Add", "Subtract", "Multiply" });
+
+  QCheckBox* adt_import_height_tiled_edges = new QCheckBox("Tiled Edges", adt_import_height_params);
+  adt_import_height_params_layout->addWidget(adt_import_height_tiled_edges);
 
   QPushButton* adt_import_height_params_okay = new QPushButton("Okay", adt_import_height_params);
   adt_import_height_params_layout->addWidget(adt_import_height_params_okay);
@@ -1576,7 +1586,7 @@ void MapView::setupAssistMenu()
 
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
           _world->importADTHeightmap(_camera.position, img, adt_import_height_params_multiplier->value(),
-                                     adt_import_height_params_mode->currentIndex());
+                                     adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
         }
       }
@@ -1593,7 +1603,7 @@ void MapView::setupAssistMenu()
 
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
           _world->importADTHeightmap(_camera.position, adt_import_height_params_multiplier->value(),
-                                     adt_import_height_params_mode->currentIndex());
+                                     adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
         }
       }
@@ -1608,6 +1618,9 @@ void MapView::setupAssistMenu()
   QComboBox* adt_import_vcol_params_mode = new QComboBox(adt_import_vcol_params);
   adt_import_vcol_params_layout->addWidget(adt_import_vcol_params_mode);
   adt_import_vcol_params_mode->addItems({"Set", "Add", "Subtract", "Multiply"});
+
+  QCheckBox* adt_import_vcol_params_mode_tiled_edges = new QCheckBox("Tiled Edges", adt_import_vcol_params);
+  adt_import_vcol_params_layout->addWidget(adt_import_vcol_params_mode_tiled_edges);
 
   QPushButton* adt_import_vcol_params_okay = new QPushButton("Okay", adt_import_vcol_params);
   adt_import_vcol_params_layout->addWidget(adt_import_vcol_params_okay);
@@ -1643,7 +1656,7 @@ void MapView::setupAssistMenu()
         img.load(filepath, "PNG");
 
         NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
-        _world->importADTVertexColorMap(_camera.position, img, adt_import_vcol_params_mode->currentIndex());
+        _world->importADTVertexColorMap(_camera.position, img, adt_import_vcol_params_mode->currentIndex(), adt_import_vcol_params_mode_tiled_edges->isChecked());
         NOGGIT_ACTION_MGR->endAction();
       }
     }
@@ -1659,7 +1672,7 @@ void MapView::setupAssistMenu()
           OpenGL::context::scoped_setter const _(::gl, context());
 
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
-          _world->importADTVertexColorMap(_camera.position, adt_import_vcol_params_mode->currentIndex());
+          _world->importADTVertexColorMap(_camera.position, adt_import_vcol_params_mode->currentIndex(), adt_import_vcol_params_mode_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
         }
       }
@@ -1814,7 +1827,7 @@ void MapView::setupAssistMenu()
             makeCurrent();
             OpenGL::context::scoped_setter const _(::gl, context());
             NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
-            _world->importAllADTsHeightmaps(adt_import_height_params_multiplier->value(), adt_import_height_params_mode->currentIndex());
+            _world->importAllADTsHeightmaps(adt_import_height_params_multiplier->value(), adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
             NOGGIT_ACTION_MGR->endAction();
         )
 
@@ -1833,7 +1846,7 @@ void MapView::setupAssistMenu()
           makeCurrent();
           OpenGL::context::scoped_setter const _(::gl, context());
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_VERTEX_COLOR);
-          _world->importAllADTVertexColorMaps(adt_import_vcol_params_mode->currentIndex());
+          _world->importAllADTVertexColorMaps(adt_import_vcol_params_mode->currentIndex(), adt_import_vcol_params_mode_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
       )
 
@@ -1911,6 +1924,13 @@ void MapView::setupViewMenu()
           _world->renderer()->markTerrainParamsUniformBlockDirty();
       });
 
+  ADD_TOGGLE_POST(view_menu, "Baked Shadows", Qt::SHIFT | Qt::Key_F7, _draw_baked_shadows,
+      [=]
+      {
+          _world->renderer()->getTerrainParamsUniformBlock()->draw_shadows = _draw_baked_shadows.get();
+          _world->renderer()->markTerrainParamsUniformBlockDirty();
+      });
+
   ADD_TOGGLE (view_menu, "Toggle Animation", Qt::Key_F11, _draw_model_animations);
   ADD_TOGGLE (view_menu, "Draw fog", Qt::Key_F12, _draw_fog);
   ADD_TOGGLE_NS (view_menu, "Flight Bounds", _draw_mfbo);
@@ -1918,6 +1938,8 @@ void MapView::setupViewMenu()
   ADD_TOGGLE_NS (view_menu, "Models with box", _draw_models_with_box);
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Hidden models", _draw_hidden_models);
+
+  ADD_TOGGLE_NS(view_menu, "Game Mode", _game_mode_camera);
 
   auto debug_menu (view_menu->addMenu ("Debug"));
   ADD_TOGGLE_NS (debug_menu, "Occlusion boxes", _draw_occlusion_boxes);
@@ -2114,6 +2136,7 @@ void MapView::setupHotkeys()
                   alloff_contour = _draw_contour.get();
                   alloff_climb = _draw_climb.get();
                   alloff_vertex_color = _draw_vertex_color.get();
+                  alloff_baked_shadows = _draw_baked_shadows.get();
                   alloff_wmo = _draw_wmo.get();
                   alloff_fog = _draw_fog.get();
                   alloff_terrain = _draw_terrain.get();
@@ -2123,6 +2146,7 @@ void MapView::setupHotkeys()
                   _draw_contour.set (true);
                   _draw_climb.set (false);
                   _draw_vertex_color.set(true);
+                  _draw_baked_shadows.set(true);
                   _draw_wmo.set (false);
                   _draw_terrain.set (true);
                   _draw_fog.set (false);
@@ -2134,6 +2158,7 @@ void MapView::setupHotkeys()
                   _draw_contour.set (alloff_contour);
                   _draw_climb.set(alloff_climb);
                   _draw_vertex_color.set(alloff_vertex_color);
+                  _draw_baked_shadows.set(alloff_baked_shadows);
                   _draw_wmo.set (alloff_wmo);
                   _draw_terrain.set (alloff_terrain);
                   _draw_fog.set (alloff_fog);
@@ -2597,6 +2622,19 @@ void MapView::createGUI()
   connect(_main_window, &Noggit::Ui::Windows::NoggitWindow::exitPromptOpened, this, &MapView::on_exit_prompt);
 
   set_editing_mode (editing_mode::ground);
+
+  // do we need to do this every tick ?
+#ifdef USE_MYSQL_UID_STORAGE
+  if (_settings->value("project/mysql/enabled").toBool())
+  {
+      if (mysql::hasMaxUIDStoredDB(_world->getMapID()))
+      {
+        _status_database->setText("MySQL UID sync enabled: "
+            + _settings->value("project/mysql/server").toString() + ":"
+            + _settings->value("project/mysql/port").toString());
+      }
+  }
+#endif
 }
 
 void MapView::on_exit_prompt()
@@ -2638,6 +2676,7 @@ MapView::MapView( math::degrees camera_yaw0
   , _status_time (new QLabel (this))
   , _status_fps (new QLabel (this))
   , _status_culling (new QLabel (this))
+  , _status_database(new QLabel(this))
   , _texBrush{new OpenGL::texture{}}
   , _transform_gizmo(Noggit::Ui::Tools::ViewportGizmo::GizmoContext::MAP_VIEW)
   , _tablet_manager(Noggit::TabletManager::instance()),
@@ -2694,6 +2733,12 @@ MapView::MapView( math::degrees camera_yaw0
       , &QObject::destroyed
       , _main_window
       , [=] { _main_window->statusBar()->removeWidget (_status_culling); }
+  );
+  _main_window->statusBar()->addWidget(_status_database);
+  connect(this
+      , &QObject::destroyed
+      , _main_window
+      , [=] { _main_window->statusBar()->removeWidget(_status_database); }
   );
 
   moving = strafing = updown = lookat = turn = 0.0f;
@@ -2926,7 +2971,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
       if (!saving_minimap)
         return;
 
-      if (_mmap_async_index < 4096 && _mmap_render_index < progress->maximum())
+      if (_mmap_async_index < 4096 && static_cast<int>(_mmap_render_index) < progress->maximum())
       {
         TileIndex tile = TileIndex(_mmap_async_index / 64, _mmap_async_index % 64);
 
@@ -3040,7 +3085,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
         return;
 
 
-      if (_mmap_async_index < 4096 && _mmap_render_index < progress->maximum())
+      if (_mmap_async_index < 4096 && static_cast<int>(_mmap_render_index) < progress->maximum())
       {
         if (selected_tiles->at(_mmap_async_index))
         {
@@ -3397,31 +3442,34 @@ void MapView::tick (float dt)
       // reset numpad_moveratio when no numpad key is pressed
       if (!(keyx != 0 || keyy != 0 || keyz != 0 || keyr != 0 || keys != 0))
       {
-        numpad_moveratio = 0.001f;
+        numpad_moveratio = 0.5f;
       }
       else // Set move scale and rotate for numpad keys
       {
         if (_mod_ctrl_down && _mod_shift_down)
         {
-          numpad_moveratio += 0.1f;
+          numpad_moveratio += 0.5f;
         }
         else if (_mod_shift_down)
         {
-          numpad_moveratio += 0.01f;
+          numpad_moveratio += 0.05f;
         }
         else if (_mod_ctrl_down)
         {
-          numpad_moveratio += 0.0005f;
+          numpad_moveratio += 0.005f;
         }
       }
 
       if (keys != 0.f)
       {
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
         _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
+        // NOGGIT_ACTION_MGR->endAction();
         _rotation_editor_need_update = true;
       }
       if (keyr != 0.f)
       {
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
         _world->rotate_selected_models( math::degrees(0.f)
                                       , math::degrees(keyr * numpad_moveratio * 5.f)
                                       , math::degrees(0.f)
@@ -3453,6 +3501,7 @@ void MapView::tick (float dt)
         else
         {
           bool snapped = false;
+          bool snapped_to_object = false;
           if (_world->has_multiple_model_selected())
           {
             NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
@@ -3482,14 +3531,74 @@ void MapView::tick (float dt)
             {
               NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                              Noggit::ActionModalityControllers::eMMB );
-              _world->set_selected_models_pos(_cursor_pos, false);
-              snapped = true;
+
+              if (_move_model_to_cursor_position.get() || _move_model_snap_to_objects.get())
+              {
+                selection_result results(intersect_result(false));
+
+                if (!results.empty())
+                {
+                    for (auto result = results.begin(); result != results.end(); result++)
+                    {
+                        auto const& hit(result->second);
+                        bool is_selected_model = false;
+
+                        // if a terrain is found first use that (terrain cursor pos position updated on move already)
+                        if (hit.index() == eEntry_MapChunk && _move_model_to_cursor_position.get())
+                        {
+                            break;
+                        }
+
+                        if (hit.index() == eEntry_Object && _move_model_snap_to_objects.get())
+                        {
+                            auto obj_hit = std::get<selected_object_type>(hit);
+                            auto obj_hit_type = obj_hit->which();
+
+                            // don't snap to animated models
+                            if (obj_hit_type == eMODEL)
+                            {
+                                auto m2_model_hit = static_cast<ModelInstance*>(obj_hit);
+                                if (m2_model_hit->model->animated_mesh())
+                                    continue;
+                            }
+
+                            // find and ignore current object/selected models or it will keep snaping to itself
+                            for (auto& entry : _world->current_selection())
+                            {
+                                auto type = entry.index();
+                                if (type == eEntry_Object)
+                                {
+                                    auto& selection_obj = std::get<selected_object_type>(entry);
+                                    if (selection_obj->uid == obj_hit->uid)
+                                    {
+                                        is_selected_model = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (is_selected_model)
+                                continue;
+                            auto hit_pos = intersect_ray().position(result->first);
+                            _cursor_pos = hit_pos;
+                            snapped_to_object = true;
+                            // TODO : rotate objects to objects normal
+                            // if (_rotate_doodads_along_doodads.get())
+                            //    _world->rotate_selected_models_to_object_normal(_rotate_along_ground_smooth.get(), obj_hit, hit_pos, glm::transpose(model_view()), _rotate_doodads_along_wmos.get());
+                            break;
+                        }
+                    }
+                }
+                _world->set_selected_models_pos(_cursor_pos, false);
+                snapped = true;
+              }
             }
           }
 
           if (snapped && _rotate_along_ground.get())
           {
-            _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
+            if (!snapped_to_object)
+              _world->rotate_selected_models_to_ground_normal(_rotate_along_ground_smooth.get());
+
             if (_rotate_along_ground_random.get())
             {
               float minX = 0, maxX = 0, minY = 0, maxY = 0, minZ = 0, maxZ = 0;
@@ -3853,20 +3962,54 @@ void MapView::tick (float dt)
       _camera.add_to_pitch(math::degrees(lookat));
       _camera_moved_since_last_draw = true;
     }
-    if (moving)
+
+    if (_game_mode_camera.get())
     {
-      _camera.move_forward(moving, dt);
-      _camera_moved_since_last_draw = true;
+        if (moving)
+        {
+            _camera.move_forward(moving, dt);
+            // TODO use normalized speed (doesn't slow down when looking up)
+            // _camera.move_forward_normalized(moving, dt);
+        }
+        if (strafing)
+        {
+            _camera.move_horizontal(strafing, dt);
+        }
+
+        // get ground z position
+        // can be optimized by calling this only when moving/strafing or changing camera mode.
+        auto ground_pos = _world.get()->get_ground_height(_camera.position);
+        _camera.position.y = ground_pos.y + 2;
+        _camera_moved_since_last_draw = true;
+
     }
-    if (strafing)
+    else
     {
-      _camera.move_horizontal(strafing, dt);
-      _camera_moved_since_last_draw = true;
-    }
-    if (updown)
-    {
-      _camera.move_vertical(updown, dt);
-      _camera_moved_since_last_draw = true;
+
+      if (moving)
+      {
+        _camera.move_forward(moving, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      if (strafing)
+      {
+        _camera.move_horizontal(strafing, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      if (updown)
+      {
+        _camera.move_vertical(updown, dt);
+        _camera_moved_since_last_draw = true;
+      }
+      // camera collision to ground
+      /*
+      auto ground_height = _world.get()->get_ground_height(_camera.position).y;
+      if (_camera.position.y < ground_height)
+      {
+          _camera.position.y = ground_height + 3;
+      }
+      */
+
     }
   }
   else
@@ -4065,6 +4208,7 @@ selection_result MapView::intersect_result(bool terrain_only)
     , _draw_wmo.get()
     , _draw_models.get()
     , _draw_hidden_models.get()
+    , _draw_wmo_exterior.get()
     )
   );
 
@@ -4378,6 +4522,8 @@ void MapView::draw_map()
                , _display_all_water_layers.get() ? -1 : _displayed_water_layer.get()
                , _display_mode
                , _draw_occlusion_boxes.get()
+               ,false
+               , _draw_wmo_exterior.get()
                );
 
   // reset after each world::draw call
@@ -4957,6 +5103,30 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
   _last_mouse_pos = event->pos();
 }
 
+void MapView::change_selected_wmo_nameset(int set)
+{
+    auto last_entry = _world->get_last_selected_model();
+    if (last_entry)
+    {
+        if (last_entry.value().index() != eEntry_Object)
+        {
+            return;
+        }
+        auto obj = std::get<selected_object_type>(last_entry.value());
+        if (obj->which() == eWMO)
+        {
+            WMOInstance* wmo = static_cast<WMOInstance*>(obj);
+            wmo->change_nameset(set);
+            _world->updateTilesWMO(wmo, model_update::none); // needed?
+            auto tiles = wmo->getTiles();
+            for (auto tile : tiles)
+            {
+                tile->changed = true;
+            }
+        }
+    }
+}
+
 void MapView::change_selected_wmo_doodadset(int set)
 {
   for (auto& selection : _world->current_selection())
@@ -4971,6 +5141,11 @@ void MapView::change_selected_wmo_doodadset(int set)
       auto wmo = static_cast<WMOInstance*>(obj);
       wmo->change_doodadset(set);
       _world->updateTilesWMO(wmo, model_update::none);
+      auto tiles = wmo->getTiles();
+      for (auto tile : tiles)
+      {
+        tile->changed = true;
+      }
     }
   }
 }
@@ -5120,7 +5295,8 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
                 glm::vec2(std::min(_drag_start_pos.x(), drag_end_pos.x()), std::min(_drag_start_pos.y(), drag_end_pos.y())),
                 glm::vec2(std::max(_drag_start_pos.x(), drag_end_pos.x()), std::max(_drag_start_pos.y(), drag_end_pos.y()))
             };
-            _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), objectEditor->drag_selection_depth(), _camera.position);
+            // _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), objectEditor->drag_selection_depth(), _camera.position);
+            _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), 3000.0f, _camera.position);
         }
         else // Do normal selection when we just clicked
         {

@@ -141,11 +141,11 @@ unsigned int BaseNode::nPorts(PortType port_type) const
 {
   if (port_type == PortType::In)
   {
-    return _in_ports.size();
+    return static_cast<unsigned int>(_in_ports.size());
   }
   else if (port_type == PortType::Out)
   {
-    return _out_ports.size();
+    return static_cast<unsigned int>(_out_ports.size());
   }
 
   return 0;

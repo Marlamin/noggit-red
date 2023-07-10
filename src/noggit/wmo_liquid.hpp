@@ -100,7 +100,7 @@ struct LiquidVertex {
 class wmo_liquid
 {
 public:
-  wmo_liquid(BlizzardArchive::ClientFile* f, WMOLiquidHeader const& header, WMOMaterial const& mat, int group_liquid, bool use_dbc_type, bool is_ocean);
+  wmo_liquid(BlizzardArchive::ClientFile* f, WMOLiquidHeader const& header, int group_liquid, bool use_dbc_type, bool is_ocean);
   wmo_liquid(wmo_liquid const& other);
 
   void upload(OpenGL::Scoped::use_program& water_shader);

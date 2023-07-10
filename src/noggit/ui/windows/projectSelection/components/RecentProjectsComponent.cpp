@@ -50,6 +50,8 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
     {
       QMenu context_menu(project_list_item->tr("Context menu"), project_list_item);
 
+      // removing the option to delete project files due to people accidentally removing their work...
+      /*
       QAction action_1("Delete Project", project_list_item);
       action_1.setIcon(FontAwesomeIcon(FontAwesome::trash).pixmap(QSize(16, 16)));
 
@@ -59,6 +61,7 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
       });
 
       context_menu.addAction(&action_1);
+      */
 
       QAction action_2("Forget Project", project_list_item);
       action_2.setIcon(FontAwesomeIcon(FontAwesome::cloud).pixmap(QSize(16, 16)));

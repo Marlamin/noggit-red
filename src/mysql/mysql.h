@@ -7,6 +7,7 @@
 
 namespace mysql
 {
+  bool testConnection(bool report_only_err = false);
   bool hasMaxUIDStoredDB(std::size_t mapID);
   std::uint32_t getGUIDFromDB(std::size_t mapID);
   void insertUIDinDB(std::size_t mapID, std::uint32_t NewUID);

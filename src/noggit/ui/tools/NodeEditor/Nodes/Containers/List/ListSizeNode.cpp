@@ -21,7 +21,7 @@ ListSizeNode::ListSizeNode()
 void ListSizeNode::compute()
 {
   _out_ports[0].out_value =
-      std::make_shared<UnsignedIntegerData>(static_cast<ListData*>(_in_ports[0].in_value.lock().get())->value()->size());
+      std::make_shared<UnsignedIntegerData>(static_cast<unsigned>(static_cast<ListData*>(_in_ports[0].in_value.lock().get())->value()->size()));
 
   _node->onDataUpdated(0);
 

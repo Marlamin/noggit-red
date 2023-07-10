@@ -36,7 +36,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
   auto model_view_trs = model_view;
   auto projection_trs = projection;
 
-  int n_selected = selection.size();
+  int n_selected = static_cast<int>(selection.size());
 
   if (!n_selected || (n_selected == 1 & selection[0].index() != eEntry_Object))
     return;
@@ -300,7 +300,16 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
           throw std::logic_error("Bounds are not supported by this gizmo.");
         }
       }
+
+      obj_instance->normalizeDirection();
+
       obj_instance->recalcExtents();
+
+
+      if (map_view)
+      {
+          map_view->updateRotationEditor();
+      }
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::add);

@@ -70,7 +70,7 @@ namespace Noggit
 
     int chunk::get_texture_count()
     {
-      return _chunk->texture_set->num();
+      return static_cast<int>(_chunk->texture_set->num());
     }
 
     std::string chunk::get_texture(int index)

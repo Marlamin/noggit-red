@@ -428,7 +428,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 
     auto normalizedQ = glm::normalize(q);
 
-    math::degrees::vec3 new_dir;
+    //math::degrees::vec3 new_dir;
     // To euler, because wow
       /*
       // roll (x-axis rotation)
@@ -542,6 +542,34 @@ void World::delete_selected_models()
   reset_selection();
 }
 
+glm::vec3 World::get_ground_height(glm::vec3 pos)
+{
+    selection_result hits;
+    
+    for_chunk_at(pos, [&](MapChunk* chunk)
+    {
+        {
+            math::ray intersect_ray(pos, glm::vec3(0.f, -1.f, 0.f));
+            chunk->intersect(intersect_ray, &hits);
+        }
+        // object is below ground
+        if (hits.empty())
+        {
+            math::ray intersect_ray(pos, glm::vec3(0.f, 1.f, 0.f));
+            chunk->intersect(intersect_ray, &hits);
+        }
+    });
+
+    // this should never happen
+    if (hits.empty())
+    {
+        LogError << "Snap to ground ray intersection failed" << std::endl;
+        return glm::vec3(0);
+    }
+
+    return std::get<selected_chunk_type>(hits[0].second).position;
+}
+
 void World::snap_selected_models_to_the_ground()
 {
   ZoneScoped;
@@ -557,32 +585,8 @@ void World::snap_selected_models_to_the_ground()
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
     glm::vec3& pos = obj->pos;
 
-    selection_result hits;
-
-
-    for_chunk_at(pos, [&] (MapChunk* chunk)
-    {
-      {
-        math::ray intersect_ray(pos, glm::vec3(0.f, -1.f, 0.f));
-        chunk->intersect(intersect_ray, &hits);
-      }
-      // object is below ground
-      if (hits.empty())
-      {
-        math::ray intersect_ray(pos, glm::vec3(0.f, 1.f, 0.f));
-        chunk->intersect(intersect_ray, &hits);
-      }
-    });
-
-    // this should never happen
-    if (hits.empty())
-    {
-      LogError << "Snap to ground ray intersection failed" << std::endl;
-      continue;
-    }
-
     // the ground can only be intersected once
-    pos.y = std::get<selected_chunk_type>(hits[0].second).position.y;
+    pos.y = get_ground_height(pos).y;
 
     std::get<selected_object_type>(entry)->recalcExtents();
 
@@ -666,6 +670,31 @@ void World::move_selected_models(float dx, float dy, float dz)
   update_selection_pivot();
 }
 
+void World::move_model(selection_type entry, float dx, float dy, float dz)
+{
+    ZoneScoped;
+    auto type = entry.index();
+    if (type == eEntry_MapChunk)
+    {
+        return;
+    }
+
+    auto& obj = std::get<selected_object_type>(entry);
+    NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
+    glm::vec3& pos = obj->pos;
+
+    updateTilesEntry(entry, model_update::remove);
+
+    pos.x += dx;
+    pos.y += dy;
+    pos.z += dz;
+
+    std::get<selected_object_type>(entry)->recalcExtents();
+
+    updateTilesEntry(entry, model_update::add);
+
+}
+
 void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
 {
   ZoneScoped;
@@ -705,6 +734,25 @@ void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
   }
 
   update_selection_pivot();
+}
+
+void World::set_model_pos(selection_type entry, glm::vec3 const& pos, bool change_height)
+{
+  ZoneScoped;
+  auto type = entry.index();
+  if (type == eEntry_MapChunk)
+  {
+      return;
+  }
+  
+  updateTilesEntry(entry, model_update::remove);
+  
+  auto& obj = std::get<selected_object_type>(entry);
+  NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
+  obj->pos = pos;
+  obj->recalcExtents();
+  
+  updateTilesEntry(entry, model_update::add);
 }
 
 void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
@@ -788,6 +836,51 @@ MapChunk* World::getChunkAt(glm::vec3 const& pos)
   return nullptr;
 }
 
+bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds)
+{
+    bool is_indoor = false;
+    // check if model bounds is within wmo bounds then check each indor wmo group bounds
+    _model_instance_storage.for_each_wmo_instance([&](WMOInstance& wmo_instance)
+        {
+            auto wmo_extents = wmo_instance.getExtents();
+
+
+            if (obj_bounds[1].x >= wmo_extents[0].x
+                && obj_bounds[1].y >= wmo_extents[0].y
+                && obj_bounds[1].z >= wmo_extents[0].z
+                && wmo_extents[1].x >= obj_bounds[0].x
+                && wmo_extents[1].y >= obj_bounds[0].y
+                && wmo_extents[1].z >= obj_bounds[0].z)
+
+            {
+                for (int i = 0; i < (int)wmo_instance.wmo->groups.size(); ++i)
+                {
+                    auto const& group = wmo_instance.wmo->groups[i];
+
+                    if (group.is_indoor())
+                    {
+                        // must call getGroupExtent() to initialize wmo_instance.group_extents
+                        // TODO : clear group extents to free memory ?
+                        auto& group_extents = wmo_instance.getGroupExtents().at(i);
+
+                        // TODO : do a precise calculation instead of using axis aligned bounding boxes.
+                        auto test = obj_bounds[1].x >= group_extents.first.x
+                            && obj_bounds[1].y >= group_extents.first.y
+                            && obj_bounds[1].z >= group_extents.first.z
+                            && group_extents.second.x >= obj_bounds[0].x
+                            && group_extents.second.y >= obj_bounds[0].y
+                            && group_extents.second.z >= obj_bounds[0].z;
+
+                        is_indoor = test;
+                        return;
+                    }
+                }
+            }
+        });
+
+    return is_indoor;
+}
+
 selection_result World::intersect (glm::mat4x4 const& model_view
                                   , math::ray const& ray
                                   , bool pOnlyMap
@@ -796,6 +889,7 @@ selection_result World::intersect (glm::mat4x4 const& model_view
                                   , bool draw_wmo
                                   , bool draw_models
                                   , bool draw_hidden_models
+                                  , bool draw_wmo_exterior
                                   )
 {
   ZoneScopedN("World::intersect()");
@@ -848,7 +942,7 @@ selection_result World::intersect (glm::mat4x4 const& model_view
       {
         if (draw_hidden_models || !wmo_instance.wmo->is_hidden())
         {
-          wmo_instance.intersect(ray, &results);
+          wmo_instance.intersect(ray, &results, draw_wmo_exterior);
         }
       });
     }
@@ -1076,9 +1170,81 @@ auto World::stamp(glm::vec3 const& pos, float dt, QImage const* img, float radiu
 }
 
 
+void World::changeObjectsWithTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius, bool iter_wmos_, bool iter_m2s)
+{
+    // applies the terrain brush to the terrain objects hit
+    ZoneScoped;
+
+  // Identical code to chunk->changeTerrain()
+  //    if (_snap_m2_objects_chkbox->isChecked() || _snap_wmo_objects_chkbox->isChecked()) {
+  auto objects_hit = getObjectsInRange(pos, radius, true, iter_wmos_, iter_m2s);
+
+  for (auto obj : objects_hit)
+  {
+
+    float dt = change;
+
+    float dist, xdiff, zdiff;
+    bool changed = false;
+
+    xdiff = obj->pos.x - pos.x;
+    zdiff = obj->pos.z - pos.z;
+
+    if (BrushType == eTerrainType_Quadra)
+    {
+        if ((std::abs(xdiff) < std::abs(radius / 2)) && (std::abs(zdiff) < std::abs(radius / 2)))
+        {
+            dist = std::sqrt(xdiff * xdiff + zdiff * zdiff);
+            dt = dt * (1.0f - dist * inner_radius / radius);
+            changed = true;
+        }
+    }
+    else
+    {
+        dist = std::sqrt(xdiff * xdiff + zdiff * zdiff);
+        if (dist < radius)
+        {
+            changed = true;
+
+            switch (BrushType)
+            {
+            case eTerrainType_Flat:
+                break;
+            case eTerrainType_Linear:
+                dt = dt * (1.0f - dist * (1.0f - inner_radius) / radius);
+                break;
+            case eTerrainType_Smooth:
+                dt = dt / (1.0f + dist / radius);
+                break;
+            case eTerrainType_Polynom:
+                dt = dt * ((dist / radius) * (dist / radius) + dist / radius + 1.0f);
+                break;
+            case eTerrainType_Trigo:
+                dt = dt * cos(dist / radius);
+                break;
+            case eTerrainType_Gaussian:
+                dt = dist < radius * inner_radius ? dt * std::exp(-(std::pow(radius * inner_radius / radius, 2) / (2 * std::pow(0.39f, 2)))) : dt * std::exp(-(std::pow(dist / radius, 2) / (2 * std::pow(0.39f, 2))));
+
+                break;
+            default:
+                LogError << "Invalid terrain edit type (" << inner_radius << ")" << std::endl;
+                changed = false;
+                break;
+            }
+        }
+    }
+    if (changed)
+    {
+        move_model(obj, 0.0f, dt, 0.0f);
+        // set_model_pos(obj, glm::vec3(obj->pos.x, obj->pos.y + dt, obj->pos.z));
+    }
+  }
+}
+
 void World::changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius)
 {
   ZoneScoped;
+
   for_all_chunks_in_range
     ( pos, radius
     , [&] (MapChunk* chunk)
@@ -1091,6 +1257,64 @@ void World::changeTerrain(glm::vec3 const& pos, float change, float radius, int 
         recalc_norms (chunk);
       }
     );
+}
+
+std::vector<selected_object_type> World::getObjectsInRange(glm::vec3 const& pos, float radius, bool ignore_height, bool iter_wmos_, bool iter_m2s)
+{
+    // ignores height by default
+
+    std::vector<selected_object_type> objects_hit_list;
+
+    /* This causes duplicates at tile edges
+    for (MapTile* tile : mapIndex.tiles_in_range(pos, radius))
+    {
+        if (!tile->finishedLoading())
+        {
+            continue;
+        }
+
+        std::vector<uint32_t>* uids = tile->get_uids();
+
+        for (uint32_t uid : *uids)
+        {
+            auto instance = _model_instance_storage.get_instance(uid);
+
+            */
+    if (iter_m2s)
+    {
+        _model_instance_storage.for_each_m2_instance([&](ModelInstance& model_instance)
+            {
+                selected_object_type obj = &model_instance;
+                auto obj_pos = obj->pos;
+                if (ignore_height)
+                {
+                    obj_pos = glm::vec3(obj->pos.x, pos.y, obj->pos.z);
+                }
+                if (glm::distance(obj_pos, pos) <= radius) // this is just origin point
+                {
+                    objects_hit_list.push_back(obj);
+                }
+            });
+    }
+
+    if (iter_wmos_)
+    {
+        _model_instance_storage.for_each_wmo_instance([&](WMOInstance& wmo_instance)
+            {
+                selected_object_type obj = &wmo_instance;
+                auto obj_pos = obj->pos;
+                if (ignore_height)
+                {
+                    obj_pos = glm::vec3(obj->pos.x, pos.y, obj->pos.z);
+                }
+                if (glm::distance(obj_pos, pos) <= radius)
+                {
+                    objects_hit_list.push_back(obj);
+                }
+            });
+    }
+
+    return objects_hit_list;
 }
 
 void World::flattenTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const glm::vec3& origin, math::degrees angle, math::degrees orientation)
@@ -1108,6 +1332,24 @@ void World::flattenTerrain(glm::vec3 const& pos, float remain, float radius, int
         recalc_norms (chunk);
       }
     );
+}
+
+std::vector<std::pair<SceneObject*, float>> World::getObjectsGroundDistance(glm::vec3 const& pos, float radius, bool iter_wmos_, bool iter_m2s)
+{
+    std::vector<std::pair<SceneObject*, float>> objects_ground_distance;
+
+    auto objects_hit = getObjectsInRange(pos, radius, true
+        , iter_wmos_, iter_m2s);
+
+    for (auto obj : objects_hit)
+    {
+        if ((obj->which() == eMODEL && !iter_m2s) || (obj->which() == eWMO && !iter_wmos_))
+            continue;
+        float height_diff = obj->pos.y - get_ground_height(obj->pos).y;
+        objects_ground_distance.push_back(std::pair<SceneObject*, float>(obj, height_diff));
+    }
+
+    return objects_ground_distance;
 }
 
 void World::blurTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode)
@@ -1834,22 +2076,23 @@ void World::importADTAlphamap(glm::vec3 const& pos)
   );
 }
 
-void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode)
+void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
+  int desired_dimensions = tiledEdges ? 256 : 257;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
   {
     NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
   });
 
-  if (image.width() != 257 || image.height() != 257)
+  if (image.width() != desired_dimensions || image.height() != desired_dimensions)
   {
-    QImage scaled = image.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+    QImage scaled = image.scaled(desired_dimensions, desired_dimensions, Qt::AspectRatioMode::IgnoreAspectRatio);
 
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setHeightmapImage(scaled, multiplier, mode);
+        tile->setHeightmapImage(scaled, multiplier, mode, tiledEdges);
       }
     );
 
@@ -1859,13 +2102,13 @@ void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float 
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setHeightmapImage(image, multiplier, mode);
+        tile->setHeightmapImage(image, multiplier, mode, tiledEdges);
       }
     );
   }
 }
 
-void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode)
+void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -1893,16 +2136,17 @@ void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned 
       QImage img;
       img.load(filename, "PNG");
 
-      if (img.width() != 257 || img.height() != 257)
-        img = img.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+      size_t desiredSize = tiledEdges ? 256 : 257;
+      if (img.width() != desiredSize || img.height() != desiredSize)
+        img = img.scaled(static_cast<int>(desiredSize), static_cast<int>(desiredSize), Qt::AspectRatioMode::IgnoreAspectRatio);
 
-      tile->setHeightmapImage(img, multiplier, mode);
+      tile->setHeightmapImage(img, multiplier, mode, tiledEdges);
 
     }
   );
 }
 
-void World::importADTVertexColorMap(glm::vec3 const& pos, int mode)
+void World::importADTVertexColorMap(glm::vec3 const& pos, int mode, bool tiledEdges)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -1930,10 +2174,11 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, int mode)
         QImage img;
         img.load(filename, "PNG");
 
-        if (img.width() != 257 || img.height() != 257)
-          img = img.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+        size_t desiredSize = tiledEdges ? 256 : 257;
+        if (img.width() != desiredSize || img.height() != desiredSize)
+          img = img.scaled(static_cast<int>(desiredSize), static_cast<int>(desiredSize), Qt::AspectRatioMode::IgnoreAspectRatio);
 
-        tile->setVertexColorImage(img, mode);
+        tile->setVertexColorImage(img, mode, tiledEdges);
 
       }
   );
@@ -1963,7 +2208,7 @@ void World::ensureAllTilesetsADT(glm::vec3 const& pos)
   });
 }
 
-void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode)
+void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode, bool tiledEdges)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -1971,14 +2216,16 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, i
     NOGGIT_CUR_ACTION->registerChunkVertexColorChange(chunk);
   });
 
-  if (image.width() != 257 || image.height() != 257)
+  size_t desiredDimensions = tiledEdges ? 256 : 257;
+
+  if (image.width() != desiredDimensions || image.height() != desiredDimensions)
   {
-    QImage scaled = image.scaled(257, 257, Qt::AspectRatioMode::IgnoreAspectRatio);
+    QImage scaled = image.scaled(static_cast<int>(desiredDimensions), static_cast<int>(desiredDimensions), Qt::AspectRatioMode::IgnoreAspectRatio);
 
     for_tile_at ( pos
       , [&] (MapTile* tile)
         {
-          tile->setVertexColorImage(scaled, mode);
+          tile->setVertexColorImage(scaled, mode, tiledEdges);
         }
     );
 
@@ -1988,7 +2235,7 @@ void World::importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, i
     for_tile_at ( pos
       , [&] (MapTile* tile)
         {
-          tile->setVertexColorImage(image, mode);
+          tile->setVertexColorImage(image, mode, tiledEdges);
         }
     );
   }
@@ -2189,7 +2436,7 @@ void World::fixAllGaps()
     // fix the gaps with the adt at the left of the current one
     if (left)
     {
-      for (size_t ty = 0; ty < 16; ty++)
+      for (unsigned ty = 0; ty < 16; ty++)
       {
         MapChunk* chunk = tile->getChunk(0, ty);
         NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
@@ -2204,7 +2451,7 @@ void World::fixAllGaps()
     // fix the gaps with the adt above the current one
     if (above)
     {
-      for (size_t tx = 0; tx < 16; tx++)
+      for (unsigned tx = 0; tx < 16; tx++)
       {
         MapChunk* chunk = tile->getChunk(tx, 0);
         NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
@@ -2217,9 +2464,9 @@ void World::fixAllGaps()
     }
 
     // fix gaps within the adt
-    for (size_t ty = 0; ty < 16; ty++)
+    for (unsigned ty = 0; ty < 16; ty++)
     {
-      for (size_t tx = 0; tx < 16; tx++)
+      for (unsigned tx = 0; tx < 16; tx++)
       {
         MapChunk* chunk = tile->getChunk(tx, ty);
         NOGGIT_CUR_ACTION->registerChunkTerrainChange(chunk);
@@ -2263,8 +2510,8 @@ bool World::isUnderMap(glm::vec3 const& pos)
 
   if (mapIndex.tileLoaded(tile))
   {
-    size_t chnkX = (pos.x / CHUNKSIZE) - tile.x * 16;
-    size_t chnkZ = (pos.z / CHUNKSIZE) - tile.z * 16;
+    unsigned chnkX = (pos.x / CHUNKSIZE) - tile.x * 16;
+    unsigned chnkZ = (pos.z / CHUNKSIZE) - tile.z * 16;
 
     // check using the cursor height
     return (mapIndex.getTile(tile)->getChunk(chnkX, chnkZ)->getMinHeight()) > pos.y + 2.0f;
@@ -2457,48 +2704,20 @@ void World::update_models_by_filename()
 void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remove)
 {
   ZoneScoped;
-  for_tile_at(pos, [this, pos, radius, remove](MapTile* tile)
+
+  auto objects_in_range = getObjectsInRange(pos, radius);
+
+  for (auto obj : objects_in_range)
   {
-    std::vector<uint32_t>* uids = tile->get_uids();
-
-    if (remove)
-    {
-      for (uint32_t uid : *uids)
+      if (remove)
       {
-        auto instance = _model_instance_storage.get_instance(uid);
-
-        if (instance && instance.value().index() == eEntry_Object)
-        {
-          auto obj = std::get<selected_object_type>(instance.value());
-
-          if (glm::distance(obj->pos, pos) <= radius && is_selected(obj))
-          {
-            remove_from_selection(obj);
-          }
-
-        }
+          remove_from_selection(obj);
       }
-    }
-    else
-    {
-      for (uint32_t uid : *uids)
+      else
       {
-        auto instance = _model_instance_storage.get_instance(uid);
-
-        if (instance && instance.value().index() == eEntry_Object)
-        {
-          auto obj = std::get<selected_object_type>(instance.value());
-
-          if (glm::distance(obj->pos, pos) <= radius && !is_selected(obj))
-          {
-            add_to_selection(obj);
-          }
-
-        }
+          add_to_selection(obj);
       }
-    }
-    
-  });
+  }
 }
 
 float World::getMaxTileHeight(const TileIndex& tile)
@@ -2849,7 +3068,7 @@ void World::importAllADTsAlphamaps()
   }
 }
 
-void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
+void World::importAllADTsHeightmaps(float multiplier, unsigned int mode, bool tiledEdges)
 {
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
@@ -2881,14 +3100,15 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
         QImage img;
         img.load(filename, "PNG");
 
-        if (img.width() != 257 || img.height() != 257)
+        size_t desiredSize = tiledEdges ? 256 : 257;
+        if (img.width() != desiredSize || img.height() != desiredSize)
         {
           QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
-          mTile->setHeightmapImage(scaled, multiplier, mode);
+          mTile->setHeightmapImage(scaled, multiplier, mode, tiledEdges);
         }
         else
         {
-          mTile->setHeightmapImage(img, multiplier, mode);
+          mTile->setHeightmapImage(img, multiplier, mode, tiledEdges);
         }
 
         mTile->saveTile(this);
@@ -2904,7 +3124,7 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode)
   }
 }
 
-void World::importAllADTVertexColorMaps(unsigned int mode)
+void World::importAllADTVertexColorMaps(unsigned int mode, bool tiledEdges)
 {
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
@@ -2936,14 +3156,15 @@ void World::importAllADTVertexColorMaps(unsigned int mode)
         QImage img;
         img.load(filename, "PNG");
 
-        if (img.width() != 257 || img.height() != 257)
+        size_t desiredSize = tiledEdges ? 256 : 257;
+        if (img.width() != desiredSize || img.height() != desiredSize)
         {
           QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
-          mTile->setVertexColorImage(scaled, mode);
+          mTile->setVertexColorImage(scaled, mode, tiledEdges);
         }
         else
         {
-          mTile->setVertexColorImage(img, mode);
+          mTile->setVertexColorImage(img, mode, tiledEdges);
         }
 
         mTile->saveTile(this);

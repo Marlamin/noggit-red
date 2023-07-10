@@ -83,6 +83,8 @@ namespace Noggit
 
       QCheckBox* _lock_up_checkbox;
       QCheckBox* _lock_down_checkbox;
+      QCheckBox* _snap_m2_objects_chkbox;
+      QCheckBox* _snap_wmo_objects_chkbox;
     };
   }
 }

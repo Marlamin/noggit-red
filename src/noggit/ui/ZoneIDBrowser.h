@@ -37,11 +37,12 @@ namespace Noggit
         {7 , "Free For All PvP"},
         {8 , "Linked Chat (Set in cities)"},
         {9 , "Linked Chat Special Area"},
-        {10, "Force this area when on a Dynamic Transport"},
+        // {10, "Force this area when on a Dynamic Transport"}, // From Classic TBC definitions, probably changed around CATA
+        {10, "Allow Flying"}, // in 3.3.5
         {11, "No PvP"},
         {12, "No Ghost on Release"},
         {13, "Sub-zone Ambient Multiplier"},
-        {14, "Enable Flight Bounds on Map"},
+        {14, "Enable Flight Bounds on Map"}, // not confirmed in 3.3.5
         {15, "PVP POI"},
         {16, "No chat channels"},
         {17, "Area not in use"},
@@ -55,7 +56,8 @@ namespace Noggit
         {25, "Force Indoors"},
         {26, "Force Outdoors"},
         {27, "Allow Hearth-and-Resurrect from Area"},
-        {28, "No Local Defense Channel"},
+        // {28, "No Local Defense Channel"}, // From Classic TBC definitions, probably chanegd around CATA
+        {28, "Flying not allowed"}, // in 3.3.5
         {29, "Only Evaluate Ghost Bind Once"},
         {30, "Is Subzone"},
         // {31, "Don't Evaluate Graveyard From Client"}

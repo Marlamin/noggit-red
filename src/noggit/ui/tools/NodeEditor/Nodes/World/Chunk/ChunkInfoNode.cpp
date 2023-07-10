@@ -74,7 +74,7 @@ void ChunkInfoNode::compute()
   if (_out_ports[7].connected)
   {
     auto center = chunk->getCenter();
-    _out_ports[7].out_value = std::make_shared<UnsignedIntegerData>(chunk->texture_set->num());
+    _out_ports[7].out_value = std::make_shared<UnsignedIntegerData>(static_cast<unsigned>(chunk->texture_set->num()));
     _node->onDataUpdated(7);
   }
 

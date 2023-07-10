@@ -28,6 +28,7 @@ namespace Noggit
 
       /*secondary top tool*/
       QVector<QWidgetAction*> _climb_secondary_tool;
+      QVector<QWidgetAction*> _time_secondary_tool;
 
       /*secondary left tool*/
       QVector<QWidgetAction*> _flatten_secondary_tool;

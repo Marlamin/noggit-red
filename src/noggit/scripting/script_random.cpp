@@ -18,7 +18,7 @@ namespace Noggit
 
     random::random(script_context * ctx, std::string const& seed)
       : script_object(ctx)
-      , _state(std::hash<std::string>()(seed))
+      , _state(static_cast<unsigned>(std::hash<std::string>()(seed)))
     {
     }
 
