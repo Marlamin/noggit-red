@@ -1230,9 +1230,7 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
 
 void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges) // image
 {
-  // convert to RGBA64 to properly load all type of images (grayscales don't load properly otherwise)
-  auto image = baseimage.convertToFormat(QImage::Format_RGBA64);
-  // auto image = baseimage.convertToFormat(QImage::Format_Grayscale16);
+  auto image = baseimage.convertToFormat(QImage::Format_Grayscale16);
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
   for (int k = 0; k < 16; ++k)
@@ -1384,7 +1382,6 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
 
 void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer)
 {
-  // auto image = baseimage.convertToFormat(QImage::Format_RGBA8888);
   auto image = baseimage.convertToFormat(QImage::Format_Grayscale8);
 
   for (int k = 0; k < 16; ++k)
