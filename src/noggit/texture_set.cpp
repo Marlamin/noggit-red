@@ -87,7 +87,7 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
   return texLevel;
 }
 
-void TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to_replace, scoped_blp_texture_reference replacement_texture)
+bool TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to_replace, scoped_blp_texture_reference replacement_texture)
 {
   int texture_to_replace_level = -1, replacement_texture_level = -1;
 
@@ -122,6 +122,11 @@ void TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to
       // merge_layers(texture_to_replace_level, replacement_texture_level);
     }
   }
+
+  if (texture_to_replace_level != -1 || replacement_texture_level != -1)
+      return true;
+  else
+      return false;
 }
 
 void TextureSet::swap_layers(int layer_1, int layer_2)

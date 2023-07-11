@@ -2278,6 +2278,51 @@ void World::swapTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex)
   }
 }
 
+void World::swapTextureGlobal(scoped_blp_texture_reference tex)
+{
+    ZoneScoped;
+    if (!!Noggit::Ui::selected_texture::get())
+    {
+
+        for (size_t z = 0; z < 64; z++)
+        {
+            for (size_t x = 0; x < 64; x++)
+            {
+                TileIndex tile(x, z);
+
+                bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
+                MapTile* mTile = mapIndex.loadTile(tile);
+
+                if (mTile)
+                {
+                    mTile->wait_until_loaded();
+
+                    bool tile_changed = false;
+                    for_all_chunks_on_tile(mTile, [&](MapChunk* chunk)
+                    {
+                        // NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
+                        bool swapped = chunk->switchTexture(tex, *Noggit::Ui::selected_texture::get());
+                        if (swapped)
+                            tile_changed = true;
+                    });
+
+                    if (tile_changed)
+                    {
+                        mTile->saveTile(this);
+                        mapIndex.markOnDisc(tile, true);
+                        mapIndex.unsetChanged(tile);
+                    }
+
+                    if (unload)
+                    {
+                        mapIndex.unloadTile(tile);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void World::removeTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex)
 {
     ZoneScoped;

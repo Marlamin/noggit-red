@@ -197,6 +197,9 @@ public:
   template<typename Fun>
     void for_all_chunks_on_tile (glm::vec3 const& pos, Fun&&);
 
+    template<typename Fun>
+    void for_all_chunks_on_tile(MapTile* tile, Fun&& fun);
+
   template<typename Fun>
     void for_chunk_at(glm::vec3 const& pos, Fun&& fun);
   template<typename Fun>
@@ -228,6 +231,7 @@ public:
   void clear_shadows(glm::vec3 const& pos);
   void clearTextures(glm::vec3 const& pos);
   void swapTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex);
+  void swapTextureGlobal(scoped_blp_texture_reference tex);
   void removeTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex);
   void removeTexDuplicateOnADT(glm::vec3 const& pos);
   void change_texture_flag(glm::vec3 const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add);

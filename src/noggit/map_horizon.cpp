@@ -189,13 +189,15 @@ map_horizon::map_horizon(const std::string& basename, const MapIndex * const ind
             wdl_file.read(_tiles[y][x]->height_17, 17 * 17 * sizeof(int16_t));
             wdl_file.read(_tiles[y][x]->height_16, 16 * 16 * sizeof(int16_t));
 
-
-            wdl_file.read(&fourcc, 4);
-            if (fourcc == 'MAHO')
+            if (wdl_file.getPos() < wdl_file.getSize())
             {
-                wdl_file.read(&size, 4);
-                assert(size == 0x20);
-                wdl_file.read(_tiles[y][x]->holes, 16 * sizeof(int16_t));
+                wdl_file.read(&fourcc, 4);
+                if (fourcc == 'MAHO')
+                {
+                    wdl_file.read(&size, 4);
+                    assert(size == 0x20);
+                    wdl_file.read(_tiles[y][x]->holes, 16 * sizeof(int16_t));
+                }
             }
 
           }
