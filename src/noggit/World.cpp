@@ -844,7 +844,6 @@ bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds)
         {
             auto wmo_extents = wmo_instance.getExtents();
 
-
             if (obj_bounds[1].x >= wmo_extents[0].x
                 && obj_bounds[1].y >= wmo_extents[0].y
                 && obj_bounds[1].z >= wmo_extents[0].z
@@ -871,8 +870,11 @@ bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds)
                             && group_extents.second.y >= obj_bounds[0].y
                             && group_extents.second.z >= obj_bounds[0].z;
 
-                        is_indoor = test;
-                        return;
+                        if (test)
+                        {
+                            return true;
+                        }
+
                     }
                 }
             }
