@@ -126,12 +126,17 @@ namespace Noggit::Ui::Windows
 #ifdef USE_MYSQL_UID_STORAGE
     bool use_mysql = settings.value("project/mysql/enabled", false).toBool();
 
-    mysql::testConnection(true);
+    bool valid_conn = false;
+    if (use_mysql)
+    {
+        valid_conn = mysql::testConnection(true);
+    }
 
-    if ((use_mysql && mysql::hasMaxUIDStoredDB(_world->getMapID()))
+    if ((valid_conn && mysql::hasMaxUIDStoredDB(_world->getMapID()))
       || uid_storage::hasMaxUIDStored(_world->getMapID())
        )
     {
+
       _world->mapIndex.loadMaxUID();
       enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::none, from_bookmark);
     }
