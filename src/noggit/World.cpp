@@ -836,14 +836,14 @@ MapChunk* World::getChunkAt(glm::vec3 const& pos)
   return nullptr;
 }
 
-bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds)
+bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds, glm::mat4x4 obj_transform)
 {
     bool is_indoor = false;
     // check if model bounds is within wmo bounds then check each indor wmo group bounds
     _model_instance_storage.for_each_wmo_instance([&](WMOInstance& wmo_instance)
         {
             auto wmo_extents = wmo_instance.getExtents();
-
+            // check if global wmo bounds intersect
             if (obj_bounds[1].x >= wmo_extents[0].x
                 && obj_bounds[1].y >= wmo_extents[0].y
                 && obj_bounds[1].z >= wmo_extents[0].z
@@ -863,18 +863,23 @@ bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds)
                         auto& group_extents = wmo_instance.getGroupExtents().at(i);
 
                         // TODO : do a precise calculation instead of using axis aligned bounding boxes.
-                        auto test = obj_bounds[1].x >= group_extents.first.x
+                        bool aabb_test = obj_bounds[1].x >= group_extents.first.x
                             && obj_bounds[1].y >= group_extents.first.y
                             && obj_bounds[1].z >= group_extents.first.z
                             && group_extents.second.x >= obj_bounds[0].x
                             && group_extents.second.y >= obj_bounds[0].y
                             && group_extents.second.z >= obj_bounds[0].z;
 
-                        if (test)
+                        if (aabb_test) // oriented box check
                         {
-                            return true;
+                            /* TODO
+                            if (collide_test)
+                            {
+                                is_indoor = true;
+                                return;
+                            }
+                            */
                         }
-
                     }
                 }
             }
