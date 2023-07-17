@@ -404,7 +404,7 @@ SET(_noggit_revision_script_file "${CMAKE_SOURCE_DIR}/cmake/GenerateRevision.cma
 INCLUDE_DIRECTORIES("${_noggit_revision_output_dir}")
 
 FIND_PACKAGE(Git)
-IF(FALSE) # GIT_FOUND
+IF(GIT_FOUND) # GIT_FOUND
   ADD_CUSTOM_TARGET(update_git_revision
     ALL
     DEPENDS "${_noggit_revision_template_file}"
