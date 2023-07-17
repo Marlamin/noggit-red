@@ -1155,6 +1155,8 @@ void MapIndex::addTile(const TileIndex& tile)
   mTiles[tile.z][tile.x].flags |= 0x1;
   mTiles[tile.z][tile.x].tile->changed = true;
 
+  _world->horizon.update_horizon_tile(mTiles[tile.z][tile.x].tile.get());
+
   changed = true;
 }
 
@@ -1169,6 +1171,8 @@ void MapIndex::removeTile(const TileIndex &tile)
 
   mTiles[tile.z][tile.x].tile->changed = true;
   mTiles[tile.z][tile.x].onDisc = false;
+
+  _world->horizon.remove_horizon_tile(tile.z, tile.x);
 
   changed = true;
 }

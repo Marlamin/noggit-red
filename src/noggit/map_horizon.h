@@ -80,7 +80,11 @@ public:
 
   map_horizon(const std::string& basename, const MapIndex * const index);
 
+  void update_minimap_tile(int y, int x, bool has_data);
+
   void set_minimap(const MapIndex* const index);
+
+  void remove_horizon_tile(int y, int x);
 
   Noggit::map_horizon_tile* get_horizon_tile(int y, int x);
 

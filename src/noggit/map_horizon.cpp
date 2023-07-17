@@ -215,6 +215,35 @@ map_horizon::map_horizon(const std::string& basename, const MapIndex * const ind
   set_minimap(index);
 }
 
+void map_horizon::update_minimap_tile(int y, int x, bool has_data = false )
+{
+    if (_tiles[y][x])
+    {
+        //! \todo There also is a second heightmap appended which has additional 16*16 pixels.
+        //! \todo There also is MAHO giving holes into this heightmap.
+
+        for (int j(0); j < 16; ++j)
+        {
+            for (int i(0); i < 16; ++i)
+            {
+                //! \todo R and B are inverted here
+                _qt_minimap.setPixel(x * 16 + i, y * 16 + j, color_for_height(_tiles[y][x]->height_17[j][i]));
+            }
+        }
+    }
+    // the adt exist but there's no data in the wdl
+    else if (has_data)
+    {
+        for (int j(0); j < 16; ++j)
+        {
+            for (int i(0); i < 16; ++i)
+            {
+                _qt_minimap.setPixel(x * 16 + i, y * 16 + j, color(200, 100, 25));
+            }
+        }
+    }
+}
+
 void map_horizon::set_minimap(const MapIndex* const index)
 {
     _qt_minimap = QImage(16 * 64, 16 * 64, QImage::Format_ARGB32);
@@ -224,31 +253,20 @@ void map_horizon::set_minimap(const MapIndex* const index)
     {
         for (int x(0); x < 64; ++x)
         {
-            if (_tiles[y][x])
-            {
-                //! \todo There also is a second heightmap appended which has additional 16*16 pixels.
-                //! \todo There also is MAHO giving holes into this heightmap.
+            update_minimap_tile(y, x, index->hasTile(TileIndex(x, y)));
+        }
+    }
+}
 
-                for (int j(0); j < 16; ++j)
-                {
-                    for (int i(0); i < 16; ++i)
-                    {
-                        //! \todo R and B are inverted here
-                        _qt_minimap.setPixel(x * 16 + i, y * 16 + j, color_for_height(_tiles[y][x]->height_17[j][i]));
-                    }
-                }
-            }
-            // the adt exist but there's no data in the wdl
-            else if (index->hasTile(TileIndex(x, y)))
-            {
-                for (int j(0); j < 16; ++j)
-                {
-                    for (int i(0); i < 16; ++i)
-                    {
-                        _qt_minimap.setPixel(x * 16 + i, y * 16 + j, color(200, 100, 25));
-                    }
-                }
-            }
+void map_horizon::remove_horizon_tile(int y, int x)
+{
+    _tiles[y][x].reset();
+
+    for (int j(0); j < 16; ++j)
+    {
+        for (int i(0); i < 16; ++i)
+        {
+            _qt_minimap.setPixel(x * 16 + i, y * 16 + j, color(255, 25, 25));
         }
     }
 }
@@ -276,6 +294,9 @@ int16_t map_horizon::getWdlheight(MapTile* tile, float x, float y)
     // truncate and clamp the float value
     auto chunk = tile->getChunk(cx, cy);
     // float height = heights[cy * 16 + cx][17 * (row / 2) + (inner ? 9 : 0) + col];
+    if (!chunk)
+        return 0.0f;
+
     float height = chunk->getHeightmap()[17 * (row / 2) + (inner ? 9 : 0) + col].y;
     return std::min(std::max(static_cast<int16_t>(height), static_cast<int16_t>(SHRT_MIN)), static_cast<int16_t>(SHRT_MAX));
 }
@@ -316,6 +337,8 @@ void map_horizon::update_horizon_tile(MapTile* mTile)
         for (int j = 0; j < 16; ++j)
         {
             auto chunk = mTile->getChunk(j, i);
+            if (!chunk)
+                continue;
             // the ordering seems to be : short array = Y axis, flags values = X axis and the values are for a whole chunk.
 
             std::bitset<16> holeBits(chunk->getHoleMask());
@@ -325,6 +348,8 @@ void map_horizon::update_horizon_tile(MapTile* mTile)
         }
         _tiles[tile_index.z][tile_index.x].get()->holes[i] = static_cast<int16_t>(wdlHoleMask.to_ulong());
     }
+
+    update_minimap_tile(tile_index.z, tile_index.x, true);
 }
 
 void map_horizon::save_wdl(World* world, bool regenerate)
