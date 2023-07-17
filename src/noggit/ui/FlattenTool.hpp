@@ -27,6 +27,7 @@ namespace Noggit
       void blur (World* world, glm::vec3 const& cursor_pos, float dt);
 
       void nextFlattenType();
+      void nextFlattenMode();
       void toggleFlattenAngle();
       void toggleFlattenLock();
       void lockPos (glm::vec3 const& cursor_pos);

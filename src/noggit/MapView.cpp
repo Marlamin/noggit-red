@@ -242,6 +242,8 @@ void MapView::set_editing_mode(editing_mode mode)
     _world->renderer()->getTerrainParamsUniformBlock()->draw_selection_overlay = false;
     _minimap->use_selection(nullptr);
 
+    bool use_classic_ui = _settings->value("classicUI", true).toBool();
+
     switch (mode)
     {
       case editing_mode::ground:
@@ -255,9 +257,20 @@ void MapView::set_editing_mode(editing_mode mode)
         {
           texturingTool->updateMaskImage();
         }
-        if (_left_sec_toolbar->showUnpaintableChunk())
+
+        if (use_classic_ui)
         {
-            _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = true;
+            if (texturingTool->show_unpaintable_chunks())
+            {
+                _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = true;
+            }
+        }
+        else
+        {
+            if (_left_sec_toolbar->showUnpaintableChunk())
+            {
+                _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = true;
+            }
         }
         break;
       case editing_mode::mccv:
@@ -2266,6 +2279,7 @@ void MapView::setupHotkeys()
     , [&]
               {
                 _left_sec_toolbar->nextFlattenMode(this);
+                flattenTool->nextFlattenMode();
               }
     , [&] { return terrainMode == editing_mode::flatten_blur && !NOGGIT_CUR_ACTION; }
   );
@@ -4485,6 +4499,8 @@ void MapView::draw_map()
   {
     doSelection(true);
   }
+  bool classic_ui = _settings->value("classicUI", true).toBool();
+  bool show_unpaintable = classic_ui ? texturingTool->show_unpaintable_chunks() : _left_sec_toolbar->showUnpaintableChunk();
 
   _world->renderer()->draw (
                  model_view()
@@ -4494,7 +4510,7 @@ void MapView::draw_map()
                , terrainMode == editing_mode::mccv ? shaderTool->shaderColor() : cursor_color
                , _cursorType
                , radius
-               , _left_sec_toolbar->showUnpaintableChunk()
+               , show_unpaintable
                , _left_sec_toolbar->drawOnlyInsideSphereLight()
                , _left_sec_toolbar->drawWireframeSphereLight()
                , _left_sec_toolbar->getAlphaSphereLight()

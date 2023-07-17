@@ -194,6 +194,7 @@ namespace Noggit
       ui->_uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
       ui->_systemWindowFrame->setChecked(_settings->value("systemWindowFrame", true).toBool());
       ui->_nativeMenubar->setChecked(_settings->value("nativeMenubar", true).toBool());
+      ui->_classic_ui->setChecked(_settings->value("classicUI", false).toBool());
       ui->_additional_file_loading_log->setChecked(
           _settings->value("additional_file_loading_log", false).toBool());
       ui->_keyboard_locale->setCurrentText(_settings->value("keyboard_locale", "QWERTY").toString());
@@ -278,6 +279,7 @@ namespace Noggit
       _settings->setValue("keyboard_locale", ui->_keyboard_locale->currentText());
       _settings->setValue("systemWindowFrame", ui->_systemWindowFrame->isChecked());
       _settings->setValue("nativeMenubar", ui->_nativeMenubar->isChecked());
+      _settings->setValue("classicUI", ui->_classic_ui->isChecked());
 
 #ifdef USE_MYSQL_UID_STORAGE
       _settings->setValue ("project/mysql/enabled", ui->MySQL_box->isChecked());

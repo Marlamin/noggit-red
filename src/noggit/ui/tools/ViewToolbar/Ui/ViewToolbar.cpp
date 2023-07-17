@@ -4,6 +4,7 @@
 #include <noggit/ui/tools/ActionHistoryNavigator/ActionHistoryNavigator.hpp>
 #include <noggit/ui/FontAwesome.hpp>
 #include <QSlider>
+#include <QtCore/QSettings>
 
 using namespace Noggit::Ui;
 using namespace Noggit::Ui::Tools::ViewToolbar::Ui;
@@ -326,6 +327,9 @@ void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
     mapView->getLeftSecondaryToolbar()->hide();
     current_mode = mode;
 
+    QSettings settings;
+    bool use_classic_ui = settings.value("classicUI", false).toBool();
+
     switch (current_mode)
     {
     case editing_mode::ground:
@@ -334,14 +338,20 @@ void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
         if (_flatten_secondary_tool.size() > 0)
         {
             setupWidget(_flatten_secondary_tool);
-            mapView->getLeftSecondaryToolbar()->show();
+            if (!use_classic_ui)
+                mapView->getLeftSecondaryToolbar()->show();
+            else
+                mapView->getLeftSecondaryToolbar()->hide();
         }
         break;
     case editing_mode::paint:
         if (_texture_secondary_tool.size() > 0)
         {
             setupWidget(_texture_secondary_tool);
-            mapView->getLeftSecondaryToolbar()->show();
+            if (!use_classic_ui)
+                mapView->getLeftSecondaryToolbar()->show();
+            else
+                mapView->getLeftSecondaryToolbar()->hide();
         }
         break;
     case editing_mode::object:
