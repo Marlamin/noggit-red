@@ -64,7 +64,7 @@ bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow
   // Not using the libWDT here doubles performance. You might want to look at your lib again and improve it.
   const int lFlags = *(reinterpret_cast<const int*>(lPointer + 8 + 4 + 8));
   if (lFlags & 1)
-    return false;
+    return true; // filter them later
 
   const int * lData = reinterpret_cast<const int*>(lPointer + 8 + 4 + 8 + 0x20 + 8);
   for (int i = 0; i < 8192; i += 2)
@@ -76,14 +76,33 @@ bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow
   return false;
 }
 
+bool World::IsWMOWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record)
+{
+    ZoneScoped;
+    std::string lMapName = record.Columns["Directory"].Value;
+
+    std::stringstream ssfilename;
+    ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
+
+    BlizzardArchive::ClientFile mf(ssfilename.str(), Noggit::Application::NoggitApplication::instance()->clientData());
+
+    const char* lPointer = reinterpret_cast<const char*>(mf.getPointer());
+
+    const int lFlags = *(reinterpret_cast<const int*>(lPointer + 8 + 4 + 8));
+    if (lFlags & 1)
+        return true;
+
+    return false;
+}
+
 World::World(const std::string& name, int map_id, Noggit::NoggitRenderContext context, bool create_empty)
     : _renderer(Noggit::Rendering::WorldRender(this))
     , _model_instance_storage(this)
     , _tile_update_queue(this)
     , mapIndex(name, map_id, this, context, create_empty)
     , horizon(name, &mapIndex)
-    , mWmoFilename("")
-    , mWmoEntry(ENTRY_MODF())
+    , mWmoFilename(mapIndex.globalWMOName)
+    , mWmoEntry(mapIndex.wmoEntry)
     , animtime(0)
     , time(1450)
     , basename(name)

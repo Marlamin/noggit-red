@@ -273,10 +273,9 @@ private:
 public:
   int const _map_id;
   std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _minimap_md5translate;
-
-private:
   std::string globalWMOName;
-
+  ENTRY_MODF wmoEntry;
+private:
   int _last_unload_time;
   int _unload_interval;
   int _unload_dist;
@@ -295,7 +294,6 @@ private:
 
   uint32_t highestGUID;
 
-  ENTRY_MODF wmoEntry;
   MPHD mphd;
 
   // Holding all MapTiles there can be in a World.

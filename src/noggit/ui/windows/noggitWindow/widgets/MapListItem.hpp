@@ -18,6 +18,7 @@ namespace Noggit::Ui::Widget
         int map_type_id;
         int expansion_id;
         bool pinned;
+        bool wmo_map;
     };
 
     class MapListItem : public QWidget
@@ -40,6 +41,7 @@ namespace Noggit::Ui::Widget
         int id() { return _map_data.map_id; };
         int type() { return _map_data.map_type_id; };
         int expansion() { return _map_data.expansion_id; };
+        bool wmo_map() { return _map_data.wmo_map; };
 
     private:
         QString toCamelCase(const QString& s);

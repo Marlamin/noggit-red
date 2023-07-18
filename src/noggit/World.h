@@ -312,6 +312,8 @@ public:
 
 	static bool IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
 
+    static bool IsWMOWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
+
   void clearHeight(glm::vec3 const& pos);
   void clearAllModelsOnADT(TileIndex const& tile);
 

@@ -2811,7 +2811,11 @@ void MapView::move_camera_with_auto_height (glm::vec3 const& pos)
   makeCurrent();
   OpenGL::context::scoped_setter const _ (::gl, context());
 
-  _world->mapIndex.loadTile(pos)->wait_until_loaded();
+  TileIndex tile_index = TileIndex(pos);
+  if (_world->mapIndex.hasTile(tile_index))
+  {
+    _world->mapIndex.loadTile(pos)->wait_until_loaded();
+  }
 
   _camera.position = pos;
   _camera.position.y = 0.0f;

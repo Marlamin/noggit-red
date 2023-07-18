@@ -140,7 +140,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
     //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
     //! \nofuckingbug  on eof read returns just without doing sth to the var and some wdts have a MWMO without having a MODF so only checking for eof above is not enough
 
-    mHasAGlobalWMO = false;
+    // mHasAGlobalWMO = false;
 
     // - MWMO ----------------------------------------------
 

@@ -42,6 +42,8 @@ void BuildMapListComponent::buildMapList(Noggit::Ui::Windows::NoggitWindow* pare
     if (map_list_data.map_type_id < 0 || map_list_data.map_type_id > 5 || !World::IsEditableWorld(record))
       continue;
 
+    map_list_data.wmo_map = (World::IsWMOWorld(record));
+
     auto project_pinned_maps = parent->_project->PinnedMaps;
 
     auto pinned_map_found = std::find_if(std::begin(project_pinned_maps), std::end(project_pinned_maps),
