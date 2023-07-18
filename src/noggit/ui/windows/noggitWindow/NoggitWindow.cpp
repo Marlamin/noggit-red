@@ -287,6 +287,10 @@ namespace Noggit::Ui::Windows
     QTabWidget* entry_points_tabs(new QTabWidget(widget));
     //entry_points_tabs->addTab(_continents_table, "Maps");
 
+     auto add_btn = new QPushButton("Add New Map", this);
+     add_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus));
+     add_btn->setAccessibleName("map_wizard_add_button");
+
     /* set-up widget for seaching etc... through _continents_table */
     {
         QWidget* _first_tab = new QWidget(this);
@@ -351,8 +355,9 @@ namespace Noggit::Ui::Windows
         _group_search->setLayout(_group_layout);
 
         _first_tab_layout->addWidget(_group_search);
-        _first_tab_layout->addSpacing(12);
+        _first_tab_layout->addSpacing(5);
         _first_tab_layout->addWidget(_continents_table);
+        _first_tab_layout->addWidget(add_btn);
 
         entry_points_tabs->addTab(_first_tab, tr("Maps"));
     }
@@ -415,14 +420,14 @@ namespace Noggit::Ui::Windows
                      }
     );
 
-    auto right_side = new QTabWidget(this);
+    _right_side = new QTabWidget(this);
 
     auto minimap_holder = new QScrollArea(this);
     minimap_holder->setWidgetResizable(true);
     minimap_holder->setAlignment(Qt::AlignCenter);
     minimap_holder->setWidget(_minimap);
 
-    right_side->addTab(minimap_holder, "Enter map");
+    _right_side->addTab(minimap_holder, "Enter map");
     minimap_holder->setAccessibleName("main_menu_minimap_holder");
 
     _map_creation_wizard = new Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard(_project, this);
@@ -434,9 +439,16 @@ namespace Noggit::Ui::Windows
                                      }
     );
 
-    right_side->addTab(_map_creation_wizard, "Edit map");
+    _right_side->addTab(_map_creation_wizard, "Edit map");
 
-    layout->addWidget(right_side);
+    layout->addWidget(_right_side);
+
+    connect(add_btn, &QPushButton::clicked
+        , [&]()
+        {
+            _right_side->setCurrentIndex(1);
+            _map_creation_wizard->addNewMap();
+        });
 
     //setCentralWidget (_stack_widget);
 

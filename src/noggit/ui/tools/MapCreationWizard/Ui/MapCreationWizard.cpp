@@ -37,8 +37,12 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   auto layout = new QHBoxLayout(this);
 
   // Left side
-  auto layout_left = new QHBoxLayout(this);
+  auto layout_left = new QVBoxLayout(this);
   layout->addLayout(layout_left);
+
+  auto info_label = new QLabel("Left Click on the grid to add Tiles, Ctrl+click to erase, Shift+Click to add 3x3.");
+  info_label->setWindowIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::info));
+  layout_left->addWidget(info_label);
 
   auto scroll_minimap = new QScrollArea(this);
 
@@ -107,10 +111,6 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   layout_selector->addWidget(remove_btn);
   
   remove_btn->setAccessibleName("map_wizard_remove_button");
-
-  auto info_label = new QLabel("Left Click on the grid to add Tiles, Ctrl+click to erase, Shift+Click to add 3x3.");
-  info_label->setWindowIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::info));
-  layout_right->addWidget(info_label);
 
   _map_settings = new QGroupBox("Map settings", this);
   layout_right->addWidget(_map_settings);

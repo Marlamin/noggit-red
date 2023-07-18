@@ -236,7 +236,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   _cull_distance= draw_fog ? _skies->fog_distance_end() : _view_distance;
 
   // Draw verylowres heightmap
-  if (draw_fog && draw_terrain)
+  if (!_world->mapIndex.hasAGlobalWMO() && draw_fog && draw_terrain)
   {
     ZoneScopedN("World::draw() : Draw horizon");
     _horizon_render->draw (model_view, projection, &_world->mapIndex, _skies->color_set[FOG_COLOR], _cull_distance, frustum, camera_pos, display);
