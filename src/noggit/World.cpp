@@ -1823,7 +1823,10 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
     reset_selection();
   }
 
-  update_models_by_filename();
+  if (uids.size())
+  {
+    update_models_by_filename();
+  }
 }
 
 void World::reload_tile(TileIndex const& tile)
@@ -2676,7 +2679,7 @@ void World::update_models_by_filename()
   {
     _models_by_filename[model_instance.model->file_key().filepath()].push_back(&model_instance);
     // to make sure the transform matrix are up to date
-    model_instance.recalcExtents();
+    model_instance.ensureExtents();
   });
 
   need_model_updates = false;
