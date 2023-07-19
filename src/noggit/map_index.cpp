@@ -360,7 +360,7 @@ void MapIndex::setFlag(bool to, glm::vec3 const& pos, uint32_t flag)
   }
 }
 
-MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading)
+MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading, bool load_models, bool load_textures)
 {
   if (!hasTile(tile))
   {
@@ -382,7 +382,7 @@ MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading)
   }
 
   mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
-     mBigAlpha, true, use_mclq_green_lava(), reloading, _world, _context);
+     mBigAlpha, load_models, use_mclq_green_lava(), reloading, _world, _context, tile_mode::edit, load_textures);
 
   MapTile* adt = mTiles[tile.z][tile.x].tile.get();
 

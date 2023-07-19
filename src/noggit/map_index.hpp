@@ -194,7 +194,7 @@ public:
   void create_empty_wdl();
 
   void enterTile(const TileIndex& tile);
-  MapTile *loadTile(const TileIndex& tile, bool reloading = false);
+  MapTile *loadTile(const TileIndex& tile, bool reloading = false, bool load_models = true, bool load_textures = true);
 
   void update_model_tile(const TileIndex& tile, model_update type, SceneObject* instance);
 
