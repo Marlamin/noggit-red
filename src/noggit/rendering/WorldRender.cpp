@@ -93,13 +93,6 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     _need_terrain_params_ubo_update = true;
   }
 
-  if (terrainMode == editing_mode::holes)
-  {
-    _terrain_params_ubo_data.draw_lines = true;
-    _terrain_params_ubo_data.draw_hole_lines = true;
-    _need_terrain_params_ubo_update = true;
-  }
-
   if (_need_terrain_params_ubo_update)
     updateTerrainParamsUniformBlock();
 

@@ -232,10 +232,23 @@ void MapView::set_editing_mode(editing_mode mode)
     _viewport_overlay_ui->gizmoBar->hide();
   }
 
+  auto previous_mode = _left_sec_toolbar->getCurrentMode();
+
   _left_sec_toolbar->setCurrentMode(this, mode);
 
   if (context() && context()->isValid())
   {
+    if (mode == editing_mode::holes && previous_mode != editing_mode::holes)
+    {
+        _world->renderer()->getTerrainParamsUniformBlock()->draw_lines = true;
+        _world->renderer()->getTerrainParamsUniformBlock()->draw_hole_lines = true;
+    }
+    else if (previous_mode == editing_mode::holes && mode != editing_mode::holes)
+    {
+        _world->renderer()->getTerrainParamsUniformBlock()->draw_lines = _draw_lines.get();
+        _world->renderer()->getTerrainParamsUniformBlock()->draw_hole_lines = _draw_hole_lines.get();
+    }
+
     _world->renderer()->getTerrainParamsUniformBlock()->draw_areaid_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_impass_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = false;
