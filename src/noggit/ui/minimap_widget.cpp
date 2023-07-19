@@ -116,8 +116,18 @@ namespace Noggit
     }
 
     //! \todo Only redraw stuff as told in event.
-    void minimap_widget::paintEvent (QPaintEvent*)
+    // called by _minimap->update()
+    // \todo : massive performance drop after clicking the minimap once until moving cursor out of frame, paintEvent gets called repeatidly
+    void minimap_widget::paintEvent (QPaintEvent* paint_event)
     {
+        /*
+        auto rectangle = paint_event->rect();
+        auto left = rectangle.left();
+        auto rectop = rectangle.top();
+        auto recwidth = rectangle.width();
+        auto recheight = rectangle.height();
+        */
+
       //! \note Only take multiples of 1.0 pixels per tile.
       const int smaller_side ((qMin (rect().width(), rect().height()) / 64) * 64);
       const QRect drawing_rect (0, 0, smaller_side, smaller_side);
@@ -377,7 +387,7 @@ namespace Noggit
         emit tile_clicked(tile);
       }
 
-      update();
+      // update();
     }
   }
 }

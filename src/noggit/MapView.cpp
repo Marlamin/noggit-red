@@ -2056,7 +2056,6 @@ void MapView::setupViewMenu()
                {
                  _camera.add_to_yaw(math::degrees(180.f));
                  _camera_moved_since_last_draw = true;
-                 _minimap->update();
                }
   );
 
@@ -2832,7 +2831,6 @@ void MapView::move_camera_with_auto_height (glm::vec3 const& pos)
 
   _camera.position.y += 50.0f;
 
-  _minimap->update();
   _camera_moved_since_last_draw = true;
 }
 
@@ -4052,7 +4050,7 @@ void MapView::tick (float dt)
     }
   }
 
-  _minimap->update();
+  // _minimap->update(); // causes massive performance issues
 
   _world->time += this->mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
@@ -4503,9 +4501,14 @@ void MapView::draw_map()
   {
     doSelection(true);
   }
+
+  if (_camera_moved_since_last_draw)
+  {
+      _minimap->update();
+  }
+
   bool classic_ui = _settings->value("classicUI", true).toBool();
   bool show_unpaintable = classic_ui ? texturingTool->show_unpaintable_chunks() : _left_sec_toolbar->showUnpaintableChunk();
-
   _world->renderer()->draw (
                  model_view()
                , projection()
@@ -4684,7 +4687,6 @@ void MapView::keyPressEvent (QKeyEvent *event)
   {
 	  _camera.position = glm::vec3(_cursor_pos.x, _cursor_pos.y + 50, _cursor_pos.z);
     _camera_moved_since_last_draw = true;
-	  _minimap->update();
   }
 
   if (event->key() == Qt::Key_L)
@@ -4701,28 +4703,24 @@ void MapView::keyPressEvent (QKeyEvent *event)
       auto next_z = cur_tile.z - 1;
       _camera.position = glm::vec3((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
-      _minimap->update();
     }
     else if (event->key() == Qt::Key_Down)
     {
       auto next_z = cur_tile.z + 1;
       _camera.position = glm::vec3((cur_tile.x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (next_z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
-      _minimap->update();
     }
     else if (event->key() == Qt::Key_Left)
     {
       auto next_x = cur_tile.x - 1;
       _camera.position = glm::vec3((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
-      _minimap->update();
     }
     else if (event->key() == Qt::Key_Right)
     {
       auto next_x = cur_tile.x + 1;
       _camera.position = glm::vec3((next_x * TILESIZE) + (TILESIZE / 2), _camera.position.y, (cur_tile.z * TILESIZE) + (TILESIZE / 2));
       _camera_moved_since_last_draw = true;
-      _minimap->update();
     }
 
   }
@@ -4870,7 +4868,6 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     _camera.add_to_yaw(math::degrees(relative_movement.dx() / XSENS));
     _camera.add_to_pitch(math::degrees(mousedir * relative_movement.dy() / YSENS));
     _camera_moved_since_last_draw = true;
-    _minimap->update();
   }
 
   if (MoveObj)

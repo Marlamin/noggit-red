@@ -49,7 +49,7 @@ namespace Noggit
       void set_resizeable(bool state) { _resizeable = state; };
 
     protected:
-      virtual void paintEvent (QPaintEvent*) override;
+      virtual void paintEvent (QPaintEvent* paint_event) override;
       virtual void mouseDoubleClickEvent (QMouseEvent*) override;
       virtual void mouseMoveEvent(QMouseEvent*) override;
       virtual void mousePressEvent(QMouseEvent* event) override;
