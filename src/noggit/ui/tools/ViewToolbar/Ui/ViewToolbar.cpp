@@ -136,6 +136,7 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Tile view"), FontNoggit::VIEW_MODE_2D, tb);
     addSeparator();
 
+    add_tool_icon(mapView, &mapView->_show_minimap_window, tr("Show Minimap"),FontNoggit::TOOL_MINIMAP_EDITOR, tb);
     add_tool_icon(mapView, &mapView->_show_detail_info_window, tr("Details info"), FontNoggit::INFO, tb);
 
     // TODO : will open a panel with time controls, or use 2n toolbar
