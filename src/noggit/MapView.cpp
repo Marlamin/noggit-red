@@ -3998,20 +3998,22 @@ void MapView::tick (float dt)
         if (moving)
         {
             _camera.move_forward(moving, dt);
+            _camera_moved_since_last_draw = true;
             // TODO use normalized speed (doesn't slow down when looking up)
             // _camera.move_forward_normalized(moving, dt);
         }
         if (strafing)
         {
             _camera.move_horizontal(strafing, dt);
+            _camera_moved_since_last_draw = true;
         }
-
         // get ground z position
-        // can be optimized by calling this only when moving/strafing or changing camera mode.
-        auto ground_pos = _world.get()->get_ground_height(_camera.position);
-        _camera.position.y = ground_pos.y + 2;
-        _camera_moved_since_last_draw = true;
-
+        // hack to update camera when entering mode in void ViewToolbar::add_tool_icon()
+        if (_camera_moved_since_last_draw)
+        {
+            auto ground_pos = _world.get()->get_ground_height(_camera.position);
+            _camera.position.y = ground_pos.y + 2;
+        }
     }
     else
     {
