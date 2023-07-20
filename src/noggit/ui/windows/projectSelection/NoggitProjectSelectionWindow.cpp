@@ -211,7 +211,7 @@ void NoggitProjectSelectionWindow::handleContextMenuProjectListItemForget(std::s
   prompt.setWindowTitle("Forget Project");
   prompt.setIcon(QMessageBox::Warning);
   prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
-  prompt.setText("Data on the disk will not be removed. Continue?.");
+  prompt.setText("Data on the disk will not be removed, this action will only hide the project. Continue?.");
   prompt.addButton("Accept", QMessageBox::AcceptRole);
   prompt.setDefaultButton(prompt.addButton("Cancel", QMessageBox::RejectRole));
   prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
