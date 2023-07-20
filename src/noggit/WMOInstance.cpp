@@ -173,6 +173,10 @@ void WMOInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
     << "<br><b>WMO Id: </b>" << wmo->WmoId
     << "<br><b>doodad set: </b>" << doodadset()
     << "<br><b>name set: </b>" << mNameset
+
+    << "<br><b>server position X/Y/Z: </b>{" << (ZEROPOINT - pos.z) << ", " << (ZEROPOINT - pos.x) << ", " << pos.y << "}"
+    << "<br><b>server orientation:  </b>" << fabs(2 * glm::pi<float>() - glm::pi<float>() / 180.0 * (float(dir.y) < 0 ? fabs(float(dir.y)) + 180.0 : fabs(float(dir.y) - 180.0)))
+
     << "<br><b>textures used: </b>" << wmo->textures.size()
     << "<span>";
 
