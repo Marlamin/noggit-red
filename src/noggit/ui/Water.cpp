@@ -62,6 +62,10 @@ namespace Noggit
       {
         int liquid_id = i->getInt(LiquidTypeDB::ID);
 
+        // filter WMO liquids
+        if (liquid_id == 13 || liquid_id == 14 || liquid_id == 17 || liquid_id == 19 || liquid_id == 20)
+            continue;
+
         std::stringstream ss;
         ss << liquid_id << "-" << LiquidTypeDB::getLiquidName(liquid_id);
         waterType->addItem (QString::fromUtf8(ss.str().c_str()), QVariant (liquid_id));
