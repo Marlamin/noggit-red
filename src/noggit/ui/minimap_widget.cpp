@@ -116,8 +116,18 @@ namespace Noggit
     }
 
     //! \todo Only redraw stuff as told in event.
-    void minimap_widget::paintEvent (QPaintEvent*)
+    // called by _minimap->update()
+    // \todo : massive performance drop after clicking the minimap once until moving cursor out of frame, paintEvent gets called repeatidly
+    void minimap_widget::paintEvent (QPaintEvent* paint_event)
     {
+        /*
+        auto rectangle = paint_event->rect();
+        auto left = rectangle.left();
+        auto rectop = rectangle.top();
+        auto recwidth = rectangle.width();
+        auto recheight = rectangle.height();
+        */
+
       //! \note Only take multiples of 1.0 pixels per tile.
       const int smaller_side ((qMin (rect().width(), rect().height()) / 64) * 64);
       const QRect drawing_rect (0, 0, smaller_side, smaller_side);
@@ -248,7 +258,33 @@ namespace Noggit
 
           painter.drawLine (camera_vector);
         }
-      }
+      
+        if (_world->mapIndex.hasAGlobalWMO())
+        {
+            painter.setPen(QColor::fromRgbF(1.0f, 0.0f, 0.0f, 1.f));
+
+            auto extents = _world->mWmoEntry.extents;
+
+            // WMOInstance inst(_world->mWmoFilename, &_world->mWmoEntry, _world->_context);
+
+            float pos = tile_size * 64 / 2; // TODO : convert wmo pos 
+
+            float min_point_x = pos + (extents[0][0] / TILESIZE * tile_size); // extents[min][x]
+            float min_point_y = pos + (extents[0][1] / TILESIZE * tile_size); // extents[min][y]
+            float max_point_x = pos + (extents[1][0] / TILESIZE * tile_size);
+            float max_point_y = pos + (extents[1][1] / TILESIZE * tile_size);
+            // tile_size = 14 | max size = 896
+
+            float width = max_point_x - min_point_x;
+            float height = max_point_y - min_point_y;
+            painter.drawRect(QRectF(min_point_x
+                , min_point_y
+                , width // width
+                , height // height
+            )
+            );
+        }
+}
       else
       {
         //! \todo Draw something so user realizes this will become the minimap.
@@ -283,7 +319,7 @@ namespace Noggit
 
       QPoint tile = locateTile(event);
 
-      if (!world()->mapIndex.hasTile (TileIndex (tile.x(), tile.y())))
+      if (!world()->mapIndex.hasTile (TileIndex (tile.x(), tile.y())) && !_world->mapIndex.hasAGlobalWMO())
       {
         event->ignore();
         return;
@@ -351,7 +387,7 @@ namespace Noggit
         emit tile_clicked(tile);
       }
 
-      update();
+      // update();
     }
   }
 }

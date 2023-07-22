@@ -55,6 +55,7 @@ public:
          , World*
          , Noggit::NoggitRenderContext context
          , tile_mode mode = tile_mode::edit
+         , bool pLoadTextures = true
          );
   ~MapTile();
 
@@ -205,6 +206,7 @@ private:
   std::array<float, 145 * 256 * 4> _chunk_heightmap_buffer;
 
   bool _load_models;
+  bool _load_textures;
   World* _world;
 
 

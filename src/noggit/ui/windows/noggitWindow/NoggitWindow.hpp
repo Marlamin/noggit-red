@@ -86,8 +86,9 @@ namespace Noggit::Ui::Windows
 
       QListWidget* _continents_table;
       QString _filter_name;
+      QTabWidget* _right_side;
 
-      void applyFilterSearch(const QString& name, int type, int expansion);
+      void applyFilterSearch(const QString& name, int type, int expansion, bool wmo_maps);
 
       std::unique_ptr<World> _world;
 

@@ -3,6 +3,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <math/bounding_box.hpp>
 #include <math/frustum.hpp>
+#include <glm/glm.hpp>
 #include <noggit/Log.h>
 #include <noggit/Misc.h> // checkinside
 #include <noggit/Model.h> // Model, etc.
@@ -237,6 +238,10 @@ void ModelInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
     << "<br><b>position X/Y/Z:</b> {" << pos.x << " , " << pos.y << " , " << pos.z << "}"
     << "<br><b>rotation X/Y/Z:</b> {" << dir.x << " , " << dir.y << " , " << dir.z << "}"
     << "<br><b>scale:</b> " << scale
+
+    << "<br><b>server position X/Y/Z: </b>{" << (ZEROPOINT - pos.z) << ", " << (ZEROPOINT - pos.x) << ", " << pos.y << "}"
+    << "<br><b>server orientation:  </b>" << fabs(2 * glm::pi<float>() - glm::pi<float>() / 180.0 * (float(dir.y) < 0 ? fabs(float(dir.y)) + 180.0 : fabs(float(dir.y) - 180.0)))
+
     << "<br><b>textures Used:</b> " << model->header.nTextures
     << "<br><b>size category:</b><span> " << size_cat;
 

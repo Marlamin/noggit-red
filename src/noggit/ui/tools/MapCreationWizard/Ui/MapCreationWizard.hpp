@@ -87,7 +87,7 @@ namespace Noggit
 
       void wheelEvent(QWheelEvent *event) override;
       void destroyFakeWorld() { if(_world) delete _world; _world = nullptr; _minimap_widget->world (nullptr); };
-
+      void addNewMap();
     signals:
       void map_dbc_updated();
 
@@ -148,7 +148,6 @@ namespace Noggit
       void saveCurrentEntry();
       void discardChanges();
 
-      void addNewMap();
       void removeMap();
 
     };

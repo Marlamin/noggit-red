@@ -140,7 +140,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
     //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
     //! \nofuckingbug  on eof read returns just without doing sth to the var and some wdts have a MWMO without having a MODF so only checking for eof above is not enough
 
-    mHasAGlobalWMO = false;
+    // mHasAGlobalWMO = false;
 
     // - MWMO ----------------------------------------------
 
@@ -360,7 +360,7 @@ void MapIndex::setFlag(bool to, glm::vec3 const& pos, uint32_t flag)
   }
 }
 
-MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading)
+MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading, bool load_models, bool load_textures)
 {
   if (!hasTile(tile))
   {
@@ -382,7 +382,7 @@ MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading)
   }
 
   mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
-     mBigAlpha, true, use_mclq_green_lava(), reloading, _world, _context);
+     mBigAlpha, load_models, use_mclq_green_lava(), reloading, _world, _context, tile_mode::edit, load_textures);
 
   MapTile* adt = mTiles[tile.z][tile.x].tile.get();
 
@@ -1162,6 +1162,8 @@ void MapIndex::addTile(const TileIndex& tile)
   mTiles[tile.z][tile.x].flags |= 0x1;
   mTiles[tile.z][tile.x].tile->changed = true;
 
+  _world->horizon.update_horizon_tile(mTiles[tile.z][tile.x].tile.get());
+
   changed = true;
 }
 
@@ -1176,6 +1178,8 @@ void MapIndex::removeTile(const TileIndex &tile)
 
   mTiles[tile.z][tile.x].tile->changed = true;
   mTiles[tile.z][tile.x].onDisc = false;
+
+  _world->horizon.remove_horizon_tile(tile.z, tile.x);
 
   changed = true;
 }

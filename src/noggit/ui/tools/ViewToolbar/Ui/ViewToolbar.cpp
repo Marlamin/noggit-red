@@ -4,6 +4,7 @@
 #include <noggit/ui/tools/ActionHistoryNavigator/ActionHistoryNavigator.hpp>
 #include <noggit/ui/FontAwesome.hpp>
 #include <QSlider>
+#include <QtCore/QSettings>
 
 using namespace Noggit::Ui;
 using namespace Noggit::Ui::Tools::ViewToolbar::Ui;
@@ -135,6 +136,7 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Tile view"), FontNoggit::VIEW_MODE_2D, tb);
     addSeparator();
 
+    add_tool_icon(mapView, &mapView->_show_minimap_window, tr("Show Minimap"),FontNoggit::TOOL_MINIMAP_EDITOR, tb);
     add_tool_icon(mapView, &mapView->_show_detail_info_window, tr("Details info"), FontNoggit::INFO, tb);
 
     // TODO : will open a panel with time controls, or use 2n toolbar
@@ -326,6 +328,9 @@ void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
     mapView->getLeftSecondaryToolbar()->hide();
     current_mode = mode;
 
+    QSettings settings;
+    bool use_classic_ui = settings.value("classicUI", false).toBool();
+
     switch (current_mode)
     {
     case editing_mode::ground:
@@ -334,14 +339,20 @@ void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
         if (_flatten_secondary_tool.size() > 0)
         {
             setupWidget(_flatten_secondary_tool);
-            mapView->getLeftSecondaryToolbar()->show();
+            if (!use_classic_ui)
+                mapView->getLeftSecondaryToolbar()->show();
+            else
+                mapView->getLeftSecondaryToolbar()->hide();
         }
         break;
     case editing_mode::paint:
         if (_texture_secondary_tool.size() > 0)
         {
             setupWidget(_texture_secondary_tool);
-            mapView->getLeftSecondaryToolbar()->show();
+            if (!use_classic_ui)
+                mapView->getLeftSecondaryToolbar()->show();
+            else
+                mapView->getLeftSecondaryToolbar()->hide();
         }
         break;
     case editing_mode::object:
@@ -387,7 +398,16 @@ void ViewToolbar::add_tool_icon(MapView* mapView,
         }
     });
 
-    connect (view_state, &Noggit::BoolToggleProperty::changed, [action, view_state] () {
+    connect (view_state, &Noggit::BoolToggleProperty::changed, [action, view_state, mapView] () {
+        if (action->text() == "Game view" && view_state->get())
+        {
+            // hack, manually update camera when switch to game_view
+            mapView->setCameraDirty();
+            auto ground_pos = mapView->getWorld()->get_ground_height(mapView->getCamera()->position);
+            mapView->getCamera()->position.y = ground_pos.y + 2;
+        }
+
+
         action->setChecked(view_state->get());
     });
 

@@ -64,7 +64,7 @@ bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow
   // Not using the libWDT here doubles performance. You might want to look at your lib again and improve it.
   const int lFlags = *(reinterpret_cast<const int*>(lPointer + 8 + 4 + 8));
   if (lFlags & 1)
-    return false;
+    return true; // filter them later
 
   const int * lData = reinterpret_cast<const int*>(lPointer + 8 + 4 + 8 + 0x20 + 8);
   for (int i = 0; i < 8192; i += 2)
@@ -76,14 +76,33 @@ bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow
   return false;
 }
 
+bool World::IsWMOWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record)
+{
+    ZoneScoped;
+    std::string lMapName = record.Columns["Directory"].Value;
+
+    std::stringstream ssfilename;
+    ssfilename << "World\\Maps\\" << lMapName << "\\" << lMapName << ".wdt";
+
+    BlizzardArchive::ClientFile mf(ssfilename.str(), Noggit::Application::NoggitApplication::instance()->clientData());
+
+    const char* lPointer = reinterpret_cast<const char*>(mf.getPointer());
+
+    const int lFlags = *(reinterpret_cast<const int*>(lPointer + 8 + 4 + 8));
+    if (lFlags & 1)
+        return true;
+
+    return false;
+}
+
 World::World(const std::string& name, int map_id, Noggit::NoggitRenderContext context, bool create_empty)
     : _renderer(Noggit::Rendering::WorldRender(this))
     , _model_instance_storage(this)
     , _tile_update_queue(this)
     , mapIndex(name, map_id, this, context, create_empty)
     , horizon(name, &mapIndex)
-    , mWmoFilename("")
-    , mWmoEntry(ENTRY_MODF())
+    , mWmoFilename(mapIndex.globalWMOName)
+    , mWmoEntry(mapIndex.wmoEntry)
     , animtime(0)
     , time(1450)
     , basename(name)
@@ -357,10 +376,11 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
         }
     });
 
-    // We shouldn't end up with empty ever.
+    // !\ todo We shouldn't end up with empty ever (but we do, on completely flat ground)
     if (results.empty())
     {
-      LogError << "rotate_selected_models_to_ground_normal ray intersection failed" << std::endl;
+      // just to avoid models disappearing when this happens
+      updateTilesEntry(entry, model_update::add);
       continue;
     }
 
@@ -836,15 +856,14 @@ MapChunk* World::getChunkAt(glm::vec3 const& pos)
   return nullptr;
 }
 
-bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds)
+bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds, glm::mat4x4 obj_transform)
 {
     bool is_indoor = false;
     // check if model bounds is within wmo bounds then check each indor wmo group bounds
     _model_instance_storage.for_each_wmo_instance([&](WMOInstance& wmo_instance)
         {
             auto wmo_extents = wmo_instance.getExtents();
-
-
+            // check if global wmo bounds intersect
             if (obj_bounds[1].x >= wmo_extents[0].x
                 && obj_bounds[1].y >= wmo_extents[0].y
                 && obj_bounds[1].z >= wmo_extents[0].z
@@ -864,15 +883,23 @@ bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds)
                         auto& group_extents = wmo_instance.getGroupExtents().at(i);
 
                         // TODO : do a precise calculation instead of using axis aligned bounding boxes.
-                        auto test = obj_bounds[1].x >= group_extents.first.x
+                        bool aabb_test = obj_bounds[1].x >= group_extents.first.x
                             && obj_bounds[1].y >= group_extents.first.y
                             && obj_bounds[1].z >= group_extents.first.z
                             && group_extents.second.x >= obj_bounds[0].x
                             && group_extents.second.y >= obj_bounds[0].y
                             && group_extents.second.z >= obj_bounds[0].z;
 
-                        is_indoor = test;
-                        return;
+                        if (aabb_test) // oriented box check
+                        {
+                            /* TODO
+                            if (collide_test)
+                            {
+                                is_indoor = true;
+                                return;
+                            }
+                            */
+                        }
                     }
                 }
             }
@@ -1797,7 +1824,10 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
     reset_selection();
   }
 
-  update_models_by_filename();
+  if (uids.size())
+  {
+    update_models_by_filename();
+  }
 }
 
 void World::reload_tile(TileIndex const& tile)
@@ -2695,7 +2725,7 @@ void World::update_models_by_filename()
   {
     _models_by_filename[model_instance.model->file_key().filepath()].push_back(&model_instance);
     // to make sure the transform matrix are up to date
-    model_instance.recalcExtents();
+    model_instance.ensureExtents();
   });
 
   need_model_updates = false;

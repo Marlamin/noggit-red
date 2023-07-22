@@ -26,6 +26,8 @@ namespace Noggit
 
       void setCurrentMode(MapView* mapView, editing_mode mode);
 
+      editing_mode getCurrentMode() const { return current_mode; }
+
       /*secondary top tool*/
       QVector<QWidgetAction*> _climb_secondary_tool;
       QVector<QWidgetAction*> _time_secondary_tool;

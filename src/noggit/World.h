@@ -105,7 +105,7 @@ public:
 
   MapChunk* getChunkAt(glm::vec3 const& pos);
 
-  bool isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds);
+  bool isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds, glm::mat4x4 obj_transform);
 
 protected:
   // Information about the currently selected model / WMO / triangle.
@@ -315,6 +315,8 @@ public:
   void unload_every_model_and_wmo_instance();
 
 	static bool IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
+
+    static bool IsWMOWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
 
   void clearHeight(glm::vec3 const& pos);
   void clearAllModelsOnADT(TileIndex const& tile);

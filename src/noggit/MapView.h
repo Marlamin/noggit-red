@@ -280,6 +280,7 @@ public:
   void randomizeStampRotation();
   void onSettingsSave();
   void updateRotationEditor() { _rotation_editor_need_update = true; };
+  void setCameraDirty() { _camera_moved_since_last_draw = true; };
 
   [[nodiscard]]
   Noggit::Ui::minimap_widget* getMinimapWidget() const { return _minimap;  }

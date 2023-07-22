@@ -37,8 +37,12 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   auto layout = new QHBoxLayout(this);
 
   // Left side
-  auto layout_left = new QHBoxLayout(this);
+  auto layout_left = new QVBoxLayout(this);
   layout->addLayout(layout_left);
+
+  auto info_label = new QLabel("Left Click on the grid to add Tiles, Ctrl+click to erase, Shift+Click to add 3x3.");
+  info_label->setWindowIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::info));
+  layout_left->addWidget(info_label);
 
   auto scroll_minimap = new QScrollArea(this);
 
@@ -224,6 +228,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   _map_settings->setLayout(difficulty_settings_layout);
 
   _difficulty_type = new QComboBox(_map_settings);
+  _difficulty_type->setDisabled(true);
 
   difficulty_settings_layout->addRow("Difficulty Index", _difficulty_type);
 
@@ -586,6 +591,23 @@ void MapCreationWizard::saveCurrentEntry()
       prompt.exec();
       return;
     }
+    // prompt the user if no tile was select
+    if (!_world->mapIndex.getNumExistingTiles()) // _world->mapIndex.hasAGlobalWMO()
+    {
+        QMessageBox prompt;
+        prompt.setIcon(QMessageBox::Warning);
+        prompt.setWindowTitle("Empty map");
+        prompt.setText(std::string("Warning : Your map is empty.").c_str());
+        prompt.setInformativeText("You didn't set any tile. To add tiles to your map click on the squares in the grid.\nDo you still want to save the empty map ?");
+        prompt.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+        prompt.setDefaultButton(QMessageBox::No);
+        prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
+        bool answer = prompt.exec() == QMessageBox::StandardButton::Yes;
+        if (!answer)
+        {
+            return;
+        }
+    }
 
     // Create WDT empty file for new map
     std::stringstream filename;
@@ -710,6 +732,19 @@ void MapCreationWizard::addNewMap()
 
 void MapCreationWizard::removeMap()
 {
+  QMessageBox prompt;
+  prompt.setIcon(QMessageBox::Warning);
+  prompt.setWindowTitle("Remove Map");
+  prompt.setText(std::string("Are you sure you want to remove this map ?").c_str());
+  prompt.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+  prompt.setDefaultButton(QMessageBox::No);
+  prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
+  bool answer = prompt.exec() == QMessageBox::StandardButton::Yes;
+  if (!answer)
+  {
+      return;
+  }
+
   if (!_is_new_record && _cur_map_id >= 0)
   {
     gMapDB.removeRecord(_cur_map_id);

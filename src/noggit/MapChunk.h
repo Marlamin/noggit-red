@@ -64,7 +64,7 @@ private:
 
 public:
   MapChunk(MapTile* mt, BlizzardArchive::ClientFile* f, bool bigAlpha, tile_mode mode, Noggit::NoggitRenderContext context
-           , bool init_empty = false, int chunk_idx = 0);
+           , bool init_empty = false, int chunk_idx = 0, bool load_textures = true);
 
   auto getHoleMask(void) const -> unsigned { return static_cast<unsigned>(holes); }
   MapTile *mt;

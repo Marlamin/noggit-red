@@ -24,8 +24,8 @@
 #include <QImage>
 #include <limits>
 
-MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAlpha,
-                   tile_mode mode, Noggit::NoggitRenderContext context, bool init_empty, int chunk_idx)
+MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAlpha,tile_mode mode
+                    , Noggit::NoggitRenderContext context, bool init_empty, int chunk_idx, bool load_textures)
   : _mode(mode)
   , mt(maintile)
   , use_big_alphamap(bigAlpha)
@@ -146,6 +146,11 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
     // correct the x and z values ^_^
     zbase = zbase*-1.0f + ZEROPOINT;
     xbase = xbase*-1.0f + ZEROPOINT;
+  }
+
+  if (!load_textures)
+  {
+      this->header.nLayers = 0;
   }
 
   texture_set = std::make_unique<TextureSet>(this, f, base, maintile, bigAlpha,

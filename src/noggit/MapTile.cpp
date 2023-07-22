@@ -41,6 +41,7 @@ MapTile::MapTile( int pX
                 , World* world
                 , Noggit::NoggitRenderContext context
                 , tile_mode mode
+                , bool pLoadTextures
                 )
   : AsyncObject(pFilename)
   , _renderer(this)
@@ -54,6 +55,7 @@ MapTile::MapTile( int pX
   , _tile_is_being_reloaded(reloading_tile)
   , mBigAlpha(pBigAlpha)
   , _load_models(pLoadModels)
+  , _load_textures(pLoadTextures)
   , _world(world)
   , _context(context)
   , _chunk_update_flags(ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
@@ -161,23 +163,25 @@ void MapTile::finishLoading()
 
   // - MTEX ----------------------------------------------
 
-  theFile.seek(Header.mtex + 0x14);
-  theFile.read(&fourcc, 4);
-  theFile.read(&size, 4);
-
-  assert(fourcc == 'MTEX');
-
+  if (_load_textures)
   {
-    char const* lCurPos = reinterpret_cast<char const*>(theFile.getPointer());
-    char const* lEnd = lCurPos + size;
+    theFile.seek(Header.mtex + 0x14);
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
 
-    while (lCurPos < lEnd)
+    assert(fourcc == 'MTEX');
+
     {
-      mTextureFilenames.push_back(BlizzardArchive::ClientData::normalizeFilenameInternal(std::string(lCurPos)));
-      lCurPos += strlen(lCurPos) + 1;
+      char const* lCurPos = reinterpret_cast<char const*>(theFile.getPointer());
+      char const* lEnd = lCurPos + size;
+
+      while (lCurPos < lEnd)
+      {
+        mTextureFilenames.push_back(BlizzardArchive::ClientData::normalizeFilenameInternal(std::string(lCurPos)));
+        lCurPos += strlen(lCurPos) + 1;
+      }
     }
   }
-
   if (_load_models)
   {
     // - MMDX ----------------------------------------------
@@ -359,7 +363,7 @@ void MapTile::finishLoading()
     unsigned x = nextChunk / 16;
     unsigned z = nextChunk % 16;
 
-    mChunks[x][z] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha, _mode, _context);
+    mChunks[x][z] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha, _mode, _context, false, 0, _load_textures);
 
     auto& chunk = mChunks[x][z];
     _renderer.initChunkData(chunk.get());

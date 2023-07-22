@@ -641,7 +641,8 @@ namespace Noggit
           new_obj->recalcExtents();
 
           // check if pos is valid (not in an interior) wmo group
-          bool is_indoor = world->isInIndoorWmoGroup(new_obj->extents);
+          // bool is_indoor = world->isInIndoorWmoGroup(new_obj->extents, new_obj->transformMatrix());
+          bool is_indoor = false; // TODO Disabled the indoor check until non axis aligned boxes check is implemented
           if (is_indoor)
           {
               QMessageBox::warning

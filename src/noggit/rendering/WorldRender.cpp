@@ -229,7 +229,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   _cull_distance= draw_fog ? _skies->fog_distance_end() : _view_distance;
 
   // Draw verylowres heightmap
-  if (draw_fog && draw_terrain)
+  if (!_world->mapIndex.hasAGlobalWMO() && draw_fog && draw_terrain)
   {
     ZoneScopedN("World::draw() : Draw horizon");
     _horizon_render->draw (model_view, projection, &_world->mapIndex, _skies->color_set[FOG_COLOR], _cull_distance, frustum, camera_pos, display);
@@ -457,6 +457,19 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
       wmo_program.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
 
+      // make this check per WMO or global WMO with tiles may not work
+      bool disable_cull = false;
+
+      if (_world->mapIndex.hasAGlobalWMO() && !wmos_to_draw.size())
+      {
+          auto global_wmo = _world->_model_instance_storage.get_wmo_instance(_world->mWmoEntry.uniqueID);
+          if (global_wmo.has_value())
+          {
+            wmos_to_draw.push_back(global_wmo.value());
+            disable_cull = true;
+          }
+      }
+
 
       for (auto& instance: wmos_to_draw)
       {
@@ -519,7 +532,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
               , _world->animtime
               , _skies->hasSkies()
               , display
-              , false
+              , disable_cull
               , draw_wmo_exterior
 
           );

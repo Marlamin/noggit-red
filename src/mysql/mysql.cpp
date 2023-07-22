@@ -81,8 +81,10 @@ namespace mysql
 	  {
 		  
 		  prompt.setIcon(QMessageBox::Warning);
-		  prompt.setText("Failed to load MySQL database, check your settings.");
+		  prompt.setText("Failed to load MySQL database, check your settings. \nIf you did not intend to use this feature, disable it in Noggit->settings->MySQL");
 		  prompt.setWindowTitle("Noggit Database Error");
+		  // disable if connection is not valid
+		  // settings.value("project/mysql/enabled") = false;
 		  std::stringstream promptText;
 
 		  promptText << "\n# ERR: " << e.what();
