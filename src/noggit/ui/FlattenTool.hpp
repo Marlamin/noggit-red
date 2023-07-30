@@ -27,6 +27,7 @@ namespace Noggit
       void blur (World* world, glm::vec3 const& cursor_pos, float dt);
 
       void nextFlattenType();
+      void nextFlattenMode();
       void toggleFlattenAngle();
       void toggleFlattenLock();
       void lockPos (glm::vec3 const& cursor_pos);
@@ -83,6 +84,8 @@ namespace Noggit
 
       QCheckBox* _lock_up_checkbox;
       QCheckBox* _lock_down_checkbox;
+      QCheckBox* _snap_m2_objects_chkbox;
+      QCheckBox* _snap_wmo_objects_chkbox;
     };
   }
 }

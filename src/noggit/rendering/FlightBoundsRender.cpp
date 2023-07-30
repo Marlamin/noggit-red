@@ -57,7 +57,7 @@ void FlightBoundsRender::draw(OpenGL::Scoped::use_program& mfbo_shader)
     OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
 
     mfbo_shader.uniform("color", glm::vec4(1.0f, 1.0f, 0.0f, 0.2f));
-    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, nullptr);
+    gl.drawElements(GL_TRIANGLE_FAN, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_BYTE, nullptr);
   }
 
   {
@@ -65,7 +65,7 @@ void FlightBoundsRender::draw(OpenGL::Scoped::use_program& mfbo_shader)
     OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> ibo_binder(_mfbo_indices);
 
     mfbo_shader.uniform("color", glm::vec4(0.0f, 1.0f, 1.0f, 0.2f));
-    gl.drawElements(GL_TRIANGLE_FAN, indices.size(), GL_UNSIGNED_BYTE, nullptr);
+    gl.drawElements(GL_TRIANGLE_FAN, static_cast<int>(indices.size()), GL_UNSIGNED_BYTE, nullptr);
   }
 
 }

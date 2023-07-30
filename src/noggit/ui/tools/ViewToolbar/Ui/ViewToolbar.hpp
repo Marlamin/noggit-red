@@ -26,16 +26,25 @@ namespace Noggit
 
       void setCurrentMode(MapView* mapView, editing_mode mode);
 
+      editing_mode getCurrentMode() const { return current_mode; }
+
       /*secondary top tool*/
       QVector<QWidgetAction*> _climb_secondary_tool;
+      QVector<QWidgetAction*> _time_secondary_tool;
 
       /*secondary left tool*/
-      bool showUnpaintableChunk();
+      QVector<QWidgetAction*> _flatten_secondary_tool;
       void nextFlattenMode(MapView* mapView);
 
-      QVector<QWidgetAction*> _flatten_secondary_tool;
       QVector<QWidgetAction*> _texture_secondary_tool;
+      bool showUnpaintableChunk();
+
       QVector<QWidgetAction*> _object_secondary_tool;
+      
+      QVector<QWidgetAction*> _light_secondary_tool;
+      bool drawOnlyInsideSphereLight();
+      bool drawWireframeSphereLight();
+      float getAlphaSphereLight();
 
     private:
       QActionGroup _tool_group;
@@ -44,6 +53,9 @@ namespace Noggit
       int raise_index = -1;
       int lower_index = -1;
       int unpaintable_chunk_index = -1;
+      int sphere_light_inside_index = -1;
+      int sphere_light_wireframe_index = -1;
+      int sphere_light_alpha_index = -1;
 
       void setupWidget(QVector<QWidgetAction*> _to_setup, bool ignoreSeparator = false);
       void add_tool_icon(MapView* mapView,
@@ -58,27 +70,29 @@ namespace Noggit
     class SliderAction : public QWidgetAction
     {
     public:
-        SliderAction (const QString &title)
+        template <typename T>
+        SliderAction (const QString &title, int min, int max, int value, const QString& prec,
+            std::function<T(T v)> func)
             : QWidgetAction(NULL)
         {
+            static_assert (std::is_arithmetic<T>::value, "<T>SliderAction - T must be numeric");
+
             QWidget* _widget = new QWidget(NULL);
             QHBoxLayout* _layout = new QHBoxLayout();
             _layout->setSpacing(3);
             _layout->setMargin(0);
             QLabel* _label = new QLabel(title);
-            QLabel* _display = new QLabel(tr("49 degrees"));
+            QLabel* _display = new QLabel(QString::number(func(static_cast<T>(value)), 'f', 2) + tr(" %1").arg(prec));
 
             _slider = new QSlider(NULL);
             _slider->setOrientation(Qt::Horizontal);
-            _slider->setMinimum(0);
-            _slider->setMaximum(1570);
-            _slider->setValue(856);
+            _slider->setMinimum(min);
+            _slider->setMaximum(max);
+            _slider->setValue(value);
 
-            connect(_slider, &QSlider::valueChanged, [_display](int value)
+            connect(_slider, &QSlider::valueChanged, [_display, prec, func](int value)
                     {
-                        float radian = float(value) / 1000.f;
-                        float degrees = radian * (180.0/3.141592653589793238463);
-                        _display->setText(QString::number(int(degrees)) + tr(" degrees"));
+                        _display->setText(QString::number(func(static_cast<T>(value)), 'f', 2) + tr(" %1").arg(prec));
                     });
 
             _layout->addWidget(_label);

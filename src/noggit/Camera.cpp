@@ -95,6 +95,22 @@ namespace Noggit
     position += direction() * sign * factor;
   }
 
+  void Camera::move_forward_normalized(float sign, float dt)
+  {
+      // does not work....
+      glm::vec3 up(0.0f, 1.0f, 0.0f);
+
+      auto test = direction();
+      test.y -= 0.5f;
+      while (test.y < -1.0f)
+          test.y += 2.0f;
+
+      auto cross = glm::cross(direction(), up);
+      glm::vec3 right = glm::normalize(cross);
+
+      position += right * sign * move_speed * dt;
+  }
+
   void Camera::move_horizontal (float sign, float dt)
   {
     glm::vec3 up (0.0f, 1.0f, 0.0f);

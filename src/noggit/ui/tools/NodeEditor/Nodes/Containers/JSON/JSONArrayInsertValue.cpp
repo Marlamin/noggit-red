@@ -26,7 +26,7 @@ void JSONArrayInsertValueNode::compute()
 {
   QJsonArray* json_array = defaultPortData<JSONArrayData>(PortType::In, 1)->value_ptr();
   QJsonValue* json_val = defaultPortData<JSONValueData>(PortType::In, 2)->value_ptr();
-  unsigned index = defaultPortData<UnsignedIntegerData>(PortType::In, 3)->value();
+  int index = static_cast<int>(defaultPortData<UnsignedIntegerData>(PortType::In, 3)->value());
 
   if (index > json_array->size() || index < 0)
   {

@@ -126,12 +126,19 @@ namespace Noggit::Ui::Windows
 #ifdef USE_MYSQL_UID_STORAGE
     bool use_mysql = settings.value("project/mysql/enabled", false).toBool();
 
-    if ((use_myqsl && mysql::hasMaxUIDStoredDB(_world->getMapID()))
+    bool valid_conn = false;
+    if (use_mysql)
+    {
+        valid_conn = mysql::testConnection(true);
+    }
+
+    if ((valid_conn && mysql::hasMaxUIDStoredDB(_world->getMapID()))
       || uid_storage::hasMaxUIDStored(_world->getMapID())
        )
     {
+
       _world->mapIndex.loadMaxUID();
-      enterMapAt(pos, camera_pitch, camera_yaw, from_bookmark);
+      enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::none, from_bookmark);
     }
 #else
     if (uid_storage::hasMaxUIDStored(_world->getMapID()))
@@ -166,6 +173,28 @@ namespace Noggit::Ui::Windows
                            bool from_bookmark
   )
   {
+      if (_world->mapIndex.hasAGlobalWMO())
+      {
+          // enter at mdoel's position
+          // pos = glm::vec3(_world->mWmoEntry[0], _world->mWmoEntry.pos[1], _world->mWmoEntry.pos[2]);
+
+          // better, enter at model's max extent, facing toward min extent
+          auto min_extent = glm::vec3(_world->mWmoEntry.extents[0][0], _world->mWmoEntry.extents[0][1], _world->mWmoEntry.extents[0][2]);
+          auto max_extent = glm::vec3(_world->mWmoEntry.extents[1][0], _world->mWmoEntry.extents[1][1] * 2, _world->mWmoEntry.extents[1][2]);
+          float dx = min_extent.x - max_extent.x;
+          float dy = min_extent.z - max_extent.z; // flipping z and y works better for some reason
+          float dz = min_extent.y - max_extent.y;
+
+          pos = max_extent;
+
+          camera_yaw = math::degrees(math::radians(std::atan2(dx, dy)));
+
+          float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+          camera_pitch = math::degrees(math::radians(std::asin(dz / distance)));
+
+      }
+
+
     _map_creation_wizard->destroyFakeWorld();
     _map_view = (new MapView(camera_yaw, camera_pitch, pos, this, _project, std::move(_world), uid_fix, from_bookmark));
     connect(_map_view, &MapView::uid_fix_failed, [this]()
@@ -180,7 +209,7 @@ namespace Noggit::Ui::Windows
 
   }
 
-  void NoggitWindow::applyFilterSearch(const QString &name, int type, int expansion)
+  void NoggitWindow::applyFilterSearch(const QString &name, int type, int expansion, bool wmo_maps)
   {
       for (int i = 0; i < _continents_table->count(); ++i)
       {
@@ -205,6 +234,11 @@ namespace Noggit::Ui::Windows
           }
 
           if (!(widget->expansion() == (expansion - 1)) && expansion != 0)
+          {
+              item_widget->setHidden(true);
+          }
+
+          if (!(widget->wmo_map() == wmo_maps))
           {
               item_widget->setHidden(true);
           }
@@ -253,6 +287,10 @@ namespace Noggit::Ui::Windows
     QTabWidget* entry_points_tabs(new QTabWidget(widget));
     //entry_points_tabs->addTab(_continents_table, "Maps");
 
+     auto add_btn = new QPushButton("Add New Map", this);
+     add_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus));
+     add_btn->setAccessibleName("map_wizard_add_button");
+
     /* set-up widget for seaching etc... through _continents_table */
     {
         QWidget* _first_tab = new QWidget(this);
@@ -287,31 +325,39 @@ namespace Noggit::Ui::Windows
         _combo_exp_search->addItem(QIcon(":/icon-shadow"), tr("Shadowlands"));
         _combo_exp_search->setCurrentIndex(0);
 
-        QObject::connect(_line_edit_search, QOverload<const QString&>::of(&QLineEdit::textChanged), [this, _combo_search, _combo_exp_search](const QString &name)
+        QCheckBox* _wmo_maps_search = new QCheckBox("Display WMO maps (No terrain)", this);
+
+        QObject::connect(_line_edit_search, QOverload<const QString&>::of(&QLineEdit::textChanged), [this, _combo_search, _combo_exp_search, _wmo_maps_search](const QString &name)
                          {
-                             applyFilterSearch(name, _combo_search->currentIndex(), _combo_exp_search->currentIndex());
+                             applyFilterSearch(name, _combo_search->currentIndex(), _combo_exp_search->currentIndex(), _wmo_maps_search->isChecked());
                          });
 
-        QObject::connect(_combo_search, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, _line_edit_search, _combo_exp_search](int index)
+        QObject::connect(_combo_search, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, _line_edit_search, _combo_exp_search, _wmo_maps_search](int index)
                          {
-                             applyFilterSearch(_line_edit_search->text(), index, _combo_exp_search->currentIndex());
+                             applyFilterSearch(_line_edit_search->text(), index, _combo_exp_search->currentIndex(), _wmo_maps_search->isChecked());
                          });
 
-        QObject::connect(_combo_exp_search, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, _line_edit_search, _combo_search](int index)
+        QObject::connect(_combo_exp_search, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, _line_edit_search, _combo_search, _wmo_maps_search](int index)
                          {
-                             applyFilterSearch(_line_edit_search->text(), _combo_search->currentIndex(), index);
+                             applyFilterSearch(_line_edit_search->text(), _combo_search->currentIndex(), index, _wmo_maps_search->isChecked());
                          });
 
+        QObject::connect(_wmo_maps_search, &QCheckBox::stateChanged, [this, _line_edit_search, _combo_search, _combo_exp_search](bool b)
+                         {
+                             applyFilterSearch(_line_edit_search->text(), _combo_search->currentIndex(), _combo_exp_search->currentIndex(), b);
+                         });
 
         QFormLayout* _group_layout = new QFormLayout();
         _group_layout->addRow(tr("Name : "), _line_edit_search);
         _group_layout->addRow(tr("Type : "), _combo_search);
         _group_layout->addRow(tr("Expansion : "), _combo_exp_search);
+        _group_layout->addRow( _wmo_maps_search);
         _group_search->setLayout(_group_layout);
 
         _first_tab_layout->addWidget(_group_search);
-        _first_tab_layout->addSpacing(12);
+        _first_tab_layout->addSpacing(5);
         _first_tab_layout->addWidget(_continents_table);
+        _first_tab_layout->addWidget(add_btn);
 
         entry_points_tabs->addTab(_first_tab, tr("Maps"));
     }
@@ -367,18 +413,21 @@ namespace Noggit::Ui::Windows
 
     QObject::connect(_minimap, &minimap_widget::map_clicked, [this](::glm::vec3 const& pos)
                      {
-                       check_uid_then_enter_map(pos, math::degrees(30.f), math::degrees(90.f));
+                        if (_world->mapIndex.hasAGlobalWMO()) // skip uid check
+                            enterMapAt(pos, math::degrees(30.f), math::degrees(90.f), uid_fix_mode::none, false);
+                        else
+                            check_uid_then_enter_map(pos, math::degrees(30.f), math::degrees(90.f));
                      }
     );
 
-    auto right_side = new QTabWidget(this);
+    _right_side = new QTabWidget(this);
 
     auto minimap_holder = new QScrollArea(this);
     minimap_holder->setWidgetResizable(true);
     minimap_holder->setAlignment(Qt::AlignCenter);
     minimap_holder->setWidget(_minimap);
 
-    right_side->addTab(minimap_holder, "Enter map");
+    _right_side->addTab(minimap_holder, "Enter map");
     minimap_holder->setAccessibleName("main_menu_minimap_holder");
 
     _map_creation_wizard = new Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard(_project, this);
@@ -390,9 +439,16 @@ namespace Noggit::Ui::Windows
                                      }
     );
 
-    right_side->addTab(_map_creation_wizard, "Edit map");
+    _right_side->addTab(_map_creation_wizard, "Edit map");
 
-    layout->addWidget(right_side);
+    layout->addWidget(_right_side);
+
+    connect(add_btn, &QPushButton::clicked
+        , [&]()
+        {
+            _right_side->setCurrentIndex(1);
+            _map_creation_wizard->addNewMap();
+        });
 
     //setCentralWidget (_stack_widget);
 
@@ -428,14 +484,14 @@ namespace Noggit::Ui::Windows
     emit exitPromptOpened();
 
     QMessageBox prompt;
+    prompt.setModal(true);
     prompt.setIcon(QMessageBox::Warning);
-    prompt.setWindowFlags(Qt::WindowStaysOnTopHint);
     prompt.setText("Exit?");
     prompt.setInformativeText("Any unsaved changes will be lost.");
     prompt.addButton("Exit", QMessageBox::DestructiveRole);
     prompt.addButton("Return to menu", QMessageBox::AcceptRole);
     prompt.setDefaultButton(prompt.addButton("Cancel", QMessageBox::RejectRole));
-    prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
 
     prompt.exec();
 

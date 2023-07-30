@@ -47,20 +47,64 @@ struct SkyFloatParam
   int time;
 };
 
+class SkyParam
+{
+public:
+    std::optional<ModelInstance> skybox;
+    int Id;
+
+    SkyParam() = default;
+    explicit SkyParam(int paramId, Noggit::NoggitRenderContext context);
+
+    std::vector<SkyColor> colorRows[36];
+    std::vector<SkyFloatParam> floatParams[6];
+    int mmin[36];
+    int mmin_float[6];
+
+    bool highlight_sky() const { return _highlight_sky; }
+    float river_shallow_alpha() const { return _river_shallow_alpha; }
+    float river_deep_alpha() const { return _river_deep_alpha; }
+    float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
+    float ocean_deep_alpha() const { return _ocean_deep_alpha; }
+    float glow() const { return _glow; }
+
+    void set_glow(float glow) { _glow = glow; }
+    void set_highlight_sky(bool state) { _highlight_sky = state; }
+    void set_river_shallow_alpha(float alpha) { _river_shallow_alpha = alpha; }
+    void set_river_deep_alpha(float alpha) { _river_deep_alpha = alpha; }
+    void set_ocean_shallow_alpha(float alpha) { _ocean_shallow_alpha = alpha; }
+    void set_ocean_deep_alpha(float alpha) { _ocean_deep_alpha = alpha; }
+
+private:
+    bool _highlight_sky;
+    float _river_shallow_alpha;
+    float _river_deep_alpha;
+    float _ocean_shallow_alpha;
+    float _ocean_deep_alpha;
+
+    float _glow;
+
+    Noggit::NoggitRenderContext _context;
+};
+
 class Sky 
 {
 public:
   std::optional<ModelInstance> skybox;
 
+  int Id;
   glm::vec3 pos;
   float r1, r2;
 
   explicit Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context);
 
-  std::vector<SkyColor> colorRows[36];
-  std::vector<SkyFloatParam> floatParams[6];
-  int mmin[36];
-  int mmin_float[6];
+  SkyParam* skyParams[8];
+  int curr_sky_param = 0;
+
+  // std::vector<SkyColor> colorRows[36];
+  // std::vector<SkyFloatParam> floatParams[6];
+  // int mmin[36];
+  // int mmin_float[6];
 
   char name[32];
 
@@ -70,6 +114,8 @@ public:
   float weight;
   bool global;
 
+  bool is_new_record = false;
+
   bool operator<(const Sky& s) const
   {
     if (global) return false;
@@ -77,20 +123,31 @@ public:
     else return r2 < s.r2;
   }
 
-  float river_shallow_alpha() const { return _river_shallow_alpha; }
-  float river_deep_alpha() const { return _river_deep_alpha; }
-  float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
-  float ocean_deep_alpha() const { return _ocean_deep_alpha; }
-  float glow() const { return _glow; }
+  // bool highlight_sky() const { return _highlight_sky; }
+  // float river_shallow_alpha() const { return _river_shallow_alpha; }
+  // float river_deep_alpha() const { return _river_deep_alpha; }
+  // float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
+  // float ocean_deep_alpha() const { return _ocean_deep_alpha; }
+  // float glow() const { return _glow; }
   bool selected() const { return _selected; }
+  // 
+  // void set_glow(float glow) { _glow = glow; }
+  // void set_highlight_sky(bool state) { _highlight_sky = state; }
+  // void set_river_shallow_alpha(float alpha) { _river_shallow_alpha = alpha; }
+  // void set_river_deep_alpha(float alpha) { _river_deep_alpha = alpha; }
+  // void set_ocean_shallow_alpha(float alpha) { _ocean_shallow_alpha = alpha; }
+  // void set_ocean_deep_alpha(float alpha) { _ocean_deep_alpha = alpha; }
+
+  void save_to_dbc();
 
 private:
-  float _river_shallow_alpha;
-  float _river_deep_alpha;
-  float _ocean_shallow_alpha;
-  float _ocean_deep_alpha;
+  // bool _highlight_sky;
+  // float _river_shallow_alpha;
+  // float _river_deep_alpha;
+  // float _ocean_shallow_alpha;
+  // float _ocean_deep_alpha;
 
-  float _glow;
+  // float _glow;
   bool _selected;
 
   Noggit::NoggitRenderContext _context;
@@ -125,9 +182,22 @@ enum SkyFloatParamsNames
   FOG_MULTIPLIER,
   CELESTIAL_FLOW,
   CLOUD_DENSITY,
-  UNK_1,
-  UNK_2,
+  UNK_FLOAT_PARAM_1,
+  UNK_FLOAT_PARAM_2,
   NUM_SkyFloatParamsNames
+};
+
+enum SkyParamsNames
+{
+    CLEAR,
+    CLEAR_WATER,
+    STORM,
+    STORM_WATER,
+    DEATH,
+    UNK_PARAM_1,
+    UNK_PARAM_2,
+    UNK_PARAM_3,
+    NUM_SkyParamsNames
 };
 
 class Skies 
@@ -157,6 +227,11 @@ public:
   explicit Skies(unsigned int mapid, Noggit::NoggitRenderContext context);
 
   Sky* findSkyWeights(glm::vec3 pos);
+
+  Sky* findClosestSkyByWeight();
+  Sky* findClosestSkyByDistance(glm::vec3 pos);
+
+  void setCurrentParam(int param_id);
   void update_sky_colors(glm::vec3 pos, int time);
 
   bool draw ( glm::mat4x4 const& model_view

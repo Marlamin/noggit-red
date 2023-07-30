@@ -112,9 +112,17 @@ namespace Noggit
       _speed_slider->setSingleStep (1);
       _speed_slider->setValue(2);
 
+      _snap_m2_objects_chkbox = new QCheckBox("Snap M2 objects", this);
+      _snap_m2_objects_chkbox->setChecked(true);
+
+      _snap_wmo_objects_chkbox = new QCheckBox("Snap WMO objects", this);
+      _snap_wmo_objects_chkbox->setChecked(true);
+
       settings_layout->addWidget(_radius_slider);
       settings_layout->addWidget(_inner_radius_slider);
       settings_layout->addWidget(_speed_slider);
+      settings_layout->addWidget(_snap_m2_objects_chkbox);
+      settings_layout->addWidget(_snap_wmo_objects_chkbox);
 
       layout->addWidget(settings_group);
 
@@ -240,14 +248,28 @@ namespace Noggit
       {
         if (_image_mask_group->isEnabled())
         {
+          // store the ground height diff at center of all objects hit before editing it
+          std::vector<std::pair<SceneObject*, float>> objects_ground_distance = world->getObjectsGroundDistance(pos, radius
+              , _snap_wmo_objects_chkbox->isChecked(), _snap_m2_objects_chkbox->isChecked());
+
           world->stamp(pos, dt * _speed_slider->value(), &_mask_image, radius,
                        _inner_radius_slider->value(),  _edit_type, _image_mask_group->getBrushMode());
+
+          // re apply the ground height diff to the objects
+          for (auto pair : objects_ground_distance)
+          {
+              auto obj = pair.first;
+              auto new_ground_height = world->get_ground_height(obj->pos).y;
+              world->set_model_pos(obj, glm::vec3(obj->pos.x, new_ground_height + pair.second, obj->pos.z));
+          }
         }
         else
         {
           world->changeTerrain(pos, dt * _speed_slider->value(), radius, _edit_type, _inner_radius_slider->value());
-        }
 
+          world->changeObjectsWithTerrain(pos, dt * _speed_slider->value(), radius, _edit_type, _inner_radius_slider->value()
+              , _snap_wmo_objects_chkbox->isChecked(), _snap_m2_objects_chkbox->isChecked());
+        }
       }
       else
       {

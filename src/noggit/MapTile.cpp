@@ -20,7 +20,7 @@
 #include <external/tracy/Tracy.hpp>
 #include <util/CurrentFunction.hpp>
 
-
+#include <noggit/World.inl>
 #include <QtCore/QSettings>
 
 #include <cassert>
@@ -42,6 +42,7 @@ MapTile::MapTile( int pX
                 , World* world
                 , Noggit::NoggitRenderContext context
                 , tile_mode mode
+                , bool pLoadTextures
                 )
   : AsyncObject(pFilename)
   , _renderer(this)
@@ -55,6 +56,7 @@ MapTile::MapTile( int pX
   , _tile_is_being_reloaded(reloading_tile)
   , mBigAlpha(pBigAlpha)
   , _load_models(pLoadModels)
+  , _load_textures(pLoadTextures)
   , _world(world)
   , _context(context)
   , _chunk_update_flags(ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
@@ -162,24 +164,25 @@ void MapTile::finishLoading()
 
   // - MTEX ----------------------------------------------
 
-  theFile.seek(Header.mtex + 0x14);
-  theFile.read(&fourcc, 4);
-  theFile.read(&size, 4);
-
-  assert(fourcc == 'MTEX');
-
+  if (_load_textures)
   {
-    char const* lCurPos = reinterpret_cast<char const*>(theFile.getPointer());
-    char const* lEnd = lCurPos + size;
+    theFile.seek(Header.mtex + 0x14);
+    theFile.read(&fourcc, 4);
+    theFile.read(&size, 4);
 
-    while (lCurPos < lEnd)
+    assert(fourcc == 'MTEX');
+
     {
-      std::string fileName = BlizzardArchive::ClientData::normalizeFilenameInternal(std::string(lCurPos));
-      mTextureFilenames.push_back(fileName);
-      lCurPos += strlen(lCurPos) + 1;
+      char const* lCurPos = reinterpret_cast<char const*>(theFile.getPointer());
+      char const* lEnd = lCurPos + size;
+
+      while (lCurPos < lEnd)
+      {
+        mTextureFilenames.push_back(BlizzardArchive::ClientData::normalizeFilenameInternal(std::string(lCurPos)));
+        lCurPos += strlen(lCurPos) + 1;
+      }
     }
   }
-
   if (_load_models)
   {
     // - MMDX ----------------------------------------------
@@ -361,7 +364,7 @@ void MapTile::finishLoading()
     unsigned x = nextChunk / 16;
     unsigned z = nextChunk % 16;
 
-    mChunks[x][z] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha, _mode, _context);
+    mChunks[x][z] = std::make_unique<MapChunk> (this, &theFile, mBigAlpha, _mode, _context, false, 0, _load_textures);
 
     auto& chunk = mChunks[x][z];
     _renderer.initChunkData(chunk.get());
@@ -664,10 +667,10 @@ void MapTile::saveTile(World* world)
   // MTEX data
   for (auto const& texture : lTextures)
   {
-    lADTFile.Insert(lCurrentPosition, texture.first.size() + 1, texture.first.c_str());
+    lADTFile.Insert(lCurrentPosition, static_cast<unsigned long>(texture.first.size() + 1), texture.first.c_str());
 
-    lCurrentPosition += texture.first.size() + 1;
-    lADTFile.GetPointer<sChunkHeader>(lMTEX_Position)->mSize += texture.first.size() + 1;
+    lCurrentPosition += static_cast<int>(texture.first.size() + 1);
+    lADTFile.GetPointer<sChunkHeader>(lMTEX_Position)->mSize += static_cast<int>(texture.first.size() + 1);
     LogDebug << "Added texture \"" << texture.first << "\"." << std::endl;
   }
 
@@ -683,15 +686,15 @@ void MapTile::saveTile(World* world)
   for (auto it = lModels.begin(); it != lModels.end(); ++it)
   {
     it->second.filenamePosition = lADTFile.GetPointer<sChunkHeader>(lMMDX_Position)->mSize;
-    lADTFile.Insert(lCurrentPosition, it->first.size() + 1, misc::normalize_adt_filename(it->first).c_str());
-    lCurrentPosition += it->first.size() + 1;
-    lADTFile.GetPointer<sChunkHeader>(lMMDX_Position)->mSize += it->first.size() + 1;
+    lADTFile.Insert(lCurrentPosition, static_cast<unsigned long>(it->first.size() + 1), misc::normalize_adt_filename(it->first).c_str());
+    lCurrentPosition += static_cast<int>(it->first.size() + 1);
+    lADTFile.GetPointer<sChunkHeader>(lMMDX_Position)->mSize += static_cast<int>(it->first.size() + 1);
     LogDebug << "Added model \"" << it->first << "\"." << std::endl;
   }
 
   // MMID
   // M2 model names
-  int lMMID_Size = 4 * lModels.size();
+  int lMMID_Size = static_cast<int>(4 * lModels.size());
   lADTFile.Extend(8 + lMMID_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MMID', lMMID_Size);
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mmid = lCurrentPosition - 0x14;
@@ -720,14 +723,14 @@ void MapTile::saveTile(World* world)
   for (auto& object : lObjects)
   {
     object.second.filenamePosition = lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize;
-    lADTFile.Insert(lCurrentPosition, object.first.size() + 1, misc::normalize_adt_filename(object.first).c_str());
-    lCurrentPosition += object.first.size() + 1;
-    lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize += object.first.size() + 1;
+    lADTFile.Insert(lCurrentPosition, static_cast<unsigned long>(object.first.size() + 1), misc::normalize_adt_filename(object.first).c_str());
+    lCurrentPosition += static_cast<int>(object.first.size() + 1);
+    lADTFile.GetPointer<sChunkHeader>(lMWMO_Position)->mSize += static_cast<int>(object.first.size() + 1);
     LogDebug << "Added object \"" << object.first << "\"." << std::endl;
   }
 
   // MWID
-  int lMWID_Size = 4 * lObjects.size();
+  int lMWID_Size = static_cast<int>(4 * lObjects.size());
   lADTFile.Extend(8 + lMWID_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MWID', lMWID_Size);
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mwid = lCurrentPosition - 0x14;
@@ -742,7 +745,7 @@ void MapTile::saveTile(World* world)
   lCurrentPosition += 8 + lMWID_Size;
 
   // MDDF
-  int lMDDF_Size = 0x24 * lModelInstances.size();
+  int lMDDF_Size = static_cast<int>(0x24 * lModelInstances.size());
   lADTFile.Extend(8 + lMDDF_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MDDF', lMDDF_Size);
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mddf = lCurrentPosition - 0x14;
@@ -786,7 +789,7 @@ void MapTile::saveTile(World* world)
   LogDebug << "Added " << lID << " doodads to MDDF" << std::endl;
 
   // MODF
-  int lMODF_Size = 0x40 * lObjectInstances.size();
+  int lMODF_Size = static_cast<int>(0x40 * lObjectInstances.size());
   lADTFile.Extend(8 + lMODF_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MODF', lMODF_Size);
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->modf = lCurrentPosition - 0x14;
@@ -849,8 +852,8 @@ void MapTile::saveTile(World* world)
   if (mFlags & 1)
   {
     size_t chunkSize = sizeof(int16_t) * 9 * 2;
-    lADTFile.Extend(8 + chunkSize);
-    SetChunkHeader(lADTFile, lCurrentPosition, 'MFBO', chunkSize);
+    lADTFile.Extend(static_cast<long>(8 + chunkSize));
+    SetChunkHeader(lADTFile, lCurrentPosition, 'MFBO', static_cast<int>(chunkSize));
     lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mfbo = lCurrentPosition - 0x14;
 
     int16_t *lMFBO_Data = lADTFile.GetPointer<int16_t>(lCurrentPosition + 8);
@@ -863,7 +866,7 @@ void MapTile::saveTile(World* world)
     for (int i = 0; i < 9; ++i)
       lMFBO_Data[lID++] = (int16_t)mMinimumValues[i].y;
 
-    lCurrentPosition += 8 + chunkSize;
+    lCurrentPosition += static_cast<int>(8 + chunkSize);
   }
 
   //! \todo Do not do bullshit here in MTFX.
@@ -887,7 +890,7 @@ void MapTile::saveTile(World* world)
   }
 #endif
 
-  lADTFile.Extend(lCurrentPosition - lADTFile.data.size()); // cleaning unused nulls at the end of file
+  lADTFile.Extend(static_cast<long>(lCurrentPosition - lADTFile.data.size())); // cleaning unused nulls at the end of file
 
 
   {
@@ -1051,7 +1054,7 @@ void MapTile::initEmptyChunks()
 
 QImage MapTile::getHeightmapImage(float min_height, float max_height)
 {
-  QImage image(257, 257, QImage::Format_RGBA64);
+    QImage image(257, 257, QImage::Format_Grayscale16);
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
@@ -1123,7 +1126,7 @@ QImage MapTile::getNormalmapImage()
 
 QImage MapTile::getAlphamapImage(unsigned layer)
 {
-  QImage image(1024, 1024, QImage::Format_RGBA8888);
+  QImage image(1024, 1024, QImage::Format_Grayscale8);
   image.fill(Qt::black);
 
   for (int i = 0; i < 16; ++i)
@@ -1156,7 +1159,7 @@ QImage MapTile::getAlphamapImage(unsigned layer)
 
 QImage MapTile::getAlphamapImage(std::string const& filename)
 {
-  QImage image(1024, 1024, QImage::Format_RGBA8888);
+  QImage image(1024, 1024, QImage::Format_Grayscale8);
   image.fill(Qt::black);
 
   for (int i = 0; i < 16; ++i)
@@ -1166,20 +1169,25 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
       MapChunk *chunk = getChunk(i, j);
 
       unsigned layer = 0;
+      bool chunk_has_texture = false;
 
       for (int k = 0; k < chunk->texture_set->num(); ++k)
       {
-        if (chunk->texture_set->filename(k) == filename)
-          layer = k;
+          if (chunk->texture_set->filename(k) == filename)
+          {
+            layer = k;
+            chunk_has_texture = true;
+          }
       }
 
-      if (!layer)
+      if (!chunk_has_texture)
       {
         for (int k = 0; k < 64; ++k)
         {
           for (int l = 0; l < 64; ++l)
           {
-            image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(255, 255, 255, 255));
+            // if texture is not in the chunk, set chunk to black
+            image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(0, 0, 0, 255));
           }
         }
       }
@@ -1188,14 +1196,31 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
         chunk->texture_set->apply_alpha_changes();
         auto alphamaps = chunk->texture_set->getAlphamaps();
 
-        auto alpha_layer = alphamaps->at(layer - 1).value();
-
         for (int k = 0; k < 64; ++k)
         {
           for (int l = 0; l < 64; ++l)
           {
-            int value = alpha_layer.getAlpha(64 * l + k);
-            image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
+            if (layer == 0) // titi test
+            {
+              // WoW calculates layer 0 as 255 - sum(Layer[1]...Layer[3])
+              int layers_sum = 0;
+              if (alphamaps->at(0).has_value())
+                  layers_sum += alphamaps->at(0).value().getAlpha(64 * l + k);
+              if (alphamaps->at(1).has_value())
+                  layers_sum += alphamaps->at(1).value().getAlpha(64 * l + k);
+              if (alphamaps->at(2).has_value())
+                  layers_sum += alphamaps->at(2).value().getAlpha(64 * l + k);
+              
+              int value = std::clamp((255 - layers_sum), 0, 255);
+              image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
+            }
+            else // layer 1-3
+            {
+              auto alpha_layer = alphamaps->at(layer - 1).value();
+
+              int value = alpha_layer.getAlpha(64 * l + k);
+              image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
+            }
           }
         }
       }
@@ -1205,10 +1230,11 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
   return std::move(image);
 }
 
-void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
+void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges) // image
 {
-  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
+  auto image = baseimage.convertToFormat(QImage::Format_Grayscale16);
 
+  unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
   for (int k = 0; k < 16; ++k)
   {
     for (int l = 0; l < 16; ++l)
@@ -1230,6 +1256,11 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
 
           bool const erp = plain % DSUM / SUM;
           unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+
+          if (tiledEdges && ((y == 16 && l == 15) || (x == 16 && k == 15)))
+          {
+              continue;
+          }
 
           switch (image.depth())
           {
@@ -1289,10 +1320,72 @@ void MapTile::setHeightmapImage(QImage const& image, float multiplier, int mode)
       registerChunkUpdate(ChunkUpdateFlags::VERTEX);
     }
   }
+
+  if (tiledEdges) // resize + fit
+  {
+    if (index.z > 0)
+    {
+      getWorld()->for_tile_at_force(TileIndex{ index.x, index.z-1}
+        , [&](MapTile* tile)
+        {
+          for (int chunk_x = 0; chunk_x < 16; ++chunk_x)
+          {
+            MapChunk* targetChunk = tile->getChunk(chunk_x, 15);
+            MapChunk* sourceChunk = this->getChunk(chunk_x, 0);
+            targetChunk->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+            for (int vert_x = 0; vert_x < 9; ++vert_x)
+            {
+                int target_vert = 136 + vert_x;
+                int source_vert = vert_x;
+                targetChunk->getHeightmap()[target_vert].y = sourceChunk->getHeightmap()[source_vert].y;
+            }
+          }
+          tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+        }
+      );
+    }
+
+    if (index.x > 0)
+    {
+      getWorld()->for_tile_at_force(TileIndex{ index.x-1, index.z}
+        , [&](MapTile* tile)
+        {
+          for (int chunk_y = 0; chunk_y < 16; ++chunk_y)
+          {
+            MapChunk* targetChunk = tile->getChunk(15, chunk_y);
+            MapChunk* sourceChunk = this->getChunk(0, chunk_y);
+            targetChunk->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+            for (int vert_y = 0; vert_y < 9; ++vert_y)
+            {
+                int target_vert = vert_y * 17 + 8;
+                int source_vert = vert_y * 17;
+                targetChunk->getHeightmap()[target_vert].y = sourceChunk->getHeightmap()[source_vert].y;
+            }
+          }
+          tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+        }
+      );
+    }
+
+    if (index.x > 0 && index.z > 0)
+    {
+      getWorld()->for_tile_at_force(TileIndex { index.x-1, index.z-1 }
+        , [&] (MapTile* tile)
+        {
+          MapChunk* targetChunk = tile->getChunk(15, 15);
+          targetChunk->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+          tile->getChunk(15,15)->getHeightmap()[144].y = this->getChunk(0,0)->getHeightmap()[0].y;
+          tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+        }
+      );
+    }
+  }
 }
 
-void MapTile::setAlphaImage(QImage const& image, unsigned layer)
+void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer)
 {
+  auto image = baseimage.convertToFormat(QImage::Format_Grayscale8);
+
   for (int k = 0; k < 16; ++k)
   {
     for (int l = 0; l < 16; ++l)
@@ -1301,6 +1394,8 @@ void MapTile::setAlphaImage(QImage const& image, unsigned layer)
 
       if (layer >= chunk->texture_set->num())
         continue;
+
+      chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
 
       chunk->texture_set->create_temporary_alphamaps_if_needed();
       auto& temp_alphamaps = chunk->texture_set->getTempAlphamaps()->value();
@@ -1358,8 +1453,10 @@ QImage MapTile::getVertexColorsImage()
   return std::move(image);
 }
 
-void MapTile::setVertexColorImage(QImage const& image, int mode)
+void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledEdges)
 {
+  QImage image = baseimage.convertToFormat(QImage::Format_RGBA8888);
+
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
   for (int k = 0; k < 16; ++k)
@@ -1367,6 +1464,8 @@ void MapTile::setVertexColorImage(QImage const& image, int mode)
     for (int l = 0; l < 16; ++l)
     {
       MapChunk* chunk = getChunk(k, l);
+
+      chunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
 
       glm::vec3* colors = chunk->getVertexColors();
 
@@ -1381,6 +1480,11 @@ void MapTile::setVertexColorImage(QImage const& image, int mode)
 
           bool const erp = plain % DSUM / SUM;
           unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
+
+          if (tiledEdges && ((y == 16 && l == 15) || (x == 16 && k == 15)))
+          {
+              continue;
+          }
 
           switch (mode)
           {
@@ -1421,14 +1525,71 @@ void MapTile::setVertexColorImage(QImage const& image, int mode)
           }
 
         }
-
       chunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
     }
   }
+
+  if (tiledEdges)
+  {
+    if (index.z > 0)
+    {
+      getWorld()->for_tile_at_force(TileIndex{ index.x, index.z-1}
+        , [&](MapTile* tile)
+        {
+          for (int chunk_x = 0; chunk_x < 16; ++chunk_x)
+          {
+            MapChunk* targetChunk = tile->getChunk(chunk_x, 15);
+            MapChunk* sourceChunk = this->getChunk(chunk_x, 0);
+            targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+            for (int vert_x = 0; vert_x < 9; ++vert_x)
+            {
+                int target_vert = 136 + vert_x;
+                int source_vert = vert_x;
+
+                targetChunk->getVertexColors()[target_vert] = sourceChunk->getVertexColors()[source_vert];
+            }
+          }
+          tile->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+        }
+      );
+    }
+
+    if (index.x > 0)
+    {
+      getWorld()->for_tile_at_force(TileIndex{ index.x-1, index.z}
+        , [&](MapTile* tile)
+        {
+          for (int chunk_y = 0; chunk_y < 16; ++chunk_y)
+          {
+            MapChunk* targetChunk = tile->getChunk(15, chunk_y);
+            MapChunk* sourceChunk = this->getChunk(0, chunk_y);
+            targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+            for (int vert_y = 0; vert_y < 9; ++vert_y)
+            {
+                int target_vert = vert_y * 17 + 8;
+                int source_vert = vert_y * 17;
+                targetChunk->getVertexColors()[target_vert] = sourceChunk->getVertexColors()[source_vert];
+            }
+          }
+          tile->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+        }
+      );
+    }
+
+    if (index.x > 0 && index.z > 0)
+    {
+      getWorld()->for_tile_at_force(TileIndex { index.x-1, index.z-1 }
+        , [&] (MapTile* tile)
+        {
+          MapChunk* targetChunk = tile->getChunk(15, 15);
+          targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+          tile->getChunk(15,15)->getVertexColors()[144] = this->getChunk(0,0)->getVertexColors()[0];
+          tile->registerChunkUpdate(ChunkUpdateFlags::MCCV);
+        }
+      );
+    }
+  }
 }
-
-
-
 
 void MapTile::recalcExtents()
 {

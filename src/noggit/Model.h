@@ -139,7 +139,7 @@ public:
 
   Model(const std::string& name, Noggit::NoggitRenderContext context );
 
-  std::vector<float> intersect (glm::mat4x4 const& model_view, math::ray const&, int animtime);
+  std::vector<std::pair<float, std::tuple<int, int, int>>> intersect (glm::mat4x4 const& model_view, math::ray const&, int animtime);
 
   void updateEmitters(float dt);
 
@@ -154,6 +154,9 @@ public:
 
   [[nodiscard]]
   bool use_fake_geometry() const { return !!_fake_geometry; }
+
+  [[nodiscard]]
+  bool animated_mesh() const { return (animGeometry || animBones); }
 
   [[nodiscard]]
   bool is_required_when_saving() const override
@@ -191,6 +194,17 @@ public:
   float trans;
   bool animcalc;
 
+  // ===============================
+  // Geometry
+  // ===============================
+
+  std::vector<ModelVertex> _vertices;
+  std::vector<ModelVertex> _current_vertices;
+
+  std::vector<uint16_t> _indices;
+
+  std::optional<FakeGeometry> _fake_geometry;
+
 private:
   bool _per_instance_animation;
   int _current_anim_seq;
@@ -209,16 +223,7 @@ private:
   void lightsOn(OpenGL::light lbase);
   void lightsOff(OpenGL::light lbase);
 
-  // ===============================
-  // Geometry
-  // ===============================
 
-  std::vector<ModelVertex> _vertices;
-  std::vector<ModelVertex> _current_vertices;
-
-  std::vector<uint16_t> _indices;
-
-  std::optional<FakeGeometry> _fake_geometry;
 
   // ===============================
   // Animation

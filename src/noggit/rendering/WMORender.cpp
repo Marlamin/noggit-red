@@ -36,6 +36,7 @@ void WMORender::draw(OpenGL::Scoped::use_program& wmo_shader
     , int animtime
     , bool world_has_skies
     , display_mode display
+    , bool interior_only
 )
 {
 
@@ -49,7 +50,10 @@ void WMORender::draw(OpenGL::Scoped::use_program& wmo_shader
 
   for (auto& group : _wmo->groups)
   {
-
+      if (interior_only && !group.is_indoor())
+      {
+          continue;
+      }
 
     /*
     if (!group.is_visible(transform_matrix, frustum, cull_distance, camera, display))

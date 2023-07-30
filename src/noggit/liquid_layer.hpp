@@ -104,4 +104,6 @@ private:
 private:
   glm::vec3 pos;
   ChunkWater* _chunk;
+
+  friend class MapView;
 };

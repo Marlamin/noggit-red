@@ -108,8 +108,9 @@ AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
   );
 
   connect(ui->viewport, &ModelViewer::model_set
-      ,[=] (const std::string& filename)
+      , [=](const std::string& filename)
       {
+        viewport_overlay_ui->doodadSetSelector->clear();
         viewport_overlay_ui->doodadSetSelector->insertItems(0, ui->viewport->getDoodadSetNames(filename));
 
         bool is_wmo = QString::fromStdString(filename).endsWith(".wmo");

@@ -64,6 +64,7 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
                        , bool world_has_skies
                        , display_mode display
                        , bool no_cull
+                       , bool draw_exterior
                        )
 {
   if (!wmo->finishedLoading() || wmo->loading_failed())
@@ -118,6 +119,7 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
               , animtime
               , world_has_skies
               , display
+              , !draw_exterior
               );
   }
 
@@ -138,7 +140,7 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
   }
 }
 
-void WMOInstance::intersect (math::ray const& ray, selection_result* results)
+void WMOInstance::intersect (math::ray const& ray, selection_result* results, bool do_exterior)
 {
   if (!ray.intersect_bounds (extents[0], extents[1]))
   {
@@ -147,7 +149,7 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results)
 
   math::ray subray(_transform_mat_inverted, ray);
 
-  for (auto&& result : wmo->intersect(subray))
+  for (auto&& result : wmo->intersect(subray, do_exterior))
   {
     results->emplace_back (result, this);
   }
@@ -164,11 +166,17 @@ void WMOInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   std::stringstream select_info;
 
   select_info << "<b>filename: </b>" << wmo->file_key().filepath()
-    << "<br><b>FileDataID: </b>" << wmo->file_key().fileDataID()
+    // << "<br><b>FileDataID: </b>" << wmo->file_key().fileDataID() not in wrath
     << "<br><b>unique ID: </b>" << uid
     << "<br><b>position X/Y/Z: </b>{" << pos.x << ", " << pos.y << ", " << pos.z << "}"
     << "<br><b>rotation X/Y/Z: </b>{" << dir.x << ", " << dir.y << ", " << dir.z << "}"
+    << "<br><b>WMO Id: </b>" << wmo->WmoId
     << "<br><b>doodad set: </b>" << doodadset()
+    << "<br><b>name set: </b>" << mNameset
+
+    << "<br><b>server position X/Y/Z: </b>{" << (ZEROPOINT - pos.z) << ", " << (ZEROPOINT - pos.x) << ", " << pos.y << "}"
+    << "<br><b>server orientation:  </b>" << fabs(2 * glm::pi<float>() - glm::pi<float>() / 180.0 * (float(dir.y) < 0 ? fabs(float(dir.y)) + 180.0 : fabs(float(dir.y) - 180.0)))
+
     << "<br><b>textures used: </b>" << wmo->textures.size()
     << "<span>";
 
@@ -238,13 +246,14 @@ void WMOInstance::recalcExtents()
 
     points.insert(points.end(), adjustedGroupPoints.begin(), adjustedGroupPoints.end());
 
-    if (group.has_skybox())
+    if (group.has_skybox() || _update_group_extents)
     {
       math::aabb const group_aabb(adjustedGroupPoints);
 
       group_extents[i] = {group_aabb.min, group_aabb.max};
     }
   }
+  _update_group_extents = false;
 
   math::aabb const wmo_aabb(points);
 
@@ -252,6 +261,10 @@ void WMOInstance::recalcExtents()
   extents[1] = wmo_aabb.max;
 }
 
+void WMOInstance::change_nameset(uint16_t name_set)
+{
+    mNameset = name_set;
+}
 
 void WMOInstance::change_doodadset(uint16_t doodad_set)
 {

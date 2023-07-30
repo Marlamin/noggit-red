@@ -64,7 +64,7 @@ private:
 
 public:
   MapChunk(MapTile* mt, BlizzardArchive::ClientFile* f, bool bigAlpha, tile_mode mode, Noggit::NoggitRenderContext context
-           , bool init_empty = false, int chunk_idx = 0);
+           , bool init_empty = false, int chunk_idx = 0, bool load_textures = true);
 
   auto getHoleMask(void) const -> unsigned { return static_cast<unsigned>(holes); }
   MapTile *mt;
@@ -160,7 +160,7 @@ public:
   bool replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture, bool entire_chunk = false);
   bool canPaintTexture(scoped_blp_texture_reference texture);
   int addTexture(scoped_blp_texture_reference texture);
-  void switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
+  bool switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
   void eraseTextures();
   void eraseTexture(scoped_blp_texture_reference const& tex);
   void change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add);

@@ -61,7 +61,7 @@ void WMO::finishLoading ()
   assert (fourcc == 'MOHD');
 
   CArgb ambient_color;
-  unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets, nX;
+  unsigned int nTextures, nGroups, nP, nLights, nModels, nDoodads, nDoodadSets;
   // header
   f.read (&nTextures, 4);
   f.read (&nGroups, 4);
@@ -71,7 +71,7 @@ void WMO::finishLoading ()
   f.read (&nDoodads, 4);
   f.read (&nDoodadSets, 4);
   f.read (&ambient_color, 4);
-  f.read (&nX, 4);
+  f.read (&WmoId, 4);
   f.read (ff, 12);
   extents[0] = ::glm::vec3 (ff[0], ff[1], ff[2]);
   f.read (ff, 12);
@@ -105,7 +105,9 @@ void WMO::finishLoading ()
   std::size_t const num_materials (size / 0x40);
   materials.resize (num_materials);
 
-  std::map<std::uint32_t, std::size_t> texture_offset_to_inmem_index;
+  // note: used to map to size_t, but our other values don't support that.
+  //std::map<std::uint32_t, std::size_t> texture_offset_to_inmem_index;
+  std::map<std::uint32_t, std::uint32_t> texture_offset_to_inmem_index;
 
   auto load_texture
     ( [&] (std::uint32_t ofs)
@@ -114,7 +116,7 @@ void WMO::finishLoading ()
           (texbuf[ofs] ? &texbuf[ofs] : "textures/shanecube.blp");
 
         auto const mapping
-          (texture_offset_to_inmem_index.emplace(ofs, textures.size()));
+          (texture_offset_to_inmem_index.emplace(ofs, static_cast<std::uint32_t>(textures.size())));
 
         if (mapping.second)
         {
@@ -157,7 +159,7 @@ void WMO::finishLoading ()
   assert (fourcc == 'MOGI');
 
   groups.reserve(nGroups);
-  for (size_t i (0); i < nGroups; ++i) {
+  for (int i (0); i < nGroups; ++i) {
     groups.emplace_back (this, &f, i, groupnames);
   }
 
@@ -353,7 +355,7 @@ void WMO::waitForChildrenLoaded()
   }
 }
 
-std::vector<float> WMO::intersect (math::ray const& ray) const
+std::vector<float> WMO::intersect (math::ray const& ray, bool do_exterior) const
 {
   std::vector<float> results;
 
@@ -364,7 +366,25 @@ std::vector<float> WMO::intersect (math::ray const& ray) const
 
   for (auto& group : groups)
   {
+    if (!do_exterior && !group.is_indoor())
+          continue;
+
     group.intersect (ray, &results);
+  }
+
+  if (!do_exterior && results.size())
+  {
+      // dirty way to find the furthest face and ignore invisible faces, cleaner way would be to do a direction check on faces
+      // float max = *std::max_element(std::begin(results), std::end(results));
+      // results.clear();
+      // results.push_back(max);
+
+      // other way, ignore the closest intersect, works well
+      if (results.size() > 1)
+      {
+        auto it = std::min_element(results.begin(), results.end());
+        results.erase(it);
+      }
   }
 
   return results;
@@ -574,7 +594,6 @@ void WMOGroup::load()
   f.read (&size, 4);
 
   assert (fourcc == 'MOPY');
-
   f.seekRelative (size);
 
   // - MOVI ----------------------------------------------
@@ -711,7 +730,7 @@ void WMOGroup::load()
     }
     else
     {
-      f.seekRelative (size);
+      f.seekRelative(size);
     }
 
   }
@@ -729,6 +748,10 @@ void WMOGroup::load()
     else
     {
       f.seekRelative (size);
+      // std::vector<uint16_t> bsp_indices;
+      // bsp_indices.resize(size / sizeof(uint16_t));
+      // f.read(bsp_indices.data(), size);
+      // _bsp_indices = bsp_indices;
     }
   }
   
@@ -826,7 +849,7 @@ void WMOGroup::load()
 
       lq = std::make_unique<wmo_liquid> ( &f
           , hlq
-          , wmo->materials[hlq.material_id]
+          // , wmo->materials[hlq.material_id] // some models have mat_id = -1, eg "world/wmo/dungeon/md_fishinghole/md_fishingholeice_001.wmo"
           , header.group_liquid
           , (bool)wmo->flags.use_liquid_type_dbc_id
           , (bool)header.flags.ocean
@@ -1084,6 +1107,8 @@ void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) con
   {
     for (size_t i (batch.index_start); i < batch.index_start + batch.index_count; i += 3)
     {
+      // TODO : only intersect visible triangles
+      // TODO : option to only check collision
       if ( auto&& distance
          = ray.intersect_triangle ( _vertices[_indices[i + 0]]
                                   , _vertices[_indices[i + 1]]

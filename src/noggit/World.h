@@ -100,9 +100,12 @@ public:
                              , bool draw_wmo
                              , bool draw_models
                              , bool draw_hidden_models
+                             , bool draw_wmo_exterior
                              );
 
   MapChunk* getChunkAt(glm::vec3 const& pos);
+
+  bool isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds, glm::mat4x4 obj_transform);
 
 protected:
   // Information about the currently selected model / WMO / triangle.
@@ -129,6 +132,7 @@ public:
   void remove_from_selection(std::uint32_t uid);
   void reset_selection();
   void delete_selected_models();
+  glm::vec3 get_ground_height(glm::vec3 pos);
   void range_add_to_selection(glm::vec3 const& pos, float radius, bool remove);
   Noggit::world_model_instances_storage& getModelInstanceStorage() { return _model_instance_storage; };
 
@@ -142,6 +146,7 @@ public:
   void snap_selected_models_to_the_ground();
   void scale_selected_models(float v, m2_scaling_type type);
   void move_selected_models(float dx, float dy, float dz);
+  void move_model(selection_type entry, float dx, float dy, float dz);
   void move_selected_models(glm::vec3 const& delta)
   {
     move_selected_models(delta.x, delta.y, delta.z);
@@ -151,6 +156,7 @@ public:
     return set_selected_models_pos({x,y,z}, change_height);
   }
   void set_selected_models_pos(glm::vec3 const& pos, bool change_height = true);
+  void set_model_pos(selection_type entry, glm::vec3 const& pos, bool change_height = true);
   void rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot);
   void rotate_selected_models_randomly(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
   void set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz);
@@ -191,6 +197,9 @@ public:
   template<typename Fun>
     void for_all_chunks_on_tile (glm::vec3 const& pos, Fun&&);
 
+    template<typename Fun>
+    void for_all_chunks_on_tile(MapTile* tile, Fun&& fun);
+
   template<typename Fun>
     void for_chunk_at(glm::vec3 const& pos, Fun&& fun);
   template<typename Fun>
@@ -199,11 +208,17 @@ public:
   template<typename Fun>
     void for_tile_at(const TileIndex& pos, Fun&&);
 
+  template<typename Fun>
+    void for_tile_at_force(const TileIndex& pos, Fun&&);
+
+  void changeObjectsWithTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius, bool iter_wmos_ = true, bool iter_m2s = true);
   void changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius);
+  std::vector<selected_object_type> getObjectsInRange(glm::vec3 const& pos, float radius, bool ignore_height = true, bool iter_wmos_ = true, bool iter_m2s = true);
   void changeShader(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode);
   void stampShader(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors);
   glm::vec3 pickShaderColor(glm::vec3 const& pos);
   void flattenTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode, const glm::vec3& origin, math::degrees angle, math::degrees orientation);
+  std::vector<std::pair<SceneObject*, float>> getObjectsGroundDistance(glm::vec3 const& pos, float radius, bool iter_wmos_, bool iter_m2s);
   void blurTerrain(glm::vec3 const& pos, float remain, float radius, int BrushType, flatten_mode const& mode);
   bool paintTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
   bool stampTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint);
@@ -216,6 +231,7 @@ public:
   void clear_shadows(glm::vec3 const& pos);
   void clearTextures(glm::vec3 const& pos);
   void swapTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex);
+  void swapTextureGlobal(scoped_blp_texture_reference tex);
   void removeTexture(glm::vec3 const& pos, scoped_blp_texture_reference tex);
   void removeTexDuplicateOnADT(glm::vec3 const& pos);
   void change_texture_flag(glm::vec3 const& pos, scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
@@ -235,14 +251,14 @@ public:
 
   void importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigned layer);
   void importADTAlphamap(glm::vec3 const& pos);
-  void importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode);
-  void importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode);
-  void importADTVertexColorMap(glm::vec3 const& pos, int mode);
-  void importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode);
+  void importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode, bool tiledEdges);
+  void importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode, bool tiledEdges);
+  void importADTVertexColorMap(glm::vec3 const& pos, int mode, bool tiledEdges);
+  void importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode, bool tiledEdges);
 
   void importAllADTsAlphamaps();
-  void importAllADTsHeightmaps(float multiplier, unsigned mode);
-  void importAllADTVertexColorMaps(unsigned mode);
+  void importAllADTsHeightmaps(float multiplier, unsigned mode, bool tiledEdges);
+  void importAllADTVertexColorMaps(unsigned mode, bool tiledEdges);
 
   void ensureAllTilesetsADT(glm::vec3 const& pos);
   void ensureAllTilesetsAllADTs();
@@ -300,6 +316,8 @@ public:
 
 	static bool IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
 
+    static bool IsWMOWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
+
   void clearHeight(glm::vec3 const& pos);
   void clearAllModelsOnADT(TileIndex const& tile);
 
@@ -355,6 +373,17 @@ public:
   void loadAllTiles();
   unsigned getNumLoadedTiles() const { return _n_loaded_tiles; };
   unsigned getNumRenderedTiles() const { return _n_rendered_tiles; };
+
+  void select_objects_in_area(
+      const std::array<glm::vec2, 2> selection_box, 
+      bool reset_selection,
+      glm::mat4x4 view,
+      glm::mat4x4 projection,
+      int viewport_width,
+      int viewport_height,
+      float user_depth,
+      glm::vec3 camera_position
+  );
 
 protected:
   void update_models_by_filename();

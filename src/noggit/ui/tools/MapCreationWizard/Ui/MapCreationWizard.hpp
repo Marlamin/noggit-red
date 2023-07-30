@@ -87,7 +87,7 @@ namespace Noggit
 
       void wheelEvent(QWheelEvent *event) override;
       void destroyFakeWorld() { if(_world) delete _world; _world = nullptr; _minimap_widget->world (nullptr); };
-
+      void addNewMap();
     signals:
       void map_dbc_updated();
 
@@ -96,6 +96,8 @@ namespace Noggit
       Noggit::Ui::minimap_widget* _minimap_widget;
       int _selected_map;
       QGroupBox* _map_settings;
+
+      QTabWidget* _tabs;
 
       // Map settings
       QLineEdit* _directory;
@@ -124,6 +126,13 @@ namespace Noggit
       QSpinBox* _raid_offset;
       QSpinBox* _max_players;
 
+      // map difficulty settings
+      QComboBox* _difficulty_type;
+      LocaleDBCEntry* _difficulty_req_message;
+      QSpinBox* _difficulty_raid_duration;
+      QSpinBox* _difficulty_max_players;
+      QLineEdit* _difficulty_string;
+
       World* _world = nullptr;
 
       bool _is_new_record = false;
@@ -131,12 +140,14 @@ namespace Noggit
 
       QMetaObject::Connection _connection;
 
+      std::string getDifficultyString();
+
       void selectMap(int map_id);
+      void selectMapDifficulty();
 
       void saveCurrentEntry();
       void discardChanges();
 
-      void addNewMap();
       void removeMap();
 
     };

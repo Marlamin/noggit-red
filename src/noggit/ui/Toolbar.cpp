@@ -25,7 +25,7 @@ namespace Noggit
       add_tool_icon(editing_mode::object, tr("Object Editor"), FontNoggit::TOOL_OBJECT_EDITOR);
       add_tool_icon(editing_mode::minimap, tr("Minimap Editor"), FontNoggit::TOOL_MINIMAP_EDITOR);
       add_tool_icon(editing_mode::stamp, tr("Stamp Mode"), FontNoggit::TOOL_STAMP);
-      add_tool_icon(editing_mode::light, tr("Light Editor"), FontNoggit::TOOL_STAMP);
+      add_tool_icon(editing_mode::light, tr("Light Editor"), FontNoggit::TOOL_LIGHT);
       add_tool_icon(editing_mode::scripting, tr("Scripting"), FontNoggit::INFO);
       add_tool_icon(editing_mode::chunk, tr("Chunk Manipulator"), FontNoggit::INFO);
     }

@@ -21,6 +21,12 @@ namespace misc
            point.x <= extents[1].x && point.z <= extents[1].z;
   }
 
+  bool pointInside(glm::vec2 point, std::array<glm::vec2, 2> const& extents)
+  {
+    return point.x >= extents[0].x && point.y >= extents[0].y &&
+           point.x <= extents[1].x && point.y <= extents[1].y;
+  }
+
   void minmax(glm::vec3* a, glm::vec3* b)
   {
     if (a->x > b->x)

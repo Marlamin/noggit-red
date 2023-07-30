@@ -40,6 +40,9 @@ namespace Noggit::Rendering
         , CursorType cursor_type
         , float brush_radius
         , bool show_unpaintable_chunks
+        , bool draw_only_inside_light_sphere
+        , bool draw_wireframe_light_sphere
+        , float alpha_light_sphere
         , float inner_radius_ratio
         , glm::vec3 const& ref_pos
         , float angle
@@ -66,6 +69,7 @@ namespace Noggit::Rendering
         , display_mode display
         , bool draw_occlusion_boxes = false
         , bool minimap_render = false
+        , bool draw_wmo_exterior = true
     );
 
     bool saveMinimap (TileIndex const& tile_idx
@@ -125,6 +129,7 @@ namespace Noggit::Rendering
     Noggit::CursorRender _cursor_render;
     Noggit::Rendering::Primitives::Sphere _sphere_render;
     Noggit::Rendering::Primitives::Square _square_render;
+    Noggit::Rendering::Primitives::Line _line_render;
 
     // buffers
     OpenGL::Scoped::deferred_upload_buffers<8> _buffers;

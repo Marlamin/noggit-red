@@ -49,8 +49,13 @@ class MapIndex
 public:
   template<bool Load>
   struct tile_iterator
-  : std::iterator<std::forward_iterator_tag, MapTile*, std::ptrdiff_t, MapTile**, MapTile* const&>
   {
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = MapTile*;
+    using difference_type = std::ptrdiff_t;
+    using pointer = MapTile**;
+    using reference = MapTile* const&;
+
     template<typename Pred>
       tile_iterator (MapIndex* index, TileIndex tile, Pred pred)
         : _index (index)
@@ -186,8 +191,10 @@ public:
 
   void set_basename(const std::string& pBasename);
 
+  void create_empty_wdl();
+
   void enterTile(const TileIndex& tile);
-  MapTile *loadTile(const TileIndex& tile, bool reloading = false);
+  MapTile *loadTile(const TileIndex& tile, bool reloading = false, bool load_models = true, bool load_textures = true);
 
   void update_model_tile(const TileIndex& tile, model_update type, SceneObject* instance);
 
@@ -266,10 +273,9 @@ private:
 public:
   int const _map_id;
   std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _minimap_md5translate;
-
-private:
   std::string globalWMOName;
-
+  ENTRY_MODF wmoEntry;
+private:
   int _last_unload_time;
   int _unload_interval;
   int _unload_dist;
@@ -288,7 +294,6 @@ private:
 
   uint32_t highestGUID;
 
-  ENTRY_MODF wmoEntry;
   MPHD mphd;
 
   // Holding all MapTiles there can be in a World.

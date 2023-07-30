@@ -4,6 +4,7 @@
 
 #include <noggit/World.h>
 #include <util/qt/overload.hpp>
+#include <QtCore/QSettings>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGridLayout>
@@ -65,10 +66,41 @@ namespace Noggit
       _speed_slider->setSingleStep (1);
       _speed_slider->setValue(2.0f);
 
+      _snap_m2_objects_chkbox = new QCheckBox("Snap M2 objects", this);
+      _snap_m2_objects_chkbox->setChecked(true);
+
+      _snap_wmo_objects_chkbox = new QCheckBox("Snap WMO objects", this);
+      _snap_wmo_objects_chkbox->setChecked(true);
+
       settings_layout->addWidget(_radius_slider);
       settings_layout->addWidget(_speed_slider);
+      settings_layout->addWidget(_snap_m2_objects_chkbox);
+      settings_layout->addWidget(_snap_wmo_objects_chkbox);
 
       layout->addWidget(settings_group);
+
+      QGroupBox* flatten_blur_group = new QGroupBox("Flatten/Blur", this);
+      flatten_blur_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+      auto flatten_blur_layout = new QGridLayout(flatten_blur_group);
+
+      flatten_blur_layout->addWidget(_lock_up_checkbox = new QCheckBox(this), 0, 0);
+      flatten_blur_layout->addWidget(_lock_down_checkbox = new QCheckBox(this), 0, 1);
+
+      _lock_up_checkbox->setChecked(_flatten_mode.raise);
+      _lock_up_checkbox->setText("Raise");
+      _lock_up_checkbox->setToolTip("Raise the terrain when using the tool");
+      _lock_down_checkbox->setChecked(_flatten_mode.lower);
+      _lock_down_checkbox->setText("Lower");
+      _lock_down_checkbox->setToolTip("Lower the terrain when using the tool");
+
+      QSettings settings;
+      bool use_classic_ui = settings.value("classicUI", true).toBool();
+      if (use_classic_ui)
+          flatten_blur_group->show();
+      else
+          flatten_blur_group->hide();
+
+      layout->addWidget(flatten_blur_group);
 
       QGroupBox* flatten_only_group = new QGroupBox("Flatten only", this);
       auto flatten_only_layout = new QVBoxLayout(flatten_only_group);
@@ -134,6 +166,20 @@ namespace Noggit
                 }
               );
 
+      connect(_lock_up_checkbox, &QCheckBox::stateChanged
+          , [&](int state)
+          {
+              _flatten_mode.raise = state;
+          }
+      );
+
+      connect(_lock_down_checkbox, &QCheckBox::stateChanged
+          , [&](int state)
+          {
+              _flatten_mode.lower = state;
+          }
+      );
+
       connect ( _angle_slider, &QSlider::valueChanged
                 , [&] (int v)
                   {
@@ -174,6 +220,12 @@ namespace Noggit
 
     void flatten_blur_tool::flatten (World* world, glm::vec3 const& cursor_pos, float dt)
     {
+      // TODO : objects snapping may be optimized by reusing the flatten code for objects instead of ray intersection for ground distance
+      // store the ground height diff at center of all objects hit before editing it
+      std::vector<std::pair<SceneObject*, float>> objects_ground_distance = world->getObjectsGroundDistance(cursor_pos, _radius_slider->value()
+          , _snap_wmo_objects_chkbox->isChecked(), _snap_m2_objects_chkbox->isChecked());
+
+
       world->flattenTerrain ( cursor_pos
                             , 1.f - pow (0.5f, dt *_speed_slider->value())
                             , _radius_slider->value()
@@ -183,16 +235,47 @@ namespace Noggit
                             , math::degrees (angled_mode() ? _angle : 0.0f)
                             , math::degrees (angled_mode() ? _orientation : 0.0f)
                             );
+
+      // re apply the ground height diff to the objects
+      for (auto pair : objects_ground_distance)
+      {
+          auto obj = pair.first;
+          auto new_ground_height = world->get_ground_height(obj->pos).y;
+          world->set_model_pos(obj, glm::vec3(obj->pos.x, new_ground_height + pair.second, obj->pos.z));
+      }
     }
 
     void flatten_blur_tool::blur (World* world, glm::vec3 const& cursor_pos, float dt)
     {
+      // store the ground height diff at center of all objects hit before editing it
+      std::vector<std::pair<SceneObject*, float>> objects_ground_distance = world->getObjectsGroundDistance(cursor_pos, _radius_slider->value()
+          , _snap_wmo_objects_chkbox->isChecked(), _snap_m2_objects_chkbox->isChecked());
+
+
       world->blurTerrain ( cursor_pos
                          , 1.f - pow (0.5f, dt * _speed_slider->value())
                          , _radius_slider->value()
                          , _flatten_type
                          , _flatten_mode
                          );
+
+      // re apply the ground height diff to the objects
+      for (auto pair : objects_ground_distance)
+      {
+          auto obj = pair.first;
+          auto new_ground_height = world->get_ground_height(obj->pos).y;
+          world->set_model_pos(obj, glm::vec3(obj->pos.x, new_ground_height + pair.second, obj->pos.z));
+      }
+    }
+
+    void flatten_blur_tool::nextFlattenMode()
+    {
+        _flatten_mode.next();
+
+        QSignalBlocker const up_lock(_lock_up_checkbox);
+        QSignalBlocker const down_lock(_lock_down_checkbox);
+        _lock_up_checkbox->setChecked(_flatten_mode.raise);
+        _lock_down_checkbox->setChecked(_flatten_mode.lower);
     }
 
     void flatten_blur_tool::nextFlattenType()

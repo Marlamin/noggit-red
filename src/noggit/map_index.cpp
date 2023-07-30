@@ -93,9 +93,9 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
 
   theFile.read(&mphd, sizeof(MPHD));
 
-  mHasAGlobalWMO = mphd.flags & 1;
-  mBigAlpha = (mphd.flags & 4) != 0;
-  _sort_models_by_size_class = mphd.flags & 0x8;
+  mHasAGlobalWMO = mphd.flags & FLAG_GLOBAL_OBJECT;
+  mBigAlpha = mphd.flags & FLAG_BIG_ALPHA;
+  _sort_models_by_size_class = mphd.flags & FLAG_DOODADS_SORT;
 
   if (!(mphd.flags & FLAG_SHADING))
   {
@@ -140,7 +140,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
     //! \bug MODF reads wrong. The assertion fails every time. Somehow, it keeps being MWMO. Or are there two blocks?
     //! \nofuckingbug  on eof read returns just without doing sth to the var and some wdts have a MWMO without having a MODF so only checking for eof above is not enough
 
-    mHasAGlobalWMO = false;
+    // mHasAGlobalWMO = false;
 
     // - MWMO ----------------------------------------------
 
@@ -177,6 +177,7 @@ void MapIndex::saveall (World* world)
 
   for (MapTile* tile : loaded_tiles())
   {
+    world->horizon.update_horizon_tile(tile);
     tile->saveTile(world);
     tile->changed = false;
   }
@@ -211,10 +212,14 @@ void MapIndex::save()
 
   mphd.flags = 0;
   mphd.something = 0;
+  if (mHasAGlobalWMO)
+      mphd.flags |= FLAG_GLOBAL_OBJECT;
   if (mBigAlpha)
-      mphd.flags |= 4;
+      mphd.flags |= FLAG_BIG_ALPHA;
   if (_sort_models_by_size_class)
-      mphd.flags |= 8;
+      mphd.flags |= FLAG_DOODADS_SORT;
+
+  mphd.flags |= FLAG_SHADING;
 
   wdtFile.Insert(curPos, sizeof(MPHD), (char*)&mphd);
   curPos += sizeof(MPHD);
@@ -241,11 +246,11 @@ void MapIndex::save()
     // MWMO
     //  {
     wdtFile.Extend(8);
-    SetChunkHeader(wdtFile, curPos, 'MWMO', globalWMOName.size());
+    SetChunkHeader(wdtFile, curPos, 'MWMO', static_cast<int>(globalWMOName.size()));
     curPos += 8;
 
-    wdtFile.Insert(curPos, globalWMOName.size(), globalWMOName.data());
-    curPos += globalWMOName.size();
+    wdtFile.Insert(curPos, static_cast<unsigned long>(globalWMOName.size()), globalWMOName.data());
+    curPos += static_cast<int>(globalWMOName.size());
     //  }
 
     // MODF
@@ -277,8 +282,8 @@ void MapIndex::enterTile(const TileIndex& tile)
   }
 
   noadt = false;
-  int cx = tile.x;
-  int cz = tile.z;
+  int cx = static_cast<int>(tile.x);
+  int cz = static_cast<int>(tile.z);
 
   for (int pz = std::max(cz - 1, 0); pz < std::min(cz + 2, 63); ++pz)
   {
@@ -355,7 +360,7 @@ void MapIndex::setFlag(bool to, glm::vec3 const& pos, uint32_t flag)
   }
 }
 
-MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading)
+MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading, bool load_models, bool load_textures)
 {
   if (!hasTile(tile))
   {
@@ -376,8 +381,8 @@ MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading)
     return nullptr;
   }
 
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(),
-     mBigAlpha, true, use_mclq_green_lava(), reloading, _world, _context);
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
+     mBigAlpha, load_models, use_mclq_green_lava(), reloading, _world, _context, tile_mode::edit, load_textures);
 
   MapTile* adt = mTiles[tile.z][tile.x].tile.get();
 
@@ -462,6 +467,7 @@ void MapIndex::saveTile(const TileIndex& tile, World* world, bool save_unloaded)
 	if (tileLoaded(tile))
 	{
     saveMaxUID();
+    world->horizon.update_horizon_tile(mTiles[tile.z][tile.x].tile.get());
 		mTiles[tile.z][tile.x].tile->saveTile(world);
 	}
 }
@@ -516,6 +522,7 @@ void MapIndex::saveChanged (World* world, bool save_unloaded)
   {
     if (tile->changed.load())
     {
+      world->horizon.update_horizon_tile(tile);
       tile->saveTile(world);
       tile->changed = false;
     }
@@ -678,7 +685,7 @@ uint32_t MapIndex::newGUID()
 #ifdef USE_MYSQL_UID_STORAGE
   QSettings settings;
 
-  if (settings->value ("project/mysql/enabled", false).toBool())
+  if (settings.value ("project/mysql/enabled", false).toBool())
   {
     mysql::updateUIDinDB(_map_id, highestGUID + 1); // update the highest uid in db, note that if the user don't save these uid won't be used (not really a problem tho) 
   }
@@ -1022,7 +1029,7 @@ void MapIndex::saveMaxUID()
 #ifdef USE_MYSQL_UID_STORAGE
   QSettings settings;
 
-  if (settings->value ("project/mysql/enabled", false).toBool())
+  if (settings.value ("project/mysql/enabled", false).toBool())
   {
     if (mysql::hasMaxUIDStoredDB(_map_id))
     {
@@ -1044,9 +1051,9 @@ void MapIndex::loadMaxUID()
 #ifdef USE_MYSQL_UID_STORAGE
   QSettings settings;
 
-  if (settings->value ("project/mysql/enabled", false).toBool())
+  if (settings.value ("project/mysql/enabled", false).toBool())
   {
-    highestGUID = std::max(mysql::getGUIDFromDB(map_id), highestGUID);
+    highestGUID = std::max(mysql::getGUIDFromDB(_map_id), highestGUID);
     // save to make sure the db and disk uid are synced
     saveMaxUID();
   }
@@ -1068,7 +1075,7 @@ void MapIndex::loadMinimapMD5translate()
   void* buffer_raw = std::malloc(size);
   md5trs_file.read(buffer_raw, size);
 
-  QByteArray md5trs_bytes(static_cast<char*>(buffer_raw), size);
+  QByteArray md5trs_bytes(static_cast<char*>(buffer_raw), static_cast<int>(size));
 
   QTextStream md5trs_stream(md5trs_bytes, QIODevice::ReadOnly);
 
@@ -1090,6 +1097,13 @@ void MapIndex::loadMinimapMD5translate()
     }
 
     QStringList line_split = line.split(QRegExp("[\t]"));
+
+    if (line_split.length() < 2)
+    {
+        std::string text = "Failed to read md5translate.trs.\nLine \"" + line.toStdString() + "\n has no tab spacing. Spacing must be only a tab character and not spaces.";
+        LogError << text << std::endl;
+        throw  std::logic_error(text);
+    }
 
     if (cur_dir.length())
     {
@@ -1142,11 +1156,13 @@ void MapIndex::addTile(const TileIndex& tile)
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
 
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(),
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
       mBigAlpha, true, use_mclq_green_lava(), false, _world, _context);
 
   mTiles[tile.z][tile.x].flags |= 0x1;
   mTiles[tile.z][tile.x].tile->changed = true;
+
+  _world->horizon.update_horizon_tile(mTiles[tile.z][tile.x].tile.get());
 
   changed = true;
 }
@@ -1157,11 +1173,13 @@ void MapIndex::removeTile(const TileIndex &tile)
 
   std::stringstream filename;
   filename << "World\\Maps\\" << basename << "\\" << basename << "_" << tile.x << "_" << tile.z << ".adt";
-  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (tile.x, tile.z, filename.str(),
+  mTiles[tile.z][tile.x].tile = std::make_unique<MapTile> (static_cast<int>(tile.x), static_cast<int>(tile.z), filename.str(),
      mBigAlpha, true, use_mclq_green_lava(), false, _world, _context);
 
   mTiles[tile.z][tile.x].tile->changed = true;
   mTiles[tile.z][tile.x].onDisc = false;
+
+  _world->horizon.remove_horizon_tile(tile.z, tile.x);
 
   changed = true;
 }
@@ -1204,4 +1222,112 @@ void MapIndex::set_basename(const std::string &pBasename)
       mTiles[z][x].tile->setFilename(filename.str());
     }
   }
+}
+
+void MapIndex::create_empty_wdl()
+{
+    // for new map creation, creates a new WDL with all heights as 0
+    std::stringstream filename;
+    filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl"; // mapIndex.basename ? 
+    //Log << "Saving WDL \"" << filename << "\"." << std::endl;
+
+    sExtendableArray wdlFile = sExtendableArray();
+    int curPos = 0;
+
+    // MVER
+    //  {
+    wdlFile.Extend(8 + 0x4);
+    SetChunkHeader(wdlFile, curPos, 'MVER', 4);
+
+    // MVER data
+    *(wdlFile.GetPointer<int>(8)) = 18; // write version 18
+    curPos += 8 + 0x4;
+    //  }
+
+    // MWMO
+    //  {
+    wdlFile.Extend(8);
+    SetChunkHeader(wdlFile, curPos, 'MWMO', 0);
+
+    curPos += 8;
+    //  }
+
+    // MWID
+    //  {
+    wdlFile.Extend(8);
+    SetChunkHeader(wdlFile, curPos, 'MWID', 0);
+
+    curPos += 8;
+    //  }
+
+    // MODF
+    //  {
+    wdlFile.Extend(8);
+    SetChunkHeader(wdlFile, curPos, 'MODF', 0);
+
+    curPos += 8;
+    //  }
+
+    uint32_t mare_offsets[4096] = { 0 }; // [64][64];
+    // MAOF
+    //  {
+    wdlFile.Extend(8);
+    SetChunkHeader(wdlFile, curPos, 'MAOF', 64 * 64 * 4);
+    curPos += 8;
+
+    uint32_t mareoffset = curPos + 64 * 64 * 4;
+
+    for (int y = 0; y < 64; ++y)
+    {
+        for (int x = 0; x < 64; ++x)
+        {
+            TileIndex index(x, y);
+
+            bool has_tile = hasTile(index);
+
+            // if (tile_exists)
+            if (has_tile) // TODO check if tile exists
+            {
+                // write offset in MAOF entry
+                wdlFile.Insert(curPos, 4, (char*)&mareoffset);
+                mare_offsets[y * 64 + x] = mareoffset;
+                mareoffset += 1138; // mare + maho
+            }
+            else
+                wdlFile.Extend(4);
+            curPos += 4;
+
+        }
+    }
+
+    for (auto offset : mare_offsets)
+    {
+        if (!offset)
+            continue;
+
+        // MARE
+        //  {
+        wdlFile.Extend(8);
+        SetChunkHeader(wdlFile, curPos, 'MARE', (2 * (17 * 17)) + (2 * (16 * 16))); // outer heights+inner heights
+        curPos += 8;
+
+        // write inner and outer heights
+        wdlFile.Extend((2 * (17 * 17)) + (2 * (16 * 16)));
+        curPos += (2 * (17 * 17)) + (2 * (16 * 16));
+        //  }
+
+        // MAHO (maparea holes)
+        //  {
+        wdlFile.Extend(8);
+        SetChunkHeader(wdlFile, curPos, 'MAHO', 2 * 16); // 1 hole mask for each chunk
+        curPos += 8;
+
+        wdlFile.Extend(32);
+        curPos += 32;
+    }
+    BlizzardArchive::ClientFile f(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData(),
+    BlizzardArchive::ClientFile::NEW_FILE);
+    f.setBuffer(wdlFile.data);
+    f.save();
+    f.close();
 }

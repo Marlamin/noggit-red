@@ -30,6 +30,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     , CursorType cursor_type
     , float brush_radius
     , bool show_unpaintable_chunks
+    , bool draw_only_inside_light_sphere
+    , bool draw_wireframe_light_sphere
+    , float alpha_light_sphere
     , float inner_radius_ratio
     , glm::vec3 const& ref_pos
     , float angle
@@ -56,6 +59,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     , display_mode display
     , bool draw_occlusion_boxes
     , bool minimap_render
+    , bool draw_wmo_exterior
 )
 {
 
@@ -107,7 +111,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       tile->renderer()->setFrustumCulled(false);
       tile->renderer()->setObjectsFrustumCullTest(2);
       tile->renderer()->setOccluded(false);
-      _world->_loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(tile->index.x, tile->index.z), tile);
+      _world->_loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(static_cast<int>(tile->index.x), static_cast<int>(tile->index.z)), tile);
 
       tile_counter++;
       _world->_n_loaded_tiles++;
@@ -118,7 +122,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     if (frustum.intersects(tile_extents[1], tile_extents[0]) || tile->getChunkUpdateFlags())
     {
       tile->calcCamDist(camera_pos);
-      _world->_loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(tile->index.x, tile->index.z), tile);
+      _world->_loaded_tiles_buffer[tile_counter] = std::make_pair(std::make_pair(static_cast<int>(tile->index.x), static_cast<int>(tile->index.z)), tile);
 
       tile->renderer()->setObjectsFrustumCullTest(1);
       if (frustum.contains(tile_extents[0]) && frustum.contains(tile_extents[1]))
@@ -225,7 +229,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   _cull_distance= draw_fog ? _skies->fog_distance_end() : _view_distance;
 
   // Draw verylowres heightmap
-  if (draw_fog && draw_terrain)
+  if (!_world->mapIndex.hasAGlobalWMO() && draw_fog && draw_terrain)
   {
     ZoneScopedN("World::draw() : Draw horizon");
     _horizon_render->draw (model_view, projection, &_world->mapIndex, _skies->color_set[FOG_COLOR], _cull_distance, frustum, camera_pos, display);
@@ -453,6 +457,19 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
       wmo_program.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
 
+      // make this check per WMO or global WMO with tiles may not work
+      bool disable_cull = false;
+
+      if (_world->mapIndex.hasAGlobalWMO() && !wmos_to_draw.size())
+      {
+          auto global_wmo = _world->_model_instance_storage.get_wmo_instance(_world->mWmoEntry.uniqueID);
+          if (global_wmo.has_value())
+          {
+            wmos_to_draw.push_back(global_wmo.value());
+            disable_cull = true;
+          }
+      }
+
 
       for (auto& instance: wmos_to_draw)
       {
@@ -515,6 +532,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
               , _world->animtime
               , _skies->hasSkies()
               , display
+              , disable_cull
+              , draw_wmo_exterior
+
           );
         }
       }
@@ -918,16 +938,46 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
   }
 
-  /*
-  skies->drawLightingSphereHandles(model_view
-                                  , projection
-                                  , camera_pos
-                                  , frustum
-                                  , culldistance
-                                  , false);
+  if (terrainMode == editing_mode::light)
+  {
+      Sky* CurrentSky = skies()->findClosestSkyByDistance(camera_pos);
+      if (!CurrentSky)
+          return;
 
-                                  */
+      int CurrentSkyID = CurrentSky->Id;
+          
+      const int MAX_TIME_VALUE_C = 2880;
+      const int CurrenTime = static_cast<int>(_world->time) % MAX_TIME_VALUE_C;
 
+      glCullFace(GL_FRONT);
+      for (Sky& sky : skies()->skies)
+      {
+          if (CurrentSkyID > 1 && draw_only_inside_light_sphere)
+              break;
+
+          if (CurrentSkyID == sky.Id)
+              continue;
+
+          if (glm::distance(sky.pos, camera_pos) <= _cull_distance) // TODO: frustum cull here
+          {
+              glm::vec4 diffuse = { sky.colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.f };
+              glm::vec4 ambient = { sky.colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.f };
+
+              _sphere_render.draw(mvp, sky.pos, ambient, sky.r1, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+              _sphere_render.draw(mvp, sky.pos, diffuse, sky.r2, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+          }
+      }
+
+      glCullFace(GL_BACK);
+      if (CurrentSky && draw_only_inside_light_sphere)
+      {
+          glm::vec4 diffuse = { CurrentSky->colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.f };
+          glm::vec4 ambient = { CurrentSky->colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.f };
+
+          _sphere_render.draw(mvp, CurrentSky->pos, ambient, CurrentSky->r1, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+          _sphere_render.draw(mvp, CurrentSky->pos, diffuse, CurrentSky->r2, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+      }
+  }
 }
 
 void WorldRender::upload()
@@ -1156,6 +1206,7 @@ void WorldRender::unload()
   _cursor_render.unload();
   _sphere_render.unload();
   _square_render.unload();
+  _line_render.unload();
   _horizon_render.reset();
 
   _liquid_texture_manager.unload();
@@ -1508,7 +1559,7 @@ void WorldRender::drawMinimap ( MapTile *tile
   }
 
   draw(model_view, projection, glm::vec3(), 0, glm::vec4(),
-       CursorType::NONE, 0.f, false, 0.f, glm::vec3(), 0.f, 0.f, false, false, false, editing_mode::minimap, camera_pos, true, false, true, settings->draw_wmo, settings->draw_water, false, settings->draw_m2, false, false, true, settings, false, eTerrainType::eTerrainType_Linear, 0, display_mode::in_3D, false, true);
+       CursorType::NONE, 0.f, false, false, false, 0.3f, 0.f, glm::vec3(), 0.f, 0.f, false, false, false, editing_mode::minimap, camera_pos, true, false, true, settings->draw_wmo, settings->draw_water, false, settings->draw_m2, false, false, true, settings, false, eTerrainType::eTerrainType_Linear, 0, display_mode::in_3D, false, true);
 
 
   if (unload)
@@ -1649,7 +1700,7 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
       {
         for (int j = 0; j < 128; ++j)
         {
-          combined_image->setPixelColor(tile_idx.x * 128 + j, tile_idx.z * 128 + i, scaled_image.pixelColor(j, i));
+          combined_image->setPixelColor(static_cast<int>(tile_idx.x) * 128 + j, static_cast<int>(tile_idx.z) * 128 + i, scaled_image.pixelColor(j, i));
         }
       }
 

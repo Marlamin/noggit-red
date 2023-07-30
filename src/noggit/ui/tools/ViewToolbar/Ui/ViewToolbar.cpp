@@ -4,6 +4,7 @@
 #include <noggit/ui/tools/ActionHistoryNavigator/ActionHistoryNavigator.hpp>
 #include <noggit/ui/FontAwesome.hpp>
 #include <QSlider>
+#include <QtCore/QSettings>
 
 using namespace Noggit::Ui;
 using namespace Noggit::Ui::Tools::ViewToolbar::Ui;
@@ -15,7 +16,7 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
   setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 
-  IconAction* climb_icon = new IconAction(FontNoggitIcon{FontNoggit::FAVORITE});
+  IconAction* climb_icon = new IconAction(FontNoggitIcon{FontNoggit::VISIBILITY_CLIMB });
 
   CheckBoxAction* climb_use_output_color_angle = new CheckBoxAction(tr("Display all angle color"));
   climb_use_output_color_angle->checkbox()->setChecked(false);
@@ -33,7 +34,13 @@ ViewToolbar::ViewToolbar(MapView* mapView)
               mapView->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
           });
 
-  SliderAction* climb_value = new SliderAction(tr("Configure climb maximum value"));
+  SliderAction* climb_value = new SliderAction(tr("Climb maximum value"), 0, 1570, 856, tr("degrees"),
+      std::function<int(int v)>() = [&](int v) {
+          float radian = float(v) / 1000.f;
+          float degrees = radian * (180.0 / 3.141592653589793238463);
+          return int(degrees);
+      });
+
   connect(climb_value->slider(), &QSlider::valueChanged, [mapView](int value)
           {
               float radian = float(value) / 1000.0f;
@@ -52,6 +59,30 @@ ViewToolbar::ViewToolbar(MapView* mapView)
   _climb_secondary_tool.push_back(climb_use_output_color_angle);
   _climb_secondary_tool.push_back(climb_value);
   _climb_secondary_tool.push_back(climb_reset_slider);
+
+
+  // Time toolbar
+  IconAction* time_icon = new IconAction(FontNoggitIcon{ FontNoggit::TIME_PAUSE });
+
+  PushButtonAction* pause_time = new PushButtonAction(tr("Pause Time"));
+  connect(pause_time->pushbutton(), &QPushButton::clicked, [pause_time]()
+      {
+
+      });
+
+  PushButtonAction* speed_up_time = new PushButtonAction(tr("Increase Time speed"));
+  connect(climb_reset_slider->pushbutton(), &QPushButton::clicked, [pause_time]()
+      {
+
+      });
+
+  _time_secondary_tool.push_back(time_icon);
+  /*
+  ADD_ACTION(view_menu, "Increase time speed", Qt::Key_N, [this] { mTimespeed += 90.0f; });
+  ADD_ACTION(view_menu, "Decrease time speed", Qt::Key_B, [this] { mTimespeed = std::max(0.0f, mTimespeed - 90.0f); });
+  ADD_ACTION(view_menu, "Pause time", Qt::Key_J, [this] { mTimespeed = 0.0f; });
+  */
+
 }
 
 ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
@@ -64,6 +95,7 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     add_tool_icon(mapView, &mapView->_draw_models, tr("Doodads"), FontNoggit::VISIBILITY_DOODADS, tb);
     add_tool_icon(mapView, &mapView->_draw_wmo, tr("WMOs"), FontNoggit::VISIBILITY_WMO, tb);
     add_tool_icon(mapView, &mapView->_draw_wmo_doodads, tr("WMO doodads"), FontNoggit::VISIBILITY_WMO_DOODADS, tb);
+    add_tool_icon(mapView, &mapView->_draw_wmo_exterior, tr("WMO exterior"), FontNoggit::UI_TOGGLE, tb);
     add_tool_icon(mapView, &mapView->_draw_terrain, tr("Terrain"), FontNoggit::VISIBILITY_TERRAIN, tb);
     add_tool_icon(mapView, &mapView->_draw_water, tr("Water"), FontNoggit::VISIBILITY_WATER, tb);
 
@@ -73,14 +105,16 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     add_tool_icon(mapView, &mapView->_draw_hole_lines, tr("Hole lines"), FontNoggit::VISIBILITY_HOLE_LINES, tb);
     add_tool_icon(mapView, &mapView->_draw_wireframe, tr("Wireframe"), FontNoggit::VISIBILITY_WIREFRAME, tb);
     add_tool_icon(mapView, &mapView->_draw_contour, tr("Contours"), FontNoggit::VISIBILITY_CONTOURS, tb);
-    add_tool_icon(mapView, &mapView->_draw_climb, tr("Climb"), FontNoggit::FAVORITE, tb, tb->_climb_secondary_tool);
-    add_tool_icon(mapView, &mapView->_draw_vertex_color, tr("Vertex Color"), FontNoggit::FAVORITE, tb);
+    add_tool_icon(mapView, &mapView->_draw_climb, tr("Climb"), FontNoggit::VISIBILITY_CLIMB, tb, tb->_climb_secondary_tool);
+    add_tool_icon(mapView, &mapView->_draw_vertex_color, tr("Vertex Color"), FontNoggit::VISIBILITY_VERTEX_PAINTER, tb);
+    add_tool_icon(mapView, &mapView->_draw_baked_shadows, tr("Baked Shadows"), FontNoggit::VISIBILITY_BAKED_SHADOWS, tb); // TODO : better icon
 
     addSeparator();
 
-    // Animation
+    add_tool_icon(mapView, &mapView->_draw_model_animations, tr("Animations"), FontNoggit::VISIBILITY_ANIMATION, tb);
     add_tool_icon(mapView, &mapView->_draw_fog, tr("Fog"), FontNoggit::VISIBILITY_FOG, tb);
     add_tool_icon(mapView, &mapView->_draw_mfbo, tr("Flight bounds"), FontNoggit::VISIBILITY_FLIGHT_BOUNDS, tb);
+    // add_tool_icon(mapView, &mapView->_draw_lights_zones, tr("Light zones"), FontNoggit::VISIBILITY_LIGHT, tb);
     addSeparator();
 
     // Hole lines always on
@@ -92,6 +126,28 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     tablet_sensitivity->setOrientation(Qt::Horizontal);
     addWidget(tablet_sensitivity);
    */
+
+    // some unused icons : 
+    // VISIBILITY_LIGHT VISIBILITY_GROUNDEFFECTS CAMERA_TURN CAMERA_SPEED_FASTER.. INFO TIME_NORMAL VIEW_AXIS VISIBILITY_UNUSED SETTINGS
+
+    // normal view mode icon, and make them only 1 at a time out of the 3 view modes? 
+    // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Normal view"), FontNoggit::VIEW_AXIS, tb);
+    add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Game view"), FontNoggit::VIEW_MODE_GAME, tb);
+    // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Tile view"), FontNoggit::VIEW_MODE_2D, tb);
+    addSeparator();
+
+    add_tool_icon(mapView, &mapView->_show_minimap_window, tr("Show Minimap"),FontNoggit::TOOL_MINIMAP_EDITOR, tb);
+    add_tool_icon(mapView, &mapView->_show_detail_info_window, tr("Details info"), FontNoggit::INFO, tb);
+
+    // TODO : will open a panel with time controls, or use 2n toolbar
+    //add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Time speed"), FontNoggit::TIME_NORMAL, tb, _time_secondary_tool);
+
+    /*
+    auto tile_view_btn = new QPushButton(this);
+    tile_view_btn->setIcon(FontNoggitIcon{ FontNoggit::VIEW_MODE_2D });
+    tile_view_btn->setToolTip("2D View");
+    addWidget(tile_view_btn);
+    */
 
     auto undo_stack_btn = new QPushButton(this);
     undo_stack_btn->setIcon(FontAwesomeIcon(FontAwesome::undo));
@@ -239,12 +295,41 @@ ViewToolbar::ViewToolbar(MapView* mapView, editing_mode mode)
         _object_secondary_tool.push_back(_up_toolbar);
         _object_secondary_tool.push_back(_down_toolbar);
     }
+
+    {
+        /*
+         * LIGHT SECONDARY TOOL 
+         */
+
+        SubToolBarAction* _toolbar = new SubToolBarAction();
+
+        {
+            IconAction* _icon = new IconAction(FontNoggitIcon{ FontNoggit::TOOL_STAMP });
+            CheckBoxAction* _draw_only_inside = new CheckBoxAction(tr("Draw current only"));
+            CheckBoxAction* _draw_wireframe = new CheckBoxAction(tr("Draw wireframe"));
+            SliderAction* _alpha_value = new SliderAction(tr("Alpha"), 0, 100, 30, "",
+                std::function<float(float v)>() = [&](float v) {
+                    return v / 100.f;
+                });
+
+            _toolbar->ADD_ACTION(_icon);
+            _toolbar->ADD_ACTION(_draw_only_inside); sphere_light_inside_index = 1;
+            _toolbar->ADD_ACTION(_draw_wireframe); sphere_light_wireframe_index = 2;
+            _toolbar->ADD_ACTION(_alpha_value); sphere_light_alpha_index = 3;
+            _toolbar->SETUP_WIDGET(false);
+        }
+
+        _light_secondary_tool.push_back(_toolbar);
+    }
 }
 
 void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
 {
     mapView->getLeftSecondaryToolbar()->hide();
     current_mode = mode;
+
+    QSettings settings;
+    bool use_classic_ui = settings.value("classicUI", false).toBool();
 
     switch (current_mode)
     {
@@ -254,14 +339,20 @@ void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
         if (_flatten_secondary_tool.size() > 0)
         {
             setupWidget(_flatten_secondary_tool);
-            mapView->getLeftSecondaryToolbar()->show();
+            if (!use_classic_ui)
+                mapView->getLeftSecondaryToolbar()->show();
+            else
+                mapView->getLeftSecondaryToolbar()->hide();
         }
         break;
     case editing_mode::paint:
         if (_texture_secondary_tool.size() > 0)
         {
             setupWidget(_texture_secondary_tool);
-            mapView->getLeftSecondaryToolbar()->show();
+            if (!use_classic_ui)
+                mapView->getLeftSecondaryToolbar()->show();
+            else
+                mapView->getLeftSecondaryToolbar()->hide();
         }
         break;
     case editing_mode::object:
@@ -270,6 +361,14 @@ void ViewToolbar::setCurrentMode(MapView* mapView, editing_mode mode)
             //setupWidget(_object_secondary_tool, true);
             //mapView->getLeftSecondaryToolbar()->show();
         }
+        break;
+    case editing_mode::light:
+        if (_light_secondary_tool.size() > 0)
+        {
+            setupWidget(_light_secondary_tool, true);
+            mapView->getLeftSecondaryToolbar()->show();
+        }
+        break;
     default:
         break;
     }
@@ -299,7 +398,16 @@ void ViewToolbar::add_tool_icon(MapView* mapView,
         }
     });
 
-    connect (view_state, &Noggit::BoolToggleProperty::changed, [action, view_state] () {
+    connect (view_state, &Noggit::BoolToggleProperty::changed, [action, view_state, mapView] () {
+        if (action->text() == "Game view" && view_state->get())
+        {
+            // hack, manually update camera when switch to game_view
+            mapView->setCameraDirty();
+            auto ground_pos = mapView->getWorld()->get_ground_height(mapView->getCamera()->position);
+            mapView->getCamera()->position.y = ground_pos.y + 2;
+        }
+
+
         action->setChecked(view_state->get());
     });
 
@@ -334,4 +442,22 @@ void ViewToolbar::nextFlattenMode(MapView* mapView)
 
     _raise_option->setChecked(true);
     _lower_option->setChecked(true);
+}
+
+bool ViewToolbar::drawOnlyInsideSphereLight()
+{
+    return static_cast<SubToolBarAction*>(_light_secondary_tool[0])->GET<CheckBoxAction*>(sphere_light_inside_index)->checkbox()->isChecked() && current_mode == editing_mode::light;
+}
+
+bool ViewToolbar::drawWireframeSphereLight()
+{
+    return static_cast<SubToolBarAction*>(_light_secondary_tool[0])->GET<CheckBoxAction*>(sphere_light_wireframe_index)->checkbox()->isChecked() && current_mode == editing_mode::light;
+}
+
+float ViewToolbar::getAlphaSphereLight()
+{
+    auto toolbar = static_cast<SubToolBarAction*>(_light_secondary_tool[0]);
+    auto slider = toolbar->GET<SliderAction*>(sphere_light_alpha_index)->slider();
+
+    return float(slider->value()) / 100.f;
 }

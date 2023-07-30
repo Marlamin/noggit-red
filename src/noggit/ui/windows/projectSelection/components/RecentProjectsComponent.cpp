@@ -4,6 +4,7 @@
 
 #include <QList>
 #include <filesystem>
+#include <QDesktopServices>
 
 using namespace Noggit::Ui::Component;
 
@@ -50,6 +51,8 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
     {
       QMenu context_menu(project_list_item->tr("Context menu"), project_list_item);
 
+      // removing the option to delete project files due to people accidentally removing their work...
+      /*
       QAction action_1("Delete Project", project_list_item);
       action_1.setIcon(FontAwesomeIcon(FontAwesome::trash).pixmap(QSize(16, 16)));
 
@@ -59,6 +62,7 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
       });
 
       context_menu.addAction(&action_1);
+      */
 
       QAction action_2("Forget Project", project_list_item);
       action_2.setIcon(FontAwesomeIcon(FontAwesome::cloud).pixmap(QSize(16, 16)));
@@ -69,7 +73,27 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
       });
 
       context_menu.addAction(&action_2);
+      /////
+      QAction action_3("Open Project Directory", project_list_item);
+      action_3.setIcon(FontAwesomeIcon(FontAwesome::folderopen).pixmap(QSize(16, 16)));
 
+      QObject::connect(&action_3, &QAction::triggered, [=]()
+          {
+              openDirectory(project_data.project_directory.toStdString());
+          });
+
+      context_menu.addAction(&action_3);
+      /////
+      QAction action_4("Open WoW Client Directory", project_list_item);
+      action_4.setIcon(FontAwesomeIcon(FontAwesome::gamepad).pixmap(QSize(16, 16)));
+
+      QObject::connect(&action_4, &QAction::triggered, [=]()
+          {
+              openDirectory(project->ClientPath);
+          });
+
+      context_menu.addAction(&action_4);
+      /////
       context_menu.exec(project_list_item->mapToGlobal(pos));
     });
 
@@ -79,6 +103,38 @@ void RecentProjectsComponent::buildRecentProjectsList(Noggit::Ui::Windows::Noggi
   }
 
   settings.endArray();
+}
+
+void RecentProjectsComponent::openDirectory(std::string const& directory_path)
+{
+    if (!std::filesystem::exists(directory_path) || !std::filesystem::is_directory(directory_path))
+        return;
+    auto path = QString(directory_path.c_str());
+    QFileInfo info(path);
+#if defined(Q_OS_WIN)
+    QStringList args;
+    if (!info.isDir())
+        args << "/select,";
+    args << QDir::toNativeSeparators(path);
+    if (QProcess::startDetached("explorer", args))
+        return;
+#elif defined(Q_OS_MAC)
+    QStringList args;
+    args << "-e";
+    args << "tell application \"Finder\"";
+    args << "-e";
+    args << "activate";
+    args << "-e";
+    args << "select POSIX file \"" + path + "\"";
+    args << "-e";
+    args << "end tell";
+    args << "-e";
+    args << "return";
+    if (!QProcess::execute("/usr/bin/osascript", args))
+        return;
+#endif
+    QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+
 }
 
 void RecentProjectsComponent::registerProjectChange(std::string const& project_path)

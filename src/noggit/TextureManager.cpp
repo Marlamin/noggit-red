@@ -41,7 +41,7 @@ void TextureManager::unload_all(Noggit::NoggitRenderContext context)
 
   for (auto& pair : arrays_for_context)
   {
-    gl.deleteTextures(pair.second.arrays.size(), pair.second.arrays.data());
+    gl.deleteTextures(static_cast<GLuint>(pair.second.arrays.size()), pair.second.arrays.data());
   }
 }
 
@@ -113,7 +113,7 @@ TexArrayParams& TextureManager::get_tex_array(GLint compression, int width, int 
 
     for (int i = 0; i < mip_level; ++i)
     {
-      gl.compressedTexImage3D(GL_TEXTURE_2D_ARRAY, i, compression, width_, height_, n_layers, 0, comp_data[i].size() * n_layers, nullptr);
+      gl.compressedTexImage3D(GL_TEXTURE_2D_ARRAY, i, compression, width_, height_, n_layers, 0, static_cast<GLsizei>(comp_data[i].size() * n_layers), nullptr);
 
       width_ = std::max(width_ >> 1, 1);
       height_ = std::max(height_ >> 1, 1);
@@ -188,7 +188,7 @@ void blp_texture::uploadToArray(unsigned layer)
   {
     for (int i = 0; i < _compressed_data.size(); ++i)
     {
-      gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, layer, width, height, 1, _compression_format.value(), _compressed_data[i].size(), _compressed_data[i].data());
+      gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, layer, width, height, 1, _compression_format.value(), static_cast<GLsizei>(_compressed_data[i].size()), _compressed_data[i].data());
 
       width = std::max(width >> 1, 1);
       height = std::max(height >> 1, 1);
@@ -217,7 +217,7 @@ void blp_texture::upload()
 
   if (!_compression_format)
   {
-    auto& params = TextureManager::get_tex_array( _width, _height, _data.size(), _context);
+    auto& params = TextureManager::get_tex_array( _width, _height, static_cast<int>(_data.size()), _context);
 
     int index_x = params.n_used / n_layers;
     int index_y = params.n_used % n_layers;
@@ -241,7 +241,7 @@ void blp_texture::upload()
   }
   else
   {
-    auto& params = TextureManager::get_tex_array(_compression_format.value(), _width, _height, _compressed_data.size(), _compressed_data, _context);
+    auto& params = TextureManager::get_tex_array(_compression_format.value(), _width, _height, static_cast<int>(_compressed_data.size()), _compressed_data, _context);
 
     int index_x = params.n_used / n_layers;
     int index_y = params.n_used % n_layers;
@@ -251,7 +251,7 @@ void blp_texture::upload()
 
     for (int i = 0; i < _compressed_data.size(); ++i)
     {
-      gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, index_y, width, height, 1, _compression_format.value(), _compressed_data[i].size(), _compressed_data[i].data());
+      gl.compressedTexSubImage3D(GL_TEXTURE_2D_ARRAY, i, 0, 0, index_y, width, height, 1, _compression_format.value(), static_cast<GLsizei>(_compressed_data[i].size()), _compressed_data[i].data());
 
       width = std::max(width >> 1, 1);
       height = std::max(height >> 1, 1);

@@ -117,14 +117,14 @@ namespace Noggit
 
     void texture_picker::updateSelection()
     {
-        if(_chunk)
+        if (!_chunk)
+            return;
+
+        for (size_t index = 0; index < _chunk->texture_set->num(); ++index)
         {
-            for (size_t index = 0; index < _chunk->texture_set->num(); ++index)
-            {
-                _labels[index]->unselect();
-                if (_main_texture_window->filename() == _labels[index]->filename())
-                    _labels[index]->select();
-            }
+            _labels[index]->unselect();
+            if (_main_texture_window->filename() == _labels[index]->filename())
+                _labels[index]->select();
         }
     }
 
@@ -155,6 +155,10 @@ namespace Noggit
     void texture_picker::shiftSelectedTextureLeft()
     {
       auto&& selectedTexture = selected_texture::get();
+
+      if (!_chunk)
+          return;
+
       auto ts = _chunk->texture_set.get();
       for (int i = 1; i < ts->num(); i++)
       {
@@ -170,6 +174,10 @@ namespace Noggit
     void texture_picker::shiftSelectedTextureRight()
     {
       auto&& selectedTexture = selected_texture::get();
+
+      if (!_chunk)
+          return;
+
       auto ts = _chunk->texture_set.get();
       for (int i = 0; i < ts->num() - 1; i++)
       {

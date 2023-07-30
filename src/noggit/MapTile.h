@@ -55,6 +55,7 @@ public:
          , World*
          , Noggit::NoggitRenderContext context
          , tile_mode mode = tile_mode::edit
+         , bool pLoadTextures = true
          );
   ~MapTile();
 
@@ -141,9 +142,9 @@ public:
   QImage getAlphamapImage(std::string const& filename);
   QImage getVertexColorsImage();
   QImage getNormalmapImage();
-  void setHeightmapImage(QImage const& image, float multiplier, int mode);
+  void setHeightmapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges);
   void setAlphaImage(QImage const& image, unsigned layer);
-  void setVertexColorImage(QImage const& image, int mode);
+  void setVertexColorImage(QImage const& image, int mode, bool tiledEdges);
   void registerChunkUpdate(unsigned flags) { _chunk_update_flags |= flags; };
   void endChunkUpdates() { _chunk_update_flags = 0; };
   std::array<float, 145 * 256 * 4>& getChunkHeightmapBuffer() { return _chunk_heightmap_buffer; };
@@ -194,7 +195,7 @@ private:
   unsigned _chunk_update_flags;
 
   // MHDR:
-  int mFlags;
+  int mFlags = 0;
   bool mBigAlpha;
 
   // Data to be loaded and later unloaded.
@@ -210,6 +211,7 @@ private:
   std::array<float, 145 * 256 * 4> _chunk_heightmap_buffer;
 
   bool _load_models;
+  bool _load_textures;
   World* _world;
 
 

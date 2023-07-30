@@ -10,7 +10,7 @@ namespace Noggit
         CChangelog::CChangelog(QWidget* parent) :
             QDialog(parent)
         {
-            setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+            /*setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
             ui = new ::Ui::Changelog;
             ui->setupUi(this);
 
@@ -46,7 +46,7 @@ namespace Noggit
             connect(ui->listWidget, &QListWidget::itemClicked, [&](QListWidgetItem *item)
                 {
                     OpenChangelog(item->data(1).toString());
-                });
+                });*/
         }
 
         void CChangelog::SelectFirst()

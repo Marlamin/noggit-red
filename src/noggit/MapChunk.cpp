@@ -24,8 +24,8 @@
 #include <QImage>
 #include <limits>
 
-MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAlpha,
-                   tile_mode mode, Noggit::NoggitRenderContext context, bool init_empty, int chunk_idx)
+MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAlpha,tile_mode mode
+                    , Noggit::NoggitRenderContext context, bool init_empty, int chunk_idx, bool load_textures)
   : _mode(mode)
   , mt(maintile)
   , use_big_alphamap(bigAlpha)
@@ -146,6 +146,11 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
     // correct the x and z values ^_^
     zbase = zbase*-1.0f + ZEROPOINT;
     xbase = xbase*-1.0f + ZEROPOINT;
+  }
+
+  if (!load_textures)
+  {
+      this->header.nLayers = 0;
   }
 
   texture_set = std::make_unique<TextureSet>(this, f, base, maintile, bigAlpha,
@@ -788,7 +793,7 @@ void MapChunk::updateNormalsData()
 
 bool MapChunk::changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius)
 {
-  float dist, xdiff, zdiff;
+  //float dist, xdiff, zdiff;
   bool changed = false;
 
   for (int i = 0; i < mapbufsize; ++i)
@@ -1280,10 +1285,13 @@ int MapChunk::addTexture(scoped_blp_texture_reference texture)
   return texture_set->addTexture(std::move (texture));
 }
 
-void MapChunk::switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
+bool MapChunk::switchTexture(scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture)
 {
-  texture_set->replace_texture(oldTexture, std::move (newTexture));
-  registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
+  bool changed = texture_set->replace_texture(oldTexture, std::move (newTexture));
+  if (changed)
+    registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
+
+  return changed;
 }
 
 bool MapChunk::paintTexture(glm::vec3 const& pos, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture)
@@ -1519,11 +1527,11 @@ void MapChunk::save(sExtendableArray& lADTFile
   //        {
   size_t lMCLY_Size = texture_set ? texture_set->num() * 0x10 : 0;
 
-  lADTFile.Extend(8 + lMCLY_Size);
-  SetChunkHeader(lADTFile, lCurrentPosition, 'MCLY', lMCLY_Size);
+  lADTFile.Extend(static_cast<long>(8 + lMCLY_Size));
+  SetChunkHeader(lADTFile, lCurrentPosition, 'MCLY', static_cast<int>(lMCLY_Size));
 
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsLayer = lCurrentPosition - lMCNK_Position;
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = texture_set ? texture_set->num() : 0;
+  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = texture_set ? static_cast<std::uint32_t>(texture_set->num()) : 0;
 
   std::vector<std::vector<uint8_t>> alphamaps;
 
@@ -1536,7 +1544,7 @@ void MapChunk::save(sExtendableArray& lADTFile
     // MCLY data
     for (size_t j = 0; j < texture_set->num(); ++j)
     {
-      ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>(lCurrentPosition + 8 + 0x10 * j);
+      ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>(lCurrentPosition + 8 + 0x10 * static_cast<unsigned long>(j));
 
       lLayer->textureID = lTextures.find(texture_set->filename(j))->second;
       lLayer->flags = texture_set->flag(j);
@@ -1553,14 +1561,14 @@ void MapChunk::save(sExtendableArray& lADTFile
         //! \todo find out why compression fuck up textures ingame
         lLayer->flags &= ~FLAG_ALPHA_COMPRESSED;
 
-        lMCAL_Size += alphamaps[j - 1].size();
+        lMCAL_Size += static_cast<int>(alphamaps[j - 1].size());
       }
     }
 
   }
 
-  lCurrentPosition += 8 + lMCLY_Size;
-  lMCNK_Size += 8 + lMCLY_Size;
+  lCurrentPosition += 8 + static_cast<int>(lMCLY_Size);
+  lMCNK_Size += 8 + static_cast<int>(lMCLY_Size);
   //        }
 
   // MCRF
@@ -1595,13 +1603,13 @@ void MapChunk::save(sExtendableArray& lADTFile
     lID++;
   }
 
-  int lMCRF_Size = 4 * (lDoodadIDs.size() + lObjectIDs.size());
+  int lMCRF_Size = static_cast<int>(4 * (lDoodadIDs.size() + lObjectIDs.size()));
   lADTFile.Extend(8 + lMCRF_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCRF', lMCRF_Size);
 
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsRefs = lCurrentPosition - lMCNK_Position;
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nDoodadRefs = lDoodadIDs.size();
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nMapObjRefs = lObjectIDs.size();
+  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nDoodadRefs = static_cast<std::uint32_t>(lDoodadIDs.size());
+  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nMapObjRefs = static_cast<std::uint32_t>(lObjectIDs.size());
 
   // MCRF data
   int *lReferences = lADTFile.GetPointer<int>(lCurrentPosition + 8);

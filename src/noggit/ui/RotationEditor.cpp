@@ -55,7 +55,7 @@ namespace Noggit
       _rotation_z->setDecimals (3);
       _rotation_z->setWrapping(true);
       _rotation_z->setSingleStep(5.0f);
-      _rotation_y->setRange (0.f, 360.f);
+      _rotation_y->setRange(-180.f, 180.f);
       _rotation_y->setDecimals (3);
       _rotation_y->setWrapping(true);
       _rotation_y->setSingleStep(5.0f);

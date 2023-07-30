@@ -24,6 +24,31 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
     << "<br><b>textures used:</b> " << chunk->texture_set->num()
     << "<br><b>textures:</b><span>";
 
+  // liquid details if the chunk has liquid data
+  if (chunk->mt->Water.hasData(0))
+  {
+      ChunkWater* waterchunk = chunk->liquid_chunk();
+
+      MH2O_Render liquid_render = waterchunk->Render.value_or(MH2O_Render{ 0xffffffffffffffff,0xffffffffffffffff });
+
+      if (waterchunk->hasData(0))
+      {
+          
+          liquid_layer liquid = waterchunk->getLayers()->at(0); // only getting data from layer 0, maybe loop them ?
+          int liquid_flags = liquid.getSubchunks();
+
+          select_info << "\nliquid type: " << liquid.liquidID() << " (\"" << gLiquidTypeDB.getLiquidName(liquid.liquidID()) << "\")"
+              << "\nliquid flags: "
+              // getting flags from the center tile
+              << ((liquid_render.fishable >> (4 * 8 + 4)) & 1 ? "fishable " : "")
+              << ((liquid_render.fatigue >> (4 * 8 + 4)) & 1 ? "fatigue" : "");
+      }
+  }
+  else
+  {
+      select_info << "\nno liquid data";
+  }
+
   unsigned counter = 0;
   for (auto& tex : *(chunk->texture_set->getTextures()))
   {

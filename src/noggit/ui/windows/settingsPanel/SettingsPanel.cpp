@@ -19,11 +19,16 @@
 #include <QDir>
 #include <QApplication>
 
+#ifdef USE_MYSQL_UID_STORAGE
+#include <mysql/mysql.h>
+#endif
+
 #include <ui_SettingsPanel.h>
 #include <ui_TitleBar.h>
 
 
 #include <algorithm>
+#include <qmessagebox.h>
 
 
 namespace Noggit
@@ -85,6 +90,7 @@ namespace Noggit
 
 #ifdef USE_MYSQL_UID_STORAGE
       ui->MySQL_box->setEnabled(true);
+      ui->MySQL_box->setCheckable(true);
       ui->mysql_warning->setVisible(false);
 #endif
 
@@ -157,6 +163,15 @@ namespace Noggit
               }
       );
 
+      connect(ui->mysql_connect_test, &QPushButton::clicked, [this]
+          {
+              save_changes();
+              #ifdef USE_MYSQL_UID_STORAGE
+              mysql::testConnection();
+              #endif
+          }
+      );
+
       // load the values in the fields
       discard_changes();
     }
@@ -179,6 +194,7 @@ namespace Noggit
       ui->_uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
       ui->_systemWindowFrame->setChecked(_settings->value("systemWindowFrame", true).toBool());
       ui->_nativeMenubar->setChecked(_settings->value("nativeMenubar", true).toBool());
+      ui->_classic_ui->setChecked(_settings->value("classicUI", false).toBool());
       ui->_additional_file_loading_log->setChecked(
           _settings->value("additional_file_loading_log", false).toBool());
       ui->_keyboard_locale->setCurrentText(_settings->value("keyboard_locale", "QWERTY").toString());
@@ -200,11 +216,31 @@ namespace Noggit
 
 
 #ifdef USE_MYSQL_UID_STORAGE
-      ui->_mysql_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
-      ui->_mysql_server_field->setText (_settings->value ("project/mysql/server").toString());
-      ui->_mysql_user_field->setText(_settings->value ("project/mysql/user").toString());
-      ui->_mysql_pwd_field->setText (_settings->value ("project/mysql/pwd").toString());
-      ui->_mysql_db_field->setText (_settings->value ("project/mysql/db").toString());
+      ui->MySQL_box->setChecked (_settings->value ("project/mysql/enabled").toBool());
+
+      auto server_str = _settings->value("project/mysql/server", "127.0.0.1").toString();
+      auto user_str = _settings->value("project/mysql/user", "127.0.0.1").toString();
+      auto pwd_str = _settings->value("project/mysql/pwd", "127.0.0.1").toString();
+      auto db_str = _settings->value("project/mysql/db", "127.0.0.1").toString();
+      auto port_int = _settings->value("project/mysql/port", "127.0.0.1").toInt();
+
+      // set some default
+      if (server_str.isEmpty())
+          server_str = "127.0.0.1";
+      if (user_str.isEmpty())
+          user_str = "root";
+      if (pwd_str.isEmpty())
+          pwd_str = "root";
+      if (db_str.isEmpty())
+          db_str = "noggit";
+      if (!port_int)
+          port_int = 3306;
+
+      ui->_mysql_server_field->setText (server_str);
+      ui->_mysql_user_field->setText(user_str);
+      ui->_mysql_pwd_field->setText (pwd_str);
+      ui->_mysql_db_field->setText (db_str);
+      ui->_mysql_port_field->setValue (port_int);
 #endif
 
       int wireframe_type = _settings->value("wireframe/type", 0).toInt();
@@ -243,13 +279,15 @@ namespace Noggit
       _settings->setValue("keyboard_locale", ui->_keyboard_locale->currentText());
       _settings->setValue("systemWindowFrame", ui->_systemWindowFrame->isChecked());
       _settings->setValue("nativeMenubar", ui->_nativeMenubar->isChecked());
+      _settings->setValue("classicUI", ui->_classic_ui->isChecked());
 
 #ifdef USE_MYSQL_UID_STORAGE
-      _settings->setValue ("project/mysql/enabled", _mysql_box->isChecked());
-      _settings->setValue ("project/mysql/server", _mysql_server_field->text());
-      _settings->setValue ("project/mysql/user", _mysql_user_field->text());
-      _settings->setValue ("project/mysql/pwd", _mysql_pwd_field->text());
-      _settings->setValue ("project/mysql/db", _mysql_db_field->text());
+      _settings->setValue ("project/mysql/enabled", ui->MySQL_box->isChecked());
+      _settings->setValue ("project/mysql/server", ui->_mysql_server_field->text());
+      _settings->setValue ("project/mysql/user", ui->_mysql_user_field->text());
+      _settings->setValue ("project/mysql/pwd", ui->_mysql_pwd_field->text());
+      _settings->setValue ("project/mysql/db", ui->_mysql_db_field->text());
+      _settings->setValue ("project/mysql/port", ui->_mysql_port_field->text());
 #endif
 
       _settings->setValue("wireframe/type", ui->radio_wire_cursor->isChecked());

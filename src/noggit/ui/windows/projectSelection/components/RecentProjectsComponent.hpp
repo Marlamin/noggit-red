@@ -18,7 +18,8 @@ namespace Noggit::Ui::Component
     static void buildRecentProjectsList(Noggit::Ui::Windows::NoggitProjectSelectionWindow* parent);
     static void registerProjectChange(std::string const& project_path);
     static void registerProjectRemove(std::string const& project_path);
-
+  private:
+      static void openDirectory(std::string const& directory_path);
 
   };
 }

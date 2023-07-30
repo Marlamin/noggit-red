@@ -22,6 +22,7 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
 {
   glm::vec3 pos(xbase, 0.0f, zbase);
 
+  if (!Render.has_value()) Render.emplace();
   for (mclq& liquid : layers)
   {
     std::uint8_t mclq_liquid_type = 0;
@@ -32,8 +33,8 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
       {
         mclq_tile const& tile = liquid.tiles[z * 8 + x];
 
-        misc::bit_or(Render.fishable, x, z, tile.fishable);
-        misc::bit_or(Render.fatigue, x, z, tile.fatigue);
+        misc::bit_or(Render.value().fishable, x, z, tile.fishable);
+        misc::bit_or(Render.value().fatigue, x, z, tile.fatigue);
 
         if (!tile.dont_render)
         {
@@ -79,8 +80,9 @@ void ChunkWater::fromFile(BlizzardArchive::ClientFile &f, size_t basePos)
   //render
   if (header.ofsRenderMask)
   {
-    f.seek(basePos + header.ofsRenderMask + sizeof(MH2O_Render));
-    f.read(&Render, sizeof(MH2O_Render));
+    Render.emplace();
+    f.seek(basePos + header.ofsRenderMask);
+    f.read(&Render.value(), sizeof(MH2O_Render));
   }
 
   for (std::size_t k = 0; k < header.nLayers; ++k)
@@ -120,18 +122,26 @@ void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int&
 
   if (hasData(0))
   {
-    header.nLayers = _layers.size();
-    header.ofsRenderMask = current_pos - base_pos;
-    adt.Insert(current_pos, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render));
-    current_pos += sizeof(MH2O_Render);
+    header.nLayers = static_cast<std::uint32_t>(_layers.size());
+
+    if (Render.has_value())
+    {
+        header.ofsRenderMask = current_pos - base_pos;
+        adt.Insert(current_pos, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render.value()));
+        current_pos += sizeof(MH2O_Render);
+    }
+    else
+    {
+        header.ofsRenderMask = 0;
+    }
 
     header.ofsInformation = current_pos - base_pos;
     int info_pos = current_pos;
 
     std::size_t info_size = sizeof(MH2O_Information) * _layers.size();
-    current_pos += info_size;
+    current_pos += static_cast<std::uint32_t>(info_size);
 
-    adt.Extend(info_size);
+    adt.Extend(static_cast<long>(info_size));
 
     for (liquid_layer& layer : _layers)
     {
@@ -305,7 +315,7 @@ void ChunkWater::paintLiquid( glm::vec3 const& pos
 
 void ChunkWater::cleanup()
 {
-  for (int i = _layers.size() - 1; i >= 0; --i)
+  for (int i = static_cast<int>(_layers.size() - 1); i >= 0; --i)
   {
     if (_layers[i].empty())
     {

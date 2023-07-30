@@ -248,7 +248,7 @@ namespace OpenGL
       if (loc < 0)
         return;
 
-      gl.uniform1iv (loc, value.size(), value.data());
+      gl.uniform1iv (loc, static_cast<GLsizei>(value.size()), value.data());
     }
     void use_program::uniform (std::string const& name, int const* data, std::size_t size)
     {
@@ -256,7 +256,7 @@ namespace OpenGL
       if (loc < 0)
         return;
 
-      gl.uniform1iv (loc, size, data);
+      gl.uniform1iv (loc, static_cast<GLsizei>(size), data);
     }
     void use_program::uniform (std::string const& name, glm::vec3 const* data, std::size_t size)
     {
@@ -264,11 +264,11 @@ namespace OpenGL
       if (loc < 0)
         return;
 
-      gl.uniform3fv (loc, size, reinterpret_cast<const GLfloat*>(data));
+      gl.uniform3fv (loc, static_cast<GLsizei>(size), reinterpret_cast<const GLfloat*>(data));
     }
     void use_program::uniform (GLint pos, std::vector<int> const& value)
     {
-      gl.uniform1iv (pos, value.size(), value.data());
+      gl.uniform1iv (pos, static_cast<GLsizei>(value.size()), value.data());
     }
     void use_program::uniform (std::string const& name, std::vector<glm::vec3> const& value)
     {
@@ -276,7 +276,15 @@ namespace OpenGL
       if (loc < 0)
         return;
 
-      gl.uniform3fv (loc, value.size(), glm::value_ptr(value[0]));
+      gl.uniform3fv (loc, static_cast<GLsizei>(value.size()), glm::value_ptr(value[0]));
+    }
+    void use_program::uniform(std::string const& name, std::vector<glm::vec4> const& value)
+    {
+        GLuint loc = uniform_location(name);
+        if (loc < 0)
+            return;
+
+        gl.uniform4fv(loc, static_cast<GLsizei>(value.size()), glm::value_ptr(value[0]));
     }
     void use_program::uniform_chunk_textures (std::string const& name, std::array<std::array<std::array<int, 2>, 4>, 256> const& value)
     {
@@ -288,7 +296,11 @@ namespace OpenGL
     }
     void use_program::uniform (GLint pos, std::vector<glm::vec3> const& value)
     {
-      gl.uniform3fv (pos, value.size(),glm::value_ptr(value[0]));
+      gl.uniform3fv (pos, static_cast<GLsizei>(value.size()),glm::value_ptr(value[0]));
+    }
+    void use_program::uniform(GLint pos, std::vector<glm::vec4> const& value)
+    {
+        gl.uniform4fv(pos, static_cast<GLsizei>(value.size()), glm::value_ptr(value[0]));
     }
     void use_program::uniform (std::string const& name, glm::vec2 const& value)
     {
@@ -425,7 +437,7 @@ namespace OpenGL
     void use_program::attrib_divisor(std::string const& name, GLuint divisor, GLsizei range)
     {
       GLuint const location (attrib_location (name));
-      for (GLuint i = 0; i < range; ++i)
+      for (GLuint i = 0; i < static_cast<GLuint>(range); ++i)
       {
         gl.vertexAttribDivisor(location + i, divisor);
       }

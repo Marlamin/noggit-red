@@ -29,176 +29,326 @@ SkyFloatParam::SkyFloatParam(int t, float val)
 {
 }
 
+SkyParam::SkyParam(int paramId, Noggit::NoggitRenderContext context)
+: _context(context)
+{
+    Id = paramId;
+
+    if (paramId == 0)
+        return; // don't initialise entry
+
+    for (int i = 0; i < 36; ++i)
+    {
+        mmin[i] = -2;
+    }
+
+    for (int i = 0; i < 6; ++i)
+    {
+        mmin_float[i] = -2;
+    }
+
+    // int light_param_0 = data->getInt(LightDB::DataIDs);
+    int light_int_start = paramId * NUM_SkyColorNames - 17;
+
+    for (int i = 0; i < NUM_SkyColorNames; ++i)
+    {
+        try
+        {
+            DBCFile::Record rec = gLightIntBandDB.getByID(light_int_start + i);
+            int entries = rec.getInt(LightIntBandDB::Entries);
+
+            if (entries == 0)
+            {
+                mmin[i] = -1;
+            }
+            else
+            {
+                mmin[i] = rec.getInt(LightIntBandDB::Times);
+                for (int l = 0; l < entries; l++)
+                {
+                    SkyColor sc(rec.getInt(LightIntBandDB::Times + l), rec.getInt(LightIntBandDB::Values + l));
+                    colorRows[i].push_back(sc);
+                }
+            }
+        }
+        catch (...)
+        {
+            // LogError << "When trying to intialize sky " << data->getInt(LightDB::ID) << ", there was an error with getting an entry in a DBC (" << i << "). Sorry." << std::endl;
+            LogError << "When trying to intialize sky, there was an error with getting an entry in LightIntBand DBC (" << i << "). Sorry." << std::endl;
+            DBCFile::Record rec = gLightIntBandDB.getByID(i);
+            int entries = rec.getInt(LightIntBandDB::Entries);
+
+            if (entries == 0)
+            {
+                mmin[i] = -1;
+            }
+            else
+            {
+                mmin[i] = rec.getInt(LightIntBandDB::Times);
+                for (int l = 0; l < entries; l++)
+                {
+                    SkyColor sc(rec.getInt(LightIntBandDB::Times + l), rec.getInt(LightIntBandDB::Values + l));
+                    colorRows[i].push_back(sc);
+                }
+            }
+        }
+    }
+
+    int light_float_start = paramId * NUM_SkyFloatParamsNames - 5;
+
+    for (int i = 0; i < NUM_SkyFloatParamsNames; ++i)
+    {
+        try
+        {
+            DBCFile::Record rec = gLightFloatBandDB.getByID(light_float_start + i);
+            int entries = rec.getInt(LightFloatBandDB::Entries);
+
+            if (entries == 0)
+            {
+                mmin_float[i] = -1;
+            }
+            else
+            {
+                mmin_float[i] = rec.getInt(LightFloatBandDB::Times);
+                for (int l = 0; l < entries; l++)
+                {
+                    SkyFloatParam sc(rec.getInt(LightFloatBandDB::Times + l), rec.getFloat(LightFloatBandDB::Values + l));
+                    floatParams[i].push_back(sc);
+                }
+            }
+        }
+        catch (...)
+        {
+            LogError << "When trying to intialize sky, there was an error with getting an entry in LightFloatBand DBC (" << i << "). Sorry." << std::endl;
+            DBCFile::Record rec = gLightFloatBandDB.getByID(i);
+            int entries = rec.getInt(LightFloatBandDB::Entries);
+
+            if (entries == 0)
+            {
+                mmin_float[i] = -1;
+            }
+            else
+            {
+                mmin_float[i] = rec.getInt(LightFloatBandDB::Times);
+                for (int l = 0; l < entries; l++)
+                {
+                    SkyFloatParam sc(rec.getInt(LightFloatBandDB::Times + l), rec.getFloat(LightFloatBandDB::Values + l));
+                    floatParams[i].push_back(sc);
+                }
+            }
+        }
+    }
+
+    try
+    {
+        DBCFile::Record light_param = gLightParamsDB.getByID(paramId);
+        int skybox_id = light_param.getInt(LightParamsDB::skybox);
+
+        _highlight_sky = light_param.getInt(LightParamsDB::highlightSky);
+        _river_shallow_alpha = light_param.getFloat(LightParamsDB::water_shallow_alpha);
+        _river_deep_alpha = light_param.getFloat(LightParamsDB::water_deep_alpha);
+        _ocean_shallow_alpha = light_param.getFloat(LightParamsDB::ocean_shallow_alpha);
+        _ocean_deep_alpha = light_param.getFloat(LightParamsDB::ocean_deep_alpha);
+        _glow = light_param.getFloat(LightParamsDB::glow);
+
+        if (skybox_id)
+        {
+            skybox.emplace(gLightSkyboxDB.getByID(skybox_id).getString(LightSkyboxDB::filename), _context);
+        }
+    }
+    catch (...)
+    {
+        LogError << "When trying to get the skybox for the entry " << paramId << " in LightParams.dbc. Sad." << std::endl;
+    }
+}
+
+
 Sky::Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context)
 : _context(context)
 , _selected(false)
 {
+  Id = data->getInt(LightDB::ID);
   pos = glm::vec3(data->getFloat(LightDB::PositionX) / skymul, data->getFloat(LightDB::PositionY) / skymul, data->getFloat(LightDB::PositionZ) / skymul);
   r1 = data->getFloat(LightDB::RadiusInner) / skymul;
   r2 = data->getFloat(LightDB::RadiusOuter) / skymul;
 
-  for (int i = 0; i < 36; ++i)
-  {
-    mmin[i] = -2;
-  }
+  // for (int i = 0; i < 36; ++i)
+  // {
+  //   mmin[i] = -2;
+  // }
 
-  for (int i = 0; i < 6; ++i)
-  {
-    mmin_float[i] = -2;
-  }
+  // for (int i = 0; i < 6; ++i)
+  // {
+  //   mmin_float[i] = -2;
+  // }
 
   global = (pos.x == 0.0f && pos.y == 0.0f && pos.z == 0.0f);
 
-  int light_param_0 = data->getInt(LightDB::DataIDs);
-  int light_int_start = light_param_0 * NUM_SkyColorNames - 17;
+  // int light_param_0 = data->getInt(LightDB::DataIDs);
+  // int light_int_start = light_param_0 * NUM_SkyColorNames - 17;
 
-  for (int i = 0; i < NUM_SkyColorNames; ++i)
+  for (int i = 0; i < NUM_SkyParamsNames; ++i)
   {
-    try
-    {
-      DBCFile::Record rec = gLightIntBandDB.getByID(light_int_start + i);
-      int entries = rec.getInt(LightIntBandDB::Entries);
+      int sky_param_id = data->getInt(LightDB::DataIDs + i);
+      if (sky_param_id == 0)
+      {
+          skyParams[i] = nullptr;
+          continue;
+      }
 
-      if (entries == 0)
-      {
-        mmin[i] = -1;
-      }
-      else
-      {
-        mmin[i] = rec.getInt(LightIntBandDB::Times);
-        for (int l = 0; l < entries; l++)
-        {
-          SkyColor sc(rec.getInt(LightIntBandDB::Times + l), rec.getInt(LightIntBandDB::Values + l));
-          colorRows[i].push_back(sc);
-        }
-      }
-    }
-    catch (...)
-    {
-      LogError << "When trying to intialize sky " << data->getInt(LightDB::ID) << ", there was an error with getting an entry in a DBC (" << i << "). Sorry." << std::endl;
-      DBCFile::Record rec = gLightIntBandDB.getByID(i);
-      int entries = rec.getInt(LightIntBandDB::Entries);
-
-      if (entries == 0)
-      {
-        mmin[i] = -1;
-      }
-      else
-      {
-        mmin[i] = rec.getInt(LightIntBandDB::Times);
-        for (int l = 0; l < entries; l++)
-        {
-          SkyColor sc(rec.getInt(LightIntBandDB::Times + l), rec.getInt(LightIntBandDB::Values + l));
-          colorRows[i].push_back(sc);
-        }
-      }
-    }
+      SkyParam* sky_param = new SkyParam(sky_param_id, _context);
+      skyParams[i] = sky_param;
   }
 
-  int light_float_start = light_param_0 * NUM_SkyFloatParamsNames - 5;
-
-  for (int i = 0; i < NUM_SkyFloatParamsNames; ++i)
-  {
-    try
-    {
-      DBCFile::Record rec = gLightFloatBandDB.getByID(light_float_start + i);
-      int entries = rec.getInt(LightFloatBandDB::Entries);
-
-      if (entries == 0)
-      {
-        mmin_float[i] = -1;
-      }
-      else
-      {
-        mmin_float[i] = rec.getInt(LightFloatBandDB::Times);
-        for (int l = 0; l < entries; l++)
-        {
-          SkyFloatParam sc(rec.getInt(LightFloatBandDB::Times + l), rec.getFloat(LightFloatBandDB::Values + l));
-          floatParams[i].push_back(sc);
-        }
-      }
-    }
-    catch (...)
-    {
-      LogError << "When trying to intialize sky " << data->getInt(LightDB::ID) << ", there was an error with getting an entry in a DBC (" << i << "). Sorry." << std::endl;
-      DBCFile::Record rec = gLightFloatBandDB.getByID(i);
-      int entries = rec.getInt(LightFloatBandDB::Entries);
-
-      if (entries == 0)
-      {
-        mmin_float[i] = -1;
-      }
-      else
-      {
-        mmin_float[i] = rec.getInt(LightFloatBandDB::Times);
-        for (int l = 0; l < entries; l++)
-        {
-          SkyFloatParam sc(rec.getInt(LightFloatBandDB::Times + l), rec.getFloat(LightFloatBandDB::Values + l));
-          floatParams[i].push_back(sc);
-        }
-      }
-    }
-  }
-
-  try
-  {
-    DBCFile::Record light_param = gLightParamsDB.getByID(light_param_0);
-    int skybox_id = light_param.getInt(LightParamsDB::skybox);
-
-    _river_shallow_alpha = light_param.getFloat(LightParamsDB::water_shallow_alpha);
-    _river_deep_alpha = light_param.getFloat(LightParamsDB::water_deep_alpha);
-    _ocean_shallow_alpha = light_param.getFloat(LightParamsDB::ocean_shallow_alpha);
-    _ocean_deep_alpha = light_param.getFloat(LightParamsDB::ocean_deep_alpha);
-    _glow = light_param.getFloat(LightParamsDB::glow);
-
-    if (skybox_id)
-    {
-      skybox.emplace(gLightSkyboxDB.getByID(skybox_id).getString(LightSkyboxDB::filename), _context);
-    }
-  }
-  catch (...)
-  {
-    LogError << "When trying to get the skybox for the entry " << light_param_0 << " in LightParams.dbc. Sad." << std::endl;
-  }
+  // for (int i = 0; i < NUM_SkyColorNames; ++i)
+  // {
+  //   try
+  //   {
+  //     DBCFile::Record rec = gLightIntBandDB.getByID(light_int_start + i);
+  //     int entries = rec.getInt(LightIntBandDB::Entries);
+  // 
+  //     if (entries == 0)
+  //     {
+  //       mmin[i] = -1;
+  //     }
+  //     else
+  //     {
+  //       mmin[i] = rec.getInt(LightIntBandDB::Times);
+  //       for (int l = 0; l < entries; l++)
+  //       {
+  //         SkyColor sc(rec.getInt(LightIntBandDB::Times + l), rec.getInt(LightIntBandDB::Values + l));
+  //         colorRows[i].push_back(sc);
+  //       }
+  //     }
+  //   }
+  //   catch (...)
+  //   {
+  //     LogError << "When trying to intialize sky " << data->getInt(LightDB::ID) << ", there was an error with getting an entry in a DBC (" << i << "). Sorry." << std::endl;
+  //     DBCFile::Record rec = gLightIntBandDB.getByID(i);
+  //     int entries = rec.getInt(LightIntBandDB::Entries);
+  // 
+  //     if (entries == 0)
+  //     {
+  //       mmin[i] = -1;
+  //     }
+  //     else
+  //     {
+  //       mmin[i] = rec.getInt(LightIntBandDB::Times);
+  //       for (int l = 0; l < entries; l++)
+  //       {
+  //         SkyColor sc(rec.getInt(LightIntBandDB::Times + l), rec.getInt(LightIntBandDB::Values + l));
+  //         colorRows[i].push_back(sc);
+  //       }
+  //     }
+  //   }
+  // }
+  // 
+  // int light_float_start = light_param_0 * NUM_SkyFloatParamsNames - 5;
+  // 
+  // for (int i = 0; i < NUM_SkyFloatParamsNames; ++i)
+  // {
+  //   try
+  //   {
+  //     DBCFile::Record rec = gLightFloatBandDB.getByID(light_float_start + i);
+  //     int entries = rec.getInt(LightFloatBandDB::Entries);
+  // 
+  //     if (entries == 0)
+  //     {
+  //       mmin_float[i] = -1;
+  //     }
+  //     else
+  //     {
+  //       mmin_float[i] = rec.getInt(LightFloatBandDB::Times);
+  //       for (int l = 0; l < entries; l++)
+  //       {
+  //         SkyFloatParam sc(rec.getInt(LightFloatBandDB::Times + l), rec.getFloat(LightFloatBandDB::Values + l));
+  //         floatParams[i].push_back(sc);
+  //       }
+  //     }
+  //   }
+  //   catch (...)
+  //   {
+  //     LogError << "When trying to intialize sky " << data->getInt(LightDB::ID) << ", there was an error with getting an entry in a DBC (" << i << "). Sorry." << std::endl;
+  //     DBCFile::Record rec = gLightFloatBandDB.getByID(i);
+  //     int entries = rec.getInt(LightFloatBandDB::Entries);
+  // 
+  //     if (entries == 0)
+  //     {
+  //       mmin_float[i] = -1;
+  //     }
+  //     else
+  //     {
+  //       mmin_float[i] = rec.getInt(LightFloatBandDB::Times);
+  //       for (int l = 0; l < entries; l++)
+  //       {
+  //         SkyFloatParam sc(rec.getInt(LightFloatBandDB::Times + l), rec.getFloat(LightFloatBandDB::Values + l));
+  //         floatParams[i].push_back(sc);
+  //       }
+  //     }
+  //   }
+  // }
+  // 
+  // try
+  // {
+  //   DBCFile::Record light_param = gLightParamsDB.getByID(light_param_0);
+  //   int skybox_id = light_param.getInt(LightParamsDB::skybox);
+  // 
+  //   _highlight_sky = light_param.getInt(LightParamsDB::highlightSky);
+  //   _river_shallow_alpha = light_param.getFloat(LightParamsDB::water_shallow_alpha);
+  //   _river_deep_alpha = light_param.getFloat(LightParamsDB::water_deep_alpha);
+  //   _ocean_shallow_alpha = light_param.getFloat(LightParamsDB::ocean_shallow_alpha);
+  //   _ocean_deep_alpha = light_param.getFloat(LightParamsDB::ocean_deep_alpha);
+  //   _glow = light_param.getFloat(LightParamsDB::glow);
+  // 
+  //   if (skybox_id)
+  //   {
+  //     skybox.emplace(gLightSkyboxDB.getByID(skybox_id).getString(LightSkyboxDB::filename), _context);
+  //   }
+  // }
+  // catch (...)
+  // {
+  //   LogError << "When trying to get the skybox for the entry " << light_param_0 << " in LightParams.dbc. Sad." << std::endl;
+  // }
 }
 
 float Sky::floatParamFor(int r, int t) const
 {
-  if (mmin_float[r]<0)
+  auto sky_param = skyParams[curr_sky_param];
+  if (sky_param->mmin_float[r]<0)
   {
     return 0.0;
   }
   float c1, c2;
   int t1, t2;
-  size_t last = floatParams[r].size() - 1;
+  size_t last = sky_param->floatParams[r].size() - 1;
 
-  if (t<mmin_float[r])
+  if (t< sky_param->mmin_float[r])
   {
     // reverse interpolate
-    c1 = floatParams[r][last].value;
-    c2 = floatParams[r][0].value;
-    t1 = floatParams[r][last].time;
-    t2 = floatParams[r][0].time + 2880;
+    c1 = sky_param->floatParams[r][last].value;
+    c2 = sky_param->floatParams[r][0].value;
+    t1 = sky_param->floatParams[r][last].time;
+    t2 = sky_param->floatParams[r][0].time + 2880;
     t += 2880;
   }
   else
   {
     for (size_t i = last; true; i--)
     { //! \todo iterator this.
-      if (floatParams[r][i].time <= t)
+      if (sky_param->floatParams[r][i].time <= t)
       {
-        c1 = floatParams[r][i].value;
-        t1 = floatParams[r][i].time;
+        c1 = sky_param->floatParams[r][i].value;
+        t1 = sky_param->floatParams[r][i].time;
 
         if (i == last)
         {
-          c2 = floatParams[r][0].value;
-          t2 = floatParams[r][0].time + 2880;
+          c2 = sky_param->floatParams[r][0].value;
+          t2 = sky_param->floatParams[r][0].time + 2880;
         }
         else
         {
-          c2 = floatParams[r][i + 1].value;
-          t2 = floatParams[r][i + 1].time;
+          c2 = sky_param->floatParams[r][i + 1].value;
+          t2 = sky_param->floatParams[r][i + 1].time;
         }
         break;
       }
@@ -211,45 +361,57 @@ float Sky::floatParamFor(int r, int t) const
 
 glm::vec3 Sky::colorFor(int r, int t) const
 {
-  if (mmin[r]<0)
+  auto sky_param = skyParams[curr_sky_param];
+  if (sky_param->mmin[r]<0)
   {
     return glm::vec3(0, 0, 0);
   }
   glm::vec3 c1, c2;
   int t1, t2;
-  size_t last = colorRows[r].size() - 1;
+  int last = static_cast<int>(sky_param->colorRows[r].size()) - 1;
 
-  if (t<mmin[r])
+  if (last == 0)
   {
-    // reverse interpolate
-    c1 = colorRows[r][last].color;
-    c2 = colorRows[r][0].color;
-    t1 = colorRows[r][last].time;
-    t2 = colorRows[r][0].time + 2880;
-    t += 2880;
+      c1 = sky_param->colorRows[r][last].color;
+      c2 = sky_param->colorRows[r][0].color;
+      t1 = sky_param->colorRows[r][last].time;
+      t2 = sky_param->colorRows[r][0].time + 2880;
+      t += 2880;
   }
   else
   {
-    for (size_t i = last; true; i--)
-    { //! \todo iterator this.
-      if (colorRows[r][i].time <= t)
+      if (t < sky_param->mmin[r])
       {
-        c1 = colorRows[r][i].color;
-        t1 = colorRows[r][i].time;
-
-        if (i == last)
-        {
-          c2 = colorRows[r][0].color;
-          t2 = colorRows[r][0].time + 2880;
-        }
-        else
-        {
-          c2 = colorRows[r][i + 1].color;
-          t2 = colorRows[r][i + 1].time;
-        }
-        break;
+          // reverse interpolate
+          c1 = sky_param->colorRows[r][last].color;
+          c2 = sky_param->colorRows[r][0].color;
+          t1 = sky_param->colorRows[r][last].time;
+          t2 = sky_param->colorRows[r][0].time + 2880;
+          t += 2880;
       }
-    }
+      else
+      {
+          for (int i = last; true; i--)
+          { //! \todo iterator this.
+              if (sky_param->colorRows[r][i].time <= t)
+              {
+                  c1 = sky_param->colorRows[r][i].color;
+                  t1 = sky_param->colorRows[r][i].time;
+
+                  if (i == last)
+                  {
+                      c2 = sky_param->colorRows[r][0].color;
+                      t2 = sky_param->colorRows[r][0].time + 2880;
+                  }
+                  else
+                  {
+                      c2 = sky_param->colorRows[r][i + 1].color;
+                      t2 = sky_param->colorRows[r][i + 1].time;
+                  }
+                  break;
+              }
+          }
+      }
   }
 
   float tt = static_cast<float>(t - t1) / static_cast<float>(t2 - t1);
@@ -350,6 +512,51 @@ Sky* Skies::findSkyWeights(glm::vec3 pos)
   return default_sky;
 }
 
+Sky* Skies::findClosestSkyByWeight()
+{
+    // gets the highest weight sky
+    if (skies.size() == 0)
+        return nullptr;
+
+    Sky* closest_sky = &skies[0];
+    for (auto& sky : skies)
+    {
+        if (sky.weight > closest_sky->weight)
+            closest_sky = &sky;
+    }
+    return closest_sky;
+}
+
+Sky* Skies::findClosestSkyByDistance(glm::vec3 pos)
+{
+    if (skies.size() == 0)
+        return nullptr;
+
+    Sky* closest = &skies[0];
+    float distance = 1000000.f;
+    for (auto& sky : skies)
+    {
+        float distanceToCenter = glm::distance(pos, sky.pos);
+
+        if (distanceToCenter <= sky.r2 && distanceToCenter < distance)
+        {
+            distance = distanceToCenter;
+            closest = &sky;
+        }
+    }
+
+    return closest;
+}
+
+void Skies::setCurrentParam(int param_id)
+{
+    for (auto& sky : skies)
+    {
+        Sky* skyptr = &sky;
+        skyptr->curr_sky_param = param_id;
+    }
+}
+
 void Skies::update_sky_colors(glm::vec3 pos, int time)
 {
   if (numSkies == 0 || (_last_time == time && _last_pos == pos))
@@ -369,11 +576,12 @@ void Skies::update_sky_colors(glm::vec3 pos, int time)
     _fog_distance = default_sky->floatParamFor(0, time);
     _fog_multiplier = default_sky->floatParamFor(1, time);
 
-    _river_shallow_alpha = default_sky->river_shallow_alpha();
-    _river_deep_alpha = default_sky->river_deep_alpha();
-    _ocean_shallow_alpha = default_sky->ocean_shallow_alpha();
-    _ocean_deep_alpha = default_sky->ocean_deep_alpha();
-    _glow = default_sky->glow();
+    auto default_sky_param = default_sky->skyParams[default_sky->curr_sky_param];
+    _river_shallow_alpha = default_sky_param->river_shallow_alpha();
+    _river_deep_alpha = default_sky_param->river_deep_alpha();
+    _ocean_shallow_alpha = default_sky_param->ocean_shallow_alpha();
+    _ocean_deep_alpha = default_sky_param->ocean_deep_alpha();
+    _glow = default_sky_param->glow();
 
   }
   else
@@ -417,13 +625,14 @@ void Skies::update_sky_colors(glm::vec3 pos, int time)
 
       _fog_distance = (_fog_distance * (1.0f - sky.weight)) + (sky.floatParamFor(0, time) * sky.weight);
       _fog_multiplier = (_fog_multiplier * (1.0f - sky.weight)) + (sky.floatParamFor(1, time) * sky.weight);
+      // sky.skyParams[sky.curr_sky_param]->river_shallow_alpha(); // new
+      // sky.skyParams[sky.curr_sky_param].river_shallow_alpha(); // old
+      _river_shallow_alpha = (_river_shallow_alpha * (1.0f - sky.weight)) + (sky.skyParams[sky.curr_sky_param]->river_shallow_alpha() * sky.weight);
+      _river_deep_alpha = (_river_deep_alpha * (1.0f - sky.weight)) + (sky.skyParams[sky.curr_sky_param]->river_deep_alpha() * sky.weight);
+      _ocean_shallow_alpha = (_ocean_shallow_alpha * (1.0f - sky.weight)) + (sky.skyParams[sky.curr_sky_param]->ocean_shallow_alpha() * sky.weight);
+      _ocean_deep_alpha = (_ocean_deep_alpha * (1.0f - sky.weight)) + (sky.skyParams[sky.curr_sky_param]->ocean_deep_alpha() * sky.weight);
 
-      _river_shallow_alpha = (_river_shallow_alpha * (1.0f - sky.weight)) + (sky.river_shallow_alpha() * sky.weight);
-      _river_deep_alpha = (_river_deep_alpha * (1.0f - sky.weight)) + (sky.river_deep_alpha() * sky.weight);
-      _ocean_shallow_alpha = (_ocean_shallow_alpha * (1.0f - sky.weight)) + (sky.ocean_shallow_alpha() * sky.weight);
-      _ocean_deep_alpha = (_ocean_deep_alpha * (1.0f - sky.weight)) + (sky.ocean_deep_alpha() * sky.weight);
-
-      _glow = (_glow * (1.0f - sky.weight)) + (sky.glow() * sky.weight);
+      _glow = (_glow * (1.0f - sky.weight)) + (sky.skyParams[sky.curr_sky_param]->glow() * sky.weight);
     }
 
   }
@@ -558,12 +767,15 @@ void Skies::drawLightingSpheres (glm::mat4x4 const& model_view
 {
   for (Sky& sky : skies)
   {
-    if (glm::distance(sky.pos, camera_pos) - sky.r2 <= cull_distance) // TODO: frustum cull here
+    if (glm::distance(sky.pos, camera_pos) <= cull_distance) // TODO: frustum cull here
     {
-      glm::vec3 diffuse = color_set[LIGHT_GLOBAL_DIFFUSE];
-      glm::vec3 ambient = color_set[LIGHT_GLOBAL_AMBIENT];
-      _sphere_render.draw(model_view * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
-      _sphere_render.draw(model_view * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
+        glm::vec4 diffuse = { color_set[LIGHT_GLOBAL_DIFFUSE], 1.f };
+        glm::vec4 ambient = { color_set[LIGHT_GLOBAL_AMBIENT], 1.f };
+
+        Log << sky.Id << " <=> (x,y,z) : " << sky.pos.x << "," << sky.pos.y << "," << sky.pos.z << " -- r1 : " << sky.r1 << " -- r2 : " << sky.r2 << std::endl;
+
+        _sphere_render.draw(model_view * projection, sky.pos, ambient, sky.r1, 32, 18, 1.f);
+        _sphere_render.draw(model_view * projection, sky.pos, diffuse, sky.r2, 32, 18, 1.f);
     }
   }
 }
@@ -586,7 +798,6 @@ void Skies::drawLightingSphereHandles (glm::mat4x4 const& model_view
       {
         glm::vec3 diffuse = color_set[LIGHT_GLOBAL_DIFFUSE];
         glm::vec3 ambient = color_set[LIGHT_GLOBAL_AMBIENT];
-
         _sphere_render.draw(model_view * projection, sky.pos, {ambient.x, ambient.y, ambient.z, 0.3}, sky.r1);
         _sphere_render.draw(model_view * projection, sky.pos, {diffuse.x, diffuse.y, diffuse.z, 0.3}, sky.r2);
       }
@@ -664,7 +875,7 @@ void main()
 
     for (int v = 0; v < cnum - 1; v++)
     {
-      int start = vertices.size();
+      int start = static_cast<int>(vertices.size());
 
       vertices.push_back(basepos2[v]);
       vertices.push_back(basepos1[v]);
@@ -684,7 +895,7 @@ void main()
   gl.bufferData<GL_ARRAY_BUFFER, glm::vec3>(_vertices_vbo, vertices, GL_STATIC_DRAW);
   gl.bufferData<GL_ELEMENT_ARRAY_BUFFER, std::uint16_t>(_indices_vbo, indices, GL_STATIC_DRAW);
 
-  _indices_count = indices.size();
+  _indices_count = static_cast<int>(indices.size());
 
   _uploaded = true;
   _need_vao_update = true;
@@ -826,4 +1037,143 @@ OutdoorLightStats OutdoorLighting::getLightStats(int time)
   out.interpolate(a, b, progressDayAndNight);
 
   return out;
+}
+
+void Sky::save_to_dbc()
+{
+    // Save Light.dbc record
+    // find new empty ID : gLightDB.getEmptyRecordID(); .prob do it when creating new light instead.
+    DBCFile::Record data = is_new_record ? gLightDB.addRecord(Id) : gLightDB.getByID(Id);
+
+    // pos = glm::vec3(data->getFloat(LightDB::PositionX) / skymul, data->getFloat(LightDB::PositionY) / skymul, data->getFloat(LightDB::PositionZ) / skymul);
+    // record.write(1, _curr_sky-> map id
+    data.write(LightDB::PositionX, pos.x * skymul);
+    data.write(LightDB::PositionY, pos.y * skymul);
+    data.write(LightDB::PositionZ, pos.z * skymul);
+    data.write(LightDB::RadiusInner, r1 * skymul);
+    data.write(LightDB::RadiusOuter,r2 * skymul);
+    // data.write(7, Params Id TODO only needed for new entries
+
+    // save LightParams.dbc
+    // TODO : all params, not just clear.
+    for (int param_id = 0; param_id < NUM_SkyFloatParamsNames; param_id++)
+    {
+        // skip if no param
+        if (skyParams[param_id] == nullptr)
+            continue;
+
+        // TODO : several lights can use the same param, ask user if he wants to save a copy or edit it for all ?
+        int lightParam_dbc_id = 0;
+        if (is_new_record) // not for duplicates
+            lightParam_dbc_id = gLightParamsDB.getEmptyRecordID();
+        else
+            lightParam_dbc_id = data.getInt(LightDB::DataIDs + param_id);
+
+        if (lightParam_dbc_id == 0)
+            continue;
+
+        int light_int_start = lightParam_dbc_id * NUM_SkyColorNames - 17;
+
+        for (int i = 0; i < NUM_SkyColorNames; ++i)
+        {
+            try
+            {
+                DBCFile::Record rec = is_new_record ? gLightIntBandDB.addRecord(light_int_start + i) : gLightIntBandDB.getByID(light_int_start + i);
+                // int entries = rec.getInt(LightIntBandDB::Entries);
+                int entries = static_cast<int>(skyParams[param_id]->colorRows[i].size());
+
+                rec.write(LightIntBandDB::Entries, entries); // nb of entries
+
+                for (int l = 0; l < 16; l++)
+                {
+                    if (l >= entries)
+                    {
+                        rec.write(LightIntBandDB::Times + l, 0);
+                        rec.write(LightIntBandDB::Values + l, 0);
+                    }
+                    else
+                    {
+                        rec.write(LightIntBandDB::Times + l, skyParams[param_id]->colorRows[i][l].time);
+                        
+                        int rebuilt_color_int = static_cast<int>(skyParams[param_id]->colorRows[i][l].color.z * 255.0f)
+                            + (static_cast<int>(skyParams[param_id]->colorRows[i][l].color.y * 255.0f) << 8)
+                            + (static_cast<int>(skyParams[param_id]->colorRows[i][l].color.x * 255.0f) << 16);
+                        rec.write(LightIntBandDB::Values + l, rebuilt_color_int);
+                    }
+                }
+            }
+            catch (...)
+            {
+                LogError << "When trying to intialize sky " << data.getInt(LightDB::ID) << ", there was an error with getting an entry in gLightIntBand (" << i << "). Sorry." << std::endl;
+            }
+        }
+
+        int light_float_start = lightParam_dbc_id * NUM_SkyFloatParamsNames - 5;
+
+        for (int i = 0; i < NUM_SkyFloatParamsNames; ++i)
+        {
+            try
+            {
+                DBCFile::Record rec = is_new_record ? gLightFloatBandDB.addRecord(light_float_start + i) : gLightFloatBandDB.getByID(light_float_start + i);
+                int entries = static_cast<int>(skyParams[param_id]->floatParams[i].size());
+
+                rec.write(LightFloatBandDB::Entries, entries); // nb of entries
+
+                // for (int l = 0; l < entries; l++)
+                for (int l = 0; l < 16; l++)
+                {
+                    if (l >= entries)
+                    {
+                        rec.write(LightFloatBandDB::Times + l, 0);
+                        rec.write(LightFloatBandDB::Values + l, 0.0f);
+                    }
+                    else
+                    {
+                        rec.write(LightFloatBandDB::Times + l, skyParams[param_id]->floatParams[i][l].time);
+                        rec.write(LightFloatBandDB::Values + l, skyParams[param_id]->floatParams[i][l].value);
+                    }
+                }
+            }
+            catch (...)
+            {
+                LogError << "When trying to intialize sky " << data.getInt(LightDB::ID) << ", there was an error with getting an entry in LightFloatBand (" << i << "). Sorry." << std::endl;
+            }
+        }
+
+        try
+        {
+            DBCFile::Record light_param = gLightParamsDB.getByID(lightParam_dbc_id);
+
+            if (skybox.has_value()) // TODO skybox dbc
+            {
+                // light_param.write(LightParamsDB::skybox, TODO);
+            }
+            else
+                light_param.write(LightParamsDB::skybox, 0);
+
+            light_param.write(LightParamsDB::highlightSky, int(skyParams[param_id]->highlight_sky()));
+            light_param.write(LightParamsDB::water_shallow_alpha, skyParams[param_id]->river_shallow_alpha());
+            light_param.write(LightParamsDB::water_deep_alpha, skyParams[param_id]->river_deep_alpha());
+            light_param.write(LightParamsDB::ocean_shallow_alpha, skyParams[param_id]->ocean_shallow_alpha());
+            light_param.write(LightParamsDB::ocean_deep_alpha, skyParams[param_id]->ocean_deep_alpha());
+            light_param.write(LightParamsDB::glow, skyParams[param_id]->glow());
+        }
+        catch (...)
+        {
+            LogError << "When trying to get the skybox for the entry " << lightParam_dbc_id << " in LightParams.dbc. Sad." << std::endl;
+        }
+
+    }
+
+    gLightDB.save();
+    gLightIntBandDB.save();
+    gLightFloatBandDB.save();
+    gLightParamsDB.save();
+    gLightSkyboxDB.save();
+
+    // emit map_dbc_updated();
+
+    is_new_record = false;
+
+
 }

@@ -37,6 +37,7 @@ namespace Noggit::Rendering
         , int animtime
         , bool world_has_skies
         , display_mode display
+        , bool interior_only
     );
 
     bool drawSkybox(glm::mat4x4 const& model_view

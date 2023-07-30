@@ -15,14 +15,31 @@ void World::for_all_chunks_on_tile (glm::vec3 const& pos, Fun&& fun)
   {
     mapIndex.setChanged(tile);
 
-    for (size_t ty = 0; ty < 16; ++ty)
+    for (unsigned ty = 0; ty < 16; ++ty)
     {
-      for (size_t tx = 0; tx < 16; ++tx)
+      for (unsigned tx = 0; tx < 16; ++tx)
       {
         fun(tile->getChunk(ty, tx));
       }
     }
   }
+}
+
+template<typename Fun>
+void World::for_all_chunks_on_tile(MapTile* tile, Fun&& fun)
+{
+    if (tile && tile->finishedLoading())
+    {
+        mapIndex.setChanged(tile);
+
+        for (size_t ty = 0; ty < 16; ++ty)
+        {
+            for (size_t tx = 0; tx < 16; ++tx)
+            {
+                fun(tile->getChunk(ty, tx));
+            }
+        }
+    }
 }
 
 template<typename Fun>
@@ -60,6 +77,30 @@ void World::for_tile_at(TileIndex const& pos, Fun&& fun)
     mapIndex.setChanged(tile);
     fun(tile);
   }
+}
+
+template<typename Fun>
+void World::for_tile_at_force(TileIndex const& pos, Fun&& fun)
+{
+    bool unload = !mapIndex.tileLoaded(pos) && !mapIndex.tileAwaitingLoading(pos);
+    MapTile* tile = mapIndex.loadTile(pos);
+    if (tile)
+    {
+        tile->wait_until_loaded();
+        mapIndex.setChanged(tile);
+        fun(tile);
+    }
+
+    if (unload)
+    {
+        if (tile)
+        {
+            tile->saveTile(this);
+        }
+        mapIndex.markOnDisc(pos, true);
+        mapIndex.unsetChanged(pos);
+        mapIndex.unloadTile(pos);
+    }
 }
 
 template<typename Fun>

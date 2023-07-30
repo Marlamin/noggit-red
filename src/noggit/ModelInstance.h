@@ -80,12 +80,12 @@ public:
                 , bool is_current_selection
                 );
 
-  void intersect (glm::mat4x4 const& model_view
-                 , math::ray const&
-                 , selection_result*
-                 , int animtime
-                 );
 
+  std::vector<std::tuple<int, int, int>> intersect(glm::mat4x4 const& model_view
+      , math::ray const&
+      , selection_result*
+      , int animtime
+  );
 
   bool isInFrustum(math::frustum const& frustum);
   bool isInRenderDist(const float& cull_distance, const glm::vec3& camera, display_mode display);

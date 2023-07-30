@@ -66,7 +66,7 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
 
   if (nTextures < 4U)
   {
-    texLevel = nTextures;
+    texLevel = static_cast<int>(nTextures);
     nTextures++;
 
     textures.emplace_back (std::move (texture));
@@ -89,11 +89,11 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
   return texLevel;
 }
 
-void TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to_replace, scoped_blp_texture_reference replacement_texture)
+bool TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to_replace, scoped_blp_texture_reference replacement_texture)
 {
   int texture_to_replace_level = -1, replacement_texture_level = -1;
 
-  for (size_t i = 0; i < nTextures; ++i)
+  for (int i = 0; i < nTextures; ++i)
   {
     if (textures[i] == texture_to_replace)
     {
@@ -124,6 +124,11 @@ void TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to
       // merge_layers(texture_to_replace_level, replacement_texture_level);
     }
   }
+
+  if (texture_to_replace_level != -1 || replacement_texture_level != -1)
+      return true;
+  else
+      return false;
 }
 
 void TextureSet::swap_layers(int layer_1, int layer_2)
@@ -316,7 +321,7 @@ bool TextureSet::eraseUnusedTextures()
 
   if (visible_tex.size() < nTextures)
   {
-    for (int i = nTextures - 1; i >= 0; --i)
+    for (int i = static_cast<int>(nTextures) - 1; i >= 0; --i)
     {
       if (visible_tex.find(i) == visible_tex.end())
       {
@@ -997,7 +1002,7 @@ std::vector<std::vector<uint8_t>> TextureSet::save_alpha(bool big_alphamap)
         }
       );
 
-      for (size_t layer = 0; layer < nTextures - 1; ++layer)
+      for (int layer = 0; layer < nTextures - 1; ++layer)
       {
         amaps.emplace_back(2048);
         auto& layer_data = amaps.back();
@@ -1030,7 +1035,7 @@ void TextureSet::alphas_to_big_alpha(uint8_t* dest)
     }
   );
 
-  for (size_t k = 0; k < nTextures - 1; k++)
+  for (int k = 0; k < nTextures - 1; k++)
   {
     memcpy(alpha(k), alphamaps[k]->getAlpha(), 4096);
   }
@@ -1039,7 +1044,7 @@ void TextureSet::alphas_to_big_alpha(uint8_t* dest)
   {
     int a = 255;
 
-    for (int k = nTextures - 2; k >= 0; --k)
+    for (int k = static_cast<int>(nTextures - 2); k >= 0; --k)
     {
       uint8_t val = misc::rounded_255_int_div(*alpha(k, i) * a);
       a -= val;
@@ -1079,7 +1084,7 @@ void TextureSet::alphas_to_old_alpha(uint8_t* dest)
     }
   );
 
-  for (size_t k = 0; k < nTextures - 1; k++)
+  for (int k = 0; k < nTextures - 1; k++)
   {
     memcpy(alpha(k), alphamaps[k]->getAlpha(), 64 * 64);
   }
@@ -1089,7 +1094,7 @@ void TextureSet::alphas_to_old_alpha(uint8_t* dest)
     // a = remaining visibility
     int a = 255;
 
-    for (int k = nTextures - 2; k >= 0; --k)
+    for (int k = static_cast<int>(nTextures - 2); k >= 0; --k)
     {
       if (a <= 0)
       {
@@ -1241,19 +1246,19 @@ namespace
 
 void TextureSet::update_lod_texture_map()
 {
-  std::array<std::uint16_t, 8> lod;
+  std::array<std::uint16_t, 8> lod{};
 
-  for (std::size_t z = 0; z < 8; ++z)
+  for (int z = 0; z < 8; ++z)
   {
-    for (std::size_t x = 0; x < 8; ++x)
+    for (int x = 0; x < 8; ++x)
     {
       misc::max_capacity_stack_vector<std::size_t, 4> dominant_square_count (nTextures);
 
-      for (std::size_t pz = z * 8; pz < (z + 1) * 8; ++pz)
+      for (int pz = z * 8; pz < (z + 1) * 8; ++pz)
       {
-        for (std::size_t px = x * 8; px < (x + 1) * 8; ++px)
+        for (int px = x * 8; px < (x + 1) * 8; ++px)
         {
-          ++dominant_square_count[max_element_index (current_layer_values (nTextures, alphamaps.data(), pz, px))];
+          ++dominant_square_count[max_element_index (current_layer_values (static_cast<std::uint8_t>(nTextures), alphamaps.data(), pz, px))];
         }
       }
       //lod.push_back (max_element_index (dominant_square_count));

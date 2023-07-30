@@ -148,7 +148,9 @@ void ModelViewer::wheelEvent(QWheelEvent* event)
 
 void ModelViewer::keyReleaseEvent(QKeyEvent* event)
 {
-  if (event->key() == Qt::Key_W || event->key() == Qt::Key_S)
+    checkInputsSettings();
+
+  if (event->key() == _inputs[0] || event->key() == _inputs[1])
   {
     moving = 0.0f;
   }
@@ -163,12 +165,12 @@ void ModelViewer::keyReleaseEvent(QKeyEvent* event)
     turn  = 0.0f;
   }
 
-  if (event->key() == Qt::Key_D || event->key() == Qt::Key_A)
+  if (event->key() == _inputs[2] || event->key() == _inputs[3])
   {
     strafing  = 0.0f;
   }
 
-  if (event->key() == Qt::Key_Q || event->key() == Qt::Key_E)
+  if (event->key() == _inputs[4] || event->key() == _inputs[5])
   {
     updown  = 0.0f;
   }
@@ -188,11 +190,13 @@ void ModelViewer::keyPressEvent(QKeyEvent* event)
 {
   event->accept();
 
-  if (event->key() == Qt::Key_W)
+  checkInputsSettings();
+
+  if (event->key() == _inputs[0])
   {
     moving = _move_sensitivity;
   }
-  if (event->key() == Qt::Key_S)
+  if (event->key() == _inputs[1])
   {
     moving = -_move_sensitivity;
   }
@@ -215,20 +219,20 @@ void ModelViewer::keyPressEvent(QKeyEvent* event)
     turn = -_move_sensitivity;
   }
 
-  if (event->key() == Qt::Key_D)
+  if (event->key() == _inputs[2])
   {
     strafing = _move_sensitivity;
   }
-  if (event->key() == Qt::Key_A)
+  if (event->key() == _inputs[3])
   {
     strafing = -_move_sensitivity;
   }
 
-  if (event->key() == Qt::Key_Q)
+  if (event->key() == _inputs[4])
   {
     updown = _move_sensitivity;
   }
-  if (event->key() == Qt::Key_E)
+  if (event->key() == _inputs[5])
   {
     updown = -_move_sensitivity;
   }
@@ -279,4 +283,17 @@ void ModelViewer::setActiveDoodadSet(const std::string& filename, const std::str
 ModelViewer::~ModelViewer()
 {
   disconnect(_gl_guard_connection);
+}
+
+void ModelViewer::checkInputsSettings()
+{
+    QString _locale = _settings->value("keyboard_locale", "QWERTY").toString();
+
+    // default is QWERTY
+    _inputs = std::array<Qt::Key, 6>{Qt::Key_W, Qt::Key_S, Qt::Key_D, Qt::Key_A, Qt::Key_Q, Qt::Key_E};
+
+    if (_locale == "AZERTY")
+    {
+        _inputs = std::array<Qt::Key, 6>{Qt::Key_Z, Qt::Key_S, Qt::Key_D, Qt::Key_Q, Qt::Key_A, Qt::Key_E};
+    }
 }
