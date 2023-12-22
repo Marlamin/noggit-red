@@ -613,11 +613,11 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     {
       ModelManager::resetAnim();
     }
-
+    /*
     if (_world->need_model_updates)
     {
       _world->update_models_by_filename();
-    }
+    }*/
 
     std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 

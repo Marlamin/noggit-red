@@ -111,7 +111,7 @@ namespace Noggit
       _add_button = new QPushButton(this);
       _add_button->setIcon(FontAwesomeIcon(FontAwesome::plus));
       button_layout->addWidget(_add_button);
-      connect(_add_button, &QAbstractButton::clicked, this, &ObjectPalette::addObject);
+      connect(_add_button, &QAbstractButton::clicked, this, &ObjectPalette::addObjectFromAssetBrowser);
 
       _remove_button = new QPushButton(this);
       _remove_button->setIcon(FontAwesomeIcon(FontAwesome::times));
@@ -125,7 +125,7 @@ namespace Noggit
 
     }
 
-    void ObjectPalette::addObject()
+    void ObjectPalette::addObjectFromAssetBrowser()
     {
 
       std::string const& display_name = reinterpret_cast<Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget*>(

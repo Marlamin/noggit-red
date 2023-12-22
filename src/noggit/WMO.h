@@ -347,6 +347,8 @@ public:
 
   void toggle_visibility() { _hidden = !_hidden; }
   void show() { _hidden = false ; }
+  void hide() { _hidden = true; }
+
 
   [[nodiscard]]
   bool is_required_when_saving()  const override

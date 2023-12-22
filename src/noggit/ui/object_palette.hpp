@@ -48,7 +48,7 @@ namespace Noggit
             ObjectPalette(MapView* map_view, QWidget* parent);
             ~ObjectPalette();
 
-            void addObject();
+            void addObjectFromAssetBrowser();
             void addObjectByFilename(QString const& filename);
 
             void removeObject(QString filename);
