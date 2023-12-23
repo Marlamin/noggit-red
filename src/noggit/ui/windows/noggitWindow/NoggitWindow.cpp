@@ -71,6 +71,9 @@ namespace Noggit::Ui::Windows
 
     setCentralWidget(_null_widget);
 
+    // The default value is AnimatedDocks | AllowTabbedDocks.
+    setDockOptions(AnimatedDocks | AllowNestedDocks | AllowTabbedDocks | GroupedDragging);
+
     _about = new about(this);
     _settings = new settings(this);
 
