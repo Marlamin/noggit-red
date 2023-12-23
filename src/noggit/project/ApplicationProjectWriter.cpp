@@ -52,10 +52,42 @@ namespace Noggit::Project
       bookmarks.push_back(json_bookmark);
     }
 
+    auto texture_palettes = QJsonArray();
+    for (auto const& texturePalette : project->TexturePalettes)
+    {
+        auto json_texture_palette = QJsonObject();
+
+        auto json_filepaths = QJsonArray();
+        for (auto& filepath : texturePalette.Filepaths)
+            json_filepaths.push_back(filepath.c_str());
+        json_texture_palette.insert("Filepaths", json_filepaths);
+
+        json_texture_palette.insert("MapId", texturePalette.MapId);
+
+        texture_palettes.push_back(json_texture_palette);
+    }
+
+    auto object_palettes = QJsonArray();
+    for (auto const& objectPalette : project->ObjectPalettes)
+    {
+        auto json_object_palette = QJsonObject();
+
+        auto json_filepaths = QJsonArray();
+        for (auto& filepath : objectPalette.Filepaths)
+            json_filepaths.push_back(filepath.c_str());
+        json_object_palette.insert("Filepaths", json_filepaths);
+
+        json_object_palette.insert("MapId", objectPalette.MapId);
+
+        object_palettes.push_back(json_object_palette);
+    }
+
     project_configuration.insert("PinnedMaps", pinned_maps);
     project_configuration.insert("Bookmarks", bookmarks);
     project_configuration.insert("ProjectName", project->ProjectName.c_str());
     project_configuration.insert("Client", client_configuration);
+    project_configuration.insert("TexturePalettes", texture_palettes);
+    project_configuration.insert("ObjectPalettes", object_palettes);
 
     root.insert("Project", project_configuration);
     document.setObject(root);

@@ -5,6 +5,7 @@
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/CurrentTexture.h>
+#include <noggit/project/ApplicationProject.h>
 
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QPushButton>
@@ -73,10 +74,11 @@ namespace Noggit
 
     }
 
-    texture_palette_small::texture_palette_small (QWidget* parent)
+    texture_palette_small::texture_palette_small (std::shared_ptr<Noggit::Project::NoggitProject> Project, int mapId, QWidget* parent)
       : widget(parent)
-      , layout(new ::QGridLayout(this)
-      )
+      , layout(new ::QGridLayout(this))
+      , _project(Project)
+      , _map_id(mapId)
     {
       setWindowTitle("Quick Access Texture Palette");
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -113,7 +115,31 @@ namespace Noggit
 
       layout->addLayout(button_layout, 0, 1);
 
+      LoadSavedPalette();
+    }
 
+    void texture_palette_small::LoadSavedPalette()
+    {
+        auto& saved_palette = _project->TexturePalettes;
+        for (auto& palette : saved_palette)
+        {
+            if (palette.MapId == _map_id)
+            {
+                for (auto& filename : palette.Filepaths)
+                    addTextureByFilename(filename.c_str(), false);
+                break;
+            }
+        }
+    }
+
+    void texture_palette_small::SavePalette()
+    {
+        auto palette_text = Noggit::Project::NoggitProjectTexturePalette();
+        palette_text.MapId =_map_id;
+        for (auto& path : _texture_paths)
+            palette_text.Filepaths.push_back("tileset/" + path);
+
+        _project->saveTexturePalette(palette_text);
     }
 
     void texture_palette_small::addTexture()
@@ -129,10 +155,11 @@ namespace Noggit
 
     }
 
-    void texture_palette_small::addTextureByFilename(const std::string& filename)
+    void texture_palette_small::addTextureByFilename(const std::string& filename, bool save_palette)
     {
 
       QString display_name = QString(filename.c_str()).remove("tileset/");
+      display_name.remove("tileset\\");
 
       for (auto path : _texture_paths)
         if (path == display_name.toStdString())
@@ -147,6 +174,9 @@ namespace Noggit
 
       _texture_list->addItem(list_item);
 
+      // auto saving whenever an object is added, could change it to manually save
+      if (save_palette)
+          SavePalette();
     }
 
     void texture_palette_small::removeTexture(QString filename)

@@ -45,11 +45,15 @@ namespace Noggit
         Q_OBJECT
 
         public:
-            ObjectPalette(MapView* map_view, QWidget* parent);
+            ObjectPalette(MapView* map_view, std::shared_ptr<Noggit::Project::NoggitProject> Project,  QWidget* parent);
+            
             ~ObjectPalette();
 
             void addObjectFromAssetBrowser();
-            void addObjectByFilename(QString const& filename);
+            void addObjectByFilename(QString const& filename, bool save_palette = true);
+            void LoadSavedPalette();
+
+            void SavePalette();
 
             void removeObject(QString filename);
 
@@ -71,6 +75,7 @@ namespace Noggit
             std::unordered_set<std::string> _object_paths;
             MapView* _map_view;
             Noggit::Ui::Tools::PreviewRenderer* _preview_renderer;
+            std::shared_ptr<Noggit::Project::NoggitProject> _project;
 
         };
     }

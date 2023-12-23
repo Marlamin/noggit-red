@@ -57,6 +57,44 @@ namespace Noggit::Project
             }
           }
 
+          if (project_configuration.contains("TexturePalettes") && project_configuration["TexturePalettes"].isArray())
+          {
+              auto project_texture_palettes = project_configuration["ObjectPalettes"].toArray();
+
+              for (auto const& json_texture_palette : project_texture_palettes)
+              {
+                  auto texture_palette = NoggitProjectObjectPalette();
+                  texture_palette.MapId = json_texture_palette.toObject().value("MapId").toInt();
+                  auto json_filepaths = json_texture_palette.toObject().value("Filepaths").toArray();
+
+                  for (auto const& json_filepath : json_filepaths)
+                  {
+                      std::string filepath = json_filepath.toString().toStdString();
+                      texture_palette.Filepaths.push_back(filepath);
+                  }
+                  project.ObjectPalettes.push_back(texture_palette);
+              }
+          }
+
+          if (project_configuration.contains("ObjectPalettes") && project_configuration["ObjectPalettes"].isArray())
+          {
+              auto project_object_palettes = project_configuration["ObjectPalettes"].toArray();
+
+              for (auto const& json_object_palette : project_object_palettes)
+              {
+                  auto object_palette = NoggitProjectObjectPalette();
+                  object_palette.MapId = json_object_palette.toObject().value("MapId").toInt();
+                  auto json_filepaths = json_object_palette.toObject().value("Filepaths").toArray();
+
+                  for (auto const& json_filepath : json_filepaths)
+                  {
+                      std::string filepath = json_filepath.toString().toStdString();
+                      object_palette.Filepaths.push_back(filepath);
+                  }
+                  project.ObjectPalettes.push_back(object_palette);
+              }
+          }
+
           if (project_configuration.contains("PinnedMaps") && project_configuration["PinnedMaps"].isArray())
           {
             auto project_pinned_maps = project_configuration["PinnedMaps"].toArray();

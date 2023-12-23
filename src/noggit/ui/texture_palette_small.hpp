@@ -42,12 +42,15 @@ namespace Noggit
       Q_OBJECT
 
     public:
-      texture_palette_small (QWidget* parent);
+      texture_palette_small (std::shared_ptr<Noggit::Project::NoggitProject> Project, int mapId, QWidget* parent);
 
       void addTexture();
-      void addTextureByFilename(const std::string& filename);
+      void addTextureByFilename(const std::string& filename, bool save_palette = true);
 
       void removeTexture(QString filename);
+
+      void LoadSavedPalette();
+      void SavePalette();
 
       void removeSelectedTexture();
 
@@ -67,6 +70,8 @@ namespace Noggit
       QPushButton* _remove_button;
       std::unordered_set<std::string> _texture_paths;
 
+      std::shared_ptr<Noggit::Project::NoggitProject> _project;
+      int _map_id;
     };
   }
 }

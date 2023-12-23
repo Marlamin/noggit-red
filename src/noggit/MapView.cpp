@@ -603,7 +603,7 @@ void MapView::setupTexturePainterUi()
   /* Texture Browser */
 
   // Dock
-  _texture_browser_dock = new QDockWidget("Texture palette", this);
+  _texture_browser_dock = new QDockWidget("Texture Browser", this);
   _texture_browser_dock->setFeatures(QDockWidget::DockWidgetMovable
                                      | QDockWidget::DockWidgetFloatable
                                      | QDockWidget::DockWidgetClosable);
@@ -662,7 +662,7 @@ void MapView::setupTexturePainterUi()
 
 
   /* Texture Palette Small */
-  _texture_palette_small = new Noggit::Ui::texture_palette_small(this);
+  _texture_palette_small = new Noggit::Ui::texture_palette_small(_project, _world->getMapID(), this);
 
   // Dock
   _texture_palette_dock = new QDockWidget("Texture Palette", this);
@@ -855,7 +855,7 @@ void MapView::setupObjectEditorUi()
   _area_selection = new QRubberBand(QRubberBand::Rectangle, this);
 
   /* Object Palette */
-  _object_palette = new Noggit::Ui::ObjectPalette(this, this);
+  _object_palette = new Noggit::Ui::ObjectPalette(this, _project, this);
   _object_palette->hide();
 
   // Dock
@@ -2046,9 +2046,9 @@ void MapView::setupViewMenu()
 
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
 
-  ADD_TOGGLE (view_menu, "Texture palette", Qt::Key_X, _show_texture_palette_window);
+  ADD_TOGGLE (view_menu, "Texture Browser", Qt::Key_X, _show_texture_palette_window);
 
-  ADD_TOGGLE_NS(view_menu, "Small texture palette", _show_texture_palette_small_window);
+  ADD_TOGGLE_NS(view_menu, "Texture palette", _show_texture_palette_small_window);
 
   addHotkey( Qt::Key_H
     , MOD_none
@@ -4460,7 +4460,7 @@ void MapView::draw_map()
   case editing_mode::ground:
     radius = terrainTool->brushRadius();
     inner_radius = terrainTool->innerRadius();
-    if((terrainTool->_edit_type != eTerrainType_Vertex || terrainTool->_edit_type != eTerrainType_Script) && terrainTool->getImageMaskSelector()->isEnabled())
+    if(terrainTool->_edit_type != eTerrainType_Vertex || terrainTool->_edit_type != eTerrainType_Script && terrainTool->getImageMaskSelector()->isEnabled())
       _cursorType = CursorType::STAMP;
     break;
   case editing_mode::flatten_blur:
