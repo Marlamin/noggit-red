@@ -4460,7 +4460,7 @@ void MapView::draw_map()
   case editing_mode::ground:
     radius = terrainTool->brushRadius();
     inner_radius = terrainTool->innerRadius();
-    if(terrainTool->_edit_type != eTerrainType_Vertex || terrainTool->_edit_type != eTerrainType_Script && terrainTool->getImageMaskSelector()->isEnabled())
+    if ((terrainTool->_edit_type != eTerrainType_Vertex || terrainTool->_edit_type != eTerrainType_Script) && terrainTool->getImageMaskSelector()->isEnabled())
       _cursorType = CursorType::STAMP;
     break;
   case editing_mode::flatten_blur:
