@@ -58,9 +58,10 @@ class World
 
 protected:
   std::vector<selection_type> _current_selection;
-  std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
+  // std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
   Noggit::world_model_instances_storage _model_instance_storage;
   Noggit::world_tile_update_queue _tile_update_queue;
+  std::vector< selection_group> _selection_groups;
 
 public:
   MapIndex mapIndex;
@@ -126,6 +127,8 @@ public:
   bool has_selection() const { return !_current_selection.empty(); }
   bool has_multiple_model_selected() const { return _selected_model_count > 1; }
   int get_selected_model_count() const { return _selected_model_count; }
+  // Unused in Red, models are now iterated by adt because of the occlusion check
+  // std::unordered_map<std::string, std::vector<ModelInstance*>> get_models_by_filename() const& { return _models_by_filename;  } 
   void set_current_selection(selection_type entry);
   void add_to_selection(selection_type entry);
   void remove_from_selection(selection_type entry);
@@ -279,6 +282,7 @@ public:
       , glm::vec3 newPos
       , float scale, math::degrees::vec3 rotation
       , Noggit::object_paste_params*
+      , bool ignore_params = false
   );
 
   WMOInstance* addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
@@ -386,7 +390,7 @@ public:
   );
 
 protected:
-  void update_models_by_filename();
+  // void update_models_by_filename();
 
   std::unordered_set<MapChunk*>& vertexBorderChunks();
 

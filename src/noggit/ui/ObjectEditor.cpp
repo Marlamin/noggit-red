@@ -55,7 +55,7 @@ namespace Noggit
             , helper_models_widget(new helper_models(this))
             , _settings (new QSettings (this))
             , _copy_model_stats (true)
-            , selected()
+            , _model_instance_created()
             , pasteMode(PASTE_ON_TERRAIN)
             , _map_view(mapView)
     {
@@ -104,7 +104,7 @@ namespace Noggit
       QPushButton* object_palette_btn = new QPushButton("Object palette", this);
       layout->addWidget(object_palette_btn);
 
-      _wmo_group = new QGroupBox("WMO Options");
+      _wmo_group = new QGroupBox("Selected WMO Options");
       auto wmo_layout = new QFormLayout(_wmo_group);
 
       _doodadSetSelector = new QComboBox(this);
@@ -113,6 +113,16 @@ namespace Noggit
 
       wmo_layout->addRow("Doodad Set:", _doodadSetSelector);
       wmo_layout->addRow("Name Set:", _nameSetSelector);
+
+      auto clipboard_box = new QGroupBox("Clipboard");
+      auto clipboard_layout = new QVBoxLayout(clipboard_box);
+
+      _filename = new QLabel(this);
+      _filename->setWordWrap(true);
+      _filename->setText("Empty (0 objects copied)");
+      layout->addWidget(clipboard_box);
+
+      clipboard_layout->addWidget(_filename);
 
       auto *copyBox = new ExpanderWidget( this);
       copyBox->setExpanderTitle("Copy options");
@@ -145,9 +155,6 @@ namespace Noggit
       QDoubleSpinBox *tiltRangeEnd = new QDoubleSpinBox(this);
       QDoubleSpinBox *scaleRangeStart = new QDoubleSpinBox(this);
       QDoubleSpinBox *scaleRangeEnd = new QDoubleSpinBox(this);
-
-      _filename = new QLabel (this);
-      _filename->setWordWrap (true);
 
       rotRangeStart->setMaximumWidth(85);
       rotRangeEnd->setMaximumWidth(85);
@@ -281,7 +288,8 @@ namespace Noggit
       selectionOptions_layout->addWidget(multi_select_movement_box);
 
       QPushButton *rotEditorButton = new QPushButton("Pos/Rotation Editor", this);
-      QPushButton *visToggleButton = new QPushButton("Toggle Hidden Models Visibility", this);
+      // replaced by a button
+      // QPushButton *visToggleButton = new QPushButton("Toggle Hidden Models Visibility", this);
       QPushButton *clearListButton = new QPushButton("Clear Hidden Models List", this);
 
       auto importBox = new ExpanderWidget(this);
@@ -309,10 +317,10 @@ namespace Noggit
       layout->addWidget(pasteBox);
       layout->addWidget(selectionOptionsBox);
       layout->addWidget(rotEditorButton);
-      layout->addWidget(visToggleButton);
+      // layout->addWidget(visToggleButton);
       layout->addWidget(clearListButton);
       layout->addWidget(importBox);
-      layout->addWidget(_filename);
+      // layout->addWidget(_filename);
 
       rotationEditor->use_median_pivot_point = &_use_median_pivot_point;
 
@@ -469,11 +477,12 @@ namespace Noggit
       connect(rotEditorButton, &QPushButton::clicked, [=]() {
           rotationEditor->show();
       });
-
+      /*
       connect(visToggleButton, &QPushButton::clicked, [=]() {
           mapView->_draw_hidden_models.set
             (!mapView->_draw_hidden_models.get());
       });
+      */
 
       connect(clearListButton, &QPushButton::clicked, [=]() {
         ModelManager::clear_hidden_models();
@@ -574,7 +583,7 @@ namespace Noggit
     {
       auto last_entry = world->get_last_selected_model();
 
-      for (auto& selection : selected)
+      for (auto& selection : _model_instance_created)
       {
         glm::vec3 pos;
 
@@ -676,23 +685,23 @@ namespace Noggit
       pasteModeGroup->button ((pasteMode + 1) % PASTE_MODE_COUNT)->setChecked (true);
     }   
 
-    void object_editor::replace_selection(std::vector<selection_type> new_selection)
+    void object_editor::update_clipboard()
     {
-      selected = new_selection;
+       // _model_instance_created = new_selection;
 
       std::stringstream ss;
       
-      if (selected.empty())
+      if (_model_instance_created.empty())
       {
-        _filename->setText("");
+        _filename->setText("Empty (0 objects copied)");
         return;
       }
 
-      if (selected.size() == 1)
+      if (_model_instance_created.size() == 1)
       {
         ss << "Model: ";
 
-        auto selectedObject = new_selection.front();
+        auto selectedObject = _model_instance_created.front();
         if (selectedObject.index() == eEntry_Object)
         {
           ss << std::get<selected_object_type>(selectedObject)->instance_model()->file_key().filepath();
@@ -705,7 +714,7 @@ namespace Noggit
       }
       else
       {
-        ss << "Multiple objects selected";
+        ss << _model_instance_created.size() << " objects selected";
       }
 
       _filename->setText(ss.str().c_str());
@@ -724,7 +733,8 @@ namespace Noggit
         return;
       }
 
-      std::vector<selection_type> selected_model;
+      // std::vector<selection_type> selected_model;
+      _model_instance_created.clear();
 
       if (filename.ends_with(".m2"))
       {
@@ -732,8 +742,8 @@ namespace Noggit
 
         _model_instance_created.push_back(mi);
 
-        selected_model.push_back(mi);
-        replace_selection(selected_model);
+        // selected_model.push_back(mi);
+        update_clipboard();
       }
       else if (filename.ends_with(".wmo"))
       {
@@ -741,8 +751,8 @@ namespace Noggit
 
         _model_instance_created.push_back(wi);
 
-        selected_model.push_back(wi);
-        replace_selection(selected_model);
+        // selected_model.push_back(wi);
+        update_clipboard();
       }
     }
 
@@ -756,7 +766,8 @@ namespace Noggit
         return;
       }
 
-      std::vector<selection_type> selected_model;
+      // std::vector<selection_type> selected_model;
+      _model_instance_created.clear();
 
       for (auto& selection : current_selection)
       {
@@ -776,7 +787,7 @@ namespace Noggit
           clone->dir = original->dir;
           clone->pos = pivot ? original->pos - pivot.value() : glm::vec3();
 
-          selected_model.push_back(clone);
+          // selected_model.push_back(clone);
           _model_instance_created.push_back(clone);
         }
         else if (obj->which() == eWMO)
@@ -786,11 +797,11 @@ namespace Noggit
           clone->dir = original->dir;
           clone->pos = pivot ? original->pos - pivot.value() : glm::vec3();
 
-          selected_model.push_back(clone);
+          // selected_model.push_back(clone);
           _model_instance_created.push_back(clone);
         }
       }
-      replace_selection(selected_model);
+      update_clipboard();
     }
 
     void object_editor::SaveObjecttoTXT (World* world)
@@ -875,7 +886,7 @@ namespace Noggit
       return QSize(215, height());
     }
 
-    void object_editor::update_selection(World* world)
+    void object_editor::update_selection_ui(World* world)
     {
         _wmo_group->setDisabled(true);
         _wmo_group->hide();

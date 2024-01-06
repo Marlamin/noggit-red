@@ -82,12 +82,16 @@ namespace Noggit
 
       float drag_selection_depth() const { return _drag_selection_depth; }
 
+      int clipboardSize() const { return _model_instance_created.size(); }
+
+      std::vector<selection_type> getClipboard() const& { return _model_instance_created; }
+
       model_import *modelImport;
       rotation_editor* rotationEditor;
       helper_models* helper_models_widget;
       QSize sizeHint() const override;
 
-      void update_selection(World* world);
+      void update_selection_ui(World* world);
 
     private:
       float _radius = 0.01f;
@@ -112,10 +116,10 @@ namespace Noggit
       bool _copy_model_stats;
       bool _use_median_pivot_point;
 
-      std::vector<selection_type> selected;
+      // std::vector<selection_type> selected;
       std::vector<selection_type> _model_instance_created;
       
-      void replace_selection(std::vector<selection_type> new_selection);
+      void update_clipboard();
 
       void showImportModels();
       void SaveObjecttoTXT (World*);

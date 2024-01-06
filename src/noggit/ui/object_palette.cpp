@@ -75,8 +75,8 @@ namespace Noggit
 
     }
 
-    ObjectPalette::ObjectPalette(MapView* map_view, QWidget* parent)
-        : widget(parent), layout(new ::QGridLayout(this)), _map_view(map_view)
+    ObjectPalette::ObjectPalette(MapView* map_view, std::shared_ptr<Noggit::Project::NoggitProject> Project, QWidget* parent)
+        : widget(parent), layout(new ::QGridLayout(this)), _map_view(map_view), _project(Project)
     {
       setWindowTitle("Object Palette");
       setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
@@ -111,7 +111,7 @@ namespace Noggit
       _add_button = new QPushButton(this);
       _add_button->setIcon(FontAwesomeIcon(FontAwesome::plus));
       button_layout->addWidget(_add_button);
-      connect(_add_button, &QAbstractButton::clicked, this, &ObjectPalette::addObject);
+      connect(_add_button, &QAbstractButton::clicked, this, &ObjectPalette::addObjectFromAssetBrowser);
 
       _remove_button = new QPushButton(this);
       _remove_button->setIcon(FontAwesomeIcon(FontAwesome::times));
@@ -122,10 +122,36 @@ namespace Noggit
 
       layout->addLayout(button_layout, 0, 1);
 
-
+      LoadSavedPalette();
     }
 
-    void ObjectPalette::addObject()
+
+    void ObjectPalette::LoadSavedPalette()
+    {
+        auto& saved_palette = _project->ObjectPalettes;
+        for (auto& palette : saved_palette)
+        {
+            if (palette.MapId == _map_view->getWorld()->getMapID())
+            {
+                for (auto& filename : palette.Filepaths)
+                    addObjectByFilename(filename.c_str(), false);
+                break;
+            }
+
+        }
+    }
+
+    void ObjectPalette::SavePalette()
+    {
+        auto palette_obj = Noggit::Project::NoggitProjectObjectPalette();
+        palette_obj.MapId = _map_view->getWorld()->getMapID();
+        for (auto& path : _object_paths)
+            palette_obj.Filepaths.push_back(path);
+
+        _project->saveObjectPalette(palette_obj);
+    }
+
+    void ObjectPalette::addObjectFromAssetBrowser()
     {
 
       std::string const& display_name = reinterpret_cast<Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget*>(
@@ -182,7 +208,7 @@ namespace Noggit
         event->accept();
     }
 
-    void ObjectPalette::addObjectByFilename(QString const& filename)
+    void ObjectPalette::addObjectByFilename(QString const& filename, bool save_palette)
     {
       if (filename.isEmpty())
         return;
@@ -203,6 +229,9 @@ namespace Noggit
 
       _object_list->addItem(list_item);
 
+      // auto saving whenever an object is added, could change it to manually save
+      if (save_palette)
+        SavePalette();
     }
 
     void ObjectPalette::dropEvent(QDropEvent* event)

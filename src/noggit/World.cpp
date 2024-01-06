@@ -1012,7 +1012,7 @@ void World::clearAllModelsOnADT(TileIndex const& tile)
 {
   ZoneScoped;
   _model_instance_storage.delete_instances_from_tile(tile);
-  update_models_by_filename();
+  // update_models_by_filename();
 }
 
 void World::CropWaterADT(const TileIndex& pos)
@@ -1638,7 +1638,7 @@ void World::unload_every_model_and_wmo_instance()
 
   _model_instance_storage.clear();
 
-  _models_by_filename.clear();
+  // _models_by_filename.clear();
 }
 
 void World::addM2 ( BlizzardArchive::Listfile::FileKey const& file_key
@@ -1687,7 +1687,7 @@ void World::addM2 ( BlizzardArchive::Listfile::FileKey const& file_key
 
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
 
-  _models_by_filename[file_key.filepath()].push_back(_model_instance_storage.get_model_instance(uid).value());
+  // _models_by_filename[file_key.filepath()].push_back(_model_instance_storage.get_model_instance(uid).value());
 }
 
 ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
@@ -1695,6 +1695,7 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
     , float scale
     , math::degrees::vec3 rotation
     , Noggit::object_paste_params* paste_params
+    , bool ignore_params
 )
 {
   ZoneScoped;
@@ -1705,7 +1706,7 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
   model_instance.scale = scale;
   model_instance.dir = rotation;
 
-  if (paste_params)
+  if (paste_params && !ignore_params)
   {
     if (_settings->value("model/random_rotation", false).toBool())
     {
@@ -1737,7 +1738,7 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
 
   auto instance = _model_instance_storage.get_model_instance(uid).value();
-  _models_by_filename[file_key.filepath()].push_back(instance);
+  // _models_by_filename[file_key.filepath()].push_back(instance);
 
   return instance;
 }
@@ -1823,11 +1824,11 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
   {
     reset_selection();
   }
-
+  /*
   if (uids.size())
   {
     update_models_by_filename();
-  }
+  }*/
 }
 
 void World::reload_tile(TileIndex const& tile)
@@ -2715,7 +2716,7 @@ std::unordered_set<MapChunk*>& World::vertexBorderChunks()
   }
   return _vertex_border_chunks;
 }
-
+/*
 void World::update_models_by_filename()
 {
   ZoneScoped;
@@ -2730,7 +2731,7 @@ void World::update_models_by_filename()
 
   need_model_updates = false;
 }
-
+*/
 void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remove)
 {
   ZoneScoped;

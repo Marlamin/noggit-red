@@ -101,7 +101,18 @@ namespace Noggit::Project
       void SetTextureHeightDataForADT(int mapID, const TileIndex& ti, const std::string& texture, texture_heightmapping_data data, World* worldToUpdate = nullptr);
 
       const texture_heightmapping_data GetTextureHeightDataForADT(int mapID, const TileIndex& ti, const std::string& texture) const;
+  };
+  
+  struct NoggitProjectObjectPalette
+  {
+      int MapId;
+      std::vector<std::string> Filepaths;
+  };
 
+  struct NoggitProjectTexturePalette
+  {
+      int MapId;
+      std::vector<std::string> Filepaths;
   };
 
   class NoggitProject
@@ -116,12 +127,16 @@ namespace Noggit::Project
     std::vector<NoggitProjectBookmarkMap> Bookmarks;
     std::shared_ptr<BlizzardDatabaseLib::BlizzardDatabase> ClientDatabase;
     std::shared_ptr<BlizzardArchive::ClientData> ClientData;
+    std::vector<NoggitProjectObjectPalette> ObjectPalettes;
+    std::vector<NoggitProjectTexturePalette> TexturePalettes;
 
     NoggitExtraMapData ExtraMapData;
     NoggitProject()
     {
       PinnedMaps = std::vector<NoggitProjectPinnedMap>();
       Bookmarks = std::vector<NoggitProjectBookmarkMap>();
+      ObjectPalettes = std::vector<NoggitProjectObjectPalette>();
+      TexturePalettes = std::vector<NoggitProjectTexturePalette>();
       _projectWriter = std::make_shared<ApplicationProjectWriter>();
     }
 
@@ -168,6 +183,35 @@ namespace Noggit::Project
 
       _projectWriter->saveProject(this, std::filesystem::path(ProjectPath));
     }
+
+    void saveTexturePalette(const NoggitProjectTexturePalette& new_texture_palette)
+    {
+        TexturePalettes.erase(std::remove_if(TexturePalettes.begin(), TexturePalettes.end(),
+          [=](NoggitProjectTexturePalette texture_palette)
+          {
+              return texture_palette.MapId == new_texture_palette.MapId;
+          }),
+            TexturePalettes.end());
+
+      TexturePalettes.push_back(new_texture_palette);
+
+      _projectWriter->saveProject(this, std::filesystem::path(ProjectPath));
+    }
+
+    void saveObjectPalette(const NoggitProjectObjectPalette& new_object_palette)
+    {
+        ObjectPalettes.erase(std::remove_if(ObjectPalettes.begin(), ObjectPalettes.end(),
+            [=](NoggitProjectObjectPalette obj_palette)
+            {
+                return obj_palette.MapId == new_object_palette.MapId;
+            }),
+            ObjectPalettes.end());
+
+        ObjectPalettes.push_back(new_object_palette);
+
+        _projectWriter->saveProject(this, std::filesystem::path(ProjectPath));
+    }
+
   };
 
   class ApplicationProject

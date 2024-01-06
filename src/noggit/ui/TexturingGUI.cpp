@@ -75,7 +75,7 @@ namespace Noggit
           && filepath.find (".blp") != std::string::npos
            )
         {
-          auto suffix_pos (filepath.find ("_s.blp"));
+          auto suffix_pos (filepath.find ("_h.blp"));
           if (suffix_pos == std::string::npos)
           {
             tilesets.emplace_back (filepath);
@@ -83,7 +83,7 @@ namespace Noggit
           else
           {
             std::string specular (filepath);
-            specular.erase (suffix_pos, strlen ("_s"));
+            specular.erase (suffix_pos, strlen ("_h"));
             tilesets_with_specular_variant.emplace (specular);
           }
         }
@@ -106,7 +106,7 @@ namespace Noggit
               && entry.find (".blp") != std::string::npos
                )
             {
-              auto suffix_pos (entry.find ("_s.blp"));
+              auto suffix_pos (entry.find ("_h.blp"));
               if (suffix_pos == std::string::npos)
               {
                 tilesets.emplace_back (entry);
@@ -114,7 +114,7 @@ namespace Noggit
               else
               {
                 std::string specular (entry);
-                specular.erase (suffix_pos, strlen ("_s"));
+                specular.erase (suffix_pos, strlen ("_h"));
                 tilesets_with_specular_variant.emplace (specular);
               }
             }
@@ -165,7 +165,7 @@ namespace Noggit
               );
 
 
-      auto only_specular (new QCheckBox ("only with specular texture variant"));
+      auto only_specular (new QCheckBox ("only with height texture variant"));
       connect ( only_specular, &QCheckBox::toggled
               , [=] (bool on)
                 {

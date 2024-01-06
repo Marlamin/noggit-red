@@ -127,6 +127,7 @@ private:
   CursorType _cursorType;
   glm::vec3 _cursor_pos;
   QPoint _drag_start_pos;
+  QPoint _right_click_pos;
   float _cursorRotation;
   bool look, freelook;
   bool ui_hidden = false;
@@ -188,7 +189,7 @@ private:
 
   void ResetSelectedObjectRotation();
   void snap_selected_models_to_the_ground();
-  void DeleteSelectedObject();
+  void DeleteSelectedObjects();
   void changeZoneIDValue (int set);
 
   QPointF _last_mouse_pos;
@@ -252,6 +253,7 @@ signals:
   void updateProgress(int value);
 public slots:
   void on_exit_prompt();
+  void ShowContextMenu(QPoint pos);
 
 public:
   glm::vec4 cursor_color;

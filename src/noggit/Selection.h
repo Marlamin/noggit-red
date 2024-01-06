@@ -50,3 +50,20 @@ enum eSelectionEntryTypes
 
 using selection_entry = std::pair<float, selection_type>;
 using selection_result = std::vector<selection_entry>;
+
+struct selection_group
+{
+    selection_group()
+    {
+    };
+
+    void add_member(selected_object_type);
+
+    void set_selected_as_group(std::vector<selection_type> selection);
+
+    void copy_group(); // create and save a new selection group from copied objects
+
+    std::vector<unsigned int> object_members; // uids
+
+    std::array<glm::vec3, 2> extents;
+};
