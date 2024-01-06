@@ -5705,14 +5705,9 @@ void MapView::ShowContextMenu(QPoint pos)
                     if (!last_entry.value().index() == eEntry_Object)
                         return;
 
-                    // Only works with m2 doodads
                     auto obj = std::get<selected_object_type>(last_entry.value());
                     auto model_name = obj->instance_model()->file_key().filepath();
                     // auto models = _world->get_models_by_filename()[model_name];
-                    // std::vector< uint32_t> objects_to_select;
-
-                    //makeCurrent();
-                    //OpenGL::context::scoped_setter const _(::gl, context());
 
                     _world->reset_selection();
 
@@ -5754,21 +5749,12 @@ void MapView::ShowContextMenu(QPoint pos)
             {
                 if (_world->has_selection())
                 {
-                    for (auto& selection : _world->current_selection())
+                    for (auto& obj : _world->get_selected_objects())
                     {
-                        if (selection.index() != eEntry_Object)
-                            continue;
-
-                        auto obj = std::get<selected_object_type>(selection);
-
                         if (obj->which() == eMODEL)
-                        {
                             static_cast<ModelInstance*>(obj)->model->hide();
-                        }
                         else if (obj->which() == eWMO)
-                        {
                             static_cast<WMOInstance*>(obj)->wmo->hide();
-                        }
                     }
                 }
             });
@@ -5783,8 +5769,6 @@ void MapView::ShowContextMenu(QPoint pos)
         action_palette_add.setEnabled(_world->get_selected_model_count() == 1);
         QObject::connect(&action_palette_add, &QAction::triggered, [=]()
             {
-
-
                 auto last_entry = _world->get_last_selected_model();
                 if (last_entry)
                 {
@@ -5823,13 +5807,8 @@ void MapView::ShowContextMenu(QPoint pos)
                 auto replace_path = replace_obj->instance_model()->file_key();
 
                 // iterate selection (objects to replace)
-                for (auto& entry : _world->current_selection())
+                for (auto& source_obj : _world->get_selected_objects())
                 {
-                    if (entry.index() == eEntry_Object)
-                    {
-                        auto source_obj = std::get<selected_object_type>(entry);
-
-                        //SceneObject* source_scene_obj = source_obj;
 
                         math::degrees::vec3 source_rot(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
                         source_rot = source_obj->dir;
@@ -5882,8 +5861,6 @@ void MapView::ShowContextMenu(QPoint pos)
                             new_obj->model->waitForChildrenLoaded();
                             new_obj->recalcExtents();
                         }
-                    }
-
                 }
                 // can cause the usual crash of deleting models overlapping unloaded tiles.
                 DeleteSelectedObjects();
@@ -5908,13 +5885,26 @@ void MapView::ShowContextMenu(QPoint pos)
 
         menu->addSeparator();
         // TODO
-        QAction action_6("Group Selected Objects TODO", this);
-        menu->addAction(&action_6);
-        action_6.setEnabled(_world->has_multiple_model_selected() && false); // TODO, some "notgrouped" condition
+        QAction action_group("Group Selected Objects TODO", this);
+        menu->addAction(&action_group);
+        action_group.setEnabled(_world->has_multiple_model_selected() && true); // TODO, some "notgrouped" condition
+        QObject::connect(&action_snap, &QAction::triggered, [=]()
+            {
+                _world->add_object_group();
 
-        QAction action_7("Ungroup Selected Objects TODO", this);
+                //auto selected_objects = _world->get_selected_objects();
+                //for (auto selected_obj : selected_objects)
+                //{
+                //
+                //}
 
-        menu->addSeparator();
+            });
+
+
+        QAction action_ungroup("Ungroup Selected Objects TODO", this);
+
+
+
 
         menu->exec(mapToGlobal(pos)); // synch
         // menu->popup(mapToGlobal(pos)); // asynch

@@ -232,6 +232,25 @@ std::optional<selection_type> World::get_last_selected_model() const
     ? std::optional<selection_type>() : std::optional<selection_type> (*it);
 }
 
+std::vector<selected_object_type> const& World::get_selected_objects() const
+{
+    // std::vector<selected_object_type> objects(_selected_model_count);
+    std::vector<selected_object_type> objects;
+    objects.reserve(_selected_model_count);
+
+    ZoneScoped;
+    for (auto& entry : _current_selection)
+    {
+        if (entry.index() == eEntry_Object)
+        {
+            auto obj = std::get<selected_object_type>(entry);
+            objects.push_back(obj);
+        }
+    }
+
+    return objects;
+}
+
 glm::vec3 getBarycentricCoordinatesAt(
     const glm::vec3& a,
     const glm::vec3& b,
@@ -490,17 +509,31 @@ void World::set_current_selection(selection_type entry)
   _current_selection.push_back(entry);
   _multi_select_pivot = std::nullopt;
 
-  _selected_model_count = entry.index() == eEntry_MapChunk ? 0 : 1;
+  _selected_model_count = entry.index() != eEntry_Object ? 0 : 1;
 }
 
-void World::add_to_selection(selection_type entry)
+void World::add_to_selection(selection_type entry, bool skip_group)
 {
   ZoneScoped;
-  if (entry.index() != eEntry_MapChunk)
+  if (entry.index() == eEntry_Object)
   {
     _selected_model_count++;
-  }
 
+    // check if it is in a group
+    if (!skip_group)
+    {
+        auto obj = std::get<selected_object_type>(entry);
+        for (auto& group : _selection_groups)
+        {
+            if (group.group_contains_object(obj))
+            {
+                // this then calls add_to_selection() with skip_group = true to avoid repetition
+                group.select_group();
+                break;
+            }
+        }
+    }
+  }
   _current_selection.push_back(entry);
   update_selection_pivot();
 }
@@ -511,7 +544,7 @@ void World::remove_from_selection(selection_type entry)
   std::vector<selection_type>::iterator position = std::find(_current_selection.begin(), _current_selection.end(), entry);
   if (position != _current_selection.end())
   {
-    if (entry.index() != eEntry_MapChunk)
+    if (entry.index() == eEntry_Object)
     {
       _selected_model_count--;
     }
@@ -3355,4 +3388,14 @@ void World::select_objects_in_area(
             }
         }
     }
+}
+
+void World::add_object_group()
+{
+    // auto selected_objects = get_selected_objects();
+    selection_group selection_group(get_selected_objects(), this);
+
+    _selection_groups.push_back(selection_group);
+
+    // write group to project
 }

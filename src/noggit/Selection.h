@@ -7,7 +7,10 @@
 #include <vector>
 #include <QString>
 
+// #include <noggit/World.h>
 
+
+class World;
 class SceneObject;
 class MapChunk;
 
@@ -48,22 +51,47 @@ enum eSelectionEntryTypes
   eEntry_MapChunk
 };
 
-using selection_entry = std::pair<float, selection_type>;
-using selection_result = std::vector<selection_entry>;
 
-struct selection_group
+
+
+class selection_group
 {
-    selection_group()
-    {
-    };
+public:
+    selection_group(std::vector<selected_object_type> selected_objects, World* world);
 
-    void add_member(selected_object_type);
+    void add_member(selected_object_type object);
 
-    void set_selected_as_group(std::vector<selection_type> selection);
+    bool group_contains_object(selected_object_type object);
+
+    void select_group();
+    void unselect_group();
+
+    // void set_selected_as_group(std::vector<selected_object_type> selection);
 
     void copy_group(); // create and save a new selection group from copied objects
 
-    std::vector<unsigned int> object_members; // uids
+    void move_group();
+    void scale_group();
+    void rotate_group();
 
-    std::array<glm::vec3, 2> extents;
+    std::vector<unsigned int> const& getObjects() const { return _members_uid; }
+
+    [[nodiscard]]
+    std::array<glm::vec3, 2> const& getExtents() { return _group_extents; } // ensureExtents();
+
+private:
+    void recalcExtents();
+
+    std::vector<unsigned int> _members_uid; // uids
+
+    // std::vector<SceneObject*> _object_members;
+
+    std::array<glm::vec3, 2> _group_extents;
+
+    unsigned int _object_count = 0;
+
+    World* _world;
 };
+
+using selection_entry = std::pair<float, selection_type>;
+using selection_result = std::vector<selection_entry>;

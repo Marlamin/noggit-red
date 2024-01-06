@@ -61,7 +61,7 @@ protected:
   // std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
   Noggit::world_model_instances_storage _model_instance_storage;
   Noggit::world_tile_update_queue _tile_update_queue;
-  std::vector< selection_group> _selection_groups;
+  std::vector<selection_group> _selection_groups;
 
 public:
   MapIndex mapIndex;
@@ -123,6 +123,7 @@ public:
   bool is_selected(selection_type selection) const;
   bool is_selected(std::uint32_t uid) const;
   std::vector<selection_type> const& current_selection() const { return _current_selection; }
+  std::vector<selected_object_type> const& get_selected_objects() const;
   std::optional<selection_type> get_last_selected_model() const;
   bool has_selection() const { return !_current_selection.empty(); }
   bool has_multiple_model_selected() const { return _selected_model_count > 1; }
@@ -130,7 +131,7 @@ public:
   // Unused in Red, models are now iterated by adt because of the occlusion check
   // std::unordered_map<std::string, std::vector<ModelInstance*>> get_models_by_filename() const& { return _models_by_filename;  } 
   void set_current_selection(selection_type entry);
-  void add_to_selection(selection_type entry);
+  void add_to_selection(selection_type entry, bool skip_group = false);
   void remove_from_selection(selection_type entry);
   void remove_from_selection(std::uint32_t uid);
   void reset_selection();
@@ -388,6 +389,9 @@ public:
       float user_depth,
       glm::vec3 camera_position
   );
+
+  void add_object_group();
+  void delete_object_group();
 
 protected:
   // void update_models_by_filename();

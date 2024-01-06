@@ -75,3 +75,117 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 
   detail_widget->setText(select_info.str());
 }
+
+selection_group::selection_group(std::vector<selected_object_type> selected_objects, World* world)
+    : _world(world)
+{
+    _object_count = selected_objects.size();
+
+    if (!_object_count)
+        return;
+
+    // default group extents to first obj
+    _group_extents = selected_objects.front()->getExtents();
+
+    _members_uid.reserve(selected_objects.size());
+    for (auto& selected_obj : selected_objects)
+    {
+        _members_uid.push_back(selected_obj->uid);
+
+        if (selected_obj->getExtents()[0].x < _group_extents[0].x)
+            _group_extents[0].x = selected_obj->extents[0].x;
+        if (selected_obj->getExtents()[0].y < _group_extents[0].y)
+            _group_extents[0].y = selected_obj->extents[0].y;
+        if (selected_obj->getExtents()[0].z < _group_extents[0].z)
+            _group_extents[0].z = selected_obj->extents[0].z;
+
+        if (selected_obj->getExtents()[1].x > _group_extents[1].x)
+            _group_extents[1].x = selected_obj->extents[1].x;
+        if (selected_obj->getExtents()[1].y > _group_extents[1].y)
+            _group_extents[1].y = selected_obj->extents[1].y;
+        if (selected_obj->getExtents()[1].z > _group_extents[1].z)
+            _group_extents[1].z = selected_obj->extents[1].z;
+    }
+}
+
+bool selection_group::group_contains_object(selected_object_type object)
+{
+    for (unsigned int member_uid : _members_uid)
+    {
+        if (object->uid == member_uid)
+            return true;
+    }
+
+    return false;
+}
+
+void selection_group::select_group()
+{
+    for (unsigned int obj_uid : _members_uid)
+    {
+        std::optional<selection_type> obj = _world->get_model(obj_uid);
+        if (!obj)
+            continue;
+
+        SceneObject* instance = std::get<SceneObject*>(obj.value());
+
+        if (_world->is_selected(instance))
+            continue;
+
+        _world->add_to_selection(obj.value(), true);
+
+    }
+}
+
+void selection_group::unselect_group()
+{
+    for (unsigned int obj_uid : _members_uid)
+    {
+        // don't need to check if it's not selected
+        _world->remove_from_selection(obj_uid);
+
+        /*
+        std::optional<selection_type> obj = _world->get_model(obj_uid);
+        if (!obj)
+            continue;
+
+        SceneObject* instance = std::get<SceneObject*>(obj.value());
+
+        if (_world->is_selected(instance))
+            _world->remove_from_selection(obj.value());
+            */
+    }
+}
+
+void selection_group::move_group()
+{
+
+    // _world->select_objects_in_area
+}
+
+void selection_group::recalcExtents()
+{
+    for (unsigned int obj_uid : _members_uid)
+    {
+        std::optional<selection_type> obj = _world->get_model(obj_uid);
+        if (!obj)
+            continue;
+
+        SceneObject* instance = std::get<SceneObject*>(obj.value());
+
+        // min = glm::min(min, point);
+        if (instance->getExtents()[0].x < _group_extents[0].x)
+            _group_extents[0].x = instance->extents[0].x;
+        if (instance->getExtents()[0].y < _group_extents[0].y)
+            _group_extents[0].y = instance->extents[0].y;
+        if (instance->getExtents()[0].z < _group_extents[0].z)
+            _group_extents[0].z = instance->extents[0].z;
+
+        if (instance->getExtents()[1].x > _group_extents[1].x)
+            _group_extents[1].x = instance->extents[1].x;
+        if (instance->getExtents()[1].y > _group_extents[1].y)
+            _group_extents[1].y = instance->extents[1].y;
+        if (instance->getExtents()[1].z > _group_extents[1].z)
+            _group_extents[1].z = instance->extents[1].z;
+    }
+}
