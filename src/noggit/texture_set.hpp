@@ -31,6 +31,7 @@ struct tmp_edit_alpha_values
   }
 };
 
+
 class TextureSet
 {
 public:
@@ -102,6 +103,7 @@ public:
   void setNTextures(size_t n) { nTextures = n; };
   std::vector<scoped_blp_texture_reference>* getTextures() { return &textures; };
 
+
 private:
 
   uint8_t sum_alpha(size_t offset) const;
@@ -116,6 +118,11 @@ private:
 
   std::vector<scoped_blp_texture_reference> textures;
   std::array<std::optional<Alphamap>, 3> alphamaps;
+
+  // Mists Heightmapping
+  std::vector<scoped_blp_texture_reference> heightTextures;
+  std::array<texture_heightmapping_data, 4> heightMappingData;
+
   size_t nTextures;
 
   std::array<std::uint16_t, 8> _doodadMapping;

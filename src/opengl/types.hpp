@@ -71,6 +71,13 @@ namespace OpenGL
     int AreaIDColor_Pad2_DrawSelection[4];
     int ChunkXZ_TileXZ[4];
     int ChunkTexAnimDir[4];
+
+    // Mists Heightmapping
+    int ChunkHeightTextureSamplers[4];
+    int ChunkTextureUVScale[4];
+    float ChunkTextureHeightScale[4];
+    float ChunkTextureHeightOffset[4];
+
   };
 
   struct LiquidChunkInstanceDataUniformBlock

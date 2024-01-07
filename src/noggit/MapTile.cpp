@@ -13,6 +13,7 @@
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/project/CurrentProject.hpp>
 #include <ClientFile.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
@@ -1676,6 +1677,24 @@ void MapTile::calcCamDist(glm::vec3 const& camera)
   _cam_dist = glm::distance(camera, _center);
 }
 
+const texture_heightmapping_data& MapTile::GetTextureHeightMappingData(const std::string& name) const
+{
+    return Noggit::Project::CurrentProject::get()->ExtraMapData.GetTextureHeightDataForADT(_world->mapIndex._map_id, index,name);
+}
+
+void MapTile::forceAlphaUpdate()
+{
+    for (int i = 0; i < 16; ++i)
+    {
+        for (int j = 0; j < 16; ++j)
+        {
+            auto chunk = mChunks[i][j].get();
+            auto texSet = chunk->getTextureSet();
+            texSet->markDirty();
+        }
+    }
+}
+
 void MapTile::recalcCombinedExtents()
 {
   if (!_combined_extents_dirty)
@@ -1702,5 +1721,3 @@ void MapTile::recalcCombinedExtents()
 
   _combined_extents_dirty = false;
 }
-
-

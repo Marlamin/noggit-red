@@ -168,6 +168,9 @@ public:
   Noggit::Rendering::TileRender* renderer() { return &_renderer; };
   Noggit::Rendering::FlightBoundsRender* flightBoundsRenderer() { return &_fl_bounds_render; };
 
+  const texture_heightmapping_data& GetTextureHeightMappingData(const std::string& name) const;
+
+  void forceAlphaUpdate();
 private:
 
   tile_mode _mode;
@@ -176,6 +179,7 @@ private:
   bool _extents_dirty = true;
   bool _combined_extents_dirty = true;
   bool _requires_object_extents_recalc = true;
+
 
 
   std::array<glm::vec3, 2> _extents;
@@ -198,7 +202,8 @@ private:
   std::vector<std::string> mTextureFilenames;
   std::vector<std::string> mModelFilenames;
   std::vector<std::string> mWMOFilenames;
-  
+
+
   std::vector<uint32_t> uids;
   tsl::robin_map<AsyncObject*, std::vector<SceneObject*>> object_instances; // only includes M2 and WMO. perhaps a medium common ancestor then?
 

@@ -269,9 +269,17 @@ void blp_texture::upload()
 void blp_texture::unload()
 {
   _uploaded = false;
+  finished = false;
+  if (hasHeightMap() && heightMap)
+  {
+      heightMap->unload();
+  }
+  _compression_format.reset();
+  _texture_array = 0;
+  _array_index = -1;
+  _data.clear();
+  _compressed_data.clear();
 
-  // load data back from file. pretty sad. maybe keep it after loading?
-  finishLoading();
 }
 
 void blp_texture::loadFromUncompressedData(BLPHeader const* lHeader, char const* lData)
@@ -402,10 +410,11 @@ void blp_texture::finishLoading()
     LogError << "file not found: '" <<  _file_key.stringRepr() << "'" << std::endl;
   }
 
-  std::string spec_filename;
-  bool has_specular = false;
+  std::string spec_filename = "", height_filename = "";
+  bool has_specular = false, has_height = false;
 
-  if (_file_key.filepath().starts_with("tileset/"))
+
+  if (_file_key.filepath().starts_with("tileset/") )
   {
     _is_tileset = true;
 
@@ -415,6 +424,19 @@ void blp_texture::finishLoading()
     if (has_specular)
     {
       _is_specular = true;
+    }
+
+    // Only load _h in map view
+    if(_context == Noggit::NoggitRenderContext::MAP_VIEW)
+    {
+        height_filename = _file_key.filepath().substr(0, _file_key.filepath().find_last_of(".")) + "_h.blp";
+        has_height = Noggit::Application::NoggitApplication::instance()->clientData()->exists(height_filename);
+        if (has_height)
+        {
+            _has_heightmap = true;
+            heightMap = std::make_unique<blp_texture>(height_filename,_context);
+            heightMap->finishLoading();
+        }
     }
   }
 

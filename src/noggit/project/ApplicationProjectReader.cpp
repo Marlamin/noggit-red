@@ -9,8 +9,11 @@
 #include <chrono>
 #include <QJsonArray>
 
+
 namespace Noggit::Project
 {
+    
+
   std::optional<NoggitProject> ApplicationProjectReader::readProject(std::filesystem::path const& project_path)
   {
 

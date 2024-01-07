@@ -9,6 +9,9 @@
 #include <blizzard-database-library/include/BlizzardDatabase.h>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/ui/windows/downloadFileDialog/DownloadFileDialog.h>
+#include <noggit/TextureManager.h>
+#include <external/tsl/robin_map.h>
+#include <noggit/World.h>
 #include <QJsonDocument>
 #include <QMessageBox>
 #include <QJsonObject>
@@ -84,6 +87,22 @@ namespace Noggit::Project
     std::string MapName;
   };
 
+  struct NoggitExtraMapData
+  {
+  public:
+      //Mists Heightmapping
+      // Valid for every map that doesn't override its specific data
+      tsl::robin_map< std::string, texture_heightmapping_data > TextureHeightData_Global;
+      // MapID,TileX,TileY, SMTextureParams for this specific ADT, fallback to global otherwise.
+      tsl::robin_map<int, 
+            tsl::robin_map< int, tsl::robin_map<int , tsl::robin_map<std::string, texture_heightmapping_data> >>> TextureHeightData_ADT;
+      
+      void SetTextureHeightData_Global(const std::string& texture, texture_heightmapping_data data, World* worldToUpdate = nullptr); 
+      void SetTextureHeightDataForADT(int mapID, const TileIndex& ti, const std::string& texture, texture_heightmapping_data data, World* worldToUpdate = nullptr);
+
+      const texture_heightmapping_data GetTextureHeightDataForADT(int mapID, const TileIndex& ti, const std::string& texture) const;
+  };
+  
   struct NoggitProjectObjectPalette
   {
       int MapId;
@@ -111,6 +130,7 @@ namespace Noggit::Project
     std::vector<NoggitProjectObjectPalette> ObjectPalettes;
     std::vector<NoggitProjectTexturePalette> TexturePalettes;
 
+    NoggitExtraMapData ExtraMapData;
     NoggitProject()
     {
       PinnedMaps = std::vector<NoggitProjectPinnedMap>();
@@ -262,8 +282,10 @@ namespace Noggit::Project
         QMessageBox::critical(nullptr, "Error", "The client does not appear to be valid.");
         return {};
       }
-
+      loadExtraData(project.value());
       return std::make_shared<NoggitProject>(project.value());
     }
+
+    void loadExtraData(NoggitProject& project);
   };
 }
