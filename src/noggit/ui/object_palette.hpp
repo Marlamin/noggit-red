@@ -5,6 +5,7 @@
 
 #include <noggit/ui/widget.hpp>
 #include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
+#include <noggit/project/ApplicationProject.h>
 #include <QtWidgets/QListWidget>
 #include <unordered_set>
 #include <string>

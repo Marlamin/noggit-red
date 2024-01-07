@@ -1,6 +1,7 @@
 #include <noggit/Selection.h>
 #include <noggit/MapChunk.h>
 #include <noggit/DBC.h>
+#include <noggit/World.h>
 
 #include <sstream>
 

@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 #include <QString>
+#include <array>
 
 // #include <noggit/World.h>
-
 
 class World;
 class SceneObject;
