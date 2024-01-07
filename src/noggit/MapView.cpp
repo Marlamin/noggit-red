@@ -4798,7 +4798,7 @@ void MapView::keyPressEvent (QKeyEvent *event)
 
   }
 
-  if (_gizmo_on.get())
+  if (_gizmo_on.get() && !_transform_gizmo.isUsing())
   {
     if (!_change_operation_mode && event->key() == Qt::Key_Space)
     {
