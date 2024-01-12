@@ -17,13 +17,15 @@ WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENT
   : SceneObject(SceneObjectTypes::eWMO, context)
   , wmo(file_key, context)
   , mFlags(d->flags)
-  , mUnknown(d->unknown), mNameset(d->nameSet)
+  , mNameset(d->nameSet)
   , _doodadset(d->doodadSet)
 {
   pos = glm::vec3(d->pos[0], d->pos[1], d->pos[2]);
   dir = math::degrees::vec3{math::degrees(d->rot[0])._, math::degrees(d->rot[1])._, math::degrees(d->rot[2])._ };
 
   uid = d->uniqueID;
+
+  scale = static_cast<float>(d->scale) / 1024.0f;
 
   extents[0] = glm::vec3(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
   extents[1] = glm::vec3(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
@@ -36,7 +38,6 @@ WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, Nog
   : SceneObject(SceneObjectTypes::eWMO, context)
   , wmo(file_key, context)
   , mFlags(0)
-  , mUnknown(0)
   , mNameset(0)
   , _doodadset(0)
 {

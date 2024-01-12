@@ -53,13 +53,10 @@ namespace Noggit
 
     void model::set_scale(float scale)
     {
-      if (_object->which() != eWMO)
-      {
         world()->updateTilesEntry(_object, model_update::remove);
         _object->scale = scale;
         _object->recalcExtents();
         world()->updateTilesEntry(_object, model_update::add);
-      }
     }
 
     unsigned model::get_uid()
@@ -101,7 +98,7 @@ namespace Noggit
       if (filename.ends_with(".wmo"))
       {
         _object = 
-          world()->addWMOAndGetInstance(filename, get_pos(), math::degrees::vec3 {get_rot()});
+          world()->addWMOAndGetInstance(filename, get_pos(), math::degrees::vec3 {get_rot()}, get_scale());
       }
       else
       {

@@ -140,7 +140,7 @@ public:
   void range_add_to_selection(glm::vec3 const& pos, float radius, bool remove);
   Noggit::world_model_instances_storage& getModelInstanceStorage() { return _model_instance_storage; };
 
-  enum class m2_scaling_type
+  enum class object_scaling_type
   {
     set,
     add,
@@ -148,7 +148,7 @@ public:
   };
 
   void snap_selected_models_to_the_ground();
-  void scale_selected_models(float v, m2_scaling_type type);
+  void scale_selected_models(float v, object_scaling_type type);
   void move_selected_models(float dx, float dy, float dz);
   void move_model(selection_type entry, float dx, float dy, float dz);
   void move_selected_models(glm::vec3 const& delta)
@@ -276,7 +276,8 @@ public:
              );
   void addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
               , glm::vec3 newPos
-              , math::degrees::vec3 rotation
+              , float scale, math::degrees::vec3 rotation
+              , Noggit::object_paste_params*
               );
 
   ModelInstance* addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
@@ -289,6 +290,7 @@ public:
   WMOInstance* addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
       , glm::vec3 newPos
       , math::degrees::vec3 rotation
+      , float scale
   );
 
   auto stamp(glm::vec3 const& pos, float dt, QImage const* img, float radiusOuter
