@@ -2105,12 +2105,12 @@ void MapView::setupHelpMenu()
 
 #if defined(_WIN32) || defined(WIN32)
   ADD_ACTION_NS ( help_menu
-                , "Forum"
+                , "WoW Modding Discord"
                 , []
                   {
                     ShellExecute ( nullptr
                                  , "open"
-                                 , "http://www.modcraft.io/index.php?board=48.0"
+                                 , "https://discord.gg/Dnrztg7dCZ"
                                  , nullptr
                                  , nullptr
                                  , SW_SHOWNORMAL
@@ -2118,12 +2118,12 @@ void MapView::setupHelpMenu()
                   }
                 );
   ADD_ACTION_NS ( help_menu
-                , "Homepage"
+                , "Noggit Red Repository"
                 , []
                   {
                     ShellExecute ( nullptr
                                  , "open"
-                                 , "https://bitbucket.org/berndloerwald/noggit3/"
+                                 , "https://gitlab.com/prophecy-rp/noggit-red/-/tree/noggit-shadowlands?ref_type=heads"
                                  , nullptr
                                  , nullptr
                                  , SW_SHOWNORMAL
@@ -2132,12 +2132,12 @@ void MapView::setupHelpMenu()
                 );
 
   ADD_ACTION_NS ( help_menu
-                , "Discord"
+                , "Noggit Red Discord"
                 , []
                   {
                     ShellExecute ( nullptr
                                  , "open"
-                                 , "https://discord.gg/UbdFHyM"
+                                 , "https://discord.gg/Tk2TpN8CaF"
                                  , nullptr
                                  , nullptr
                                  , SW_SHOWNORMAL
