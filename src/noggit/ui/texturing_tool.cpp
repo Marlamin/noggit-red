@@ -160,7 +160,13 @@ namespace Noggit
       _image_mask_group->setBrushModeVisible(parent == map_view);
       _mask_image = _image_mask_group->getPixmap()->toImage();
       _image_mask_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-      tool_layout->addWidget(_image_mask_group);
+      // tool_layout->addWidget(_image_mask_group);
+      auto* customBrushBox = new ExpanderWidget(this);
+      customBrushBox->setExpanderTitle("Custom Brush");
+      customBrushBox->addPage(_image_mask_group);
+      customBrushBox->setExpanded(false);
+      tool_layout->addWidget(customBrushBox);
+
       tool_layout->setAlignment(_image_mask_group, Qt::AlignTop);
 
       auto quick_palette_btn (new QPushButton("Quick Palette", this));

@@ -92,13 +92,6 @@ namespace Noggit
       _use_image_colors->setChecked(true);
       layout->addRow("Use image colors", _use_image_colors);
 
-      _image_mask_group = new Noggit::Ui::Tools::ImageMaskSelector(map_view, this);
-      _image_mask_group->setContinuousActionName("Paint");
-      _image_mask_group->setBrushModeVisible(parent == map_view);
-      _image_mask_group->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum));
-      _mask_image = _image_mask_group->getPixmap()->toImage();
-      layout->addRow(_image_mask_group);
-
       _color_palette = new color_widgets::ColorListWidget(this);
       _color_palette->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred));
       layout->addRow(_color_palette);
@@ -107,6 +100,19 @@ namespace Noggit
       info_label->setAlignment(Qt::AlignCenter | Qt::AlignTop);
 
       layout->addRow(info_label);
+
+      _image_mask_group = new Noggit::Ui::Tools::ImageMaskSelector(map_view, this);
+      _image_mask_group->setContinuousActionName("Paint");
+      _image_mask_group->setBrushModeVisible(parent == map_view);
+      _image_mask_group->setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum));
+      _mask_image = _image_mask_group->getPixmap()->toImage();
+      // layout->addRow(_image_mask_group);
+
+      auto* customBrushBox = new ExpanderWidget(this);
+      customBrushBox->setExpanderTitle("Custom Brush");
+      customBrushBox->addPage(_image_mask_group);
+      customBrushBox->setExpanded(false);
+      layout->addRow(customBrushBox);
 
       QObject::connect(_slide_saturation, &color_widgets::GradientSlider::valueChanged, this, &ShaderTool::set_hsv);
       QObject::connect(_slide_value, &color_widgets::GradientSlider::valueChanged, this, &ShaderTool::set_hsv);
