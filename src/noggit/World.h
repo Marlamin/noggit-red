@@ -123,7 +123,7 @@ public:
   bool is_selected(selection_type selection) const;
   bool is_selected(std::uint32_t uid) const;
   std::vector<selection_type> const& current_selection() const { return _current_selection; }
-  std::vector<selected_object_type> const& get_selected_objects() const;
+  std::vector<selected_object_type> const get_selected_objects() const;
   std::optional<selection_type> get_last_selected_model() const;
   bool has_selection() const { return !_current_selection.empty(); }
   bool has_multiple_model_selected() const { return _selected_model_count > 1; }

@@ -1202,7 +1202,6 @@ void MapView::setupFileMenu()
                  QClipboard* clipboard = QGuiApplication::clipboard();
                  clipboard->setText(port_command.str().c_str(), QClipboard::Clipboard);
                }
-
   );
 
 }
@@ -5788,7 +5787,6 @@ void MapView::ShowContextMenu(QPoint pos)
         // allow replacing all selected?
         QAction action_replace("Replace Models (By Clipboard)", this);
         menu->addAction(&action_replace);
-        // auto model_path = objectEditor->getFilename();
         action_replace.setEnabled(has_selected_objects && objectEditor->clipboardSize() == 1);
         action_replace.setToolTip("Replace the currently selected objects by the object in the clipboard (There must only be one!). M2s can only be replaced by m2s");
         QObject::connect(&action_replace, &QAction::triggered, [=]()
@@ -5882,6 +5880,55 @@ void MapView::ShowContextMenu(QPoint pos)
                 }
             });
 
+        QAction action_save_obj_coords("Save objects coords(to file)", this);
+        menu->addAction(&action_save_obj_coords);
+        action_save_obj_coords.setEnabled(has_selected_objects);
+        QObject::connect(&action_save_obj_coords, &QAction::triggered, [=]()
+            {
+                if (terrainMode == editing_mode::object)
+                {
+                    if (_world->has_selection() && _world->get_selected_model_count())
+                    {
+                        std::stringstream obj_data;
+                        for (auto& obj : _world->get_selected_objects())
+                        {
+                            // std::stringstream obj_data;
+                            obj_data << "\"Object : " << obj->instance_model()->file_key().filepath() << "(UID :" << obj->uid << ")\"," << std::endl;
+                            obj_data << "\"Scale : " << obj->scale << "\"," << std::endl;
+                            // coords string in ts-wow format
+                            obj_data << "\"Coords(server): {map:" << _world->getMapID() << ",x:" << (ZEROPOINT - obj->pos.z) << ",y:" << (ZEROPOINT - obj->pos.x)
+                                << ",z:" << obj->pos.y << ",o:"; // << glm::radians(obj->dir.y) << "}\"," << std::endl;
+
+                            float server_rot = 2 * glm::pi<float>() - glm::pi<float>() / 180.0 * (float(obj->dir.y) < 0 ? fabs(float(obj->dir.y)) + 180.0 : fabs(float(obj->dir.y) - 180.0));
+                            // float server_rot = glm::radians(obj->dir.y) + glm::radians(180.f);
+
+                            obj_data << server_rot << "}\"," << std::endl;
+
+                            /// converting db gobject rotation to noggit. Keep commented for later usage
+                            /*
+                            glm::quat test_db_quat = glm::quat(1.0, 1.0, 1.0, 1.0);
+                            test_db_quat.x = 0.607692, test_db_quat.y = -0.361538, test_db_quat.z = 0.607693, test_db_quat.w = 0.361539;
+                            glm::vec3 rot_euler = glm::eulerAngles(test_db_quat);
+                            glm::vec3 rot_degrees = glm::degrees(rot_euler); 
+                            rot_degrees = glm::vec3(rot_degrees.y, rot_degrees.z - 180.f, rot_degrees.x); // final noggit coords
+                            */
+
+                            glm::quat rot_quat = glm::quat(glm::vec3(glm::radians(obj->dir.z), glm::radians(obj->dir.x), server_rot));
+                            auto normalized_quat = glm::normalize(rot_quat);
+
+                            obj_data << "\"Rotation (server quaternion): {x:" << normalized_quat.x << ",y:" << normalized_quat.y << ",z:" << normalized_quat.z
+                                << ",w:" << normalized_quat.w << "}\"," <<  std::endl << "\n";
+                        }
+
+                        std::ofstream f("saved_objects_data.txt", std::ios_base::app);
+                        f << "\"Saved " << _world->get_selected_model_count() << " objects at : " << QDateTime::currentDateTime().toString("dd MMMM yyyy hh:mm:ss").toStdString() << "\"" << std::endl;
+                        f << obj_data.str();
+                        f.close();
+                        // QClipboard* clipboard = QGuiApplication::clipboard();
+                        // clipboard->setText(port_command.str().c_str(), QClipboard::Clipboard);
+                    }
+                }
+            });
 
         menu->addSeparator();
         // TODO

@@ -232,7 +232,7 @@ std::optional<selection_type> World::get_last_selected_model() const
     ? std::optional<selection_type>() : std::optional<selection_type> (*it);
 }
 
-std::vector<selected_object_type> const& World::get_selected_objects() const
+std::vector<selected_object_type> const World::get_selected_objects() const
 {
     // std::vector<selected_object_type> objects(_selected_model_count);
     std::vector<selected_object_type> objects;
