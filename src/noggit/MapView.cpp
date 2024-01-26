@@ -5892,12 +5892,11 @@ void MapView::ShowContextMenu(QPoint pos)
                         std::stringstream obj_data;
                         for (auto& obj : _world->get_selected_objects())
                         {
-                            // std::stringstream obj_data;
                             obj_data << "\"Object : " << obj->instance_model()->file_key().filepath() << "(UID :" << obj->uid << ")\"," << std::endl;
                             obj_data << "\"Scale : " << obj->scale << "\"," << std::endl;
                             // coords string in ts-wow format
                             obj_data << "\"Coords(server): {map:" << _world->getMapID() << ",x:" << (ZEROPOINT - obj->pos.z) << ",y:" << (ZEROPOINT - obj->pos.x)
-                                << ",z:" << obj->pos.y << ",o:"; // << glm::radians(obj->dir.y) << "}\"," << std::endl;
+                                << ",z:" << obj->pos.y << ",o:";
 
                             float server_rot = 2 * glm::pi<float>() - glm::pi<float>() / 180.0 * (float(obj->dir.y) < 0 ? fabs(float(obj->dir.y)) + 180.0 : fabs(float(obj->dir.y) - 180.0));
                             // float server_rot = glm::radians(obj->dir.y) + glm::radians(180.f);
@@ -5924,8 +5923,6 @@ void MapView::ShowContextMenu(QPoint pos)
                         f << "\"Saved " << _world->get_selected_model_count() << " objects at : " << QDateTime::currentDateTime().toString("dd MMMM yyyy hh:mm:ss").toStdString() << "\"" << std::endl;
                         f << obj_data.str();
                         f.close();
-                        // QClipboard* clipboard = QGuiApplication::clipboard();
-                        // clipboard->setText(port_command.str().c_str(), QClipboard::Clipboard);
                     }
                 }
             });
