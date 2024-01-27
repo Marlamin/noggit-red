@@ -766,12 +766,44 @@ void WorldRender::draw (glm::mat4x4 const& model_view
           continue;
 
         auto model = static_cast<ModelInstance*>(obj);
+
+
+
         if (model->isInFrustum(frustum) && model->isInRenderDist(_cull_distance, camera_pos, display))
         {
-          model->draw_box(model_view, projection, false); // make optional!
+          bool is_selected = false;
+          /*
+          auto id = model->uid;
+          bool const is_selected = _world->current_selection().size() > 0 &&
+              std::find_if(_world->current_selection().begin(), _world->current_selection().end(),
+                  [id](selection_type type)
+                  {
+                      return var_type(type) == typeid(selected_object_type)
+                          && std::get<selected_object_type>(type)->which() == SceneObjectTypes::eMODEL
+                          && static_cast<ModelInstance*>(std::get<selected_object_type>(type))->uid == id;
+                  }) != _world->current_selection().end();*/
+
+          model->draw_box(model_view, projection, is_selected); // make optional!
         }
       }
     }
+  }
+
+  // render selection group boxes
+  for (auto& selection_group : _world->_selection_groups)
+  {
+      if (!selection_group.isSelected())
+          continue;
+
+      glm::mat4x4 identity_mtx = glm::mat4x4{ 1 };
+      auto& extents = selection_group.getExtents();
+      Noggit::Rendering::Primitives::WireBox::getInstance(_world->_context).draw(model_view
+          , projection
+          , identity_mtx
+          , { 0.0f, 0.0f, 1.0f, 1.0f } // blue
+          , extents[0]
+          , extents[1]
+      );
   }
 
   // set anim time only once per frame

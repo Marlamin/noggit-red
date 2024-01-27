@@ -73,10 +73,11 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
   }
   else
   {
+    const glm::vec4 color = _grouped ? glm::vec4(0.5f, 0.5f, 1.0f, 0.5f) : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
       , projection
       , transformMatrix()
-      , {0.5f, 0.5f, 0.5f, 1.0f}
+      , color
       , misc::transform_model_box_coords(model->header.bounding_box_min)
       , misc::transform_model_box_coords(model->header.bounding_box_max)
       );

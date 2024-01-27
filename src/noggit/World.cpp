@@ -363,6 +363,8 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
 void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
   for (auto& entry : _current_selection)
   {
     auto type = entry.index();
@@ -500,16 +502,14 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
     updateTilesEntry(entry, model_update::add);
   }
+  update_selected_model_groups();
 }
 
 void World::set_current_selection(selection_type entry)
 {
   ZoneScoped;
-  _current_selection.clear();
-  _current_selection.push_back(entry);
-  _multi_select_pivot = std::nullopt;
-
-  _selected_model_count = entry.index() != eEntry_Object ? 0 : 1;
+  reset_selection();
+  add_to_selection(entry);
 }
 
 void World::add_to_selection(selection_type entry, bool skip_group)
@@ -525,7 +525,7 @@ void World::add_to_selection(selection_type entry, bool skip_group)
         auto obj = std::get<selected_object_type>(entry);
         for (auto& group : _selection_groups)
         {
-            if (group.group_contains_object(obj))
+            if (group.contains_object(obj))
             {
                 // this then calls add_to_selection() with skip_group = true to avoid repetition
                 group.select_group();
@@ -538,7 +538,16 @@ void World::add_to_selection(selection_type entry, bool skip_group)
   update_selection_pivot();
 }
 
-void World::remove_from_selection(selection_type entry)
+void World::remove_selection_group(selection_group* group)
+{
+    for (auto it = _selection_groups.begin(); it != _selection_groups.end(); ++it)
+    {
+        _selection_groups.erase(it);
+        return;
+    }
+}
+
+void World::remove_from_selection(selection_type entry, bool skip_group)
 {
   ZoneScoped;
   std::vector<selection_type>::iterator position = std::find(_current_selection.begin(), _current_selection.end(), entry);
@@ -547,6 +556,21 @@ void World::remove_from_selection(selection_type entry)
     if (entry.index() == eEntry_Object)
     {
       _selected_model_count--;
+
+      // check if it is in a group
+      if (!skip_group)
+      {
+        auto obj = std::get<selected_object_type>(entry);
+        for (auto& group : _selection_groups)
+        {
+          if (group.contains_object(obj))
+          {
+              // this then calls remove_from_selection() with skip_group = true to avoid repetition
+              group.unselect_group();
+              break;
+          }
+        }
+      }
     }
 
     _current_selection.erase(position);
@@ -554,7 +578,7 @@ void World::remove_from_selection(selection_type entry)
   }
 }
 
-void World::remove_from_selection(std::uint32_t uid)
+void World::remove_from_selection(std::uint32_t uid, bool skip_group)
 {
   ZoneScoped;
   for (auto it = _current_selection.begin(); it != _current_selection.end(); ++it)
@@ -564,18 +588,30 @@ void World::remove_from_selection(std::uint32_t uid)
 
     auto obj = std::get<selected_object_type>(*it);
 
-    if (obj->which() == eMODEL && static_cast<ModelInstance*>(obj)->uid == uid)
+    if (obj->uid == uid)
     {
-      _current_selection.erase(it);
-      update_selection_pivot();
-      return;
+        _selected_model_count--;
+        _current_selection.erase(it);
+
+        // check if it is in a group
+        if (!skip_group)
+        {
+            for (auto& group : _selection_groups)
+            {
+                if (group.contains_object(obj))
+                {
+                    // this then calls remove_from_selection() with skip_group = true to avoid repetition
+                    group.unselect_group();
+                    break;
+                }
+            }
+        }
+
+        update_selection_pivot();
+        return;
     }
-    else if (obj->which() == eWMO && static_cast<WMOInstance*>(obj)->uid == uid)
-    {
-      _current_selection.erase(it);
-      update_selection_pivot();
-      return;
-    }
+
+
   }
 }
 
@@ -585,11 +621,28 @@ void World::reset_selection()
   _current_selection.clear();
   _multi_select_pivot = std::nullopt;
   _selected_model_count = 0;
+
+  for (auto& selection_group : _selection_groups)
+  {
+      selection_group.setUnselected();
+  }
 }
 
 void World::delete_selected_models()
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
+
+  // erase selected groups as well
+  for (auto& group : _selection_groups)
+  {
+      if (group.isSelected())
+      {
+          group.remove_group();
+      }
+  }
+
   _model_instance_storage.delete_instances(_current_selection);
   need_model_updates = true;
   reset_selection();
@@ -626,6 +679,8 @@ glm::vec3 World::get_ground_height(glm::vec3 pos)
 void World::snap_selected_models_to_the_ground()
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
   for (auto& entry : _current_selection)
   {
     auto type = entry.index();
@@ -647,11 +702,14 @@ void World::snap_selected_models_to_the_ground()
   }
 
   update_selection_pivot();
+  update_selected_model_groups();
 }
 
 void World::scale_selected_models(float v, m2_scaling_type type)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
   for (auto& entry : _current_selection)
   {
     if (entry.index() == eEntry_Object)
@@ -692,11 +750,14 @@ void World::scale_selected_models(float v, m2_scaling_type type)
       updateTilesModel(mi, model_update::add);
     }
   }
+  update_selected_model_groups();
 }
 
 void World::move_selected_models(float dx, float dy, float dz)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
   for (auto& entry : _current_selection)
   {
     auto type = entry.index();
@@ -721,6 +782,7 @@ void World::move_selected_models(float dx, float dy, float dz)
   }
 
   update_selection_pivot();
+  update_selected_model_groups();
 }
 
 void World::move_model(selection_type entry, float dx, float dy, float dz)
@@ -751,6 +813,8 @@ void World::move_model(selection_type entry, float dx, float dy, float dz)
 void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
   // move models relative to the pivot when several are selected
   if (has_multiple_model_selected())
   {
@@ -787,6 +851,7 @@ void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
   }
 
   update_selection_pivot();
+  update_selected_model_groups();
 }
 
 void World::set_model_pos(selection_type entry, glm::vec3 const& pos, bool change_height)
@@ -811,6 +876,9 @@ void World::set_model_pos(selection_type entry, glm::vec3 const& pos, bool chang
 void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
+
   math::degrees::vec3 dir_change(rx._, ry._, rz._);
   bool has_multi_select = has_multiple_model_selected();
 
@@ -848,17 +916,21 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
 
     updateTilesEntry(entry, model_update::add);
   }
+  update_selected_model_groups();
 }
 
 void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
+
   math::degrees::vec3 new_dir(rx._, ry._, rz._);
 
   for (auto& entry : _current_selection)
   {
     auto type = entry.index();
-    if (type == eEntry_MapChunk)
+    if (type != eEntry_Object)
     {
       continue;
     }
@@ -876,8 +948,17 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
 
     updateTilesEntry(entry, model_update::add);
   }
+  update_selected_model_groups();
 }
 
+void World::update_selected_model_groups()
+{
+  for (auto& selection_group : _selection_groups)
+  {
+      if (selection_group.isSelected())
+          selection_group.recalcExtents();
+  }
+}
 
 MapChunk* World::getChunkAt(glm::vec3 const& pos)
 {
@@ -3390,9 +3471,9 @@ void World::select_objects_in_area(
     }
 }
 
-void World::add_object_group()
+void World::add_object_group_from_selection()
 {
-    // auto selected_objects = get_selected_objects();
+    // create group from selecetd objects
     selection_group selection_group(get_selected_objects(), this);
 
     _selection_groups.push_back(selection_group);

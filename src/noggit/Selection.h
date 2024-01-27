@@ -57,40 +57,51 @@ enum eSelectionEntryTypes
 class selection_group
 {
 public:
-    selection_group(std::vector<selected_object_type> selected_objects, World* world);
+    selection_group(std::vector<SceneObject*> selected_objects, World* world);
+    // selection_group(std::vector<unsigned int> objects_uids, World* world);
+    // void set_selected_as_group(std::vector<selected_object_type> selection);
 
-    void add_member(selected_object_type object);
+    void remove_group();
 
-    bool group_contains_object(selected_object_type object);
+    void add_member(SceneObject* object);
+    void remove_member(unsigned int object_uid);
+
+    bool contains_object(SceneObject* object);
+
+
 
     void select_group();
     void unselect_group();
 
-    // void set_selected_as_group(std::vector<selected_object_type> selection);
+    void recalcExtents();
+    // void copy_group(); // create and save a new selection group from copied objects
 
-    void copy_group(); // create and save a new selection group from copied objects
-
-    void move_group();
-    void scale_group();
-    void rotate_group();
+    // void move_group();
+    // void scale_group();
+    // void rotate_group();
 
     std::vector<unsigned int> const& getObjects() const { return _members_uid; }
 
     [[nodiscard]]
     std::array<glm::vec3, 2> const& getExtents() { return _group_extents; } // ensureExtents();
 
-private:
-    void recalcExtents();
+    bool isSelected() const { return _is_selected; }
+    void setUnselected() { _is_selected = false; }
 
+private:
     std::vector<unsigned int> _members_uid; // uids
+
+    bool _is_selected = false;
 
     // std::vector<SceneObject*> _object_members;
 
     std::array<glm::vec3, 2> _group_extents;
 
-    unsigned int _object_count = 0;
+    // unsigned int _object_count = 0;
 
     World* _world;
+
+    // bool _need_recalc_extents = false;
 };
 
 using selection_entry = std::pair<float, selection_type>;

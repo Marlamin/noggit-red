@@ -77,20 +77,22 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   detail_widget->setText(select_info.str());
 }
 
-selection_group::selection_group(std::vector<selected_object_type> selected_objects, World* world)
+selection_group::selection_group(std::vector<SceneObject*> selected_objects, World* world)
     : _world(world)
 {
-    _object_count = selected_objects.size();
+    // _object_count = selected_objects.size();
 
-    if (!_object_count)
+    if (!selected_objects.size())
         return;
 
+    _is_selected = true;
     // default group extents to first obj
     _group_extents = selected_objects.front()->getExtents();
 
     _members_uid.reserve(selected_objects.size());
     for (auto& selected_obj : selected_objects)
     {
+        selected_obj->_grouped = true;
         _members_uid.push_back(selected_obj->uid);
 
         if (selected_obj->getExtents()[0].x < _group_extents[0].x)
@@ -109,7 +111,32 @@ selection_group::selection_group(std::vector<selected_object_type> selected_obje
     }
 }
 
-bool selection_group::group_contains_object(selected_object_type object)
+void selection_group::remove_member(unsigned int object_uid)
+{
+    if (_members_uid.size() == 1)
+    {
+        remove_group();
+        return;
+    }
+
+    for (auto it = _members_uid.begin(); it != _members_uid.end(); ++it)
+    {
+        auto member_uid = *it;
+        std::optional<selection_type> obj = _world->get_model(member_uid);
+        if (!obj)
+            continue;
+        SceneObject* instance = std::get<SceneObject*>(obj.value());
+
+        if (instance->uid == object_uid)
+        {
+            _members_uid.erase(it);
+            instance->_grouped = false;
+            return;
+        }
+    }
+}
+
+bool selection_group::contains_object(SceneObject* object)
 {
     for (unsigned int member_uid : _members_uid)
     {
@@ -134,8 +161,9 @@ void selection_group::select_group()
             continue;
 
         _world->add_to_selection(obj.value(), true);
-
     }
+
+    _is_selected = true;
 }
 
 void selection_group::unselect_group()
@@ -143,29 +171,35 @@ void selection_group::unselect_group()
     for (unsigned int obj_uid : _members_uid)
     {
         // don't need to check if it's not selected
-        _world->remove_from_selection(obj_uid);
-
-        /*
-        std::optional<selection_type> obj = _world->get_model(obj_uid);
-        if (!obj)
-            continue;
-
-        SceneObject* instance = std::get<SceneObject*>(obj.value());
-
-        if (_world->is_selected(instance))
-            _world->remove_from_selection(obj.value());
-            */
+        _world->remove_from_selection(obj_uid, true);
     }
+
+    _is_selected = false;
 }
 
-void selection_group::move_group()
+// only remove the group, not used to delete objects in it
+void selection_group::remove_group()
 {
+    // TODO remove group from storage and json
 
-    // _world->select_objects_in_area
+    _world->remove_selection_group(this);
+
+    // remvoe grouped attribute
+    for (auto it = _members_uid.begin(); it != _members_uid.end(); ++it)
+    {
+        auto member_uid = *it;
+        std::optional<selection_type> obj = _world->get_model(member_uid);
+        if (!obj)
+            continue;
+        SceneObject* instance = std::get<SceneObject*>(obj.value());
+
+       instance->_grouped = false;
+    }
 }
 
 void selection_group::recalcExtents()
 {
+    bool first_obj = true;
     for (unsigned int obj_uid : _members_uid)
     {
         std::optional<selection_type> obj = _world->get_model(obj_uid);
@@ -173,6 +207,13 @@ void selection_group::recalcExtents()
             continue;
 
         SceneObject* instance = std::get<SceneObject*>(obj.value());
+
+        if (first_obj)
+        {
+            _group_extents = instance->getExtents();
+            first_obj = false;
+            continue;
+        }
 
         // min = glm::min(min, point);
         if (instance->getExtents()[0].x < _group_extents[0].x)

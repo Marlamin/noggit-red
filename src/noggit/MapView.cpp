@@ -5931,29 +5931,85 @@ void MapView::ShowContextMenu(QPoint pos)
         // TODO
         QAction action_group("Group Selected Objects TODO", this);
         menu->addAction(&action_group);
-        action_group.setEnabled(_world->has_multiple_model_selected() && true); // TODO, some "notgrouped" condition
-        QObject::connect(&action_snap, &QAction::triggered, [=]()
+        // check if all selected objects are already grouped
+        bool groupable = false; 
+        if ( _world->has_multiple_model_selected())
+        {
+            // if there's no existing groups, that means it's always groupable
+            if (!_world->_selection_groups.size())
+                groupable = true;
+
+            if (!groupable)
             {
-                _world->add_object_group();
+                // check if there's any ungrouped object
+                for (auto obj : _world->get_selected_objects())
+                {
+                    bool obj_ungrouped = true;
+                    for (auto& group : _world->_selection_groups)
+                    {
+                        if (group.contains_object(obj))
+                            obj_ungrouped = false;
+                    }
+                    if (obj_ungrouped)
+                    {
+                        groupable = true;
+                        break;
+                    }
+                }
+            }
+        }
+        action_group.setEnabled(groupable);
+        QObject::connect(&action_group, &QAction::triggered, [=]()
+            {
+                // remove all groups the objects are already in and create a new one
+                // for (auto obj : _world->get_selected_objects())
+                // {
+                //     for (auto& group : _world->_selection_groups)
+                //     {
+                //         if (group.contains_object(obj))
+                //         {
+                //             group.remove_group();
+                //         }
+                //     }
+                // }
+                for (auto& group : _world->_selection_groups)
+                {
+                    if (group.isSelected())
+                    {
+                        group.remove_group();
+                    }
+                }
 
-                //auto selected_objects = _world->get_selected_objects();
-                //for (auto selected_obj : selected_objects)
-                //{
-                //
-                //}
-
+                _world->add_object_group_from_selection();
             });
 
 
         QAction action_ungroup("Ungroup Selected Objects TODO", this);
-
-
+        menu->addAction(&action_ungroup);
+        bool group_selected = false;
+        for (auto& group : _world->_selection_groups)
+        {
+            if (group.isSelected())
+            {
+                group_selected = true;
+                break;
+            }
+        }
+        action_ungroup.setEnabled(group_selected);
+        QObject::connect(&action_ungroup, &QAction::triggered, [=]()
+            {
+                for (auto& group : _world->_selection_groups)
+                {
+                    if (group.isSelected())
+                    {
+                        group.remove_group();
+                    }
+                }
+            });
 
 
         menu->exec(mapToGlobal(pos)); // synch
-        // menu->popup(mapToGlobal(pos)); // asynch
+        // menu->popup(mapToGlobal(pos)); // asynch, needs to be preloaded to work
     };
-
-
 
 }

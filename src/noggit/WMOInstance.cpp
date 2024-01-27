@@ -110,7 +110,7 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
               , model_view
               , projection
               , _transform_mat
-              , is_selected
+              , is_selected && !_grouped
               , frustum
               , cull_distance
               , camera
@@ -125,10 +125,10 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
 
   if (force_box || is_selected)
   {
-    //gl.enable(GL_BLEND);
-    //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gl.enable(GL_BLEND);
+    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glm::vec4 color = force_box ? glm::vec4(0.0f, 0.0f, 1.0f, 1.0f)
+    glm::vec4 color = force_box || _grouped ? glm::vec4(0.5f, 0.5f, 1.0f, 0.5f)
         : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
 
     Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw(model_view

@@ -61,9 +61,9 @@ protected:
   // std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
   Noggit::world_model_instances_storage _model_instance_storage;
   Noggit::world_tile_update_queue _tile_update_queue;
+public:
   std::vector<selection_group> _selection_groups;
 
-public:
   MapIndex mapIndex;
   Noggit::map_horizon horizon;
 
@@ -132,8 +132,8 @@ public:
   // std::unordered_map<std::string, std::vector<ModelInstance*>> get_models_by_filename() const& { return _models_by_filename;  } 
   void set_current_selection(selection_type entry);
   void add_to_selection(selection_type entry, bool skip_group = false);
-  void remove_from_selection(selection_type entry);
-  void remove_from_selection(std::uint32_t uid);
+  void remove_from_selection(selection_type entry, bool skip_group = false);
+  void remove_from_selection(std::uint32_t uid, bool skip_group = false);
   void reset_selection();
   void delete_selected_models();
   glm::vec3 get_ground_height(glm::vec3 pos);
@@ -164,6 +164,8 @@ public:
   void rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot);
   void rotate_selected_models_randomly(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
   void set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz);
+
+  void update_selected_model_groups();
 
   // Checks the normal of the terrain on model origin and rotates to that spot.
   void rotate_selected_models_to_ground_normal(bool smoothNormals);
@@ -390,8 +392,8 @@ public:
       glm::vec3 camera_position
   );
 
-  void add_object_group();
-  void delete_object_group();
+  void add_object_group_from_selection();
+  void remove_selection_group(selection_group* group);
 
 protected:
   // void update_models_by_filename();

@@ -72,6 +72,8 @@ public:
 
   glm::vec3 const getServerPos() { return glm::vec3(ZEROPOINT - pos.z, ZEROPOINT - pos.x, pos.y); }
 
+  bool _grouped = false;
+
 public:
   glm::vec3 pos;
   std::array<glm::vec3, 2> extents;
