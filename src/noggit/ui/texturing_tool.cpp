@@ -304,13 +304,13 @@ namespace Noggit
                 }
               );
 
-      connect ( quick_palette_btn, &QPushButton::pressed
+      connect ( quick_palette_btn, &QPushButton::clicked
               , [=] ()
                 {
-                  show_quick_palette->set(!show_quick_palette);
+              _map_view->getTexturePalette()->setVisible(_map_view->getTexturePalette()->isHidden());
+                  // show_quick_palette->set(!show_quick_palette);
                 }
               );
-
 
       connect ( _radius_slider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged
           , [&] (double v)
