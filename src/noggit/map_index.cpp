@@ -695,6 +695,10 @@ uint32_t MapIndex::newGUID()
 
 uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_error)
 {
+  // clear all selection groups since UIDs will change.
+  // TODO : update them instead.
+    _world->clear_selection_groups();
+
   // pre-cond: mTiles[z][x].flags are set
 
   // unload any previously loaded tile, although there shouldn't be as

@@ -80,35 +80,37 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 selection_group::selection_group(std::vector<SceneObject*> selected_objects, World* world)
     : _world(world)
 {
-    // _object_count = selected_objects.size();
-
     if (!selected_objects.size())
         return;
 
-    _is_selected = true;
-    // default group extents to first obj
-    _group_extents = selected_objects.front()->getExtents();
-
+    // _is_selected = true;
     _members_uid.reserve(selected_objects.size());
     for (auto& selected_obj : selected_objects)
     {
         selected_obj->_grouped = true;
         _members_uid.push_back(selected_obj->uid);
-
-        if (selected_obj->getExtents()[0].x < _group_extents[0].x)
-            _group_extents[0].x = selected_obj->extents[0].x;
-        if (selected_obj->getExtents()[0].y < _group_extents[0].y)
-            _group_extents[0].y = selected_obj->extents[0].y;
-        if (selected_obj->getExtents()[0].z < _group_extents[0].z)
-            _group_extents[0].z = selected_obj->extents[0].z;
-
-        if (selected_obj->getExtents()[1].x > _group_extents[1].x)
-            _group_extents[1].x = selected_obj->extents[1].x;
-        if (selected_obj->getExtents()[1].y > _group_extents[1].y)
-            _group_extents[1].y = selected_obj->extents[1].y;
-        if (selected_obj->getExtents()[1].z > _group_extents[1].z)
-            _group_extents[1].z = selected_obj->extents[1].z;
     }
+    recalcExtents();
+    // can't save when initialiazing because it would save durign initial loading
+    // save_json();
+}
+
+selection_group::selection_group(std::vector<unsigned int> objects_uids, World* world)
+    : _world(world)
+{
+    if (!objects_uids.size())
+        return;
+
+    // _is_selected = true;
+    _members_uid = objects_uids;
+
+    recalcExtents();
+    // save_json();
+}
+
+void selection_group::save_json()
+{
+    _world->saveSelectionGroups();
 }
 
 void selection_group::remove_member(unsigned int object_uid)
@@ -116,6 +118,7 @@ void selection_group::remove_member(unsigned int object_uid)
     if (_members_uid.size() == 1)
     {
         remove_group();
+        save_json();
         return;
     }
 
@@ -131,6 +134,7 @@ void selection_group::remove_member(unsigned int object_uid)
         {
             _members_uid.erase(it);
             instance->_grouped = false;
+            save_json();
             return;
         }
     }
@@ -157,6 +161,8 @@ void selection_group::select_group()
 
         SceneObject* instance = std::get<SceneObject*>(obj.value());
 
+        instance->_grouped = true; // ensure grouped attribute, some models could still be unloaded when creating the group
+
         if (_world->is_selected(instance))
             continue;
 
@@ -178,23 +184,34 @@ void selection_group::unselect_group()
 }
 
 // only remove the group, not used to delete objects in it
-void selection_group::remove_group()
+void selection_group::remove_group(bool save)
 {
-    // TODO remove group from storage and json
-
-    _world->remove_selection_group(this);
-
     // remvoe grouped attribute
-    for (auto it = _members_uid.begin(); it != _members_uid.end(); ++it)
+    for (unsigned int member_uid : _members_uid)
     {
-        auto member_uid = *it;
         std::optional<selection_type> obj = _world->get_model(member_uid);
         if (!obj)
             continue;
         SceneObject* instance = std::get<SceneObject*>(obj.value());
 
-       instance->_grouped = false;
+        instance->_grouped = false;
     }
+
+    for (auto it = _world->_selection_groups.begin(); it != _world->_selection_groups.end(); ++it)
+    {
+        auto it_group = *it;
+        if (it_group.getMembers().size() == _members_uid.size() && it_group.getExtents() == _group_extents)
+            // if (it_group.isSelected())
+        {
+            _world->_selection_groups.erase(it);
+            // saveSelectionGroups();
+            if (save)
+                _world->saveSelectionGroups();
+            return;
+        }
+    }
+    return; // if group wasn't found somehow, BAD
+    // _world->remove_selection_group(this); // saves json
 }
 
 void selection_group::recalcExtents()
@@ -207,7 +224,6 @@ void selection_group::recalcExtents()
             continue;
 
         SceneObject* instance = std::get<SceneObject*>(obj.value());
-
         if (first_obj)
         {
             _group_extents = instance->getExtents();

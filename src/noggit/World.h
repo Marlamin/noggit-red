@@ -82,6 +82,10 @@ public:
 
   explicit World(const std::string& name, int map_id, Noggit::NoggitRenderContext context, bool create_empty = false);
 
+  void LoadSavedSelectionGroups();
+
+  void saveSelectionGroups();
+
   void setBasename(const std::string& name);
 
   SceneObject* getObjectInstance(std::uint32_t uid);
@@ -380,6 +384,7 @@ public:
   void loadAllTiles();
   unsigned getNumLoadedTiles() const { return _n_loaded_tiles; };
   unsigned getNumRenderedTiles() const { return _n_rendered_tiles; };
+  unsigned getNumRenderedObjects() const { return _n_rendered_objects; };
 
   void select_objects_in_area(
       const std::array<glm::vec2, 2> selection_box, 
@@ -394,6 +399,8 @@ public:
 
   void add_object_group_from_selection();
   void remove_selection_group(selection_group* group);
+
+  void clear_selection_groups();
 
 protected:
   // void update_models_by_filename();
@@ -419,5 +426,8 @@ protected:
   // Debug metrics
   unsigned _n_loaded_tiles;
   unsigned _n_rendered_tiles;
+
+  // unsigned _n_loaded_objects; // done from instance storage size currently
+  unsigned _n_rendered_objects;
 
 };

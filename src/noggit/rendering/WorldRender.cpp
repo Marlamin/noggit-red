@@ -242,6 +242,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   //gl.disable(GL_CULL_FACE);
 
   _world->_n_rendered_tiles = 0;
+  _world->_n_rendered_objects = 0;
 
   if (draw_terrain)
   {
@@ -378,6 +379,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     {
       if (pair.second[0]->which() == eMODEL)
       {
+        if (!draw_models && !(minimap_render && minimap_render_settings->use_filters))
+          continue;
+
         auto& instances = models_to_draw[reinterpret_cast<Model*>(pair.first)];
 
         // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
@@ -413,8 +417,11 @@ void WorldRender::draw (glm::mat4x4 const& model_view
         }
 
       }
-      else
+      else if (pair.second[0]->which() == eWMO)
       {
+        if (!draw_wmo)
+            continue;
+
         // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
         // otherwise we only allocate for a half
 
@@ -540,6 +547,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       }
     }
   }
+
 
   // occlusion culling
   // terrain tiles act as occluders for each other, water and M2/WMOs.
@@ -684,6 +692,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
                 , model_boxes_to_draw
                 , display
             );
+            _world->_n_rendered_objects += pair.second.size();
           }
         }
 
@@ -730,6 +739,10 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     gl.enable(GL_CULL_FACE);
     gl.depthMask(GL_TRUE);
 
+
+    // unsigned int wmos_todraw_count = wmos_to_draw.size();
+    // unsigned int models_todraw_count = models_to_draw.size();
+    _world->_n_rendered_objects += wmos_to_draw.size();
 
     models_to_draw.clear();
     wmos_to_draw.clear();

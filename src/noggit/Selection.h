@@ -58,10 +58,14 @@ class selection_group
 {
 public:
     selection_group(std::vector<SceneObject*> selected_objects, World* world);
-    // selection_group(std::vector<unsigned int> objects_uids, World* world);
+    selection_group(std::vector<unsigned int> objects_uids, World* world);
+
+    // ~selection_group();
+
+    void save_json();
     // void set_selected_as_group(std::vector<selected_object_type> selection);
 
-    void remove_group();
+    void remove_group(bool save = true);
 
     void add_member(SceneObject* object);
     void remove_member(unsigned int object_uid);
@@ -80,7 +84,7 @@ public:
     // void scale_group();
     // void rotate_group();
 
-    std::vector<unsigned int> const& getObjects() const { return _members_uid; }
+    std::vector<unsigned int> const& getMembers() const { return _members_uid; }
 
     [[nodiscard]]
     std::array<glm::vec3, 2> const& getExtents() { return _group_extents; } // ensureExtents();
@@ -88,11 +92,10 @@ public:
     bool isSelected() const { return _is_selected; }
     void setUnselected() { _is_selected = false; }
 
-private:
-    std::vector<unsigned int> _members_uid; // uids
-
     bool _is_selected = false;
 
+private:
+    std::vector<unsigned int> _members_uid; // uids
     // std::vector<SceneObject*> _object_members;
 
     std::array<glm::vec3, 2> _group_extents;

@@ -114,6 +114,37 @@ World::World(const std::string& name, int map_id, Noggit::NoggitRenderContext co
   _loaded_tiles_buffer[0] = std::make_pair<std::pair<int, int>, MapTile*>(std::make_pair(0, 0), nullptr);
 }
 
+void World::LoadSavedSelectionGroups()
+{
+  _selection_groups.clear();
+
+  auto& saved_map_groups = Noggit::Project::CurrentProject::get()->ObjectSelectionGroups;
+  for (auto& map_group : saved_map_groups)
+  {
+      if (map_group.MapId == mapIndex._map_id)
+      {
+          for (auto& group : map_group.SelectionGroups)
+          {
+              selection_group selectionGroup(group, this);
+              _selection_groups.push_back(selectionGroup);
+          }
+          return;
+      }
+  }
+}
+
+void World::saveSelectionGroups()
+{
+    auto proj_selection_map_group = Noggit::Project::NoggitProjectSelectionGroups();
+    proj_selection_map_group.MapId = mapIndex._map_id;
+    for (auto& selection_group : _selection_groups)
+    {
+        proj_selection_map_group.SelectionGroups.push_back(selection_group.getMembers());
+    }
+
+    Noggit::Project::CurrentProject::get()->saveObjectSelectionGroups(proj_selection_map_group);
+}
+
 void World::update_selection_pivot()
 {
   ZoneScoped;
@@ -536,15 +567,6 @@ void World::add_to_selection(selection_type entry, bool skip_group)
   }
   _current_selection.push_back(entry);
   update_selection_pivot();
-}
-
-void World::remove_selection_group(selection_group* group)
-{
-    for (auto it = _selection_groups.begin(); it != _selection_groups.end(); ++it)
-    {
-        _selection_groups.erase(it);
-        return;
-    }
 }
 
 void World::remove_from_selection(selection_type entry, bool skip_group)
@@ -3473,10 +3495,49 @@ void World::select_objects_in_area(
 
 void World::add_object_group_from_selection()
 {
-    // create group from selecetd objects
+    // create group from selected objects
     selection_group selection_group(get_selected_objects(), this);
+    selection_group._is_selected = true;
 
     _selection_groups.push_back(selection_group);
 
     // write group to project
+    saveSelectionGroups();
 }
+
+void World::remove_selection_group(selection_group* group)
+{
+    // std::vector<selection_type>::iterator position = std::find(_selection_groups.begin(), _selection_groups.end(), group);
+    // if (position != _selection_groups.end())
+    // {
+    //     _selection_groups.erase(position);
+    // }
+
+    // for (auto it = _selection_groups.begin(); it != _selection_groups.end(); ++it)
+    // {
+    //     auto it_group = *it;
+    //     if (it_group.getMembers().size() == group->getMembers().size() && it_group.getExtents() == group->getExtents())
+    //     // if (it_group.isSelected())
+    //     {
+    //         _selection_groups.erase(it);
+    //         saveSelectionGroups();
+    //         return;
+    //     }
+    // }
+}
+
+void World::clear_selection_groups()
+{
+    // _selection_groups.clear();
+
+    // for (auto it = _selection_groups.begin(); it != _selection_groups.end(); ++it)
+    for (auto& group : _selection_groups)
+    {
+        // auto it_group = *it;
+        // it->remove_group();
+        group.remove_group(false);
+    }
+    _selection_groups.clear(); // in case it didn't properly clear
+    saveSelectionGroups(); // only save once
+}
+

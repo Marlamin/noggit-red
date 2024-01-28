@@ -57,44 +57,6 @@ namespace Noggit::Project
             }
           }
 
-          if (project_configuration.contains("TexturePalettes") && project_configuration["TexturePalettes"].isArray())
-          {
-              auto project_texture_palettes = project_configuration["ObjectPalettes"].toArray();
-
-              for (auto const& json_texture_palette : project_texture_palettes)
-              {
-                  auto texture_palette = NoggitProjectObjectPalette();
-                  texture_palette.MapId = json_texture_palette.toObject().value("MapId").toInt();
-                  auto json_filepaths = json_texture_palette.toObject().value("Filepaths").toArray();
-
-                  for (auto const& json_filepath : json_filepaths)
-                  {
-                      std::string filepath = json_filepath.toString().toStdString();
-                      texture_palette.Filepaths.push_back(filepath);
-                  }
-                  project.ObjectPalettes.push_back(texture_palette);
-              }
-          }
-
-          if (project_configuration.contains("ObjectPalettes") && project_configuration["ObjectPalettes"].isArray())
-          {
-              auto project_object_palettes = project_configuration["ObjectPalettes"].toArray();
-
-              for (auto const& json_object_palette : project_object_palettes)
-              {
-                  auto object_palette = NoggitProjectObjectPalette();
-                  object_palette.MapId = json_object_palette.toObject().value("MapId").toInt();
-                  auto json_filepaths = json_object_palette.toObject().value("Filepaths").toArray();
-
-                  for (auto const& json_filepath : json_filepaths)
-                  {
-                      std::string filepath = json_filepath.toString().toStdString();
-                      object_palette.Filepaths.push_back(filepath);
-                  }
-                  project.ObjectPalettes.push_back(object_palette);
-              }
-          }
-
           if (project_configuration.contains("PinnedMaps") && project_configuration["PinnedMaps"].isArray())
           {
             auto project_pinned_maps = project_configuration["PinnedMaps"].toArray();
@@ -140,13 +102,120 @@ namespace Noggit::Project
           }
         } else
         {
+          input_file.close();
           return {};
         }
-
+        input_file.close();
         return project;
       }
     }
 
     return {};
+  }
+  void ApplicationProjectReader::readPalettes(NoggitProject* project)
+  {
+      QString str = QString(project->ProjectPath.c_str());
+      if (!(str.endsWith('\\') || str.endsWith('/')))
+      {
+          str += "/";
+      }
+
+      QFile json_file = QFile(str + "/noggit_palettes.json");
+      if (!json_file.open(QIODevice::ReadOnly))
+      {
+          return;
+      }
+
+      auto json_doc = QJsonDocument().fromJson(json_file.readAll());
+      if (json_doc.isObject())
+      {
+          QJsonObject root = json_doc.object();
+
+          if (root.contains("TexturePalettes") && root["TexturePalettes"].isArray())
+          {
+              auto project_texture_palettes = root["ObjectPalettes"].toArray();
+
+              for (auto const& json_texture_palette : project_texture_palettes)
+              {
+                  auto texture_palette = NoggitProjectObjectPalette();
+                  texture_palette.MapId = json_texture_palette.toObject().value("MapId").toInt();
+                  auto json_filepaths = json_texture_palette.toObject().value("Filepaths").toArray();
+
+                  for (auto const& json_filepath : json_filepaths)
+                  {
+                      std::string filepath = json_filepath.toString().toStdString();
+                      texture_palette.Filepaths.push_back(filepath);
+                  }
+                  project->ObjectPalettes.push_back(texture_palette);
+              }
+          }
+
+          if (root.contains("ObjectPalettes") && root["ObjectPalettes"].isArray())
+          {
+              auto project_object_palettes = root["ObjectPalettes"].toArray();
+
+              for (auto const& json_object_palette : project_object_palettes)
+              {
+                  auto object_palette = NoggitProjectObjectPalette();
+                  object_palette.MapId = json_object_palette.toObject().value("MapId").toInt();
+                  auto json_filepaths = json_object_palette.toObject().value("Filepaths").toArray();
+
+                  for (auto const& json_filepath : json_filepaths)
+                  {
+                      std::string filepath = json_filepath.toString().toStdString();
+                      object_palette.Filepaths.push_back(filepath);
+                  }
+                  project->ObjectPalettes.push_back(object_palette);
+              }
+          }
+      }
+      json_file.close();
+
+  }
+
+  void ApplicationProjectReader::readObjectSelectionGroups(NoggitProject* project)
+  {
+      QString str = QString(project->ProjectPath.c_str());
+      if (!(str.endsWith('\\') || str.endsWith('/')))
+      {
+          str += "/";
+      }
+
+      QFile json_file = QFile(str + "/noggit_object_selection_groups.json");
+      if (!json_file.open(QIODevice::ReadOnly))
+      {
+          return;
+      }
+
+      auto json_doc = QJsonDocument().fromJson(json_file.readAll());
+      if (json_doc.isObject())
+      {
+          QJsonObject root = json_doc.object();
+
+          if (root.contains("ObjectSelectionGroups") && root["ObjectSelectionGroups"].isArray())
+          {
+              auto project_selection_groups = root["ObjectSelectionGroups"].toArray();
+
+              for (auto const& json_object_map_selec_groups : project_selection_groups)
+              {
+                  auto object_selection_groups = NoggitProjectSelectionGroups();
+                  object_selection_groups.MapId = json_object_map_selec_groups.toObject().value("MapId").toInt();
+                  auto json_selection_groups = json_object_map_selec_groups.toObject().value("ObjectGroups").toArray();
+
+                  for (auto const& json_selection_group : json_selection_groups)
+                  {
+                      std::vector<unsigned int> proj_object_uid_array;
+
+                      auto objects_uid_list = json_selection_group.toArray();
+                      for (auto const object_uid : objects_uid_list)
+                          proj_object_uid_array.push_back(object_uid.toInt());
+
+                      object_selection_groups.SelectionGroups.push_back(proj_object_uid_array);
+                  }
+                  project->ObjectSelectionGroups.push_back(object_selection_groups);
+              }
+          }
+      }
+      json_file.close();
   }
 }

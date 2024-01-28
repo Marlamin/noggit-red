@@ -291,6 +291,7 @@ namespace Noggit
       // replaced by a button
       // QPushButton *visToggleButton = new QPushButton("Toggle Hidden Models Visibility", this);
       QPushButton *clearListButton = new QPushButton("Clear Hidden Models List", this);
+      QPushButton *clearGroupsButton = new QPushButton("Clear Selection Groups List", this);
 
       auto importBox = new ExpanderWidget(this);
       auto importBox_content = new QWidget(this);
@@ -319,6 +320,7 @@ namespace Noggit
       layout->addWidget(rotEditorButton);
       // layout->addWidget(visToggleButton);
       layout->addWidget(clearListButton);
+      layout->addWidget(clearGroupsButton);
       layout->addWidget(importBox);
       // layout->addWidget(_filename);
 
@@ -488,6 +490,10 @@ namespace Noggit
         ModelManager::clear_hidden_models();
         WMOManager::clear_hidden_wmos();
       });
+
+      connect(clearGroupsButton, &QPushButton::clicked, [=]() {
+          _map_view->getWorld()->clear_selection_groups();
+          });
 
       connect(toTxt, &QPushButton::clicked, [=]() {
           SaveObjecttoTXT (world);

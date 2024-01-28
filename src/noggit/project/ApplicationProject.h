@@ -96,6 +96,13 @@ namespace Noggit::Project
       std::vector<std::string> Filepaths;
   };
 
+  struct NoggitProjectSelectionGroups
+  {
+      int MapId;
+      // Might let the user name them later if they get some list UI
+      std::vector<std::vector<unsigned int>> SelectionGroups;
+  };
+
   class NoggitProject
   {
     std::shared_ptr<ApplicationProjectWriter> _projectWriter;
@@ -110,6 +117,7 @@ namespace Noggit::Project
     std::shared_ptr<BlizzardArchive::ClientData> ClientData;
     std::vector<NoggitProjectObjectPalette> ObjectPalettes;
     std::vector<NoggitProjectTexturePalette> TexturePalettes;
+    std::vector<NoggitProjectSelectionGroups> ObjectSelectionGroups;
 
     NoggitProject()
     {
@@ -117,6 +125,8 @@ namespace Noggit::Project
       Bookmarks = std::vector<NoggitProjectBookmarkMap>();
       ObjectPalettes = std::vector<NoggitProjectObjectPalette>();
       TexturePalettes = std::vector<NoggitProjectTexturePalette>();
+      ObjectSelectionGroups = std::vector<NoggitProjectSelectionGroups>();
+
       _projectWriter = std::make_shared<ApplicationProjectWriter>();
     }
 
@@ -175,7 +185,7 @@ namespace Noggit::Project
 
       TexturePalettes.push_back(new_texture_palette);
 
-      _projectWriter->saveProject(this, std::filesystem::path(ProjectPath));
+      _projectWriter->savePalettes(this, std::filesystem::path(ProjectPath));
     }
 
     void saveObjectPalette(const NoggitProjectObjectPalette& new_object_palette)
@@ -189,9 +199,22 @@ namespace Noggit::Project
 
         ObjectPalettes.push_back(new_object_palette);
 
-        _projectWriter->saveProject(this, std::filesystem::path(ProjectPath));
+        _projectWriter->savePalettes(this, std::filesystem::path(ProjectPath));
     }
 
+    void saveObjectSelectionGroups(const NoggitProjectSelectionGroups& new_selection_groups)
+    {
+        ObjectSelectionGroups.erase(std::remove_if(ObjectSelectionGroups.begin(), ObjectSelectionGroups.end(),
+            [=](NoggitProjectSelectionGroups proj_selection_group)
+            {
+                return proj_selection_group.MapId == new_selection_groups.MapId;
+            }),
+            ObjectSelectionGroups.end());
+
+        ObjectSelectionGroups.push_back(new_selection_groups);
+
+        _projectWriter->saveObjectSelectionGroups(this, std::filesystem::path(ProjectPath));
+    }
   };
 
   class ApplicationProject
@@ -230,6 +253,9 @@ namespace Noggit::Project
 
       if(!project.has_value())
         return {};
+
+      project_reader.readPalettes(&project.value());
+      project_reader.readObjectSelectionGroups(&project.value());
 
       std::string dbd_file_directory = _configuration->ApplicationDatabaseDefinitionsPath;
 

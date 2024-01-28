@@ -2710,13 +2710,15 @@ MapView::MapView( math::degrees camera_yaw0
   , _tablet_manager(Noggit::TabletManager::instance()),
     _project(Project)
 {
-  setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
+  setWindowTitle ("Noggit Studio Red - " STRPRODUCTVER);
   setFocusPolicy (Qt::StrongFocus);
   setMouseTracking (true);
   setMinimumHeight(200);
   setMaximumHeight(10000);
   setAttribute(Qt::WA_OpaquePaintEvent, true);
   setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
+
+  _world->LoadSavedSelectionGroups(); // not doing this in world constructor because noggit loads world twice
 
   _context = Noggit::NoggitRenderContext::MAP_VIEW;
   _transform_gizmo.setWorld(_world.get());
@@ -4192,6 +4194,8 @@ void MapView::tick (float dt)
 
   _status_culling->setText ( "Loaded tiles: " + QString::number(_world->getNumLoadedTiles())
                          + " Rendered tiles: " + QString::number(_world->getNumRenderedTiles())
+                         + " Loaded objects: " + QString::number(_world->getModelInstanceStorage().getTotalModelsCount())
+                         + " Rendered objects: " + QString::number(_world->getNumRenderedObjects())
   );
 
   guiWater->updatePos (_camera.position);
@@ -5929,7 +5933,7 @@ void MapView::ShowContextMenu(QPoint pos)
 
         menu->addSeparator();
         // TODO
-        QAction action_group("Group Selected Objects TODO", this);
+        QAction action_group("Group Selected Objects", this);
         menu->addAction(&action_group);
         // check if all selected objects are already grouped
         bool groupable = false; 
@@ -5984,7 +5988,7 @@ void MapView::ShowContextMenu(QPoint pos)
             });
 
 
-        QAction action_ungroup("Ungroup Selected Objects TODO", this);
+        QAction action_ungroup("Ungroup Selected Objects", this);
         menu->addAction(&action_ungroup);
         bool group_selected = false;
         for (auto& group : _world->_selection_groups)
@@ -5998,13 +6002,7 @@ void MapView::ShowContextMenu(QPoint pos)
         action_ungroup.setEnabled(group_selected);
         QObject::connect(&action_ungroup, &QAction::triggered, [=]()
             {
-                for (auto& group : _world->_selection_groups)
-                {
-                    if (group.isSelected())
-                    {
-                        group.remove_group();
-                    }
-                }
+                _world->clear_selection_groups();
             });
 
 

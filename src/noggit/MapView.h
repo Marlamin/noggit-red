@@ -317,6 +317,8 @@ public:
   [[nodiscard]]
   QDockWidget* getObjectPalette() { return _object_palette_dock; };
 
+  [[nodiscard]]
+  QDockWidget* getTexturePalette() { return   _texture_palette_dock; };
 
 private:
   enum Modifier

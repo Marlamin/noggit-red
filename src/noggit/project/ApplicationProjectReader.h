@@ -14,6 +14,9 @@ namespace Noggit::Project
 		ApplicationProjectReader() = default;
 
 		std::optional<NoggitProject> readProject(std::filesystem::path const& project_path);
+
+		void readPalettes(NoggitProject* project);
+		void readObjectSelectionGroups(NoggitProject* project);
 	};
 }
 
