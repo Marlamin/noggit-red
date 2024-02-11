@@ -67,7 +67,7 @@ enum class editing_mode
   paint = 2,
   holes = 3,
   areaid = 4,
-  flags = 5,
+  impass = 5,
   water = 6,
   mccv = 7,
   object = 8,

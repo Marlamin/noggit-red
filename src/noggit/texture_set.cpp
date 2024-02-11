@@ -372,6 +372,32 @@ int TextureSet::get_texture_index_or_add (scoped_blp_texture_reference texture, 
   return addTexture (std::move (texture));
 }
 
+uint8_t const TextureSet::getDoodadActiveLayerIdAt(unsigned int x, unsigned int y)
+{
+    if (x >= 8 || y >= 8)
+        return 0; // not valid
+
+    unsigned int firstbit_pos = y * 2;
+
+    bool first_bit = _doodadMapping[x] & (1 << firstbit_pos);
+    bool second_bit = _doodadMapping[x] & (1 << (firstbit_pos + 1) );
+
+    uint8_t layer_id = first_bit + second_bit * 2;
+
+    return layer_id;
+}
+
+bool const TextureSet::getDoodadEnabledAt(int x, int y)
+{
+    if (x >= 8 || y >= 8)
+        return true; // not valid. default to enabled
+
+    // X and Y are swapped
+    bool is_enabled = _doodadStencil[y] & (1 << (x));
+
+    return is_enabled;
+}
+
 bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* image, bool paint)
 {
 

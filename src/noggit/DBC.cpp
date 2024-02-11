@@ -16,6 +16,7 @@ LightIntBandDB gLightIntBandDB;
 LightFloatBandDB gLightFloatBandDB;
 GroundEffectDoodadDB gGroundEffectDoodadDB;
 GroundEffectTextureDB gGroundEffectTextureDB;
+TerrainTypeDB gTerrainTypeDB;
 LiquidTypeDB gLiquidTypeDB;
 SoundProviderPreferencesDB gSoundProviderPreferencesDB;
 SoundAmbienceDB gSoundAmbienceDB;
@@ -36,6 +37,7 @@ void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData)
   gLightFloatBandDB.open(clientData);
   gGroundEffectDoodadDB.open(clientData);
   gGroundEffectTextureDB.open(clientData);
+  gTerrainTypeDB.open(clientData);
   gLiquidTypeDB.open(clientData);
   gSoundProviderPreferencesDB.open(clientData);
   gSoundAmbienceDB.open(clientData);

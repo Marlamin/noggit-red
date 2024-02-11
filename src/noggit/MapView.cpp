@@ -253,6 +253,9 @@ void MapView::set_editing_mode(editing_mode mode)
     _world->renderer()->getTerrainParamsUniformBlock()->draw_impass_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_selection_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
     _minimap->use_selection(nullptr);
 
     bool use_classic_ui = _settings->value("classicUI", true).toBool();
@@ -270,6 +273,14 @@ void MapView::set_editing_mode(editing_mode mode)
         {
           texturingTool->updateMaskImage();
         }
+        else if (texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::ground_effect)
+        {
+            getGroundEffectsTool()->updateTerrainUniformParams();
+            // _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = getGroundEffectsTool()->show_active_sets_overlay();
+            // _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = getGroundEffectsTool()->show_placement_map_overlay();
+            // _world->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = getGroundEffectsTool()->show_exclusion_map_overlay();
+        }
+
 
         if (use_classic_ui)
         {
@@ -301,7 +312,7 @@ void MapView::set_editing_mode(editing_mode mode)
       case editing_mode::areaid:
         _world->renderer()->getTerrainParamsUniformBlock()->draw_areaid_overlay = true;
         break;
-      case editing_mode::flags:
+      case editing_mode::impass:
         _world->renderer()->getTerrainParamsUniformBlock()->draw_impass_overlay = true;
         break;
       case editing_mode::minimap:
@@ -721,6 +732,7 @@ void MapView::setupTexturePainterUi()
           , [=]()
       {
        _world->notifyTileRendererOnSelectedTextureChange();
+       getGroundEffectsTool()->TextureChanged();
       }
   );
 
@@ -2511,7 +2523,7 @@ void MapView::setupHotkeys()
     , [this] { return !_mod_num_down && !NOGGIT_CUR_ACTION;  });
   addHotkey (Qt::Key_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); }
     , [this] { return !_mod_num_down && !NOGGIT_CUR_ACTION;  });
-  addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); }
+  addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::impass); }
     , [this] { return !_mod_num_down && !NOGGIT_CUR_ACTION;  });
   addHotkey (Qt::Key_7, MOD_none, [this] { set_editing_mode (editing_mode::water); }
     , [this] { return !_mod_num_down && !NOGGIT_CUR_ACTION;  });
@@ -2633,6 +2645,7 @@ void MapView::createGUI()
   // End combined dock
 
   setupViewportOverlay();
+  // texturingTool->setup_ge_tool_renderer();
   setupNodeEditor();
   setupAssetBrowser();
   setupDetailInfos();
@@ -3110,6 +3123,12 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
                     progress->setValue(value);
                 });
 
+        connect(this, &MapView::selectionUpdated, [this]()
+            { 
+                updateDetailInfos(true);
+                _world->selection_updated = false;
+            });
+
         // setup combined image if necessary
         if (settings->combined_minimap)
         {
@@ -3428,7 +3447,7 @@ void MapView::tick (float dt)
       switch (terrainMode)
       {
         case editing_mode::areaid:
-        case editing_mode::flags:
+        case editing_mode::impass:
         case editing_mode::holes:
         case editing_mode::object:
           update_cursor_pos();
@@ -3876,7 +3895,7 @@ void MapView::tick (float dt)
             }
           }
           break;
-        case editing_mode::flags:
+        case editing_mode::impass:
           if (!underMap)
           {
             // todo: replace this
@@ -4154,8 +4173,14 @@ void MapView::tick (float dt)
       }
     }
   }
-
-  updateDetailInfos();
+  if (_world->selection_updated)
+  {
+      updateDetailInfos(true);
+      _world->selection_updated = false;
+  }
+  else
+      updateDetailInfos();
+      // emit selectionUpdated();
 
   _status_area->setText
     (QString::fromStdString (gAreaDB.getAreaName (_world->getAreaID (_camera.position))));
@@ -5093,6 +5118,12 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       doSelection(false, true); // Required for radius selection in Object mode
     }
   }
+  // drag selection, only do it when not using brush
+  else if (!_mod_alt_down && leftMouse && terrainMode == editing_mode::object && _display_mode == display_mode::in_3D && !ImGuizmo::IsUsing())
+  {
+      _needs_redraw = true;
+      _area_selection->setGeometry(QRect(_drag_start_pos, event->pos()).normalized());
+  }
 
   if (leftMouse && _mod_shift_down)
   {
@@ -5123,12 +5154,6 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       stampTool->execute(_cursor_pos, _world.get(), relative_movement.dx() / 30.0f, _mod_shift_down, _mod_alt_down, _mod_ctrl_down, false);
     }
 
-  }
-
-  if (leftMouse && terrainMode == editing_mode::object && _display_mode == display_mode::in_3D && !ImGuizmo::IsUsing())
-  {
-      _needs_redraw = true;
-      _area_selection->setGeometry(QRect(_drag_start_pos, event->pos()).normalized());
   }
 
   if (_display_mode == display_mode::in_2D && leftMouse && _mod_alt_down && _mod_shift_down)
@@ -5582,6 +5607,11 @@ QWidget* MapView::getActiveStampModeItem()
     return nullptr;
 }
 
+Noggit::Ui::ground_effect_tool* MapView::getGroundEffectsTool()
+{
+    return texturingTool->getGroundEffectsTool();
+}
+
 void MapView::onSettingsSave()
 {
   OpenGL::TerrainParamsUniformBlock* params = _world->renderer()->getTerrainParamsUniformBlock();
@@ -5712,6 +5742,7 @@ void MapView::ShowContextMenu(QPoint pos)
                     auto model_name = obj->instance_model()->file_key().filepath();
                     // auto models = _world->get_models_by_filename()[model_name];
 
+                    // if changing this, make sure to check for duplicate instead // if (!_world->is_selected(instance))
                     _world->reset_selection();
 
                     if (obj->which() == eMODEL)
@@ -5720,7 +5751,6 @@ void MapView::ShowContextMenu(QPoint pos)
                             {
                                 if (model_instance.instance_model()->file_key().filepath() == model_name)
                                 {
-                                    // objects_to_select.push_back(model_instance.uid);
                                     _world->add_to_selection(&model_instance);
                                 }
                             });

@@ -24,19 +24,22 @@ public:
 
 struct selected_chunk_type : Selectable
 {
-    selected_chunk_type(MapChunk* _chunk, std::tuple<int, int, int> _triangle, glm::vec3 _position)
-    : chunk(_chunk)
-    , triangle(_triangle)
-    , position(_position)
-  {}
+    selected_chunk_type(MapChunk* _chunk, std::tuple<int, int, int> _triangle, glm::vec3 _position);
+  //   : chunk(_chunk)
+  //   , triangle(_triangle)
+  //   , position(_position)
+  // {}
 
   MapChunk* chunk;
   std::tuple<int,int,int> triangle; // mVertices[i] points of the hit triangle
   glm::vec3 position;
+  glm::uvec2 unit_index;
 
   bool operator== (selected_chunk_type const& other) const
   {
-    return chunk == other.chunk;
+    return chunk == other.chunk 
+        && unit_index == other.unit_index
+        && triangle == other.triangle;
   }
 
   virtual void updateDetails(Noggit::Ui::detail_infos* detail_widget) override;

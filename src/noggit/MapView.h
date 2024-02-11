@@ -93,6 +93,7 @@ namespace Noggit
     class hole_tool;
     struct tileset_chooser;
     class ObjectPalette;
+    class ground_effect_tool;
   }
 }
 
@@ -251,6 +252,7 @@ signals:
   void resized();
   void saved();
   void updateProgress(int value);
+  void selectionUpdated();
 public slots:
   void on_exit_prompt();
   void ShowContextMenu(QPoint pos);
@@ -303,6 +305,9 @@ public:
   Noggit::Ui::flatten_blur_tool* getFlattenTool() { return flattenTool; };
 
   [[nodiscard]]
+  Noggit::Ui::ground_effect_tool* getGroundEffectsTool();
+
+  [[nodiscard]]
   Noggit::NoggitRenderContext getRenderContext() { return _context; };
 
   [[nodiscard]]
@@ -310,6 +315,9 @@ public:
 
   [[nodiscard]]
   QDockWidget* getAssetBrowser() {return _asset_browser_dock; };
+
+  [[nodiscard]]
+  Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget* getAssetBrowserWidget() { return _asset_browser; };
 
   [[nodiscard]]
   Noggit::Ui::object_editor* getObjectEditor() { return objectEditor; };

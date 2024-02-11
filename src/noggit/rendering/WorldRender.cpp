@@ -90,6 +90,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     _terrain_params_ubo_data.draw_paintability_overlay = false;
     _terrain_params_ubo_data.draw_selection_overlay = false;
     _terrain_params_ubo_data.draw_wireframe = false;
+    _terrain_params_ubo_data.draw_groundeffectid_overlay = false;
+    _terrain_params_ubo_data.draw_groundeffect_layerid_overlay = false;
+    _terrain_params_ubo_data.draw_noeffectdoodad_overlay = false;
     _need_terrain_params_ubo_update = true;
   }
 

@@ -11,7 +11,9 @@ namespace Noggit
     OBJECT_PALETTE_PREVIEW,
     PRESET_EDITOR,
     PRESET_EDITOR_PREVIEW,
-    BLP_RENDERER
+    GROUND_EFFECT_PREVIEW,
+    BLP_RENDERER,
+    count
   };
 }
 

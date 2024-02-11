@@ -19,7 +19,7 @@ namespace Noggit
       add_tool_icon(editing_mode::paint, tr("Texture Painter"), FontNoggit::TOOL_TEXTURE_PAINT);
       add_tool_icon(editing_mode::holes, tr("Hole Cutter"), FontNoggit::TOOL_HOLE_CUTTER);
       add_tool_icon(editing_mode::areaid, tr("Area Designator"), FontNoggit::TOOL_AREA_DESIGNATOR);
-      add_tool_icon(editing_mode::flags, tr("Impass Designator"), FontNoggit::TOOL_IMPASS_DESIGNATOR);
+      add_tool_icon(editing_mode::impass, tr("Impass Designator"), FontNoggit::TOOL_IMPASS_DESIGNATOR);
       add_tool_icon(editing_mode::water, tr("Water Editor"), FontNoggit::TOOL_WATER_EDITOR);
       add_tool_icon(editing_mode::mccv, tr("Vertex Painter"), FontNoggit::TOOL_VERTEX_PAINT);
       add_tool_icon(editing_mode::object, tr("Object Editor"), FontNoggit::TOOL_OBJECT_EDITOR);

@@ -39,14 +39,15 @@ static const int mapbufsize = 9 * 9 + 8 * 8; // chunk size
 
 enum ChunkUpdateFlags
 {
-  VERTEX   = 0x1,
-  SHADOW   = 0x2,
-  MCCV     = 0x4,
-  ALPHAMAP = 0x8,
-  NORMALS  = 0x10,
-  HOLES    = 0x20,
-  AREA_ID  = 0x40,
-  FLAGS    = 0x80
+  VERTEX        = 0x1,
+  SHADOW        = 0x2,
+  MCCV          = 0x4,
+  ALPHAMAP      = 0x8,
+  NORMALS       = 0x10,
+  HOLES         = 0x20,
+  AREA_ID       = 0x40,
+  FLAGS         = 0x80,
+  GROUND_EFFECT = 0x100
 };
 
 class MapChunk
@@ -73,7 +74,7 @@ public:
 
   MapChunkHeader header;
 
-  float xbase, ybase, zbase;
+  float xbase, ybase, zbase; // global coords
 
   mcnk_flags header_flags;
   bool use_big_alphamap;
@@ -138,6 +139,8 @@ public:
   void recalcNorms();
   void updateNormalsData();
   glm::vec3 getNeighborVertex(int i, unsigned dir);
+
+  glm::uvec2 getUnitIndextAt(glm::vec3 pos);
 
   //! \todo implement Action stack for these
   bool changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius);

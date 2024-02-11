@@ -396,6 +396,7 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
   ZoneScoped;
   if (!_selected_model_count)
       return;
+  selection_updated = true;
   for (auto& entry : _current_selection)
   {
     auto type = entry.index();
@@ -546,6 +547,7 @@ void World::set_current_selection(selection_type entry)
 void World::add_to_selection(selection_type entry, bool skip_group)
 {
   ZoneScoped;
+  selection_updated = true;
   if (entry.index() == eEntry_Object)
   {
     _selected_model_count++;
@@ -558,9 +560,11 @@ void World::add_to_selection(selection_type entry, bool skip_group)
         {
             if (group.contains_object(obj))
             {
+                // make sure to add it to selection before donig group selection so it doesn't get selected twice
+                _current_selection.push_back(entry);
                 // this then calls add_to_selection() with skip_group = true to avoid repetition
                 group.select_group();
-                break;
+                return;
             }
         }
     }
@@ -597,6 +601,7 @@ void World::remove_from_selection(selection_type entry, bool skip_group)
 
     _current_selection.erase(position);
     update_selection_pivot();
+    selection_updated = true;
   }
 }
 
@@ -630,6 +635,7 @@ void World::remove_from_selection(std::uint32_t uid, bool skip_group)
         }
 
         update_selection_pivot();
+        selection_updated = true;
         return;
     }
 
@@ -640,6 +646,7 @@ void World::remove_from_selection(std::uint32_t uid, bool skip_group)
 void World::reset_selection()
 {
   ZoneScoped;
+  selection_updated = true;
   _current_selection.clear();
   _multi_select_pivot = std::nullopt;
   _selected_model_count = 0;
@@ -722,7 +729,7 @@ void World::snap_selected_models_to_the_ground()
 
     updateTilesEntry(entry, model_update::add);
   }
-
+  selection_updated = true;
   update_selection_pivot();
   update_selected_model_groups();
 }
@@ -802,7 +809,7 @@ void World::move_selected_models(float dx, float dy, float dz)
 
     updateTilesEntry(entry, model_update::add);
   }
-
+  selection_updated = true;
   update_selection_pivot();
   update_selected_model_groups();
 }
@@ -871,7 +878,7 @@ void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
 
     updateTilesEntry(entry, model_update::add);
   }
-
+  selection_updated = true;
   update_selection_pivot();
   update_selected_model_groups();
 }
@@ -2882,7 +2889,8 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
       }
       else
       {
-          add_to_selection(obj);
+          if (!is_selected(obj))
+            add_to_selection(obj);
       }
   }
 }

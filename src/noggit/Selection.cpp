@@ -6,6 +6,14 @@
 #include <sstream>
 
 
+selected_chunk_type::selected_chunk_type(MapChunk* _chunk, std::tuple<int, int, int> _triangle, glm::vec3 _position)
+: chunk(_chunk)
+, triangle(_triangle)
+, position(_position)
+{
+    unit_index = chunk->getUnitIndextAt(position);
+}
+
 void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 {
   std::stringstream select_info;
@@ -13,17 +21,21 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   mcnk_flags const& flags = chunk->header_flags;
 
   select_info << "<b>Chunk</b> (" << chunk->px << ", " << chunk->py << ") flat index: (" << chunk->py * 16 + chunk->px
-    << ") of <b>tile</b> (" << chunk->mt->index.x << " , " << chunk->mt->index.z << ")"
-    << "<br><b>area ID:</b> " << chunk->getAreaID() << " (\"" << gAreaDB.getAreaName(chunk->getAreaID()) << "\")"
-    << "<br><b>flags</b>: "
-    << (flags.flags.has_mcsh ? "<br>shadows " : "")
-    << (flags.flags.impass ? "<br>impassable " : "")
-    << (flags.flags.lq_river ? "<br>river " : "")
-    << (flags.flags.lq_ocean ? "<br>ocean " : "")
-    << (flags.flags.lq_magma ? "<br>lava" : "")
-    << (flags.flags.lq_slime ? "<br>slime" : "")
-    << "<br><b>textures used:</b> " << chunk->texture_set->num()
-    << "<br><b>textures:</b><span>";
+      << ") of <b>tile</b> (" << chunk->mt->index.x << " , " << chunk->mt->index.z << ")"
+      << "<br><b>area ID:</b> " << chunk->getAreaID() << " (\"" << gAreaDB.getAreaName(chunk->getAreaID()) << "\")"
+      << "<br><b>flags</b>: "
+      << (flags.flags.has_mcsh ? "<br>shadows " : "")
+      << (flags.flags.impass ? "<br>impassable " : "")
+      << (flags.flags.lq_river ? "<br>river " : "")
+      << (flags.flags.lq_ocean ? "<br>ocean " : "")
+      << (flags.flags.lq_magma ? "<br>lava" : "")
+      << (flags.flags.lq_slime ? "<br>slime" : "");
+
+  select_info << "<br><b>Chunk Unit</b> (" << unit_index.x << ", " << unit_index.y << ")"
+      << "<br><b>Chunk Unit Effect Doodads disabled</b>: "
+      << (chunk->getTextureSet()->getDoodadEnabledAt(unit_index.y, unit_index.x) ? "True" : "False")
+      << "<br><b>Chunk Unit Active Doodad Effect Layer </b>: "
+      << int(chunk->getTextureSet()->getDoodadActiveLayerIdAt(unit_index.x, unit_index.y));
 
   // liquid details if the chunk has liquid data
   if (chunk->mt->Water.hasData(0))
@@ -38,8 +50,8 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
           liquid_layer liquid = waterchunk->getLayers()->at(0); // only getting data from layer 0, maybe loop them ?
           int liquid_flags = liquid.getSubchunks();
 
-          select_info << "\nliquid type: " << liquid.liquidID() << " (\"" << gLiquidTypeDB.getLiquidName(liquid.liquidID()) << "\")"
-              << "\nliquid flags: "
+          select_info << "<br><b>liquid type</b>: " << liquid.liquidID() << " (\"" << gLiquidTypeDB.getLiquidName(liquid.liquidID()) << "\")"
+              << "<br><b>liquid flags</b>: "
               // getting flags from the center tile
               << ((liquid_render.fishable >> (4 * 8 + 4)) & 1 ? "fishable " : "")
               << ((liquid_render.fatigue >> (4 * 8 + 4)) & 1 ? "fatigue" : "");
@@ -47,8 +59,11 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   }
   else
   {
-      select_info << "\nno liquid data";
+      select_info << "<br><b>no liquid data</b>";
   }
+
+  select_info << "<br><b>textures used:</b> " << chunk->texture_set->num()
+      << "<br><b>textures:</b><span>";
 
   unsigned counter = 0;
   for (auto& tex : *(chunk->texture_set->getTextures()))
@@ -68,6 +83,8 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 
     if (stuck || error)
       select_info << "</font>";
+    select_info << "<br><b>Ground Effect</b>: " << chunk->getTextureSet()->getEffectForLayer(counter);
+        counter++;
   }
 
   //! \todo get a list of textures and their flags as well as detail doodads.

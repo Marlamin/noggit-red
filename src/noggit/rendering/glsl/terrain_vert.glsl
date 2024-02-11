@@ -23,6 +23,8 @@ struct ChunkInstanceData
   ivec4 AreaIDColor_Pad2_DrawSelection;
   ivec4 ChunkXZ_TileXZ;
   ivec4 ChunkTexAnimDir;
+  vec4 ChunkGroundEffectColor;
+  ivec4 ChunkDoodadsEnabled2_ChunksLayerEnabled2;
 };
 
 layout (std140) uniform chunk_instances

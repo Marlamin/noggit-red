@@ -33,7 +33,9 @@ layout (std140) uniform overlay_params
   int climb_use_smooth_interpolation;
   float climb_value;
   int draw_vertex_color;
-  int padding[3];
+  int draw_groundeffectid_overlay;
+  int draw_groundeffect_layerid_overlay;
+  int draw_noeffectdoodad_overlay;
 };
 
 struct ChunkInstanceData
@@ -46,6 +48,10 @@ struct ChunkInstanceData
   ivec4 AreaIDColor_Pad2_DrawSelection;
   ivec4 ChunkXZ_TileXZ;
   ivec4 ChunkTexAnimDir;
+  vec4 ChunkGroundEffectColor;
+  // pack 8x8 bools in two ints. Simplified ChunksLayerEnabled to a bool instead of 2 bits id.
+  // If those modes are mutually exclusive, we can do it in ChunkGroundEffectColor for now.
+  ivec4 ChunkDoodadsEnabled2_ChunksLayerEnabled2;
 };
 
 layout (std140) uniform chunk_instances
@@ -273,6 +279,57 @@ void main()
   {
     out_color.rgb = out_color.rgb * 0.3 + random_color(instances[instanceID].AreaIDColor_Pad2_DrawSelection.r);
   }
+
+
+
+if(draw_groundeffectid_overlay != 0)
+{
+  out_color.rgb = out_color.rgb * 0.3 + instances[instanceID].ChunkGroundEffectColor.rgb;
+}
+
+if(draw_groundeffect_layerid_overlay != 0)
+{
+  
+}
+
+if(draw_noeffectdoodad_overlay != 0)
+{
+  uint no_doodad = 0;
+
+  uvec2 tile_index = uvec2(uint(floor(vary_position.x / TILESIZE)), uint(floor(vary_position.z / TILESIZE)));
+  vec2 tile_base_pos = vec2(float(tile_index.x * TILESIZE), float(tile_index.y * TILESIZE));
+
+  uvec2 chunk_index = uvec2(uint(floor(instanceID / 16)), uint(floor(instanceID % 16)));
+  // uint chunk_x = uint(floor( (vary_position.x - tile_base_pos.x) / CHUNKSIZE));
+  // uint chunk_y = uint(floor( (vary_position.z - tile_base_pos.y) / CHUNKSIZE));
+
+  vec2 chunk_base_pos = vec2(float(chunk_index.x * CHUNKSIZE), float(chunk_index.y * CHUNKSIZE));
+
+  uint unit_x = uint(floor((vary_position.x - (tile_base_pos.x + chunk_base_pos.x)) / UNITSIZE));
+  uint unit_z = uint(floor((vary_position.z - (tile_base_pos.y + chunk_base_pos.y)) / UNITSIZE));
+
+  // swapped x and y order, the data is wrongly ordered when loaded
+  if (unit_z < 4)
+  {
+    no_doodad =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.r) & (1 << ((unit_z * 8) + unit_x) );
+  }
+  else
+  {
+    no_doodad =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.g) & (1 << ((unit_z * 8) + unit_x) - 32 ); // (unit_x-4) * 8 + unit_z)
+  }
+
+  if (no_doodad != 0)
+  {
+    // if set, draw chunk in white
+    out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
+  }
+  else
+  {
+    // else, draw in black(default)
+    out_color.rgb = mix(vec3(0.0), out_color.rgb, 0.5);
+  }
+
+}
 
   if(draw_impass_overlay != 0 && instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.g != 0)
   {

@@ -175,6 +175,27 @@ public:
   static const size_t Flags = 2;   // uint
 };
 
+class TerrainTypeDB : public DBCFile
+{
+public:
+    TerrainTypeDB() :
+        DBCFile("DBFilesClient\\TerrainType.dbc")
+    { }
+
+    /// Fields
+    // WDBX generates a fake id column. Real id start at 0.
+    static const size_t TerrainId = 0;    // uint // this is the real id referenced by groundeffecttexture
+    static const size_t TerrainDesc = 1;   // string
+    static const size_t FootstepSprayRun = 2;   // uint
+    static const size_t FootstepSprayWalk = 3;   // uint
+    static const size_t Sound = 4;   // uint
+    static const size_t Flags = 5;   // uint
+};
+
+// TODO for terrain type editing:
+// TerrainTypeSounds, FootstepTerrainLookup, FootprintTextures
+
+
 class LiquidTypeDB : public DBCFile
 {
 public:
@@ -336,6 +357,7 @@ extern LightIntBandDB gLightIntBandDB;
 extern LightFloatBandDB gLightFloatBandDB;
 extern GroundEffectDoodadDB gGroundEffectDoodadDB;
 extern GroundEffectTextureDB gGroundEffectTextureDB;
+extern TerrainTypeDB gTerrainTypeDB;
 extern LiquidTypeDB gLiquidTypeDB;
 extern SoundProviderPreferencesDB gSoundProviderPreferencesDB;
 extern SoundAmbienceDB gSoundAmbienceDB;

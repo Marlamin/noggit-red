@@ -110,7 +110,7 @@ public:
 private:
   friend struct scoped_blp_texture_reference;
   static Noggit::AsyncObjectMultimap<blp_texture> _;
-  static std::array<std::unordered_map<std::tuple<GLint, int, int, int>, TexArrayParams, tuple_hash>, 7> _tex_arrays;
+  static std::array<std::unordered_map<std::tuple<GLint, int, int, int>, TexArrayParams, tuple_hash>, Noggit::NoggitRenderContext::count> _tex_arrays;
 
 };
 

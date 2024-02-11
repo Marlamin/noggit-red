@@ -35,7 +35,8 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
   , _chunk_update_flags(ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
-                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
+                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS
+                        | ChunkUpdateFlags::GROUND_EFFECT)
 {
 
 
@@ -742,6 +743,16 @@ glm::vec3 MapChunk::getNeighborVertex(int i, unsigned dir)
   return mVertices[i + idiff[dir]];
 
   */
+}
+
+glm::uvec2 MapChunk::getUnitIndextAt(glm::vec3 pos)
+{
+    glm::uvec2 unit_index = glm::uvec2(floor((pos.x - xbase) / UNITSIZE), floor((pos.z - zbase) / UNITSIZE));
+
+    if (unit_index.x > 8 || unit_index.y > 8)
+        return glm::uvec2(8, 8);
+
+    return unit_index;
 }
 
 void MapChunk::recalcNorms()
@@ -1905,7 +1916,8 @@ void MapChunk::unload()
   _chunk_update_flags = ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
-                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS;
+                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS
+                        | ChunkUpdateFlags::GROUND_EFFECT;
 }
 
 void MapChunk::setAlphamapImage(const QImage &image, unsigned int layer)

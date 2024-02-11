@@ -38,7 +38,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
   int n_selected = static_cast<int>(selection.size());
 
-  if (!n_selected || (n_selected == 1 & selection[0].index() != eEntry_Object))
+  if (!n_selected || (n_selected == 1 && selection[0].index() != eEntry_Object))
     return;
 
   if (n_selected == 1)
