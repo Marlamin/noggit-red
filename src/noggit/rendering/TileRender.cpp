@@ -553,6 +553,7 @@ void Noggit::Rendering::TileRender::setChunkGroundEffectColor(unsigned int chunk
     _chunk_instance_data[chunkid].ChunkGroundEffectColor[0] = color.r;
     _chunk_instance_data[chunkid].ChunkGroundEffectColor[1] = color.g;
     _chunk_instance_data[chunkid].ChunkGroundEffectColor[2] = color.b;
+    _chunk_instance_data[chunkid].ChunkGroundEffectColor[2] = 0.0; // not used
 }
 
 void TileRender::initChunkData(MapChunk* chunk)
@@ -569,39 +570,81 @@ void TileRender::initChunkData(MapChunk* chunk)
   chunk_render_instance.ChunkGroundEffectColor[0] = 0.0f;
   chunk_render_instance.ChunkGroundEffectColor[1] = 0.0f;
   chunk_render_instance.ChunkGroundEffectColor[2] = 0.0f;
+  chunk_render_instance.ChunkGroundEffectColor[3] = 0.0f;
 
   // setChunkGroundEffectData(chunk);
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[0] = 0;
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[1] = 0;
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[2] = 0;
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[3] = 0;
 }
 
 void TileRender::setChunkGroundEffectData(MapChunk* chunk)
 {
-  auto& chunk_render_instance = _chunk_instance_data[chunk->px * 16 + chunk->py];
-
-  // chunk_render_instance.ChunkGroundEffectColor; 
-  auto doodadMapping = chunk->texture_set->getDoodadMappingBase();
   auto doodadExclusionMap = chunk->texture_set->getDoodadStencilBase();
 
-  // convert layer id to bool (IsCurrent)
-  // TODO
-  for (unsigned int x = 0; x < 8; x++)
-  {
-      for (unsigned int y = 0; y < 8; y++)
-      {
-          uint8_t layer_id = chunk->texture_set->getDoodadActiveLayerIdAt(x, y);
-          unsigned int effect_id = chunk->getTextureSet()->getEffectForLayer(layer_id);
-
-      }
-  }
-
   // pack it to int32s
-
   int32_t exclusionmap1 = (int32_t)((uint32_t)(doodadExclusionMap[0] << 0) | (uint32_t)(doodadExclusionMap[1] << 8)
       | (uint32_t)(doodadExclusionMap[2] << 16) | (uint32_t)(doodadExclusionMap[3] << 24));
 
   int32_t exclusionmap2 = (int32_t)((uint32_t)(doodadExclusionMap[4] << 0) | (uint32_t)(doodadExclusionMap[5] << 8)
       | (uint32_t)(doodadExclusionMap[6] << 16) | (uint32_t)(doodadExclusionMap[7] << 24));
 
-  // (a << 0) | (b << 8) | (c << 16) | (d << 24);
+  auto& chunk_render_instance = _chunk_instance_data[chunk->px * 16 + chunk->py];
   chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[0] = exclusionmap1;
   chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[1] = exclusionmap2;
+}
+
+void Noggit::Rendering::TileRender::setChunkGroundEffectActiveData(MapChunk* chunk, std::string active_texture)
+{
+  // 1 : check if chunk has our texture AND set
+  // if it does, then check if it's the active layer for each unit
+  
+  // get the layer id of our texture
+  int layer_id = -1;
+  for (int i = 0; i < chunk->getTextureSet()->num(); ++i)
+  {
+      if (chunk->getTextureSet()->filename(i) == active_texture)
+      {
+          layer_id = i;
+      }
+  }
+
+  // int layer_id = chunk->getTextureSet()->texture_id(active_texture); // -1 if not present
+
+  auto& chunk_render_instance = _chunk_instance_data[chunk->px * 16 + chunk->py];
+
+  if (layer_id == -1)
+  {
+      chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[2] = 0;
+      chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[3] = 0;
+      return;
+  }
+
+  int32_t active_map1 = 0;
+  int32_t active_map2 = 0;
+
+  // convert layer id to bool (Is Active)
+  int bit = 0;
+  for (unsigned int x = 0; x < 8; x++)
+  {
+      for (unsigned int y = 0; y < 8; y++)
+      {
+          uint8_t unit_layer_id = chunk->texture_set->getDoodadActiveLayerIdAt(x, y);
+          bool is_active = layer_id == unit_layer_id;
+
+          if (is_active)
+          {
+            if (bit < 32)
+              active_map1 |= (1 << bit);
+            else
+              active_map2 |= (1 << (bit-32));
+          }
+
+          bit++;
+      }
+  }
+
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[2] = active_map1;
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[3] = active_map2;
 }

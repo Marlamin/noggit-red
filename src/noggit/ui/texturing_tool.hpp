@@ -125,6 +125,9 @@ namespace Noggit
         bool show_placement_map_overlay() const { return _render_placement_map->isChecked() && _render_group_box->isChecked(); };
         bool show_exclusion_map_overlay() const { return _render_exclusion_map->isChecked() && _render_group_box->isChecked(); };
     private:        
+
+        std::optional<ground_effect_set> getSelectedGroundEffect();
+        std::optional<glm::vec3> getSelectedEffectColor();
         void SetActiveGroundEffect(ground_effect_set const& effect);
 
         void updateDoodadPreviewRender(int slot_index);
@@ -137,7 +140,7 @@ namespace Noggit
         int active_doodad_widget = 0;
         // std::unordered_map<unsigned int, int> _texture_effect_ids;
 
-        std::vector< ground_effect_set> _loaded_effects;
+        std::vector<ground_effect_set> _loaded_effects;
 
         std::unordered_map<unsigned int, ground_effect_set> _ground_effect_cache; // store them for faster iteration on duplicates
 
@@ -150,8 +153,17 @@ namespace Noggit
 
         QGroupBox* _render_group_box;
         QButtonGroup* _render_type_group;
+
+        // render all the loaded effect sets for this texture in various colors
         QRadioButton* _render_active_sets;
+
+        // only for the active/selected set of the current texture : 
+        // - render as red if set is present in the chunk and NOT the current active layer
+        // - render as green if set is present in the chunk and is the current active layer
+        // - render as black is set is not present
         QRadioButton* _render_placement_map;
+
+        // render chunk units where effect doodads are disabled as white, rest as black
         QRadioButton* _render_exclusion_map;
 
         QCheckBox* _chkbox_merge_duplicates;

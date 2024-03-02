@@ -282,54 +282,87 @@ void main()
 
 
 
-if(draw_groundeffectid_overlay != 0)
-{
-  out_color.rgb = out_color.rgb * 0.3 + instances[instanceID].ChunkGroundEffectColor.rgb;
-}
+  if(draw_groundeffectid_overlay != 0)
+  {
+    out_color.rgb = out_color.rgb * 0.3 + instances[instanceID].ChunkGroundEffectColor.rgb;
+  }
 
-if(draw_groundeffect_layerid_overlay != 0)
-{
+  if(draw_groundeffect_layerid_overlay != 0)
+  {
+    // if chuck does not have our texture it is set as black color
+    if (instances[instanceID].ChunkGroundEffectColor.rgb == vec3(0.0, 0.0, 0.0))
+    {
+      out_color.rgb = out_color.rgb * 0.3 + instances[instanceID].ChunkGroundEffectColor.rgb;
+    }
+    else
+    {
+      uint is_active = 0;
+
+      uvec2 tile_index = uvec2(uint(floor(vary_position.x / TILESIZE)), uint(floor(vary_position.z / TILESIZE)));
+      vec2 tile_base_pos = vec2(float(tile_index.x * TILESIZE), float(tile_index.y * TILESIZE));
+      uvec2 chunk_index = uvec2(uint(floor(instanceID / 16)), uint(floor(instanceID % 16)));
+      vec2 chunk_base_pos = vec2(float(chunk_index.x * CHUNKSIZE), float(chunk_index.y * CHUNKSIZE));
+      uint unit_x = uint(floor((vary_position.x - (tile_base_pos.x + chunk_base_pos.x)) / UNITSIZE));
+      uint unit_z = uint(floor((vary_position.z - (tile_base_pos.y + chunk_base_pos.y)) / UNITSIZE));
+
+      // swapped x and y order, the data is wrongly ordered when loaded
+      if (unit_z < 4)
+      {
+        is_active =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.b) & (1 << ((unit_z * 8) + unit_x) );
+      }
+      else
+      {
+        is_active =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.a) & (1 << ((unit_z * 8) + unit_x) - 32 ); // (unit_x-4) * 8 + unit_z)
+      }
+
+      if (is_active != 0)
+      {
+        // if set, draw chunk in green
+        out_color.rgb = mix(vec3(0.0, 1.0, 0.0), out_color.rgb, 0.7);
+      }
+      else
+      {
+        // else, draw in red
+        out_color.rgb = mix(vec3(1.0, 0.0, 0.0), out_color.rgb, 0.7);
+      }
+    }
+  }
+
+  // render mode for ge doodads enabled on chunk unit. no_render set = white
+  if(draw_noeffectdoodad_overlay != 0)
+  {
+    uint no_doodad = 0;
   
-}
-
-if(draw_noeffectdoodad_overlay != 0)
-{
-  uint no_doodad = 0;
-
-  uvec2 tile_index = uvec2(uint(floor(vary_position.x / TILESIZE)), uint(floor(vary_position.z / TILESIZE)));
-  vec2 tile_base_pos = vec2(float(tile_index.x * TILESIZE), float(tile_index.y * TILESIZE));
-
-  uvec2 chunk_index = uvec2(uint(floor(instanceID / 16)), uint(floor(instanceID % 16)));
-  // uint chunk_x = uint(floor( (vary_position.x - tile_base_pos.x) / CHUNKSIZE));
-  // uint chunk_y = uint(floor( (vary_position.z - tile_base_pos.y) / CHUNKSIZE));
-
-  vec2 chunk_base_pos = vec2(float(chunk_index.x * CHUNKSIZE), float(chunk_index.y * CHUNKSIZE));
-
-  uint unit_x = uint(floor((vary_position.x - (tile_base_pos.x + chunk_base_pos.x)) / UNITSIZE));
-  uint unit_z = uint(floor((vary_position.z - (tile_base_pos.y + chunk_base_pos.y)) / UNITSIZE));
-
-  // swapped x and y order, the data is wrongly ordered when loaded
-  if (unit_z < 4)
-  {
-    no_doodad =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.r) & (1 << ((unit_z * 8) + unit_x) );
+    uvec2 tile_index = uvec2(uint(floor(vary_position.x / TILESIZE)), uint(floor(vary_position.z / TILESIZE)));
+    vec2 tile_base_pos = vec2(float(tile_index.x * TILESIZE), float(tile_index.y * TILESIZE));
+    uvec2 chunk_index = uvec2(uint(floor(instanceID / 16)), uint(floor(instanceID % 16)));
+    // uint chunk_x = uint(floor( (vary_position.x - tile_base_pos.x) / CHUNKSIZE));
+    // uint chunk_y = uint(floor( (vary_position.z - tile_base_pos.y) / CHUNKSIZE));
+    vec2 chunk_base_pos = vec2(float(chunk_index.x * CHUNKSIZE), float(chunk_index.y * CHUNKSIZE));
+    uint unit_x = uint(floor((vary_position.x - (tile_base_pos.x + chunk_base_pos.x)) / UNITSIZE));
+    uint unit_z = uint(floor((vary_position.z - (tile_base_pos.y + chunk_base_pos.y)) / UNITSIZE));
+  
+    // swapped x and y order, the data is wrongly ordered when loaded
+    if (unit_z < 4)
+    {
+      no_doodad =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.r) & (1 << ((unit_z * 8) + unit_x) );
+    }
+    else
+    {
+      no_doodad =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.g) & (1 << ((unit_z * 8) + unit_x) - 32 ); // (unit_x-4) * 8 + unit_z)
+    }
+  
+    if (no_doodad != 0)
+    {
+      // if set, draw chunk in white
+      out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
+    }
+    else
+    {
+      // else, draw in black(default)
+      out_color.rgb = mix(vec3(0.0), out_color.rgb, 0.5);
+    }
   }
-  else
-  {
-    no_doodad =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.g) & (1 << ((unit_z * 8) + unit_x) - 32 ); // (unit_x-4) * 8 + unit_z)
-  }
-
-  if (no_doodad != 0)
-  {
-    // if set, draw chunk in white
-    out_color.rgb = mix(vec3(1.0), out_color.rgb, 0.5);
-  }
-  else
-  {
-    // else, draw in black(default)
-    out_color.rgb = mix(vec3(0.0), out_color.rgb, 0.5);
-  }
-
-}
 
   if(draw_impass_overlay != 0 && instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.g != 0)
   {

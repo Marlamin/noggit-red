@@ -104,6 +104,9 @@ public:
   void setNTextures(size_t n) { nTextures = n; };
   std::vector<scoped_blp_texture_reference>* getTextures() { return &textures; };
 
+  // get the weight of each texture in a chunk unit
+  std::array<float, 4> get_textures_weight_for_unit(unsigned int unit_x, unsigned int unit_y);
+
 private:
 
   uint8_t sum_alpha(size_t offset) const;

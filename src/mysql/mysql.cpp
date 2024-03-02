@@ -5,8 +5,10 @@
 
 #include <QtCore/QSettings>
 
-#include <cppconn/driver.h>
-#include <cppconn/prepared_statement.h>
+#include <driver.h>
+#include <prepared_statement.h>
+// #include <cppconn/driver.h>
+// #include <cppconn/prepared_statement.h>
 
 namespace
 {

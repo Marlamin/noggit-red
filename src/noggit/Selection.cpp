@@ -31,11 +31,27 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
       << (flags.flags.lq_magma ? "<br>lava" : "")
       << (flags.flags.lq_slime ? "<br>slime" : "");
 
-  select_info << "<br><b>Chunk Unit</b> (" << unit_index.x << ", " << unit_index.y << ")"
+  select_info << "\n<br><b>Chunk Unit</b> (" << unit_index.x << ", " << unit_index.y << ")"
       << "<br><b>Chunk Unit Effect Doodads disabled</b>: "
       << (chunk->getTextureSet()->getDoodadEnabledAt(unit_index.y, unit_index.x) ? "True" : "False")
       << "<br><b>Chunk Unit Active Doodad Effect Layer </b>: "
-      << int(chunk->getTextureSet()->getDoodadActiveLayerIdAt(unit_index.x, unit_index.y));
+      << int(chunk->getTextureSet()->getDoodadActiveLayerIdAt(unit_index.x, unit_index.y))
+      << ""
+      <<"\n";
+
+  std::array<float, 4> weights = chunk->getTextureSet()->get_textures_weight_for_unit(unit_index.x, unit_index.y);
+  if (chunk->getTextureSet()->num())
+  {
+      select_info << "\n<br><b>DEBUG Chunk Unit texture weights:</b>"
+          << "<br>0:" << weights[0] << "%";
+  }
+  if (chunk->getTextureSet()->num()>1)
+      select_info << "<br>1:" << weights[1] << "%";
+  if (chunk->getTextureSet()->num() > 2)
+      select_info << "<br>2:" << weights[2] << "%";
+  if (chunk->getTextureSet()->num() > 3)
+      select_info << "<br>3:" << weights[3] << "%";
+
 
   // liquid details if the chunk has liquid data
   if (chunk->mt->Water.hasData(0))
@@ -62,7 +78,7 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
       select_info << "<br><b>no liquid data</b>";
   }
 
-  select_info << "<br><b>textures used:</b> " << chunk->texture_set->num()
+  select_info << "\n<br><b>textures used:</b> " << chunk->texture_set->num()
       << "<br><b>textures:</b><span>";
 
   unsigned counter = 0;

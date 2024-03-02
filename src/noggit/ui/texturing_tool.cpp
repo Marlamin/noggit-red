@@ -721,14 +721,17 @@ namespace Noggit
         _render_type_group = new QButtonGroup(_render_group_box);
 
         _render_active_sets = new QRadioButton("Effect Id/Set", this);
+        _render_active_sets->setToolTip("Render all the loaded effect sets for this texture in various colors");
         _render_type_group->addButton(_render_active_sets);
         render_layout->addWidget(_render_active_sets);
 
         _render_exclusion_map = new QRadioButton("Doodads Disabled", this);
+        _render_exclusion_map->setToolTip("Render chunk units where effect doodads are disabled as white, rest as black");
         _render_type_group->addButton(_render_exclusion_map);
         render_layout->addWidget(_render_exclusion_map);
 
-        _render_placement_map = new QRadioButton("Active layer", this); // if chunk contains texture/Effect : render as green or red if the effect layer is active or not
+        _render_placement_map = new QRadioButton("Selected set active", this); // if chunk contains texture/Effect : render as green or red if the effect layer is active or not
+        _render_placement_map->setToolTip("For the currently selected set, render as red if set is present in the chunk unit and NOT the current active layer, render as green if it's active.");
         _render_type_group->addButton(_render_placement_map);
         render_layout->addWidget(_render_placement_map);
 
@@ -769,7 +772,7 @@ namespace Noggit
         _effect_sets_list->setSelectionBehavior(QAbstractItemView::SelectItems);
         _effect_sets_list->setUniformItemSizes(true);
 
-        _effect_sets_list->setMinimumHeight(_object_list->iconSize().height() * 6);
+        // _effect_sets_list->setMinimumHeight(_object_list->iconSize().height() * 6);
 
         // effect settings
         {
@@ -957,20 +960,18 @@ namespace Noggit
 */
             QObject::connect(_effect_sets_list, &QListWidget::itemClicked, [this](QListWidgetItem* item)
             {
-            //_effect_sets_list->currentItem
-            int index = _effect_sets_list->currentIndex().row();
+                int index = _effect_sets_list->currentIndex().row();
 
-            if (_loaded_effects.empty() || !_effect_sets_list->count() || index == -1)
-                return;
+                auto effect = getSelectedGroundEffect();
+                if (!effect.has_value())
+                    return;
 
-            auto effect = _loaded_effects[index];
+                SetActiveGroundEffect(effect.value());
 
-            SetActiveGroundEffect(effect);
-
-            // _cbbox_effect_sets->setStyleSheet
-            QPalette pal = _effect_sets_list->palette();
-            pal.setColor(_effect_sets_list->backgroundRole(), QColor::fromRgbF(_effects_colors[index].r, _effects_colors[index].g, _effects_colors[index].b));
-            _effect_sets_list->setPalette(pal);
+                // _cbbox_effect_sets->setStyleSheet
+                // QPalette pal = _effect_sets_list->palette();
+                // pal.setColor(_effect_sets_list->backgroundRole(), QColor::fromRgbF(_effects_colors[index].r, _effects_colors[index].g, _effects_colors[index].b));
+                // _effect_sets_list->setPalette(pal);
             });
 
         // TODO fix this shit
@@ -1123,7 +1124,15 @@ namespace Noggit
         //     _cbbox_effect_sets->setCurrentIndex(0);
         auto first_item = _effect_sets_list->itemAt(0, 0);
         if (_effect_sets_list->count() && first_item)
+        {
             _effect_sets_list->setCurrentItem(first_item);
+            auto effect = getSelectedGroundEffect();
+            if (!effect.has_value())
+                return;
+
+            SetActiveGroundEffect(effect.value());
+        }
+
     }
 
     void ground_effect_tool::genEffectColors()
@@ -1160,12 +1169,18 @@ namespace Noggit
                 for (int y = 0; y < 16; y++)
                 {
                     auto chunk = tile->getChunk(x, y);
+
+                    int chunk_index = chunk->px * 16 + chunk->py;
                      // reset to black by default
-                    tile->renderer()->setChunkGroundEffectColor(chunk->px * 16 + chunk->py, glm::vec3(0.0, 0.0, 0.0));
+                    tile->renderer()->setChunkGroundEffectColor(chunk_index, glm::vec3(0.0, 0.0, 0.0));
+
+                    // ! Set the chunk active layer data
+                    tile->renderer()->setChunkGroundEffectActiveData(chunk, active_texture);
 
                     for (int layer_id = 0; layer_id < chunk->getTextureSet()->num(); layer_id++)
                     {
                         auto texture_name = chunk->getTextureSet()->filename(layer_id);
+
                         if (texture_name == active_texture)
                         {
                             unsigned int const effect_id = chunk->getTextureSet()->getEffectForLayer(layer_id);
@@ -1187,7 +1202,7 @@ namespace Noggit
                                 {
                                     if (effect_id == effect_set.ID)
                                     {
-                                        tile->renderer()->setChunkGroundEffectColor(chunk->px * 16 + chunk->py, _effects_colors[count]);
+                                        tile->renderer()->setChunkGroundEffectColor(chunk_index, _effects_colors[count]);
                                         break;
                                     }
                                     if (_chkbox_merge_duplicates->isChecked() && (ground_effect == &effect_set)) // do deep comparison, find those that have the same effect as loaded effects, but diff id.
@@ -1197,9 +1212,13 @@ namespace Noggit
                                         // same color
                                         tile->renderer()->setChunkGroundEffectColor(chunk->px * 16 + chunk->py, _effects_colors[count]);
                                         break;
-
                                     }
                                     count++;
+                                }
+                                
+                                if (_render_placement_map->isChecked())
+                                {
+
                                 }
                             }
                         }
@@ -1271,6 +1290,29 @@ namespace Noggit
     ground_effect_tool::~ground_effect_tool()
     {
         delete _preview_renderer;
+    }
+
+    std::optional<ground_effect_set> ground_effect_tool::getSelectedGroundEffect()
+    {
+        //_effect_sets_list->currentItem
+        int index = _effect_sets_list->currentIndex().row();
+        if (_loaded_effects.empty() || !_effect_sets_list->count() || index == -1)
+            return std::nullopt;
+
+        auto effect = _loaded_effects[index];
+
+        return effect;
+    }
+
+    std::optional<glm::vec3> ground_effect_tool::getSelectedEffectColor()
+    {
+        int index = _effect_sets_list->currentIndex().row();
+        if (_loaded_effects.empty() || !_effect_sets_list->count() || index == -1)
+            return std::nullopt;
+
+        glm::vec3 effect_color = _effects_colors[index];
+
+        return effect_color;
     }
 
     void ground_effect_tool::SetActiveGroundEffect(ground_effect_set const& effect)

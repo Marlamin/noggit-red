@@ -1295,6 +1295,46 @@ void TextureSet::update_lod_texture_map()
 
 
 
+std::array<float, 4> TextureSet::get_textures_weight_for_unit(unsigned int unit_x, unsigned int unit_y)
+{
+    float total_layer_0 = 0.f;
+    float total_layer_1 = 0.f;
+    float total_layer_2 = 0.f;
+    float total_layer_3 = 0.f;
+
+    // 8x8 bits per unit
+    for (int x = unit_x; x < unit_x + 8; x++)
+    {
+        for (int y = unit_y; y < unit_y + 8; y++)
+        {
+            float base_alpha = 255.f;
+
+            for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
+            {
+                float f = static_cast<float>(alphamaps[alpha_layer]->getAlpha(64 * y + x));
+
+                if (alpha_layer == 0)
+                    total_layer_1 += f;
+                else if (alpha_layer == 1)
+                    total_layer_2 += f;
+                else if (alpha_layer == 2)
+                    total_layer_3 += f;
+
+                base_alpha -= f;
+            }
+            total_layer_0 += base_alpha;
+        }
+    }
+
+    float sum = total_layer_0 + total_layer_1 + total_layer_2 + total_layer_3;
+    std::array<float, 4> weights = { total_layer_0 / sum * 100.f,
+        total_layer_1 / sum * 100.f,
+        total_layer_2 / sum * 100.f,
+        total_layer_3 / sum * 100.f };
+
+    return weights;
+}
+
 uint8_t TextureSet::sum_alpha(size_t offset) const
 {
   uint8_t sum = 0;
