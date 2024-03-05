@@ -553,7 +553,7 @@ void Noggit::Rendering::TileRender::setChunkGroundEffectColor(unsigned int chunk
     _chunk_instance_data[chunkid].ChunkGroundEffectColor[0] = color.r;
     _chunk_instance_data[chunkid].ChunkGroundEffectColor[1] = color.g;
     _chunk_instance_data[chunkid].ChunkGroundEffectColor[2] = color.b;
-    _chunk_instance_data[chunkid].ChunkGroundEffectColor[2] = 0.0; // not used
+    _chunk_instance_data[chunkid].ChunkGroundEffectColor[3] = 0.0; // not used
 }
 
 void TileRender::initChunkData(MapChunk* chunk)

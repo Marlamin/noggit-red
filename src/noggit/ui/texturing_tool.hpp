@@ -22,6 +22,8 @@ class World;
 class MapView;
 class DBCFile::Record;
 
+inline constexpr const char* STRING_EMPTY_DISPLAY = "-NONE-";
+
 namespace Noggit
 {
   namespace Ui
@@ -137,7 +139,7 @@ namespace Noggit
 
         void genEffectColors();
 
-        int active_doodad_widget = 0;
+        // int active_doodad_widget = 0;
         // std::unordered_map<unsigned int, int> _texture_effect_ids;
 
         std::vector<ground_effect_set> _loaded_effects;
@@ -173,7 +175,7 @@ namespace Noggit
 
         // TODO create some nice UI for doodads
         QListWidget* _object_list; // for render previews
-        QPushButton* _button_effect_doodad[4];
+        // QPushButton* _button_effect_doodad[4];
 
         QSpinBox* _spinbox_doodads_amount;
         QComboBox* _cbbox_terrain_type;
@@ -197,7 +199,7 @@ namespace Noggit
                      , QWidget* parent = nullptr
                      );
 
-      ~texturing_tool() { delete _ground_effect_tool; };
+      // ~texturing_tool() { _ground_effect_tool->deleteLater(); }; // { delete _ground_effect_tool; };
 
       float brush_radius() const;
       float hardness() const;

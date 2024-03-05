@@ -721,7 +721,7 @@ namespace Noggit
         _render_type_group = new QButtonGroup(_render_group_box);
 
         _render_active_sets = new QRadioButton("Effect Id/Set", this);
-        _render_active_sets->setToolTip("Render all the loaded effect sets for this texture in various colors");
+        _render_active_sets->setToolTip("Render all the loaded effect sets for this texture in matching colors");
         _render_type_group->addButton(_render_active_sets);
         render_layout->addWidget(_render_active_sets);
 
@@ -730,8 +730,8 @@ namespace Noggit
         _render_type_group->addButton(_render_exclusion_map);
         render_layout->addWidget(_render_exclusion_map);
 
-        _render_placement_map = new QRadioButton("Selected set active", this); // if chunk contains texture/Effect : render as green or red if the effect layer is active or not
-        _render_placement_map->setToolTip("For the currently selected set, render as red if set is present in the chunk unit and NOT the current active layer, render as green if it's active.");
+        _render_placement_map = new QRadioButton("Selected Texture state", this); // if chunk contains texture/Effect : render as green or red if the effect layer is active or not
+        _render_placement_map->setToolTip("Render chunk unit as red if texture is present in the chunk and NOT the current active layer, render as green if it's active. \nThis defines which of the 4 textures' set is currently active, this is determined by which has the highest opacity.");
         _render_type_group->addButton(_render_placement_map);
         render_layout->addWidget(_render_placement_map);
 
@@ -771,6 +771,8 @@ namespace Noggit
         _effect_sets_list->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
         _effect_sets_list->setSelectionBehavior(QAbstractItemView::SelectItems);
         _effect_sets_list->setUniformItemSizes(true);
+        _effect_sets_list->setFixedHeight(160);
+        _effect_sets_list->setIconSize(QSize(20, 20));
 
         // _effect_sets_list->setMinimumHeight(_object_list->iconSize().height() * 6);
 
@@ -785,21 +787,39 @@ namespace Noggit
             auto settings_layout(new QFormLayout(settings_group));
             settings_group->setLayout(settings_layout);
 
-            for (int i = 0; i < 4; i++)
-            {
-                _button_effect_doodad[i] = new QPushButton(" -NONE- ", this);
-                settings_layout->addRow(("Effect Doodad " + std::to_string(i) + " : ").c_str(), _button_effect_doodad[i]);
-            }
+            // for (int i = 0; i < 4; i++)
+            // {
+            //     _button_effect_doodad[i] = new QPushButton(STRING_EMPTY_DISPLAY, this);
+            //     settings_layout->addRow(("Effect Doodad " + std::to_string(i) + " : ").c_str(), _button_effect_doodad[i]);
+            // }
 
-            _object_list = new ObjectList(this);
+
+            // auto doodads_layout(new QGridLayout(settings_group));
+            // settings_layout->addRow(settings_layout);
+
+            _object_list = new QListWidget(this);
             _object_list->setItemAlignment(Qt::AlignLeft);
             _object_list->setViewMode(QListView::IconMode);
+            _object_list->setWrapping(false);
+            _object_list->setIconSize(QSize(100, 100));
+            _object_list->setFlow(QListWidget::LeftToRight);
+            _object_list->setSelectionMode(QAbstractItemView::SingleSelection);
+            _object_list->setAcceptDrops(false);
+            _object_list->setMovement(QListView::Movement::Static);
+            _object_list->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+            _object_list->setMinimumWidth(425);
+            _object_list->setMinimumHeight(120);
+
             settings_layout->addRow(_object_list);
             for (int i = 0; i < 4; i++)
             {
                 QListWidgetItem* list_item = new QListWidgetItem(_object_list);
+                list_item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
                 list_item->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus));
-                list_item->setText(" -NONE- ");
+                list_item->setText(STRING_EMPTY_DISPLAY);
+
+                // list_item->setData(Qt::DisplayRole, ""); // does the same as settext
+                list_item->setToolTip("");
                 _object_list->addItem(list_item);
             }
 
@@ -846,6 +866,22 @@ namespace Noggit
 
         auto apply_layout(new QVBoxLayout(apply_group));
         apply_group->setLayout(apply_layout);
+
+        // generate modes
+        {
+            auto generate_type_group = new QButtonGroup(apply_group);
+
+            auto generate_effect_zone = new QRadioButton("Current Zone", this);
+            generate_type_group->addButton(generate_effect_zone);
+            apply_layout->addWidget(generate_effect_zone);
+
+            auto generate_effect_area = new QRadioButton("Current Area(subzone)", this);
+            generate_type_group->addButton(generate_effect_area);
+            apply_layout->addWidget(generate_effect_area);
+
+            generate_effect_zone->setChecked(true);
+            generate_effect_zone->setAutoExclusive(true);
+        }
 
         _apply_override_cb = new QCheckBox("Override", this);
         apply_layout->addWidget(_apply_override_cb);
@@ -975,17 +1011,25 @@ namespace Noggit
             });
 
         // TODO fix this shit
-        for (int i = 0; i < 4; i++)
-        {
-            connect(_button_effect_doodad[i], &QPushButton::clicked
-                , [=]()
+        // for (int i = 0; i < 4; i++)
+        // {
+        //     connect(_button_effect_doodad[i], &QPushButton::clicked
+        //         , [=]()
+        //         {
+        //             active_doodad_widget = i;
+        //             _map_view->getAssetBrowserWidget()->set_browse_mode(Tools::AssetBrowser::asset_browse_mode::detail_doodads);
+        //             _map_view->getAssetBrowser()->setVisible(true);
+        //         }
+        //     );
+        // }
+
+            connect(_object_list, &QListWidget::itemClicked, this, [=](QListWidgetItem* item)
                 {
-                    active_doodad_widget = i;
                     _map_view->getAssetBrowserWidget()->set_browse_mode(Tools::AssetBrowser::asset_browse_mode::detail_doodads);
                     _map_view->getAssetBrowser()->setVisible(true);
                 }
             );
-        }
+
     }
 
     void ground_effect_tool::updateTerrainUniformParams()
@@ -1080,10 +1124,10 @@ namespace Noggit
 
     void ground_effect_tool::updateSetsList()
     {
+        _effect_sets_list->clear();
         genEffectColors();
 
         // _cbbox_effect_sets->clear();
-        _effect_sets_list->clear();
 
         int count = 0;
         for (auto& effect_set : _loaded_effects)
@@ -1102,20 +1146,21 @@ namespace Noggit
 
 
             QListWidgetItem* list_item = new QListWidgetItem(effect_set.Name.c_str());
+            _effect_sets_list->addItem(list_item);
 
-            list_item->setData(Qt::BackgroundRole, color);
-            list_item->setBackground(color);
+            // list_item->setData(Qt::BackgroundRole, color); // same as setBackgroundColor
             list_item->setBackgroundColor(color);
-            QPixmap pixmap(50, 50);
+            QPixmap pixmap(_effect_sets_list->iconSize());
             pixmap.fill(color);
             QIcon icon(pixmap);
             list_item->setIcon(icon);
-            _effect_sets_list->addItem(list_item);
+
 
             // test
-            QPalette pal = _effect_sets_list->palette();
-            pal.setColor(_effect_sets_list->backgroundRole(), color);
-            _effect_sets_list->setPalette(pal);
+            // QPalette pal = _effect_sets_list->palette();
+            // pal.setColor(_effect_sets_list->backgroundRole(), color);
+            // _effect_sets_list->setPalette(pal);
+            // list_item->setTextColor()
 
 
             count++;
@@ -1139,28 +1184,27 @@ namespace Noggit
     {
         _effects_colors.clear();
 
-        int count = 1;
+        int color_count = 1;
         for (auto& effect : _loaded_effects)
         {
             // same formula as in the shader
             float partr, partg, partb;
             // TODO : can use id instead of count ?
-            float r = modf(sin(glm::dot(glm::vec2(count), glm::vec2(12.9898, 78.233))) * 43758.5453, &partr);
-            float g = modf(sin(glm::dot(glm::vec2(count), glm::vec2(11.5591, 70.233))) * 43569.5451, &partg);
-            float b = modf(sin(glm::dot(glm::vec2(count), glm::vec2(13.1234, 76.234))) * 43765.5452, &partg);
+            float r = modf(sin(glm::dot(glm::vec2(color_count), glm::vec2(12.9898, 78.233))) * 43758.5453, &partr);
+            float g = modf(sin(glm::dot(glm::vec2(color_count), glm::vec2(11.5591, 70.233))) * 43569.5451, &partg);
+            float b = modf(sin(glm::dot(glm::vec2(color_count), glm::vec2(13.1234, 76.234))) * 43765.5452, &partg);
 
             // return vec3(r, g, b);
-            count++;
+            color_count++;
 
             _effects_colors.push_back(glm::vec3(r, g, b));
         }
 
         std::string active_texture = _texturing_tool->_current_texture->filename();
 
-        if (active_texture.empty() || active_texture == "tileset\\generic\\black.blp")
-            return;
-
-        std::unordered_map<unsigned int, ground_effect_set> ground_effect_cache;
+        // check in loop instead to clear data everytime
+        // if (active_texture.empty() || active_texture == "tileset\\generic\\black.blp")
+        //     return;
 
         for (MapTile* tile : _map_view->getWorld()->mapIndex.loaded_tiles())
         {
@@ -1171,11 +1215,14 @@ namespace Noggit
                     auto chunk = tile->getChunk(x, y);
 
                     int chunk_index = chunk->px * 16 + chunk->py;
+
                      // reset to black by default
                     tile->renderer()->setChunkGroundEffectColor(chunk_index, glm::vec3(0.0, 0.0, 0.0));
-
                     // ! Set the chunk active layer data
                     tile->renderer()->setChunkGroundEffectActiveData(chunk, active_texture);
+
+                    if (active_texture.empty() || active_texture == "tileset\\generic\\black.blp" || _loaded_effects.empty())
+                        continue;
 
                     for (int layer_id = 0; layer_id < chunk->getTextureSet()->num(); layer_id++)
                     {
@@ -1197,12 +1244,15 @@ namespace Noggit
                                     _ground_effect_cache[effect_id] = ground_effect;
                                 }
 
-                                int count = 0;
+                                int count = -1;
+                                bool found_debug = false;
                                 for (auto& effect_set : _loaded_effects)
                                 {
+                                    count++;
                                     if (effect_id == effect_set.ID)
                                     {
                                         tile->renderer()->setChunkGroundEffectColor(chunk_index, _effects_colors[count]);
+                                        found_debug = true;
                                         break;
                                     }
                                     if (_chkbox_merge_duplicates->isChecked() && (ground_effect == &effect_set)) // do deep comparison, find those that have the same effect as loaded effects, but diff id.
@@ -1210,17 +1260,16 @@ namespace Noggit
                                         if (ground_effect.empty())
                                             continue;
                                         // same color
-                                        tile->renderer()->setChunkGroundEffectColor(chunk->px * 16 + chunk->py, _effects_colors[count]);
+                                        tile->renderer()->setChunkGroundEffectColor(chunk_index, _effects_colors[count]);
+                                        found_debug = true;
                                         break;
                                     }
-                                    count++;
                                 }
-                                
-                                if (_render_placement_map->isChecked())
-                                {
-
-                                }
+                                // in case some chunks couldn't be resolved, paint them in pure red
+                                if (!found_debug)
+                                    tile->renderer()->setChunkGroundEffectColor(chunk_index, glm::vec3(1.0, 0.0, 0.0));
                             }
+                            break;
                         }
                     }
                 }
@@ -1233,7 +1282,7 @@ namespace Noggit
     {
         // TODO : maybe load saved sets for the new texture
 
-        active_doodad_widget = 0;
+        // active_doodad_widget = 0;
 
         _loaded_effects.clear();
         _ground_effect_cache.clear();
@@ -1247,7 +1296,7 @@ namespace Noggit
 
         for (int i = 0; i < 4; i++)
         {
-            _button_effect_doodad[i]->setText(" -NONE- ");
+            // _button_effect_doodad[i]->setText(STRING_EMPTY_DISPLAY);
             updateDoodadPreviewRender(i);
         }
     }
@@ -1257,18 +1306,25 @@ namespace Noggit
         const QFileInfo info(doodad_path);
         const QString filename(info.fileName());
 
-        _button_effect_doodad[active_doodad_widget]->setText(filename);
+        // _button_effect_doodad[active_doodad_widget]->setText(filename);
 
-        updateDoodadPreviewRender(active_doodad_widget);
+        if (_object_list->currentItem())
+            _object_list->currentItem()->setText(filename);
+
+        // _object_list->item(active_doodad_widget)->setText(filename);
+
+        updateDoodadPreviewRender(_object_list->currentRow());
     }
 
     void ground_effect_tool::updateDoodadPreviewRender(int slot_index)
     {
-        QString filename = _button_effect_doodad[slot_index]->text();
+        // QString filename = _button_effect_doodad[slot_index]->text();
 
         QListWidgetItem* list_item = _object_list->item(slot_index); // new QListWidgetItem(_object_list);
 
-        if (filename.isEmpty() || filename == " -NONE- ")
+        QString filename = list_item->text();
+
+        if (filename.isEmpty() || filename == STRING_EMPTY_DISPLAY)
         {
             list_item->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus)); // (Noggit::Ui::FontNoggitIcon(Noggit::Ui::FontNoggit::Icons::VISIBILITY_GROUNDEFFECTS));
         }
@@ -1279,17 +1335,18 @@ namespace Noggit
             _preview_renderer->setModelOffscreen(filepath.toStdString());
             list_item->setIcon(*_preview_renderer->renderToPixmap());
 
-            _button_effect_doodad[slot_index]->setIcon(*_preview_renderer->renderToPixmap());
+            // _button_effect_doodad[slot_index]->setIcon(*_preview_renderer->renderToPixmap());
             // list_item->setData(Qt::DisplayRole, filepath);
-            // list_item->setToolTip(filepath);
+            list_item->setToolTip(filepath);
 
         }
-        list_item->setText(filename);
+        // list_item->setText(filename);
     }
 
     ground_effect_tool::~ground_effect_tool()
     {
         delete _preview_renderer;
+        // _preview_renderer->deleteLater();
     }
 
     std::optional<ground_effect_set> ground_effect_tool::getSelectedGroundEffect()
@@ -1332,10 +1389,16 @@ namespace Noggit
             // TODO turn this into an array of elements
 
             if (filename.isEmpty())
-                _button_effect_doodad[i]->setText(" -NONE- ");
-            else
-                _button_effect_doodad[i]->setText(filename);
+            {
+                // _button_effect_doodad[i]->setText(" -NONE- ");
+                _object_list->item(i)->setText(STRING_EMPTY_DISPLAY);
+            }
 
+            else
+            {
+                // _button_effect_doodad[i]->setText(filename);
+                _object_list->item(i)->setText(filename);
+            }
             updateDoodadPreviewRender(i);
         }
     }

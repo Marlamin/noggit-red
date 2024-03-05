@@ -151,14 +151,6 @@ struct MapChunkHeader {
   uint32_t unused2 = 0;
 };
 
-struct MCCV
-{
-  uint32_t  textureID = 0;
-  uint32_t  flags = 0;
-  uint32_t  ofsAlpha = 0;
-  uint32_t  effectID = 0;
-};
-
 struct MCLYFlags
 {
   uint32_t animation_rotation : 3;        // each tick is 45°

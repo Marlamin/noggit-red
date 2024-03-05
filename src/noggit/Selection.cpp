@@ -33,11 +33,94 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 
   select_info << "\n<br><b>Chunk Unit</b> (" << unit_index.x << ", " << unit_index.y << ")"
       << "<br><b>Chunk Unit Effect Doodads disabled</b>: "
-      << (chunk->getTextureSet()->getDoodadEnabledAt(unit_index.y, unit_index.x) ? "True" : "False")
+      << (chunk->getTextureSet()->getDoodadDisabledAt(unit_index.x, unit_index.y) ? "True" : "False")
       << "<br><b>Chunk Unit Active Doodad Effect Layer </b>: "
       << int(chunk->getTextureSet()->getDoodadActiveLayerIdAt(unit_index.x, unit_index.y))
       << ""
       <<"\n";
+
+
+  // test compare active layer algorithm with blizzard. can reuse the same for saving
+
+
+  int matching_count = 0;
+  int not_matching_count = 0;
+  int very_innacurate_count = 0;
+
+  auto tile = chunk->mt;
+
+  for (int chunk_x = 0; chunk_x < 16; chunk_x++)
+  {
+      for (int chunk_y = 0; chunk_y < 16; chunk_y++)
+      {
+          auto local_chunk = tile->getChunk(chunk_x, chunk_y);
+
+          auto blizzard_mapping = local_chunk->getTextureSet()->getDoodadMapping();
+          auto blizzard_mapping_readable = local_chunk->getTextureSet()->getDoodadMappingReadable();
+        
+          std::array<std::uint16_t, 8> test_doodadMapping{};
+          std::array<std::array<std::uint8_t, 8>, 8> doodad_mapping_readable{};
+
+          for (int x = 0; x < 8; x++)
+          {
+              for (int y = 0; y < 8; y++)
+              {
+                  std::array<float, 4> weights = local_chunk->getTextureSet()->get_textures_weight_for_unit(x, y);
+        
+                  float max = weights[0];
+                  int max_layer_index = 0;
+        
+                  for (int i = 1; i < weights.size(); i++)
+                      if (weights[i] >= max) // (weights[i] >= max) ? superior layer seems to have priority
+                      {
+                          max = weights[i];
+                          max_layer_index = i;
+                      }
+        
+                  unsigned int firstbit_pos = x * 2;
+                  doodad_mapping_readable[y][x] = max_layer_index;
+                  // there might be a smarter way to do this
+                  if (max_layer_index == 1)
+                  {
+                      test_doodadMapping[y] |= (1 << firstbit_pos);
+                  }
+                  else if (max_layer_index == 2)
+                  {
+                      test_doodadMapping[y] |= (1 << firstbit_pos + 1);
+                  }
+                  else if (max_layer_index == 3)
+                  {
+                      test_doodadMapping[y] |= (1 << firstbit_pos) | (1 << (firstbit_pos + 1));
+                  }
+        
+        
+                  // debug compare
+                  uint8_t blizzard_layer_id = blizzard_mapping_readable[y][x];
+                  //uint8_t blizzard_layer_id2 = blizzard_mapping_readable[x][y];
+                  uint8_t blizzard_layer_id3 = local_chunk->getTextureSet()->getDoodadActiveLayerIdAt(x, y); // make sure
+                  bool test_doodads_enabled = local_chunk->getTextureSet()->getDoodadDisabledAt(x, y);
+        
+                  if (max_layer_index != blizzard_layer_id)
+                  {
+                      int blizzard_effect_id = local_chunk->getTextureSet()->getEffectForLayer(blizzard_layer_id);
+                      int found_effect_id = local_chunk->getTextureSet()->getEffectForLayer(max_layer_index);
+                      not_matching_count++;
+
+                      float percent_innacuracy = ((weights[max_layer_index] - weights[blizzard_layer_id]) / ((weights[max_layer_index] + weights[blizzard_layer_id]) / 2)) * 100.f;
+
+                      if (percent_innacuracy > 10)
+                          very_innacurate_count++;
+
+                  }
+                  else
+                      matching_count++;
+              }
+          }
+      }
+  }
+
+  float not_matching_percent = ((float)not_matching_count / (float)matching_count) * 100.f;
+
 
   std::array<float, 4> weights = chunk->getTextureSet()->get_textures_weight_for_unit(unit_index.x, unit_index.y);
   if (chunk->getTextureSet()->num())

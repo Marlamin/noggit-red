@@ -305,14 +305,14 @@ void main()
       uint unit_x = uint(floor((vary_position.x - (tile_base_pos.x + chunk_base_pos.x)) / UNITSIZE));
       uint unit_z = uint(floor((vary_position.z - (tile_base_pos.y + chunk_base_pos.y)) / UNITSIZE));
 
-      // swapped x and y order, the data is wrongly ordered when loaded
-      if (unit_z < 4)
+      // x and y aren't swapped because getDoodadActiveLayerIdAt() already does it in code
+      if (unit_x < 4)
       {
-        is_active =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.b) & (1 << ((unit_z * 8) + unit_x) );
+        is_active =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.b) & (1 << ((unit_x * 8) + unit_z) );
       }
       else
       {
-        is_active =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.a) & (1 << ((unit_z * 8) + unit_x) - 32 ); // (unit_x-4) * 8 + unit_z)
+        is_active =  uint(instances[instanceID].ChunkDoodadsEnabled2_ChunksLayerEnabled2.a) & (1 << ((unit_x * 8) + unit_z) - 32 ); // (unit_x-4) * 8 + unit_z)
       }
 
       if (is_active != 0)

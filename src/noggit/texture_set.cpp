@@ -372,22 +372,36 @@ int TextureSet::get_texture_index_or_add (scoped_blp_texture_reference texture, 
   return addTexture (std::move (texture));
 }
 
+std::array<std::array<std::uint8_t, 8>, 8> const TextureSet::getDoodadMappingReadable()
+{
+    std::array<std::array<std::uint8_t, 8>, 8> doodad_mapping{};
+
+    for (int x = 0; x < 8; x++)
+    {
+        for (int y = 0; y < 8; y++)
+        {
+            doodad_mapping[y][x] = getDoodadActiveLayerIdAt(x, y);
+        }
+    }
+    return doodad_mapping;
+}
+
 uint8_t const TextureSet::getDoodadActiveLayerIdAt(unsigned int x, unsigned int y)
 {
     if (x >= 8 || y >= 8)
         return 0; // not valid
 
-    unsigned int firstbit_pos = y * 2;
+    unsigned int firstbit_pos = x * 2;
 
-    bool first_bit = _doodadMapping[x] & (1 << firstbit_pos);
-    bool second_bit = _doodadMapping[x] & (1 << (firstbit_pos + 1) );
+    bool first_bit = _doodadMapping[y] & (1 << firstbit_pos);
+    bool second_bit = _doodadMapping[y] & (1 << (firstbit_pos + 1) );
 
     uint8_t layer_id = first_bit + second_bit * 2;
 
     return layer_id;
 }
 
-bool const TextureSet::getDoodadEnabledAt(int x, int y)
+bool const TextureSet::getDoodadDisabledAt(int x, int y)
 {
     if (x >= 8 || y >= 8)
         return true; // not valid. default to enabled
@@ -1303,15 +1317,15 @@ std::array<float, 4> TextureSet::get_textures_weight_for_unit(unsigned int unit_
     float total_layer_3 = 0.f;
 
     // 8x8 bits per unit
-    for (int x = unit_x; x < unit_x + 8; x++)
+    for (int x = 0; x < 8; x++)
     {
-        for (int y = unit_y; y < unit_y + 8; y++)
+        for (int y = 0; y < 8; y++)
         {
             float base_alpha = 255.f;
 
             for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
             {
-                float f = static_cast<float>(alphamaps[alpha_layer]->getAlpha(64 * y + x));
+                float f = static_cast<float>(alphamaps[alpha_layer]->getAlpha( (unit_y * 8  + y)* 64 + (unit_x * 8 + x) )); // getAlpha(64 * y + x))
 
                 if (alpha_layer == 0)
                     total_layer_1 += f;

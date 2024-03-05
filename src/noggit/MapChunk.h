@@ -88,7 +88,7 @@ public:
 
   glm::vec3 mVertices[mapbufsize];
   glm::vec3 mNormals[mapbufsize];
-  glm::vec3 mccv[mapbufsize];
+  glm::vec3 mccv[mapbufsize]; // blizzard stores alpha, but deosn't seem to be used
 
   uint8_t _shadow_map[64 * 64];
 

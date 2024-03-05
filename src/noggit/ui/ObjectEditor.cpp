@@ -520,7 +520,10 @@ namespace Noggit
 
       connect( asset_browser_btn
           , &QPushButton::clicked
-          , [=]() { mapView->getAssetBrowser()->setVisible(mapView->getAssetBrowser()->isHidden()); }
+          , [=]() {       
+              _map_view->getAssetBrowserWidget()->set_browse_mode(Tools::AssetBrowser::asset_browse_mode::world);
+              mapView->getAssetBrowser()->setVisible(mapView->getAssetBrowser()->isHidden());
+          }
       );
 
       connect( object_palette_btn

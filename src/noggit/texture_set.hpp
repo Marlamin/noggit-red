@@ -96,9 +96,11 @@ public:
 
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
   auto getDoodadMappingBase(void) -> std::uint16_t* { return _doodadMapping.data(); }
+  std::array<std::uint16_t, 8> const& getDoodadMapping() { return _doodadMapping; }
+  std::array<std::array<std::uint8_t, 8>, 8> const getDoodadMappingReadable(); // get array of readable values
   auto getDoodadStencilBase(void) -> std::uint8_t* { return _doodadStencil.data(); }
   uint8_t const getDoodadActiveLayerIdAt(unsigned int x, unsigned int y); // max is 8
-  bool const getDoodadEnabledAt(int x, int y); // max is 8
+  bool const getDoodadDisabledAt(int x, int y); // max is 8
   auto getEffectForLayer(std::size_t idx) const -> unsigned { return _layers_info[idx].effectID; }
   ENTRY_MCLY* getMCLYEntries() { return &_layers_info[0]; };
   void setNTextures(size_t n) { nTextures = n; };
@@ -133,7 +135,7 @@ private:
                                                 // this is actually uint1_t[8][8] (8*8 -> 1 bit each)
   bool _need_lod_texture_map_update = false;
 
-  ENTRY_MCLY _layers_info[4];
+  ENTRY_MCLY _layers_info[4]; // TODO rework this, don't need to store textureid and offset
 
   std::optional<tmp_edit_alpha_values> tmp_edit_values;
 

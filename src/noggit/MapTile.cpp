@@ -1200,7 +1200,7 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
         {
           for (int l = 0; l < 64; ++l)
           {
-            if (layer == 0) // titi test
+            if (layer == 0)
             {
               // WoW calculates layer 0 as 255 - sum(Layer[1]...Layer[3])
               int layers_sum = 0;
