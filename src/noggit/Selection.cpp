@@ -49,6 +49,9 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 
   auto tile = chunk->mt;
 
+  bool debug_test = true;
+
+  if (debug_test)
   for (int chunk_x = 0; chunk_x < 16; chunk_x++)
   {
       for (int chunk_y = 0; chunk_y < 16; chunk_y++)
@@ -119,7 +122,7 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
       }
   }
 
-  float not_matching_percent = ((float)not_matching_count / (float)matching_count) * 100.f;
+  float debug_not_matching_percent = ((float)not_matching_count / (float)matching_count) * 100.f;
 
 
   std::array<float, 4> weights = chunk->getTextureSet()->get_textures_weight_for_unit(unit_index.x, unit_index.y);

@@ -31,13 +31,21 @@ struct tmp_edit_alpha_values
   }
 };
 
+struct layer_info
+{
+    // uint32_t  textureID = 0;
+    uint32_t  flags = 0;
+    // uint32_t  ofsAlpha = 0;
+    uint32_t  effectID = 0xFFFFFFFF; // default value, see https://wowdev.wiki/ADT/v18#MCLY_sub-chunk
+};
+
 class TextureSet
 {
 public:
   TextureSet() = delete;
   TextureSet(MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
              , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
-             , Noggit::NoggitRenderContext context);
+             , Noggit::NoggitRenderContext context, MapChunkHeader const& header);
 
   int addTexture(scoped_blp_texture_reference texture);
   void eraseTexture(size_t id);
@@ -102,7 +110,7 @@ public:
   uint8_t const getDoodadActiveLayerIdAt(unsigned int x, unsigned int y); // max is 8
   bool const getDoodadDisabledAt(int x, int y); // max is 8
   auto getEffectForLayer(std::size_t idx) const -> unsigned { return _layers_info[idx].effectID; }
-  ENTRY_MCLY* getMCLYEntries() { return &_layers_info[0]; };
+  layer_info* getMCLYEntries() { return &_layers_info[0]; };
   void setNTextures(size_t n) { nTextures = n; };
   std::vector<scoped_blp_texture_reference>* getTextures() { return &textures; };
 
@@ -135,7 +143,8 @@ private:
                                                 // this is actually uint1_t[8][8] (8*8 -> 1 bit each)
   bool _need_lod_texture_map_update = false;
 
-  ENTRY_MCLY _layers_info[4]; // TODO rework this, don't need to store textureid and offset
+  // ENTRY_MCLY _layers_info[4]; // TODO rework this, don't need to store textureid and offset
+  layer_info _layers_info[4];
 
   std::optional<tmp_edit_alpha_values> tmp_edit_values;
 

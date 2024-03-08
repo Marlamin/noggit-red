@@ -14,14 +14,12 @@
 
 TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
                         , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
-                        , Noggit::NoggitRenderContext context)
-  : nTextures(chunk->header.nLayers)
+                        , Noggit::NoggitRenderContext context, MapChunkHeader const& header)
+  : nTextures(header.nLayers)
   , _do_not_convert_alphamaps(do_not_convert_alphamaps)
   , _context(context)
   , _chunk(chunk)
 {
-
-  auto& header = chunk->header;
 
   std::copy(header.doodadMapping, header.doodadMapping + 8, _doodadMapping.begin());
   std::copy(header.doodadStencil, header.doodadStencil + 8, _doodadStencil.begin());
@@ -30,20 +28,24 @@ TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t 
   {
     f->seek(base + header.ofsLayer + 8);
 
+    ENTRY_MCLY tmp_entry_mcly[4];
+
     for (size_t i = 0; i<nTextures; ++i)
     {
-      f->read (&_layers_info[i], sizeof(ENTRY_MCLY));
+      f->read (&tmp_entry_mcly[i], sizeof(ENTRY_MCLY)); // f->read (&_layers_info[i], sizeof(ENTRY_MCLY));
 
-      textures.emplace_back (tile->mTextureFilenames[_layers_info[i].textureID], _context);
+      textures.emplace_back (tile->mTextureFilenames[tmp_entry_mcly[i].textureID], _context);
+      _layers_info[i].effectID = tmp_entry_mcly[i].effectID;
+      _layers_info[i].flags = tmp_entry_mcly[i].flags;
     }
 
     size_t alpha_base = base + header.ofsAlpha + 8;
 
     for (unsigned int layer = 0; layer < nTextures; ++layer)
     {
-      if (_layers_info[layer].flags & 0x100)
+      if (_layers_info[layer].flags & FLAG_USE_ALPHA)
       {
-        f->seek (alpha_base + _layers_info[layer].ofsAlpha);
+        f->seek (alpha_base + tmp_entry_mcly[layer].ofsAlpha);
         alphamaps[layer - 1].emplace(f, _layers_info[layer].flags, use_big_alphamaps, do_not_fix_alpha_map);
       }
     }
@@ -68,7 +70,7 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
     nTextures++;
 
     textures.emplace_back (std::move (texture));
-    _layers_info[texLevel] = ENTRY_MCLY();
+    _layers_info[texLevel] = layer_info();
 
     if (texLevel)
     {
@@ -189,7 +191,7 @@ void TextureSet::eraseTextures()
     {
       alphamaps[i - 1] = std::nullopt;
     }
-    _layers_info[i] = ENTRY_MCLY();
+    _layers_info[i] = layer_info();
   }
 
   nTextures = 0;
@@ -235,7 +237,7 @@ void TextureSet::eraseTexture(size_t id)
   nTextures--;
 
   // erase the old info as a precaution but it's overriden when adding a new texture
-  _layers_info[nTextures] = ENTRY_MCLY();
+  _layers_info[nTextures] = layer_info();
 
   // set the default values for the temporary alphamap too
   if (tmp_edit_values)

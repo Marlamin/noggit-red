@@ -167,10 +167,18 @@ struct MCLYFlags
 
 struct ENTRY_MCLY
 {
-  uint32_t  textureID = 0;
-  uint32_t  flags = 0;
-  uint32_t  ofsAlpha = 0;
-  uint32_t  effectID = 0xFFFF; // default value, see https://wowdev.wiki/ADT/v18#MCLY_sub-chunk
+  uint32_t textureID = 0;
+  uint32_t flags = 0;
+  uint32_t ofsAlpha = 0;
+  uint32_t effectID = 0xFFFFFFFF; // default value, see https://wowdev.wiki/ADT/v18#MCLY_sub-chunk
+};
+
+// sound emitters
+struct ENTRY_MCSE
+{
+    uint32_t soundId; // foreign_keyⁱ<uint32_t, &SoundEntriesAdvancedRec::m_ID>
+    float  pos[3];
+    float  size[3];
 };
 
 #include <string.h> // memcpy()

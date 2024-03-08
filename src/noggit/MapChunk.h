@@ -72,7 +72,8 @@ public:
   glm::vec3 vmin, vmax, vcenter;
   int px, py;
 
-  MapChunkHeader header;
+  // MapChunkHeader header;
+  // uint32_t nLayers = 0;
 
   float xbase, ybase, zbase; // global coords
 
@@ -85,6 +86,8 @@ public:
   bool currently_paintable = true;
 
   unsigned int areaID;
+
+  std::vector<ENTRY_MCSE> sound_emitters;
 
   glm::vec3 mVertices[mapbufsize];
   glm::vec3 mNormals[mapbufsize];
