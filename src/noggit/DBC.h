@@ -32,7 +32,7 @@ public:
   static const size_t AmbientMultiplier = 34;    // float
   static const size_t LightId = 35;    // int
 
-  static std::string getAreaName(int pAreaID);
+  static std::string getAreaFullName(int pAreaID);
   static std::uint32_t get_area_parent(int area_id);
   static std::uint32_t get_new_areabit();
 };
@@ -309,7 +309,7 @@ public:
     static const size_t ID = 0;    // uint
     static const size_t WmoId = 1;  // uint
     static const size_t NameSetId = 2;    // uint [AreaID]
-    static const size_t WMOGroupID= 3;    // uint 
+    static const size_t WMOGroupID= 3;    // ! int 
     static const size_t SoundProviderPreferences = 4;    // uint 
     static const size_t UnderwaterSoundProviderPreferences = 5;    // uint 
     static const size_t SoundAmbience = 6;    // uint 

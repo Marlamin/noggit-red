@@ -943,7 +943,7 @@ namespace Noggit
                     if (area_name.empty())
                     {
                         auto chunk = world->getChunkAt(wi->pos);
-                        namesetnames.append(gAreaDB.getAreaName(chunk->getAreaID()).c_str());
+                        namesetnames.append(gAreaDB.getAreaFullName(chunk->getAreaID()).c_str());
                     }
                     else
                         namesetnames.append(area_name.c_str());

@@ -1111,7 +1111,7 @@ namespace Noggit
                                 _loaded_effects.push_back(ground_effect);
                                 // give it a name
                                 // Area is probably useless if we merge since duplictes are per area.
-                                _loaded_effects.back().Name += " - " + gAreaDB.getAreaName(chunk->getAreaID());
+                                _loaded_effects.back().Name += " - " + gAreaDB.getAreaFullName(chunk->getAreaID());
                             }
 
                             // _texture_effect_ids[effect_id]++;

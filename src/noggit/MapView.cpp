@@ -1192,7 +1192,7 @@ void MapView::setupFileMenu()
           bookmark.camera_pitch = _camera.pitch()._;
           bookmark.camera_yaw = _camera.yaw()._;
           bookmark.map_id = _world->getMapID();
-          bookmark.name = gAreaDB.getAreaName(_world->getAreaID(_camera.position));
+          bookmark.name = gAreaDB.getAreaFullName(_world->getAreaID(_camera.position));
 
         _project->createBookmark(bookmark);
 
@@ -1207,7 +1207,7 @@ void MapView::setupFileMenu()
                  std::stringstream port_command;
                  port_command << ".go XYZ " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID();
                  std::ofstream f("ports.txt", std::ios_base::app);
-                 f << "Map: " << gAreaDB.getAreaName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
+                 f << "Map: " << gAreaDB.getAreaFullName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
                  f << "Trinity/AC:" << std::endl << port_command.str() << std::endl;
                  // f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
                  f.close();
@@ -4183,7 +4183,7 @@ void MapView::tick (float dt)
       // emit selectionUpdated();
 
   _status_area->setText
-    (QString::fromStdString (gAreaDB.getAreaName (_world->getAreaID (_camera.position))));
+    (QString::fromStdString (gAreaDB.getAreaFullName (_world->getAreaID (_camera.position))));
 
   {
     int time ((static_cast<int>(_world->time) % 2880) / 2);
