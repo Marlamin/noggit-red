@@ -1,5 +1,6 @@
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/project/ApplicationProject.h>
+#include <noggit/Log.h>
 
 namespace Noggit::Application
 {

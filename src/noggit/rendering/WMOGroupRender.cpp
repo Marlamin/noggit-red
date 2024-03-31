@@ -338,9 +338,13 @@ void WMOGroupRender::initRenderBatches()
   std::size_t batch_counter = 0;
   for (auto& batch : _wmo_group->_batches)
   {
-    for (std::size_t i = 0; i < (batch.vertex_end - batch.vertex_start + 1); ++i)
+    // some custom models have bugged batch.vertex_end as 0, avoid crash
+    if (batch.vertex_end >= batch.vertex_start)
     {
-      _render_batch_mapping[batch.vertex_start + i] = static_cast<unsigned>(batch_counter + 1);
+        for (std::size_t i = 0; i < (batch.vertex_end - batch.vertex_start + 1); ++i)
+        {
+          _render_batch_mapping[batch.vertex_start + i] = static_cast<unsigned>(batch_counter + 1);
+        }
     }
 
     std::uint32_t flags = 0;
