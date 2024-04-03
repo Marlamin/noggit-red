@@ -7,6 +7,7 @@
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QDial>
 
 #include <qt-color-widgets/color_selector.hpp>
 #include <qt-color-widgets/color_wheel.hpp>

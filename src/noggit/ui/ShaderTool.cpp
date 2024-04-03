@@ -3,6 +3,7 @@
 #include <noggit/World.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/ShaderTool.hpp>
+#include <noggit/ui/tools/UiCommon/expanderwidget.h>
 #include <util/qt/overload.hpp>
 #include <noggit/ui/FontAwesome.hpp>
 
@@ -17,6 +18,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QToolButton>
+#include <QtWidgets/QCheckBox>
 
 #define _USE_MATH_DEFINES
 #include <math.h>

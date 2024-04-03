@@ -12,6 +12,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QVBoxLayout>
+#include <noggit/ui/tools/UiCommon/expanderwidget.h>
 
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>

@@ -5,10 +5,12 @@
 #include <noggit/Brush.h>
 #include <noggit/TextureManager.h>
 #include <noggit/unsigned_int_property.hpp>
+#include <noggit/DBCFile.h>
 #include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
 #include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
 #include <noggit/ui/widget.hpp>
 #include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
+#include <noggit/MapView.h>
 
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QDial>
@@ -16,6 +18,7 @@
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
+#include <QtWidgets/QListWidget>
 #include <QJsonObject>
 
 class World;
@@ -146,7 +149,7 @@ namespace Noggit
 
         std::unordered_map<unsigned int, ground_effect_set> _ground_effect_cache; // store them for faster iteration on duplicates
 
-        std::vector < glm::vec3> _effects_colors;
+        std::vector<glm::vec3> _effects_colors;
 
         texturing_tool* _texturing_tool;
         MapView* _map_view;
@@ -175,6 +178,7 @@ namespace Noggit
 
         // TODO create some nice UI for doodads
         QListWidget* _object_list; // for render previews
+        QListWidget* _weight_list; // weight and percentage customization
         // QPushButton* _button_effect_doodad[4];
 
         QSpinBox* _spinbox_doodads_amount;

@@ -7,6 +7,7 @@
 #include <math/ray.hpp>
 #include <noggit/Selection.h>
 #include <noggit/ContextObject.hpp>
+#include <noggit/MapHeaders.h>
 #include <cstdint>
 #include <unordered_set>
 #include <array>

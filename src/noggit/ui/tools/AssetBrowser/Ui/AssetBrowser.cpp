@@ -5,6 +5,7 @@
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/FontNoggit.hpp>
 #include <noggit/MapView.h>
+#include <noggit/ui/texturing_tool.hpp>
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/project/CurrentProject.hpp>
 

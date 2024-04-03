@@ -1,5 +1,6 @@
 #include <noggit/project/ApplicationProjectWriter.h>
 #include <noggit/project/ApplicationProject.h>
+#include <noggit/Log.h>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFile>

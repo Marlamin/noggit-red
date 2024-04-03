@@ -3,6 +3,7 @@
 #include <variant>
 #include <noggit/ui/DetailInfos.h>
 #include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 #include <string>
 #include <vector>
 #include <QString>

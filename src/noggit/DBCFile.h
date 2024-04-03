@@ -9,7 +9,9 @@
 #include <cstring>
 #include <algorithm>
 #include <memory>
+#include <iostream>
 #include <blizzard-archive-library/include/ClientData.hpp>
+#include <noggit/Log.h>
 
 class DBCFile
 {

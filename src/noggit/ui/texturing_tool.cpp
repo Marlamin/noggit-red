@@ -18,6 +18,9 @@
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTabWidget>
 #include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
+#include <noggit/ui/tools/UiCommon/expanderwidget.h>
+#include <noggit/ui/WeightListWidgetItem.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -685,17 +688,20 @@ namespace Noggit
     }
 
     ground_effect_tool::ground_effect_tool(texturing_tool* texturing_tool, MapView* map_view, QWidget* parent)
-        : QWidget(parent, Qt::Window)
+        : QWidget(parent, Qt::Window), _texturing_tool(texturing_tool), _map_view(map_view) 
         // , layout(new ::QGridLayout(this))
         // , _chunk(nullptr)
-        , _texturing_tool(texturing_tool)
-        , _map_view(map_view)
     {
         setWindowTitle("Ground Effects Tools");
+        setMinimumSize(750, 600);
         setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
         // setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
-        auto layout(new QVBoxLayout(this));
-        layout->setAlignment(Qt::AlignTop);
+        QHBoxLayout* main_layout = new QHBoxLayout(this);
+        QVBoxLayout* left_side_layout = new QVBoxLayout(this);
+        QVBoxLayout* right_side_layout = new QVBoxLayout(this);
+        main_layout->addLayout(left_side_layout);
+        main_layout->addLayout(right_side_layout);
+        //layout->setAlignment(Qt::AlignTop);
 
         // auto tool_widget(new QWidget(this));
         // tool_widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
@@ -713,7 +719,7 @@ namespace Noggit
         _render_group_box = new QGroupBox("Render Mode", this);
         _render_group_box->setCheckable(true);
         _render_group_box->setChecked(true);
-        layout->addWidget(_render_group_box);
+        left_side_layout->addWidget(_render_group_box);
 
         auto render_layout(new QHBoxLayout(_render_group_box));
         _render_group_box->setLayout(render_layout);
@@ -742,18 +748,18 @@ namespace Noggit
         ////// Scan /////////
         _chkbox_merge_duplicates = new QCheckBox("Ignore duplicates", this);
         _chkbox_merge_duplicates->setChecked(true);
-        layout->addWidget(_chkbox_merge_duplicates);
+        left_side_layout->addWidget(_chkbox_merge_duplicates);
 
         auto button_scan_adt = new QPushButton("Scan for sets in curr tile", this);
-        layout->addWidget(button_scan_adt);
+        left_side_layout->addWidget(button_scan_adt);
 
         auto button_scan_adt_loaded = new QPushButton("Scan for sets in loaded Tiles", this);
-        layout->addWidget(button_scan_adt_loaded);
+        left_side_layout->addWidget(button_scan_adt_loaded);
 
 
         // selection
         auto selection_group = new QGroupBox("Effect Set Selection", this);
-        layout->addWidget(selection_group);
+        right_side_layout->addWidget(selection_group);
         auto selection_layout(new QFormLayout(selection_group));
         selection_group->setLayout(selection_layout);
 
@@ -781,7 +787,7 @@ namespace Noggit
             auto settings_group = new QGroupBox("Selected Set Settings", this);
             // settings_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
             // settings_group->setCheckable(true);
-            layout->addWidget(settings_group);
+            right_side_layout->addWidget(settings_group);
 
             // auto settings_content = new QWidget(settings_group);
             auto settings_layout(new QFormLayout(settings_group));
@@ -798,7 +804,7 @@ namespace Noggit
             // settings_layout->addRow(settings_layout);
 
             _object_list = new QListWidget(this);
-            _object_list->setItemAlignment(Qt::AlignLeft);
+            _object_list->setItemAlignment(Qt::AlignCenter);
             _object_list->setViewMode(QListView::IconMode);
             _object_list->setWrapping(false);
             _object_list->setIconSize(QSize(100, 100));
@@ -807,8 +813,8 @@ namespace Noggit
             _object_list->setAcceptDrops(false);
             _object_list->setMovement(QListView::Movement::Static);
             _object_list->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-            _object_list->setMinimumWidth(425);
-            _object_list->setMinimumHeight(120);
+            _object_list->setMinimumWidth(480);
+            _object_list->setMinimumHeight(100);
 
             settings_layout->addRow(_object_list);
             for (int i = 0; i < 4; i++)
@@ -817,10 +823,30 @@ namespace Noggit
                 list_item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
                 list_item->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus));
                 list_item->setText(STRING_EMPTY_DISPLAY);
-
-                // list_item->setData(Qt::DisplayRole, ""); // does the same as settext
                 list_item->setToolTip("");
                 _object_list->addItem(list_item);
+            }
+
+            _weight_list = new QListWidget(this);
+            _weight_list->setItemAlignment(Qt::AlignLeft);
+            _weight_list->setFlow(QListWidget::LeftToRight);
+            _weight_list->setMovement(QListView::Movement::Static);
+            _weight_list->setSelectionMode(QAbstractItemView::NoSelection);
+            _weight_list->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+            _weight_list->setMinimumWidth(480);
+            _weight_list->setMinimumHeight(120);
+            _weight_list->setVisible(true);
+            QString styleSheet = "QListWidget::item { padding-right: 10px; }";
+            _weight_list->setStyleSheet(styleSheet);
+
+            settings_layout->addRow(_weight_list);
+            for (int i = 0; i < 4; i++)
+            {
+                QListWidgetItem* weight_list_item = new QListWidgetItem(_weight_list);
+                _weight_list->addItem(weight_list_item);
+                noggit::Ui::WeightListWidgetItem* custom_weight_list_widget = new noggit::Ui::WeightListWidgetItem(i+1);
+                weight_list_item->setSizeHint(custom_weight_list_widget->minimumSizeHint());
+                _weight_list->setItemWidget(weight_list_item, custom_weight_list_widget);
             }
 
             _preview_renderer = new Tools::PreviewRenderer(_object_list->iconSize().width(),
@@ -862,7 +888,7 @@ namespace Noggit
 
         /// Apply group
         auto apply_group = new QGroupBox("Apply Ground Effect", this);
-        layout->addWidget(apply_group);
+        left_side_layout->addWidget(apply_group);
 
         auto apply_layout(new QVBoxLayout(apply_group));
         apply_group->setLayout(apply_layout);
@@ -897,9 +923,9 @@ namespace Noggit
             _brush_grup_box = new QGroupBox("Brush Mode", this);
             _brush_grup_box->setCheckable(true);
             _brush_grup_box->setChecked(false);
-            layout->addWidget(_brush_grup_box);
+            left_side_layout->addWidget(_brush_grup_box);
 
-            auto brush_layout(new QHBoxLayout(_brush_grup_box));
+            QHBoxLayout* brush_layout = new QHBoxLayout(_brush_grup_box);
             _brush_grup_box->setLayout(brush_layout);
 
             _brush_type_group = new QButtonGroup(_brush_grup_box);
