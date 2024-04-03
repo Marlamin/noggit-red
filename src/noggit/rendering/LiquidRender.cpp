@@ -51,6 +51,10 @@ void LiquidRender::draw(math::frustum const& frustum
     }
     else
     {
+      // In some cases samplers_upload_buf becomes empty and causes crash
+      if (samplers_upload_buf.size() < N_SAMPLERS)
+          samplers_upload_buf.resize(N_SAMPLERS);
+
       std::fill(samplers_upload_buf.begin(), samplers_upload_buf.end(), -1);
 
       for (std::size_t j = 0; j < render_layer.texture_samplers.size(); ++j)
