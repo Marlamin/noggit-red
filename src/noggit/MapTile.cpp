@@ -1465,6 +1465,11 @@ void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledE
     {
       MapChunk* chunk = getChunk(k, l);
 
+      if (!chunk->hasColors())
+      {
+          chunk->initMCCV();
+      }
+
       chunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
 
       glm::vec3* colors = chunk->getVertexColors();
@@ -1540,6 +1545,12 @@ void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledE
           {
             MapChunk* targetChunk = tile->getChunk(chunk_x, 15);
             MapChunk* sourceChunk = this->getChunk(chunk_x, 0);
+
+            if (!targetChunk->hasColors())
+            {
+                targetChunk->initMCCV();
+            }
+
             targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
             for (int vert_x = 0; vert_x < 9; ++vert_x)
             {
@@ -1563,6 +1574,12 @@ void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledE
           {
             MapChunk* targetChunk = tile->getChunk(15, chunk_y);
             MapChunk* sourceChunk = this->getChunk(0, chunk_y);
+
+            if (!targetChunk->hasColors())
+            {
+                targetChunk->initMCCV();
+            }
+
             targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
             for (int vert_y = 0; vert_y < 9; ++vert_y)
             {
@@ -1582,6 +1599,12 @@ void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledE
         , [&] (MapTile* tile)
         {
           MapChunk* targetChunk = tile->getChunk(15, 15);
+
+          if (!targetChunk->hasColors())
+          {
+              targetChunk->initMCCV();
+          }
+
           targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
           tile->getChunk(15,15)->getVertexColors()[144] = this->getChunk(0,0)->getVertexColors()[0];
           tile->registerChunkUpdate(ChunkUpdateFlags::MCCV);

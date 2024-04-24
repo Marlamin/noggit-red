@@ -860,16 +860,8 @@ bool MapChunk::ChangeMCCV(glm::vec3 const& pos, glm::vec4 const& color, float ch
 
   if (!hasMCCV)
   {
-    for (int i = 0; i < mapbufsize; ++i)
-    {
-      mccv[i].x = 1.0f; // set default shaders
-      mccv[i].y = 1.0f;
-      mccv[i].z = 1.0f;
-    }
-
+    initMCCV();
     changed = true;
-    header_flags.flags.has_mccv = 1;
-    hasMCCV = true;
   }
 
   for (int i = 0; i < mapbufsize; ++i)
@@ -913,16 +905,8 @@ bool MapChunk::stampMCCV(glm::vec3 const& pos, glm::vec4 const& color, float cha
 
   if (!hasMCCV)
   {
-    for (int i = 0; i < mapbufsize; ++i)
-    {
-      mccv[i].x = 1.0f; // set default shaders
-      mccv[i].y = 1.0f;
-      mccv[i].z = 1.0f;
-    }
-
+    initMCCV();
     changed = true;
-    header_flags.flags.has_mccv = 1;
-    hasMCCV = true;
   }
 
   for (int i = 0; i < mapbufsize; ++i)
@@ -2044,6 +2028,22 @@ void MapChunk::setVertexColorImage(const QImage &image)
     }
 
   registerChunkUpdate(ChunkUpdateFlags::MCCV);
+}
+
+void MapChunk::initMCCV()
+{
+  if (!hasMCCV)
+  {
+    for (int i = 0; i < mapbufsize; ++i)
+    {
+      mccv[i].x = 1.0f; // set default shaders
+      mccv[i].y = 1.0f;
+      mccv[i].z = 1.0f;
+    }
+
+    header_flags.flags.has_mccv = 1;
+    hasMCCV = true;
+  }
 }
 
 void MapChunk::registerChunkUpdate(unsigned flags)

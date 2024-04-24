@@ -215,6 +215,7 @@ public:
   void setHeightmapImage(QImage const& image, float multiplier, int mode);
   void setAlphamapImage(QImage const& image, unsigned layer);
   void setVertexColorImage(QImage const& image);
+  void initMCCV();
 
   void registerChunkUpdate(unsigned flags);
   void endChunkUpdates() { _chunk_update_flags = 0; }
