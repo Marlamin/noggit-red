@@ -937,9 +937,11 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
     }
     else
     {
-      math::degrees::vec3& dir = obj->dir;
-      dir += dir_change;
+      // math::degrees::vec3& dir = obj->dir;
+      // dir += dir_change;
     }
+    math::degrees::vec3& dir = obj->dir;
+    dir += dir_change;
 
     obj->recalcExtents();
 

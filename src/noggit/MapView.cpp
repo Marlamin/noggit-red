@@ -3429,6 +3429,12 @@ void MapView::tick (float dt)
     action_modality |= Noggit::ActionModalityControllers::eRMB;
   if (MoveObj)
     action_modality |= Noggit::ActionModalityControllers::eMMB;
+  if (keys)
+      action_modality |= Noggit::ActionModalityControllers::eSCALE;
+  if (keyr)
+      action_modality |= Noggit::ActionModalityControllers::eROTATE;
+  // if (keyx != 0 || keyy != 0 || keyz != 0)
+  //   action_modality |= Noggit::ActionModalityControllers::eTRANSLATE;
 
   NOGGIT_ACTION_MGR->endActionOnModalityMismatch(action_modality);
 
@@ -3519,14 +3525,15 @@ void MapView::tick (float dt)
 
       if (keys != 0.f)
       {
-        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                            Noggit::ActionModalityControllers::eSCALE);
         _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::m2_scaling_type::add);
-        // NOGGIT_ACTION_MGR->endAction();
         _rotation_editor_need_update = true;
       }
       if (keyr != 0.f)
       {
-        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                            Noggit::ActionModalityControllers::eROTATE);
         _world->rotate_selected_models( math::degrees(0.f)
                                       , math::degrees(keyr * numpad_moveratio * 5.f)
                                       , math::degrees(0.f)
