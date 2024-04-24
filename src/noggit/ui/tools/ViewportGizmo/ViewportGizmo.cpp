@@ -97,6 +97,24 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     return;
   }
 
+  glm::mat4 glm_transform_mat = delta_matrix;
+
+  glm::vec3 new_scale;
+  glm::quat new_orientation;
+  glm::vec3 new_translation;
+  glm::vec3 new_skew_;
+  glm::vec4 new_perspective_;
+
+  glm::decompose(glm_transform_mat,
+      new_scale,
+      new_orientation,
+      new_translation,
+      new_skew_,
+      new_perspective_
+  );
+
+  new_orientation = glm::conjugate(new_orientation);
+
   NOGGIT_ACTION_MGR->beginAction(map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                  Noggit::ActionModalityControllers::eLMB);
 
@@ -115,28 +133,10 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance->recalcExtents();
       object_matrix = obj_instance->transformMatrix();
 
-      glm::mat4 glm_transform_mat = delta_matrix;
-
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
       float wmo_scale = 0.f;
       float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
-
-      glm::vec3 new_scale;
-      glm::quat new_orientation;
-      glm::vec3 new_translation;
-      glm::vec3 new_skew_;
-      glm::vec4 new_perspective_;
-
-      glm::decompose(glm_transform_mat,
-                     new_scale,
-                     new_orientation,
-                     new_translation,
-                     new_skew_,
-                     new_perspective_
-      );
-
-      new_orientation = glm::conjugate(new_orientation);
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::remove);
@@ -249,29 +249,10 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance->recalcExtents();
       object_matrix = obj_instance->transformMatrix();
 
-
-      glm::mat4 glm_transform_mat = delta_matrix;
-
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
       float wmo_scale = 0.f;
       float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
-
-      glm::vec3 new_scale;
-      glm::quat new_orientation;
-      glm::vec3 new_translation;
-      glm::vec3 new_skew_;
-      glm::vec4 new_perspective_;
-
-      glm::decompose(glm_transform_mat,
-                     new_scale,
-                     new_orientation,
-                     new_translation,
-                     new_skew_,
-                     new_perspective_
-      );
-
-      new_orientation = glm::conjugate(new_orientation);
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::remove);
