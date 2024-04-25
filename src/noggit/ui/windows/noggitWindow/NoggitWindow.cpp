@@ -14,6 +14,7 @@
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/tools/UiCommon/StackedWidget.hpp>
+#include <noggit/project/ApplicationProject.h>
 #include <BlizzardDatabase.h>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
@@ -63,6 +64,8 @@ namespace Noggit::Ui::Windows
     title << "Noggit - " << STRPRODUCTVER;
     setWindowTitle(QString::fromStdString(title.str()));
     setWindowIcon(QIcon(":/icon"));
+
+    Log << "Project version : " << Noggit::Project::ClientVersionFactory::MapToStringVersion(project->projectVersion).c_str() << std::endl;
 
     if (project->projectVersion == Project::ProjectVersion::WOTLK)
     {

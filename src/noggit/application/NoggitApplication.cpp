@@ -2,6 +2,8 @@
 #include <noggit/project/ApplicationProject.h>
 #include <noggit/Log.h>
 
+#include <QDateTime>
+
 namespace Noggit::Application
 {
   void NoggitApplication::initalize(int argc, char* argv[], std::vector<bool> Parser)
@@ -9,8 +11,13 @@ namespace Noggit::Application
 	  InitLogging();
 	  Command = Parser;
 
+	  QLocale locale = QLocale(QLocale::English);
+	  QString dateTimeText = locale.toString(QDateTime::currentDateTime(), "dd MMMM yyyy hh:mm:ss");
+	  Log << "Start time : " << dateTimeText.toStdString() << std::endl;
+
 	 //Locate application relative path
 	  Log << "Noggit Studio - " << STRPRODUCTVER << std::endl;
+	  Log << "Build Date : " << __DATE__ ", " __TIME__ << std::endl;
 
 	  auto applicationLocation = std::filesystem::path(argv[0]);
 	  Log << "Noggit Application Path: " << applicationLocation << std::endl;
@@ -133,6 +140,8 @@ namespace Noggit::Application
 		  );
 	  }
 	  LogError << "std::terminate: " << reason << std::endl;
+
+	  CloseLogging();
   }
 
   bool NoggitApplication::GetCommand(int index)

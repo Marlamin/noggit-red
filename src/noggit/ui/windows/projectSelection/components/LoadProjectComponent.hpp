@@ -3,6 +3,7 @@
 
 #include <noggit/project/ApplicationProject.h>
 #include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
+#include <noggit/Log.h>
 
 #include <algorithm>
 #include <cctype>
@@ -29,7 +30,11 @@ namespace Noggit::Ui::Component
       auto application_project_service = Noggit::Project::ApplicationProject(application_configuration);
 
       if (!QDir(project_path).exists())
+      {
+        LogError << "Project path does not exist : " << project_path.toStdString() << std::endl;
         return {};
+      }
+      Log << "Loading Project path : " << project_path.toStdString() << std::endl;
 
       // check if current filesystem is case sensitive
       QDir q_project_path{project_path};
@@ -46,6 +51,7 @@ namespace Noggit::Ui::Component
       }
       else
       {
+        LogError << "Failed to open file : " << file_1_path.toStdString() << std::endl;
         assert(false);
         return {};
       }
@@ -59,6 +65,7 @@ namespace Noggit::Ui::Component
       }
       else
       {
+        LogError << "Failed to open file : " << file_2_path.toStdString() << std::endl;
         assert(false);
         return {};
       }
@@ -77,6 +84,7 @@ namespace Noggit::Ui::Component
       }
       else
       {
+        LogError << "Failed to read file content : " << file_1_path.toStdString() << std::endl;
         assert(false);
         return {};
       }
@@ -160,6 +168,8 @@ namespace Noggit::Ui::Component
       //This to not be static, but its hard to remove
       if (project)
         Noggit::Application::NoggitApplication::instance()->setClientData(project->ClientData);
+      else
+        LogError << "Couldn't set client data : Project loading failed." << std::endl;
 
       return project;
     }

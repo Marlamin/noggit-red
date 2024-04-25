@@ -1,5 +1,6 @@
 #include <noggit/project/ApplicationProjectReader.h>
 #include <noggit/project/ApplicationProject.h>
+#include <noggit/Log.h>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFile>
@@ -15,7 +16,10 @@ namespace Noggit::Project
   {
 
     if (!std::filesystem::exists(project_path) || !std::filesystem::is_directory(project_path))
+    {
+      LogError << "Failed to read project path : " << project_path << std::endl;
       return {};
+    }
 
     for (const auto& entry: std::filesystem::directory_iterator(project_path))
     {
@@ -102,6 +106,7 @@ namespace Noggit::Project
           }
         } else
         {
+          LogError << "Project file is corrupted : " << project_path << std::endl;
           input_file.close();
           return {};
         }
@@ -110,6 +115,7 @@ namespace Noggit::Project
       }
     }
 
+    LogError << "Failed to find a .noggitproj file in project path : " << project_path << std::endl;
     return {};
   }
   void ApplicationProjectReader::readPalettes(NoggitProject* project)

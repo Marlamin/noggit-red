@@ -3,6 +3,7 @@
 #include <noggit/ui/windows/projectSelection/components/CreateProjectComponent.hpp>
 #include <noggit/ui/windows/projectSelection/components/LoadProjectComponent.hpp>
 #include <noggit/project/CurrentProject.hpp>
+#include <noggit/Log.h>
 
 #include <filesystem>
 #include <QString>
@@ -87,7 +88,11 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
                                                                      "*.noggitproj");
 
                      if (proj_file.isEmpty())
+                     {
+                       QMessageBox::critical(this, "Error", "Failed to read project: project file is empty");
                        return;
+                     }
+
 
                      std::filesystem::path filepath(proj_file.toStdString());
 
@@ -130,7 +135,10 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
                      auto selected_project = _load_project_component->loadProject(this);
 
                      if (!selected_project)
+                     {
+                       LogError << "Selected Project is null, loading failed." << std::endl;
                        return;
+                     }
 
                      Noggit::Project::CurrentProject::initialize(selected_project.get());
 

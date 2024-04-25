@@ -49,7 +49,7 @@ bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow
 
   if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists(ssfilename.str()))
   {
-    Log << "World " << record.RecordId << ": " << lMapName << " has no WDT file!" << std::endl;
+    LogDebug << "World " << record.RecordId << ": " << lMapName << " has no WDT file!" << std::endl;
     return false;
   }
 

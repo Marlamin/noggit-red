@@ -9,6 +9,7 @@
 #include <blizzard-database-library/include/BlizzardDatabase.h>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/ui/windows/downloadFileDialog/DownloadFileDialog.h>
+#include <noggit/Log.h>
 #include <QJsonDocument>
 #include <QMessageBox>
 #include <QJsonObject>
@@ -251,8 +252,12 @@ namespace Noggit::Project
       ApplicationProjectReader project_reader{};
       auto project = project_reader.readProject(project_path);
 
-      if(!project.has_value())
+      if (!project.has_value())
+      {
+        LogError << "loadProject() failed, Project is null" << std::endl;
         return {};
+      }
+
 
       project_reader.readPalettes(&project.value());
       project_reader.readObjectSelectionGroups(&project.value());
