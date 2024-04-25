@@ -390,25 +390,11 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
   }
 }
 
-
-void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
+void World::rotate_model_to_ground_normal(SceneObject* obj, bool smoothNormals)
 {
-  ZoneScoped;
-  if (!_selected_model_count)
-      return;
-  selection_updated = true;
-  for (auto& entry : _current_selection)
-  {
-    auto type = entry.index();
-    if (type == eEntry_MapChunk)
-    {
-      continue;
-    }
-
-    auto& obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
-    updateTilesEntry(entry, model_update::remove);
+    updateTilesEntry(obj, model_update::remove);
 
     glm::vec3 rayPos = obj->pos;
     math::degrees::vec3& dir = obj->dir;
@@ -416,43 +402,43 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 
     selection_result results;
     for_chunk_at(rayPos, [&](MapChunk* chunk)
-    {
         {
-          math::ray intersect_ray(rayPos, glm::vec3(0.f, -1.f, 0.f));
-          chunk->intersect(intersect_ray, &results);
-        }
-        // object is below ground
-        if (results.empty())
-        {
-          math::ray intersect_ray(rayPos, glm::vec3(0.f, 1.f, 0.f));
-          chunk->intersect(intersect_ray, &results);
-        }
-    });
+            {
+                math::ray intersect_ray(rayPos, glm::vec3(0.f, -1.f, 0.f));
+                chunk->intersect(intersect_ray, &results);
+            }
+            // object is below ground
+            if (results.empty())
+            {
+                math::ray intersect_ray(rayPos, glm::vec3(0.f, 1.f, 0.f));
+                chunk->intersect(intersect_ray, &results);
+            }
+        });
 
     // !\ todo We shouldn't end up with empty ever (but we do, on completely flat ground)
     if (results.empty())
     {
-      // just to avoid models disappearing when this happens
-      updateTilesEntry(entry, model_update::add);
-      continue;
+        // just to avoid models disappearing when this happens
+        updateTilesEntry(obj, model_update::add);
+        return;
     }
 
 
-// We hit the terrain, now we take the normal of this position and use it to get the rotation we want.
+    // We hit the terrain, now we take the normal of this position and use it to get the rotation we want.
     auto const& hitChunkInfo = std::get<selected_chunk_type>(results.front().second);
 
     glm::quat q;
     glm::vec3 varnormal;
 
     // Surface Normal
-    auto &p0 = hitChunkInfo.chunk->mVertices[std::get<0>(hitChunkInfo.triangle)];
-    auto &p1 = hitChunkInfo.chunk->mVertices[std::get<1>(hitChunkInfo.triangle)];
-    auto &p2 = hitChunkInfo.chunk->mVertices[std::get<2>(hitChunkInfo.triangle)];
+    auto& p0 = hitChunkInfo.chunk->mVertices[std::get<0>(hitChunkInfo.triangle)];
+    auto& p1 = hitChunkInfo.chunk->mVertices[std::get<1>(hitChunkInfo.triangle)];
+    auto& p2 = hitChunkInfo.chunk->mVertices[std::get<2>(hitChunkInfo.triangle)];
 
     glm::vec3 v1 = p1 - p0;
     glm::vec3 v2 = p2 - p0;
 
-    auto tmpVec = glm::cross(v2 ,v1);
+    auto tmpVec = glm::cross(v2, v1);
     varnormal.x = tmpVec.z;
     varnormal.y = tmpVec.y;
     varnormal.z = tmpVec.x;
@@ -460,34 +446,34 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     // Smooth option, gradient the normal towards closest vertex
     if (smoothNormals) // Vertex Normal
     {
-      auto normalWeights = getBarycentricCoordinatesAt(p0, p1, p2, hitChunkInfo.position, varnormal);
+        auto normalWeights = getBarycentricCoordinatesAt(p0, p1, p2, hitChunkInfo.position, varnormal);
 
-      auto& tile_buffer = hitChunkInfo.chunk->mt->getChunkHeightmapBuffer();
-      int chunk_start = (hitChunkInfo.chunk->px * 16 + hitChunkInfo.chunk->py) * mapbufsize * 4;
+        auto& tile_buffer = hitChunkInfo.chunk->mt->getChunkHeightmapBuffer();
+        int chunk_start = (hitChunkInfo.chunk->px * 16 + hitChunkInfo.chunk->py) * mapbufsize * 4;
 
-      const auto& vNormal0 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<0>(hitChunkInfo.triangle) * 4]);
-      const auto& vNormal1 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<1>(hitChunkInfo.triangle) * 4]);
-      const auto& vNormal2 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<2>(hitChunkInfo.triangle) * 4]);
+        const auto& vNormal0 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<0>(hitChunkInfo.triangle) * 4]);
+        const auto& vNormal1 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<1>(hitChunkInfo.triangle) * 4]);
+        const auto& vNormal2 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<2>(hitChunkInfo.triangle) * 4]);
 
-      varnormal.x =
-          vNormal0.x * normalWeights.x +
-          vNormal1.x * normalWeights.y +
-          vNormal2.x * normalWeights.z;
+        varnormal.x =
+            vNormal0.x * normalWeights.x +
+            vNormal1.x * normalWeights.y +
+            vNormal2.x * normalWeights.z;
 
-      varnormal.y =
-          vNormal0.y * normalWeights.x +
-          vNormal1.y * normalWeights.y +
-          vNormal2.y * normalWeights.z;
+        varnormal.y =
+            vNormal0.y * normalWeights.x +
+            vNormal1.y * normalWeights.y +
+            vNormal2.y * normalWeights.z;
 
-      varnormal.z =
-          vNormal0.z * normalWeights.x +
-          vNormal1.z * normalWeights.y +
-          vNormal2.z * normalWeights.z;
+        varnormal.z =
+            vNormal0.z * normalWeights.x +
+            vNormal1.z * normalWeights.y +
+            vNormal2.z * normalWeights.z;
     }
 
 
     glm::vec3 worldUp = glm::vec3(0, 1, 0);
-    glm::vec3 a =glm::cross(worldUp ,varnormal);
+    glm::vec3 a = glm::cross(worldUp, varnormal);
 
     q.x = a.x;
     q.y = a.y;
@@ -527,12 +513,31 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     dir.y = math::degrees(math::radians(eulerAngles.x))._; //Pitch
     dir.z = math::degrees(math::radians(eulerAngles.y))._; //Yaw
 
-    std::get<selected_object_type>(entry)->recalcExtents();
+    obj->recalcExtents();
 
     // yaw (z-axis rotation)
     double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
     double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-    updateTilesEntry(entry, model_update::add);
+    updateTilesEntry(obj, model_update::add);
+}
+
+void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
+{
+  ZoneScoped;
+  if (!_selected_model_count)
+      return;
+  selection_updated = true;
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.index();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    auto& obj = std::get<selected_object_type>(entry);
+
+    rotate_model_to_ground_normal(obj, smoothNormals);
   }
   update_selected_model_groups();
 }

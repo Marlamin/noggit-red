@@ -175,6 +175,7 @@ public:
 
   // Checks the normal of the terrain on model origin and rotates to that spot.
   void rotate_selected_models_to_ground_normal(bool smoothNormals);
+  void rotate_model_to_ground_normal(SceneObject* obj, bool smoothNormals);
 
   bool GetVertex(float x, float z, glm::vec3 *V) const;
 

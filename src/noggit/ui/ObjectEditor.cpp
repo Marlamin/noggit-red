@@ -203,6 +203,8 @@ namespace Noggit
       QRadioButton *selectionButton = new QRadioButton("Selection");
       QRadioButton *cameraButton = new QRadioButton("Camera");
 
+      QCheckBox* paste_override_rotate_cb = new QCheckBox("Rotate to Terrain", this);
+
       pasteModeGroup = new QButtonGroup(this);
       pasteModeGroup->addButton(terrainButton, 0);
       pasteModeGroup->addButton(selectionButton, 1);
@@ -211,6 +213,8 @@ namespace Noggit
       paste_layout->addWidget(terrainButton, 0, 0);
       paste_layout->addWidget(selectionButton, 0, 1);
       paste_layout->addWidget(cameraButton, 1, 0);
+
+      paste_layout->addWidget(paste_override_rotate_cb, 2, 0);
 
       pasteBox->addPage(pasteBox_content);
 
@@ -469,6 +473,12 @@ namespace Noggit
           _use_median_pivot_point = b;
       });
 
+      paste_override_rotate_cb->setChecked(paste_params->rotate_on_terrain);
+      connect(paste_override_rotate_cb, &QCheckBox::stateChanged, [=](int s)
+          {
+              paste_params->rotate_on_terrain = s;
+          });
+
       connect ( pasteModeGroup, qOverload<int> (&QButtonGroup::idClicked)
               , [&] (int id)
                 {
@@ -658,6 +668,12 @@ namespace Noggit
           new_obj->model->waitForChildrenLoaded();
           new_obj->recalcExtents();
 
+          if (paste_params->rotate_on_terrain)
+          {
+              // new_obj->pos.y = world->get_ground_height(new_obj->pos).y;// in multi select, objects aren't on the ground
+              world->rotate_model_to_ground_normal(new_obj, true); // always smooth?
+          }
+
           // check if pos is valid (not in an interior) wmo group
           // bool is_indoor = world->isInIndoorWmoGroup(new_obj->extents, new_obj->transformMatrix());
           bool is_indoor = false; // TODO Disabled the indoor check until non axis aligned boxes check is implemented
@@ -685,6 +701,11 @@ namespace Noggit
           new_obj->wmo->wait_until_loaded();
           new_obj->wmo->waitForChildrenLoaded();
           new_obj->recalcExtents();
+
+          if (paste_params->rotate_on_terrain)
+          {
+              world->rotate_model_to_ground_normal(new_obj, true); // always smooth?
+          }
         }        
 }
     }
