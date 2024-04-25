@@ -1433,8 +1433,8 @@ void MapChunk::save(sExtendableArray& lADTFile
   lMCNK_header->flags = header_flags.value;
   lMCNK_header->ix = px;
   lMCNK_header->iy = py;
-  lMCNK_header->zpos = zbase;
-  lMCNK_header->xpos = xbase;
+  lMCNK_header->zpos = zbase * -1.0f + ZEROPOINT;
+  lMCNK_header->xpos = xbase * -1.0f + ZEROPOINT;
   lMCNK_header->ypos = ybase;
 
   lMCNK_header->holes = holes;
