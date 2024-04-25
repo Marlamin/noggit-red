@@ -21,12 +21,22 @@ namespace Noggit::Ui::Component
     friend Windows::NoggitProjectSelectionWindow;
 
   public:
-    std::shared_ptr<Project::NoggitProject> loadProject(Noggit::Ui::Windows::NoggitProjectSelectionWindow* parent)
+    std::shared_ptr<Project::NoggitProject> loadProject(Noggit::Ui::Windows::NoggitProjectSelectionWindow* parent, QString force_project_path = "")
     {
-      QModelIndex index = parent->_ui->listView->currentIndex();
+      QString project_path;
+
+      if (!force_project_path.isEmpty())
+          project_path = force_project_path;
+      else
+      {
+        QModelIndex index = parent->_ui->listView->currentIndex();
+        project_path = index.data(Qt::UserRole).toString();
+      }
+
       auto application_configuration = parent->_noggit_application->getConfiguration();
-      auto application_projects_folder_path = std::filesystem::path(application_configuration->ApplicationProjectPath);
-      QString project_path = index.data(Qt::UserRole).toString();
+      // auto application_projects_folder_path = std::filesystem::path(application_configuration->ApplicationProjectPath);
+
+
       auto application_project_service = Noggit::Project::ApplicationProject(application_configuration);
 
       if (!QDir(project_path).exists())

@@ -140,8 +140,6 @@ namespace Noggit::Application
 		  );
 	  }
 	  LogError << "std::terminate: " << reason << std::endl;
-
-	  CloseLogging();
   }
 
   bool NoggitApplication::GetCommand(int index)

@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
   noggit->initalize(argc, argv, Command);
 
   auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
-  project_selection->show();
+  // project_selection->show();
 
   return q_application.exec();
 }

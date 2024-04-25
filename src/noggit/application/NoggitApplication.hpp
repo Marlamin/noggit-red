@@ -46,6 +46,7 @@ namespace Noggit::Application {
         }
 
         BlizzardArchive::ClientData* clientData() { return _client_data.get(); }
+        bool hasClientData() { return _client_data != nullptr; }
         void setClientData(std::shared_ptr<BlizzardArchive::ClientData> data) { _client_data = data; }
 
         void initalize(int argc, char* argv[], std::vector<bool> Parser);

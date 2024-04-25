@@ -117,6 +117,16 @@ namespace Noggit::Ui::Windows
                      }
     );
 
+    auto proj_selec_action(file_menu->addAction("Exit to Project Selection"));
+    QObject::connect(proj_selec_action, &QAction::triggered, [this]
+        {
+            auto noggit = Noggit::Application::NoggitApplication::instance();
+            auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
+            project_selection->show();
+            close();
+        }
+    );
+
     _menuBar->adjustSize();
 
     _buildMapListComponent = std::make_unique<Component::BuildMapListComponent>();
