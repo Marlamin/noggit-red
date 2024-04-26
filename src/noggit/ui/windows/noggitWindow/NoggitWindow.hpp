@@ -93,6 +93,7 @@ namespace Noggit::Ui::Windows
       std::unique_ptr<World> _world;
 
       bool map_loaded = false;
+      bool exit_to_project_selection = false;
 
       virtual void closeEvent (QCloseEvent*) override;
     };

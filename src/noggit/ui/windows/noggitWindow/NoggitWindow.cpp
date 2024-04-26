@@ -110,21 +110,23 @@ namespace Noggit::Ui::Windows
                      }
     );
 
+    auto proj_selec_action(file_menu->addAction("Exit to Project Selection"));
+    QObject::connect(proj_selec_action, &QAction::triggered, [this]
+        {
+            // auto noggit = Noggit::Application::NoggitApplication::instance();
+            // auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
+            // project_selection->show();
+
+            exit_to_project_selection = true;
+            close();
+        }
+    );
+
     auto mapmenu_action(file_menu->addAction("Exit"));
     QObject::connect(mapmenu_action, &QAction::triggered, [this]
                      {
                        close();
                      }
-    );
-
-    auto proj_selec_action(file_menu->addAction("Exit to Project Selection"));
-    QObject::connect(proj_selec_action, &QAction::triggered, [this]
-        {
-            auto noggit = Noggit::Application::NoggitApplication::instance();
-            auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
-            project_selection->show();
-            close();
-        }
     );
 
     _menuBar->adjustSize();
@@ -481,6 +483,7 @@ namespace Noggit::Ui::Windows
     {
       event->accept();
     }
+    exit_to_project_selection = false;
   }
 
   void NoggitWindow::handleEventMapListContextMenuPinMap(int mapId, std::string MapName)
@@ -505,7 +508,8 @@ namespace Noggit::Ui::Windows
     prompt.setText("Exit?");
     prompt.setInformativeText("Any unsaved changes will be lost.");
     prompt.addButton("Exit", QMessageBox::DestructiveRole);
-    prompt.addButton("Return to menu", QMessageBox::AcceptRole);
+    if (!exit_to_project_selection)
+        prompt.addButton("Return to menu", QMessageBox::AcceptRole);
     prompt.setDefaultButton(prompt.addButton("Cancel", QMessageBox::RejectRole));
     prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
 
@@ -525,6 +529,12 @@ namespace Noggit::Ui::Windows
       case QMessageBox::DestructiveRole:
         Noggit::Ui::Tools::ViewportManager::ViewportManager::unloadAll();
         setCentralWidget(_null_widget = new QWidget(this));
+        if (exit_to_project_selection)
+        {
+            auto noggit = Noggit::Application::NoggitApplication::instance();
+            auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
+            project_selection->show();
+        }
         event->accept();
         break;
       default:
