@@ -2805,7 +2805,30 @@ MapView::MapView( math::degrees camera_yaw0
   std::cout << "FPS limit is set to : " << _fps_limit << " (" << _fps_calcul << ")" << std::endl;
 
   _update_every_event_loop.start (_fps_calcul);
-  connect(&_update_every_event_loop, &QTimer::timeout,[=]{ _needs_redraw = true; update(); });
+  connect(&_update_every_event_loop, &QTimer::timeout,[=]
+      { 
+          _needs_redraw = true;
+
+          Qt::ApplicationState app_state = QGuiApplication::applicationState();
+          if (app_state == Qt::ApplicationState::ApplicationSuspended)
+          {
+              _needs_redraw = false;
+              return;
+          };
+
+          if (_main_window->isMinimized())
+          {
+              _needs_redraw = false;
+              // return;
+          }
+
+          update();
+      });
+
+  // reduce frame rate in background
+  connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)),
+      this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+
   createGUI();
 }
 
@@ -6047,4 +6070,41 @@ void MapView::ShowContextMenu(QPoint pos)
         // menu->popup(mapToGlobal(pos)); // asynch, needs to be preloaded to work
     };
 
+}
+
+void MapView::onApplicationStateChanged(Qt::ApplicationState state)
+{
+    // auto interval = _update_every_event_loop.interval();
+    int fps_limit = _settings->value("fps_limit", 60).toInt();
+    int fps_calcul = (int)((1.f / (float)fps_limit) * 1000.f);
+
+    switch (state)
+    {
+    case Qt::ApplicationState::ApplicationHidden:
+    {
+        // The application is hidden and runs in the background.
+        // this isn't minimized, it's when the window is entirely hidden, should never happen on noggit
+        _update_every_event_loop.setInterval(1000); // set to 1fps
+        break;
+    }
+    case Qt::ApplicationState::ApplicationActive:
+    {
+        _update_every_event_loop.setInterval(fps_calcul); // normal
+        break;
+    }
+    case Qt::ApplicationState::ApplicationInactive:
+    {
+        // The application is visible, but not selected to be in front.
+        _update_every_event_loop.setInterval(fps_calcul * 2); // half fps if inactive
+        break;
+    }
+    case Qt::ApplicationState::ApplicationSuspended:
+    {
+        // don't run updates ?
+        _update_every_event_loop.setInterval(1000);
+        break;
+    }
+    default:
+        break;
+    }
 }

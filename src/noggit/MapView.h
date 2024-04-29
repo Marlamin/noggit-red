@@ -256,6 +256,7 @@ signals:
 public slots:
   void on_exit_prompt();
   void ShowContextMenu(QPoint pos);
+  void onApplicationStateChanged(Qt::ApplicationState state);
 
 public:
   glm::vec4 cursor_color;
