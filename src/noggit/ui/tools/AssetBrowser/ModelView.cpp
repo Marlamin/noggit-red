@@ -29,8 +29,15 @@ ModelViewer::ModelViewer(QWidget* parent, Noggit::NoggitRenderContext context)
 
   _move_sensitivity = _settings->value("assetBrowser/move_sensitivity", 15.0f).toFloat() / 30.0f;
 
-  _update_every_event_loop.start (0);
-  connect (&_update_every_event_loop, &QTimer::timeout, [this] { update(); });
+  int _fps_limit = _settings->value("fps_limit", 60).toInt();
+  int _fps_calcul = (int)((1.f / (float)_fps_limit) * 1000.f);
+
+  _update_every_event_loop.start (_fps_calcul);
+  connect (&_update_every_event_loop, &QTimer::timeout, [this]
+      { 
+          _needs_redraw = true;
+          update();
+      });
 }
 
 void ModelViewer::initializeGL()
@@ -44,6 +51,11 @@ void ModelViewer::initializeGL()
 
 void ModelViewer::paintGL()
 {
+  if (!_needs_redraw)
+      return;
+  else
+      _needs_redraw = false;
+
   const qreal now(_startup_time.elapsed() / 1000.0);
 
   OpenGL::context::scoped_setter const _ (::gl, context());
@@ -64,6 +76,7 @@ void ModelViewer::resizeGL(int w, int h)
   OpenGL::context::scoped_setter const _ (::gl, context());
   gl.viewport(0.0f, 0.0f, w, h);
   emit resized();
+  _needs_redraw = true;
 }
 
 void ModelViewer::tick(float dt)

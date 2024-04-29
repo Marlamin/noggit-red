@@ -61,6 +61,7 @@ namespace Noggit
 
       QElapsedTimer _startup_time;
       qreal _last_update = 0.f;
+      bool _needs_redraw = false;
       float _move_sensitivity = 0.5f;
 
       QMetaObject::Connection _gl_guard_connection;
