@@ -2816,7 +2816,7 @@ MapView::MapView( math::degrees camera_yaw0
               return;
           };
 
-          if (_main_window->isMinimized())
+          if (_main_window->isMinimized() && _settings->value("background_fps_limit", true).toBool())
           {
               _needs_redraw = false;
               // return;
@@ -6075,6 +6075,10 @@ void MapView::ShowContextMenu(QPoint pos)
 void MapView::onApplicationStateChanged(Qt::ApplicationState state)
 {
     // auto interval = _update_every_event_loop.interval();
+
+    if (!_settings->value("background_fps_limit", true).toBool())
+        return;
+
     int fps_limit = _settings->value("fps_limit", 60).toInt();
     int fps_calcul = (int)((1.f / (float)fps_limit) * 1000.f);
 
