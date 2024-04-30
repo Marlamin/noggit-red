@@ -35,18 +35,19 @@ void WireBox::draw ( glm::mat4x4 const& model_view
 
   auto points = math::box_points(min_point, max_point);
 
-  auto glmPoints = std::vector<glm::vec3>();
+  /*auto glmPoints = std::vector<glm::vec3>();
 
-  for(auto const point : points)
+
+  for(auto const &point : points)
     {
         glmPoints.push_back(glm::vec3(point.x, point.y, point.z));
-    }
+    }*/
 
   wire_box_shader.uniform("model_view", model_view);
   wire_box_shader.uniform("projection", projection);
   wire_box_shader.uniform("transform", transform);
   wire_box_shader.uniform("color", color);
-  wire_box_shader.uniform("pointPositions", glmPoints);
+  wire_box_shader.uniform("pointPositions", points);
 
   OpenGL::Scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
   gl.hint(GL_LINE_SMOOTH_HINT, GL_NICEST);
