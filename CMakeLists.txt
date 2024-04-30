@@ -110,7 +110,7 @@ set(FASTNOISE2_NOISETOOL OFF CACHE BOOL "")
 FIND_PACKAGE(FastNoise2 REQUIRED)
 
 FIND_PACKAGE(Sol2 REQUIRED)
-FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGL OpenGLExtensions Network Xml Multimedia REQUIRED)
+FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGLExtensions Gui Network Xml Multimedia REQUIRED)
 
 IF(USE_SQL)
   FIND_LIBRARY(MYSQL_LIBRARY NAMES libmysql
@@ -336,8 +336,8 @@ TARGET_LINK_LIBRARIES (noggit
   ${OPENGL_LIBRARIES}
   StormLib
   CascLib
+  Qt5::Gui
   Qt5::Widgets
-  Qt5::OpenGL
   Qt5::OpenGLExtensions
   Qt5::Xml
   Qt5::Network

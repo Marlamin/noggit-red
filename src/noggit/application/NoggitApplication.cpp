@@ -70,7 +70,7 @@ namespace Noggit::Application
 	  auto listFilePath = applicationConfiguration.ApplicationListFilePath;
 	  if (!std::filesystem::exists(listFilePath))
 	  {
-		  LogError << "Unable to find listfile! please reinstall Noggit Red, or download from wow.tools" << std::endl;
+		  // LogError << "Unable to find listfile! please reinstall Noggit Red, or download from wow.tools" << std::endl;
 	  }
 
 	  Log << "Listfile found! : " << listFilePath << std::endl;
@@ -78,25 +78,23 @@ namespace Noggit::Application
 	  auto databaseDefinitionPath = applicationConfiguration.ApplicationDatabaseDefinitionsPath;
 	  if (!std::filesystem::exists(databaseDefinitionPath))
 	  {
-		  LogError << "Unable to find database definitions! please reinstall Noggit Red, or download from wow.tools" << std::endl;
+		  // LogError << "Unable to find database definitions! please reinstall Noggit Red, or download from wow.tools" << std::endl;
 	  }
 
 	  Log << "Database Definitions found! : " << databaseDefinitionPath << std::endl;
 
-	  //Initalise OpenGL Context
-	  if (!QGLFormat::hasOpenGL())
-	  {
-		  throw std::runtime_error(
-			  "Your system does not support OpenGL. Sorry, this application can't run without it.");
-	  }
-
 	  QSurfaceFormat format;
+	  
 	  format.setRenderableType(QSurfaceFormat::OpenGL);
-	  format.setVersion(4, 1);
+	  format.setVersion(4, 5); // will automatically set to the highest version available
 	  format.setProfile(QSurfaceFormat::CoreProfile);
 	  format.setSwapBehavior(applicationConfiguration.GraphicsConfiguration.SwapChainDepth);
-	  format.setSwapInterval(applicationConfiguration.GraphicsConfiguration.SwapChainInternal);
-	  format.setDepthBufferSize(applicationConfiguration.GraphicsConfiguration.DepthBufferSize);
+	  QSettings app_settings;
+	  bool vsync = app_settings.value("vsync", false).toBool();
+	  format.setSwapInterval(vsync ? 1 : applicationConfiguration.GraphicsConfiguration.SwapChainInternal);
+	  // TODO. old config files used 16 so just ignore them, could implement a version check of the config file to update it
+	  format.setDepthBufferSize(24); // applicationConfiguration.GraphicsConfiguration.DepthBufferSize
+	  auto deflt = format.depthBufferSize();
 	  format.setSamples(applicationConfiguration.GraphicsConfiguration.SamplesCount);
 
 	  QSurfaceFormat::setDefaultFormat(format);
@@ -110,10 +108,31 @@ namespace Noggit::Application
 
 	  OpenGL::context::scoped_setter const _(::gl, &context);
 
+	  GLint majVers = 0, minVers = 0;
+	  glGetIntegerv(GL_MAJOR_VERSION, &majVers);
+	  glGetIntegerv(GL_MINOR_VERSION, &minVers);
+
+	  if (majVers != 4)
+	  {
+		  LogError << "Default GL major version is not 4" << std::endl;
+	  }
+	  else if (minVers < 1) // noggit required 4.1
+	  {
+		  LogError << "Default GL minor version is less than 1" << std::endl;
+	  }
+	  
+	  QOpenGLVersionProfile profile = QOpenGLVersionProfile(format);
+
 	  LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
 	  LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
 	  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
 
+	  if (!profile.isValid())
+	  {
+		  LogError << "OpenGL version profile is not valid." << std::endl;
+		  throw std::runtime_error(
+			  "OpenGL version profile is not valid.");
+	  }
 
     _application_configuration = std::make_shared<Noggit::Application::NoggitApplicationConfiguration>(applicationConfiguration);
 	  //All of the below should be Project Initalisation

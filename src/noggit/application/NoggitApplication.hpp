@@ -17,7 +17,6 @@
 #include <string_view>
 #include <QtCore/QSettings>
 #include <QtGui/QOffscreenSurface>
-#include <QtOpenGL/QGLFormat>
 #include <QtCore/QDir>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QFileDialog>

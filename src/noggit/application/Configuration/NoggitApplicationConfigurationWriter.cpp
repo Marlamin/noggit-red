@@ -14,7 +14,7 @@ namespace Noggit::Application {
 
         noggitApplicationConfiguration.GraphicsConfiguration = NoggitApplicationGraphicsConfiguration();
         noggitApplicationConfiguration.GraphicsConfiguration.SwapChainDepth = QSurfaceFormat::TripleBuffer;
-        noggitApplicationConfiguration.GraphicsConfiguration.DepthBufferSize = 16;
+        noggitApplicationConfiguration.GraphicsConfiguration.DepthBufferSize = 24;
         noggitApplicationConfiguration.GraphicsConfiguration.SwapChainInternal = 0;
         noggitApplicationConfiguration.GraphicsConfiguration.SamplesCount = 0;
 
