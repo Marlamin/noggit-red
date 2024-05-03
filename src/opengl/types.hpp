@@ -40,7 +40,7 @@ namespace OpenGL
 
   struct TerrainParamsUniformBlock
   {
-    int draw_shadows = true;
+    int draw_shadows = false;
     int draw_lines = false;
     int draw_hole_lines = false;
     int draw_areaid_overlay = false;

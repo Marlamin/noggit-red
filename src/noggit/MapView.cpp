@@ -2331,7 +2331,7 @@ void MapView::setupHotkeys()
                   _draw_contour.set (true);
                   _draw_climb.set (false);
                   _draw_vertex_color.set(true);
-                  _draw_baked_shadows.set(true);
+                  _draw_baked_shadows.set(false);
                   _draw_wmo.set (false);
                   _draw_terrain.set (true);
                   _draw_fog.set (false);
