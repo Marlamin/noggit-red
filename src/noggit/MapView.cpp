@@ -1421,21 +1421,40 @@ void MapView::setupAssistMenu()
                   }
   );
 
+  // vertices can support up to 32bit but other things break at 16bit like WDL and MFBO
+  //  DB/ZoneLight appears to be using -64000 and 64000
+  //  DB/DungeonMapChunk seems to use -10000 for lower default.
+  int constexpr MIN_HEIGHT = std::numeric_limits<short>::min(); // -32768
+  int constexpr MAX_HEIGHT = std::numeric_limits<short>::max(); // 32768
+
+  int constexpr DEFAULT_MIN_HEIGHT = -2000; // outland goes to -1200
+  int constexpr DEFAULT_MAX_HEIGHT = 3000; // hyjal goes to 2000
+
   QDialog* heightmap_export_params = new QDialog(this);
   heightmap_export_params->setWindowFlags(Qt::Popup);
   heightmap_export_params->setWindowTitle("Heightmap Exporter");
   QVBoxLayout* heightmap_export_params_layout = new QVBoxLayout(heightmap_export_params);
 
-  heightmap_export_params_layout->addWidget(new QLabel("Min:", heightmap_export_params));
+  heightmap_export_params_layout->addWidget(new QLabel("Import with the same values \nto keep the same coordinates.",
+      heightmap_export_params));
+
+  heightmap_export_params_layout->addWidget(new QLabel("Min Height:", heightmap_export_params));
   QDoubleSpinBox* heightmap_export_min = new QDoubleSpinBox(heightmap_export_params);
-  heightmap_export_min->setRange(-10000000, 10000000);
+  heightmap_export_min->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  heightmap_export_min->setValue(DEFAULT_MIN_HEIGHT);
   heightmap_export_params_layout->addWidget(heightmap_export_min);
 
-  heightmap_export_params_layout->addWidget(new QLabel("Max:", heightmap_export_params));
+  heightmap_export_params_layout->addWidget(new QLabel("Max Height:", heightmap_export_params));
   QDoubleSpinBox* heightmap_export_max = new QDoubleSpinBox(heightmap_export_params);
-  heightmap_export_max->setRange(-10000000, 10000000);
-  heightmap_export_max->setValue(100.0);
+  heightmap_export_max->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  heightmap_export_max->setValue(DEFAULT_MAX_HEIGHT);
   heightmap_export_params_layout->addWidget(heightmap_export_max);
+
+  std::string const autoheights_tooltip_str = "Sets fields to this tile's min and max heights\nDefaults : Min: "
+      + std::to_string(DEFAULT_MIN_HEIGHT) + ", Max: " + std::to_string(DEFAULT_MAX_HEIGHT);
+  QPushButton* heightmap_export_params_auto_height = new QPushButton("Auto Heights", heightmap_export_params);
+  heightmap_export_params_auto_height->setToolTip(autoheights_tooltip_str.c_str());
+  heightmap_export_params_layout->addWidget(heightmap_export_params_auto_height);
 
   QPushButton* heightmap_export_okay = new QPushButton("Okay", heightmap_export_params);
   heightmap_export_params_layout->addWidget(heightmap_export_okay);
@@ -1455,6 +1474,20 @@ void MapView::setupAssistMenu()
               heightmap_export_min->setValue(value - 1.0);
 
           });
+
+  connect(heightmap_export_params_auto_height, &QPushButton::clicked
+      , [=]()
+      {
+          MapTile* tile = _world->mapIndex.getTile(_camera.position);
+          if (tile)
+          {
+              QSignalBlocker const blocker_min(heightmap_export_min);
+              QSignalBlocker const blocker_max(heightmap_export_max);
+
+              heightmap_export_min->setValue(tile->getMinHeight());
+              heightmap_export_max->setValue(tile->getMaxHeight());
+          }
+      });
 
   connect(heightmap_export_okay, &QPushButton::clicked
     ,[=]()
@@ -1499,6 +1532,8 @@ void MapView::setupAssistMenu()
 
   auto cur_adt_import_menu(assist_menu->addMenu("Import"));
 
+  // alphamaps import
+  auto const alphamap_image_format = "Required Image format :\n1024x1024 and 8bit color channel.";
 
   QDialog* adt_import_params = new QDialog(this);
   adt_import_params->setWindowFlags(Qt::Popup);
@@ -1512,6 +1547,11 @@ void MapView::setupAssistMenu()
 
   QPushButton* adt_import_params_okay = new QPushButton("Okay", adt_import_params);
   adt_import_params_layout->addWidget(adt_import_params_okay);
+
+  auto const alphamap_file_info_tooltip = "\nThe image file must be placed in the map's directory in the project"
+      " folder with the following naming : MAPNAME_XX_YY_layer1.png (or layer2...)."
+      "\nFor example \"C:/noggitproject/world/maps/MAPNAME/MAPNAME_29_53_layer2.png\"";
+  adt_import_params_okay->setToolTip(alphamap_file_info_tooltip);
 
   connect(adt_import_params_okay, &QPushButton::clicked
     ,[=]()
@@ -1571,15 +1611,42 @@ void MapView::setupAssistMenu()
     }
   );
 
+  auto const heightmap_image_format = "Required Image format :\n257x257 or 256x256(tiled edges)\nand 16bit per color channel.";
+
+  auto const heightmap_file_info_tooltip = "Requires a .png image of 257x257, or 256x256 in Tiled Edges mode.(Otherwise it will be stretched)"
+      "\nThe image file must be placed in the map's directory in the project folder with the following naming : MAPNAME_XX_YY_height.png."
+      "\nFor example \"C:/noggitproject/world/maps/MAPNAME/MAPNAME_29_53_height.png\"";
+
+  auto const tiled_edges_tooltip_str = "Tiled edge uses a 256x256 image instead 257."
+      "\nTiled image imports encroach on edge vertices on neighboring tiles to avoid duplicate edges. ";
+
+  /*auto const multiplier_tooltip_str = "Multiplies pixel values by this to obtain the final position."
+      "\n For example a pixel grayscale of 40%(0.4%) with a multiplier of 100 means this vertex's height will be 0.4*100 = 40.";
+*/
+
+  // heightmaps
   QDialog* adt_import_height_params = new QDialog(this);
   adt_import_height_params->setWindowFlags(Qt::Popup);
-  adt_import_height_params->setWindowTitle("Alphamap Importer");
+  adt_import_height_params->setWindowTitle("Heightmap Importer");
   QVBoxLayout* adt_import_height_params_layout = new QVBoxLayout(adt_import_height_params);
 
-  adt_import_height_params_layout->addWidget(new QLabel("Multiplier:", adt_import_height_params));
-  QDoubleSpinBox* adt_import_height_params_multiplier = new QDoubleSpinBox(adt_import_height_params);
-  adt_import_height_params_multiplier->setRange(0, 100000000);
-  adt_import_height_params_layout->addWidget(adt_import_height_params_multiplier);
+  adt_import_height_params_layout->addWidget(new QLabel(heightmap_image_format, adt_import_height_params));
+
+  adt_import_height_params_layout->addWidget(new QLabel("Min Height:", adt_import_height_params));
+  QDoubleSpinBox* heightmap_import_min = new QDoubleSpinBox(adt_import_height_params);
+  heightmap_import_min->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  heightmap_import_min->setValue(DEFAULT_MIN_HEIGHT);
+  adt_import_height_params_layout->addWidget(heightmap_import_min);
+
+  adt_import_height_params_layout->addWidget(new QLabel("Max Height:", adt_import_height_params));
+  QDoubleSpinBox* heightmap_import_max = new QDoubleSpinBox(adt_import_height_params);
+  heightmap_import_max->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  heightmap_import_max->setValue(DEFAULT_MAX_HEIGHT);
+  adt_import_height_params_layout->addWidget(heightmap_import_max);
+
+  QPushButton* adt_import_height_params_auto_height = new QPushButton("Auto Heights", adt_import_height_params);
+  adt_import_height_params_auto_height->setToolTip(autoheights_tooltip_str.c_str());
+  adt_import_height_params_layout->addWidget(adt_import_height_params_auto_height);
 
   adt_import_height_params_layout->addWidget(new QLabel("Mode:", adt_import_height_params));
   QComboBox* adt_import_height_params_mode = new QComboBox(adt_import_height_params);
@@ -1587,10 +1654,23 @@ void MapView::setupAssistMenu()
   adt_import_height_params_mode->addItems({"Set", "Add", "Subtract", "Multiply" });
 
   QCheckBox* adt_import_height_tiled_edges = new QCheckBox("Tiled Edges", adt_import_height_params);
+  adt_import_height_tiled_edges->setToolTip(tiled_edges_tooltip_str);
   adt_import_height_params_layout->addWidget(adt_import_height_tiled_edges);
 
   QPushButton* adt_import_height_params_okay = new QPushButton("Okay", adt_import_height_params);
   adt_import_height_params_layout->addWidget(adt_import_height_params_okay);
+  adt_import_height_params_okay->setToolTip(heightmap_file_info_tooltip);
+
+  connect(adt_import_height_params_auto_height, &QPushButton::clicked
+    , [=]()
+    {
+      MapTile* tile = _world->mapIndex.getTile(_camera.position);
+      if (tile)
+      {
+        heightmap_import_min->setValue(tile->getMinHeight());
+        heightmap_import_max->setValue(tile->getMaxHeight());
+      }
+    });
 
   connect(adt_import_height_params_okay, &QPushButton::clicked
     ,[=]()
@@ -1622,7 +1702,7 @@ void MapView::setupAssistMenu()
           img.load(filepath, "PNG");
 
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
-          _world->importADTHeightmap(_camera.position, img, adt_import_height_params_multiplier->value(),
+          _world->importADTHeightmap(_camera.position, img, heightmap_import_min->value(), heightmap_import_max->value(),
                                      adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
         }
@@ -1639,16 +1719,84 @@ void MapView::setupAssistMenu()
           OpenGL::context::scoped_setter const _(::gl, context());
 
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
-          _world->importADTHeightmap(_camera.position, adt_import_height_params_multiplier->value(),
+          _world->importADTHeightmap(_camera.position, heightmap_import_min->value(), heightmap_import_max->value(),
                                      adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
         }
       }
   );
 
+  // Watermap
+  QDialog* adt_import_water_params = new QDialog(this);
+  adt_import_water_params->setWindowFlags(Qt::Popup);
+  adt_import_water_params->setWindowTitle("Watermap Importer");
+  QVBoxLayout* adt_import_water_params_layout = new QVBoxLayout(adt_import_water_params);
+
+  // MIN MAX
+  adt_import_water_params_layout->addWidget(new QLabel("Min Height:", adt_import_water_params));
+  QDoubleSpinBox* watermap_import_min = new QDoubleSpinBox(adt_import_water_params);
+  watermap_import_min->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  watermap_import_min->setValue(MIN_HEIGHT);
+  adt_import_water_params_layout->addWidget(watermap_import_min);
+
+  adt_import_water_params_layout->addWidget(new QLabel("Max Height:", adt_import_water_params));
+  QDoubleSpinBox* watermap_import_max = new QDoubleSpinBox(adt_import_water_params);
+  watermap_import_max->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  watermap_import_max->setValue(MAX_HEIGHT);
+  adt_import_water_params_layout->addWidget(watermap_import_max);
+
+  adt_import_water_params_layout->addWidget(new QLabel("Mode:", adt_import_water_params));
+  QComboBox* adt_import_water_params_mode = new QComboBox(adt_import_water_params);
+  adt_import_water_params_layout->addWidget(adt_import_water_params_mode);
+  adt_import_water_params_mode->addItems({ "Set", "Add", "Subtract", "Multiply" });
+
+  QCheckBox* adt_import_water_tiled_edges = new QCheckBox("Tiled Edges", adt_import_water_params);
+  adt_import_water_params_layout->addWidget(adt_import_water_tiled_edges);
+
+  QPushButton* adt_import_water_params_okay = new QPushButton("Okay", adt_import_water_params);
+  adt_import_water_params_layout->addWidget(adt_import_water_params_okay);
+
+  connect(adt_import_water_params_okay, &QPushButton::clicked
+      , [=]()
+      {
+          adt_import_water_params->accept();
+
+      });
+
+  ADD_ACTION_NS(cur_adt_import_menu
+      , "Import watermap (file)"
+      , [=]
+      {
+          if (adt_import_water_params->exec() == QDialog::Accepted)
+          {
+              makeCurrent();
+              OpenGL::context::scoped_setter const _(::gl, context());
+
+              QString filepath = QFileDialog::getOpenFileName(
+                  this,
+                  tr("Open watermap (257x257)"),
+                  "",
+                  "PNG file (*.png);;"
+              );
+
+              if (!QFileInfo::exists(filepath))
+                  return;
+
+              QImage img;
+              img.load(filepath, "PNG");
+
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_WATER);
+              _world->importADTWatermap(_camera.position, img, watermap_import_min->value(), watermap_import_max->value(),
+                  adt_import_water_params_mode->currentIndex(), adt_import_water_tiled_edges->isChecked());
+              NOGGIT_ACTION_MGR->endAction();
+          }
+      }
+  );
+
+  // Vertex Colors
   QDialog* adt_import_vcol_params = new QDialog(this);
   adt_import_vcol_params->setWindowFlags(Qt::Popup);
-  adt_import_vcol_params->setWindowTitle("Alphamap Importer");
+  adt_import_vcol_params->setWindowTitle("Vertex Color Map Importer");
   QVBoxLayout* adt_import_vcol_params_layout = new QVBoxLayout(adt_import_vcol_params);
 
   adt_import_vcol_params_layout->addWidget(new QLabel("Mode:", adt_import_vcol_params));
@@ -1864,7 +2012,7 @@ void MapView::setupAssistMenu()
             makeCurrent();
             OpenGL::context::scoped_setter const _(::gl, context());
             NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
-            _world->importAllADTsHeightmaps(adt_import_height_params_multiplier->value(), adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
+            _world->importAllADTsHeightmaps(heightmap_import_min->value(), heightmap_import_max->value(), adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
             NOGGIT_ACTION_MGR->endAction();
         )
 

@@ -1054,7 +1054,9 @@ void MapTile::initEmptyChunks()
 
 QImage MapTile::getHeightmapImage(float min_height, float max_height)
 {
-    QImage image(257, 257, QImage::Format_Grayscale16);
+    // grayscale 16 doesn't work, it rounds values or is actually 8bit
+    QImage image(257, 257, QImage::Format_RGBA64);
+    int depth = image.depth();
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
@@ -1076,7 +1078,7 @@ QImage MapTile::getHeightmapImage(float min_height, float max_height)
           unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
           float value = is_virtual ? (heightmap[idx].y + heightmap[idx + (erp ? SUM : 1)].y) / 2.f : heightmap[idx].y;
           value = std::min(1.0f, std::max(0.0f, ((value - min_height) / (max_height - min_height))));
-          image.setPixelColor((k * 16) + x,  (l * 16) + y, QColor::fromRgbF(value, value, value, 1.0));
+          image.setPixelColor((k * 16) + x,  (l * 16) + y, QColor::fromRgbF(value, value, value, 1.0)); // grayscale uses alpha channel ?
         }
       }
     }
@@ -1126,7 +1128,7 @@ QImage MapTile::getNormalmapImage()
 
 QImage MapTile::getAlphamapImage(unsigned layer)
 {
-  QImage image(1024, 1024, QImage::Format_Grayscale8);
+  QImage image(1024, 1024, QImage::Format_RGBA8888);
   image.fill(Qt::black);
 
   for (int i = 0; i < 16; ++i)
@@ -1159,7 +1161,7 @@ QImage MapTile::getAlphamapImage(unsigned layer)
 
 QImage MapTile::getAlphamapImage(std::string const& filename)
 {
-  QImage image(1024, 1024, QImage::Format_Grayscale8);
+  QImage image(1024, 1024, QImage::Format_RGBA8888);
   image.fill(Qt::black);
 
   for (int i = 0; i < 16; ++i)
@@ -1230,9 +1232,11 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
   return std::move(image);
 }
 
-void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges) // image
+void MapTile::setHeightmapImage(QImage const& baseimage, float min_height, float max_height, int mode, bool tiledEdges) // image
 {
-  auto image = baseimage.convertToFormat(QImage::Format_Grayscale16);
+  auto image = baseimage.convertToFormat(QImage::Format_RGBA64);
+
+  float const height_range = (max_height - min_height);
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
   for (int k = 0; k < 16; ++k)
@@ -1268,22 +1272,27 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
             case 16:
             case 32:
             {
+              float const ratio = qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f; // 0.0 - 1.0
+              float const new_height = (height_range * ratio) + min_height;
+
+              float test_newheight = (ratio + min_height) * (height_range);
+
               switch (mode)
               {
                 case 0: // Set
-                  heightmap[idx].y = qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  heightmap[idx].y = new_height;
                   break;
 
                 case 1: // Add
-                  heightmap[idx].y += qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  heightmap[idx].y += new_height;
                   break;
 
                 case 2: // Subtract
-                  heightmap[idx].y -= qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  heightmap[idx].y -= new_height;
                   break;
 
                 case 3: // Multiply
-                  heightmap[idx].y *= qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  heightmap[idx].y *= new_height;
                   break;
               }
 
@@ -1292,22 +1301,25 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
 
             case 64:
             {
+              double const ratio = image.pixelColor((k * 16) + x, (l * 16) + y).redF(); // 0.0 - 1.0
+              float new_height = height_range * ratio + min_height;
+
               switch (mode)
               {
                 case 0: // Set
-                  heightmap[idx].y = image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;
+                  heightmap[idx].y = new_height;
                   break;
 
                 case 1: // Add
-                  heightmap[idx].y += image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  heightmap[idx].y += new_height;
                   break;
 
                 case 2: // Subtract
-                  heightmap[idx].y -= image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  heightmap[idx].y -= new_height;
                   break;
 
                 case 3: // Multiply
-                  heightmap[idx].y *= image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  heightmap[idx].y *= new_height;
                   break;
               }
 
@@ -1384,7 +1396,7 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
 
 void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer)
 {
-  auto image = baseimage.convertToFormat(QImage::Format_Grayscale8);
+  auto image = baseimage.convertToFormat(QImage::Format_RGBA8888);
 
   for (int k = 0; k < 16; ++k)
   {

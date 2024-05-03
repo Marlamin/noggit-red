@@ -264,13 +264,14 @@ public:
 
   void importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigned layer);
   void importADTAlphamap(glm::vec3 const& pos);
-  void importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode, bool tiledEdges);
-  void importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode, bool tiledEdges);
+  void importADTHeightmap(glm::vec3 const& pos, QImage const& image, float min_height, float max_height, unsigned mode, bool tiledEdges);
+  void importADTHeightmap(glm::vec3 const& pos, float min_height, float max_height, unsigned mode, bool tiledEdges);
+  void importADTWatermap(glm::vec3 const& pos, QImage const& image, float min_height, float max_height, unsigned mode, bool tiledEdges);
   void importADTVertexColorMap(glm::vec3 const& pos, int mode, bool tiledEdges);
   void importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode, bool tiledEdges);
 
   void importAllADTsAlphamaps();
-  void importAllADTsHeightmaps(float multiplier, unsigned mode, bool tiledEdges);
+  void importAllADTsHeightmaps(float min_height, float max_height, unsigned mode, bool tiledEdges);
   void importAllADTVertexColorMaps(unsigned mode, bool tiledEdges);
 
   void ensureAllTilesetsADT(glm::vec3 const& pos);

@@ -65,6 +65,8 @@ public:
   [[nodiscard]]
   bool isVisible(const math::frustum& frustum) const;
 
+  void setWatermapImage(QImage const& baseimage, float min_height, float max_height, int mode, bool tiledEdges);
+
   void tagExtents(bool state) { _extents_changed = state; };
   void tagUpdate() { _renderer.tagUpdate(); };
 

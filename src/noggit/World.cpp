@@ -2257,7 +2257,7 @@ void World::importADTAlphamap(glm::vec3 const& pos)
   );
 }
 
-void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode, bool tiledEdges)
+void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float min_height, float max_height, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
   int desired_dimensions = tiledEdges ? 256 : 257;
@@ -2273,7 +2273,7 @@ void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float 
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setHeightmapImage(scaled, multiplier, mode, tiledEdges);
+        tile->setHeightmapImage(scaled, min_height, max_height, mode, tiledEdges);
       }
     );
 
@@ -2283,13 +2283,13 @@ void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float 
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setHeightmapImage(image, multiplier, mode, tiledEdges);
+        tile->setHeightmapImage(image, min_height, max_height, mode, tiledEdges);
       }
     );
   }
 }
 
-void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode, bool tiledEdges)
+void World::importADTHeightmap(glm::vec3 const& pos, float min_height, float max_height, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -2306,8 +2306,17 @@ void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned 
                          + "_" + std::to_string(tile->index.x).c_str() + "_" + std::to_string(tile->index.z).c_str()
                          + "_height" + ".png";
 
-      if(!QFileInfo::exists(filename))
+      if (!QFileInfo::exists(filename))
+      {
+          QMessageBox::warning
+          (nullptr
+              , "File not found"
+              , "File not found: " + filename
+              , QMessageBox::Ok
+          );
         return;
+      }
+
 
       for_all_chunks_on_tile(pos, [](MapChunk* chunk)
       {
@@ -2321,10 +2330,42 @@ void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned 
       if (img.width() != desiredSize || img.height() != desiredSize)
         img = img.scaled(static_cast<int>(desiredSize), static_cast<int>(desiredSize), Qt::AspectRatioMode::IgnoreAspectRatio);
 
-      tile->setHeightmapImage(img, multiplier, mode, tiledEdges);
+      tile->setHeightmapImage(img, min_height, max_height, mode, tiledEdges);
 
     }
   );
+}
+
+void World::importADTWatermap(glm::vec3 const& pos, QImage const& image, float min_height, float max_height, unsigned mode, bool tiledEdges)
+{
+    ZoneScoped;
+    int desired_dimensions = tiledEdges ? 256 : 257;
+    for_all_chunks_on_tile(pos, [](MapChunk* chunk)
+        {
+            NOGGIT_CUR_ACTION->registerChunkLiquidChange(chunk);
+        });
+
+    if (image.width() != desired_dimensions || image.height() != desired_dimensions)
+    {
+        QImage scaled = image.scaled(desired_dimensions, desired_dimensions, Qt::AspectRatioMode::IgnoreAspectRatio);
+
+        for_tile_at(pos
+            , [&](MapTile* tile)
+            {
+                tile->Water.setWatermapImage(scaled, min_height, max_height, mode, tiledEdges);
+            }
+        );
+
+    }
+    else
+    {
+        for_tile_at(pos
+            , [&](MapTile* tile)
+            {
+                tile->Water.setWatermapImage(image, min_height, max_height, mode, tiledEdges);
+            }
+        );
+    }
 }
 
 void World::importADTVertexColorMap(glm::vec3 const& pos, int mode, bool tiledEdges)
@@ -3250,7 +3291,7 @@ void World::importAllADTsAlphamaps()
   }
 }
 
-void World::importAllADTsHeightmaps(float multiplier, unsigned int mode, bool tiledEdges)
+void World::importAllADTsHeightmaps(float min_height, float max_height, unsigned int mode, bool tiledEdges)
 {
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
@@ -3286,11 +3327,11 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode, bool ti
         if (img.width() != desiredSize || img.height() != desiredSize)
         {
           QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
-          mTile->setHeightmapImage(scaled, multiplier, mode, tiledEdges);
+          mTile->setHeightmapImage(scaled, min_height, max_height, mode, tiledEdges);
         }
         else
         {
-          mTile->setHeightmapImage(img, multiplier, mode, tiledEdges);
+          mTile->setHeightmapImage(img, min_height, max_height, mode, tiledEdges);
         }
 
         mTile->saveTile(this);
