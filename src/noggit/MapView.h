@@ -194,7 +194,7 @@ private:
   void changeZoneIDValue (int set);
 
   QPointF _last_mouse_pos;
-  float mh, mv, rh, rv;
+  float mh, mv, rh, rv; // mh = left click x, rv = right click y
 
   float keyx = 0, keyy = 0, keyz = 0, keyr = 0, keys = 0;
 

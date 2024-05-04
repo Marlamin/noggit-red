@@ -1,4 +1,4 @@
-#include "ModelView.hpp"
+#include "BrowserModelView.hpp"
 #include <opengl/scoped.hpp>
 #include <noggit/Selection.h>
 #include <noggit/tool_enums.hpp>

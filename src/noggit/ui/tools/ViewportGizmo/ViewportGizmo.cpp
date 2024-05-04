@@ -296,7 +296,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
         _world->updateTilesEntry(selected, model_update::add);
     }
   }
-
-  _world->update_selected_model_groups();
+  if (_world)
+    _world->update_selected_model_groups();
 }
 

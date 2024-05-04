@@ -249,6 +249,9 @@ bool World::is_selected(std::uint32_t uid) const
 std::optional<selection_type> World::get_last_selected_model() const
 {
   ZoneScoped;
+  if (_current_selection.empty())
+      return std::optional<selection_type>();
+
   auto const it
     ( std::find_if ( _current_selection.rbegin()
                    , _current_selection.rend()

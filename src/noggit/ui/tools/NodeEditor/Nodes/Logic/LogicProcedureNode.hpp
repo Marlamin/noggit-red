@@ -4,7 +4,7 @@
 #define NOGGIT_LOGICPROCEDURENODE_HPP
 
 #include "noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp"
-#include "noggit/ui/tools/NodeEditor/Nodes/Scene/Context.hpp"
+#include "noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp"
 #include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodeScene.hpp>
 
 #include <vector>

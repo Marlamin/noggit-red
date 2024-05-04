@@ -3,7 +3,7 @@
 #include "NodeEditor.hpp"
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/tools/NodeEditor/Nodes/Scene/Context.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Log.h>
 #include <noggit/MapView.h>
