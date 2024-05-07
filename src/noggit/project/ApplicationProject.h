@@ -283,6 +283,8 @@ namespace Noggit::Project
 
       project->ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(dbd_file_directory, client_build);
 
+      Log << "Loading Client Path : " << project->ClientPath << std::endl;
+
       try
       {
         project->ClientData = std::make_shared<BlizzardArchive::ClientData>(

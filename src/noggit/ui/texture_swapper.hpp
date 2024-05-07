@@ -41,6 +41,11 @@ namespace Noggit
           return _swap_entire_chunk->isChecked();
       }
 
+      bool entireTile() const
+      {
+          return _swap_entire_tile->isChecked();
+      }
+
       void change_radius(float change);
 
       bool brush_mode() const
@@ -67,6 +72,7 @@ namespace Noggit
       QGroupBox* _brush_mode_group;
       QSlider* _radius_slider;
       QCheckBox* _swap_entire_chunk;
+      QCheckBox* _swap_entire_tile;
       QDoubleSpinBox* _radius_spin;
       World* _world;
     };

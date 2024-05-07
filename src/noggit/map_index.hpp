@@ -39,7 +39,7 @@ private:
   bool onDisc;
 
 
-  MapTileEntry() : flags(0), tile(nullptr) {}
+  MapTileEntry() : flags(0), tile(nullptr), onDisc(false) {}
 
   friend class MapIndex;
 };

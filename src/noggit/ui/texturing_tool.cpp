@@ -540,7 +540,7 @@ namespace Noggit
           if (_texture_switcher->brush_mode())
           {
                 std::cout << _texture_switcher->radius() << std::endl;
-            world->replaceTexture(pos, _texture_switcher->radius(), to_swap.value(), texture, _texture_switcher->entireChunk());
+            world->replaceTexture(pos, _texture_switcher->radius(), to_swap.value(), texture, _texture_switcher->entireChunk(), _texture_switcher->entireTile());
           }
           else
           {

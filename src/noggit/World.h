@@ -73,7 +73,7 @@ public:
   std::string mWmoFilename;
   ENTRY_MODF mWmoEntry;
 
-  unsigned int getMapID();
+  unsigned int getMapID() const;
 
   // Time of the day.
   float animtime;
@@ -180,7 +180,7 @@ public:
   bool GetVertex(float x, float z, glm::vec3 *V) const;
 
   // check if the cursor is under map or in an unloaded tile
-  bool isUnderMap(glm::vec3 const& pos);
+  bool isUnderMap(glm::vec3 const& pos) const;
 
   template<typename Fun>
   bool for_all_chunks_in_range ( glm::vec3 const& pos
@@ -236,7 +236,7 @@ public:
   bool paintTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture);
   bool stampTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* img, bool paint);
   bool sprayTexture(glm::vec3 const& pos, Brush *brush, float strength, float pressure, float spraySize, float sprayPressure, scoped_blp_texture_reference texture);
-  bool replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture, bool entire_chunk = false);
+  bool replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture, bool entire_chunk = false, bool entire_tile = false);
 
   void eraseTextures(glm::vec3 const& pos);
   void overwriteTextureAtCurrentChunk(glm::vec3 const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
@@ -428,10 +428,10 @@ protected:
   Noggit::Rendering::WorldRender _renderer;
 
   // Debug metrics
-  unsigned _n_loaded_tiles;
-  unsigned _n_rendered_tiles;
+  unsigned _n_loaded_tiles = 0;
+  unsigned _n_rendered_tiles = 0;;
 
   // unsigned _n_loaded_objects; // done from instance storage size currently
-  unsigned _n_rendered_objects;
+  unsigned _n_rendered_objects = 0;
 
 };

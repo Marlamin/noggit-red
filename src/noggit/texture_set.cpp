@@ -869,7 +869,7 @@ bool TextureSet::replace_texture( float xbase
 {
   float dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
 
-  if (dist > radius)
+  if (!entire_chunk && dist > radius)
   {
     return false;
   }
