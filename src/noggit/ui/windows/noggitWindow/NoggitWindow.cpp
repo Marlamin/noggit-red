@@ -481,7 +481,14 @@ namespace Noggit::Ui::Windows
       promptExit(event);
     } else
     {
-      event->accept();
+      if (exit_to_project_selection)
+      {
+        auto noggit = Noggit::Application::NoggitApplication::instance();
+        auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
+        project_selection->show();
+      }
+      else
+        event->accept();
     }
     exit_to_project_selection = false;
   }
