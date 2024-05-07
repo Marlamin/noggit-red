@@ -1334,6 +1334,10 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float min_height, float
         }
 
       registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+
+      // else we recalculate after tiled edges updates
+      if (!tiledEdges)
+        chunk->recalcNorms();
     }
   }
 
@@ -1355,6 +1359,7 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float min_height, float
                 int source_vert = vert_x;
                 targetChunk->getHeightmap()[target_vert].y = sourceChunk->getHeightmap()[source_vert].y;
             }
+            targetChunk->recalcNorms();
           }
           tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
         }
@@ -1377,6 +1382,7 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float min_height, float
                 int source_vert = vert_y * 17;
                 targetChunk->getHeightmap()[target_vert].y = sourceChunk->getHeightmap()[source_vert].y;
             }
+            targetChunk->recalcNorms();
           }
           tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
         }
@@ -1391,9 +1397,19 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float min_height, float
           MapChunk* targetChunk = tile->getChunk(15, 15);
           targetChunk->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
           tile->getChunk(15,15)->getHeightmap()[144].y = this->getChunk(0,0)->getHeightmap()[0].y;
+          targetChunk->recalcNorms();
           tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
         }
       );
+    }
+  
+    for (int k = 0; k < 16; ++k)
+    {
+        for (int l = 0; l < 16; ++l)
+        {
+            MapChunk* chunk = getChunk(k, l);
+            chunk->recalcNorms();
+        }
     }
   }
 }
