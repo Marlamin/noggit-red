@@ -122,6 +122,10 @@ void MapTile::finishLoading()
   std::vector<ENTRY_MDDF> lModelInstances;
   std::vector<ENTRY_MODF> lWMOInstances;
 
+  std::vector<std::string> mTextureFilenames;
+  std::vector<std::string> mModelFilenames;
+  std::vector<std::string> mWMOFilenames;
+
   uint32_t fourcc;
   uint32_t size;
 
