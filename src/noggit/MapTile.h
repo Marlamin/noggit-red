@@ -144,7 +144,7 @@ public:
   QImage getNormalmapImage();
   void setHeightmapImage(QImage const& baseimage, float min_height, float max_height, int mode, bool tiledEdges);
   void setWatermapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges);
-  void setAlphaImage(QImage const& image, unsigned layer);
+  void setAlphaImage(QImage const& image, unsigned layer, bool cleanup);
   void setVertexColorImage(QImage const& image, int mode, bool tiledEdges);
   void registerChunkUpdate(unsigned flags) { _chunk_update_flags |= flags; };
   void endChunkUpdates() { _chunk_update_flags = 0; };
@@ -196,7 +196,7 @@ private:
   bool mBigAlpha;
 
   // Data to be loaded and later unloaded.
-  // std::vector<std::string> mTextureFilenames;
+  std::vector<std::string> mTextureFilenames;
   // std::vector<std::string> mModelFilenames;
   // std::vector<std::string> mWMOFilenames;
   

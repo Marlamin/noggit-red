@@ -122,7 +122,6 @@ void MapTile::finishLoading()
   std::vector<ENTRY_MDDF> lModelInstances;
   std::vector<ENTRY_MODF> lWMOInstances;
 
-  std::vector<std::string> mTextureFilenames;
   std::vector<std::string> mModelFilenames;
   std::vector<std::string> mWMOFilenames;
 
@@ -373,6 +372,8 @@ void MapTile::finishLoading()
     auto& chunk = mChunks[x][z];
     _renderer.initChunkData(chunk.get());
   }
+  // can be cleared after texture sets are loaded in chunks.
+  mTextureFilenames.clear();
 
   theFile.close();
 
@@ -1408,13 +1409,13 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float min_height, float
         for (int l = 0; l < 16; ++l)
         {
             MapChunk* chunk = getChunk(k, l);
-            chunk->recalcNorms();
+            // chunk->recalcNorms();
         }
     }
   }
 }
 
-void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer)
+void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer, bool cleanup)
 {
   auto image = baseimage.convertToFormat(QImage::Format_RGBA8888);
 
@@ -1443,6 +1444,8 @@ void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer)
       chunk->texture_set->markDirty();
       chunk->texture_set->apply_alpha_changes();
 
+      if (cleanup)
+          chunk->texture_set->eraseUnusedTextures();
     }
   }
 }
