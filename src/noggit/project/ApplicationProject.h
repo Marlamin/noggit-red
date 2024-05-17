@@ -290,9 +290,19 @@ namespace Noggit::Project
         project->ClientData = std::make_shared<BlizzardArchive::ClientData>(
             project->ClientPath, client_archive_version, client_archive_locale, project_path.generic_string());
       }
-      catch (BlizzardArchive::Exceptions::Locale::LocaleNotFoundError&)
+      catch (BlizzardArchive::Exceptions::Locale::LocaleNotFoundError& e)
       {
-        QMessageBox::critical(nullptr, "Error", "The client does not appear to be valid.");
+        QMessageBox::critical(nullptr, "Error", e.what());
+        return {};
+      }
+      catch (BlizzardArchive::Exceptions::Locale::IncorrectLocaleModeError& e)
+      {
+        QMessageBox::critical(nullptr, "Error", e.what());
+        return {};
+      }
+      catch (BlizzardArchive::Exceptions::Archive::ArchiveOpenError& e)
+      {
+        QMessageBox::critical(nullptr, "Error", e.what());
         return {};
       }
 
