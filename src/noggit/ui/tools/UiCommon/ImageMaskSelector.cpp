@@ -22,7 +22,7 @@ ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
   _pixmap = QPixmap{128, 128};
   _pixmap.fill(Qt::black);
   _ui.curImageLabel->setPixmap(_pixmap);
-  _ui.curImageLabel->setToolTip("No image");
+  _ui.curImageLabel->setToolTip("No image. Place grayscale images in your Samples folder.");
 
   connect(_ui.curImageLabel, &Noggit::Ui::ClickableLabel::clicked,
           [this]()
