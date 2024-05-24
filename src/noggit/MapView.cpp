@@ -4666,7 +4666,7 @@ void MapView::draw_map()
   case editing_mode::ground:
     radius = terrainTool->brushRadius();
     inner_radius = terrainTool->innerRadius();
-    if ((terrainTool->_edit_type != eTerrainType_Vertex || terrainTool->_edit_type != eTerrainType_Script) && terrainTool->getImageMaskSelector()->isEnabled())
+    if ((terrainTool->_edit_type != eTerrainType_Vertex && terrainTool->_edit_type != eTerrainType_Script) && terrainTool->getImageMaskSelector()->isEnabled())
       _cursorType = CursorType::STAMP;
     break;
   case editing_mode::flatten_blur:
@@ -5114,7 +5114,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     rv = relative_movement.dy() / YSENS * 5.0f;
   }
 
-  if (rightMouse && _mod_alt_down)
+  if (rightMouse && _mod_alt_down && !_mod_shift_down && !_mod_ctrl_down)
   {
     if (terrainMode == editing_mode::ground)
     {
@@ -5140,7 +5140,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     }
   }
 
-  if (rightMouse && _mod_shift_down)
+  if (rightMouse && _mod_shift_down && !_mod_alt_down && !_mod_ctrl_down)
   {
     if (terrainMode == editing_mode::ground)
     {
@@ -5153,7 +5153,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     }
   }
 
-  if (rightMouse && _mod_ctrl_down)
+  if (rightMouse && _mod_ctrl_down && !_mod_alt_down && !_mod_shift_down)
   {
     if (terrainMode == editing_mode::ground)
     {
@@ -5226,7 +5226,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     }
   }
 
-  if (leftMouse && _mod_alt_down)
+  if (leftMouse && _mod_alt_down && !_mod_shift_down && !_mod_ctrl_down)
   {
 	switch (terrainMode)
     {
