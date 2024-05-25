@@ -4004,10 +4004,11 @@ void MapView::tick (float dt)
           }
           else if (_mod_ctrl_down && !ui_hidden)
           {
+            _texture_picker_need_update = true;
             // Pick texture
-            _texture_picker_dock->setVisible(true);
-            TexturePicker->setMainTexture(texturingTool->_current_texture);
-            TexturePicker->getTextures(selection);
+            // _texture_picker_dock->setVisible(true);
+            // TexturePicker->setMainTexture(texturingTool->_current_texture);
+            // TexturePicker->getTextures(selection);
           }
           else  if (_mod_shift_down && !!Noggit::Ui::selected_texture::get())
           {
@@ -4068,10 +4069,11 @@ void MapView::tick (float dt)
             else if (_mod_ctrl_down)
             {
               // pick areaID from chunk
-              MapChunk* chnk(std::get<selected_chunk_type>(selection).chunk);
-              int newID = chnk->getAreaID();
-              _selected_area_id = newID;
-              ZoneIDBrowser->setZoneID(newID);
+              _area_picker_need_update = true;
+              // MapChunk* chnk(std::get<selected_chunk_type>(selection).chunk);
+              // int newID = chnk->getAreaID();
+              // _selected_area_id = newID;
+              // ZoneIDBrowser->setZoneID(newID);
             }
           }
           break;
@@ -4311,7 +4313,7 @@ void MapView::tick (float dt)
 
   _status_position->setText (status);
 
-  if (currentSelection.size() > 0)
+  if (currentSelection.size() > 0) // currently disabled, change to == to enable status bar selection
   {
     _status_selection->setText ("");
   }
@@ -4356,6 +4358,27 @@ void MapView::tick (float dt)
   if (_world->selection_updated)
   {
       updateDetailInfos(true);
+      // update areaid and texture picker
+
+      if (_texture_picker_need_update)
+      {
+          _texture_picker_dock->setVisible(true);
+          TexturePicker->setMainTexture(texturingTool->_current_texture);
+          TexturePicker->getTextures(*currentSelection.begin());
+
+          _texture_picker_need_update = false;
+      }
+
+      if (_area_picker_need_update)
+      {
+          MapChunk* chnk(std::get<selected_chunk_type>(*currentSelection.begin()).chunk);
+          int newID = chnk->getAreaID();
+          _selected_area_id = newID;
+          ZoneIDBrowser->setZoneID(newID);
+
+          _area_picker_need_update = false;
+      }
+
       _world->selection_updated = false;
   }
   else
