@@ -86,16 +86,17 @@ namespace Noggit::Application
 	  QSurfaceFormat format;
 	  
 	  format.setRenderableType(QSurfaceFormat::OpenGL);
-	  format.setVersion(4, 5); // will automatically set to the highest version available
+	  format.setVersion(4, 1); // will automatically set to the highest version available
 	  format.setProfile(QSurfaceFormat::CoreProfile);
-	  format.setSwapBehavior(applicationConfiguration.GraphicsConfiguration.SwapChainDepth);
+	  format.setSwapBehavior(applicationConfiguration.GraphicsConfiguration.SwapChainDepth); // default is TripleBuffer
 	  QSettings app_settings;
 	  bool vsync = app_settings.value("vsync", false).toBool();
 	  format.setSwapInterval(vsync ? 1 : applicationConfiguration.GraphicsConfiguration.SwapChainInternal);
 	  // TODO. old config files used 16 so just ignore them, could implement a version check of the config file to update it
 	  format.setDepthBufferSize(24); // applicationConfiguration.GraphicsConfiguration.DepthBufferSize
 	  auto deflt = format.depthBufferSize();
-	  format.setSamples(applicationConfiguration.GraphicsConfiguration.SamplesCount);
+	  bool doAntiAliasing = app_settings.value("anti_aliasing", false).toBool();
+	  format.setSamples(doAntiAliasing ? 4 : applicationConfiguration.GraphicsConfiguration.SamplesCount); // default is 0, no AA
 
 	  QSurfaceFormat::setDefaultFormat(format);
 	  QOpenGLContext context;
