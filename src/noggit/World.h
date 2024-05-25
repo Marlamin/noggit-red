@@ -31,6 +31,7 @@
 #include <array>
 #include <noggit/project/ApplicationProject.h>
 #include <noggit/rendering/WorldRender.hpp>
+#include <QProgressDialog>
 
 namespace Noggit
 {
@@ -262,16 +263,16 @@ public:
   void exportAllADTsHeightmap();
   void exportAllADTsVertexColorMap();
 
-  void importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigned layer);
-  void importADTAlphamap(glm::vec3 const& pos);
+  void importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigned layer, bool cleanup);
+  void importADTAlphamap(glm::vec3 const& pos, bool cleanup);
   void importADTHeightmap(glm::vec3 const& pos, QImage const& image, float min_height, float max_height, unsigned mode, bool tiledEdges);
   void importADTHeightmap(glm::vec3 const& pos, float min_height, float max_height, unsigned mode, bool tiledEdges);
   void importADTWatermap(glm::vec3 const& pos, QImage const& image, float min_height, float max_height, unsigned mode, bool tiledEdges);
   void importADTVertexColorMap(glm::vec3 const& pos, int mode, bool tiledEdges);
   void importADTVertexColorMap(glm::vec3 const& pos, QImage const& image, int mode, bool tiledEdges);
 
-  void importAllADTsAlphamaps();
-  void importAllADTsHeightmaps(float min_height, float max_height, unsigned mode, bool tiledEdges);
+  void importAllADTsAlphamaps(QProgressDialog* progress_dialog);
+  void importAllADTsHeightmaps(QProgressDialog* progress_dialog, float min_height, float max_height, unsigned mode, bool tiledEdges);
   void importAllADTVertexColorMaps(unsigned mode, bool tiledEdges);
 
   void ensureAllTilesetsADT(glm::vec3 const& pos);
@@ -351,13 +352,14 @@ public:
                   );
   void CropWaterADT(const TileIndex& pos);
   void setWaterType(const TileIndex& pos, int type, int layer);
-  int getWaterType(const TileIndex& tile, int layer);
+  int getWaterType(const TileIndex& tile, int layer) const;
   void autoGenWaterTrans(const TileIndex&, float factor);
 
 
   void fixAllGaps();
 
-  void convert_alphamap(bool to_big_alpha);
+  void CleanupEmptyTexturesChunks();
+  void convert_alphamap(QProgressDialog* progress_dialog, bool to_big_alpha);
 
   bool deselectVertices(glm::vec3 const& pos, float radius);
   void selectVertices(glm::vec3 const& pos, float radius);

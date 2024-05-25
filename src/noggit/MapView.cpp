@@ -1545,6 +1545,11 @@ void MapView::setupAssistMenu()
   adt_import_params_layer->setRange(1, 3);
   adt_import_params_layout->addWidget(adt_import_params_layer);
 
+  QCheckBox* adt_import_params_cleanup_layers = new QCheckBox("Cleanup unused chunk layers", adt_import_params);
+  adt_import_params_cleanup_layers->setToolTip("Remove textures that have empty layers from chunks.");
+  adt_import_params_cleanup_layers->setChecked(false);
+  adt_import_params_layout->addWidget(adt_import_params_cleanup_layers);
+
   QPushButton* adt_import_params_okay = new QPushButton("Okay", adt_import_params);
   adt_import_params_layout->addWidget(adt_import_params_okay);
 
@@ -1590,7 +1595,7 @@ void MapView::setupAssistMenu()
                       img.load(filepath, "PNG");
 
                       NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
-                      _world->importADTAlphamap(_camera.position, img, adt_import_params_layer->value());
+                      _world->importADTAlphamap(_camera.position, img, adt_import_params_layer->value(), adt_import_params_cleanup_layers->isChecked());
                       NOGGIT_ACTION_MGR->endAction();
                     }
 
@@ -1598,7 +1603,7 @@ void MapView::setupAssistMenu()
   );
 
   ADD_ACTION_NS ( cur_adt_import_menu
-  , "Import alphamap"
+  , "Import alphamaps"
   , [=]
     {
 
@@ -1606,7 +1611,7 @@ void MapView::setupAssistMenu()
         OpenGL::context::scoped_setter const _(::gl, context());
 
         NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
-        _world->importADTAlphamap(_camera.position);
+        _world->importADTAlphamap(_camera.position, adt_import_params_cleanup_layers->isChecked());
         NOGGIT_ACTION_MGR->endAction();
     }
   );
@@ -1879,6 +1884,18 @@ void MapView::setupAssistMenu()
       }
   );
 
+  ADD_ACTION_NS(assist_menu
+      , "Cleanup empty texture chunks"
+      , [this]
+      {
+          makeCurrent();
+          OpenGL::context::scoped_setter const _(::gl, context());
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
+          _world->CleanupEmptyTexturesChunks();
+          NOGGIT_ACTION_MGR->endAction();
+      }
+  );
+
   assist_menu->addSeparator();
   assist_menu->addAction(createTextSeparator("Global"));
   assist_menu->addSeparator();
@@ -1890,11 +1907,24 @@ void MapView::setupAssistMenu()
       (
         makeCurrent();
         OpenGL::context::scoped_setter const _ (::gl, context());
-        _world->convert_alphamap(true);
+        if (_world->mapIndex.hasBigAlpha())
+        {
+            QMessageBox::information(this
+                , "Noggit"
+                , "Map is already Big Alpha."
+                , QMessageBox::Ok
+            );
+        }
+        else
+        {
+            QProgressDialog progress_dialog("Converting Alpha format...", "", 0, _world->mapIndex.getNumExistingTiles(), this);
+            progress_dialog.setWindowModality(Qt::WindowModal);
+            _world->convert_alphamap(&progress_dialog, true);
+        }
       )
-
     }
   );
+
   ADD_ACTION_NS ( assist_menu
   , "Map to old alpha"
   , [this]
@@ -1903,7 +1933,19 @@ void MapView::setupAssistMenu()
       (
         makeCurrent();
         OpenGL::context::scoped_setter const _(::gl, context());
-        _world->convert_alphamap(false);
+        if (!_world->mapIndex.hasBigAlpha())
+        {
+            QMessageBox::information(this
+                , "Noggit"
+                , "Map is already Old Alpha."
+                , QMessageBox::Ok
+            );
+        }
+        else
+        {
+            QProgressDialog progress_dialog("Converting Alpha format...", "", 0, _world->mapIndex.getNumExistingTiles(), this);
+            _world->convert_alphamap(&progress_dialog, false);
+        }
       )
     }
   );
@@ -1993,14 +2035,14 @@ void MapView::setupAssistMenu()
     (
         makeCurrent();
         OpenGL::context::scoped_setter const _(::gl, context());
+        QProgressDialog progress_dialog("Importing Alphamaps...", "Cancel", 0, _world->mapIndex.getNumExistingTiles(), this);
+        progress_dialog.setWindowModality(Qt::WindowModal);
         NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
-        _world->importAllADTsAlphamaps();
+        _world->importAllADTsAlphamaps(&progress_dialog);
         NOGGIT_ACTION_MGR->endAction();
-
     )
   }
   );
-
   ADD_ACTION_NS ( all_adts_import_menu
   , "Import heightmaps"
   , [=]
@@ -2011,8 +2053,11 @@ void MapView::setupAssistMenu()
         (
             makeCurrent();
             OpenGL::context::scoped_setter const _(::gl, context());
+            QProgressDialog progress_dialog("Importing Heightmaps...", "Cancel", 0, _world->mapIndex.getNumExistingTiles(), this);
+            progress_dialog.setWindowModality(Qt::WindowModal);
             NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
-            _world->importAllADTsHeightmaps(heightmap_import_min->value(), heightmap_import_max->value(), adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
+            _world->importAllADTsHeightmaps(&progress_dialog, heightmap_import_max->value(), heightmap_import_min->value(),
+                adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
             NOGGIT_ACTION_MGR->endAction();
         )
 

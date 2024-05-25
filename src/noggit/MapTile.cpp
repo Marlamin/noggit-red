@@ -1223,7 +1223,7 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
             }
             else // layer 1-3
             {
-              auto alpha_layer = alphamaps->at(layer - 1).value();
+                auto& alpha_layer = alphamaps->at(layer - 1).value();
 
               int value = alpha_layer.getAlpha(64 * l + k);
               image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
@@ -1441,11 +1441,13 @@ void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer, bool cleanu
         }
       }
 
+      if (cleanup)
+          chunk->texture_set->eraseUnusedTextures();
+
       chunk->texture_set->markDirty();
       chunk->texture_set->apply_alpha_changes();
 
-      if (cleanup)
-          chunk->texture_set->eraseUnusedTextures();
+
     }
   }
 }

@@ -34,6 +34,7 @@
 #include <limits>
 #include <array>
 #include <cstdint>
+#include <QProgressBar>
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -1612,17 +1613,48 @@ bool World::sprayTexture(glm::vec3 const& pos, Brush *brush, float strength, flo
   return succ;
 }
 
-bool World::replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture, bool entire_chunk)
+bool World::replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture, bool entire_chunk, bool entire_tile)
 {
   ZoneScoped;
-  return for_all_chunks_in_range
-    ( pos, radius
-      , [&](MapChunk* chunk)
+
+  if (entire_tile)
+  {
+      bool changed(false);
+
+      for (MapTile* tile : mapIndex.tiles_in_range(pos, radius))
       {
-        NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
-        return chunk->replaceTexture(pos, radius, old_texture, new_texture, entire_chunk);
+          if (!tile->finishedLoading())
+          {
+              continue;
+          }
+
+          for (int i = 0; i < 16; ++i)
+          {
+              for (int j = 0; j < 16; ++j)
+              {
+                  MapChunk* chunk = tile->getChunk(i, j);
+                  NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
+                  if (chunk->replaceTexture(pos, radius, old_texture, new_texture, true))
+                  {
+                      changed = true;
+                      mapIndex.setChanged(tile);
+                  }
+              }
+          }
       }
-    );
+      return changed;
+  }
+  else
+  {
+    return for_all_chunks_in_range
+      ( pos, radius
+        , [&](MapChunk* chunk)
+        {
+          NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
+          return chunk->replaceTexture(pos, radius, old_texture, new_texture, entire_chunk);
+        }
+      );
+  }
 }
 
 void World::eraseTextures(glm::vec3 const& pos)
@@ -1690,7 +1722,7 @@ void World::loadAllTiles()
   }
 }
 
-void World::convert_alphamap(bool to_big_alpha)
+void World::convert_alphamap(QProgressDialog* progress_dialog, bool to_big_alpha)
 {
   ZoneScoped;
 
@@ -1699,10 +1731,13 @@ void World::convert_alphamap(bool to_big_alpha)
     return;
   }
 
+
+  int count = 0;
   for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
     {
+      // not cancellable.
       TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
@@ -1721,10 +1756,11 @@ void World::convert_alphamap(bool to_big_alpha)
         {
           mapIndex.unloadTile(tile);
         }
+        count++;
+        progress_dialog->setValue(count);
       }
     }
   }
-
   mapIndex.convert_alphamap(to_big_alpha);
   mapIndex.save();
 }
@@ -1890,10 +1926,10 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
 
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
 
-  auto instance = _model_instance_storage.get_model_instance(uid).value();
+  auto instance = _model_instance_storage.get_model_instance(uid); // .value();
   // _models_by_filename[file_key.filepath()].push_back(instance);
 
-  return instance;
+  return instance.value();
 }
 
 void World::addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
@@ -1933,7 +1969,9 @@ WMOInstance* World::addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey co
 
   std::uint32_t uid = _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
 
-  return _model_instance_storage.get_wmo_instance(uid).value();
+  auto instance = _model_instance_storage.get_wmo_instance(uid);
+
+  return instance.value();
 }
 
 
@@ -2042,7 +2080,7 @@ void World::wait_for_all_tile_updates()
   _tile_update_queue.wait_for_all_update();
 }
 
-unsigned int World::getMapID()
+unsigned int World::getMapID() const
 {
   ZoneScoped;
   return mapIndex._map_id;
@@ -2189,7 +2227,7 @@ void World::exportADTVertexColorMap(glm::vec3 const& pos)
   );
 }
 
-void World::importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigned layer)
+void World::importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigned layer, bool cleanup)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -2204,7 +2242,7 @@ void World::importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigne
     for_tile_at ( pos
       , [&] (MapTile* tile)
                   {
-                    tile->setAlphaImage(scaled, layer);
+                    tile->setAlphaImage(scaled, layer, cleanup);
                   }
     );
 
@@ -2214,14 +2252,14 @@ void World::importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigne
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setAlphaImage(image, layer);
+        tile->setAlphaImage(image, layer, cleanup);
       }
     );
   }
 
 }
 
-void World::importADTAlphamap(glm::vec3 const& pos)
+void World::importADTAlphamap(glm::vec3 const& pos, bool cleanup)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -2253,7 +2291,7 @@ void World::importADTAlphamap(glm::vec3 const& pos)
         if (img.width() != 1024 || img.height() != 1024)
           img = img.scaled(1024, 1024, Qt::AspectRatioMode::IgnoreAspectRatio);
 
-        tile->setAlphaImage(img, i);
+        tile->setAlphaImage(img, i, true);
       }
 
     }
@@ -2620,7 +2658,7 @@ void World::setWaterType(const TileIndex& pos, int type, int layer)
               );
 }
 
-int World::getWaterType(const TileIndex& tile, int layer)
+int World::getWaterType(const TileIndex& tile, int layer) const
 {
   ZoneScoped;
   if (mapIndex.tileLoaded(tile))
@@ -2646,6 +2684,36 @@ void World::autoGenWaterTrans(const TileIndex& pos, float factor)
   });
 }
 
+void World::CleanupEmptyTexturesChunks()
+{
+    ZoneScoped;
+    for (MapTile* tile : mapIndex.loaded_tiles())
+    {
+        bool tileChanged = false;
+
+        for (unsigned ty = 0; ty < 16; ty++)
+        {
+            for (unsigned tx = 0; tx < 16; tx++)
+            {
+                MapChunk* chunk = tile->getChunk(tx, ty);
+
+                TextureSet* texture_set = chunk->getTextureSet();
+
+                bool changed = texture_set->eraseUnusedTextures();
+
+                if (changed)
+                {
+                    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
+                    tileChanged = true;
+                }
+            }
+        }
+        if (tileChanged)
+        {
+            mapIndex.setChanged(tile);
+        }
+    }
+}
 
 void World::fixAllGaps()
 {
@@ -2728,7 +2796,7 @@ void World::fixAllGaps()
   }
 }
 
-bool World::isUnderMap(glm::vec3 const& pos)
+bool World::isUnderMap(glm::vec3 const& pos) const
 {
   ZoneScoped;
   TileIndex const tile (pos);
@@ -3235,66 +3303,74 @@ void World::exportAllADTsVertexColorMap()
   }
 }
 
-void World::importAllADTsAlphamaps()
+void World::importAllADTsAlphamaps(QProgressDialog* progress_dialog)
 {
+  bool clean_up = false;
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
   if (!(path.endsWith('\\') || path.endsWith('/')))
   {
     path += "/";
   }
-
+  int count = 0;
   for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
     {
+      if (progress_dialog->wasCanceled())
+        return;
+
       TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
-
+      
       if (mTile)
       {
         mTile->wait_until_loaded();
-
+      
         for (int i = 1; i < 4; ++i)
         {
           QString filename = path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
                   + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
                   + "_layer" + std::to_string(i).c_str() + ".png";
-
+      
           if(!QFileInfo::exists(filename))
             continue;
-
+      
           QImage img;
           img.load(filename, "PNG");
-
+      
           if (img.width() != 1024 || img.height() != 1024)
           {
             QImage scaled = img.scaled(1024, 1024, Qt::IgnoreAspectRatio);
-            mTile->setAlphaImage(scaled, i);
+            mTile->setAlphaImage(scaled, i, clean_up);
           }
           else
           {
-            mTile->setAlphaImage(img, i);
+            mTile->setAlphaImage(img, i, clean_up);
           }
-
+      
         }
-
+      
         mTile->saveTile(this);
         mapIndex.markOnDisc (tile, true);
         mapIndex.unsetChanged(tile);
-
+      
         if (unload)
         {
           mapIndex.unloadTile(tile);
         }
+
+        count++;
+        progress_dialog->setValue(count);
       }
+
     }
   }
 }
 
-void World::importAllADTsHeightmaps(float min_height, float max_height, unsigned int mode, bool tiledEdges)
+void World::importAllADTsHeightmaps(QProgressDialog* progress_dialog, float min_height, float max_height, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
@@ -3303,29 +3379,32 @@ void World::importAllADTsHeightmaps(float min_height, float max_height, unsigned
     path += "/";
   }
 
+  int count = 0;
   for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
     {
+      if (progress_dialog->wasCanceled())
+        return;
       TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
-
+      
       if (mTile)
       {
         mTile->wait_until_loaded();
-
+      
         QString filename = path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
                            + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
                            + "_height.png";
-
-        if(!QFileInfo::exists(filename))
-          continue;
-
+      
+        if (!QFileInfo::exists(filename))
+            continue;
+      
         QImage img;
         img.load(filename, "PNG");
-
+      
         size_t desiredSize = tiledEdges ? 256 : 257;
         if (img.width() != desiredSize || img.height() != desiredSize)
         {
@@ -3336,21 +3415,23 @@ void World::importAllADTsHeightmaps(float min_height, float max_height, unsigned
         {
           mTile->setHeightmapImage(img, min_height, max_height, mode, tiledEdges);
         }
-
+      
         mTile->saveTile(this);
         mapIndex.markOnDisc (tile, true);
         mapIndex.unsetChanged(tile);
-
+      
         if (unload)
         {
           mapIndex.unloadTile(tile);
         }
+        count++;
+        progress_dialog->setValue(count);
       }
     }
   }
 }
 
-void World::importAllADTVertexColorMaps(unsigned int mode, bool tiledEdges)
+void World::importAllADTVertexColorMaps(unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());

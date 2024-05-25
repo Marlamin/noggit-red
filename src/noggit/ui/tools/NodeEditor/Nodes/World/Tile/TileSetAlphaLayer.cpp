@@ -56,7 +56,7 @@ void TileSetAlphaLayerNode::compute()
     image_to_process = &scaled;
   }
 
-  tile->setAlphaImage(*image_to_process, layer);
+  tile->setAlphaImage(*image_to_process, layer, true);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);
