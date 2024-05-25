@@ -468,6 +468,7 @@ private:
   bool _gl_initialized = false;
   bool _destroying = false;
   bool _needs_redraw = false;
+  bool _unload_tiles = true;
 
   unsigned _mmap_async_index = 0;
   unsigned _mmap_render_index = 0;

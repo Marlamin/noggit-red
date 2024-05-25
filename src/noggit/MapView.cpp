@@ -2047,6 +2047,7 @@ void MapView::setupAssistMenu()
   {
     makeCurrent();
     OpenGL::context::scoped_setter const _(::gl, context());
+    _unload_tiles = false;
     _world->loadAllTiles();
   }
   );
@@ -2788,8 +2789,8 @@ void MapView::createGUI()
   setupMinimapEditorUi();
   setupStampUi();
   setupLightEditorUi();
-  setupChunkManipulatorUi();
   setupScriptingUi();
+  setupChunkManipulatorUi();
   // End combined dock
 
   setupViewportOverlay();
@@ -3611,7 +3612,8 @@ void MapView::tick (float dt)
 
   // start unloading tiles
   _world->mapIndex.enterTile (TileIndex (_camera.position));
-  _world->mapIndex.unloadTiles (TileIndex (_camera.position));
+  if (_unload_tiles)
+    _world->mapIndex.unloadTiles (TileIndex (_camera.position));
 
   dt = std::min(dt, 1.0f);
 
@@ -4217,7 +4219,7 @@ void MapView::tick (float dt)
         if (_camera_moved_since_last_draw)
         {
             auto ground_pos = _world.get()->get_ground_height(_camera.position);
-            _camera.position.y = ground_pos.y + 2;
+            _camera.position.y = ground_pos.y + 6;
         }
     }
     else
@@ -4396,9 +4398,9 @@ void MapView::tick (float dt)
   }
 
   _status_culling->setText ( "Loaded tiles: " + QString::number(_world->getNumLoadedTiles())
-                         + " Rendered tiles: " + QString::number(_world->getNumRenderedTiles())
-                         + " Loaded objects: " + QString::number(_world->getModelInstanceStorage().getTotalModelsCount())
-                         + " Rendered objects: " + QString::number(_world->getNumRenderedObjects())
+                         + ", Rendered tiles: " + QString::number(_world->getNumRenderedTiles())
+                         + "\t Loaded objects: " + QString::number(_world->getModelInstanceStorage().getTotalModelsCount())
+                         + ", Rendered objects: " + QString::number(_world->getNumRenderedObjects())
   );
 
   guiWater->updatePos (_camera.position);
