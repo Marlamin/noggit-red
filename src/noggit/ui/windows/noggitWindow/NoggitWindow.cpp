@@ -71,6 +71,10 @@ namespace Noggit::Ui::Windows
     {
       OpenDBs(project->ClientData);
     }
+    else
+    {
+        LogError << "NoggitWindow() : Unsupported project version, skipping loading DBCs." << std::endl;
+    }
 
     setCentralWidget(_null_widget);
 

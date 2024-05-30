@@ -257,6 +257,10 @@ namespace Noggit::Project
         LogError << "loadProject() failed, Project is null" << std::endl;
         return {};
       }
+      else
+      {
+          Log << "loadProject(): Loading Project Data" << std::endl;
+      }
 
 
       project_reader.readPalettes(&project.value());
@@ -274,11 +278,17 @@ namespace Noggit::Project
         client_archive_locale = BlizzardArchive::Locale::enUS;
       }
 
-      if (project->projectVersion == ProjectVersion::WOTLK)
+      else if (project->projectVersion == ProjectVersion::WOTLK)
       {
         client_archive_version = BlizzardArchive::ClientVersion::WOTLK;
         client_build = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
         client_archive_locale = BlizzardArchive::Locale::AUTO;
+      }
+
+      else
+      {
+          LogError << "Unsupported project version" << std::endl;
+          return {};
       }
 
       project->ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(dbd_file_directory, client_build);
@@ -292,18 +302,32 @@ namespace Noggit::Project
       }
       catch (BlizzardArchive::Exceptions::Locale::LocaleNotFoundError& e)
       {
+        LogError << e.what() << std::endl;
         QMessageBox::critical(nullptr, "Error", e.what());
         return {};
       }
       catch (BlizzardArchive::Exceptions::Locale::IncorrectLocaleModeError& e)
       {
+        LogError << e.what() << std::endl;
         QMessageBox::critical(nullptr, "Error", e.what());
         return {};
       }
       catch (BlizzardArchive::Exceptions::Archive::ArchiveOpenError& e)
       {
+        LogError << e.what() << std::endl;
         QMessageBox::critical(nullptr, "Error", e.what());
         return {};
+      }
+      catch (...)
+      {
+          LogError << "Failed loading Client data. Unhandled exception." << std::endl;
+          return {};
+      }
+
+      if (!project->ClientData)
+      {
+          LogError << "Failed loading Client data." << std::endl;
+          return {};
       }
 
       return std::make_shared<NoggitProject>(project.value());

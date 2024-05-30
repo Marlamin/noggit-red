@@ -27,24 +27,38 @@ WMOAreaTableDB gWMOAreaTableDB;
 
 void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData)
 {
-  gAreaDB.open(clientData);
-  gMapDB.open(clientData);
-  gLoadingScreensDB.open(clientData);
-  gLightDB.open(clientData);
-  gLightParamsDB.open(clientData);
-  gLightSkyboxDB.open(clientData);
-  gLightIntBandDB.open(clientData);
-  gLightFloatBandDB.open(clientData);
-  gGroundEffectDoodadDB.open(clientData);
-  gGroundEffectTextureDB.open(clientData);
-  gTerrainTypeDB.open(clientData);
-  gLiquidTypeDB.open(clientData);
-  gSoundProviderPreferencesDB.open(clientData);
-  gSoundAmbienceDB.open(clientData);
-  gZoneMusicDB.open(clientData);
-  gZoneIntroMusicTableDB.open(clientData);
-  gSoundEntriesDB.open(clientData);
-  gWMOAreaTableDB.open(clientData);
+  Log << "Opening client DBCs..." << std::endl;
+
+  try
+  {
+    gAreaDB.open(clientData);
+    gMapDB.open(clientData);
+    gLoadingScreensDB.open(clientData);
+    gLightDB.open(clientData);
+    gLightParamsDB.open(clientData);
+    gLightSkyboxDB.open(clientData);
+    gLightIntBandDB.open(clientData);
+    gLightFloatBandDB.open(clientData);
+    gGroundEffectDoodadDB.open(clientData);
+    gGroundEffectTextureDB.open(clientData);
+    gTerrainTypeDB.open(clientData);
+    gLiquidTypeDB.open(clientData);
+    gSoundProviderPreferencesDB.open(clientData);
+    gSoundAmbienceDB.open(clientData);
+    gZoneMusicDB.open(clientData);
+    gZoneIntroMusicTableDB.open(clientData);
+    gSoundEntriesDB.open(clientData);
+    gWMOAreaTableDB.open(clientData);
+  }
+  catch (BlizzardArchive::Exceptions::FileReadFailedError const& e)
+  {
+      LogError << e.what() << std::endl;
+  }
+  catch (...)
+  {
+      LogError << "OpenDBs() : unhandled exception" << std::endl;
+  }
+
 }
 
 

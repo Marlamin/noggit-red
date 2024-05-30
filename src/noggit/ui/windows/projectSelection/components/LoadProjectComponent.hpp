@@ -168,7 +168,12 @@ namespace Noggit::Ui::Component
             }
             case QMessageBox::DestructiveRole:
             default:
+            {
+              LogError << "Failed to convert uppercase sensitive project." << std::endl;
+              assert(false);
               return {};
+            }
+
           }
         }
       }
