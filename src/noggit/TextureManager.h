@@ -128,6 +128,7 @@ struct scoped_blp_texture_reference
 
   bool operator== (scoped_blp_texture_reference const& other) const;
 
+  bool use_cubemap = false;
 private:
   struct Deleter
   {

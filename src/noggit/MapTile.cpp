@@ -125,6 +125,8 @@ void MapTile::finishLoading()
   std::vector<std::string> mModelFilenames;
   std::vector<std::string> mWMOFilenames;
 
+  // std::map<std::string, mtxf_entry> _mtxf_entries;
+
   uint32_t fourcc;
   uint32_t size;
 
@@ -302,34 +304,30 @@ void MapTile::finishLoading()
     }
   }
 
-  // - MTFX ----------------------------------------------
-  /*
-  //! \todo Implement this or just use Terrain Cube maps?
-  Log << "MTFX offs: " << Header.mtfx << std::endl;
-  if(Header.mtfx != 0){
-  Log << "Try to load MTFX" << std::endl;
-  theFile.seek( Header.mtfx + 0x14 );
-
-  theFile.read( &fourcc, 4 );
-  theFile.read( &size, 4 );
-
-  assert( fourcc == 'MTFX' );
-
-
+  // - MTXF ----------------------------------------------
+  if (Header.mtxf != 0)
   {
-  char* lCurPos = reinterpret_cast<char*>( theFile.getPointer() );
-  char* lEnd = lCurPos + size;
-  int tCount = 0;
-  while( lCurPos < lEnd ) {
-  int temp = 0;
-  theFile.read(&temp, 4);
-  Log << "Adding to " << mTextureFilenames[tCount].first << " texture effect: " << temp << std::endl;
-  mTextureFilenames[tCount++].second = temp;
-  lCurPos += 4;
-  }
-  }
+      theFile.seek(Header.mtxf + 0x14);
 
-  }*/
+      theFile.read(&fourcc, 4);
+      theFile.read(&size, 4);
+
+      assert(fourcc == 'MTXF');
+
+      int count = size / 0x4;
+
+      std::vector<mtxf_entry> mtxf_data(count);
+
+      theFile.read(mtxf_data.data(), size);
+
+      for (int i = 0; i < count; ++i)
+      {
+          // _mtxf_entries[mTextureFilenames[i]] = mtxf_data[i];
+          // only save those with flags set
+          if (mtxf_data[i].use_cubemap)
+              _mtxf_entries[mTextureFilenames[i]] = mtxf_data[i];
+      }
+  }
 
   // - Done. ---------------------------------------------
 
@@ -374,6 +372,7 @@ void MapTile::finishLoading()
   }
   // can be cleared after texture sets are loaded in chunks.
   mTextureFilenames.clear();
+  _mtxf_entries.clear();
 
   theFile.close();
 

@@ -74,7 +74,7 @@ struct MHDR
   /*020h*/  uint32_t modf;  //WMO Positioning Information
   /*024h*/  uint32_t mfbo;  // tbc, wotlk; only when flags&1
   /*028h*/  uint32_t mh2o;  // wotlk
-  /*02Ch*/  uint32_t mtfx;  // wotlk
+  /*02Ch*/  uint32_t mtxf;  // wotlk
   /*030h*/  uint32_t pad4;
   /*034h*/  uint32_t pad5;
   /*038h*/  uint32_t pad6;
@@ -299,4 +299,16 @@ struct MPHD
   uint32_t flags;
   uint32_t something;
   uint32_t unused[6];
+};
+
+struct mtxf_entry
+{
+    uint32_t use_cubemap : 1; // do_not_load_specular_or_height_texture_but_use_cubemap
+    /*
+    uint32_t : 3;
+    uint32_t texture_scale : 4; // MOP+ Texture scale here is not an actual "scale". 
+                                // Default value is 0 (no extra scaling applied). The values are computed as 1 << SMTextureFlags.texture_scale.
+    uint32_t : 24;
+    */
+    uint32_t unused : 31;
 };

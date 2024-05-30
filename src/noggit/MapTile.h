@@ -199,6 +199,7 @@ private:
   std::vector<std::string> mTextureFilenames;
   // std::vector<std::string> mModelFilenames;
   // std::vector<std::string> mWMOFilenames;
+  std::map<std::string, mtxf_entry> _mtxf_entries;
   
   std::vector<uint32_t> uids;
   tsl::robin_map<AsyncObject*, std::vector<SceneObject*>> object_instances; // only includes M2 and WMO. perhaps a medium common ancestor then?
