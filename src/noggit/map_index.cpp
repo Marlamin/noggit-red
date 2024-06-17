@@ -423,10 +423,12 @@ void MapIndex::unloadTiles(const TileIndex& tile)
 
 void MapIndex::unloadTile(const TileIndex& tile)
 {
-  // unloads a tile with givn cords
+  // unloads a tile with given cords
   if (tileLoaded(tile))
   {
     Log << "Unload Tile " << tile.x << "-" << tile.z << std::endl;
+
+    AsyncLoader::instance().ensure_deletable(mTiles[tile.z][tile.x].tile.get());
     mTiles[tile.z][tile.x].tile = nullptr;
     _n_loaded_tiles--;
   }

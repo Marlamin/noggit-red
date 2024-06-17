@@ -99,6 +99,7 @@ void AsyncLoader::process()
       std::lock_guard<std::mutex> const lock(_guard);
 
       object->error_on_loading();
+      LogError << "Caught unknown error." << std::endl;
 
       if (object->is_required_when_saving())
       {
@@ -144,6 +145,10 @@ void AsyncLoader::ensure_deletable (AsyncObject* object)
 AsyncLoader::AsyncLoader(int numThreads)
   : _stop (false)
 {
+  // use half of the available threads
+  unsigned int maxThreads = std::thread::hardware_concurrency() / 2; 
+  numThreads = maxThreads > numThreads ? maxThreads : numThreads;
+
   for (int i = 0; i < numThreads; ++i)
   {
     _threads.emplace_back (&AsyncLoader::process, this);
@@ -152,7 +157,10 @@ AsyncLoader::AsyncLoader(int numThreads)
 
 AsyncLoader::~AsyncLoader()
 {
-  _stop = true;
+  {
+    std::unique_lock<std::mutex> lock(_guard);
+    _stop = true;
+  }
   _state_changed.notify_all();
 
   for (auto& thread : _threads)

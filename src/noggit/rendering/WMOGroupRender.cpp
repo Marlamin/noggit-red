@@ -2,6 +2,7 @@
 
 #include "WMOGroupRender.hpp"
 #include <noggit/WMO.h>
+#include <noggit/Log.h> // LogDebug
 
 using namespace Noggit::Rendering;
 
@@ -346,6 +347,8 @@ void WMOGroupRender::initRenderBatches()
           _render_batch_mapping[batch.vertex_start + i] = static_cast<unsigned>(batch_counter + 1);
         }
     }
+    else
+        LogError << "WMO has incorrect render batch data. batch.vertex_end < batch.vertex_start" << std::endl;
 
     std::uint32_t flags = 0;
 

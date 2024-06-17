@@ -9,7 +9,6 @@
 #include <QString>
 #include <chrono>
 #include <QJsonArray>
-#include <noggit/Log.h>
 
 namespace Noggit::Project
 {
