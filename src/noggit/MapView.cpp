@@ -6080,11 +6080,14 @@ void MapView::ShowContextMenu(QPoint pos)
                 NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED | Noggit::ActionFlags::eOBJECTS_REMOVED); // Noggit::ActionFlags::eOBJECTS_TRANSFORMED
                 // NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
 
+                if (!objectEditor->clipboardSize())
+                    return;
+
                 // get the model to replace by
                 auto replace_select = objectEditor->getClipboard().front();
                 auto replace_obj = std::get<selected_object_type>(replace_select);
                 // bool replace_is_wmo = replace_obj->which() == eWMO;
-                auto replace_path = replace_obj->instance_model()->file_key();
+                auto& replace_path = replace_obj->instance_model()->file_key().filepath();
 
                 // iterate selection (objects to replace)
                 for (auto& source_obj : _world->get_selected_objects())
@@ -6109,10 +6112,11 @@ void MapView::ShowContextMenu(QPoint pos)
                             // auto source_wmo = static_cast<WMOInstance*>(source_obj);
 
                             auto new_obj = _world->addWMOAndGetInstance(replace_path, source_pos, source_rot);
-                            new_obj->wmo->wait_until_loaded();
-                            new_obj->wmo->waitForChildrenLoaded();
+                            // new_obj->wmo->wait_until_loaded();
+                            // new_obj->wmo->waitForChildrenLoaded();
                             new_obj->recalcExtents();
 
+                            _world->deleteWMOInstance(source_obj->uid);
                         }
                         else if (replace_obj->which() == eMODEL)
                         {
@@ -6137,13 +6141,15 @@ void MapView::ShowContextMenu(QPoint pos)
                                 , &_object_paste_params
                                 , true
                             );
-                            new_obj->model->wait_until_loaded();
-                            new_obj->model->waitForChildrenLoaded();
+                            // new_obj->model->wait_until_loaded();
+                            // new_obj->model->waitForChildrenLoaded();
                             new_obj->recalcExtents();
+
+                            _world->deleteModelInstance(source_obj->uid);
                         }
                 }
                 // can cause the usual crash of deleting models overlapping unloaded tiles.
-                DeleteSelectedObjects();
+                // DeleteSelectedObjects();
                 // NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
                 NOGGIT_ACTION_MGR->endAction();
             });
