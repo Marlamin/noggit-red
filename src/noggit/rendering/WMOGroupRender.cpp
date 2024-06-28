@@ -20,7 +20,12 @@ void WMOGroupRender::upload()
   std::size_t batch_counter = 0;
   for (auto& batch : _wmo_group->_batches)
   {
-    WMOMaterial const& mat (_wmo_group->wmo->materials.at (batch.texture));
+    std::uint16_t material_to_use = batch.texture;
+    // TODO: Modern feature toggle check, this will likely break on old WMOs where there is a box here
+    if (batch.flags == 2)
+        material_to_use = batch.unused[5];
+
+    WMOMaterial const& mat(_wmo_group->wmo->materials.at(material_to_use));
 
     auto& tex1 = _wmo_group->wmo->textures.at(mat.texture1);
 
@@ -32,11 +37,20 @@ void WMOGroupRender::upload()
 
     std::uint32_t tex_array1 = 0;
     std::uint32_t array_index1 = 0;
-    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
+
+    std::uint32_t tex_array2 = 0;
+    std::uint32_t array_index2 = 0;
+
+    std::uint32_t tex_array3 = 0;
+    std::uint32_t array_index3 = 0;
+
+    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3 || mat.shader == 21;
 
     if (use_tex2)
     {
       auto& tex2 = _wmo_group->wmo->textures.at(mat.texture2);
+      LogDebug << "WMOGroupRender::upload: use_tex2 " << mat.texture2 << std::endl;
+
       tex2->wait_until_loaded();
       tex2->upload();
 
@@ -46,8 +60,13 @@ void WMOGroupRender::upload()
 
     _render_batches[batch_counter].tex_array0 = tex_array0;
     _render_batches[batch_counter].tex_array1 = tex_array1;
+    //_render_batches[batch_counter].tex_array2 = tex_array2;
+    //_render_batches[batch_counter].tex_array3 = tex_array3;
+
     _render_batches[batch_counter].tex0 = array_index0;
     _render_batches[batch_counter].tex1 = array_index1;
+    //_render_batches[batch_counter].tex2 = array_index2;
+    //_render_batches[batch_counter].tex3 = array_index3;
 
     batch_counter++;
   }
@@ -64,9 +83,15 @@ void WMOGroupRender::upload()
   batch_counter = 0;
   for (auto& batch : _wmo_group->_batches)
   {
-    WMOMaterial& mat = _wmo_group->wmo->materials.at(batch.texture);
+    std::uint16_t material_to_use = batch.texture;
+    // TODO: Modern feature toggle check, this will likely break on old WMOs where there is a box here
+    if (batch.flags == 2)
+        material_to_use = batch.unused[5];
+
+    WMOMaterial& mat(_wmo_group->wmo->materials.at(material_to_use));
+
     bool backface_cull = !mat.flags.unculled;
-    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
+    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3 || mat.shader == 21;
 
     bool create_draw_call = false;
     if (draw_call && draw_call->backface_cull == backface_cull && batch.index_start == draw_call->index_start + draw_call->index_count)
@@ -338,6 +363,7 @@ void WMOGroupRender::initRenderBatches()
   std::size_t batch_counter = 0;
   for (auto& batch : _wmo_group->_batches)
   {
+
     for (std::size_t i = 0; i < (batch.vertex_end - batch.vertex_start + 1); ++i)
     {
       _render_batch_mapping[batch.vertex_start + i] = static_cast<unsigned>(batch_counter + 1);
@@ -354,7 +380,12 @@ void WMOGroupRender::initRenderBatches()
       flags |= WMORenderBatchFlags::eWMOBatch_HasMOCV;
     }
 
-    WMOMaterial const& mat (_wmo_group->wmo->materials.at (batch.texture));
+    std::uint16_t material_to_use = batch.texture;
+    // TODO: Modern feature toggle check, this will likely break on old WMOs where there is a box here
+    if (batch.flags == 2)
+        material_to_use = batch.unused[5];
+
+    WMOMaterial const& mat (_wmo_group->wmo->materials.at (material_to_use));
 
     if (mat.flags.unlit)
     {
@@ -386,7 +417,8 @@ void WMOGroupRender::initRenderBatches()
         break;
     }
 
-    _render_batches[batch_counter] = WMORenderBatch{flags, mat.shader, 0, 0, 0, 0, alpha_test, 0};
+    //_render_batches[batch_counter] = WMORenderBatch{flags, mat.shader, 0, 0, 0, 0, 0, 0, 0, 0, alpha_test, 0};
+    _render_batches[batch_counter] = WMORenderBatch{ flags, mat.shader, 0, 0, 0, 0, alpha_test, 0 };
 
     batch_counter++;
   }

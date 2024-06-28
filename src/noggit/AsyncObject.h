@@ -56,6 +56,8 @@ public:
   {
     if (finished.load())
     {
+     LogDebug << "Loaded file " << (_file_key.hasFilepath() ? _file_key.filepath() : std::to_string(_file_key.fileDataID()))
+            << " from storage" << std::endl;
       return;
     }
 

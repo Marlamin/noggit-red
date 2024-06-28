@@ -33,8 +33,12 @@ flat in uint flags;
 flat in uint shader;
 flat in uint tex_array0;
 flat in uint tex_array1;
+//flat in uint tex_array2;
+//flat in uint tex_array3;
 flat in uint tex0;
 flat in uint tex1;
+//flat in uint tex2;
+//flat in uint tex3;
 flat in uint alpha_test_mode;
 
 out vec4 out_color;
@@ -193,6 +197,10 @@ void main()
   {
     vec3 layer2 = mix(tex.rgb, tex_2.rgb, tex_2.a);
     out_color = vec4(apply_lighting(mix(layer2, tex.rgb, vertex_color.a)), 1.);
+  }
+  else if (shader == 21)
+  {
+    out_color = vec4(apply_lighting(tex_2.rgb), 1.);
   }
   else // default shader, used for shader 0,1,2,4 (Diffuse, Specular, Metal, Opaque)
   {
