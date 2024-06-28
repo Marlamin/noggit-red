@@ -424,6 +424,9 @@ AssetBrowserWidget::~AssetBrowserWidget()
 
 void AssetBrowserWidget::set_browse_mode(asset_browse_mode browse_mode)
 {
+    if (_browse_mode == browse_mode)
+        return;
+
     _browse_mode = browse_mode;
     updateModelData();
     // if (_browse_mode == asset_browse_mode::detail_doodads)
