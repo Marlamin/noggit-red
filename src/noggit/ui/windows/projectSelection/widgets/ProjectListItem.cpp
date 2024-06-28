@@ -1,4 +1,5 @@
 #include <noggit/ui/windows/projectSelection/widgets/ProjectListItem.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 
 namespace Noggit::Ui::Widget
 {
