@@ -198,7 +198,7 @@ void main()
     vec3 layer2 = mix(tex.rgb, tex_2.rgb, tex_2.a);
     out_color = vec4(apply_lighting(mix(layer2, tex.rgb, vertex_color.a)), 1.);
   }
-  else if (shader == 21)
+  else if (shader == 21 || shader == 23)
   {
     out_color = vec4(apply_lighting(tex_2.rgb), 1.);
   }

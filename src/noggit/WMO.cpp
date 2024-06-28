@@ -131,7 +131,7 @@ void WMO::finishLoading ()
     f.read(&materials[i], sizeof(WMOMaterial));
 
     uint32_t shader = materials[i].shader;
-    bool use_second_texture = (shader == 6 || shader == 5 || shader == 3);
+    bool use_second_texture = (shader == 6 || shader == 5 || shader == 3 || shader == 21 || shader == 23);
 
     materials[i].texture1 = load_texture(materials[i].texture_offset_1);
     if (use_second_texture)

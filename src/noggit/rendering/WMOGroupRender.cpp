@@ -45,7 +45,7 @@ void WMOGroupRender::upload()
     std::uint32_t tex_array3 = 0;
     std::uint32_t array_index3 = 0;
 
-    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3 || mat.shader == 21;
+    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3 || mat.shader == 21 || mat.shader == 23;
 
     if (use_tex2)
     {
@@ -92,7 +92,7 @@ void WMOGroupRender::upload()
     WMOMaterial& mat(_wmo_group->wmo->materials.at(material_to_use));
 
     bool backface_cull = !mat.flags.unculled;
-    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3 || mat.shader == 21;
+    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3 || mat.shader == 21 || mat.shader == 23;
 
     bool create_draw_call = false;
     if (draw_call && draw_call->backface_cull == backface_cull && batch.index_start == draw_call->index_start + draw_call->index_count)
