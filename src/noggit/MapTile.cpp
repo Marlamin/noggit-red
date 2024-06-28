@@ -249,6 +249,8 @@ void MapTile::finishLoading()
     for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
     {
       lWMOInstances.push_back(modf_ptr[i]);
+      if(lWMOInstances[i].scale == 0.0f)
+        lWMOInstances[i].scale = 1024.0f;
     }
   }
 
