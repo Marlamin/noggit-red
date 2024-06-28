@@ -203,6 +203,8 @@ namespace Noggit
       QRadioButton *selectionButton = new QRadioButton("Selection");
       QRadioButton *cameraButton = new QRadioButton("Camera");
 
+      QCheckBox* paste_override_rotate_cb = new QCheckBox("Rotate to Terrain", this);
+
       pasteModeGroup = new QButtonGroup(this);
       pasteModeGroup->addButton(terrainButton, 0);
       pasteModeGroup->addButton(selectionButton, 1);
@@ -211,6 +213,8 @@ namespace Noggit
       paste_layout->addWidget(terrainButton, 0, 0);
       paste_layout->addWidget(selectionButton, 0, 1);
       paste_layout->addWidget(cameraButton, 1, 0);
+
+      paste_layout->addWidget(paste_override_rotate_cb, 2, 0);
 
       pasteBox->addPage(pasteBox_content);
 
@@ -291,6 +295,7 @@ namespace Noggit
       // replaced by a button
       // QPushButton *visToggleButton = new QPushButton("Toggle Hidden Models Visibility", this);
       QPushButton *clearListButton = new QPushButton("Clear Hidden Models List", this);
+      QPushButton *clearGroupsButton = new QPushButton("Clear Selection Groups List", this);
 
       auto importBox = new ExpanderWidget(this);
       auto importBox_content = new QWidget(this);
@@ -319,6 +324,7 @@ namespace Noggit
       layout->addWidget(rotEditorButton);
       // layout->addWidget(visToggleButton);
       layout->addWidget(clearListButton);
+      layout->addWidget(clearGroupsButton);
       layout->addWidget(importBox);
       // layout->addWidget(_filename);
 
@@ -467,6 +473,12 @@ namespace Noggit
           _use_median_pivot_point = b;
       });
 
+      paste_override_rotate_cb->setChecked(paste_params->rotate_on_terrain);
+      connect(paste_override_rotate_cb, &QCheckBox::stateChanged, [=](int s)
+          {
+              paste_params->rotate_on_terrain = s;
+          });
+
       connect ( pasteModeGroup, qOverload<int> (&QButtonGroup::idClicked)
               , [&] (int id)
                 {
@@ -488,6 +500,10 @@ namespace Noggit
         ModelManager::clear_hidden_models();
         WMOManager::clear_hidden_wmos();
       });
+
+      connect(clearGroupsButton, &QPushButton::clicked, [=]() {
+          _map_view->getWorld()->clear_selection_groups();
+          });
 
       connect(toTxt, &QPushButton::clicked, [=]() {
           SaveObjecttoTXT (world);
@@ -514,7 +530,10 @@ namespace Noggit
 
       connect( asset_browser_btn
           , &QPushButton::clicked
-          , [=]() { mapView->getAssetBrowser()->setVisible(mapView->getAssetBrowser()->isHidden()); }
+          , [=]() {       
+              _map_view->getAssetBrowserWidget()->set_browse_mode(Tools::AssetBrowser::asset_browse_mode::world);
+              mapView->getAssetBrowser()->setVisible(mapView->getAssetBrowser()->isHidden());
+          }
       );
 
       connect( object_palette_btn
@@ -649,6 +668,12 @@ namespace Noggit
           new_obj->model->waitForChildrenLoaded();
           new_obj->recalcExtents();
 
+          if (paste_params->rotate_on_terrain)
+          {
+              // new_obj->pos.y = world->get_ground_height(new_obj->pos).y;// in multi select, objects aren't on the ground
+              world->rotate_model_to_ground_normal(new_obj, true); // always smooth?
+          }
+
           // check if pos is valid (not in an interior) wmo group
           // bool is_indoor = world->isInIndoorWmoGroup(new_obj->extents, new_obj->transformMatrix());
           bool is_indoor = false; // TODO Disabled the indoor check until non axis aligned boxes check is implemented
@@ -679,6 +704,11 @@ namespace Noggit
           new_obj->wmo->wait_until_loaded();
           new_obj->wmo->waitForChildrenLoaded();
           new_obj->recalcExtents();
+
+          if (paste_params->rotate_on_terrain)
+          {
+              world->rotate_model_to_ground_normal(new_obj, true); // always smooth?
+          }
         }        
 }
     }
@@ -938,7 +968,7 @@ namespace Noggit
                     if (area_name.empty())
                     {
                         auto chunk = world->getChunkAt(wi->pos);
-                        namesetnames.append(gAreaDB.getAreaName(chunk->getAreaID()).c_str());
+                        namesetnames.append(gAreaDB.getAreaFullName(chunk->getAreaID()).c_str());
                     }
                     else
                         namesetnames.append(area_name.c_str());

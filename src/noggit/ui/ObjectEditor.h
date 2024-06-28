@@ -44,6 +44,7 @@ namespace Noggit
     float maxTilt = 5.f;
     float minScale = 0.9f;
     float maxScale = 1.1f;
+    bool rotate_on_terrain = true;
   };
 
   namespace Ui
@@ -112,6 +113,8 @@ namespace Noggit
 
       QButtonGroup* pasteModeGroup;
       QLabel* _filename;
+
+      QLabel* _selection_groups_info;
 
       bool _copy_model_stats;
       bool _use_median_pivot_point;

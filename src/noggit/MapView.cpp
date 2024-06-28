@@ -253,6 +253,9 @@ void MapView::set_editing_mode(editing_mode mode)
     _world->renderer()->getTerrainParamsUniformBlock()->draw_impass_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_paintability_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_selection_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
     _minimap->use_selection(nullptr);
 
     bool use_classic_ui = _settings->value("classicUI", true).toBool();
@@ -270,6 +273,14 @@ void MapView::set_editing_mode(editing_mode mode)
         {
           texturingTool->updateMaskImage();
         }
+        else if (texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::ground_effect)
+        {
+            getGroundEffectsTool()->updateTerrainUniformParams();
+            // _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = getGroundEffectsTool()->show_active_sets_overlay();
+            // _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = getGroundEffectsTool()->show_placement_map_overlay();
+            // _world->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = getGroundEffectsTool()->show_exclusion_map_overlay();
+        }
+
 
         if (use_classic_ui)
         {
@@ -301,7 +312,7 @@ void MapView::set_editing_mode(editing_mode mode)
       case editing_mode::areaid:
         _world->renderer()->getTerrainParamsUniformBlock()->draw_areaid_overlay = true;
         break;
-      case editing_mode::flags:
+      case editing_mode::impass:
         _world->renderer()->getTerrainParamsUniformBlock()->draw_impass_overlay = true;
         break;
       case editing_mode::minimap:
@@ -774,6 +785,7 @@ void MapView::setupTexturePainterUi()
           , [=]()
       {
        _world->notifyTileRendererOnSelectedTextureChange();
+       getGroundEffectsTool()->TextureChanged();
       }
   );
 
@@ -1233,7 +1245,7 @@ void MapView::setupFileMenu()
           bookmark.camera_pitch = _camera.pitch()._;
           bookmark.camera_yaw = _camera.yaw()._;
           bookmark.map_id = _world->getMapID();
-          bookmark.name = gAreaDB.getAreaName(_world->getAreaID(_camera.position));
+          bookmark.name = gAreaDB.getAreaFullName(_world->getAreaID(_camera.position));
 
         _project->createBookmark(bookmark);
 
@@ -1248,14 +1260,13 @@ void MapView::setupFileMenu()
                  std::stringstream port_command;
                  port_command << ".go XYZ " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << _world->getMapID();
                  std::ofstream f("ports.txt", std::ios_base::app);
-                 f << "Map: " << gAreaDB.getAreaName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
+                 f << "Map: " << gAreaDB.getAreaFullName(_world->getAreaID (_camera.position)) << " on ADT " << std::floor(_camera.position.x / TILESIZE) << " " << std::floor(_camera.position.z / TILESIZE) << std::endl;
                  f << "Trinity/AC:" << std::endl << port_command.str() << std::endl;
                  // f << "ArcEmu:" << std::endl << ".worldport " << _world->getMapID() << " " << (ZEROPOINT - _camera.position.z) << " " << (ZEROPOINT - _camera.position.x) << " " << _camera.position.y << " " << std::endl << std::endl;
                  f.close();
                  QClipboard* clipboard = QGuiApplication::clipboard();
                  clipboard->setText(port_command.str().c_str(), QClipboard::Clipboard);
                }
-
   );
 
 }
@@ -1463,21 +1474,40 @@ void MapView::setupAssistMenu()
                   }
   );
 
+  // vertices can support up to 32bit but other things break at 16bit like WDL and MFBO
+  //  DB/ZoneLight appears to be using -64000 and 64000
+  //  DB/DungeonMapChunk seems to use -10000 for lower default.
+  int constexpr MIN_HEIGHT = std::numeric_limits<short>::min(); // -32768
+  int constexpr MAX_HEIGHT = std::numeric_limits<short>::max(); // 32768
+
+  int constexpr DEFAULT_MIN_HEIGHT = -2000; // outland goes to -1200
+  int constexpr DEFAULT_MAX_HEIGHT = 3000; // hyjal goes to 2000
+
   QDialog* heightmap_export_params = new QDialog(this);
   heightmap_export_params->setWindowFlags(Qt::Popup);
   heightmap_export_params->setWindowTitle("Heightmap Exporter");
   QVBoxLayout* heightmap_export_params_layout = new QVBoxLayout(heightmap_export_params);
 
-  heightmap_export_params_layout->addWidget(new QLabel("Min:", heightmap_export_params));
+  heightmap_export_params_layout->addWidget(new QLabel("Import with the same values \nto keep the same coordinates.",
+      heightmap_export_params));
+
+  heightmap_export_params_layout->addWidget(new QLabel("Min Height:", heightmap_export_params));
   QDoubleSpinBox* heightmap_export_min = new QDoubleSpinBox(heightmap_export_params);
-  heightmap_export_min->setRange(-10000000, 10000000);
+  heightmap_export_min->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  heightmap_export_min->setValue(DEFAULT_MIN_HEIGHT);
   heightmap_export_params_layout->addWidget(heightmap_export_min);
 
-  heightmap_export_params_layout->addWidget(new QLabel("Max:", heightmap_export_params));
+  heightmap_export_params_layout->addWidget(new QLabel("Max Height:", heightmap_export_params));
   QDoubleSpinBox* heightmap_export_max = new QDoubleSpinBox(heightmap_export_params);
-  heightmap_export_max->setRange(-10000000, 10000000);
-  heightmap_export_max->setValue(100.0);
+  heightmap_export_max->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  heightmap_export_max->setValue(DEFAULT_MAX_HEIGHT);
   heightmap_export_params_layout->addWidget(heightmap_export_max);
+
+  std::string const autoheights_tooltip_str = "Sets fields to this tile's min and max heights\nDefaults : Min: "
+      + std::to_string(DEFAULT_MIN_HEIGHT) + ", Max: " + std::to_string(DEFAULT_MAX_HEIGHT);
+  QPushButton* heightmap_export_params_auto_height = new QPushButton("Auto Heights", heightmap_export_params);
+  heightmap_export_params_auto_height->setToolTip(autoheights_tooltip_str.c_str());
+  heightmap_export_params_layout->addWidget(heightmap_export_params_auto_height);
 
   QPushButton* heightmap_export_okay = new QPushButton("Okay", heightmap_export_params);
   heightmap_export_params_layout->addWidget(heightmap_export_okay);
@@ -1497,6 +1527,20 @@ void MapView::setupAssistMenu()
               heightmap_export_min->setValue(value - 1.0);
 
           });
+
+  connect(heightmap_export_params_auto_height, &QPushButton::clicked
+      , [=]()
+      {
+          MapTile* tile = _world->mapIndex.getTile(_camera.position);
+          if (tile)
+          {
+              QSignalBlocker const blocker_min(heightmap_export_min);
+              QSignalBlocker const blocker_max(heightmap_export_max);
+
+              heightmap_export_min->setValue(tile->getMinHeight());
+              heightmap_export_max->setValue(tile->getMaxHeight());
+          }
+      });
 
   connect(heightmap_export_okay, &QPushButton::clicked
     ,[=]()
@@ -1541,6 +1585,8 @@ void MapView::setupAssistMenu()
 
   auto cur_adt_import_menu(assist_menu->addMenu("Import"));
 
+  // alphamaps import
+  auto const alphamap_image_format = "Required Image format :\n1024x1024 and 8bit color channel.";
 
   QDialog* adt_import_params = new QDialog(this);
   adt_import_params->setWindowFlags(Qt::Popup);
@@ -1552,8 +1598,18 @@ void MapView::setupAssistMenu()
   adt_import_params_layer->setRange(1, 3);
   adt_import_params_layout->addWidget(adt_import_params_layer);
 
+  QCheckBox* adt_import_params_cleanup_layers = new QCheckBox("Cleanup unused chunk layers", adt_import_params);
+  adt_import_params_cleanup_layers->setToolTip("Remove textures that have empty layers from chunks.");
+  adt_import_params_cleanup_layers->setChecked(false);
+  adt_import_params_layout->addWidget(adt_import_params_cleanup_layers);
+
   QPushButton* adt_import_params_okay = new QPushButton("Okay", adt_import_params);
   adt_import_params_layout->addWidget(adt_import_params_okay);
+
+  auto const alphamap_file_info_tooltip = "\nThe image file must be placed in the map's directory in the project"
+      " folder with the following naming : MAPNAME_XX_YY_layer1.png (or layer2...)."
+      "\nFor example \"C:/noggitproject/world/maps/MAPNAME/MAPNAME_29_53_layer2.png\"";
+  adt_import_params_okay->setToolTip(alphamap_file_info_tooltip);
 
   connect(adt_import_params_okay, &QPushButton::clicked
     ,[=]()
@@ -1592,7 +1648,7 @@ void MapView::setupAssistMenu()
                       img.load(filepath, "PNG");
 
                       NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
-                      _world->importADTAlphamap(_camera.position, img, adt_import_params_layer->value());
+                      _world->importADTAlphamap(_camera.position, img, adt_import_params_layer->value(), adt_import_params_cleanup_layers->isChecked());
                       NOGGIT_ACTION_MGR->endAction();
                     }
 
@@ -1600,7 +1656,7 @@ void MapView::setupAssistMenu()
   );
 
   ADD_ACTION_NS ( cur_adt_import_menu
-  , "Import alphamap"
+  , "Import alphamaps"
   , [=]
     {
 
@@ -1608,20 +1664,47 @@ void MapView::setupAssistMenu()
         OpenGL::context::scoped_setter const _(::gl, context());
 
         NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
-        _world->importADTAlphamap(_camera.position);
+        _world->importADTAlphamap(_camera.position, adt_import_params_cleanup_layers->isChecked());
         NOGGIT_ACTION_MGR->endAction();
     }
   );
 
+  auto const heightmap_image_format = "Required Image format :\n257x257 or 256x256(tiled edges)\nand 16bit per color channel.";
+
+  auto const heightmap_file_info_tooltip = "Requires a .png image of 257x257, or 256x256 in Tiled Edges mode.(Otherwise it will be stretched)"
+      "\nThe image file must be placed in the map's directory in the project folder with the following naming : MAPNAME_XX_YY_height.png."
+      "\nFor example \"C:/noggitproject/world/maps/MAPNAME/MAPNAME_29_53_height.png\"";
+
+  auto const tiled_edges_tooltip_str = "Tiled edge uses a 256x256 image instead 257."
+      "\nTiled image imports encroach on edge vertices on neighboring tiles to avoid duplicate edges. ";
+
+  /*auto const multiplier_tooltip_str = "Multiplies pixel values by this to obtain the final position."
+      "\n For example a pixel grayscale of 40%(0.4%) with a multiplier of 100 means this vertex's height will be 0.4*100 = 40.";
+*/
+
+  // heightmaps
   QDialog* adt_import_height_params = new QDialog(this);
   adt_import_height_params->setWindowFlags(Qt::Popup);
-  adt_import_height_params->setWindowTitle("Alphamap Importer");
+  adt_import_height_params->setWindowTitle("Heightmap Importer");
   QVBoxLayout* adt_import_height_params_layout = new QVBoxLayout(adt_import_height_params);
 
-  adt_import_height_params_layout->addWidget(new QLabel("Multiplier:", adt_import_height_params));
-  QDoubleSpinBox* adt_import_height_params_multiplier = new QDoubleSpinBox(adt_import_height_params);
-  adt_import_height_params_multiplier->setRange(0, 100000000);
-  adt_import_height_params_layout->addWidget(adt_import_height_params_multiplier);
+  adt_import_height_params_layout->addWidget(new QLabel(heightmap_image_format, adt_import_height_params));
+
+  adt_import_height_params_layout->addWidget(new QLabel("Min Height:", adt_import_height_params));
+  QDoubleSpinBox* heightmap_import_min = new QDoubleSpinBox(adt_import_height_params);
+  heightmap_import_min->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  heightmap_import_min->setValue(DEFAULT_MIN_HEIGHT);
+  adt_import_height_params_layout->addWidget(heightmap_import_min);
+
+  adt_import_height_params_layout->addWidget(new QLabel("Max Height:", adt_import_height_params));
+  QDoubleSpinBox* heightmap_import_max = new QDoubleSpinBox(adt_import_height_params);
+  heightmap_import_max->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  heightmap_import_max->setValue(DEFAULT_MAX_HEIGHT);
+  adt_import_height_params_layout->addWidget(heightmap_import_max);
+
+  QPushButton* adt_import_height_params_auto_height = new QPushButton("Auto Heights", adt_import_height_params);
+  adt_import_height_params_auto_height->setToolTip(autoheights_tooltip_str.c_str());
+  adt_import_height_params_layout->addWidget(adt_import_height_params_auto_height);
 
   adt_import_height_params_layout->addWidget(new QLabel("Mode:", adt_import_height_params));
   QComboBox* adt_import_height_params_mode = new QComboBox(adt_import_height_params);
@@ -1629,10 +1712,23 @@ void MapView::setupAssistMenu()
   adt_import_height_params_mode->addItems({"Set", "Add", "Subtract", "Multiply" });
 
   QCheckBox* adt_import_height_tiled_edges = new QCheckBox("Tiled Edges", adt_import_height_params);
+  adt_import_height_tiled_edges->setToolTip(tiled_edges_tooltip_str);
   adt_import_height_params_layout->addWidget(adt_import_height_tiled_edges);
 
   QPushButton* adt_import_height_params_okay = new QPushButton("Okay", adt_import_height_params);
   adt_import_height_params_layout->addWidget(adt_import_height_params_okay);
+  adt_import_height_params_okay->setToolTip(heightmap_file_info_tooltip);
+
+  connect(adt_import_height_params_auto_height, &QPushButton::clicked
+    , [=]()
+    {
+      MapTile* tile = _world->mapIndex.getTile(_camera.position);
+      if (tile)
+      {
+        heightmap_import_min->setValue(tile->getMinHeight());
+        heightmap_import_max->setValue(tile->getMaxHeight());
+      }
+    });
 
   connect(adt_import_height_params_okay, &QPushButton::clicked
     ,[=]()
@@ -1664,7 +1760,7 @@ void MapView::setupAssistMenu()
           img.load(filepath, "PNG");
 
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
-          _world->importADTHeightmap(_camera.position, img, adt_import_height_params_multiplier->value(),
+          _world->importADTHeightmap(_camera.position, img, heightmap_import_min->value(), heightmap_import_max->value(),
                                      adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
         }
@@ -1681,16 +1777,84 @@ void MapView::setupAssistMenu()
           OpenGL::context::scoped_setter const _(::gl, context());
 
           NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
-          _world->importADTHeightmap(_camera.position, adt_import_height_params_multiplier->value(),
+          _world->importADTHeightmap(_camera.position, heightmap_import_min->value(), heightmap_import_max->value(),
                                      adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
           NOGGIT_ACTION_MGR->endAction();
         }
       }
   );
 
+  // Watermap
+  QDialog* adt_import_water_params = new QDialog(this);
+  adt_import_water_params->setWindowFlags(Qt::Popup);
+  adt_import_water_params->setWindowTitle("Watermap Importer");
+  QVBoxLayout* adt_import_water_params_layout = new QVBoxLayout(adt_import_water_params);
+
+  // MIN MAX
+  adt_import_water_params_layout->addWidget(new QLabel("Min Height:", adt_import_water_params));
+  QDoubleSpinBox* watermap_import_min = new QDoubleSpinBox(adt_import_water_params);
+  watermap_import_min->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  watermap_import_min->setValue(MIN_HEIGHT);
+  adt_import_water_params_layout->addWidget(watermap_import_min);
+
+  adt_import_water_params_layout->addWidget(new QLabel("Max Height:", adt_import_water_params));
+  QDoubleSpinBox* watermap_import_max = new QDoubleSpinBox(adt_import_water_params);
+  watermap_import_max->setRange(MIN_HEIGHT, MAX_HEIGHT);
+  watermap_import_max->setValue(MAX_HEIGHT);
+  adt_import_water_params_layout->addWidget(watermap_import_max);
+
+  adt_import_water_params_layout->addWidget(new QLabel("Mode:", adt_import_water_params));
+  QComboBox* adt_import_water_params_mode = new QComboBox(adt_import_water_params);
+  adt_import_water_params_layout->addWidget(adt_import_water_params_mode);
+  adt_import_water_params_mode->addItems({ "Set", "Add", "Subtract", "Multiply" });
+
+  QCheckBox* adt_import_water_tiled_edges = new QCheckBox("Tiled Edges", adt_import_water_params);
+  adt_import_water_params_layout->addWidget(adt_import_water_tiled_edges);
+
+  QPushButton* adt_import_water_params_okay = new QPushButton("Okay", adt_import_water_params);
+  adt_import_water_params_layout->addWidget(adt_import_water_params_okay);
+
+  connect(adt_import_water_params_okay, &QPushButton::clicked
+      , [=]()
+      {
+          adt_import_water_params->accept();
+
+      });
+
+  ADD_ACTION_NS(cur_adt_import_menu
+      , "Import watermap (file)"
+      , [=]
+      {
+          if (adt_import_water_params->exec() == QDialog::Accepted)
+          {
+              makeCurrent();
+              OpenGL::context::scoped_setter const _(::gl, context());
+
+              QString filepath = QFileDialog::getOpenFileName(
+                  this,
+                  tr("Open watermap (257x257)"),
+                  "",
+                  "PNG file (*.png);;"
+              );
+
+              if (!QFileInfo::exists(filepath))
+                  return;
+
+              QImage img;
+              img.load(filepath, "PNG");
+
+              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_WATER);
+              _world->importADTWatermap(_camera.position, img, watermap_import_min->value(), watermap_import_max->value(),
+                  adt_import_water_params_mode->currentIndex(), adt_import_water_tiled_edges->isChecked());
+              NOGGIT_ACTION_MGR->endAction();
+          }
+      }
+  );
+
+  // Vertex Colors
   QDialog* adt_import_vcol_params = new QDialog(this);
   adt_import_vcol_params->setWindowFlags(Qt::Popup);
-  adt_import_vcol_params->setWindowTitle("Alphamap Importer");
+  adt_import_vcol_params->setWindowTitle("Vertex Color Map Importer");
   QVBoxLayout* adt_import_vcol_params_layout = new QVBoxLayout(adt_import_vcol_params);
 
   adt_import_vcol_params_layout->addWidget(new QLabel("Mode:", adt_import_vcol_params));
@@ -1773,6 +1937,18 @@ void MapView::setupAssistMenu()
       }
   );
 
+  ADD_ACTION_NS(assist_menu
+      , "Cleanup empty texture chunks"
+      , [this]
+      {
+          makeCurrent();
+          OpenGL::context::scoped_setter const _(::gl, context());
+          NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
+          _world->CleanupEmptyTexturesChunks();
+          NOGGIT_ACTION_MGR->endAction();
+      }
+  );
+
   assist_menu->addSeparator();
   assist_menu->addAction(createTextSeparator("Global"));
   assist_menu->addSeparator();
@@ -1784,11 +1960,24 @@ void MapView::setupAssistMenu()
       (
         makeCurrent();
         OpenGL::context::scoped_setter const _ (::gl, context());
-        _world->convert_alphamap(true);
+        if (_world->mapIndex.hasBigAlpha())
+        {
+            QMessageBox::information(this
+                , "Noggit"
+                , "Map is already Big Alpha."
+                , QMessageBox::Ok
+            );
+        }
+        else
+        {
+            QProgressDialog progress_dialog("Converting Alpha format...", "", 0, _world->mapIndex.getNumExistingTiles(), this);
+            progress_dialog.setWindowModality(Qt::WindowModal);
+            _world->convert_alphamap(&progress_dialog, true);
+        }
       )
-
     }
   );
+
   ADD_ACTION_NS ( assist_menu
   , "Map to old alpha"
   , [this]
@@ -1797,7 +1986,19 @@ void MapView::setupAssistMenu()
       (
         makeCurrent();
         OpenGL::context::scoped_setter const _(::gl, context());
-        _world->convert_alphamap(false);
+        if (!_world->mapIndex.hasBigAlpha())
+        {
+            QMessageBox::information(this
+                , "Noggit"
+                , "Map is already Old Alpha."
+                , QMessageBox::Ok
+            );
+        }
+        else
+        {
+            QProgressDialog progress_dialog("Converting Alpha format...", "", 0, _world->mapIndex.getNumExistingTiles(), this);
+            _world->convert_alphamap(&progress_dialog, false);
+        }
       )
     }
   );
@@ -1887,14 +2088,14 @@ void MapView::setupAssistMenu()
     (
         makeCurrent();
         OpenGL::context::scoped_setter const _(::gl, context());
+        QProgressDialog progress_dialog("Importing Alphamaps...", "Cancel", 0, _world->mapIndex.getNumExistingTiles(), this);
+        progress_dialog.setWindowModality(Qt::WindowModal);
         NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE);
-        _world->importAllADTsAlphamaps();
+        _world->importAllADTsAlphamaps(&progress_dialog);
         NOGGIT_ACTION_MGR->endAction();
-
     )
   }
   );
-
   ADD_ACTION_NS ( all_adts_import_menu
   , "Import heightmaps"
   , [=]
@@ -1905,8 +2106,11 @@ void MapView::setupAssistMenu()
         (
             makeCurrent();
             OpenGL::context::scoped_setter const _(::gl, context());
+            QProgressDialog progress_dialog("Importing Heightmaps...", "Cancel", 0, _world->mapIndex.getNumExistingTiles(), this);
+            progress_dialog.setWindowModality(Qt::WindowModal);
             NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
-            _world->importAllADTsHeightmaps(adt_import_height_params_multiplier->value(), adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
+            _world->importAllADTsHeightmaps(&progress_dialog, heightmap_import_max->value(), heightmap_import_min->value(),
+                adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
             NOGGIT_ACTION_MGR->endAction();
         )
 
@@ -1941,6 +2145,7 @@ void MapView::setupAssistMenu()
   {
     makeCurrent();
     OpenGL::context::scoped_setter const _(::gl, context());
+    _unload_tiles = false;
     _world->loadAllTiles();
   }
   );
@@ -2158,12 +2363,12 @@ void MapView::setupHelpMenu()
 
 #if defined(_WIN32) || defined(WIN32)
   ADD_ACTION_NS ( help_menu
-                , "Forum"
+                , "WoW Modding Discord"
                 , []
                   {
                     ShellExecute ( nullptr
                                  , "open"
-                                 , "http://www.modcraft.io/index.php?board=48.0"
+                                 , "https://discord.gg/Dnrztg7dCZ"
                                  , nullptr
                                  , nullptr
                                  , SW_SHOWNORMAL
@@ -2171,12 +2376,12 @@ void MapView::setupHelpMenu()
                   }
                 );
   ADD_ACTION_NS ( help_menu
-                , "Homepage"
+                , "Noggit Red Repository"
                 , []
                   {
                     ShellExecute ( nullptr
                                  , "open"
-                                 , "https://bitbucket.org/berndloerwald/noggit3/"
+                                 , "https://gitlab.com/prophecy-rp/noggit-red/-/tree/noggit-shadowlands?ref_type=heads"
                                  , nullptr
                                  , nullptr
                                  , SW_SHOWNORMAL
@@ -2185,12 +2390,12 @@ void MapView::setupHelpMenu()
                 );
 
   ADD_ACTION_NS ( help_menu
-                , "Discord"
+                , "Noggit Red Discord"
                 , []
                   {
                     ShellExecute ( nullptr
                                  , "open"
-                                 , "https://discord.gg/UbdFHyM"
+                                 , "https://discord.gg/Tk2TpN8CaF"
                                  , nullptr
                                  , nullptr
                                  , SW_SHOWNORMAL
@@ -2225,7 +2430,7 @@ void MapView::setupHotkeys()
                   _draw_contour.set (true);
                   _draw_climb.set (false);
                   _draw_vertex_color.set(true);
-                  _draw_baked_shadows.set(true);
+                  _draw_baked_shadows.set(false);
                   _draw_wmo.set (false);
                   _draw_terrain.set (true);
                   _draw_fog.set (false);
@@ -2565,7 +2770,7 @@ void MapView::setupHotkeys()
     , [this] { return !_mod_num_down && !NOGGIT_CUR_ACTION;  });
   addHotkey (Qt::Key_5, MOD_none, [this] { set_editing_mode (editing_mode::areaid); }
     , [this] { return !_mod_num_down && !NOGGIT_CUR_ACTION;  });
-  addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::flags); }
+  addHotkey (Qt::Key_6, MOD_none, [this] { set_editing_mode (editing_mode::impass); }
     , [this] { return !_mod_num_down && !NOGGIT_CUR_ACTION;  });
   addHotkey (Qt::Key_7, MOD_none, [this] { set_editing_mode (editing_mode::water); }
     , [this] { return !_mod_num_down && !NOGGIT_CUR_ACTION;  });
@@ -2682,11 +2887,12 @@ void MapView::createGUI()
   setupMinimapEditorUi();
   setupStampUi();
   setupLightEditorUi();
-  setupChunkManipulatorUi();
   setupScriptingUi();
+  setupChunkManipulatorUi();
   // End combined dock
 
   setupViewportOverlay();
+  // texturingTool->setup_ge_tool_renderer();
   setupNodeEditor();
   setupAssetBrowser();
   setupDetailInfos();
@@ -2764,13 +2970,15 @@ MapView::MapView( math::degrees camera_yaw0
   , _tablet_manager(Noggit::TabletManager::instance()),
     _project(Project)
 {
-  setWindowTitle ("Noggit Studio - " STRPRODUCTVER);
+  setWindowTitle ("Noggit Studio Red - " STRPRODUCTVER);
   setFocusPolicy (Qt::StrongFocus);
   setMouseTracking (true);
   setMinimumHeight(200);
   setMaximumHeight(10000);
   setAttribute(Qt::WA_OpaquePaintEvent, true);
   setUpdateBehavior(QOpenGLWidget::NoPartialUpdate);
+
+  _world->LoadSavedSelectionGroups(); // not doing this in world constructor because noggit loads world twice
 
   _context = Noggit::NoggitRenderContext::MAP_VIEW;
   _transform_gizmo.setWorld(_world.get());
@@ -2844,7 +3052,30 @@ MapView::MapView( math::degrees camera_yaw0
   std::cout << "FPS limit is set to : " << _fps_limit << " (" << _fps_calcul << ")" << std::endl;
 
   _update_every_event_loop.start (_fps_calcul);
-  connect(&_update_every_event_loop, &QTimer::timeout,[=]{ _needs_redraw = true; update(); });
+  connect(&_update_every_event_loop, &QTimer::timeout,[=]
+      { 
+          _needs_redraw = true;
+
+          Qt::ApplicationState app_state = QGuiApplication::applicationState();
+          if (app_state == Qt::ApplicationState::ApplicationSuspended)
+          {
+              _needs_redraw = false;
+              return;
+          };
+
+          if (_main_window->isMinimized() && _settings->value("background_fps_limit", true).toBool())
+          {
+              _needs_redraw = false;
+              // return;
+          }
+
+          update();
+      });
+
+  // reduce frame rate in background
+  connect(QGuiApplication::instance(), SIGNAL(applicationStateChanged(Qt::ApplicationState)),
+      this, SLOT(onApplicationStateChanged(Qt::ApplicationState)));
+
   createGUI();
 }
 
@@ -3162,6 +3393,12 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
                     progress->setValue(value);
                 });
 
+        connect(this, &MapView::selectionUpdated, [this]()
+            { 
+                updateDetailInfos(true);
+                _world->selection_updated = false;
+            });
+
         // setup combined image if necessary
         if (settings->combined_minimap)
         {
@@ -3462,12 +3699,19 @@ void MapView::tick (float dt)
     action_modality |= Noggit::ActionModalityControllers::eRMB;
   if (MoveObj)
     action_modality |= Noggit::ActionModalityControllers::eMMB;
+  if (keys)
+      action_modality |= Noggit::ActionModalityControllers::eSCALE;
+  if (keyr)
+      action_modality |= Noggit::ActionModalityControllers::eROTATE;
+  // if (keyx != 0 || keyy != 0 || keyz != 0)
+  //   action_modality |= Noggit::ActionModalityControllers::eTRANSLATE;
 
   NOGGIT_ACTION_MGR->endActionOnModalityMismatch(action_modality);
 
   // start unloading tiles
   _world->mapIndex.enterTile (TileIndex (_camera.position));
-  _world->mapIndex.unloadTiles (TileIndex (_camera.position));
+  if (_unload_tiles)
+    _world->mapIndex.unloadTiles (TileIndex (_camera.position));
 
   dt = std::min(dt, 1.0f);
 
@@ -3480,7 +3724,7 @@ void MapView::tick (float dt)
       switch (terrainMode)
       {
         case editing_mode::areaid:
-        case editing_mode::flags:
+        case editing_mode::impass:
         case editing_mode::holes:
         case editing_mode::object:
           update_cursor_pos();
@@ -3552,12 +3796,15 @@ void MapView::tick (float dt)
 
       if (keys != 0.f)
       {
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                            Noggit::ActionModalityControllers::eSCALE);
         _world->scale_selected_models(keys*numpad_moveratio / 50.f, World::object_scaling_type::add);
         _rotation_editor_need_update = true;
       }
       if (keyr != 0.f)
       {
-        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
+                                            Noggit::ActionModalityControllers::eROTATE);
         _world->rotate_selected_models( math::degrees(0.f)
                                       , math::degrees(keyr * numpad_moveratio * 5.f)
                                       , math::degrees(0.f)
@@ -3855,10 +4102,11 @@ void MapView::tick (float dt)
           }
           else if (_mod_ctrl_down && !ui_hidden)
           {
+            _texture_picker_need_update = true;
             // Pick texture
-            _texture_picker_dock->setVisible(true);
-            TexturePicker->setMainTexture(texturingTool->_current_texture);
-            TexturePicker->getTextures(selection);
+            // _texture_picker_dock->setVisible(true);
+            // TexturePicker->setMainTexture(texturingTool->_current_texture);
+            // TexturePicker->getTextures(selection);
           }
           else  if (_mod_shift_down && !!Noggit::Ui::selected_texture::get())
           {
@@ -3919,14 +4167,15 @@ void MapView::tick (float dt)
             else if (_mod_ctrl_down)
             {
               // pick areaID from chunk
-              MapChunk* chnk(std::get<selected_chunk_type>(selection).chunk);
-              int newID = chnk->getAreaID();
-              _selected_area_id = newID;
-              ZoneIDBrowser->setZoneID(newID);
+              _area_picker_need_update = true;
+              // MapChunk* chnk(std::get<selected_chunk_type>(selection).chunk);
+              // int newID = chnk->getAreaID();
+              // _selected_area_id = newID;
+              // ZoneIDBrowser->setZoneID(newID);
             }
           }
           break;
-        case editing_mode::flags:
+        case editing_mode::impass:
           if (!underMap)
           {
             // todo: replace this
@@ -4070,7 +4319,7 @@ void MapView::tick (float dt)
         if (_camera_moved_since_last_draw)
         {
             auto ground_pos = _world.get()->get_ground_height(_camera.position);
-            _camera.position.y = ground_pos.y + 2;
+            _camera.position.y = ground_pos.y + 6;
         }
     }
     else
@@ -4162,7 +4411,7 @@ void MapView::tick (float dt)
 
   _status_position->setText (status);
 
-  if (currentSelection.size() > 0)
+  if (currentSelection.size() > 0) // currently disabled, change to == to enable status bar selection
   {
     _status_selection->setText ("");
   }
@@ -4204,11 +4453,38 @@ void MapView::tick (float dt)
       }
     }
   }
+  if (_world->selection_updated)
+  {
+      updateDetailInfos(true);
+      // update areaid and texture picker
 
-  updateDetailInfos();
+      if (_texture_picker_need_update)
+      {
+          _texture_picker_dock->setVisible(true);
+          TexturePicker->setMainTexture(texturingTool->_current_texture);
+          TexturePicker->getTextures(*currentSelection.begin());
+
+          _texture_picker_need_update = false;
+      }
+
+      if (_area_picker_need_update)
+      {
+          MapChunk* chnk(std::get<selected_chunk_type>(*currentSelection.begin()).chunk);
+          int newID = chnk->getAreaID();
+          _selected_area_id = newID;
+          ZoneIDBrowser->setZoneID(newID);
+
+          _area_picker_need_update = false;
+      }
+
+      _world->selection_updated = false;
+  }
+  else
+      updateDetailInfos();
+      // emit selectionUpdated();
 
   _status_area->setText
-    (QString::fromStdString (gAreaDB.getAreaName (_world->getAreaID (_camera.position))));
+    (QString::fromStdString (gAreaDB.getAreaFullName (_world->getAreaID (_camera.position))));
 
   {
     int time ((static_cast<int>(_world->time) % 2880) / 2);
@@ -4243,7 +4519,9 @@ void MapView::tick (float dt)
   }
 
   _status_culling->setText ( "Loaded tiles: " + QString::number(_world->getNumLoadedTiles())
-                         + " Rendered tiles: " + QString::number(_world->getNumRenderedTiles())
+                         + ", Rendered tiles: " + QString::number(_world->getNumRenderedTiles())
+                         + "\t Loaded objects: " + QString::number(_world->getModelInstanceStorage().getTotalModelsCount())
+                         + ", Rendered objects: " + QString::number(_world->getNumRenderedObjects())
   );
 
   guiWater->updatePos (_camera.position);
@@ -4511,7 +4789,7 @@ void MapView::draw_map()
   case editing_mode::ground:
     radius = terrainTool->brushRadius();
     inner_radius = terrainTool->innerRadius();
-    if ((terrainTool->_edit_type != eTerrainType_Vertex || terrainTool->_edit_type != eTerrainType_Script) && terrainTool->getImageMaskSelector()->isEnabled())
+    if ((terrainTool->_edit_type != eTerrainType_Vertex && terrainTool->_edit_type != eTerrainType_Script) && terrainTool->getImageMaskSelector()->isEnabled())
       _cursorType = CursorType::STAMP;
     break;
   case editing_mode::flatten_blur:
@@ -4959,7 +5237,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     rv = relative_movement.dy() / YSENS * 5.0f;
   }
 
-  if (rightMouse && _mod_alt_down)
+  if (rightMouse && _mod_alt_down && !_mod_shift_down && !_mod_ctrl_down)
   {
     if (terrainMode == editing_mode::ground)
     {
@@ -4985,7 +5263,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     }
   }
 
-  if (rightMouse && _mod_shift_down)
+  if (rightMouse && _mod_shift_down && !_mod_alt_down && !_mod_ctrl_down)
   {
     if (terrainMode == editing_mode::ground)
     {
@@ -4998,7 +5276,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     }
   }
 
-  if (rightMouse && _mod_ctrl_down)
+  if (rightMouse && _mod_ctrl_down && !_mod_alt_down && !_mod_shift_down)
   {
     if (terrainMode == editing_mode::ground)
     {
@@ -5071,7 +5349,7 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
     }
   }
 
-  if (leftMouse && _mod_alt_down)
+  if (leftMouse && _mod_alt_down && !_mod_shift_down && !_mod_ctrl_down)
   {
 	switch (terrainMode)
     {
@@ -5141,6 +5419,12 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       doSelection(false, true); // Required for radius selection in Object mode
     }
   }
+  // drag selection, only do it when not using brush
+  else if (!_mod_alt_down && leftMouse && terrainMode == editing_mode::object && _display_mode == display_mode::in_3D && !ImGuizmo::IsUsing())
+  {
+      _needs_redraw = true;
+      _area_selection->setGeometry(QRect(_drag_start_pos, event->pos()).normalized());
+  }
 
   if (leftMouse && _mod_shift_down)
   {
@@ -5171,12 +5455,6 @@ void MapView::mouseMoveEvent (QMouseEvent* event)
       stampTool->execute(_cursor_pos, _world.get(), relative_movement.dx() / 30.0f, _mod_shift_down, _mod_alt_down, _mod_ctrl_down, false);
     }
 
-  }
-
-  if (leftMouse && terrainMode == editing_mode::object && _display_mode == display_mode::in_3D && !ImGuizmo::IsUsing())
-  {
-      _needs_redraw = true;
-      _area_selection->setGeometry(QRect(_drag_start_pos, event->pos()).normalized());
   }
 
   if (_display_mode == display_mode::in_2D && leftMouse && _mod_alt_down && _mod_shift_down)
@@ -5630,6 +5908,11 @@ QWidget* MapView::getActiveStampModeItem()
     return nullptr;
 }
 
+Noggit::Ui::ground_effect_tool* MapView::getGroundEffectsTool()
+{
+    return texturingTool->getGroundEffectsTool();
+}
+
 void MapView::onSettingsSave()
 {
   OpenGL::TerrainParamsUniformBlock* params = _world->renderer()->getTerrainParamsUniformBlock();
@@ -5760,6 +6043,7 @@ void MapView::ShowContextMenu(QPoint pos)
                     auto model_name = obj->instance_model()->file_key().filepath();
                     // auto models = _world->get_models_by_filename()[model_name];
 
+                    // if changing this, make sure to check for duplicate instead // if (!_world->is_selected(instance))
                     _world->reset_selection();
 
                     if (obj->which() == eMODEL)
@@ -5768,7 +6052,6 @@ void MapView::ShowContextMenu(QPoint pos)
                             {
                                 if (model_instance.instance_model()->file_key().filepath() == model_name)
                                 {
-                                    // objects_to_select.push_back(model_instance.uid);
                                     _world->add_to_selection(&model_instance);
                                 }
                             });
@@ -5839,7 +6122,6 @@ void MapView::ShowContextMenu(QPoint pos)
         // allow replacing all selected?
         QAction action_replace("Replace Models (By Clipboard)", this);
         menu->addAction(&action_replace);
-        // auto model_path = objectEditor->getFilename();
         action_replace.setEnabled(has_selected_objects && objectEditor->clipboardSize() == 1);
         action_replace.setToolTip("Replace the currently selected objects by the object in the clipboard (There must only be one!). M2s can only be replaced by m2s");
         QObject::connect(&action_replace, &QAction::triggered, [=]()
@@ -5851,11 +6133,14 @@ void MapView::ShowContextMenu(QPoint pos)
                 NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED | Noggit::ActionFlags::eOBJECTS_REMOVED); // Noggit::ActionFlags::eOBJECTS_TRANSFORMED
                 // NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
 
+                if (!objectEditor->clipboardSize())
+                    return;
+
                 // get the model to replace by
                 auto replace_select = objectEditor->getClipboard().front();
                 auto replace_obj = std::get<selected_object_type>(replace_select);
                 // bool replace_is_wmo = replace_obj->which() == eWMO;
-                auto replace_path = replace_obj->instance_model()->file_key();
+                auto& replace_path = replace_obj->instance_model()->file_key().filepath();
 
                 // iterate selection (objects to replace)
                 for (auto& source_obj : _world->get_selected_objects())
@@ -5879,11 +6164,12 @@ void MapView::ShowContextMenu(QPoint pos)
                             // auto replace_wmo = static_cast<WMOInstance*>(replace_obj);
                             // auto source_wmo = static_cast<WMOInstance*>(source_obj);
 
-                            auto new_obj = _world->addWMOAndGetInstance(replace_path, source_pos, source_rot, 1.0f);
-                            new_obj->wmo->wait_until_loaded();
-                            new_obj->wmo->waitForChildrenLoaded();
+                            auto new_obj = _world->addWMOAndGetInstance(replace_path, source_pos, source_rot);
+                            // new_obj->wmo->wait_until_loaded();
+                            // new_obj->wmo->waitForChildrenLoaded();
                             new_obj->recalcExtents();
 
+                            _world->deleteWMOInstance(source_obj->uid);
                         }
                         else if (replace_obj->which() == eMODEL)
                         {
@@ -5908,13 +6194,15 @@ void MapView::ShowContextMenu(QPoint pos)
                                 , &_object_paste_params
                                 , true
                             );
-                            new_obj->model->wait_until_loaded();
-                            new_obj->model->waitForChildrenLoaded();
+                            // new_obj->model->wait_until_loaded();
+                            // new_obj->model->waitForChildrenLoaded();
                             new_obj->recalcExtents();
+
+                            _world->deleteModelInstance(source_obj->uid);
                         }
                 }
                 // can cause the usual crash of deleting models overlapping unloaded tiles.
-                DeleteSelectedObjects();
+                // DeleteSelectedObjects();
                 // NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
                 NOGGIT_ACTION_MGR->endAction();
             });
@@ -5933,31 +6221,171 @@ void MapView::ShowContextMenu(QPoint pos)
                 }
             });
 
+        QAction action_save_obj_coords("Save objects coords(to file)", this);
+        menu->addAction(&action_save_obj_coords);
+        action_save_obj_coords.setEnabled(has_selected_objects);
+        QObject::connect(&action_save_obj_coords, &QAction::triggered, [=]()
+            {
+                if (terrainMode == editing_mode::object)
+                {
+                    if (_world->has_selection() && _world->get_selected_model_count())
+                    {
+                        std::stringstream obj_data;
+                        for (auto& obj : _world->get_selected_objects())
+                        {
+                            obj_data << "\"Object : " << obj->instance_model()->file_key().filepath() << "(UID :" << obj->uid << ")\"," << std::endl;
+                            obj_data << "\"Scale : " << obj->scale << "\"," << std::endl;
+                            // coords string in ts-wow format
+                            obj_data << "\"Coords(server): {map:" << _world->getMapID() << ",x:" << (ZEROPOINT - obj->pos.z) << ",y:" << (ZEROPOINT - obj->pos.x)
+                                << ",z:" << obj->pos.y << ",o:";
+
+                            float server_rot = 2 * glm::pi<float>() - glm::pi<float>() / 180.0 * (float(obj->dir.y) < 0 ? fabs(float(obj->dir.y)) + 180.0 : fabs(float(obj->dir.y) - 180.0));
+                            // float server_rot = glm::radians(obj->dir.y) + glm::radians(180.f);
+
+                            obj_data << server_rot << "}\"," << std::endl;
+
+                            /// converting db gobject rotation to noggit. Keep commented for later usage
+                            /*
+                            glm::quat test_db_quat = glm::quat(1.0, 1.0, 1.0, 1.0);
+                            test_db_quat.x = 0.607692, test_db_quat.y = -0.361538, test_db_quat.z = 0.607693, test_db_quat.w = 0.361539;
+                            glm::vec3 rot_euler = glm::eulerAngles(test_db_quat);
+                            glm::vec3 rot_degrees = glm::degrees(rot_euler); 
+                            rot_degrees = glm::vec3(rot_degrees.y, rot_degrees.z - 180.f, rot_degrees.x); // final noggit coords
+                            */
+
+                            glm::quat rot_quat = glm::quat(glm::vec3(glm::radians(obj->dir.z), glm::radians(obj->dir.x), server_rot));
+                            auto normalized_quat = glm::normalize(rot_quat);
+
+                            obj_data << "\"Rotation (server quaternion): {x:" << normalized_quat.x << ",y:" << normalized_quat.y << ",z:" << normalized_quat.z
+                                << ",w:" << normalized_quat.w << "}\"," <<  std::endl << "\n";
+                        }
+
+                        std::ofstream f("saved_objects_data.txt", std::ios_base::app);
+                        f << "\"Saved " << _world->get_selected_model_count() << " objects at : " << QDateTime::currentDateTime().toString("dd MMMM yyyy hh:mm:ss").toStdString() << "\"" << std::endl;
+                        f << obj_data.str();
+                        f.close();
+                    }
+                }
+            });
 
         menu->addSeparator();
         // TODO
-        QAction action_group("Group Selected Objects TODO", this);
+        QAction action_group("Group Selected Objects", this);
         menu->addAction(&action_group);
-        action_group.setEnabled(_world->has_multiple_model_selected() && true); // TODO, some "notgrouped" condition
-        QObject::connect(&action_snap, &QAction::triggered, [=]()
+        // check if all selected objects are already grouped
+        bool groupable = false; 
+        if ( _world->has_multiple_model_selected())
+        {
+            // if there's no existing groups, that means it's always groupable
+            if (!_world->_selection_groups.size())
+                groupable = true;
+
+            if (!groupable)
             {
-                _world->add_object_group();
+                // check if there's any ungrouped object
+                for (auto obj : _world->get_selected_objects())
+                {
+                    bool obj_ungrouped = true;
+                    for (auto& group : _world->_selection_groups)
+                    {
+                        if (group.contains_object(obj))
+                            obj_ungrouped = false;
+                    }
+                    if (obj_ungrouped)
+                    {
+                        groupable = true;
+                        break;
+                    }
+                }
+            }
+        }
+        action_group.setEnabled(groupable);
+        QObject::connect(&action_group, &QAction::triggered, [=]()
+            {
+                // remove all groups the objects are already in and create a new one
+                // for (auto obj : _world->get_selected_objects())
+                // {
+                //     for (auto& group : _world->_selection_groups)
+                //     {
+                //         if (group.contains_object(obj))
+                //         {
+                //             group.remove_group();
+                //         }
+                //     }
+                // }
+                for (auto& group : _world->_selection_groups)
+                {
+                    if (group.isSelected())
+                    {
+                        group.remove_group();
+                    }
+                }
 
-                //auto selected_objects = _world->get_selected_objects();
-                //for (auto selected_obj : selected_objects)
-                //{
-                //
-                //}
-
+                _world->add_object_group_from_selection();
             });
 
 
-        QAction action_ungroup("Ungroup Selected Objects TODO", this);
-
-
+        QAction action_ungroup("Ungroup Selected Objects", this);
+        menu->addAction(&action_ungroup);
+        bool group_selected = false;
+        for (auto& group : _world->_selection_groups)
+        {
+            if (group.isSelected())
+            {
+                group_selected = true;
+                break;
+            }
+        }
+        action_ungroup.setEnabled(group_selected);
+        QObject::connect(&action_ungroup, &QAction::triggered, [=]()
+            {
+                _world->clear_selection_groups();
+            });
 
 
         menu->exec(mapToGlobal(pos)); // synch
-        // menu->popup(mapToGlobal(pos)); // asynch
+        // menu->popup(mapToGlobal(pos)); // asynch, needs to be preloaded to work
     };
+
+}
+
+void MapView::onApplicationStateChanged(Qt::ApplicationState state)
+{
+    // auto interval = _update_every_event_loop.interval();
+
+    if (!_settings->value("background_fps_limit", true).toBool())
+        return;
+
+    int fps_limit = _settings->value("fps_limit", 60).toInt();
+    int fps_calcul = (int)((1.f / (float)fps_limit) * 1000.f);
+
+    switch (state)
+    {
+    case Qt::ApplicationState::ApplicationHidden:
+    {
+        // The application is hidden and runs in the background.
+        // this isn't minimized, it's when the window is entirely hidden, should never happen on noggit
+        _update_every_event_loop.setInterval(1000); // set to 1fps
+        break;
+    }
+    case Qt::ApplicationState::ApplicationActive:
+    {
+        _update_every_event_loop.setInterval(fps_calcul); // normal
+        break;
+    }
+    case Qt::ApplicationState::ApplicationInactive:
+    {
+        // The application is visible, but not selected to be in front.
+        _update_every_event_loop.setInterval(fps_calcul * 2); // half fps if inactive
+        break;
+    }
+    case Qt::ApplicationState::ApplicationSuspended:
+    {
+        // don't run updates ?
+        _update_every_event_loop.setInterval(1000);
+        break;
+    }
+    default:
+        break;
+    }
 }

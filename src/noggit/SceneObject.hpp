@@ -7,6 +7,7 @@
 #include <math/ray.hpp>
 #include <noggit/Selection.h>
 #include <noggit/ContextObject.hpp>
+#include <noggit/MapHeaders.h>
 #include <cstdint>
 #include <unordered_set>
 #include <array>
@@ -69,6 +70,10 @@ public:
 
   [[nodiscard]]
   std::array<glm::vec3, 2> const& getExtents() { ensureExtents(); return extents; }
+
+  glm::vec3 const getServerPos() { return glm::vec3(ZEROPOINT - pos.z, ZEROPOINT - pos.x, pos.y); }
+
+  bool _grouped = false;
 
 public:
   glm::vec3 pos;

@@ -9,7 +9,9 @@
 #include <cstring>
 #include <algorithm>
 #include <memory>
+#include <iostream>
 #include <blizzard-archive-library/include/ClientData.hpp>
+#include <noggit/Log.h>
 
 class DBCFile
 {
@@ -174,12 +176,14 @@ public:
   inline size_t getFieldCount()  { return fieldCount; }
   inline Record getByID(unsigned int id, size_t field = 0)
   {
-    for (Iterator i = begin(); i != end(); ++i)
-    {
-      if (i->getUInt(field) == id)
-        return (*i);
-    }
-    throw NotFound();
+      for (Iterator i = begin(); i != end(); ++i)
+      {
+        if (i->getUInt(field) == id)
+          return (*i);
+      }
+
+      LogError << "Tried to get a not existing row in " << filename << " (ID = " << id << ")!" << std::endl;
+      return *begin(); // return the first entry if it failed
   }
   inline bool CheckIfIdExists(unsigned int id, size_t field = 0)
   {
@@ -200,7 +204,8 @@ public:
 
           row_id++;
       }
-      throw NotFound();
+      LogError << "Tried to get a not existing row in " << filename << " (ID = " << id << ")!" << std::endl;
+      return 0;
   }
 
   Record addRecord(size_t id, size_t id_field = 0);

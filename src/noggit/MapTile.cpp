@@ -62,7 +62,8 @@ MapTile::MapTile( int pX
   , _chunk_update_flags(ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
-                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
+                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS
+                        | ChunkUpdateFlags::GROUND_EFFECT)
   , _extents{glm::vec3{pX * TILESIZE, std::numeric_limits<float>::max(), pZ * TILESIZE},
              glm::vec3{pX * TILESIZE + TILESIZE, std::numeric_limits<float>::lowest(), pZ * TILESIZE + TILESIZE}}
   , _combined_extents{glm::vec3{pX * TILESIZE, std::numeric_limits<float>::max(), pZ * TILESIZE},
@@ -121,6 +122,11 @@ void MapTile::finishLoading()
   uint32_t lMCNKOffsets[256];
   std::vector<ENTRY_MDDF> lModelInstances;
   std::vector<ENTRY_MODF> lWMOInstances;
+
+  std::vector<std::string> mModelFilenames;
+  std::vector<std::string> mWMOFilenames;
+
+  // std::map<std::string, mtxf_entry> _mtxf_entries;
 
   uint32_t fourcc;
   uint32_t size;
@@ -301,34 +307,30 @@ void MapTile::finishLoading()
     }
   }
 
-  // - MTFX ----------------------------------------------
-  /*
-  //! \todo Implement this or just use Terrain Cube maps?
-  Log << "MTFX offs: " << Header.mtfx << std::endl;
-  if(Header.mtfx != 0){
-  Log << "Try to load MTFX" << std::endl;
-  theFile.seek( Header.mtfx + 0x14 );
-
-  theFile.read( &fourcc, 4 );
-  theFile.read( &size, 4 );
-
-  assert( fourcc == 'MTFX' );
-
-
+  // - MTXF ----------------------------------------------
+  if (Header.mtxf != 0)
   {
-  char* lCurPos = reinterpret_cast<char*>( theFile.getPointer() );
-  char* lEnd = lCurPos + size;
-  int tCount = 0;
-  while( lCurPos < lEnd ) {
-  int temp = 0;
-  theFile.read(&temp, 4);
-  Log << "Adding to " << mTextureFilenames[tCount].first << " texture effect: " << temp << std::endl;
-  mTextureFilenames[tCount++].second = temp;
-  lCurPos += 4;
-  }
-  }
+      theFile.seek(Header.mtxf + 0x14);
 
-  }*/
+      theFile.read(&fourcc, 4);
+      theFile.read(&size, 4);
+
+      assert(fourcc == 'MTXF');
+
+      int count = size / 0x4;
+
+      std::vector<mtxf_entry> mtxf_data(count);
+
+      theFile.read(mtxf_data.data(), size);
+
+      for (int i = 0; i < count; ++i)
+      {
+          // _mtxf_entries[mTextureFilenames[i]] = mtxf_data[i];
+          // only save those with flags set
+          if (mtxf_data[i].use_cubemap)
+              _mtxf_entries[mTextureFilenames[i]] = mtxf_data[i];
+      }
+  }
 
   // - Done. ---------------------------------------------
 
@@ -371,6 +373,9 @@ void MapTile::finishLoading()
     auto& chunk = mChunks[x][z];
     _renderer.initChunkData(chunk.get());
   }
+  // can be cleared after texture sets are loaded in chunks.
+  mTextureFilenames.clear();
+  _mtxf_entries.clear();
 
   theFile.close();
 
@@ -1056,7 +1061,9 @@ void MapTile::initEmptyChunks()
 
 QImage MapTile::getHeightmapImage(float min_height, float max_height)
 {
-    QImage image(257, 257, QImage::Format_Grayscale16);
+    // grayscale 16 doesn't work, it rounds values or is actually 8bit
+    QImage image(257, 257, QImage::Format_RGBA64);
+    int depth = image.depth();
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
 
@@ -1078,7 +1085,7 @@ QImage MapTile::getHeightmapImage(float min_height, float max_height)
           unsigned const idx {(plain - (is_virtual ? (erp ? SUM : 1) : 0)) / 2};
           float value = is_virtual ? (heightmap[idx].y + heightmap[idx + (erp ? SUM : 1)].y) / 2.f : heightmap[idx].y;
           value = std::min(1.0f, std::max(0.0f, ((value - min_height) / (max_height - min_height))));
-          image.setPixelColor((k * 16) + x,  (l * 16) + y, QColor::fromRgbF(value, value, value, 1.0));
+          image.setPixelColor((k * 16) + x,  (l * 16) + y, QColor::fromRgbF(value, value, value, 1.0)); // grayscale uses alpha channel ?
         }
       }
     }
@@ -1128,7 +1135,7 @@ QImage MapTile::getNormalmapImage()
 
 QImage MapTile::getAlphamapImage(unsigned layer)
 {
-  QImage image(1024, 1024, QImage::Format_Grayscale8);
+  QImage image(1024, 1024, QImage::Format_RGBA8888);
   image.fill(Qt::black);
 
   for (int i = 0; i < 16; ++i)
@@ -1161,7 +1168,7 @@ QImage MapTile::getAlphamapImage(unsigned layer)
 
 QImage MapTile::getAlphamapImage(std::string const& filename)
 {
-  QImage image(1024, 1024, QImage::Format_Grayscale8);
+  QImage image(1024, 1024, QImage::Format_RGBA8888);
   image.fill(Qt::black);
 
   for (int i = 0; i < 16; ++i)
@@ -1202,7 +1209,7 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
         {
           for (int l = 0; l < 64; ++l)
           {
-            if (layer == 0) // titi test
+            if (layer == 0)
             {
               // WoW calculates layer 0 as 255 - sum(Layer[1]...Layer[3])
               int layers_sum = 0;
@@ -1218,7 +1225,7 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
             }
             else // layer 1-3
             {
-              auto alpha_layer = alphamaps->at(layer - 1).value();
+                auto& alpha_layer = alphamaps->at(layer - 1).value();
 
               int value = alpha_layer.getAlpha(64 * l + k);
               image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
@@ -1232,9 +1239,11 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
   return std::move(image);
 }
 
-void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges) // image
+void MapTile::setHeightmapImage(QImage const& baseimage, float min_height, float max_height, int mode, bool tiledEdges) // image
 {
-  auto image = baseimage.convertToFormat(QImage::Format_Grayscale16);
+  auto image = baseimage.convertToFormat(QImage::Format_RGBA64);
+
+  float const height_range = (max_height - min_height);
 
   unsigned const LONG{9}, SHORT{8}, SUM{LONG + SHORT}, DSUM{SUM * 2};
   for (int k = 0; k < 16; ++k)
@@ -1270,22 +1279,27 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
             case 16:
             case 32:
             {
+              float const ratio = qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f; // 0.0 - 1.0
+              float const new_height = (height_range * ratio) + min_height;
+
+              float test_newheight = (ratio + min_height) * (height_range);
+
               switch (mode)
               {
                 case 0: // Set
-                  heightmap[idx].y = qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  heightmap[idx].y = new_height;
                   break;
 
                 case 1: // Add
-                  heightmap[idx].y += qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  heightmap[idx].y += new_height;
                   break;
 
                 case 2: // Subtract
-                  heightmap[idx].y -= qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  heightmap[idx].y -= new_height;
                   break;
 
                 case 3: // Multiply
-                  heightmap[idx].y *= qGray(image.pixel((k * 16) + x, (l * 16) + y)) / 255.0f * multiplier;
+                  heightmap[idx].y *= new_height;
                   break;
               }
 
@@ -1294,22 +1308,25 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
 
             case 64:
             {
+              double const ratio = image.pixelColor((k * 16) + x, (l * 16) + y).redF(); // 0.0 - 1.0
+              float new_height = height_range * ratio + min_height;
+
               switch (mode)
               {
                 case 0: // Set
-                  heightmap[idx].y = image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;
+                  heightmap[idx].y = new_height;
                   break;
 
                 case 1: // Add
-                  heightmap[idx].y += image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  heightmap[idx].y += new_height;
                   break;
 
                 case 2: // Subtract
-                  heightmap[idx].y -= image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  heightmap[idx].y -= new_height;
                   break;
 
                 case 3: // Multiply
-                  heightmap[idx].y *= image.pixelColor((k * 16) + x, (l * 16) + y).redF() * multiplier;;
+                  heightmap[idx].y *= new_height;
                   break;
               }
 
@@ -1320,6 +1337,10 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
         }
 
       registerChunkUpdate(ChunkUpdateFlags::VERTEX);
+
+      // else we recalculate after tiled edges updates
+      if (!tiledEdges)
+        chunk->recalcNorms();
     }
   }
 
@@ -1341,6 +1362,7 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
                 int source_vert = vert_x;
                 targetChunk->getHeightmap()[target_vert].y = sourceChunk->getHeightmap()[source_vert].y;
             }
+            targetChunk->recalcNorms();
           }
           tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
         }
@@ -1363,6 +1385,7 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
                 int source_vert = vert_y * 17;
                 targetChunk->getHeightmap()[target_vert].y = sourceChunk->getHeightmap()[source_vert].y;
             }
+            targetChunk->recalcNorms();
           }
           tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
         }
@@ -1377,16 +1400,26 @@ void MapTile::setHeightmapImage(QImage const& baseimage, float multiplier, int m
           MapChunk* targetChunk = tile->getChunk(15, 15);
           targetChunk->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
           tile->getChunk(15,15)->getHeightmap()[144].y = this->getChunk(0,0)->getHeightmap()[0].y;
+          targetChunk->recalcNorms();
           tile->registerChunkUpdate(ChunkUpdateFlags::VERTEX);
         }
       );
     }
+  
+    for (int k = 0; k < 16; ++k)
+    {
+        for (int l = 0; l < 16; ++l)
+        {
+            MapChunk* chunk = getChunk(k, l);
+            // chunk->recalcNorms();
+        }
+    }
   }
 }
 
-void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer)
+void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer, bool cleanup)
 {
-  auto image = baseimage.convertToFormat(QImage::Format_Grayscale8);
+  auto image = baseimage.convertToFormat(QImage::Format_RGBA8888);
 
   for (int k = 0; k < 16; ++k)
   {
@@ -1410,8 +1443,12 @@ void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer)
         }
       }
 
+      if (cleanup)
+          chunk->texture_set->eraseUnusedTextures();
+
       chunk->texture_set->markDirty();
       chunk->texture_set->apply_alpha_changes();
+
 
     }
   }
@@ -1466,6 +1503,11 @@ void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledE
     for (int l = 0; l < 16; ++l)
     {
       MapChunk* chunk = getChunk(k, l);
+
+      if (!chunk->hasColors())
+      {
+          chunk->initMCCV();
+      }
 
       chunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
 
@@ -1542,6 +1584,12 @@ void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledE
           {
             MapChunk* targetChunk = tile->getChunk(chunk_x, 15);
             MapChunk* sourceChunk = this->getChunk(chunk_x, 0);
+
+            if (!targetChunk->hasColors())
+            {
+                targetChunk->initMCCV();
+            }
+
             targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
             for (int vert_x = 0; vert_x < 9; ++vert_x)
             {
@@ -1565,6 +1613,12 @@ void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledE
           {
             MapChunk* targetChunk = tile->getChunk(15, chunk_y);
             MapChunk* sourceChunk = this->getChunk(0, chunk_y);
+
+            if (!targetChunk->hasColors())
+            {
+                targetChunk->initMCCV();
+            }
+
             targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
             for (int vert_y = 0; vert_y < 9; ++vert_y)
             {
@@ -1584,6 +1638,12 @@ void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledE
         , [&] (MapTile* tile)
         {
           MapChunk* targetChunk = tile->getChunk(15, 15);
+
+          if (!targetChunk->hasColors())
+          {
+              targetChunk->initMCCV();
+          }
+
           targetChunk->registerChunkUpdate(ChunkUpdateFlags::MCCV);
           tile->getChunk(15,15)->getVertexColors()[144] = this->getChunk(0,0)->getVertexColors()[0];
           tile->registerChunkUpdate(ChunkUpdateFlags::MCCV);

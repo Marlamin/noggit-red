@@ -39,14 +39,15 @@ static const int mapbufsize = 9 * 9 + 8 * 8; // chunk size
 
 enum ChunkUpdateFlags
 {
-  VERTEX   = 0x1,
-  SHADOW   = 0x2,
-  MCCV     = 0x4,
-  ALPHAMAP = 0x8,
-  NORMALS  = 0x10,
-  HOLES    = 0x20,
-  AREA_ID  = 0x40,
-  FLAGS    = 0x80
+  VERTEX        = 0x1,
+  SHADOW        = 0x2,
+  MCCV          = 0x4,
+  ALPHAMAP      = 0x8,
+  NORMALS       = 0x10,
+  HOLES         = 0x20,
+  AREA_ID       = 0x40,
+  FLAGS         = 0x80,
+  GROUND_EFFECT = 0x100
 };
 
 class MapChunk
@@ -71,9 +72,10 @@ public:
   glm::vec3 vmin, vmax, vcenter;
   int px, py;
 
-  MapChunkHeader header;
+  // MapChunkHeader header;
+  // uint32_t nLayers = 0;
 
-  float xbase, ybase, zbase;
+  float xbase, ybase, zbase; // global coords
 
   mcnk_flags header_flags;
   bool use_big_alphamap;
@@ -85,9 +87,11 @@ public:
 
   unsigned int areaID;
 
+  std::vector<ENTRY_MCSE> sound_emitters;
+
   glm::vec3 mVertices[mapbufsize];
   glm::vec3 mNormals[mapbufsize];
-  glm::vec3 mccv[mapbufsize];
+  glm::vec3 mccv[mapbufsize]; // blizzard stores alpha, but deosn't seem to be used
 
   uint8_t _shadow_map[64 * 64];
 
@@ -138,6 +142,8 @@ public:
   void recalcNorms();
   void updateNormalsData();
   glm::vec3 getNeighborVertex(int i, unsigned dir);
+
+  glm::uvec2 getUnitIndextAt(glm::vec3 pos);
 
   //! \todo implement Action stack for these
   bool changeTerrain(glm::vec3 const& pos, float change, float radius, int BrushType, float inner_radius);
@@ -209,6 +215,7 @@ public:
   void setHeightmapImage(QImage const& image, float multiplier, int mode);
   void setAlphamapImage(QImage const& image, unsigned layer);
   void setVertexColorImage(QImage const& image);
+  void initMCCV();
 
   void registerChunkUpdate(unsigned flags);
   void endChunkUpdates() { _chunk_update_flags = 0; }

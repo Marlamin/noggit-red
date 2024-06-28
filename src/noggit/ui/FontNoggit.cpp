@@ -37,17 +37,14 @@ namespace Noggit
 
           temp_btn->ensurePolished();
 
-          QColor color;
           if (state == QIcon::On)
           {
-              color = temp_btn->palette().color(QPalette::WindowText);
+              painter->setPen(temp_btn->palette().color(QPalette::WindowText));
           }
           else if (state == QIcon::Off)
           {
-              color = temp_btn->palette().color(QPalette::Disabled, QPalette::WindowText);
+              painter->setPen(temp_btn->palette().color(QPalette::Disabled, QPalette::WindowText));
           }
-
-          painter->setPen(color);
 
 
           delete temp_btn;

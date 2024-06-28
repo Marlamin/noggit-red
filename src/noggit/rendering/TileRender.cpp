@@ -49,7 +49,8 @@ void TileRender::unload()
   _map_tile->_chunk_update_flags = ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
                                   | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                                   | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
-                                  | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS;
+                                  | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS
+                                  | ChunkUpdateFlags::GROUND_EFFECT;
 }
 
 
@@ -109,7 +110,7 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
   }
 
   // run chunk updates. running this when splitdraw call detected unused sampler configuration as well.
-  if (_map_tile->_chunk_update_flags || is_selected != _selected || need_paintability_update || _requires_sampler_reset || _texture_not_loaded)
+  if (_map_tile->_chunk_update_flags || is_selected != _selected || need_paintability_update || _requires_sampler_reset || _texture_not_loaded || _requires_ground_effect_color_recalc)
   {
 
     gl.bindBuffer(GL_UNIFORM_BUFFER, _chunk_instance_data_ubo);
@@ -210,8 +211,15 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
 
       if (flags & ChunkUpdateFlags::AREA_ID)
       {
+        
         _chunk_instance_data[i].AreaIDColor_Pad2_DrawSelection[0] = chunk->areaID;
       }
+
+      if (flags & ChunkUpdateFlags::GROUND_EFFECT)
+      {
+          setChunkGroundEffectData(chunk.get());
+      }
+      
 
       _chunk_instance_data[i].AreaIDColor_Pad2_DrawSelection[3] = _selected;
 
@@ -223,7 +231,7 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
     }
 
     _requires_sampler_reset = false;
-
+    _requires_ground_effect_color_recalc = false;
 
     if (_split_drawcall)
     {
@@ -580,6 +588,24 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
   return true;
 }
 
+void Noggit::Rendering::TileRender::setChunkGroundEffectColor(unsigned int chunkid, glm::vec3 color)
+{
+    if (chunkid > 255)
+        return;
+
+    // int chunk_x = chunkid / 16;
+    // int chunk_y = chunkid % 16;
+    // auto& chunk = _map_tile->mChunks[chunk_y][chunk_x];
+    // chunk->registerChunkUpdate(ChunkUpdateFlags::GROUND_EFFECT);
+
+    _requires_ground_effect_color_recalc = true;
+
+    _chunk_instance_data[chunkid].ChunkGroundEffectColor[0] = color.r;
+    _chunk_instance_data[chunkid].ChunkGroundEffectColor[1] = color.g;
+    _chunk_instance_data[chunkid].ChunkGroundEffectColor[2] = color.b;
+    _chunk_instance_data[chunkid].ChunkGroundEffectColor[3] = 0.0; // not used
+}
+
 void TileRender::initChunkData(MapChunk* chunk)
 {
   auto& chunk_render_instance = _chunk_instance_data[chunk->px * 16 + chunk->py];
@@ -590,4 +616,85 @@ void TileRender::initChunkData(MapChunk* chunk)
   chunk_render_instance.ChunkHoles_DrawImpass_TexLayerCount_CantPaint[3] = 0;
   chunk_render_instance.AreaIDColor_Pad2_DrawSelection[0] = chunk->areaID;
   chunk_render_instance.AreaIDColor_Pad2_DrawSelection[3] = 0;
+
+  chunk_render_instance.ChunkGroundEffectColor[0] = 0.0f;
+  chunk_render_instance.ChunkGroundEffectColor[1] = 0.0f;
+  chunk_render_instance.ChunkGroundEffectColor[2] = 0.0f;
+  chunk_render_instance.ChunkGroundEffectColor[3] = 0.0f;
+
+  // setChunkGroundEffectData(chunk);
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[0] = 0;
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[1] = 0;
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[2] = 0;
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[3] = 0;
+}
+
+void TileRender::setChunkGroundEffectData(MapChunk* chunk)
+{
+  auto doodadExclusionMap = chunk->texture_set->getDoodadStencilBase();
+
+  // pack it to int32s
+  int32_t exclusionmap1 = (int32_t)((uint32_t)(doodadExclusionMap[0] << 0) | (uint32_t)(doodadExclusionMap[1] << 8)
+      | (uint32_t)(doodadExclusionMap[2] << 16) | (uint32_t)(doodadExclusionMap[3] << 24));
+
+  int32_t exclusionmap2 = (int32_t)((uint32_t)(doodadExclusionMap[4] << 0) | (uint32_t)(doodadExclusionMap[5] << 8)
+      | (uint32_t)(doodadExclusionMap[6] << 16) | (uint32_t)(doodadExclusionMap[7] << 24));
+
+  auto& chunk_render_instance = _chunk_instance_data[chunk->px * 16 + chunk->py];
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[0] = exclusionmap1;
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[1] = exclusionmap2;
+}
+
+void Noggit::Rendering::TileRender::setChunkGroundEffectActiveData(MapChunk* chunk, std::string active_texture)
+{
+  // 1 : check if chunk has our texture AND set
+  // if it does, then check if it's the active layer for each unit
+  
+  // get the layer id of our texture
+  int layer_id = -1;
+  for (int i = 0; i < chunk->getTextureSet()->num(); ++i)
+  {
+      if (chunk->getTextureSet()->filename(i) == active_texture)
+      {
+          layer_id = i;
+      }
+  }
+
+  // int layer_id = chunk->getTextureSet()->texture_id(active_texture); // -1 if not present
+
+  auto& chunk_render_instance = _chunk_instance_data[chunk->px * 16 + chunk->py];
+
+  if (layer_id == -1)
+  {
+      chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[2] = 0;
+      chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[3] = 0;
+      return;
+  }
+
+  int32_t active_map1 = 0;
+  int32_t active_map2 = 0;
+
+  // convert layer id to bool (Is Active)
+  int bit = 0;
+  for (unsigned int x = 0; x < 8; x++)
+  {
+      for (unsigned int y = 0; y < 8; y++)
+      {
+          uint8_t unit_layer_id = chunk->texture_set->getDoodadActiveLayerIdAt(x, y);
+          bool is_active = layer_id == unit_layer_id;
+
+          if (is_active)
+          {
+            if (bit < 32)
+              active_map1 |= (1 << bit);
+            else
+              active_map2 |= (1 << (bit-32));
+          }
+
+          bit++;
+      }
+  }
+
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[2] = active_map1;
+  chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[3] = active_map2;
 }

@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
   std::set_terminate(Noggit::Application::NoggitApplication::terminationHandler);
 
   QApplication::setStyle(QStyleFactory::create("Fusion"));
+  QCoreApplication::setAttribute(Qt::AA_UseDesktopOpenGL);
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QApplication q_application (argc, argv);
   q_application.setApplicationName ("Noggit");
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
   noggit->initalize(argc, argv, Command);
 
   auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
-  project_selection->show();
+  // project_selection->show();
 
   return q_application.exec();
 }

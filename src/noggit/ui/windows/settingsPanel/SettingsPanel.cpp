@@ -189,9 +189,11 @@ namespace Noggit
       ui->_vsync_cb->setChecked(_settings->value("vsync", false).toBool());
       ui->_anti_aliasing_cb->setChecked(_settings->value("anti_aliasing", false).toBool());
       ui->_fullscreen_cb->setChecked(_settings->value("fullscreen", false).toBool());
+      ui->_background_fps_limit_cb->setChecked(_settings->value("background_fps_limit", true).toBool());
       ui->_adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
       ui->_adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
       ui->_uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
+      ui->_load_fav_cb->setChecked(_settings->value("auto_load_fav_project", true).toBool());
       ui->_systemWindowFrame->setChecked(_settings->value("systemWindowFrame", true).toBool());
       ui->_nativeMenubar->setChecked(_settings->value("nativeMenubar", true).toBool());
       ui->_classic_ui->setChecked(_settings->value("classicUI", false).toBool());
@@ -272,9 +274,11 @@ namespace Noggit
       _settings->setValue("vsync", ui->_vsync_cb->isChecked());
       _settings->setValue("anti_aliasing", ui->_anti_aliasing_cb->isChecked());
       _settings->setValue("fullscreen", ui->_fullscreen_cb->isChecked());
+      _settings->setValue("background_fps_limit", ui->_background_fps_limit_cb->isChecked());
       _settings->setValue("unload_dist", ui->_adt_unload_dist->value());
       _settings->setValue("unload_interval", ui->_adt_unload_check_interval->value());
       _settings->setValue("uid_startup_check", ui->_uid_cb->isChecked());
+      _settings->setValue("auto_load_fav_project", ui->_load_fav_cb->isChecked());
       _settings->setValue("additional_file_loading_log", ui->_additional_file_loading_log->isChecked());
       _settings->setValue("keyboard_locale", ui->_keyboard_locale->currentText());
       _settings->setValue("systemWindowFrame", ui->_systemWindowFrame->isChecked());

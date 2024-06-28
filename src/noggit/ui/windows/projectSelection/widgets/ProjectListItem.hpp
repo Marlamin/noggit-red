@@ -17,6 +17,7 @@ namespace Noggit::Ui::Widget
         QString project_directory;
         QString project_last_edited;
         Project::ProjectVersion project_version;
+        bool is_favorite;
     };
 
     class ProjectListItem : public QWidget
@@ -28,6 +29,7 @@ namespace Noggit::Ui::Widget
         QLabel* _project_directory_label;
         QLabel* _project_version_label;
         QLabel* _project_last_edited_label;
+        QLabel* _project_favorite_icon;
     public:
         ProjectListItem(const ProjectListItemData& data, QWidget* parent);
         QSize minimumSizeHint() const override;

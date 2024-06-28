@@ -309,7 +309,7 @@
   <customwidget>
    <class>Noggit::Ui::Tools::AssetBrowser::ModelViewer</class>
    <extends>QOpenGLWidget</extends>
-   <header location="global">noggit/ui/tools/AssetBrowser/ModelView.hpp</header>
+   <header location="global">noggit/ui/tools/AssetBrowser/BrowserModelView.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

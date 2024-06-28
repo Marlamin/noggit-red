@@ -38,7 +38,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
   int n_selected = static_cast<int>(selection.size());
 
-  if (!n_selected || (n_selected == 1 & selection[0].index() != eEntry_Object))
+  if (!n_selected || (n_selected == 1 && selection[0].index() != eEntry_Object))
     return;
 
   if (n_selected == 1)
@@ -97,6 +97,24 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     return;
   }
 
+  glm::mat4 glm_transform_mat = delta_matrix;
+
+  glm::vec3 new_scale;
+  glm::quat new_orientation;
+  glm::vec3 new_translation;
+  glm::vec3 new_skew_;
+  glm::vec4 new_perspective_;
+
+  glm::decompose(glm_transform_mat,
+      new_scale,
+      new_orientation,
+      new_translation,
+      new_skew_,
+      new_perspective_
+  );
+
+  new_orientation = glm::conjugate(new_orientation);
+
   NOGGIT_ACTION_MGR->beginAction(map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                  Noggit::ActionModalityControllers::eLMB);
 
@@ -115,27 +133,9 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance->recalcExtents();
       object_matrix = obj_instance->transformMatrix();
 
-      glm::mat4 glm_transform_mat = delta_matrix;
-
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
       float& scale = obj_instance->scale;
-
-      glm::vec3 new_scale;
-      glm::quat new_orientation;
-      glm::vec3 new_translation;
-      glm::vec3 new_skew_;
-      glm::vec4 new_perspective_;
-
-      glm::decompose(glm_transform_mat,
-                     new_scale,
-                     new_orientation,
-                     new_translation,
-                     new_skew_,
-                     new_perspective_
-      );
-
-      new_orientation = glm::conjugate(new_orientation);
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::remove);
@@ -248,28 +248,9 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance->recalcExtents();
       object_matrix = obj_instance->transformMatrix();
 
-
-      glm::mat4 glm_transform_mat = delta_matrix;
-
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
       float& scale = obj_instance->scale;
-
-      glm::vec3 new_scale;
-      glm::quat new_orientation;
-      glm::vec3 new_translation;
-      glm::vec3 new_skew_;
-      glm::vec4 new_perspective_;
-
-      glm::decompose(glm_transform_mat,
-                     new_scale,
-                     new_orientation,
-                     new_translation,
-                     new_skew_,
-                     new_perspective_
-      );
-
-      new_orientation = glm::conjugate(new_orientation);
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::remove);
@@ -313,5 +294,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
         _world->updateTilesEntry(selected, model_update::add);
     }
   }
+  if (_world)
+    _world->update_selected_model_groups();
 }
 

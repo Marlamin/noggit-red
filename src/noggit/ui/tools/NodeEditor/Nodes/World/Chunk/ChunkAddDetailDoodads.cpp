@@ -329,6 +329,7 @@ void ChunkAddDetailDoodads::compute()
       + std::string{gGroundEffectDoodadDB.getByID(curDoodadId)
       .getString(GroundEffectDoodadDB::Filename)}).c_str()};
       filename = filename.replace(".mdx", ".m2", Qt::CaseInsensitive);
+      filename = filename.replace(".mdl", ".m2", Qt::CaseInsensitive);
 
       world->addM2(filename.toStdString(), {chunk->xbase - inMinichunkCoords[0]
           , 0, chunk->zbase - inMinichunkCoords[1]}, 1.0, {math::degrees(0)._, math::degrees(0)._, math::degrees(0)._ }, nullptr);

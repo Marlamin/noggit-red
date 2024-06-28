@@ -17,7 +17,6 @@
 #include <string_view>
 #include <QtCore/QSettings>
 #include <QtGui/QOffscreenSurface>
-#include <QtOpenGL/QGLFormat>
 #include <QtCore/QDir>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QFileDialog>
@@ -46,6 +45,7 @@ namespace Noggit::Application {
         }
 
         BlizzardArchive::ClientData* clientData() { return _client_data.get(); }
+        bool hasClientData() const { return _client_data != nullptr; }
         void setClientData(std::shared_ptr<BlizzardArchive::ClientData> data) { _client_data = data; }
 
         void initalize(int argc, char* argv[], std::vector<bool> Parser);

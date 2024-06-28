@@ -641,24 +641,24 @@ void MapCreationWizard::saveCurrentEntry()
   // Save Map.dbc record
   DBCFile::Record record = _is_new_record ? gMapDB.addRecord(_cur_map_id) : gMapDB.getByID(_cur_map_id);
 
-  record.writeString(1, _directory->text().toStdString());
+  record.writeString(MapDB::InternalName, _directory->text().toStdString());
 
-  record.write(2, _instance_type->itemData(_instance_type->currentIndex()).toInt());
-  record.write(3, _sort_by_size_cat->isChecked() ? 16 : 0 );
-  _map_name->toRecord(record, 5);
+  record.write(MapDB::AreaType, _instance_type->itemData(_instance_type->currentIndex()).toInt());
+  record.write(MapDB::Flags, _sort_by_size_cat->isChecked() ? 16 : 0 );
+  _map_name->toRecord(record, MapDB::Name);
 
-  record.write(22, _area_table_id->value());
-  _map_desc_alliance->toRecord(record, 23);
-  _map_desc_horde->toRecord(record, 40);
-  record.write(57, _loading_screen->value());
-  record.write(58, static_cast<float>(_minimap_icon_scale->value()));
-  record.write(59, _corpse_map_id->itemData(_corpse_map_id->currentIndex()).toInt());
-  record.write(60, static_cast<float>(_corpse_x->value()));
-  record.write(61, static_cast<float>(_corpse_y->value()));
-  record.write(62, _time_of_day_override->value());
-  record.write(63, _expansion_id->itemData(_expansion_id->currentIndex()).toInt());
-  record.write(64, _raid_offset->value());
-  record.write(65, _max_players->value());
+  record.write(MapDB::AreaTableID, _area_table_id->value());
+  _map_desc_alliance->toRecord(record, MapDB::MapDescriptionAlliance);
+  _map_desc_horde->toRecord(record, MapDB::MapDescriptionHorde);
+  record.write(MapDB::LoadingScreen, _loading_screen->value());
+  record.write(MapDB::minimapIconScale, static_cast<float>(_minimap_icon_scale->value()));
+  record.write(MapDB::corpseMapID, _corpse_map_id->itemData(_corpse_map_id->currentIndex()).toInt());
+  record.write(MapDB::corpseX, static_cast<float>(_corpse_x->value()));
+  record.write(MapDB::corpseY, static_cast<float>(_corpse_y->value()));
+  record.write(MapDB::TimeOfDayOverride, _time_of_day_override->value());
+  record.write(MapDB::ExpansionID, _expansion_id->itemData(_expansion_id->currentIndex()).toInt());
+  record.write(MapDB::RaidOffset, _raid_offset->value());
+  record.write(MapDB::NumberOfPlayers, _max_players->value());
 
   gMapDB.save();
 

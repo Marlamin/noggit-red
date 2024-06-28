@@ -27,6 +27,7 @@ namespace Noggit::Ui::Widget
     _project_directory_label->setGeometry(48, 20, max_width, 20);
     _project_directory_label->setObjectName("project-information");
     _project_directory_label->setStyleSheet("QLabel#project-information { font-size: 10px; }");
+    _project_directory_label->setToolTip(data.project_directory);
 
     auto directory_effect = new QGraphicsOpacityEffect(this);
     directory_effect->setOpacity(0.5);
@@ -63,6 +64,25 @@ namespace Noggit::Ui::Widget
 
     _project_last_edited_label->setGraphicsEffect(last_edited_effect);
     _project_last_edited_label->setAutoFillBackground(true);
+
+    if (data.is_favorite)
+    {
+        _project_favorite_icon = new QLabel("", this);
+        _project_favorite_icon->setPixmap(FontAwesomeIcon(FontAwesome::star).pixmap(QSize(16, 16)));
+        _project_favorite_icon->setGeometry(max_width-10, 10, 125, 20);
+        _project_favorite_icon->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+        _project_favorite_icon->setObjectName("project-favorite");
+        _project_favorite_icon->setStyleSheet("QLabel#project-information { font-size: 10px; }");
+
+        auto colour = new QGraphicsColorizeEffect(this);
+        colour->setColor(QColor(255, 204, 0));
+        colour->setStrength(1.0f);
+
+        _project_favorite_icon->setGraphicsEffect(colour);
+        _project_favorite_icon->setAutoFillBackground(true);
+
+        layout.addWidget(_project_favorite_icon);
+    }
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 

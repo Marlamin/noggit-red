@@ -142,8 +142,9 @@ public:
   QImage getAlphamapImage(std::string const& filename);
   QImage getVertexColorsImage();
   QImage getNormalmapImage();
-  void setHeightmapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges);
-  void setAlphaImage(QImage const& image, unsigned layer);
+  void setHeightmapImage(QImage const& baseimage, float min_height, float max_height, int mode, bool tiledEdges);
+  void setWatermapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges);
+  void setAlphaImage(QImage const& image, unsigned layer, bool cleanup);
   void setVertexColorImage(QImage const& image, int mode, bool tiledEdges);
   void registerChunkUpdate(unsigned flags) { _chunk_update_flags |= flags; };
   void endChunkUpdates() { _chunk_update_flags = 0; };
@@ -200,10 +201,10 @@ private:
 
   // Data to be loaded and later unloaded.
   std::vector<std::string> mTextureFilenames;
-  std::vector<std::string> mModelFilenames;
-  std::vector<std::string> mWMOFilenames;
-
-
+  // std::vector<std::string> mModelFilenames;
+  // std::vector<std::string> mWMOFilenames;
+  std::map<std::string, mtxf_entry> _mtxf_entries;
+  
   std::vector<uint32_t> uids;
   tsl::robin_map<AsyncObject*, std::vector<SceneObject*>> object_instances; // only includes M2 and WMO. perhaps a medium common ancestor then?
 

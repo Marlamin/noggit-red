@@ -3,6 +3,7 @@
 
 #include <noggit/project/ApplicationProject.h>
 #include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
+#include <noggit/Log.h>
 
 #include <algorithm>
 #include <cctype>
@@ -20,16 +21,30 @@ namespace Noggit::Ui::Component
     friend Windows::NoggitProjectSelectionWindow;
 
   public:
-    std::shared_ptr<Project::NoggitProject> loadProject(Noggit::Ui::Windows::NoggitProjectSelectionWindow* parent)
+    std::shared_ptr<Project::NoggitProject> loadProject(Noggit::Ui::Windows::NoggitProjectSelectionWindow* parent, QString force_project_path = "")
     {
-      QModelIndex index = parent->_ui->listView->currentIndex();
+      QString project_path;
+
+      if (!force_project_path.isEmpty())
+          project_path = force_project_path;
+      else
+      {
+        QModelIndex index = parent->_ui->listView->currentIndex();
+        project_path = index.data(Qt::UserRole).toString();
+      }
+
       auto application_configuration = parent->_noggit_application->getConfiguration();
-      auto application_projects_folder_path = std::filesystem::path(application_configuration->ApplicationProjectPath);
-      QString project_path = index.data(Qt::UserRole).toString();
+      // auto application_projects_folder_path = std::filesystem::path(application_configuration->ApplicationProjectPath);
+
+
       auto application_project_service = Noggit::Project::ApplicationProject(application_configuration);
 
       if (!QDir(project_path).exists())
+      {
+        LogError << "Project path does not exist : " << project_path.toStdString() << std::endl;
         return {};
+      }
+      Log << "Loading Project path : " << project_path.toStdString() << std::endl;
 
       // check if current filesystem is case sensitive
       QDir q_project_path{project_path};
@@ -46,6 +61,7 @@ namespace Noggit::Ui::Component
       }
       else
       {
+        LogError << "Failed to open file : " << file_1_path.toStdString() << std::endl;
         assert(false);
         return {};
       }
@@ -59,6 +75,7 @@ namespace Noggit::Ui::Component
       }
       else
       {
+        LogError << "Failed to open file : " << file_2_path.toStdString() << std::endl;
         assert(false);
         return {};
       }
@@ -77,6 +94,7 @@ namespace Noggit::Ui::Component
       }
       else
       {
+        LogError << "Failed to read file content : " << file_1_path.toStdString() << std::endl;
         assert(false);
         return {};
       }
@@ -150,7 +168,12 @@ namespace Noggit::Ui::Component
             }
             case QMessageBox::DestructiveRole:
             default:
+            {
+              LogError << "Failed to convert uppercase sensitive project." << std::endl;
+              assert(false);
               return {};
+            }
+
           }
         }
       }
@@ -160,6 +183,8 @@ namespace Noggit::Ui::Component
       //This to not be static, but its hard to remove
       if (project)
         Noggit::Application::NoggitApplication::instance()->setClientData(project->ClientData);
+      else
+        LogError << "Couldn't set client data : Project loading failed." << std::endl;
 
       return project;
     }

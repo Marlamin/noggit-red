@@ -40,7 +40,7 @@ namespace OpenGL
 
   struct TerrainParamsUniformBlock
   {
-    int draw_shadows = true;
+    int draw_shadows = false;
     int draw_lines = false;
     int draw_hole_lines = false;
     int draw_areaid_overlay = false;
@@ -58,7 +58,10 @@ namespace OpenGL
     int climb_use_smooth_interpolation = false;
     float climb_value;
     int draw_vertex_color = true;
-    int padding[3];
+    int draw_groundeffectid_overlay = false;
+    int draw_groundeffect_layerid_overlay = false;
+    int draw_noeffectdoodad_overlay = false;
+    // int padding[3];
   };
 
   struct ChunkInstanceDataUniformBlock
@@ -78,6 +81,8 @@ namespace OpenGL
     float ChunkTextureHeightScale[4];
     float ChunkTextureHeightOffset[4];
 
+    float ChunkGroundEffectColor[4];
+    int ChunkDoodadsEnabled2_ChunksLayerEnabled2[4];
   };
 
   struct LiquidChunkInstanceDataUniformBlock

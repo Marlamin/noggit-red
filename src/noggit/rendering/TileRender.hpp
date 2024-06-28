@@ -39,8 +39,12 @@ namespace Noggit::Rendering
     bool getTileOcclusionQueryResult(glm::vec3 const& camera);
     void discardTileOcclusionQuery() { _tile_occlusion_query_in_use = false; }
     void notifyTileRendererOnSelectedTextureChange() { _requires_paintability_recalc = true; };
+    void setChunkGroundEffectColor(unsigned int chunkid, glm::vec3 color);
 
     void initChunkData(MapChunk* chunk);
+
+    void setChunkGroundEffectData(MapChunk* chunk);
+    void setChunkGroundEffectActiveData(MapChunk* chunk, std::string active_texture);
 
     [[nodiscard]]
     unsigned objectsFrustumCullTest() const { return _objects_frustum_cull_test; };
@@ -70,6 +74,7 @@ namespace Noggit::Rendering
     bool _split_drawcall = false;
     bool _requires_sampler_reset = false;
     bool _requires_paintability_recalc = true;
+    bool _requires_ground_effect_color_recalc = true;
     bool _texture_not_loaded = false;
 
     // culling

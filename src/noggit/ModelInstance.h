@@ -112,7 +112,7 @@ public:
 protected:
   bool _need_recalc_extents = true;
   bool _need_gpu_transform_update = true;
-  std::uint32_t _gpu_transform_uid;
+  std::uint32_t _gpu_transform_uid = 0;
 
 };
 

@@ -16,14 +16,12 @@
 
 TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
                         , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
-                        , Noggit::NoggitRenderContext context)
-  : nTextures(chunk->header.nLayers)
+                        , Noggit::NoggitRenderContext context, MapChunkHeader const& header)
+  : nTextures(header.nLayers)
   , _do_not_convert_alphamaps(do_not_convert_alphamaps)
   , _context(context)
   , _chunk(chunk)
 {
-
-  auto& header = chunk->header;
 
   std::copy(header.doodadMapping, header.doodadMapping + 8, _doodadMapping.begin());
   std::copy(header.doodadStencil, header.doodadStencil + 8, _doodadStencil.begin());
@@ -32,20 +30,32 @@ TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t 
   {
     f->seek(base + header.ofsLayer + 8);
 
+    ENTRY_MCLY tmp_entry_mcly[4];
+
     for (size_t i = 0; i<nTextures; ++i)
     {
-      f->read (&_layers_info[i], sizeof(ENTRY_MCLY));
+      f->read (&tmp_entry_mcly[i], sizeof(ENTRY_MCLY)); // f->read (&_layers_info[i], sizeof(ENTRY_MCLY));
 
-      textures.emplace_back (tile->mTextureFilenames[_layers_info[i].textureID], _context);
+      std::string const& texturefilename = tile->mTextureFilenames[tmp_entry_mcly[i].textureID];
+      textures.emplace_back (texturefilename, _context);
+
+      if (tile->_mtxf_entries.contains(texturefilename))
+      {
+          if (tile->_mtxf_entries[texturefilename].use_cubemap)
+              textures.back().use_cubemap = true;
+      }
+
+      _layers_info[i].effectID = tmp_entry_mcly[i].effectID;
+      _layers_info[i].flags = tmp_entry_mcly[i].flags;
     }
 
     size_t alpha_base = base + header.ofsAlpha + 8;
 
     for (unsigned int layer = 0; layer < nTextures; ++layer)
     {
-      if (_layers_info[layer].flags & 0x100)
+      if (_layers_info[layer].flags & FLAG_USE_ALPHA)
       {
-        f->seek (alpha_base + _layers_info[layer].ofsAlpha);
+        f->seek (alpha_base + tmp_entry_mcly[layer].ofsAlpha);
         alphamaps[layer - 1].emplace(f, _layers_info[layer].flags, use_big_alphamaps, do_not_fix_alpha_map);
       }
     }
@@ -70,7 +80,7 @@ int TextureSet::addTexture (scoped_blp_texture_reference texture)
     nTextures++;
 
     textures.emplace_back (std::move (texture));
-    _layers_info[texLevel] = ENTRY_MCLY();
+    _layers_info[texLevel] = layer_info();
 
     if (texLevel)
     {
@@ -191,7 +201,7 @@ void TextureSet::eraseTextures()
     {
       alphamaps[i - 1] = std::nullopt;
     }
-    _layers_info[i] = ENTRY_MCLY();
+    _layers_info[i] = layer_info();
   }
 
   nTextures = 0;
@@ -233,11 +243,11 @@ void TextureSet::eraseTexture(size_t id)
     alphamaps[nTextures - 2] = std::nullopt;
   }
 
-  textures.erase(textures.begin()+id);
   nTextures--;
+  textures.erase(textures.begin() + nTextures);
 
   // erase the old info as a precaution but it's overriden when adding a new texture
-  _layers_info[nTextures] = ENTRY_MCLY();
+  _layers_info[nTextures] = layer_info();
 
   // set the default values for the temporary alphamap too
   if (tmp_edit_values)
@@ -285,13 +295,14 @@ bool TextureSet::eraseUnusedTextures()
   {
     auto& amaps = tmp_edit_values.value();
 
-    for (int i = 0; i < 4096 && visible_tex.size() < nTextures; ++i)
+    for (int layer = 0; layer < nTextures && visible_tex.size() < nTextures; ++layer)
     {
-      for (int layer = 0; layer < nTextures; ++layer)
+      for (int i = 0; i < 4096; ++i)
       {
         if (amaps[layer][i] > 0.f)
         {
-          visible_tex.emplace(i);
+          visible_tex.emplace(layer);
+          break; // texture visible, go to the next layer
         }
       }
     }
@@ -372,6 +383,46 @@ int TextureSet::get_texture_index_or_add (scoped_blp_texture_reference texture, 
   }
 
   return addTexture (std::move (texture));
+}
+
+std::array<std::array<std::uint8_t, 8>, 8> const TextureSet::getDoodadMappingReadable()
+{
+    std::array<std::array<std::uint8_t, 8>, 8> doodad_mapping{};
+
+    for (int x = 0; x < 8; x++)
+    {
+        for (int y = 0; y < 8; y++)
+        {
+            doodad_mapping[y][x] = getDoodadActiveLayerIdAt(x, y);
+        }
+    }
+    return doodad_mapping;
+}
+
+uint8_t const TextureSet::getDoodadActiveLayerIdAt(unsigned int x, unsigned int y)
+{
+    if (x >= 8 || y >= 8)
+        return 0; // not valid
+
+    unsigned int firstbit_pos = x * 2;
+
+    bool first_bit = _doodadMapping[y] & (1 << firstbit_pos);
+    bool second_bit = _doodadMapping[y] & (1 << (firstbit_pos + 1) );
+
+    uint8_t layer_id = first_bit + second_bit * 2;
+
+    return layer_id;
+}
+
+bool const TextureSet::getDoodadDisabledAt(int x, int y)
+{
+    if (x >= 8 || y >= 8)
+        return true; // not valid. default to enabled
+
+    // X and Y are swapped
+    bool is_enabled = _doodadStencil[y] & (1 << (x));
+
+    return is_enabled;
 }
 
 bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* image, bool paint)
@@ -829,7 +880,7 @@ bool TextureSet::replace_texture( float xbase
 {
   float dist = misc::getShortestDist(x, z, xbase, zbase, CHUNKSIZE);
 
-  if (dist > radius)
+  if (!entire_chunk && dist > radius)
   {
     return false;
   }
@@ -1270,6 +1321,46 @@ void TextureSet::update_lod_texture_map()
 }
 
 
+
+std::array<float, 4> TextureSet::get_textures_weight_for_unit(unsigned int unit_x, unsigned int unit_y)
+{
+    float total_layer_0 = 0.f;
+    float total_layer_1 = 0.f;
+    float total_layer_2 = 0.f;
+    float total_layer_3 = 0.f;
+
+    // 8x8 bits per unit
+    for (int x = 0; x < 8; x++)
+    {
+        for (int y = 0; y < 8; y++)
+        {
+            float base_alpha = 255.f;
+
+            for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
+            {
+                float f = static_cast<float>(alphamaps[alpha_layer]->getAlpha( (unit_y * 8  + y)* 64 + (unit_x * 8 + x) )); // getAlpha(64 * y + x))
+
+                if (alpha_layer == 0)
+                    total_layer_1 += f;
+                else if (alpha_layer == 1)
+                    total_layer_2 += f;
+                else if (alpha_layer == 2)
+                    total_layer_3 += f;
+
+                base_alpha -= f;
+            }
+            total_layer_0 += base_alpha;
+        }
+    }
+
+    float sum = total_layer_0 + total_layer_1 + total_layer_2 + total_layer_3;
+    std::array<float, 4> weights = { total_layer_0 / sum * 100.f,
+        total_layer_1 / sum * 100.f,
+        total_layer_2 / sum * 100.f,
+        total_layer_3 / sum * 100.f };
+
+    return weights;
+}
 
 uint8_t TextureSet::sum_alpha(size_t offset) const
 {

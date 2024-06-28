@@ -34,6 +34,7 @@
 #include <limits>
 #include <array>
 #include <cstdint>
+#include <QProgressBar>
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -49,7 +50,7 @@ bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow
 
   if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists(ssfilename.str()))
   {
-    Log << "World " << record.RecordId << ": " << lMapName << " has no WDT file!" << std::endl;
+    LogDebug << "World " << record.RecordId << ": " << lMapName << " has no WDT file!" << std::endl;
     return false;
   }
 
@@ -112,6 +113,37 @@ World::World(const std::string& name, int map_id, Noggit::NoggitRenderContext co
 {
   LogDebug << "Loading world \"" << name << "\"." << std::endl;
   _loaded_tiles_buffer[0] = std::make_pair<std::pair<int, int>, MapTile*>(std::make_pair(0, 0), nullptr);
+}
+
+void World::LoadSavedSelectionGroups()
+{
+  _selection_groups.clear();
+
+  auto& saved_map_groups = Noggit::Project::CurrentProject::get()->ObjectSelectionGroups;
+  for (auto& map_group : saved_map_groups)
+  {
+      if (map_group.MapId == mapIndex._map_id)
+      {
+          for (auto& group : map_group.SelectionGroups)
+          {
+              selection_group selectionGroup(group, this);
+              _selection_groups.push_back(selectionGroup);
+          }
+          return;
+      }
+  }
+}
+
+void World::saveSelectionGroups()
+{
+    auto proj_selection_map_group = Noggit::Project::NoggitProjectSelectionGroups();
+    proj_selection_map_group.MapId = mapIndex._map_id;
+    for (auto& selection_group : _selection_groups)
+    {
+        proj_selection_map_group.SelectionGroups.push_back(selection_group.getMembers());
+    }
+
+    Noggit::Project::CurrentProject::get()->saveObjectSelectionGroups(proj_selection_map_group);
 }
 
 void World::update_selection_pivot()
@@ -218,6 +250,9 @@ bool World::is_selected(std::uint32_t uid) const
 std::optional<selection_type> World::get_last_selected_model() const
 {
   ZoneScoped;
+  if (_current_selection.empty())
+      return std::optional<selection_type>();
+
   auto const it
     ( std::find_if ( _current_selection.rbegin()
                    , _current_selection.rend()
@@ -232,7 +267,7 @@ std::optional<selection_type> World::get_last_selected_model() const
     ? std::optional<selection_type>() : std::optional<selection_type> (*it);
 }
 
-std::vector<selected_object_type> const& World::get_selected_objects() const
+std::vector<selected_object_type> const World::get_selected_objects() const
 {
     // std::vector<selected_object_type> objects(_selected_model_count);
     std::vector<selected_object_type> objects;
@@ -359,22 +394,11 @@ void World::rotate_selected_models_randomly(float minX, float maxX, float minY, 
   }
 }
 
-
-void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
+void World::rotate_model_to_ground_normal(SceneObject* obj, bool smoothNormals)
 {
-  ZoneScoped;
-  for (auto& entry : _current_selection)
-  {
-    auto type = entry.index();
-    if (type == eEntry_MapChunk)
-    {
-      continue;
-    }
-
-    auto& obj = std::get<selected_object_type>(entry);
     NOGGIT_CUR_ACTION->registerObjectTransformed(obj);
 
-    updateTilesEntry(entry, model_update::remove);
+    updateTilesEntry(obj, model_update::remove);
 
     glm::vec3 rayPos = obj->pos;
     math::degrees::vec3& dir = obj->dir;
@@ -382,43 +406,43 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
 
     selection_result results;
     for_chunk_at(rayPos, [&](MapChunk* chunk)
-    {
         {
-          math::ray intersect_ray(rayPos, glm::vec3(0.f, -1.f, 0.f));
-          chunk->intersect(intersect_ray, &results);
-        }
-        // object is below ground
-        if (results.empty())
-        {
-          math::ray intersect_ray(rayPos, glm::vec3(0.f, 1.f, 0.f));
-          chunk->intersect(intersect_ray, &results);
-        }
-    });
+            {
+                math::ray intersect_ray(rayPos, glm::vec3(0.f, -1.f, 0.f));
+                chunk->intersect(intersect_ray, &results);
+            }
+            // object is below ground
+            if (results.empty())
+            {
+                math::ray intersect_ray(rayPos, glm::vec3(0.f, 1.f, 0.f));
+                chunk->intersect(intersect_ray, &results);
+            }
+        });
 
     // !\ todo We shouldn't end up with empty ever (but we do, on completely flat ground)
     if (results.empty())
     {
-      // just to avoid models disappearing when this happens
-      updateTilesEntry(entry, model_update::add);
-      continue;
+        // just to avoid models disappearing when this happens
+        updateTilesEntry(obj, model_update::add);
+        return;
     }
 
 
-// We hit the terrain, now we take the normal of this position and use it to get the rotation we want.
+    // We hit the terrain, now we take the normal of this position and use it to get the rotation we want.
     auto const& hitChunkInfo = std::get<selected_chunk_type>(results.front().second);
 
     glm::quat q;
     glm::vec3 varnormal;
 
     // Surface Normal
-    auto &p0 = hitChunkInfo.chunk->mVertices[std::get<0>(hitChunkInfo.triangle)];
-    auto &p1 = hitChunkInfo.chunk->mVertices[std::get<1>(hitChunkInfo.triangle)];
-    auto &p2 = hitChunkInfo.chunk->mVertices[std::get<2>(hitChunkInfo.triangle)];
+    auto& p0 = hitChunkInfo.chunk->mVertices[std::get<0>(hitChunkInfo.triangle)];
+    auto& p1 = hitChunkInfo.chunk->mVertices[std::get<1>(hitChunkInfo.triangle)];
+    auto& p2 = hitChunkInfo.chunk->mVertices[std::get<2>(hitChunkInfo.triangle)];
 
     glm::vec3 v1 = p1 - p0;
     glm::vec3 v2 = p2 - p0;
 
-    auto tmpVec = glm::cross(v2 ,v1);
+    auto tmpVec = glm::cross(v2, v1);
     varnormal.x = tmpVec.z;
     varnormal.y = tmpVec.y;
     varnormal.z = tmpVec.x;
@@ -426,34 +450,34 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     // Smooth option, gradient the normal towards closest vertex
     if (smoothNormals) // Vertex Normal
     {
-      auto normalWeights = getBarycentricCoordinatesAt(p0, p1, p2, hitChunkInfo.position, varnormal);
+        auto normalWeights = getBarycentricCoordinatesAt(p0, p1, p2, hitChunkInfo.position, varnormal);
 
-      auto& tile_buffer = hitChunkInfo.chunk->mt->getChunkHeightmapBuffer();
-      int chunk_start = (hitChunkInfo.chunk->px * 16 + hitChunkInfo.chunk->py) * mapbufsize * 4;
+        auto& tile_buffer = hitChunkInfo.chunk->mt->getChunkHeightmapBuffer();
+        int chunk_start = (hitChunkInfo.chunk->px * 16 + hitChunkInfo.chunk->py) * mapbufsize * 4;
 
-      const auto& vNormal0 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<0>(hitChunkInfo.triangle) * 4]);
-      const auto& vNormal1 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<1>(hitChunkInfo.triangle) * 4]);
-      const auto& vNormal2 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<2>(hitChunkInfo.triangle) * 4]);
+        const auto& vNormal0 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<0>(hitChunkInfo.triangle) * 4]);
+        const auto& vNormal1 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<1>(hitChunkInfo.triangle) * 4]);
+        const auto& vNormal2 = *reinterpret_cast<glm::vec3*>(&tile_buffer[chunk_start + std::get<2>(hitChunkInfo.triangle) * 4]);
 
-      varnormal.x =
-          vNormal0.x * normalWeights.x +
-          vNormal1.x * normalWeights.y +
-          vNormal2.x * normalWeights.z;
+        varnormal.x =
+            vNormal0.x * normalWeights.x +
+            vNormal1.x * normalWeights.y +
+            vNormal2.x * normalWeights.z;
 
-      varnormal.y =
-          vNormal0.y * normalWeights.x +
-          vNormal1.y * normalWeights.y +
-          vNormal2.y * normalWeights.z;
+        varnormal.y =
+            vNormal0.y * normalWeights.x +
+            vNormal1.y * normalWeights.y +
+            vNormal2.y * normalWeights.z;
 
-      varnormal.z =
-          vNormal0.z * normalWeights.x +
-          vNormal1.z * normalWeights.y +
-          vNormal2.z * normalWeights.z;
+        varnormal.z =
+            vNormal0.z * normalWeights.x +
+            vNormal1.z * normalWeights.y +
+            vNormal2.z * normalWeights.z;
     }
 
 
     glm::vec3 worldUp = glm::vec3(0, 1, 0);
-    glm::vec3 a =glm::cross(worldUp ,varnormal);
+    glm::vec3 a = glm::cross(worldUp, varnormal);
 
     q.x = a.x;
     q.y = a.y;
@@ -493,28 +517,46 @@ void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
     dir.y = math::degrees(math::radians(eulerAngles.x))._; //Pitch
     dir.z = math::degrees(math::radians(eulerAngles.y))._; //Yaw
 
-    std::get<selected_object_type>(entry)->recalcExtents();
+    obj->recalcExtents();
 
     // yaw (z-axis rotation)
     double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
     double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
-    updateTilesEntry(entry, model_update::add);
+    updateTilesEntry(obj, model_update::add);
+}
+
+void World::rotate_selected_models_to_ground_normal(bool smoothNormals)
+{
+  ZoneScoped;
+  if (!_selected_model_count)
+      return;
+  selection_updated = true;
+  for (auto& entry : _current_selection)
+  {
+    auto type = entry.index();
+    if (type == eEntry_MapChunk)
+    {
+      continue;
+    }
+
+    auto& obj = std::get<selected_object_type>(entry);
+
+    rotate_model_to_ground_normal(obj, smoothNormals);
   }
+  update_selected_model_groups();
 }
 
 void World::set_current_selection(selection_type entry)
 {
   ZoneScoped;
-  _current_selection.clear();
-  _current_selection.push_back(entry);
-  _multi_select_pivot = std::nullopt;
-
-  _selected_model_count = entry.index() != eEntry_Object ? 0 : 1;
+  reset_selection();
+  add_to_selection(entry);
 }
 
 void World::add_to_selection(selection_type entry, bool skip_group)
 {
   ZoneScoped;
+  selection_updated = true;
   if (entry.index() == eEntry_Object)
   {
     _selected_model_count++;
@@ -525,11 +567,13 @@ void World::add_to_selection(selection_type entry, bool skip_group)
         auto obj = std::get<selected_object_type>(entry);
         for (auto& group : _selection_groups)
         {
-            if (group.group_contains_object(obj))
+            if (group.contains_object(obj))
             {
+                // make sure to add it to selection before donig group selection so it doesn't get selected twice
+                _current_selection.push_back(entry);
                 // this then calls add_to_selection() with skip_group = true to avoid repetition
                 group.select_group();
-                break;
+                return;
             }
         }
     }
@@ -538,7 +582,7 @@ void World::add_to_selection(selection_type entry, bool skip_group)
   update_selection_pivot();
 }
 
-void World::remove_from_selection(selection_type entry)
+void World::remove_from_selection(selection_type entry, bool skip_group)
 {
   ZoneScoped;
   std::vector<selection_type>::iterator position = std::find(_current_selection.begin(), _current_selection.end(), entry);
@@ -547,14 +591,30 @@ void World::remove_from_selection(selection_type entry)
     if (entry.index() == eEntry_Object)
     {
       _selected_model_count--;
+
+      // check if it is in a group
+      if (!skip_group)
+      {
+        auto obj = std::get<selected_object_type>(entry);
+        for (auto& group : _selection_groups)
+        {
+          if (group.contains_object(obj))
+          {
+              // this then calls remove_from_selection() with skip_group = true to avoid repetition
+              group.unselect_group();
+              break;
+          }
+        }
+      }
     }
 
     _current_selection.erase(position);
     update_selection_pivot();
+    selection_updated = true;
   }
 }
 
-void World::remove_from_selection(std::uint32_t uid)
+void World::remove_from_selection(std::uint32_t uid, bool skip_group)
 {
   ZoneScoped;
   for (auto it = _current_selection.begin(); it != _current_selection.end(); ++it)
@@ -564,32 +624,63 @@ void World::remove_from_selection(std::uint32_t uid)
 
     auto obj = std::get<selected_object_type>(*it);
 
-    if (obj->which() == eMODEL && static_cast<ModelInstance*>(obj)->uid == uid)
+    if (obj->uid == uid)
     {
-      _current_selection.erase(it);
-      update_selection_pivot();
-      return;
+        _selected_model_count--;
+        _current_selection.erase(it);
+
+        // check if it is in a group
+        if (!skip_group)
+        {
+            for (auto& group : _selection_groups)
+            {
+                if (group.contains_object(obj))
+                {
+                    // this then calls remove_from_selection() with skip_group = true to avoid repetition
+                    group.unselect_group();
+                    break;
+                }
+            }
+        }
+
+        update_selection_pivot();
+        selection_updated = true;
+        return;
     }
-    else if (obj->which() == eWMO && static_cast<WMOInstance*>(obj)->uid == uid)
-    {
-      _current_selection.erase(it);
-      update_selection_pivot();
-      return;
-    }
+
+
   }
 }
 
 void World::reset_selection()
 {
   ZoneScoped;
+  selection_updated = true;
   _current_selection.clear();
   _multi_select_pivot = std::nullopt;
   _selected_model_count = 0;
+
+  for (auto& selection_group : _selection_groups)
+  {
+      selection_group.setUnselected();
+  }
 }
 
 void World::delete_selected_models()
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
+
+  // erase selected groups as well
+  for (auto& group : _selection_groups)
+  {
+      if (group.isSelected())
+      {
+          group.remove_group();
+      }
+  }
+
   _model_instance_storage.delete_instances(_current_selection);
   need_model_updates = true;
   reset_selection();
@@ -626,6 +717,8 @@ glm::vec3 World::get_ground_height(glm::vec3 pos)
 void World::snap_selected_models_to_the_ground()
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
   for (auto& entry : _current_selection)
   {
     auto type = entry.index();
@@ -645,13 +738,16 @@ void World::snap_selected_models_to_the_ground()
 
     updateTilesEntry(entry, model_update::add);
   }
-
+  selection_updated = true;
   update_selection_pivot();
+  update_selected_model_groups();
 }
 
 void World::scale_selected_models(float v, object_scaling_type type)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
   for (auto& entry : _current_selection)
   {
     if (entry.index() == eEntry_Object)
@@ -723,11 +819,14 @@ void World::scale_selected_models(float v, object_scaling_type type)
       }
     }
   }
+  update_selected_model_groups();
 }
 
 void World::move_selected_models(float dx, float dy, float dz)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
   for (auto& entry : _current_selection)
   {
     auto type = entry.index();
@@ -750,8 +849,9 @@ void World::move_selected_models(float dx, float dy, float dz)
 
     updateTilesEntry(entry, model_update::add);
   }
-
+  selection_updated = true;
   update_selection_pivot();
+  update_selected_model_groups();
 }
 
 void World::move_model(selection_type entry, float dx, float dy, float dz)
@@ -782,6 +882,8 @@ void World::move_model(selection_type entry, float dx, float dy, float dz)
 void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
   // move models relative to the pivot when several are selected
   if (has_multiple_model_selected())
   {
@@ -816,8 +918,9 @@ void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
 
     updateTilesEntry(entry, model_update::add);
   }
-
+  selection_updated = true;
   update_selection_pivot();
+  update_selected_model_groups();
 }
 
 void World::set_model_pos(selection_type entry, glm::vec3 const& pos, bool change_height)
@@ -842,6 +945,9 @@ void World::set_model_pos(selection_type entry, glm::vec3 const& pos, bool chang
 void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
+
   math::degrees::vec3 dir_change(rx._, ry._, rz._);
   bool has_multi_select = has_multiple_model_selected();
 
@@ -871,25 +977,31 @@ void World::rotate_selected_models(math::degrees rx, math::degrees ry, math::deg
     }
     else
     {
-      math::degrees::vec3& dir = obj->dir;
-      dir += dir_change;
+      // math::degrees::vec3& dir = obj->dir;
+      // dir += dir_change;
     }
+    math::degrees::vec3& dir = obj->dir;
+    dir += dir_change;
 
     obj->recalcExtents();
 
     updateTilesEntry(entry, model_update::add);
   }
+  update_selected_model_groups();
 }
 
 void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, math::degrees rz)
 {
   ZoneScoped;
+  if (!_selected_model_count)
+      return;
+
   math::degrees::vec3 new_dir(rx._, ry._, rz._);
 
   for (auto& entry : _current_selection)
   {
     auto type = entry.index();
-    if (type == eEntry_MapChunk)
+    if (type != eEntry_Object)
     {
       continue;
     }
@@ -907,8 +1019,17 @@ void World::set_selected_models_rotation(math::degrees rx, math::degrees ry, mat
 
     updateTilesEntry(entry, model_update::add);
   }
+  update_selected_model_groups();
 }
 
+void World::update_selected_model_groups()
+{
+  for (auto& selection_group : _selection_groups)
+  {
+      if (selection_group.isSelected())
+          selection_group.recalcExtents();
+  }
+}
 
 MapChunk* World::getChunkAt(glm::vec3 const& pos)
 {
@@ -1523,17 +1644,48 @@ bool World::sprayTexture(glm::vec3 const& pos, Brush *brush, float strength, flo
   return succ;
 }
 
-bool World::replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture, bool entire_chunk)
+bool World::replaceTexture(glm::vec3 const& pos, float radius, scoped_blp_texture_reference const& old_texture, scoped_blp_texture_reference new_texture, bool entire_chunk, bool entire_tile)
 {
   ZoneScoped;
-  return for_all_chunks_in_range
-    ( pos, radius
-      , [&](MapChunk* chunk)
+
+  if (entire_tile)
+  {
+      bool changed(false);
+
+      for (MapTile* tile : mapIndex.tiles_in_range(pos, radius))
       {
-        NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
-        return chunk->replaceTexture(pos, radius, old_texture, new_texture, entire_chunk);
+          if (!tile->finishedLoading())
+          {
+              continue;
+          }
+
+          for (int i = 0; i < 16; ++i)
+          {
+              for (int j = 0; j < 16; ++j)
+              {
+                  MapChunk* chunk = tile->getChunk(i, j);
+                  NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
+                  if (chunk->replaceTexture(pos, radius, old_texture, new_texture, true))
+                  {
+                      changed = true;
+                      mapIndex.setChanged(tile);
+                  }
+              }
+          }
       }
-    );
+      return changed;
+  }
+  else
+  {
+    return for_all_chunks_in_range
+      ( pos, radius
+        , [&](MapChunk* chunk)
+        {
+          NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
+          return chunk->replaceTexture(pos, radius, old_texture, new_texture, entire_chunk);
+        }
+      );
+  }
 }
 
 void World::eraseTextures(glm::vec3 const& pos)
@@ -1601,7 +1753,7 @@ void World::loadAllTiles()
   }
 }
 
-void World::convert_alphamap(bool to_big_alpha)
+void World::convert_alphamap(QProgressDialog* progress_dialog, bool to_big_alpha)
 {
   ZoneScoped;
 
@@ -1610,10 +1762,13 @@ void World::convert_alphamap(bool to_big_alpha)
     return;
   }
 
+
+  int count = 0;
   for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
     {
+      // not cancellable.
       TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
@@ -1632,10 +1787,11 @@ void World::convert_alphamap(bool to_big_alpha)
         {
           mapIndex.unloadTile(tile);
         }
+        count++;
+        progress_dialog->setValue(count);
       }
     }
   }
-
   mapIndex.convert_alphamap(to_big_alpha);
   mapIndex.save();
 }
@@ -1801,10 +1957,10 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
 
   std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
 
-  auto instance = _model_instance_storage.get_model_instance(uid).value();
+  auto instance = _model_instance_storage.get_model_instance(uid); // .value();
   // _models_by_filename[file_key.filepath()].push_back(instance);
 
-  return instance;
+  return instance.value();
 }
 
 void World::addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
@@ -1874,7 +2030,9 @@ WMOInstance* World::addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey co
 
   std::uint32_t uid = _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
 
-  return _model_instance_storage.get_wmo_instance(uid).value();
+  auto instance = _model_instance_storage.get_wmo_instance(uid);
+
+  return instance.value();
 }
 
 
@@ -1983,7 +2141,7 @@ void World::wait_for_all_tile_updates()
   _tile_update_queue.wait_for_all_update();
 }
 
-unsigned int World::getMapID()
+unsigned int World::getMapID() const
 {
   ZoneScoped;
   return mapIndex._map_id;
@@ -2130,7 +2288,7 @@ void World::exportADTVertexColorMap(glm::vec3 const& pos)
   );
 }
 
-void World::importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigned layer)
+void World::importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigned layer, bool cleanup)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -2145,7 +2303,7 @@ void World::importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigne
     for_tile_at ( pos
       , [&] (MapTile* tile)
                   {
-                    tile->setAlphaImage(scaled, layer);
+                    tile->setAlphaImage(scaled, layer, cleanup);
                   }
     );
 
@@ -2155,14 +2313,14 @@ void World::importADTAlphamap(glm::vec3 const& pos, QImage const& image, unsigne
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setAlphaImage(image, layer);
+        tile->setAlphaImage(image, layer, cleanup);
       }
     );
   }
 
 }
 
-void World::importADTAlphamap(glm::vec3 const& pos)
+void World::importADTAlphamap(glm::vec3 const& pos, bool cleanup)
 {
   ZoneScoped;
   for_all_chunks_on_tile(pos, [](MapChunk* chunk)
@@ -2194,14 +2352,14 @@ void World::importADTAlphamap(glm::vec3 const& pos)
         if (img.width() != 1024 || img.height() != 1024)
           img = img.scaled(1024, 1024, Qt::AspectRatioMode::IgnoreAspectRatio);
 
-        tile->setAlphaImage(img, i);
+        tile->setAlphaImage(img, i, true);
       }
 
     }
   );
 }
 
-void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float multiplier, unsigned mode, bool tiledEdges)
+void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float min_height, float max_height, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
   int desired_dimensions = tiledEdges ? 256 : 257;
@@ -2217,7 +2375,7 @@ void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float 
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setHeightmapImage(scaled, multiplier, mode, tiledEdges);
+        tile->setHeightmapImage(scaled, min_height, max_height, mode, tiledEdges);
       }
     );
 
@@ -2227,13 +2385,13 @@ void World::importADTHeightmap(glm::vec3 const& pos, QImage const& image, float 
     for_tile_at ( pos
       , [&] (MapTile* tile)
       {
-        tile->setHeightmapImage(image, multiplier, mode, tiledEdges);
+        tile->setHeightmapImage(image, min_height, max_height, mode, tiledEdges);
       }
     );
   }
 }
 
-void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned mode, bool tiledEdges)
+void World::importADTHeightmap(glm::vec3 const& pos, float min_height, float max_height, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
   for_tile_at ( pos
@@ -2250,8 +2408,17 @@ void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned 
                          + "_" + std::to_string(tile->index.x).c_str() + "_" + std::to_string(tile->index.z).c_str()
                          + "_height" + ".png";
 
-      if(!QFileInfo::exists(filename))
+      if (!QFileInfo::exists(filename))
+      {
+          QMessageBox::warning
+          (nullptr
+              , "File not found"
+              , "File not found: " + filename
+              , QMessageBox::Ok
+          );
         return;
+      }
+
 
       for_all_chunks_on_tile(pos, [](MapChunk* chunk)
       {
@@ -2265,10 +2432,42 @@ void World::importADTHeightmap(glm::vec3 const& pos, float multiplier, unsigned 
       if (img.width() != desiredSize || img.height() != desiredSize)
         img = img.scaled(static_cast<int>(desiredSize), static_cast<int>(desiredSize), Qt::AspectRatioMode::IgnoreAspectRatio);
 
-      tile->setHeightmapImage(img, multiplier, mode, tiledEdges);
+      tile->setHeightmapImage(img, min_height, max_height, mode, tiledEdges);
 
     }
   );
+}
+
+void World::importADTWatermap(glm::vec3 const& pos, QImage const& image, float min_height, float max_height, unsigned mode, bool tiledEdges)
+{
+    ZoneScoped;
+    int desired_dimensions = tiledEdges ? 256 : 257;
+    for_all_chunks_on_tile(pos, [](MapChunk* chunk)
+        {
+            NOGGIT_CUR_ACTION->registerChunkLiquidChange(chunk);
+        });
+
+    if (image.width() != desired_dimensions || image.height() != desired_dimensions)
+    {
+        QImage scaled = image.scaled(desired_dimensions, desired_dimensions, Qt::AspectRatioMode::IgnoreAspectRatio);
+
+        for_tile_at(pos
+            , [&](MapTile* tile)
+            {
+                tile->Water.setWatermapImage(scaled, min_height, max_height, mode, tiledEdges);
+            }
+        );
+
+    }
+    else
+    {
+        for_tile_at(pos
+            , [&](MapTile* tile)
+            {
+                tile->Water.setWatermapImage(image, min_height, max_height, mode, tiledEdges);
+            }
+        );
+    }
 }
 
 void World::importADTVertexColorMap(glm::vec3 const& pos, int mode, bool tiledEdges)
@@ -2520,7 +2719,7 @@ void World::setWaterType(const TileIndex& pos, int type, int layer)
               );
 }
 
-int World::getWaterType(const TileIndex& tile, int layer)
+int World::getWaterType(const TileIndex& tile, int layer) const
 {
   ZoneScoped;
   if (mapIndex.tileLoaded(tile))
@@ -2546,6 +2745,36 @@ void World::autoGenWaterTrans(const TileIndex& pos, float factor)
   });
 }
 
+void World::CleanupEmptyTexturesChunks()
+{
+    ZoneScoped;
+    for (MapTile* tile : mapIndex.loaded_tiles())
+    {
+        bool tileChanged = false;
+
+        for (unsigned ty = 0; ty < 16; ty++)
+        {
+            for (unsigned tx = 0; tx < 16; tx++)
+            {
+                MapChunk* chunk = tile->getChunk(tx, ty);
+
+                TextureSet* texture_set = chunk->getTextureSet();
+
+                bool changed = texture_set->eraseUnusedTextures();
+
+                if (changed)
+                {
+                    NOGGIT_CUR_ACTION->registerChunkTextureChange(chunk);
+                    tileChanged = true;
+                }
+            }
+        }
+        if (tileChanged)
+        {
+            mapIndex.setChanged(tile);
+        }
+    }
+}
 
 void World::fixAllGaps()
 {
@@ -2628,7 +2857,7 @@ void World::fixAllGaps()
   }
 }
 
-bool World::isUnderMap(glm::vec3 const& pos)
+bool World::isUnderMap(glm::vec3 const& pos) const
 {
   ZoneScoped;
   TileIndex const tile (pos);
@@ -2840,7 +3069,8 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
       }
       else
       {
-          add_to_selection(obj);
+          if (!is_selected(obj))
+            add_to_selection(obj);
       }
   }
 }
@@ -3134,66 +3364,74 @@ void World::exportAllADTsVertexColorMap()
   }
 }
 
-void World::importAllADTsAlphamaps()
+void World::importAllADTsAlphamaps(QProgressDialog* progress_dialog)
 {
+  bool clean_up = false;
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
   if (!(path.endsWith('\\') || path.endsWith('/')))
   {
     path += "/";
   }
-
+  int count = 0;
   for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
     {
+      if (progress_dialog->wasCanceled())
+        return;
+
       TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
-
+      
       if (mTile)
       {
         mTile->wait_until_loaded();
-
+      
         for (int i = 1; i < 4; ++i)
         {
           QString filename = path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
                   + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
                   + "_layer" + std::to_string(i).c_str() + ".png";
-
+      
           if(!QFileInfo::exists(filename))
             continue;
-
+      
           QImage img;
           img.load(filename, "PNG");
-
+      
           if (img.width() != 1024 || img.height() != 1024)
           {
             QImage scaled = img.scaled(1024, 1024, Qt::IgnoreAspectRatio);
-            mTile->setAlphaImage(scaled, i);
+            mTile->setAlphaImage(scaled, i, clean_up);
           }
           else
           {
-            mTile->setAlphaImage(img, i);
+            mTile->setAlphaImage(img, i, clean_up);
           }
-
+      
         }
-
+      
         mTile->saveTile(this);
         mapIndex.markOnDisc (tile, true);
         mapIndex.unsetChanged(tile);
-
+      
         if (unload)
         {
           mapIndex.unloadTile(tile);
         }
+
+        count++;
+        progress_dialog->setValue(count);
       }
+
     }
   }
 }
 
-void World::importAllADTsHeightmaps(float multiplier, unsigned int mode, bool tiledEdges)
+void World::importAllADTsHeightmaps(QProgressDialog* progress_dialog, float min_height, float max_height, unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
@@ -3202,54 +3440,59 @@ void World::importAllADTsHeightmaps(float multiplier, unsigned int mode, bool ti
     path += "/";
   }
 
+  int count = 0;
   for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
     {
+      if (progress_dialog->wasCanceled())
+        return;
       TileIndex tile(x, z);
 
       bool unload = !mapIndex.tileLoaded(tile) && !mapIndex.tileAwaitingLoading(tile);
       MapTile* mTile = mapIndex.loadTile(tile);
-
+      
       if (mTile)
       {
         mTile->wait_until_loaded();
-
+      
         QString filename = path + "/world/maps/" + basename.c_str() + "/" + basename.c_str()
                            + "_" + std::to_string(mTile->index.x).c_str() + "_" + std::to_string(mTile->index.z).c_str()
                            + "_height.png";
-
-        if(!QFileInfo::exists(filename))
-          continue;
-
+      
+        if (!QFileInfo::exists(filename))
+            continue;
+      
         QImage img;
         img.load(filename, "PNG");
-
+      
         size_t desiredSize = tiledEdges ? 256 : 257;
         if (img.width() != desiredSize || img.height() != desiredSize)
         {
           QImage scaled = img.scaled(257, 257, Qt::IgnoreAspectRatio);
-          mTile->setHeightmapImage(scaled, multiplier, mode, tiledEdges);
+          mTile->setHeightmapImage(scaled, min_height, max_height, mode, tiledEdges);
         }
         else
         {
-          mTile->setHeightmapImage(img, multiplier, mode, tiledEdges);
+          mTile->setHeightmapImage(img, min_height, max_height, mode, tiledEdges);
         }
-
+      
         mTile->saveTile(this);
         mapIndex.markOnDisc (tile, true);
         mapIndex.unsetChanged(tile);
-
+      
         if (unload)
         {
           mapIndex.unloadTile(tile);
         }
+        count++;
+        progress_dialog->setValue(count);
       }
     }
   }
 }
 
-void World::importAllADTVertexColorMaps(unsigned int mode, bool tiledEdges)
+void World::importAllADTVertexColorMaps(unsigned mode, bool tiledEdges)
 {
   ZoneScoped;
   QString path = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
@@ -3451,12 +3694,51 @@ void World::select_objects_in_area(
     }
 }
 
-void World::add_object_group()
+void World::add_object_group_from_selection()
 {
-    // auto selected_objects = get_selected_objects();
+    // create group from selected objects
     selection_group selection_group(get_selected_objects(), this);
+    selection_group._is_selected = true;
 
     _selection_groups.push_back(selection_group);
 
     // write group to project
+    saveSelectionGroups();
 }
+
+void World::remove_selection_group(selection_group* group)
+{
+    // std::vector<selection_type>::iterator position = std::find(_selection_groups.begin(), _selection_groups.end(), group);
+    // if (position != _selection_groups.end())
+    // {
+    //     _selection_groups.erase(position);
+    // }
+
+    // for (auto it = _selection_groups.begin(); it != _selection_groups.end(); ++it)
+    // {
+    //     auto it_group = *it;
+    //     if (it_group.getMembers().size() == group->getMembers().size() && it_group.getExtents() == group->getExtents())
+    //     // if (it_group.isSelected())
+    //     {
+    //         _selection_groups.erase(it);
+    //         saveSelectionGroups();
+    //         return;
+    //     }
+    // }
+}
+
+void World::clear_selection_groups()
+{
+    // _selection_groups.clear();
+
+    // for (auto it = _selection_groups.begin(); it != _selection_groups.end(); ++it)
+    for (auto& group : _selection_groups)
+    {
+        // auto it_group = *it;
+        // it->remove_group();
+        group.remove_group(false);
+    }
+    _selection_groups.clear(); // in case it didn't properly clear
+    saveSelectionGroups(); // only save once
+}
+

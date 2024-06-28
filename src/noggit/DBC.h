@@ -32,7 +32,7 @@ public:
   static const size_t AmbientMultiplier = 34;    // float
   static const size_t LightId = 35;    // int
 
-  static std::string getAreaName(int pAreaID);
+  static std::string getAreaFullName(int pAreaID);
   static std::uint32_t get_area_parent(int area_id);
   static std::uint32_t get_new_areabit();
 };
@@ -48,10 +48,22 @@ public:
   static const size_t MapID = 0;        // uint
   static const size_t InternalName = 1;    // string
   static const size_t AreaType = 2;      // uint
-  static const size_t IsBattleground = 4;    // uint
+  static const size_t Flags = 3;      // uint
+  static const size_t IsBattleground = 4;    // uint 
   static const size_t Name = 5;        // loc
-
+  static const size_t AreaTableID = 22;    // uint 
+  static const size_t MapDescriptionAlliance = 23;    // loc 
+  static const size_t MapDescriptionHorde = 40;    // loc 
   static const size_t LoadingScreen = 57;    // uint [LoadingScreen]
+  static const size_t minimapIconScale = 58;    // uint [LoadingScreen]
+  static const size_t corpseMapID = 59; //	iRefID	Points to column 1, -1 if none
+  static const size_t corpseX = 60; //	Float	The X - Coord of the instance entrance
+  static const size_t corpseY = 61; //	Float	The Y - Coord of the instance entrance
+  static const size_t TimeOfDayOverride = 62; //	Integer	Set to - 1 for everything but Orgrimmar and Dalaran arena.For those, the time of day will change to this.
+  static const size_t ExpansionID = 63; //	Integer	Vanilla : 0, BC : 1, WotLK : 2
+  static const size_t RaidOffset = 64; //	Integer
+  static const size_t NumberOfPlayers = 65; //	Integer	Used for reset time?
+
   static std::string getMapName(int pMapID);
   static int findMapName(const std::string& map_name);
 };
@@ -175,6 +187,27 @@ public:
   static const size_t Flags = 2;   // uint
 };
 
+class TerrainTypeDB : public DBCFile
+{
+public:
+    TerrainTypeDB() :
+        DBCFile("DBFilesClient\\TerrainType.dbc")
+    { }
+
+    /// Fields
+    // WDBX generates a fake id column. Real id start at 0.
+    static const size_t TerrainId = 0;    // uint // this is the real id referenced by groundeffecttexture
+    static const size_t TerrainDesc = 1;   // string
+    static const size_t FootstepSprayRun = 2;   // uint
+    static const size_t FootstepSprayWalk = 3;   // uint
+    static const size_t Sound = 4;   // uint
+    static const size_t Flags = 5;   // uint
+};
+
+// TODO for terrain type editing:
+// TerrainTypeSounds, FootstepTerrainLookup, FootprintTextures
+
+
 class LiquidTypeDB : public DBCFile
 {
 public:
@@ -288,7 +321,7 @@ public:
     static const size_t ID = 0;    // uint
     static const size_t WmoId = 1;  // uint
     static const size_t NameSetId = 2;    // uint [AreaID]
-    static const size_t WMOGroupID= 3;    // uint 
+    static const size_t WMOGroupID= 3;    // ! int 
     static const size_t SoundProviderPreferences = 4;    // uint 
     static const size_t UnderwaterSoundProviderPreferences = 5;    // uint 
     static const size_t SoundAmbience = 6;    // uint 
@@ -336,6 +369,7 @@ extern LightIntBandDB gLightIntBandDB;
 extern LightFloatBandDB gLightFloatBandDB;
 extern GroundEffectDoodadDB gGroundEffectDoodadDB;
 extern GroundEffectTextureDB gGroundEffectTextureDB;
+extern TerrainTypeDB gTerrainTypeDB;
 extern LiquidTypeDB gLiquidTypeDB;
 extern SoundProviderPreferencesDB gSoundProviderPreferencesDB;
 extern SoundAmbienceDB gSoundAmbienceDB;

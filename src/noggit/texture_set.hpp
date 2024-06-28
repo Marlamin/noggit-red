@@ -31,6 +31,13 @@ struct tmp_edit_alpha_values
   }
 };
 
+struct layer_info
+{
+    // uint32_t  textureID = 0;
+    uint32_t  flags = 0;
+    // uint32_t  ofsAlpha = 0;
+    uint32_t  effectID = 0xFFFFFFFF; // default value, see https://wowdev.wiki/ADT/v18#MCLY_sub-chunk
+};
 
 class TextureSet
 {
@@ -38,7 +45,7 @@ public:
   TextureSet() = delete;
   TextureSet(MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
              , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
-             , Noggit::NoggitRenderContext context);
+             , Noggit::NoggitRenderContext context, MapChunkHeader const& header);
 
   int addTexture(scoped_blp_texture_reference texture);
   void eraseTexture(size_t id);
@@ -97,12 +104,18 @@ public:
 
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
   auto getDoodadMappingBase(void) -> std::uint16_t* { return _doodadMapping.data(); }
+  std::array<std::uint16_t, 8> const& getDoodadMapping() { return _doodadMapping; }
+  std::array<std::array<std::uint8_t, 8>, 8> const getDoodadMappingReadable(); // get array of readable values
   auto getDoodadStencilBase(void) -> std::uint8_t* { return _doodadStencil.data(); }
+  uint8_t const getDoodadActiveLayerIdAt(unsigned int x, unsigned int y); // max is 8
+  bool const getDoodadDisabledAt(int x, int y); // max is 8
   auto getEffectForLayer(std::size_t idx) const -> unsigned { return _layers_info[idx].effectID; }
-  ENTRY_MCLY* getMCLYEntries() { return &_layers_info[0]; };
+  layer_info* getMCLYEntries() { return &_layers_info[0]; };
   void setNTextures(size_t n) { nTextures = n; };
   std::vector<scoped_blp_texture_reference>* getTextures() { return &textures; };
 
+  // get the weight of each texture in a chunk unit
+  std::array<float, 4> get_textures_weight_for_unit(unsigned int unit_x, unsigned int unit_y);
 
 private:
 
@@ -125,11 +138,18 @@ private:
 
   size_t nTextures;
 
-  std::array<std::uint16_t, 8> _doodadMapping;
-  std::array<std::uint8_t, 8> _doodadStencil;
+  // byte[8][8] // can store the 2bits value in a byte, but might never be higher than 3 or layer count.
+  std::array<std::uint16_t, 8> _doodadMapping; // "predTex", It is used to determine which detail doodads to show.Values are an array of two bit unsigned integers, naming the layer.
+                                                // this is actually uint2_t[8][8] (8*8 -> 2 bit each)
+                                                // getting the layer id from the two bits :  MCLY textureLayer entry ID (can be only one of: 00 | 01 | 10 | 11)
+  // bool[8][8]
+  // TODO x and Y are swapped
+  std::array<std::uint8_t, 8> _doodadStencil; // doodads disabled if 1; WoD: may be an explicit MCDD chunk
+                                                // this is actually uint1_t[8][8] (8*8 -> 1 bit each)
   bool _need_lod_texture_map_update = false;
 
-  ENTRY_MCLY _layers_info[4];
+  // ENTRY_MCLY _layers_info[4]; // TODO rework this, don't need to store textureid and offset
+  layer_info _layers_info[4];
 
   std::optional<tmp_edit_alpha_values> tmp_edit_values;
 

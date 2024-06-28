@@ -31,6 +31,8 @@ struct ChunkInstanceData
   vec4 ChunkTextureHeightScale;
   vec4 ChunkTextureHeightOffset;
 
+  vec4 ChunkGroundEffectColor;
+  ivec4 ChunkDoodadsEnabled2_ChunksLayerEnabled2;
 };
 
 layout (std140) uniform chunk_instances

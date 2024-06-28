@@ -189,6 +189,14 @@ namespace Noggit
       _world->updateTilesEntry(instance.value(), model_update::remove);
       auto obj = std::get<selected_object_type>(instance.value());
 
+      for (auto& selection_group : _world->_selection_groups)
+      {
+          if (selection_group.contains_object(obj))
+          {
+              selection_group.remove_member(obj->uid);
+          }
+      }
+
       if (NOGGIT_CUR_ACTION)
       {
         NOGGIT_CUR_ACTION->registerObjectRemoved(obj);

@@ -35,26 +35,27 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
   , _chunk_update_flags(ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
-                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS)
+                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS
+                        | ChunkUpdateFlags::GROUND_EFFECT)
 {
 
 
   if (init_empty)
   {
 
-    header.flags = 0;
-    px = header.ix = chunk_idx / 16;
-    py = header.iy = chunk_idx % 16;
+    //  header.flags = 0;
+    px = chunk_idx / 16;
+    py = chunk_idx % 16;
 
-    header.zpos = ZEROPOINT - (maintile->zbase + py * CHUNKSIZE);
-    header.xpos = ZEROPOINT - (maintile->xbase + px * CHUNKSIZE);
-    header.ypos = 0.0f;
+    zbase = ZEROPOINT - (maintile->zbase + py * CHUNKSIZE);
+    xbase = ZEROPOINT - (maintile->xbase + px * CHUNKSIZE);
+    ybase = 0.0f;
 
-    areaID = header.areaid = 0;
+    areaID = 0;
 
-    zbase = header.zpos;
-    xbase = header.xpos;
-    ybase = header.ypos;
+    // zbase = header.zpos;
+    // xbase = header.xpos;
+    // ybase = header.ypos;
 
     texture_set = nullptr;
 
@@ -107,7 +108,6 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
 
     // use absolute y pos in vertices
     ybase = 0.0f;
-    header.ypos = 0.0f;
 
     vcenter = (vmin + vmax) * 0.5f;
 
@@ -122,6 +122,8 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
 
   hasMCCV = false;
 
+  MapChunkHeader tmp_chunk_header;
+
   // - MCNK ----------------------------------------------
   {
     f->read(&fourcc, 4);
@@ -129,36 +131,40 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
 
     assert(fourcc == 'MCNK');
 
-    f->read(&header, 0x80);
 
-    header_flags.value = header.flags;
-    areaID = header.areaid;
 
-    zbase = header.zpos;
-    xbase = header.xpos;
-    ybase = header.ypos;
+    f->read(&tmp_chunk_header, sizeof(MapChunkHeader));
 
-    px = header.ix;
-    py = header.iy;
+    header_flags.value = tmp_chunk_header.flags;
+    areaID = tmp_chunk_header.areaid;
 
-    holes = header.holes;
+    zbase = tmp_chunk_header.zpos;
+    xbase = tmp_chunk_header.xpos;
+    ybase = tmp_chunk_header.ypos;
+
+    px = tmp_chunk_header.ix;
+    py = tmp_chunk_header.iy;
+
+    holes = tmp_chunk_header.holes;
 
     // correct the x and z values ^_^
     zbase = zbase*-1.0f + ZEROPOINT;
     xbase = xbase*-1.0f + ZEROPOINT;
+
+
   }
 
   if (!load_textures)
   {
-      this->header.nLayers = 0;
+      tmp_chunk_header.nLayers = 0;
   }
 
   texture_set = std::make_unique<TextureSet>(this, f, base, maintile, bigAlpha,
-     !!header_flags.flags.do_not_fix_alpha_map, mode == tile_mode::uid_fix_all, _context);
+     !!header_flags.flags.do_not_fix_alpha_map, mode == tile_mode::uid_fix_all, _context, tmp_chunk_header);
 
   // - MCVT ----------------------------------------------
   {
-    f->seek(base + header.ofsHeight);
+    f->seek(base + tmp_chunk_header.ofsHeight);
     f->read(&fourcc, 4);
     f->read(&size, 4);
 
@@ -192,11 +198,11 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
 
     // use absolute y pos in vertices
     ybase = 0.0f;
-    header.ypos = 0.0f;
+    tmp_chunk_header.ypos = 0.0f;
   }
   // - MCNR ----------------------------------------------
   {
-    f->seek(base + header.ofsNormal);
+    f->seek(base + tmp_chunk_header.ofsNormal);
     f->read(&fourcc, 4);
     f->read(&size, 4);
 
@@ -216,9 +222,9 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
     }
   }
   // - MCSH ----------------------------------------------
-  if((header_flags.flags.has_mcsh) && header.ofsShadow && header.sizeShadow)
+  if((header_flags.flags.has_mcsh) && tmp_chunk_header.ofsShadow && tmp_chunk_header.sizeShadow)
   {
-    f->seek(base + header.ofsShadow);
+    f->seek(base + tmp_chunk_header.ofsShadow);
     f->read(&fourcc, 4);
     f->read(&size, 4);
 
@@ -260,9 +266,9 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
     memset(_shadow_map, 0, 64 * 64);
   }
   // - MCCV ----------------------------------------------
-  if(header.ofsMCCV)
+  if(tmp_chunk_header.ofsMCCV)
   {
-    f->seek(base + header.ofsMCCV);
+    f->seek(base + tmp_chunk_header.ofsMCCV);
     f->read(&fourcc, 4);
     f->read(&size, 4);
 
@@ -291,16 +297,16 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
     }
   }
 
-  if (header.sizeLiquid > 8)
+  if (tmp_chunk_header.sizeLiquid > 8)
   {
-    f->seek(base + header.ofsLiquid);
+    f->seek(base + tmp_chunk_header.ofsLiquid);
 
     f->read(&fourcc, 4);
     f->seekRelative(4); // ignore the size here, the valid size is in the header
 
     assert(fourcc == 'MCLQ');
 
-    int layer_count = (header.sizeLiquid - 8) / sizeof(mclq);
+    int layer_count = (tmp_chunk_header.sizeLiquid - 8) / sizeof(mclq);
     std::vector<mclq> layers(layer_count);
     f->read(layers.data(), sizeof(mclq)*layer_count);
 
@@ -310,6 +316,31 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
   }
 
   vcenter = (vmin + vmax) * 0.5f;
+
+  if (tmp_chunk_header.nSndEmitters)
+  {
+      f->seek(base + tmp_chunk_header.ofsSndEmitters);
+      f->read(&fourcc, 4);
+      f->read(&size, 4);
+
+      assert(fourcc == 'MCSE');
+
+      for (int i = 0; i < tmp_chunk_header.nSndEmitters; i++)
+      {
+          ENTRY_MCSE sound_emitter;
+          f->read(&sound_emitter, sizeof(ENTRY_MCSE));
+
+          float pos_x = sound_emitter.pos[1] * -1.0f + ZEROPOINT;
+          float pos_y = sound_emitter.pos[2];
+          float pos_z = sound_emitter.pos[0] * -1.0f + ZEROPOINT;
+
+          sound_emitter.pos[0] = pos_x;
+          sound_emitter.pos[1] = pos_y;
+          sound_emitter.pos[2] = pos_z;
+
+          sound_emitters.emplace_back(sound_emitter);
+      }
+  }
 }
 
 int MapChunk::indexLoD(int x, int y)
@@ -744,6 +775,16 @@ glm::vec3 MapChunk::getNeighborVertex(int i, unsigned dir)
   */
 }
 
+glm::uvec2 MapChunk::getUnitIndextAt(glm::vec3 pos)
+{
+    glm::uvec2 unit_index = glm::uvec2(floor((pos.x - xbase) / UNITSIZE), floor((pos.z - zbase) / UNITSIZE));
+
+    if (unit_index.x > 8 || unit_index.y > 8)
+        return glm::uvec2(8, 8);
+
+    return unit_index;
+}
+
 void MapChunk::recalcNorms()
 {
   // 0 - up_left
@@ -819,16 +860,8 @@ bool MapChunk::ChangeMCCV(glm::vec3 const& pos, glm::vec4 const& color, float ch
 
   if (!hasMCCV)
   {
-    for (int i = 0; i < mapbufsize; ++i)
-    {
-      mccv[i].x = 1.0f; // set default shaders
-      mccv[i].y = 1.0f;
-      mccv[i].z = 1.0f;
-    }
-
+    initMCCV();
     changed = true;
-    header_flags.flags.has_mccv = 1;
-    hasMCCV = true;
   }
 
   for (int i = 0; i < mapbufsize; ++i)
@@ -872,16 +905,8 @@ bool MapChunk::stampMCCV(glm::vec3 const& pos, glm::vec4 const& color, float cha
 
   if (!hasMCCV)
   {
-    for (int i = 0; i < mapbufsize; ++i)
-    {
-      mccv[i].x = 1.0f; // set default shaders
-      mccv[i].y = 1.0f;
-      mccv[i].z = 1.0f;
-    }
-
+    initMCCV();
     changed = true;
-    header_flags.flags.has_mccv = 1;
-    hasMCCV = true;
   }
 
   for (int i = 0; i < mapbufsize; ++i)
@@ -1400,27 +1425,33 @@ void MapChunk::save(sExtendableArray& lADTFile
   lADTFile.GetPointer<MCIN>(lMCIN_Position + 8)->mEntries[py * 16 + px].offset = lCurrentPosition; // check this
 
                                                                                                    // MCNK data
-  lADTFile.Insert(lCurrentPosition + 8, 0x80, reinterpret_cast<char*>(&(header)));
+  // lADTFile.Insert(lCurrentPosition + 8, 0x80, reinterpret_cast<char*>(&(header)));
   MapChunkHeader *lMCNK_header = lADTFile.GetPointer<MapChunkHeader>(lCurrentPosition + 8);
 
   header_flags.flags.do_not_fix_alpha_map = 1;
 
   lMCNK_header->flags = header_flags.value;
+  lMCNK_header->ix = px;
+  lMCNK_header->iy = py;
+  lMCNK_header->zpos = zbase * -1.0f + ZEROPOINT;
+  lMCNK_header->xpos = xbase * -1.0f + ZEROPOINT;
+  lMCNK_header->ypos = ybase;
+
   lMCNK_header->holes = holes;
   lMCNK_header->areaid = areaID;
 
-  lMCNK_header->nLayers = -1;
-  lMCNK_header->nDoodadRefs = -1;
-  lMCNK_header->ofsHeight = -1;
-  lMCNK_header->ofsNormal = -1;
-  lMCNK_header->ofsLayer = -1;
-  lMCNK_header->ofsRefs = -1;
-  lMCNK_header->ofsAlpha = -1;
-  lMCNK_header->sizeAlpha = -1;
-  lMCNK_header->ofsShadow = -1;
-  lMCNK_header->sizeShadow = -1;
-  lMCNK_header->nMapObjRefs = -1;
-  lMCNK_header->ofsMCCV = -1;
+  lMCNK_header->nLayers = 0;
+  lMCNK_header->nDoodadRefs = 0;
+  lMCNK_header->ofsHeight = 0;
+  lMCNK_header->ofsNormal = 0;
+  lMCNK_header->ofsLayer = 0;
+  lMCNK_header->ofsRefs = 0;
+  lMCNK_header->ofsAlpha = 0;
+  lMCNK_header->sizeAlpha = 0;
+  lMCNK_header->ofsShadow = 0;
+  lMCNK_header->sizeShadow = 0;
+  lMCNK_header->nMapObjRefs = 0;
+  lMCNK_header->ofsMCCV = 0;
 
   //! \todo  Implement sound emitter support. Or not.
   lMCNK_header->ofsSndEmitters = 0;
@@ -1681,14 +1712,33 @@ void MapChunk::save(sExtendableArray& lADTFile
 
 
   // MCSE
-  int lMCSE_Size = 0;
+  int lMCSE_Size = sizeof(ENTRY_MCSE) * sound_emitters.size();
   lADTFile.Extend(8 + lMCSE_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCSE', lMCSE_Size);
 
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsSndEmitters = lCurrentPosition - lMCNK_Position;
   lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nSndEmitters = lMCSE_Size / 0x1C;
 
-  lCurrentPosition += 8 + lMCSE_Size;
+  lCurrentPosition += 8;
+
+  for (auto& sound_emitter : sound_emitters)
+  {
+      ENTRY_MCSE* MCSE = lADTFile.GetPointer<ENTRY_MCSE>(lCurrentPosition);
+
+      MCSE->soundId = sound_emitter.soundId;
+
+      MCSE->pos[0] = ZEROPOINT - sound_emitter.pos[2];
+      MCSE->pos[1] = ZEROPOINT - sound_emitter.pos[0];
+      MCSE->pos[2] = sound_emitter.pos[1];
+
+      MCSE->size[0] = sound_emitter.size[0];
+      MCSE->size[1] = sound_emitter.size[1];
+      MCSE->size[2] = sound_emitter.size[2];
+
+      lCurrentPosition += 0x1C;
+  }
+
+  // lCurrentPosition += 8 + lMCSE_Size;
   lMCNK_Size += 8 + lMCSE_Size;
 
   lADTFile.GetPointer<sChunkHeader>(lMCNK_Position)->mSize = lMCNK_Size;
@@ -1905,7 +1955,8 @@ void MapChunk::unload()
   _chunk_update_flags = ChunkUpdateFlags::VERTEX | ChunkUpdateFlags::ALPHAMAP
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
-                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS;
+                        | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS
+                        | ChunkUpdateFlags::GROUND_EFFECT;
 }
 
 void MapChunk::setAlphamapImage(const QImage &image, unsigned int layer)
@@ -1977,6 +2028,22 @@ void MapChunk::setVertexColorImage(const QImage &image)
     }
 
   registerChunkUpdate(ChunkUpdateFlags::MCCV);
+}
+
+void MapChunk::initMCCV()
+{
+  if (!hasMCCV)
+  {
+    for (int i = 0; i < mapbufsize; ++i)
+    {
+      mccv[i].x = 1.0f; // set default shaders
+      mccv[i].y = 1.0f;
+      mccv[i].z = 1.0f;
+    }
+
+    header_flags.flags.has_mccv = 1;
+    hasMCCV = true;
+  }
 }
 
 void MapChunk::registerChunkUpdate(unsigned flags)

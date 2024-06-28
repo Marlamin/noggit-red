@@ -56,17 +56,15 @@ namespace math
 
   std::vector<glm::vec3> box_points(glm::vec3 const& box_min, glm::vec3 const& box_max)
   {
-    std::vector<glm::vec3> points;
-
-    points.emplace_back(box_max.x, box_max.y, box_max.z);
-    points.emplace_back(box_max.x, box_max.y, box_min.z);
-    points.emplace_back(box_max.x, box_min.y, box_max.z);
-    points.emplace_back(box_max.x, box_min.y, box_min.z);
-    points.emplace_back(box_min.x, box_max.y, box_max.z);
-    points.emplace_back(box_min.x, box_max.y, box_min.z);
-    points.emplace_back(box_min.x, box_min.y, box_max.z);
-    points.emplace_back(box_min.x, box_min.y, box_min.z);
-
-    return points;
+    return std::vector<glm::vec3> {
+        glm::vec3(box_max.x, box_max.y, box_max.z),
+        glm::vec3(box_max.x, box_max.y, box_min.z),
+        glm::vec3(box_max.x, box_min.y, box_max.z),
+        glm::vec3(box_max.x, box_min.y, box_min.z),
+        glm::vec3(box_min.x, box_max.y, box_max.z),
+        glm::vec3(box_min.x, box_max.y, box_min.z),
+        glm::vec3(box_min.x, box_min.y, box_max.z),
+        glm::vec3(box_min.x, box_min.y, box_min.z)
+    };
   }
 }

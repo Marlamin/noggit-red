@@ -159,7 +159,7 @@ void WMO::finishLoading ()
   assert (fourcc == 'MOGI');
 
   groups.reserve(nGroups);
-  for (int i (0); i < nGroups; ++i) {
+  for (unsigned int i (0); i < nGroups; ++i) {
     groups.emplace_back (this, &f, i, groupnames);
   }
 

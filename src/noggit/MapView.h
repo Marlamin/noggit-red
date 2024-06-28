@@ -93,6 +93,7 @@ namespace Noggit
     class hole_tool;
     struct tileset_chooser;
     class ObjectPalette;
+    class ground_effect_tool;
   }
 }
 
@@ -139,7 +140,7 @@ private:
 
 public:
   Noggit::BoolToggleProperty _draw_vertex_color = {true};
-  Noggit::BoolToggleProperty _draw_baked_shadows = { true };
+  Noggit::BoolToggleProperty _draw_baked_shadows = { false };
   Noggit::BoolToggleProperty _draw_climb = {false};
   Noggit::BoolToggleProperty _draw_contour = {false};
   Noggit::BoolToggleProperty _draw_mfbo = {false};
@@ -193,7 +194,7 @@ private:
   void changeZoneIDValue (int set);
 
   QPointF _last_mouse_pos;
-  float mh, mv, rh, rv;
+  float mh, mv, rh, rv; // mh = left click x, rv = right click y
 
   float keyx = 0, keyy = 0, keyz = 0, keyr = 0, keys = 0;
 
@@ -205,6 +206,8 @@ private:
   std::vector<selection_type> lastSelected;
 
   bool _rotation_editor_need_update = false;
+  bool _texture_picker_need_update = false;
+  bool _area_picker_need_update = false;
 
   // Vars for the ground editing toggle mode store the status of some
   // view settings when the ground editing mode is switched on to
@@ -251,9 +254,11 @@ signals:
   void resized();
   void saved();
   void updateProgress(int value);
+  void selectionUpdated();
 public slots:
   void on_exit_prompt();
   void ShowContextMenu(QPoint pos);
+  void onApplicationStateChanged(Qt::ApplicationState state);
 
 public:
   glm::vec4 cursor_color;
@@ -303,6 +308,9 @@ public:
   Noggit::Ui::flatten_blur_tool* getFlattenTool() { return flattenTool; };
 
   [[nodiscard]]
+  Noggit::Ui::ground_effect_tool* getGroundEffectsTool();
+
+  [[nodiscard]]
   Noggit::NoggitRenderContext getRenderContext() { return _context; };
 
   [[nodiscard]]
@@ -312,11 +320,16 @@ public:
   QDockWidget* getAssetBrowser() {return _asset_browser_dock; };
 
   [[nodiscard]]
+  Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget* getAssetBrowserWidget() { return _asset_browser; };
+
+  [[nodiscard]]
   Noggit::Ui::object_editor* getObjectEditor() { return objectEditor; };
 
   [[nodiscard]]
   QDockWidget* getObjectPalette() { return _object_palette_dock; };
 
+  [[nodiscard]]
+  QDockWidget* getTexturePalette() { return   _texture_palette_dock; };
 
 private:
   enum Modifier
@@ -457,6 +470,7 @@ private:
   bool _gl_initialized = false;
   bool _destroying = false;
   bool _needs_redraw = false;
+  bool _unload_tiles = true;
 
   unsigned _mmap_async_index = 0;
   unsigned _mmap_render_index = 0;

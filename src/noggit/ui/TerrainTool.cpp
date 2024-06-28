@@ -12,6 +12,7 @@
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QVBoxLayout>
+#include <noggit/ui/tools/UiCommon/expanderwidget.h>
 
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
@@ -128,8 +129,14 @@ namespace Noggit
 
       _image_mask_group = new Noggit::Ui::Tools::ImageMaskSelector(map_view, this);
       _mask_image = _image_mask_group->getPixmap()->toImage();
-      layout->addWidget(_image_mask_group);
+      // layout->addWidget(_image_mask_group);
       _image_mask_group->setBrushModeVisible(!stamp);
+
+      auto* customBrushBox = new ExpanderWidget(this);
+      customBrushBox->setExpanderTitle("Custom Brush");
+      customBrushBox->addPage(_image_mask_group);
+      customBrushBox->setExpanded(false);
+      layout->addWidget(customBrushBox);
 
       _vertex_type_group = new QGroupBox ("Vertex edit", this);
       _vertex_type_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);

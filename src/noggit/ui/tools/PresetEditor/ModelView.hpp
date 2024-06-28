@@ -1,7 +1,7 @@
-#ifndef NOGGIT_MODELVIEW_HPP
-#define NOGGIT_MODELVIEW_HPP
+#ifndef NOGGIT_BROWSER_MODELVIEW_HPP
+#define NOGGIT_BROWSER_MODELVIEW_HPP
 
-#include <noggit/ui/tools/AssetBrowser/ModelView.hpp>
+#include <noggit/ui/tools/AssetBrowser/BrowserModelView.hpp>
 #include <external/qtimgui/QtImGui.h>
 #include <external/qtimgui/imgui/imgui.h>
 #include <external/imguizmo/ImGuizmo.h>
@@ -15,7 +15,7 @@ namespace Noggit
 {
   namespace Ui::Tools::PresetEditor
   {
-    class ModelViewer : public Ui::Tools::AssetBrowser::ModelViewer
+    class ModelViewer : public Noggit::Ui::Tools::AssetBrowser::ModelViewer
     {
     public:
         explicit ModelViewer(QWidget* parent = nullptr);

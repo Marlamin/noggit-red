@@ -74,7 +74,7 @@ struct MHDR
   /*020h*/  uint32_t modf;  //WMO Positioning Information
   /*024h*/  uint32_t mfbo;  // tbc, wotlk; only when flags&1
   /*028h*/  uint32_t mh2o;  // wotlk
-  /*02Ch*/  uint32_t mtfx;  // wotlk
+  /*02Ch*/  uint32_t mtxf;  // wotlk
   /*030h*/  uint32_t pad4;
   /*034h*/  uint32_t pad5;
   /*038h*/  uint32_t pad6;
@@ -151,14 +151,6 @@ struct MapChunkHeader {
   uint32_t unused2 = 0;
 };
 
-struct MCCV
-{
-  uint32_t  textureID = 0;
-  uint32_t  flags = 0;
-  uint32_t  ofsAlpha = 0;
-  uint32_t  effectID = 0;
-};
-
 struct MCLYFlags
 {
   uint32_t animation_rotation : 3;        // each tick is 45°
@@ -175,10 +167,18 @@ struct MCLYFlags
 
 struct ENTRY_MCLY
 {
-  uint32_t  textureID = 0;
-  uint32_t  flags = 0;
-  uint32_t  ofsAlpha = 0;
-  uint32_t  effectID = 0xFFFF; // default value, see https://wowdev.wiki/ADT/v18#MCLY_sub-chunk
+  uint32_t textureID = 0;
+  uint32_t flags = 0;
+  uint32_t ofsAlpha = 0;
+  uint32_t effectID = 0xFFFFFFFF; // default value, see https://wowdev.wiki/ADT/v18#MCLY_sub-chunk
+};
+
+// sound emitters
+struct ENTRY_MCSE
+{
+    uint32_t soundId; // foreign_keyⁱ<uint32_t, &SoundEntriesAdvancedRec::m_ID>
+    float  pos[3];
+    float  size[3];
 };
 
 #include <string.h> // memcpy()
@@ -299,4 +299,16 @@ struct MPHD
   uint32_t flags;
   uint32_t something;
   uint32_t unused[6];
+};
+
+struct mtxf_entry
+{
+    uint32_t use_cubemap : 1; // do_not_load_specular_or_height_texture_but_use_cubemap
+    /*
+    uint32_t : 3;
+    uint32_t texture_scale : 4; // MOP+ Texture scale here is not an actual "scale". 
+                                // Default value is 0 (no extra scaling applied). The values are computed as 1 << SMTextureFlags.texture_scale.
+    uint32_t : 24;
+    */
+    uint32_t unused : 31;
 };

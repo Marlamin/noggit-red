@@ -576,7 +576,7 @@ namespace Noggit
                 // save the change for the session (don't write dbc yet)
                 _parent_area_id = tree_selected_id;
                 std::stringstream ss;
-                ss << _parent_area_id << "-" << gAreaDB.getAreaName(_parent_area_id);
+                ss << _parent_area_id << "-" << gAreaDB.getAreaFullName(_parent_area_id);
                 _parent_area_label->setText(ss.str().c_str());
 
                 // _parent_area_label->setText(std::to_string( tree_selected_id).c_str());
@@ -616,7 +616,7 @@ namespace Noggit
             if (_parent_area_id)
             {
                 std::stringstream ss;
-                ss << _parent_area_id << "-" << gAreaDB.getAreaName(_parent_area_id);
+                ss << _parent_area_id << "-" << gAreaDB.getAreaFullName(_parent_area_id);
                 _parent_area_label->setText(ss.str().c_str());
             }
             else

@@ -3,6 +3,7 @@
 #include <noggit/ui/windows/projectSelection/components/CreateProjectComponent.hpp>
 #include <noggit/ui/windows/projectSelection/components/LoadProjectComponent.hpp>
 #include <noggit/project/CurrentProject.hpp>
+#include <noggit/Log.h>
 
 #include <filesystem>
 #include <QString>
@@ -21,6 +22,73 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
   , _noggit_application(noggit_app)
 {
   setWindowFlags(Qt::Window | Qt::MSWindowsFixedSizeDialogHint);
+
+  ////////////////////////////
+  // auto load favorite project
+  QSettings settings;
+  int favorite_proj_idx = settings.value("favorite_project", -1).toInt();
+
+  bool load_favorite = settings.value("auto_load_fav_project", true).toBool();
+
+  // if it has client data, it means it already loaded before and we exited through the menu, skip autoloading favorite
+  if (noggit_app->hasClientData())
+      load_favorite = false;
+
+  if (load_favorite && favorite_proj_idx != -1)
+  {
+    Log << "Auto loading favorite project index : " << favorite_proj_idx << std::endl;
+
+    int size = settings.beginReadArray("recent_projects");
+
+    QString project_final_path;
+
+    // for (int i = 0; i < size; ++i)
+    if (size > favorite_proj_idx)
+    {
+      settings.setArrayIndex(favorite_proj_idx);
+      std::filesystem::path project_path = settings.value("project_path").toString().toStdString().c_str();
+
+      if (std::filesystem::exists(project_path) && std::filesystem::is_directory(project_path))
+      {
+        auto project_reader = Noggit::Project::ApplicationProjectReader();
+        
+        auto project = project_reader.readProject(project_path);
+        
+        if (project.has_value())
+        {
+          // project->projectVersion;
+          // project_directory = QString::fromStdString(project_path.generic_string());
+          // auto project_name = QString::fromStdString(project->ProjectName);
+
+          project_final_path = QString(project_path.string().c_str());
+        }
+      }
+    }
+    settings.endArray();
+
+    if (!project_final_path.isEmpty())
+    {
+      auto selected_project = _load_project_component->loadProject(this, project_final_path);
+
+      if (!selected_project)
+      {
+        LogError << "Selected Project is null, favorite loading failed." << std::endl;
+      }
+      else
+      {
+        Noggit::Project::CurrentProject::initialize(selected_project.get());
+
+        _project_selection_page = std::make_unique<Noggit::Ui::Windows::NoggitWindow>(
+            _noggit_application->getConfiguration(),
+            selected_project);
+        _project_selection_page->showMaximized();
+
+        close();
+        return;
+      }
+    }
+  }
+  ///////////////////////////
 
   _ui->setupUi(this);
 
@@ -69,6 +137,7 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
                          return;
 
                        Component::CreateProjectComponent::createProject(this, project_reference);
+                       resetFavoriteProject();
                        Component::RecentProjectsComponent::buildRecentProjectsList(this);
                      });
 
@@ -87,7 +156,11 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
                                                                      "*.noggitproj");
 
                      if (proj_file.isEmpty())
+                     {
+                       QMessageBox::critical(this, "Error", "Failed to read project: project file is empty");
                        return;
+                     }
+
 
                      std::filesystem::path filepath(proj_file.toStdString());
 
@@ -130,7 +203,10 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
                      auto selected_project = _load_project_component->loadProject(this);
 
                      if (!selected_project)
+                     {
+                       LogError << "Selected Project is null, loading failed." << std::endl;
                        return;
+                     }
 
                      Noggit::Project::CurrentProject::initialize(selected_project.get());
 
@@ -155,7 +231,7 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
           });
   }*/
 
-  auto _set = new QSettings(this);
+  // auto _set = new QSettings(this);
   //auto first_changelog = _set->value("first_changelog", false);
 
   // force-changelog
@@ -170,7 +246,7 @@ NoggitProjectSelectionWindow::NoggitProjectSelectionWindow(Noggit::Application::
           _set->sync();
       }
   }*/
-  
+  show();
 }
 
 void NoggitProjectSelectionWindow::handleContextMenuProjectListItemDelete(std::string const& project_path)
@@ -200,6 +276,7 @@ void NoggitProjectSelectionWindow::handleContextMenuProjectListItemDelete(std::s
     default:
       break;
   }
+  resetFavoriteProject();
 
   Component::RecentProjectsComponent::buildRecentProjectsList(this);
 }
@@ -228,7 +305,23 @@ void NoggitProjectSelectionWindow::handleContextMenuProjectListItemForget(std::s
       break;
   }
 
+  resetFavoriteProject();
   Component::RecentProjectsComponent::buildRecentProjectsList(this);
+}
+
+void Noggit::Ui::Windows::NoggitProjectSelectionWindow::handleContextMenuProjectListItemFavorite(int index)
+{
+  QSettings settings;
+  settings.sync();
+  settings.setValue("favorite_project", index);
+  Component::RecentProjectsComponent::buildRecentProjectsList(this);
+}
+
+void Noggit::Ui::Windows::NoggitProjectSelectionWindow::resetFavoriteProject()
+{
+    QSettings settings;
+    settings.sync();
+    settings.setValue("favorite_project", -1);
 }
 
 NoggitProjectSelectionWindow::~NoggitProjectSelectionWindow()

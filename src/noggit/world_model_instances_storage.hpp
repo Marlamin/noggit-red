@@ -57,6 +57,8 @@ namespace Noggit
     void upload();
     void unload();
 
+    unsigned int getTotalModelsCount() const { return _m2s.size() + _wmos.size(); };
+
   private: // private functions aren't thread safe
     inline bool unsafe_uid_is_used(std::uint32_t uid) const;
 

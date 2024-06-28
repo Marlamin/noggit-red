@@ -98,7 +98,7 @@ PresetEditorWidget::PresetEditorWidget(std::shared_ptr<Project::NoggitProject> p
 
       count++;
   }
-  _project->ClientDatabase->UnloadTable("map");
+  _project->ClientDatabase->UnloadTable("Map");
 
 
   // Handle minimap widget

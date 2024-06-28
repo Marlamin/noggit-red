@@ -46,27 +46,35 @@ namespace Noggit
       layout->addRow(swap_global);
       layout->addRow(remove_text_adt);
 
-      _brush_mode_group = new QGroupBox("Brush mode", this);
+      auto brush_widget (new QWidget(this));
+      auto brush_layout (new QFormLayout(brush_widget));
+
+      _brush_mode_group = new QGroupBox("Brush mode", brush_widget);
+      // _brush_mode_group->setAlignment(Qt::AlignLeft);
       _brush_mode_group->setCheckable(true);
       _brush_mode_group->setChecked(false);
-      layout->addRow(_brush_mode_group);
 
-      auto brush_content (new QWidget(_brush_mode_group));
-      auto brush_layout (new QFormLayout(brush_content));
+      layout->addRow(_brush_mode_group);
       _brush_mode_group->setLayout(brush_layout);
 
-      _swap_entire_chunk = new QCheckBox(brush_content);
+
+      _swap_entire_chunk = new QCheckBox(_brush_mode_group);
       _swap_entire_chunk->setText(tr("Entire chunk"));
       _swap_entire_chunk->setCheckState(Qt::CheckState::Unchecked);
       brush_layout->addRow(_swap_entire_chunk);
 
-      _radius_spin = new QDoubleSpinBox(brush_content);
+      _swap_entire_tile = new QCheckBox(_brush_mode_group);
+      _swap_entire_tile->setText(tr("Entire tile"));
+      _swap_entire_tile->setCheckState(Qt::CheckState::Unchecked);
+      brush_layout->addRow(_swap_entire_tile);
+
+      _radius_spin = new QDoubleSpinBox(_brush_mode_group);
       _radius_spin->setRange (0.f, 100.f);
       _radius_spin->setDecimals (2);
       _radius_spin->setValue (_radius);
       brush_layout->addRow ("Radius:", _radius_spin);
 
-      _radius_slider = new QSlider (Qt::Orientation::Horizontal, brush_content);
+      _radius_slider = new QSlider (Qt::Orientation::Horizontal, _brush_mode_group);
       _radius_slider->setRange (0, 100);
       _radius_slider->setSliderPosition (_radius);
       brush_layout->addRow (_radius_slider);      

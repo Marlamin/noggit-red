@@ -53,7 +53,10 @@ namespace Noggit
         eRMB         = 0x20,
         eMMB         = 0x40,
         eSCROLL      = 0x80,
-        eNUM         = 0x100
+        eNUM         = 0x100,
+        eSCALE       = 0x200,
+        eROTATE      = 0x400,
+        eTRANSLATE   = 0x800
     };
 
     enum class ActionObjectTypes

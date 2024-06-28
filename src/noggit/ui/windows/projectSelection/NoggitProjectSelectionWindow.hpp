@@ -56,6 +56,9 @@ namespace Noggit::Ui::Windows
 
         void handleContextMenuProjectListItemDelete(std::string const& project_path);
         void handleContextMenuProjectListItemForget(std::string const& project_path);
+        void handleContextMenuProjectListItemFavorite(int index);
+
+        void resetFavoriteProject();
     };
 }
 #endif // NOGGITREDPROJECTPAGE_H

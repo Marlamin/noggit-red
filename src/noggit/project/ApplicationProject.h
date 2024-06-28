@@ -12,6 +12,7 @@
 #include <noggit/TextureManager.h>
 #include <external/tsl/robin_map.h>
 #include <noggit/World.h>
+#include <noggit/Log.h>
 #include <QJsonDocument>
 #include <QMessageBox>
 #include <QJsonObject>
@@ -115,6 +116,13 @@ namespace Noggit::Project
       std::vector<std::string> Filepaths;
   };
 
+  struct NoggitProjectSelectionGroups
+  {
+      int MapId;
+      // Might let the user name them later if they get some list UI
+      std::vector<std::vector<unsigned int>> SelectionGroups;
+  };
+
   class NoggitProject
   {
     std::shared_ptr<ApplicationProjectWriter> _projectWriter;
@@ -129,6 +137,7 @@ namespace Noggit::Project
     std::shared_ptr<BlizzardArchive::ClientData> ClientData;
     std::vector<NoggitProjectObjectPalette> ObjectPalettes;
     std::vector<NoggitProjectTexturePalette> TexturePalettes;
+    std::vector<NoggitProjectSelectionGroups> ObjectSelectionGroups;
 
     NoggitExtraMapData ExtraMapData;
     NoggitProject()
@@ -137,6 +146,8 @@ namespace Noggit::Project
       Bookmarks = std::vector<NoggitProjectBookmarkMap>();
       ObjectPalettes = std::vector<NoggitProjectObjectPalette>();
       TexturePalettes = std::vector<NoggitProjectTexturePalette>();
+      ObjectSelectionGroups = std::vector<NoggitProjectSelectionGroups>();
+
       _projectWriter = std::make_shared<ApplicationProjectWriter>();
     }
 
@@ -195,7 +206,7 @@ namespace Noggit::Project
 
       TexturePalettes.push_back(new_texture_palette);
 
-      _projectWriter->saveProject(this, std::filesystem::path(ProjectPath));
+      _projectWriter->savePalettes(this, std::filesystem::path(ProjectPath));
     }
 
     void saveObjectPalette(const NoggitProjectObjectPalette& new_object_palette)
@@ -209,9 +220,22 @@ namespace Noggit::Project
 
         ObjectPalettes.push_back(new_object_palette);
 
-        _projectWriter->saveProject(this, std::filesystem::path(ProjectPath));
+        _projectWriter->savePalettes(this, std::filesystem::path(ProjectPath));
     }
 
+    void saveObjectSelectionGroups(const NoggitProjectSelectionGroups& new_selection_groups)
+    {
+        ObjectSelectionGroups.erase(std::remove_if(ObjectSelectionGroups.begin(), ObjectSelectionGroups.end(),
+            [=](NoggitProjectSelectionGroups proj_selection_group)
+            {
+                return proj_selection_group.MapId == new_selection_groups.MapId;
+            }),
+            ObjectSelectionGroups.end());
+
+        ObjectSelectionGroups.push_back(new_selection_groups);
+
+        _projectWriter->saveObjectSelectionGroups(this, std::filesystem::path(ProjectPath));
+    }
   };
 
   class ApplicationProject
@@ -248,8 +272,19 @@ namespace Noggit::Project
       ApplicationProjectReader project_reader{};
       auto project = project_reader.readProject(project_path);
 
-      if(!project.has_value())
+      if (!project.has_value())
+      {
+        LogError << "loadProject() failed, Project is null" << std::endl;
         return {};
+      }
+      else
+      {
+          Log << "loadProject(): Loading Project Data" << std::endl;
+      }
+
+
+      project_reader.readPalettes(&project.value());
+      project_reader.readObjectSelectionGroups(&project.value());
 
       std::string dbd_file_directory = _configuration->ApplicationDatabaseDefinitionsPath;
 
@@ -263,24 +298,56 @@ namespace Noggit::Project
         client_archive_locale = BlizzardArchive::Locale::enUS;
       }
 
-      if (project->projectVersion == ProjectVersion::WOTLK)
+      else if (project->projectVersion == ProjectVersion::WOTLK)
       {
         client_archive_version = BlizzardArchive::ClientVersion::WOTLK;
         client_build = BlizzardDatabaseLib::Structures::Build("3.3.5.12340");
         client_archive_locale = BlizzardArchive::Locale::AUTO;
       }
 
+      else
+      {
+          LogError << "Unsupported project version" << std::endl;
+          return {};
+      }
+
       project->ClientDatabase = std::make_shared<BlizzardDatabaseLib::BlizzardDatabase>(dbd_file_directory, client_build);
+
+      Log << "Loading Client Path : " << project->ClientPath << std::endl;
 
       try
       {
         project->ClientData = std::make_shared<BlizzardArchive::ClientData>(
             project->ClientPath, client_archive_version, client_archive_locale, project_path.generic_string());
       }
-      catch (BlizzardArchive::Exceptions::Locale::LocaleNotFoundError&)
+      catch (BlizzardArchive::Exceptions::Locale::LocaleNotFoundError& e)
       {
-        QMessageBox::critical(nullptr, "Error", "The client does not appear to be valid.");
+        LogError << e.what() << std::endl;
+        QMessageBox::critical(nullptr, "Error", e.what());
         return {};
+      }
+      catch (BlizzardArchive::Exceptions::Locale::IncorrectLocaleModeError& e)
+      {
+        LogError << e.what() << std::endl;
+        QMessageBox::critical(nullptr, "Error", e.what());
+        return {};
+      }
+      catch (BlizzardArchive::Exceptions::Archive::ArchiveOpenError& e)
+      {
+        LogError << e.what() << std::endl;
+        QMessageBox::critical(nullptr, "Error", e.what());
+        return {};
+      }
+      catch (...)
+      {
+          LogError << "Failed loading Client data. Unhandled exception." << std::endl;
+          return {};
+      }
+
+      if (!project->ClientData)
+      {
+          LogError << "Failed loading Client data." << std::endl;
+          return {};
       }
       loadExtraData(project.value());
       return std::make_shared<NoggitProject>(project.value());

@@ -4,7 +4,7 @@
 #define NOGGIT_CONTEXTLOGICNODEBASE_HPP
 
 #include <noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp>
-#include <noggit/ui/tools/NodeEditor/Nodes/Scene/Context.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;

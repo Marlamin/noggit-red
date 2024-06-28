@@ -16,6 +16,7 @@ LightIntBandDB gLightIntBandDB;
 LightFloatBandDB gLightFloatBandDB;
 GroundEffectDoodadDB gGroundEffectDoodadDB;
 GroundEffectTextureDB gGroundEffectTextureDB;
+TerrainTypeDB gTerrainTypeDB;
 LiquidTypeDB gLiquidTypeDB;
 SoundProviderPreferencesDB gSoundProviderPreferencesDB;
 SoundAmbienceDB gSoundAmbienceDB;
@@ -26,28 +27,43 @@ WMOAreaTableDB gWMOAreaTableDB;
 
 void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData)
 {
-  gAreaDB.open(clientData);
-  gMapDB.open(clientData);
-  gLoadingScreensDB.open(clientData);
-  gLightDB.open(clientData);
-  gLightParamsDB.open(clientData);
-  gLightSkyboxDB.open(clientData);
-  gLightIntBandDB.open(clientData);
-  gLightFloatBandDB.open(clientData);
-  gGroundEffectDoodadDB.open(clientData);
-  gGroundEffectTextureDB.open(clientData);
-  gLiquidTypeDB.open(clientData);
-  gSoundProviderPreferencesDB.open(clientData);
-  gSoundAmbienceDB.open(clientData);
-  gZoneMusicDB.open(clientData);
-  gZoneIntroMusicTableDB.open(clientData);
-  gSoundEntriesDB.open(clientData);
-  gWMOAreaTableDB.open(clientData);
+  Log << "Opening client DBCs..." << std::endl;
+
+  try
+  {
+    gAreaDB.open(clientData);
+    gMapDB.open(clientData);
+    gLoadingScreensDB.open(clientData);
+    gLightDB.open(clientData);
+    gLightParamsDB.open(clientData);
+    gLightSkyboxDB.open(clientData);
+    gLightIntBandDB.open(clientData);
+    gLightFloatBandDB.open(clientData);
+    gGroundEffectDoodadDB.open(clientData);
+    gGroundEffectTextureDB.open(clientData);
+    gTerrainTypeDB.open(clientData);
+    gLiquidTypeDB.open(clientData);
+    gSoundProviderPreferencesDB.open(clientData);
+    gSoundAmbienceDB.open(clientData);
+    gZoneMusicDB.open(clientData);
+    gZoneIntroMusicTableDB.open(clientData);
+    gSoundEntriesDB.open(clientData);
+    gWMOAreaTableDB.open(clientData);
+  }
+  catch (BlizzardArchive::Exceptions::FileReadFailedError const& e)
+  {
+      LogError << e.what() << std::endl;
+  }
+  catch (...)
+  {
+      LogError << "OpenDBs() : unhandled exception" << std::endl;
+  }
+
 }
 
 
-
-std::string AreaDB::getAreaName(int pAreaID)
+// includes the parent zone name as a prefix
+std::string AreaDB::getAreaFullName(int pAreaID)
 {
   if (!pAreaID || pAreaID == -1)
   {
@@ -197,7 +213,7 @@ std::string WMOAreaTableDB::getWMOAreaName(int WMOId, int namesetId)
 
     for (Iterator i = gWMOAreaTableDB.begin(); i != gWMOAreaTableDB.end(); ++i)
     {
-        if (i->getUInt(WMOAreaTableDB::WmoId) == WMOId && i->getUInt(WMOAreaTableDB::NameSetId) == namesetId && i->getUInt(WMOAreaTableDB::WMOGroupID) == -1)
+        if (i->getUInt(WMOAreaTableDB::WmoId) == WMOId && i->getUInt(WMOAreaTableDB::NameSetId) == namesetId && i->getInt(WMOAreaTableDB::WMOGroupID) == -1)
         {
             // wmoareatableid = i->getUInt(WMOAreaTableDB::ID);
             std::string areaName = i->getLocalizedString(WMOAreaTableDB::Name);
@@ -213,7 +229,7 @@ std::string WMOAreaTableDB::getWMOAreaName(int WMOId, int namesetId)
                     return rec.getLocalizedString(AreaDB::Name);
                 }
                 else
-                    return "Unknown location"; // nullptr? need to get it from terrain
+                    return "-Local Terrain Area-"; // nullptr? need to get it from terrain
             }
         }
     }
@@ -231,7 +247,7 @@ std::vector<std::string> WMOAreaTableDB::getWMOAreaNames(int WMOId)
 
     for (Iterator i = gWMOAreaTableDB.begin(); i != gWMOAreaTableDB.end(); ++i)
     {
-        if (i->getUInt(WMOAreaTableDB::WmoId) == WMOId && i->getUInt(WMOAreaTableDB::WMOGroupID) == -1)
+        if (i->getUInt(WMOAreaTableDB::WmoId) == WMOId && i->getInt(WMOAreaTableDB::WMOGroupID) == -1)
         {
             // wmoareatableid = i->getUInt(WMOAreaTableDB::ID);
             std::string areaName = i->getLocalizedString(WMOAreaTableDB::Name);
@@ -247,7 +263,7 @@ std::vector<std::string> WMOAreaTableDB::getWMOAreaNames(int WMOId)
                     areanamesvect.push_back(rec.getLocalizedString(AreaDB::Name));
                 }
                 else
-                    areanamesvect.push_back(""); // nullptr? need to get it from terrain
+                    areanamesvect.push_back("-Local Terrain Area-"); // nullptr? need to get it from terrain
             }
         }
         // could optimise and break when iterator WmoId is higher than the Wmodid, but this wouldn't support unordered DBCs.

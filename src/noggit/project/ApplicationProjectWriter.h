@@ -13,6 +13,10 @@ namespace Noggit::Project
 		ApplicationProjectWriter() = default;
 
 		void saveProject(NoggitProject* project, std::filesystem::path const& project_path);
+
+		void savePalettes(NoggitProject* project, std::filesystem::path const& project_path);
+
+		void saveObjectSelectionGroups(NoggitProject* project, std::filesystem::path const& project_path);
 	};
 }
 

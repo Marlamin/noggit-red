@@ -14,6 +14,7 @@
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/tools/UiCommon/StackedWidget.hpp>
+#include <noggit/project/ApplicationProject.h>
 #include <BlizzardDatabase.h>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
@@ -64,9 +65,15 @@ namespace Noggit::Ui::Windows
     setWindowTitle(QString::fromStdString(title.str()));
     setWindowIcon(QIcon(":/icon"));
 
+    Log << "Project version : " << Noggit::Project::ClientVersionFactory::MapToStringVersion(project->projectVersion).c_str() << std::endl;
+
     if (project->projectVersion == Project::ProjectVersion::WOTLK)
     {
       OpenDBs(project->ClientData);
+    }
+    else
+    {
+        LogError << "NoggitWindow() : Unsupported project version, skipping loading DBCs." << std::endl;
     }
 
     setCentralWidget(_null_widget);
@@ -105,6 +112,18 @@ namespace Noggit::Ui::Windows
                      {
                        _about->show();
                      }
+    );
+
+    auto proj_selec_action(file_menu->addAction("Exit to Project Selection"));
+    QObject::connect(proj_selec_action, &QAction::triggered, [this]
+        {
+            // auto noggit = Noggit::Application::NoggitApplication::instance();
+            // auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
+            // project_selection->show();
+
+            exit_to_project_selection = true;
+            close();
+        }
     );
 
     auto mapmenu_action(file_menu->addAction("Exit"));
@@ -466,8 +485,16 @@ namespace Noggit::Ui::Windows
       promptExit(event);
     } else
     {
-      event->accept();
+      if (exit_to_project_selection)
+      {
+        auto noggit = Noggit::Application::NoggitApplication::instance();
+        auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
+        project_selection->show();
+      }
+      else
+        event->accept();
     }
+    exit_to_project_selection = false;
   }
 
   void NoggitWindow::handleEventMapListContextMenuPinMap(int mapId, std::string MapName)
@@ -492,7 +519,8 @@ namespace Noggit::Ui::Windows
     prompt.setText("Exit?");
     prompt.setInformativeText("Any unsaved changes will be lost.");
     prompt.addButton("Exit", QMessageBox::DestructiveRole);
-    prompt.addButton("Return to menu", QMessageBox::AcceptRole);
+    if (!exit_to_project_selection)
+        prompt.addButton("Return to menu", QMessageBox::AcceptRole);
     prompt.setDefaultButton(prompt.addButton("Cancel", QMessageBox::RejectRole));
     prompt.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowStaysOnTopHint);
 
@@ -512,6 +540,12 @@ namespace Noggit::Ui::Windows
       case QMessageBox::DestructiveRole:
         Noggit::Ui::Tools::ViewportManager::ViewportManager::unloadAll();
         setCentralWidget(_null_widget = new QWidget(this));
+        if (exit_to_project_selection)
+        {
+            auto noggit = Noggit::Application::NoggitApplication::instance();
+            auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
+            project_selection->show();
+        }
         event->accept();
         break;
       default:
