@@ -13,6 +13,7 @@
 
 #include <QtGui/QOffscreenSurface>
 #include <QtGui/QOpenGLFramebufferObjectFormat>
+#include <QPainter>
 #include <optional>
 #include <map>
 #include <unordered_map>

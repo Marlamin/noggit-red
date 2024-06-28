@@ -1,4 +1,5 @@
 #include "LightViewWidget.h"
+#include <QPainter>
 
 LightViewWidget::LightViewWidget(QWidget* parent)
 	: QWidget(parent)
