@@ -6164,7 +6164,7 @@ void MapView::ShowContextMenu(QPoint pos)
                             // auto replace_wmo = static_cast<WMOInstance*>(replace_obj);
                             // auto source_wmo = static_cast<WMOInstance*>(source_obj);
 
-                            auto new_obj = _world->addWMOAndGetInstance(replace_path, source_pos, source_rot);
+                            auto new_obj = _world->addWMOAndGetInstance(replace_path, source_pos, source_rot, source_scale);
                             // new_obj->wmo->wait_until_loaded();
                             // new_obj->wmo->waitForChildrenLoaded();
                             new_obj->recalcExtents();
