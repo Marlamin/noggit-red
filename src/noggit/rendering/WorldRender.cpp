@@ -102,6 +102,10 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   // Frustum culling
   _world->_n_loaded_tiles = 0;
   unsigned tile_counter = 0;
+
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
+
   for (MapTile* tile : _world->mapIndex.loaded_tiles())
   {
     tile->recalcObjectInstanceExtents();
@@ -256,6 +260,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     {
       OpenGL::Scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
+      mcnk_shader.uniform("enable_mists_heightmapping", modern_features);
       mcnk_shader.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
       mcnk_shader.uniform("animtime", static_cast<int>(_world->animtime));
 

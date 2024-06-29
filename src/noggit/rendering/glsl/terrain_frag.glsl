@@ -79,6 +79,7 @@ uniform float cursorRotation;
 uniform float outer_cursor_radius;
 uniform float inner_cursor_ratio;
 uniform vec4 cursor_color;
+uniform bool enable_mists_heightmapping;
 
 in vec3 vary_position;
 in vec2 vary_texcoord;
@@ -224,7 +225,7 @@ vec2 getAdjustedUV(vec2 uv, int textureScale) {
 
 }
 
-vec4 texture_blend()
+vec4 mists_texture_blend()
 {
   vec3 alpha = texture(alphamap, vec3(vary_texcoord / 8.0, instanceID)).rgb;
 
@@ -277,6 +278,35 @@ vec4 texture_blend()
   return vec4 (t0 + t1 + t2 + t3);//(t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2);
 }
 
+vec4 texture_blend()
+{
+  vec3 alpha = texture(alphamap, vec3(vary_texcoord / 8.0, instanceID)).rgb;
+
+  int layer_count = instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b;
+
+  alpha.r = mix(alpha.r, 0.0, float(layer_count < 2));
+  alpha.g = mix(alpha.g, 0.0, float(layer_count < 3));
+  alpha.b = mix(alpha.b, 0.0, float(layer_count < 4));
+
+  float a0 = alpha.r;
+  float a1 = alpha.g;
+  float a2 = alpha.b;
+
+  vec4 t0 = get_tex_color(vary_t0_uv, instances[instanceID].ChunkTextureSamplers.x, abs(instances[instanceID].ChunkTextureArrayIDs.x));
+  t0.a = mix(t0.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.x < 0));
+
+  vec4 t1 = get_tex_color(vary_t1_uv, instances[instanceID].ChunkTextureSamplers.y, abs(instances[instanceID].ChunkTextureArrayIDs.y));
+  t1.a = mix(t1.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.y < 0));
+
+  vec4 t2 = get_tex_color(vary_t2_uv, instances[instanceID].ChunkTextureSamplers.z, abs(instances[instanceID].ChunkTextureArrayIDs.z));
+  t2.a = mix(t2.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.z < 0));
+
+  vec4 t3 = get_tex_color(vary_t3_uv, instances[instanceID].ChunkTextureSamplers.w, abs(instances[instanceID].ChunkTextureArrayIDs.w));
+  t3.a = mix(t3.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.w < 0));
+
+  return vec4 (t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2);
+}
+
 float contour_alpha(float unit_size, float pos, float line_width)
 {
   float f = abs(fract((pos + unit_size*0.5) / unit_size) - 0.5);
@@ -315,7 +345,14 @@ void main()
   float specularFactor = max(dot(reflection, normalize(camera - vary_position)), 0.0);
 
   // blend textures
-  out_color = mix(vec4(1.0, 1.0, 1.0, 0.0), texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
+  if(enable_mists_heightmapping)
+  {
+	  out_color = mix(vec4(1.0, 1.0, 1.0, 0.0), mists_texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
+  }
+  else
+  {
+	  out_color = mix(vec4(1.0, 1.0, 1.0, 0.0), texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
+  }
 
   vec3 spc = out_color.a * out_color.rgb * pow(specularFactor, 8);
   out_color.a = 1.0;
