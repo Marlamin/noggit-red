@@ -661,6 +661,26 @@
                    </item>
                   </widget>
                  </item>
+                  <item row="6" column="0">
+                    <widget class="QLabel" name="label_44">
+                      <property name="minimumSize">
+                        <size>
+                          <width>200</width>
+                          <height>0</height>
+                        </size>
+                      </property>
+                      <property name="text">
+                        <string>Modern features (WMO scaling, height texturing)</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item row="6" column="1">
+                    <widget class="QCheckBox" name="_modern_features">
+                      <property name="text">
+                        <string/>
+                      </property>
+                    </widget>
+                  </item>
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_12">
                    <property name="minimumSize">
