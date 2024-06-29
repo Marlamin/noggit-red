@@ -268,8 +268,23 @@ namespace Noggit
 
           auto obj = std::get<selected_object_type>(selection);
 
-          //_scale->setEnabled(obj->which() != eWMO);
-          _scale->setEnabled(true);
+          if(obj->which() == eWMO)
+          {
+            QSettings settings;
+            bool modern_features = settings.value("modern_features", false).toBool();
+            if(modern_features)
+            {
+              _scale->setEnabled(true);
+            }
+            else
+            {
+              _scale->setEnabled(false);
+            }
+          }
+          else
+          {
+            _scale->setEnabled(true);
+          }
 
           _position_x->setValue(obj->pos.x);
           _position_y->setValue(obj->pos.y);

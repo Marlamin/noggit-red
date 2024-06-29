@@ -50,6 +50,9 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     gizmo_selection_type = GizmoInternalMode::MULTISELECTION;
   }
 
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
+
   SceneObject* obj_instance;
 
   ImGuizmo::SetID(_gizmo_context);
@@ -136,6 +139,12 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
       float& scale = obj_instance->scale;
+
+      // If modern features are disabled, we don't want to scale WMOs
+      if (obj_instance->which() == eWMO && !modern_features && _gizmo_operation == ImGuizmo::SCALE) {
+          scale = 1.0f;
+          continue;
+      }
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::remove);
@@ -251,6 +260,12 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
       float& scale = obj_instance->scale;
+
+      // If modern features are disabled, we don't want to scale WMOs
+      if (obj_instance->which() == eWMO && !modern_features && _gizmo_operation == ImGuizmo::SCALE) {
+          scale = 1.0f;
+          continue;
+      }
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::remove);

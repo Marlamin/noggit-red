@@ -13,6 +13,8 @@
 
 #include <sstream>
 
+#include <QtCore/QSettings>
+
 WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, Noggit::NoggitRenderContext context)
   : SceneObject(SceneObjectTypes::eWMO, context)
   , wmo(file_key, context)
@@ -25,7 +27,15 @@ WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENT
 
   uid = d->uniqueID;
 
-  scale = static_cast<float>(d->scale) / 1024.0f;
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
+
+  if (modern_features) {
+      scale = static_cast<float>(d->scale) / 1024.0f;
+  }
+  else {
+      scale = 1.0f;
+  }
 
   extents[0] = glm::vec3(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
   extents[1] = glm::vec3(d->extents[1][0], d->extents[1][1], d->extents[1][2]);

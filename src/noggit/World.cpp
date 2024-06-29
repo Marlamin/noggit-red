@@ -748,6 +748,10 @@ void World::scale_selected_models(float v, object_scaling_type type)
   ZoneScoped;
   if (!_selected_model_count)
       return;
+
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
+
   for (auto& entry : _current_selection)
   {
     if (entry.index() == eEntry_Object)
@@ -756,6 +760,10 @@ void World::scale_selected_models(float v, object_scaling_type type)
 
       if (obj->which() != eMODEL)
       {
+          // If we are not using modern features, we don't want to scale WMOs
+          if(!modern_features)
+			  continue;
+
           WMOInstance* wi = static_cast<WMOInstance*>(obj);
 
           NOGGIT_CUR_ACTION->registerObjectTransformed(wi);
