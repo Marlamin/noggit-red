@@ -670,7 +670,7 @@
                         </size>
                       </property>
                       <property name="toolTip">
-                        <string>This will enable modern features added in expansions after WotLK. This enables height texturing and WMO scaling.</string>
+                        <string>This will enable modern features added in expansions after WotLK. This enables height texturing and WMO scaling. Some features may require additional tools.</string>
                       </property>
                       <property name="text">
                         <string>Modern features (MoP/Legion+)</string>
