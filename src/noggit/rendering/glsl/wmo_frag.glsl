@@ -33,12 +33,8 @@ flat in uint flags;
 flat in uint shader;
 flat in uint tex_array0;
 flat in uint tex_array1;
-//flat in uint tex_array2;
-//flat in uint tex_array3;
 flat in uint tex0;
 flat in uint tex1;
-//flat in uint tex2;
-//flat in uint tex3;
 flat in uint alpha_test_mode;
 
 out vec4 out_color;
