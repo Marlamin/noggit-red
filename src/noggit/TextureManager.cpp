@@ -413,6 +413,8 @@ void blp_texture::finishLoading()
   std::string spec_filename = "", height_filename = "";
   bool has_specular = false, has_height = false;
 
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
 
   if (_file_key.filepath().starts_with("tileset/") )
   {
@@ -427,7 +429,7 @@ void blp_texture::finishLoading()
     }
 
     // Only load _h in map view
-    if(_context == Noggit::NoggitRenderContext::MAP_VIEW)
+    if(_context == Noggit::NoggitRenderContext::MAP_VIEW && modern_features)
     {
         height_filename = _file_key.filepath().substr(0, _file_key.filepath().find_last_of(".")) + "_h.blp";
         has_height = Noggit::Application::NoggitApplication::instance()->clientData()->exists(height_filename);
