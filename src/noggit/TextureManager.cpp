@@ -415,9 +415,6 @@ void blp_texture::finishLoading()
   std::string spec_filename = "", height_filename = "";
   bool has_specular = false, has_height = false;
 
-  QSettings settings;
-  bool modern_features = settings.value("modern_features", false).toBool();
-
   if (_file_key.filepath().starts_with("tileset/") )
   {
     _is_tileset = true;
@@ -429,6 +426,9 @@ void blp_texture::finishLoading()
     {
       _is_specular = true;
     }
+
+    QSettings settings;
+    bool modern_features = settings.value("modern_features", false).toBool();
 
     // Only load _h in map view when modern features are enabled
     if(_context == Noggit::NoggitRenderContext::MAP_VIEW && modern_features)

@@ -494,8 +494,8 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
 
 
   auto& chunk_textures = (*chunk->texture_set->getTextures());
-
-
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
 
   for (int k = 0; k < chunk->texture_set->num(); ++k)
   {
@@ -519,9 +519,6 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
         }
     }
 
-    QSettings settings;
-    bool modern_features = settings.value("modern_features", false).toBool();
-   
     if (modern_features) {
         // Mists Heightmapping
         auto hData = chunk->mt->GetTextureHeightMappingData(chunk_textures[k]->file_key().filepath());

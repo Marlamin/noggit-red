@@ -351,6 +351,9 @@ void WMOGroupRender::initRenderBatches()
 
   _render_batches.resize(_wmo_group->_batches.size());
 
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
+
   std::size_t batch_counter = 0;
   for (auto& batch : _wmo_group->_batches)
   {
@@ -375,9 +378,6 @@ void WMOGroupRender::initRenderBatches()
     {
       flags |= WMORenderBatchFlags::eWMOBatch_HasMOCV;
     }
-
-    QSettings settings;
-    bool modern_features = settings.value("modern_features", false).toBool();
 
     std::uint16_t material_to_use = batch.texture;
     if (modern_features && batch.flags == 2)

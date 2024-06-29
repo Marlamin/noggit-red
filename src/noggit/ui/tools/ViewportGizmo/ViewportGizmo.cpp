@@ -50,9 +50,6 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     gizmo_selection_type = GizmoInternalMode::MULTISELECTION;
   }
 
-  QSettings settings;
-  bool modern_features = settings.value("modern_features", false).toBool();
-
   SceneObject* obj_instance;
 
   ImGuizmo::SetID(_gizmo_context);
@@ -120,6 +117,9 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
   NOGGIT_ACTION_MGR->beginAction(map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                  Noggit::ActionModalityControllers::eLMB);
+
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
 
   if (gizmo_selection_type == MULTISELECTION)
   {
