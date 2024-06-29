@@ -3,6 +3,7 @@
 #include "WMOGroupRender.hpp"
 #include <noggit/WMO.h>
 #include <noggit/Log.h> // LogDebug
+#include <QtCore/QSettings>
 
 using namespace Noggit::Rendering;
 
@@ -22,7 +23,6 @@ void WMOGroupRender::upload()
   for (auto& batch : _wmo_group->_batches)
   {
     std::uint16_t material_to_use = batch.texture;
-    // TODO: Modern feature toggle check, this will likely break on old WMOs where there is a box here
     if (batch.flags == 2)
         material_to_use = batch.unused[5];
 
@@ -39,18 +39,11 @@ void WMOGroupRender::upload()
     std::uint32_t tex_array1 = 0;
     std::uint32_t array_index1 = 0;
 
-    std::uint32_t tex_array2 = 0;
-    std::uint32_t array_index2 = 0;
-
-    std::uint32_t tex_array3 = 0;
-    std::uint32_t array_index3 = 0;
-
     bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3 || mat.shader == 21 || mat.shader == 23;
 
     if (use_tex2)
     {
       auto& tex2 = _wmo_group->wmo->textures.at(mat.texture2);
-      LogDebug << "WMOGroupRender::upload: use_tex2 " << mat.texture2 << std::endl;
 
       tex2->wait_until_loaded();
       tex2->upload();
@@ -61,13 +54,9 @@ void WMOGroupRender::upload()
 
     _render_batches[batch_counter].tex_array0 = tex_array0;
     _render_batches[batch_counter].tex_array1 = tex_array1;
-    //_render_batches[batch_counter].tex_array2 = tex_array2;
-    //_render_batches[batch_counter].tex_array3 = tex_array3;
 
     _render_batches[batch_counter].tex0 = array_index0;
     _render_batches[batch_counter].tex1 = array_index1;
-    //_render_batches[batch_counter].tex2 = array_index2;
-    //_render_batches[batch_counter].tex3 = array_index3;
 
     batch_counter++;
   }
@@ -80,13 +69,14 @@ void WMOGroupRender::upload()
   _draw_calls.clear();
   WMOCombinedDrawCall* draw_call = nullptr;
   std::vector<WMORenderBatch*> _used_batches;
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
 
   batch_counter = 0;
   for (auto& batch : _wmo_group->_batches)
   {
     std::uint16_t material_to_use = batch.texture;
-    // TODO: Modern feature toggle check, this will likely break on old WMOs where there is a box here
-    if (batch.flags == 2)
+    if (modern_features && batch.flags & 2)
         material_to_use = batch.unused[5];
 
     WMOMaterial& mat(_wmo_group->wmo->materials.at(material_to_use));
@@ -386,9 +376,11 @@ void WMOGroupRender::initRenderBatches()
       flags |= WMORenderBatchFlags::eWMOBatch_HasMOCV;
     }
 
+    QSettings settings;
+    bool modern_features = settings.value("modern_features", false).toBool();
+
     std::uint16_t material_to_use = batch.texture;
-    // TODO: Modern feature toggle check, this will likely break on old WMOs where there is a box here
-    if (batch.flags == 2)
+    if (modern_features && batch.flags == 2)
         material_to_use = batch.unused[5];
 
     WMOMaterial const& mat (_wmo_group->wmo->materials.at (material_to_use));
@@ -423,7 +415,6 @@ void WMOGroupRender::initRenderBatches()
         break;
     }
 
-    //_render_batches[batch_counter] = WMORenderBatch{flags, mat.shader, 0, 0, 0, 0, 0, 0, 0, 0, alpha_test, 0};
     _render_batches[batch_counter] = WMORenderBatch{ flags, mat.shader, 0, 0, 0, 0, alpha_test, 0 };
 
     batch_counter++;

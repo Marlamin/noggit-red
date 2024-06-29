@@ -280,6 +280,8 @@ void blp_texture::unload()
   _data.clear();
   _compressed_data.clear();
 
+  // load data back from file. pretty sad. maybe keep it after loading?
+  finishLoading();
 }
 
 void blp_texture::loadFromUncompressedData(BLPHeader const* lHeader, char const* lData)
@@ -428,7 +430,7 @@ void blp_texture::finishLoading()
       _is_specular = true;
     }
 
-    // Only load _h in map view
+    // Only load _h in map view when modern features are enabled
     if(_context == Noggit::NoggitRenderContext::MAP_VIEW && modern_features)
     {
         height_filename = _file_key.filepath().substr(0, _file_key.filepath().find_last_of(".")) + "_h.blp";

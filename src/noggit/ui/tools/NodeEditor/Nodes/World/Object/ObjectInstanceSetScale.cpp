@@ -39,7 +39,19 @@ void ObjectInstanceSetScaleNode::compute()
     return;
   }
 
-  obj->scale = scale;
+  if (obj->which() == eWMO) {
+      QSettings settings;
+      bool modern_features = settings.value("modern_features", false).toBool();
+      if (modern_features) {
+        obj->scale = scale;
+      }
+      else {
+        obj->scale = scale;
+      }
+  }
+  else {
+      obj->scale = scale;
+  }
 
   obj->recalcExtents();
 

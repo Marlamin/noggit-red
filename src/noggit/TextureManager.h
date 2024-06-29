@@ -55,15 +55,15 @@ struct BLPHeader;
 struct scoped_blp_texture_reference;
 struct blp_texture : public AsyncObject
 {
-    blp_texture(BlizzardArchive::Listfile::FileKey const& filename, Noggit::NoggitRenderContext context);
-    void finishLoading() override;
-    virtual void waitForChildrenLoaded() override {};
+  blp_texture (BlizzardArchive::Listfile::FileKey const& filename, Noggit::NoggitRenderContext context);
+  void finishLoading() override;
+  virtual void waitForChildrenLoaded() override {};
 
-    void loadFromUncompressedData(BLPHeader const* lHeader, char const* lData);
-    void loadFromCompressedData(BLPHeader const* lHeader, char const* lData);
+  void loadFromUncompressedData(BLPHeader const* lHeader, char const* lData);
+  void loadFromCompressedData(BLPHeader const* lHeader, char const* lData);
 
-    int width() const { return _width; }
-    int height() const { return _height; }
+  int width() const { return _width; }
+  int height() const { return _height; }
 
   void bind();
   void upload();
@@ -75,22 +75,21 @@ struct blp_texture : public AsyncObject
   bool is_specular() { return _is_specular; };
   unsigned mip_level() { return static_cast<unsigned>(!_compression_format ? _data.size() : _compressed_data.size()); };
 
-    std::map<int, std::vector<uint32_t>>& data() { return _data; };
-    std::map<int, std::vector<uint8_t>>& compressed_data() { return _compressed_data; };
-    std::optional<GLint> const& compression_format() { return _compression_format; };
+  std::map<int, std::vector<uint32_t>>& data() { return _data;};
+  std::map<int, std::vector<uint8_t>>& compressed_data() { return _compressed_data; };
+  std::optional<GLint> const& compression_format() { return _compression_format; };
 
-    Noggit::NoggitRenderContext getContext() { return _context; };
+  Noggit::NoggitRenderContext getContext() { return _context; };
 
-    [[nodiscard]]
-    async_priority loading_priority() const override
-    {
-        return async_priority::high;
-    }
+  [[nodiscard]]
+  async_priority loading_priority() const override
+  {
+    return async_priority::high;
+  }
+  // Mists HeightMapping
+  bool hasHeightMap() {return _has_heightmap; };
 
-    // Mists HeightMapping
-    bool hasHeightMap() {return _has_heightmap; };
-
-    blp_texture* getHeightMap() { return heightMap.get(); };
+  blp_texture* getHeightMap() { return heightMap.get(); };
 private:
   bool _uploaded = false;
 

@@ -5,6 +5,7 @@
 #include <noggit/MapChunk.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <external/tracy/Tracy.hpp>
+#include <QtCore/QSettings>
 
 using namespace Noggit::Rendering;
 
@@ -518,11 +519,16 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
         }
     }
 
-    // Mists Heightmapping
-    auto hData = chunk->mt->GetTextureHeightMappingData(chunk_textures[k]->file_key().filepath());
-    _chunk_instance_data[chunk_index].ChunkTextureUVScale[k] = hData.uvScale;
-    _chunk_instance_data[chunk_index].ChunkTextureHeightScale[k] = hData.heightScale;
-    _chunk_instance_data[chunk_index].ChunkTextureHeightOffset[k] = hData.heightOffset;
+    QSettings settings;
+    bool modern_features = settings.value("modern_features", false).toBool();
+   
+    if (modern_features) {
+        // Mists Heightmapping
+        auto hData = chunk->mt->GetTextureHeightMappingData(chunk_textures[k]->file_key().filepath());
+        _chunk_instance_data[chunk_index].ChunkTextureUVScale[k] = hData.uvScale;
+        _chunk_instance_data[chunk_index].ChunkTextureHeightScale[k] = hData.heightScale;
+        _chunk_instance_data[chunk_index].ChunkTextureHeightOffset[k] = hData.heightOffset;
+    }
 
     GLuint tex_array = (*chunk->texture_set->getTextures())[k]->texture_array();
     int tex_index = (*chunk->texture_set->getTextures())[k]->array_index();
@@ -555,7 +561,7 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
     _chunk_instance_data[chunk_index].ChunkTextureSamplers[k] = sampler_id;
     _chunk_instance_data[chunk_index].ChunkTextureArrayIDs[k] = (*chunk->texture_set->getTextures())[k]->is_specular() ? tex_index : -tex_index;
     
-    if(heightRef)
+    if(modern_features && heightRef)
     {
         GLuint hTex_array = (*chunk->texture_set->getTextures())[k]->getHeightMap()->texture_array();
 

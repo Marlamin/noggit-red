@@ -18,12 +18,8 @@ flat out uint flags;
 flat out uint shader;
 flat out uint tex_array0;
 flat out uint tex_array1;
-//flat out uint tex_array2;
-//flat out uint tex_array3;
 flat out uint tex0;
 flat out uint tex1;
-//flat out uint tex2;
-//flat out uint tex3;
 flat out uint alpha_test_mode;
 
 layout (std140) uniform matrices
@@ -58,12 +54,8 @@ void main()
     shader = 0;
     tex_array0 = 0;
     tex_array1 = 0;
-    //tex_array2 = 0;
-    //tex_array3 = 0;
     tex0 = 0;
     tex1 = 0;
-    //tex2 = 0;
-    //tex3 = 0;
     alpha_test_mode = 0;
   }
   else
@@ -78,9 +70,6 @@ void main()
     uvec4 batch_first_half = texelFetch(render_batches_tex, int((batch_mapping - 1) * 2));
     uvec4 batch_second_half = texelFetch(render_batches_tex, int((batch_mapping - 1) * 2 + 1));
 
-    // this is just not how it works obviousy, todo
-    //uvec4 batch_third_half = texelFetch(render_batches_tex, int((batch_mapping - 1) * 2 + 2));
-
     flags = batch_first_half.r;
     shader = batch_first_half.g;
     tex_array0 = batch_first_half.b;
@@ -88,14 +77,6 @@ void main()
     tex0 = batch_second_half.r;
     tex1 = batch_second_half.g;
     alpha_test_mode = batch_second_half.b;
-
-    //tex_array2 = batch_second_half.r;
-    //tex_array3 = batch_second_half.g;
-    //tex0 = batch_second_half.b;
-    //tex1 = batch_second_half.a;
-    //tex2 = batch_third_half.r;
-    //tex3 = batch_third_half.g;
-    //alpha_test_mode = batch_third_half.b;
 
     // Env and EnvMetal
     if(shader == 3 || shader == 5)

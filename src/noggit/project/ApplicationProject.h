@@ -349,7 +349,18 @@ namespace Noggit::Project
           LogError << "Failed loading Client data." << std::endl;
           return {};
       }
-      loadExtraData(project.value());
+
+      QSettings settings;
+      bool modern_features = settings.value("modern_features", false).toBool();
+	  if (modern_features)
+	  {
+		Log << "Modern Features Enabled" << std::endl;
+        loadExtraData(project.value());
+	  }
+	  else
+	  {
+		Log << "Modern Features Disabled" << std::endl;
+	  }
       return std::make_shared<NoggitProject>(project.value());
     }
 

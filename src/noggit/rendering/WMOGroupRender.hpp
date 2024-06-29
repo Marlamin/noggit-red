@@ -18,12 +18,8 @@ namespace Noggit::Rendering
     std::uint32_t shader;
     std::uint32_t tex_array0;
     std::uint32_t tex_array1;
-    //std::uint32_t tex_array2;
-    //std::uint32_t tex_array3;
     std::uint32_t tex0;
     std::uint32_t tex1;
-    //std::uint32_t tex2;
-    //std::uint32_t tex3;
     std::uint32_t alpha_test_mode;
     std::uint32_t _pad1;
   };
