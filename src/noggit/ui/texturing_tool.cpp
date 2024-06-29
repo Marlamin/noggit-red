@@ -227,14 +227,15 @@ namespace Noggit
           heightmapping_group_layout->addRow(wrap_label);
 
           _heightmapping_apply_global_btn = new QPushButton("Apply (Global)", this);
-          _heightmapping_apply_global_btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+          _heightmapping_apply_global_btn->setFixedHeight(30);
           heightmapping_btngroup_layout->addWidget(_heightmapping_apply_global_btn);
 
           _heightmapping_apply_adt_btn = new QPushButton("Apply (Current ADT)", this);
-          _heightmapping_apply_adt_btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+          _heightmapping_apply_adt_btn->setFixedHeight(30);
           heightmapping_btngroup_layout->addWidget(_heightmapping_apply_adt_btn);
 
           _heightmapping_copy_btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+          _heightmapping_copy_btn->setFixedHeight(30);
           heightmapping_btngroup_layout->addWidget(_heightmapping_copy_btn);
 
           heightmapping_group_layout->addRow(heightmapping_buttons_widget);
