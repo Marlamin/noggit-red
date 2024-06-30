@@ -5,6 +5,7 @@
 #include <noggit/Misc.h>
 #include <blizzard-archive-library/include/ClientData.hpp>
 #include <string>
+#include <Exception.hpp>
 
 AreaDB gAreaDB;
 MapDB gMapDB;

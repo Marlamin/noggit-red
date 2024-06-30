@@ -2328,7 +2328,7 @@ void MapView::setupHelpMenu()
                   {
                     ShellExecute ( nullptr
                                  , "open"
-                                 , "https://gitlab.com/prophecy-rp/noggit-red/-/tree/noggit-shadowlands?ref_type=heads"
+                                 , "https://gitlab.com/prophecy-rp/noggit-red/"
                                  , nullptr
                                  , nullptr
                                  , SW_SHOWNORMAL

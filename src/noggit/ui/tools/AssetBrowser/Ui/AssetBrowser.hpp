@@ -11,6 +11,7 @@
 #include <QSortFilterProxyModel>
 #include <QRegularExpression>
 #include <QMainWindow>
+#include <QMap>
 
 class MapView;
 
@@ -54,7 +55,6 @@ private:
     }
 };
 
-
 namespace Noggit::Ui::Tools::AssetBrowser
 {
     enum class asset_browse_mode
@@ -72,11 +72,12 @@ namespace Noggit::Ui::Tools::AssetBrowser
     };
 }
 
-
 namespace Noggit
 {
   namespace Ui::Tools::AssetBrowser::Ui
   {
+
+
     class AssetBrowserWidget : public QMainWindow
     {
       Q_OBJECT
@@ -103,7 +104,21 @@ namespace Noggit
 
       void updateModelData();
       void recurseDirectory(Model::TreeManager& tree_mgr, const QString& s_dir, const QString& project_dir);
-      bool validateBrowseMode(QString wow_file_path);
+      inline bool validateBrowseMode(const QString& wow_file_path);
+
+      // commented objects that shouldn't be placed on the map, still accessible through Show all
+      const QMap<QString, asset_browse_mode> brosweModeLabels =  {
+      { "World Objects", asset_browse_mode::world },
+      // { "Detail Doodads", asset_browse_mode::detail_doodads },
+      // { "Skybox", asset_browse_mode::skybox },
+      // { "Creatures", asset_browse_mode::creatures },
+      // { "Characters", asset_browse_mode::characters },
+      // {"Particles", asset_browse_mode::particles },
+      // {"Cameras", asset_browse_mode::cameras },
+      { "Items", asset_browse_mode::items },
+      { "Spells", asset_browse_mode::spells },
+      { "Show All", asset_browse_mode::ALL },
+      };
 
     protected:
       void keyPressEvent(QKeyEvent* event) override;

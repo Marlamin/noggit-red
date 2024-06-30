@@ -16,6 +16,7 @@
 #include <noggit/DBC.h>
 #include "noggit/ActionManager.hpp"
 #include "noggit/Action.hpp"
+#include <noggit/ui/FontAwesome.hpp>
 
 #include <QFormLayout>
 #include <QGridLayout>
@@ -100,8 +101,10 @@ namespace Noggit
       layout->addWidget(drag_selection_depth_group);*/
 
       QPushButton* asset_browser_btn = new QPushButton("Asset browser", this);
+      asset_browser_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::file));
       layout->addWidget(asset_browser_btn);
       QPushButton* object_palette_btn = new QPushButton("Object palette", this);
+      object_palette_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::palette));
       layout->addWidget(object_palette_btn);
 
       _wmo_group = new QGroupBox("Selected WMO Options");
@@ -115,6 +118,7 @@ namespace Noggit
       wmo_layout->addRow("Name Set:", _nameSetSelector);
 
       auto clipboard_box = new QGroupBox("Clipboard");
+      // clipboard_box->setWindowIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::clipboard));
       auto clipboard_layout = new QVBoxLayout(clipboard_box);
 
       _filename = new QLabel(this);
