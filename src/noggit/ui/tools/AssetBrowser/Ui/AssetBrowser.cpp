@@ -35,6 +35,37 @@ AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
 
   setWindowFlags(windowFlags() | Qt::Tool | Qt::WindowStaysOnTopHint);
 
+  ui->checkBox_M2s->setChecked(true);
+  ui->checkBox_WMOs->setChecked(true);
+  connect(ui->checkBox_M2s, &QCheckBox::stateChanged, [&](int state)
+      {
+          updateModelData();
+      });
+
+  connect(ui->checkBox_WMOs, &QCheckBox::stateChanged, [&](int state)
+      {
+          updateModelData();
+      });
+
+  ui->comboBox_BrowseMode->addItems(brosweModeLabels.keys());
+
+  // set combobox browse mode to World
+  for (auto it = brosweModeLabels.constBegin(); it != brosweModeLabels.constEnd(); ++it) {
+      if (it.value() == asset_browse_mode::world) {
+          ui->comboBox_BrowseMode->setCurrentText(it.key());
+          break;
+      }
+  }
+
+  connect(ui->comboBox_BrowseMode, qOverload<int>(&QComboBox::currentIndexChanged)
+      , [this](int index)
+      {
+          asset_browse_mode mode = brosweModeLabels[ui->comboBox_BrowseMode->currentText()];
+
+          set_browse_mode(mode);
+      }
+  );
+
   _model = new QStandardItemModel(this);
   // _sort_model = new QSortFilterProxyModel(this);
   _sort_model = new NoggitExpendableFilterProxyModel;
@@ -274,8 +305,14 @@ void AssetBrowserWidget::setupConnectsCommon()
           [this](bool state) {ui->viewport->_draw_grid.set(state);});
 }
 
-bool AssetBrowserWidget::validateBrowseMode(QString wow_file_path)
+bool AssetBrowserWidget::validateBrowseMode(const QString& wow_file_path)
 {
+    // if (_browse_mode == asset_browse_mode::detail_doodads)
+    // {
+    //     _sort_model->setFilterFixedString("world/nodxt/detail");
+    // }
+
+
     // TODO : do it in sort model instead?
     switch (_browse_mode)
     {
@@ -391,8 +428,9 @@ void AssetBrowserWidget::updateModelData()
 
     QString q_path = QString(filename.c_str());
 
-    if (!((q_path.endsWith(".wmo") && !_wmo_group_and_lod_regex.match(q_path).hasMatch())
-    || q_path.endsWith(".m2")))
+    if (!( (ui->checkBox_WMOs->isChecked() && q_path.endsWith(".wmo")  && !_wmo_group_and_lod_regex.match(q_path).hasMatch())
+        || (ui->checkBox_M2s->isChecked() && q_path.endsWith(".m2")) 
+        ))
       continue;
 
     if (!validateBrowseMode(q_path))
@@ -409,10 +447,21 @@ void AssetBrowserWidget::updateModelData()
   _sort_model->setSortRole(Qt::UserRole);
   _sort_model->sort(0, Qt::AscendingOrder);
 
-  // TODO : set default layout for the modes
+  // TODO : set default layout(base folder) for the modes
   if (_browse_mode != asset_browse_mode::ALL)
   {
       // expend base directories
+      // ui->listfileTree->expand();
+  }
+
+  // those modes don't have subfolders, can auto expend without it becoming a mess
+  if (_browse_mode == asset_browse_mode::detail_doodads
+      || _browse_mode == asset_browse_mode::spells
+      || _browse_mode == asset_browse_mode::skybox
+      || _browse_mode == asset_browse_mode::cameras
+      || _browse_mode == asset_browse_mode::particles)
+  {
+      ui->listfileTree->expandAll();
   }
 }
 
@@ -423,17 +472,28 @@ AssetBrowserWidget::~AssetBrowserWidget()
 }
 
 void AssetBrowserWidget::set_browse_mode(asset_browse_mode browse_mode)
-{
+{    
     if (_browse_mode == browse_mode)
         return;
 
+    {
+        QSignalBlocker const combobox_blocker(ui->comboBox_BrowseMode);
+
+        QString key_text = "";
+
+        for (auto it = brosweModeLabels.constBegin(); it != brosweModeLabels.constEnd(); ++it) {
+            if (it.value() == browse_mode) {
+                key_text = it.key();
+                break; 
+            }
+        }
+        // if (key_text.isEmpty())
+
+        ui->comboBox_BrowseMode->setCurrentText(key_text);
+    }
+
     _browse_mode = browse_mode;
     updateModelData();
-    // if (_browse_mode == asset_browse_mode::detail_doodads)
-    // {
-    //     _sort_model->setFilterFixedString("world/nodxt/detail");
-    // }
-
 }
 
 void AssetBrowserWidget::keyPressEvent(QKeyEvent *event)
