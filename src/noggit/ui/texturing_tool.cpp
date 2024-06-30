@@ -189,10 +189,17 @@ namespace Noggit
 
       // Define UI elements regardless of modern_features being enabled because they're used later on as well.
       _heightmapping_group = new QGroupBox("Height Mapping", tool_widget);
+      _heightmapping_group->setVisible(modern_features);
 
       auto heightmapping_scale_spin = new QDoubleSpinBox(_heightmapping_group);
+      heightmapping_scale_spin->setVisible(modern_features);
+
       auto heightmapping_heightscale_spin = new QDoubleSpinBox(_heightmapping_group);
+      heightmapping_heightscale_spin->setVisible(modern_features);
+
       auto heightmapping_heightoffset_spin = new QDoubleSpinBox(_heightmapping_group);
+      heightmapping_heightoffset_spin->setVisible(modern_features);
+
       QPushButton* _heightmapping_copy_btn = new QPushButton("Copy to JSON", this);
       _heightmapping_copy_btn->setVisible(modern_features);
 
