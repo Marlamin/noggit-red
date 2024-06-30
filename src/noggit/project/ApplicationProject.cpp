@@ -10,31 +10,48 @@ namespace Noggit::Project
         std::filesystem::path extraDataFolder = (project.ProjectPath);
         extraDataFolder /= "extraData";
 
+        Log << "Loading extra data from " << extraDataFolder << std::endl;
         const auto& table = std::string("Map");
 
-        auto readFileAsIMemStream = [project](std::string const& file_path) -> std::shared_ptr<BlizzardDatabaseLib::Stream::IMemStream>
-        {
-            BlizzardArchive::ClientFile f(file_path, project.ClientData.get());
+        Log << "Loading " << table << " table for extra data " << std::endl;
 
-            return std::make_shared<BlizzardDatabaseLib::Stream::IMemStream>(f.getBuffer(), f.getSize());
-        };
 
-        auto mapTable = project.ClientDatabase->LoadTable(table, readFileAsIMemStream);
 
-        int count = 0;
-        auto iterator = mapTable.Records();
-        
         tsl::robin_map<std::string, int> MapNameToID;
-        while (iterator.HasRecords())
-        {
-            auto record = iterator.Next();
 
-            int map_id = record.RecordId;
-            std::string name = (record.Columns["Directory"].Value);
-            std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-            MapNameToID.emplace(name, map_id);
-            count++;
+        try
+        {
+            auto readFileAsIMemStream = [project](std::string const& file_path) -> std::shared_ptr<BlizzardDatabaseLib::Stream::IMemStream>
+                {
+                    BlizzardArchive::ClientFile f(file_path, project.ClientData.get());
+
+                    return std::make_shared<BlizzardDatabaseLib::Stream::IMemStream>(f.getBuffer(), f.getSize());
+                };
+
+            Log << "Read map table from client, loading as DBC " << std::endl;
+
+            auto mapTable = project.ClientDatabase->LoadTable(table, readFileAsIMemStream);
+
+            int count = 0;
+            auto iterator = mapTable.Records();
+
+            while (iterator.HasRecords())
+            {
+                auto record = iterator.Next();
+                int map_id = record.RecordId;
+                std::string name = (record.Columns["Directory"].Value);
+                std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+                MapNameToID.emplace(name, map_id);
+                count++;
+            }
         }
+        catch (...)
+        {
+            LogError << "Failed to read Map.dbc " << std::endl;
+        }
+
+        Log << "Loaded map table as DBC " << std::endl;
+
         project.ClientDatabase->UnloadTable(table);
 
         if (std::filesystem::exists(extraDataFolder) && std::filesystem::is_directory(extraDataFolder))
