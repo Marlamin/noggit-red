@@ -10,6 +10,7 @@
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/World.h>
 #include <noggit/tool_enums.hpp>
+#include <noggit/ui/tools/UiCommon/expanderwidget.h>
 
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QPushButton>
@@ -29,6 +30,25 @@ namespace Noggit
     {
       setWindowTitle ("Texture Picker");
       setWindowFlags (Qt::Tool | Qt::WindowStaysOnTopHint);
+
+      auto* AlphamapsBox = new ExpanderWidget(this);
+      AlphamapsBox->setExpanderTitle("View Chunk Alphamaps");
+      AlphamapsBox->setExpanded(false);
+      auto AlphamapsBox_content = new QWidget(this);
+      AlphamapsBox_content->setLayoutDirection(Qt::LeftToRight);
+      auto Alphamaps_layout = new QGridLayout(AlphamapsBox_content);
+      AlphamapsBox->setLayoutDirection(Qt::LeftToRight);
+      AlphamapsBox->addPage(AlphamapsBox_content);
+      layout->addWidget(AlphamapsBox, 3, 0, 1, 4, Qt::AlignLeft);
+
+      connect(AlphamapsBox, &ExpanderWidget::expanderChanged, [&](bool flag)
+          {
+              // adjust window's size with the expander.
+              if (flag)
+                this->setFixedHeight(224 + 128 + 18);
+              else
+                  this->setFixedHeight(224);
+          });
 
       for (int i = 0; i < 4; i++)
       {
@@ -86,7 +106,7 @@ namespace Noggit
         alphamap_label->setMinimumSize(128, 128);
         // alphamap_label->hide();
 
-        layout->addWidget(alphamap_label, 3, i);
+        Alphamaps_layout->addWidget(alphamap_label, 0, i);
         _alphamap_preview_labels.push_back(alphamap_label);
       }
 
@@ -124,26 +144,6 @@ namespace Noggit
                   emit shift_right();
                 }
               );
-      /*
-      connect(btn_hide_alphamaps, &QPushButton::clicked
-          , [this]
-          {
-              _display_alphamaps = !_display_alphamaps;
-
-              if (_display_alphamaps)
-              {
-                  for (uint8_t index = 0; index < _chunk->texture_set->num(); ++index)
-                      _alphamap_preview_labels[index]->show();
-                  for (uint8_t index = _chunk->texture_set->num(); index < 4U; ++index)
-                      _alphamap_preview_labels[index]->hide();
-              }
-              else
-              {
-                  for (uint8_t index = 0; index < 4U; ++index)
-                      _alphamap_preview_labels[index]->hide();
-              }
-          }
-      );*/
 
       adjustSize();
       setFixedSize(size());
