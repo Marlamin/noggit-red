@@ -111,44 +111,28 @@ namespace Noggit
 
   void world_model_instances_storage::delete_instances_from_tile(TileIndex const& tile)
   {
-    std::unique_lock<std::mutex> const lock (_mutex);
+    // std::unique_lock<std::mutex> const lock (_mutex);
+    std::vector<selection_type> instances_to_remove;
 
-    for (auto it = _m2s.begin(); it != _m2s.end();)
+    for (auto it = _m2s.begin(); it != _m2s.end(); ++it)
     {
       if (TileIndex(it->second.pos) == tile)
       {
-        if (NOGGIT_CUR_ACTION)
-          NOGGIT_CUR_ACTION->registerObjectRemoved(&it->second);
-        _world->updateTilesModel(&it->second, model_update::remove);
-        _instance_count_per_uid.erase(it->first);
-        it = _m2s.erase(it);
-      }
-      else
-      {
-        it++;
+        instances_to_remove.push_back(&it->second);
       }
     }
-    for (auto it = _wmos.begin(); it != _wmos.end();)
+    for (auto it = _wmos.begin(); it != _wmos.end();++it)
     {
       if (TileIndex(it->second.pos) == tile)
       {
-        if (NOGGIT_CUR_ACTION)
-          NOGGIT_CUR_ACTION->registerObjectRemoved(&it->second);
-        _world->updateTilesWMO(&it->second, model_update::remove);
-        _instance_count_per_uid.erase(it->first);
-        it = _wmos.erase(it);
-      }
-      else
-      {
-        it++;
+        instances_to_remove.push_back(&it->second);
       }
     }
+    delete_instances(instances_to_remove);
   }
 
   void world_model_instances_storage::delete_instances(std::vector<selection_type> const& instances)
   {
-    std::unique_lock<std::mutex> const lock (_mutex);
-
     for (auto& it : instances)
     {
       if (it.index() != eEntry_Object)
@@ -156,6 +140,7 @@ namespace Noggit
 
       auto obj = std::get<selected_object_type>(it);
 
+      // should be done in delete_instance
       if (NOGGIT_CUR_ACTION)
         NOGGIT_CUR_ACTION->registerObjectRemoved(obj);
 
@@ -164,18 +149,14 @@ namespace Noggit
         auto instance = static_cast<ModelInstance*>(obj);
         
         _world->updateTilesModel(instance, model_update::remove);
-
-        _instance_count_per_uid.erase(instance->uid);
-        _m2s.erase(instance->uid);
+        delete_instance(instance->uid);
       }
       else if (obj->which() == eWMO)
       {
         auto instance = static_cast<WMOInstance*>(obj);
 
         _world->updateTilesWMO(instance, model_update::remove);
-
-        _instance_count_per_uid.erase(instance->uid);
-        _wmos.erase(instance->uid);
+        delete_instance(instance->uid);
       }
     }
   }
