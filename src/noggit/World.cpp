@@ -1677,6 +1677,23 @@ void World::overwriteTextureAtCurrentChunk(glm::vec3 const& pos, scoped_blp_text
   });
 }
 
+void World::paintGroundEffectExclusion(glm::vec3 const& pos, float radius, bool exclusion)
+{
+    ZoneScoped;
+    for_all_chunks_in_range
+    (pos, radius
+        , [&](MapChunk* chunk)
+        {
+            // TODO action
+            NOGGIT_CUR_ACTION->registerChunkDetailDoodadExclusionChange(chunk);
+
+            // chunk->setHole(pos, radius, exclusion);
+            chunk->paintDetailDoodadsExclusion(pos, radius, exclusion);
+            return true;
+        }
+    );
+}
+
 void World::setHole(glm::vec3 const& pos, float radius, bool big, bool hole)
 {
   ZoneScoped;

@@ -36,7 +36,7 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
                         | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS
-                        | ChunkUpdateFlags::GROUND_EFFECT)
+                        | ChunkUpdateFlags::GROUND_EFFECT | ChunkUpdateFlags::DETAILDOODADS_EXCLUSION)
 {
 
 
@@ -1352,6 +1352,11 @@ void MapChunk::clear_shadows()
   registerChunkUpdate(ChunkUpdateFlags::SHADOW);
 }
 
+void MapChunk::paintDetailDoodadsExclusion(glm::vec3 const& pos, float radius, bool exclusion)
+{
+    texture_set->setDetailDoodadsExclusion(xbase, zbase, pos, radius, false, exclusion);
+}
+
 bool MapChunk::isHole(int i, int j)
 {
   return (holes & ((1 << ((j * 4) + i)))) != 0;
@@ -1956,7 +1961,7 @@ void MapChunk::unload()
                         | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                         | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
                         | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS
-                        | ChunkUpdateFlags::GROUND_EFFECT;
+                        | ChunkUpdateFlags::GROUND_EFFECT | ChunkUpdateFlags::DETAILDOODADS_EXCLUSION;
 }
 
 void MapChunk::setAlphamapImage(const QImage &image, unsigned int layer)

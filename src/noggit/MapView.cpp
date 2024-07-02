@@ -49,6 +49,7 @@
 #include <limits>
 #include <variant>
 #include <noggit/Selection.h>
+#include <noggit/ui/FontAwesome.hpp>
 
 #ifdef USE_MYSQL_UID_STORAGE
 #include <mysql/mysql.h>
@@ -106,7 +107,7 @@ NOGGIT_ACTION_MGR->purge();                                                     
 ACTION_CODE                                                                                                            \
 }                                                                                                                      \
 
-
+// add action no shortcut
 #define ADD_ACTION_NS(menu, name, on_action)                      \
   {                                                               \
     auto action (menu->addAction (name));                         \
@@ -258,7 +259,12 @@ void MapView::set_editing_mode(editing_mode mode)
     _world->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
     _minimap->use_selection(nullptr);
 
-    bool use_classic_ui = _settings->value("classicUI", true).toBool();
+    bool use_classic_ui = _settings->value("classicUI", false).toBool();
+
+    if (mode != editing_mode::paint)
+    {
+        getGroundEffectsTool()->hide();
+    }
 
     switch (mode)
     {
@@ -276,11 +282,7 @@ void MapView::set_editing_mode(editing_mode mode)
         else if (texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::ground_effect)
         {
             getGroundEffectsTool()->updateTerrainUniformParams();
-            // _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = getGroundEffectsTool()->show_active_sets_overlay();
-            // _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = getGroundEffectsTool()->show_placement_map_overlay();
-            // _world->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = getGroundEffectsTool()->show_exclusion_map_overlay();
         }
-
 
         if (use_classic_ui)
         {
@@ -2854,6 +2856,75 @@ void MapView::createGUI()
   setupHelpMenu();
   setupHotkeys();
 
+
+  // temp test, move to a function later
+  auto separator(_main_window->_menuBar->addSeparator());
+
+#if defined(_WIN32) || defined(WIN32)
+  QAction* start_wow_action(_main_window->_menuBar->addAction("Launch WoW"));
+  start_wow_action->setIconVisibleInMenu(true);
+  start_wow_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::playcircle));
+  start_wow_action->setIconText("test icon text");
+
+  connect(start_wow_action, &QAction::triggered, 
+      [&]
+      {
+          std::filesystem::path WoW_path = std::filesystem::path(Noggit::Project::CurrentProject::get()->ClientPath) / "Wow.exe";
+
+          QString program_path = WoW_path.string().c_str();
+          QFileInfo checkFile(program_path);
+
+          QStringList arguments;
+          // arguments << "-console"; // deosn't seem to work
+
+          if (checkFile.exists() && checkFile.isFile()) 
+          {
+              QProcess* process = new QProcess(); // this parent?
+              process->start(program_path, arguments);
+
+              if (!process->waitForStarted()) {
+                  qWarning("Failed to start process");
+                  QMessageBox::information(this, "Error", "Failed to start process");
+              }
+          }
+          else 
+          {
+              // Handle file not existing
+              qWarning("File does not exist");
+              QMessageBox::critical(this, "Error", "The specified file does not exist");
+          }
+
+          // ShellExecute(nullptr
+          //     , "open"
+          //     , WoW_path.string().c_str()
+          //     , nullptr
+          //     , nullptr
+          //     , SW_SHOWNORMAL
+          // );
+      });
+
+
+  QAction* build_data_action(_main_window->_menuBar->addAction("Build Game Data"));
+  build_data_action->setToolTip("Save content of project folder as MPQ patch in the client.");
+  build_data_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::filearchive));
+
+  QAction* start_server_action(_main_window->_menuBar->addAction("Start Server"));
+  start_server_action->setToolTip("Start World and Auth servers.");
+  start_server_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::server));
+
+  QAction* extract_server_map_action(_main_window->_menuBar->addAction("Extract Server Map"));
+  extract_server_map_action->setToolTip("Start server extractors for this map.");
+  // TODO idea : detect modified tiles and only extract those.
+  extract_server_map_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::map));
+
+  // TODO : restart button while WoW is running?
+
+#endif
+
+  // IDEAs : various client utils like synchronize client view with noggit, reload, patch WoW.exe with community patches like unlock md5 check, set WoW client version
+
+  /////////////////////////////////////////////////////////////////
+
   connect(_main_window, &Noggit::Ui::Windows::NoggitWindow::exitPromptOpened, this, &MapView::on_exit_prompt);
 
   set_editing_mode (editing_mode::ground);
@@ -3598,7 +3669,10 @@ MapView::~MapView()
   {
     delete TexturePicker; // explicitly delete this here to avoid opengl context related crash
     delete objectEditor;
-    delete texturingTool;
+
+    // since the ground effect tool preview renderer got added, this causes crashing on exit to menu. 
+    // Now it crashes in application exit.
+    // delete texturingTool;
   }
   
   if (_force_uid_check)
@@ -4033,54 +4107,86 @@ void MapView::tick (float dt)
           }
           break;
         case editing_mode::paint:
-          if (_mod_shift_down && _mod_ctrl_down && _mod_alt_down)
-          {
-            // clear chunk texture
-            if (!underMap)
+
+            if (texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::ground_effect)
             {
-              NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE,
-                                                             Noggit::ActionModalityControllers::eSHIFT
-                                                             | Noggit::ActionModalityControllers::eCTRL
-                                                             | Noggit::ActionModalityControllers::eALT
-                                                             | Noggit::ActionModalityControllers::eLMB);
+                if (_mod_shift_down)
+                {
+                    if (texturingTool->getGroundEffectsTool()->brush_mode() == Noggit::Ui::ground_effect_brush_mode::exclusion)
+                    {
+                        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNK_DOODADS_EXCLUSION,
+                            Noggit::ActionModalityControllers::eSHIFT
+                            | Noggit::ActionModalityControllers::eLMB);
+                        _world->paintGroundEffectExclusion(_cursor_pos, texturingTool->getGroundEffectsTool()->radius(), true);
+                        // _world->setHole(_cursor_pos, holeTool->brushRadius(), _mod_alt_down, false);
+                    }
+                    else if (texturingTool->getGroundEffectsTool()->brush_mode() == Noggit::Ui::ground_effect_brush_mode::effect)
+                    {
 
-              _world->eraseTextures(_cursor_pos);
+                    }
+
+                }
+                else if (_mod_ctrl_down && !underMap)
+                {
+                    NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNK_DOODADS_EXCLUSION,
+                        Noggit::ActionModalityControllers::eCTRL
+                        | Noggit::ActionModalityControllers::eLMB);
+                    _world->paintGroundEffectExclusion(_cursor_pos, texturingTool->getGroundEffectsTool()->radius(), false);
+                }
             }
-          }
-          else if (_mod_ctrl_down && !ui_hidden)
-          {
-            _texture_picker_need_update = true;
-            // Pick texture
-            // _texture_picker_dock->setVisible(true);
-            // TexturePicker->setMainTexture(texturingTool->_current_texture);
-            // TexturePicker->getTextures(selection);
-          }
-          else  if (_mod_shift_down && !!Noggit::Ui::selected_texture::get())
-          {
-            if ((_display_mode == display_mode::in_3D && !underMap) || _display_mode == display_mode::in_2D)
+            else
             {
-              auto image_mask_selector = texturingTool->getImageMaskSelector();
+                if (_mod_shift_down && _mod_ctrl_down && _mod_alt_down)
+                {
+                  // clear chunk texture
+                  if (!underMap)
+                  {
+                    NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE,
+                                                                   Noggit::ActionModalityControllers::eSHIFT
+                                                                   | Noggit::ActionModalityControllers::eCTRL
+                                                                   | Noggit::ActionModalityControllers::eALT
+                                                                   | Noggit::ActionModalityControllers::eLMB);
 
-              if (NOGGIT_CUR_ACTION
-              && texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::paint
-              && image_mask_selector->isEnabled()
-              && !image_mask_selector->getBrushMode())
-                break;
+                    _world->eraseTextures(_cursor_pos);
+                  }
+                }
+                else if (_mod_ctrl_down && !ui_hidden)
+                {
+                  _texture_picker_need_update = true;
+                  // Pick texture
+                  // _texture_picker_dock->setVisible(true);
+                  // TexturePicker->setMainTexture(texturingTool->_current_texture);
+                  // TexturePicker->getTextures(selection);
+                }
+                else  if (_mod_shift_down && !!Noggit::Ui::selected_texture::get())
+                {
+                  if ((_display_mode == display_mode::in_3D && !underMap) || _display_mode == display_mode::in_2D)
+                  {
+                    auto image_mask_selector = texturingTool->getImageMaskSelector();
 
-              auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE,
-                                             Noggit::ActionModalityControllers::eSHIFT
-                                                             | Noggit::ActionModalityControllers::eLMB);
+                    if (NOGGIT_CUR_ACTION
+                    && texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::paint
+                    && image_mask_selector->isEnabled()
+                    && !image_mask_selector->getBrushMode())
+                      break;
 
-              action->setPostCallback(&MapView::randomizeTexturingRotation);
+                    auto action = NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TEXTURE,
+                                                   Noggit::ActionModalityControllers::eSHIFT
+                                                                   | Noggit::ActionModalityControllers::eLMB);
 
-              if (texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::paint
-                  && image_mask_selector->isEnabled()
-                  && !image_mask_selector->getBrushMode())
-                action->setBlockCursor(true);
+                    action->setPostCallback(&MapView::randomizeTexturingRotation);
 
-              texturingTool->paint(_world.get(), _cursor_pos, dt, *Noggit::Ui::selected_texture::get());
+                    if (texturingTool->getTexturingMode() == Noggit::Ui::texturing_mode::paint
+                        && image_mask_selector->isEnabled()
+                        && !image_mask_selector->getBrushMode())
+                      action->setBlockCursor(true);
+
+                    texturingTool->paint(_world.get(), _cursor_pos, dt, *Noggit::Ui::selected_texture::get());
+                  }
+                }
             }
-          }
+
+
           break;
 
         case editing_mode::holes:
@@ -4804,7 +4910,7 @@ void MapView::draw_map()
       _minimap->update();
   }
 
-  bool classic_ui = _settings->value("classicUI", true).toBool();
+  bool classic_ui = _settings->value("classicUI", false).toBool();
   bool show_unpaintable = classic_ui ? texturingTool->show_unpaintable_chunks() : _left_sec_toolbar->showUnpaintableChunk();
   _world->renderer()->draw (
                  model_view()
@@ -5880,7 +5986,7 @@ void MapView::onSettingsSave()
 void MapView::ShowContextMenu(QPoint pos) 
 {
     // QApplication::startDragDistance() is 10
-    auto mouse_moved = QApplication::startDragDistance() < (_right_click_pos - pos).manhattanLength();;
+    auto mouse_moved = QApplication::startDragDistance() / 3 < (_right_click_pos - pos).manhattanLength();
 
     // don't show context menu if dragging mouse
     if (mouse_moved || ImGuizmo::IsUsing())

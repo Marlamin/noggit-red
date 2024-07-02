@@ -46,8 +46,9 @@ enum ChunkUpdateFlags
   NORMALS       = 0x10,
   HOLES         = 0x20,
   AREA_ID       = 0x40,
-  FLAGS         = 0x80,
-  GROUND_EFFECT = 0x100
+  FLAGS         = 0x80, // both chunk and texture layers flags
+  GROUND_EFFECT = 0x100,
+  DETAILDOODADS_EXCLUSION = 0x200
 };
 
 class MapChunk
@@ -110,7 +111,7 @@ private:
 
 public:
 
-  TextureSet* getTextureSet() { return texture_set.get(); };
+    TextureSet* getTextureSet() const { return texture_set.get(); };
 
   void draw ( math::frustum const& frustum
             , OpenGL::Scoped::use_program& mcnk_shader
@@ -172,6 +173,8 @@ public:
   void change_texture_flag(scoped_blp_texture_reference const& tex, std::size_t flag, bool add);
 
   void clear_shadows();
+
+  void paintDetailDoodadsExclusion(glm::vec3 const& pos, float radius, bool exclusion);
 
   bool isHole(int i, int j);
   void setHole(glm::vec3 const& pos, float radius, bool big, bool add);

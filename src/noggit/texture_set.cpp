@@ -423,6 +423,36 @@ bool const TextureSet::getDoodadDisabledAt(int x, int y)
     return is_enabled;
 }
 
+void TextureSet::setDetailDoodadsExclusion(float xbase, float zbase, glm::vec3 const& pos, float radius, bool big, bool add)
+{
+    // big = fill chunk
+    if (big)
+    {
+        std::fill(_doodadStencil.begin(), _doodadStencil.end(), add ? 0xFF : 0x0);
+    }
+    else
+    {
+        for (int x = 0; x < 8; ++x)
+        {
+            for (int y = 0; y < 8; ++y)
+            {
+                if (misc::getShortestDist(pos.x, pos.z, xbase + (UNITSIZE * x),
+                    zbase + (UNITSIZE * y), UNITSIZE) <= radius)
+                {
+                    int v = (1 << (x));
+
+                    if (add)
+                        _doodadStencil[y] |= v;
+                    else
+                        _doodadStencil[y] &= ~v;
+                }
+
+            }
+        }
+    }
+    _chunk->registerChunkUpdate(ChunkUpdateFlags::DETAILDOODADS_EXCLUSION);
+}
+
 bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* image, bool paint)
 {
 
