@@ -224,6 +224,10 @@ namespace Noggit::Ui::Windows
     connect(_settings, &settings::saved, [this]()
     { if (_map_view) _map_view->onSettingsSave(); });
 
+    // _app_toolbar = new QToolBar("Application", this);
+    // _app_toolbar->setOrientation(Qt::Horizontal);
+    // addToolBar(_app_toolbar);
+
     _stack_widget->addWidget(_map_view);
     _stack_widget->setCurrentIndex(1);
 

@@ -1098,10 +1098,10 @@ void MapView::setupToolbars()
 {
   _toolbar = new Noggit::Ui::toolbar([this] (editing_mode mode) { set_editing_mode (mode); });
   _toolbar->setOrientation(Qt::Vertical);
-  auto right_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->leftToolbarHolder);
-  right_toolbar_layout->addWidget( _toolbar);
-  right_toolbar_layout->setDirection(QBoxLayout::LeftToRight);
-  right_toolbar_layout->setContentsMargins(0, 5, 0, 5);
+  auto left_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->leftToolbarHolder);
+  left_toolbar_layout->addWidget( _toolbar);
+  left_toolbar_layout->setDirection(QBoxLayout::LeftToRight);
+  left_toolbar_layout->setContentsMargins(0, 5, 0, 5);
   connect (this, &QObject::destroyed, _toolbar, &QObject::deleteLater);
 
   auto left_sec_toolbar_layout = new QVBoxLayout(_viewport_overlay_ui->leftSecondaryToolbarHolder);
@@ -1125,6 +1125,90 @@ void MapView::setupToolbars()
 
   top_toolbar_layout->addWidget( _view_toolbar);
   sec_toolbar_layout->addWidget( _secondary_toolbar);
+}
+
+void MapView::setupMainToolbar()
+{
+    _main_window->_app_toolbar = new QToolBar("Menu Toolbar", this); // this or mainwindow as parent?
+    _main_window->_app_toolbar->setOrientation(Qt::Horizontal);
+    _main_window->addToolBar(_main_window->_app_toolbar);
+    // _main_window->_app_toolbar->hide(); // can hide by default.
+
+    auto save_changed_btn = new QPushButton(this);
+    save_changed_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::save));
+    save_changed_btn->setToolTip("Save Changed");
+    // save_changed_btn->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_S));
+    _main_window->_app_toolbar->addWidget(save_changed_btn);
+
+    auto undo_btn = new QPushButton(this);
+    undo_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::undo));
+    undo_btn->setToolTip("Undo");
+    // undo_btn->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Z));
+    _main_window->_app_toolbar->addWidget(undo_btn);
+
+    auto redo_btn = new QPushButton(this);
+    redo_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::redo));
+    redo_btn->setToolTip("Undo");
+    // redo_btn->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z));
+    _main_window->_app_toolbar->addWidget(redo_btn);
+
+
+    _main_window->_app_toolbar->addSeparator();
+
+
+    QAction* start_server_action = _main_window->_app_toolbar->addAction("Start Server");
+    start_server_action->setToolTip("Start World and Auth servers.");
+    start_server_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::server));
+    
+    QAction* extract_server_map_action = _main_window->_app_toolbar->addAction("Extract Server Map");
+    extract_server_map_action->setToolTip("Start server extractors for this map.");
+    // TODO idea : detect modified tiles and only extract those.
+    extract_server_map_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::map));
+
+    auto build_data_action = _main_window->_app_toolbar->addAction("Build Game Data");
+    build_data_action->setToolTip("Save content of project folder as MPQ patch in the client.");
+    build_data_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::filearchive));
+
+    auto start_wow_btn = new QPushButton(this);
+    start_wow_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::play));
+    start_wow_btn->setToolTip("Save, unlock MPQs and launch the client");
+    _main_window->_app_toolbar->addWidget(start_wow_btn);
+
+    connect(start_wow_btn, &QPushButton::clicked
+        , [=]()
+        {
+            std::filesystem::path WoW_path = std::filesystem::path(Noggit::Project::CurrentProject::get()->ClientPath) / "Wow.exe";
+
+            QString program_path = WoW_path.string().c_str();
+            QFileInfo checkFile(program_path);
+
+            QStringList arguments;
+            // arguments << "-console"; // deosn't seem to work
+
+            if (checkFile.exists() && checkFile.isFile())
+            {
+                QProcess* process = new QProcess(); // this parent?
+                process->start(program_path, arguments);
+
+                if (!process->waitForStarted()) {
+                    qWarning("Failed to start process");
+                    QMessageBox::information(this, "Error", "Failed to start process");
+                }
+            }
+            else
+            {
+                // Handle file not existing
+                qWarning("File does not exist");
+                QMessageBox::critical(this, "Error", "The specified file does not exist");
+            }
+        });
+
+
+    // TODO : restart button while WoW is running?
+
+    // Lock/unlock archives button, and auto unlock when starting client
+
+  // IDEAs : various client utils like synchronize client view with noggit, reload, patch WoW.exe with community patches like unlock md5 check, set WoW client version
 }
 
 void MapView::setupKeybindingsGui()
@@ -2856,74 +2940,7 @@ void MapView::createGUI()
   setupHelpMenu();
   setupHotkeys();
 
-
-  // temp test, move to a function later
-  auto separator(_main_window->_menuBar->addSeparator());
-
-#if defined(_WIN32) || defined(WIN32)
-  QAction* start_wow_action(_main_window->_menuBar->addAction("Launch WoW"));
-  start_wow_action->setIconVisibleInMenu(true);
-  start_wow_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::playcircle));
-  start_wow_action->setIconText("test icon text");
-
-  connect(start_wow_action, &QAction::triggered, 
-      [&]
-      {
-          std::filesystem::path WoW_path = std::filesystem::path(Noggit::Project::CurrentProject::get()->ClientPath) / "Wow.exe";
-
-          QString program_path = WoW_path.string().c_str();
-          QFileInfo checkFile(program_path);
-
-          QStringList arguments;
-          // arguments << "-console"; // deosn't seem to work
-
-          if (checkFile.exists() && checkFile.isFile()) 
-          {
-              QProcess* process = new QProcess(); // this parent?
-              process->start(program_path, arguments);
-
-              if (!process->waitForStarted()) {
-                  qWarning("Failed to start process");
-                  QMessageBox::information(this, "Error", "Failed to start process");
-              }
-          }
-          else 
-          {
-              // Handle file not existing
-              qWarning("File does not exist");
-              QMessageBox::critical(this, "Error", "The specified file does not exist");
-          }
-
-          // ShellExecute(nullptr
-          //     , "open"
-          //     , WoW_path.string().c_str()
-          //     , nullptr
-          //     , nullptr
-          //     , SW_SHOWNORMAL
-          // );
-      });
-
-
-  QAction* build_data_action(_main_window->_menuBar->addAction("Build Game Data"));
-  build_data_action->setToolTip("Save content of project folder as MPQ patch in the client.");
-  build_data_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::filearchive));
-
-  QAction* start_server_action(_main_window->_menuBar->addAction("Start Server"));
-  start_server_action->setToolTip("Start World and Auth servers.");
-  start_server_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::server));
-
-  QAction* extract_server_map_action(_main_window->_menuBar->addAction("Extract Server Map"));
-  extract_server_map_action->setToolTip("Start server extractors for this map.");
-  // TODO idea : detect modified tiles and only extract those.
-  extract_server_map_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::map));
-
-  // TODO : restart button while WoW is running?
-
-#endif
-
-  // IDEAs : various client utils like synchronize client view with noggit, reload, patch WoW.exe with community patches like unlock md5 check, set WoW client version
-
-  /////////////////////////////////////////////////////////////////
+  setupMainToolbar();
 
   connect(_main_window, &Noggit::Ui::Windows::NoggitWindow::exitPromptOpened, this, &MapView::on_exit_prompt);
 
@@ -3659,6 +3676,8 @@ MapView::~MapView()
   makeCurrent();
 
   _destroying = true;
+
+  _main_window->removeToolBar(_main_window->_app_toolbar);
 
   OpenGL::context::scoped_setter const _ (::gl, context());
   delete _texBrush;

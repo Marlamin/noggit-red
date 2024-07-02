@@ -42,6 +42,8 @@ namespace Noggit::Ui::Windows
 
       QMenuBar* _menuBar;
 
+      QToolBar* _app_toolbar;
+
       std::unordered_set<QWidget*> displayed_widgets;
       void buildMenu();
     signals:
