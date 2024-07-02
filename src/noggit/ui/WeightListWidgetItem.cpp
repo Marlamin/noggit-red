@@ -14,6 +14,8 @@ namespace noggit
             label_doodad_name(new QLabel), wrapper_layout(new QHBoxLayout), reset_button(new QPushButton),
             title_layout(new QHBoxLayout)
         {
+            setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+
             // Set up spinbox ranges
             spinbox_weight->setRange(0, 10);
 
@@ -25,6 +27,7 @@ namespace noggit
             label_percentage->setText("NaN");
 
             reset_button->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::minus));
+            reset_button->setToolTip("Reset this Doodad's values");
             reset_button->setFixedSize(15, 15);
             // Set fixed heights for labels and spin boxes
             //label_text_weight->setFixedHeight(20); // Adjust the height as needed

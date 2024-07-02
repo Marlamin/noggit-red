@@ -826,7 +826,7 @@ namespace Noggit
         setWindowTitle("Ground Effects Tools");
         setMinimumSize(750, 600);
         setWindowFlags(Qt::Tool | Qt::WindowStaysOnTopHint);
-        // setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+        setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
         QHBoxLayout* main_layout = new QHBoxLayout(this);
         QVBoxLayout* left_side_layout = new QVBoxLayout(this);
         QVBoxLayout* right_side_layout = new QVBoxLayout(this);
@@ -890,12 +890,13 @@ namespace Noggit
 
         // selection
         auto selection_group = new QGroupBox("Effect Set Selection", this);
-        right_side_layout->addWidget(selection_group);
-        auto selection_layout(new QFormLayout(selection_group));
+        selection_group->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+        left_side_layout->addWidget(selection_group);
+        auto selection_layout(new QVBoxLayout(selection_group));
         selection_group->setLayout(selection_layout);
 
         auto button_create_new = new QPushButton("Create New", this);
-        selection_layout->addRow(button_create_new);
+        selection_layout->addWidget(button_create_new);
 
         // _cbbox_effect_sets = new QComboBox(this);
         // _cbbox_effect_sets->addItem("Noggit Default");
@@ -903,7 +904,7 @@ namespace Noggit
         // selection_layout->addRow("Active Set : ", _cbbox_effect_sets);
 
         _effect_sets_list = new QListWidget(this);
-        selection_layout->addRow(_effect_sets_list);
+        selection_layout->addWidget(_effect_sets_list);
         _effect_sets_list->setViewMode(QListView::ListMode);
         _effect_sets_list->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
         _effect_sets_list->setSelectionBehavior(QAbstractItemView::SelectItems);
@@ -916,13 +917,16 @@ namespace Noggit
         // effect settings
         {
             auto settings_group = new QGroupBox("Selected Set Settings", this);
-            // settings_group->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+            settings_group->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
             // settings_group->setCheckable(true);
             right_side_layout->addWidget(settings_group);
 
             // auto settings_content = new QWidget(settings_group);
             auto settings_layout(new QFormLayout(settings_group));
             settings_group->setLayout(settings_layout);
+
+            auto set_help_label = new QLabel("A ground Effect Set contains up to 4 different doodads.\nTerrain Type is used for footprints and sounds.");
+            settings_layout->addRow(set_help_label);
 
             // for (int i = 0; i < 4; i++)
             // {
@@ -943,9 +947,9 @@ namespace Noggit
             _object_list->setSelectionMode(QAbstractItemView::SingleSelection);
             _object_list->setAcceptDrops(false);
             _object_list->setMovement(QListView::Movement::Static);
-            _object_list->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-            _object_list->setMinimumWidth(480);
-            _object_list->setMinimumHeight(100);
+            _object_list->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+            _object_list->setFixedWidth(_object_list->iconSize().width() * 4 + 40); //  padding-right: 10px * 4
+            _object_list->setFixedHeight(_object_list->iconSize().height() + 20);
 
             settings_layout->addRow(_object_list);
             for (int i = 0; i < 4; i++)
@@ -959,15 +963,15 @@ namespace Noggit
             }
 
             _weight_list = new QListWidget(this);
-            _weight_list->setItemAlignment(Qt::AlignLeft);
+            _weight_list->setItemAlignment(Qt::AlignLeft | Qt::AlignTop);
             _weight_list->setFlow(QListWidget::LeftToRight);
             _weight_list->setMovement(QListView::Movement::Static);
             _weight_list->setSelectionMode(QAbstractItemView::NoSelection);
-            _weight_list->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
-            _weight_list->setMinimumWidth(480);
-            _weight_list->setMinimumHeight(120);
+            _weight_list->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+            _weight_list->setMinimumWidth(450);
+            _weight_list->setFixedHeight(120);
             _weight_list->setVisible(true);
-            QString styleSheet = "QListWidget::item { padding-right: 10px; }";
+            QString styleSheet = "QListWidget::item { padding-right: 6px; border: 1px solid darkGray;}";
             _weight_list->setStyleSheet(styleSheet);
 
             settings_layout->addRow(_weight_list);
@@ -1019,35 +1023,51 @@ namespace Noggit
 
         /// Apply group
         auto apply_group = new QGroupBox("Apply Ground Effect", this);
-        left_side_layout->addWidget(apply_group);
+        right_side_layout->addWidget(apply_group);
 
         auto apply_layout(new QVBoxLayout(apply_group));
         apply_group->setLayout(apply_layout);
 
         // generate modes
         {
+            auto buttons_layout(new QGridLayout(this));
+            apply_layout->addLayout(buttons_layout);
+
             auto generate_type_group = new QButtonGroup(apply_group);
 
             auto generate_effect_zone = new QRadioButton("Current Zone", this);
             generate_type_group->addButton(generate_effect_zone);
-            apply_layout->addWidget(generate_effect_zone);
+            buttons_layout->addWidget(generate_effect_zone, 0, 0);
 
             auto generate_effect_area = new QRadioButton("Current Area(subzone)", this);
             generate_type_group->addButton(generate_effect_area);
-            apply_layout->addWidget(generate_effect_area);
+            buttons_layout->addWidget(generate_effect_area, 0, 1);
+
+            auto generate_effect_adt = new QRadioButton("Current ADT(Tile)", this);
+            generate_type_group->addButton(generate_effect_adt);
+            buttons_layout->addWidget(generate_effect_adt, 1, 0);
+
+            auto generate_effect_global = new QRadioButton("Global (entire map)", this);
+            generate_type_group->addButton(generate_effect_global);
+            buttons_layout->addWidget(generate_effect_global, 1, 1);
 
             generate_effect_zone->setChecked(true);
             generate_effect_zone->setAutoExclusive(true);
         }
 
         _apply_override_cb = new QCheckBox("Override", this);
+        _apply_override_cb->setToolTip("If the texture already had a ground effect, replace it.");
+        _apply_override_cb->setChecked(true);
         apply_layout->addWidget(_apply_override_cb);
 
-        auto button_generate_adt = new QPushButton("Generate for current ADT", this);
-        apply_layout->addWidget(button_generate_adt);
+        auto button_generate = new QPushButton("Apply to Texture", this);
+        apply_layout->addWidget(button_generate);
 
-        auto button_generate_global = new QPushButton("Generate Global(entire map)", this);
-        apply_layout->addWidget(button_generate_global);
+        // auto button_generate_adt = new QPushButton("Generate for current ADT", this);
+        // apply_layout->addWidget(button_generate_adt);
+
+        // auto button_generate_global = new QPushButton("Generate Global(entire map)", this);
+        // apply_layout->addWidget(button_generate_global);
 
         // brush modes
         {
@@ -1072,7 +1092,8 @@ namespace Noggit
             _paint_effect->setChecked(true);
             _paint_effect->setAutoExclusive(true);
         }
-        //adjustSize();
+        left_side_layout->addSpacerItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+        // adjustSize();
 
         connect(_render_group_box, &QGroupBox::clicked,
             [this](bool checked)
