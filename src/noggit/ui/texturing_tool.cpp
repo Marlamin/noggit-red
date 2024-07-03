@@ -189,7 +189,6 @@ namespace Noggit
       tool_layout->setAlignment(quick_palette_btn, Qt::AlignTop);
 
       // Mists HeightMapping, only enable if modern feature setting is on
-      QSettings settings;
       bool modern_features = settings.value("modern_features", false).toBool();
 
       // Define UI elements regardless of modern_features being enabled because they're used later on as well.

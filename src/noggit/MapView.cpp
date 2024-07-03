@@ -83,6 +83,7 @@
 #include <QFileDialog>
 #include <QProgressDialog>
 #include <QClipboard>
+#include <QProcess>
 
 #include <algorithm>
 #include <cmath>
