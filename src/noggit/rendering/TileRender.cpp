@@ -51,7 +51,7 @@ void TileRender::unload()
                                   | ChunkUpdateFlags::SHADOW | ChunkUpdateFlags::MCCV
                                   | ChunkUpdateFlags::NORMALS| ChunkUpdateFlags::HOLES
                                   | ChunkUpdateFlags::AREA_ID| ChunkUpdateFlags::FLAGS
-                                  | ChunkUpdateFlags::GROUND_EFFECT;
+                                  | ChunkUpdateFlags::GROUND_EFFECT | ChunkUpdateFlags::DETAILDOODADS_EXCLUSION;
 }
 
 
@@ -218,7 +218,15 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
 
       if (flags & ChunkUpdateFlags::GROUND_EFFECT)
       {
-          setChunkGroundEffectData(chunk.get());
+          // TODO.
+          // currently directly handled in functions
+          // setChunkGroundEffectColor()
+          // setChunkGroundEffectActiveData()
+      }
+
+      if (flags & ChunkUpdateFlags::DETAILDOODADS_EXCLUSION)
+      {
+          setChunkDetaildoodadsExclusionData(chunk.get());
       }
       
 
@@ -625,14 +633,14 @@ void TileRender::initChunkData(MapChunk* chunk)
   chunk_render_instance.ChunkGroundEffectColor[2] = 0.0f;
   chunk_render_instance.ChunkGroundEffectColor[3] = 0.0f;
 
-  // setChunkGroundEffectData(chunk);
+  // setChunkDetaildoodadsExclusionData(chunk);
   chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[0] = 0;
   chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[1] = 0;
   chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[2] = 0;
   chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[3] = 0;
 }
 
-void TileRender::setChunkGroundEffectData(MapChunk* chunk)
+void TileRender::setChunkDetaildoodadsExclusionData(MapChunk* chunk)
 {
   auto doodadExclusionMap = chunk->texture_set->getDoodadStencilBase();
 

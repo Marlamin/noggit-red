@@ -241,6 +241,7 @@ public:
 
   void eraseTextures(glm::vec3 const& pos);
   void overwriteTextureAtCurrentChunk(glm::vec3 const& pos, scoped_blp_texture_reference const& oldTexture, scoped_blp_texture_reference newTexture);
+  void paintGroundEffectExclusion(glm::vec3 const& pos, float radius, bool exclusion);
   void setBaseTexture(glm::vec3 const& pos);
   void clear_shadows(glm::vec3 const& pos);
   void clearTextures(glm::vec3 const& pos);

@@ -87,6 +87,12 @@ namespace Noggit
         unsigned int TerrainType = 0;
     };
 
+    enum class ground_effect_brush_mode
+    {
+        none,
+        exclusion,
+        effect
+    };
 
     class ground_effect_tool : public QWidget
     {
@@ -99,37 +105,50 @@ namespace Noggit
 
         ~ground_effect_tool(); // delete renderer
 
+        float radius() const{ return _effect_radius_slider->value();}
+        ground_effect_brush_mode brush_mode() const; // { return _brush_grup_box->isChecked(); }
+        bool render_mode() const { return _render_group_box->isChecked(); }
+
+        void delete_renderer() { delete _preview_renderer; } // test to fix opengl crashes on exit
+
     protected:
-        void showEvent(QShowEvent* event) {
+        void showEvent(QShowEvent* event) override {
             QWidget::showEvent(event);
+
             updateTerrainUniformParams();
         }
 
-        void hideEvent(QHideEvent* event)  {
+        void hideEvent(QHideEvent* event) override {
             _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = false;
             _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = false;
             _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
+            _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
+
             QWidget::hideEvent(event);
             // event->accept();
         };
-
-        void closeEvent(QCloseEvent* event) override {
-            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = false;
-            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = false;
-            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
-            QWidget::closeEvent(event);
-            // event->accept();
-        };
+        // close event triggers hide event.
 
   public:
         void setDoodadSlotFromBrowser(QString doodad_path);
 
-        void TextureChanged(); // textureChanged
+        void TextureChanged(); // selected texture was changed
 
-        bool show_active_sets_overlay() const { return _render_active_sets->isChecked() && _render_group_box->isChecked(); };
-        bool show_placement_map_overlay() const { return _render_placement_map->isChecked() && _render_group_box->isChecked(); };
-        bool show_exclusion_map_overlay() const { return _render_exclusion_map->isChecked() && _render_group_box->isChecked(); };
-    private:        
+        inline bool render_active_sets_overlay() const
+        {
+            return isVisible() && _render_active_sets->isChecked() && render_mode(); // _texturing_tool->getTexturingMode() == texturing_mode::ground_effect
+        };
+        inline bool render_placement_map_overlay() const
+        {
+            return isVisible() && _render_placement_map->isChecked() && render_mode();
+        };
+        inline bool render_exclusion_map_overlay() const
+        {
+            return isVisible() && _render_exclusion_map->isChecked() && render_mode();
+        };
+
+        void change_radius(float change) { _effect_radius_slider->setValue(static_cast<float>(_effect_radius_slider->value()) + change); };
+    private:
 
         std::optional<ground_effect_set> getSelectedGroundEffect();
         std::optional<glm::vec3> getSelectedEffectColor();
@@ -158,21 +177,17 @@ namespace Noggit
 
         QGroupBox* _render_group_box;
         QButtonGroup* _render_type_group;
-
         // render all the loaded effect sets for this texture in various colors
         QRadioButton* _render_active_sets;
-
         // only for the active/selected set of the current texture : 
         // - render as red if set is present in the chunk and NOT the current active layer
         // - render as green if set is present in the chunk and is the current active layer
         // - render as black is set is not present
         QRadioButton* _render_placement_map;
-
         // render chunk units where effect doodads are disabled as white, rest as black
         QRadioButton* _render_exclusion_map;
 
         QCheckBox* _chkbox_merge_duplicates;
-
         // QComboBox* _cbbox_effect_sets;
         QListWidget* _effect_sets_list;
 
@@ -180,7 +195,6 @@ namespace Noggit
         QListWidget* _object_list; // for render previews
         QListWidget* _weight_list; // weight and percentage customization
         // QPushButton* _button_effect_doodad[4];
-
         QSpinBox* _spinbox_doodads_amount;
         QComboBox* _cbbox_terrain_type;
 
@@ -190,9 +204,16 @@ namespace Noggit
         QButtonGroup* _brush_type_group;
         QRadioButton* _paint_effect;
         QRadioButton* _paint_exclusion;
-
-
+        Noggit::Ui::Tools::UiCommon::ExtendedSlider* _effect_radius_slider;
     };
+
+    /// <summary>
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////////
+    /// </summary>
+    /// 
+    /// 
+    /// 
+    /// 
 
     class texturing_tool : public QWidget
     {
@@ -203,7 +224,7 @@ namespace Noggit
                      , QWidget* parent = nullptr
                      );
 
-      // ~texturing_tool() { _ground_effect_tool->deleteLater(); }; // { delete _ground_effect_tool; };
+      ~texturing_tool(); // { _ground_effect_tool->deleteLater(); }; // { delete _ground_effect_tool; };
 
       float brush_radius() const;
       float hardness() const;
@@ -251,7 +272,7 @@ namespace Noggit
 
       Noggit::Ui::Tools::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
       QImage* getMaskImage() { return &_mask_image; }
-      texturing_mode getTexturingMode() 
+      inline texturing_mode getTexturingMode() const
       { 
           if (_ground_effect_tool->isVisible())
               return texturing_mode::ground_effect;
@@ -291,8 +312,9 @@ namespace Noggit
       unsigned_int_property _anim_rotation_prop;
       BoolToggleProperty _overbright_prop;
 
-      texturing_mode _texturing_mode;
+      texturing_mode _texturing_mode; // use getTexturingMode() to check for ground effect mode
       texture_heightmapping_data textureHeightmappingData;
+
     private:
       QSlider* _brush_level_slider;
       Noggit::Ui::Tools::UiCommon::ExtendedSlider* _hardness_slider;

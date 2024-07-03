@@ -74,7 +74,7 @@ void Noggit::Action::undo(bool redo)
       auto texture_set = pair.first->getTextureSet();
       *texture_set->getAlphamaps() = pair.second.alphamaps;
       *texture_set->getTempAlphamaps() = pair.second.tmp_edit_values;
-      std::memcpy(texture_set->getMCLYEntries(), &pair.second.layers_info, sizeof(ENTRY_MCLY) * 4);
+      std::memcpy(texture_set->getMCLYEntries(), &pair.second.layers_info, sizeof(layer_info) * 4);
       texture_set->setNTextures(pair.second.n_textures);
 
       auto textures = texture_set->getTextures();
@@ -88,6 +88,7 @@ void Noggit::Action::undo(bool redo)
 
       texture_set->markDirty();
       texture_set->apply_alpha_changes();
+      pair.first->registerChunkUpdate(ChunkUpdateFlags::FLAGS); // for texture anim flags
     }
   }
   if (_flags & ActionFlags::eCHUNKS_VERTEX_COLOR)
@@ -199,6 +200,28 @@ void Noggit::Action::undo(bool redo)
       std::memcpy(&pair.first->_shadow_map, pair.second.data(), 64 * 64 * sizeof(uint8_t));
       pair.first->update_shadows();
     }
+  }
+  if (_flags & ActionFlags::eCHUNK_DOODADS_EXCLUSION)
+  {
+      for (auto& pair : redo ? _chunk_detaildoodad_exclusion_post : _chunk_detaildoodad_exclusion_pre)
+      {
+          std::memcpy(&pair.first->texture_set->_doodadStencil, pair.second.data(), 8 * sizeof(std::uint8_t));
+
+          pair.first->registerChunkUpdate(ChunkUpdateFlags::DETAILDOODADS_EXCLUSION);
+      }
+  }
+  if (_flags & ActionFlags::eCHUNKS_LAYERINFO)
+  {
+      for (auto& pair : redo ? _chunk_layerinfos_post : _chunk_layerinfos_pre)
+      {
+          auto texture_set = pair.first->getTextureSet();
+          std::memcpy(texture_set->getMCLYEntries(), &pair.second, sizeof(layer_info) * 4);
+
+          // TODO, enable this if texture flags get moved to this action flag.
+          // pair.first->registerChunkUpdate(ChunkUpdateFlags::FLAGS); // for texture anim flags. 
+
+          pair.first->registerChunkUpdate(ChunkUpdateFlags::GROUND_EFFECT);
+      }
   }
 
 }
@@ -386,7 +409,7 @@ void Noggit::Action::finish()
       cache.n_textures = texture_set->num();
       cache.alphamaps = *texture_set->getAlphamaps();
       cache.tmp_edit_values = *texture_set->getTempAlphamaps();
-      std::memcpy(&cache.layers_info, texture_set->getMCLYEntries(), sizeof(ENTRY_MCLY) * 4);
+      std::memcpy(&cache.layers_info, texture_set->getMCLYEntries(), sizeof(layer_info) * 4);
 
       for (int j = 0; j < cache.n_textures; ++j)
       {
@@ -578,14 +601,16 @@ void Noggit::Action::registerChunkTextureChange(MapChunk* chunk)
   cache.n_textures = texture_set->num();
   cache.alphamaps = *texture_set->getAlphamaps();
   cache.tmp_edit_values = *texture_set->getTempAlphamaps();
-  std::memcpy(&cache.layers_info, texture_set->getMCLYEntries(), sizeof(ENTRY_MCLY) * 4);
+  std::memcpy(&cache.layers_info, texture_set->getMCLYEntries(), sizeof(layer_info) * 4);
 
   for (int i = 0; i < cache.n_textures; ++i)
   {
     cache.textures.push_back(texture_set->filename(i));
   }
+  // _chunk_texture_pre.emplace_back(std::make_pair(chunk, std::move( cache)));
 
-  _chunk_texture_pre.emplace_back(std::make_pair(chunk, std::move(cache)));
+  auto cache_pair = std::make_pair(chunk, std::move(cache));
+  _chunk_texture_pre.emplace_back(std::move(cache_pair));
 }
 
 void Noggit::Action::registerChunkVertexColorChange(MapChunk* chunk)
@@ -742,6 +767,36 @@ void Noggit::Action::registerChunkShadowChange(MapChunk *chunk)
   _chunk_shadow_map_pre.emplace_back(std::make_pair(chunk, std::move(data)));
 }
 
+void Noggit::Action::registerChunkLayerInfoChange(MapChunk* chunk)
+{
+    _flags |= ActionFlags::eCHUNKS_LAYERINFO;
+
+    for (auto& pair : _chunk_layerinfos_pre)
+    {
+        if (pair.first == chunk)
+            return;
+    }
+    std::array<layer_info, 4> layer_infos{};
+    std::memcpy(&layer_infos, chunk->texture_set->getMCLYEntries(), sizeof(layer_info) * 4);
+
+    _chunk_layerinfos_pre.emplace_back(chunk, std::move(layer_infos));
+}
+
+void Noggit::Action::registerChunkDetailDoodadExclusionChange(MapChunk* chunk)
+{
+    _flags |= ActionFlags::eCHUNK_DOODADS_EXCLUSION;
+
+    for (auto& pair : _chunk_detaildoodad_exclusion_pre)
+    {
+        if (pair.first == chunk)
+            return;
+    }
+    std::array<std::uint8_t, 8> data{};
+    std::memcpy(&data, chunk->texture_set->getDoodadStencilBase(), sizeof(std::uint8_t) * 8);
+
+    _chunk_detaildoodad_exclusion_pre.emplace_back(std::make_pair(chunk, data));
+}
+
 void Noggit::Action::registerAllChunkChanges(MapChunk* chunk)
 {
   registerChunkTerrainChange(chunk);
@@ -753,6 +808,8 @@ void Noggit::Action::registerAllChunkChanges(MapChunk* chunk)
   registerChunkLiquidChange(chunk);
   registerVertexSelectionChange();
   registerChunkShadowChange(chunk);
+  registerChunkLayerInfoChange(chunk);
+  registerChunkDetailDoodadExclusionChange(chunk);
 }
 
 Noggit::Action::~Action()

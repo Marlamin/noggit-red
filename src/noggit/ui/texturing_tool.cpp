@@ -115,8 +115,13 @@ namespace Noggit
       _brush_level_spin->setSingleStep(5);
       slider_layout_right->addWidget(_brush_level_spin);
 
+      QSettings settings;
+      bool use_classic_ui = settings.value("classicUI", false).toBool();
+
       _show_unpaintable_chunks_cb = new QCheckBox("Show unpaintable chunks", tool_widget);
       _show_unpaintable_chunks_cb->setChecked(false);
+      if (!use_classic_ui)
+          _show_unpaintable_chunks_cb->hide();
       tool_layout->addWidget(_show_unpaintable_chunks_cb);
 
       connect(_show_unpaintable_chunks_cb, &QCheckBox::toggled, [=](bool checked)
@@ -417,7 +422,6 @@ namespace Noggit
       connect(geffect_tools_btn, &QPushButton::clicked
           , [=]()
           {
-              _texturing_mode = texturing_mode::ground_effect;
               _ground_effect_tool->show();
           }
       );
@@ -493,6 +497,12 @@ namespace Noggit
       setMaximumWidth(250);
     }
 
+    texturing_tool::~texturing_tool()
+    {
+        // _ground_effect_tool->delete_renderer();
+        // delete _ground_effect_tool;
+    }
+
     void texturing_tool::updateMaskImage()
     {
       QPixmap* pixmap = _image_mask_group->getPixmap();
@@ -546,6 +556,7 @@ namespace Noggit
     {
       _radius_slider->setValue(radius);
       _texture_switcher->change_radius(radius - _texture_switcher->radius());
+      _ground_effect_tool->change_radius(radius);
     }
 
     void texturing_tool::setHardness(float hardness)
@@ -562,6 +573,10 @@ namespace Noggit
       else if (_texturing_mode == texturing_mode::swap)
       {
         _texture_switcher->change_radius(change);
+      }
+      else if (_texturing_mode == texturing_mode::ground_effect)
+      {
+        _ground_effect_tool->change_radius(change);
       }
     }
 
@@ -631,17 +646,18 @@ namespace Noggit
     float texturing_tool::brush_radius() const
     {
       // show only a dot when using the anim / swap mode
-      switch (_texturing_mode)
+      switch (getTexturingMode())
       {
         case texturing_mode::paint: return static_cast<float>(_radius_slider->value());
         case texturing_mode::swap: return (_texture_switcher->brush_mode() ? _texture_switcher->radius() : 0.f);
+        case texturing_mode::ground_effect: return (_ground_effect_tool->brush_mode() != ground_effect_brush_mode::none ? _ground_effect_tool->radius() : 0.f);
         default: return 0.f;
       }
     }
 
     float texturing_tool::hardness() const
     { 
-      switch (_texturing_mode)
+      switch (getTexturingMode())
       {
         case texturing_mode::paint: return static_cast<float>(_hardness_slider->value());
         default: return 0.f;
@@ -650,7 +666,7 @@ namespace Noggit
 
     bool texturing_tool::show_unpaintable_chunks() const
     {
-        return _show_unpaintable_chunks && _texturing_mode == texturing_mode::paint;
+        return _show_unpaintable_chunks && getTexturingMode() == texturing_mode::paint;
     }
 
     void texturing_tool::paint (World* world, glm::vec3 const& pos, float dt, scoped_blp_texture_reference texture)
@@ -661,58 +677,79 @@ namespace Noggit
         update_brush_hardness();
       }
 
-      float strength = 1.0f - pow(1.0f - _pressure_slider->value(), dt * 10.0f);
-
-      if (_texturing_mode == texturing_mode::swap)
+      switch(getTexturingMode())
       {
-        auto to_swap (_texture_switcher->texture_to_swap());
-        if (to_swap)
-        {
-          if (_texture_switcher->brush_mode())
+        case (texturing_mode::swap):
           {
-                std::cout << _texture_switcher->radius() << std::endl;
-            world->replaceTexture(pos, _texture_switcher->radius(), to_swap.value(), texture, _texture_switcher->entireChunk(), _texture_switcher->entireTile());
+              auto to_swap(_texture_switcher->texture_to_swap());
+              if (to_swap)
+              {
+                  if (_texture_switcher->brush_mode())
+                  {
+                      std::cout << _texture_switcher->radius() << std::endl;
+                      world->replaceTexture(pos, _texture_switcher->radius(), to_swap.value(), texture, _texture_switcher->entireChunk(), _texture_switcher->entireTile());
+                  }
+                  else
+                  {
+                      world->overwriteTextureAtCurrentChunk(pos, to_swap.value(), texture);
+                  }
+              }
+              break;
           }
-          else
+        case (texturing_mode::paint):
           {
-            world->overwriteTextureAtCurrentChunk(pos, to_swap.value(), texture);
-          }          
-        }
-      }
-      else if (_texturing_mode == texturing_mode::paint)
-      {
-        if (_spray_mode_group->isChecked())
-        {
-          world->sprayTexture(pos, &_spray_brush, alpha_target(), strength, static_cast<float>(_radius_slider->value()), _spray_pressure, texture);
+              float strength = 1.0f - pow(1.0f - _pressure_slider->value(), dt * 10.0f);
+              if (_spray_mode_group->isChecked())
+              {
+                  world->sprayTexture(pos, &_spray_brush, alpha_target(), strength, static_cast<float>(_radius_slider->value()), _spray_pressure, texture);
 
-          if (_inner_radius_cb->isChecked())
-          {
-            if (!_image_mask_group->isEnabled())
-            {
-              world->paintTexture(pos, &_inner_brush, alpha_target(), strength, texture);
-            }
-            else
-            {
-              world->stampTexture(pos, &_inner_brush, alpha_target(), strength, texture, &_mask_image, _image_mask_group->getBrushMode());
-            }
+                  if (_inner_radius_cb->isChecked())
+                  {
+                      if (!_image_mask_group->isEnabled())
+                      {
+                          world->paintTexture(pos, &_inner_brush, alpha_target(), strength, texture);
+                      }
+                      else
+                      {
+                          world->stampTexture(pos, &_inner_brush, alpha_target(), strength, texture, &_mask_image, _image_mask_group->getBrushMode());
+                      }
+                  }
+              }
+              else
+              {
+                  if (!_image_mask_group->isEnabled())
+                  {
+                      world->paintTexture(pos, &_texture_brush, alpha_target(), strength, texture);
+                  }
+                  else
+                  {
+                      world->stampTexture(pos, &_texture_brush, alpha_target(), strength, texture, &_mask_image, _image_mask_group->getBrushMode());
+                  }
+              }
+              break;
           }
-        }
-        else
+        case (texturing_mode::anim):
+          {
+              change_tex_flag(world, pos, _anim_prop.get(), texture);
+              break;
+          }
+        case (texturing_mode::ground_effect):
         {
-          if (!_image_mask_group->isEnabled())
-          {
-            world->paintTexture(pos, &_texture_brush, alpha_target(), strength, texture);
-          }
-          else
-          {
-            world->stampTexture(pos, &_texture_brush, alpha_target(), strength, texture, &_mask_image, _image_mask_group->getBrushMode());
-          }
+              // handled directly in MapView::tick()
+
+              // if (_ground_effect_tool->brush_mode() == ground_effect_brush_mode::exclusion)
+              // {
+              //     world->paintGroundEffectExclusion(pos, _ground_effect_tool->radius(), );
+              // }
+              // else if (_ground_effect_tool->brush_mode() == ground_effect_brush_mode::effect)
+              // {
+              // 
+              // }
+        }
+        default:
+        {
 
         }
-      }
-      else if (_texturing_mode == texturing_mode::anim)
-      {
-        change_tex_flag(world, pos, _anim_prop.get(), texture);
       }
     }
 
@@ -852,7 +889,7 @@ namespace Noggit
         _render_group_box->setChecked(true);
         left_side_layout->addWidget(_render_group_box);
 
-        auto render_layout(new QHBoxLayout(_render_group_box));
+        auto render_layout(new QGridLayout(_render_group_box));
         _render_group_box->setLayout(render_layout);
 
         _render_type_group = new QButtonGroup(_render_group_box);
@@ -860,17 +897,17 @@ namespace Noggit
         _render_active_sets = new QRadioButton("Effect Id/Set", this);
         _render_active_sets->setToolTip("Render all the loaded effect sets for this texture in matching colors");
         _render_type_group->addButton(_render_active_sets);
-        render_layout->addWidget(_render_active_sets);
+        render_layout->addWidget(_render_active_sets, 0, 0);
 
         _render_exclusion_map = new QRadioButton("Doodads Disabled", this);
         _render_exclusion_map->setToolTip("Render chunk units where effect doodads are disabled as white, rest as black");
         _render_type_group->addButton(_render_exclusion_map);
-        render_layout->addWidget(_render_exclusion_map);
+        render_layout->addWidget(_render_exclusion_map, 0, 1);
 
         _render_placement_map = new QRadioButton("Selected Texture state", this); // if chunk contains texture/Effect : render as green or red if the effect layer is active or not
         _render_placement_map->setToolTip("Render chunk unit as red if texture is present in the chunk and NOT the current active layer, render as green if it's active. \nThis defines which of the 4 textures' set is currently active, this is determined by which has the highest opacity.");
         _render_type_group->addButton(_render_placement_map);
-        render_layout->addWidget(_render_placement_map);
+        render_layout->addWidget(_render_placement_map, 1, 0);
 
         _render_active_sets->setChecked(true);
         // _render_type_group->setAutoExclusive(true);
@@ -1076,21 +1113,30 @@ namespace Noggit
             _brush_grup_box->setChecked(false);
             left_side_layout->addWidget(_brush_grup_box);
 
-            QHBoxLayout* brush_layout = new QHBoxLayout(_brush_grup_box);
+            QVBoxLayout* brush_layout = new QVBoxLayout(_brush_grup_box);
             _brush_grup_box->setLayout(brush_layout);
 
+            QHBoxLayout* brush_buttons_layout = new QHBoxLayout(_brush_grup_box);
+            brush_layout->addLayout(brush_buttons_layout);
             _brush_type_group = new QButtonGroup(_brush_grup_box);
 
             _paint_effect = new QRadioButton("Paint Effect", this);
             _brush_type_group->addButton(_paint_effect);
-            brush_layout->addWidget(_paint_effect);
-
+            brush_buttons_layout->addWidget(_paint_effect);
             _paint_exclusion = new QRadioButton("Paint Exclusion", this);
             _brush_type_group->addButton(_paint_exclusion);
-            brush_layout->addWidget(_paint_exclusion);
+            brush_buttons_layout->addWidget(_paint_exclusion);
 
             _paint_effect->setChecked(true);
             _paint_effect->setAutoExclusive(true);
+
+            brush_layout->addWidget(new QLabel("Radius:", _brush_grup_box));
+            _effect_radius_slider = new Noggit::Ui::Tools::UiCommon::ExtendedSlider(_brush_grup_box);
+            _effect_radius_slider->setPrefix("");
+            _effect_radius_slider->setRange(0, 1000);
+            _effect_radius_slider->setDecimals(2);
+            _effect_radius_slider->setValue(_texturing_tool->texture_brush().getRadius());
+            brush_layout->addWidget(_effect_radius_slider);
         }
         left_side_layout->addSpacerItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
         // adjustSize();
@@ -1212,20 +1258,19 @@ namespace Noggit
 
     void ground_effect_tool::updateTerrainUniformParams()
     {
-        if (_map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay != show_active_sets_overlay())
+        if (_map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay != render_active_sets_overlay())
         {
-            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = show_active_sets_overlay();
+            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = render_active_sets_overlay();
             _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
         }
-
-        if (_map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay != show_placement_map_overlay())
+        if (_map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay != render_placement_map_overlay())
         {
-            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = show_placement_map_overlay();
+            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = render_placement_map_overlay();
             _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
         }
-        if (_map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay != show_exclusion_map_overlay())
+        if (_map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay != render_exclusion_map_overlay())
         {
-            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = show_exclusion_map_overlay();
+            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = render_exclusion_map_overlay();
             _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
         }
     }
@@ -1525,6 +1570,20 @@ namespace Noggit
     {
         delete _preview_renderer;
         // _preview_renderer->deleteLater();
+    }
+
+    ground_effect_brush_mode ground_effect_tool::brush_mode() const
+    {
+        if (!_brush_grup_box->isChecked())
+        {
+            return ground_effect_brush_mode::none;
+        }
+        else if (_paint_effect->isChecked())
+            return ground_effect_brush_mode::effect;
+        else if (_paint_exclusion->isChecked())
+            return ground_effect_brush_mode::exclusion;
+
+        return ground_effect_brush_mode::none;
     }
 
     std::optional<ground_effect_set> ground_effect_tool::getSelectedGroundEffect()

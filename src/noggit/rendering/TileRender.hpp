@@ -43,7 +43,7 @@ namespace Noggit::Rendering
 
     void initChunkData(MapChunk* chunk);
 
-    void setChunkGroundEffectData(MapChunk* chunk);
+    void setChunkDetaildoodadsExclusionData(MapChunk* chunk);
     void setChunkGroundEffectActiveData(MapChunk* chunk, std::string active_texture);
 
     [[nodiscard]]

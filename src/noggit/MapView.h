@@ -512,6 +512,7 @@ private:
   void setupViewMenu();
   void setupHelpMenu();
   void setupHotkeys();
+  void setupMainToolbar();
 
   QWidget* _overlay_widget;
 };

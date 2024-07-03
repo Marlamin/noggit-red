@@ -39,7 +39,9 @@ namespace Noggit
         eCHUNKS_FLAGS        = 0x200,
         eVERTEX_SELECTION    = 0x400,
         eCHUNK_SHADOWS       = 0x800,
-        eDO_NOT_WRITE_HISTORY= 0x1000
+        eDO_NOT_WRITE_HISTORY= 0x1000,
+        eCHUNK_DOODADS_EXCLUSION = 0x2000, // ground effects exclusion mapping
+        eCHUNKS_LAYERINFO = 0x4000 // ground effect id and texture flags
     };
 
     enum ActionModalityControllers
@@ -71,7 +73,7 @@ namespace Noggit
       std::vector<std::string> textures;
       std::array<std::optional<Alphamap>, 3> alphamaps;
       std::optional<tmp_edit_alpha_values> tmp_edit_values;
-      ENTRY_MCLY layers_info[4];
+      layer_info layers_info[4];
     };
 
     struct ObjectInstanceCache
@@ -135,6 +137,8 @@ namespace Noggit
         void registerChunkLiquidChange(MapChunk* chunk);
         void registerVertexSelectionChange();
         void registerChunkShadowChange(MapChunk* chunk);
+        void registerChunkLayerInfoChange(MapChunk* chunk);
+        void registerChunkDetailDoodadExclusionChange(MapChunk* chunk);
         void registerAllChunkChanges(MapChunk* chunk);
 
 
@@ -161,6 +165,10 @@ namespace Noggit
         std::vector<std::pair<MapChunk*, int>> _chunk_holes_post;
         std::vector<std::pair<MapChunk*, int>> _chunk_area_id_pre;
         std::vector<std::pair<MapChunk*, int>> _chunk_area_id_post;
+        std::vector<std::pair<MapChunk*, std::array<layer_info, 4>>> _chunk_layerinfos_pre;
+        std::vector<std::pair<MapChunk*, std::array<layer_info, 4>>> _chunk_layerinfos_post;
+        std::vector<std::pair<MapChunk*, std::array<std::uint8_t, 8>>> _chunk_detaildoodad_exclusion_pre;
+        std::vector<std::pair<MapChunk*, std::array<std::uint8_t, 8>>> _chunk_detaildoodad_exclusion_post;
         std::vector<std::pair<MapChunk*, mcnk_flags>> _chunk_flags_pre;
         std::vector<std::pair<MapChunk*, mcnk_flags>> _chunk_flags_post;
         std::vector<std::pair<MapChunk*, std::vector<liquid_layer>>> _chunk_liquid_pre;
