@@ -98,11 +98,34 @@ namespace Noggit
       _pressure_slider->setValue (0.9f);
       slider_layout_left->addWidget (_pressure_slider);
 
-      _brush_level_slider = new QSlider (Qt::Orientation::Vertical, tool_widget);
+      slider_layout_right->addWidget(new QLabel("Opacity:", tool_widget));
+      _brush_level_slider = new OpacitySlider(Qt::Orientation::Vertical, tool_widget);
       _brush_level_slider->setRange (0, 255);
+      _brush_level_slider->setToolTip("Opacity");
       _brush_level_slider->setSliderPosition (_brush_level);
 
       _brush_level_slider->setObjectName("texturing_brush_level_slider");
+      
+      // TODO : couldn't figure out how to make QSlider::groove:vertical::background-color work, the themes broke it. so made a scuffed subclass of QSlider with a custom paintevent
+
+      /*
+      QString _brush_level_slider_style =
+
+          "QSlider#texturing_brush_level_slider::groove:vertical { \n "
+          "  background-color: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop: 0 black, stop: 1 white) !important; \n "
+          "  width: 35px; \n"
+          "  margin: 0 0 0 0; \n "
+          "} \n "
+          "QSlider#texturing_brush_level_slider::handle:vertical { \n"
+          "  background-color: red; \n"
+          "  height: 5px; \n"
+          "} \n"
+          "QSlider#texturing_brush_level_slider::vertical { \n"
+          "  width: 35px; \n"
+          "} \n"
+          ;
+      _brush_level_slider->setStyleSheet(_brush_level_slider_style);
+*/
 
       slider_layout_right->addWidget(_brush_level_slider, 0, Qt::AlignHCenter);
 
@@ -772,9 +795,12 @@ namespace Noggit
         _render_exclusion_map->setToolTip("Render chunk units where effect doodads are disabled as white, rest as black");
         _render_type_group->addButton(_render_exclusion_map);
         render_layout->addWidget(_render_exclusion_map, 0, 1);
-
-        _render_placement_map = new QRadioButton("Selected Texture state", this); // if chunk contains texture/Effect : render as green or red if the effect layer is active or not
-        _render_placement_map->setToolTip("Render chunk unit as red if texture is present in the chunk and NOT the current active layer, render as green if it's active. \nThis defines which of the 4 textures' set is currently active, this is determined by which has the highest opacity.");
+        
+        // if chunk contains texture/Effect : render as green or red if the effect layer is active or not
+        _render_placement_map = new QRadioButton("Selected Texture state", this); 
+        _render_placement_map->setToolTip("Render chunk unit as red if texture is present in the chunk and NOT the current \
+active layer, render as green if it's active. \nThis defines which of the 4 textures' set is currently active,\
+ this is determined by which has the highest opacity.");
         _render_type_group->addButton(_render_placement_map);
         render_layout->addWidget(_render_placement_map, 1, 0);
 

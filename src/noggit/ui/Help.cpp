@@ -209,10 +209,10 @@ namespace Noggit
       generate_hotkey_row({FontNoggit::ctrl, FontNoggit::shift, FontNoggit::alt, FontNoggit::lmb }, "\a+\a+\a+\aErase textures", texture_layout);
       generate_hotkey_row({FontNoggit::shift, FontNoggit::lmb }, "\a+\aDraw texture or fills if chunk is empty", texture_layout);
       generate_hotkey_row({FontNoggit::alt, FontNoggit::lmb_drag }, "\a+\aChange radius", texture_layout);
-      generate_hotkey_row({FontNoggit::alt, FontNoggit::rmb_drag }, "\a+\aChange hardness", texture_layout);
-      generate_hotkey_row({FontNoggit::space, FontNoggit::lmb_drag }, "\a+\aChange pressure", texture_layout);
-      generate_hotkey_row({FontNoggit::space, FontNoggit::mmb }, "\a+\aChange strength (gradient)", texture_layout);
-      generate_hotkey_row({FontNoggit::space, FontNoggit::r }, "\a+\aToggle min and max strength (gradient)", texture_layout);
+      generate_hotkey_row({FontNoggit::alt, FontNoggit::rmb_drag }, "\a+\aChange hardness (falloff)", texture_layout);
+      generate_hotkey_row({FontNoggit::space, FontNoggit::lmb_drag }, "\a+\aChange pressure (strength)", texture_layout);
+      generate_hotkey_row({FontNoggit::space, FontNoggit::mmb }, "\a+\aChange opacity (gradient)", texture_layout);
+      generate_hotkey_row({FontNoggit::space, FontNoggit::r }, "\a+\aToggle min and max oapcity (gradient)", texture_layout);
       generate_hotkey_row({FontNoggit::t }, "\aToggle spray brush", texture_layout);
       generate_hotkey_row({FontNoggit::alt, FontNoggit::mmb }, "\a+\aChange spray radius", texture_layout);
       generate_hotkey_row({FontNoggit::shift, FontNoggit::mmb }, "\a+\aChange spray pressure", texture_layout);
