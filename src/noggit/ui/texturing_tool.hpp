@@ -35,6 +35,79 @@ namespace Noggit
     class current_texture;
     class texture_swapper;
 
+
+    class OpacitySlider : public QSlider{
+    public:
+        OpacitySlider(Qt::Orientation orientation, QWidget * parent = nullptr)
+            : QSlider(orientation, parent) {
+            setFixedWidth(35);
+        }
+    
+    protected:
+        void paintEvent(QPaintEvent * event) override {
+            // QSlider::paintEvent(event);
+    
+            // chat-gpt code, can probably be improved...
+
+            QPainter p(this);
+            QStyleOptionSlider opt;
+            initStyleOption(&opt);
+            opt.subControls = QStyle::SC_SliderGroove | QStyle::SC_SliderHandle;
+            if (tickPosition() != NoTicks)
+                opt.subControls |= QStyle::SC_SliderTickmarks;
+            if (isSliderDown()) {
+                opt.activeSubControls = QStyle::SC_SliderHandle;
+                opt.state |= QStyle::State_Sunken;
+            }
+            else {
+                opt.activeSubControls = QStyle::SC_None;
+            }
+
+            // Draw the groove with a linear gradient
+            QRect grooveRect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
+            grooveRect.setLeft((width() - 35) / 2);
+            grooveRect.setRight((width() + 35) / 2);
+            QLinearGradient gradient(grooveRect.topLeft(), grooveRect.bottomLeft());
+            gradient.setColorAt(0, Qt::black);
+            gradient.setColorAt(1, Qt::white);
+            p.fillRect(grooveRect.adjusted(0, 0, -1, -1), gradient);
+
+            // Draw the handle with red color
+            QRect handleRect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
+            handleRect.setLeft((width() - 35) / 2);
+            handleRect.setRight((width() + 35) / 2);
+            handleRect.setHeight(5); // Set handle height to 5
+            p.setBrush(Qt::red);
+            p.setPen(Qt::NoPen);
+            p.drawRect(handleRect);
+
+            // Draw the ticks if needed
+            if (tickPosition() != NoTicks) {
+                opt.subControls = QStyle::SC_SliderTickmarks;
+                style()->drawComplexControl(QStyle::CC_Slider, &opt, &p, this);
+            }
+
+            // QSlider::paintEvent() source code :
+            /*
+            Q_D(QSlider);
+            QPainter p(this);
+            QStyleOptionSlider opt;
+            initStyleOption(&opt);
+            opt.subControls = QStyle::SC_SliderGroove | QStyle::SC_SliderHandle;
+            if (d->tickPosition != NoTicks)
+                opt.subControls |= QStyle::SC_SliderTickmarks;
+            if (d->pressedControl) {
+                opt.activeSubControls = d->pressedControl;
+                opt.state |= QStyle::State_Sunken;
+            }
+            else {
+                opt.activeSubControls = d->hoverControl;
+            }
+            style()->drawComplexControl(QStyle::CC_Slider, &opt, &p, this);
+            */
+        }
+    };
+
     enum class texturing_mode
     {
       paint,
@@ -316,7 +389,7 @@ namespace Noggit
       texture_heightmapping_data textureHeightmappingData;
 
     private:
-      QSlider* _brush_level_slider;
+      OpacitySlider* _brush_level_slider;
       Noggit::Ui::Tools::UiCommon::ExtendedSlider* _hardness_slider;
       Noggit::Ui::Tools::UiCommon::ExtendedSlider* _radius_slider;
       Noggit::Ui::Tools::UiCommon::ExtendedSlider* _pressure_slider;
