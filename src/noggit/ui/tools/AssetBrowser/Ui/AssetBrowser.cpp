@@ -4,6 +4,7 @@
 #include <noggit/ContextObject.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/FontNoggit.hpp>
+#include <noggit/ui/GroundEffectsTool.hpp>
 #include <noggit/MapView.h>
 #include <noggit/ui/texturing_tool.hpp>
 #include <noggit/application/NoggitApplication.hpp>

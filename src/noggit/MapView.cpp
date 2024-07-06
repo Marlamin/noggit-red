@@ -28,6 +28,7 @@
 #include <noggit/ui/TerrainTool.hpp>
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/texturing_tool.hpp>
+#include <noggit/ui/GroundEffectsTool.hpp>
 #include <noggit/ui/hole_tool.hpp>
 #include <noggit/ui/texture_palette_small.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
@@ -5980,7 +5981,7 @@ QWidget* MapView::getActiveStampModeItem()
     return nullptr;
 }
 
-Noggit::Ui::ground_effect_tool* MapView::getGroundEffectsTool()
+Noggit::Ui::GroundEffectsTool* MapView::getGroundEffectsTool()
 {
     return texturingTool->getGroundEffectsTool();
 }
