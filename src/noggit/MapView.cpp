@@ -1130,10 +1130,24 @@ void MapView::setupToolbars()
 void MapView::setupMainToolbar()
 {
     _main_window->_app_toolbar = new QToolBar("Menu Toolbar", this); // this or mainwindow as parent?
+    connect(this, &QObject::destroyed, _main_window->_app_toolbar, &QObject::deleteLater);
+
     _main_window->_app_toolbar->setOrientation(Qt::Horizontal);
     _main_window->addToolBar(_main_window->_app_toolbar);
-    // _main_window->_app_toolbar->hide(); // can hide by default.
+    _main_window->_app_toolbar->setVisible(_settings->value("map_view/app_toolbar", false).toBool()); // hide by default.
 
+    connect(_main_window->_app_toolbar, &QToolBar::visibilityChanged,
+        [=](bool visible)
+        {
+            if (ui_hidden)
+                return;
+
+            _settings->setValue("map_view/app_toolbar", visible);
+            _settings->sync();
+        });
+
+    // TODO
+    /*
     auto save_changed_btn = new QPushButton(this);
     save_changed_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::save));
     save_changed_btn->setToolTip("Save Changed");
@@ -1152,9 +1166,7 @@ void MapView::setupMainToolbar()
     // redo_btn->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z));
     _main_window->_app_toolbar->addWidget(redo_btn);
 
-
     _main_window->_app_toolbar->addSeparator();
-
 
     QAction* start_server_action = _main_window->_app_toolbar->addAction("Start Server");
     start_server_action->setToolTip("Start World and Auth servers.");
@@ -1164,49 +1176,32 @@ void MapView::setupMainToolbar()
     extract_server_map_action->setToolTip("Start server extractors for this map.");
     // TODO idea : detect modified tiles and only extract those.
     extract_server_map_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::map));
+*/
 
-    auto build_data_action = _main_window->_app_toolbar->addAction("Build Game Data");
-    build_data_action->setToolTip("Save content of project folder as MPQ patch in the client.");
-    build_data_action->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::filearchive));
+    auto build_data_btn = new QPushButton(this); 
+    _main_window->_app_toolbar->addWidget(build_data_btn);
+    build_data_btn->setToolTip("Save content of project folder as MPQ patch in the client.");
+    build_data_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::filearchive));
+    connect(build_data_btn, &QPushButton::clicked
+        , [=]()
+        {
+            _main_window->patchWowClient(); // code to open dialog
+
+        });
 
     auto start_wow_btn = new QPushButton(this);
     start_wow_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::play));
-    start_wow_btn->setToolTip("Save, unlock MPQs and launch the client");
+    start_wow_btn->setToolTip("Launch the client");
     _main_window->_app_toolbar->addWidget(start_wow_btn);
 
     connect(start_wow_btn, &QPushButton::clicked
         , [=]()
         {
-            std::filesystem::path WoW_path = std::filesystem::path(Noggit::Project::CurrentProject::get()->ClientPath) / "Wow.exe";
-
-            QString program_path = WoW_path.string().c_str();
-            QFileInfo checkFile(program_path);
-
-            QStringList arguments;
-            // arguments << "-console"; // deosn't seem to work
-
-            if (checkFile.exists() && checkFile.isFile())
-            {
-                QProcess* process = new QProcess(); // this parent?
-                process->start(program_path, arguments);
-
-                if (!process->waitForStarted()) {
-                    qWarning("Failed to start process");
-                    QMessageBox::information(this, "Error", "Failed to start process");
-                }
-            }
-            else
-            {
-                // Handle file not existing
-                qWarning("File does not exist");
-                QMessageBox::critical(this, "Error", "The specified file does not exist");
-            }
+            _main_window->startWowClient();
         });
 
 
     // TODO : restart button while WoW is running?
-
-    // Lock/unlock archives button, and auto unlock when starting client
 
   // IDEAs : various client utils like synchronize client view with noggit, reload, patch WoW.exe with community patches like unlock md5 check, set WoW client version
 }
@@ -2439,6 +2434,24 @@ void MapView::setupHelpMenu()
 
 }
 
+void MapView::setupClientMenu()
+{
+    // can add this to main menu instead in NoggitWindow()
+
+    auto client_menu(_main_window->_menuBar->addMenu("Client"));
+    // connect(this, &QObject::destroyed, client_menu, &QObject::deleteLater); // to remove from main menu
+
+    // ADD_ACTION_NS(client_menu, "Start Client",  [this] { _main_window->startWowClient(); });
+    auto start_client_action(client_menu->addAction("Start Client"));
+    connect(start_client_action, &QAction::triggered, [this] { _main_window->startWowClient(); });
+
+    // ADD_ACTION_NS(client_menu, "Patch Client", [this] { _main_window->patchWowClient(); });
+    auto pack_client_action(client_menu->addAction("Patch Client"));
+    pack_client_action->setToolTip("Save content of project folder as MPQ patch in the client.");
+    connect(pack_client_action, &QAction::triggered, [this] { _main_window->patchWowClient(); });
+
+}
+
 void MapView::setupHotkeys()
 {
 
@@ -2938,6 +2951,7 @@ void MapView::createGUI()
   setupViewMenu();
   setupAssistMenu();
   setupHelpMenu();
+  setupClientMenu();
   setupHotkeys();
 
   setupMainToolbar();
