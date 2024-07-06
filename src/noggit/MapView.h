@@ -93,7 +93,7 @@ namespace Noggit
     class hole_tool;
     struct tileset_chooser;
     class ObjectPalette;
-    class ground_effect_tool;
+    class GroundEffectsTool;
   }
 }
 
@@ -308,7 +308,7 @@ public:
   Noggit::Ui::flatten_blur_tool* getFlattenTool() { return flattenTool; };
 
   [[nodiscard]]
-  Noggit::Ui::ground_effect_tool* getGroundEffectsTool();
+  Noggit::Ui::GroundEffectsTool* getGroundEffectsTool();
 
   [[nodiscard]]
   Noggit::NoggitRenderContext getRenderContext() { return _context; };
