@@ -1357,6 +1357,11 @@ std::array<float, 4> TextureSet::get_textures_weight_for_unit(unsigned int unit_
     float total_layer_2 = 0.f;
     float total_layer_3 = 0.f;
 
+    if (nTextures == 0)
+        return std::array<float, 4> { 0.f, 0.f, 0.f, 0.f };
+    else if (nTextures == 1)
+        return std::array<float, 4> { 100.f, 0.f, 0.f, 0.f };
+
     // 8x8 bits per unit
     for (int x = 0; x < 8; x++)
     {
