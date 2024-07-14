@@ -15,6 +15,11 @@
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/tools/UiCommon/StackedWidget.hpp>
 #include <noggit/project/ApplicationProject.h>
+#include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
+#include <noggit/ui/windows/noggitWindow/widgets/MapBookmarkListItem.hpp>
+#include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
+#include <noggit/application/Utils.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <BlizzardDatabase.h>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
@@ -27,16 +32,14 @@
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QComboBox>
-#include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
-#include <noggit/ui/windows/noggitWindow/widgets/MapBookmarkListItem.hpp>
 #include <QtNetwork/QTcpSocket>
-#include <sstream>
 #include <QSysInfo>
 #include <QStandardPaths>
 #include <QDir>
 #include <QIcon>
-#include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
-#include <noggit/application/Utils.hpp>
+
+#include <sstream>
+#include <chrono>
 
 #ifdef USE_MYSQL_UID_STORAGE
 #include <mysql/mysql.h>
@@ -566,5 +569,218 @@ namespace Noggit::Ui::Windows
         (nullptr, "UID fix failed", "The UID fix couldn't be done because some models were missing or fucked up.\n"
                                     "The models are listed in the log file.", QMessageBox::Ok
         );
+  }
+  void NoggitWindow::startWowClient()
+  {
+      // TODO auto login
+
+      // TODO attach to process to allow memory edits
+
+      // std::filesystem::path WoW_path = std::filesystem::path(Noggit::Project::CurrentProject::get()->ClientPath) / "Wow.exe";
+      std::filesystem::path WoW_path = std::filesystem::path(_project->ClientPath) / "Wow.exe";
+
+      QString program_path = WoW_path.string().c_str();
+      QFileInfo checkFile(program_path);
+
+      QStringList arguments;
+      // arguments << "-console"; // deosn't seem to work
+      arguments << "-windowed";
+      // auto login using https://github.com/FrostAtom/awesome_wotlk, requires patched Wow.exe
+      // arguments << "-login \"LOGIN\" -password \"PASSWORD\" -realmlist \"REALMLIST\" -realmname \"REALMNAME\"";
+
+
+      if (checkFile.exists() && checkFile.isFile())
+      {
+          QProcess* process = new QProcess(this); // this parent?
+          process->start(program_path, arguments);
+
+          //Noggit::Application::NoggitApplication::instance().
+          if (!process->waitForStarted()) {
+              // qWarning("Failed to start process");
+              QMessageBox::information(this, "Error", "Failed to start process Wow.exe");
+          }
+      }
+      else
+      {
+          // qWarning("File does not exist");
+          QMessageBox::information(this, "Error", std::format("File {} does not exist", WoW_path.string()).c_str());
+      }
+  }
+
+  void NoggitWindow::patchWowClient()
+  {
+      // Option to make folder patch ?
+
+      QDialog* mpq_patch_params = new QDialog(this);
+      mpq_patch_params->setWindowFlags(Qt::Dialog);
+      mpq_patch_params->setWindowTitle("Patch Export Settings");
+      QVBoxLayout* mpq_patch_params_layout = new QVBoxLayout(mpq_patch_params);
+
+      mpq_patch_params_layout->addWidget(new QLabel("<font color=orange><h4> Warning :\
+          \nErrors can cause MPQ Corruption, make sure to have backup.</h4></font>\
+          \nWhile Noggit is writting the archive, files are not accessible by the client, please wait.", mpq_patch_params));
+
+      mpq_patch_params_layout->addWidget(new QLabel("MPQ Name:", mpq_patch_params));
+
+      QLineEdit* mpq_patch_params_ledit = new QLineEdit("patch-A.MPQ", mpq_patch_params);
+      QSettings settings;
+      // saved last set patch name
+      mpq_patch_params_ledit->setText(settings.value("noggit_window/mpq_name", "patch-A.MPQ").toString());
+      mpq_patch_params_layout->addWidget(mpq_patch_params_ledit);
+
+
+      QCheckBox* mpq_patch_params_locale_chk = new QCheckBox("Save DBC to Locale:", mpq_patch_params);
+      mpq_patch_params_locale_chk->setToolTip("This is recommended for non English clients");
+      //auto set locale mode if client isn't english.
+      bool non_english = false;
+      BlizzardArchive::Locale locale_mode = Noggit::Application::NoggitApplication::instance()->clientData()->locale_mode();
+      if (!(locale_mode != BlizzardArchive::Locale::AUTO) && !(locale_mode != BlizzardArchive::Locale::enGB)
+          && !(locale_mode != BlizzardArchive::Locale::enUS))
+      {
+          non_english = true;
+      }
+      mpq_patch_params_locale_chk->setChecked(non_english);
+      // Unimplemented
+      mpq_patch_params_locale_chk->setHidden(true);
+      mpq_patch_params_locale_chk->setDisabled(true);
+      mpq_patch_params_layout->addWidget(mpq_patch_params_locale_chk);
+
+
+      // mode choice between replace archive and add files to archive
+      QCheckBox* mpq_overwrite_chk = new QCheckBox("Overwrite Archive", mpq_patch_params);
+      mpq_overwrite_chk->setToolTip("If there is already an archive with this name, it will be deleted and replaced by a new one.");
+      mpq_overwrite_chk->setChecked(false);
+      // Unimplemented
+      mpq_overwrite_chk->setHidden(true);
+      mpq_overwrite_chk->setDisabled(true);
+      mpq_patch_params_layout->addWidget(mpq_overwrite_chk);
+
+
+      QCheckBox* mpq_compact_chk = new QCheckBox("Compact Archive", mpq_patch_params);
+      mpq_compact_chk->setToolTip("Adding and removing files creates empty space in the MPQ, making it grow in size.\
+          \nCompacting takes a few seconds depending on patch size, it is recommended to compact when many files have been added.");
+      mpq_compact_chk->setChecked(false);
+      mpq_patch_params_layout->addWidget(mpq_compact_chk);
+
+      QCheckBox* mpq_compress_files_chk = new QCheckBox("Compress Files (slow)", mpq_patch_params);
+      mpq_compress_files_chk->setToolTip("Files will be compressed in the MPQ, but writting becomes much slower(about 3x slower).\
+          \nRecommended for distribution.");
+      mpq_compress_files_chk->setChecked(true);
+      mpq_patch_params_layout->addWidget(mpq_compress_files_chk);
+
+
+      QPushButton* mpq_patch_params_okay = new QPushButton("Save Project to Client MPQ", mpq_patch_params);
+      mpq_patch_params_layout->addWidget(mpq_patch_params_okay);
+
+      connect(mpq_patch_params_okay, &QPushButton::clicked
+          , [=]()
+          {
+              // check if mpq name is allowed
+              if (!Noggit::Application::NoggitApplication::instance()->clientData()->isMPQNameValid(mpq_patch_params_ledit->text().toLower().toStdString(), true))
+              {
+                  QMessageBox::warning(this, "Name Error", "MPQ Name is not allowed.\This name is already used by base client patches, or the client can't load it.\
+                     \nYour patch must be named \"patch-[4-9].MPQ\" or \"patch-[A-Z].MPQ\".");
+              }
+              else
+              {
+                QSettings settings;
+                settings.setValue("noggit_window/mpq_name", mpq_patch_params_ledit->text());
+                settings.sync();
+
+                mpq_patch_params->accept();
+              }
+          });
+
+      // execute dialog, and run code when Mpq_patch_params_okay calls Mpq_patch_params->accept();
+      if (mpq_patch_params->exec() == QDialog::Accepted)
+      {
+          // OK button was pressed, do stuff.
+
+          auto archive_name = mpq_patch_params_ledit->text().toStdString();
+          auto clientData = Noggit::Application::NoggitApplication::instance()->clientData();
+
+          namespace fs = std::filesystem;
+          // progress bar, count maximum files
+          // ignore directories, only count files
+          auto regular_file = [](const fs::path& path) {
+              std::string const extension = path.extension().string();
+              // filter noggit files
+              if (extension == ".noggitproj" || extension == ".json" || extension == ".ini")
+                  return false;
+              return fs::is_regular_file(path);
+              };
+
+          int totalItems = std::count_if(fs::recursive_directory_iterator(clientData->projectPath()), {}, regular_file);
+
+          if (!totalItems)
+          {
+              QMessageBox::warning(this, "Error", std::format("No files found in project {}", clientData->projectPath()).c_str());
+              return;
+          }
+
+          if (!clientData->mpqArchiveExistsOnDisk(archive_name))
+          {
+              try
+              {
+                  auto archive = clientData->tryCreateMPQArchive(archive_name);
+              }
+              catch (BlizzardArchive::Exceptions::Archive::ArchiveOpenError& e)
+              {
+                  QMessageBox::critical(nullptr, "Error", e.what());
+              }
+              catch (...)
+              {
+                  QMessageBox::critical(nullptr, "Error", "Failed to create MPQ Archive. Unhandled exception.");
+              }
+          }
+          {
+              auto archive = clientData->getMPQArchive(archive_name);
+              if (archive.has_value())
+              {
+                  auto progress_box = new QMessageBox(QMessageBox::Information, "Working...", std::format("Saving {} files to patch {}...\
+                      \nClosing the program now can corrupt the MPQ.", std::to_string(totalItems), archive_name ).c_str(), QMessageBox::StandardButton::NoButton, this);
+                  progress_box->setStandardButtons(QMessageBox::NoButton);
+                  progress_box->setWindowFlags(progress_box->windowFlags() & ~Qt::WindowCloseButtonHint);
+                  // progress_box->exec(); // this stops code execution
+                  progress_box->repaint();
+                  qApp->processEvents();
+
+                  try
+                  {
+                      auto start = std::chrono::high_resolution_clock::now();
+
+                      std::array<int, 2> result = clientData->saveLocalFilesToArchive(archive.value(), mpq_compress_files_chk->isChecked(), mpq_compact_chk->isChecked());
+                      int processed_files = result[0];
+                      int files_failed = processed_files - result[1];
+
+                      auto end = std::chrono::high_resolution_clock::now();
+                      std::chrono::duration<double> duration = end - start;
+                      std::ostringstream oss; // duration in seconds with 1 digit
+                      oss << std::fixed << std::setprecision(1) << duration.count();
+
+                      // if no file was processed, archive was most likely opened and not accessible
+                      // TODO : we can throw an error message in saveLocalFilesToArchive if (!archive->openForWritting()) instead
+                      if (!processed_files)
+                      {
+                          QMessageBox::warning(this, "Error", "Project Folder is not a valid directory or client MPQ is not accessible.\
+                              \nMake sure it isn't opened by Wow or MPQ editor");
+                      }
+                      else
+                          QMessageBox::information(this, "Archive Updated", std::format("Added {} files to existing Archive {} in {} seconds.\
+                        \n{} Files failed.",  std::to_string(processed_files), archive_name, oss.str(), std::to_string(files_failed)).c_str());
+
+
+                  }
+                  catch (...)
+                  {
+                      QMessageBox::critical(nullptr, "Error", "unhandled exception");
+                  }
+
+                  progress_box->close();
+              }
+              else
+                  QMessageBox::warning(this, "Error", std::format("Error accessing archive {}", archive_name).c_str());
+          }
+      }
   }
 }

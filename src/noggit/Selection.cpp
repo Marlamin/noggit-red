@@ -41,7 +41,7 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 
 
   // test compare active layer algorithm with blizzard. can reuse the same for saving
-
+  // TODO remove this
 
   int matching_count = 0;
   int not_matching_count = 0;
@@ -49,7 +49,7 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 
   auto tile = chunk->mt;
 
-  bool debug_test = true;
+  bool debug_test = false;
 
   if (debug_test)
   for (int chunk_x = 0; chunk_x < 16; chunk_x++)
@@ -185,7 +185,10 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 
     if (stuck || error)
       select_info << "</font>";
-    select_info << "<br><b>Ground Effect</b>: " << chunk->getTextureSet()->getEffectForLayer(counter);
+    unsigned int effect_id = chunk->getTextureSet()->getEffectForLayer(counter);
+    if (effect_id == 0xFFFFFFFF)
+        effect_id = 0;
+    select_info << "<br><b>Ground Effect</b>: " << effect_id;
         counter++;
   }
 
