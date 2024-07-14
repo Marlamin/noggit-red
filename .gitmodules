@@ -20,3 +20,7 @@
 	path = dist/themes
 	url = https://gitlab.com/prophecy-rp/build-dependencies.git
 	branch = dist-themes
+[submodule "blizzard-archive-library"]
+	path = blizzard-archive-library
+	url = https://gitlab.com/T1ti/blizzard-archive-library
+	branch = MPQ
