@@ -244,7 +244,7 @@ void TextureSet::eraseTexture(size_t id)
   }
 
   nTextures--;
-  textures.erase(textures.begin() + nTextures);
+  textures.erase(textures.begin() + id);
 
   // erase the old info as a precaution but it's overriden when adding a new texture
   _layers_info[nTextures] = layer_info();
@@ -1359,6 +1359,11 @@ std::array<float, 4> TextureSet::get_textures_weight_for_unit(unsigned int unit_
     float total_layer_2 = 0.f;
     float total_layer_3 = 0.f;
 
+    if (nTextures == 0)
+        return std::array<float, 4> { 0.f, 0.f, 0.f, 0.f };
+    else if (nTextures == 1)
+        return std::array<float, 4> { 100.f, 0.f, 0.f, 0.f };
+
     // 8x8 bits per unit
     for (int x = 0; x < 8; x++)
     {
@@ -1366,7 +1371,7 @@ std::array<float, 4> TextureSet::get_textures_weight_for_unit(unsigned int unit_
         {
             float base_alpha = 255.f;
 
-            for (int alpha_layer = 0; alpha_layer < nTextures - 1; ++alpha_layer)
+            for (int alpha_layer = 0; alpha_layer < (nTextures - 1); ++alpha_layer)
             {
                 float f = static_cast<float>(alphamaps[alpha_layer]->getAlpha( (unit_y * 8  + y)* 64 + (unit_x * 8 + x) )); // getAlpha(64 * y + x))
 

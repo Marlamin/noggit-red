@@ -10,6 +10,7 @@
 
 #include <QDir>
 #include <QBuffer>
+#include <QCryptographicHash>
 
 using namespace Noggit::Rendering;
 
@@ -1734,6 +1735,20 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
 
       uint32_t file_size;
       void* blp_image = blp.createBlpDxtInMemory(true, FORMAT_DXT5, file_size);
+
+      // converts the texture name to an md5 hash like blizzard, this is used to avoid duplicates textures for ocean
+      // downside is that if the file gets updated regularly there will be a lot of duplicates in the project folder
+      // probably should be a patching option when deploying
+      bool use_md5 = false;
+      if (use_md5)
+      {
+          QCryptographicHash md5_hash(QCryptographicHash::Md5);
+          // auto data = reinterpret_cast<char*>(blp_image);
+          md5_hash.addData(reinterpret_cast<char*>(blp_image), file_size);
+          auto resulthex = md5_hash.result().toHex().toStdString() + ".blp";
+          tex_name = resulthex;
+      }
+
 
       QFile file(dir.filePath(tex_name.c_str()));
       file.open(QIODevice::WriteOnly);

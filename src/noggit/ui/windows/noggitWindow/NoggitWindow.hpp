@@ -40,6 +40,12 @@ namespace Noggit::Ui::Windows
       void promptExit(QCloseEvent* event);
       void promptUidFixFailure();
 
+      // TODO, better location for those utils that need to be above mapview?
+      void startWowClient();
+
+      void patchWowClient();
+
+
       QMenuBar* _menuBar;
 
       QToolBar* _app_toolbar;
