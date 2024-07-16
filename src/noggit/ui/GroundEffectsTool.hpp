@@ -120,17 +120,18 @@ namespace Noggit
 
             inline bool render_active_sets_overlay() const
             {
-                return isVisible() && _render_active_sets->isChecked() && render_mode();
+                return isVisible() && !render_exclusion_map_overlay() && _render_active_sets->isChecked() && render_mode();
             };
 
             inline bool render_placement_map_overlay() const
             {
-                return isVisible() && _render_placement_map->isChecked() && render_mode();
+                return isVisible() && !render_exclusion_map_overlay() && _render_placement_map->isChecked() && render_mode();
             };
 
             inline bool render_exclusion_map_overlay() const
             {
-                return isVisible() && _render_exclusion_map->isChecked() && render_mode();
+                // return isVisible() && _render_exclusion_map->isChecked() && render_mode();
+                return isVisible() && brush_mode() == ground_effect_brush_mode::exclusion;
             };
 
             void change_radius(float change)
@@ -164,7 +165,7 @@ namespace Noggit
             // - Render as black is set is not present.
             QRadioButton* _render_placement_map;
             // Render chunk units where effect doodads are disabled as white, rest as black.
-            QRadioButton* _render_exclusion_map;
+            // QRadioButton* _render_exclusion_map;
             QCheckBox* _chkbox_merge_duplicates;
             QListWidget* _effect_sets_list;
             // For render previews.
