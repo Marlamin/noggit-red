@@ -65,8 +65,6 @@ protected:
 public:
   std::vector<selection_group> _selection_groups;
 
-  bool selection_updated = false; // for mapview
-
   MapIndex mapIndex;
   Noggit::map_horizon horizon;
 

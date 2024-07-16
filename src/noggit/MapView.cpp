@@ -1015,14 +1015,17 @@ void MapView::setupDetailInfos()
   // End Dock
 
   guidetailInfos = new Noggit::Ui::detail_infos(this);
-  _detail_infos_dock->setWidget(guidetailInfos);;
+  _detail_infos_dock->setWidget(guidetailInfos);
 
 
   connect ( &_show_detail_info_window, &Noggit::BoolToggleProperty::changed
     , guidetailInfos, [this]
             {
               if (!ui_hidden)
-                _detail_infos_dock->setVisible(_show_detail_info_window.get());
+              {
+                  _detail_infos_dock->setVisible(_show_detail_info_window.get());
+                  updateDetailInfos();
+              }
             }
   );
 
@@ -1033,55 +1036,57 @@ void MapView::setupDetailInfos()
   connect(NOGGIT_ACTION_MGR, &Noggit::ActionManager::onActionBegin,
     [this](Noggit::Action*)
     {
-      updateDetailInfos(true);
+      updateDetailInfos();
     });
 
   connect(NOGGIT_ACTION_MGR, &Noggit::ActionManager::onActionEnd,
     [this](Noggit::Action*)
     {
-      updateDetailInfos(true);
+      updateDetailInfos();
     });
 
   connect(NOGGIT_ACTION_MGR, &Noggit::ActionManager::currentActionChanged,
     [this](unsigned)
     {
-      updateDetailInfos(true);
+      updateDetailInfos();
     });
 }
 
-void MapView::updateDetailInfos(bool no_sel_change_check)
+void MapView::updateDetailInfos()
 {
   auto& current_selection = _world->current_selection();
 
   // update detail infos TODO: selection update signal.
-  static std::uintptr_t last_sel = 0;
+
 
   if (guidetailInfos->isVisible())
   {
-    if (current_selection.size() > 0)
+    if (!current_selection.empty())
     {
-      selection_type& last_selection = const_cast<selection_type&>(current_selection.at(current_selection.size() - 1));
+        std::uintptr_t previous_sel_last = 0;
+        if (!lastSelected.empty())
+          previous_sel_last = reinterpret_cast<std::uintptr_t>(&const_cast<selection_type&>(lastSelected.back()));
 
-      switch (last_selection.index())
+      selection_type& selection_last = const_cast<selection_type&>(current_selection.back());
+
+      switch (selection_last.index())
       {
         case eEntry_Object:
         {
-          auto obj = std::get<selected_object_type>(last_selection);
+          auto obj = std::get<selected_object_type>(selection_last);
 
-          if (no_sel_change_check || reinterpret_cast<std::uintptr_t>(obj) != last_sel || NOGGIT_CUR_ACTION)
+          if (reinterpret_cast<std::uintptr_t>(obj) != previous_sel_last || NOGGIT_CUR_ACTION)
           {
-            last_sel = reinterpret_cast<std::uintptr_t>(obj);
             obj->updateDetails(guidetailInfos);
           }
           break;
         }
         case eEntry_MapChunk:
         {
-          selected_chunk_type& chunk_sel(std::get<selected_chunk_type>(last_selection));
+          selected_chunk_type& chunk_sel(std::get<selected_chunk_type>(selection_last));
 
-          if (no_sel_change_check || reinterpret_cast<std::uintptr_t>(chunk_sel.chunk) != last_sel || NOGGIT_CUR_ACTION)
+          if (reinterpret_cast<std::uintptr_t>(chunk_sel.chunk) != previous_sel_last || NOGGIT_CUR_ACTION)
           {
-            last_sel = reinterpret_cast<std::uintptr_t>(chunk_sel.chunk);
             chunk_sel.updateDetails(guidetailInfos);
           }
           break;
@@ -3086,6 +3091,11 @@ MapView::MapView( math::degrees camera_yaw0
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
       this, SLOT(ShowContextMenu(const QPoint&)));
 
+  connect(this, &MapView::selectionUpdated, [this]()
+      {
+          updateDetailInfos();
+      });
+
   moving = strafing = updown = lookat = turn = 0.0f;
 
   freelook = false;
@@ -3442,12 +3452,6 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
                   if (progress->value() != value)
                     progress->setValue(value);
                 });
-
-        connect(this, &MapView::selectionUpdated, [this]()
-            { 
-                updateDetailInfos(true);
-                _world->selection_updated = false;
-            });
 
         // setup combined image if necessary
         if (settings->combined_minimap)
@@ -3817,12 +3821,16 @@ void MapView::tick (float dt)
     math::rotate(0.0f, 0.0f, &dirRight.x, &dirRight.z, yaw);
   }
 
+  // note : selection update most commonly happens in mouseReleaseEvent, which sets leftMouse to false
+  bool selection_changed = false;
+
   auto currentSelection = _world->current_selection();
   if (_world->has_selection())
   {
     // update rotation editor if the selection has changed
     if (lastSelected != currentSelection)
     {
+      selection_changed = true;
       _rotation_editor_need_update = true;
     }
 
@@ -4540,11 +4548,15 @@ void MapView::tick (float dt)
       }
     }
   }
-  if (_world->selection_updated)
-  {
-      updateDetailInfos(true);
-      // update areaid and texture picker
 
+  updateDetailInfos(); // checks if sel changed
+
+  if (selection_changed)
+  {
+      // emit selectionUpdated();
+      // updateDetailInfos();
+
+      // update areaid and texture picker
       if (_texture_picker_need_update)
       {
           _texture_picker_dock->setVisible(true);
@@ -4563,12 +4575,7 @@ void MapView::tick (float dt)
 
           _area_picker_need_update = false;
       }
-
-      _world->selection_updated = false;
   }
-  else
-      updateDetailInfos();
-      // emit selectionUpdated();
 
   _status_area->setText
     (QString::fromStdString (gAreaDB.getAreaFullName (_world->getAreaID (_camera.position))));

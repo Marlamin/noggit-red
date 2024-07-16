@@ -502,7 +502,7 @@ private:
   void setupNodeEditor();
   void setupAssetBrowser();
   void setupDetailInfos();
-  void updateDetailInfos(bool no_sel_change_check = false);
+  void updateDetailInfos();
   void setupToolbars();
   void setupKeybindingsGui();
   void setupMinimap();
