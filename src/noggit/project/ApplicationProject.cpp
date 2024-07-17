@@ -11,48 +11,6 @@ namespace Noggit::Project
         extraDataFolder /= "extraData";
 
         Log << "Loading extra data from " << extraDataFolder << std::endl;
-        const auto& table = std::string("Map");
-
-        Log << "Loading " << table << " table for extra data " << std::endl;
-
-
-
-        tsl::robin_map<std::string, int> MapNameToID;
-
-        try
-        {
-            auto readFileAsIMemStream = [project](std::string const& file_path) -> std::shared_ptr<BlizzardDatabaseLib::Stream::IMemStream>
-                {
-                    BlizzardArchive::ClientFile f(file_path, project.ClientData.get());
-
-                    return std::make_shared<BlizzardDatabaseLib::Stream::IMemStream>(f.getBuffer(), f.getSize());
-                };
-
-            Log << "Read map table from client, loading as DBC " << std::endl;
-
-            auto mapTable = project.ClientDatabase->LoadTable(table, readFileAsIMemStream);
-
-            int count = 0;
-            auto iterator = mapTable.Records();
-
-            while (iterator.HasRecords())
-            {
-                auto record = iterator.Next();
-                int map_id = record.RecordId;
-                std::string name = (record.Columns["Directory"].Value);
-                std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-                MapNameToID.emplace(name, map_id);
-                count++;
-            }
-        }
-        catch (...)
-        {
-            LogError << "Failed to read Map.dbc " << std::endl;
-        }
-
-        Log << "Loaded map table as DBC " << std::endl;
-
-        project.ClientDatabase->UnloadTable(table);
 
         if (std::filesystem::exists(extraDataFolder) && std::filesystem::is_directory(extraDataFolder))
         {
@@ -77,37 +35,6 @@ namespace Noggit::Project
                             project.ExtraMapData.SetTextureHeightData_Global(entry.toStdString(), newData);
                         }
                     }
-                    else
-                    {
-                        std::string file_name = entry.path().stem().string();
-                        std::regex pattern(R"(([A-Za-z]+)_([0-9]+)_([0-9]+))");
-                        std::smatch matches;
-
-                        if (std::regex_search(file_name, matches, pattern)) {
-                            std::string mapName = matches[1].str();
-                            int xx = std::stoi(matches[2].str());
-                            int yy = std::stoi(matches[3].str());
-                            
-                            std::transform(mapName.begin(), mapName.end(), mapName.begin(), ::tolower);
-
-                            auto mapIsLoaded = MapNameToID.find(mapName);
-
-                            if (mapIsLoaded != MapNameToID.end())
-                            {
-                                for (auto const& entry : keys)
-                                {
-                                    texture_heightmapping_data newData;
-                                    newData.uvScale = root[entry].toObject()["Scale"].toInt();
-                                    newData.heightOffset = root[entry].toObject()["HeightOffset"].toDouble();
-                                    newData.heightScale = root[entry].toObject()["HeightScale"].toDouble();
-
-                                    project.ExtraMapData.SetTextureHeightDataForADT(mapIsLoaded.value(), TileIndex(xx, yy), entry.toStdString(), newData);
-                                }
-                            }
-                            
-                        }
-                    }
-
                 }
             }
         }
