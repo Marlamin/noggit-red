@@ -1773,7 +1773,7 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
     std::string map_name = gMapDB.getByID(_world->mapIndex._map_id).getString(MapDB::InternalName);
 
     auto sstream = std::stringstream();
-    sstream << map_name << "\\map" << std::setfill('0') << std::setw(2) << tile_idx.x << "_" << std::setfill('0') << std::setw(2) << tile_idx.z << ".blp";
+    sstream << map_name << "\\map" << tile_idx.x << "_" << std::setfill('0') << std::setw(2) << tile_idx.z << ".blp";
     std::string tilename_left = sstream.str();
     _world->mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
 
