@@ -52,10 +52,10 @@ namespace Noggit
                 _render_type_group->addButton(_render_active_sets);
                 render_layout->addWidget(_render_active_sets, 0, 0);
 
-                _render_exclusion_map = new QRadioButton("Doodads Disabled", this);
-                _render_exclusion_map->setToolTip("Render chunk units where effect doodads are disabled as white, rest as black");
-                _render_type_group->addButton(_render_exclusion_map);
-                render_layout->addWidget(_render_exclusion_map, 0, 1);
+                // _render_exclusion_map = new QRadioButton("Doodads Disabled", this);
+                // _render_exclusion_map->setToolTip("Render chunk units where effect doodads are disabled as white, rest as black");
+                // _render_type_group->addButton(_render_exclusion_map);
+                // render_layout->addWidget(_render_exclusion_map, 0, 1);
 
                 // If chunk contains Texture/Effect : Render as green or red if the effect layer is active or not.
                 _render_placement_map = new QRadioButton("Selected Texture state", this);
@@ -63,7 +63,7 @@ namespace Noggit
                 active layer, render as green if it's active. \nThis defines which of the 4 textures' set is currently active,\
                 this is determined by which has the highest opacity.");
                 _render_type_group->addButton(_render_placement_map);
-                render_layout->addWidget(_render_placement_map, 1, 0);
+                render_layout->addWidget(_render_placement_map, 0, 1);
 
                 _render_active_sets->setChecked(true);
             }
@@ -279,11 +279,29 @@ namespace Noggit
                     updateTerrainUniformParams();
                 });
 
-            connect(_render_exclusion_map, &QRadioButton::clicked,
+            // connect(_render_exclusion_map, &QRadioButton::clicked,
+            //     [this](bool checked)
+            //     {
+            //         updateTerrainUniformParams();
+            //     });
+
+            connect(_brush_grup_box, &QGroupBox::clicked,
                 [this](bool checked)
                 {
                     updateTerrainUniformParams();
                 });
+
+            connect(_paint_effect, &QRadioButton::clicked,
+                [this](bool checked)
+                {
+                    updateTerrainUniformParams();
+                });
+
+            connect(_paint_exclusion, &QRadioButton::clicked,
+                 [this](bool checked)
+                 {
+                     updateTerrainUniformParams();
+                 });
 
             // Get list of ground effect id this texture uses in this ADT.
             connect(button_scan_adt, &QPushButton::clicked
