@@ -373,7 +373,7 @@ public:
   void updateVertexCenter();
   void clearVertexSelection();
 
-  void deleteObjects(std::vector<selection_type> const& types);
+  void deleteObjects(std::vector<selected_object_type> const& types);
 
   float getMaxTileHeight(const TileIndex& tile);
 

@@ -107,9 +107,8 @@ public:
   auto getDoodadMappingBase(void) -> std::uint16_t* { return _doodadMapping.data(); }
   std::array<std::uint16_t, 8> const& getDoodadMapping() { return _doodadMapping; }
   std::array<std::array<std::uint8_t, 8>, 8> const getDoodadMappingReadable(); // get array of readable values
-  uint8_t const getDoodadActiveLayerIdAt(unsigned int x, unsigned int y); // max is 8
+  uint8_t const getDoodadActiveLayerIdAt(unsigned int unit_x, unsigned int unit_y);
 
-  // TODO x and Y are swapped
   std::array<std::uint8_t, 8> _doodadStencil; // doodads disabled if 1; WoD: may be an explicit MCDD chunk
                                                 // this is actually uint1_t[8][8] (8*8 -> 1 bit each)
   auto getDoodadStencilBase(void) -> std::uint8_t* { return _doodadStencil.data(); }
@@ -123,6 +122,8 @@ public:
 
   // get the weight of each texture in a chunk unit
   std::array<float, 4> get_textures_weight_for_unit(unsigned int unit_x, unsigned int unit_y);
+
+  void updateDoodadMapping();
 
 private:
 

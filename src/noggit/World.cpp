@@ -677,7 +677,7 @@ void World::delete_selected_models()
       }
   }
 
-  _model_instance_storage.delete_instances(_current_selection);
+  _model_instance_storage.delete_instances(get_selected_objects());
   need_model_updates = true;
   reset_selection();
 }
@@ -2039,7 +2039,7 @@ void World::reload_tile(TileIndex const& tile)
   mapIndex.reloadTile(tile);
 }
 
-void World::deleteObjects(std::vector<selection_type> const& types)
+void World::deleteObjects(std::vector<selected_object_type> const& types)
 {
   ZoneScoped;
   _model_instance_storage.delete_instances(types);

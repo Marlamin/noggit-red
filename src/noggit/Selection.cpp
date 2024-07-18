@@ -40,12 +40,14 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
       <<"\n";
 
 
-  // test compare active layer algorithm with blizzard. can reuse the same for saving
+  // test compare active layer algorithm with blizzard for the whole adt. can reuse the same for saving
   // TODO remove this
 
   int matching_count = 0;
   int not_matching_count = 0;
   int very_innacurate_count = 0;
+  int higher_count = 0;
+  int lower_count = 0;
 
   auto tile = chunk->mt;
 
@@ -58,12 +60,17 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
       {
           auto local_chunk = tile->getChunk(chunk_x, chunk_y);
 
-          auto blizzard_mapping = local_chunk->getTextureSet()->getDoodadMapping();
-          auto blizzard_mapping_readable = local_chunk->getTextureSet()->getDoodadMappingReadable();
-        
-          std::array<std::uint16_t, 8> test_doodadMapping{};
-          std::array<std::array<std::uint8_t, 8>, 8> doodad_mapping_readable{};
+          // auto blizzard_mapping = local_chunk->getTextureSet()->getDoodadMapping();
+          // auto blizzard_mapping_readable = local_chunk->getTextureSet()->getDoodadMappingReadable();
 
+          local_chunk->getTextureSet()->updateDoodadMapping();
+          // test after creating new array
+          auto blizzard_mapping_readable = local_chunk->getTextureSet()->getDoodadMappingReadable();
+
+
+          // test getting highest weight vs blizzard
+          std::array<std::uint16_t, 8> test_doodadMapping{};
+          std::array<std::array<std::uint8_t, 8>, 8> test_doodad_mapping_readable{};
           for (int x = 0; x < 8; x++)
           {
               for (int y = 0; y < 8; y++)
@@ -74,34 +81,54 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
                   int max_layer_index = 0;
         
                   for (int i = 1; i < weights.size(); i++)
-                      if (weights[i] >= max) // (weights[i] >= max) ? superior layer seems to have priority
+                  {
+                      // in old azeroth maps superior layers seems to have higher priority
+                      // error margin is ~4% in old azeroth without adjusted weight, 2% with
+                      // error margin is < 0.5% in northrend without adjusting
+
+                      // float adjusted_weight = weights[i] * (1 + 0.05*i); // superior layer seems to have priority, adjust by 5% per layer
+                      if (weights[i] >= max)
+                      // if (std::floor(weights[i]) >= max)
+                      // if (std::round(weights[i]) >= max)
+                      // if (adjusted_weight >= max) // this works the best
                       {
                           max = weights[i];
                           max_layer_index = i;
                       }
+                  }
         
                   unsigned int firstbit_pos = x * 2;
-                  doodad_mapping_readable[y][x] = max_layer_index;
+                  test_doodad_mapping_readable[y][x] = max_layer_index;
                   // there might be a smarter way to do this
-                  if (max_layer_index == 1)
-                  {
-                      test_doodadMapping[y] |= (1 << firstbit_pos);
-                  }
-                  else if (max_layer_index == 2)
-                  {
-                      test_doodadMapping[y] |= (1 << firstbit_pos + 1);
-                  }
-                  else if (max_layer_index == 3)
-                  {
-                      test_doodadMapping[y] |= (1 << firstbit_pos) | (1 << (firstbit_pos + 1));
-                  }
-        
+                  // if (max_layer_index == 1)
+                  // {
+                  //     test_doodadMapping[y] |= (1 << firstbit_pos);
+                  // }
+                  // else if (max_layer_index == 2)
+                  // {
+                  //     test_doodadMapping[y] |= (1 << firstbit_pos + 1);
+                  // }
+                  // else if (max_layer_index == 3)
+                  // {
+                  //     test_doodadMapping[y] |= (1 << firstbit_pos) | (1 << (firstbit_pos + 1));
+                  // }
+                  
+                  // the smarter way.
+                  test_doodadMapping[y] |= ((max_layer_index & 3) << firstbit_pos);
+
         
                   // debug compare
                   uint8_t blizzard_layer_id = blizzard_mapping_readable[y][x];
-                  //uint8_t blizzard_layer_id2 = blizzard_mapping_readable[x][y];
-                  uint8_t blizzard_layer_id3 = local_chunk->getTextureSet()->getDoodadActiveLayerIdAt(x, y); // make sure
-                  bool test_doodads_enabled = local_chunk->getTextureSet()->getDoodadDisabledAt(x, y);
+                  // 
+                  // uint8_t blizzard_layer_id3 = local_chunk->getTextureSet()->getDoodadActiveLayerIdAt(x, y); // make sure both work the same
+                  // if (blizzard_layer_id != blizzard_layer_id3)
+                  //     throw;
+                  // bool test_doodads_enabled = local_chunk->getTextureSet()->getDoodadDisabledAt(x, y);
+
+                  if (max_layer_index < blizzard_layer_id)
+                      lower_count++;
+                  if (max_layer_index > blizzard_layer_id)
+                      higher_count++;
         
                   if (max_layer_index != blizzard_layer_id)
                   {
@@ -125,18 +152,18 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   float debug_not_matching_percent = ((float)not_matching_count / (float)matching_count) * 100.f;
 
 
-  std::array<float, 4> weights = chunk->getTextureSet()->get_textures_weight_for_unit(unit_index.x, unit_index.y);
+  std::array<float, 4> unit_texture_weights = chunk->getTextureSet()->get_textures_weight_for_unit(unit_index.x, unit_index.y);
   if (chunk->getTextureSet()->num())
   {
       select_info << "\n<br><b>DEBUG Chunk Unit texture weights:</b>"
-          << "<br>0:" << weights[0] << "%";
+          << "<br>0:" << unit_texture_weights[0] << "%";
   }
   if (chunk->getTextureSet()->num()>1)
-      select_info << "<br>1:" << weights[1] << "%";
+      select_info << "<br>1:" << unit_texture_weights[1] << "%";
   if (chunk->getTextureSet()->num() > 2)
-      select_info << "<br>2:" << weights[2] << "%";
+      select_info << "<br>2:" << unit_texture_weights[2] << "%";
   if (chunk->getTextureSet()->num() > 3)
-      select_info << "<br>3:" << weights[3] << "%";
+      select_info << "<br>3:" << unit_texture_weights[3] << "%";
 
 
   // liquid details if the chunk has liquid data
