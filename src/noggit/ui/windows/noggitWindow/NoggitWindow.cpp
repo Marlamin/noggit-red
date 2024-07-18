@@ -339,7 +339,8 @@ namespace Noggit::Ui::Windows
                                 tr("Battleground") <<
                                 tr("Arena") <<
                                 tr("Scenario"));
-        _combo_search->setCurrentIndex(2);
+        QSettings settings;
+        _combo_search->setCurrentIndex(settings.value("mapComboSearch", 2).toInt());
 
         QComboBox* _combo_exp_search = new QComboBox(this);
         _combo_exp_search->addItem(tr("All"));
@@ -364,6 +365,9 @@ namespace Noggit::Ui::Windows
         QObject::connect(_combo_search, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, _line_edit_search, _combo_exp_search, _wmo_maps_search](int index)
                          {
                              applyFilterSearch(_line_edit_search->text(), index, _combo_exp_search->currentIndex(), _wmo_maps_search->isChecked());
+                             QSettings settings;
+                             settings.setValue("mapComboSearch", index);
+                             settings.sync();
                          });
 
         QObject::connect(_combo_exp_search, QOverload<int>::of(&QComboBox::currentIndexChanged), [this, _line_edit_search, _combo_search, _wmo_maps_search](int index)
