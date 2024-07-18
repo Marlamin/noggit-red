@@ -406,10 +406,10 @@ uint8_t const TextureSet::getDoodadActiveLayerIdAt(unsigned int x, unsigned int 
 
     unsigned int firstbit_pos = x * 2;
 
-    bool first_bit = _doodadMapping[y] & (1 << firstbit_pos);
-    bool second_bit = _doodadMapping[y] & (1 << (firstbit_pos + 1) );
-
-    uint8_t layer_id = first_bit + second_bit * 2;
+    // bool first_bit = _doodadMapping[y] & (1 << firstbit_pos);
+    // bool second_bit = _doodadMapping[y] & (1 << (firstbit_pos + 1) );
+    // uint8_t layer_id = first_bit | (second_bit << 1); // first_bit + second_bit * 2;
+    uint8_t layer_id = (_doodadMapping[y] >> firstbit_pos) & 0x03;
 
     return layer_id;
 }
@@ -1395,6 +1395,120 @@ std::array<float, 4> TextureSet::get_textures_weight_for_unit(unsigned int unit_
         total_layer_3 / sum * 100.f };
 
     return weights;
+}
+
+void TextureSet::updateDoodadMapping()
+{
+    std::array<std::uint16_t, 8> new_doodad_mapping{};
+    // std::array<std::array<std::uint8_t, 8>, 8> new_doodad_mapping{};
+    // for (auto& row : new_doodad_mapping) {
+    //     row.fill(nTextures - 1);
+    // }
+
+    if (nTextures <= 1)
+    {
+        // 0 or 1 layer, we just use the 0 default
+        _doodadMapping = new_doodad_mapping;
+        return;
+    }
+
+    // test comparison variables 
+    int matching_count = 0;
+    int not_matching_count = 0;
+    int very_innacurate_count = 0;
+    int higher_count = 0;
+    int lower_count = 0;
+    auto blizzard_mapping_readable = getDoodadMappingReadable();
+    bool debug_test = true;
+
+    // 8x8 bits per unit
+    for (int unit_x = 0; unit_x < 8; unit_x++)
+    {
+        for (int unit_y = 0; unit_y < 8; unit_y++)
+        {
+            int layer_totals[4]{ 0,0,0,0 };
+
+            // 8x8 bits per unit
+            for (int x = 0; x < 8; x++)
+            {
+                for (int y = 0; y < 8; y++)
+                {
+                    unsigned int base_alpha = 255;
+
+                    for (int alpha_layer = 0; alpha_layer < (nTextures - 1); ++alpha_layer)
+                    {
+                        auto alpha = static_cast<int>(alphamaps[alpha_layer]->getAlpha((unit_y * 8 + y) * 64 + (unit_x * 8 + x)));
+
+                        layer_totals[alpha_layer+1] += alpha;
+
+                        base_alpha -= alpha;
+                    }
+                    layer_totals[0] += base_alpha;
+                }
+            }
+
+            // int sum = layer_totals[0] + layer_totals[1] + layer_totals[2] + layer_totals[3];
+            // std::array<float, 4> percent_weights = { total_layer_0 / sum * 100.f,
+            //     total_layer_1 / sum * 100.f,
+            //     total_layer_2 / sum * 100.f,
+            //     total_layer_3 / sum * 100.f };
+
+            int max = layer_totals[0];
+            int max_layer_index = 0;
+
+            for (int i = 1; i < nTextures; i++)
+            {
+                // in old azeroth maps superior layers seems to have higher priority
+                // error margin is ~4% in old azeroth without adjusted weight, 2% with
+                // error margin is < 0.5% in northrend without adjusting
+
+                float adjusted_weight = layer_totals[i] * (1 + 0.01*i); // superior layer seems to have priority, adjust by 1% per layer
+                // if (layer_totals[i] >= max)
+                // if (std::floor(weights[i]) >= max)
+                // if (std::round(weights[i]) >= max)
+                if (adjusted_weight >= max) // this with 5% works the best in old continents
+                {
+                    max = layer_totals[i];
+                    max_layer_index = i;
+                }
+            }
+            unsigned int firstbit_pos = unit_x * 2;
+            new_doodad_mapping[unit_y] |= ((max_layer_index & 3) << firstbit_pos);
+            // new_chunk_mapping[y][x] = max_layer_index;
+
+            // debug compare with original data
+            if (debug_test)
+            {
+                uint8_t blizzard_layer_id = blizzard_mapping_readable[unit_y][unit_x];
+                uint8_t blizzard_layer_id2 = getDoodadActiveLayerIdAt(unit_x, unit_y); // make sure both work the same
+                if (blizzard_layer_id != blizzard_layer_id2)
+                    throw;
+                // bool test_doodads_enabled = local_chunk->getTextureSet()->getDoodadDisabledAt(x, y);
+
+                if (max_layer_index < blizzard_layer_id)
+                    lower_count++;
+                if (max_layer_index > blizzard_layer_id)
+                    higher_count++;
+
+                if (max_layer_index != blizzard_layer_id)
+                {
+                    int blizzard_effect_id = getEffectForLayer(blizzard_layer_id);
+                    int found_effect_id = getEffectForLayer(max_layer_index);
+                    not_matching_count++;
+                    /*
+                    float percent_innacuracy = ((layer_totals[max_layer_index] - layer_totals[blizzard_layer_id]) / ((static_cast<float>(layer_totals[max_layer_index]) + layer_totals[blizzard_layer_id]) / 2)) * 100.f;
+
+                    if (percent_innacuracy > 15)
+                        very_innacurate_count++;*/
+
+                }
+                else
+                    matching_count++;
+            }
+        }
+    }
+
+    _doodadMapping = new_doodad_mapping;
 }
 
 uint8_t TextureSet::sum_alpha(size_t offset) const

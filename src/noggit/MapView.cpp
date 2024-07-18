@@ -1121,10 +1121,6 @@ void MapView::updateDetailInfos()
   {
     if (!current_selection.empty())
     {
-        std::uintptr_t previous_sel_last = 0;
-        if (!lastSelected.empty())
-          previous_sel_last = reinterpret_cast<std::uintptr_t>(&const_cast<selection_type&>(lastSelected.back()));
-
       selection_type& selection_last = const_cast<selection_type&>(current_selection.back());
 
       switch (selection_last.index())
@@ -1132,21 +1128,13 @@ void MapView::updateDetailInfos()
         case eEntry_Object:
         {
           auto obj = std::get<selected_object_type>(selection_last);
-
-          if (reinterpret_cast<std::uintptr_t>(obj) != previous_sel_last || NOGGIT_CUR_ACTION)
-          {
-            obj->updateDetails(guidetailInfos);
-          }
+          obj->updateDetails(guidetailInfos);
           break;
         }
         case eEntry_MapChunk:
         {
           selected_chunk_type& chunk_sel(std::get<selected_chunk_type>(selection_last));
-
-          if (reinterpret_cast<std::uintptr_t>(chunk_sel.chunk) != previous_sel_last || NOGGIT_CUR_ACTION)
-          {
-            chunk_sel.updateDetails(guidetailInfos);
-          }
+          chunk_sel.updateDetails(guidetailInfos);
           break;
         }
       }
@@ -4607,7 +4595,8 @@ void MapView::tick (float dt)
     }
   }
 
-  updateDetailInfos(); // checks if sel changed
+  if (selection_changed || NOGGIT_CUR_ACTION)
+    updateDetailInfos(); // checks if sel changed
 
   if (selection_changed)
   {
@@ -6278,57 +6267,53 @@ void MapView::ShowContextMenu(QPoint pos)
         action_replace.setToolTip("Replace the currently selected objects by the object in the clipboard (There must only be one!). M2s can only be replaced by m2s");
         QObject::connect(&action_replace, &QAction::triggered, [=]()
             {
+                makeCurrent();
+                OpenGL::context::scoped_setter const _(::gl, context());
+
                 if (terrainMode != editing_mode::object && NOGGIT_CUR_ACTION)
                     return;
-
-                // verify this
-                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED | Noggit::ActionFlags::eOBJECTS_REMOVED); // Noggit::ActionFlags::eOBJECTS_TRANSFORMED
-                // NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_TRANSFORMED);
 
                 if (!objectEditor->clipboardSize())
                     return;
 
+                // verify this
+                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED | Noggit::ActionFlags::eOBJECTS_REMOVED); // Noggit::ActionFlags::eOBJECTS_TRANSFORMED
+
                 // get the model to replace by
                 auto replace_select = objectEditor->getClipboard().front();
-                auto replace_obj = std::get<selected_object_type>(replace_select);
-                // bool replace_is_wmo = replace_obj->which() == eWMO;
-                auto& replace_path = replace_obj->instance_model()->file_key().filepath();
+                auto replacement_obj = std::get<selected_object_type>(replace_select);
+                auto& replace_path = replacement_obj->instance_model()->file_key().filepath();
+
+                std::vector<SceneObject*> objects_to_delete;
 
                 // iterate selection (objects to replace)
-                for (auto& source_obj : _world->get_selected_objects())
+                std::vector<selected_object_type> selected_objects = _world->get_selected_objects();
+                for (SceneObject* old_obj : selected_objects)
                 {
-
-                        math::degrees::vec3 source_rot(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
-                        source_rot = source_obj->dir;
-                        float source_scale = source_obj->scale;
-                        auto source_pos = source_obj->pos;
-
-                        if (source_obj->instance_model()->file_key().filepath() == replace_path)
+                        if (old_obj->instance_model()->file_key().filepath() == replace_path)
                             continue;
 
-                        // TODO : Test if this breaks if clipboard is empty
+                        math::degrees::vec3 source_rot(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
+                        source_rot = old_obj->dir;
+                        float source_scale = old_obj->scale;
+                        glm::vec3 source_pos = old_obj->pos;
 
-                        if (replace_obj->which() == eWMO)
+                        // _world->deleteInstance(old_obj->uid);
+                        objects_to_delete.emplace_back(old_obj);
+
+                        if (replacement_obj->which() == eWMO)
                         {
-                            // if (!replace_is_wmo)
-                            //     continue;
-
-                            // auto replace_wmo = static_cast<WMOInstance*>(replace_obj);
-                            // auto source_wmo = static_cast<WMOInstance*>(source_obj);
+                            // auto replace_wmo = static_cast<WMOInstance*>(replacement_obj);
+                            // auto source_wmo = static_cast<WMOInstance*>(old_obj);
 
                             auto new_obj = _world->addWMOAndGetInstance(replace_path, source_pos, source_rot, source_scale);
-                            // new_obj->wmo->wait_until_loaded();
-                            // new_obj->wmo->waitForChildrenLoaded();
+                            new_obj->wmo->wait_until_loaded();
+                            new_obj->wmo->waitForChildrenLoaded();
                             new_obj->recalcExtents();
-
-                            _world->deleteWMOInstance(source_obj->uid);
                         }
-                        else if (replace_obj->which() == eMODEL)
+                        else if (replacement_obj->which() == eMODEL)
                         {
-                            // if (replace_is_wmo)
-                            //     continue;
-
-                            // auto replace_m2 = static_cast<ModelInstance*>(replace_obj);
+                            // auto replace_m2 = static_cast<ModelInstance*>(replacement_obj);
                             // auto source_m2 = static_cast<ModelInstance*>(source_obj);
 
                             // Just swapping model
@@ -6338,7 +6323,6 @@ void MapView::ShowContextMenu(QPoint pos)
                             // source_m2->recalcExtents();
                             // _world->updateTilesEntry(entry, model_update::add);
                             
-
                             auto new_obj = _world->addM2AndGetInstance(replace_path
                                 , source_pos
                                 , source_scale
@@ -6346,16 +6330,21 @@ void MapView::ShowContextMenu(QPoint pos)
                                 , &_object_paste_params
                                 , true
                             );
-                            // new_obj->model->wait_until_loaded();
-                            // new_obj->model->waitForChildrenLoaded();
+                            new_obj->model->wait_until_loaded();
+                            new_obj->model->waitForChildrenLoaded();
                             new_obj->recalcExtents();
-
-                            _world->deleteModelInstance(source_obj->uid);
                         }
                 }
                 // can cause the usual crash of deleting models overlapping unloaded tiles.
-                // DeleteSelectedObjects();
+                // _world->delete_selected_models();
                 // NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
+                
+                // this would also delete models that got skipped
+                // _world->delete_selected_models();
+
+                _world->deleteObjects(objects_to_delete);
+                _world->reset_selection();
+
                 NOGGIT_ACTION_MGR->endAction();
             });
 

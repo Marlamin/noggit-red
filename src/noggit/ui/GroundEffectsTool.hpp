@@ -105,10 +105,13 @@ namespace Noggit
             //Close event triggers, hide event.
             void hideEvent(QHideEvent* event) override
             {
-                _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = false;
-                _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = false;
-                _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
-                _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
+                if (_map_view->_world)
+                {
+                    _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = false;
+                    _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = false;
+                    _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
+                    _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
+                }
 
                 QWidget::hideEvent(event);
             };

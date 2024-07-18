@@ -46,8 +46,10 @@ namespace Noggit
     }
     else if(!unsafe_uid_is_used(uid))
     {
+      /* This causes a crash when undoing while loading a tile, those objects get registered to the action stack
       if (NOGGIT_CUR_ACTION)
         NOGGIT_CUR_ACTION->registerObjectAdded(&instance);
+      */
       _m2s.emplace(uid, instance);
       _instance_count_per_uid[uid] = 1;
       return uid;
@@ -95,8 +97,10 @@ namespace Noggit
     }
     else if (!unsafe_uid_is_used(uid))
     {
+      /*
       if (NOGGIT_CUR_ACTION)
         NOGGIT_CUR_ACTION->registerObjectAdded(&instance);
+      */
       _wmos.emplace(uid, instance);
       _instance_count_per_uid[uid] = 1;
       return uid;
@@ -112,7 +116,7 @@ namespace Noggit
   void world_model_instances_storage::delete_instances_from_tile(TileIndex const& tile)
   {
     // std::unique_lock<std::mutex> const lock (_mutex);
-    std::vector<selection_type> instances_to_remove;
+    std::vector<selected_object_type> instances_to_remove;
 
     for (auto it = _m2s.begin(); it != _m2s.end(); ++it)
     {
@@ -131,15 +135,10 @@ namespace Noggit
     delete_instances(instances_to_remove);
   }
 
-  void world_model_instances_storage::delete_instances(std::vector<selection_type> const& instances)
+  void world_model_instances_storage::delete_instances(std::vector<selected_object_type> const& instances)
   {
-    for (auto& it : instances)
+    for (auto& obj : instances)
     {
-      if (it.index() != eEntry_Object)
-        continue;
-
-      auto obj = std::get<selected_object_type>(it);
-
       // should be done in delete_instance
       if (NOGGIT_CUR_ACTION)
         NOGGIT_CUR_ACTION->registerObjectRemoved(obj);

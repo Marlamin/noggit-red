@@ -649,7 +649,7 @@ namespace Noggit
 
         if (obj->which() == eMODEL)
         {
-          auto model_instance = static_cast<ModelInstance*>(obj);
+          // auto model_instance = static_cast<ModelInstance*>(obj);
 
           float scale(1.f);
           math::degrees::vec3 rotation(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);

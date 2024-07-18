@@ -154,6 +154,14 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
           _split_drawcall = true;
         }
       }
+      // this isn't exactly rendering but...
+      if (flags & ChunkUpdateFlags::ALPHAMAP)
+      {
+          // recalculate doodad mapping.
+          chunk->getTextureSet()->updateDoodadMapping();
+
+          // setChunkGroundEffectActiveData();
+      }
 
       if (!flags)
         continue;

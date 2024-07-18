@@ -82,7 +82,7 @@ namespace Noggit
 
     void model::remove()
     {
-      std::vector<selection_type> type{_object};
+      std::vector<SceneObject*> type{_object};
       world()->deleteObjects(type);
     }
 
