@@ -339,7 +339,7 @@ namespace Noggit::Ui::Windows
                                 tr("Battleground") <<
                                 tr("Arena") <<
                                 tr("Scenario"));
-        _combo_search->setCurrentIndex(0);
+        _combo_search->setCurrentIndex(2);
 
         QComboBox* _combo_exp_search = new QComboBox(this);
         _combo_exp_search->addItem(tr("All"));
@@ -389,13 +389,14 @@ namespace Noggit::Ui::Windows
         _first_tab_layout->addWidget(add_btn);
 
         entry_points_tabs->addTab(_first_tab, tr("Maps"));
+
+        entry_points_tabs->addTab(bookmarks_table, "Bookmarks");
+        entry_points_tabs->setFixedWidth(310);
+        layout->addWidget(entry_points_tabs);
+
+        _buildMapListComponent->buildMapList(this);
+        applyFilterSearch(_line_edit_search->text(), _combo_search->currentIndex(), _combo_exp_search->currentIndex(), _wmo_maps_search->isChecked());
     }
-
-    entry_points_tabs->addTab(bookmarks_table, "Bookmarks");
-    entry_points_tabs->setFixedWidth(310);
-    layout->addWidget(entry_points_tabs);
-
-    _buildMapListComponent->buildMapList(this);
 
     qulonglong bookmark_index(0);
     for (auto entry: _project->Bookmarks)
