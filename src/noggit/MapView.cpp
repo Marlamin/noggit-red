@@ -1063,10 +1063,6 @@ void MapView::updateDetailInfos()
   {
     if (!current_selection.empty())
     {
-        std::uintptr_t previous_sel_last = 0;
-        if (!lastSelected.empty())
-          previous_sel_last = reinterpret_cast<std::uintptr_t>(&const_cast<selection_type&>(lastSelected.back()));
-
       selection_type& selection_last = const_cast<selection_type&>(current_selection.back());
 
       switch (selection_last.index())
@@ -1074,21 +1070,13 @@ void MapView::updateDetailInfos()
         case eEntry_Object:
         {
           auto obj = std::get<selected_object_type>(selection_last);
-
-          if (reinterpret_cast<std::uintptr_t>(obj) != previous_sel_last || NOGGIT_CUR_ACTION)
-          {
-            obj->updateDetails(guidetailInfos);
-          }
+          obj->updateDetails(guidetailInfos);
           break;
         }
         case eEntry_MapChunk:
         {
           selected_chunk_type& chunk_sel(std::get<selected_chunk_type>(selection_last));
-
-          if (reinterpret_cast<std::uintptr_t>(chunk_sel.chunk) != previous_sel_last || NOGGIT_CUR_ACTION)
-          {
-            chunk_sel.updateDetails(guidetailInfos);
-          }
+          chunk_sel.updateDetails(guidetailInfos);
           break;
         }
       }
@@ -4549,7 +4537,8 @@ void MapView::tick (float dt)
     }
   }
 
-  updateDetailInfos(); // checks if sel changed
+  if (selection_changed || NOGGIT_CUR_ACTION)
+    updateDetailInfos(); // checks if sel changed
 
   if (selection_changed)
   {
