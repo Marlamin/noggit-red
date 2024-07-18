@@ -46,8 +46,10 @@ namespace Noggit
     }
     else if(!unsafe_uid_is_used(uid))
     {
+      /* This causes a crash when undoing while loading a tile, those objects get registered to the action stack
       if (NOGGIT_CUR_ACTION)
         NOGGIT_CUR_ACTION->registerObjectAdded(&instance);
+      */
       _m2s.emplace(uid, instance);
       _instance_count_per_uid[uid] = 1;
       return uid;
@@ -95,8 +97,10 @@ namespace Noggit
     }
     else if (!unsafe_uid_is_used(uid))
     {
+      /*
       if (NOGGIT_CUR_ACTION)
         NOGGIT_CUR_ACTION->registerObjectAdded(&instance);
+      */
       _wmos.emplace(uid, instance);
       _instance_count_per_uid[uid] = 1;
       return uid;
