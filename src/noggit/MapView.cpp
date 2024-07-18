@@ -6209,6 +6209,9 @@ void MapView::ShowContextMenu(QPoint pos)
         action_replace.setToolTip("Replace the currently selected objects by the object in the clipboard (There must only be one!). M2s can only be replaced by m2s");
         QObject::connect(&action_replace, &QAction::triggered, [=]()
             {
+                makeCurrent();
+                OpenGL::context::scoped_setter const _(::gl, context());
+
                 if (terrainMode != editing_mode::object && NOGGIT_CUR_ACTION)
                     return;
 
