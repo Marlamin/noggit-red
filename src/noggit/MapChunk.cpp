@@ -159,7 +159,7 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
       tmp_chunk_header.nLayers = 0;
   }
 
-  texture_set = std::make_unique<TextureSet>(this, f, base, maintile, bigAlpha,
+  texture_set = std::make_unique<TextureSet>(this, f, base, bigAlpha,
      !!header_flags.flags.do_not_fix_alpha_map, mode == tile_mode::uid_fix_all, _context, tmp_chunk_header);
 
   // - MCVT ----------------------------------------------

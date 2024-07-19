@@ -43,7 +43,7 @@ class TextureSet
 {
 public:
   TextureSet() = delete;
-  TextureSet(MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
+  TextureSet(MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base
              , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
              , Noggit::NoggitRenderContext context, MapChunkHeader const& header);
 
@@ -135,7 +135,6 @@ private:
   void update_lod_texture_map(); // todo: remove. WHAT?
 
   MapChunk* _chunk;
-  MapTile* _tile;
 
   std::vector<scoped_blp_texture_reference> textures;
   std::array<std::optional<Alphamap>, 3> alphamaps;
