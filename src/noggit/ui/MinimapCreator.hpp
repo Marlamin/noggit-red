@@ -31,7 +31,7 @@ enum MinimapGenMode
 struct MinimapRenderSettings
 {
   MinimapGenMode export_mode;
-  std::string file_format = ".blp";
+  std::string file_format = ".blp (DXT1)";
 
   // Render settings
   int resolution = 512;

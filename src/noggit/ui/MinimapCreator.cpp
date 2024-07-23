@@ -88,9 +88,10 @@ namespace Noggit
       render_settings_box_layout->addRow (resolution);
 
       auto file_format = new QComboBox(this);
-      file_format->addItem(".blp");
+      file_format->addItem(".blp (DXT1)");
+      file_format->addItem(".blp (DXT5)");
       file_format->addItem(".png");
-      file_format->setCurrentText(".blp");
+      file_format->setCurrentText(".blp (DXT1)");
 
       render_settings_box_layout->addRow (file_format);
 

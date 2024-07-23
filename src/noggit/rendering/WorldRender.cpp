@@ -1722,7 +1722,7 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
     {
       image.save(dir.filePath(std::string(_world->basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str()));
     }
-    else if (settings->file_format == ".blp")
+    else if (settings->file_format == ".blp (DXT1)" || settings->file_format == ".blp (DXT5)")
     {
       QByteArray bytes;
       QBuffer buffer( &bytes );
@@ -1734,7 +1734,7 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
       blp.load(reinterpret_cast<const void*>(bytes.constData()), bytes.size());
 
       uint32_t file_size;
-      void* blp_image = blp.createBlpDxtInMemory(true, FORMAT_DXT5, file_size);
+      void* blp_image = blp.createBlpDxtInMemory(settings->file_format == ".blp (DXT5)" ? true : false, settings->file_format == ".blp (DXT5)" ? FORMAT_DXT5 : FORMAT_DXT1, file_size);
 
       // converts the texture name to an md5 hash like blizzard, this is used to avoid duplicates textures for ocean
       // downside is that if the file gets updated regularly there will be a lot of duplicates in the project folder
