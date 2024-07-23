@@ -1985,9 +1985,9 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
 
 void World::addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
                    , glm::vec3 newPos
+                   , float scale
                    , math::degrees::vec3 rotation
                    , Noggit::object_paste_params* paste_params
-                   , float scale
                    , bool action
                    )
 {

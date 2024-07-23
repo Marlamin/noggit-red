@@ -52,8 +52,9 @@ namespace Noggit {
         global->get_view()->_world.get()->addWMO(
             filename
           , pos
-          , math::degrees::vec3(rotation)
           , scale
+          , math::degrees::vec3(rotation)
+          , &p
           , false);
       });
 
