@@ -259,6 +259,7 @@ void MapView::set_editing_mode(editing_mode mode)
     _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_only_normals = false;
     _minimap->use_selection(nullptr);
 
     bool use_classic_ui = _settings->value("classicUI", false).toBool();
@@ -3353,6 +3354,8 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
       break;
     }
     case MinimapGenMode::MAP:
+    case MinimapGenMode::LOD_MAPTEXTURES:
+    case MinimapGenMode::LOD_MAPTEXTURES_N:
     {
 
       // init progress
@@ -3397,6 +3400,22 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
 
       if (!saving_minimap)
         return;
+
+      QSettings noggitSettings;
+      bool modern_features = noggitSettings.value("modern_features", false).toBool();
+      if (modern_features && (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES || settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES_N)) {
+          settings->draw_m2 = false;
+          settings->draw_wmo = false;
+          settings->draw_water = false;
+          settings->resolution = 512;
+          settings->file_format = ".blp (DXT5)";
+
+          if (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES_N)
+          {
+              settings->draw_only_normals = true;
+              settings->resolution = 256;
+          }
+      }
 
       if (_mmap_async_index < 4096 && static_cast<int>(_mmap_render_index) < progress->maximum())
       {

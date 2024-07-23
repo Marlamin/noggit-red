@@ -36,6 +36,7 @@ layout (std140) uniform overlay_params
   int draw_groundeffectid_overlay;
   int draw_groundeffect_layerid_overlay;
   int draw_noeffectdoodad_overlay;
+  int draw_only_normals;
 };
 
 struct ChunkInstanceData
@@ -628,6 +629,11 @@ void main()
     && (outer_cursor_radius - diff_x <= d || outer_cursor_radius - diff_z <= d)) || (diff_x < inner_radius
     && diff_z < inner_radius && (inner_radius - diff_x <= d || inner_radius - diff_z <= d))));
     out_color.rgb = mix(cursor_color.rgb, out_color.rgb, alpha);*/
+  }
+
+  if(draw_only_normals != 0)
+  {
+    out_color.rgb = vec3(vary_normal.z * -1, vary_normal.y, vary_normal.x * -1) * 0.5 + 0.5;
   }
 
 }

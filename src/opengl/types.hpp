@@ -61,7 +61,8 @@ namespace OpenGL
     int draw_groundeffectid_overlay = false;
     int draw_groundeffect_layerid_overlay = false;
     int draw_noeffectdoodad_overlay = false;
-    // int padding[3];
+    int draw_only_normals = false;
+    // int padding[2];
   };
 
   struct ChunkInstanceDataUniformBlock

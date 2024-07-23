@@ -65,10 +65,23 @@ namespace Noggit
       auto cur_adt_btn = new QPushButton("Current ADT", generate_widget);
       auto sel_adts_btn = new QPushButton("Selected ADTs", generate_widget);
       auto all_adts_btn = new QPushButton("Map", generate_widget);
+      auto maptexture_btn = new QPushButton("Map Textures", generate_widget);
+      maptexture_btn->setVisible(false);
+      auto maptexture_n_btn = new QPushButton("Map Textures (Normals)", generate_widget);
+      maptexture_n_btn->setVisible(false);
 
       generate_layout->addRow (cur_adt_btn);
       generate_layout->addRow (sel_adts_btn);
       generate_layout->addRow (all_adts_btn);
+
+      QSettings settings;
+      bool modern_features = settings.value("modern_features", false).toBool();
+      if (modern_features) {
+          generate_layout->addRow (maptexture_btn);
+          maptexture_btn->setVisible(true);
+          generate_layout->addRow(maptexture_n_btn);
+          maptexture_n_btn->setVisible(true);
+      }
 
       // Render settings box
       auto render_settings_box = new QGroupBox("Render options", generate_widget);
@@ -838,6 +851,16 @@ namespace Noggit
 
       connect(all_adts_btn, &QPushButton::clicked, [=]() {
         _render_settings.export_mode = MinimapGenMode::MAP;
+        mapView->initMinimapSave();
+      });
+
+      connect(maptexture_btn, &QPushButton::clicked, [=]() {
+        _render_settings.export_mode = MinimapGenMode::LOD_MAPTEXTURES;
+        mapView->initMinimapSave();
+      });
+
+      connect(maptexture_n_btn, &QPushButton::clicked, [=]() {
+        _render_settings.export_mode = MinimapGenMode::LOD_MAPTEXTURES_N;
         mapView->initMinimapSave();
       });
 

@@ -94,7 +94,21 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     _terrain_params_ubo_data.draw_groundeffectid_overlay = false;
     _terrain_params_ubo_data.draw_groundeffect_layerid_overlay = false;
     _terrain_params_ubo_data.draw_noeffectdoodad_overlay = false;
+    if(minimap_render_settings->draw_only_normals)
+	{
+	  _terrain_params_ubo_data.draw_only_normals = true;
+	}
+	else
+	{
+	  _terrain_params_ubo_data.draw_only_normals = false;
+	}
     _need_terrain_params_ubo_update = true;
+  }
+
+  // After coming out of minimap rendering mode and draw_only_normals is still on, disable it.
+  if (!minimap_render && _terrain_params_ubo_data.draw_only_normals) {
+      _terrain_params_ubo_data.draw_only_normals = false;
+      _need_terrain_params_ubo_update = true;
   }
 
   if (_need_terrain_params_ubo_update)
@@ -1327,7 +1341,12 @@ void WorldRender::updateLightingUniformBlockMinimap(MinimapRenderSettings* setti
   _lighting_ubo_data.DiffuseColor_FogStart = { diffuse, 0 };
   _lighting_ubo_data.AmbientColor_FogEnd = { ambient, 0 };
   _lighting_ubo_data.FogColor_FogOn = { 0, 0, 0, 0 };
-  _lighting_ubo_data.LightDir_FogRate = { _outdoor_light_stats.dayDir.x, _outdoor_light_stats.dayDir.y, _outdoor_light_stats.dayDir.z, _skies->fogRate() };
+  if (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES) {
+      _lighting_ubo_data.LightDir_FogRate = { 0.0, -1.0, 0.0, _skies->fogRate() };
+  }
+  else {
+      _lighting_ubo_data.LightDir_FogRate = { _outdoor_light_stats.dayDir.x, _outdoor_light_stats.dayDir.y, _outdoor_light_stats.dayDir.z, _skies->fogRate() };
+  }
   _lighting_ubo_data.OceanColorLight = settings->ocean_color_light;
   _lighting_ubo_data.OceanColorDark = settings->ocean_color_dark;
   _lighting_ubo_data.RiverColorLight = settings->river_color_light;
@@ -1712,11 +1731,21 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
       str += "/";
     }
 
-    QDir dir(str + "/textures/minimap/");
+    QString target_dir = QString("/textures/minimap/");
+    if(settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES || settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES_N)
+	{
+	  target_dir = QString("/textures/maptextures/");
+	}
+
+    QDir dir(str + target_dir);
     if (!dir.exists())
       dir.mkpath(".");
 
     std::string tex_name = std::string(_world->basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".blp");
+    if (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES_N)
+    {
+        tex_name = std::string(_world->basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + "_n.blp");
+    }
 
     if (settings->file_format == ".png")
     {

@@ -25,7 +25,9 @@ enum MinimapGenMode
 {
   CURRENT_ADT,
   SELECTED_ADTS,
-  MAP
+  MAP,
+  LOD_MAPTEXTURES,
+  LOD_MAPTEXTURES_N,
 };
 
 struct MinimapRenderSettings
@@ -43,6 +45,7 @@ struct MinimapRenderSettings
   bool draw_shadows = false;
   bool use_filters = false;
   bool combined_minimap = false;
+  bool draw_only_normals = false;
 
   // Selection
   std::array<bool, 4096> selected_tiles = {false};
