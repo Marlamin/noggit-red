@@ -31,7 +31,7 @@ namespace Noggit {
         p.minScale = scale;
         p.maxScale = scale;
         global->get_view()->_world.get()->
-          addM2(filename,pos,scale,math::degrees::vec3(rotation), &p);
+          addM2(filename,pos,scale,math::degrees::vec3(rotation), &p, false);
       });
 
       state->set_function("vec",[](float x, float y, float z){
@@ -46,7 +46,8 @@ namespace Noggit {
         global->get_view()->_world.get()->addWMO(
             filename
           , pos
-          , math::degrees::vec3(rotation));
+          , math::degrees::vec3(rotation)
+          , false);
       });
 
       state->set_function("get_map_id",[global]()

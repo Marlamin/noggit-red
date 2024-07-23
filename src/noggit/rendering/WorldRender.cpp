@@ -1038,7 +1038,7 @@ void WorldRender::upload()
   {
     WMOInstance inst(_world->mWmoFilename, &_world->mWmoEntry, _world->_context);
 
-    _world->_model_instance_storage.add_wmo_instance(std::move(inst), false);
+    _world->_model_instance_storage.add_wmo_instance(std::move(inst), false, false);
   }
   else
   {

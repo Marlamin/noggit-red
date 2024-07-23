@@ -1441,7 +1441,7 @@ void MapView::setupAssistMenu()
                     makeCurrent();
                     OpenGL::context::scoped_setter const _ (::gl, context());
                     NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
-                    _world->clearAllModelsOnADT(_camera.position);
+                    _world->clearAllModelsOnADT(_camera.position, true);
                     NOGGIT_ACTION_MGR->endAction();
                     _rotation_editor_need_update = true;
                   }
@@ -6208,87 +6208,88 @@ void MapView::ShowContextMenu(QPoint pos)
         action_replace.setEnabled(has_selected_objects && objectEditor->clipboardSize() == 1);
         action_replace.setToolTip("Replace the currently selected objects by the object in the clipboard (There must only be one!). M2s can only be replaced by m2s");
         QObject::connect(&action_replace, &QAction::triggered, [=]()
+        {
+            makeCurrent();
+            OpenGL::context::scoped_setter const _(::gl, context());
+
+            if (terrainMode != editing_mode::object && NOGGIT_CUR_ACTION)
+                return;
+
+            if (!objectEditor->clipboardSize())
+                return;
+
+            // verify this
+            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED | Noggit::ActionFlags::eOBJECTS_REMOVED); // Noggit::ActionFlags::eOBJECTS_TRANSFORMED
+
+            // get the model to replace by
+            auto replace_select = objectEditor->getClipboard().front();
+            auto replacement_obj = std::get<selected_object_type>(replace_select);
+            auto& replace_path = replacement_obj->instance_model()->file_key().filepath();
+
+            std::vector<SceneObject*> objects_to_delete;
+
+            // iterate selection (objects to replace)
+            std::vector<selected_object_type> selected_objects = _world->get_selected_objects();
+            for (SceneObject* old_obj : selected_objects)
             {
-                makeCurrent();
-                OpenGL::context::scoped_setter const _(::gl, context());
+                if (old_obj->instance_model()->file_key().filepath() == replace_path)
+                    continue;
 
-                if (terrainMode != editing_mode::object && NOGGIT_CUR_ACTION)
-                    return;
+                math::degrees::vec3 source_rot(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
+                source_rot = old_obj->dir;
+                float source_scale = old_obj->scale;
+                glm::vec3 source_pos = old_obj->pos;
 
-                if (!objectEditor->clipboardSize())
-                    return;
+                // _world->deleteInstance(old_obj->uid);
+                objects_to_delete.emplace_back(old_obj);
 
-                // verify this
-                NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED | Noggit::ActionFlags::eOBJECTS_REMOVED); // Noggit::ActionFlags::eOBJECTS_TRANSFORMED
-
-                // get the model to replace by
-                auto replace_select = objectEditor->getClipboard().front();
-                auto replacement_obj = std::get<selected_object_type>(replace_select);
-                auto& replace_path = replacement_obj->instance_model()->file_key().filepath();
-
-                std::vector<SceneObject*> objects_to_delete;
-
-                // iterate selection (objects to replace)
-                std::vector<selected_object_type> selected_objects = _world->get_selected_objects();
-                for (SceneObject* old_obj : selected_objects)
+                if (replacement_obj->which() == eWMO)
                 {
-                        if (old_obj->instance_model()->file_key().filepath() == replace_path)
-                            continue;
+                    // auto replace_wmo = static_cast<WMOInstance*>(replacement_obj);
+                    // auto source_wmo = static_cast<WMOInstance*>(old_obj);
 
-                        math::degrees::vec3 source_rot(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
-                        source_rot = old_obj->dir;
-                        float source_scale = old_obj->scale;
-                        glm::vec3 source_pos = old_obj->pos;
-
-                        // _world->deleteInstance(old_obj->uid);
-                        objects_to_delete.emplace_back(old_obj);
-
-                        if (replacement_obj->which() == eWMO)
-                        {
-                            // auto replace_wmo = static_cast<WMOInstance*>(replacement_obj);
-                            // auto source_wmo = static_cast<WMOInstance*>(old_obj);
-
-                            auto new_obj = _world->addWMOAndGetInstance(replace_path, source_pos, source_rot);
-                            new_obj->wmo->wait_until_loaded();
-                            new_obj->wmo->waitForChildrenLoaded();
-                            new_obj->recalcExtents();
-                        }
-                        else if (replacement_obj->which() == eMODEL)
-                        {
-                            // auto replace_m2 = static_cast<ModelInstance*>(replacement_obj);
-                            // auto source_m2 = static_cast<ModelInstance*>(source_obj);
-
-                            // Just swapping model
-                            // Issue : doesn't work with actions
-                            // _world->updateTilesEntry(entry, model_update::remove);
-                            // source_m2->model = scoped_model_reference(replace_path, _context);
-                            // source_m2->recalcExtents();
-                            // _world->updateTilesEntry(entry, model_update::add);
-                            
-                            auto new_obj = _world->addM2AndGetInstance(replace_path
-                                , source_pos
-                                , source_scale
-                                , source_rot
-                                , &_object_paste_params
-                                , true
-                            );
-                            new_obj->model->wait_until_loaded();
-                            new_obj->model->waitForChildrenLoaded();
-                            new_obj->recalcExtents();
-                        }
+                    auto new_obj = _world->addWMOAndGetInstance(replace_path, source_pos, source_rot, true);
+                    new_obj->wmo->wait_until_loaded();
+                    new_obj->wmo->waitForChildrenLoaded();
+                    new_obj->recalcExtents();
                 }
-                // can cause the usual crash of deleting models overlapping unloaded tiles.
-                // _world->delete_selected_models();
-                // NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
-                
-                // this would also delete models that got skipped
-                // _world->delete_selected_models();
+                else if (replacement_obj->which() == eMODEL)
+                {
+                    // auto replace_m2 = static_cast<ModelInstance*>(replacement_obj);
+                    // auto source_m2 = static_cast<ModelInstance*>(source_obj);
 
-                _world->deleteObjects(objects_to_delete);
-                _world->reset_selection();
+                    // Just swapping model
+                    // Issue : doesn't work with actions
+                    // _world->updateTilesEntry(entry, model_update::remove);
+                    // source_m2->model = scoped_model_reference(replace_path, _context);
+                    // source_m2->recalcExtents();
+                    // _world->updateTilesEntry(entry, model_update::add);
+                    
+                    auto new_obj = _world->addM2AndGetInstance(replace_path
+                        , source_pos
+                        , source_scale
+                        , source_rot
+                        , &_object_paste_params
+                        , true
+                        , true
+                    );
+                    new_obj->model->wait_until_loaded();
+                    new_obj->model->waitForChildrenLoaded();
+                    new_obj->recalcExtents();
+                }
+            }
+            // can cause the usual crash of deleting models overlapping unloaded tiles.
+            // _world->delete_selected_models();
+            // NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
+            
+            // this would also delete models that got skipped
+            // _world->delete_selected_models();
 
-                NOGGIT_ACTION_MGR->endAction();
-            });
+            _world->deleteObjects(objects_to_delete, true);
+            _world->reset_selection();
+
+            NOGGIT_ACTION_MGR->endAction();
+        });
 
         QAction action_snap("Snap Selected To Ground", this);
         menu->addAction(&action_snap);

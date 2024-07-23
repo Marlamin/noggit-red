@@ -677,7 +677,7 @@ void World::delete_selected_models()
       }
   }
 
-  _model_instance_storage.delete_instances(get_selected_objects());
+  _model_instance_storage.delete_instances(get_selected_objects(), true);
   need_model_updates = true;
   reset_selection();
 }
@@ -1155,10 +1155,10 @@ void World::clearHeight(glm::vec3 const& pos)
   });
 }
 
-void World::clearAllModelsOnADT(TileIndex const& tile)
+void World::clearAllModelsOnADT(TileIndex const& tile, bool action)
 {
   ZoneScoped;
-  _model_instance_storage.delete_instances_from_tile(tile);
+  _model_instance_storage.delete_instances_from_tile(tile, action);
   // update_models_by_filename();
 }
 
@@ -1776,40 +1776,40 @@ void World::convert_alphamap(QProgressDialog* progress_dialog, bool to_big_alpha
 }
 
 
-void World::deleteModelInstance(int uid)
+void World::deleteModelInstance(int uid, bool action)
 {
   ZoneScoped;
   auto instance = _model_instance_storage.get_model_instance(uid);
 
   if (instance)
   {
-    _model_instance_storage.delete_instance(uid);
+    _model_instance_storage.delete_instance(uid, action);
     need_model_updates = true;
     reset_selection();
   }
 }
 
-void World::deleteWMOInstance(int uid)
+void World::deleteWMOInstance(int uid, bool action)
 {
   ZoneScoped;
   auto instance = _model_instance_storage.get_wmo_instance(uid);
 
   if (instance)
   {
-    _model_instance_storage.delete_instance(uid);
+    _model_instance_storage.delete_instance(uid, action);
     need_model_updates = true;
     reset_selection();
   }
 }
 
-void World::deleteInstance(int uid)
+void World::deleteInstance(int uid, bool action)
 {
   ZoneScoped;
   auto instance = _model_instance_storage.get_instance(uid);
 
   if (instance)
   {
-    _model_instance_storage.delete_instance(uid);
+    _model_instance_storage.delete_instance(uid, action);
     need_model_updates = true;
     reset_selection();
   }
@@ -1826,7 +1826,7 @@ void World::delete_duplicate_model_and_wmo_instances()
   ZoneScoped;
   reset_selection();
 
-  _model_instance_storage.clear_duplicates();
+  _model_instance_storage.clear_duplicates(false);
   need_model_updates = true;
 }
 
@@ -1845,6 +1845,7 @@ void World::addM2 ( BlizzardArchive::Listfile::FileKey const& file_key
                   , float scale
                   , glm::vec3 rotation
                   , Noggit::object_paste_params* paste_params
+                  , bool action
                   )
 {
   ZoneScoped;
@@ -1884,7 +1885,7 @@ void World::addM2 ( BlizzardArchive::Listfile::FileKey const& file_key
   model_instance.model->wait_until_loaded();
   model_instance.recalcExtents();
 
-  std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
+  std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true, action);
 
   // _models_by_filename[file_key.filepath()].push_back(_model_instance_storage.get_model_instance(uid).value());
 }
@@ -1895,6 +1896,7 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
     , math::degrees::vec3 rotation
     , Noggit::object_paste_params* paste_params
     , bool ignore_params
+    , bool action
 )
 {
   ZoneScoped;
@@ -1934,7 +1936,7 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
   model_instance.model->wait_until_loaded();
   model_instance.recalcExtents();
 
-  std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true);
+  std::uint32_t uid = _model_instance_storage.add_model_instance(std::move(model_instance), true, action);
 
   auto instance = _model_instance_storage.get_model_instance(uid); // .value();
   // _models_by_filename[file_key.filepath()].push_back(instance);
@@ -1945,6 +1947,7 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
 void World::addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
                    , glm::vec3 newPos
                    , math::degrees::vec3 rotation
+                   , bool action
                    )
 {
   ZoneScoped;
@@ -1958,12 +1961,13 @@ void World::addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
   wmo_instance.wmo->wait_until_loaded();
   wmo_instance.recalcExtents();
 
-  _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
+  _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true, action);
 }
 
 WMOInstance* World::addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
     , glm::vec3 newPos
     , math::degrees::vec3 rotation
+    , bool action
 )
 {
   ZoneScoped;
@@ -1977,7 +1981,7 @@ WMOInstance* World::addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey co
   wmo_instance.wmo->wait_until_loaded();
   wmo_instance.recalcExtents();
 
-  std::uint32_t uid = _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true);
+  std::uint32_t uid = _model_instance_storage.add_wmo_instance(std::move(wmo_instance), true, action);
 
   auto instance = _model_instance_storage.get_wmo_instance(uid);
 
@@ -1985,16 +1989,16 @@ WMOInstance* World::addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey co
 }
 
 
-std::uint32_t World::add_model_instance(ModelInstance model_instance, bool from_reloading)
+std::uint32_t World::add_model_instance(ModelInstance model_instance, bool from_reloading, bool action)
 {
   ZoneScoped;
-  return _model_instance_storage.add_model_instance(std::move(model_instance), from_reloading);
+  return _model_instance_storage.add_model_instance(std::move(model_instance), from_reloading, action);
 }
 
-std::uint32_t World::add_wmo_instance(WMOInstance wmo_instance, bool from_reloading)
+std::uint32_t World::add_wmo_instance(WMOInstance wmo_instance, bool from_reloading, bool action)
 {
   ZoneScoped;
-  return _model_instance_storage.add_wmo_instance(std::move(wmo_instance), from_reloading);
+  return _model_instance_storage.add_wmo_instance(std::move(wmo_instance), from_reloading, action);
 }
 
 std::optional<selection_type> World::get_model(std::uint32_t uid)
@@ -2039,10 +2043,10 @@ void World::reload_tile(TileIndex const& tile)
   mapIndex.reloadTile(tile);
 }
 
-void World::deleteObjects(std::vector<selected_object_type> const& types)
+void World::deleteObjects(std::vector<selected_object_type> const& types, bool action)
 {
   ZoneScoped;
-  _model_instance_storage.delete_instances(types);
+  _model_instance_storage.delete_instances(types, action);
   need_model_updates = true;
 }
 

@@ -86,7 +86,7 @@ namespace Noggit
     void model::remove()
     {
       std::vector<SceneObject*> type{_object};
-      world()->deleteObjects(type);
+      world()->deleteObjects(type, false);
     }
 
     void model::replace(std::string const& filename)
@@ -101,13 +101,13 @@ namespace Noggit
       if (filename.ends_with(".wmo"))
       {
         _object = 
-          world()->addWMOAndGetInstance(filename, get_pos(), math::degrees::vec3 {get_rot()});
+          world()->addWMOAndGetInstance(filename, get_pos(), math::degrees::vec3 {get_rot()}, false);
       }
       else
       {
         auto params = object_paste_params();
         _object =
-          world()->addM2AndGetInstance(filename, get_pos(), get_scale(), math::degrees::vec3 {get_rot()}, &params);
+          world()->addM2AndGetInstance(filename, get_pos(), get_scale(), math::degrees::vec3 {get_rot()}, &params, false, false);
       }
     }
 

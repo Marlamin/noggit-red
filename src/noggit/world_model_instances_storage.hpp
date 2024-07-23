@@ -32,22 +32,22 @@ namespace Noggit
     world_model_instances_storage& operator= (world_model_instances_storage&&) = delete;
 
     // perform uid duplicate check, return the uid of the stored instance
-    std::uint32_t add_model_instance(ModelInstance instance, bool from_reloading);
+    std::uint32_t add_model_instance(ModelInstance instance, bool from_reloading, bool action);
     // perform uid duplicate check, return the uid of the stored instance
-    std::uint32_t add_wmo_instance(WMOInstance instance, bool from_reloading);
+    std::uint32_t add_wmo_instance(WMOInstance instance, bool from_reloading, bool action);
 
     std::optional<ModelInstance*> get_model_instance(std::uint32_t uid);
     std::optional<WMOInstance*> get_wmo_instance(std::uint32_t uid);
     std::optional<selection_type> get_instance(std::uint32_t uid, bool lock=true);
 
-    void delete_instances_from_tile(TileIndex const& tile);
-    void delete_instances(std::vector<selected_object_type> const& instances);
-    void delete_instance(std::uint32_t uid);
+    void delete_instances_from_tile(TileIndex const& tile, bool action);
+    void delete_instances(std::vector<selected_object_type> const& instances, bool action);
+    void delete_instance(std::uint32_t uid, bool action);
     void unload_instance_and_remove_from_selection_if_necessary(std::uint32_t uid);
 
     void clear();
 
-    void clear_duplicates();
+    void clear_duplicates(bool action);
 
     bool uid_duplicates_found() const
     {
@@ -62,8 +62,8 @@ namespace Noggit
   private: // private functions aren't thread safe
     inline bool unsafe_uid_is_used(std::uint32_t uid) const;
 
-    std::uint32_t unsafe_add_model_instance_no_world_upd(ModelInstance instance);
-    std::uint32_t unsafe_add_wmo_instance_no_world_upd(WMOInstance instance);
+    std::uint32_t unsafe_add_model_instance_no_world_upd(ModelInstance instance, bool action);
+    std::uint32_t unsafe_add_wmo_instance_no_world_upd(WMOInstance instance, bool action);
     std::optional<ModelInstance*> unsafe_get_model_instance(std::uint32_t uid);
     std::optional<WMOInstance*> unsafe_get_wmo_instance(std::uint32_t uid);
 
