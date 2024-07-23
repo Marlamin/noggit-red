@@ -190,6 +190,7 @@ namespace Noggit
       ui->_anti_aliasing_cb->setChecked(_settings->value("anti_aliasing", false).toBool());
       ui->_fullscreen_cb->setChecked(_settings->value("fullscreen", false).toBool());
       ui->_background_fps_limit_cb->setChecked(_settings->value("background_fps_limit", true).toBool());
+      ui->_directional_light_cb->setChecked(_settings->value("directional_lightning", true).toBool());
       ui->_adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
       ui->_adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
       ui->_uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
@@ -275,6 +276,7 @@ namespace Noggit
       _settings->setValue("anti_aliasing", ui->_anti_aliasing_cb->isChecked());
       _settings->setValue("fullscreen", ui->_fullscreen_cb->isChecked());
       _settings->setValue("background_fps_limit", ui->_background_fps_limit_cb->isChecked());
+      _settings->setValue("directional_lightning", ui->_directional_light_cb->isChecked());
       _settings->setValue("unload_dist", ui->_adt_unload_dist->value());
       _settings->setValue("unload_interval", ui->_adt_unload_check_interval->value());
       _settings->setValue("uid_startup_check", ui->_uid_cb->isChecked());

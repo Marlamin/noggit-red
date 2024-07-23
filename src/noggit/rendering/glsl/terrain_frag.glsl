@@ -240,10 +240,10 @@ void main()
   // calc world lighting
   vec3 currColor;
   vec3 lDiffuse = vec3(0.0, 0.0, 0.0);
-  vec3 accumlatedLight = vec3(1.0, 1.0, 1.0);
+  // vec3 accumlatedLight = vec3(1.0, 1.0, 1.0);
 
   vec3 normalized_normal = normalize(vary_normal);
-  float nDotL = clamp(dot(normalized_normal, -normalize(LightDir_FogRate.xyz)), 0.0, 1.0);
+  float nDotL = clamp(dot(normalized_normal, -normalize(LightDir_FogRate.xyz)), 0.0, 1.0); // default LightDir = -0.6
 
   vec3 skyColor = (AmbientColor_FogEnd.xyz * 1.10000002);
   vec3 groundColor = (AmbientColor_FogEnd.xyz * 0.699999988);
