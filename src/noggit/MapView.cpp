@@ -260,6 +260,7 @@ void MapView::set_editing_mode(editing_mode mode)
     _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_only_normals = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->point_normals_up = false;
     _minimap->use_selection(nullptr);
 
     bool use_classic_ui = _settings->value("classicUI", false).toBool();
@@ -3414,6 +3415,10 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
           {
               settings->draw_only_normals = true;
               settings->resolution = 256;
+          }
+          else {
+              // Point normals upwards for diffuse maptexture baking
+              settings->point_normals_up = true;
           }
       }
 

@@ -94,20 +94,20 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     _terrain_params_ubo_data.draw_groundeffectid_overlay = false;
     _terrain_params_ubo_data.draw_groundeffect_layerid_overlay = false;
     _terrain_params_ubo_data.draw_noeffectdoodad_overlay = false;
-    if(minimap_render_settings->draw_only_normals)
-	{
-	  _terrain_params_ubo_data.draw_only_normals = true;
-	}
-	else
-	{
-	  _terrain_params_ubo_data.draw_only_normals = false;
-	}
+    _terrain_params_ubo_data.draw_only_normals = minimap_render_settings->draw_only_normals;
+    _terrain_params_ubo_data.point_normals_up = minimap_render_settings->point_normals_up;
     _need_terrain_params_ubo_update = true;
   }
 
   // After coming out of minimap rendering mode and draw_only_normals is still on, disable it.
   if (!minimap_render && _terrain_params_ubo_data.draw_only_normals) {
       _terrain_params_ubo_data.draw_only_normals = false;
+      _need_terrain_params_ubo_update = true;
+  }
+
+  // After coming out of minimap rendering mode and point_normals_up is still on, disable it.
+  if (!minimap_render && _terrain_params_ubo_data.point_normals_up) {
+      _terrain_params_ubo_data.point_normals_up = false;
       _need_terrain_params_ubo_update = true;
   }
 
@@ -1338,13 +1338,15 @@ void WorldRender::updateLightingUniformBlockMinimap(MinimapRenderSettings* setti
   glm::vec3 diffuse = settings->diffuse_color;
   glm::vec3 ambient = settings->ambient_color;
 
-  _lighting_ubo_data.DiffuseColor_FogStart = { diffuse, 0 };
-  _lighting_ubo_data.AmbientColor_FogEnd = { ambient, 0 };
   _lighting_ubo_data.FogColor_FogOn = { 0, 0, 0, 0 };
   if (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES) {
+      _lighting_ubo_data.DiffuseColor_FogStart = { 0.5, 0.5, 0.5, 0 };
+      _lighting_ubo_data.AmbientColor_FogEnd = { 0.5, 0.5, 0.5, 0 };
       _lighting_ubo_data.LightDir_FogRate = { 0.0, -1.0, 0.0, _skies->fogRate() };
   }
   else {
+      _lighting_ubo_data.DiffuseColor_FogStart = { diffuse, 0 };
+      _lighting_ubo_data.AmbientColor_FogEnd = { ambient, 0 };
       _lighting_ubo_data.LightDir_FogRate = { _outdoor_light_stats.dayDir.x, _outdoor_light_stats.dayDir.y, _outdoor_light_stats.dayDir.z, _skies->fogRate() };
   }
   _lighting_ubo_data.OceanColorLight = settings->ocean_color_light;

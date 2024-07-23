@@ -46,6 +46,7 @@ struct MinimapRenderSettings
   bool use_filters = false;
   bool combined_minimap = false;
   bool draw_only_normals = false;
+  bool point_normals_up = false;
 
   // Selection
   std::array<bool, 4096> selected_tiles = {false};
