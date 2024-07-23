@@ -58,11 +58,11 @@ void AddObjectInstanceNode::compute()
   if (QString(path.c_str()).endsWith(".m2", Qt::CaseInsensitive))
   {
     Noggit::object_paste_params paste_params;
-    obj = world->addM2AndGetInstance(path, {pos.x, pos.y, pos.z}, scale, {math::degrees(dir.x)._, math::degrees(dir.y)._, math::degrees(dir.z)._ }, &paste_params);
+    obj = world->addM2AndGetInstance(path, {pos.x, pos.y, pos.z}, scale, {math::degrees(dir.x)._, math::degrees(dir.y)._, math::degrees(dir.z)._ }, &paste_params, false, false);
   }
   else if (QString(path.c_str()).endsWith(".wmo", Qt::CaseInsensitive))
   {
-    obj = world->addWMOAndGetInstance(path, {pos.x, pos.y, pos.z}, {math::degrees(dir.x)._, math::degrees(dir.y)._, math::degrees(dir.z)._ }, scale);
+    obj = world->addWMOAndGetInstance(path, {pos.x, pos.y, pos.z}, {math::degrees(dir.x)._, math::degrees(dir.y)._, math::degrees(dir.z)._ }, scale, false);
   }
   else
   {

@@ -345,7 +345,7 @@ void MapTile::finishLoading()
     for (auto const& object : lWMOInstances)
     {
       add_model(_world->add_wmo_instance(WMOInstance(mWMOFilenames[object.nameID],
-                                                     &object, _context), _tile_is_being_reloaded));
+                                                     &object, _context), _tile_is_being_reloaded, false));
     }
 
     // - Load M2s ------------------------------------------
@@ -353,7 +353,7 @@ void MapTile::finishLoading()
     for (auto const& model : lModelInstances)
     {
       add_model(_world->add_model_instance(ModelInstance(mModelFilenames[model.nameID],
-                                                         &model, _context), _tile_is_being_reloaded));
+                                                         &model, _context), _tile_is_being_reloaded, false));
     }
 
     _world->need_model_updates = true;

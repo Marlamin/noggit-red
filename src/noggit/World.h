@@ -283,33 +283,37 @@ public:
              , glm::vec3 newPos
              , float scale, math::degrees::vec3 rotation
              , Noggit::object_paste_params*
+             , bool action
              );
   void addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
               , glm::vec3 newPos
               , float scale, math::degrees::vec3 rotation
               , Noggit::object_paste_params*
+              , bool action
               );
 
   ModelInstance* addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
       , glm::vec3 newPos
       , float scale, math::degrees::vec3 rotation
       , Noggit::object_paste_params*
-      , bool ignore_params = false
+      , bool ignore_params
+      , bool action
   );
 
   WMOInstance* addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
       , glm::vec3 newPos
       , math::degrees::vec3 rotation
       , float scale
+      , bool action
   );
 
   auto stamp(glm::vec3 const& pos, float dt, QImage const* img, float radiusOuter
   , float radiusInner, int BrushType, bool sculpt) -> void;
 
   // add a m2 instance to the world (needs to be positioned already), return the uid
-  std::uint32_t add_model_instance(ModelInstance model_instance, bool from_reloading);
+  std::uint32_t add_model_instance(ModelInstance model_instance, bool from_reloading, bool action);
   // add a wmo instance to the world (needs to be positioned already), return the uid
-  std::uint32_t add_wmo_instance(WMOInstance wmo_instance, bool from_reloading);
+  std::uint32_t add_wmo_instance(WMOInstance wmo_instance, bool from_reloading, bool action);
 
   std::optional<selection_type> get_model(std::uint32_t uid);
   void remove_models_if_needed(std::vector<uint32_t> const& uids);
@@ -322,9 +326,9 @@ public:
   void updateTilesModel(ModelInstance* m2, model_update type);
   void wait_for_all_tile_updates();
 
-  void deleteModelInstance(int uid);
-  void deleteWMOInstance(int uid);
-  void deleteInstance(int uid);
+  void deleteModelInstance(int uid, bool action);
+  void deleteWMOInstance(int uid, bool action);
+  void deleteInstance(int uid, bool action);
 
   bool uid_duplicates_found() const;
   void delete_duplicate_model_and_wmo_instances();
@@ -336,7 +340,7 @@ public:
     static bool IsWMOWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
 
   void clearHeight(glm::vec3 const& pos);
-  void clearAllModelsOnADT(TileIndex const& tile);
+  void clearAllModelsOnADT(TileIndex const& tile, bool action);
 
   // liquids
   void paintLiquid( glm::vec3 const& pos
@@ -375,7 +379,7 @@ public:
   void updateVertexCenter();
   void clearVertexSelection();
 
-  void deleteObjects(std::vector<selected_object_type> const& types);
+  void deleteObjects(std::vector<selected_object_type> const& types, bool action);
 
   float getMaxTileHeight(const TileIndex& tile);
 

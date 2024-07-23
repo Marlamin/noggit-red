@@ -924,7 +924,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     std::size_t ex = std::min((std::size_t)(instance.extents[1].x / TILESIZE), (std::size_t)63);
     std::size_t ez = std::min((std::size_t)(instance.extents[1].z / TILESIZE), (std::size_t)63);
 
-    auto const real_uid (world->add_model_instance (std::move(instance), false));
+    auto const real_uid (world->add_model_instance (std::move(instance), false, false));
 
     for (std::size_t z = sz; z <= ez; ++z)
     {
@@ -949,7 +949,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
     std::size_t ex = std::min((std::size_t)(instance.extents[1].x / TILESIZE), (std::size_t)63);
     std::size_t ez = std::min((std::size_t)(instance.extents[1].z / TILESIZE), (std::size_t)63);
 
-    auto const real_uid (world->add_wmo_instance (std::move(instance), false));
+    auto const real_uid (world->add_wmo_instance (std::move(instance), false, false));
 
     for (std::size_t z = sz; z <= ez; ++z)
     {

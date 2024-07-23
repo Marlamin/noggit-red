@@ -666,6 +666,8 @@ namespace Noggit
                         , scale
                         , rotation
                         , paste_params
+                        , false
+                        , true
                         );
 
           new_obj->model->wait_until_loaded();
@@ -704,7 +706,7 @@ namespace Noggit
             scale = obj->scale;
           }
 
-          auto new_obj = world->addWMOAndGetInstance(obj->instance_model()->file_key(), pos, rotation, scale);
+          auto new_obj = world->addWMOAndGetInstance(obj->instance_model()->file_key(), pos, rotation, scale, true);
           new_obj->wmo->wait_until_loaded();
           new_obj->wmo->waitForChildrenLoaded();
           new_obj->recalcExtents();

@@ -243,7 +243,7 @@ unsigned Noggit::Action::handleObjectAdded(unsigned uid, bool redo)
         obj = _map_view->getWorld()->addWMOAndGetInstance(pair.second.file_key, pair.second.pos, pair.second.dir, pair.second.scale);
       else
         obj = _map_view->getWorld()->addM2AndGetInstance(pair.second.file_key, pair.second.pos,
-                                                         pair.second.scale,  pair.second.dir, nullptr);
+                                                         pair.second.scale,  pair.second.dir, nullptr, false, false);
 
       obj->instance_model()->wait_until_loaded();
       obj->instance_model()->waitForChildrenLoaded();
@@ -281,7 +281,7 @@ unsigned Noggit::Action::handleObjectAdded(unsigned uid, bool redo)
     }
     else
     {
-      _map_view->getWorld()->deleteInstance(pair.first);
+      _map_view->getWorld()->deleteInstance(pair.first, false);
     }
 
     return new_uid;
@@ -307,7 +307,7 @@ unsigned Noggit::Action::handleObjectRemoved(unsigned uid, bool redo)
         obj = _map_view->getWorld()->addWMOAndGetInstance(pair.second.file_key, pair.second.pos, pair.second.dir, pair.second.scale);
       else
         obj = _map_view->getWorld()->addM2AndGetInstance(pair.second.file_key, pair.second.pos,
-                                                         pair.second.scale,  pair.second.dir, nullptr);
+                                                         pair.second.scale,  pair.second.dir, nullptr, false, false);
 
       obj->instance_model()->wait_until_loaded();
       obj->instance_model()->waitForChildrenLoaded();
@@ -345,7 +345,7 @@ unsigned Noggit::Action::handleObjectRemoved(unsigned uid, bool redo)
     }
     else
     {
-        _map_view->getWorld()->deleteInstance(pair.first);
+        _map_view->getWorld()->deleteInstance(pair.first, false);
     }
 
     return new_uid;

@@ -14,7 +14,7 @@
 
 
 
-TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base, MapTile* tile
+TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base
                         , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
                         , Noggit::NoggitRenderContext context, MapChunkHeader const& header)
   : nTextures(header.nLayers)
@@ -36,12 +36,12 @@ TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t 
     {
       f->read (&tmp_entry_mcly[i], sizeof(ENTRY_MCLY)); // f->read (&_layers_info[i], sizeof(ENTRY_MCLY));
 
-      std::string const& texturefilename = tile->mTextureFilenames[tmp_entry_mcly[i].textureID];
+      std::string const& texturefilename = chunk->mt->mTextureFilenames[tmp_entry_mcly[i].textureID];
       textures.emplace_back (texturefilename, _context);
 
-      if (tile->_mtxf_entries.contains(texturefilename))
+      if (chunk->mt->_mtxf_entries.contains(texturefilename))
       {
-          if (tile->_mtxf_entries[texturefilename].use_cubemap)
+          if (chunk->mt->_mtxf_entries[texturefilename].use_cubemap)
               textures.back().use_cubemap = true;
       }
 
