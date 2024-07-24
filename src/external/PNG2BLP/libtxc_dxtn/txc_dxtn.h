@@ -25,7 +25,17 @@
 #ifndef _TXC_DXTN_H
 #define _TXC_DXTN_H
 
-#include <GL/gl.h>
+#include <stdint.h>
+// #include <GL/gl.h>
+typedef uint8_t GLchan;
+typedef int32_t GLint;
+typedef uint8_t GLubyte;
+typedef void GLvoid;
+typedef uint32_t GLenum;
+typedef uint8_t GLboolean;
+typedef uint32_t GLuint;
+typedef uint16_t GLushort;
+typedef int16_t GLshort;
 
 typedef GLubyte GLchan;
 #define UBYTE_TO_CHAN(b)  (b)
@@ -34,6 +44,13 @@ typedef GLubyte GLchan;
 #define GCOMP 1
 #define BCOMP 2
 #define ACOMP 3
+#define GL_FALSE 0
+#define GL_TRUE 1
+
+#define GL_COMPRESSED_RGB_S3TC_DXT1_EXT 0
+#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 1
+#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 2
+#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 3
 
 void fetch_2d_texel_rgb_dxt1(GLint srcRowStride, const GLubyte *pixdata,
 			     GLint i, GLint j, GLvoid *texel);
