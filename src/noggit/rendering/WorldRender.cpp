@@ -1734,7 +1734,9 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
       blp.load(reinterpret_cast<const void*>(bytes.constData()), bytes.size());
 
       uint32_t file_size;
-      void* blp_image = blp.createBlpDxtInMemory(true, FORMAT_DXT5, file_size);
+      // void* blp_image = blp.createBlpDxtInMemory(true, FORMAT_DXT5, file_size);
+      // this mirrors blizzards : dxt1, no mipmap
+      void* blp_image = blp.createBlpDxtInMemory(false, FORMAT_DXT1, file_size);
 
       // converts the texture name to an md5 hash like blizzard, this is used to avoid duplicates textures for ocean
       // downside is that if the file gets updated regularly there will be a lot of duplicates in the project folder
