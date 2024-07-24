@@ -3416,7 +3416,7 @@ void MapView::saveMinimap(MinimapRenderSettings* settings)
               settings->draw_only_normals = true;
               settings->resolution = 256;
           }
-          else {
+          else if (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES) {
               // Point normals upwards for diffuse maptexture baking
               settings->point_normals_up = true;
           }
