@@ -76,6 +76,23 @@ namespace Noggit
               , [&]
                 {
                   changeWaterType(waterType->currentData().toInt());
+
+                  // change auto opacity based on liquid type
+                  if (_opacity_mode == custom_opacity)
+                      return;
+
+                  int liquid_type = LiquidTypeDB::getLiquidType(_liquid_id);
+                  if (liquid_type == 1) // ocean
+                  {
+                      ocean_button->setChecked(true);
+                      _opacity_mode = ocean_opacity;
+                  }
+                  else
+                  {
+                      river_button->setChecked(true);
+                      _opacity_mode = river_opacity;
+                  }
+
                 }
               );
 
@@ -164,11 +181,11 @@ namespace Noggit
       auto opacity_group (new QGroupBox ("Auto opacity", this));
       auto opacity_layout (new QFormLayout (opacity_group));
 
-      auto river_button (new QRadioButton ("River", this));
-      auto ocean_button (new QRadioButton ("Ocean", this));
-      auto custom_button (new QRadioButton ("Custom factor:", this));
+      river_button = new QRadioButton ("River", this);
+      ocean_button = new QRadioButton ("Ocean", this);
+      custom_button = new QRadioButton ("Custom factor:", this);
 
-      QButtonGroup *transparency_toggle = new QButtonGroup (this);
+      transparency_toggle = new QButtonGroup (this);
       transparency_toggle->addButton (river_button, river_opacity);
       transparency_toggle->addButton (ocean_button, ocean_opacity);
       transparency_toggle->addButton (custom_button, custom_opacity);

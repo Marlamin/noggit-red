@@ -87,6 +87,11 @@ namespace Noggit
       QDoubleSpinBox* _z_spin;
       QDoubleSpinBox* _h_spin;
 
+      QRadioButton* river_button;
+      QRadioButton* ocean_button;
+      QRadioButton* custom_button;
+      QButtonGroup* transparency_toggle;
+
       QComboBox* waterType;
       QSpinBox* waterLayer;
 
