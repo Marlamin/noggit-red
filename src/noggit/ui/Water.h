@@ -60,6 +60,9 @@ namespace Noggit
       void crop_water();
 
     private:
+      static constexpr float RIVER_OPACITY_VALUE = 0.0337f;
+      static constexpr float OCEAN_OPACITY_VALUE = 0.007f;
+
       float get_opacity_factor() const;
 
       int _liquid_id;
@@ -86,6 +89,11 @@ namespace Noggit
       QDoubleSpinBox* _x_spin;
       QDoubleSpinBox* _z_spin;
       QDoubleSpinBox* _h_spin;
+
+      QRadioButton* river_button;
+      QRadioButton* ocean_button;
+      QRadioButton* custom_button;
+      QButtonGroup* transparency_toggle;
 
       QComboBox* waterType;
       QSpinBox* waterLayer;

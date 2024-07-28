@@ -109,7 +109,8 @@ namespace Noggit
       generate_hotkey_row({FontNoggit::o, FontNoggit::p}, "\aor\aSlower /  Faster movement", adjust_layout);
       generate_hotkey_row({FontNoggit::b, FontNoggit::n}, "\aor\aSlower /  Faster time", adjust_layout);
       generate_hotkey_row({FontNoggit::j}, "\aPause time", adjust_layout);
-      generate_hotkey_row({FontNoggit::shift, FontNoggit::plus, FontNoggit::minus}, "\a+\aor\aFog distance when no model is selected", adjust_layout);
+      // NYI
+      // generate_hotkey_row({FontNoggit::shift, FontNoggit::plus, FontNoggit::minus}, "\a+\aor\aFog distance when no model is selected", adjust_layout);
 
       auto flag_widget (new QWidget (this));
       auto flag_layout (new QFormLayout (flag_widget));
@@ -118,7 +119,7 @@ namespace Noggit
       holes_label->setStyleSheet(header_style);
       flag_layout->addRow(holes_label);
 
-      generate_hotkey_row({FontNoggit::shift, FontNoggit::lmb}, "\a+\aFog distance when no model is selected", flag_layout);
+      generate_hotkey_row({FontNoggit::shift, FontNoggit::lmb}, "\a+\aClear hole", flag_layout);
       generate_hotkey_row({FontNoggit::ctrl, FontNoggit::lmb}, "\a+\aAdd hole", flag_layout);
       generate_hotkey_row({FontNoggit::t}, "\aRemove all holes on ADT", flag_layout);
       generate_hotkey_row({FontNoggit::alt, FontNoggit::t}, "\a+\aRemove all ground on ADT", flag_layout);

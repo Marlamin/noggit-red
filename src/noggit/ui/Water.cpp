@@ -36,7 +36,7 @@ namespace Noggit
       , _override_liquid_id(true)
       , _override_height(true)
       , _opacity_mode(river_opacity)
-      , _custom_opacity_factor(0.0337f)
+      , _custom_opacity_factor(RIVER_OPACITY_VALUE)
       , _lock_pos(glm::vec3(0.0f, 0.0f, 0.0f))
       , tile(0, 0)
     {
@@ -76,6 +76,23 @@ namespace Noggit
               , [&]
                 {
                   changeWaterType(waterType->currentData().toInt());
+
+                  // change auto opacity based on liquid type
+                  if (_opacity_mode == custom_opacity)
+                      return;
+
+                  int liquid_type = LiquidTypeDB::getLiquidType(_liquid_id);
+                  if (liquid_type == 1) // ocean
+                  {
+                      ocean_button->setChecked(true);
+                      _opacity_mode = ocean_opacity;
+                  }
+                  else
+                  {
+                      river_button->setChecked(true);
+                      _opacity_mode = river_opacity;
+                  }
+
                 }
               );
 
@@ -164,11 +181,13 @@ namespace Noggit
       auto opacity_group (new QGroupBox ("Auto opacity", this));
       auto opacity_layout (new QFormLayout (opacity_group));
 
-      auto river_button (new QRadioButton ("River", this));
-      auto ocean_button (new QRadioButton ("Ocean", this));
-      auto custom_button (new QRadioButton ("Custom factor:", this));
+      river_button = new QRadioButton ("River", this);
+      river_button->setToolTip(std::to_string(RIVER_OPACITY_VALUE).c_str());
+      ocean_button = new QRadioButton ("Ocean", this);
+      ocean_button->setToolTip(std::to_string(OCEAN_OPACITY_VALUE).c_str());
+      custom_button = new QRadioButton ("Custom factor:", this);
 
-      QButtonGroup *transparency_toggle = new QButtonGroup (this);
+      transparency_toggle = new QButtonGroup (this);
       transparency_toggle->addButton (river_button, river_opacity);
       transparency_toggle->addButton (ocean_button, ocean_opacity);
       transparency_toggle->addButton (custom_button, custom_opacity);
@@ -343,8 +362,8 @@ namespace Noggit
       switch (_opacity_mode)
       {
       default:          // values found by experimenting
-      case river_opacity:  return 0.0337f;
-      case ocean_opacity:  return 0.007f;
+      case river_opacity:  return RIVER_OPACITY_VALUE;
+      case ocean_opacity:  return OCEAN_OPACITY_VALUE;
       case custom_opacity: return _custom_opacity_factor;
       }
     }

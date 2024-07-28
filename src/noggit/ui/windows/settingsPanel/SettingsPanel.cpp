@@ -247,7 +247,7 @@ namespace Noggit
       ui->_mysql_port_field->setValue (port_int);
 #endif
 
-      int wireframe_type = _settings->value("wireframe/type", 0).toInt();
+      bool wireframe_type = _settings->value("wireframe/type", false).toBool();
 
       if (wireframe_type)
       {

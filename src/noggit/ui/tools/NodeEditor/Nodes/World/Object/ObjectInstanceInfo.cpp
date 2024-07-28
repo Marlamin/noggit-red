@@ -54,13 +54,13 @@ void ObjectInstanceInfoNode::compute()
 
   if (_out_ports[3].connected)
   {
-    _out_ports[3].out_value = std::make_shared<Vector3DData>(obj->extents[0]);
+    _out_ports[3].out_value = std::make_shared<Vector3DData>(obj->getExtents()[0]);
     _node->onDataUpdated(3);
   }
 
   if (_out_ports[4].connected)
   {
-    _out_ports[4].out_value = std::make_shared<Vector3DData>(obj->extents[1]);
+    _out_ports[4].out_value = std::make_shared<Vector3DData>(obj->getExtents()[1]);
     _node->onDataUpdated(4);
   }
 

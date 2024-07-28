@@ -6081,7 +6081,7 @@ Noggit::Ui::GroundEffectsTool* MapView::getGroundEffectsTool()
 void MapView::onSettingsSave()
 {
   OpenGL::TerrainParamsUniformBlock* params = _world->renderer()->getTerrainParamsUniformBlock();
-  params->wireframe_type = _settings->value("wireframe/type", 0).toInt();
+  params->wireframe_type = _settings->value("wireframe/type", false).toBool();
   params->wireframe_radius = _settings->value("wireframe/radius", 1.5f).toFloat();
   params->wireframe_width = _settings->value ("wireframe/width", 1.f).toFloat();
 
@@ -6301,7 +6301,7 @@ void MapView::ShowContextMenu(QPoint pos)
                 return;
 
             // verify this
-            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED | Noggit::ActionFlags::eOBJECTS_REMOVED); // Noggit::ActionFlags::eOBJECTS_TRANSFORMED
+            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED | Noggit::ActionFlags::eOBJECTS_REMOVED);
 
             // get the model to replace by
             auto replace_select = objectEditor->getClipboard().front();
@@ -6360,10 +6360,6 @@ void MapView::ShowContextMenu(QPoint pos)
                     new_obj->recalcExtents();
                 }
             }
-            // can cause the usual crash of deleting models overlapping unloaded tiles.
-            // _world->delete_selected_models();
-            // NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
-            
             // this would also delete models that got skipped
             // _world->delete_selected_models();
 

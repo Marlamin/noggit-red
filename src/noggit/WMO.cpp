@@ -639,7 +639,7 @@ void WMOGroup::load()
   }
 
   center = (VertexBoxMax + VertexBoxMin) * 0.5f;
-  rad = (VertexBoxMax - center).length () + 300.0f;;
+  rad = glm::distance(center, VertexBoxMax);
 
   f.seekRelative (size);
 
@@ -1080,18 +1080,39 @@ bool WMOGroup::is_visible( glm::mat4x4 const& transform
                          , display_mode display
                          ) const
 {
-    glm::vec3 pos = transform * glm::vec4(center, 0);
+   // glm::vec3 pos = transform * glm::vec4(center, 0);
+   // 
+    // glm::vec3 pos = transform[3] * glm::vec4(center, 1.0f);
+    // glm::vec3 test_pos = transform[3] + glm::vec4(center, 0);
+    // glm::vec3 test_pos2 = transform[3];
+
+
+    // TODO center is just the center of the group vertex box, and rad is distance from box max to center.
+    // to do operation on group we need to get its true position
+    // 
+    // adjusted group transform mat = 
+    glm::vec3 pos = transform *  glm::vec4(center, 1.0f);
+
+  float dist = display == display_mode::in_3D
+    ? glm::distance(pos, camera) - rad
+    : std::abs(pos.y - camera.y) - rad;
+
+  // Camera is within the bounding sphere, always draw
+  if (dist < 0)
+      return true;
+
+  float cull = cull_distance;
+
+  if (dist > cull_distance)
+      return false;
+
 
   if (!frustum.intersects(pos + BoundingBoxMin, pos + BoundingBoxMax))
   {
     return false;
   }
 
-  float dist = display == display_mode::in_3D
-    ? glm::distance(pos, camera) - rad
-    : std::abs(pos.y - camera.y) - rad;
-
-  return (dist < cull_distance);
+  return true;
 }
 
 

@@ -219,14 +219,11 @@ void ModelInstance::ensureExtents()
   }
 }
 
-glm::vec3* ModelInstance::getExtents()
+std::array<glm::vec3, 2> const& ModelInstance::getExtents()
 {
-  if (_need_recalc_extents && model->finishedLoading())
-  {
-    recalcExtents();
-  }
+  ensureExtents();
 
-  return &extents[0];
+  return extents;
 }
 
 void ModelInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
@@ -282,6 +279,7 @@ wmo_doodad_instance::wmo_doodad_instance(BlizzardArchive::Listfile::FileKey cons
 
   f->read(ff, 16);
   doodad_orientation = glm::quat (-ff[0], -ff[2], ff[1], ff[3]);
+  dir = glm::eulerAngles(doodad_orientation);
 
   f->read(&scale, 4);
 
@@ -301,12 +299,13 @@ wmo_doodad_instance::wmo_doodad_instance(BlizzardArchive::Listfile::FileKey cons
 
 void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
 {
-  if (!model->finishedLoading())
+  if (!model->finishedLoading() || !wmo->finishedLoading())
   {
     return;
   }  
 
-  world_pos = wmo->transformMatrix() * glm::vec4(pos,0);
+  // world_pos = wmo->transformMatrix() * glm::vec4(pos,0);
+  world_pos = wmo->transformMatrix() * glm::vec4(pos, 1.0f);
 
   auto m2_mat = glm::mat4x4(1);
   m2_mat = glm::translate(m2_mat, pos);
@@ -318,9 +317,11 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
     wmo->transformMatrix() * m2_mat
   );
 
+  _transform_mat = mat;
   _transform_mat_inverted = glm::inverse(mat);
 
   // to compute the size category (used in culling)
+  // updateTransformMatrix() is overriden to do nothing
   recalcExtents();
 
   _need_matrix_update = false;

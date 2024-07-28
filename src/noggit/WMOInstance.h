@@ -14,7 +14,7 @@ class WMOInstance : public SceneObject
 {
 public:
   scoped_wmo_reference wmo;
-  std::map<int, std::pair<glm::vec3, glm::vec3>> group_extents;
+
   uint16_t mFlags;
   uint16_t mNameset; 
 
@@ -28,10 +28,11 @@ private:
   void update_doodads();
 
   uint16_t _doodadset;
-
+  std::map<int, std::pair<glm::vec3, glm::vec3>> group_extents;
   std::map<uint32_t, std::vector<wmo_doodad_instance>> _doodads_per_group;
   bool _need_doodadset_update = true;
   bool _update_group_extents = false;
+  bool _need_recalc_extents = true;
 
 public:
   WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, Noggit::NoggitRenderContext context);
@@ -50,6 +51,7 @@ public:
     , _doodadset (other._doodadset)
     , _doodads_per_group(other._doodads_per_group)
     , _need_doodadset_update(other._need_doodadset_update)
+    , _need_recalc_extents(other._need_recalc_extents)
   {
     std::swap (extents, other.extents);
     pos = other.pos;
@@ -79,6 +81,7 @@ public:
     std::swap(_transform_mat, other._transform_mat);
     std::swap(_transform_mat_inverted, other._transform_mat_inverted);
     std::swap(_context, other._context);
+    std::swap(_need_recalc_extents, other._need_recalc_extents);
     return *this;
   }
 
@@ -101,6 +104,7 @@ public:
 
   void intersect (math::ray const&, selection_result*, bool do_exterior = true);
 
+  std::array<glm::vec3, 2> const& getExtents() override;
   void recalcExtents() override;
   void change_nameset(uint16_t name_set);
   void ensureExtents() override;

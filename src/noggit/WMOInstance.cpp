@@ -40,6 +40,7 @@ WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENT
   extents[0] = glm::vec3(d->extents[0][0], d->extents[0][1], d->extents[0][2]);
   extents[1] = glm::vec3(d->extents[1][0], d->extents[1][1], d->extents[1][2]);
 
+  _need_recalc_extents = true;
   updateTransformMatrix();
   change_doodadset(_doodadset);
 }
@@ -57,6 +58,7 @@ WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, Nog
   uid = 0;
   _context = context;
 
+  _need_recalc_extents = true;
   updateTransformMatrix();
 }
 
@@ -82,6 +84,8 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
   {
     return;
   }
+
+  ensureExtents();
 
   const uint id = this->uid;
   bool const is_selected = selection.size() > 0 &&
@@ -153,6 +157,8 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
 
 void WMOInstance::intersect (math::ray const& ray, selection_result* results, bool do_exterior)
 {
+  ensureExtents();
+
   if (!ray.intersect_bounds (extents[0], extents[1]))
   {
     return;
@@ -166,10 +172,19 @@ void WMOInstance::intersect (math::ray const& ray, selection_result* results, bo
   }
 }
 
+std::array<glm::vec3, 2> const& WMOInstance::getExtents()
+{
+  ensureExtents();
+
+  return extents;
+}
+
 void WMOInstance::ensureExtents()
 {
-  recalcExtents();
-  // TODO: optimize
+  if (_need_recalc_extents && wmo->finishedLoading())
+  {
+    recalcExtents();
+  }
 }
 
 void WMOInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
@@ -217,11 +232,18 @@ void WMOInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
 
 void WMOInstance::recalcExtents()
 {
-  // todo: keep track of whether the extents need to be recalculated or not
   // keep the old extents since they are saved in the adt
-  if (wmo->loading_failed() || !wmo->finishedLoading())
+  if (!wmo->finishedLoading())
   {
-    return;
+      _need_recalc_extents = true;
+      return;
+  }
+
+  if (wmo->loading_failed())
+  {
+      extents[0] = extents[1] = pos;
+      _need_recalc_extents = false;
+      return;
   }
 
   updateTransformMatrix();
@@ -257,7 +279,7 @@ void WMOInstance::recalcExtents()
 
     points.insert(points.end(), adjustedGroupPoints.begin(), adjustedGroupPoints.end());
 
-    if (group.has_skybox() || _update_group_extents)
+    if (group.has_skybox() /* || _update_group_extents*/)
     {
       math::aabb const group_aabb(adjustedGroupPoints);
 
@@ -270,6 +292,8 @@ void WMOInstance::recalcExtents()
 
   extents[0] = wmo_aabb.min;
   extents[1] = wmo_aabb.max;
+
+  _need_recalc_extents = false;
 }
 
 void WMOInstance::change_nameset(uint16_t name_set)
@@ -295,6 +319,7 @@ void WMOInstance::change_doodadset(uint16_t doodad_set)
   _doodads_per_group = wmo->doodads_per_group(_doodadset);
   _need_doodadset_update = false;
 
+  ensureExtents();
   update_doodads();
 }
 
@@ -304,8 +329,8 @@ void WMOInstance::update_doodads()
   {
     for (auto& doodad : group_doodads.second)
     {
-      if (!doodad.need_matrix_update())
-        continue;
+      // if (!doodad.need_matrix_update())
+      //   continue;
 
       doodad.update_transform_matrix_wmo(this);
     }
