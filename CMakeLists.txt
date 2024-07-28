@@ -366,15 +366,15 @@ add_custom_command(TARGET noggit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove -f 
         $<TARGET_FILE_DIR:noggit>/themes/.git)
 
-#add distribution definitions
-add_custom_command(TARGET noggit POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/dist/listfile"
-        $<TARGET_FILE_DIR:noggit>
-        COMMAND ${CMAKE_COMMAND} -E remove -f 
-        $<TARGET_FILE_DIR:noggit>/.git )
-
 #add distribution listfile
+# add_custom_command(TARGET noggit POST_BUILD
+#         COMMAND ${CMAKE_COMMAND} -E copy_directory
+#         "${PROJECT_SOURCE_DIR}/dist/listfile"
+#         $<TARGET_FILE_DIR:noggit>
+#         COMMAND ${CMAKE_COMMAND} -E remove -f 
+#         $<TARGET_FILE_DIR:noggit>/.git )
+
+#add distribution definitions
 add_custom_command(TARGET noggit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${PROJECT_SOURCE_DIR}/dist/definitions"
