@@ -70,7 +70,7 @@ namespace Noggit
 
             QGridLayout* layout;
 
-            QListWidget* _object_list;
+            ObjectList* _object_list;
             QPushButton* _add_button;
             QPushButton* _remove_button;
             std::unordered_set<std::string> _object_paths;

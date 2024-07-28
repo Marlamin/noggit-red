@@ -37,6 +37,7 @@ namespace Noggit
       setSelectionMode(QAbstractItemView::SingleSelection);
       setAcceptDrops(false);
       setMovement(Movement::Static);
+      setResizeMode(QListView::Adjust);
     }
 
     void PaletteList::mousePressEvent(QMouseEvent* event)
@@ -102,6 +103,7 @@ namespace Noggit
       QVBoxLayout* button_layout = new QVBoxLayout(this);
 
       _add_button = new QPushButton(this);
+      _add_button->setToolTip("Add Selected Texture");
       _add_button->setIcon(FontAwesomeIcon(FontAwesome::plus));
       button_layout->addWidget(_add_button);
       connect(_add_button, &QAbstractButton::clicked, this, &texture_palette_small::addTexture);
