@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <math/bounding_box.hpp>
 #include <math/frustum.hpp>
 #include <glm/glm.hpp>
@@ -278,8 +279,10 @@ wmo_doodad_instance::wmo_doodad_instance(BlizzardArchive::Listfile::FileKey cons
   pos = glm::vec3(ff[0], ff[2], -ff[1]);
 
   f->read(ff, 16);
-  doodad_orientation = glm::quat (-ff[0], -ff[2], ff[1], ff[3]);
-  dir = glm::eulerAngles(doodad_orientation);
+  // doodad_orientation = glm::quat (-ff[0], -ff[2], ff[1], ff[3]);
+  doodad_orientation = glm::quat(ff[3], -ff[0], -ff[2], ff[1]); // in GLM w is the first argument
+  doodad_orientation = glm::normalize(doodad_orientation);
+  dir = glm::degrees(glm::eulerAngles(doodad_orientation));
 
   f->read(&scale, 4);
 
@@ -307,18 +310,15 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
   // world_pos = wmo->transformMatrix() * glm::vec4(pos,0);
   world_pos = wmo->transformMatrix() * glm::vec4(pos, 1.0f);
 
-  auto m2_mat = glm::mat4x4(1);
-  m2_mat = glm::translate(m2_mat, pos);
-  m2_mat = m2_mat * glm::toMat4(doodad_orientation);
+  auto m2_mat = glm::mat4x4(1.0f);
+
+  // m2_mat = glm::translate(m2_mat, pos);
+  m2_mat = m2_mat * glm::translate(glm::mat4(1.0f), pos);
+  m2_mat = m2_mat * glm::toMat4(glm::inverse(doodad_orientation));
   m2_mat = glm::scale(m2_mat, glm::vec3(scale));
 
-  glm::mat4x4 mat
-  (
-    wmo->transformMatrix() * m2_mat
-  );
-
-  _transform_mat = mat;
-  _transform_mat_inverted = glm::inverse(mat);
+  _transform_mat = wmo->transformMatrix() * m2_mat;
+  _transform_mat_inverted = glm::inverse(_transform_mat);
 
   // to compute the size category (used in culling)
   // updateTransformMatrix() is overriden to do nothing

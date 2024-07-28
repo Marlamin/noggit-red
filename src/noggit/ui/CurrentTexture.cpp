@@ -10,6 +10,7 @@
 #include <QtGui/QMouseEvent>
 #include <QtWidgets/QApplication>
 #include <QtGui/QDrag>
+#include <QtGui/QPainter>
 #include <QMimeData>
 
 namespace Noggit
