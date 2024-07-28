@@ -36,7 +36,7 @@ namespace Noggit
       , _override_liquid_id(true)
       , _override_height(true)
       , _opacity_mode(river_opacity)
-      , _custom_opacity_factor(0.0337f)
+      , _custom_opacity_factor(RIVER_OPACITY_VALUE)
       , _lock_pos(glm::vec3(0.0f, 0.0f, 0.0f))
       , tile(0, 0)
     {
@@ -182,7 +182,9 @@ namespace Noggit
       auto opacity_layout (new QFormLayout (opacity_group));
 
       river_button = new QRadioButton ("River", this);
+      river_button->setToolTip(std::to_string(RIVER_OPACITY_VALUE).c_str());
       ocean_button = new QRadioButton ("Ocean", this);
+      ocean_button->setToolTip(std::to_string(OCEAN_OPACITY_VALUE).c_str());
       custom_button = new QRadioButton ("Custom factor:", this);
 
       transparency_toggle = new QButtonGroup (this);
@@ -360,8 +362,8 @@ namespace Noggit
       switch (_opacity_mode)
       {
       default:          // values found by experimenting
-      case river_opacity:  return 0.0337f;
-      case ocean_opacity:  return 0.007f;
+      case river_opacity:  return RIVER_OPACITY_VALUE;
+      case ocean_opacity:  return OCEAN_OPACITY_VALUE;
       case custom_opacity: return _custom_opacity_factor;
       }
     }
