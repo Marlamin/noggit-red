@@ -14,6 +14,8 @@ class QPushButton;
 class QSpinBox;
 class World;
 class QComboBox;
+class QRadioButton;
+class QButtonGroup;
 
 namespace Noggit
 {
