@@ -66,7 +66,7 @@ namespace Noggit
 
       QGridLayout* layout;
 
-      QListWidget* _texture_list;
+      PaletteList* _texture_list;
       QPushButton* _add_button;
       QPushButton* _remove_button;
       std::unordered_set<std::string> _texture_paths;

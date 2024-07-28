@@ -38,6 +38,7 @@ namespace Noggit
       setSelectionMode(QAbstractItemView::SingleSelection);
       setAcceptDrops(false);
       setMovement(Movement::Static);
+      setResizeMode(QListView::Adjust);
     }
 
     void ObjectList::mousePressEvent(QMouseEvent* event)
@@ -109,11 +110,13 @@ namespace Noggit
       QVBoxLayout* button_layout = new QVBoxLayout(this);
 
       _add_button = new QPushButton(this);
+      _add_button->setToolTip("Add from Asset Browser");
       _add_button->setIcon(FontAwesomeIcon(FontAwesome::plus));
       button_layout->addWidget(_add_button);
       connect(_add_button, &QAbstractButton::clicked, this, &ObjectPalette::addObjectFromAssetBrowser);
 
       _remove_button = new QPushButton(this);
+      _remove_button->setToolTip("Remove selected Object");
       _remove_button->setIcon(FontAwesomeIcon(FontAwesome::times));
       button_layout->addWidget(_remove_button);
       connect(_remove_button, &QAbstractButton::clicked, this, &ObjectPalette::removeSelectedTexture);
