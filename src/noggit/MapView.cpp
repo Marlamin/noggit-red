@@ -5999,7 +5999,7 @@ Noggit::Ui::GroundEffectsTool* MapView::getGroundEffectsTool()
 void MapView::onSettingsSave()
 {
   OpenGL::TerrainParamsUniformBlock* params = _world->renderer()->getTerrainParamsUniformBlock();
-  params->wireframe_type = _settings->value("wireframe/type", 0).toInt();
+  params->wireframe_type = _settings->value("wireframe/type", false).toBool();
   params->wireframe_radius = _settings->value("wireframe/radius", 1.5f).toFloat();
   params->wireframe_width = _settings->value ("wireframe/width", 1.f).toFloat();
 
