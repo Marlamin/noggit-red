@@ -382,17 +382,17 @@ void selection_group::recalcExtents()
 
         // min = glm::min(min, point);
         if (instance->getExtents()[0].x < _group_extents[0].x)
-            _group_extents[0].x = instance->extents[0].x;
+            _group_extents[0].x = instance->getExtents()[0].x;
         if (instance->getExtents()[0].y < _group_extents[0].y)
-            _group_extents[0].y = instance->extents[0].y;
+            _group_extents[0].y = instance->getExtents()[0].y;
         if (instance->getExtents()[0].z < _group_extents[0].z)
-            _group_extents[0].z = instance->extents[0].z;
+            _group_extents[0].z = instance->getExtents()[0].z;
 
         if (instance->getExtents()[1].x > _group_extents[1].x)
-            _group_extents[1].x = instance->extents[1].x;
+            _group_extents[1].x = instance->getExtents()[1].x;
         if (instance->getExtents()[1].y > _group_extents[1].y)
-            _group_extents[1].y = instance->extents[1].y;
+            _group_extents[1].y = instance->getExtents()[1].y;
         if (instance->getExtents()[1].z > _group_extents[1].z)
-            _group_extents[1].z = instance->extents[1].z;
+            _group_extents[1].z = instance->getExtents()[1].z;
     }
 }

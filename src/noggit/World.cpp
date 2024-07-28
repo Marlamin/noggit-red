@@ -1026,10 +1026,10 @@ bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds, glm::mat4x4 
                     if (group.is_indoor())
                     {
                         // must call getGroupExtent() to initialize wmo_instance.group_extents
-                        // TODO : clear group extents to free memory ?
+                        // clear group extents to free memory ?
                         auto& group_extents = wmo_instance.getGroupExtents().at(i);
 
-                        // TODO : do a precise calculation instead of using axis aligned bounding boxes.
+
                         bool aabb_test = obj_bounds[1].x >= group_extents.first.x
                             && obj_bounds[1].y >= group_extents.first.y
                             && obj_bounds[1].z >= group_extents.first.z
@@ -1037,6 +1037,7 @@ bool World::isInIndoorWmoGroup(std::array<glm::vec3, 2> obj_bounds, glm::mat4x4 
                             && group_extents.second.y >= obj_bounds[0].y
                             && group_extents.second.z >= obj_bounds[0].z;
 
+                        // TODO : do a precise calculation instead of using axis aligned bounding boxes.
                         if (aabb_test) // oriented box check
                         {
                             /* TODO
@@ -3046,7 +3047,7 @@ float World::getMaxTileHeight(const TileIndex& tile)
     {
       auto obj = std::get<selected_object_type>(instance.value());
       obj->ensureExtents();
-      max_height = std::max(max_height, std::max(obj->extents[0].y, obj->extents[1].y));
+      max_height = std::max(max_height, std::max(obj->getExtents()[0].y, obj->getExtents()[1].y));
     }
   }
 

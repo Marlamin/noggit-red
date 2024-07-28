@@ -821,13 +821,13 @@ void MapTile::saveTile(World* world)
     lMODF_Data[lID].rot[1] = object->dir.y;
     lMODF_Data[lID].rot[2] = object->dir.z;
 
-    lMODF_Data[lID].extents[0][0] = object->extents[0].x;
-    lMODF_Data[lID].extents[0][1] = object->extents[0].y;
-    lMODF_Data[lID].extents[0][2] = object->extents[0].z;
+    lMODF_Data[lID].extents[0][0] = object->getExtents()[0].x;
+    lMODF_Data[lID].extents[0][1] = object->getExtents()[0].y;
+    lMODF_Data[lID].extents[0][2] = object->getExtents()[0].z;
 
-    lMODF_Data[lID].extents[1][0] = object->extents[1].x;
-    lMODF_Data[lID].extents[1][1] = object->extents[1].y;
-    lMODF_Data[lID].extents[1][2] = object->extents[1].z;
+    lMODF_Data[lID].extents[1][0] = object->getExtents()[1].x;
+    lMODF_Data[lID].extents[1][1] = object->getExtents()[1].y;
+    lMODF_Data[lID].extents[1][2] = object->getExtents()[1].z;
 
     lMODF_Data[lID].flags = object->mFlags;
     lMODF_Data[lID].doodadSet = object->doodadset();
@@ -996,13 +996,13 @@ void MapTile::add_model(uint32_t uid)
     {
       instance->ensureExtents();
 
-      _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, instance->extents[0].x);
-      _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, instance->extents[0].y);
-      _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, instance->extents[0].z);
+      _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, instance->getExtents()[0].x);
+      _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, instance->getExtents()[0].y);
+      _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, instance->getExtents()[0].z);
 
-      _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->extents[1].x);
-      _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->extents[1].y);
-      _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->extents[1].z);
+      _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->getExtents()[1].x);
+      _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->getExtents()[1].y);
+      _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->getExtents()[1].z);
 
       tagCombinedExtents(true);
     }
@@ -1029,13 +1029,13 @@ void MapTile::add_model(SceneObject* instance)
     {
       instance->ensureExtents();
 
-      _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, instance->extents[0].x);
-      _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, instance->extents[0].y);
-      _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, instance->extents[0].z);
+      _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, instance->getExtents()[0].x);
+      _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, instance->getExtents()[0].y);
+      _object_instance_extents[0].z = std::min(_object_instance_extents[0].z, instance->getExtents()[0].z);
 
-      _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->extents[1].x);
-      _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->extents[1].y);
-      _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->extents[1].z);
+      _object_instance_extents[1].x = std::max(_object_instance_extents[1].x, instance->getExtents()[1].x);
+      _object_instance_extents[1].y = std::max(_object_instance_extents[1].y, instance->getExtents()[1].y);
+      _object_instance_extents[1].z = std::max(_object_instance_extents[1].z, instance->getExtents()[1].z);
 
       tagCombinedExtents(true);
     }
@@ -1714,8 +1714,8 @@ void MapTile::recalcObjectInstanceExtents()
 
       instance->ensureExtents();
 
-      glm::vec3& min = instance->extents[0];
-      glm::vec3& max = instance->extents[1];
+      glm::vec3 min = instance->getExtents()[0];
+      glm::vec3 max = instance->getExtents()[1];
 
       _object_instance_extents[0].x = std::min(_object_instance_extents[0].x, min.x);
       _object_instance_extents[0].y = std::min(_object_instance_extents[0].y, min.y);

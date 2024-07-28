@@ -193,7 +193,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
               {
                 if (wmo.wmo->finishedLoading() && wmo.wmo->skybox)
                 {
-                  if (wmo.group_extents.empty())
+                  if (wmo.getGroupExtents().empty())
                   {
                     wmo.recalcExtents();
                   }
@@ -205,9 +205,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
                       , _cull_distance
                       , _world->animtime
                       , draw_model_animations
-                      , wmo.extents[0]
-                      , wmo.extents[1]
-                      , wmo.group_extents
+                      , wmo.getExtents()[0]
+                      , wmo.getExtents()[1]
+                      , wmo.getGroupExtents()
                   );
                 }
 
@@ -450,9 +450,52 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           auto wmo_instance = static_cast<WMOInstance*>(instance);
 
-          if (tile->renderer()->objectsFrustumCullTest() > 1 || frustum.intersects(wmo_instance->extents[1], wmo_instance->extents[0]))
+          if (tile->renderer()->objectsFrustumCullTest() > 1 || frustum.intersects(wmo_instance->getExtents()[1], wmo_instance->getExtents()[0]))
           {
             wmos_to_draw.push_back(wmo_instance);
+
+              if (draw_wmo_doodads)
+              {
+                  // auto doodads = wmo_instance->get_visible_doodads(frustum, _cull_distance, camera_pos, draw_hidden_models, display);
+                  // 
+                  // for (auto& doodad : doodads)
+                  // {
+                  //     if (doodad->frame == frame)
+                  //         continue;
+                  //     doodad->frame = frame;
+                  // 
+                  //     auto& instances = models_to_draw[doodad->model.get()];
+                  // 
+                  //     instances.push_back(doodad->transformMatrix());
+                  // }
+
+
+                  // doodad->isInFrustum(frustum);
+
+                  std::map<uint32_t, std::vector<wmo_doodad_instance>>* doodads = wmo_instance->get_doodads(draw_hidden_models);
+                  
+                  if (!doodads)
+                      continue;
+                  
+                  for (auto& pair : *doodads)
+                  {
+                      for (auto& doodad : pair.second)
+                      {
+                          if (doodad.frame == frame)
+                              continue;
+                          doodad.frame = frame;
+                  
+                          auto& instances = models_to_draw[doodad.model.get()];
+                  
+                          instances.push_back(doodad.transformMatrix());
+                      }
+                  }
+
+
+              }
+
+
+              //////////////////////
           }
         }
       }
@@ -634,7 +677,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 
     {
-      if (draw_models || (minimap_render && minimap_render_settings->use_filters))
+      if (draw_models || draw_doodads_wmo || (minimap_render && minimap_render_settings->use_filters))
       {
         OpenGL::Scoped::use_program m2_shader {*_m2_instanced_program.get()};
 

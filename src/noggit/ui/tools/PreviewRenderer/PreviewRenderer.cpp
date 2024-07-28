@@ -394,8 +394,8 @@ std::vector<glm::vec3> PreviewRenderer::calcSceneExtents()
   {
     for (int i = 0; i < 3; ++i)
     {
-      min[i] = std::min(instance.extents[0][i], min[i]);
-      max[i] = std::max(instance.extents[1][i], max[i]);
+      min[i] = std::min(instance.getExtents()[0][i], min[i]);
+      max[i] = std::max(instance.getExtents()[1][i], max[i]);
     }
   }
 
@@ -403,8 +403,8 @@ std::vector<glm::vec3> PreviewRenderer::calcSceneExtents()
   {
     for (int i = 0; i < 3; ++i)
     {
-      min[i] = std::min(instance.extents[0][i], min[i]);
-      max[i] = std::max(instance.extents[1][i], max[i]);
+      min[i] = std::min(instance.getExtents()[0][i], min[i]);
+      max[i] = std::max(instance.getExtents()[1][i], max[i]);
     }
   }
 

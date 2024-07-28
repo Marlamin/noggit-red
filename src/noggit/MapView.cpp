@@ -6219,7 +6219,7 @@ void MapView::ShowContextMenu(QPoint pos)
                 return;
 
             // verify this
-            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED | Noggit::ActionFlags::eOBJECTS_REMOVED); // Noggit::ActionFlags::eOBJECTS_TRANSFORMED
+            NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_ADDED | Noggit::ActionFlags::eOBJECTS_REMOVED);
 
             // get the model to replace by
             auto replace_select = objectEditor->getClipboard().front();
@@ -6278,10 +6278,6 @@ void MapView::ShowContextMenu(QPoint pos)
                     new_obj->recalcExtents();
                 }
             }
-            // can cause the usual crash of deleting models overlapping unloaded tiles.
-            // _world->delete_selected_models();
-            // NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
-            
             // this would also delete models that got skipped
             // _world->delete_selected_models();
 

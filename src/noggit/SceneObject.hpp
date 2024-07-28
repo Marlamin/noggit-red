@@ -69,7 +69,7 @@ public:
   virtual AsyncObject* instance_model() const = 0;
 
   [[nodiscard]]
-  std::array<glm::vec3, 2> const& getExtents() { ensureExtents(); return extents; }
+  virtual std::array<glm::vec3, 2> const& getExtents() { ensureExtents(); return extents; }
 
   glm::vec3 const getServerPos() { return glm::vec3(ZEROPOINT - pos.z, ZEROPOINT - pos.x, pos.y); }
 
@@ -77,7 +77,7 @@ public:
 
 public:
   glm::vec3 pos;
-  std::array<glm::vec3, 2> extents;
+
   glm::vec3 dir;
   float scale = 1.f;
   unsigned int uid;
@@ -88,6 +88,7 @@ protected:
 
   glm::mat4x4 _transform_mat = glm::mat4x4();
   glm::mat4x4 _transform_mat_inverted = glm::mat4x4();
+  std::array<glm::vec3, 2> extents;
 
   Noggit::NoggitRenderContext _context;
 

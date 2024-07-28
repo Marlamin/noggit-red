@@ -96,7 +96,8 @@ public:
   void recalcExtents() override;
   void ensureExtents() override;
   bool finishedLoading() override { return model->finishedLoading(); };
-  glm::vec3* getExtents();
+  std::array<glm::vec3, 2> const& getExtents() override;
+  // glm::vec3* getExtents();
 
   [[nodiscard]]
   virtual bool isWMODoodad() const { return false; };
@@ -121,18 +122,26 @@ class wmo_doodad_instance : public ModelInstance
 public:
   glm::quat doodad_orientation;
   glm::vec3 world_pos;
+  // local wmo group position is stored in modelInstance::pos
+  // same for scale
 
   explicit wmo_doodad_instance(BlizzardArchive::Listfile::FileKey const& file_key
       , BlizzardArchive::ClientFile* f
       , Noggit::NoggitRenderContext context );
 
+  // titi : issue with those constructors: ModelInstance data is lost (scale, pos...)
+  /**/
   wmo_doodad_instance(wmo_doodad_instance const& other)
-  : ModelInstance(other.model->file_key(), other._context)
+  // : ModelInstance(other.model->file_key(), other._context)
+  : ModelInstance(other)  // titi : Use the copy constructor of ModelInstance instead
   , doodad_orientation(other.doodad_orientation)
   , world_pos(other.world_pos)
   , _need_matrix_update(other._need_matrix_update)
   {
-
+      // titi: added those.
+      // pos = other.pos;
+      // scale = other.scale;
+      // frame = other.frame;
   };
 
   wmo_doodad_instance& operator= (wmo_doodad_instance const& other) = delete;
@@ -153,6 +162,7 @@ public:
     std::swap (_need_matrix_update, other._need_matrix_update);
     return *this;
   }
+  
 
   [[nodiscard]]
   bool need_matrix_update() const { return _need_matrix_update; }
