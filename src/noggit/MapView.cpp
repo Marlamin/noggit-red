@@ -2131,7 +2131,7 @@ void MapView::setupAssistMenu()
             QProgressDialog progress_dialog("Importing Heightmaps...", "Cancel", 0, _world->mapIndex.getNumExistingTiles(), this);
             progress_dialog.setWindowModality(Qt::WindowModal);
             NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_TERRAIN);
-            _world->importAllADTsHeightmaps(&progress_dialog, heightmap_import_max->value(), heightmap_import_min->value(),
+            _world->importAllADTsHeightmaps(&progress_dialog, heightmap_import_min->value(), heightmap_import_max->value(), 
                 adt_import_height_params_mode->currentIndex(), adt_import_height_tiled_edges->isChecked());
             NOGGIT_ACTION_MGR->endAction();
         )
