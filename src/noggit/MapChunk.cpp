@@ -1084,10 +1084,10 @@ bool MapChunk::blurTerrain ( glm::vec3 const& pos
                            , float radius
                            , int BrushType
                            , flatten_mode const& mode
-                           , std::function<std::optional<float> (float, float)> height
+                           /*, std::function<std::optional<float>(float, float)> height*/
                            )
 {
-  bool changed (false);
+  bool changed = false;
 
   if (BrushType == eFlattenType_Origin)
   {
@@ -1096,7 +1096,7 @@ bool MapChunk::blurTerrain ( glm::vec3 const& pos
 
   for (int i (0); i < mapbufsize; ++i)
   {
-    float const dist(misc::dist(mVertices[i], pos));
+    float const dist = misc::dist(mVertices[i], pos);
 
     if (dist >= radius)
     {
@@ -1111,16 +1111,28 @@ bool MapChunk::blurTerrain ( glm::vec3 const& pos
       float tz = pos.z + j * UNITSIZE / 2;
       for (int k = -Rad; k <= Rad; ++k)
       {
-        float tx = pos.x + k*UNITSIZE + (j % 2) * UNITSIZE / 2.0f;
-        float dist2 = misc::dist (tx, tz, mVertices[i].x, mVertices[i].z);
+        float const tx = pos.x + k*UNITSIZE + (j % 2) * UNITSIZE / 2.0f;
+        float const dist2 = misc::dist (tx, tz, mVertices[i].x, mVertices[i].z);
         if (dist2 > radius)
           continue;
-        auto h (height (tx, tz));
+
+        glm::vec3 vec;
+        bool res = mt->getWorld()->GetVertex(tx, tz, &vec);
+        if (res)
+        {
+            // float h = vec.y;
+            TotalHeight += (1.0f - dist2 / radius) * vec.y;
+            TotalWeight += (1.0f - dist2 / radius);
+        }
+
+        /*
+        // auto h (height (tx, tz));
+        auto h = height(tx, tz);
         if (h)
         {
           TotalHeight += (1.0f - dist2 / radius) * h.value();
           TotalWeight += (1.0f - dist2 / radius);
-        }
+        }*/
       }
     }
 

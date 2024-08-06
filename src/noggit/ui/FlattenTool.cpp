@@ -26,6 +26,55 @@ namespace Noggit
       setMaximumWidth(250);
       auto layout (new QVBoxLayout (this));
 
+      // flatten keybind
+      auto keybinds_row1_layout = new QHBoxLayout(this);
+      keybinds_row1_layout->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+      keybinds_row1_layout->setContentsMargins(0, 0, 0, 0);
+      keybinds_row1_layout->setSpacing(2);
+
+      auto label_row1_icon1 = new QLabel(this);
+      label_row1_icon1->setPixmap(QIcon(FontNoggitIcon(FontNoggit::shift)).pixmap(20, 20));
+      keybinds_row1_layout->addWidget(label_row1_icon1);
+
+      keybinds_row1_layout->addWidget(new QLabel("+"));
+
+      auto label_row1_icon2 = new QLabel(this);
+      label_row1_icon2->setPixmap(QIcon(FontNoggitIcon(FontNoggit::lmb)).pixmap(20, 20));
+      keybinds_row1_layout->addWidget(label_row1_icon2);
+
+      keybinds_row1_layout->addWidget(new QLabel("Flatten Terrain"));
+
+      // layout->addLayout(keybinds_row1_layout, Qt::AlignLeft | Qt::AlignTop);
+      // 
+      QWidget* containerWidget = new QWidget;
+      containerWidget->setLayout(keybinds_row1_layout);
+      containerWidget->setFixedHeight(25);
+      layout->addWidget(containerWidget);
+
+      // blur keybind
+      auto keybinds_row2_layout = new QHBoxLayout(this);
+      keybinds_row2_layout->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+      keybinds_row2_layout->setContentsMargins(0, 0, 0, 0);
+      keybinds_row2_layout->setSpacing(2);
+
+      auto label_row2_icon1 = new QLabel(this);
+      label_row2_icon1->setPixmap(QIcon(FontNoggitIcon(FontNoggit::ctrl)).pixmap(20, 20));
+      keybinds_row2_layout->addWidget(label_row2_icon1);
+
+      keybinds_row2_layout->addWidget(new QLabel("+"));
+
+      auto label_row2_icon2 = new QLabel(this);
+      label_row2_icon2->setPixmap(QIcon(FontNoggitIcon(FontNoggit::lmb)).pixmap(20, 20));
+      keybinds_row2_layout->addWidget(label_row2_icon2);
+
+      keybinds_row2_layout->addWidget(new QLabel("Blur Terrain"));
+
+      layout->addLayout(keybinds_row1_layout, Qt::AlignLeft | Qt::AlignTop);
+      QWidget* containerWidget2 = new QWidget;
+      containerWidget2->setLayout(keybinds_row2_layout);
+      containerWidget2->setFixedHeight(25);
+      layout->addWidget(containerWidget2);
+
       _type_button_box = new QButtonGroup (this);
       QRadioButton* radio_flat = new QRadioButton ("Flat");
       QRadioButton* radio_linear = new QRadioButton ("Linear");
