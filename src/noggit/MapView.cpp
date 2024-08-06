@@ -849,6 +849,9 @@ void MapView::setupScriptingUi()
 
 void MapView::setupObjectEditorUi()
 {
+  // initialize some saved defaults
+  _object_paste_params.rotate_on_terrain = _settings->value("paste_params/rotate_on_terrain", true).toBool();
+
   /* Tool */
   objectEditor = new Noggit::Ui::object_editor(this
     , _world.get()
