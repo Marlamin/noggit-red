@@ -196,55 +196,80 @@ namespace Noggit
 
         void ZoneIntroMusicPickerWindow::select_entry(int id)
         {
-            _entry_id = id;
 
-            if (id != 0)
-                _picker_listview->setCurrentRow(gZoneIntroMusicTableDB.getRecordRowId(id));
+
+            if (id)
+            {
+                try
+                {
+                    _picker_listview->setCurrentRow(gZoneIntroMusicTableDB.getRecordRowId(id));
+                }
+                catch (ZoneIntroMusicTableDB::NotFound)
+                {
+
+                }
+            }
             else
             {
                 _picker_listview->setCurrentRow(0);
                 return;
             }
 
-            _entry_id_lbl->setText(QString(std::to_string(id).c_str()));
-
-            DBCFile::Record record = gZoneIntroMusicTableDB.getByID(id);
-
-            _name_ledit->setText(record.getString(ZoneIntroMusicTableDB::Name));
-
-            int sound_entry = record.getInt(ZoneIntroMusicTableDB::SoundId);
-
-            if (sound_entry != 0 && gSoundEntriesDB.CheckIfIdExists(sound_entry))
+            try
             {
-                DBCFile::Record sound_record = gSoundEntriesDB.getByID(sound_entry);
-                std::stringstream ss;
-                ss << sound_entry << "-" << sound_record.getString(SoundEntriesDB::Name);
-                _sound_button->setText(ss.str().c_str());
-                _sound_button->setProperty("id", sound_entry);
+                DBCFile::Record record = gZoneIntroMusicTableDB.getByID(id);
+
+                _entry_id = id;
+                _entry_id_lbl->setText(QString(std::to_string(id).c_str()));
+
+                _name_ledit->setText(record.getString(ZoneIntroMusicTableDB::Name));
+
+                int sound_entry = record.getInt(ZoneIntroMusicTableDB::SoundId);
+
+                if (sound_entry != 0 && gSoundEntriesDB.CheckIfIdExists(sound_entry))
+                {
+                    DBCFile::Record sound_record = gSoundEntriesDB.getByID(sound_entry);
+                    std::stringstream ss;
+                    ss << sound_entry << "-" << sound_record.getString(SoundEntriesDB::Name);
+                    _sound_button->setText(ss.str().c_str());
+                    _sound_button->setProperty("id", sound_entry);
+                }
+                else
+                {
+                    _sound_button->setText("-NONE-");
+                    _sound_button->setProperty("id", 0);
+                }
+
+                _priority = record.getInt(ZoneIntroMusicTableDB::Priority); // always 1 except for 1 test entry
+
+                _min_delay_spinbox->setValue(record.getInt(ZoneIntroMusicTableDB::MinDelayMinutes));
             }
-            else
+            catch (ZoneIntroMusicTableDB::NotFound)
             {
-                _sound_button->setText("-NONE-");
-                _sound_button->setProperty("id", 0);
+
             }
 
-            _priority = record.getInt(ZoneIntroMusicTableDB::Priority); // always 1 except for 1 test entry
-
-            _min_delay_spinbox->setValue(record.getInt(ZoneIntroMusicTableDB::MinDelayMinutes));
         }
 
         void ZoneIntroMusicPickerWindow::save_entry(int entry_id)
         {
-            DBCFile::Record record = gZoneIntroMusicTableDB.getByID(entry_id); // is_new_record ? gLightDB.addRecord(Id) : gLightDB.getByID(Id);
+            try
+            {
+                DBCFile::Record record = gZoneIntroMusicTableDB.getByID(entry_id); // is_new_record ? gLightDB.addRecord(Id) : gLightDB.getByID(Id);
 
 
-            record.write(ZoneIntroMusicTableDB::ID, entry_id);
-            record.writeString(ZoneIntroMusicTableDB::Name, _name_ledit->text().toStdString());
-            record.write(ZoneIntroMusicTableDB::SoundId, _sound_button->property("id").toInt());
-            record.write(ZoneIntroMusicTableDB::Priority, _priority);
-            record.write(ZoneIntroMusicTableDB::MinDelayMinutes, _min_delay_spinbox->value());
+                record.write(ZoneIntroMusicTableDB::ID, entry_id);
+                record.writeString(ZoneIntroMusicTableDB::Name, _name_ledit->text().toStdString());
+                record.write(ZoneIntroMusicTableDB::SoundId, _sound_button->property("id").toInt());
+                record.write(ZoneIntroMusicTableDB::Priority, _priority);
+                record.write(ZoneIntroMusicTableDB::MinDelayMinutes, _min_delay_spinbox->value());
 
-            gZoneIntroMusicTableDB.save();
+                gZoneIntroMusicTableDB.save();
+            }
+            catch (ZoneIntroMusicTableDB::NotFound)
+            {
+
+            }
         }
     }
 }

@@ -226,11 +226,25 @@ std::string WMOAreaTableDB::getWMOAreaName(int WMOId, int namesetId)
                 int areatableid = i->getUInt(WMOAreaTableDB::AreaTableRefId);
                 if (areatableid)
                 {
-                    auto rec = gAreaDB.getByID(areatableid);
-                    return rec.getLocalizedString(AreaDB::Name);
+                    // return AreaDB::getAreaFullName(areatableid); // full name with zone
+                    std::string arena_name = "";
+                    try
+                    {
+                        auto rec = gAreaDB.getByID(areatableid);
+                        arena_name =  rec.getLocalizedString(AreaDB::Name);
+                    }
+                    catch (WMOAreaTableDB::NotFound)
+                    {
+                        arena_name = "Unknown location";
+                    }
+                    return areaName;
                 }
                 else
-                    return "-Local Terrain Area-"; // nullptr? need to get it from terrain
+                {
+                    // if no areaId is set in the WMOAreaTableDB record, client uses the local terrain area id.
+                    return "-Local Terrain Area-";
+                }
+
             }
         }
     }
@@ -260,14 +274,22 @@ std::vector<std::string> WMOAreaTableDB::getWMOAreaNames(int WMOId)
                 int areatableid = i->getUInt(WMOAreaTableDB::AreaTableRefId);
                 if (areatableid)
                 {
-                    auto rec = gAreaDB.getByID(areatableid);
-                    areanamesvect.push_back(rec.getLocalizedString(AreaDB::Name));
+                    try
+                    {
+                        auto rec = gAreaDB.getByID(areatableid);
+                        areanamesvect.push_back(rec.getLocalizedString(AreaDB::Name));
+                    }
+                    catch (WMOAreaTableDB::NotFound)
+                    {
+                        areanamesvect.push_back("Unknown location");
+                    }
+
                 }
                 else
                     areanamesvect.push_back("-Local Terrain Area-"); // nullptr? need to get it from terrain
             }
         }
-        // could optimise and break when iterator WmoId is higher than the Wmodid, but this wouldn't support unordered DBCs.
+        // could optimise and break when iterator WmoId is higher than the Wmodid, but this wouldn't support unordered DBCs. Client does this.
     }
     return areanamesvect;
 }

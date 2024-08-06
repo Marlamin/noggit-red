@@ -481,6 +481,8 @@ namespace Noggit
       connect(paste_override_rotate_cb, &QCheckBox::stateChanged, [=](int s)
           {
               paste_params->rotate_on_terrain = s;
+              _settings->setValue("paste_params/rotate_on_terrain", (bool)s);
+              _settings->sync();
           });
 
       connect ( pasteModeGroup, qOverload<int> (&QButtonGroup::idClicked)

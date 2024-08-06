@@ -251,76 +251,96 @@ namespace Noggit
         }
         void ZoneMusicPickerWindow::select_entry(int id)
         {
-            _entry_id = id;
+            if (id)
+            {
+                try
+                {
+                    _picker_listview->setCurrentRow(gZoneMusicDB.getRecordRowId(id));
+                }
+                catch (ZoneMusicDB::NotFound)
+                {
 
-            if (id != 0)
-                _picker_listview->setCurrentRow(gZoneMusicDB.getRecordRowId(id));
+                }
+            }
             else
             {
                 _picker_listview->setCurrentRow(0);
                 return;
             }
 
-            _entry_id_lbl->setText(QString(std::to_string(id).c_str()));
-
-            DBCFile::Record record = gZoneMusicDB.getByID(id);
-
-            _name_ledit->setText(record.getString(ZoneMusicDB::Name));
-
-            int day_sound_entry = record.getInt(ZoneMusicDB::DayMusic);
-            int night_sound_entry = record.getInt(ZoneMusicDB::NightMusic);
-
-            if (day_sound_entry != 0 && gSoundEntriesDB.CheckIfIdExists(day_sound_entry)) // some entries reference sound entries that don't exist
+            try
             {
-                DBCFile::Record day_sound_record = gSoundEntriesDB.getByID(day_sound_entry);
-                std::stringstream ss_day;
-                ss_day << day_sound_entry << "-" << day_sound_record.getString(SoundEntriesDB::Name);
-                _day_music_button->setText(ss_day.str().c_str());
-                _day_music_button->setProperty("id", day_sound_entry);
+                DBCFile::Record record = gZoneMusicDB.getByID(id);
+
+                _entry_id = id;
+                _entry_id_lbl->setText(QString(std::to_string(id).c_str()));
+
+                _name_ledit->setText(record.getString(ZoneMusicDB::Name));
+
+                int day_sound_entry = record.getInt(ZoneMusicDB::DayMusic);
+                int night_sound_entry = record.getInt(ZoneMusicDB::NightMusic);
+
+                if (day_sound_entry != 0 && gSoundEntriesDB.CheckIfIdExists(day_sound_entry)) // some entries reference sound entries that don't exist
+                {
+                    DBCFile::Record day_sound_record = gSoundEntriesDB.getByID(day_sound_entry);
+                    std::stringstream ss_day;
+                    ss_day << day_sound_entry << "-" << day_sound_record.getString(SoundEntriesDB::Name);
+                    _day_music_button->setText(ss_day.str().c_str());
+                    _day_music_button->setProperty("id", day_sound_entry);
+                }
+                else
+                {
+                    _day_music_button->setText("-NONE-");
+                    _day_music_button->setProperty("id", 0);
+                }
+
+                if (night_sound_entry != 0 && gSoundEntriesDB.CheckIfIdExists(night_sound_entry))
+                {
+                    DBCFile::Record night_sound_record = gSoundEntriesDB.getByID(night_sound_entry);
+                    std::stringstream ss_night;
+                    ss_night << night_sound_entry << "-" << night_sound_record.getString(SoundEntriesDB::Name);
+                    _night_music_button->setText(ss_night.str().c_str());
+                    _night_music_button->setProperty("id", night_sound_entry);
+                }
+                else
+                {
+                    _night_music_button->setText("-NONE-");
+                    _night_music_button->setProperty("id", 0);
+                }
+
+                _day_min_interval_spinbox->setValue(record.getInt(ZoneMusicDB::SilenceIntervalMinDay));
+                _day_max_interval_spinbox->setValue(record.getInt(ZoneMusicDB::SilenceIntervalMaxDay));
+                _night_min_interval_spinbox->setValue(record.getInt(ZoneMusicDB::SilenceIntervalMinNight));
+                _night_max_interval_spinbox->setValue(record.getInt(ZoneMusicDB::SilenceIntervalMaxNight));
             }
-            else
+            catch (ZoneMusicDB::NotFound)
             {
-                _day_music_button->setText("-NONE-");
-                _day_music_button->setProperty("id", 0);
+
             }
-
-            if (night_sound_entry != 0 && gSoundEntriesDB.CheckIfIdExists(night_sound_entry))
-            {
-                DBCFile::Record night_sound_record = gSoundEntriesDB.getByID(night_sound_entry);
-                std::stringstream ss_night;
-                ss_night << night_sound_entry << "-" << night_sound_record.getString(SoundEntriesDB::Name);
-                _night_music_button->setText(ss_night.str().c_str());
-                _night_music_button->setProperty("id", night_sound_entry);
-            }
-            else
-            {
-                _night_music_button->setText("-NONE-");
-                _night_music_button->setProperty("id", 0);
-            }
-
-            _day_min_interval_spinbox->setValue(record.getInt(ZoneMusicDB::SilenceIntervalMinDay));
-            _day_max_interval_spinbox->setValue(record.getInt(ZoneMusicDB::SilenceIntervalMaxDay));
-            _night_min_interval_spinbox->setValue(record.getInt(ZoneMusicDB::SilenceIntervalMinNight));
-            _night_max_interval_spinbox->setValue(record.getInt(ZoneMusicDB::SilenceIntervalMaxNight));
-
-
         }
 
         void ZoneMusicPickerWindow::save_entry(int entry_id)
         {
-            DBCFile::Record record = gZoneMusicDB.getByID(entry_id); // is_new_record ? gLightDB.addRecord(Id) : gLightDB.getByID(Id);
+            try
+            {
+                DBCFile::Record record = gZoneMusicDB.getByID(entry_id); // is_new_record ? gLightDB.addRecord(Id) : gLightDB.getByID(Id);
 
 
-            record.write(ZoneMusicDB::ID, entry_id);
-            record.writeString(ZoneMusicDB::Name, _name_ledit->text().toStdString());
-            record.write(ZoneMusicDB::SilenceIntervalMinDay, _day_min_interval_spinbox->value());
-            record.write(ZoneMusicDB::SilenceIntervalMaxDay, _day_max_interval_spinbox->value());
-            record.write(ZoneMusicDB::SilenceIntervalMinNight, _night_min_interval_spinbox->value());
-            record.write(ZoneMusicDB::SilenceIntervalMaxNight, _night_max_interval_spinbox->value());
-            record.write(ZoneMusicDB::DayMusic, _day_music_button->property("id").toInt());
-            record.write(ZoneMusicDB::NightMusic, _night_music_button->property("id").toInt());
+                record.write(ZoneMusicDB::ID, entry_id);
+                record.writeString(ZoneMusicDB::Name, _name_ledit->text().toStdString());
+                record.write(ZoneMusicDB::SilenceIntervalMinDay, _day_min_interval_spinbox->value());
+                record.write(ZoneMusicDB::SilenceIntervalMaxDay, _day_max_interval_spinbox->value());
+                record.write(ZoneMusicDB::SilenceIntervalMinNight, _night_min_interval_spinbox->value());
+                record.write(ZoneMusicDB::SilenceIntervalMaxNight, _night_max_interval_spinbox->value());
+                record.write(ZoneMusicDB::DayMusic, _day_music_button->property("id").toInt());
+                record.write(ZoneMusicDB::NightMusic, _night_music_button->property("id").toInt());
 
-            gZoneMusicDB.save();
+                gZoneMusicDB.save();
+            }
+            catch (ZoneMusicDB::NotFound)
+            {
+
+            }
         }
     }
 }

@@ -110,6 +110,7 @@ public:
     void writeLocalizedString(size_t field, const std::string& val, int locale)
     {
       assert(field < file.fieldCount);
+      assert(locale < 16);
 
       if (!val.size())
       {
@@ -181,9 +182,8 @@ public:
         if (i->getUInt(field) == id)
           return (*i);
       }
-
-      LogError << "Tried to get a not existing row in " << filename << " (ID = " << id << ")!" << std::endl;
-      return *begin(); // return the first entry if it failed
+      LogDebug << "Tried to get a not existing row in " << filename << " (ID = " << id << ")!" << std::endl;
+      throw NotFound();
   }
   inline bool CheckIfIdExists(unsigned int id, size_t field = 0)
   {
@@ -205,7 +205,7 @@ public:
           row_id++;
       }
       LogError << "Tried to get a not existing row in " << filename << " (ID = " << id << ")!" << std::endl;
-      return 0;
+      throw NotFound();
   }
 
   Record addRecord(size_t id, size_t id_field = 0);

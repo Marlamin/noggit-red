@@ -740,42 +740,46 @@ namespace Noggit
                 return;
             }
 
-            DBCFile::Record GErecord
-            { 
-                gGroundEffectTextureDB.getByID(effect_id) 
-            };
-
-            Name = std::to_string(effect_id);
-
-            ID = GErecord.getUInt(GroundEffectTextureDB::ID);
-            Amount = GErecord.getUInt(GroundEffectTextureDB::Amount);
-            TerrainType = GErecord.getUInt(GroundEffectTextureDB::TerrainType);
-
-            for (int i = 0; i < 4; ++i)
+            try
             {
-                Weights[i] = GErecord.getUInt(GroundEffectTextureDB::Weights + i);
-                unsigned const curDoodadId
-                { 
-                    GErecord.getUInt(GroundEffectTextureDB::Doodads + i) 
-                };
+                DBCFile::Record GErecord = gGroundEffectTextureDB.getByID(effect_id);
+                Name = std::to_string(effect_id);
+                ID = GErecord.getUInt(GroundEffectTextureDB::ID);
+                Amount = GErecord.getUInt(GroundEffectTextureDB::Amount);
+                TerrainType = GErecord.getUInt(GroundEffectTextureDB::TerrainType);
 
-                if (!curDoodadId)
+                for (int i = 0; i < 4; ++i)
                 {
-                    continue;
-                }
-                
-                if (!gGroundEffectDoodadDB.CheckIfIdExists(curDoodadId))
-                {
-                    continue;
-                }
+                    Weights[i] = GErecord.getUInt(GroundEffectTextureDB::Weights + i);
+                    unsigned const curDoodadId
+                    { 
+                        GErecord.getUInt(GroundEffectTextureDB::Doodads + i) 
+                    };
+
+                    if (!curDoodadId)
+                    {
+                        continue;
+                    }
                     
-                Doodads[i].ID = curDoodadId;
-                QString filename = gGroundEffectDoodadDB.getByID(curDoodadId).getString(GroundEffectDoodadDB::Filename);
+                    if (!gGroundEffectDoodadDB.CheckIfIdExists(curDoodadId))
+                    {
+                        continue;
+                    }
+                        
+                    Doodads[i].ID = curDoodadId;
+                    QString filename = gGroundEffectDoodadDB.getByID(curDoodadId).getString(GroundEffectDoodadDB::Filename);
 
-                filename.replace(".mdx", ".m2", Qt::CaseInsensitive);
-                filename.replace(".mdl", ".m2", Qt::CaseInsensitive);
+                    filename.replace(".mdx", ".m2", Qt::CaseInsensitive);
+                    filename.replace(".mdl", ".m2", Qt::CaseInsensitive);
 
-                Doodads[i].filename = filename.toStdString();
+                    Doodads[i].filename = filename.toStdString();
+                }
+            }
+            catch (GroundEffectTextureDB::NotFound)
+            {
+                ID = 0;
+                assert(false);
+                LogError << "Couldn't find ground effect Id : " << effect_id << "in GroundEffectTexture.dbc" << std::endl;
             }
         }
     }

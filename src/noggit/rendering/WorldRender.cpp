@@ -1856,12 +1856,19 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
     }
 
     // Register in md5translate.trs
-    std::string map_name = gMapDB.getByID(_world->mapIndex._map_id).getString(MapDB::InternalName);
-
-    auto sstream = std::stringstream();
-    sstream << map_name << "\\map" << tile_idx.x << "_" << std::setfill('0') << std::setw(2) << tile_idx.z << ".blp";
-    std::string tilename_left = sstream.str();
-    _world->mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
+    try
+    {
+        std::string map_name = gMapDB.getByID(_world->mapIndex._map_id).getString(MapDB::InternalName);
+        auto sstream = std::stringstream();
+        sstream << map_name << "\\map" << tile_idx.x << "_" << std::setfill('0') << std::setw(2) << tile_idx.z << ".blp";
+        std::string tilename_left = sstream.str();
+        _world->mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
+    }
+    catch(MapDB::NotFound)
+    {
+        LogError << "SaveMinimap : Couldn't find entry " << _world->mapIndex._map_id << std::endl;
+        assert(false);
+    }
 
     if (unload)
     {

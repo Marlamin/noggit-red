@@ -267,29 +267,75 @@ namespace Noggit
         void zone_id_browser::add_new_zone()
         {
             // create new zone area id 
-            auto new_id = gAreaDB.getEmptyRecordID();
-            auto new_record = gAreaDB.addRecord(new_id);
-            // init some defaults
-            new_record.write(AreaDB::Continent, mapID);
-            // get new areabit
-            new_record.write(AreaDB::AreaBit, gAreaDB.get_new_areabit());
-            new_record.write(AreaDB::Flags, 64); // allow dueling, seems to the be the common default for regions
-            new_record.write(AreaDB::UnderwaterSoundProviderPreferences, 11); // underwater sound pref, usually set
+            int new_id = gAreaDB.getEmptyRecordID();
 
-            // locale stuff
-            new_record.writeString(AreaDB::Name, "Unnamed Noggit Zone"); // only write default name for enUS and enGB ? maybe get the client's locale somehow
-            new_record.writeString(AreaDB::Name + 1, "Unnamed Noggit Zone"); // enGB
-            new_record.write(AreaDB::Name + 16, 16712190); // loc mask, only verified for enUS
+            QDialog* zone_create_params = new QDialog(this);
+            zone_create_params->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
+            zone_create_params->setWindowTitle("New Zone settings");
+            QVBoxLayout* zone_create_params_layout = new QVBoxLayout(zone_create_params);
 
-            new_record.write(AreaDB::MinElevation, -500.0f); // loc mask, only verified for enUS
-            // save dbc instantly ?
-            gAreaDB.save();
-            // add to tree
-            auto areawidgetitem = add_area(new_id);
-            // select the new item
-            _area_tree->clearSelection();
-            areawidgetitem->setSelected(true);
-            open_area_editor();// open the editor
+            zone_create_params_layout->addWidget(new QLabel("AreaTable Id : ", zone_create_params));
+            QSpinBox* params_id_spinbox = new QSpinBox(zone_create_params);
+            params_id_spinbox->setRange(1, std::numeric_limits<int>::max());
+            params_id_spinbox->setValue(new_id);
+            zone_create_params_layout->addWidget(params_id_spinbox);
+
+            zone_create_params_layout->addWidget(new QLabel("Zone Name : ", zone_create_params));
+            QLineEdit* params_name_ledit = new QLineEdit(zone_create_params);
+            params_name_ledit->setText("Unnamed Noggit Zone");
+            zone_create_params_layout->addWidget(params_name_ledit);
+
+            QPushButton* params_okay = new QPushButton("Create new Zone", zone_create_params);
+            zone_create_params_layout->addWidget(params_okay);
+
+            connect(params_okay, &QPushButton::clicked
+                , [=]()
+                {
+                    // check if ID is valid
+                    if (!gAreaDB.CheckIfIdExists(params_id_spinbox->value()))
+                    {
+                        zone_create_params->accept();
+                    }
+                    else
+                    {
+                        QMessageBox::warning
+                        (nullptr
+                            , "ID already in use"
+                            , "Id is already used, use a different one"
+                            , QMessageBox::Ok
+                        );
+                    }
+                });
+
+            // start popup and wait for ok button
+            if (zone_create_params->exec() == QDialog::Accepted)
+            {
+                auto new_record = gAreaDB.addRecord(params_id_spinbox->value()); // could add a try catch but we already check if id is used before
+                // init some defaults
+                new_record.write(AreaDB::Continent, mapID);
+                // get new areabit
+                new_record.write(AreaDB::AreaBit, gAreaDB.get_new_areabit());
+                unsigned int flags = 0;
+                flags |= (1 << 6); // Allow Dueling
+                new_record.write(AreaDB::Flags, flags);
+                new_record.write(AreaDB::UnderwaterSoundProviderPreferences, 11); // underwater sound pref, usually set
+
+                // locale stuff
+                // new_record.writeString(AreaDB::Name, params_name_ledit->text().toStdString()); // only write default name for enUS and enGB ? maybe get the client's locale somehow
+                int locale_id = Noggit::Application::NoggitApplication::instance()->clientData()->getLocaleId();
+                new_record.writeLocalizedString(AreaDB::Name, params_name_ledit->text().toStdString(), locale_id);
+                new_record.write(AreaDB::Name + 16, 16712190); // loc mask, only verified for enUS
+
+                new_record.write(AreaDB::MinElevation, -500.0f);
+                // save dbc instantly ?
+                gAreaDB.save();
+                // add to tree
+                auto areawidgetitem = add_area(new_id);
+                // select the new item
+                _area_tree->clearSelection();
+                areawidgetitem->setSelected(true);
+                open_area_editor();// open the editor
+            }
         }
 
         void zone_id_browser::add_new_subzone()
@@ -303,42 +349,91 @@ namespace Noggit
             std::uint32_t selected_parent_area_id = gAreaDB.get_area_parent(selected_areaid); // the selected area's parentid
             if (selected_parent_area_id)
             {
-                // error, parent must not have a parent
-                QMessageBox messagebox;
-                messagebox.setIcon(QMessageBox::Information);
-                messagebox.setWindowIcon(QIcon(":/icon"));
-                messagebox.setWindowTitle("Wrong Parent type");
-                messagebox.setText("The parent must be a Zone, not a Subzone.");
-                messagebox.exec();
+                QMessageBox::information
+                (nullptr
+                    , "Wrong Parent type"
+                    , "The parent must be a Zone, not a Subzone."
+                    , QMessageBox::Ok
+                );
                 return;
             }
 
-            auto new_id = gAreaDB.getEmptyRecordID();
-            auto new_record = gAreaDB.addRecord(new_id);
-            // init some defaults
-            new_record.write(AreaDB::Continent, mapID);
+            int new_id = gAreaDB.getEmptyRecordID();
 
-            new_record.write(AreaDB::Region, selected_areaid); // set selecetd area as parent.
-            // get new areabit
-            new_record.write(AreaDB::AreaBit, gAreaDB.get_new_areabit());
-            new_record.write(AreaDB::Flags, 1073759296); // allow dueling + force area on dynamic transport + enable flight bounds+ subzone flags
-            new_record.write(AreaDB::UnderwaterSoundProviderPreferences, 11); // underwater sound pref, usually set
-            // lcoale stuff
-            new_record.writeString(AreaDB::Name, "Unnamed Noggit Subzone"); // only write default name for enUS and enGB ? maybe get the client's locale somehow
-            new_record.writeString(AreaDB::Name + 1, "Unnamed Noggit Subzone"); // enGB
-            new_record.write(AreaDB::Name + 16, 16712190); // loc mask, only verified for enUS
+            QDialog* zone_create_params = new QDialog(this);
+            zone_create_params->setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint);
+            zone_create_params->setWindowTitle("New Zone settings");
+            QVBoxLayout* zone_create_params_layout = new QVBoxLayout(zone_create_params);
 
-            new_record.write(AreaDB::MinElevation, -500.0f); // loc mask, only verified for enUS
-            // save dbc instantly ?
-            gAreaDB.save();
-            // add to tree
-            auto areawidgetitem = add_area(new_id);
-            // select the new item
-            _area_tree->clearSelection();
-            areawidgetitem->setSelected(true);
-            open_area_editor();// open the editor
+            zone_create_params_layout->addWidget(new QLabel("AreaTable Id : ", zone_create_params));
+            QSpinBox* params_id_spinbox = new QSpinBox(zone_create_params);
+            params_id_spinbox->setRange(1, std::numeric_limits<int>::max());
+            params_id_spinbox->setValue(new_id);
+            zone_create_params_layout->addWidget(params_id_spinbox);
+
+            zone_create_params_layout->addWidget(new QLabel("Zone Name : ", zone_create_params));
+            QLineEdit* params_name_ledit = new QLineEdit(zone_create_params);
+            params_name_ledit->setText("Unnamed Noggit Zone");
+            zone_create_params_layout->addWidget(params_name_ledit);
+
+            QPushButton* params_okay = new QPushButton("Create new Zone", zone_create_params);
+            zone_create_params_layout->addWidget(params_okay);
+
+            connect(params_okay, &QPushButton::clicked
+                , [=]()
+                {
+                    // check if ID is valid
+                    int id = params_id_spinbox->value();
+                    bool exists = gAreaDB.CheckIfIdExists(params_id_spinbox->value());
+                    if (exists)
+                    {
+                        QMessageBox::warning
+                        (nullptr
+                            , "ID already in use"
+                            , "Id is already used, use a different one"
+                            , QMessageBox::Ok
+                        );
+                    }
+                    else
+                    {
+                        zone_create_params->accept();
+                    }
+                });
+
+            // start popup and wait for ok button
+            if (zone_create_params->exec() == QDialog::Accepted)
+            {
+                auto new_record = gAreaDB.addRecord(params_id_spinbox->value());
+                // init some defaults
+                new_record.write(AreaDB::Continent, mapID);
+
+                new_record.write(AreaDB::Region, selected_areaid); // set selecetd area as parent.
+                // get new areabit
+                new_record.write(AreaDB::AreaBit, gAreaDB.get_new_areabit());
+                unsigned int flags = 0;
+                flags |= (1 << 6); // Allow Dueling
+                flags |= (1 << 10); // force area on dynamic transport
+                flags |= (1 << 14); // enable flight bounds
+                flags |= (1 << 30); // subzone flag
+                new_record.write(AreaDB::Flags, flags); // allow dueling + force area on dynamic transport + enable flight bounds+ subzone flags
+                new_record.write(AreaDB::UnderwaterSoundProviderPreferences, 11); // underwater sound pref, usually set
+                // lcoale stuff
+                int locale_id = Noggit::Application::NoggitApplication::instance()->clientData()->getLocaleId();
+                new_record.writeLocalizedString(AreaDB::Name, params_name_ledit->text().toStdString(), locale_id);
+                new_record.write(AreaDB::Name + 16, 16712190); // loc mask, only verified for enUS
+
+                new_record.write(AreaDB::MinElevation, -500.0f); // loc mask, only verified for enUS
+                // save dbc instantly ?
+                gAreaDB.save();
+                // add to tree
+                auto areawidgetitem = add_area(new_id);
+                // select the new item
+                _area_tree->clearSelection();
+                areawidgetitem->setSelected(true);
+                open_area_editor();// open the editor
+            }
+
         }
-
 
         AreaEditor::AreaEditor(QWidget* parent) 
         : QWidget(parent)
@@ -490,7 +585,8 @@ namespace Noggit
             auto flags_layout = new QVBoxLayout(area_flags_group);
 
             _flags_value_spinbox = new QSpinBox(this);
-            _flags_value_spinbox->setRange(0, INT_MAX); // uint?
+            _flags_value_spinbox->setRange(0, INT_MAX); // uint not necessary for wrath because we only have 31 flags. 
+                                                            // for cata+ we'll need all 32 bits instead, might need a line edit
             flags_layout->addWidget(_flags_value_spinbox);
 
             // TODO : update checkboxes when value is changed, temporarly disable it from edit
@@ -508,16 +604,15 @@ namespace Noggit
                     // int old_value = _flags_value_spinbox->value();
                     int new_value = _flags_value_spinbox->value();
                     if (state) // set bit
-                        new_value |= (1ULL << (i));
+                        new_value |= (1U << (i));
                     else // remove bit
-                        new_value &= ~(1ULL << (i));
+                        new_value &= ~(1U << (i));
                         
                     _flags_value_spinbox->setValue(new_value);
                     });
             }
             // hide some useless flags to gain space
             flags_checkboxes[30]->setEnabled(false); // user can't set subzone flag.
-            flags_checkboxes[30]->setHidden(true); // subzone flag
             flags_checkboxes[20]->setHidden(true); // tournement realm thingy, useless for pservers
             flags_checkboxes[17]->setHidden(true); // "Area not in use", prob some blizz dev stuff
             //************************************//
@@ -580,13 +675,21 @@ namespace Noggit
                 _parent_area_label->setText(ss.str().c_str());
 
                 // _parent_area_label->setText(std::to_string( tree_selected_id).c_str());
-                auto curr_record = gAreaDB.getByID(_area_id_label->text().toInt());
-                curr_record.write(AreaDB::Region, tree_selected_id);
-                // update the tree
-                parent->buildAreaList();
-                // select the item ?
-                auto item = parent->create_or_get_tree_widget_item(_area_id_label->text().toInt());
-                // parent->selected(_area_id_label->text().toInt());
+                try
+                {
+                    auto curr_record = gAreaDB.getByID(_area_id_label->text().toInt());
+                    curr_record.write(AreaDB::Region, tree_selected_id);
+                    // update the tree
+                    parent->buildAreaList();
+                    // select the item ?
+                    auto item = parent->create_or_get_tree_widget_item(_area_id_label->text().toInt());
+                    // parent->selected(_area_id_label->text().toInt());
+                }
+                catch (AreaDB::NotFound)
+                {
+
+                }
+
                 });
 
             connect(save_area_button, &QPushButton::clicked, [=]() {
@@ -604,241 +707,253 @@ namespace Noggit
 
         void AreaEditor::load_area(int area_id)
         {
-            DBCFile::Record record = gAreaDB.getByID(area_id);
-            // record.getString(AreaDB::Name)
-
-            _area_id_label->setText(QString(std::to_string(area_id).c_str()));
-
-            _areabit = record.getInt(AreaDB::AreaBit);
-
-            _parent_area_id = record.getInt(AreaDB::Region);
-
-            if (_parent_area_id)
+            try
             {
-                std::stringstream ss;
-                ss << _parent_area_id << "-" << gAreaDB.getAreaFullName(_parent_area_id);
-                _parent_area_label->setText(ss.str().c_str());
-            }
-            else
-                _parent_area_label->setText("-NONE-");
+                DBCFile::Record record = gAreaDB.getByID(area_id);
 
-            // hide some UI if not subzone
-            _set_parent_button->setHidden(_parent_area_id ? false : true);
+                _area_id_label->setText(QString(std::to_string(area_id).c_str()));
 
-            // _area_name_ledit->setText(record.getString(AreaDB::Name));
-            _area_name->fill(record, AreaDB::Name);
+                _areabit = record.getInt(AreaDB::AreaBit);
 
-            _flags_value_spinbox->setValue(record.getInt(AreaDB::Flags));
+                _parent_area_id = record.getInt(AreaDB::Region);
 
-            std::bitset<32> IntBits(_flags_value_spinbox->value());
-            for (int i = 0; i < 31; i++)
-                flags_checkboxes[i]->setChecked(IntBits[i]);
+                if (_parent_area_id)
+                {
+                    std::stringstream ss;
+                    ss << _parent_area_id << "-" << gAreaDB.getAreaFullName(_parent_area_id);
+                    _parent_area_label->setText(ss.str().c_str());
+                }
+                else
+                    _parent_area_label->setText("-NONE-");
 
-            _exploration_level_spinbox->setValue(record.getInt(AreaDB::ExplorationLevel));
+                // hide some UI if not subzone
+                _set_parent_button->setHidden(_parent_area_id ? false : true);
 
-            int faction_group_mask = record.getInt(AreaDB::FactionGroup);
-            switch (faction_group_mask) // hardcoded but can be read from factiongroup.dbc
-            {
-                case 2:
-                    _faction_group_combobox->setCurrentIndex(1);
-                    break;
-                case 4:
-                        _faction_group_combobox->setCurrentIndex(2);
+                // _area_name_ledit->setText(record.getString(AreaDB::Name));
+                _area_name->fill(record, AreaDB::Name);
+
+                _flags_value_spinbox->setValue(record.getInt(AreaDB::Flags));
+
+                std::bitset<32> IntBits(_flags_value_spinbox->value());
+                for (int i = 0; i < 31; i++)
+                    flags_checkboxes[i]->setChecked(IntBits[i]);
+
+                _exploration_level_spinbox->setValue(record.getInt(AreaDB::ExplorationLevel));
+
+                int faction_group_mask = record.getInt(AreaDB::FactionGroup);
+                switch (faction_group_mask) // hardcoded but can be read from factiongroup.dbc
+                {
+                    case 2:
+                        _faction_group_combobox->setCurrentIndex(1);
                         break;
-                case 6:
-                    _faction_group_combobox->setCurrentIndex(3);
-                    break;
-                default:
-                    _faction_group_combobox->setCurrentIndex(0);
-            }
+                    case 4:
+                            _faction_group_combobox->setCurrentIndex(2);
+                            break;
+                    case 6:
+                        _faction_group_combobox->setCurrentIndex(3);
+                        break;
+                    default:
+                        _faction_group_combobox->setCurrentIndex(0);
+                }
 
-            _min_elevation_spinbox->setValue(record.getFloat(AreaDB::MinElevation)); // only 3 known values : -5000, -500, 1000
+                _min_elevation_spinbox->setValue(record.getFloat(AreaDB::MinElevation)); // only 3 known values : -5000, -500, 1000
 
-            _ambiant_multiplier->setValue(record.getFloat(AreaDB::AmbientMultiplier) * 100);
+                _ambiant_multiplier->setValue(record.getFloat(AreaDB::AmbientMultiplier) * 100);
 
-            int sound_provider_id = record.getInt(AreaDB::SoundProviderPreferences);
-            if (sound_provider_id != 0 && gSoundProviderPreferencesDB.CheckIfIdExists(sound_provider_id))
-            {
-                int row_id = gSoundProviderPreferencesDB.getRecordRowId(sound_provider_id);
-                _sound_provider_preferences_cbbox->setCurrentIndex(row_id + 1); // index 0 = "None"
-            }
-            else
-                _sound_provider_preferences_cbbox->setCurrentIndex(0);
-
-            int underwater_sound_provider_id = record.getInt(AreaDB::UnderwaterSoundProviderPreferences);
-            if (underwater_sound_provider_id != 0 && gSoundProviderPreferencesDB.CheckIfIdExists(underwater_sound_provider_id))
-            {
-                int row_id = gSoundProviderPreferencesDB.getRecordRowId(underwater_sound_provider_id);
-                _underwater_sound_provider_preferences_cbbox->setCurrentIndex(row_id + 1); // index 0 = "None"
-            }
-            else
-                _underwater_sound_provider_preferences_cbbox->setCurrentIndex(0);
-
-            int zone_music_id = record.getInt(AreaDB::ZoneMusic);
-            if (zone_music_id != 0 && gZoneMusicDB.CheckIfIdExists(zone_music_id))
-            {
-                _zone_music_button->setProperty("id", zone_music_id);
-                auto zone_music_record = gZoneMusicDB.getByID(zone_music_id);
-                std::stringstream ss;
-                ss << zone_music_id << "-" << zone_music_record.getString(ZoneMusicDB::Name);
-                _zone_music_button->setText(ss.str().c_str());
-            }
-            else
-            {
-                _zone_music_button->setText("-NONE-");
-                _zone_music_button->setProperty("id", 0);
-            }
-
-            int zone_intro_music_id = record.getInt(AreaDB::ZoneIntroMusicTable);
-            if (zone_intro_music_id != 0 && gZoneIntroMusicTableDB.CheckIfIdExists(zone_intro_music_id))
-            {
-                _zone_intro_music_button->setProperty("id", zone_intro_music_id);
-                auto zone_intro_music_record = gZoneIntroMusicTableDB.getByID(zone_intro_music_id);
-                std::stringstream ss;
-                ss << zone_intro_music_id << "-" << zone_intro_music_record.getString(ZoneIntroMusicTableDB::Name);
-                _zone_intro_music_button->setText(ss.str().c_str());
-            }
-            else
-            {
-                _zone_intro_music_button->setProperty("id", 0);
-                _zone_intro_music_button->setText("-NONE-");
-            }
-
-            int sound_ambiance_id = record.getInt(AreaDB::SoundAmbience);
-            if (sound_ambiance_id != 0 && gSoundAmbienceDB.CheckIfIdExists(sound_ambiance_id))
-            {
-                auto sound_ambiance_record = gSoundAmbienceDB.getByID(sound_ambiance_id);
-
-                int day_sound_id = sound_ambiance_record.getInt(SoundAmbienceDB::SoundEntry_day);
-                if (day_sound_id != 0 && gSoundEntriesDB.CheckIfIdExists(day_sound_id))
+                int sound_provider_id = record.getInt(AreaDB::SoundProviderPreferences);
+                if (sound_provider_id != 0 && gSoundProviderPreferencesDB.CheckIfIdExists(sound_provider_id))
                 {
-                    auto sound_entry_day_record = gSoundEntriesDB.getByID(day_sound_id);
-                    std::stringstream ss_day;
-                    ss_day << day_sound_id << "-" << sound_entry_day_record.getString(SoundEntriesDB::Name);
-                    _sound_ambiance_day_button->setText(ss_day.str().c_str());
-                    _sound_ambiance_day_button->setProperty("id", day_sound_id);
+                    int row_id = gSoundProviderPreferencesDB.getRecordRowId(sound_provider_id);
+                    _sound_provider_preferences_cbbox->setCurrentIndex(row_id + 1); // index 0 = "None"
+                }
+                else
+                    _sound_provider_preferences_cbbox->setCurrentIndex(0);
+
+                int underwater_sound_provider_id = record.getInt(AreaDB::UnderwaterSoundProviderPreferences);
+                if (underwater_sound_provider_id != 0 && gSoundProviderPreferencesDB.CheckIfIdExists(underwater_sound_provider_id))
+                {
+                    int row_id = gSoundProviderPreferencesDB.getRecordRowId(underwater_sound_provider_id);
+                    _underwater_sound_provider_preferences_cbbox->setCurrentIndex(row_id + 1); // index 0 = "None"
+                }
+                else
+                    _underwater_sound_provider_preferences_cbbox->setCurrentIndex(0);
+
+                int zone_music_id = record.getInt(AreaDB::ZoneMusic);
+                if (zone_music_id != 0 && gZoneMusicDB.CheckIfIdExists(zone_music_id))
+                {
+                    _zone_music_button->setProperty("id", zone_music_id);
+                    auto zone_music_record = gZoneMusicDB.getByID(zone_music_id);
+                    std::stringstream ss;
+                    ss << zone_music_id << "-" << zone_music_record.getString(ZoneMusicDB::Name);
+                    _zone_music_button->setText(ss.str().c_str());
                 }
                 else
                 {
-                    _sound_ambiance_day_button->setText("-NONE-");
+                    _zone_music_button->setText("-NONE-");
+                    _zone_music_button->setProperty("id", 0);
+                }
+
+                int zone_intro_music_id = record.getInt(AreaDB::ZoneIntroMusicTable);
+                if (zone_intro_music_id != 0 && gZoneIntroMusicTableDB.CheckIfIdExists(zone_intro_music_id))
+                {
+                    _zone_intro_music_button->setProperty("id", zone_intro_music_id);
+                    auto zone_intro_music_record = gZoneIntroMusicTableDB.getByID(zone_intro_music_id);
+                    std::stringstream ss;
+                    ss << zone_intro_music_id << "-" << zone_intro_music_record.getString(ZoneIntroMusicTableDB::Name);
+                    _zone_intro_music_button->setText(ss.str().c_str());
+                }
+                else
+                {
+                    _zone_intro_music_button->setProperty("id", 0);
+                    _zone_intro_music_button->setText("-NONE-");
+                }
+
+                int sound_ambiance_id = record.getInt(AreaDB::SoundAmbience);
+                if (sound_ambiance_id != 0 && gSoundAmbienceDB.CheckIfIdExists(sound_ambiance_id))
+                {
+                    auto sound_ambiance_record = gSoundAmbienceDB.getByID(sound_ambiance_id);
+
+                    int day_sound_id = sound_ambiance_record.getInt(SoundAmbienceDB::SoundEntry_day);
+                    if (day_sound_id != 0 && gSoundEntriesDB.CheckIfIdExists(day_sound_id))
+                    {
+                        auto sound_entry_day_record = gSoundEntriesDB.getByID(day_sound_id);
+                        std::stringstream ss_day;
+                        ss_day << day_sound_id << "-" << sound_entry_day_record.getString(SoundEntriesDB::Name);
+                        _sound_ambiance_day_button->setText(ss_day.str().c_str());
+                        _sound_ambiance_day_button->setProperty("id", day_sound_id);
+                    }
+                    else
+                    {
+                        _sound_ambiance_day_button->setText("-NONE-");
+                        _sound_ambiance_day_button->setProperty("id", 0);
+                    }
+
+                    int night_sound_id = sound_ambiance_record.getInt(SoundAmbienceDB::SoundEntry_night);
+                    if (night_sound_id != 0 && gSoundEntriesDB.CheckIfIdExists(night_sound_id))
+                    {
+                        auto sound_entry_night_record = gSoundEntriesDB.getByID(night_sound_id);
+                        std::stringstream ss_night;
+                        ss_night << night_sound_id << "-" << sound_entry_night_record.getString(SoundEntriesDB::Name);
+                        _sound_ambiance_night_button->setText(ss_night.str().c_str());
+                        _sound_ambiance_night_button->setProperty("id", night_sound_id);
+                    }
+                    else
+                    {
+                        _sound_ambiance_night_button->setText("-NONE-");
+                        _sound_ambiance_night_button->setProperty("id", 0);
+                    }
+                }
+                else
+                {
                     _sound_ambiance_day_button->setProperty("id", 0);
-                }
-
-                int night_sound_id = sound_ambiance_record.getInt(SoundAmbienceDB::SoundEntry_night);
-                if (night_sound_id != 0 && gSoundEntriesDB.CheckIfIdExists(night_sound_id))
-                {
-                    auto sound_entry_night_record = gSoundEntriesDB.getByID(night_sound_id);
-                    std::stringstream ss_night;
-                    ss_night << night_sound_id << "-" << sound_entry_night_record.getString(SoundEntriesDB::Name);
-                    _sound_ambiance_night_button->setText(ss_night.str().c_str());
-                    _sound_ambiance_night_button->setProperty("id", night_sound_id);
-                }
-                else
-                {
-                    _sound_ambiance_night_button->setText("-NONE-");
+                    _sound_ambiance_day_button->setText("-NONE-");
                     _sound_ambiance_night_button->setProperty("id", 0);
+                    _sound_ambiance_night_button->setText("-NONE-");
                 }
             }
-            else
+            catch (AreaDB::NotFound)
             {
-                _sound_ambiance_day_button->setProperty("id", 0);
-                _sound_ambiance_day_button->setText("-NONE-");
-                _sound_ambiance_night_button->setProperty("id", 0);
-                _sound_ambiance_night_button->setText("-NONE-");
-            }
 
+            }
         }
 
         void AreaEditor::save_area()
         {
-            DBCFile::Record record = gAreaDB.getByID(_area_id_label->text().toInt()); // is_new_record ? gLightDB.addRecord(Id) : gLightDB.getByID(Id);
-            // record.write(AreaDB::ID, entry_id);
-            // rewrite mapid ?
-            record.write(AreaDB::Region, _parent_area_id);
-            record.write(AreaDB::AreaBit, _areabit);
-            record.write(AreaDB::Flags, _flags_value_spinbox->value());
-
-            int SoundProviderPreferences_id = 0;
-            if (_sound_provider_preferences_cbbox->currentIndex() != 0)
+            try
             {
-                auto rec = gSoundProviderPreferencesDB.getRecord(_sound_provider_preferences_cbbox->currentIndex() - 1);
-                SoundProviderPreferences_id = rec.getInt(SoundProviderPreferencesDB::ID);
-            }
-            record.write(AreaDB::SoundProviderPreferences, SoundProviderPreferences_id);
-            
-            int underwaterSoundProviderPreferences_id = 0;
-            if (_underwater_sound_provider_preferences_cbbox->currentIndex() != 0)
-            {
-                auto rec = gSoundProviderPreferencesDB.getRecord(_underwater_sound_provider_preferences_cbbox->currentIndex() - 1);
-                underwaterSoundProviderPreferences_id = rec.getInt(SoundProviderPreferencesDB::ID);
-            }
-            record.write(AreaDB::UnderwaterSoundProviderPreferences, underwaterSoundProviderPreferences_id);
+                DBCFile::Record record = gAreaDB.getByID(_area_id_label->text().toInt()); // is_new_record ? gLightDB.addRecord(Id) : gLightDB.getByID(Id);
+                // record.write(AreaDB::ID, entry_id);
+                // rewrite mapid ?
+                record.write(AreaDB::Region, _parent_area_id);
+                record.write(AreaDB::AreaBit, _areabit);
+                record.write(AreaDB::Flags, _flags_value_spinbox->value());
 
-            // Ambiance ID. Blizzard stores those as unamed pair
-            // Just iterate the DBC to see if an entry with our settings already exists, if not create it.
-            // The reasoning for not having a selector/picker with the existing pairs is that it has less freedom, is harder to use and it's ugly if they don't have a name.
-            // This doesn't have the option to edit that entry for all its users though.
-
-            int soundambience_day = _sound_ambiance_day_button->property("id").toInt();
-            int soundambience_night = _sound_ambiance_night_button->property("id").toInt();
-
-            if (soundambience_day && !soundambience_night) // if day is set but not night, set night to day
-                soundambience_night = soundambience_day;
-            else if (!soundambience_day && soundambience_night) // night to day
-                soundambience_night = soundambience_day;
-
-            if (soundambience_day && soundambience_night) // check if both day and night are set
-            {
-                bool sound_ambiance_exists {false};
-                for (DBCFile::Iterator i = gSoundAmbienceDB.begin(); i != gSoundAmbienceDB.end(); ++i)
+                int SoundProviderPreferences_id = 0;
+                if (_sound_provider_preferences_cbbox->currentIndex() != 0)
                 {
-                    int day_id = i->getInt(SoundAmbienceDB::SoundEntry_day);
-                    int night_id = i->getInt(SoundAmbienceDB::SoundEntry_night);
-                    if (day_id == soundambience_day && night_id == soundambience_night)
+                    auto rec = gSoundProviderPreferencesDB.getRecord(_sound_provider_preferences_cbbox->currentIndex() - 1);
+                    SoundProviderPreferences_id = rec.getInt(SoundProviderPreferencesDB::ID);
+                }
+                record.write(AreaDB::SoundProviderPreferences, SoundProviderPreferences_id);
+                
+                int underwaterSoundProviderPreferences_id = 0;
+                if (_underwater_sound_provider_preferences_cbbox->currentIndex() != 0)
+                {
+                    auto rec = gSoundProviderPreferencesDB.getRecord(_underwater_sound_provider_preferences_cbbox->currentIndex() - 1);
+                    underwaterSoundProviderPreferences_id = rec.getInt(SoundProviderPreferencesDB::ID);
+                }
+                record.write(AreaDB::UnderwaterSoundProviderPreferences, underwaterSoundProviderPreferences_id);
+
+                // Ambiance ID. Blizzard stores those as unamed pair
+                // Just iterate the DBC to see if an entry with our settings already exists, if not create it.
+                // The reasoning for not having a selector/picker with the existing pairs is that it has less freedom, is harder to use and it's ugly if they don't have a name.
+                // This doesn't have the option to edit that entry for all its users though.
+
+                int soundambience_day = _sound_ambiance_day_button->property("id").toInt();
+                int soundambience_night = _sound_ambiance_night_button->property("id").toInt();
+
+                if (soundambience_day && !soundambience_night) // if day is set but not night, set night to day
+                    soundambience_night = soundambience_day;
+                else if (!soundambience_day && soundambience_night) // night to day
+                    soundambience_night = soundambience_day;
+
+                if (soundambience_day && soundambience_night) // check if both day and night are set
+                {
+                    bool sound_ambiance_exists {false};
+                    for (DBCFile::Iterator i = gSoundAmbienceDB.begin(); i != gSoundAmbienceDB.end(); ++i)
                     {
-                        record.write(AreaDB::SoundAmbience, i->getInt(SoundAmbienceDB::ID));
-                        sound_ambiance_exists = true;
-                        break;
+                        int day_id = i->getInt(SoundAmbienceDB::SoundEntry_day);
+                        int night_id = i->getInt(SoundAmbienceDB::SoundEntry_night);
+                        if (day_id == soundambience_day && night_id == soundambience_night)
+                        {
+                            record.write(AreaDB::SoundAmbience, i->getInt(SoundAmbienceDB::ID));
+                            sound_ambiance_exists = true;
+                            break;
+                        }
+                    }
+                    if (!sound_ambiance_exists)
+                    {
+                        // create new sond entry record with the two ids
+                        auto new_id = gSoundAmbienceDB.getEmptyRecordID();
+                        auto new_record = gSoundAmbienceDB.addRecord(new_id);
+
+                        new_record.write(SoundAmbienceDB::SoundEntry_day, soundambience_day);
+                        new_record.write(SoundAmbienceDB::SoundEntry_night, soundambience_night);
+                        gSoundAmbienceDB.save();
+                        record.write(AreaDB::SoundAmbience, new_id);
                     }
                 }
-                if (!sound_ambiance_exists)
-                {
-                    // create new sond entry record with the two ids
-                    auto new_id = gSoundAmbienceDB.getEmptyRecordID();
-                    auto new_record = gSoundAmbienceDB.addRecord(new_id);
+                else
+                    record.write(AreaDB::SoundAmbience, 0); // if night or day isn't set, set to 0
 
-                    new_record.write(SoundAmbienceDB::SoundEntry_day, soundambience_day);
-                    new_record.write(SoundAmbienceDB::SoundEntry_night, soundambience_night);
-                    gSoundAmbienceDB.save();
-                    record.write(AreaDB::SoundAmbience, new_id);
-                }
+
+                record.write(AreaDB::ZoneMusic, _zone_music_button->property("id").toInt());
+                record.write(AreaDB::ZoneIntroMusicTable, _zone_intro_music_button->property("id").toInt());
+
+                record.write(AreaDB::ExplorationLevel, _exploration_level_spinbox->value());
+
+                _area_name->toRecord(record, AreaDB::Name);
+                // update name in the tree
+                auto parent = static_cast<zone_id_browser*>(this->parentWidget());
+                auto item = parent->create_or_get_tree_widget_item(_area_id_label->text().toInt());
+                std::stringstream ss;
+                std::string areaName = record.getLocalizedString(AreaDB::Name);
+                ss << _area_id_label->text().toInt() << "-" << areaName;
+                item->setText(0, QString(ss.str().c_str()));
+
+                record.write(AreaDB::FactionGroup, _faction_group_combobox->currentIndex() * 2);
+                record.write(AreaDB::MinElevation, static_cast<float>(_min_elevation_spinbox->value()));
+                record.write(AreaDB::AmbientMultiplier, _ambiant_multiplier->value() / 100.0f);
+                record.write(AreaDB::LightId, 0); // never used
+
+                gAreaDB.save();
+
+                load_area(_area_id_label->text().toInt());// reload ui, especially for night/day ambience
             }
-            else
-                record.write(AreaDB::SoundAmbience, 0); // if night or day isn't set, set to 0
+            catch (AreaDB::NotFound)
+            {
 
-
-            record.write(AreaDB::ZoneMusic, _zone_music_button->property("id").toInt());
-            record.write(AreaDB::ZoneIntroMusicTable, _zone_intro_music_button->property("id").toInt());
-
-            record.write(AreaDB::ExplorationLevel, _exploration_level_spinbox->value());
-
-            _area_name->toRecord(record, AreaDB::Name);
-            // update name in the tree
-            auto parent = static_cast<zone_id_browser*>(this->parentWidget());
-            auto item = parent->create_or_get_tree_widget_item(_area_id_label->text().toInt());
-            std::stringstream ss;
-            std::string areaName = record.getLocalizedString(AreaDB::Name);
-            ss << _area_id_label->text().toInt() << "-" << areaName;
-            item->setText(0, QString(ss.str().c_str()));
-
-            record.write(AreaDB::FactionGroup, _faction_group_combobox->currentIndex() * 2);
-            record.write(AreaDB::MinElevation, static_cast<float>(_min_elevation_spinbox->value()));
-            record.write(AreaDB::AmbientMultiplier, _ambiant_multiplier->value() / 100.0f);
-            record.write(AreaDB::LightId, 0); // never used
-
-            gAreaDB.save();
-
-            load_area(_area_id_label->text().toInt()); // reload ui, especially for night/day ambience
+            } 
         }
 
     }

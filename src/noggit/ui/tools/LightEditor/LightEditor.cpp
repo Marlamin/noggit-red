@@ -409,35 +409,43 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 		_curr_sky->curr_sky_param = index;
 		_world->renderer()->skies()->update_sky_colors(_map_view->getCamera()->position, static_cast<int>(_world->time) % 2880); // find how to update sky
 
-		DBCFile::Record data = gLightDB.getByID(_curr_sky->Id);
-		int nb_user = 0;
-		for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i)
+		try
 		{
-			for (int l = 0; l < NUM_SkyParamsNames; l++)
+			DBCFile::Record data = gLightDB.getByID(_curr_sky->Id);
+			int nb_user = 0;
+			for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i)
 			{
-				if (i->getInt(LightDB::DataIDs + l) == data.getInt(LightDB::DataIDs + index))
-					nb_user++;
+				for (int l = 0; l < NUM_SkyParamsNames; l++)
+				{
+					if (i->getInt(LightDB::DataIDs + l) == data.getInt(LightDB::DataIDs + index))
+						nb_user++;
+				}
+			}
+			_nb_param_users->setText("This param is used " + nb_user);
+
+			auto sky_param = _curr_sky->skyParams[index];
+
+			glow_slider->setSliderPosition(sky_param->glow() * 100);
+			highlight_sky_checkbox->setCheckState(Qt::CheckState(sky_param->highlight_sky()));
+			if (_curr_sky->skybox.has_value())
+				skybox_model_lineedit->setText(QString::fromStdString(sky_param->skybox.value().model.get()->file_key().filepath()));
+			// alpha values
+			shallow_water_alpha_slider->setSliderPosition(sky_param->river_shallow_alpha() * 100);
+			deep_water_alpha_slider->setSliderPosition(sky_param->river_deep_alpha() * 100);
+			shallow_ocean_alpha_slider->setSliderPosition(sky_param->ocean_shallow_alpha() * 100);
+			deep_ocean_alpha_slider->setSliderPosition(sky_param->ocean_deep_alpha() * 100);
+			// color values
+			for (int i = 0; i < NUM_SkyColorNames; ++i)
+			{
+				LightsPreview[i]->SetPreview(sky_param->colorRows[i]);
+				//_color_value_Buttons[i]->setText(QString::fromStdString(std::format("{} / 16 values", sky_param->colorRows[i].size())));
 			}
 		}
-		_nb_param_users->setText("This param is used " + nb_user);
-
-		auto sky_param = _curr_sky->skyParams[index];
-
-		glow_slider->setSliderPosition(sky_param->glow() * 100);
-		highlight_sky_checkbox->setCheckState(Qt::CheckState(sky_param->highlight_sky()));
-		if (_curr_sky->skybox.has_value())
-			skybox_model_lineedit->setText(QString::fromStdString(sky_param->skybox.value().model.get()->file_key().filepath()));
-		// alpha values
-		shallow_water_alpha_slider->setSliderPosition(sky_param->river_shallow_alpha() * 100);
-		deep_water_alpha_slider->setSliderPosition(sky_param->river_deep_alpha() * 100);
-		shallow_ocean_alpha_slider->setSliderPosition(sky_param->ocean_shallow_alpha() * 100);
-		deep_ocean_alpha_slider->setSliderPosition(sky_param->ocean_deep_alpha() * 100);
-		// color values
-		for (int i = 0; i < NUM_SkyColorNames; ++i)
+		catch (LightDB::NotFound)
 		{
-			LightsPreview[i]->SetPreview(sky_param->colorRows[i]);
-			//_color_value_Buttons[i]->setText(QString::fromStdString(std::format("{} / 16 values", sky_param->colorRows[i].size())));
+			assert(false);
 		}
+
 		});
 
 	connect(SaveCurrentSkyButton, &QPushButton::clicked, [=]() {
