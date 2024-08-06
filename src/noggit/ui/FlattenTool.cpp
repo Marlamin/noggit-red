@@ -1,6 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/FlattenTool.hpp>
+#include <noggit/ui/FontNoggit.hpp>
 
 #include <noggit/World.h>
 #include <util/qt/overload.hpp>
