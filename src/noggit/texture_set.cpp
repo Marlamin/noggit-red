@@ -117,19 +117,27 @@ bool TextureSet::replace_texture (scoped_blp_texture_reference const& texture_to
   {
     textures[texture_to_replace_level] = std::move (replacement_texture);
 
+    QSettings settings;
+    bool do_merge_layers = settings.value("texture_merge_layers", true).toBool();
+
     // prevent texture duplication
     if (replacement_texture_level != -1 && replacement_texture_level != texture_to_replace_level)
     {
+      if (!do_merge_layers)
+      {
         auto sstream = std::stringstream();
         sstream << "error_" << replacement_texture_level << ".blp";
 
-      std::string fallback_tex_name = sstream.str();
-      auto fallback = scoped_blp_texture_reference(fallback_tex_name, _context);
+        std::string fallback_tex_name = sstream.str();
+        auto fallback = scoped_blp_texture_reference(fallback_tex_name, _context);
 
-      textures[replacement_texture_level] = std::move(fallback);
-
-      // temp alphamap changes are applied in here
-      // merge_layers(texture_to_replace_level, replacement_texture_level);
+        textures[replacement_texture_level] = std::move(fallback);
+      }
+      else
+      {
+        // temp alphamap changes are applied in here
+        merge_layers(texture_to_replace_level, replacement_texture_level);
+      }
     }
   }
 
