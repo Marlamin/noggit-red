@@ -330,7 +330,7 @@ namespace Noggit
                 // save dbc instantly ?
                 gAreaDB.save();
                 // add to tree
-                auto areawidgetitem = add_area(new_id);
+                auto areawidgetitem = add_area(params_id_spinbox->value());
                 // select the new item
                 _area_tree->clearSelection();
                 areawidgetitem->setSelected(true);
@@ -371,12 +371,12 @@ namespace Noggit
             params_id_spinbox->setValue(new_id);
             zone_create_params_layout->addWidget(params_id_spinbox);
 
-            zone_create_params_layout->addWidget(new QLabel("Zone Name : ", zone_create_params));
+            zone_create_params_layout->addWidget(new QLabel("Subzone Name : ", zone_create_params));
             QLineEdit* params_name_ledit = new QLineEdit(zone_create_params);
-            params_name_ledit->setText("Unnamed Noggit Zone");
+            params_name_ledit->setText("Unnamed Noggit Subzone");
             zone_create_params_layout->addWidget(params_name_ledit);
 
-            QPushButton* params_okay = new QPushButton("Create new Zone", zone_create_params);
+            QPushButton* params_okay = new QPushButton("Create new Subzone", zone_create_params);
             zone_create_params_layout->addWidget(params_okay);
 
             connect(params_okay, &QPushButton::clicked
@@ -426,7 +426,7 @@ namespace Noggit
                 // save dbc instantly ?
                 gAreaDB.save();
                 // add to tree
-                auto areawidgetitem = add_area(new_id);
+                auto areawidgetitem = add_area(params_id_spinbox->value());
                 // select the new item
                 _area_tree->clearSelection();
                 areawidgetitem->setSelected(true);
