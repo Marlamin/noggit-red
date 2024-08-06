@@ -1482,6 +1482,10 @@ void MapChunk::save(sExtendableArray& lADTFile
 
   if(texture_set)
   {
+    // HACKFIX -- Temp hackfix to force an alpha map save + doodad mapping update so ground effects aren't 1 save behind.
+    texture_set->save_alpha(use_big_alphamap);
+    texture_set->updateDoodadMapping();
+
     std::copy(texture_set->getDoodadMappingBase(), texture_set->getDoodadMappingBase() + 8
     , lMCNK_header->doodadMapping);
     *reinterpret_cast<std::uint64_t*>(lMCNK_header->doodadStencil)
