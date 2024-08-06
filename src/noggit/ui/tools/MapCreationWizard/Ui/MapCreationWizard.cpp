@@ -639,33 +639,43 @@ void MapCreationWizard::saveCurrentEntry()
       _world->mapIndex.create_empty_wdl();
 
   // Save Map.dbc record
-  DBCFile::Record record = _is_new_record ? gMapDB.addRecord(_cur_map_id) : gMapDB.getByID(_cur_map_id);
+  try
+  {
+    DBCFile::Record record = _is_new_record ? gMapDB.addRecord(_cur_map_id) : gMapDB.getByID(_cur_map_id);
 
-  record.writeString(MapDB::InternalName, _directory->text().toStdString());
+    record.writeString(MapDB::InternalName, _directory->text().toStdString());
 
-  record.write(MapDB::AreaType, _instance_type->itemData(_instance_type->currentIndex()).toInt());
-  record.write(MapDB::Flags, _sort_by_size_cat->isChecked() ? 16 : 0 );
-  _map_name->toRecord(record, MapDB::Name);
+    record.write(MapDB::AreaType, _instance_type->itemData(_instance_type->currentIndex()).toInt());
+    record.write(MapDB::Flags, _sort_by_size_cat->isChecked() ? 16 : 0 );
+    _map_name->toRecord(record, MapDB::Name);
 
-  record.write(MapDB::AreaTableID, _area_table_id->value());
-  _map_desc_alliance->toRecord(record, MapDB::MapDescriptionAlliance);
-  _map_desc_horde->toRecord(record, MapDB::MapDescriptionHorde);
-  record.write(MapDB::LoadingScreen, _loading_screen->value());
-  record.write(MapDB::minimapIconScale, static_cast<float>(_minimap_icon_scale->value()));
-  record.write(MapDB::corpseMapID, _corpse_map_id->itemData(_corpse_map_id->currentIndex()).toInt());
-  record.write(MapDB::corpseX, static_cast<float>(_corpse_x->value()));
-  record.write(MapDB::corpseY, static_cast<float>(_corpse_y->value()));
-  record.write(MapDB::TimeOfDayOverride, _time_of_day_override->value());
-  record.write(MapDB::ExpansionID, _expansion_id->itemData(_expansion_id->currentIndex()).toInt());
-  record.write(MapDB::RaidOffset, _raid_offset->value());
-  record.write(MapDB::NumberOfPlayers, _max_players->value());
+    record.write(MapDB::AreaTableID, _area_table_id->value());
+    _map_desc_alliance->toRecord(record, MapDB::MapDescriptionAlliance);
+    _map_desc_horde->toRecord(record, MapDB::MapDescriptionHorde);
+    record.write(MapDB::LoadingScreen, _loading_screen->value());
+    record.write(MapDB::minimapIconScale, static_cast<float>(_minimap_icon_scale->value()));
+    record.write(MapDB::corpseMapID, _corpse_map_id->itemData(_corpse_map_id->currentIndex()).toInt());
+    record.write(MapDB::corpseX, static_cast<float>(_corpse_x->value()));
+    record.write(MapDB::corpseY, static_cast<float>(_corpse_y->value()));
+    record.write(MapDB::TimeOfDayOverride, _time_of_day_override->value());
+    record.write(MapDB::ExpansionID, _expansion_id->itemData(_expansion_id->currentIndex()).toInt());
+    record.write(MapDB::RaidOffset, _raid_offset->value());
+    record.write(MapDB::NumberOfPlayers, _max_players->value());
 
-  gMapDB.save();
+    gMapDB.save();
 
-  emit map_dbc_updated();
+    emit map_dbc_updated();
 
-  _is_new_record = false;
+    _is_new_record = false;
+  }
+  catch (MapDB::AlreadyExists)
+  {
 
+  }
+  catch (MapDB::NotFound)
+  {
+
+  }
 }
 
 void MapCreationWizard::discardChanges()
@@ -831,6 +841,11 @@ LocaleDBCEntry::LocaleDBCEntry(QWidget* parent) : QWidget(parent)
   };
 
   layout->addWidget(_current_locale);
+
+  int locale_id = Noggit::Application::NoggitApplication::instance()->clientData()->getLocaleId();
+  _current_locale->setCurrentIndex(locale_id);
+  setCurrentLocale(_locale_names[locale_id]);
+
   // Connect
 
   connect ( _current_locale, &QComboBox::currentTextChanged

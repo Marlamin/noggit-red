@@ -130,27 +130,35 @@ namespace Noggit
             }
 
             // get files list
-            DBCFile::Record sound_entry_record = gSoundEntriesDB.getByID(sound_entry_id);
-
-            _directory_lbl->setText(sound_entry_record.getString(SoundEntriesDB::FilePath));
-
-            _volume_slider->setValue(sound_entry_record.getFloat(SoundEntriesDB::Volume) * 100);
-            _media_player->setVolume(sound_entry_record.getFloat(SoundEntriesDB::Volume) * 100);
-
-            for (int fileid = 0; fileid < 10; fileid++)
+            try
             {
-                std::string filename = sound_entry_record.getString(SoundEntriesDB::Filenames + fileid);
-                if (!filename.empty())
+                DBCFile::Record sound_entry_record = gSoundEntriesDB.getByID(sound_entry_id);
+
+                _directory_lbl->setText(sound_entry_record.getString(SoundEntriesDB::FilePath));
+
+                _volume_slider->setValue(sound_entry_record.getFloat(SoundEntriesDB::Volume) * 100);
+                _media_player->setVolume(sound_entry_record.getFloat(SoundEntriesDB::Volume) * 100);
+
+                for (int fileid = 0; fileid < 10; fileid++)
                 {
-                    // std::stringstream ss_filepah;
-                    // ss_filepath << directory << "\\" << filename;
-                    // music_files.push_back(ss_filepah.str());
-                    // music_files.push_back(filename);
-                    _files_listview->addItem(filename.c_str());
+                    std::string filename = sound_entry_record.getString(SoundEntriesDB::Filenames + fileid);
+                    if (!filename.empty())
+                    {
+                        // std::stringstream ss_filepah;
+                        // ss_filepath << directory << "\\" << filename;
+                        // music_files.push_back(ss_filepah.str());
+                        // music_files.push_back(filename);
+                        _files_listview->addItem(filename.c_str());
+                    }
                 }
+                _files_listview->setCurrentRow(0);
+                play_selected_sound();
             }
-            _files_listview->setCurrentRow(0);
-            play_selected_sound();
+            catch (SoundEntriesDB::NotFound)
+            {
+
+            }
+
         }
 
         void SoundEntryPlayer::PlaySingleSoundFile(std::string filepath, std::string dir_path)

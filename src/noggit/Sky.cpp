@@ -1043,137 +1043,155 @@ void Sky::save_to_dbc()
 {
     // Save Light.dbc record
     // find new empty ID : gLightDB.getEmptyRecordID(); .prob do it when creating new light instead.
-    DBCFile::Record data = is_new_record ? gLightDB.addRecord(Id) : gLightDB.getByID(Id);
-
-    // pos = glm::vec3(data->getFloat(LightDB::PositionX) / skymul, data->getFloat(LightDB::PositionY) / skymul, data->getFloat(LightDB::PositionZ) / skymul);
-    // record.write(1, _curr_sky-> map id
-    data.write(LightDB::PositionX, pos.x * skymul);
-    data.write(LightDB::PositionY, pos.y * skymul);
-    data.write(LightDB::PositionZ, pos.z * skymul);
-    data.write(LightDB::RadiusInner, r1 * skymul);
-    data.write(LightDB::RadiusOuter,r2 * skymul);
-    // data.write(7, Params Id TODO only needed for new entries
-
-    // save LightParams.dbc
-    // TODO : all params, not just clear.
-    for (int param_id = 0; param_id < NUM_SkyFloatParamsNames; param_id++)
+    try 
     {
-        // skip if no param
-        if (skyParams[param_id] == nullptr)
-            continue;
+        DBCFile::Record data = is_new_record ? gLightDB.addRecord(Id) : gLightDB.getByID(Id);
 
-        // TODO : several lights can use the same param, ask user if he wants to save a copy or edit it for all ?
-        int lightParam_dbc_id = 0;
-        if (is_new_record) // not for duplicates
-            lightParam_dbc_id = gLightParamsDB.getEmptyRecordID();
-        else
-            lightParam_dbc_id = data.getInt(LightDB::DataIDs + param_id);
+        // pos = glm::vec3(data->getFloat(LightDB::PositionX) / skymul, data->getFloat(LightDB::PositionY) / skymul, data->getFloat(LightDB::PositionZ) / skymul);
+        // record.write(1, _curr_sky-> map id
+        data.write(LightDB::PositionX, pos.x * skymul);
+        data.write(LightDB::PositionY, pos.y * skymul);
+        data.write(LightDB::PositionZ, pos.z * skymul);
+        data.write(LightDB::RadiusInner, r1 * skymul);
+        data.write(LightDB::RadiusOuter,r2 * skymul);
+        // data.write(7, Params Id TODO only needed for new entries
 
-        if (lightParam_dbc_id == 0)
-            continue;
-
-        int light_int_start = lightParam_dbc_id * NUM_SkyColorNames - 17;
-
-        for (int i = 0; i < NUM_SkyColorNames; ++i)
+        // save LightParams.dbc
+        // TODO : all params, not just clear.
+        for (int param_id = 0; param_id < NUM_SkyFloatParamsNames; param_id++)
         {
-            try
-            {
-                DBCFile::Record rec = is_new_record ? gLightIntBandDB.addRecord(light_int_start + i) : gLightIntBandDB.getByID(light_int_start + i);
-                // int entries = rec.getInt(LightIntBandDB::Entries);
-                int entries = static_cast<int>(skyParams[param_id]->colorRows[i].size());
+            // skip if no param
+            if (skyParams[param_id] == nullptr)
+                continue;
 
-                rec.write(LightIntBandDB::Entries, entries); // nb of entries
-
-                for (int l = 0; l < 16; l++)
-                {
-                    if (l >= entries)
-                    {
-                        rec.write(LightIntBandDB::Times + l, 0);
-                        rec.write(LightIntBandDB::Values + l, 0);
-                    }
-                    else
-                    {
-                        rec.write(LightIntBandDB::Times + l, skyParams[param_id]->colorRows[i][l].time);
-                        
-                        int rebuilt_color_int = static_cast<int>(skyParams[param_id]->colorRows[i][l].color.z * 255.0f)
-                            + (static_cast<int>(skyParams[param_id]->colorRows[i][l].color.y * 255.0f) << 8)
-                            + (static_cast<int>(skyParams[param_id]->colorRows[i][l].color.x * 255.0f) << 16);
-                        rec.write(LightIntBandDB::Values + l, rebuilt_color_int);
-                    }
-                }
-            }
-            catch (...)
-            {
-                LogError << "When trying to intialize sky " << data.getInt(LightDB::ID) << ", there was an error with getting an entry in gLightIntBand (" << i << "). Sorry." << std::endl;
-            }
-        }
-
-        int light_float_start = lightParam_dbc_id * NUM_SkyFloatParamsNames - 5;
-
-        for (int i = 0; i < NUM_SkyFloatParamsNames; ++i)
-        {
-            try
-            {
-                DBCFile::Record rec = is_new_record ? gLightFloatBandDB.addRecord(light_float_start + i) : gLightFloatBandDB.getByID(light_float_start + i);
-                int entries = static_cast<int>(skyParams[param_id]->floatParams[i].size());
-
-                rec.write(LightFloatBandDB::Entries, entries); // nb of entries
-
-                // for (int l = 0; l < entries; l++)
-                for (int l = 0; l < 16; l++)
-                {
-                    if (l >= entries)
-                    {
-                        rec.write(LightFloatBandDB::Times + l, 0);
-                        rec.write(LightFloatBandDB::Values + l, 0.0f);
-                    }
-                    else
-                    {
-                        rec.write(LightFloatBandDB::Times + l, skyParams[param_id]->floatParams[i][l].time);
-                        rec.write(LightFloatBandDB::Values + l, skyParams[param_id]->floatParams[i][l].value);
-                    }
-                }
-            }
-            catch (...)
-            {
-                LogError << "When trying to intialize sky " << data.getInt(LightDB::ID) << ", there was an error with getting an entry in LightFloatBand (" << i << "). Sorry." << std::endl;
-            }
-        }
-
-        try
-        {
-            DBCFile::Record light_param = gLightParamsDB.getByID(lightParam_dbc_id);
-
-            if (skybox.has_value()) // TODO skybox dbc
-            {
-                // light_param.write(LightParamsDB::skybox, TODO);
-            }
+            // TODO : several lights can use the same param, ask user if he wants to save a copy or edit it for all ?
+            int lightParam_dbc_id = 0;
+            if (is_new_record) // not for duplicates
+                lightParam_dbc_id = gLightParamsDB.getEmptyRecordID();
             else
-                light_param.write(LightParamsDB::skybox, 0);
+                lightParam_dbc_id = data.getInt(LightDB::DataIDs + param_id);
 
-            light_param.write(LightParamsDB::highlightSky, int(skyParams[param_id]->highlight_sky()));
-            light_param.write(LightParamsDB::water_shallow_alpha, skyParams[param_id]->river_shallow_alpha());
-            light_param.write(LightParamsDB::water_deep_alpha, skyParams[param_id]->river_deep_alpha());
-            light_param.write(LightParamsDB::ocean_shallow_alpha, skyParams[param_id]->ocean_shallow_alpha());
-            light_param.write(LightParamsDB::ocean_deep_alpha, skyParams[param_id]->ocean_deep_alpha());
-            light_param.write(LightParamsDB::glow, skyParams[param_id]->glow());
-        }
-        catch (...)
-        {
-            LogError << "When trying to get the skybox for the entry " << lightParam_dbc_id << " in LightParams.dbc. Sad." << std::endl;
+            if (lightParam_dbc_id == 0)
+                continue;
+
+            int light_int_start = lightParam_dbc_id * NUM_SkyColorNames - 17;
+
+            for (int i = 0; i < NUM_SkyColorNames; ++i)
+            {
+                try
+                {
+                    DBCFile::Record rec = is_new_record ? gLightIntBandDB.addRecord(light_int_start + i) : gLightIntBandDB.getByID(light_int_start + i);
+                    // int entries = rec.getInt(LightIntBandDB::Entries);
+                    int entries = static_cast<int>(skyParams[param_id]->colorRows[i].size());
+
+                    rec.write(LightIntBandDB::Entries, entries); // nb of entries
+
+                    for (int l = 0; l < 16; l++)
+                    {
+                        if (l >= entries)
+                        {
+                            rec.write(LightIntBandDB::Times + l, 0);
+                            rec.write(LightIntBandDB::Values + l, 0);
+                        }
+                        else
+                        {
+                            rec.write(LightIntBandDB::Times + l, skyParams[param_id]->colorRows[i][l].time);
+                            
+                            int rebuilt_color_int = static_cast<int>(skyParams[param_id]->colorRows[i][l].color.z * 255.0f)
+                                + (static_cast<int>(skyParams[param_id]->colorRows[i][l].color.y * 255.0f) << 8)
+                                + (static_cast<int>(skyParams[param_id]->colorRows[i][l].color.x * 255.0f) << 16);
+                            rec.write(LightIntBandDB::Values + l, rebuilt_color_int);
+                        }
+                    }
+                }
+                catch (...)
+                {
+                    assert(false);
+                    LogError << "When trying to save sky colors, sky id : " << data.getInt(LightDB::ID) << std::endl;
+                }
+            }
+
+            int light_float_start = lightParam_dbc_id * NUM_SkyFloatParamsNames - 5;
+
+            for (int i = 0; i < NUM_SkyFloatParamsNames; ++i)
+            {
+                try
+                {
+                    DBCFile::Record rec = is_new_record ? gLightFloatBandDB.addRecord(light_float_start + i) : gLightFloatBandDB.getByID(light_float_start + i);
+                    int entries = static_cast<int>(skyParams[param_id]->floatParams[i].size());
+
+                    rec.write(LightFloatBandDB::Entries, entries); // nb of entries
+
+                    // for (int l = 0; l < entries; l++)
+                    for (int l = 0; l < 16; l++)
+                    {
+                        if (l >= entries)
+                        {
+                            rec.write(LightFloatBandDB::Times + l, 0);
+                            rec.write(LightFloatBandDB::Values + l, 0.0f);
+                        }
+                        else
+                        {
+                            rec.write(LightFloatBandDB::Times + l, skyParams[param_id]->floatParams[i][l].time);
+                            rec.write(LightFloatBandDB::Values + l, skyParams[param_id]->floatParams[i][l].value);
+                        }
+                    }
+                }
+                catch (...)
+                {
+                    LogError << "Error when trying to save sky float params, sky id : " << data.getInt(LightDB::ID) << std::endl;
+                }
+            }
+
+            try
+            {
+                DBCFile::Record light_param = gLightParamsDB.getByID(lightParam_dbc_id);
+
+                if (skybox.has_value()) // TODO skybox dbc
+                {
+                    // light_param.write(LightParamsDB::skybox, TODO);
+                }
+                else
+                    light_param.write(LightParamsDB::skybox, 0);
+
+                light_param.write(LightParamsDB::highlightSky, int(skyParams[param_id]->highlight_sky()));
+                light_param.write(LightParamsDB::water_shallow_alpha, skyParams[param_id]->river_shallow_alpha());
+                light_param.write(LightParamsDB::water_deep_alpha, skyParams[param_id]->river_deep_alpha());
+                light_param.write(LightParamsDB::ocean_shallow_alpha, skyParams[param_id]->ocean_shallow_alpha());
+                light_param.write(LightParamsDB::ocean_deep_alpha, skyParams[param_id]->ocean_deep_alpha());
+                light_param.write(LightParamsDB::glow, skyParams[param_id]->glow());
+            }
+            catch (DBCFile::NotFound)
+            {
+                assert(false);
+                LogError << "When trying to get the lightparams for the entry " << lightParam_dbc_id << " in LightParams.dbc" << std::endl;
+            }
         }
 
+        gLightDB.save();
+        gLightIntBandDB.save();
+        gLightFloatBandDB.save();
+        gLightParamsDB.save();
+        gLightSkyboxDB.save();
+
+        // emit map_dbc_updated();
+
+        is_new_record = false;
     }
-
-    gLightDB.save();
-    gLightIntBandDB.save();
-    gLightFloatBandDB.save();
-    gLightParamsDB.save();
-    gLightSkyboxDB.save();
-
-    // emit map_dbc_updated();
-
-    is_new_record = false;
-
+    catch (DBCFile::AlreadyExists)
+    {
+        LogError << "DBCFile::AlreadyExists When trying to add light.dbc record for the entry " << Id << std::endl;
+        assert(false);
+    }
+    catch (DBCFile::NotFound)
+    {
+        LogError << "DBCFile::NotFound When trying to add light.dbc record for the entry " << Id << std::endl;
+        assert(false);
+    }
+    catch (...)
+    {
+        LogError << "Unknown exception When trying to add light.dbc record for the entry " << Id << std::endl;
+        assert(false);
+    }
 
 }

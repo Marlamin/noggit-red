@@ -26,7 +26,7 @@ namespace Noggit
   namespace Ui
   {
 
-    static std::map <int, std::string> area_flags_names = {
+    static const std::unordered_map <int, std::string> area_flags_names = {
         {0 , "Emit Breath Particles"},
         {1 , "Breath Particles Override Parent"},
         {2 , "On Map Dungeon"},
@@ -60,7 +60,7 @@ namespace Noggit
         {28, "Flying not allowed"}, // in 3.3.5
         {29, "Only Evaluate Ghost Bind Once"},
         {30, "Is Subzone"},
-        // {31, "Don't Evaluate Graveyard From Client"}
+        // {31, "Don't Evaluate Graveyard From Client"} // not used in 3.3.5
     };
 
     class AreaEditor : public QWidget
