@@ -15,16 +15,25 @@ using namespace Noggit::Ui;
 ActionHistoryNavigator::ActionHistoryNavigator(QWidget* parent)
 : QWidget(parent)
 {
+  auto action_mgr = NOGGIT_ACTION_MGR;
+
   _active_action_button_group = new QButtonGroup(this);
 
   auto layout = new QVBoxLayout(this);
+
+  unsigned int limit = action_mgr->limit();
+  _stack_size_label = new QLabel(this);
+
+  layout->addWidget(_stack_size_label);
+
   _action_stack = new QListWidget(this);
   layout->addWidget(_action_stack);
   _action_stack->setSelectionMode(QAbstractItemView::SingleSelection);
   _action_stack->setSelectionBehavior(QAbstractItemView::SelectRows);
   _action_stack->setSelectionRectVisible(true);
+  _action_stack->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  _action_stack->setResizeMode(QListView::Adjust);
 
-  auto action_mgr = NOGGIT_ACTION_MGR;
 
   connect(action_mgr, &Noggit::ActionManager::popBack, this, &ActionHistoryNavigator::popBack);
   connect(action_mgr, &Noggit::ActionManager::popFront, this, &ActionHistoryNavigator::popFront);
@@ -40,6 +49,7 @@ ActionHistoryNavigator::ActionHistoryNavigator(QWidget* parent)
             action_mgr->setCurrentAction((_action_stack->count() - index) - 1);
           });
 
+  updateStackSizeLabel();
 }
 
 void ActionHistoryNavigator::pushAction(Noggit::Action* action)
@@ -48,6 +58,7 @@ void ActionHistoryNavigator::pushAction(Noggit::Action* action)
   _action_stack->insertItem(_action_stack->count(), item);
 
   auto widget = new QWidget();
+  widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   widget->setMinimumWidth(150);
   widget->setMinimumHeight(17);
   auto layout = new QHBoxLayout(widget);
@@ -61,9 +72,68 @@ void ActionHistoryNavigator::pushAction(Noggit::Action* action)
 
   QDateTime date = QDateTime::currentDateTime();
   layout->addWidget(new QLabel(date.toString("hh:mm:ss ap"), widget));
-  layout->addStretch();
 
+  if (action->getFlags() & ActionFlags::eCHUNKS_TERRAIN)
+  {
+    layout->addWidget(new QLabel(" | Terrain", widget));
+  }
+  if (action->getFlags() & ActionFlags::eCHUNKS_AREAID)
+  {
+      layout->addWidget(new QLabel(" | Area ID", widget));
+  }
+  if (action->getFlags() & ActionFlags::eCHUNKS_HOLES)
+  {
+      layout->addWidget(new QLabel(" | Holes", widget));
+  }
+  if (action->getFlags() & ActionFlags::eCHUNKS_VERTEX_COLOR)
+  {
+      layout->addWidget(new QLabel(" | Vertex Color", widget));
+  }
+  if (action->getFlags() & ActionFlags::eCHUNKS_WATER)
+  {
+      layout->addWidget(new QLabel(" | Liquid", widget));
+  }
+  if (action->getFlags() & ActionFlags::eCHUNKS_TEXTURE)
+  {
+      layout->addWidget(new QLabel(" | Textures", widget));
+  }
+  if (action->getFlags() & ActionFlags::eOBJECTS_REMOVED)
+  {
+      layout->addWidget(new QLabel(" | Objects Removed", widget));
+  }
+  if (action->getFlags() & ActionFlags::eOBJECTS_ADDED)
+  {
+      layout->addWidget(new QLabel(" | Objects Added", widget));
+  }
+  if (action->getFlags() & ActionFlags::eOBJECTS_TRANSFORMED)
+  {
+      layout->addWidget(new QLabel(" | Objects Transformed", widget));
+  }
+  if (action->getFlags() & ActionFlags::eCHUNKS_FLAGS)
+  {
+      layout->addWidget(new QLabel(" | Chunk Flags", widget));
+  }
+  if (action->getFlags() & ActionFlags::eVERTEX_SELECTION)
+  {
+      layout->addWidget(new QLabel(" | Vertex Selection", widget));
+  }
+  if (action->getFlags() & ActionFlags::eCHUNK_SHADOWS)
+  {
+      layout->addWidget(new QLabel(" | Shadows", widget));
+  }
+  if (action->getFlags() & ActionFlags::eCHUNK_DOODADS_EXCLUSION)
+  {
+      layout->addWidget(new QLabel(" | Ground Effects Exclusion", widget));
+  }
+  if (action->getFlags() & ActionFlags::eCHUNKS_LAYERINFO)
+  {
+      layout->addWidget(new QLabel(" | Texture Layer Info", widget)); // todo : separate anim & ground effect?
+  }
+
+  layout->addStretch();
   _action_stack->setItemWidget(item, widget);
+
+  updateStackSizeLabel();
 }
 
 void ActionHistoryNavigator::popFront()
@@ -77,6 +147,8 @@ void ActionHistoryNavigator::popFront()
   _action_stack->removeItemWidget(_action_stack->item(0));
   auto item = _action_stack->takeItem(0);
   delete item;
+
+  updateStackSizeLabel();
 }
 
 void ActionHistoryNavigator::popBack()
@@ -89,6 +161,8 @@ void ActionHistoryNavigator::popBack()
   _action_stack->removeItemWidget(_action_stack->item(_action_stack->count() - 1));
   auto item = _action_stack->takeItem(_action_stack->count() - 1);
   delete item;
+
+  updateStackSizeLabel();
 }
 
 void ActionHistoryNavigator::purge()
@@ -102,6 +176,7 @@ void ActionHistoryNavigator::purge()
   }
   _action_stack->clear();
 
+  updateStackSizeLabel();
 }
 
 void ActionHistoryNavigator::changeCurrentAction(unsigned index)
@@ -123,4 +198,15 @@ void ActionHistoryNavigator::changeCurrentAction(unsigned index)
   }
 
   //_action_stack->setCurrentItem(_action_stack->item(_action_stack->count() - 1 - index));
+  updateStackSizeLabel();
+}
+
+void Noggit::Ui::Tools::ActionHistoryNavigator::updateStackSizeLabel()
+{
+    auto action_mgr = NOGGIT_ACTION_MGR;
+    unsigned int limit = action_mgr->limit();
+    auto stack_size = _action_stack->count(); // action_mgr->_action_stack.size()
+
+    QString labelText = QString("Action stack size : %1/%2").arg(stack_size).arg(limit);
+    _stack_size_label->setText(labelText);
 }
