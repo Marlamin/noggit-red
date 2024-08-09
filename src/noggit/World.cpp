@@ -1350,6 +1350,9 @@ void World::changeObjectsWithTerrain(glm::vec3 const& pos, float change, float r
     // applies the terrain brush to the terrain objects hit
     ZoneScoped;
 
+    if (!iter_wmos_ && !iter_m2s)
+        return;
+
   // Identical code to chunk->changeTerrain()
   //    if (_snap_m2_objects_chkbox->isChecked() || _snap_wmo_objects_chkbox->isChecked()) {
   auto objects_hit = getObjectsInRange(pos, radius, true, iter_wmos_, iter_m2s);
@@ -1512,6 +1515,9 @@ void World::flattenTerrain(glm::vec3 const& pos, float remain, float radius, int
 std::vector<std::pair<SceneObject*, float>> World::getObjectsGroundDistance(glm::vec3 const& pos, float radius, bool iter_wmos_, bool iter_m2s)
 {
     std::vector<std::pair<SceneObject*, float>> objects_ground_distance;
+
+    if (!iter_wmos_ && !iter_m2s)
+        return objects_ground_distance;
 
     auto objects_hit = getObjectsInRange(pos, radius, true
         , iter_wmos_, iter_m2s);
