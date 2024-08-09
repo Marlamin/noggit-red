@@ -7,7 +7,6 @@
 #include <QVBoxLayout>
 #include <QRadioButton>
 #include <QDateTime>
-#include <QLabel>
 
 using namespace Noggit::Ui::Tools;
 using namespace Noggit::Ui;
