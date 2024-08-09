@@ -6,7 +6,7 @@
 #include <QWidget>
 #include <QListWidget>
 #include <QButtonGroup>
-
+#include <QLabel>
 
 
 namespace Noggit
