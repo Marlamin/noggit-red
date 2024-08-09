@@ -34,7 +34,10 @@ namespace Noggit
     private:
       QListWidget* _action_stack;
       QButtonGroup* _active_action_button_group;
+      QLabel* _stack_size_label;
 
+    private:
+        void updateStackSizeLabel();
 
     };
   }

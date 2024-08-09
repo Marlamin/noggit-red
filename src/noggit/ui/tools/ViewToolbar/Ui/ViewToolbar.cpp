@@ -155,14 +155,19 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
     addWidget(undo_stack_btn);
 
 
-    auto undo_stack_popup = new QWidget(this);
+    auto undo_stack_popup = new QDialog(this);
     undo_stack_popup->setMinimumWidth(160);
     undo_stack_popup->setMinimumHeight(300);
+    undo_stack_popup->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     auto layout = new QVBoxLayout(undo_stack_popup);
+    layout->setContentsMargins(0, 0, 0, 0);
     auto action_navigator = new Noggit::Ui::Tools::ActionHistoryNavigator(undo_stack_popup);
+    action_navigator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     action_navigator->setMinimumWidth(160);
     action_navigator->setMinimumHeight(300);
-    layout->addWidget(undo_stack_popup);
+    // layout->addWidget(undo_stack_popup);
+    layout->addWidget(action_navigator);
 
     undo_stack_popup->updateGeometry();
     undo_stack_popup->adjustSize();

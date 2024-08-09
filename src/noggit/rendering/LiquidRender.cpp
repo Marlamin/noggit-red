@@ -20,7 +20,7 @@ void LiquidRender::draw(math::frustum const& frustum
     , LiquidTextureManager* tex_manager
 )
 {
-  if (!_map_tile->Water.hasData())
+  if (!_map_tile->Water.hasData() && !_map_tile->Water.needsUpdate())
   {
     return;
   }
