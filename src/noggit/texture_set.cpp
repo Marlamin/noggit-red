@@ -1405,6 +1405,8 @@ std::array<float, 4> TextureSet::get_textures_weight_for_unit(unsigned int unit_
 
 void TextureSet::updateDoodadMapping()
 {
+    // NOTE : tempalphamap needs to be applied first with apply_alpha_changes()
+
     std::array<std::uint16_t, 8> new_doodad_mapping{};
     // std::array<std::array<std::uint8_t, 8>, 8> new_doodad_mapping{};
     // for (auto& row : new_doodad_mapping) {
@@ -1424,8 +1426,10 @@ void TextureSet::updateDoodadMapping()
     int very_innacurate_count = 0;
     int higher_count = 0;
     int lower_count = 0;
-    auto blizzard_mapping_readable = getDoodadMappingReadable();
+    std::array<std::array<std::uint8_t, 8>, 8> blizzard_mapping_readable;
     bool debug_test = true;
+    if (debug_test)
+        blizzard_mapping_readable = getDoodadMappingReadable();
 
     // 8x8 bits per unit
     for (int unit_x = 0; unit_x < 8; unit_x++)

@@ -2249,8 +2249,6 @@ void MapView::setupViewMenu()
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Hidden models", _draw_hidden_models);
 
-  ADD_TOGGLE_NS(view_menu, "Game Mode", _game_mode_camera);
-
   auto debug_menu (view_menu->addMenu ("Debug"));
   ADD_TOGGLE_NS (debug_menu, "Occlusion boxes", _draw_occlusion_boxes);
 
@@ -2259,6 +2257,8 @@ void MapView::setupViewMenu()
   view_menu->addSeparator();
 
   ADD_TOGGLE (view_menu, "Show Node Editor", "Shift+N", _show_node_editor);
+
+  ADD_TOGGLE_NS(view_menu, "Game View", _game_mode_camera);
 
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Minimap"));

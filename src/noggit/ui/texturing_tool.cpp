@@ -209,7 +209,7 @@ namespace Noggit
       tool_layout->setAlignment(quick_palette_btn, Qt::AlignTop);
 
 
-      auto geffect_tools_btn(new QPushButton("Ground Effect Tools", this));
+      auto geffect_tools_btn(new QPushButton(/*"Ground Effect Tools"*/ "In developement", this));
       tool_layout->addWidget(geffect_tools_btn);
       tool_layout->setAlignment(geffect_tools_btn, Qt::AlignTop);
 
