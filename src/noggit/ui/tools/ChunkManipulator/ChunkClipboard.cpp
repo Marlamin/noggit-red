@@ -165,8 +165,23 @@ void ChunkClipboard::copySelected(glm::vec3 const& pos, ChunkCopyFlags flags)
       auto texture_set = chunk->getTextureSet();
 
       cache.n_textures = texture_set->num();
-      cache.alphamaps = *texture_set->getAlphamaps();
-      cache.tmp_edit_values = *texture_set->getTempAlphamaps();
+      // cache.alphamaps = *texture_set->getAlphamaps();
+      // cache.tmp_edit_values = *texture_set->getTempAlphamaps();
+      const auto& sourceAlphamaps = *texture_set->getAlphamaps();
+      for (size_t i = 0; i < MAX_ALPHAMAPS; ++i)
+      {
+          if (sourceAlphamaps[i])
+              cache.alphamaps[i] = std::make_unique<Alphamap>(*sourceAlphamaps[i]);
+          else
+              cache.alphamaps[i].reset();
+      }
+
+      const auto& source_temp_alphas = texture_set->getTempAlphamaps();
+      if (source_temp_alphas)
+          cache.tmp_edit_values = std::make_unique<tmp_edit_alpha_values>(*source_temp_alphas);
+      else
+          cache.tmp_edit_values.reset();
+
       std::memcpy(&cache.layers_info, texture_set->getMCLYEntries(), sizeof(layer_info) * 4);
 
       for (int i = 0; i < cache.n_textures; ++i)
@@ -174,7 +189,7 @@ void ChunkClipboard::copySelected(glm::vec3 const& pos, ChunkCopyFlags flags)
         cache.textures.push_back(texture_set->filename(i));
       }
 
-      chunk_cache.textures = cache;
+      chunk_cache.textures = std::move(cache);
     }
 
 

@@ -99,8 +99,20 @@ public:
 
   std::array<std::uint16_t, 8> lod_texture_map();
 
-  std::array<std::optional<Alphamap>, 3>* getAlphamaps() { return &alphamaps; };
-  std::optional<tmp_edit_alpha_values>* getTempAlphamaps() { return &tmp_edit_values; };
+  std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS>* getAlphamaps() { return &alphamaps; };
+  std::unique_ptr<tmp_edit_alpha_values>& getTempAlphamaps() { return tmp_edit_values; };
+
+  void setAlphamaps(const std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS>& newAlphamaps) {
+      for (int i = 0; i < MAX_ALPHAMAPS; ++i) 
+      {
+          if (newAlphamaps[i])
+          {
+            alphamaps[i] = std::make_unique<Alphamap>(*newAlphamaps[i]);
+          }
+          else
+              alphamaps[i].reset();
+      }
+  }
 
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
 
@@ -137,7 +149,7 @@ private:
   MapChunk* _chunk;
 
   std::vector<scoped_blp_texture_reference> textures;
-  std::array<std::optional<Alphamap>, 3> alphamaps;
+  std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS> alphamaps;
   size_t nTextures;
 
   // byte[8][8] // can store the 2bits value in a byte, but might never be higher than 3 or layer count.
@@ -148,10 +160,9 @@ private:
 
   bool _need_lod_texture_map_update = false;
 
-  // ENTRY_MCLY _layers_info[4]; // TODO rework this, don't need to store textureid and offset
   layer_info _layers_info[4];
 
-  std::optional<tmp_edit_alpha_values> tmp_edit_values;
+  std::unique_ptr<tmp_edit_alpha_values> tmp_edit_values;
 
   bool _do_not_convert_alphamaps;
 

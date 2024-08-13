@@ -312,6 +312,7 @@ namespace Noggit
 
       _settings->sync();
 
+      // calls MapView::onSettingsSave()
       emit saved();
     }
   }

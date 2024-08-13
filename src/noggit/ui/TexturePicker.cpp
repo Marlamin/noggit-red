@@ -266,12 +266,12 @@ namespace Noggit
                 {
                     // WoW calculates layer 0 as 255 - sum(Layer[1]...Layer[3])
                     int layers_sum = 0;
-                    if (alphamaps->at(0).has_value())
-                        layers_sum += alphamaps->at(0).value().getAlpha(64 * l + k);
-                    if (alphamaps->at(1).has_value())
-                        layers_sum += alphamaps->at(1).value().getAlpha(64 * l + k);
-                    if (alphamaps->at(2).has_value())
-                        layers_sum += alphamaps->at(2).value().getAlpha(64 * l + k);
+                    if (alphamaps->at(0))
+                        layers_sum += alphamaps->at(0)->getAlpha(64 * l + k);
+                    if (alphamaps->at(1))
+                        layers_sum += alphamaps->at(1)->getAlpha(64 * l + k);
+                    if (alphamaps->at(2))
+                        layers_sum += alphamaps->at(2)->getAlpha(64 * l + k);
         
                     int value = std::clamp((255 - layers_sum), 0, 255);
                     image.setPixelColor(k, l, QColor(value, value, value, 255));
@@ -280,7 +280,7 @@ namespace Noggit
                 }
                 else // layer 1-3
                 {
-                    auto& alpha_layer = alphamaps->at(index - 1).value();
+                    auto& alpha_layer = *alphamaps->at(index - 1);
         
                     int value = alpha_layer.getAlpha(64 * l + k);
                     image.setPixelColor(k, l, QColor(value, value, value, 255));

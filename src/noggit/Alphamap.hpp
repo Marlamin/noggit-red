@@ -10,6 +10,8 @@ namespace BlizzardArchive
   class ClientFile;
 }
 
+static constexpr int MAX_ALPHAMAPS = 3;
+
 class Alphamap
 {
 public:

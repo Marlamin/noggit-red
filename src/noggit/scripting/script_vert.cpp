@@ -107,7 +107,7 @@ namespace Noggit
       {
         if (*iter == -1)
           break;
-        ts->getTempAlphamaps()->value()[index][*iter] = alpha;
+        ts->getTempAlphamaps()->map[index][*iter] = alpha;
       }
     }
 
@@ -137,7 +137,7 @@ namespace Noggit
       {
         if (*iter == -1)
           break;
-        sum += ts->getTempAlphamaps()->value()[index][*iter];
+        sum += ts->getTempAlphamaps()->map[index][*iter];
         ++ctr;
       }
       return sum / float(ctr);

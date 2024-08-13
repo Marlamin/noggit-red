@@ -72,8 +72,14 @@ void Noggit::Action::undo(bool redo)
     for (auto& pair : redo ? _chunk_texture_post : _chunk_texture_pre)
     {
       auto texture_set = pair.first->getTextureSet();
-      *texture_set->getAlphamaps() = pair.second.alphamaps;
-      *texture_set->getTempAlphamaps() = pair.second.tmp_edit_values;
+
+      texture_set->setAlphamaps(pair.second.alphamaps);
+
+      if (pair.second.tmp_edit_values)
+        texture_set->getTempAlphamaps() = std::make_unique<tmp_edit_alpha_values>(*pair.second.tmp_edit_values);
+      else
+        texture_set->getTempAlphamaps() = nullptr;
+
       std::memcpy(texture_set->getMCLYEntries(), &pair.second.layers_info, sizeof(layer_info) * 4);
       texture_set->setNTextures(pair.second.n_textures);
 
@@ -407,8 +413,21 @@ void Noggit::Action::finish()
       auto texture_set = pre.first->getTextureSet();
 
       cache.n_textures = texture_set->num();
-      cache.alphamaps = *texture_set->getAlphamaps();
-      cache.tmp_edit_values = *texture_set->getTempAlphamaps();
+
+      const auto& sourceAlphamaps = *texture_set->getAlphamaps();
+      for (size_t i = 0; i < MAX_ALPHAMAPS; ++i) {
+        if (sourceAlphamaps[i])
+          cache.alphamaps[i] = std::make_unique<Alphamap>(*sourceAlphamaps[i]);
+        else
+          cache.alphamaps[i].reset();
+      }
+
+      const auto& source_temp_alphas = texture_set->getTempAlphamaps();
+      if (source_temp_alphas)
+          cache.tmp_edit_values = std::make_unique<tmp_edit_alpha_values>(*source_temp_alphas);
+      else
+          cache.tmp_edit_values.reset();
+
       std::memcpy(&cache.layers_info, texture_set->getMCLYEntries(), sizeof(layer_info) * 4);
 
       for (int j = 0; j < cache.n_textures; ++j)
@@ -599,8 +618,23 @@ void Noggit::Action::registerChunkTextureChange(MapChunk* chunk)
   auto texture_set = chunk->getTextureSet();
 
   cache.n_textures = texture_set->num();
-  cache.alphamaps = *texture_set->getAlphamaps();
-  cache.tmp_edit_values = *texture_set->getTempAlphamaps();
+  // cache.alphamaps = *texture_set->getAlphamaps();
+  // cache.tmp_edit_values = *texture_set->getTempAlphamaps();
+  const auto& sourceAlphamaps = *texture_set->getAlphamaps();
+  for (size_t i = 0; i < MAX_ALPHAMAPS; ++i) 
+  {
+      if (sourceAlphamaps[i])
+          cache.alphamaps[i] = std::make_unique<Alphamap>(*sourceAlphamaps[i]);
+      else
+          cache.alphamaps[i].reset();
+  }
+
+  const auto& source_temp_alphas = texture_set->getTempAlphamaps();
+  if (source_temp_alphas)
+      cache.tmp_edit_values = std::make_unique<tmp_edit_alpha_values>(*source_temp_alphas);
+  else
+      cache.tmp_edit_values.reset();
+
   std::memcpy(&cache.layers_info, texture_set->getMCLYEntries(), sizeof(layer_info) * 4);
 
   for (int i = 0; i < cache.n_textures; ++i)
