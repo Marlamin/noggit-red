@@ -403,6 +403,15 @@ void MapIndex::unloadTiles(const TileIndex& tile)
 {
   if (((clock() / CLOCKS_PER_SEC) - _last_unload_time) > _unload_interval)
   {
+    // ensure _unload_dist is always bigger than loading dist
+    if (_unload_dist <= _loading_radius)
+    {
+        _unload_dist = _loading_radius + 1;
+        QSettings settings;
+        settings.setValue("unload_dist", _unload_dist);
+        settings.sync();
+    }
+
     for (MapTile* adt : loaded_tiles())
     {
       if (tile.dist(adt->index) > _unload_dist)
