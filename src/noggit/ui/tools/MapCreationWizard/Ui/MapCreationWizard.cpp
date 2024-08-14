@@ -424,7 +424,8 @@ void MapCreationWizard::selectMap(int map_id)
   auto corpseCoords = record.Columns["Corpse"].Values;
   auto expansionId = record.Columns["ExpansionID"].Value;
   auto maxPlayers = record.Columns["MaxPlayers"].Value;
-  auto timeOffset = record.Columns["TimeOffset"].Value;
+  auto timeOfDayOverride = record.Columns["TimeOfDayOverride"].Value;
+  // auto timeOffset = record.Columns["TimeOffset"].Value;
   auto raidOffset = record.Columns["RaidOffset"].Value;
 
   _world = new World(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW);
@@ -484,7 +485,7 @@ void MapCreationWizard::selectMap(int map_id)
       _corpse_y->setValue(std::atoi(corpseCoords[1].c_str()));
   }
 
-  _time_of_day_override->setValue(std::atoi(timeOffset.c_str()));
+  _time_of_day_override->setValue(std::atoi(timeOfDayOverride.c_str()));
   _expansion_id->setCurrentIndex(std::atoi(expansionId.c_str()));
 
   _raid_offset->setValue(std::atoi(raidOffset.c_str())); // only ever used in 2 places? not sure what for
