@@ -91,7 +91,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, mclq& liqui
       _vertices[v_index] = glm::vec3(
                             pos.x + UNITSIZE * x
                             // sometimes there's garbage data on unused tiles that mess things up
-                            , std::max(std::min(v.height, _maximum), _minimum)
+                            , std::clamp(v.height, _minimum, _maximum)
                             , pos.z + UNITSIZE * z
                             );
     }
@@ -154,7 +154,9 @@ liquid_layer::liquid_layer(ChunkWater* chunk
       {
         for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
         {
-          f.read(&_vertices[z * 9 + x].y, sizeof(float));
+          int index = z * 9 + x;
+          f.read(&_vertices[index].y, sizeof(float));
+          _vertices[index].y = std::clamp(_vertices[index].y, _minimum, _maximum);
         }
       }
     }
