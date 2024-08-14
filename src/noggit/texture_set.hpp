@@ -166,5 +166,19 @@ private:
 
   bool _do_not_convert_alphamaps;
 
+  static constexpr std::array<std::uint8_t, 256 * 256> make_alpha_lookup_array()
+  {
+      std::array<std::uint8_t, 256 * 256> array{};
+
+      for (int i = 0; i < 256 * 256; ++i)
+      {
+          array[i] = i / 255 + (i % 255 <= 127 ? 0 : 1);
+      }
+
+      return array;
+  }
+
+  static std::array<std::uint8_t, 256 * 256> alpha_convertion_lookup;
+
   Noggit::NoggitRenderContext _context;
 };
