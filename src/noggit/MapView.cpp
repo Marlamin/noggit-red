@@ -6014,12 +6014,19 @@ void MapView::onSettingsSave()
   params->wireframe_color = wireframe_color;
 
   _world->renderer()->markTerrainParamsUniformBlockDirty();
+
+  _world->renderer()->setViewDistance(_settings->value("view_distance", 1000.f).toFloat());
+
+  _world.get()->mapIndex.setLoadingRadius(_settings->value("loading_radius", 2).toInt());
+  _world.get()->mapIndex.setUnloadDistance(_settings->value("unload_dist", 5).toInt());
+  _world.get()->mapIndex.setUnloadInterval(_settings->value("unload_interval", 30).toInt());
+
 }
 
 void MapView::ShowContextMenu(QPoint pos) 
 {
     // QApplication::startDragDistance() is 10
-    auto mouse_moved = QApplication::startDragDistance() / 3 < (_right_click_pos - pos).manhattanLength();
+    auto mouse_moved = (QApplication::startDragDistance() / 5) < (_right_click_pos - pos).manhattanLength();
 
     // don't show context menu if dragging mouse
     if (mouse_moved || ImGuizmo::IsUsing())

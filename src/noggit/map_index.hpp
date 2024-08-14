@@ -218,9 +218,6 @@ public:
   bool tileAwaitingLoading(const TileIndex& tile) const;
   bool tileLoaded(const TileIndex& tile) const;
 
-  bool hasAdt();
-  void setAdt(bool value);
-
   void save();
   void saveall (World*);
 
@@ -275,17 +272,32 @@ public:
   std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _minimap_md5translate;
   std::string globalWMOName;
   ENTRY_MODF wmoEntry;
+public:
+  // reloadable settings
+  void setLoadingRadius(int value)
+  {
+      if (value < _unload_dist)
+          _loading_radius = value;
+  }
+
+  void setUnloadDistance(int value)
+  {
+      if (value > _loading_radius)
+          _unload_dist = value;
+  }
+
+  void setUnloadInterval(int value) { _unload_interval = value; };
 private:
   int _last_unload_time;
   int _unload_interval;
   int _unload_dist;
+  int _loading_radius;
   unsigned _n_loaded_tiles = 0; // to be loaded, not necessarily already loaded
   int _n_existing_tiles = -1;
 
   // Is the WDT telling us to use a different alphamap structure.
   bool mBigAlpha;
   bool mHasAGlobalWMO;
-  bool noadt;
   bool changed;
 
   bool _sort_models_by_size_class;

@@ -84,6 +84,8 @@ namespace Noggit::Rendering
 
     [[nodiscard]] std::unique_ptr<Skies>& skies() { return _skies; };
 
+    void setViewDistance(float distance) { _view_distance = distance; };
+
   private:
 
     void drawMinimap ( MapTile *tile

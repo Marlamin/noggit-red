@@ -1078,7 +1078,6 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 void WorldRender::upload()
 {
   ZoneScoped;
-  _world->mapIndex.setAdt(false);
 
   if (_world->mapIndex.hasAGlobalWMO())
   {

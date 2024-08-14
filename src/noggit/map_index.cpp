@@ -32,7 +32,6 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
   , _last_unload_time((clock() / CLOCKS_PER_SEC)) // to not try to unload right away
   , mBigAlpha(false)
   , mHasAGlobalWMO(false)
-  , noadt(false)
   , changed(false)
   , _sort_models_by_size_class(false)
   , highestGUID(0)
@@ -41,8 +40,9 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
 {
 
   QSettings settings;
-  _unload_interval = settings.value("unload_interval", 5).toInt();
+  _unload_interval = settings.value("unload_interval", 30).toInt();
   _unload_dist = settings.value("unload_dist", 5).toInt();
+  _loading_radius = settings.value("loading_radius", 2).toInt();
 
   if (create_empty)
   {
@@ -277,17 +277,15 @@ void MapIndex::enterTile(const TileIndex& tile)
 {
   if (!hasTile(tile))
   {
-    noadt = true;
     return;
   }
 
-  noadt = false;
   int cx = static_cast<int>(tile.x);
   int cz = static_cast<int>(tile.z);
 
-  for (int pz = std::max(cz - 1, 0); pz < std::min(cz + 2, 63); ++pz)
+  for (int pz = std::max(cz - _loading_radius, 0); pz <= std::min(cz + _loading_radius, 63); ++pz)
   {
-    for (int px = std::max(cx - 1, 0); px < std::min(cx + 2, 63); ++px)
+      for (int px = std::max(cx - _loading_radius, 0); px <= std::min(cx + _loading_radius, 63); ++px)
     {
       loadTile(TileIndex(px, pz));
     }
@@ -550,16 +548,6 @@ bool MapIndex::tileAwaitingLoading(const TileIndex& tile) const
 bool MapIndex::tileLoaded(const TileIndex& tile) const
 {
   return hasTile(tile) && mTiles[tile.z][tile.x].tile && mTiles[tile.z][tile.x].tile->finishedLoading();
-}
-
-bool MapIndex::hasAdt()
-{
-  return noadt;
-}
-
-void MapIndex::setAdt(bool value)
-{
-  noadt = value;
 }
 
 MapTile* MapIndex::getTile(const TileIndex& tile) const
