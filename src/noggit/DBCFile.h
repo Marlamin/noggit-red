@@ -107,7 +107,7 @@ public:
       file.stringSize += static_cast<std::uint32_t>(val.size() + 1);
     }
 
-    void writeLocalizedString(size_t field, const std::string& val, int locale)
+    void writeLocalizedString(size_t field, const std::string& val, unsigned int locale)
     {
       assert(field < file.fieldCount);
       assert(locale < 16);

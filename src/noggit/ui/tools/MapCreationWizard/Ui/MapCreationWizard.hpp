@@ -40,6 +40,11 @@ namespace Noggit
         void setValue(const std::string& val, int locale)
         {
           _widget_map.at(_locale_names[locale])->setText(QString::fromStdString(val));
+
+          if (!val.empty() && _flags->value() == 0)
+          {
+              _flags->setValue(16712190); // default flags when there is text
+          }
         }
 
         std::string getValue(int locale) { return  _widget_map.at(_locale_names[locale])->text().toStdString(); };
@@ -48,6 +53,7 @@ namespace Noggit
         void fill(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record, std::string columnName);
         void clear();
         void toRecord(DBCFile::Record& record, size_t field);
+        void setDefaultLocValue(const std::string& text);
 
       private:
         QComboBox* _current_locale;
@@ -89,7 +95,7 @@ namespace Noggit
       void destroyFakeWorld() { if(_world) delete _world; _world = nullptr; _minimap_widget->world (nullptr); };
       void addNewMap();
     signals:
-      void map_dbc_updated();
+      void map_dbc_updated(int new_map = 0);
 
     private:
         std::shared_ptr<Project::NoggitProject> _project;

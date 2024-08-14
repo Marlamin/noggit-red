@@ -246,10 +246,13 @@ void map_horizon::update_minimap_tile(int y, int x, bool has_data = false )
     }
 }
 
-void map_horizon::set_minimap(const MapIndex* const index)
+void map_horizon::set_minimap(const MapIndex* const index, bool set_empty)
 {
     _qt_minimap = QImage(16 * 64, 16 * 64, QImage::Format_ARGB32);
     _qt_minimap.fill(Qt::transparent);
+
+    if (set_empty)
+        return;
 
     for (int y(0); y < 64; ++y)
     {
