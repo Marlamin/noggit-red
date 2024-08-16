@@ -1150,7 +1150,7 @@ QImage MapTile::getAlphamapImage(unsigned layer)
       chunk->texture_set->apply_alpha_changes();
       auto alphamaps = chunk->texture_set->getAlphamaps();
 
-      auto alpha_layer = alphamaps->at(layer - 1).value();
+      auto alpha_layer = *alphamaps->at(layer - 1);
 
       for (int k = 0; k < 64; ++k)
       {
@@ -1213,19 +1213,19 @@ QImage MapTile::getAlphamapImage(std::string const& filename)
             {
               // WoW calculates layer 0 as 255 - sum(Layer[1]...Layer[3])
               int layers_sum = 0;
-              if (alphamaps->at(0).has_value())
-                  layers_sum += alphamaps->at(0).value().getAlpha(64 * l + k);
-              if (alphamaps->at(1).has_value())
-                  layers_sum += alphamaps->at(1).value().getAlpha(64 * l + k);
-              if (alphamaps->at(2).has_value())
-                  layers_sum += alphamaps->at(2).value().getAlpha(64 * l + k);
+              if (alphamaps->at(0))
+                  layers_sum += alphamaps->at(0)->getAlpha(64 * l + k);
+              if (alphamaps->at(1))
+                  layers_sum += alphamaps->at(1)->getAlpha(64 * l + k);
+              if (alphamaps->at(2))
+                  layers_sum += alphamaps->at(2)->getAlpha(64 * l + k);
               
               int value = std::clamp((255 - layers_sum), 0, 255);
               image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
             }
             else // layer 1-3
             {
-                auto& alpha_layer = alphamaps->at(layer - 1).value();
+                auto& alpha_layer = *alphamaps->at(layer - 1);
 
               int value = alpha_layer.getAlpha(64 * l + k);
               image.setPixelColor((i * 64) + k, (j * 64) + l, QColor(value, value, value, 255));
@@ -1433,7 +1433,7 @@ void MapTile::setAlphaImage(QImage const& baseimage, unsigned layer, bool cleanu
       chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
 
       chunk->texture_set->create_temporary_alphamaps_if_needed();
-      auto& temp_alphamaps = chunk->texture_set->getTempAlphamaps()->value();
+      auto& temp_alphamaps = *chunk->texture_set->getTempAlphamaps();
 
       for (int i = 0; i < 64; ++i)
       {

@@ -424,7 +424,8 @@ void MapCreationWizard::selectMap(int map_id)
   auto corpseCoords = record.Columns["Corpse"].Values;
   auto expansionId = record.Columns["ExpansionID"].Value;
   auto maxPlayers = record.Columns["MaxPlayers"].Value;
-  auto timeOffset = record.Columns["TimeOffset"].Value;
+  auto timeOfDayOverride = record.Columns["TimeOfDayOverride"].Value;
+  // auto timeOffset = record.Columns["TimeOffset"].Value;
   auto raidOffset = record.Columns["RaidOffset"].Value;
 
   _world = new World(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW);
@@ -484,7 +485,7 @@ void MapCreationWizard::selectMap(int map_id)
       _corpse_y->setValue(std::atoi(corpseCoords[1].c_str()));
   }
 
-  _time_of_day_override->setValue(std::atoi(timeOffset.c_str()));
+  _time_of_day_override->setValue(std::atoi(timeOfDayOverride.c_str()));
   _expansion_id->setCurrentIndex(std::atoi(expansionId.c_str()));
 
   _raid_offset->setValue(std::atoi(raidOffset.c_str())); // only ever used in 2 places? not sure what for
@@ -634,9 +635,39 @@ void MapCreationWizard::saveCurrentEntry()
   _world->mapIndex.set_sort_models_by_size_class(_sort_by_size_cat->isChecked());
   _world->mapIndex.saveChanged(_world, true);
   _world->mapIndex.save(); // save wdt file
-  // create default wdl
+  
   if (_is_new_record)
-      _world->mapIndex.create_empty_wdl();
+  {
+    _world->mapIndex.create_empty_wdl(); // create default wdl
+
+    // save default maxguid to avoid the uid fix popup
+    _world->mapIndex.saveMaxUID();
+
+    // TODO save mapdifficulty.dbc
+    //
+
+    // save default global light.dbc entry for new maps
+    try
+    {
+        int new_id = gLightDB.getEmptyRecordID();
+        DBCFile::Record record = gLightDB.addRecord(new_id);
+        record.write(LightDB::Map, _cur_map_id);
+        // positions and falloffs should be defaulted to 0
+        // set some default light params to the same as eastern kingdom
+        record.write(LightDB::DataIDs + 0, 12);// CLEAR
+        record.write(LightDB::DataIDs + 1, 13);//     CLEAR_WATER,
+        record.write(LightDB::DataIDs + 2, 10);//     STORM,
+        record.write(LightDB::DataIDs + 3, 13);//     STORM_WATER,
+        record.write(LightDB::DataIDs + 4, 4);//     DEATH,
+
+        gLightDB.save();
+    }
+    catch (LightDB::AlreadyExists)
+    {
+        assert(false);
+        LogError << "Light.dbc entry already exists, failed to add record" << std::endl;
+    }
+  }
 
   // Save Map.dbc record
   try
@@ -664,17 +695,28 @@ void MapCreationWizard::saveCurrentEntry()
 
     gMapDB.save();
 
-    emit map_dbc_updated();
+    // reloads map list, and selects the new map
+    emit map_dbc_updated(_cur_map_id);
 
     _is_new_record = false;
   }
   catch (MapDB::AlreadyExists)
   {
-
+      QMessageBox::information(this
+          , "Error"
+          , QString("A map with Id %1 already exists").arg(_cur_map_id)
+          , QMessageBox::Ok
+      );
   }
   catch (MapDB::NotFound)
   {
+      LogError << "Map.dbc entry " << _cur_map_id << " was not found" << std::endl;
 
+      QMessageBox::information(this
+          , "Error"
+          , QString("Map.dbc entry %1 was not found").arg(_cur_map_id)
+          , QMessageBox::Ok
+      );
   }
 }
 
@@ -707,10 +749,25 @@ void MapCreationWizard::addNewMap()
     delete _world;
   }
 
-  _world = new World("New_Map", _cur_map_id, Noggit::NoggitRenderContext::MAP_VIEW, true);
+  // default to a new internal map name that isn't already used, or default world will load existing files
+  std::string const base_name = "New_Map";
+  std::string internal_map_name = base_name;
+  int id = gMapDB.findMapName(internal_map_name);
+
+  int suffix = 1;
+  while (id >= 0) {
+      internal_map_name = base_name + std::to_string(suffix);  // Append the current suffix to the base name
+      id = gMapDB.findMapName(internal_map_name);  // Check if the name exists
+      suffix++;  // Increment the suffix for the next iteration
+  }
+
+  _world = new World(internal_map_name, _cur_map_id, Noggit::NoggitRenderContext::MAP_VIEW, true);
+  // hack to reset the minimap if there is an existing WDL with the same path(happens when removing a map from map.dbc but not the files
+  _world->horizon.set_minimap(&_world->mapIndex, true);
+
   _minimap_widget->world(_world);
 
-  _directory->setText("New_Map");
+  _directory->setText(internal_map_name.c_str());
   _directory->setEnabled(true);
 
   _is_big_alpha->setChecked(true);
@@ -720,7 +777,7 @@ void MapCreationWizard::addNewMap()
 
   _instance_type->setCurrentIndex(0);
 
-  _map_name->clear();
+  _map_name->setDefaultLocValue("Unnamed Noggit Map");
   _area_table_id->setValue(0);
 
   _map_desc_alliance->clear();
@@ -902,6 +959,18 @@ void LocaleDBCEntry::toRecord(DBCFile::Record &record, size_t field)
   }
 
   record.write(field + 16, _flags->value());
+}
+
+void LocaleDBCEntry::setDefaultLocValue(const std::string& text)
+{
+    // set the default locale's widget text and select it, but don't write data.
+
+    int locale_id = Noggit::Application::NoggitApplication::instance()->clientData()->getLocaleId();
+    _current_locale->setCurrentIndex(locale_id);
+    setCurrentLocale(_locale_names[locale_id]);
+
+    // fill default locale's line edit
+    setValue(text, locale_id);
 }
 
 void LocaleDBCEntry::clear()

@@ -71,8 +71,8 @@ namespace Noggit
     {
       size_t n_textures;
       std::vector<std::string> textures;
-      std::array<std::optional<Alphamap>, 3> alphamaps;
-      std::optional<tmp_edit_alpha_values> tmp_edit_values;
+      std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS> alphamaps;
+      std::unique_ptr<tmp_edit_alpha_values> tmp_edit_values;
       layer_info layers_info[4];
     };
 

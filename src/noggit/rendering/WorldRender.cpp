@@ -1045,7 +1045,10 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
     for (MapTile* tile : _world->mapIndex.loaded_tiles())
     {
-      tile->flightBoundsRenderer()->draw(mfbo_shader);
+      if (tile->hasFlightBounds())
+      {
+        tile->flightBoundsRenderer()->draw(mfbo_shader);
+      }
     }
   }
 
@@ -1094,7 +1097,6 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 void WorldRender::upload()
 {
   ZoneScoped;
-  _world->mapIndex.setAdt(false);
 
   if (_world->mapIndex.hasAGlobalWMO())
   {

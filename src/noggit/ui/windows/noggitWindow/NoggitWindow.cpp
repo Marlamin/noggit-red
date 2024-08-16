@@ -467,11 +467,28 @@ namespace Noggit::Ui::Windows
     _map_creation_wizard = new Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard(_project, this);
 
     _map_wizard_connection = connect(_map_creation_wizard,
-                                     &Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated, [=]
+                                     &Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated, 
+                                [this](int map_id)
                                      {
                                        _buildMapListComponent->buildMapList(this);
-                                     }
-    );
+
+                                       // if a new map was added select it
+                                       if (map_id)
+                                       {
+                                           for (int i = 0; i < _continents_table->count(); ++i)
+                                           {
+                                               QListWidgetItem* item = _continents_table->item(i);
+                                               if (item && item->data(Qt::UserRole).toInt() == map_id)
+                                               {
+                                                   _continents_table->setCurrentItem(item);
+                                                   _continents_table->scrollToItem(item);
+                                                   _right_side->setCurrentIndex(0); // swap to "enter map" tab
+                                                   loadMap(map_id);
+                                                   break;
+                                               }
+                                           }
+                                       }
+                                     });
 
     _right_side->addTab(_map_creation_wizard, "Edit map");
 

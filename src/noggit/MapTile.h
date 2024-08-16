@@ -112,6 +112,8 @@ public:
 
   bool isTile(int pX, int pZ);
 
+  bool hasFlightBounds() const { return mFlags & 1; };
+
   async_priority loading_priority() const override
   {
     return async_priority::high;
@@ -189,9 +191,9 @@ private:
   glm::vec3 _center;
   float _cam_dist;
 
-  // MFBO:
-  glm::vec3 mMinimumValues[3 * 3];
-  glm::vec3 mMaximumValues[3 * 3];
+  // MFBO: requires mFlags & 1
+  glm::vec3 mMinimumValues[3 * 3] = {};
+  glm::vec3 mMaximumValues[3 * 3] = {};
 
   unsigned _chunk_update_flags;
 

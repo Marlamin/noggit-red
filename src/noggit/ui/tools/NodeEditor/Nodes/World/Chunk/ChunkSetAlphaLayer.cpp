@@ -65,7 +65,7 @@ void ChunkSetAlphaLayerNode::compute()
   }
 
   texture_set->create_temporary_alphamaps_if_needed();
-  auto& temp_alphamaps = texture_set->getTempAlphamaps()->value();
+  auto& temp_alphamaps = *texture_set->getTempAlphamaps();
 
   for (int i = 0; i < 64; ++i)
   {

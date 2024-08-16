@@ -132,9 +132,9 @@ ViewToolbar::ViewToolbar(MapView *mapView, ViewToolbar *tb)
 
     // normal view mode icon, and make them only 1 at a time out of the 3 view modes? 
     // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Normal view"), FontNoggit::VIEW_AXIS, tb);
-    add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Game view"), FontNoggit::VIEW_MODE_GAME, tb);
+    // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Game view"), FontNoggit::VIEW_MODE_GAME, tb);
     // add_tool_icon(mapView, &mapView->_game_mode_camera, tr("Tile view"), FontNoggit::VIEW_MODE_2D, tb);
-    addSeparator();
+    // addSeparator();
 
     add_tool_icon(mapView, &mapView->_show_minimap_window, tr("Show Minimap"),FontNoggit::TOOL_MINIMAP_EDITOR, tb);
     add_tool_icon(mapView, &mapView->_show_detail_info_window, tr("Details info"), FontNoggit::INFO, tb);
@@ -411,7 +411,6 @@ void ViewToolbar::add_tool_icon(MapView* mapView,
             auto ground_pos = mapView->getWorld()->get_ground_height(mapView->getCamera()->position);
             mapView->getCamera()->position.y = ground_pos.y + 2;
         }
-
 
         action->setChecked(view_state->get());
     });

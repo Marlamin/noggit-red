@@ -277,7 +277,7 @@ namespace Noggit
           tool_layout->addWidget(_heightmapping_group);
       }
       
-      auto geffect_tools_btn(new QPushButton("Ground Effect Tools", this));
+      auto geffect_tools_btn(new QPushButton("In development", this));
       tool_layout->addWidget(geffect_tools_btn);
       tool_layout->setAlignment(geffect_tools_btn, Qt::AlignTop);
 

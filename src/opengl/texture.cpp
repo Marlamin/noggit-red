@@ -43,9 +43,15 @@ namespace OpenGL
     gl.bindTexture (GL_TEXTURE_2D, _id);
   }
 
+  size_t texture::current_active_texture = -1;
+
   void texture::set_active_texture (size_t num)
   {
-    gl.activeTexture (static_cast<GLenum>(GL_TEXTURE0 + num));
+    if (num != current_active_texture)
+    {
+        gl.activeTexture(GL_TEXTURE0 + num);
+        current_active_texture = num;
+    }
   }
 
   void texture::unload()

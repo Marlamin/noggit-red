@@ -325,7 +325,7 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
 
       assert(fourcc == 'MCSE');
 
-      for (int i = 0; i < tmp_chunk_header.nSndEmitters; i++)
+      for (unsigned int i = 0; i < tmp_chunk_header.nSndEmitters; i++)
       {
           ENTRY_MCSE sound_emitter;
           f->read(&sound_emitter, sizeof(ENTRY_MCSE));
@@ -1908,9 +1908,9 @@ QImage MapChunk::getHeightmapImage(float min_height, float max_height)
 QImage MapChunk::getAlphamapImage(unsigned layer)
 {
   texture_set->apply_alpha_changes();
-  auto alphamaps = texture_set->getAlphamaps();
+  auto& alphamaps = *texture_set->getAlphamaps();
 
-  auto alpha_layer = alphamaps->at(layer - 1).value();
+  auto& alpha_layer = *alphamaps.at(layer - 1);
 
   QImage image(64, 64, QImage::Format_RGBA8888);
 
@@ -1986,7 +1986,7 @@ void MapChunk::setAlphamapImage(const QImage &image, unsigned int layer)
     return;
 
   texture_set->create_temporary_alphamaps_if_needed();
-  auto& temp_alphamaps = texture_set->getTempAlphamaps()->value();
+  auto& temp_alphamaps = *texture_set->getTempAlphamaps();
 
   for (int i = 0; i < 64; ++i)
   {

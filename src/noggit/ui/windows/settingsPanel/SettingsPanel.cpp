@@ -147,6 +147,20 @@ namespace Noggit
                       QString(tr("FPS limitation, current : %1")).arg(value));
               });
 
+      connect(ui->_adt_unload_dist, qOverload<int>(&QSpinBox::valueChanged)
+          , [&](int v)
+          {
+              QSignalBlocker const blocker(ui->_adt_loading_radius);
+              ui->_adt_loading_radius->setMaximum(v - 1);
+          });
+
+      connect(ui->_adt_loading_radius, qOverload<int>(&QSpinBox::valueChanged)
+          , [&](int v)
+          {
+              QSignalBlocker const blocker(ui->_adt_unload_dist);
+              ui->_adt_unload_dist->setMinimum(v + 1);
+          });
+
       ui->_wireframe_color->setColor(Qt::white);
 
       connect(ui->saveButton, &QPushButton::clicked, [this]
@@ -174,6 +188,9 @@ namespace Noggit
 
       // load the values in the fields
       discard_changes();
+
+      // ui->_adt_loading_radius->setMaximum(ui->_adt_unload_dist->value() - 1);
+      // ui->_adt_unload_dist->setMinimum(ui->_adt_loading_radius->value() + 1);
     }
 
     void settings::discard_changes()
@@ -192,7 +209,8 @@ namespace Noggit
       ui->_background_fps_limit_cb->setChecked(_settings->value("background_fps_limit", true).toBool());
       ui->_directional_light_cb->setChecked(_settings->value("directional_lightning", true).toBool());
       ui->_adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
-      ui->_adt_unload_check_interval->setValue(_settings->value("unload_interval", 5).toInt());
+      ui->_adt_unload_check_interval->setValue(_settings->value("unload_interval", 30).toInt());
+      ui->_adt_loading_radius->setValue(_settings->value("loading_radius", 2).toInt());
       ui->_uid_cb->setChecked(_settings->value("uid_startup_check", true).toBool());
       ui->_load_fav_cb->setChecked(_settings->value("auto_load_fav_project", true).toBool());
       ui->_systemWindowFrame->setChecked(_settings->value("systemWindowFrame", true).toBool());
@@ -280,6 +298,7 @@ namespace Noggit
       _settings->setValue("directional_lightning", ui->_directional_light_cb->isChecked());
       _settings->setValue("unload_dist", ui->_adt_unload_dist->value());
       _settings->setValue("unload_interval", ui->_adt_unload_check_interval->value());
+      _settings->setValue("loading_radius", ui->_adt_loading_radius->value());
       _settings->setValue("uid_startup_check", ui->_uid_cb->isChecked());
       _settings->setValue("auto_load_fav_project", ui->_load_fav_cb->isChecked());
       _settings->setValue("additional_file_loading_log", ui->_additional_file_loading_log->isChecked());
@@ -314,6 +333,7 @@ namespace Noggit
 
       _settings->sync();
 
+      // calls MapView::onSettingsSave()
       emit saved();
     }
   }

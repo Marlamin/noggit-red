@@ -82,7 +82,7 @@ public:
 
   void update_minimap_tile(int y, int x, bool has_data);
 
-  void set_minimap(const MapIndex* const index);
+  void set_minimap(const MapIndex* const index, bool set_empty = false);
 
   void remove_horizon_tile(int y, int x);
 
