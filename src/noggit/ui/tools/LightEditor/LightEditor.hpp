@@ -11,7 +11,7 @@
 namespace Noggit::Ui::Tools
 {
 
-	static std::map <int, std::string> sky_color_names_map = {
+	static const std::unordered_map <int, std::string> sky_color_names_map = {
 		{0	, "Direct"},
 		{1	, "Ambiant"},
 		{2	, "Sky Top"},
@@ -32,7 +32,8 @@ namespace Noggit::Ui::Tools
 		{17	, "River Far"}
 	};
 
-	static std::map <int, std::string> light_names_map = {
+	// TODO : move to definitions files
+	static const std::unordered_map <int, std::string> light_names_map = {
 		{1	, "Global Light"},
 		{2	, "DuskWood"},
 		{3	, "Swamp Of Sorrows"},

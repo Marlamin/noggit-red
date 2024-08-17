@@ -31,6 +31,73 @@ public:
   OutdoorLightStats getLightStats(int time);
 };
 
+struct ZoneLight
+{
+  unsigned int id = 0;
+  std::string name;
+  unsigned int mapId = 0; // map.dbc
+  unsigned int lightId = 0; // light.dbc reference
+};
+
+struct ZoneLightPoint
+{
+    unsigned int id = 0;
+    unsigned int zoneLightId = 0;
+    float pos1 = 0.0f;
+    float pos2 = 0.0f;
+    unsigned int pointOrder;
+};
+
+// hardcoded in the client in 3.3.5, they were moved to a DBC in 4.0
+// TODO : move to a definition file
+static const std::vector<ZoneLight> zoneLightsWotlk = {
+    {60, "BoreanTundra", 571, 914},
+    {61, "DragonBlight", 571, 825},
+    {62, "GrizzlyHills", 571, 959},
+    {63, "HowlingFjord", 571, 862},
+    {64, "HowlingGrizzly", 571, 1847},
+    {65, "Icecrown", 571, 1703},
+    {66, "Sholazar", 571, 1796},
+    {67, "StormPeaks", 571, 1777},
+    {68, "Wintergrasp", 571, 1792},
+    {69, "ZulDrak", 571, 1589},
+    {70, "CrystalSong", 571, 1740},
+    {187, "Shadow Moon Main", 530, 519}
+};
+
+// TODO also move to a csv file. added just borean tundra as example
+/*
+std::vector<ZoneLightPoint> zoneLightPoints = {
+    {300, 60, 4215.8745f, 3269.2654f, 1},
+    {301, 60, 4271.2856f, 4197.4040f, 2},
+    {302, 60, 4363.6377f, 4262.0503f, 3},
+    {303, 60, 4585.2827f, 4264.3594f, 4},
+    {304, 60, 4562.1950f, 4617.6060f, 5},
+    {305, 60, 4522.9450f, 4633.7670f, 6},
+    {306, 60, 4520.6360f, 4675.3257f, 7},
+    {307, 60, 4562.1950f, 4709.9580f, 8},
+    {308, 60, 4566.8125f, 4936.2207f, 9},
+    {309, 60, 4622.2236f, 4940.8380f, 10},
+    {310, 60, 4631.4585f, 5499.5680f, 11},
+    {311, 60, 4728.4280f, 5679.6550f, 12},
+    {312, 60, 4728.4280f, 5956.7110f, 13},
+    {313, 60, 4682.2524f, 6012.1226f, 14},
+    {314, 60, 4673.0170f, 6487.7354f, 15},
+    {315, 60, 6081.3860f, 8990.4780f, 16},
+    {316, 60, 3043.0032f, 9590.7660f, 17},
+    {317, 60, 826.5530f, 8247.0430f, 18},
+    {318, 60, 133.91203f, 5448.7744f, 19},
+    {319, 60, 957.1393f, 3272.8423f, 20},
+    {320, 60, 2381.5320f, 3242.5560f, 21},
+    {321, 60, 3117.2805f, 3195.2437f, 22},
+    {322, 60, 3292.0650f, 3263.7822f, 23},
+    {323, 60, 3610.3906f, 3122.0793f, 24},
+    {324, 60, 3746.0330f, 3111.1125f, 25},
+    {325, 60, 3812.3870f, 3198.4680f, 26},
+    {326, 60, 4098.6855f, 3195.5237f, 27}
+};
+*/
+
 struct SkyColor 
 {
   glm::vec3 color;
