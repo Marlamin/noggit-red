@@ -433,10 +433,12 @@ void MapIndex::unloadTile(const TileIndex& tile)
   // unloads a tile with given cords
   if (tileLoaded(tile))
   {
-    Log << "Unload Tile " << tile.x << "-" << tile.z << std::endl;
+    // either log before or don't use a reference for the tile/make a copy
+    // otherwise it can be deleted before the log because it comes from the adt itself (see unloadTiles)
+    Log << "Unloading Tile " << tile.x << "-" << tile.z << std::endl;
 
     AsyncLoader::instance().ensure_deletable(mTiles[tile.z][tile.x].tile.get());
-    mTiles[tile.z][tile.x].tile = nullptr;
+    mTiles[tile.z][tile.x].tile.reset();
     _n_loaded_tiles--;
   }
 }
@@ -720,8 +722,8 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
   _uid_fix_all_in_progress = true;
 
-  std::forward_list<ModelInstance> models;
-  std::forward_list<WMOInstance> wmos;
+  auto models = std::make_unique<std::forward_list<ModelInstance>>();
+  auto wmos = std::make_unique<std::forward_list<WMOInstance>>();
 
   for (int z = 0; z < 64; ++z)
   {
@@ -890,11 +892,11 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
       for (ENTRY_MDDF& entry : modelEntries)
       {
-        models.emplace_front(modelFilenames[entry.nameID], &entry, _context);
+        models->emplace_front(modelFilenames[entry.nameID], &entry, _context);
       }
       for (ENTRY_MODF& entry : wmoEntries)
       {
-        wmos.emplace_front(wmoFilenames[entry.nameID], &entry, _context);
+        wmos->emplace_front(wmoFilenames[entry.nameID], &entry, _context);
       }
     }
   }
@@ -903,11 +905,11 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
   // for each tile save the m2/wmo present inside
   highestGUID = 0;
 
-  std::map<std::size_t, std::map<std::size_t, std::forward_list<std::uint32_t>>> uids_per_tile;
+  auto uids_per_tile = std::make_unique<std::map<std::size_t, std::map<std::size_t, std::forward_list<std::uint32_t>>>>();
 
   bool loading_error = false;
 
-  for (ModelInstance& instance : models)
+  for (ModelInstance& instance : *models)
   {
     instance.uid = highestGUID++;
     instance.model->wait_until_loaded();
@@ -925,16 +927,18 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
     for (std::size_t z = sz; z <= ez; ++z)
     {
+      auto& row_map = (*uids_per_tile)[z];
       for (std::size_t x = sx; x <= ex; ++x)
       {
-        uids_per_tile[z][x].push_front (real_uid);
+          auto& uid_list = row_map[x];
+          uid_list.emplace_front(real_uid);
       }
     }
   }
 
-  models.clear();
+  models.reset();
 
-  for (WMOInstance& instance : wmos)
+  for (WMOInstance& instance : *wmos)
   {
     instance.uid = highestGUID++;
     instance.wmo->wait_until_loaded();
@@ -950,14 +954,16 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
     for (std::size_t z = sz; z <= ez; ++z)
     {
+      auto& row_map = (*uids_per_tile)[z];
       for (std::size_t x = sx; x <= ex; ++x)
       {
-        uids_per_tile[z][x].push_front (real_uid);
+        auto& uid_list = row_map[x];
+        uid_list.emplace_front(real_uid);
       }
     }
   }
 
-  wmos.clear();
+  wmos.reset();
 
   if (cancel_on_model_loading_error && loading_error)
   {
@@ -987,7 +993,7 @@ uid_fix_status MapIndex::fixUIDs (World* world, bool cancel_on_model_loading_err
 
       // add the uids to the tile to be able to save the models
       // which have been loaded in world earlier
-      for (std::uint32_t uid : uids_per_tile[z][x])
+      for (std::uint32_t uid : (*uids_per_tile)[z][x])
       {
         tile.add_model(uid);
       }
@@ -1227,7 +1233,7 @@ void MapIndex::set_basename(const std::string &pBasename)
   }
 }
 
-void MapIndex::create_empty_wdl()
+void MapIndex::create_empty_wdl() const
 {
     // for new map creation, creates a new WDL with all heights as 0
     std::stringstream filename;
@@ -1271,7 +1277,8 @@ void MapIndex::create_empty_wdl()
     curPos += 8;
     //  }
 
-    uint32_t mare_offsets[4096] = { 0 }; // [64][64];
+    uint32_t* mare_offsets = new uint32_t[4096]();
+    // uint32_t mare_offsets[4096] = { 0 }; // [64][64];
     // MAOF
     //  {
     wdlFile.Extend(8);
@@ -1303,8 +1310,9 @@ void MapIndex::create_empty_wdl()
         }
     }
 
-    for (auto offset : mare_offsets)
+    for (int i = 0; i < 4096; ++i)
     {
+        uint32_t offset = mare_offsets[i];
         if (!offset)
             continue;
 
@@ -1328,6 +1336,8 @@ void MapIndex::create_empty_wdl()
         wdlFile.Extend(32);
         curPos += 32;
     }
+    delete[] mare_offsets;
+
     BlizzardArchive::ClientFile f(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData(),
     BlizzardArchive::ClientFile::NEW_FILE);
     f.setBuffer(wdlFile.data);
