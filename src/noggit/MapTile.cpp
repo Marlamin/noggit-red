@@ -74,11 +74,15 @@ MapTile::MapTile( int pX
 
 MapTile::~MapTile()
 {
-  for (auto& pair : object_instances)
   {
-    for (auto& instance : pair.second)
+    std::lock_guard<std::mutex> const lock(_mutex);
+    
+    for (auto& pair : object_instances)
     {
-      instance->derefTile(this);
+      for (auto& instance : pair.second)
+      {
+        instance->derefTile(this);
+      }
     }
   }
 

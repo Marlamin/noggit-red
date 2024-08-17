@@ -15,6 +15,8 @@ SceneObject::SceneObject(SceneObjectTypes type, Noggit::NoggitRenderContext cont
 , _context(context)
 , pos(0.f, 0.f, 0.f)
 , dir(0.f, 0.f, 0.f)
+, uid(0)
+, frame(0)
 {
   // min and max initialized to their opposites
   extents[0] = glm::vec3(std::numeric_limits<float>::max()); 
@@ -86,6 +88,7 @@ void SceneObject::normalizeDirection()
 
 void SceneObject::refTile(MapTile* tile)
 {
+  assert(tile);
   auto it = std::find(_tiles.begin(), _tiles.end(), tile);
   if (it == _tiles.end())
     _tiles.push_back(tile);
@@ -93,6 +96,7 @@ void SceneObject::refTile(MapTile* tile)
 
 void SceneObject::derefTile(MapTile* tile)
 {
+  assert(tile);
   auto it = std::find(_tiles.begin(), _tiles.end(), tile);
   if (it != _tiles.end())
     _tiles.erase(it);

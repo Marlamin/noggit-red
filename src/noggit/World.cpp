@@ -2039,7 +2039,7 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
   /*
   if (uids.size())
   {
-    update_models_by_filename();
+    need_model_updates = true;
   }*/
 }
 
