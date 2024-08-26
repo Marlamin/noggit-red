@@ -127,6 +127,11 @@ namespace
   };
 }
 
+bool OpenGL::context::has_extension(std::string const& name)
+{
+    return _current_context->hasExtension(QByteArray::fromStdString(name));
+}
+
 void OpenGL::context::enable (GLenum target)
 {
 #ifndef NOGGIT_DO_NOT_CHECK_FOR_OPENGL_ERRORS
