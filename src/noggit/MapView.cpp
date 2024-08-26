@@ -3125,10 +3125,10 @@ MapView::MapView( math::degrees camera_yaw0
   _startup_time.start();
 
   int _fps_limit = _settings->value("fps_limit", 60).toInt();
-  int _fps_calcul = (int)((1.f / (float)_fps_limit) * 1000.f);
-  std::cout << "FPS limit is set to : " << _fps_limit << " (" << _fps_calcul << ")" << std::endl;
+  int _frametime = static_cast<int>((1.f / static_cast<float>(_fps_limit)) * 1000.f);
+  std::cout << "FPS limit is set to : " << _fps_limit << " (" << _frametime << ")" << std::endl;
 
-  _update_every_event_loop.start (_fps_calcul);
+  _update_every_event_loop.start (_frametime);
   connect(&_update_every_event_loop, &QTimer::timeout,[=]
       { 
           _needs_redraw = true;
