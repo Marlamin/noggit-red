@@ -3,6 +3,8 @@
 #include <noggit/Log.h>
 
 #include <QDateTime>
+#include <QMessageBox>
+#include <QString>
 
 namespace Noggit::Application
 {
@@ -97,6 +99,9 @@ namespace Noggit::Application
 		  // "17.0"  //  MSVC 14.3 Visual Studio 2022
 	  };
 
+	  // confirmed crash with v14.30.30704.00
+	  const int required_version = 31;
+
 	  bool redist_found = false;
 	  foreach (const QString & version, versions) {
 		  QString keyPath = registryPath + version + "\\VC\\Runtimes\\x64";
@@ -105,14 +110,42 @@ namespace Noggit::Application
 		  if (settings.contains("Installed")) {
 			  bool installed = settings.value("Installed").toBool();
 			  if (installed) {
-				  redist_found = true;
+
 				  QString versionNumber = settings.value("Version").toString();
+				  // LogDebug << "Minor version : " << minorVersion << std::endl;
 				  LogDebug << "Found MSVC " << version.toStdString() << " Redistributable Version: " << versionNumber.toStdString() << std::endl;
+
+				  int minorVersion = settings.value("Minor").toInt();
+ 				  if (minorVersion < required_version)
+ 				  {
+ 					  {
+ 						QMessageBox msgBox;
+ 						msgBox.setIcon(QMessageBox::Critical);
+ 						msgBox.setWindowTitle("Outdated Redistributable");
+ 						msgBox.setTextFormat(Qt::RichText);   //this is what makes the links clickable
+ 
+ 						QString message = "Your Microsoft Visual C++ Redistributable x64 is outdated. "
+ 							  "Please update it to the latest version to continue running this application.<br>"
+ 							  "You can download it from the <a href=\"https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170\">official website (x64)</a>.<br>"
+ 							"Direct Download Link : <a href=\"https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170\">https://aka.ms/vs/17/release/vc_redist.x64.exe</a>";
+ 
+ 						msgBox.setText(message);
+ 						msgBox.setStandardButtons(QMessageBox::Ok);
+ 						msgBox.exec();
+ 					  }
+ 
+ 					  // throw std::runtime_error("Installed Microsoft Visual C++ Redistributable version : " + versionNumber.toStdString() +  " is too old."
+ 					  // + "Minimum required is 14.31"
+ 					  // + "Update at https://aka.ms/vs/17/release/vc_redist.x64.exe or search \"Microsoft Visual C++ Redistributable x64\"");
+ 				  }
+				  redist_found = true;
 			  }
 		  }
 	  }
 	  if (!redist_found)
-		  LogDebug << "No Redistribuable MSVC version found" << std::endl;
+	  {
+		  LogDebug << "No Redistribuable MSVC version 14.xx found" << std::endl;
+	  }
 
 	  // Initialize OpenGL
 	  QSurfaceFormat format;
