@@ -11,6 +11,53 @@
 #include <string>
 #include <vector>
 
+// 3.3.5 only
+enum SkyColorNames
+{
+  LIGHT_GLOBAL_DIFFUSE,
+  LIGHT_GLOBAL_AMBIENT,
+  SKY_COLOR_0, // top
+  SKY_COLOR_1, // middle
+  SKY_COLOR_2, // middle to horizon
+  SKY_COLOR_3, // above horizon
+  SKY_COLOR_4, // horizon
+  FOG_COLOR, // fog and WDL mountains
+  SHADOW_OPACITY,
+  SUN_COLOR, // sun, specular light, sunrays
+  SUN_HALO_COLOR, // bigger sun halo
+  CLOUD_EDGE_COLOR, // cloud edge
+  CLOUD_COLOR, // cloud body
+  SKY_UNKNOWN_3,
+  OCEAN_COLOR_LIGHT, // shallow ocean
+  OCEAN_COLOR_DARK, // deep ocean
+  RIVER_COLOR_LIGHT, // shallow river
+  RIVER_COLOR_DARK, // deep river
+  NUM_SkyColorNames
+};
+
+enum SkyFloatParamsNames
+{
+  SKY_FOG_DISTANCE,
+  SKY_FOG_MULTIPLIER,
+  SKY_CELESTIAL_FLOW,
+  SKY_CLOUD_DENSITY,
+  SKY_UNK_FLOAT_PARAM_4,
+  SKY_UNK_FLOAT_PARAM_5,
+  NUM_SkyFloatParamsNames
+};
+
+enum SkyParamsNames
+{
+    SKY_PARAM_CLEAR,
+    SKY_PARAM_CLEAR_UNDERWATER,
+    SKY_PARAM_TORM,
+    SKY_PARAM_STORM_UNDERWATER,
+    SKY_PARAM_DEATH,
+    SKY_PARAM_UNK_1,
+    SKY_PARAM_UNK_2,
+    SKY_PARAM_UNK_3,
+    NUM_SkyParamsNames
+};
 
 struct OutdoorLightStats
 {
@@ -123,10 +170,10 @@ public:
     SkyParam() = default;
     explicit SkyParam(int paramId, Noggit::NoggitRenderContext context);
 
-    std::vector<SkyColor> colorRows[36];
-    std::vector<SkyFloatParam> floatParams[6];
-    int mmin[36];
-    int mmin_float[6];
+    std::vector<SkyColor> colorRows[NUM_SkyColorNames]; // [NUM_SkyColorNames] // 36
+    std::vector<SkyFloatParam> floatParams[NUM_SkyFloatParamsNames];
+    int mmin[NUM_SkyColorNames]; // [NUM_SkyColorNames] // 36
+    int mmin_float[NUM_SkyFloatParamsNames];
 
     bool highlight_sky() const { return _highlight_sky; }
     float river_shallow_alpha() const { return _river_shallow_alpha; }
@@ -142,14 +189,13 @@ public:
     void set_ocean_shallow_alpha(float alpha) { _ocean_shallow_alpha = alpha; }
     void set_ocean_deep_alpha(float alpha) { _ocean_deep_alpha = alpha; }
 
-private:
-    bool _highlight_sky;
-    float _river_shallow_alpha;
-    float _river_deep_alpha;
-    float _ocean_shallow_alpha;
-    float _ocean_deep_alpha;
-
-    float _glow;
+private: // most common settings
+    bool _highlight_sky = false;
+    float _river_shallow_alpha = 0.5f;
+    float _river_deep_alpha = 1.0f;
+    float _ocean_shallow_alpha = 0.75f;
+    float _ocean_deep_alpha = 1.0f;
+    float _glow = 0.5f;
 
     Noggit::NoggitRenderContext _context;
 };
@@ -160,20 +206,15 @@ public:
   std::optional<ModelInstance> skybox;
 
   int Id;
-  glm::vec3 pos;
-  float r1, r2;
+  glm::vec3 pos = glm::vec3(0, 0, 0);
+  float r1 = 0.f, r2 = 0.f;
 
   explicit Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context);
 
-  SkyParam* skyParams[8];
-  int curr_sky_param = 0;
+  SkyParam* skyParams[NUM_SkyParamsNames];
+  int curr_sky_param = SKY_PARAM_CLEAR;
 
-  // std::vector<SkyColor> colorRows[36];
-  // std::vector<SkyFloatParam> floatParams[6];
-  // int mmin[36];
-  // int mmin_float[6];
-
-  char name[32];
+  // std::string name;
 
   glm::vec3 colorFor(int r, int t) const;
   float floatParamFor(int r, int t) const;
@@ -200,52 +241,7 @@ private:
   Noggit::NoggitRenderContext _context;
 };
 
-enum SkyColorNames 
-{
-  LIGHT_GLOBAL_DIFFUSE,
-  LIGHT_GLOBAL_AMBIENT,
-  SKY_COLOR_0, // top
-  SKY_COLOR_1, // middle
-  SKY_COLOR_2, // middle to horizon
-  SKY_COLOR_3, // above horizon
-  SKY_COLOR_4, // horizon
-  FOG_COLOR, // fog and WDL mountains
-  SHADOW_OPACITY,
-  SUN_COLOR, // sun, specular light, sunrays
-  SUN_HALO_COLOR, // bigger sun halo
-  CLOUD_EDGE_COLOR, // cloud edge
-  CLOUD_COLOR, // cloud body
-  SKY_UNKNOWN_3,
-  OCEAN_COLOR_LIGHT, // shallow ocean
-  OCEAN_COLOR_DARK, // deep ocean
-  RIVER_COLOR_LIGHT, // shallow river
-  RIVER_COLOR_DARK, // deep river
-  NUM_SkyColorNames
-};
 
-enum SkyFloatParamsNames
-{
-  FOG_DISTANCE,
-  FOG_MULTIPLIER,
-  CELESTIAL_FLOW,
-  CLOUD_DENSITY,
-  UNK_FLOAT_PARAM_1,
-  UNK_FLOAT_PARAM_2,
-  NUM_SkyFloatParamsNames
-};
-
-enum SkyParamsNames
-{
-    CLEAR,
-    CLEAR_WATER,
-    STORM,
-    STORM_WATER,
-    DEATH,
-    UNK_PARAM_1,
-    UNK_PARAM_2,
-    UNK_PARAM_3,
-    NUM_SkyParamsNames
-};
 
 class Skies 
 {
@@ -257,19 +253,21 @@ private:
   int _last_time = -1;
   glm::vec3 _last_pos;
 
-  float _river_shallow_alpha;
-  float _river_deep_alpha;
-  float _ocean_shallow_alpha;
-  float _ocean_deep_alpha;
-  float _glow;
-  float _fog_rate;
+  float _river_shallow_alpha = 0.5f;
+  float _river_deep_alpha = 1.0f;
+  float _ocean_shallow_alpha = 0.75f;
+  float _ocean_deep_alpha = 1.0f;
+  float _glow = 0.5f;
+  // bool _highlight_sky = false;
 
-  float _fog_distance;
-  float _fog_multiplier;
+  float _fog_rate = 1.5f;
+
+  float _fog_distance = 6500;
+  float _fog_multiplier = 0.1;
 
 public:
   std::vector<Sky> skies;
-  std::vector<glm::vec3> color_set = std::vector<glm::vec3>(NUM_SkyColorNames);
+  std::vector<glm::vec3> color_set = std::vector<glm::vec3>(NUM_SkyColorNames, glm::vec3(1.f, 1.f, 1.f));
 
   explicit Skies(unsigned int mapid, Noggit::NoggitRenderContext context);
 

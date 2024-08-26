@@ -654,7 +654,7 @@ void MapCreationWizard::saveCurrentEntry()
         record.write(LightDB::Map, _cur_map_id);
         // positions and falloffs should be defaulted to 0
         // set some default light params to the same as eastern kingdom
-        record.write(LightDB::DataIDs + 0, 12);// CLEAR
+        record.write(LightDB::DataIDs + 0, 12);// SKY_PARAM_CLEAR
         record.write(LightDB::DataIDs + 1, 13);//     CLEAR_WATER,
         record.write(LightDB::DataIDs + 2, 10);//     STORM,
         record.write(LightDB::DataIDs + 3, 13);//     STORM_WATER,

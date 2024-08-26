@@ -175,20 +175,7 @@ Sky::Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context)
   r1 = data->getFloat(LightDB::RadiusInner) / skymul;
   r2 = data->getFloat(LightDB::RadiusOuter) / skymul;
 
-  // for (int i = 0; i < 36; ++i)
-  // {
-  //   mmin[i] = -2;
-  // }
-
-  // for (int i = 0; i < 6; ++i)
-  // {
-  //   mmin_float[i] = -2;
-  // }
-
   global = (pos.x == 0.0f && pos.y == 0.0f && pos.z == 0.0f);
-
-  // int light_param_0 = data->getInt(LightDB::DataIDs);
-  // int light_int_start = light_param_0 * NUM_SkyColorNames - 17;
 
   for (int i = 0; i < NUM_SkyParamsNames; ++i)
   {
@@ -347,11 +334,14 @@ Skies::Skies(unsigned int mapid, Noggit::NoggitRenderContext context)
 
   if (!has_global)
   {
+    LogDebug << "No global light data found for the current map (id :" << mapid
+        << ") using light id 1 as a fallback" << std::endl;
     for (DBCFile::Iterator i = gLightDB.begin(); i != gLightDB.end(); ++i)
     {
       if (1 == i->getUInt(LightDB::ID))
       {
         Sky s(i, _context);
+        s.global = true;
         skies.push_back(s);
         numSkies++;
         break;
@@ -518,8 +508,6 @@ void Skies::update_sky_colors(glm::vec3 pos, int time)
 
       _fog_distance = (_fog_distance * (1.0f - sky.weight)) + (sky.floatParamFor(0, time) * sky.weight);
       _fog_multiplier = (_fog_multiplier * (1.0f - sky.weight)) + (sky.floatParamFor(1, time) * sky.weight);
-      // sky.skyParams[sky.curr_sky_param]->river_shallow_alpha(); // new
-      // sky.skyParams[sky.curr_sky_param].river_shallow_alpha(); // old
       _river_shallow_alpha = (_river_shallow_alpha * (1.0f - sky.weight)) + (sky.skyParams[sky.curr_sky_param]->river_shallow_alpha() * sky.weight);
       _river_deep_alpha = (_river_deep_alpha * (1.0f - sky.weight)) + (sky.skyParams[sky.curr_sky_param]->river_deep_alpha() * sky.weight);
       _ocean_shallow_alpha = (_ocean_shallow_alpha * (1.0f - sky.weight)) + (sky.skyParams[sky.curr_sky_param]->ocean_shallow_alpha() * sky.weight);
