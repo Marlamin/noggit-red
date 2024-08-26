@@ -161,16 +161,16 @@ void LiquidRender::updateLayerData(LiquidTextureManager* tex_manager)
 
           // fill vertex data
           auto& vertices = layer.getVertices();
-          auto& tex_coords = layer.getTexCoords();
-          auto& depth = layer.getDepth();
+          // auto& tex_coords = layer.getTexCoords();
+          // auto& depth = layer.getDepth();
 
           for (int z_v = 0; z_v < 9; ++z_v)
           {
             for (int x_v = 0; x_v < 9; ++x_v)
             {
               const unsigned v_index = z_v * 9 + x_v;
-              glm::vec2& tex_coord = tex_coords[v_index];
-              layer_params.vertex_data[n_chunks][v_index] = glm::vec4(vertices[v_index].y, depth[v_index], tex_coord.x, tex_coord.y);
+              glm::vec2& tex_coord = vertices[v_index].uv;
+              layer_params.vertex_data[n_chunks][v_index] = glm::vec4(vertices[v_index].position.y, vertices[v_index].depth, tex_coord.x, tex_coord.y);
             }
           }
 

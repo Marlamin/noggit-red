@@ -187,13 +187,47 @@ struct ENTRY_MCSE
 struct MH2O_Header{
   uint32_t ofsInformation;
   uint32_t nLayers;
-  uint32_t ofsRenderMask;
+  uint32_t ofsAttributes;
 
   MH2O_Header()
     : ofsInformation(0)
     , nLayers(0)
-    , ofsRenderMask(0)
+    , ofsAttributes(0)
   {}
+};
+
+// enum for type column of liquidtype.dbc
+enum liquid_basic_types
+{
+    liquid_basic_types_water = 0,
+    liquid_basic_types_ocean = 1,
+    liquid_basic_types_magma = 2,
+    liquid_basic_types_slime = 3,
+
+    liquid_basic_types_MASK = 3,
+};
+
+// just liquidtype.dbc
+enum liquid_types
+{
+    LIQUID_WATER = 1,
+    LIQUID_OCEAN = 2,
+    LIQUID_MAGMA = 3,
+    LIQUID_SLIME = 4,
+    // slow
+    // fast
+    LIQUID_WMO_Water = 13,
+    LIQUID_WMO_Ocean = 14,
+    LIQUID_Green_Lava = 15,
+    LIQUID_WMO_Water_Interior = 17,
+    LIQUID_WMO_Magma = 19,
+    LIQUID_WMO_Slime = 20,
+
+    LIQUID_END_BASIC_LIQUIDS = LIQUID_WMO_Slime,
+
+    LIQUID_FIRST_NONBASIC_LIQUID_TYPE = 21,
+
+    LIQUID_NAXX_SLIME = LIQUID_FIRST_NONBASIC_LIQUID_TYPE,
 };
 
 struct MH2O_Information{
@@ -231,11 +265,10 @@ struct mh2o_uv
   std::uint16_t y;
 };
 
-struct MH2O_Render
+struct MH2O_Attributes
 {
-  // seems to be usable as visibility information (as per https://wowdev.wiki/ADT/v18#MH2O_chunk_.28WotLK.2B.29)
   std::uint64_t fishable = 0xFFFFFFFFFFFFFFFF;
-  std::uint64_t fatigue = 0;
+  std::uint64_t fatigue = 0; // should be set to max ?
 };
 
 struct water_vert

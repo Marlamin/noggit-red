@@ -70,10 +70,13 @@ public:
 
   MapChunk* getChunk() { return _chunk; };
   TileWater* getWaterTile() { return _water_tile; };
-  std::optional<MH2O_Render> Render;
+
+  MH2O_Attributes& const getAttributes() { return attributes; };
+
   float xbase, zbase;
 
 private:
+  MH2O_Attributes attributes;
 
   glm::vec3 vmin, vmax, vcenter;
   bool _use_mclq_green_lava;
@@ -83,8 +86,9 @@ private:
 
   void copy_height_to_layer(liquid_layer& target, glm::vec3 const& pos, float radius);
 
-
-
+  bool _auto_update_attributes = true;
+  // updates attributes for all layers
+  void update_attributes();
 
   std::vector<liquid_layer> _layers;
   MapChunk* _chunk;

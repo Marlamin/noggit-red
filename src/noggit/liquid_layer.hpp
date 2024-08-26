@@ -21,6 +21,14 @@ enum LiquidLayerUpdateFlags
   ll_FLAGS = 0x10
 };
 
+enum LiquidVertexFormats
+{
+    HEIGHT_DEPTH = 0,
+    HEIGHT_UV = 1,
+    DEPTH = 2,
+    HEIGHT_DEPTH_UV = 3
+};
+
 namespace BlizzardArchive
 {
   class ClientFile;
@@ -29,6 +37,15 @@ namespace BlizzardArchive
 // handle liquids like oceans, lakes, rivers, slime, magma
 class liquid_layer
 {
+struct liquid_vertex
+{
+    glm::vec3 position;
+    glm::vec2 uv;
+    float depth;
+
+    liquid_vertex() = default;
+    liquid_vertex(glm::vec3 const& pos, glm::vec2 const& uv, float depth) : position(pos), uv(uv), depth(depth) {}
+};
 
 public:
   liquid_layer() = delete;
@@ -44,18 +61,22 @@ public:
 
   void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
 
+  void update_attributes(MH2O_Attributes& attributes);
   void changeLiquidID(int id);
 
   void crop(MapChunk* chunk);
   void update_opacity(MapChunk* chunk, float factor);
 
-  std::array<glm::vec3, 9 * 9>& getVertices() { return _vertices; };
-  std::array<float, 9 * 9>& getDepth() { return _depth; };
-  std::array<glm::vec2, 9 * 9>& getTexCoords() { return _tex_coords; };
+  std::array<liquid_vertex, 9 * 9>& getVertices() { return _vertices; };
+  // std::array<float, 9 * 9>& getDepth() { return _depth; };
+  // std::array<glm::vec2, 9 * 9>& getTexCoords() { return _tex_coords; };
 
   float min() const { return _minimum; }
   float max() const { return _maximum; }
   int liquidID() const { return _liquid_id; }
+
+  // used for fatigue calculation
+  bool subchunk_at_max_depth(int x, int z) const;
 
   bool hasSubchunk(int x, int z, int size = 1) const;
   void setSubchunk(int x, int z, bool water);
@@ -82,23 +103,34 @@ public:
 
   ChunkWater* getChunk() { return _chunk; };
 
+  bool has_fatigue() const { return _fatigue_enabled; }
 private:
+  void create_vertices(float height);
+
   void update_min_max();
   void update_vertex_opacity(int x, int z, MapChunk* chunk, float factor);
   int get_lod_level(glm::vec3 const& camera_pos) const;
-  void set_lod_level(int lod_level);
+  // void set_lod_level(int lod_level);
+
+  bool check_fatigue() const;
+  // gets enabled when all subchunks are at max depth and type is ocean : check_fatigue()
+  bool _fatigue_enabled = false;
 
   int _liquid_id;
+  int _liquid_type;
   int _liquid_vertex_format;
   float _minimum;
   float _maximum;
 
   std::uint64_t _subchunks;
-  std::array<glm::vec3, 9 * 9> _vertices;
-  std::array<float, 9 * 9> _depth;
-  std::array<glm::vec2, 9 * 9> _tex_coords;
+  // std::array<glm::vec3, 9 * 9> _vertices;
+  // std::array<float, 9 * 9> _depth;
+  // std::array<glm::vec2, 9 * 9> _tex_coords;
 
-  std::map<int, std::vector<std::uint16_t>> _indices_by_lod;
+  // std::vector<liquid_vertex> _vertices;
+  std::array<liquid_vertex, 9 * 9> _vertices;
+
+  // std::map<int, std::vector<liquid_indice>> _indices_by_lod;
 
 
 private:

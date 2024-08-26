@@ -6,6 +6,7 @@
 #include <noggit/World.h>
 #include <noggit/ui/pushbutton.hpp>
 #include <noggit/ui/Water.h>
+#include <noggit/MapHeaders.h>
 #include <util/qt/overload.hpp>
 
 #include <QtWidgets/QButtonGroup>
@@ -63,7 +64,8 @@ namespace Noggit
         int liquid_id = i->getInt(LiquidTypeDB::ID);
 
         // filter WMO liquids
-        if (liquid_id == 13 || liquid_id == 14 || liquid_id == 17 || liquid_id == 19 || liquid_id == 20)
+        if (liquid_id == LIQUID_WMO_Water || liquid_id == LIQUID_WMO_Ocean || liquid_id == LIQUID_WMO_Water_Interior
+            || liquid_id == LIQUID_WMO_Magma || liquid_id == LIQUID_WMO_Slime)
             continue;
 
         std::stringstream ss;
@@ -81,13 +83,14 @@ namespace Noggit
                   if (_opacity_mode == custom_opacity)
                       return;
 
+                  // other liquid types shouldn't use opacity(depth)
                   int liquid_type = LiquidTypeDB::getLiquidType(_liquid_id);
-                  if (liquid_type == 1) // ocean
+                  if (liquid_type == liquid_basic_types_ocean) // ocean
                   {
                       ocean_button->setChecked(true);
                       _opacity_mode = ocean_opacity;
                   }
-                  else
+                  else // water. opacity doesn't matter for lava/slim
                   {
                       river_button->setChecked(true);
                       _opacity_mode = river_opacity;
