@@ -2,9 +2,34 @@
 #include <noggit/project/ApplicationProject.h>
 #include <noggit/Log.h>
 
+#include <chrono>
+#include <future>
+#include <thread>
+
 #include <QDateTime>
 #include <QMessageBox>
 #include <QString>
+
+namespace
+{
+  std::atomic_bool success = false;
+  
+  void opengl_context_creation_stuck_failsafe()
+  {
+  	for (int i = 0; i < 50; ++i)
+  	{
+  		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  		if (success.load())
+  		{
+  			return;
+  		}
+  	}
+  
+  	LogError << "OpenGL Context creation failed (timeout), closing..." << std::endl;
+  
+  	std::terminate();
+  }
+}
 
 namespace Noggit::Application
 {
@@ -163,6 +188,10 @@ namespace Noggit::Application
 	  bool doAntiAliasing = app_settings.value("anti_aliasing", false).toBool();
 	  format.setSamples(doAntiAliasing ? 4 : applicationConfiguration.GraphicsConfiguration.SamplesCount); // default is 0, no AA
 
+	  // context creation seems to get stuck sometimes, this ensure the app is killed
+	  // otherwise it's wasting cpu resources and is annoying when developping
+	  auto failsafe = std::async(&opengl_context_creation_stuck_failsafe);
+
 	  QSurfaceFormat::setDefaultFormat(format);
 	  QOpenGLContext context;
 	  context.create();
@@ -171,6 +200,8 @@ namespace Noggit::Application
 	  surface.create();
 
 	  context.makeCurrent(&surface);
+
+	  success = true;
 
 	  OpenGL::context::scoped_setter const _(::gl, &context);
 

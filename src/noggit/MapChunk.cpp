@@ -57,7 +57,7 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
     // xbase = header.xpos;
     // ybase = header.ypos;
 
-    texture_set = nullptr;
+    texture_set.reset();
 
     auto& tile_buffer = mt->getChunkHeightmapBuffer();
     int chunk_start = (px * 16 + py) * mapbufsize * 4;
