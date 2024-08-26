@@ -133,6 +133,11 @@ private:
   bool look, freelook;
   bool ui_hidden = false;
 
+  Noggit::Camera _debug_cam;
+  Noggit::BoolToggleProperty _debug_cam_mode = { false };
+  Noggit::BoolToggleProperty _fps_mode = { false };
+  Noggit::BoolToggleProperty _camera_collision = { false };
+
   bool _camera_moved_since_last_draw = true;
 
   std::array<Qt::Key, 6> _inputs = {Qt::Key_W, Qt::Key_S, Qt::Key_D, Qt::Key_A, Qt::Key_Q, Qt::Key_E};
@@ -158,7 +163,7 @@ public:
   Noggit::BoolToggleProperty _draw_fog = {false};
   Noggit::BoolToggleProperty _draw_hidden_models = {false};
   Noggit::BoolToggleProperty _draw_occlusion_boxes = {false};
-  Noggit::BoolToggleProperty _game_mode_camera = { false };
+  // Noggit::BoolToggleProperty _game_mode_camera = { false };
   Noggit::BoolToggleProperty _draw_lights_zones = { false };
   Noggit::BoolToggleProperty _show_detail_info_window = { false };
   Noggit::BoolToggleProperty _show_minimap_window = { false };
@@ -175,7 +180,7 @@ private:
   display_mode _display_mode;
 
   [[nodiscard]]
-  glm::mat4x4 model_view() const;
+  glm::mat4x4 model_view(bool use_debug_cam = false) const;
 
   [[nodiscard]]
   glm::mat4x4 projection() const;

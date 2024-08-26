@@ -2258,7 +2258,7 @@ void MapView::setupViewMenu()
 
   ADD_TOGGLE (view_menu, "Show Node Editor", "Shift+N", _show_node_editor);
 
-  ADD_TOGGLE_NS(view_menu, "Game View", _game_mode_camera);
+  // ADD_TOGGLE_NS(view_menu, "Game View", _game_mode_camera);
 
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Minimap"));
@@ -2376,6 +2376,31 @@ void MapView::setupViewMenu()
                  }
                }
   );
+
+  view_menu->addSeparator();
+  view_menu->addAction(createTextSeparator("Camera Modes"));
+  view_menu->addSeparator();
+
+  /* // TODO, doesn't work for some reason.
+  ADD_TOGGLE_NS(view_menu, "Debug cam", _debug_cam_mode);
+  connect(&_debug_cam_mode, &Noggit::BoolToggleProperty::changed
+      , [this]
+      {
+          _debug_cam = Noggit::Camera(_camera.position, _camera.yaw(), _camera.pitch());
+      }
+  );
+
+  ADD_ACTION_NS(view_menu
+      , "Go to debug camera"
+      , [this]
+      {
+          _camera = Noggit::Camera(_debug_cam.position, _debug_cam.yaw(), _debug_cam.pitch());
+      }
+  );*/
+
+  ADD_TOGGLE_NS(view_menu, "FPS camera", _fps_mode);
+
+  ADD_TOGGLE_NS(view_menu, "Camera Collision", _camera_collision);
 
 }
 
@@ -3003,6 +3028,7 @@ MapView::MapView( math::degrees camera_yaw0
   , cursor_color (1.f, 1.f, 1.f, 1.f)
   , _cursorType{CursorType::CIRCLE}
   , _main_window (NoggitWindow)
+  , _debug_cam(camera_pos, camera_yaw0, camera_pitch0)
   , _world (std::move (world))
   , _status_position (new QLabel (this))
   , _status_selection (new QLabel (this))
@@ -4373,7 +4399,7 @@ void MapView::tick (float dt)
   rh = 0;
   rv = 0;
 
-  if (_display_mode != display_mode::in_2D)
+  if (_display_mode == display_mode::in_3D)
   {
     if (turn)
     {
@@ -4386,29 +4412,33 @@ void MapView::tick (float dt)
       _camera_moved_since_last_draw = true;
     }
 
-    if (_game_mode_camera.get())
-    {
-        if (moving)
-        {
-            _camera.move_forward(moving, dt);
-            _camera_moved_since_last_draw = true;
-            // TODO use normalized speed (doesn't slow down when looking up)
-            // _camera.move_forward_normalized(moving, dt);
-        }
-        if (strafing)
-        {
-            _camera.move_horizontal(strafing, dt);
-            _camera_moved_since_last_draw = true;
-        }
-        // get ground z position
-        // hack to update camera when entering mode in void ViewToolbar::add_tool_icon()
-        if (_camera_moved_since_last_draw)
-        {
-            auto ground_pos = _world.get()->get_ground_height(_camera.position);
-            _camera.position.y = ground_pos.y + 6;
-        }
-    }
-    else
+    // if (_fps_mode.get())
+    // {
+    //     // if (moving)
+    //     // {
+    //     //     _camera.move_forward(moving, dt);
+    //     //     _camera_moved_since_last_draw = true;
+    //     //     // TODO use normalized speed (doesn't slow down when looking up)
+    //     //     // _camera.move_forward_normalized(moving, dt);
+    //     // }
+    //     // if (strafing)
+    //     // {
+    //     //     _camera.move_horizontal(strafing, dt);
+    //     //     _camera_moved_since_last_draw = true;
+    //     // }
+    //     // // get ground z position
+    //     // // hack to update camera when entering mode in void ViewToolbar::add_tool_icon()
+    //     // if (_camera_moved_since_last_draw)
+    //     // {
+    //     //     auto ground_pos = _world.get()->get_ground_height(_camera.position);
+    //     //     _camera.position.y = ground_pos.y + 6;
+    //     // }
+    // 
+    //     auto h = _world->get_ground_height(_camera.position).y;
+    // 
+    //     _camera.position.y = h + 6.f;
+    // }
+    // else
     {
 
       if (moving)
@@ -4426,15 +4456,24 @@ void MapView::tick (float dt)
         _camera.move_vertical(updown, dt);
         _camera_moved_since_last_draw = true;
       }
-      // camera collision to ground
-      /*
-      auto ground_height = _world.get()->get_ground_height(_camera.position).y;
-      if (_camera.position.y < ground_height)
-      {
-          _camera.position.y = ground_height + 3;
-      }
-      */
 
+      if (_camera_moved_since_last_draw)
+      {
+        if (_fps_mode.get())
+        {
+          // there is a also hack to update camera when entering mode in void ViewToolbar::add_tool_icon()
+          float h = _world->get_ground_height(_camera.position).y;
+          _camera.position.y = h + 3.f;
+        }
+        else if (_camera_collision.get())
+        {
+          float h = _world.get()->get_ground_height(_camera.position).y;
+          if (_camera.position.y < h + 3.f)
+          {
+            _camera.position.y = h + 3.f;
+          }
+        }
+      }
     }
   }
   else
@@ -4824,11 +4863,11 @@ void MapView::update_cursor_pos()
   }
 }
 
-glm::mat4x4 MapView::model_view() const
+glm::mat4x4 MapView::model_view(bool use_debug_cam) const
 {
   if (_display_mode == display_mode::in_2D)
   {
-    glm::vec3 eye = _camera.position;
+    glm::vec3 eye = use_debug_cam ? _debug_cam.position : _camera.position;
     glm::vec3 target = eye;
     target.y -= 1.f;
     target.z -= 0.001f;
@@ -4839,7 +4878,14 @@ glm::mat4x4 MapView::model_view() const
   }
   else
   {
-    return _camera.look_at_matrix();
+    if (use_debug_cam)
+    {
+        return _debug_cam.look_at_matrix();
+    }
+    else
+    {
+        return _camera.look_at_matrix();
+    }
   }
 }
 
@@ -4856,7 +4902,7 @@ glm::mat4x4 MapView::projection() const
   }
   else
   {
-    return glm::perspective(_camera.fov()._, aspect_ratio(), 1.f, far_z);
+    return glm::perspective(_camera.fov()._, aspect_ratio(), _fps_mode.get() ? 0.1f : 1.f, far_z);
   }
 }
 
@@ -4945,8 +4991,12 @@ void MapView::draw_map()
 
   bool classic_ui = _settings->value("classicUI", false).toBool();
   bool show_unpaintable = classic_ui ? texturingTool->show_unpaintable_chunks() : _left_sec_toolbar->showUnpaintableChunk();
+
+  bool debug_cam = _debug_cam_mode.get();
+  // math::frustum frustum(model_view(debug_cam) * projection());
+
   _world->renderer()->draw (
-                 model_view()
+                 model_view(debug_cam)
                , projection()
                , _cursor_pos
                , _cursorRotation
@@ -4965,8 +5015,8 @@ void MapView::draw_map()
                , angled_mode
                , terrainMode == editing_mode::paint
                , terrainMode
-               , _camera.position
-               , _camera_moved_since_last_draw
+               , debug_cam ? _debug_cam.position : _camera.position
+               , debug_cam ? false : _camera_moved_since_last_draw
                , _draw_mfbo.get()
                , _draw_terrain.get()
                , _draw_wmo.get()
