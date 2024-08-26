@@ -204,6 +204,9 @@ namespace Noggit::Application
 	  //All of the below should be Project Initalisation
 	  srand(::time(nullptr));
 
+	  // TODO : thread count setting
+	  // AsyncLoader::setup(NoggitSettings.value("async_thread_count", 3).toInt());
+	  AsyncLoader::setup(3);
   }
 
   std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> NoggitApplication::getConfiguration()

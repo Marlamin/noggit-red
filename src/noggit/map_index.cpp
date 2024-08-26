@@ -384,7 +384,7 @@ MapTile* MapIndex::loadTile(const TileIndex& tile, bool reloading, bool load_mod
 
   MapTile* adt = mTiles[tile.z][tile.x].tile.get();
 
-  AsyncLoader::instance().queue_for_load(adt);
+  AsyncLoader::instance->queue_for_load(adt);
   _n_loaded_tiles++;
 
   return adt;
@@ -437,7 +437,7 @@ void MapIndex::unloadTile(const TileIndex& tile)
     // otherwise it can be deleted before the log because it comes from the adt itself (see unloadTiles)
     Log << "Unloading Tile " << tile.x << "-" << tile.z << std::endl;
 
-    AsyncLoader::instance().ensure_deletable(mTiles[tile.z][tile.x].tile.get());
+    AsyncLoader::instance->ensure_deletable(mTiles[tile.z][tile.x].tile.get());
     mTiles[tile.z][tile.x].tile.reset();
     _n_loaded_tiles--;
   }

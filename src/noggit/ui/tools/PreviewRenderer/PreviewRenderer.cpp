@@ -436,15 +436,15 @@ QPixmap* PreviewRenderer::renderToPixmap()
   tick(1.0f);
   draw();
 
-  auto& async_loader = AsyncLoader::instance();
+  auto async_loader = AsyncLoader::instance;
 
-  if (async_loader.is_loading())
+  if (async_loader->is_loading())
   {
     // wait for the loader to finish
     do
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    } while (async_loader.is_loading());
+    } while (async_loader->is_loading());
 
     // redraw
     gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

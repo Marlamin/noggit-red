@@ -1701,7 +1701,7 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
     unsigned counter = 0;
     constexpr unsigned TIMEOUT = 5000;
 
-    while (AsyncLoader::instance().is_loading() || !mTile->finishedLoading())
+    while (AsyncLoader::instance->is_loading() || !mTile->finishedLoading())
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
       counter++;

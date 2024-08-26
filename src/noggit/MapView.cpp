@@ -3711,7 +3711,7 @@ MapView::~MapView()
 
   _world.reset();
 
-  AsyncLoader::instance().reset_object_fail();
+  AsyncLoader::instance->reset_object_fail();
 
   Noggit::Ui::selected_texture::texture.reset();
 
@@ -5800,7 +5800,7 @@ void MapView::save(save_mode mode)
   // Save minimap creator model filters
   minimapTool->saveFiltersToJSON();
 
-  if (AsyncLoader::instance().important_object_failed_loading())
+  if (AsyncLoader::instance->important_object_failed_loading())
   {
     save = false;
     QPushButton *yes, *no;
@@ -5873,7 +5873,7 @@ void MapView::save(save_mode mode)
 
 
     NOGGIT_ACTION_MGR->purge();
-    AsyncLoader::instance().reset_object_fail();
+    AsyncLoader::instance->reset_object_fail();
 
 
     _main_window->statusBar()->showMessage("Map saved", 2000);
