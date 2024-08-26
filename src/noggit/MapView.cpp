@@ -2249,6 +2249,9 @@ void MapView::setupViewMenu()
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Hidden models", _draw_hidden_models);
 
+  ADD_TOGGLE_NS(view_menu, "Draw Sky", _draw_sky);
+  ADD_TOGGLE_NS(view_menu, "Draw Skybox", _draw_skybox);
+
   auto debug_menu (view_menu->addMenu ("Debug"));
   ADD_TOGGLE_NS (debug_menu, "Occlusion boxes", _draw_occlusion_boxes);
 
@@ -5026,6 +5029,8 @@ void MapView::draw_map()
                , _draw_model_animations.get()
                , _draw_models_with_box.get()
                , _draw_hidden_models.get()
+               , _draw_sky.get()
+               , _draw_skybox.get()
                , minimapTool->getMinimapRenderSettings()
                , _draw_fog.get()
                , terrainTool->_edit_type

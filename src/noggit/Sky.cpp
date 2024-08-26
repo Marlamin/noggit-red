@@ -557,6 +557,8 @@ bool Skies::draw(glm::mat4x4 const& model_view
                 , math::frustum const& frustum
                 , const float& cull_distance
                 , int animtime
+                /*, bool draw_particles*/
+                , bool draw_skybox
                 , OutdoorLightStats const& light_stats
                 )
 {
@@ -594,18 +596,45 @@ bool Skies::draw(glm::mat4x4 const& model_view
   }
 
   bool has_skybox = false;
-  for (Sky& sky : skies)
+  if (draw_skybox)
   {
-    if (sky.weight > 0.f && sky.skybox)
+    for (Sky& sky : skies)
     {
-      has_skybox = true;
-
-      auto& model = sky.skybox.value();
-      model.model->trans = sky.weight;
-      model.pos = camera_pos;
-      model.scale = 0.1f;
-      model.recalcExtents();
-
+      if (sky.weight > 0.f && sky.skybox)
+      {
+        has_skybox = true;
+    
+        auto& model = sky.skybox.value();
+        model.model->trans = sky.weight;
+        model.pos = camera_pos;
+        model.scale = 0.1f;
+        model.recalcExtents();
+    
+        OpenGL::M2RenderState model_render_state;
+        model_render_state.tex_arrays = {0, 0};
+        model_render_state.tex_indices = {0, 0};
+        model_render_state.tex_unit_lookups = {-1, -1};
+        gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        gl.disable(GL_BLEND);
+        gl.depthMask(GL_TRUE);
+        m2_shader.uniform("blend_mode", 0);
+        m2_shader.uniform("unfogged", static_cast<int>(model_render_state.unfogged));
+        m2_shader.uniform("unlit",  static_cast<int>(model_render_state.unlit));
+        m2_shader.uniform("tex_unit_lookup_1", 0);
+        m2_shader.uniform("tex_unit_lookup_2", 0);
+        m2_shader.uniform("pixel_shader", 0);
+    
+        model.model->renderer()->draw(model_view, model, m2_shader, model_render_state, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
+      }
+    }
+    // if it's night, draw the stars
+    if (light_stats.nightIntensity > 0 /* && !has_skybox*/)
+    {
+      stars.model->trans = light_stats.nightIntensity;
+      stars.pos = camera_pos;
+      stars.scale = 0.1f;
+      stars.recalcExtents();
+    
       OpenGL::M2RenderState model_render_state;
       model_render_state.tex_arrays = {0, 0};
       model_render_state.tex_indices = {0, 0};
@@ -619,34 +648,11 @@ bool Skies::draw(glm::mat4x4 const& model_view
       m2_shader.uniform("tex_unit_lookup_1", 0);
       m2_shader.uniform("tex_unit_lookup_2", 0);
       m2_shader.uniform("pixel_shader", 0);
-
-      model.model->renderer()->draw(model_view, model, m2_shader, model_render_state, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
+    
+      stars.model->renderer()->draw(model_view, stars, m2_shader, model_render_state, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
     }
   }
-  // if it's night, draw the stars
-  if (light_stats.nightIntensity > 0 && !has_skybox)
-  {
-    stars.model->trans = light_stats.nightIntensity;
-    stars.pos = camera_pos;
-    stars.scale = 0.1f;
-    stars.recalcExtents();
 
-    OpenGL::M2RenderState model_render_state;
-    model_render_state.tex_arrays = {0, 0};
-    model_render_state.tex_indices = {0, 0};
-    model_render_state.tex_unit_lookups = {-1, -1};
-    gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    gl.disable(GL_BLEND);
-    gl.depthMask(GL_TRUE);
-    m2_shader.uniform("blend_mode", 0);
-    m2_shader.uniform("unfogged", static_cast<int>(model_render_state.unfogged));
-    m2_shader.uniform("unlit",  static_cast<int>(model_render_state.unlit));
-    m2_shader.uniform("tex_unit_lookup_1", 0);
-    m2_shader.uniform("tex_unit_lookup_2", 0);
-    m2_shader.uniform("pixel_shader", 0);
-
-    stars.model->renderer()->draw(model_view, stars, m2_shader, model_render_state, frustum, 1000000, camera_pos, animtime, display_mode::in_3D);
-  }
 
   return true;
 }

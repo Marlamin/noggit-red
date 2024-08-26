@@ -53,6 +53,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     , bool draw_model_animations
     , bool draw_models_with_box
     , bool draw_hidden_models
+    , bool draw_sky
+    , bool draw_skybox
     , MinimapRenderSettings* minimap_render_settings
     , bool draw_fog
     , eTerrainType ground_editing_brush
@@ -178,14 +180,14 @@ void WorldRender::draw (glm::mat4x4 const& model_view
             });
 
   // only draw the sky in 3D
-  if(!minimap_render && display == display_mode::in_3D)
+  if(!minimap_render && display == display_mode::in_3D && draw_sky)
   {
     ZoneScopedN("World::draw() : Draw skies");
     OpenGL::Scoped::use_program m2_shader {*_m2_program.get()};
 
     bool hadSky = false;
 
-    if (draw_wmo || _world->mapIndex.hasAGlobalWMO())
+    if (draw_skybox && (draw_wmo || _world->mapIndex.hasAGlobalWMO()))
     {
       _world->_model_instance_storage.for_each_wmo_instance
           (
@@ -225,6 +227,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
           , frustum
           , _cull_distance
           , _world->animtime
+          , draw_skybox
           , _outdoor_light_stats
       );
     }
@@ -1658,7 +1661,13 @@ void WorldRender::drawMinimap ( MapTile *tile
   }
 
   draw(model_view, projection, glm::vec3(), 0, glm::vec4(),
-       CursorType::NONE, 0.f, false, false, false, 0.3f, 0.f, glm::vec3(), 0.f, 0.f, false, false, false, editing_mode::minimap, camera_pos, true, false, true, settings->draw_wmo, settings->draw_water, false, settings->draw_m2, false, false, true, settings, false, eTerrainType::eTerrainType_Linear, 0, display_mode::in_3D, false, true);
+       CursorType::NONE, 0.f, false, false,
+      false, 0.3f, 0.f, glm::vec3(), 0.f, 0.f,
+      false, false, false, editing_mode::minimap, camera_pos,
+      true, false, true, settings->draw_wmo, settings->draw_water, false,
+      settings->draw_m2, false, false, true,
+      false, false, settings, false, eTerrainType::eTerrainType_Linear, 0,
+      display_mode::in_3D, false, true);
 
 
   if (unload)

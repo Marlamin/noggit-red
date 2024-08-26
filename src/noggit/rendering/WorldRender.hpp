@@ -62,6 +62,8 @@ namespace Noggit::Rendering
         , bool draw_model_animations
         , bool draw_models_with_box
         , bool draw_hidden_models
+        , bool draw_sky
+        , bool draw_skybox
         , MinimapRenderSettings* minimap_render_settings
         , bool draw_fog
         , eTerrainType ground_editing_brush

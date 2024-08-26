@@ -161,6 +161,8 @@ public:
   Noggit::BoolToggleProperty _draw_hole_lines = {false};
   Noggit::BoolToggleProperty _draw_models_with_box = {false};
   Noggit::BoolToggleProperty _draw_fog = {false};
+  Noggit::BoolToggleProperty _draw_sky = { true };
+  Noggit::BoolToggleProperty _draw_skybox = { true };
   Noggit::BoolToggleProperty _draw_hidden_models = {false};
   Noggit::BoolToggleProperty _draw_occlusion_boxes = {false};
   // Noggit::BoolToggleProperty _game_mode_camera = { false };

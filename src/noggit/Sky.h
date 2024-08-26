@@ -190,31 +190,11 @@ public:
     else return r2 < s.r2;
   }
 
-  // bool highlight_sky() const { return _highlight_sky; }
-  // float river_shallow_alpha() const { return _river_shallow_alpha; }
-  // float river_deep_alpha() const { return _river_deep_alpha; }
-  // float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
-  // float ocean_deep_alpha() const { return _ocean_deep_alpha; }
-  // float glow() const { return _glow; }
   bool selected() const { return _selected; }
-  // 
-  // void set_glow(float glow) { _glow = glow; }
-  // void set_highlight_sky(bool state) { _highlight_sky = state; }
-  // void set_river_shallow_alpha(float alpha) { _river_shallow_alpha = alpha; }
-  // void set_river_deep_alpha(float alpha) { _river_deep_alpha = alpha; }
-  // void set_ocean_shallow_alpha(float alpha) { _ocean_shallow_alpha = alpha; }
-  // void set_ocean_deep_alpha(float alpha) { _ocean_deep_alpha = alpha; }
 
   void save_to_dbc();
 
 private:
-  // bool _highlight_sky;
-  // float _river_shallow_alpha;
-  // float _river_deep_alpha;
-  // float _ocean_shallow_alpha;
-  // float _ocean_deep_alpha;
-
-  // float _glow;
   bool _selected;
 
   Noggit::NoggitRenderContext _context;
@@ -308,6 +288,8 @@ public:
             , math::frustum const& frustum
             , const float& cull_distance
             , int animtime
+            /*, bool draw_particles*/
+            , bool draw_skybox
             , OutdoorLightStats const& light_stats
             );
 

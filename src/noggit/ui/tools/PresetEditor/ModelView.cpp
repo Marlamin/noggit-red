@@ -60,6 +60,8 @@ void ModelViewer::paintGL()
         , true
         , false
         , true
+        , false
+        , false
         , &_settings_unused
         , false
         , eTerrainType::eTerrainType_Flat
