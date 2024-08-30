@@ -66,6 +66,8 @@ LightViewPreview::LightViewPreview(QString LightName, QSize Size, QWidget* paren
 	: DynamicMouseWidget(parent), MainLayout(new QVBoxLayout(this)), Name(new QLabel(this)),
 	Preview(new LightViewPixmap(Size, this))
 {
+	// Preview->ShowLines(true);
+
 	Name->setText(LightName);
 
 	MainLayout->addWidget(Name);
@@ -245,12 +247,41 @@ bool LightViewPixmap::DrawLines()
 	QPixmap ResultPixmap = QPixmap(Final.size());
 
 	QPainter Painter(&ResultPixmap);
+
+	const bool blend_lines = false;
 	for (int i = 0; i < Data.size(); ++i)
 	{
 		for (int y = 0; y < LIGHT_VIEW_PREVIEW_LINE_SIZE; ++y)
 		{
 			int X = Data[i].time * Final.width() / MAX_TIME_VALUE - LIGHT_VIEW_PREVIEW_LINE_SIZE / 2 + y;
-			Final = LightViewWidget::FillImagePart(Final, X, QColor(LIGHT_VIEW_PREVIEW_LINE_COLOR));
+			if (!blend_lines)
+			{
+				Final = LightViewWidget::FillImagePart(Final, X, QColor(LIGHT_VIEW_PREVIEW_LINE_COLOR));
+				continue;
+			}
+
+			// blend the line instead, it just looks better with red.
+			if (X == Image.width() || X < 0)
+				continue;
+
+			QColor new_color(255, 0, 0, 150);
+
+			for (int Y = 0; Y < Image.height(); ++Y)
+			{
+				QColor existingColor = Image.pixelColor(X, Y);
+				QColor blendedColor;
+
+				float alpha = new_color.alphaF();
+
+				// Blend the colors
+				int red = static_cast<int>(new_color.red() * alpha + existingColor.red() * (1.0 - alpha));
+				int green = static_cast<int>(new_color.green() * alpha + existingColor.green() * (1.0 - alpha));
+				int blue = static_cast<int>(new_color.blue() * alpha + existingColor.blue() * (1.0 - alpha));
+
+				blendedColor.setRgb(red, green, blue);
+				Image.setPixelColor(QPoint(X, Y), blendedColor);
+			}
+			Final = Image;
 		}
 	}
 
@@ -458,7 +489,7 @@ void LightViewEditor::closeEvent(QCloseEvent* event)
 void LightViewEditor::UpdateSkyColorRowsValue()
 {
 	UpdateWidgetEdition(CurrentIndex);
-	_World->renderer()->skies()->update_sky_colors(_Map->getCamera()->position, static_cast<int>(_World->time) % MAX_TIME_VALUE);
+	_World->renderer()->skies()->force_update();
 
 	Arrow->UpdateData(_Sky->colorRows[_eSkyColorIndex]);
 	Preview->SetPreview(_Sky->colorRows[_eSkyColorIndex]);

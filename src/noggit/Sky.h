@@ -39,7 +39,7 @@ enum SkyFloatParamsNames
 {
   SKY_FOG_DISTANCE,
   SKY_FOG_MULTIPLIER,
-  SKY_CELESTIAL_FLOW,
+  SKY_CELESTIAL_GLOW,
   SKY_CLOUD_DENSITY,
   SKY_UNK_FLOAT_PARAM_4,
   SKY_UNK_FLOAT_PARAM_5,
@@ -48,15 +48,26 @@ enum SkyFloatParamsNames
 
 enum SkyParamsNames
 {
-    SKY_PARAM_CLEAR,
-    SKY_PARAM_CLEAR_UNDERWATER,
-    SKY_PARAM_TORM,
-    SKY_PARAM_STORM_UNDERWATER,
-    SKY_PARAM_DEATH,
-    SKY_PARAM_UNK_1,
-    SKY_PARAM_UNK_2,
-    SKY_PARAM_UNK_3,
-    NUM_SkyParamsNames
+  SKY_PARAM_CLEAR,
+  SKY_PARAM_CLEAR_UNDERWATER,
+  SKY_PARAM_TORM,
+  SKY_PARAM_STORM_UNDERWATER,
+  SKY_PARAM_DEATH,
+  SKY_PARAM_UNK_1,
+  SKY_PARAM_UNK_2,
+  SKY_PARAM_UNK_3,
+  NUM_SkyParamsNames
+};
+
+enum SkyModelSkyBoxFlags
+{
+  LIGHT_SKYBOX_FULL_DAY = 0x1, // Full day Skybox: animation syncs with time of day (uses animation 0, time of day is just in percentage).
+  LIGHT_SKYBOX_COMBINE = 0x2, // Combine Procedural And Skybox : render stars, sun and moons and clouds as well
+  /*  
+  0x04	Procedural Fog Color Blend
+  0x08	Force Sun-shafts
+  0x10	Disable use Sun Fog Color
+  */
 };
 
 struct OutdoorLightStats
@@ -161,19 +172,40 @@ struct SkyFloatParam
   int time;
 };
 
+// modern LightData.db
+// unified timestamps for float and int data
+struct LightData
+{
+  LightData(int paramId);
+  
+  unsigned int paramId;
+  unsigned int time = 0;
+  glm::vec3 colorRows[NUM_SkyColorNames] = {};
+  float floatParams[NUM_SkyParamsNames] = {};
+};
+
 class SkyParam
 {
 public:
     std::optional<ModelInstance> skybox;
+    int skyboxFlags = 0;
+
     int Id;
 
     SkyParam() = default;
     explicit SkyParam(int paramId, Noggit::NoggitRenderContext context);
 
-    std::vector<SkyColor> colorRows[NUM_SkyColorNames]; // [NUM_SkyColorNames] // 36
+    //array of 18 vectors(for each color), each vector item is a time/value
+    std::vector<SkyColor> colorRows[NUM_SkyColorNames];
     std::vector<SkyFloatParam> floatParams[NUM_SkyFloatParamsNames];
-    int mmin[NUM_SkyColorNames]; // [NUM_SkyColorNames] // 36
-    int mmin_float[NUM_SkyFloatParamsNames];
+
+    // first/min time value for each entry
+    // titi : deprecated those and replaced it by checking the time value of the first vector element
+    // int mmin[NUM_SkyColorNames];
+    // int mmin_float[NUM_SkyFloatParamsNames];
+
+    // potential structure rework, more similar to retail/classic LightData.db
+    // std::vector<LightData> lightData;
 
     bool highlight_sky() const { return _highlight_sky; }
     float river_shallow_alpha() const { return _river_shallow_alpha; }
@@ -189,6 +221,13 @@ public:
     void set_ocean_shallow_alpha(float alpha) { _ocean_shallow_alpha = alpha; }
     void set_ocean_deep_alpha(float alpha) { _ocean_deep_alpha = alpha; }
 
+    // always save them for now
+    // later we can have a system to only save modified dbcs
+    bool _need_save = true;
+    bool _colors_need_save = true;
+    bool _floats_need_save = true;
+    bool _is_new_param_record = false;
+
 private: // most common settings
     bool _highlight_sky = false;
     float _river_shallow_alpha = 0.5f;
@@ -203,9 +242,11 @@ private: // most common settings
 class Sky 
 {
 public:
-  std::optional<ModelInstance> skybox;
+  // std::optional<ModelInstance> skybox;
 
   int Id;
+  int mapId; // just for saving...
+
   glm::vec3 pos = glm::vec3(0, 0, 0);
   float r1 = 0.f, r2 = 0.f;
 
@@ -214,7 +255,7 @@ public:
   SkyParam* skyParams[NUM_SkyParamsNames];
   int curr_sky_param = SKY_PARAM_CLEAR;
 
-  // std::string name;
+  std::string name;
 
   glm::vec3 colorFor(int r, int t) const;
   float floatParamFor(int r, int t) const;
@@ -250,6 +291,7 @@ private:
   int cs = -1;
   ModelInstance stars;
 
+  bool _force_update = true;
   int _last_time = -1;
   glm::vec3 _last_pos;
 
@@ -270,6 +312,8 @@ public:
   std::vector<glm::vec3> color_set = std::vector<glm::vec3>(NUM_SkyColorNames, glm::vec3(1.f, 1.f, 1.f));
 
   explicit Skies(unsigned int mapid, Noggit::NoggitRenderContext context);
+
+  Sky* createNewSky(Sky* old_sky, unsigned int new_id, glm::vec3& pos);
 
   Sky* findSkyWeights(glm::vec3 pos);
 
@@ -322,6 +366,8 @@ public:
   float fogRate() const { return _fog_rate; }
 
   void unload();
+
+  void force_update() { _force_update = true; }
 
 private:
   bool _uploaded = false;

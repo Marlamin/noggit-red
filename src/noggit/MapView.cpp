@@ -4505,7 +4505,8 @@ void MapView::tick (float dt)
   _world->time += this->mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
 
-  lightEditor->UpdateWorldTime();
+  if (mTimespeed > 0.0f)
+    lightEditor->UpdateWorldTime();
 
   if (_draw_model_animations.get())
   {

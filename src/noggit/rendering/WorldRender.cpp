@@ -1038,7 +1038,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
   if (terrainMode == editing_mode::light)
   {
-      Sky* CurrentSky = skies()->findClosestSkyByDistance(camera_pos);
+      // Sky* CurrentSky = skies()->findClosestSkyByDistance(camera_pos);
+      Sky* CurrentSky = skies()->findClosestSkyByWeight();
       if (!CurrentSky)
           return;
 
@@ -1048,12 +1049,16 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       const int CurrenTime = static_cast<int>(_world->time) % MAX_TIME_VALUE_C;
 
       glCullFace(GL_FRONT);
-      for (Sky& sky : skies()->skies)
+      if (!draw_only_inside_light_sphere)
       {
-          if (CurrentSkyID > 1 && draw_only_inside_light_sphere)
-              break;
+        for (Sky& sky : skies()->skies)
+        {
 
+          // we draw the current sky below with glCullFace(GL_BACK);
           if (CurrentSkyID == sky.Id)
+              continue;
+
+          if (sky.global)
               continue;
 
           if (glm::distance(sky.pos, camera_pos) <= _cull_distance) // TODO: frustum cull here
@@ -1063,17 +1068,32 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
               _sphere_render.draw(mvp, sky.pos, ambient, sky.r1, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
               _sphere_render.draw(mvp, sky.pos, diffuse, sky.r2, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+          
+              // TODO Those lines tank fps by 50%
+              // std::vector<glm::vec3> linePoints;
+              // linePoints.push_back(glm::vec3(sky.pos.x, sky.pos.y, sky.pos.z - sky.r2));
+              // linePoints.push_back(glm::vec3(sky.pos.x, sky.pos.y, sky.pos.z + sky.r2));
+              // _line_render.draw(mvp, linePoints, glm::vec4(1.f), false);
           }
+        }
       }
 
       glCullFace(GL_BACK);
-      if (CurrentSky && draw_only_inside_light_sphere)
+      if (CurrentSky && !CurrentSky->global)
       {
           glm::vec4 diffuse = { CurrentSky->colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.f };
           glm::vec4 ambient = { CurrentSky->colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.f };
 
-          _sphere_render.draw(mvp, CurrentSky->pos, ambient, CurrentSky->r1, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
-          _sphere_render.draw(mvp, CurrentSky->pos, diffuse, CurrentSky->r2, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+          // always render wireframe in the current light
+          // need to render outer first or it gets culled
+          _sphere_render.draw(mvp, CurrentSky->pos, diffuse, CurrentSky->r2, 32, 18, alpha_light_sphere, false, true);
+          _sphere_render.draw(mvp, CurrentSky->pos, ambient, CurrentSky->r1, 32, 18, alpha_light_sphere, false, true);
+
+
+          // std::vector<glm::vec3> linePoints;
+          // linePoints.push_back(glm::vec3(CurrentSky->pos.x, CurrentSky->pos.z, CurrentSky->pos.y - CurrentSky->r2));
+          // linePoints.push_back(glm::vec3(CurrentSky->pos.x, CurrentSky->pos.z, CurrentSky->pos.y + CurrentSky->r2));
+          // _line_render.draw(mvp, linePoints, glm::vec4(1.f, 0.f, 0.f, 1.f), false);
       }
   }
 }
