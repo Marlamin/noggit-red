@@ -57,6 +57,8 @@ public:
 
   void autoGen(float factor);
 
+  void update_underground_vertices_depth();
+
   void setType(int type, size_t layer);
   int getType(size_t layer);
 

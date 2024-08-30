@@ -173,6 +173,14 @@ void ChunkWater::autoGen(MapChunk *chunk, float factor)
   update_layers();
 }
 
+void ChunkWater::update_underground_vertices_depth(MapChunk* chunk)
+{
+  for (liquid_layer& layer : _layers)
+  {
+    layer.update_underground_vertices_depth(chunk);
+  }
+}
+
 
 void ChunkWater::CropWater(MapChunk* chunkTerrain)
 {
@@ -282,11 +290,13 @@ void ChunkWater::update_layers()
   _water_tile->tagExtents(true);
 
   vcenter = (vmin + vmax) * 0.5f;
+
+  _layer_count = _layers.size();
 }
 
 bool ChunkWater::hasData(size_t layer) const
 {
-  return _layers.size() > layer;
+  return _layer_count > layer;
 }
 
 

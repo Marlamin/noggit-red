@@ -34,6 +34,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, float heigh
 
   changeLiquidID(_liquid_id);
   
+  update_min_max();
 }
 
 liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, mclq& liquid, int liquid_id)
@@ -85,7 +86,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, mclq& liqui
       _vertices[v_index] = lv;
     }
   }
-
+  update_min_max();
 }
 
 liquid_layer::liquid_layer(ChunkWater* chunk
@@ -170,8 +171,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk
 
   changeLiquidID(_liquid_id); // to update the liquid type
 
-  if (check_fatigue())
-    _fatigue_enabled = true;
+  update_min_max();
 }
 
 liquid_layer::liquid_layer(liquid_layer&& other)
@@ -452,6 +452,35 @@ void liquid_layer::update_opacity(MapChunk* chunk, float factor)
     for (int x = 0; x < 9; ++x)
     {
       update_vertex_opacity(x, z, chunk, factor);
+    }
+  }
+}
+
+void liquid_layer::update_underground_vertices_depth(MapChunk* chunk)
+{
+  // set depth = 0 to liquid verts under ground. This is for LODs.
+  {
+    for (int z = 0; z < 9; ++z)
+    {
+      for (int x = 0; x < 9; ++x)
+      {
+        float diff = _vertices[z * 9 + x].position.y - chunk->mVertices[z * 17 + x].y;
+
+        if (diff < 0.f)
+        {
+          _vertices[z * 9 + x].depth = 0.f;
+        }
+        else
+        {
+          if (x < 8 && z < 8 && !hasSubchunk(x, z))
+          {
+            _vertices[z * 9 + x].depth = 0.f;
+            _vertices[z * 9 + x + 1].depth = 0.f;
+            _vertices[(z + 1) * 9 + x].depth = 0.f;
+            _vertices[(z + 1) * 9 + (x + 1)].depth = 0.f;
+          }
+        }
+      }
     }
   }
 }

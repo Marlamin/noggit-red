@@ -66,6 +66,7 @@ public:
 
   void crop(MapChunk* chunk);
   void update_opacity(MapChunk* chunk, float factor);
+  void update_underground_vertices_depth(MapChunk* chunk);
 
   std::array<liquid_vertex, 9 * 9>& getVertices() { return _vertices; };
   // std::array<float, 9 * 9>& getDepth() { return _depth; };

@@ -40,6 +40,7 @@ public:
                   ) const;
 
   void autoGen(MapChunk* chunk, float factor);
+  void update_underground_vertices_depth(MapChunk* chunk);
   void CropWater(MapChunk* chunkTerrain);
 
   void setType(int type, size_t layer);
@@ -91,6 +92,8 @@ private:
   void update_attributes();
 
   std::vector<liquid_layer> _layers;
+  int _layer_count = 0;
+
   MapChunk* _chunk;
   TileWater* _water_tile;
 
