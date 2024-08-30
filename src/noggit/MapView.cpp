@@ -1951,7 +1951,7 @@ void MapView::setupAssistMenu()
   assist_menu->addAction(createTextSeparator("Loaded ADTs"));
   assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
-  , "Fix gaps"
+  , "Fix terrain gaps between chunks"
   , [this]
       {
         makeCurrent();
@@ -1978,7 +1978,7 @@ void MapView::setupAssistMenu()
   assist_menu->addAction(createTextSeparator("Global"));
   assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
-  , "Map to big alpha"
+  , "Convert Map to 8bits alphamaps"
   , [this]
     {
       DESTRUCTIVE_ACTION
@@ -2004,7 +2004,7 @@ void MapView::setupAssistMenu()
   );
 
   ADD_ACTION_NS ( assist_menu
-  , "Map to old alpha"
+  , "Convert Map to 4bits alphamaps (old format)"
   , [this]
     {
       DESTRUCTIVE_ACTION
