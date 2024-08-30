@@ -1482,6 +1482,10 @@ void MapChunk::save(sExtendableArray& lADTFile
 
   if(texture_set)
   {
+    // hackfix -- temp hackfix to bruteforce update + save
+    texture_set->apply_alpha_changes();
+    texture_set->updateDoodadMapping();
+
     std::copy(texture_set->getDoodadMappingBase(), texture_set->getDoodadMappingBase() + 8
     , lMCNK_header->doodadMapping);
     *reinterpret_cast<std::uint64_t*>(lMCNK_header->doodadStencil)

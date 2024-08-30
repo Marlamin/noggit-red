@@ -536,6 +536,7 @@ namespace Noggit
 
             for (MapTile* tile : _map_view->getWorld()->mapIndex.loaded_tiles())
             {
+                tile->renderer()->setActiveRenderGEffectTexture(active_texture);
                 for (int x = 0; x < 16; x++)
                 {
                     for (int y = 0; y < 16; y++)
@@ -546,8 +547,10 @@ namespace Noggit
 
                         // reset to black by default
                         tile->renderer()->setChunkGroundEffectColor(chunk_index, glm::vec3(0.0, 0.0, 0.0));
-                        // ! Set the chunk active layer data
-                        tile->renderer()->setChunkGroundEffectActiveData(chunk, active_texture);
+
+                        // ! Set the chunk active layer data.
+                        // new system : just update the active texture and mark dirty to the renderer
+                        // tile->renderer()->setChunkGroundEffectActiveData(chunk);
 
                         if (active_texture.empty() || active_texture == "tileset\\generic\\black.blp" || _loaded_effects.empty())
                             continue;

@@ -44,7 +44,8 @@ namespace Noggit::Rendering
     void initChunkData(MapChunk* chunk);
 
     void setChunkDetaildoodadsExclusionData(MapChunk* chunk);
-    void setChunkGroundEffectActiveData(MapChunk* chunk, std::string active_texture);
+    void setChunkGroundEffectActiveData(MapChunk* chunk);
+    void setActiveRenderGEffectTexture(std::string active_texture);
 
     [[nodiscard]]
     unsigned objectsFrustumCullTest() const { return _objects_frustum_cull_test; };
@@ -76,6 +77,9 @@ namespace Noggit::Rendering
     bool _requires_paintability_recalc = true;
     bool _requires_ground_effect_color_recalc = true;
     bool _texture_not_loaded = false;
+    bool _require_geffect_active_texture_update = true;
+
+    std::string _geffect_active_texture = "";
 
     // culling
     unsigned _objects_frustum_cull_test = 0;
