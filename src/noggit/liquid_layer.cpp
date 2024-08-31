@@ -261,7 +261,7 @@ void liquid_layer::create_vertices(float height)
     }
 }
 
-void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const
+void liquid_layer::save(util::sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const
 {
   int min_x = 9, min_z = 9, max_x = 0, max_z = 0;
   bool filled = true;
@@ -334,7 +334,7 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
     {
       for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
       {
-        memcpy(adt.GetPointer<char>(current_pos), &_vertices[z * 9 + x].position.y, sizeof(float));
+        memcpy(adt.GetPointer<char>(current_pos).get(), &_vertices[z * 9 + x].position.y, sizeof(float));
         current_pos += sizeof(float);
       }
     }
@@ -357,7 +357,7 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
         uv.x = static_cast<std::uint16_t>(std::min(_vertices[z * 9 + x].uv.x * 255.f, 65535.f));
         uv.y = static_cast<std::uint16_t>(std::min(_vertices[z * 9 + x].uv.y * 255.f, 65535.f));
 
-        memcpy(adt.GetPointer<char>(current_pos), &uv, sizeof(mh2o_uv));
+        memcpy(adt.GetPointer<char>(current_pos).get(), &uv, sizeof(mh2o_uv));
         current_pos += sizeof(mh2o_uv);
       }
     }
@@ -372,13 +372,13 @@ void liquid_layer::save(sExtendableArray& adt, int base_pos, int& info_pos, int&
       for (int x = info.xOffset; x <= info.xOffset + info.width; ++x)
       {
           std::uint8_t depth = static_cast<std::uint8_t>(std::min(_vertices[z * 9 + x].depth * 255.0f, 255.f));
-        memcpy(adt.GetPointer<char>(current_pos), &depth, sizeof(std::uint8_t));
+        memcpy(adt.GetPointer<char>(current_pos).get(), &depth, sizeof(std::uint8_t));
         current_pos += sizeof(std::uint8_t);
       }
     }
   }
 
-  memcpy(adt.GetPointer<char>(info_pos), &info, sizeof(MH2O_Information));
+  memcpy(adt.GetPointer<char>(info_pos).get(), &info, sizeof(MH2O_Information));
   info_pos += sizeof(MH2O_Information);
 }
 

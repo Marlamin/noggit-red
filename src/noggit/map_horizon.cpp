@@ -365,7 +365,7 @@ void map_horizon::save_wdl(World* world, bool regenerate)
     filename << "World\\Maps\\" << world->basename << "\\" << world->basename << ".wdl";
     //Log << "Saving WDL \"" << filename << "\"." << std::endl;
 
-    sExtendableArray wdlFile = sExtendableArray();
+    util::sExtendableArray wdlFile;
     int curPos = 0;
 
     // MVER
@@ -475,7 +475,7 @@ void map_horizon::save_wdl(World* world, bool regenerate)
     }
     BlizzardArchive::ClientFile f(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData(),
     BlizzardArchive::ClientFile::NEW_FILE);
-    f.setBuffer(wdlFile.data);
+    f.setBuffer(wdlFile.all_data());
     f.save();
     f.close();
 

@@ -190,7 +190,7 @@ void MapIndex::save()
 
   //Log << "Saving WDT \"" << filename << "\"." << std::endl;
 
-  sExtendableArray wdtFile = sExtendableArray();
+  util::sExtendableArray wdtFile;
   int curPos = 0;
 
   // MVER
@@ -266,7 +266,7 @@ void MapIndex::save()
 
   BlizzardArchive::ClientFile f(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData(),
                                 BlizzardArchive::ClientFile::NEW_FILE);
-  f.setBuffer(wdtFile.data);
+  f.setBuffer(wdtFile.all_data());
   f.save();
   f.close();
 
@@ -1240,7 +1240,7 @@ void MapIndex::create_empty_wdl() const
     filename << "World\\Maps\\" << basename << "\\" << basename << ".wdl"; // mapIndex.basename ? 
     //Log << "Saving WDL \"" << filename << "\"." << std::endl;
 
-    sExtendableArray wdlFile = sExtendableArray();
+    util::sExtendableArray wdlFile;
     int curPos = 0;
 
     // MVER
@@ -1340,7 +1340,7 @@ void MapIndex::create_empty_wdl() const
 
     BlizzardArchive::ClientFile f(filename.str(), Noggit::Application::NoggitApplication::instance()->clientData(),
     BlizzardArchive::ClientFile::NEW_FILE);
-    f.setBuffer(wdlFile.data);
+    f.setBuffer(wdlFile.all_data());
     f.save();
     f.close();
 }

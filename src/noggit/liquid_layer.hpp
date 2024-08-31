@@ -7,9 +7,9 @@
 #include <opengl/scoped.hpp>
 #include <array>
 #include <glm/vec2.hpp>
+#include <util/sExtendableArray.hpp>
 
 class MapChunk;
-class sExtendableArray;
 class ChunkWater;
 
 enum LiquidLayerUpdateFlags
@@ -59,7 +59,7 @@ public:
   liquid_layer& operator=(liquid_layer&&);
   liquid_layer& operator=(liquid_layer const& other);
 
-  void save(sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
+  void save(util::sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
 
   void update_attributes(MH2O_Attributes& attributes);
   void changeLiquidID(int id);

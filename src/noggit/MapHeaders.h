@@ -122,8 +122,8 @@ struct ENTRY_MODF
 
 struct MapChunkHeader {
   uint32_t flags = 0;
-  uint32_t ix;
-  uint32_t iy;
+  uint32_t ix = 0;
+  uint32_t iy = 0;
   uint32_t nLayers = 0;
   uint32_t nDoodadRefs = 0;
   uint32_t ofsHeight = 0;
@@ -143,9 +143,9 @@ struct MapChunkHeader {
   uint32_t nSndEmitters = 0;
   uint32_t ofsLiquid = 0;
   uint32_t sizeLiquid = 0;
-  float  zpos;
-  float  xpos;
-  float  ypos;
+  float  zpos = 0.0f;
+  float  xpos = 0.0f;
+  float  ypos = 0.0f;
   uint32_t ofsMCCV = 0;
   uint32_t unused1 = 0;
   uint32_t unused2 = 0;

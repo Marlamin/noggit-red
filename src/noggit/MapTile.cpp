@@ -18,6 +18,7 @@
 #include <opengl/shader.hpp>
 #include <external/tracy/Tracy.hpp>
 #include <util/CurrentFunction.hpp>
+#include <util/sExtendableArray.hpp>
 
 #include <noggit/World.inl>
 #include <QtCore/QSettings>
@@ -275,6 +276,8 @@ void MapTile::finishLoading()
     assert(fourcc == 'MH2O');
 
     Water.readFromFile(theFile, ofsW);
+
+    // Water.update_underground_vertices_depth();
   }
 
   // - MFBO ----------------------------------------------
@@ -633,7 +636,7 @@ void MapTile::saveTile(World* world)
     texture.second = lID++;
 
   // Now write the file.
-  sExtendableArray lADTFile;
+  util::sExtendableArray lADTFile;
 
   int lCurrentPosition = 0;
 
@@ -709,7 +712,7 @@ void MapTile::saveTile(World* world)
 
   // MMID data
   // WMO model names
-  int * lMMID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
+  auto const lMMID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
 
   lID = 0;
   for (auto const& model : lModels)
@@ -744,7 +747,7 @@ void MapTile::saveTile(World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mwid = lCurrentPosition - 0x14;
 
   // MWID data
-  int * lMWID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
+  auto const lMWID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
 
   lID = 0;
   for (auto const& object : lObjects)
@@ -759,7 +762,7 @@ void MapTile::saveTile(World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mddf = lCurrentPosition - 0x14;
 
   // MDDF data
-  ENTRY_MDDF* lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>(lCurrentPosition + 8);
+  auto const lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>(lCurrentPosition + 8);
 
   if(world->mapIndex.sort_models_by_size_class())
   {
@@ -803,7 +806,7 @@ void MapTile::saveTile(World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->modf = lCurrentPosition - 0x14;
 
   // MODF data
-  ENTRY_MODF *lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>(lCurrentPosition + 8);
+  auto const lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>(lCurrentPosition + 8);
 
   lID = 0;
   for (auto const& object : lObjectInstances)
@@ -864,7 +867,7 @@ void MapTile::saveTile(World* world)
     SetChunkHeader(lADTFile, lCurrentPosition, 'MFBO', static_cast<int>(chunkSize));
     lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mfbo = lCurrentPosition - 0x14;
 
-    int16_t *lMFBO_Data = lADTFile.GetPointer<int16_t>(lCurrentPosition + 8);
+    auto const lMFBO_Data = lADTFile.GetPointer<int16_t>(lCurrentPosition + 8);
 
     lID = 0;
 
@@ -883,9 +886,9 @@ void MapTile::saveTile(World* world)
     //! \todo check if nTexEffects == nTextures, correct order etc.
     lADTFile.Extend(8 + 4 * mTextureEffects.size());
     SetChunkHeader(lADTFile, lCurrentPosition, 'MTFX', 4 * mTextureEffects.size());
-    lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mtfx = lCurrentPosition - 0x14;
+    lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mtxf = lCurrentPosition - 0x14;
 
-    uint32_t* lMTFX_Data = lADTFile.GetPointer<uint32_t>(lCurrentPosition + 8);
+    auto const lMTFX_Data = lADTFile.GetPointer<uint32_t>(lCurrentPosition + 8);
 
     lID = 0;
     //they should be in the correct order...
@@ -898,13 +901,12 @@ void MapTile::saveTile(World* world)
   }
 #endif
 
-  lADTFile.Extend(static_cast<long>(lCurrentPosition - lADTFile.data.size())); // cleaning unused nulls at the end of file
-
-
   {
     BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::NoggitApplication::instance()->clientData()
       , BlizzardArchive::ClientFile::NEW_FILE);
-    f.setBuffer(lADTFile.data);
+    // \todo This sounds wrong. There shouldn't *be* unused nulls to
+    // begin with.
+    f.setBuffer(lADTFile.data_up_to(lCurrentPosition)); // cleaning unused nulls at the end of file
     f.save();
   }
 

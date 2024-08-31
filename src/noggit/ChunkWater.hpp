@@ -4,12 +4,12 @@
 #include <noggit/liquid_layer.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/tool_enums.hpp>
+#include <util/sExtendableArray.hpp>
 
 #include <vector>
 #include <set>
 #include <optional>
 
-class sExtendableArray;
 class MapChunk;
 class TileWater;
 
@@ -31,7 +31,7 @@ public:
 
   void from_mclq(std::vector<mclq>& layers);
   void fromFile(BlizzardArchive::ClientFile& f, size_t basePos);
-  void save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
+  void save(util::sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
 
   bool is_visible ( const float& cull_distance
                   , const math::frustum& frustum

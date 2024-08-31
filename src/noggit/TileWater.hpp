@@ -7,6 +7,7 @@
 #include <opengl/types.hpp>
 #include <noggit/rendering/LiquidTextureManager.hpp>
 #include <noggit/rendering/LiquidRender.hpp>
+#include <util/sExtendableArray.hpp>
 
 #include <memory>
 #include <vector>
@@ -15,7 +16,6 @@
 
 class MapTile;
 class liquid_layer;
-class sExtendableArray;
 enum LiquidLayerUpdateFlags;
 
 namespace BlizzardArchive
@@ -39,7 +39,7 @@ public:
   ChunkWater* getChunk(int x, int z);
 
   void readFromFile(BlizzardArchive::ClientFile& theFile, size_t basePos);
-  void saveToFile(sExtendableArray& lADTFile, int& lMHDR_Position, int& lCurrentPosition);
+  void saveToFile(util::sExtendableArray& lADTFile, int& lMHDR_Position, int& lCurrentPosition);
 
   void draw ( math::frustum const& frustum
             , const glm::vec3& camera
