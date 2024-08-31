@@ -54,12 +54,13 @@ public:
   liquid_layer(ChunkWater* chunk, BlizzardArchive::ClientFile& f, std::size_t base_pos, glm::vec3 const& base, MH2O_Information const& info, std::uint64_t infomask);
 
   liquid_layer(liquid_layer const& other);
-  liquid_layer(liquid_layer&&);
+  liquid_layer(liquid_layer&&) noexcept;
 
-  liquid_layer& operator=(liquid_layer&&);
+  liquid_layer& operator=(liquid_layer&&) noexcept;
   liquid_layer& operator=(liquid_layer const& other);
 
   void save(util::sExtendableArray& adt, int base_pos, int& info_pos, int& current_pos) const;
+  mclq to_mclq(MH2O_Attributes& attributes) const;
 
   void update_attributes(MH2O_Attributes& attributes);
   void changeLiquidID(int id);
@@ -75,6 +76,9 @@ public:
   float min() const { return _minimum; }
   float max() const { return _maximum; }
   int liquidID() const { return _liquid_id; }
+  int mclq_liquid_type() const { return _mclq_liquid_type; }
+  // order of the flag corresponding to the liquid type in the mcnk header
+  int mclq_flag_ordering() const;
 
   // used for fatigue calculation
   bool subchunk_at_max_depth(int x, int z) const;
@@ -105,6 +109,7 @@ public:
   ChunkWater* getChunk() { return _chunk; };
 
   bool has_fatigue() const { return _fatigue_enabled; }
+
 private:
   void create_vertices(float height);
 
@@ -120,6 +125,7 @@ private:
   int _liquid_id;
   int _liquid_type;
   int _liquid_vertex_format;
+  int _mclq_liquid_type;
   float _minimum;
   float _maximum;
 

@@ -174,7 +174,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk
   update_min_max();
 }
 
-liquid_layer::liquid_layer(liquid_layer&& other)
+liquid_layer::liquid_layer(liquid_layer&& other) noexcept
   : _liquid_id(other._liquid_id)
   , _liquid_vertex_format(other._liquid_vertex_format)
   , _minimum(other._minimum)
@@ -207,7 +207,7 @@ liquid_layer::liquid_layer(liquid_layer const& other)
   changeLiquidID(_liquid_id);
 }
 
-liquid_layer& liquid_layer::operator= (liquid_layer&& other)
+liquid_layer& liquid_layer::operator= (liquid_layer&& other) noexcept
 {
   std::swap(_liquid_id, other._liquid_id);
   std::swap(_liquid_vertex_format, other._liquid_vertex_format);
@@ -395,14 +395,20 @@ void liquid_layer::changeLiquidID(int id)
     switch (_liquid_type)
     {
     case liquid_basic_types_magma:
+      _mclq_liquid_type = 6;
+      _liquid_vertex_format = 1;
+      break;
     case liquid_basic_types_slime:
+      _mclq_liquid_type = 3;
       _liquid_vertex_format = HEIGHT_UV;
       break;
     case liquid_basic_types_ocean: // ocean
       _liquid_vertex_format = DEPTH;
+      _mclq_liquid_type = 1;
       break;
-    default:
+    default: // river
       _liquid_vertex_format = HEIGHT_DEPTH;
+      _mclq_liquid_type = 4;
       break;
     }
   }
@@ -648,6 +654,62 @@ bool liquid_layer::check_fatigue() const
     }
 
     return true;
+}
+
+mclq liquid_layer::to_mclq(MH2O_Attributes& attributes) const
+{
+  mclq mclq_data;
+
+  mclq_data.min_height = _minimum;
+  mclq_data.max_height = _maximum;
+
+  for (int i = 0; i < 8 * 8; ++i)
+  {
+    if (hasSubchunk(i % 8, i / 8))
+    {
+      mclq_data.tiles[i].liquid_type = _mclq_liquid_type & 0x7;
+      mclq_data.tiles[i].dont_render = 0;
+      mclq_data.tiles[i].fishable = (attributes.fishable >> i) & 1;
+      mclq_data.tiles[i].fatigue = (attributes.fatigue >> i) & 1;
+    }
+    else
+    {
+      mclq_data.tiles[i].liquid_type = 7;
+      mclq_data.tiles[i].dont_render = 1;
+      mclq_data.tiles[i].fishable = 0;
+      mclq_data.tiles[i].fatigue = 0;
+    }
+  }
+
+  for (int i = 0; i < 9 * 9; ++i)
+  {
+    mclq_data.vertices[i].height = _vertices[i].position.y;
+
+    // magma and slime
+    if (_liquid_type == 2 || _liquid_type == 3)
+    {
+      mclq_data.vertices[i].magma.x = static_cast<std::uint16_t>(std::min(_vertices[i].uv.x * 255.f, 65535.f));
+      mclq_data.vertices[i].magma.y = static_cast<std::uint16_t>(std::min(_vertices[i].uv.y * 255.f, 65535.f));
+    }
+    else
+    {
+      mclq_data.vertices[i].water.depth = static_cast<std::uint8_t>(std::clamp(_vertices[i].depth * 255.f, 0.f, 255.f));
+    }
+  }
+
+  return mclq_data;
+}
+
+int liquid_layer::mclq_flag_ordering() const
+{
+  switch (_mclq_liquid_type)
+  {
+  case 6: return 2;  // lava
+  case 3: return 3;  // slime
+  case 1: return 1;  // ocean
+  default: return 0; // river
+
+  }
 }
 
 void liquid_layer::update_attributes(MH2O_Attributes& attributes)

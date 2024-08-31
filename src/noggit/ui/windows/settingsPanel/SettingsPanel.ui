@@ -478,7 +478,7 @@
                           <number>64</number>
                          </property>
                          <property name="value">
-                          <number>1</number>
+                          <number>2</number>
                          </property>
                         </widget>
                        </item>
@@ -585,6 +585,15 @@
              <set>Qt::AlignCenter</set>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_32">
+             <property name="leftMargin">
+              <number>9</number>
+             </property>
+             <property name="topMargin">
+              <number>9</number>
+             </property>
+             <property name="bottomMargin">
+              <number>9</number>
+             </property>
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_9">
                <property name="leftMargin">
@@ -765,6 +774,23 @@
                    </property>
                    <property name="checked">
                     <bool>true</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="1">
+                  <widget class="QCheckBox" name="_use_mclq_liquids_export">
+                   <property name="enabled">
+                    <bool>true</bool>
+                   </property>
+                   <property name="text">
+                    <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="6" column="0">
+                  <widget class="QLabel" name="label_16">
+                   <property name="text">
+                    <string>Use MCLQ Liquids (vanilla/BC) export</string>
                    </property>
                   </widget>
                  </item>

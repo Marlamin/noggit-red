@@ -135,7 +135,7 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
 
     f->read(&tmp_chunk_header, sizeof(MapChunkHeader));
 
-    header_flags.value = tmp_chunk_header.flags;
+    header_flags.value = tmp_chunk_header.flags.value;
     areaID = tmp_chunk_header.areaid;
 
     zbase = tmp_chunk_header.zpos;
@@ -1432,7 +1432,8 @@ void MapChunk::save(util::sExtendableArray& lADTFile
                     , int& lMCIN_Position
                     , std::map<std::string, int> &lTextures
                     , std::vector<WMOInstance*> &lObjectInstances
-                    , std::vector<ModelInstance*>& lModelInstances)
+                    , std::vector<ModelInstance*>& lModelInstances
+                    , bool use_mclq_liquids)
 {
   int lID;
   int lMCNK_Size = 0x80;
@@ -1445,9 +1446,9 @@ void MapChunk::save(util::sExtendableArray& lADTFile
   // lADTFile.Insert(lCurrentPosition + 8, 0x80, reinterpret_cast<char*>(&(header)));
   auto const lMCNK_header = lADTFile.GetPointer<MapChunkHeader>(lCurrentPosition + 8);
 
-  header_flags.flags.do_not_fix_alpha_map = 1;
+  header_flags.flags.do_not_fix_alpha_map = use_mclq_liquids ? 0 : 1;
 
-  lMCNK_header->flags = header_flags.value;
+  lMCNK_header->flags = header_flags;
   lMCNK_header->ix = px;
   lMCNK_header->iy = py;
   lMCNK_header->zpos = zbase * -1.0f + ZEROPOINT;
@@ -1690,7 +1691,8 @@ void MapChunk::save(util::sExtendableArray& lADTFile
   // MCSH
   if (has_shadows())
   {
-    header_flags.flags.has_mcsh = 1;
+    // header_flags.flags.has_mcsh = 1;
+    lMCNK_header->flags.flags.has_mcsh = 1;
 
     int lMCSH_Size = 0x200;
     lADTFile.Extend(8 + lMCSH_Size);
@@ -1709,7 +1711,8 @@ void MapChunk::save(util::sExtendableArray& lADTFile
   }
   else
   {
-    header_flags.flags.has_mcsh = 0;
+    lMCNK_header->flags.flags.has_mcsh = 0;
+    // header_flags.flags.has_mcsh = 0;
     header_ptr->ofsShadow = 0;
     header_ptr->sizeShadow = 0;
   }
@@ -1731,10 +1734,42 @@ void MapChunk::save(util::sExtendableArray& lADTFile
 
   lCurrentPosition += 8 + lMCAL_Size;
   lMCNK_Size += 8 + lMCAL_Size;
-  //        }
 
-  //! Don't write anything MCLQ related anymore...
+  if (use_mclq_liquids)
+  {
+    auto liquids = liquid_chunk();
 
+    if (liquids && liquids->layer_count() > 0)
+    {
+      int liquids_size = 8 + liquids->layer_count() * sizeof(mclq);
+
+      lMCNK_Size += liquids_size;
+
+      header_ptr->sizeLiquid = liquids_size;
+      header_ptr->ofsLiquid = lCurrentPosition - lMCNK_Position;
+
+      // current position updated inside
+      liquids->save_mclq(lADTFile, lMCNK_Position, lCurrentPosition);
+    }
+    // no liquid, vanilla adt still have an empty chunk
+    else
+    {
+      lADTFile.Extend(8);
+      // size seems to be 0 in vanilla adts in the mclq chunk's header and set right in the mcnk header (layer_size * n_layer + 8)
+      SetChunkHeader(lADTFile, lCurrentPosition, 'MCLQ', 0);
+
+      header_ptr->sizeLiquid = 8;
+      header_ptr->ofsLiquid = lCurrentPosition - lMCNK_Position;
+
+      // When saving a tile that had MLCQ, also remove flags in MCNK
+      // Client sees the flag and loads random data as if it were MCLQ, which we don’t save.
+      // clear MCLQ liquid flags (0x4, 0x8, 0x10, 0x20)
+      header_ptr->flags.value &= 0xFFFFFFC3;
+
+      lCurrentPosition += 8;
+      lMCNK_Size += 8;
+    }
+  }
 
   // MCSE
   int lMCSE_Size = sizeof(ENTRY_MCSE) * sound_emitters.size();

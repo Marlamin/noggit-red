@@ -530,6 +530,24 @@ void MapTile::getVertexInternal(float x, float z, glm::vec3* v)
 
 void MapTile::saveTile(World* world)
 {
+  // if we want to save a duplicate with mclq in a separate folder
+  /*
+  save(world, false);
+
+  if (NoggitSettings.value("use_mclq_liquids_export", false).toBool())
+  {
+    save(world, true);
+  }
+  */
+
+  QSettings settings;
+  bool use_mclq = settings.value("use_mclq_liquids_export", false).toBool();
+
+  save(world, use_mclq);
+}
+
+void MapTile::save(World* world, bool save_using_mclq_liquids)
+{
   Log << "Saving ADT \"" << _file_key.stringRepr() << "\"." << std::endl;
 
   int lID;  // This is a global counting variable. Do not store something in here you need later.
@@ -848,14 +866,17 @@ void MapTile::saveTile(World* world)
   lCurrentPosition += 8 + lMODF_Size;
 
   //MH2O
-  Water.saveToFile(lADTFile, lMHDR_Position, lCurrentPosition);
+  if (!save_using_mclq_liquids)
+  {
+    Water.saveToFile(lADTFile, lMHDR_Position, lCurrentPosition);
+  }
 
   // MCNK
   for (int y = 0; y < 16; ++y)
   {
     for (int x = 0; x < 16; ++x)
     {
-      mChunks[y][x]->save(lADTFile, lCurrentPosition, lMCIN_Position, lTextures, lObjectInstances, lModelInstances);
+      mChunks[y][x]->save(lADTFile, lCurrentPosition, lMCIN_Position, lTextures, lObjectInstances, lModelInstances, save_using_mclq_liquids);
     }
   }
 
@@ -908,6 +929,17 @@ void MapTile::saveTile(World* world)
     // begin with.
     f.setBuffer(lADTFile.data_up_to(lCurrentPosition)); // cleaning unused nulls at the end of file
     f.save();
+
+    // adspartan's way, save MCLQ files separately
+    /*
+        if (save_using_mclq_liquids)
+    {
+      f.save_file_to_folder(NoggitSettings.value("project/mclq_liquids_path").toString().toStdString());
+    }
+    else
+    {
+      f.save();
+    }*/
   }
 
   lObjectInstances.clear();

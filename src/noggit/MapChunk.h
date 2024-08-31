@@ -201,7 +201,9 @@ public:
             , int &lMCIN_Position
             , std::map<std::string, int> &lTextures
             , std::vector<WMOInstance*> &lObjectInstances
-            , std::vector<ModelInstance*>& lModelInstances);
+            , std::vector<ModelInstance*>& lModelInstances
+            , bool use_mclq_liquids
+            );
 
   // fix the gaps with the chunk to the left
   bool fixGapLeft(const MapChunk* chunk);
