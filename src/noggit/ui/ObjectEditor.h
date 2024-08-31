@@ -38,8 +38,8 @@ namespace Noggit
 {
   struct object_paste_params
   {
-    float minRotation = 0.f;
-    float maxRotation = 360.f;
+    float minRotation = -180.f;
+    float maxRotation = 180.f;
     float minTilt = -5.f;
     float maxTilt = 5.f;
     float minScale = 0.9f;
