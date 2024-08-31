@@ -440,6 +440,8 @@ bool MapTile::intersect (math::ray const& ray, selection_result* results) const
     return false;
   }
 
+  recalcExtents();
+
   if (!ray.intersect_bounds(_extents[0], _extents[1]))
   {
     return false;
