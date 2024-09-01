@@ -107,7 +107,6 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   unsigned tile_counter = 0;
   for (MapTile* tile : _world->mapIndex.loaded_tiles())
   {
-    tile->recalcObjectInstanceExtents();
     tile->recalcCombinedExtents();
 
     if (minimap_render)

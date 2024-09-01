@@ -1781,6 +1781,18 @@ void MapTile::recalcCombinedExtents()
   if (!_combined_extents_dirty)
     return;
 
+  // ensure all extents are updated
+  {
+    recalcExtents();
+
+    if (Water.needsUpdate())
+    {
+      Water.recalcExtents();
+    }
+
+    recalcObjectInstanceExtents();
+  }
+
   _combined_extents = _extents;
 
   auto& water_extents =  Water.getExtents();
