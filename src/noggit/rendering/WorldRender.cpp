@@ -921,6 +921,65 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  // render before the water and enable depth right 
+  // so it's visible under water
+  // the checker board pattern is used to see the water under it
+  if (angled_mode || use_ref_pos)
+  {
+    ZoneScopedN("World::draw() : Draw angles");
+    // OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
+    OpenGL::Scoped::depth_mask_setter<GL_TRUE> const depth_mask;
+
+    math::degrees orient = math::degrees(orientation);
+    math::degrees incl = math::degrees(angle);
+    glm::vec4 color = cursor_color;
+    // color.w = 0.5f;
+    color.w = 0.75f;
+
+    float radius = 1.2f * brush_radius;
+
+    if (angled_mode && terrainMode == editing_mode::flatten_blur)
+    {
+      if (angle > 49.0f) // 0.855 radian
+      {
+        color.x = 1.f;
+        color.y = 0.f;
+        color.z = 0.f;
+      }
+    }
+
+    if (angled_mode && !use_ref_pos)
+    {
+      glm::vec3 pos = cursor_pos;
+      pos.y += 0.1f; // to avoid z-fighting with the ground
+      _square_render.draw(mvp, pos, radius, incl, orient, color);
+    }
+    else if (use_ref_pos)
+    {
+      if (angled_mode)
+      {
+        glm::vec3 pos = cursor_pos;
+        pos.y = misc::angledHeight(ref_pos, pos, incl, orient);
+        pos.y += 0.1f;
+        _square_render.draw(mvp, pos, radius, incl, orient, color);
+
+        // display the plane when the cursor is far from ref_point
+        if (misc::dist(pos.x, pos.z, ref_pos.x, ref_pos.z) > 10.f + radius)
+        {
+          glm::vec3 ref = ref_pos;
+          ref.y += 0.1f;
+          _square_render.draw(mvp, ref, 10.f, incl, orient, color);
+        }
+      }
+      else
+      {
+        glm::vec3 pos = cursor_pos;
+        pos.y = ref_pos.y + 0.1f;
+        _square_render.draw(mvp, pos, radius, math::degrees(0.f), math::degrees(0.f), color);
+      }
+    }
+  }
+
   if (draw_water)
   {
     ZoneScopedN("World::draw() : Draw water");
@@ -957,62 +1016,6 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
 
     gl.bindVertexArray(0);
-  }
-
-  if (angled_mode || use_ref_pos)
-  {
-    ZoneScopedN("World::draw() : Draw angles");
-    OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
-    OpenGL::Scoped::depth_mask_setter<GL_FALSE> const depth_mask;
-
-    math::degrees orient = math::degrees(orientation);
-    math::degrees incl = math::degrees(angle);
-    glm::vec4 color = cursor_color;
-    // always half transparent regardless or the cursor transparency
-    color.w = 0.5f;
-
-    float radius = 1.2f * brush_radius;
-
-    if (angled_mode && terrainMode == editing_mode::flatten_blur)
-    {
-        if (angle > 49.0f) // 0.855 radian
-        {
-            color.x = 1.f;
-            color.y = 0.f;
-            color.z = 0.f;
-        }
-    }
-
-    if (angled_mode && !use_ref_pos)
-    {
-      glm::vec3 pos = cursor_pos;
-      pos.y += 0.1f; // to avoid z-fighting with the ground
-      _square_render.draw(mvp, pos, radius, incl, orient, color);
-    }
-    else if (use_ref_pos)
-    {
-      if (angled_mode)
-      {
-        glm::vec3 pos = cursor_pos;
-        pos.y = misc::angledHeight(ref_pos, pos, incl, orient);
-        pos.y += 0.1f;
-        _square_render.draw(mvp, pos, radius, incl, orient, color);
-
-        // display the plane when the cursor is far from ref_point
-        if (misc::dist(pos.x, pos.z, ref_pos.x, ref_pos.z) > 10.f + radius)
-        {
-          glm::vec3 ref = ref_pos;
-          ref.y += 0.1f;
-          _square_render.draw(mvp, ref, 10.f, incl, orient, color);
-        }
-      }
-      else
-      {
-        glm::vec3 pos = cursor_pos;
-        pos.y = ref_pos.y + 0.1f;
-        _square_render.draw(mvp, pos, radius, math::degrees(0.f), math::degrees(0.f), color);
-      }
-    }
   }
 
   gl.enable(GL_BLEND);
