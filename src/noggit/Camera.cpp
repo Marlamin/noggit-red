@@ -1,5 +1,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <noggit/Camera.hpp>
+#include <QSettings>
 
 namespace Noggit
 {
@@ -17,6 +18,9 @@ namespace Noggit
     //! \note ensure ranges
     yaw (yaw_);
     pitch (pitch_);
+
+    QSettings settings;
+    _fov = math::degrees(settings.value("fov", 54.f).toFloat());
   }
 
   math::degrees Camera::yaw() const
@@ -61,6 +65,13 @@ namespace Noggit
 
   math::radians Camera::fov() const
   {
+    return _fov;
+  }
+
+  math::degrees Camera::fov(math::degrees value)
+  {
+    _fov = math::degrees(std::max(10.f, std::min(90.f, value._)));
+
     return _fov;
   }
 

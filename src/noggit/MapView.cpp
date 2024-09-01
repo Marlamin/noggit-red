@@ -4896,7 +4896,7 @@ glm::mat4x4 MapView::model_view(bool use_debug_cam) const
 
 glm::mat4x4 MapView::projection() const
 {
-  float far_z = _settings->value("farZ", 2048).toFloat();
+  float far_z = _settings->value("view_distance", 2000.f).toFloat() + 1.f;
 
   if (_display_mode == display_mode::in_2D)
   {
@@ -6072,11 +6072,14 @@ void MapView::onSettingsSave()
 
   _world->renderer()->markTerrainParamsUniformBlockDirty();
 
-  _world->renderer()->setViewDistance(_settings->value("view_distance", 1000.f).toFloat());
+  _world->renderer()->setViewDistance(_settings->value("view_distance", 2000.f).toFloat());
 
   _world.get()->mapIndex.setLoadingRadius(_settings->value("loading_radius", 2).toInt());
   _world.get()->mapIndex.setUnloadDistance(_settings->value("unload_dist", 5).toInt());
   _world.get()->mapIndex.setUnloadInterval(_settings->value("unload_interval", 30).toInt());
+
+  _camera.fov(math::degrees(_settings->value("fov", 54.f).toFloat()));
+  _debug_cam.fov(math::degrees(_settings->value("fov", 54.f).toFloat()));
 
 }
 

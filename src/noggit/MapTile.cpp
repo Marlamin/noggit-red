@@ -433,7 +433,7 @@ void MapTile::convert_alphamap(bool to_big_alpha)
 }
 
 
-bool MapTile::intersect (math::ray const& ray, selection_result* results) const
+bool MapTile::intersect (math::ray const& ray, selection_result* results)
 {
   if (!finished)
   {

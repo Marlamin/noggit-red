@@ -24,6 +24,7 @@ namespace Noggit
     void add_to_pitch (math::degrees);
 
     math::radians fov() const;
+    math::degrees fov(math::degrees);
 
     glm::vec3 look_at() const;
     glm::vec3 direction() const;

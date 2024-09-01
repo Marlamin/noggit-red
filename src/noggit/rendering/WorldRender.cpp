@@ -18,7 +18,7 @@ WorldRender::WorldRender(World* world)
 : BaseRender()
 , _world(world)
 , _liquid_texture_manager(world->_context)
-, _view_distance(world->_settings->value("view_distance", 1000.f).toFloat())
+, _view_distance(world->_settings->value("view_distance", 2000.f).toFloat()) // + TILE_RADIUS) // add adt radius to make sure tiles aren't culled too soon, todo: improve adt culling to prevent that from happening
 , _cull_distance(0.f)
 {
 }

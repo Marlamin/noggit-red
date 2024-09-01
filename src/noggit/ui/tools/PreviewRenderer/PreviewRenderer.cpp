@@ -371,7 +371,7 @@ glm::mat4x4 PreviewRenderer::model_view() const
 
 glm::mat4x4 PreviewRenderer::projection() const
 {
-  float far_z = _settings->value("farZ", 2048).toFloat();
+  float far_z = _settings->value("view_distance", 2000.f).toFloat();
   return glm::perspective(_camera.fov()._, aspect_ratio(), 1.f, far_z);
 }
 
