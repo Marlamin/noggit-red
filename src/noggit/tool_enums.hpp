@@ -80,6 +80,7 @@ enum class editing_mode
 
 enum water_opacity
 {
+  auto_opacity,
   river_opacity,
   ocean_opacity,
   custom_opacity,
