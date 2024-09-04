@@ -124,8 +124,8 @@ namespace Noggit::Application
 		  // "17.0"  //  MSVC 14.3 Visual Studio 2022
 	  };
 
-	  // confirmed crash with v14.30.30704.00
-	  const int required_version = 31;
+	  // confirmed crashes with v14.30.30704.00 and v14.36.32532.00
+	  const int required_version = 37;
 
 	  bool redist_found = false;
 	  foreach (const QString & version, versions) {
