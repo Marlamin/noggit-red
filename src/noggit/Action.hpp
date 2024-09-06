@@ -18,6 +18,8 @@
 #include <QObject>
 #include <ClientData.hpp>
 
+#include <functional>
+
 class MapView;
 class MapChunk;
 
@@ -115,7 +117,7 @@ namespace Noggit
         float getDelta() const;
         void setBlockCursor(bool state);
         bool getBlockCursor() const;
-        void setPostCallback(auto(MapView::*method)()->void);
+        void setPostCallback(std::function<void()> function);
         bool getTag() { return _tag; };
         void setTag(bool tag) { _tag = tag; };
 
@@ -184,7 +186,7 @@ namespace Noggit
 
         tsl::robin_map<unsigned, std::vector<unsigned>> _object_operations;
 
-        auto(MapView::*_post)()->void = nullptr;
+        std::function<void()> _post;
 
     };
 }

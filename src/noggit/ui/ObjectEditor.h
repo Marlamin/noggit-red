@@ -3,6 +3,7 @@
 #pragma once
 #include <noggit/Selection.h>
 #include <noggit/BoolToggleProperty.hpp>
+#include <noggit/object_paste_params.hpp>
 
 #include <QLabel>
 #include <QWidget>
@@ -36,21 +37,11 @@ enum ModelPasteMode
 
 namespace Noggit
 {
-  struct object_paste_params
-  {
-    float minRotation = -180.f;
-    float maxRotation = 180.f;
-    float minTilt = -5.f;
-    float maxTilt = 5.f;
-    float minScale = 0.9f;
-    float maxScale = 1.1f;
-    bool rotate_on_terrain = true;
-  };
-
   namespace Ui
   {
     class object_editor : public QWidget
     {
+        Q_OBJECT
     public:
       object_editor ( MapView*
                     , World*
@@ -93,6 +84,9 @@ namespace Noggit
       QSize sizeHint() const override;
 
       void update_selection_ui(World* world);
+
+    signals:
+      void objectPaletteBtnPressed();
 
     private:
       float _radius = 0.01f;

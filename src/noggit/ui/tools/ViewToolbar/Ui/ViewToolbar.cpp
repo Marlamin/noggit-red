@@ -1,5 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/MapView.h>
+#include <noggit/BoolToggleProperty.hpp>
 #include <noggit/ui/tools/ViewToolbar/Ui/ViewToolbar.hpp>
 #include <noggit/ui/tools/ActionHistoryNavigator/ActionHistoryNavigator.hpp>
 #include <noggit/ui/FontAwesome.hpp>
@@ -213,15 +215,15 @@ ViewToolbar::ViewToolbar(MapView* mapView, editing_mode mode)
             IconAction* _icon = new IconAction(FontNoggitIcon{ FontNoggit::TOOL_FLATTEN_BLUR });
 
             CheckBoxAction* _raise = new CheckBoxAction(tr("Raise"), true);
-            connect(_raise->checkbox(), &QCheckBox::stateChanged, [mapView](int state)
+            connect(_raise->checkbox(), &QCheckBox::stateChanged, [this, mapView](int state)
                 {
-                    mapView->getFlattenTool()->_flatten_mode.raise = state;
+                    emit updateStateRaise(state != 0);
                 });
 
             CheckBoxAction* _lower = new CheckBoxAction(tr("Lower"), true);
-            connect(_lower->checkbox(), &QCheckBox::stateChanged, [mapView](int state)
+            connect(_lower->checkbox(), &QCheckBox::stateChanged, [this, mapView](int state)
                 {
-                    mapView->getFlattenTool()->_flatten_mode.lower = state;
+                    emit updateStateLower(state != 0);
                 });
 
 
@@ -434,10 +436,8 @@ bool ViewToolbar::showUnpaintableChunk()
     return static_cast<SubToolBarAction*>(_texture_secondary_tool[0])->GET<CheckBoxAction*>(unpaintable_chunk_index)->checkbox()->isChecked() && current_mode == editing_mode::paint;
 }
 
-void ViewToolbar::nextFlattenMode(MapView* mapView)
+void ViewToolbar::nextFlattenMode()
 {
-    mapView->getFlattenTool()->_flatten_mode.next();
-
     CheckBoxAction* _raise_option = static_cast<SubToolBarAction*>(_flatten_secondary_tool[0])->GET<CheckBoxAction*>(raise_index);
     CheckBoxAction* _lower_option = static_cast<SubToolBarAction*>(_flatten_secondary_tool[0])->GET<CheckBoxAction*>(lower_index);
 

@@ -8,17 +8,20 @@
 #include <QtWidgets/QActionGroup>
 #include <QtWidgets/QToolBar>
 
-#include <noggit/MapView.h>
 #include <noggit/ui/FontNoggit.hpp>
-#include <noggit/BoolToggleProperty.hpp>
-#include <noggit/ui/FlattenTool.hpp>
+
+class MapView;
 
 namespace Noggit
 {
+  struct BoolToggleProperty;
+
   namespace Ui::Tools::ViewToolbar::Ui
   {
     class ViewToolbar: public QToolBar
     {
+        Q_OBJECT
+
     public:
       ViewToolbar(MapView* mapView);
       ViewToolbar(MapView* mapView, ViewToolbar* tb);
@@ -34,7 +37,7 @@ namespace Noggit
 
       /*secondary left tool*/
       QVector<QWidgetAction*> _flatten_secondary_tool;
-      void nextFlattenMode(MapView* mapView);
+      void nextFlattenMode();
 
       QVector<QWidgetAction*> _texture_secondary_tool;
       bool showUnpaintableChunk();
@@ -45,6 +48,10 @@ namespace Noggit
       bool drawOnlyInsideSphereLight();
       bool drawWireframeSphereLight();
       float getAlphaSphereLight();
+
+    signals:
+        void updateStateRaise(bool newState);
+        void updateStateLower(bool newState);
 
     private:
       QActionGroup _tool_group;

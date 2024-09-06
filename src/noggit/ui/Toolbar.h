@@ -12,12 +12,14 @@
 
 namespace Noggit
 {
+  class Tool;
+
   namespace Ui
   {
     class toolbar: public QToolBar
     {
     public:
-      toolbar(std::function<void (editing_mode)> set_editing_mode);
+      toolbar(std::vector<std::unique_ptr<Noggit::Tool>> const& tools, std::function<void (editing_mode)> set_editing_mode);
 
       void check_tool(editing_mode);
 

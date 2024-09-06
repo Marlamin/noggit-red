@@ -302,7 +302,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
       if (map_view)
       {
-          map_view->updateRotationEditor();
+          emit map_view->rotationChanged();
       }
 
       if (_world)

@@ -91,6 +91,7 @@ namespace Noggit
       asset_browse_mode _browse_mode = asset_browse_mode::world;
     signals:
         void gl_data_unloaded();
+        void selectionChanged(std::string const& path);
 
     private:
       ::Ui::AssetBrowser* ui;

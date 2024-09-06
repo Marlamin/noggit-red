@@ -544,7 +544,7 @@ void Noggit::Action::finish()
   }
 
   if (_post)
-    (_map_view->*_post)();
+      _post();
 }
 
 float* Noggit::Action::getChunkTerrainOriginalData(MapChunk* chunk)
@@ -578,9 +578,9 @@ bool Noggit::Action::getBlockCursor() const
 
 }
 
-void Noggit::Action::setPostCallback(auto(MapView::*method)()->void)
+void Noggit::Action::setPostCallback(std::function<void()> function)
 {
-  _post = method;
+  _post = function;
 }
 
 

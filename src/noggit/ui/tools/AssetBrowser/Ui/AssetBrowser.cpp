@@ -135,14 +135,7 @@ AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
                 ui->viewport->setModel(str_path);
                 _selected_path = str_path;
 
-                if (_browse_mode == asset_browse_mode::detail_doodads && _map_view->get_editing_mode() == editing_mode::paint)
-                {
-                    _map_view->getGroundEffectsTool()->setDoodadSlotFromBrowser(str_path.c_str());
-                }
-                else
-                {
-                    _map_view->getObjectEditor()->copy(str_path);
-                }
+                emit selectionChanged(str_path);
               }
             }
 

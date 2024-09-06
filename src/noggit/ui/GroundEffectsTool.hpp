@@ -14,7 +14,6 @@
 #include <QtWidgets/QListWidget>
 
 class World;
-class texturing_tool;
 class MapView;
 class DBCFile::Record;
 
@@ -22,6 +21,8 @@ namespace Noggit
 {
     namespace Ui
     {
+        class texturing_tool;
+
         struct ground_effect_doodad
         {
             unsigned int ID = 0;

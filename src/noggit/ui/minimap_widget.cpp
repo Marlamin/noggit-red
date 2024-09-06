@@ -76,7 +76,7 @@ namespace Noggit
           if (!_selected_tiles)
             return;
 
-          _selected_tiles->fill(false);
+          std::memset(_selected_tiles->data(), false, _selected_tiles->size());
         }
       );
     }
