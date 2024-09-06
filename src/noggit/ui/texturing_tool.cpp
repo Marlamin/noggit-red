@@ -227,8 +227,8 @@ namespace Noggit
       auto heightmapping_heightoffset_spin = new QDoubleSpinBox(_heightmapping_group);
       heightmapping_heightoffset_spin->setVisible(modern_features);
 
-      //QPushButton* _heightmapping_copy_btn = new QPushButton("Copy to JSON", this);
-      //_heightmapping_copy_btn->setVisible(modern_features);
+      QPushButton* _heightmapping_copy_btn = new QPushButton("Copy to JSON", this);
+      _heightmapping_copy_btn->setVisible(modern_features);
 
       if (modern_features) {
 
@@ -252,27 +252,27 @@ namespace Noggit
           heightmapping_heightoffset_spin->setValue(1);
           heightmapping_group_layout->addRow("Height Offset:", heightmapping_heightoffset_spin);
 
-          //auto heightmapping_btngroup_layout(new QVBoxLayout(_heightmapping_group));
-          //auto heightmapping_buttons_widget = new QWidget(_heightmapping_group);
-          //heightmapping_buttons_widget->setLayout(heightmapping_btngroup_layout);
+          auto heightmapping_btngroup_layout(new QVBoxLayout(_heightmapping_group));
+          auto heightmapping_buttons_widget = new QWidget(_heightmapping_group);
+          heightmapping_buttons_widget->setLayout(heightmapping_btngroup_layout);
 
-          //auto wrap_label = new QLabel("Note: This doesn't save to .cfg, use copy and do it manually.", _heightmapping_group);
-          //wrap_label->setWordWrap(true);
-          //heightmapping_group_layout->addRow(wrap_label);
+          auto wrap_label = new QLabel("Note: This doesn't save to .cfg, use copy and do it manually.", _heightmapping_group);
+          wrap_label->setWordWrap(true);
+          heightmapping_group_layout->addRow(wrap_label);
 
-          //_heightmapping_apply_global_btn = new QPushButton("Apply (Global)", this);
-          //_heightmapping_apply_global_btn->setFixedHeight(30);
-          //heightmapping_btngroup_layout->addWidget(_heightmapping_apply_global_btn);
+          _heightmapping_apply_global_btn = new QPushButton("Apply (Global)", this);
+          _heightmapping_apply_global_btn->setFixedHeight(30);
+          heightmapping_btngroup_layout->addWidget(_heightmapping_apply_global_btn);
 
-          //_heightmapping_apply_adt_btn = new QPushButton("Apply (Current ADT)", this);
-          //_heightmapping_apply_adt_btn->setFixedHeight(30);
-          //heightmapping_btngroup_layout->addWidget(_heightmapping_apply_adt_btn);
+          _heightmapping_apply_adt_btn = new QPushButton("Apply (Current ADT)", this);
+          _heightmapping_apply_adt_btn->setFixedHeight(30);
+          heightmapping_btngroup_layout->addWidget(_heightmapping_apply_adt_btn);
 
-          //_heightmapping_copy_btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-          //_heightmapping_copy_btn->setFixedHeight(30);
-          //heightmapping_btngroup_layout->addWidget(_heightmapping_copy_btn);
+          _heightmapping_copy_btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+          _heightmapping_copy_btn->setFixedHeight(30);
+          heightmapping_btngroup_layout->addWidget(_heightmapping_copy_btn);
 
-          //heightmapping_group_layout->addRow(heightmapping_buttons_widget);
+          heightmapping_group_layout->addRow(heightmapping_buttons_widget);
 
           tool_layout->addWidget(_heightmapping_group);
       }
@@ -485,28 +485,28 @@ namespace Noggit
               }
           );
 
-          //connect(_heightmapping_copy_btn, &QPushButton::pressed
-          //    , [=]()
-          //    {
-          //        std::ostringstream oss;
-          //        oss << "{\r\n    \"" << _current_texture->filename() << "\": {\r\n"
-          //            << "    \"Scale\": " << textureHeightmappingData.uvScale << ",\r\n"
-          //            << "    \"HeightScale\": " << textureHeightmappingData.heightScale << ",\r\n"
-          //            << "    \"HeightOffset\": " << textureHeightmappingData.heightOffset << "\r\n"
-          //            << "    }\r\n}";
+          connect(_heightmapping_copy_btn, &QPushButton::pressed
+              , [=]()
+              {
+                  std::ostringstream oss;
+                  oss << "{\r\n    \"" << _current_texture->filename() << "\": {\r\n"
+                      << "    \"Scale\": " << textureHeightmappingData.uvScale << ",\r\n"
+                      << "    \"HeightScale\": " << textureHeightmappingData.heightScale << ",\r\n"
+                      << "    \"HeightOffset\": " << textureHeightmappingData.heightOffset << "\r\n"
+                      << "    }\r\n}";
 
-          //        QClipboard* clip = QApplication::clipboard();
-          //        clip->setText(QString::fromStdString(oss.str()));
+                  QClipboard* clip = QApplication::clipboard();
+                  clip->setText(QString::fromStdString(oss.str()));
 
-          //        QMessageBox::information
-          //        (nullptr
-          //            , "Copied"
-          //            , "JSON Copied to Clipboard",
-          //            QMessageBox::Ok
-          //        );
+                  QMessageBox::information
+                  (nullptr
+                      , "Copied"
+                      , "JSON Copied to Clipboard",
+                      QMessageBox::Ok
+                  );
 
-          //    }
-          //);
+              }
+          );
       }
 
       _spray_content->hide();
