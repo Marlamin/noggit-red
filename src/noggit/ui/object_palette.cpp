@@ -102,7 +102,7 @@ namespace Noggit
 
       connect(_object_list, &QListWidget::itemClicked, this, [=](QListWidgetItem* item)
               {
-                _map_view->getObjectEditor()->copy(item->toolTip().toStdString());
+                emit selected(item->toolTip().toStdString());
               }
       );
 

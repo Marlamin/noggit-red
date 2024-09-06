@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <QWidget>
 #include <QtGui/QIcon>
 #include <QtGui/QIconEngine>
 

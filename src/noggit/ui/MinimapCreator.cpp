@@ -827,17 +827,17 @@ namespace Noggit
       // Buttons
       connect(cur_adt_btn, &QPushButton::clicked, [=]() {
         _render_settings.export_mode = MinimapGenMode::CURRENT_ADT;
-        mapView->initMinimapSave();
+        emit onSave();
       });
 
       connect(sel_adts_btn, &QPushButton::clicked, [=]() {
         _render_settings.export_mode = MinimapGenMode::SELECTED_ADTS;
-        mapView->initMinimapSave();
+        emit onSave();
       });
 
       connect(all_adts_btn, &QPushButton::clicked, [=]() {
         _render_settings.export_mode = MinimapGenMode::MAP;
-        mapView->initMinimapSave();
+        emit onSave();
       });
 
     }

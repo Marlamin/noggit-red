@@ -15,53 +15,13 @@
 #include <array>
 #include <glm/vec4.hpp>
 
+#include <noggit/MinimapRenderSettings.hpp>
 #include <noggit/ui/minimap_widget.hpp>
 
 
 class MapView;
 class World;
 
-enum MinimapGenMode
-{
-  CURRENT_ADT,
-  SELECTED_ADTS,
-  MAP
-};
-
-struct MinimapRenderSettings
-{
-  MinimapGenMode export_mode;
-  std::string file_format = ".blp";
-
-  // Render settings
-  int resolution = 512;
-  bool draw_m2 = false;
-  bool draw_wmo = true;
-  bool draw_water = true;
-  bool draw_adt_grid = false;
-  bool draw_elevation = false;
-  bool draw_shadows = false;
-  bool use_filters = false;
-  bool combined_minimap = false;
-
-  // Selection
-  std::array<bool, 4096> selected_tiles = {false};
-
-  // Filtering
-  QListWidget* m2_model_filter_include;
-  QListWidget* m2_instance_filter_include;
-  QListWidget* wmo_model_filter_exclude;
-  QListWidget* wmo_instance_filter_exclude;
-
-  // Lighting. Based on default eastern kingdom global light settings (lightparams 12)
-  glm::vec3 diffuse_color = {1.0, 0.532352924, 0.0};
-  glm::vec3 ambient_color = {0.407770514, 0.508424163, 0.602650642};
-  glm::vec4 ocean_color_light = {0.0693173409, 0.294008732, 0.348329663, 0.75};
-  glm::vec4 ocean_color_dark = {0.000762581825, 0.113907099, 0.161220074, 1.0};
-  glm::vec4 river_color_light = {0.308351517, 0.363725543, 0.0798838138, 0.5};
-  glm::vec4 river_color_dark = {0.19945538, 0.320697188, 0.332425594, 1.0};
-
-};
 
 
 namespace Noggit
@@ -72,6 +32,7 @@ namespace Noggit
 
     class MinimapCreator : public QWidget
     {
+        Q_OBJECT
     public:
       MinimapCreator(MapView* mapView, World* world, QWidget* parent = nullptr);
 
@@ -79,7 +40,8 @@ namespace Noggit
 
       float brushRadius() const { return _radius; }
 
-      std::array<bool, 4096>* getSelectedTiles() { return &_render_settings.selected_tiles; };
+      //std::array<bool, 4096>* getSelectedTiles() { return &_render_settings.selected_tiles; };
+      std::vector<char>* getSelectedTiles() { return &_render_settings.selected_tiles; };
 
       MinimapRenderSettings* getMinimapRenderSettings() { return &_render_settings; };
 
@@ -97,6 +59,9 @@ namespace Noggit
 
       void loadFiltersFromJSON();
       void saveFiltersToJSON();
+
+    signals:
+      void onSave();
 
     private:
       float _radius = 0.01f;

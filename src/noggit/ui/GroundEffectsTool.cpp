@@ -383,6 +383,10 @@ namespace Noggit
                 }
             );
 
+            using AssetBrowser = Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget;
+            connect(map_view->getAssetBrowserWidget(), &AssetBrowser::selectionChanged, this, [=](std::string const& path) {
+                if (isVisible()) setDoodadSlotFromBrowser(path.c_str());
+                });
         }
 
         void GroundEffectsTool::updateTerrainUniformParams()

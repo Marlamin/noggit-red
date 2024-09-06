@@ -347,7 +347,7 @@ namespace Noggit
       connect ( quick_palette_btn, &QPushButton::clicked
               , [=] ()
                 {
-              _map_view->getTexturePalette()->setVisible(_map_view->getTexturePalette()->isHidden());
+                  emit texturePaletteToggled();
                 }
               );
 
@@ -402,9 +402,7 @@ namespace Noggit
       matrix.rotateRadians(_image_mask_group->getRotation() * M_PI / 180.f);
       _mask_image = pixmap->toImage().transformed(matrix, Qt::SmoothTransformation);
 
-      if (_map_view->get_editing_mode() != editing_mode::stamp
-        || (_map_view->getActiveStampModeItem() && _map_view->getActiveStampModeItem() == this))
-       _map_view->setBrushTexture(&_mask_image);
+      emit _map_view->trySetBrushTexture(&_mask_image, this);
     }
 
     void texturing_tool::update_brush_hardness()

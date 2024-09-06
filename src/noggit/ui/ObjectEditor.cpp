@@ -544,7 +544,9 @@ namespace Noggit
 
       connect( object_palette_btn
           , &QPushButton::clicked
-          , [=]() { mapView->getObjectPalette()->setVisible(mapView->getObjectPalette()->isHidden()); }
+          , [=]() { 
+              emit objectPaletteBtnPressed();
+          }
       );
 
       connect(_doodadSetSelector

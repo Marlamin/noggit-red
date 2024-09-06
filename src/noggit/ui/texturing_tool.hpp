@@ -21,6 +21,7 @@
 #include <QtWidgets/QWidget>
 #include <QtWidgets/QListWidget>
 #include <QJsonObject>
+#include <QPainter>
 
 class World;
 class MapView;
@@ -127,6 +128,7 @@ namespace Noggit
 
     class texturing_tool : public QWidget
     {
+        Q_OBJECT
     public:
       texturing_tool ( const glm::vec3* camera_pos
                      , MapView* map_view
@@ -196,6 +198,9 @@ namespace Noggit
 
       QJsonObject toJSON();
       void fromJSON(QJsonObject const& json);
+
+    signals:
+      void texturePaletteToggled();
 
     private:
       void change_tex_flag(World* world, glm::vec3 const& pos, bool add, scoped_blp_texture_reference texture);

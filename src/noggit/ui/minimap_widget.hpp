@@ -41,9 +41,9 @@ namespace Noggit
         { _draw_boundaries = draw_boundaries_; update(); return _draw_boundaries; }
       inline const bool& draw_boundaries() const { return _draw_boundaries; }
 
-      inline const std::array<bool, 4096>* use_selection (std::array<bool, 4096>* selection_)
+      inline const std::vector<char>* use_selection (std::vector<char>* selection_)
       { _use_selection = selection_; _selected_tiles = selection_; update(); return _selected_tiles; }
-      inline const std::array<bool, 4096>* selection() const { return _selected_tiles; }
+      inline const std::vector<char>* selection() const { return _selected_tiles; }
 
       inline void camera (Noggit::Camera* camera) { _camera = camera; }
       void set_resizeable(bool state) { _resizeable = state; };
@@ -66,7 +66,7 @@ namespace Noggit
     private:
       World* _world;
       Noggit::Camera* _camera;
-      std::array<bool, 4096>* _selected_tiles;
+      std::vector<char>* _selected_tiles;
 
       bool _draw_skies;
       bool _draw_camera;
