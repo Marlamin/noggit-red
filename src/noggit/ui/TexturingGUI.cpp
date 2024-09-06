@@ -169,16 +169,6 @@ namespace Noggit
                 }
               );
 
-
-      auto only_specular (new QCheckBox ("only with specular texture variant"));
-      connect ( only_specular, &QCheckBox::toggled
-              , [=] (bool on)
-                {
-                  specular_filter->setFilterRegExp (on ? "true" : "");
-                }
-              );
-      only_specular->setChecked (false);
-
       auto texture_filter_box(new QCheckBox("only with specular texture variant"));
 
       if (modern_features)
