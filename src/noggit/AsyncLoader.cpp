@@ -9,6 +9,14 @@
 #include <algorithm>
 #include <list>
 
+AsyncLoader* AsyncLoader::instance;
+
+void AsyncLoader::setup(int threads)
+{
+  // make sure there's always at least one thread otherwise nothing can load
+  instance = new AsyncLoader(std::max(1, threads));
+}
+
 bool AsyncLoader::is_loading()
 {
   std::lock_guard<std::mutex> const lock (_guard);
@@ -146,8 +154,8 @@ AsyncLoader::AsyncLoader(int numThreads)
   : _stop (false)
 {
   // use half of the available threads
-  unsigned int maxThreads = std::thread::hardware_concurrency() / 2; 
-  numThreads = maxThreads > numThreads ? maxThreads : numThreads;
+  // unsigned int maxThreads = std::thread::hardware_concurrency() / 2; 
+  // numThreads = maxThreads > numThreads ? maxThreads : numThreads;
 
   for (int i = 0; i < numThreads; ++i)
   {

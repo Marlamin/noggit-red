@@ -7,11 +7,12 @@
 #include <noggit/MapView.h>
 #include <QtWidgets/qtreewidget.h>
 #include <noggit/ui/widgets/LightViewWidget.h>
+#include <QTabWidget>
 
 namespace Noggit::Ui::Tools
 {
 
-	static std::map <int, std::string> sky_color_names_map = {
+	static const std::unordered_map <int, std::string> sky_color_names_map = {
 		{0	, "Direct"},
 		{1	, "Ambiant"},
 		{2	, "Sky Top"},
@@ -23,7 +24,7 @@ namespace Noggit::Ui::Tools
 		{8	, "Sun"},
 		{9	, "Cloud Sun"},
 		{10	, "Cloud Emissive"},
-		{11	, "Cloud Layer 1 Ambian"},
+		{11	, "Cloud Layer 1 Ambiant"},
 		{12	, "Cloud Layer 2 Ambiant"},
 		{13	, "Unknown/Unused"},
 		{14	, "Ocean Close"},
@@ -32,7 +33,17 @@ namespace Noggit::Ui::Tools
 		{17	, "River Far"}
 	};
 
-	static std::map <int, std::string> light_names_map = {
+	static const std::map <int, std::string> sky_float_values_names_map = {
+	{0	, "Fog Distance"},
+	{1	, "Fog Multiplier"},
+	{2	, "Celestial Glow Through"},
+	{3	, "Cloud Density"},
+	{4	, "Unkown/Unused1"},
+	{5	, "Unkown/Unused2"}
+	 };
+
+	// TODO : move to definitions files
+	static const std::unordered_map <int, std::string> light_names_map = {
 		{1	, "Global Light"},
 		{2	, "DuskWood"},
 		{3	, "Swamp Of Sorrows"},
@@ -277,6 +288,7 @@ namespace Noggit::Ui::Tools
   {
   public:
     LightEditor(MapView* map_view, QWidget* parent = nullptr);
+
 	void UpdateWorldTime();
 
   private:
@@ -289,12 +301,30 @@ namespace Noggit::Ui::Tools
 	std::vector<LightViewPreview*> LightsPreview;
 	std::vector<LightViewEditor*> ActiveEditor;
 
+	QWidget* _light_editing_widget;
+
+	QTabWidget* lightning_tabs;
+	QPushButton* save_current_sky_button;
+	QLabel* lightid_label;
+
+	QCheckBox* global_light_chk;
+	QLineEdit* name_line_edit;
+	QDoubleSpinBox* pos_x_spin;
+	QDoubleSpinBox* pos_y_spin;
+	QDoubleSpinBox* pos_z_spin;
+	QDoubleSpinBox* inner_radius_spin;
+	QDoubleSpinBox* outer_radius_spin;
+
 	QLabel* _nb_param_users;
-    QTreeWidget* _light_tree;
+	QListWidget* _light_tree;
     QComboBox* param_combobox;
     QSlider* glow_slider;
     QCheckBox* highlight_sky_checkbox;
+
     QLineEdit* skybox_model_lineedit;
+	QCheckBox* skybox_flag_1;
+	QCheckBox* skybox_flag_2;
+
     QSlider* shallow_water_alpha_slider;
     QSlider* deep_water_alpha_slider;
     QSlider* shallow_ocean_alpha_slider;
@@ -302,7 +332,8 @@ namespace Noggit::Ui::Tools
 
     bool _is_new_record = false;
 
-    void load_light_param();
+    void load_light_param(int param_id);
+	void loadSelectSky(Sky* sky);
   };
 
 

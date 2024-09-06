@@ -4,12 +4,12 @@
 #include <noggit/liquid_layer.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/tool_enums.hpp>
+#include <util/sExtendableArray.hpp>
 
 #include <vector>
 #include <set>
 #include <optional>
 
-class sExtendableArray;
 class MapChunk;
 class TileWater;
 
@@ -31,7 +31,8 @@ public:
 
   void from_mclq(std::vector<mclq>& layers);
   void fromFile(BlizzardArchive::ClientFile& f, size_t basePos);
-  void save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
+  void save(util::sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos);
+  void save_mclq(util::sExtendableArray& adt, int mcnk_pos, int& current_pos);
 
   bool is_visible ( const float& cull_distance
                   , const math::frustum& frustum
@@ -40,6 +41,7 @@ public:
                   ) const;
 
   void autoGen(MapChunk* chunk, float factor);
+  void update_underground_vertices_depth(MapChunk* chunk);
   void CropWater(MapChunk* chunkTerrain);
 
   void setType(int type, size_t layer);
@@ -70,10 +72,15 @@ public:
 
   MapChunk* getChunk() { return _chunk; };
   TileWater* getWaterTile() { return _water_tile; };
-  std::optional<MH2O_Render> Render;
+
+  MH2O_Attributes& const getAttributes() { return attributes; };
+
   float xbase, zbase;
 
+  int layer_count() const { return _layers.size(); }
+
 private:
+  MH2O_Attributes attributes;
 
   glm::vec3 vmin, vmax, vcenter;
   bool _use_mclq_green_lava;
@@ -83,10 +90,13 @@ private:
 
   void copy_height_to_layer(liquid_layer& target, glm::vec3 const& pos, float radius);
 
-
-
+  bool _auto_update_attributes = true;
+  // updates attributes for all layers
+  void update_attributes();
 
   std::vector<liquid_layer> _layers;
+  int _layer_count = 0;
+
   MapChunk* _chunk;
   TileWater* _water_tile;
 

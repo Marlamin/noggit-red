@@ -55,6 +55,8 @@ namespace OpenGL
     QOpenGLContext* _current_context = nullptr;
     QOpenGLFunctions_4_1_Core* _4_1_core_func = nullptr;
 
+    NOGGIT_FORCEINLINE bool has_extension(std::string const& name);
+
     NOGGIT_FORCEINLINE void enable (GLenum);
     NOGGIT_FORCEINLINE void disable (GLenum);
     NOGGIT_FORCEINLINE GLboolean isEnabled (GLenum);

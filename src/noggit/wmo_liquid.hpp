@@ -88,7 +88,7 @@ struct SMOMVert
   std::int16_t t;
 };
 
-struct LiquidVertex {
+struct WmoLiquidVertex {
   union
   {
     SMOWVert water_vertex;

@@ -1413,11 +1413,11 @@ void MapView::setupAssistMenu()
   assist_menu->addSeparator();
   assist_menu->addAction(createTextSeparator("Current ADT"));
   assist_menu->addSeparator();
-  ADD_ACTION_NS ( assist_menu
+  ADD_ACTION_NS( assist_menu
   , "Set Area ID"
   , [this]
                   {
-                    if (_selected_area_id != -1)
+                    if (terrainMode == editing_mode::areaid && _selected_area_id != -1)
                     {
                       NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_AREAID);
                       _world->setAreaID(_camera.position, _selected_area_id, true);
@@ -2011,7 +2011,7 @@ void MapView::setupAssistMenu()
   assist_menu->addAction(createTextSeparator("Loaded ADTs"));
   assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
-  , "Fix gaps"
+  , "Fix terrain gaps between chunks"
   , [this]
       {
         makeCurrent();
@@ -2038,7 +2038,7 @@ void MapView::setupAssistMenu()
   assist_menu->addAction(createTextSeparator("Global"));
   assist_menu->addSeparator();
   ADD_ACTION_NS ( assist_menu
-  , "Map to big alpha"
+  , "Convert Map to 8bits alphamaps"
   , [this]
     {
       DESTRUCTIVE_ACTION
@@ -2064,7 +2064,7 @@ void MapView::setupAssistMenu()
   );
 
   ADD_ACTION_NS ( assist_menu
-  , "Map to old alpha"
+  , "Convert Map to 4bits alphamaps (old format)"
   , [this]
     {
       DESTRUCTIVE_ACTION
@@ -2309,6 +2309,9 @@ void MapView::setupViewMenu()
   //! \todo space+h in object mode
   ADD_TOGGLE_NS (view_menu, "Hidden models", _draw_hidden_models);
 
+  ADD_TOGGLE_NS(view_menu, "Draw Sky", _draw_sky);
+  ADD_TOGGLE_NS(view_menu, "Draw Skybox", _draw_skybox);
+
   auto debug_menu (view_menu->addMenu ("Debug"));
   ADD_TOGGLE_NS (debug_menu, "Occlusion boxes", _draw_occlusion_boxes);
 
@@ -2318,7 +2321,7 @@ void MapView::setupViewMenu()
 
   ADD_TOGGLE (view_menu, "Show Node Editor", "Shift+N", _show_node_editor);
 
-  ADD_TOGGLE_NS(view_menu, "Game View", _game_mode_camera);
+  // ADD_TOGGLE_NS(view_menu, "Game View", _game_mode_camera);
 
   view_menu->addSeparator();
   view_menu->addAction(createTextSeparator("Minimap"));
@@ -2436,6 +2439,31 @@ void MapView::setupViewMenu()
                  }
                }
   );
+
+  view_menu->addSeparator();
+  view_menu->addAction(createTextSeparator("Camera Modes"));
+  view_menu->addSeparator();
+
+  /* // TODO, doesn't work for some reason.
+  ADD_TOGGLE_NS(view_menu, "Debug cam", _debug_cam_mode);
+  connect(&_debug_cam_mode, &Noggit::BoolToggleProperty::changed
+      , [this]
+      {
+          _debug_cam = Noggit::Camera(_camera.position, _camera.yaw(), _camera.pitch());
+      }
+  );
+
+  ADD_ACTION_NS(view_menu
+      , "Go to debug camera"
+      , [this]
+      {
+          _camera = Noggit::Camera(_debug_cam.position, _debug_cam.yaw(), _debug_cam.pitch());
+      }
+  );*/
+
+  ADD_TOGGLE_NS(view_menu, "FPS camera", _fps_mode);
+
+  ADD_TOGGLE_NS(view_menu, "Camera Collision", _camera_collision);
 
 }
 
@@ -2692,6 +2720,20 @@ void MapView::setupHotkeys()
               }
     , [&] { return terrainMode == editing_mode::holes && !NOGGIT_CUR_ACTION; }
   );
+
+  addHotkey(Qt::Key_F
+    , MOD_none
+    , [&]
+    {
+      if (_selected_area_id != -1)
+      {
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eCHUNKS_AREAID);
+        _world->setAreaID(_camera.position, _selected_area_id, true);
+        NOGGIT_ACTION_MGR->endAction();
+      }
+    }
+  , [&] { return terrainMode == editing_mode::areaid && !NOGGIT_CUR_ACTION; }
+    );
 
   addHotkey ( Qt::Key_T
     , MOD_none
@@ -3063,6 +3105,7 @@ MapView::MapView( math::degrees camera_yaw0
   , cursor_color (1.f, 1.f, 1.f, 1.f)
   , _cursorType{CursorType::CIRCLE}
   , _main_window (NoggitWindow)
+  , _debug_cam(camera_pos, camera_yaw0, camera_pitch0)
   , _world (std::move (world))
   , _status_position (new QLabel (this))
   , _status_selection (new QLabel (this))
@@ -3159,10 +3202,10 @@ MapView::MapView( math::degrees camera_yaw0
   _startup_time.start();
 
   int _fps_limit = _settings->value("fps_limit", 60).toInt();
-  int _fps_calcul = (int)((1.f / (float)_fps_limit) * 1000.f);
-  std::cout << "FPS limit is set to : " << _fps_limit << " (" << _fps_calcul << ")" << std::endl;
+  int _frametime = static_cast<int>((1.f / static_cast<float>(_fps_limit)) * 1000.f);
+  std::cout << "FPS limit is set to : " << _fps_limit << " (" << _frametime << ")" << std::endl;
 
-  _update_every_event_loop.start (_fps_calcul);
+  _update_every_event_loop.start (_frametime);
   connect(&_update_every_event_loop, &QTimer::timeout,[=]
       { 
           _needs_redraw = true;
@@ -3793,7 +3836,7 @@ MapView::~MapView()
 
   _world.reset();
 
-  AsyncLoader::instance().reset_object_fail();
+  AsyncLoader::instance->reset_object_fail();
 
   Noggit::Ui::selected_texture::texture.reset();
 
@@ -4455,7 +4498,7 @@ void MapView::tick (float dt)
   rh = 0;
   rv = 0;
 
-  if (_display_mode != display_mode::in_2D)
+  if (_display_mode == display_mode::in_3D)
   {
     if (turn)
     {
@@ -4468,29 +4511,33 @@ void MapView::tick (float dt)
       _camera_moved_since_last_draw = true;
     }
 
-    if (_game_mode_camera.get())
-    {
-        if (moving)
-        {
-            _camera.move_forward(moving, dt);
-            _camera_moved_since_last_draw = true;
-            // TODO use normalized speed (doesn't slow down when looking up)
-            // _camera.move_forward_normalized(moving, dt);
-        }
-        if (strafing)
-        {
-            _camera.move_horizontal(strafing, dt);
-            _camera_moved_since_last_draw = true;
-        }
-        // get ground z position
-        // hack to update camera when entering mode in void ViewToolbar::add_tool_icon()
-        if (_camera_moved_since_last_draw)
-        {
-            auto ground_pos = _world.get()->get_ground_height(_camera.position);
-            _camera.position.y = ground_pos.y + 6;
-        }
-    }
-    else
+    // if (_fps_mode.get())
+    // {
+    //     // if (moving)
+    //     // {
+    //     //     _camera.move_forward(moving, dt);
+    //     //     _camera_moved_since_last_draw = true;
+    //     //     // TODO use normalized speed (doesn't slow down when looking up)
+    //     //     // _camera.move_forward_normalized(moving, dt);
+    //     // }
+    //     // if (strafing)
+    //     // {
+    //     //     _camera.move_horizontal(strafing, dt);
+    //     //     _camera_moved_since_last_draw = true;
+    //     // }
+    //     // // get ground z position
+    //     // // hack to update camera when entering mode in void ViewToolbar::add_tool_icon()
+    //     // if (_camera_moved_since_last_draw)
+    //     // {
+    //     //     auto ground_pos = _world.get()->get_ground_height(_camera.position);
+    //     //     _camera.position.y = ground_pos.y + 6;
+    //     // }
+    // 
+    //     auto h = _world->get_ground_height(_camera.position).y;
+    // 
+    //     _camera.position.y = h + 6.f;
+    // }
+    // else
     {
 
       if (moving)
@@ -4508,15 +4555,24 @@ void MapView::tick (float dt)
         _camera.move_vertical(updown, dt);
         _camera_moved_since_last_draw = true;
       }
-      // camera collision to ground
-      /*
-      auto ground_height = _world.get()->get_ground_height(_camera.position).y;
-      if (_camera.position.y < ground_height)
-      {
-          _camera.position.y = ground_height + 3;
-      }
-      */
 
+      if (_camera_moved_since_last_draw)
+      {
+        if (_fps_mode.get())
+        {
+          // there is a also hack to update camera when entering mode in void ViewToolbar::add_tool_icon()
+          float h = _world->get_ground_height(_camera.position).y;
+          _camera.position.y = h + 3.f;
+        }
+        else if (_camera_collision.get())
+        {
+          float h = _world.get()->get_ground_height(_camera.position).y;
+          if (_camera.position.y < h + 3.f)
+          {
+            _camera.position.y = h + 3.f;
+          }
+        }
+      }
     }
   }
   else
@@ -4545,7 +4601,8 @@ void MapView::tick (float dt)
   _world->time += this->mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
 
-  lightEditor->UpdateWorldTime();
+  if (mTimespeed > 0.0f)
+    lightEditor->UpdateWorldTime();
 
   if (_draw_model_animations.get())
   {
@@ -4906,11 +4963,11 @@ void MapView::update_cursor_pos()
   }
 }
 
-glm::mat4x4 MapView::model_view() const
+glm::mat4x4 MapView::model_view(bool use_debug_cam) const
 {
   if (_display_mode == display_mode::in_2D)
   {
-    glm::vec3 eye = _camera.position;
+    glm::vec3 eye = use_debug_cam ? _debug_cam.position : _camera.position;
     glm::vec3 target = eye;
     target.y -= 1.f;
     target.z -= 0.001f;
@@ -4921,13 +4978,20 @@ glm::mat4x4 MapView::model_view() const
   }
   else
   {
-    return _camera.look_at_matrix();
+    if (use_debug_cam)
+    {
+        return _debug_cam.look_at_matrix();
+    }
+    else
+    {
+        return _camera.look_at_matrix();
+    }
   }
 }
 
 glm::mat4x4 MapView::projection() const
 {
-  float far_z = _settings->value("farZ", 2048).toFloat();
+  float far_z = _settings->value("view_distance", 2000.f).toFloat() + 1.f;
 
   if (_display_mode == display_mode::in_2D)
   {
@@ -4938,7 +5002,7 @@ glm::mat4x4 MapView::projection() const
   }
   else
   {
-    return glm::perspective(_camera.fov()._, aspect_ratio(), 1.f, far_z);
+    return glm::perspective(_camera.fov()._, aspect_ratio(), _fps_mode.get() ? 0.1f : 1.f, far_z);
   }
 }
 
@@ -5027,8 +5091,12 @@ void MapView::draw_map()
 
   bool classic_ui = _settings->value("classicUI", false).toBool();
   bool show_unpaintable = classic_ui ? texturingTool->show_unpaintable_chunks() : _left_sec_toolbar->showUnpaintableChunk();
+
+  bool debug_cam = _debug_cam_mode.get();
+  // math::frustum frustum(model_view(debug_cam) * projection());
+
   _world->renderer()->draw (
-                 model_view()
+                 model_view(debug_cam)
                , projection()
                , _cursor_pos
                , _cursorRotation
@@ -5047,8 +5115,8 @@ void MapView::draw_map()
                , angled_mode
                , terrainMode == editing_mode::paint
                , terrainMode
-               , _camera.position
-               , _camera_moved_since_last_draw
+               , debug_cam ? _debug_cam.position : _camera.position
+               , debug_cam ? false : _camera_moved_since_last_draw
                , _draw_mfbo.get()
                , _draw_terrain.get()
                , _draw_wmo.get()
@@ -5058,6 +5126,8 @@ void MapView::draw_map()
                , _draw_model_animations.get()
                , _draw_models_with_box.get()
                , _draw_hidden_models.get()
+               , _draw_sky.get()
+               , _draw_skybox.get()
                , minimapTool->getMinimapRenderSettings()
                , _draw_fog.get()
                , terrainTool->_edit_type
@@ -5074,6 +5144,11 @@ void MapView::draw_map()
 
 void MapView::keyPressEvent (QKeyEvent *event)
 {
+  if (event->key() == Qt::Key_Space)
+  {
+    _mod_space_down = true;
+  }
+
   size_t const modifier
     ( ((event->modifiers() & Qt::ShiftModifier) ? MOD_shift : 0)
     | ((event->modifiers() & Qt::ControlModifier) ? MOD_ctrl : 0)
@@ -5094,9 +5169,6 @@ void MapView::keyPressEvent (QKeyEvent *event)
       return;
     }
   }
-
-  if (event->key() == Qt::Key_Space)
-    _mod_space_down = true;
 
   checkInputsSettings();
 
@@ -5882,7 +5954,7 @@ void MapView::save(save_mode mode)
   // Save minimap creator model filters
   minimapTool->saveFiltersToJSON();
 
-  if (AsyncLoader::instance().important_object_failed_loading())
+  if (AsyncLoader::instance->important_object_failed_loading())
   {
     save = false;
     QPushButton *yes, *no;
@@ -5955,7 +6027,7 @@ void MapView::save(save_mode mode)
 
 
     NOGGIT_ACTION_MGR->purge();
-    AsyncLoader::instance().reset_object_fail();
+    AsyncLoader::instance->reset_object_fail();
 
 
     _main_window->statusBar()->showMessage("Map saved", 2000);
@@ -6097,11 +6169,14 @@ void MapView::onSettingsSave()
 
   _world->renderer()->markTerrainParamsUniformBlockDirty();
 
-  _world->renderer()->setViewDistance(_settings->value("view_distance", 1000.f).toFloat());
+  _world->renderer()->setViewDistance(_settings->value("view_distance", 2000.f).toFloat());
 
   _world.get()->mapIndex.setLoadingRadius(_settings->value("loading_radius", 2).toInt());
   _world.get()->mapIndex.setUnloadDistance(_settings->value("unload_dist", 5).toInt());
   _world.get()->mapIndex.setUnloadInterval(_settings->value("unload_interval", 30).toInt());
+
+  _camera.fov(math::degrees(_settings->value("fov", 54.f).toFloat()));
+  _debug_cam.fov(math::degrees(_settings->value("fov", 54.f).toFloat()));
 
 }
 

@@ -59,7 +59,20 @@ void TileWater::autoGen(float factor)
   }
 }
 
-void TileWater::saveToFile(sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)
+void TileWater::update_underground_vertices_depth()
+{
+  tagUpdate();
+
+  for (int z = 0; z < 16; ++z)
+  {
+    for (int x = 0; x < 16; ++x)
+    {
+      chunks[z][x]->update_underground_vertices_depth(tile->getChunk(x, z));
+    }
+  }
+}
+
+void TileWater::saveToFile(util::sExtendableArray &lADTFile, int &lMHDR_Position, int &lCurrentPosition)
 {
   if (!hasData(0))
   {

@@ -101,14 +101,19 @@ public:
   std::atomic<bool> changed;
 
 
-  bool intersect (math::ray const&, selection_result*) const;
+  bool intersect (math::ray const&, selection_result*);
 
 
   bool GetVertex(float x, float z, glm::vec3 *V);
   void getVertexInternal(float x, float z, glm::vec3* v);
 
-  void saveTile(World*);
 	void CropWater();
+  void saveTile(World* world);
+
+private:
+  void save(World* world, bool save_using_mclq_liquids);
+
+public:
 
   bool isTile(int pX, int pZ);
 

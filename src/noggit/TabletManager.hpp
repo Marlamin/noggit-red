@@ -29,7 +29,9 @@ namespace Noggit
     private:
         TabletManager() : QObject() {}
 
+        // gets activated by MapView::tabletEvent(QTabletEvent* event)
         bool _is_active = false;
+        // 0.0 to 1.0 scale
         double _pressure = 0.0;
 
     };

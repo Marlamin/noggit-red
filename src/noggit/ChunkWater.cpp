@@ -6,12 +6,16 @@
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
 #include <ClientFile.hpp>
+#include <util/sExtendableArray.hpp>
+
+#include <algorithm>
 
 ChunkWater::ChunkWater(MapChunk* chunk, TileWater* water_tile, float x, float z, bool use_mclq_green_lava)
   : xbase(x)
   , zbase(z)
   , vmin(x, 0.f, z)
   , vmax(x + CHUNKSIZE, 0.f, z + CHUNKSIZE)
+  , vcenter((vmin + vmax) * 0.5f)
   , _use_mclq_green_lava(use_mclq_green_lava)
   , _chunk(chunk)
   , _water_tile(water_tile)
@@ -22,7 +26,6 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
 {
   glm::vec3 pos(xbase, 0.0f, zbase);
 
-  if (!Render.has_value()) Render.emplace();
   for (mclq& liquid : layers)
   {
     std::uint8_t mclq_liquid_type = 0;
@@ -33,8 +36,8 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
       {
         mclq_tile const& tile = liquid.tiles[z * 8 + x];
 
-        misc::bit_or(Render.value().fishable, x, z, tile.fishable);
-        misc::bit_or(Render.value().fatigue, x, z, tile.fatigue);
+        misc::bit_or(attributes.fishable, x, z, tile.fishable);
+        misc::bit_or(attributes.fatigue, x, z, tile.fatigue);
 
         if (!tile.dont_render)
         {
@@ -45,17 +48,17 @@ void ChunkWater::from_mclq(std::vector<mclq>& layers)
 
     switch (mclq_liquid_type)
     {
-      case 1:
-        _layers.emplace_back(this, pos, liquid, 2);
+      case 1: // mclq ocean
+        _layers.emplace_back(this, pos, liquid, LIQUID_OCEAN);
         break;
-      case 3:
-        _layers.emplace_back(this, pos, liquid, 4);
+      case 3: // mclq slime
+        _layers.emplace_back(this, pos, liquid, LIQUID_SLIME);
         break;
-      case 4:
-        _layers.emplace_back(this, pos, liquid, 1);
+      case 4: // mclq river
+        _layers.emplace_back(this, pos, liquid, LIQUID_WATER);
         break;
-      case 6:
-        _layers.emplace_back(this, pos, liquid, (_use_mclq_green_lava ? 15 : 3));
+      case 6: // mclq magma
+        _layers.emplace_back(this, pos, liquid, (_use_mclq_green_lava ? LIQUID_Green_Lava : LIQUID_MAGMA));
 
         break;
       default:
@@ -78,17 +81,22 @@ void ChunkWater::fromFile(BlizzardArchive::ClientFile &f, size_t basePos)
   }
 
   //render
-  if (header.ofsRenderMask)
+  if (header.ofsAttributes)
   {
-    Render.emplace();
-    f.seek(basePos + header.ofsRenderMask);
-    f.read(&Render.value(), sizeof(MH2O_Render));
+    f.seek(basePos + header.ofsAttributes);
+    f.read(&attributes, sizeof(MH2O_Attributes));
+  }
+  else
+  {
+      // when chunks don't have attributes it means everything is set.
+      attributes.fishable = 0xFFFFFFFFFFFFFFFF;
+      attributes.fatigue = 0xFFFFFFFFFFFFFFFF;
   }
 
   for (std::size_t k = 0; k < header.nLayers; ++k)
   {
     MH2O_Information info;
-    uint64_t infoMask = 0xFFFFFFFFFFFFFFFF; // default = all water
+    uint64_t infoMask = 0xFFFFFFFFFFFFFFFF; // default = all water. InfoMask + HeightMap combined
 
     //info
     f.seek(basePos + header.ofsInformation + sizeof(MH2O_Information)* k);
@@ -106,6 +114,8 @@ void ChunkWater::fromFile(BlizzardArchive::ClientFile &f, size_t basePos)
 
     glm::vec3 pos(xbase, 0.0f, zbase);
     _water_tile->tagUpdate();
+    // liquid_layer(ChunkWater* chunk, BlizzardArchive::ClientFile& f, std::size_t base_pos, glm::vec3 const& base
+    //              ,MH2O_Information const& info, std::uint64_t infomask);
     _layers.emplace_back(this, f, basePos, pos, info, infoMask);
   }
 
@@ -113,32 +123,35 @@ void ChunkWater::fromFile(BlizzardArchive::ClientFile &f, size_t basePos)
 }
 
 
-void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos)
+void ChunkWater::save(util::sExtendableArray& adt, int base_pos, int& header_pos, int& current_pos)
 {
   MH2O_Header header;
 
   // remove empty layers
   cleanup();
+  update_attributes();
 
   if (hasData(0))
   {
-    header.nLayers = static_cast<std::uint32_t>(_layers.size());
+    header.nLayers = _layer_count;;
 
-    if (Render.has_value())
+    // fagique only for single layer ocean chunk
+    bool fatigue = _layers[0].has_fatigue();
+    if (!fatigue)
     {
-        header.ofsRenderMask = current_pos - base_pos;
-        adt.Insert(current_pos, sizeof(MH2O_Render), reinterpret_cast<char*>(&Render.value()));
-        current_pos += sizeof(MH2O_Render);
+      header.ofsAttributes = current_pos - base_pos;
+      adt.Insert(current_pos, sizeof(MH2O_Attributes), reinterpret_cast<char*>(&attributes));
+      current_pos += sizeof(MH2O_Attributes);
     }
     else
     {
-        header.ofsRenderMask = 0;
+      header.ofsAttributes = 0;
     }
 
     header.ofsInformation = current_pos - base_pos;
     int info_pos = current_pos;
 
-    std::size_t info_size = sizeof(MH2O_Information) * _layers.size();
+    std::size_t info_size = sizeof(MH2O_Information) * _layer_count;
     current_pos += static_cast<std::uint32_t>(info_size);
 
     adt.Extend(static_cast<long>(info_size));
@@ -149,8 +162,64 @@ void ChunkWater::save(sExtendableArray& adt, int base_pos, int& header_pos, int&
     }
   }
 
-  memcpy(adt.GetPointer<char>(header_pos), &header, sizeof(MH2O_Header));
+  memcpy(adt.GetPointer<char>(header_pos).get(), &header, sizeof(MH2O_Header));
   header_pos += sizeof(MH2O_Header);
+}
+
+void ChunkWater::save_mclq(util::sExtendableArray& adt, int mcnk_pos, int& current_pos)
+{
+  // remove empty layers
+  cleanup();
+  update_attributes();
+
+  if (hasData(0))
+  {
+    adt.Extend(sizeof(mclq) * _layer_count + 8);
+    // size seems to be 0 in vanilla adts in the mclq chunk's header and set right in the mcnk header (layer_size * n_layer + 8)
+    SetChunkHeader(adt, current_pos, 'MCLQ', 0);
+
+    current_pos += 8;
+
+    // it's possible to merge layers when they don't overlap (liquids using the same vertice, but at different height)
+    // layer ordering seems to matter, having a lava layer then a river layer causes the lava layer to not render ingame
+    // sorting order seems to be dependant on the flag ordering in the mcnk's header
+    std::vector<std::pair<mclq, int>> mclq_layers;
+
+    for (liquid_layer const& layer : _layers)
+    {
+      switch (layer.mclq_liquid_type())
+      {
+      case 6: // lava
+        adt.GetPointer<MapChunkHeader>(mcnk_pos + 8)->flags.flags.lq_magma = 1;
+        break;
+      case 3: // slime
+        adt.GetPointer<MapChunkHeader>(mcnk_pos + 8)->flags.flags.lq_slime = 1;
+        break;
+      case 1: // ocean
+        adt.GetPointer<MapChunkHeader>(mcnk_pos + 8)->flags.flags.lq_ocean = 1;
+        break;
+      default: // river
+        adt.GetPointer<MapChunkHeader>(mcnk_pos + 8)->flags.flags.lq_river = 1;
+        break;
+      }
+
+      mclq_layers.push_back({ layer.to_mclq(attributes), layer.mclq_flag_ordering() });
+    }
+
+    auto cmp = [](std::pair<mclq, int> const& a, std::pair<mclq, int> const& b)
+      {
+        return a.second < b.second;
+      };
+
+    // sort the layers by flag order
+    std::sort(mclq_layers.begin(), mclq_layers.end(), cmp);
+
+    for (auto const& mclq_layer : mclq_layers)
+    {
+      std::memcpy(adt.GetPointer<char>(current_pos).get(), &mclq_layer.first, sizeof(mclq));
+      current_pos += sizeof(mclq);
+    }
+  }
 }
 
 
@@ -161,6 +230,14 @@ void ChunkWater::autoGen(MapChunk *chunk, float factor)
     layer.update_opacity(chunk, factor);
   }
   update_layers();
+}
+
+void ChunkWater::update_underground_vertices_depth(MapChunk* chunk)
+{
+  for (liquid_layer& layer : _layers)
+  {
+    layer.update_underground_vertices_depth(chunk);
+  }
 }
 
 
@@ -211,6 +288,16 @@ void ChunkWater::update_layers()
   vmin.y = std::numeric_limits<float>::max();
   vmax.y = std::numeric_limits<float>::lowest();
 
+  std::uint64_t debug_fishable_old = attributes.fishable;
+  std::uint64_t debug_fatigue_old = attributes.fatigue;
+
+  if (_auto_update_attributes)
+  {
+    // reset attributes
+    attributes.fishable = 0;
+    attributes.fatigue = 0;
+  }
+
   for (liquid_layer& layer : _layers)
   {
     vmin.y = std::min (vmin.y, layer.min());
@@ -220,17 +307,55 @@ void ChunkWater::update_layers()
     extents[1].y = std::max(extents[1].y, vmax.y);
 
     _water_tile->tagUpdate();
+
+    if (_auto_update_attributes)
+      layer.update_attributes(attributes);
+
     count++;
   }
+
+  // some tests to compare with blizzard
+  const bool run_tests = false;
+  if (run_tests)
+  {
+    if (attributes.fishable != debug_fishable_old && _layers.size())
+    {
+      uint64_t x = attributes.fishable ^ debug_fishable_old; 
+      int difference_count = 0;
+
+      
+      while (x > 0) {
+          difference_count += x & 1;
+          x >>= 1;
+      }
+
+      auto type = _layers.front().liquidID();
+      std::vector<float> depths;
+
+      int zero_depth_num = 0;
+      int below_20_num = 0; // below 0.2
+      for (auto& vert : _layers.front().getVertices())
+      {
+          depths.push_back(vert.depth);
+          if (vert.depth == 0.0f)
+              zero_depth_num++;
+          if (vert.depth < 0.2f && vert.depth != 0.0f)
+              below_20_num++;
+      }
+    }
+  }
+
 
   _water_tile->tagExtents(true);
 
   vcenter = (vmin + vmax) * 0.5f;
+
+  _layer_count = _layers.size();
 }
 
 bool ChunkWater::hasData(size_t layer) const
 {
-  return _layers.size() > layer;
+  return _layer_count > layer;
 }
 
 
@@ -315,7 +440,7 @@ void ChunkWater::paintLiquid( glm::vec3 const& pos
 
 void ChunkWater::cleanup()
 {
-  for (int i = static_cast<int>(_layers.size() - 1); i >= 0; --i)
+  for (int i = static_cast<int>(_layer_count - 1); i >= 0; --i)
   {
     if (_layers[i].empty())
     {
@@ -323,6 +448,7 @@ void ChunkWater::cleanup()
       _water_tile->tagUpdate();
     }
   }
+  update_layers();
 }
 
 void ChunkWater::copy_height_to_layer(liquid_layer& target, glm::vec3 const& pos, float radius)
@@ -347,6 +473,17 @@ void ChunkWater::copy_height_to_layer(liquid_layer& target, glm::vec3 const& pos
         }
       }
     }
+  }
+}
+
+void ChunkWater::update_attributes()
+{
+  attributes.fishable = 0;
+  attributes.fatigue = 0;
+
+  for (liquid_layer& layer : _layers)
+  {
+      layer.update_attributes(attributes);
   }
 }
 

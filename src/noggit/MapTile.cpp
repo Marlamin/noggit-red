@@ -19,6 +19,7 @@
 #include <opengl/shader.hpp>
 #include <external/tracy/Tracy.hpp>
 #include <util/CurrentFunction.hpp>
+#include <util/sExtendableArray.hpp>
 
 #include <noggit/World.inl>
 #include <QtCore/QSettings>
@@ -75,11 +76,15 @@ MapTile::MapTile( int pX
 
 MapTile::~MapTile()
 {
-  for (auto& pair : object_instances)
   {
-    for (auto& instance : pair.second)
+    std::lock_guard<std::mutex> const lock(_mutex);
+    
+    for (auto& pair : object_instances)
     {
-      instance->derefTile(this);
+      for (auto& instance : pair.second)
+      {
+        instance->derefTile(this);
+      }
     }
   }
 
@@ -274,6 +279,8 @@ void MapTile::finishLoading()
     assert(fourcc == 'MH2O');
 
     Water.readFromFile(theFile, ofsW);
+
+    // Water.update_underground_vertices_depth();
   }
 
   // - MFBO ----------------------------------------------
@@ -429,12 +436,14 @@ void MapTile::convert_alphamap(bool to_big_alpha)
 }
 
 
-bool MapTile::intersect (math::ray const& ray, selection_result* results) const
+bool MapTile::intersect (math::ray const& ray, selection_result* results)
 {
   if (!finished)
   {
     return false;
   }
+
+  recalcExtents();
 
   if (!ray.intersect_bounds(_extents[0], _extents[1]))
   {
@@ -525,6 +534,24 @@ void MapTile::getVertexInternal(float x, float z, glm::vec3* v)
 /// --- Only saving related below this line. --------------------------
 
 void MapTile::saveTile(World* world)
+{
+  // if we want to save a duplicate with mclq in a separate folder
+  /*
+  save(world, false);
+
+  if (NoggitSettings.value("use_mclq_liquids_export", false).toBool())
+  {
+    save(world, true);
+  }
+  */
+
+  QSettings settings;
+  bool use_mclq = settings.value("use_mclq_liquids_export", false).toBool();
+
+  save(world, use_mclq);
+}
+
+void MapTile::save(World* world, bool save_using_mclq_liquids)
 {
   Log << "Saving ADT \"" << _file_key.stringRepr() << "\"." << std::endl;
 
@@ -632,7 +659,7 @@ void MapTile::saveTile(World* world)
     texture.second = lID++;
 
   // Now write the file.
-  sExtendableArray lADTFile;
+  util::sExtendableArray lADTFile;
 
   int lCurrentPosition = 0;
 
@@ -708,7 +735,7 @@ void MapTile::saveTile(World* world)
 
   // MMID data
   // WMO model names
-  int * lMMID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
+  auto const lMMID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
 
   lID = 0;
   for (auto const& model : lModels)
@@ -743,7 +770,7 @@ void MapTile::saveTile(World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mwid = lCurrentPosition - 0x14;
 
   // MWID data
-  int * lMWID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
+  auto const lMWID_Data = lADTFile.GetPointer<int>(lCurrentPosition + 8);
 
   lID = 0;
   for (auto const& object : lObjects)
@@ -758,7 +785,7 @@ void MapTile::saveTile(World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mddf = lCurrentPosition - 0x14;
 
   // MDDF data
-  ENTRY_MDDF* lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>(lCurrentPosition + 8);
+  auto const lMDDF_Data = lADTFile.GetPointer<ENTRY_MDDF>(lCurrentPosition + 8);
 
   if(world->mapIndex.sort_models_by_size_class())
   {
@@ -802,7 +829,7 @@ void MapTile::saveTile(World* world)
   lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->modf = lCurrentPosition - 0x14;
 
   // MODF data
-  ENTRY_MODF *lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>(lCurrentPosition + 8);
+  auto const lMODF_Data = lADTFile.GetPointer<ENTRY_MODF>(lCurrentPosition + 8);
 
   lID = 0;
   for (auto const& object : lObjectInstances)
@@ -844,14 +871,17 @@ void MapTile::saveTile(World* world)
   lCurrentPosition += 8 + lMODF_Size;
 
   //MH2O
-  Water.saveToFile(lADTFile, lMHDR_Position, lCurrentPosition);
+  if (!save_using_mclq_liquids)
+  {
+    Water.saveToFile(lADTFile, lMHDR_Position, lCurrentPosition);
+  }
 
   // MCNK
   for (int y = 0; y < 16; ++y)
   {
     for (int x = 0; x < 16; ++x)
     {
-      mChunks[y][x]->save(lADTFile, lCurrentPosition, lMCIN_Position, lTextures, lObjectInstances, lModelInstances);
+      mChunks[y][x]->save(lADTFile, lCurrentPosition, lMCIN_Position, lTextures, lObjectInstances, lModelInstances, save_using_mclq_liquids);
     }
   }
 
@@ -863,7 +893,7 @@ void MapTile::saveTile(World* world)
     SetChunkHeader(lADTFile, lCurrentPosition, 'MFBO', static_cast<int>(chunkSize));
     lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mfbo = lCurrentPosition - 0x14;
 
-    int16_t *lMFBO_Data = lADTFile.GetPointer<int16_t>(lCurrentPosition + 8);
+    auto const lMFBO_Data = lADTFile.GetPointer<int16_t>(lCurrentPosition + 8);
 
     lID = 0;
 
@@ -882,9 +912,9 @@ void MapTile::saveTile(World* world)
     //! \todo check if nTexEffects == nTextures, correct order etc.
     lADTFile.Extend(8 + 4 * mTextureEffects.size());
     SetChunkHeader(lADTFile, lCurrentPosition, 'MTFX', 4 * mTextureEffects.size());
-    lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mtfx = lCurrentPosition - 0x14;
+    lADTFile.GetPointer<MHDR>(lMHDR_Position + 8)->mtxf = lCurrentPosition - 0x14;
 
-    uint32_t* lMTFX_Data = lADTFile.GetPointer<uint32_t>(lCurrentPosition + 8);
+    auto const lMTFX_Data = lADTFile.GetPointer<uint32_t>(lCurrentPosition + 8);
 
     lID = 0;
     //they should be in the correct order...
@@ -897,14 +927,24 @@ void MapTile::saveTile(World* world)
   }
 #endif
 
-  lADTFile.Extend(static_cast<long>(lCurrentPosition - lADTFile.data.size())); // cleaning unused nulls at the end of file
-
-
   {
     BlizzardArchive::ClientFile f(_file_key.filepath(), Noggit::Application::NoggitApplication::instance()->clientData()
       , BlizzardArchive::ClientFile::NEW_FILE);
-    f.setBuffer(lADTFile.data);
+    // \todo This sounds wrong. There shouldn't *be* unused nulls to
+    // begin with.
+    f.setBuffer(lADTFile.data_up_to(lCurrentPosition)); // cleaning unused nulls at the end of file
     f.save();
+
+    // adspartan's way, save MCLQ files separately
+    /*
+        if (save_using_mclq_liquids)
+    {
+      f.save_file_to_folder(NoggitSettings.value("project/mclq_liquids_path").toString().toStdString());
+    }
+    else
+    {
+      f.save();
+    }*/
   }
 
   lObjectInstances.clear();
@@ -1761,6 +1801,18 @@ void MapTile::recalcCombinedExtents()
 {
   if (!_combined_extents_dirty)
     return;
+
+  // ensure all extents are updated
+  {
+    recalcExtents();
+
+    if (Water.needsUpdate())
+    {
+      Water.recalcExtents();
+    }
+
+    recalcObjectInstanceExtents();
+  }
 
   _combined_extents = _extents;
 

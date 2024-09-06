@@ -78,7 +78,7 @@ void Noggit::Action::undo(bool redo)
       if (pair.second.tmp_edit_values)
         texture_set->getTempAlphamaps() = std::make_unique<tmp_edit_alpha_values>(*pair.second.tmp_edit_values);
       else
-        texture_set->getTempAlphamaps() = nullptr;
+        texture_set->getTempAlphamaps().reset();
 
       std::memcpy(texture_set->getMCLYEntries(), &pair.second.layers_info, sizeof(layer_info) * 4);
       texture_set->setNTextures(pair.second.n_textures);

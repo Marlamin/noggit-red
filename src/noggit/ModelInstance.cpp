@@ -115,7 +115,7 @@ std::vector<std::tuple<int, int, int>> ModelInstance::intersect (glm::mat4x4 con
 
 bool ModelInstance::isInFrustum(const math::frustum& frustum)
 {
-  if (_need_recalc_extents && model->finishedLoading())
+  if (_need_recalc_extents)
   {
     recalcExtents();
   }

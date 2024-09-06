@@ -108,6 +108,7 @@ namespace Noggit
 
             if ( entry.find ("tileset") != std::string::npos
               && entry.find (".blp") != std::string::npos
+              && entry.find("_h.blp") == std::string::npos // skip _h textures
                )
             {
               auto suffix_pos (entry.find (modern_features ? "_h.blp" : "_s.blp"));
@@ -169,6 +170,14 @@ namespace Noggit
               );
 
 
+      auto only_specular (new QCheckBox ("only with specular texture variant"));
+      connect ( only_specular, &QCheckBox::toggled
+              , [=] (bool on)
+                {
+                  specular_filter->setFilterRegExp (on ? "true" : "");
+                }
+              );
+      only_specular->setChecked (false);
 
       auto texture_filter_box(new QCheckBox("only with specular texture variant"));
 

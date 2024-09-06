@@ -171,7 +171,7 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   {
       ChunkWater* waterchunk = chunk->liquid_chunk();
 
-      MH2O_Render liquid_render = waterchunk->Render.value_or(MH2O_Render{ 0xffffffffffffffff,0xffffffffffffffff });
+      MH2O_Attributes attributes = waterchunk->getAttributes();
 
       if (waterchunk->hasData(0))
       {
@@ -179,11 +179,13 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
           liquid_layer liquid = waterchunk->getLayers()->at(0); // only getting data from layer 0, maybe loop them ?
           int liquid_flags = liquid.getSubchunks();
 
-          select_info << "<br><b>liquid type</b>: " << liquid.liquidID() << " (\"" << gLiquidTypeDB.getLiquidName(liquid.liquidID()) << "\")"
-              << "<br><b>liquid flags</b>: "
+          select_info << "<br><b>Liquid type</b>: " << liquid.liquidID() << " (\"" << gLiquidTypeDB.getLiquidName(liquid.liquidID()) << "\")"
+              << "<br><b>liquid flags(center)</b>: "
               // getting flags from the center tile
-              << ((liquid_render.fishable >> (4 * 8 + 4)) & 1 ? "fishable " : "")
-              << ((liquid_render.fatigue >> (4 * 8 + 4)) & 1 ? "fatigue" : "");
+              << ((attributes.fishable >> (4 * 8 + 4)) & 1 ? "fishable " : "")
+              << ((attributes.fatigue >> (4 * 8 + 4)) & 1 ? "fatigue " : "")
+
+              << (liquid.has_fatigue() ? "<br><b>entire chunk has fatigue!</b>" : "");
       }
   }
   else

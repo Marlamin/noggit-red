@@ -18,7 +18,7 @@ WorldRender::WorldRender(World* world)
 : BaseRender()
 , _world(world)
 , _liquid_texture_manager(world->_context)
-, _view_distance(world->_settings->value("view_distance", 1000.f).toFloat())
+, _view_distance(world->_settings->value("view_distance", 2000.f).toFloat()) // + TILE_RADIUS) // add adt radius to make sure tiles aren't culled too soon, todo: improve adt culling to prevent that from happening
 , _cull_distance(0.f)
 {
 }
@@ -53,6 +53,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     , bool draw_model_animations
     , bool draw_models_with_box
     , bool draw_hidden_models
+    , bool draw_sky
+    , bool draw_skybox
     , MinimapRenderSettings* minimap_render_settings
     , bool draw_fog
     , eTerrainType ground_editing_brush
@@ -123,7 +125,6 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
   for (MapTile* tile : _world->mapIndex.loaded_tiles())
   {
-    tile->recalcObjectInstanceExtents();
     tile->recalcCombinedExtents();
 
     if (minimap_render)
@@ -196,14 +197,14 @@ void WorldRender::draw (glm::mat4x4 const& model_view
             });
 
   // only draw the sky in 3D
-  if(!minimap_render && display == display_mode::in_3D)
+  if(!minimap_render && display == display_mode::in_3D && draw_sky)
   {
     ZoneScopedN("World::draw() : Draw skies");
     OpenGL::Scoped::use_program m2_shader {*_m2_program.get()};
 
     bool hadSky = false;
 
-    if (draw_wmo || _world->mapIndex.hasAGlobalWMO())
+    if (draw_skybox && (draw_wmo || _world->mapIndex.hasAGlobalWMO()))
     {
       _world->_model_instance_storage.for_each_wmo_instance
           (
@@ -243,6 +244,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
           , frustum
           , _cull_distance
           , _world->animtime
+          , draw_skybox
           , _outdoor_light_stats
       );
     }
@@ -938,6 +940,65 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   gl.enable(GL_BLEND);
   gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  // render before the water and enable depth right 
+  // so it's visible under water
+  // the checker board pattern is used to see the water under it
+  if (angled_mode || use_ref_pos)
+  {
+    ZoneScopedN("World::draw() : Draw angles");
+    // OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
+    OpenGL::Scoped::depth_mask_setter<GL_TRUE> const depth_mask;
+
+    math::degrees orient = math::degrees(orientation);
+    math::degrees incl = math::degrees(angle);
+    glm::vec4 color = cursor_color;
+    // color.w = 0.5f;
+    color.w = 0.75f;
+
+    float radius = 1.2f * brush_radius;
+
+    if (angled_mode && terrainMode == editing_mode::flatten_blur)
+    {
+      if (angle > 49.0f) // 0.855 radian
+      {
+        color.x = 1.f;
+        color.y = 0.f;
+        color.z = 0.f;
+      }
+    }
+
+    if (angled_mode && !use_ref_pos)
+    {
+      glm::vec3 pos = cursor_pos;
+      pos.y += 0.1f; // to avoid z-fighting with the ground
+      _square_render.draw(mvp, pos, radius, incl, orient, color);
+    }
+    else if (use_ref_pos)
+    {
+      if (angled_mode)
+      {
+        glm::vec3 pos = cursor_pos;
+        pos.y = misc::angledHeight(ref_pos, pos, incl, orient);
+        pos.y += 0.1f;
+        _square_render.draw(mvp, pos, radius, incl, orient, color);
+
+        // display the plane when the cursor is far from ref_point
+        if (misc::dist(pos.x, pos.z, ref_pos.x, ref_pos.z) > 10.f + radius)
+        {
+          glm::vec3 ref = ref_pos;
+          ref.y += 0.1f;
+          _square_render.draw(mvp, ref, 10.f, incl, orient, color);
+        }
+      }
+      else
+      {
+        glm::vec3 pos = cursor_pos;
+        pos.y = ref_pos.y + 0.1f;
+        _square_render.draw(mvp, pos, radius, math::degrees(0.f), math::degrees(0.f), color);
+      }
+    }
+  }
+
   if (draw_water)
   {
     ZoneScopedN("World::draw() : Draw water");
@@ -976,62 +1037,6 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     gl.bindVertexArray(0);
   }
 
-  if (angled_mode || use_ref_pos)
-  {
-    ZoneScopedN("World::draw() : Draw angles");
-    OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
-    OpenGL::Scoped::depth_mask_setter<GL_FALSE> const depth_mask;
-
-    math::degrees orient = math::degrees(orientation);
-    math::degrees incl = math::degrees(angle);
-    glm::vec4 color = cursor_color;
-    // always half transparent regardless or the cursor transparency
-    color.w = 0.5f;
-
-    float radius = 1.2f * brush_radius;
-
-    if (angled_mode && terrainMode == editing_mode::flatten_blur)
-    {
-        if (angle > 49.0f) // 0.855 radian
-        {
-            color.x = 1.f;
-            color.y = 0.f;
-            color.z = 0.f;
-        }
-    }
-
-    if (angled_mode && !use_ref_pos)
-    {
-      glm::vec3 pos = cursor_pos;
-      pos.y += 0.1f; // to avoid z-fighting with the ground
-      _square_render.draw(mvp, pos, radius, incl, orient, color);
-    }
-    else if (use_ref_pos)
-    {
-      if (angled_mode)
-      {
-        glm::vec3 pos = cursor_pos;
-        pos.y = misc::angledHeight(ref_pos, pos, incl, orient);
-        pos.y += 0.1f;
-        _square_render.draw(mvp, pos, radius, incl, orient, color);
-
-        // display the plane when the cursor is far from ref_point
-        if (misc::dist(pos.x, pos.z, ref_pos.x, ref_pos.z) > 10.f + radius)
-        {
-          glm::vec3 ref = ref_pos;
-          ref.y += 0.1f;
-          _square_render.draw(mvp, ref, 10.f, incl, orient, color);
-        }
-      }
-      else
-      {
-        glm::vec3 pos = cursor_pos;
-        pos.y = ref_pos.y + 0.1f;
-        _square_render.draw(mvp, pos, radius, math::degrees(0.f), math::degrees(0.f), color);
-      }
-    }
-  }
-
   gl.enable(GL_BLEND);
 
   // draw last because of the transparency
@@ -1054,7 +1059,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
   if (terrainMode == editing_mode::light)
   {
-      Sky* CurrentSky = skies()->findClosestSkyByDistance(camera_pos);
+      // Sky* CurrentSky = skies()->findClosestSkyByDistance(camera_pos);
+      Sky* CurrentSky = skies()->findClosestSkyByWeight();
       if (!CurrentSky)
           return;
 
@@ -1064,12 +1070,16 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       const int CurrenTime = static_cast<int>(_world->time) % MAX_TIME_VALUE_C;
 
       glCullFace(GL_FRONT);
-      for (Sky& sky : skies()->skies)
+      if (!draw_only_inside_light_sphere)
       {
-          if (CurrentSkyID > 1 && draw_only_inside_light_sphere)
-              break;
+        for (Sky& sky : skies()->skies)
+        {
 
+          // we draw the current sky below with glCullFace(GL_BACK);
           if (CurrentSkyID == sky.Id)
+              continue;
+
+          if (sky.global)
               continue;
 
           if (glm::distance(sky.pos, camera_pos) <= _cull_distance) // TODO: frustum cull here
@@ -1079,17 +1089,32 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
               _sphere_render.draw(mvp, sky.pos, ambient, sky.r1, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
               _sphere_render.draw(mvp, sky.pos, diffuse, sky.r2, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+          
+              // TODO Those lines tank fps by 50%
+              // std::vector<glm::vec3> linePoints;
+              // linePoints.push_back(glm::vec3(sky.pos.x, sky.pos.y, sky.pos.z - sky.r2));
+              // linePoints.push_back(glm::vec3(sky.pos.x, sky.pos.y, sky.pos.z + sky.r2));
+              // _line_render.draw(mvp, linePoints, glm::vec4(1.f), false);
           }
+        }
       }
 
       glCullFace(GL_BACK);
-      if (CurrentSky && draw_only_inside_light_sphere)
+      if (CurrentSky && !CurrentSky->global)
       {
           glm::vec4 diffuse = { CurrentSky->colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.f };
           glm::vec4 ambient = { CurrentSky->colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.f };
 
-          _sphere_render.draw(mvp, CurrentSky->pos, ambient, CurrentSky->r1, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
-          _sphere_render.draw(mvp, CurrentSky->pos, diffuse, CurrentSky->r2, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
+          // always render wireframe in the current light
+          // need to render outer first or it gets culled
+          _sphere_render.draw(mvp, CurrentSky->pos, diffuse, CurrentSky->r2, 32, 18, alpha_light_sphere, false, true);
+          _sphere_render.draw(mvp, CurrentSky->pos, ambient, CurrentSky->r1, 32, 18, alpha_light_sphere, false, true);
+
+
+          // std::vector<glm::vec3> linePoints;
+          // linePoints.push_back(glm::vec3(CurrentSky->pos.x, CurrentSky->pos.z, CurrentSky->pos.y - CurrentSky->r2));
+          // linePoints.push_back(glm::vec3(CurrentSky->pos.x, CurrentSky->pos.z, CurrentSky->pos.y + CurrentSky->r2));
+          // _line_render.draw(mvp, linePoints, glm::vec4(1.f, 0.f, 0.f, 1.f), false);
       }
   }
 }
@@ -1684,7 +1709,13 @@ void WorldRender::drawMinimap ( MapTile *tile
   }
 
   draw(model_view, projection, glm::vec3(), 0, glm::vec4(),
-       CursorType::NONE, 0.f, false, false, false, 0.3f, 0.f, glm::vec3(), 0.f, 0.f, false, false, false, editing_mode::minimap, camera_pos, true, false, true, settings->draw_wmo, settings->draw_water, false, settings->draw_m2, false, false, true, settings, false, eTerrainType::eTerrainType_Linear, 0, display_mode::in_3D, false, true);
+       CursorType::NONE, 0.f, false, false,
+      false, 0.3f, 0.f, glm::vec3(), 0.f, 0.f,
+      false, false, false, editing_mode::minimap, camera_pos,
+      true, false, true, settings->draw_wmo, settings->draw_water, false,
+      settings->draw_m2, false, false, true,
+      false, false, settings, false, eTerrainType::eTerrainType_Linear, 0,
+      display_mode::in_3D, false, true);
 
 
   if (unload)
@@ -1727,7 +1758,7 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
     unsigned counter = 0;
     constexpr unsigned TIMEOUT = 5000;
 
-    while (AsyncLoader::instance().is_loading() || !mTile->finishedLoading())
+    while (AsyncLoader::instance->is_loading() || !mTile->finishedLoading())
     {
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
       counter++;

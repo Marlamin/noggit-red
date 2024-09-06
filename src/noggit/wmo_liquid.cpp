@@ -5,6 +5,7 @@
 #include <noggit/World.h>
 #include <noggit/wmo_liquid.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/MapHeaders.h>
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <opengl/shader.hpp>
@@ -14,30 +15,6 @@
 
 namespace
 {
-
-  enum liquid_basic_types
-  {
-    liquid_basic_types_water = 0,
-    liquid_basic_types_ocean = 1,
-    liquid_basic_types_magma = 2,
-    liquid_basic_types_slime = 3,
-
-    liquid_basic_types_MASK = 3,
-  };
-  enum liquid_types
-  {
-    LIQUID_WMO_Water = 13,
-    LIQUID_WMO_Ocean = 14,
-    LIQUID_Green_Lava = 15,
-    LIQUID_WMO_Magma = 19,
-    LIQUID_WMO_Slime = 20,
-
-    LIQUID_END_BASIC_LIQUIDS = 20,
-    LIQUID_FIRST_NONBASIC_LIQUID_TYPE = 21,
-
-    LIQUID_NAXX_SLIME = 21,
-  };
-
   liquid_types to_wmo_liquid(int x, bool ocean)
   {
     liquid_basic_types const basic(static_cast<liquid_basic_types>(x & liquid_basic_types_MASK));
@@ -117,8 +94,8 @@ wmo_liquid::wmo_liquid(wmo_liquid const& other)
 
 int wmo_liquid::initGeometry(BlizzardArchive::ClientFile* f)
 {
-  LiquidVertex const* map = reinterpret_cast<LiquidVertex const*>(f->getPointer());
-  SMOLTile const* tiles = reinterpret_cast<SMOLTile const*>(f->getPointer() + (xtiles + 1)*(ytiles + 1) * sizeof(LiquidVertex));
+  WmoLiquidVertex const* map = reinterpret_cast<WmoLiquidVertex const*>(f->getPointer());
+  SMOLTile const* tiles = reinterpret_cast<SMOLTile const*>(f->getPointer() + (xtiles + 1)*(ytiles + 1) * sizeof(WmoLiquidVertex));
   int last_liquid_id = 0;
 
   // generate vertices

@@ -111,7 +111,8 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
   }
 
   // run chunk updates. running this when splitdraw call detected unused sampler configuration as well.
-  if (_map_tile->_chunk_update_flags || is_selected != _selected || need_paintability_update || _requires_sampler_reset || _texture_not_loaded || _requires_ground_effect_color_recalc)
+  if (_map_tile->_chunk_update_flags || is_selected != _selected || need_paintability_update || _requires_sampler_reset || _texture_not_loaded
+      || _requires_ground_effect_color_recalc || _require_geffect_active_texture_update)
   {
 
     gl.bindBuffer(GL_UNIFORM_BUFFER, _chunk_instance_data_ubo);
@@ -159,8 +160,13 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
       {
           // recalculate doodad mapping.
           chunk->getTextureSet()->updateDoodadMapping();
-
-          // setChunkGroundEffectActiveData();
+          // update render
+          setChunkGroundEffectActiveData(chunk.get());
+      }
+      else if (_require_geffect_active_texture_update)
+      {
+          // active texture render changed, just update render
+          setChunkGroundEffectActiveData(chunk.get());
       }
 
       if (!flags)
@@ -249,6 +255,7 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
 
     _requires_sampler_reset = false;
     _requires_ground_effect_color_recalc = false;
+    _require_geffect_active_texture_update = false;
 
     if (_split_drawcall)
     {
@@ -664,7 +671,7 @@ void TileRender::setChunkDetaildoodadsExclusionData(MapChunk* chunk)
   chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[1] = exclusionmap2;
 }
 
-void Noggit::Rendering::TileRender::setChunkGroundEffectActiveData(MapChunk* chunk, std::string active_texture)
+void Noggit::Rendering::TileRender::setChunkGroundEffectActiveData(MapChunk* chunk)
 {
   // 1 : check if chunk has our texture AND set
   // if it does, then check if it's the active layer for each unit
@@ -673,7 +680,7 @@ void Noggit::Rendering::TileRender::setChunkGroundEffectActiveData(MapChunk* chu
   int layer_id = -1;
   for (int i = 0; i < chunk->getTextureSet()->num(); ++i)
   {
-      if (chunk->getTextureSet()->filename(i) == active_texture)
+      if (chunk->getTextureSet()->filename(i) == _geffect_active_texture)
       {
           layer_id = i;
       }
@@ -716,4 +723,15 @@ void Noggit::Rendering::TileRender::setChunkGroundEffectActiveData(MapChunk* chu
 
   chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[2] = active_map1;
   chunk_render_instance.ChunkDoodadsEnabled2_ChunksLayerEnabled2[3] = active_map2;
+}
+
+void Noggit::Rendering::TileRender::setActiveRenderGEffectTexture(std::string active_texture)
+{
+    if (active_texture == _geffect_active_texture)
+        return;
+
+    _geffect_active_texture = active_texture;
+
+    _require_geffect_active_texture_update = true;
+
 }

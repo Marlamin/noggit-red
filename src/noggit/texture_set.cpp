@@ -757,6 +757,29 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
 
   float zPos, xPos, dist, radius;
 
+  // todo: investigate the root cause
+  // shift brush origin to avoid disconnects at the chunks' borders
+  if (x < xbase)
+  {
+      float chunk_dist = std::abs(x - (std::fmod(x, CHUNKSIZE)) - xbase) / CHUNKSIZE;
+      x += TEXDETAILSIZE * chunk_dist;
+  }
+  if (x > xbase + CHUNKSIZE)
+  {
+      float chunk_dist = std::abs(x - (std::fmod(x, CHUNKSIZE)) - xbase) / CHUNKSIZE;
+      x -= TEXDETAILSIZE * chunk_dist;
+  }
+  if (z < zbase)
+  {
+      float chunk_dist = std::abs(z - (std::fmod(z, CHUNKSIZE)) - zbase) / CHUNKSIZE;
+      z += TEXDETAILSIZE * chunk_dist;
+  }
+  if (z > zbase + CHUNKSIZE)
+  {
+      float chunk_dist = std::abs(z - (std::fmod(z, CHUNKSIZE)) - zbase) / CHUNKSIZE;
+      z -= TEXDETAILSIZE * chunk_dist;
+  }
+
   int tex_layer = get_texture_index_or_add (std::move (texture), strength);
 
   if (tex_layer == -1 || nTextures == 1)
@@ -781,7 +804,7 @@ bool TextureSet::paintTexture(float xbase, float zbase, float x, float z, Brush*
     xPos = xbase;
     for (int i = 0; i < 64; ++i)
     {
-      dist = misc::dist(x, z, xPos + TEXDETAILSIZE / 2.0f, zPos + TEXDETAILSIZE / 2.0f);
+      dist = misc::getShortestDist(x, z, xPos, zPos, TEXDETAILSIZE);
 
       if (dist <= radius)
       {

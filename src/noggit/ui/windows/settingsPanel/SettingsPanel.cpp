@@ -197,8 +197,8 @@ namespace Noggit
     {
       ui->importPathField->setText(_settings->value("project/import_file", "import.txt").toString());
       ui->wmvLogPathField->setText(_settings->value("project/wmv_log_file").toString());
-      ui->viewDistanceField->setValue(_settings->value("view_distance", 1000.f).toFloat());
-      ui->farZField->setValue(_settings->value("farZ", 2048.f).toFloat());
+      ui->_view_distance->setValue(_settings->value("view_distance", 2000.f).toFloat());
+      ui->_fov->setValue(_settings->value("fov", 54.f).toFloat());
       ui->_undock_tool_properties->setChecked(
           _settings->value("undock_tool_properties/enabled", true).toBool());
       ui->_undock_small_texture_palette->setChecked(
@@ -219,6 +219,7 @@ namespace Noggit
       ui->_additional_file_loading_log->setChecked(
           _settings->value("additional_file_loading_log", false).toBool());
       ui->_keyboard_locale->setCurrentText(_settings->value("keyboard_locale", "QWERTY").toString());
+      ui->_use_mclq_liquids_export->setChecked(_settings->value("use_mclq_liquids_export", false).toBool());
       ui->_theme->setCurrentText(_settings->value("theme", "Dark").toString());
       ui->_modern_features->setChecked(_settings->value("modern_features", false).toBool());
 
@@ -286,8 +287,8 @@ namespace Noggit
     {
       _settings->setValue("project/import_file", ui->importPathField->text());
       _settings->setValue("project/wmv_log_file", ui->wmvLogPathField->text());
-      _settings->setValue("farZ", ui->farZField->value());
-      _settings->setValue("view_distance", ui->viewDistanceField->value());
+      _settings->setValue("view_distance", ui->_view_distance->value());
+      _settings->setValue("fov", ui->_fov->value());
       _settings->setValue("undock_tool_properties/enabled", ui->_undock_tool_properties->isChecked());
       _settings->setValue("undock_small_texture_palette/enabled",
                           ui->_undock_small_texture_palette->isChecked());
@@ -307,6 +308,7 @@ namespace Noggit
       _settings->setValue("nativeMenubar", ui->_nativeMenubar->isChecked());
       _settings->setValue("classicUI", ui->_classic_ui->isChecked());
       _settings->setValue("modern_features", ui->_modern_features->isChecked());
+      _settings->setValue("use_mclq_liquids_export", ui->_use_mclq_liquids_export->isChecked());
 
 #ifdef USE_MYSQL_UID_STORAGE
       _settings->setValue ("project/mysql/enabled", ui->MySQL_box->isChecked());

@@ -2,7 +2,34 @@
 #include <noggit/project/ApplicationProject.h>
 #include <noggit/Log.h>
 
+#include <chrono>
+#include <future>
+#include <thread>
+
 #include <QDateTime>
+#include <QMessageBox>
+#include <QString>
+
+namespace
+{
+  std::atomic_bool success = false;
+  
+  void opengl_context_creation_stuck_failsafe()
+  {
+  	for (int i = 0; i < 50; ++i)
+  	{
+  		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  		if (success.load())
+  		{
+  			return;
+  		}
+  	}
+  
+  	LogError << "OpenGL Context creation failed (timeout), closing..." << std::endl;
+  
+  	std::terminate();
+  }
+}
 
 namespace Noggit::Application
 {
@@ -97,6 +124,9 @@ namespace Noggit::Application
 		  // "17.0"  //  MSVC 14.3 Visual Studio 2022
 	  };
 
+	  // confirmed crashes with v14.30.30704.00 and v14.36.32532.00
+	  const int required_version = 37;
+
 	  bool redist_found = false;
 	  foreach (const QString & version, versions) {
 		  QString keyPath = registryPath + version + "\\VC\\Runtimes\\x64";
@@ -105,14 +135,42 @@ namespace Noggit::Application
 		  if (settings.contains("Installed")) {
 			  bool installed = settings.value("Installed").toBool();
 			  if (installed) {
-				  redist_found = true;
+
 				  QString versionNumber = settings.value("Version").toString();
+				  // LogDebug << "Minor version : " << minorVersion << std::endl;
 				  LogDebug << "Found MSVC " << version.toStdString() << " Redistributable Version: " << versionNumber.toStdString() << std::endl;
+
+				  int minorVersion = settings.value("Minor").toInt();
+ 				  if (minorVersion < required_version)
+ 				  {
+ 					  {
+ 						QMessageBox msgBox;
+ 						msgBox.setIcon(QMessageBox::Critical);
+ 						msgBox.setWindowTitle("Outdated Redistributable");
+ 						msgBox.setTextFormat(Qt::RichText);   //this is what makes the links clickable
+ 
+ 						QString message = "Your Microsoft Visual C++ Redistributable x64 is outdated. "
+ 							  "Please update it to the latest version to continue running this application.<br>"
+ 							  "You can download it from the <a href=\"https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170\">official website (x64)</a>.<br>"
+ 							"Direct Download Link : <a href=\"https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170\">https://aka.ms/vs/17/release/vc_redist.x64.exe</a>";
+ 
+ 						msgBox.setText(message);
+ 						msgBox.setStandardButtons(QMessageBox::Ok);
+ 						msgBox.exec();
+ 					  }
+ 
+ 					  // throw std::runtime_error("Installed Microsoft Visual C++ Redistributable version : " + versionNumber.toStdString() +  " is too old."
+ 					  // + "Minimum required is 14.31"
+ 					  // + "Update at https://aka.ms/vs/17/release/vc_redist.x64.exe or search \"Microsoft Visual C++ Redistributable x64\"");
+ 				  }
+				  redist_found = true;
 			  }
 		  }
 	  }
 	  if (!redist_found)
-		  LogDebug << "No Redistribuable MSVC version found" << std::endl;
+	  {
+		  LogDebug << "No Redistribuable MSVC version 14.xx found" << std::endl;
+	  }
 
 	  // Initialize OpenGL
 	  QSurfaceFormat format;
@@ -130,6 +188,10 @@ namespace Noggit::Application
 	  bool doAntiAliasing = app_settings.value("anti_aliasing", false).toBool();
 	  format.setSamples(doAntiAliasing ? 4 : applicationConfiguration.GraphicsConfiguration.SamplesCount); // default is 0, no AA
 
+	  // context creation seems to get stuck sometimes, this ensure the app is killed
+	  // otherwise it's wasting cpu resources and is annoying when developping
+	  auto failsafe = std::async(&opengl_context_creation_stuck_failsafe);
+
 	  QSurfaceFormat::setDefaultFormat(format);
 	  QOpenGLContext context;
 	  context.create();
@@ -138,6 +200,8 @@ namespace Noggit::Application
 	  surface.create();
 
 	  context.makeCurrent(&surface);
+
+	  success = true;
 
 	  OpenGL::context::scoped_setter const _(::gl, &context);
 
@@ -171,6 +235,9 @@ namespace Noggit::Application
 	  //All of the below should be Project Initalisation
 	  srand(::time(nullptr));
 
+	  // TODO : thread count setting
+	  // AsyncLoader::setup(NoggitSettings.value("async_thread_count", 3).toInt());
+	  AsyncLoader::setup(3);
   }
 
   std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> NoggitApplication::getConfiguration()

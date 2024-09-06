@@ -3,16 +3,19 @@
 #pragma once
 #include <noggit/map_enums.hpp>
 #include <noggit/MapTile.h> // MapTile
+#include <noggit/Misc.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/TextureManager.h>
 #include <noggit/WMOInstance.h>
+#include <noggit/map_enums.hpp>
 #include <noggit/texture_set.hpp>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ContextObject.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/texture.hpp>
-#include <noggit/Misc.h>
+#include <util/sExtendableArray.hpp>
+
 #include <optional>
 #include <map>
 #include <memory>
@@ -31,7 +34,6 @@ namespace math
 }
 class Brush;
 class ChunkWater;
-class sExtendableArray;
 class QPixmap;
 
 using StripType = uint16_t;
@@ -194,12 +196,14 @@ public:
   void clearHeight();
 
   //! \todo this is ugly create a build struct or sth
-  void save(sExtendableArray &lADTFile
+  void save(util::sExtendableArray &lADTFile
             , int &lCurrentPosition
             , int &lMCIN_Position
             , std::map<std::string, int> &lTextures
             , std::vector<WMOInstance*> &lObjectInstances
-            , std::vector<ModelInstance*>& lModelInstances);
+            , std::vector<ModelInstance*>& lModelInstances
+            , bool use_mclq_liquids
+            );
 
   // fix the gaps with the chunk to the left
   bool fixGapLeft(const MapChunk* chunk);

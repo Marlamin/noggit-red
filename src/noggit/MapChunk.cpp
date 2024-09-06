@@ -57,7 +57,7 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
     // xbase = header.xpos;
     // ybase = header.ypos;
 
-    texture_set = nullptr;
+    texture_set.reset();
 
     auto& tile_buffer = mt->getChunkHeightmapBuffer();
     int chunk_start = (px * 16 + py) * mapbufsize * 4;
@@ -135,7 +135,7 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
 
     f->read(&tmp_chunk_header, sizeof(MapChunkHeader));
 
-    header_flags.value = tmp_chunk_header.flags;
+    header_flags.value = tmp_chunk_header.flags.value;
     areaID = tmp_chunk_header.areaid;
 
     zbase = tmp_chunk_header.zpos;
@@ -1427,12 +1427,13 @@ void MapChunk::setFlag(bool changeto, uint32_t flag)
   registerChunkUpdate(ChunkUpdateFlags::FLAGS);
 }
 
-void MapChunk::save(sExtendableArray& lADTFile
+void MapChunk::save(util::sExtendableArray& lADTFile
                     , int& lCurrentPosition
                     , int& lMCIN_Position
                     , std::map<std::string, int> &lTextures
                     , std::vector<WMOInstance*> &lObjectInstances
-                    , std::vector<ModelInstance*>& lModelInstances)
+                    , std::vector<ModelInstance*>& lModelInstances
+                    , bool use_mclq_liquids)
 {
   int lID;
   int lMCNK_Size = 0x80;
@@ -1443,11 +1444,11 @@ void MapChunk::save(sExtendableArray& lADTFile
 
                                                                                                    // MCNK data
   // lADTFile.Insert(lCurrentPosition + 8, 0x80, reinterpret_cast<char*>(&(header)));
-  MapChunkHeader *lMCNK_header = lADTFile.GetPointer<MapChunkHeader>(lCurrentPosition + 8);
+  auto const lMCNK_header = lADTFile.GetPointer<MapChunkHeader>(lCurrentPosition + 8);
 
-  header_flags.flags.do_not_fix_alpha_map = 1;
+  header_flags.flags.do_not_fix_alpha_map = use_mclq_liquids ? 0 : 1;
 
-  lMCNK_header->flags = header_flags.value;
+  lMCNK_header->flags = header_flags;
   lMCNK_header->ix = px;
   lMCNK_header->iy = py;
   lMCNK_header->zpos = zbase * -1.0f + ZEROPOINT;
@@ -1482,7 +1483,7 @@ void MapChunk::save(sExtendableArray& lADTFile
 
   if(texture_set)
   {
-    // HACKFIX -- Temp hackfix to force an alpha map save + doodad mapping update so ground effects aren't 1 save behind.
+    // hackfix -- temp hackfix to bruteforce update + save
     texture_set->apply_alpha_changes();
     texture_set->updateDoodadMapping();
 
@@ -1505,9 +1506,13 @@ void MapChunk::save(sExtendableArray& lADTFile
   lADTFile.Extend(8 + lMCVT_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCVT', lMCVT_Size);
 
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsHeight = lCurrentPosition - lMCNK_Position;
+  // lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsHeight = lCurrentPosition - lMCNK_Position;
 
-  float* lHeightmap = lADTFile.GetPointer<float>(lCurrentPosition + 8);
+  auto header_ptr = lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8);
+
+  header_ptr->ofsHeight = lCurrentPosition - lMCNK_Position;
+
+  auto const lHeightmap = lADTFile.GetPointer<float>(lCurrentPosition + 8);
 
   for (int i = 0; i < mapbufsize; ++i)
     lHeightmap[i] = mVertices[i].y - mVertices[0].y;
@@ -1522,15 +1527,15 @@ void MapChunk::save(sExtendableArray& lADTFile
     lMCCV_Size = mapbufsize * sizeof(unsigned int);
     lADTFile.Extend(8 + lMCCV_Size);
     SetChunkHeader(lADTFile, lCurrentPosition, 'MCCV', lMCCV_Size);
-    lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsMCCV = lCurrentPosition - lMCNK_Position;
+    header_ptr->ofsMCCV = lCurrentPosition - lMCNK_Position;
 
-    unsigned int *lmccv = lADTFile.GetPointer<unsigned int>(lCurrentPosition + 8);
+    auto const lmccv = lADTFile.GetPointer<unsigned int>(lCurrentPosition + 8);
 
     for (int i = 0; i < mapbufsize; ++i)
     {
-      *lmccv++ = ((unsigned char)(mccv[i].z * 127.0f) & 0xFF)
-        + (((unsigned char)(mccv[i].y * 127.0f) & 0xFF) << 8)
-        + (((unsigned char)(mccv[i].x * 127.0f) & 0xFF) << 16);
+      lmccv[i] = (((unsigned char)(mccv[i].z * 127.0f) & 0xFF) <<  0)
+               + (((unsigned char)(mccv[i].y * 127.0f) & 0xFF) <<  8)
+               + (((unsigned char)(mccv[i].x * 127.0f) & 0xFF) << 16);
     }
 
     lCurrentPosition += 8 + lMCCV_Size;
@@ -1538,7 +1543,7 @@ void MapChunk::save(sExtendableArray& lADTFile
   }
   else
   {
-    lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsMCCV = 0;
+    header_ptr->ofsMCCV = 0;
   }
 
   // MCNR
@@ -1547,9 +1552,9 @@ void MapChunk::save(sExtendableArray& lADTFile
   lADTFile.Extend(8 + lMCNR_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCNR', lMCNR_Size);
 
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsNormal = lCurrentPosition - lMCNK_Position;
+  header_ptr->ofsNormal = lCurrentPosition - lMCNK_Position;
 
-  char * lNormals = lADTFile.GetPointer<char>(lCurrentPosition + 8);
+  auto const lNormals = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
   auto& tile_buffer = mt->getChunkHeightmapBuffer();
   int chunk_start = (px * 16 + py) * mapbufsize * 4;
@@ -1582,8 +1587,8 @@ void MapChunk::save(sExtendableArray& lADTFile
   lADTFile.Extend(static_cast<long>(8 + lMCLY_Size));
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCLY', static_cast<int>(lMCLY_Size));
 
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsLayer = lCurrentPosition - lMCNK_Position;
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nLayers = texture_set ? static_cast<std::uint32_t>(texture_set->num()) : 0;
+  header_ptr->ofsLayer = lCurrentPosition - lMCNK_Position;
+  header_ptr->nLayers = texture_set ? static_cast<std::uint32_t>(texture_set->num()) : 0;
 
   std::vector<std::vector<uint8_t>> alphamaps;
 
@@ -1596,7 +1601,7 @@ void MapChunk::save(sExtendableArray& lADTFile
     // MCLY data
     for (size_t j = 0; j < texture_set->num(); ++j)
     {
-      ENTRY_MCLY * lLayer = lADTFile.GetPointer<ENTRY_MCLY>(lCurrentPosition + 8 + 0x10 * static_cast<unsigned long>(j));
+      auto const lLayer = lADTFile.GetPointer<ENTRY_MCLY>(lCurrentPosition + 8 + 0x10 * static_cast<unsigned long>(j));
 
       lLayer->textureID = lTextures.find(texture_set->filename(j))->second;
       lLayer->flags = texture_set->flag(j);
@@ -1659,12 +1664,12 @@ void MapChunk::save(sExtendableArray& lADTFile
   lADTFile.Extend(8 + lMCRF_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCRF', lMCRF_Size);
 
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsRefs = lCurrentPosition - lMCNK_Position;
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nDoodadRefs = static_cast<std::uint32_t>(lDoodadIDs.size());
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nMapObjRefs = static_cast<std::uint32_t>(lObjectIDs.size());
+  header_ptr->ofsRefs = lCurrentPosition - lMCNK_Position;
+  header_ptr->nDoodadRefs = static_cast<std::uint32_t>(lDoodadIDs.size());
+  header_ptr->nMapObjRefs = static_cast<std::uint32_t>(lObjectIDs.size());
 
   // MCRF data
-  int *lReferences = lADTFile.GetPointer<int>(lCurrentPosition + 8);
+  auto const lReferences = lADTFile.GetPointer<int>(lCurrentPosition + 8);
 
   lID = 0;
   for (std::list<int>::iterator it = lDoodadIDs.begin(); it != lDoodadIDs.end(); ++it)
@@ -1686,65 +1691,99 @@ void MapChunk::save(sExtendableArray& lADTFile
   // MCSH
   if (has_shadows())
   {
-    header_flags.flags.has_mcsh = 1;
+    // header_flags.flags.has_mcsh = 1;
+    lMCNK_header->flags.flags.has_mcsh = 1;
 
     int lMCSH_Size = 0x200;
     lADTFile.Extend(8 + lMCSH_Size);
     SetChunkHeader(lADTFile, lCurrentPosition, 'MCSH', lMCSH_Size);
 
-    lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsShadow = lCurrentPosition - lMCNK_Position;
-    lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->sizeShadow = 0x200;
+    header_ptr->ofsShadow = lCurrentPosition - lMCNK_Position;
+    header_ptr->sizeShadow = 0x200;
 
-    char * lLayer = lADTFile.GetPointer<char>(lCurrentPosition + 8);
+    auto const lLayer = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
     auto shadow_map = compressed_shadow_map();
-    memcpy(lLayer, shadow_map.data(), 0x200);
+    memcpy(lLayer.get(), shadow_map.data(), 0x200);
 
     lCurrentPosition += 8 + lMCSH_Size;
     lMCNK_Size += 8 + lMCSH_Size;
   }
   else
   {
-    header_flags.flags.has_mcsh = 0;
-    lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsShadow = 0;
-    lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->sizeShadow = 0;
+    lMCNK_header->flags.flags.has_mcsh = 0;
+    // header_flags.flags.has_mcsh = 0;
+    header_ptr->ofsShadow = 0;
+    header_ptr->sizeShadow = 0;
   }
 
   // MCAL
   lADTFile.Extend(8 + lMCAL_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCAL', lMCAL_Size);
 
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsAlpha = lCurrentPosition - lMCNK_Position;
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->sizeAlpha = 8 + lMCAL_Size;
+  header_ptr->ofsAlpha = lCurrentPosition - lMCNK_Position;
+  header_ptr->sizeAlpha = 8 + lMCAL_Size;
 
-  char * lAlphaMaps = lADTFile.GetPointer<char>(lCurrentPosition + 8);
+  auto lAlphaMaps = lADTFile.GetPointer<char>(lCurrentPosition + 8);
 
   for (auto& alpha : alphamaps)
   {
-    memcpy(lAlphaMaps, alpha.data(), alpha.size());
+    memcpy(lAlphaMaps.get(), alpha.data(), alpha.size());
     lAlphaMaps += alpha.size();
   }
 
   lCurrentPosition += 8 + lMCAL_Size;
   lMCNK_Size += 8 + lMCAL_Size;
-  //        }
 
-  //! Don't write anything MCLQ related anymore...
+  if (use_mclq_liquids)
+  {
+    auto liquids = liquid_chunk();
 
+    if (liquids && liquids->layer_count() > 0)
+    {
+      int liquids_size = 8 + liquids->layer_count() * sizeof(mclq);
+
+      lMCNK_Size += liquids_size;
+
+      header_ptr->sizeLiquid = liquids_size;
+      header_ptr->ofsLiquid = lCurrentPosition - lMCNK_Position;
+
+      // current position updated inside
+      liquids->save_mclq(lADTFile, lMCNK_Position, lCurrentPosition);
+    }
+    // no liquid, vanilla adt still have an empty chunk
+    else
+    {
+      lADTFile.Extend(8);
+      // size seems to be 0 in vanilla adts in the mclq chunk's header and set right in the mcnk header (layer_size * n_layer + 8)
+      SetChunkHeader(lADTFile, lCurrentPosition, 'MCLQ', 0);
+
+      header_ptr->sizeLiquid = 8;
+      header_ptr->ofsLiquid = lCurrentPosition - lMCNK_Position;
+
+      // When saving a tile that had MLCQ, also remove flags in MCNK
+      // Client sees the flag and loads random data as if it were MCLQ, which we don�t save.
+      // clear MCLQ liquid flags (0x4, 0x8, 0x10, 0x20)
+      header_ptr->flags.value &= 0xFFFFFFC3;
+
+      lCurrentPosition += 8;
+      lMCNK_Size += 8;
+    }
+  }
 
   // MCSE
   int lMCSE_Size = sizeof(ENTRY_MCSE) * sound_emitters.size();
   lADTFile.Extend(8 + lMCSE_Size);
   SetChunkHeader(lADTFile, lCurrentPosition, 'MCSE', lMCSE_Size);
 
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->ofsSndEmitters = lCurrentPosition - lMCNK_Position;
-  lADTFile.GetPointer<MapChunkHeader>(lMCNK_Position + 8)->nSndEmitters = lMCSE_Size / 0x1C;
+  header_ptr->ofsSndEmitters = lCurrentPosition - lMCNK_Position;
+  header_ptr->nSndEmitters = lMCSE_Size / 0x1C;
 
   lCurrentPosition += 8;
 
   for (auto& sound_emitter : sound_emitters)
   {
-      ENTRY_MCSE* MCSE = lADTFile.GetPointer<ENTRY_MCSE>(lCurrentPosition);
+      auto const MCSE = lADTFile.GetPointer<ENTRY_MCSE>(lCurrentPosition);
 
       MCSE->soundId = sound_emitter.soundId;
 

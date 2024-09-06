@@ -468,9 +468,30 @@ void blp_texture::finishLoading()
   }
   else
   {
-    finished = true;
-    throw std::logic_error ("unimplemented BLP colorEncoding");
+      BlizzardArchive::ClientFile fallback("textures/shanecube.blp", Noggit::Application::NoggitApplication::instance()->clientData());
 
+      char const* lData_f = fallback.getPointer();
+      BLPHeader const* lHeader_f = reinterpret_cast<BLPHeader const*>(lData_f);
+      _width = lHeader_f->resx;
+      _height = lHeader_f->resy;
+
+      if (lHeader_f->attr_0_compression == 1)
+      {
+          loadFromUncompressedData(lHeader_f, lData_f);
+      }
+      else if (lHeader_f->attr_0_compression == 2)
+      {
+          loadFromCompressedData(lHeader_f, lData_f);
+      }
+      else
+      {
+          finished = true;
+          throw std::logic_error("Unsupported BLP compression");
+      }
+
+      fallback.close();
+
+      LogError << "Unsupported BLP compression: " << _file_key.filepath() << std::endl;
   }
 
   f.close();

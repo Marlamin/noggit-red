@@ -151,37 +151,14 @@ namespace Noggit
       return vert(state(), _chunk, index);
     }
 
-    bool chunk::has_render_flags()
+    MH2O_Attributes& chunk::getAttributes()
     {
-        return _chunk->liquid_chunk()->Render.has_value();
-    }
-
-    MH2O_Render chunk::getRenderOrDefault()
-    {
-        std::optional<MH2O_Render> render = _chunk->liquid_chunk()->Render;
-        if (render.has_value())
-        {
-            return render.value();
-        }
-        else
-        {
-            return { 0xFFFFFFFFFFFFFFFF,1 };
-        }
-    }
-
-    MH2O_Render& chunk::getOrCreateRender()
-    {
-        std::optional<MH2O_Render>& render = _chunk->liquid_chunk()->Render;
-        if (!render.has_value())
-        {
-            render.emplace();
-        }
-        return render.value();
+        return _chunk->liquid_chunk()->getAttributes();
     }
 
     void chunk::set_deep_flag(std::uint32_t low, std::uint32_t high)
     {
-        getOrCreateRender().fatigue = std::uint64_t(low) | (std::uint64_t(high) << 32);
+        _chunk->liquid_chunk()->getAttributes().fatigue = std::uint64_t(low) | (std::uint64_t(high) << 32);
     }
 
     void chunk::set_deep_flag_1(std::uint32_t low)
@@ -191,17 +168,17 @@ namespace Noggit
 
     std::uint32_t chunk::get_deep_flag()
     {
-        return static_cast<std::uint32_t>(getRenderOrDefault().fatigue);
+        return static_cast<std::uint32_t>(getAttributes().fatigue);
     }
 
     std::uint32_t chunk::get_deep_flag_high()
     {
-        return static_cast<std::uint32_t>(getRenderOrDefault().fatigue >> 32);
+        return static_cast<std::uint32_t>(getAttributes().fatigue >> 32);
     }
 
     void chunk::set_fishable_flag(std::uint32_t low, std::uint32_t high)
     {
-        getOrCreateRender().fishable = std::uint64_t(low) | (std::uint64_t(high) << 32);
+        _chunk->liquid_chunk()->getAttributes().fishable = std::uint64_t(low) | (std::uint64_t(high) << 32);
     }
 
     void chunk::set_fishable_flag_1(std::uint32_t low)
@@ -211,11 +188,11 @@ namespace Noggit
 
     std::uint32_t chunk::get_fishable_flag()
     {
-        return static_cast<std::uint32_t>(getRenderOrDefault().fishable);
+        return static_cast<std::uint32_t>(getAttributes().fishable);
     }
     std::uint32_t chunk::get_fishable_flag_high()
     {
-        return static_cast<std::uint32_t>(getRenderOrDefault().fishable >> 32);
+        return static_cast<std::uint32_t>(getAttributes().fishable >> 32);
     }
 
     std::shared_ptr<selection> chunk::to_selection()
