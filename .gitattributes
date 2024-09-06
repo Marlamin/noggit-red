@@ -1,6 +1,0 @@
-# Sources
-*.c     text diff=cpp eol=lf
-*.h     text diff=cpp eol=lf
-*.cpp   text diff=cpp eol=lf
-*.hpp   text diff=cpp eol=lf
-*.ipp   text diff=cpp eol=lf
