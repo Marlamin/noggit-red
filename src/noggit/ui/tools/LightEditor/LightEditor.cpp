@@ -12,6 +12,7 @@
 #include <QtWidgets/QFormLayout>
 // #include <QtWidgets/QLabel>
 #include <QtWidgets/qtreewidget.h>
+#include <noggit/ui/FontAwesome.hpp>
 
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QCheckBox>
