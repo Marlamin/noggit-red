@@ -37,6 +37,7 @@
 #include <QStandardPaths>
 #include <QDir>
 #include <QIcon>
+#include <QScrollArea>
 
 #include <sstream>
 #include <chrono>

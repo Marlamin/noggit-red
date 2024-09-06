@@ -106,8 +106,12 @@ FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(Json REQUIRED)
 FIND_PACKAGE(lodepng REQUIRED)
 
-set(FASTNOISE2_NOISETOOL OFF CACHE BOOL "")
-FIND_PACKAGE(FastNoise2 REQUIRED)
+FetchContent_Declare(
+  FastNoise2
+  GIT_REPOSITORY https://github.com/Auburn/FastNoise2.git
+  GIT_TAG v0.10.0-alpha
+)
+FetchContent_MakeAvailable(FastNoise2)
 
 FIND_PACKAGE(Sol2 REQUIRED)
 FIND_PACKAGE(Qt5 COMPONENTS Widgets OpenGLExtensions Gui Network Xml Multimedia REQUIRED)
