@@ -856,12 +856,12 @@ namespace Noggit
 
       connect(maptexture_btn, &QPushButton::clicked, [=]() {
         _render_settings.export_mode = MinimapGenMode::LOD_MAPTEXTURES;
-        mapView->initMinimapSave();
+        emit onSave();
       });
 
       connect(maptexture_n_btn, &QPushButton::clicked, [=]() {
         _render_settings.export_mode = MinimapGenMode::LOD_MAPTEXTURES_N;
-        mapView->initMinimapSave();
+        emit onSave();
       });
 
     }

@@ -182,6 +182,8 @@ namespace Noggit
             break;
         }
         case MinimapGenMode::MAP:
+        case MinimapGenMode::LOD_MAPTEXTURES:
+        case MinimapGenMode::LOD_MAPTEXTURES_N:
         {
             // init progress
             if (!_mmap_async_index)
@@ -191,6 +193,26 @@ namespace Noggit
 
             if (!saving_minimap)
                 return false;
+
+            QSettings noggitSettings;
+            bool modern_features = noggitSettings.value("modern_features", false).toBool();
+            if (modern_features && (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES || settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES_N)) {
+                settings->draw_m2 = false;
+                settings->draw_wmo = false;
+                settings->draw_water = false;
+                settings->resolution = 512;
+                settings->file_format = ".blp (DXT5)";
+
+                if (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES_N)
+                {
+                    settings->draw_only_normals = true;
+                    settings->resolution = 256;
+                }
+                else if (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES) {
+                    // Point normals upwards for diffuse maptexture baking
+                    settings->point_normals_up = true;
+                }
+            }
 
             if (_mmap_async_index < 4096 && static_cast<int>(_mmap_render_index) < progress->maximum())
             {
