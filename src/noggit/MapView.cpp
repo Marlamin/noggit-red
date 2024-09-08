@@ -1993,6 +1993,14 @@ void MapView::setupViewMenu()
   );*/
 
   ADD_TOGGLE_NS(view_menu, "FPS camera", _fps_mode);
+  connect(&_fps_mode, &Noggit::BoolToggleProperty::changed
+    , [this]
+    {
+      setCameraDirty();
+      auto ground_pos = getWorld()->get_ground_height(getCamera()->position);
+      getCamera()->position.y = ground_pos.y + 2;
+    }
+  );
 
   ADD_TOGGLE_NS(view_menu, "Camera Collision", _camera_collision);
 
@@ -2374,8 +2382,8 @@ void MapView::createGUI()
   _tools.emplace_back(std::make_unique<Noggit::MinimapTool>(this))->setupUi(_tool_panel_dock);
   _tools.emplace_back(std::make_unique<Noggit::StampTool>(this))->setupUi(_tool_panel_dock);
   _tools.emplace_back(std::make_unique<Noggit::LightTool>(this))->setupUi(_tool_panel_dock);
-  _tools.emplace_back(std::make_unique<Noggit::ScriptingTool>(this))->setupUi(_tool_panel_dock);
-  _tools.emplace_back(std::make_unique<Noggit::ChunkTool>(this))->setupUi(_tool_panel_dock);
+  // _tools.emplace_back(std::make_unique<Noggit::ScriptingTool>(this))->setupUi(_tool_panel_dock);
+  // _tools.emplace_back(std::make_unique<Noggit::ChunkTool>(this))->setupUi(_tool_panel_dock);
 
   // End combined dock
 
@@ -3042,71 +3050,41 @@ void MapView::tick (float dt)
       _camera_moved_since_last_draw = true;
     }
 
-    // if (_fps_mode.get())
-    // {
-    //     // if (moving)
-    //     // {
-    //     //     _camera.move_forward(moving, dt);
-    //     //     _camera_moved_since_last_draw = true;
-    //     //     // TODO use normalized speed (doesn't slow down when looking up)
-    //     //     // _camera.move_forward_normalized(moving, dt);
-    //     // }
-    //     // if (strafing)
-    //     // {
-    //     //     _camera.move_horizontal(strafing, dt);
-    //     //     _camera_moved_since_last_draw = true;
-    //     // }
-    //     // // get ground z position
-    //     // // hack to update camera when entering mode in void ViewToolbar::add_tool_icon()
-    //     // if (_camera_moved_since_last_draw)
-    //     // {
-    //     //     auto ground_pos = _world.get()->get_ground_height(_camera.position);
-    //     //     _camera.position.y = ground_pos.y + 6;
-    //     // }
-    // 
-    //     auto h = _world->get_ground_height(_camera.position).y;
-    // 
-    //     _camera.position.y = h + 6.f;
-    // }
-    // else
+    if (moving)
     {
+      _camera.move_forward(moving, dt);
+      _camera_moved_since_last_draw = true;
+    }
+    if (strafing)
+    {
+      _camera.move_horizontal(strafing, dt);
+      _camera_moved_since_last_draw = true;
+    }
+    if (updown)
+    {
+      _camera.move_vertical(updown, dt);
+      _camera_moved_since_last_draw = true;
+    }
 
-      if (moving)
+    if (_camera_moved_since_last_draw)
+    {
+      if (_fps_mode.get())
       {
-        _camera.move_forward(moving, dt);
-        _camera_moved_since_last_draw = true;
+        // there is a also hack to update camera when entering mode in void ViewToolbar::add_tool_icon()
+        float h = _world->get_ground_height(_camera.position).y;
+        _camera.position.y = h + 3.f;
       }
-      if (strafing)
+      else if (_camera_collision.get())
       {
-        _camera.move_horizontal(strafing, dt);
-        _camera_moved_since_last_draw = true;
-      }
-      if (updown)
-      {
-        _camera.move_vertical(updown, dt);
-        _camera_moved_since_last_draw = true;
-      }
-
-      if (_camera_moved_since_last_draw)
-      {
-        if (_fps_mode.get())
+        float h = _world.get()->get_ground_height(_camera.position).y;
+        if (_camera.position.y < h + 3.f)
         {
-          // there is a also hack to update camera when entering mode in void ViewToolbar::add_tool_icon()
-          float h = _world->get_ground_height(_camera.position).y;
           _camera.position.y = h + 3.f;
-        }
-        else if (_camera_collision.get())
-        {
-          float h = _world.get()->get_ground_height(_camera.position).y;
-          if (_camera.position.y < h + 3.f)
-          {
-            _camera.position.y = h + 3.f;
-          }
         }
       }
     }
   }
-  else
+  else if (_display_mode == display_mode::in_2D)
   {
     //! \todo this is total bullshit. there should be a seperate view and camera class for tilemode
     if (moving)
