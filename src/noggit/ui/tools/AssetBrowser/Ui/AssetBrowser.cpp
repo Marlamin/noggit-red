@@ -169,7 +169,8 @@ AssetBrowserWidget::AssetBrowserWidget(MapView* map_view, QWidget *parent)
 
         for (int i = 0; i != _sort_model->rowCount(index); ++i)
         {
-          auto child = index.child(i, 0);
+          auto child = _sort_model->index(i, 0, index);
+          // auto child = index.child(i, 0);
           auto path = child.data(Qt::UserRole).toString();
           if (path.endsWith(".wmo") || path.endsWith(".m2"))
           {
@@ -314,7 +315,7 @@ bool AssetBrowserWidget::validateBrowseMode(const QString& wow_file_path)
         return true;
     case asset_browse_mode::world:
     {
-        if (wow_file_path.startsWith("World", Qt::CaseInsensitive))
+        if (wow_file_path.startsWith("World", Qt::CaseInsensitive) /*&& !wow_file_path.startsWith("world/nodxt/detail/", Qt::CaseInsensitive)*/)
             return true;
         return false;
     }

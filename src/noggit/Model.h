@@ -31,6 +31,26 @@ namespace Noggit::Rendering
   struct ModelRenderPass;
 }
 
+enum M2Versions
+{
+  m2_version_pre_release = 256, // < 257
+  m2_version_classic = 257, // 256-257	
+  m2_version_burning_crusade = 263, // 260-263
+  m2_version_wrath = 264,
+  m2_version_cataclysm = 272, // 265-272
+  m2_version_pandaria_draenor = 272,
+  m2_version_legion_bfa_sl = 274, // 272-274 Legion, Battle for Azeroth, Shadowlands
+};
+
+enum M2GlobalFlags
+{
+  m2_flag_tilt_x = 0x1,
+  m2_flag_tilt_x = 0x2,
+  // m2_flag_unk_0x4 = 0x4,
+  m2_flag_use_texture_combiner_combos = 0x8,
+  // m2_flag_unk_0x10 = 0x10
+  // TODO : MOP +
+};
 
 glm::vec3 fixCoordSystem(glm::vec3 v);
 

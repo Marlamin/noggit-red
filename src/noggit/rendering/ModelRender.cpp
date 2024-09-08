@@ -317,7 +317,7 @@ void ModelRender::fixShaderIdBlendOverride()
     }
 
     int shader = 0;
-    bool blend_mode_override = (_model->header.Flags & 8);
+    bool blend_mode_override = (_model->header.Flags & m2_flag_use_texture_combiner_combos);
 
     // fuckporting check
     if (pass.texture_coord_combo_index + pass.texture_count - 1 >= _model->_texture_unit_lookup.size())
