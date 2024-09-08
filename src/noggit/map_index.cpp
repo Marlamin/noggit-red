@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/coordinates.hpp>
 #include <noggit/AsyncLoader.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
@@ -160,6 +161,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
     assert(fourcc == 'MODF');
 
     theFile.read(&wmoEntry, sizeof(ENTRY_MODF));
+    math::to_client(wmoEntry.pos);
   }
 
   // -----------------------------------------------------
@@ -245,6 +247,11 @@ void MapIndex::save()
   {
     // MWMO
     //  {
+    // the game requires the path to be zero terminated!
+    if(globalWMOName[globalWMOName.size() - 1] != '\0')
+    {
+        globalWMOName += '\0';
+    }
     wdtFile.Extend(8);
     SetChunkHeader(wdtFile, curPos, 'MWMO', static_cast<int>(globalWMOName.size()));
     curPos += 8;
@@ -259,7 +266,9 @@ void MapIndex::save()
     SetChunkHeader(wdtFile, curPos, 'MODF', sizeof(ENTRY_MODF));
     curPos += 8;
 
-    wdtFile.Insert(curPos, sizeof(ENTRY_MODF), (char*)&wmoEntry);
+    auto entry = wmoEntry;
+    math::to_server(entry.pos);
+    wdtFile.Insert(curPos, sizeof(ENTRY_MODF), (char*)&entry);
     curPos += sizeof(ENTRY_MODF);
     //  }
   }
@@ -540,7 +549,7 @@ void MapIndex::saveChanged (World* world, bool save_unloaded)
   }
 }
 
-bool MapIndex::hasAGlobalWMO()
+bool MapIndex::hasAGlobalWMO() const
 {
   return mHasAGlobalWMO;
 }
@@ -1191,6 +1200,20 @@ void MapIndex::removeTile(const TileIndex &tile)
   _world->horizon.remove_horizon_tile(tile.z, tile.x);
 
   changed = true;
+}
+
+void MapIndex::addGlobalWmo(std::string path, ENTRY_MODF entry)
+{
+    mHasAGlobalWMO = true;
+    globalWMOName = std::move(path);
+    wmoEntry = std::move(entry);
+}
+
+void MapIndex::removeGlobalWmo()
+{
+    mHasAGlobalWMO = false;
+    globalWMOName.clear();
+    wmoEntry = {};
 }
 
 unsigned MapIndex::getNumExistingTiles()
