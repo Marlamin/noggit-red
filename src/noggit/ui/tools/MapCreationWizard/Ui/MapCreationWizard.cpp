@@ -4,6 +4,7 @@
 
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <noggit/ui/widgets/Vector3Widget.hpp>
 #include <noggit/project/CurrentProject.hpp>
 #include <blizzard-database-library/include/structures/Types.h>
 #include <noggit/MapView.h>
@@ -121,135 +122,11 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
   _tabs = new QTabWidget(_map_settings);
 
-  auto map_settings_widget(new QWidget(this));
-  auto map_difficulty_widget(new QWidget(this));
-
-  _tabs->addTab(map_settings_widget, "Map Settings");
-  _tabs->addTab(map_difficulty_widget, "Map Difficulty Settings");
-
   box_map_settings_layout->addWidget(_tabs);
 
-  auto map_settings_layout = new QFormLayout(map_settings_widget);
-
-  _directory = new QLineEdit(_map_settings);
-  map_settings_layout->addRow("Map directory:", _directory);
-
-  _is_big_alpha = new QCheckBox(this);
-  map_settings_layout->addRow("Big alpha:", _is_big_alpha);
-  _is_big_alpha->setChecked(true);
-
-  _sort_by_size_cat = new QCheckBox(this);
-  map_settings_layout->addRow("Sort models", _sort_by_size_cat);
-  _sort_by_size_cat->setChecked(true);
-  _sort_by_size_cat->setToolTip("Sorts models based on their size on save. May help increase loading speed of the map.");
-
-
-  _instance_type = new QComboBox(_map_settings);
-  _instance_type->addItem("None");
-  _instance_type->setItemData(0, QVariant(0));
-
-  _instance_type->addItem("Instance");
-  _instance_type->setItemData(1, QVariant(1));
-
-  _instance_type->addItem("Raid");
-  _instance_type->setItemData(2, QVariant(2));
-
-  _instance_type->addItem("Battleground");
-  _instance_type->setItemData(3, QVariant(3));
-
-  _instance_type->addItem("Arena");
-  _instance_type->setItemData(4, QVariant(4));
-
-  map_settings_layout->addRow("Map type:",_instance_type);
-
-  _map_name = new LocaleDBCEntry(_map_settings);
-  map_settings_layout->addRow("Map name:",_map_name);
-
-  _area_table_id = new QSpinBox(_map_settings);
-  map_settings_layout->addRow("Area ID:",_area_table_id);
-  _area_table_id->setMaximum(std::numeric_limits<std::int32_t>::max());
-
-  _map_desc_alliance = new LocaleDBCEntry(_map_settings);
-  map_settings_layout->addRow("Description (Alliance):",_map_desc_alliance);
-
-  _map_desc_horde = new LocaleDBCEntry(_map_settings);
-  map_settings_layout->addRow("Description (Horde):",_map_desc_horde);
-
-  _loading_screen  = new QSpinBox(_map_settings);
-  map_settings_layout->addRow("Loading screen:",_loading_screen);
-  _loading_screen->setMaximum(std::numeric_limits<std::int32_t>::max());
-
-   _minimap_icon_scale = new QDoubleSpinBox(_map_settings);
-  map_settings_layout->addRow("Minimap icon scale:",_minimap_icon_scale);
-
-  _corpse_map_id->setCurrentText("None");
-  map_settings_layout->addRow("Corpse map:",_corpse_map_id);
-
-  _corpse_x = new QDoubleSpinBox(_map_settings);
-  map_settings_layout->addRow("Corpse X:",_corpse_x);
-  _corpse_x->setMinimum(-17066.66656); // map size
-  _corpse_x->setMaximum(17066.66656);
-
-  _corpse_y = new QDoubleSpinBox(_map_settings);
-  map_settings_layout->addRow("Corpse Y:",_corpse_y);
-  _corpse_y->setMinimum(-17066.66656); // map size
-  _corpse_y->setMaximum(17066.66656);
-
-  _time_of_day_override = new QSpinBox(_map_settings);
-  _time_of_day_override->setMinimum(-1);
-  _time_of_day_override->setMaximum(2880); // Time Values from 0 to 2880 where each number represents a half minute from midnight to midnight 
-  _time_of_day_override->setValue(-1);
-
-  map_settings_layout->addRow("Daytime override:",_time_of_day_override);
-
-  _expansion_id = new QComboBox(_map_settings);
-
-  _expansion_id->addItem("Classic");
-  _expansion_id->setItemData(0, QVariant(0));
-
-  _expansion_id->addItem("Burning Crusade");
-  _expansion_id->setItemData(1, QVariant(1));
-
-  _expansion_id->addItem("Wrath of the Lich King");
-  _expansion_id->setItemData(2, QVariant(2));
-
-  map_settings_layout->addRow("Expansion:",_expansion_id);
-
-  _raid_offset = new QSpinBox(_map_settings);
-  _raid_offset->setMaximum(std::numeric_limits<std::int32_t>::max());
-  map_settings_layout->addRow("Raid offset:",_raid_offset);
-
-  _max_players = new QSpinBox(_map_settings);
-  _max_players->setMaximum(std::numeric_limits<std::int32_t>::max());
-  map_settings_layout->addRow("Max players:",_max_players);
-
-  // difficulty tab
-  auto difficulty_settings_layout = new QFormLayout(map_difficulty_widget);
-  _map_settings->setLayout(difficulty_settings_layout);
-
-  _difficulty_type = new QComboBox(_map_settings);
-  _difficulty_type->setDisabled(true);
-
-  difficulty_settings_layout->addRow("Difficulty Index", _difficulty_type);
-
-  _difficulty_req_message = new LocaleDBCEntry(_map_settings);
-  _difficulty_req_message->setDisabled(true); // disable them until they're actually saveable, only "display" it for now
-  difficulty_settings_layout->addRow("Requirement Message", _difficulty_req_message);
-
-  _difficulty_raid_duration = new QSpinBox(_map_settings);
-  _difficulty_raid_duration->setDisabled(true);
-  _difficulty_raid_duration->setRange(0, 7);
-  difficulty_settings_layout->addRow("Instance Duration(days)", _difficulty_raid_duration);
-
-  _difficulty_max_players = new QSpinBox(_map_settings);
-  _difficulty_max_players->setDisabled(true);
-  difficulty_settings_layout->addRow("Max Players", _difficulty_max_players);
-
-  _difficulty_string = new QLineEdit(_map_settings);
-  _difficulty_string->setDisabled(true);
-  difficulty_settings_layout->addRow("Difficulty String", _difficulty_string);
-
-  difficulty_settings_layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));
+  createMapSettingsTab();
+  createDifficultyTab();
+  createWmoEntryTab();
 
   // Bottom row
   auto bottom_row_wgt = new QWidget(layout_right_holder);
@@ -327,7 +204,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
                 if (!_world->mapIndex.hasTile(TileIndex(x_final, y_final)))
                 {
-                  if (!QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
+                  if (!QApplication::keyboardModifiers().testFlag(Qt::ControlModifier) && !_wmoEntryTab.disableTerrain->isChecked())
                   {
                     _world->mapIndex.addTile(TileIndex(x_final, y_final));
                   }
@@ -349,7 +226,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
 
             if (!_world->mapIndex.hasTile(TileIndex(x, y)))
             {
-              if (!QApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
+              if (!QApplication::keyboardModifiers().testFlag(Qt::ControlModifier) && !_wmoEntryTab.disableTerrain->isChecked())
               {
                 _world->mapIndex.addTile(TileIndex(x, y));
               }
@@ -364,6 +241,315 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
         }
       );
 
+}
+
+void MapCreationWizard::createMapSettingsTab()
+{
+    auto map_settings_widget(new QWidget(this));
+    _tabs->addTab(map_settings_widget, "Map Settings");
+
+    auto map_settings_layout = new QFormLayout(map_settings_widget);
+
+    _directory = new QLineEdit(_map_settings);
+    map_settings_layout->addRow("Map directory:", _directory);
+
+    _is_big_alpha = new QCheckBox(this);
+    map_settings_layout->addRow("Big alpha:", _is_big_alpha);
+    _is_big_alpha->setChecked(true);
+
+    _sort_by_size_cat = new QCheckBox(this);
+    map_settings_layout->addRow("Sort models", _sort_by_size_cat);
+    _sort_by_size_cat->setChecked(true);
+    _sort_by_size_cat->setToolTip("Sorts models based on their size on save. May help increase loading speed of the map.");
+
+
+    _instance_type = new QComboBox(_map_settings);
+    _instance_type->addItem("None");
+    _instance_type->setItemData(0, QVariant(0));
+
+    _instance_type->addItem("Instance");
+    _instance_type->setItemData(1, QVariant(1));
+
+    _instance_type->addItem("Raid");
+    _instance_type->setItemData(2, QVariant(2));
+
+    _instance_type->addItem("Battleground");
+    _instance_type->setItemData(3, QVariant(3));
+
+    _instance_type->addItem("Arena");
+    _instance_type->setItemData(4, QVariant(4));
+
+    map_settings_layout->addRow("Map type:", _instance_type);
+
+    _map_name = new LocaleDBCEntry(_map_settings);
+    map_settings_layout->addRow("Map name:", _map_name);
+
+    _area_table_id = new QSpinBox(_map_settings);
+    map_settings_layout->addRow("Area ID:", _area_table_id);
+    _area_table_id->setMaximum(std::numeric_limits<std::int32_t>::max());
+
+    _map_desc_alliance = new LocaleDBCEntry(_map_settings);
+    map_settings_layout->addRow("Description (Alliance):", _map_desc_alliance);
+
+    _map_desc_horde = new LocaleDBCEntry(_map_settings);
+    map_settings_layout->addRow("Description (Horde):", _map_desc_horde);
+
+    _loading_screen = new QSpinBox(_map_settings);
+    map_settings_layout->addRow("Loading screen:", _loading_screen);
+    _loading_screen->setMaximum(std::numeric_limits<std::int32_t>::max());
+
+    _minimap_icon_scale = new QDoubleSpinBox(_map_settings);
+    map_settings_layout->addRow("Minimap icon scale:", _minimap_icon_scale);
+
+    _corpse_map_id->setCurrentText("None");
+    map_settings_layout->addRow("Corpse map:", _corpse_map_id);
+
+    _corpse_x = new QDoubleSpinBox(_map_settings);
+    map_settings_layout->addRow("Corpse X:", _corpse_x);
+    _corpse_x->setMinimum(-17066.66656); // map size
+    _corpse_x->setMaximum(17066.66656);
+
+    _corpse_y = new QDoubleSpinBox(_map_settings);
+    map_settings_layout->addRow("Corpse Y:", _corpse_y);
+    _corpse_y->setMinimum(-17066.66656); // map size
+    _corpse_y->setMaximum(17066.66656);
+
+    _time_of_day_override = new QSpinBox(_map_settings);
+    _time_of_day_override->setMinimum(-1);
+    _time_of_day_override->setMaximum(2880); // Time Values from 0 to 2880 where each number represents a half minute from midnight to midnight 
+    _time_of_day_override->setValue(-1);
+
+    map_settings_layout->addRow("Daytime override:", _time_of_day_override);
+
+    _expansion_id = new QComboBox(_map_settings);
+
+    _expansion_id->addItem("Classic");
+    _expansion_id->setItemData(0, QVariant(0));
+
+    _expansion_id->addItem("Burning Crusade");
+    _expansion_id->setItemData(1, QVariant(1));
+
+    _expansion_id->addItem("Wrath of the Lich King");
+    _expansion_id->setItemData(2, QVariant(2));
+
+    map_settings_layout->addRow("Expansion:", _expansion_id);
+
+    _raid_offset = new QSpinBox(_map_settings);
+    _raid_offset->setMaximum(std::numeric_limits<std::int32_t>::max());
+    map_settings_layout->addRow("Raid offset:", _raid_offset);
+
+    _max_players = new QSpinBox(_map_settings);
+    _max_players->setMaximum(std::numeric_limits<std::int32_t>::max());
+    map_settings_layout->addRow("Max players:", _max_players);
+}
+
+void MapCreationWizard::createDifficultyTab()
+{
+    auto map_difficulty_widget(new QWidget(this));
+    _tabs->addTab(map_difficulty_widget, "Map Difficulty Settings");
+
+    auto difficulty_settings_layout = new QFormLayout(map_difficulty_widget);
+    _map_settings->setLayout(difficulty_settings_layout);
+
+    _difficulty_type = new QComboBox(_map_settings);
+    _difficulty_type->setDisabled(true);
+
+    difficulty_settings_layout->addRow("Difficulty Index", _difficulty_type);
+
+    _difficulty_req_message = new LocaleDBCEntry(_map_settings);
+    _difficulty_req_message->setDisabled(true); // disable them until they're actually saveable, only "display" it for now
+    difficulty_settings_layout->addRow("Requirement Message", _difficulty_req_message);
+
+    _difficulty_raid_duration = new QSpinBox(_map_settings);
+    _difficulty_raid_duration->setDisabled(true);
+    _difficulty_raid_duration->setRange(0, 7);
+    difficulty_settings_layout->addRow("Instance Duration(days)", _difficulty_raid_duration);
+
+    _difficulty_max_players = new QSpinBox(_map_settings);
+    _difficulty_max_players->setDisabled(true);
+    difficulty_settings_layout->addRow("Max Players", _difficulty_max_players);
+
+    _difficulty_string = new QLineEdit(_map_settings);
+    _difficulty_string->setDisabled(true);
+    difficulty_settings_layout->addRow("Difficulty String", _difficulty_string);
+
+    difficulty_settings_layout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding));
+}
+
+void MapCreationWizard::createWmoEntryTab()
+{
+    auto wmo_widget(new QWidget(this));
+    _tabs->addTab(wmo_widget, "WMO Entry");
+
+    auto layout = new QFormLayout(wmo_widget);
+    _map_settings->setLayout(layout);
+
+    _wmoEntryTab.disableTerrain = new QCheckBox(_map_settings);
+    _wmoEntryTab.disableTerrain->setChecked(false);
+    connect(_wmoEntryTab.disableTerrain, &QCheckBox::toggled, [=](bool state) {
+        _wmoEntryTab.wmoPath->setDisabled(!state);
+        // Is there any value in exposing these?
+        //_wmoEntryTab.nameId->setDisabled(!state);
+        //_wmoEntryTab.uniqueId->setDisabled(!state);
+        _wmoEntryTab.position->setDisabled(!state);
+        _wmoEntryTab.rotation->setDisabled(!state);
+        //_wmoEntryTab.flags->setDisabled(!state);
+        _wmoEntryTab.doodadSet->setDisabled(!state);
+        _wmoEntryTab.nameSet->setDisabled(!state);
+        });
+    layout->addRow("WMO only (disable terrain):", _wmoEntryTab.disableTerrain);
+
+    _wmoEntryTab.wmoPath = new QLineEdit(_map_settings);
+    _wmoEntryTab.wmoPath->setDisabled(true);
+    auto defaultStylesheet = _wmoEntryTab.wmoPath->styleSheet();
+    connect(_wmoEntryTab.wmoPath, &QLineEdit::textChanged, [=](QString text) {
+        if (!_wmoEntryTab.disableTerrain->isChecked())
+        {
+            return;
+        }
+
+        _world->mWmoFilename = text.toStdString();
+        WMOInstance wmo{ _world->mWmoFilename, _world->getRenderContext() };
+        wmo.wmo->wait_until_loaded();
+        if (!wmo.finishedLoading() || wmo.wmo->loading_failed())
+        {
+            _wmoEntryTab.wmoPath->setStyleSheet("QLineEdit { background-color : red; }");
+            return;
+        }
+
+        _wmoEntryTab.wmoEntry.extents = wmo.getExtents();
+        _wmoEntryTab.wmoPath->setStyleSheet(defaultStylesheet);
+        populateDoodadSet(wmo);
+        populateNameSet(wmo);
+        });
+    layout->addRow("Path:", _wmoEntryTab.wmoPath);
+
+    _wmoEntryTab.nameId = new QSpinBox(_map_settings);
+    _wmoEntryTab.nameId->setDisabled(true);
+    _wmoEntryTab.nameId->setMinimum(std::numeric_limits<std::int32_t>::min());
+    _wmoEntryTab.nameId->setMaximum(std::numeric_limits<std::int32_t>::max()); 
+    connect(_wmoEntryTab.nameId, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=](int value) {
+        _wmoEntryTab.wmoEntry.nameID = value;
+        });
+    layout->addRow("Name Id:", _wmoEntryTab.nameId);
+
+    _wmoEntryTab.uniqueId = new QSpinBox(_map_settings);
+    _wmoEntryTab.uniqueId->setDisabled(true);
+    _wmoEntryTab.uniqueId->setMinimum(std::numeric_limits<std::int32_t>::min());
+    _wmoEntryTab.uniqueId->setMaximum(std::numeric_limits<std::int32_t>::max());
+    connect(_wmoEntryTab.uniqueId, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=](int value) {
+        _wmoEntryTab.wmoEntry.uniqueID = value;
+        });
+    layout->addRow("Unique Id:", _wmoEntryTab.uniqueId);
+
+    _wmoEntryTab.position = new Vector3fWidget(_map_settings);
+    _wmoEntryTab.position->setDisabled(true);
+    connect(_wmoEntryTab.position, &Vector3fWidget::valueChanged , [=](glm::vec3 const& value) {
+        _wmoEntryTab.wmoEntry.pos[0] = value.x;
+        _wmoEntryTab.wmoEntry.pos[1] = value.y;
+        _wmoEntryTab.wmoEntry.pos[2] = value.z;
+        });
+    layout->addRow("Position:", _wmoEntryTab.position);
+
+    _wmoEntryTab.rotation = new Vector3fWidget(_map_settings);
+    _wmoEntryTab.rotation->setDisabled(true);
+    connect(_wmoEntryTab.rotation, &Vector3fWidget::valueChanged, [=](glm::vec3 const& value) {
+        _wmoEntryTab.wmoEntry.rot[0] = value.x;
+        _wmoEntryTab.wmoEntry.rot[1] = value.y;
+        _wmoEntryTab.wmoEntry.rot[2] = value.z;
+        });
+    layout->addRow("Rotation:", _wmoEntryTab.rotation);
+
+    _wmoEntryTab.flags = new QSpinBox(_map_settings);
+    _wmoEntryTab.flags->setDisabled(true);
+    _wmoEntryTab.flags->setMinimum(std::numeric_limits<std::uint16_t>::min());
+    _wmoEntryTab.flags->setMaximum(std::numeric_limits<std::uint16_t>::max());
+    connect(_wmoEntryTab.flags, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=](int value) {
+        _wmoEntryTab.wmoEntry.flags = static_cast<uint16_t>(value);
+        });
+    layout->addRow("Flags:", _wmoEntryTab.flags);
+
+    _wmoEntryTab.doodadSet = new QComboBox(_map_settings);
+    _wmoEntryTab.doodadSet->setDisabled(true);
+    connect(_wmoEntryTab.doodadSet, &QComboBox::currentTextChanged, [=](QString)
+        {
+            _wmoEntryTab.wmoEntry.doodadSet = _wmoEntryTab.doodadSet->currentIndex();
+        });
+    layout->addRow("Doodad Set:", _wmoEntryTab.doodadSet);
+
+    _wmoEntryTab.nameSet = new QComboBox(_map_settings);
+    _wmoEntryTab.nameSet->setDisabled(true);
+    connect(_wmoEntryTab.nameSet, &QComboBox::currentTextChanged, [=](QString)
+        {
+            _wmoEntryTab.wmoEntry.nameSet = _wmoEntryTab.nameSet->currentIndex();
+        });
+    layout->addRow("Name set:", _wmoEntryTab.nameSet);
+}
+
+void MapCreationWizard::populateWmoEntryTab()
+{
+    _wmoEntryTab.disableTerrain->setChecked(_world->mapIndex.hasAGlobalWMO());
+    if (!_world->mapIndex.hasAGlobalWMO())
+    {
+        _wmoEntryTab.wmoPath->clear();
+        _wmoEntryTab.nameId->clear();
+        _wmoEntryTab.uniqueId->clear();
+        _wmoEntryTab.position->clear();
+        _wmoEntryTab.rotation->clear();
+        _wmoEntryTab.flags->clear();
+        _wmoEntryTab.doodadSet->clear();
+        _wmoEntryTab.nameSet->clear();
+    }
+    else
+    {
+        _wmoEntryTab.wmoPath->setText(QString::fromStdString(_world->mWmoFilename));
+        _wmoEntryTab.wmoEntry = _world->mWmoEntry;
+        _wmoEntryTab.nameId->setValue(_wmoEntryTab.wmoEntry.nameID);
+        _wmoEntryTab.uniqueId->setValue(_wmoEntryTab.wmoEntry.uniqueID);
+        _wmoEntryTab.position->setValue(_wmoEntryTab.wmoEntry.pos);
+        _wmoEntryTab.rotation->setValue(_wmoEntryTab.wmoEntry.rot);
+        _wmoEntryTab.flags->setValue(_wmoEntryTab.wmoEntry.flags);
+        _wmoEntryTab.doodadSet->setCurrentIndex(_wmoEntryTab.wmoEntry.doodadSet);
+        _wmoEntryTab.nameSet->setCurrentIndex(_wmoEntryTab.wmoEntry.nameSet);
+    }
+}
+
+void MapCreationWizard::populateDoodadSet(WMOInstance& instance)
+{
+    QSignalBlocker const doodadsetblocker(_wmoEntryTab.doodadSet);
+    _wmoEntryTab.doodadSet->clear();
+
+    QStringList doodadsetnames;
+    for (auto& doodad_set : instance.wmo->doodadsets)
+    {
+        doodadsetnames.append(doodad_set.name);
+    }
+    _wmoEntryTab.doodadSet->insertItems(0, doodadsetnames);
+    _wmoEntryTab.doodadSet->setCurrentIndex(instance.doodadset());
+}
+
+void MapCreationWizard::populateNameSet(WMOInstance& instance)
+{
+    // get names from WMOAreatable, if no name, get from areatable
+    // if no areatable, we have to get the terrain's area
+    QSignalBlocker const namesetblocker(_wmoEntryTab.nameSet);
+    _wmoEntryTab.nameSet->clear();
+    auto wmoid = instance.wmo->WmoId;
+    auto setnames = gWMOAreaTableDB.getWMOAreaNames(wmoid);
+    QStringList namesetnames;
+    for (auto& area_name : setnames)
+    {
+        if (area_name.empty())
+        {
+            auto chunk = _world->getChunkAt(instance.pos);
+            namesetnames.append(gAreaDB.getAreaFullName(chunk->getAreaID()).c_str());
+        }
+        else
+            namesetnames.append(area_name.c_str());
+    }
+
+    _wmoEntryTab.nameSet->insertItems(0, namesetnames);
+    _wmoEntryTab.nameSet->setCurrentIndex(instance.mNameset);
 }
 
 std::string MapCreationWizard::getDifficultyString()
@@ -518,6 +704,8 @@ void MapCreationWizard::selectMap(int map_id)
   _project->ClientDatabase->UnloadTable("MapDifficulty");
   _difficulty_type->setCurrentIndex(0);
   selectMapDifficulty();
+
+  populateWmoEntryTab();
 }
 
 void MapCreationWizard::selectMapDifficulty()
@@ -633,6 +821,14 @@ void MapCreationWizard::saveCurrentEntry()
   _world->mapIndex.setBigAlpha(_is_big_alpha->isChecked());
   _world->setBasename(_directory->text().toStdString());
   _world->mapIndex.set_sort_models_by_size_class(_sort_by_size_cat->isChecked());
+  if (_wmoEntryTab.disableTerrain->isChecked())
+  {
+      _world->mapIndex.addGlobalWmo(_wmoEntryTab.wmoPath->text().toStdString(), _wmoEntryTab.wmoEntry);
+  }
+  else
+  {
+      _world->mapIndex.removeGlobalWmo();
+  }
   _world->mapIndex.saveChanged(_world, true);
   _world->mapIndex.save(); // save wdt file
   

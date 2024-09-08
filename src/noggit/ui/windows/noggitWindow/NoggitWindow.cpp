@@ -20,6 +20,7 @@
 #include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
 #include <noggit/application/Utils.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <math/coordinates.hpp>
 #include <BlizzardDatabase.h>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
@@ -211,12 +212,12 @@ namespace Noggit::Ui::Windows
           float dy = min_extent.z - max_extent.z; // flipping z and y works better for some reason
           float dz = min_extent.y - max_extent.y;
 
-          pos = max_extent;
+          pos = { _world->mWmoEntry.pos[0], _world->mWmoEntry.pos[1], _world->mWmoEntry.pos[2] };
 
           camera_yaw = math::degrees(math::radians(std::atan2(dx, dy)));
 
           float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
-          camera_pitch = math::degrees(math::radians(std::asin(dz / distance)));
+          camera_pitch = -math::degrees(math::radians(std::asin(dz / distance)));
 
       }
 
