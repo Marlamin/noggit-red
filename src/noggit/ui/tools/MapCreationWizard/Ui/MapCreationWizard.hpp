@@ -26,6 +26,10 @@
 
 namespace Noggit
 {
+  namespace Ui
+  {
+    class Vector3fWidget;
+  }
 
   namespace Ui::Tools::MapCreationWizard::Ui
   {
@@ -98,7 +102,22 @@ namespace Noggit
       void map_dbc_updated(int new_map = 0);
 
     private:
-        std::shared_ptr<Project::NoggitProject> _project;
+      struct WmoEntryTab
+      {
+          QCheckBox* disableTerrain = nullptr;
+          QLineEdit* wmoPath = nullptr;
+          QSpinBox* nameId = nullptr;
+          QSpinBox* uniqueId = nullptr;
+          Vector3fWidget* position = nullptr;
+          Vector3fWidget* rotation = nullptr;
+          QSpinBox* flags = nullptr;
+          QComboBox* doodadSet = nullptr;
+          QComboBox* nameSet = nullptr;
+
+          ENTRY_MODF wmoEntry;
+      };
+
+      std::shared_ptr<Project::NoggitProject> _project;
       Noggit::Ui::minimap_widget* _minimap_widget;
       int _selected_map;
       QGroupBox* _map_settings;
@@ -139,6 +158,8 @@ namespace Noggit
       QSpinBox* _difficulty_max_players;
       QLineEdit* _difficulty_string;
 
+      WmoEntryTab _wmoEntryTab;
+
       World* _world = nullptr;
 
       bool _is_new_record = false;
@@ -156,6 +177,13 @@ namespace Noggit
 
       void removeMap();
 
+      void createMapSettingsTab();
+      void createDifficultyTab();
+      void createWmoEntryTab();
+
+      void populateWmoEntryTab();
+      void populateDoodadSet(WMOInstance& instance);
+      void populateNameSet(WMOInstance& instance);
     };
   }
 }

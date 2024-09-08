@@ -35,15 +35,45 @@ void Model::finishLoading()
 
   if (f.isEof() || f.getSize() < sizeof(ModelHeader))
   {
-    LogError << "Error loading file \"" << _file_key.stringRepr() << "\". Aborting to load model." << std::endl;
-    finished = true;
-    return;
+    // LogError << "Error loading file \"" << _file_key.stringRepr() << "\". Aborting to load model." << std::endl;
+    // finished = true;
+    throw std::runtime_error("Error loading file \"" + _file_key.stringRepr() + "\". Aborting to load model.");
   }
 
   memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
 
+
+
+  uint32_t packed_version = 0;
+  std::memcpy(&packed_version, header.version, sizeof(packed_version));
+
+  bool valid_version = false;
+
+  // Noggit::Application::NoggitApplication::instance()->clientData()->version()// either should work
+  switch (Noggit::Project::CurrentProject::get()->projectVersion )
+  {
+  case Noggit::Project::ProjectVersion::WOTLK:
+    if (packed_version == m2_version_wrath)
+      valid_version = true;
+    break;
+  case Noggit::Project::ProjectVersion::SL:
+    if (packed_version == m2_version_legion_bfa_sl)
+      valid_version = true;
+    break;
+  default:
+    assert(false);
+  }
+
+
+  if (!valid_version)
+  [[unlikely]]
+  {
+    LogError << "Error loading file \"" << _file_key.stringRepr() << "\". Wrong M2 version " << std::to_string(packed_version) << std::endl;
+    throw std::runtime_error("Error loading file \"" + _file_key.stringRepr() + "\". Wrong M2 version " + std::to_string(packed_version));
+  }
+
   // blend mode override
-  if (header.Flags & 8)
+  if (header.Flags & m2_flag_use_texture_combiner_combos)
   {
     // go to the end of the header (where the blend override data is)    
     uint32_t const* blend_override_info = reinterpret_cast<uint32_t const*>(f.getBuffer() + sizeof(ModelHeader));

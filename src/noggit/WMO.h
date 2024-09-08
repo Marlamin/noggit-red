@@ -115,7 +115,7 @@ union wmo_group_flags
     uint32_t flag_0x20 : 1;
     uint32_t exterior_lit : 1; // 0x40
     uint32_t unreacheable : 1; // 0x80
-    uint32_t flag_0x100: 1;
+    uint32_t show_exterior_sky: 1;
     uint32_t has_light : 1; // 0x200
     uint32_t flag_0x400 : 1;
     uint32_t has_doodads : 1; // 0x800

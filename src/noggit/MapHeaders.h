@@ -2,7 +2,9 @@
 
 #pragma once
 
+#include <glm/vec3.hpp>
 #include <cstdint>
+#include <array>
 
 union mcnk_flags
 {
@@ -114,7 +116,7 @@ struct ENTRY_MODF
   uint32_t  uniqueID;
   float  pos[3];
   float  rot[3];
-  float  extents[2][3];
+  std::array<glm::vec3, 2>  extents;
   //uint16_t  flags;
   uint16_t  flags;
   uint16_t  doodadSet;

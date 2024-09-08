@@ -213,7 +213,7 @@ public:
   void markOnDisc(const TileIndex& tile, bool mto);
   bool isTileExternal(const TileIndex& tile) const;
 
-  bool hasAGlobalWMO();
+  bool hasAGlobalWMO() const;
   bool hasTile(const TileIndex& index) const;
   bool tileAwaitingLoading(const TileIndex& tile) const;
   bool tileLoaded(const TileIndex& tile) const;
@@ -240,6 +240,9 @@ public:
   void searchMaxUID();
   void saveMaxUID();
   void loadMaxUID();
+
+  void addGlobalWmo(std::string path, ENTRY_MODF entry);
+  void removeGlobalWmo();
 
   void addTile(const TileIndex& tile);
   void removeTile(const TileIndex& tile);

@@ -406,13 +406,15 @@ void ViewToolbar::add_tool_icon(MapView* mapView,
     });
 
     connect (view_state, &Noggit::BoolToggleProperty::changed, [action, view_state, mapView] () {
+      
+      /* it has been removed from the bar
         if (action->text() == "Game view" && view_state->get())
         {
             // hack, manually update camera when switch to game_view
             mapView->setCameraDirty();
             auto ground_pos = mapView->getWorld()->get_ground_height(mapView->getCamera()->position);
             mapView->getCamera()->position.y = ground_pos.y + 2;
-        }
+        }*/
 
         action->setChecked(view_state->get());
     });
