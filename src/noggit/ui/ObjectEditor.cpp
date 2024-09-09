@@ -481,6 +481,8 @@ namespace Noggit
       connect(paste_override_rotate_cb, &QCheckBox::stateChanged, [=](int s)
           {
               paste_params->rotate_on_terrain = s;
+              _settings->setValue("paste_params/rotate_on_terrain", (bool)s);
+              _settings->sync();
           });
 
       connect ( pasteModeGroup, qOverload<int> (&QButtonGroup::idClicked)
@@ -542,7 +544,9 @@ namespace Noggit
 
       connect( object_palette_btn
           , &QPushButton::clicked
-          , [=]() { mapView->getObjectPalette()->setVisible(mapView->getObjectPalette()->isHidden()); }
+          , [=]() { 
+              emit objectPaletteBtnPressed();
+          }
       );
 
       connect(_doodadSetSelector
@@ -649,7 +653,7 @@ namespace Noggit
 
         if (obj->which() == eMODEL)
         {
-          auto model_instance = static_cast<ModelInstance*>(obj);
+          // auto model_instance = static_cast<ModelInstance*>(obj);
 
           float scale(1.f);
           math::degrees::vec3 rotation(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
@@ -666,6 +670,8 @@ namespace Noggit
                         , scale
                         , rotation
                         , paste_params
+                        , false
+                        , true
                         );
 
           new_obj->model->wait_until_loaded();
@@ -701,7 +707,7 @@ namespace Noggit
             rotation = obj->dir;
           }
 
-          auto new_obj = world->addWMOAndGetInstance(obj->instance_model()->file_key(), pos, rotation);
+          auto new_obj = world->addWMOAndGetInstance(obj->instance_model()->file_key(), pos, rotation, true);
           new_obj->wmo->wait_until_loaded();
           new_obj->wmo->waitForChildrenLoaded();
           new_obj->recalcExtents();
