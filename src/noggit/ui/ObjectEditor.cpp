@@ -481,8 +481,6 @@ namespace Noggit
       connect(paste_override_rotate_cb, &QCheckBox::stateChanged, [=](int s)
           {
               paste_params->rotate_on_terrain = s;
-              _settings->setValue("paste_params/rotate_on_terrain", (bool)s);
-              _settings->sync();
           });
 
       connect ( pasteModeGroup, qOverload<int> (&QButtonGroup::idClicked)
@@ -544,9 +542,7 @@ namespace Noggit
 
       connect( object_palette_btn
           , &QPushButton::clicked
-          , [=]() { 
-              emit objectPaletteBtnPressed();
-          }
+          , [=]() { mapView->getObjectPalette()->setVisible(mapView->getObjectPalette()->isHidden()); }
       );
 
       connect(_doodadSetSelector
@@ -653,7 +649,7 @@ namespace Noggit
 
         if (obj->which() == eMODEL)
         {
-          // auto model_instance = static_cast<ModelInstance*>(obj);
+          auto model_instance = static_cast<ModelInstance*>(obj);
 
           float scale(1.f);
           math::degrees::vec3 rotation(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
@@ -670,8 +666,6 @@ namespace Noggit
                         , scale
                         , rotation
                         , paste_params
-                        , false
-                        , true
                         );
 
           new_obj->model->wait_until_loaded();
@@ -701,16 +695,13 @@ namespace Noggit
         else if (obj->which() == eWMO)
         {
           math::degrees::vec3 rotation(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
-          float scale(1.f);
-
           if (_copy_model_stats)
           {
             // copy rot from original model. Dirty but working
             rotation = obj->dir;
-            scale = obj->scale;
           }
 
-          auto new_obj = world->addWMOAndGetInstance(obj->instance_model()->file_key(), pos, rotation, scale, true);
+          auto new_obj = world->addWMOAndGetInstance(obj->instance_model()->file_key(), pos, rotation);
           new_obj->wmo->wait_until_loaded();
           new_obj->wmo->waitForChildrenLoaded();
           new_obj->recalcExtents();
@@ -839,7 +830,6 @@ namespace Noggit
           auto clone = new WMOInstance(original->wmo->file_key().filepath(), _map_view->getRenderContext());
           clone->dir = original->dir;
           clone->pos = pivot ? original->pos - pivot.value() : glm::vec3();
-          clone->scale = original->scale;
 
           // selected_model.push_back(clone);
           _model_instance_created.push_back(clone);

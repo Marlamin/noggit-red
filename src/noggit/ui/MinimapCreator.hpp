@@ -22,6 +22,8 @@
 class MapView;
 class World;
 
+
+
 namespace Noggit
 {
 

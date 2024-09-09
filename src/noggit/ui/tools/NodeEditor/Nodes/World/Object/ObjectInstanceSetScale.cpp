@@ -46,7 +46,7 @@ void ObjectInstanceSetScaleNode::compute()
         obj->scale = scale;
       }
       else {
-        obj->scale = scale;
+        obj->scale = 1.0;
       }
   }
   else {

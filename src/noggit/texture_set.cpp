@@ -12,8 +12,6 @@
 #include <array>
 #include <sstream>
 
-
-
 TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base
                         , bool use_big_alphamaps, bool do_not_fix_alpha_map, bool do_not_convert_alphamaps
                         , Noggit::NoggitRenderContext context, MapChunkHeader const& header)
