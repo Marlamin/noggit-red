@@ -20,7 +20,6 @@
 #include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
 #include <noggit/application/Utils.hpp>
 #include <noggit/application/NoggitApplication.hpp>
-#include <math/coordinates.hpp>
 #include <BlizzardDatabase.h>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>

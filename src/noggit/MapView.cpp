@@ -2899,11 +2899,14 @@ MapView::~MapView()
   // when the uid fix fail the UI isn't created
   if (!_uid_fix_failed)
   {
-    //delete objectEditor;
-
+    // delete TexturePicker; // explicitly delete this here to avoid opengl context related crash
+    // delete objectEditor;
     // since the ground effect tool preview renderer got added, this causes crashing on exit to menu. 
     // Now it crashes in application exit.
     // delete texturingTool;
+
+    _tools[static_cast<int>(editing_mode::paint)].reset();
+    _tools[static_cast<int>(editing_mode::object)].reset();
   }
   
   if (_force_uid_check)

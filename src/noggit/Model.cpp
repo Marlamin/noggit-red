@@ -10,7 +10,8 @@
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
 #include <external/tracy/Tracy.hpp>
-#include <noggit/application/NoggitApplication.hpp>
+// #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/project/CurrentProject.hpp>
 #include <util/CurrentFunction.hpp>
 
 #include <algorithm>
