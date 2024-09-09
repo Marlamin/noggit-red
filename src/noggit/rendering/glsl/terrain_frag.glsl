@@ -199,32 +199,16 @@ vec4 get_tex_color(vec2 tex_coord, int tex_sampler, int array_index)
 
 }
 
-/*vec2 getAdjustedUV(vec2 uv, float scale) {
-    // Calculate the world position in the XZ plane
-    vec2 worldPosXZ = vary_position.xz;
-
-    // Scale the world position by the desired scale factor
-    vec2 scaledWorldPos = (worldPosXZ / 16.0f) / (scale);
-
-    // Calculate the new UV coordinates by adding the original UV and scaled world position
-    vec2 scaledUV = (uv / scale) + scaledWorldPos;
-
-    return scaledUV;
-}*/
-
 const int numChunks = 16;
 const int numTiles = 64;
 
 vec2 getAdjustedUV(vec2 uv, int textureScale) {
-
-    vec2 worldOffset = (numChunks * instances[instanceID].ChunkXZ_TileXZ.zw) + 
-                                instances[instanceID].ChunkXZ_TileXZ.xy;
+    vec2 worldOffset = (numChunks * instances[instanceID].ChunkXZ_TileXZ.zw) + instances[instanceID].ChunkXZ_TileXZ.xy;
 
     // Scale the UV coordinates. Wow Interprets texture scaling this way.
     vec2 combinedUV = fract((uv + worldOffset) / ((1 << textureScale) / 8.0f));
 
     return combinedUV;
-
 }
 
 vec4 mists_texture_blend()

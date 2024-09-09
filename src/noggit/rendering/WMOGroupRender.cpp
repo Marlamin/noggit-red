@@ -44,7 +44,6 @@ void WMOGroupRender::upload()
     if (use_tex2)
     {
       auto& tex2 = _wmo_group->wmo->textures.at(mat.texture2);
-
       tex2->wait_until_loaded();
       tex2->upload();
 
@@ -54,7 +53,6 @@ void WMOGroupRender::upload()
 
     _render_batches[batch_counter].tex_array0 = tex_array0;
     _render_batches[batch_counter].tex_array1 = tex_array1;
-
     _render_batches[batch_counter].tex0 = array_index0;
     _render_batches[batch_counter].tex1 = array_index1;
 
@@ -415,7 +413,7 @@ void WMOGroupRender::initRenderBatches()
         break;
     }
 
-    _render_batches[batch_counter] = WMORenderBatch{ flags, mat.shader, 0, 0, 0, 0, alpha_test, 0 };
+    _render_batches[batch_counter] = WMORenderBatch{flags, mat.shader, 0, 0, 0, 0, alpha_test, 0};
 
     batch_counter++;
   }

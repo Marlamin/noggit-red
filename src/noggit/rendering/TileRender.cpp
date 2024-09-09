@@ -13,6 +13,7 @@ using namespace Noggit::Rendering;
 TileRender::TileRender(MapTile* map_tile)
 : _map_tile(map_tile)
 {
+
 }
 
 void TileRender::upload()
