@@ -1762,7 +1762,7 @@ void MapChunk::save(util::sExtendableArray& lADTFile
       header_ptr->ofsLiquid = lCurrentPosition - lMCNK_Position;
 
       // When saving a tile that had MLCQ, also remove flags in MCNK
-      // Client sees the flag and loads random data as if it were MCLQ, which we don�t save.
+      // Client sees the flag and loads random data as if it were MCLQ, which we dont save.
       // clear MCLQ liquid flags (0x4, 0x8, 0x10, 0x20)
       header_ptr->flags.value &= 0xFFFFFFC3;
 
