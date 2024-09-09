@@ -700,16 +700,14 @@ namespace Noggit
         }
         else if (obj->which() == eWMO)
         {
-          float scale(1.f);
           math::degrees::vec3 rotation(math::degrees(0)._, math::degrees(0)._, math::degrees(0)._);
           if (_copy_model_stats)
           {
-            // copy rot size from original model. Dirty but working
-            scale = obj->scale;
+            // copy rot from original model. Dirty but working
             rotation = obj->dir;
           }
 
-          auto new_obj = world->addWMOAndGetInstance(obj->instance_model()->file_key(), pos, rotation, scale, true);
+          auto new_obj = world->addWMOAndGetInstance(obj->instance_model()->file_key(), pos, rotation, true);
           new_obj->wmo->wait_until_loaded();
           new_obj->wmo->waitForChildrenLoaded();
           new_obj->recalcExtents();
@@ -838,7 +836,6 @@ namespace Noggit
           auto clone = new WMOInstance(original->wmo->file_key().filepath(), _map_view->getRenderContext());
           clone->dir = original->dir;
           clone->pos = pivot ? original->pos - pivot.value() : glm::vec3();
-          clone->scale = original->scale;
 
           // selected_model.push_back(clone);
           _model_instance_created.push_back(clone);
