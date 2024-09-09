@@ -45,7 +45,7 @@ enum M2Versions
 enum M2GlobalFlags
 {
   m2_flag_tilt_x = 0x1,
-  m2_flag_tilt_x = 0x2,
+  m2_flag_tilt_y = 0x2,
   // m2_flag_unk_0x4 = 0x4,
   m2_flag_use_texture_combiner_combos = 0x8,
   // m2_flag_unk_0x10 = 0x10
