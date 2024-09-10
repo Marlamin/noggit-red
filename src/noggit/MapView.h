@@ -64,6 +64,7 @@ namespace Noggit
   namespace Ui
   {
     class detail_infos;
+    class model_list;
     class help;
     class minimap_widget;
     class toolbar;
@@ -142,6 +143,7 @@ public:
   Noggit::BoolToggleProperty _draw_lights_zones = { false };
   Noggit::BoolToggleProperty _show_detail_info_window = { false };
   Noggit::BoolToggleProperty _show_minimap_window = { false };
+  Noggit::BoolToggleProperty _show_model_list_window = { false };
 private:
 
   void update_cursor_pos();
@@ -356,6 +358,7 @@ private:
 
   Noggit::Ui::help* _keybindings;
   Noggit::Ui::detail_infos* guidetailInfos;
+  Noggit::Ui::model_list* modelList;
 
   OpenGL::texture* const _texBrush;
 
@@ -364,6 +367,7 @@ private:
   QDockWidget* _asset_browser_dock;
   QDockWidget* _node_editor_dock;
   QDockWidget* _detail_infos_dock;
+  QDockWidget* _model_list_dock;
 
   Noggit::Ui::Tools::ToolPanel* _tool_panel_dock;
 
@@ -392,6 +396,7 @@ private:
   void setupAssetBrowser();
   void setupDetailInfos();
   void updateDetailInfos();
+  void updateModelList();
   void setupToolbars();
   void setupKeybindingsGui();
   void setupMinimap();
@@ -404,6 +409,7 @@ private:
   void setupHotkeys();
   void setupClientMenu();
   void setupMainToolbar();
+  void setupModelList();
 
   QWidget* _overlay_widget;
 

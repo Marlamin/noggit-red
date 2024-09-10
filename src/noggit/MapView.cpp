@@ -15,6 +15,7 @@
 #include <noggit/ui/Help.h>
 #include <noggit/ui/HelperModels.h>
 #include <noggit/ui/ModelImport.h>
+#include <noggit/ui/ModelList.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/TexturePicker.h>
@@ -645,6 +646,112 @@ void MapView::updateDetailInfos()
       guidetailInfos->setText("");
     }
   }
+}
+
+void MapView::setupModelList()
+{
+    // Dock
+    _model_list_dock = new QDockWidget("Model list", this);
+    _model_list_dock->setFeatures(QDockWidget::DockWidgetMovable
+        | QDockWidget::DockWidgetFloatable
+        | QDockWidget::DockWidgetClosable);
+
+    _model_list_dock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
+
+
+    _main_window->addDockWidget(Qt::BottomDockWidgetArea, _model_list_dock);
+    _model_list_dock->setFloating(true);
+    _model_list_dock->hide();
+    // End Dock
+
+    modelList = new Noggit::Ui::model_list(this);
+    _model_list_dock->setWidget(modelList);
+
+    connect(&_show_model_list_window, &Noggit::BoolToggleProperty::changed
+        , modelList, [this]
+        {
+            if (!ui_hidden)
+            {
+                _model_list_dock->setVisible(_show_model_list_window.get());
+                updateModelList();
+            }
+        }
+    );
+
+    connect(modelList, &Noggit::Ui::widget::visibilityChanged
+        , &_show_model_list_window, &Noggit::BoolToggleProperty::set
+    );
+
+    connect(NOGGIT_ACTION_MGR, &Noggit::ActionManager::onActionBegin,
+        [this](Noggit::Action*)
+        {
+            updateModelList();
+        });
+
+    connect(NOGGIT_ACTION_MGR, &Noggit::ActionManager::onActionEnd,
+        [this](Noggit::Action*)
+        {
+            updateModelList();
+        });
+
+    connect(NOGGIT_ACTION_MGR, &Noggit::ActionManager::currentActionChanged,
+        [this](unsigned)
+        {
+            updateModelList();
+        });
+
+    connect(modelList->_table->selectionModel(), &QItemSelectionModel::selectionChanged, 
+        [this]
+        {
+            if (!modelList->_table->selectionModel()->hasSelection())
+                return;
+
+            _world->reset_selection();
+
+            for (auto item : modelList->_table->selectedItems()) {
+                auto uid = modelList->_table->model()->index(item->row(), 0).data().toUInt();
+                auto model = _world->get_model(uid);
+                if (model.has_value()) {
+                    _world->add_to_selection(model.value());
+                }
+            }
+        });
+}
+ 
+void MapView::updateModelList()
+{
+    if (modelList->isVisible())
+    {
+        modelList->clearList();
+        
+        auto tile = _world->mapIndex.getTile(_camera.position);
+
+        for (MapTile* tile : _world->mapIndex.loaded_tiles())
+        {
+            for (auto& pair : tile->getObjectInstances())
+            {
+                for (auto& instance : pair.second)
+                {
+                    if (instance->which() == eWMO)
+                    {
+                        auto wmo = static_cast<WMOInstance*>(instance);
+                        auto& filename = wmo->instance_model()->file_key().filepath();
+
+                        modelList->addModel(instance->uid, tile->index.x, tile->index.z, filename);
+                    }
+                    else if (instance->which() == eMODEL)
+                    {
+                        auto model = static_cast<ModelInstance*>(instance);
+                        auto& filename = model->instance_model()->file_key().filepath();
+
+                        modelList->addModel(instance->uid, tile->index.x, tile->index.z, filename);
+                    }
+                }
+            }
+        }
+
+        modelList->_table->resizeRowsToContents();
+    }
 }
 
 void MapView::setupToolbars()
@@ -1889,6 +1996,7 @@ void MapView::setupViewMenu()
 
     QWidget *widget_list[] =
       {
+		_model_list_dock,
         _detail_infos_dock,
         _keybindings,
         _minimap_dock,
@@ -1930,6 +2038,8 @@ void MapView::setupViewMenu()
   ADD_ACTION(view_menu, "Toggle UI", Qt::Key_Tab, hide_widgets);
 
   ADD_TOGGLE (view_menu, "Detail infos", Qt::Key_F8, _show_detail_info_window);
+
+  ADD_TOGGLE_NS(view_menu, "Model list", _show_model_list_window);
 
   addHotkey( Qt::Key_H
     , MOD_none
@@ -2395,6 +2505,7 @@ void MapView::createGUI()
   // texturingTool->setup_ge_tool_renderer();
   setupNodeEditor();
   setupDetailInfos();
+  setupModelList();
   setupToolbars();
   setupKeybindingsGui();
 
@@ -2439,6 +2550,7 @@ void MapView::on_exit_prompt()
   _keybindings->hide();
   _minimap_dock->hide();
   _detail_infos_dock->hide();
+  _model_list_dock->hide();
 }
 
 MapView::MapView( math::degrees camera_yaw0
@@ -3143,7 +3255,7 @@ void MapView::tick (float dt)
 
   _status_position->setText (status);
 
-  if (currentSelection.size() > 0) // currently disabled, change to == to enable status bar selection
+  if (currentSelection.size() == 0) // currently disabled, change to == to enable status bar selection
   {
     _status_selection->setText ("");
   }
