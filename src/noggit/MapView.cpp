@@ -3133,12 +3133,12 @@ void MapView::tick (float dt)
             . arg (std::floor (_camera.position.z / TILESIZE))
             );
   status += ( QString ("; coordinates client: (%1, %2, %3), server: (%4, %5, %6)")
-            . arg (_camera.position.x)
-            . arg (_camera.position.z)
-            . arg (_camera.position.y)
-            . arg (ZEROPOINT - _camera.position.z)
-            . arg (ZEROPOINT - _camera.position.x)
-            . arg (_camera.position.y)
+            . arg (_camera.position.x, 0, 'f', 2)
+            . arg (_camera.position.z, 0, 'f', 2)
+            . arg (_camera.position.y, 0, 'f', 2)
+            . arg (ZEROPOINT - _camera.position.z, 0, 'f', 2)
+            . arg (ZEROPOINT - _camera.position.x, 0, 'f', 2)
+            . arg (_camera.position.y, 0, 'f', 2)
             );
 
   _status_position->setText (status);
@@ -3184,6 +3184,10 @@ void MapView::tick (float dt)
         break;
       }
     }
+  }
+  else
+  {
+	  _status_selection->setText(QString::number(currentSelection.size()) + " objects selected");
   }
 
   if (selection_changed || NOGGIT_CUR_ACTION)
