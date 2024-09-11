@@ -305,7 +305,7 @@ namespace Noggit
       auto importBox_content = new QWidget(this);
       auto importBox_content_layout = new QGridLayout (importBox_content);
       importBox_content_layout->setAlignment(Qt::AlignTop);
-      importBox->setExpanderTitle("Import");
+      importBox->setExpanderTitle("Import (old, use Asset Browser)");
       importBox->setExpanded(_settings->value ("object_editor/import_box", false).toBool());
 
       QPushButton *toTxt = new QPushButton("To Text File", this);

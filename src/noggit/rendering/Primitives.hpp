@@ -158,7 +158,7 @@ namespace Noggit::Rendering::Primitives
   {
   public:
       void initSpline();
-      void draw(glm::mat4x4 const& mvp, std::vector<glm::vec3> const points, glm::vec4 const& color, bool spline);
+      void draw(glm::mat4x4 const& mvp, std::vector<glm::vec3> const& points, glm::vec4 const& color, bool spline);
       void unload();
 
   private:

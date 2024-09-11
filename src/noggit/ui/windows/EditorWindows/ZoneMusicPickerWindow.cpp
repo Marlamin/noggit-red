@@ -58,7 +58,7 @@ namespace Noggit
             for (DBCFile::Iterator i = gZoneMusicDB.begin(); i != gZoneMusicDB.end(); ++i)
             {
                 auto item = new QListWidgetItem();
-                item->setData(1, i->getInt(ZoneMusicDB::ID));
+                item->setData(Qt::UserRole, i->getInt(ZoneMusicDB::ID));
 
                 std::stringstream ss;
                 ss << i->getInt(ZoneMusicDB::ID) << "-" << i->getString(ZoneMusicDB::Name);
@@ -180,9 +180,15 @@ namespace Noggit
             }
                 });
 
-            connect(_picker_listview, &QListWidget::itemClicked, this, [=](QListWidgetItem* item) {
-                select_entry(item->data(1).toInt());
-                });
+            QObject::connect(_picker_listview, &QListWidget::itemSelectionChanged, [this]()
+              {
+                QListWidgetItem* const item = _picker_listview->currentItem();
+                if (item)
+                {
+                  select_entry(item->data(Qt::UserRole).toInt());
+                }
+              }
+            );
 
             connect(select_entry_btn, &QPushButton::clicked, [=]() {
                 // auto selection = _picker_listview->selectedItems();
@@ -190,7 +196,7 @@ namespace Noggit
             if (selected_item == nullptr)
                 return;
 
-            button->setProperty("id", selected_item->data(1).toInt());
+            button->setProperty("id", selected_item->data(Qt::UserRole).toInt());
             button->setText(selected_item->text());
             this->close();
                 });
@@ -236,7 +242,7 @@ namespace Noggit
 
             // add new tree item
             auto item = new QListWidgetItem();
-            item->setData(1, new_id);
+            item->setData(Qt::UserRole, new_id);
             std::stringstream ss;
 
             _picker_listview->addItem(item);

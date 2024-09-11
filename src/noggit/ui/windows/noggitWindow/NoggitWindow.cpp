@@ -307,10 +307,17 @@ namespace Noggit::Ui::Windows
     layout->setAlignment(Qt::AlignLeft);
     QListWidget* bookmarks_table(new QListWidget(widget));
     _continents_table = new QListWidget(widget);
-    QObject::connect(_continents_table, &QListWidget::itemClicked, [this](QListWidgetItem* item)
-                     {
-                       loadMap(item->data(Qt::UserRole).toInt());
-                     }
+    _continents_table->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+    _continents_table->setSelectionBehavior(QAbstractItemView::SelectItems);
+
+    QObject::connect(_continents_table, &QListWidget::itemSelectionChanged, [this]()
+      {
+        QListWidgetItem* const item = _continents_table->currentItem();
+        if (item)
+        {
+          loadMap(item->data(Qt::UserRole).toInt());
+        }
+      }
     );
 
 

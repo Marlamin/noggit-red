@@ -513,7 +513,7 @@ void Square::setup_buffers()
   }
 
   void Line::draw(glm::mat4x4 const& mvp
-      , std::vector<glm::vec3> const points
+      , std::vector<glm::vec3> const& points
       , glm::vec4 const& color
       , bool spline
   )
