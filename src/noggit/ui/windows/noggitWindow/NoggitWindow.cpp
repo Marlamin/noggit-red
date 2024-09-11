@@ -310,8 +310,11 @@ namespace Noggit::Ui::Windows
     _continents_table->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
     _continents_table->setSelectionBehavior(QAbstractItemView::SelectItems);
 
+    // in some situations like when returning to menu an item is selected and itemSelectionChanged won't fire when reclicking it
+    // so might need to also connect itemClicked but then they both trigger at the same time.
     QObject::connect(_continents_table, &QListWidget::itemSelectionChanged, [this]()
       {
+        QSignalBlocker const blocker(_continents_table);
         QListWidgetItem* const item = _continents_table->currentItem();
         if (item)
         {
@@ -476,22 +479,22 @@ namespace Noggit::Ui::Windows
 
     _map_wizard_connection = connect(_map_creation_wizard,
                                      &Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated, 
-                                [this](int map_id)
+                                [this](int map_id = -1)
                                      {
                                        _buildMapListComponent->buildMapList(this);
 
                                        // if a new map was added select it
-                                       if (map_id)
+                                       if (map_id >= 0)
                                        {
                                            for (int i = 0; i < _continents_table->count(); ++i)
                                            {
                                                QListWidgetItem* item = _continents_table->item(i);
                                                if (item && item->data(Qt::UserRole).toInt() == map_id)
                                                {
-                                                   _continents_table->setCurrentItem(item);
+                                                   _continents_table->setCurrentItem(item); // calls itemSelectionChanged -> loadmap
                                                    _continents_table->scrollToItem(item);
                                                    _right_side->setCurrentIndex(0); // swap to "enter map" tab
-                                                   loadMap(map_id);
+                                                   // loadMap(map_id);
                                                    break;
                                                }
                                            }

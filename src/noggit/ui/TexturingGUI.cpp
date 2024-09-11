@@ -187,13 +187,16 @@ namespace Noggit
       list->setWrapping (true);
       list->setModel (search_filter);
 
-      connect ( list, &QAbstractItemView::clicked
-              , [=] (QModelIndex const& index)
-                {
-                  emit selected
-                    ("tileset/" + index.data().toString().toStdString());
-                }
-              );
+      connect(list->selectionModel(), &QItemSelectionModel::selectionChanged,
+        [=]() 
+        {
+          QModelIndexList selectedIndexes = list->selectionModel()->selectedIndexes();
+          if (!selectedIndexes.isEmpty()) 
+          {
+            QModelIndex index = selectedIndexes.first();
+            emit selected("tileset/" + index.data().toString().toStdString());
+          }
+        });
 
       auto size_slider (new QSlider (Qt::Horizontal));
       size_slider->setRange (64, 256);
