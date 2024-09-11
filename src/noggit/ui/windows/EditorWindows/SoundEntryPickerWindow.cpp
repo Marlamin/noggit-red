@@ -62,7 +62,7 @@ namespace Noggit
             _picker_listview = new QListWidget(this);
             _picker_listview->setFixedSize(280, 460);
             _picker_listview->setSelectionMode(QListWidget::SingleSelection);
-            // _picker_listview->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+            _picker_listview->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectItems);
             list_layout->addWidget(_picker_listview);
 
             if (sound_type_filter == -1)
@@ -209,9 +209,15 @@ namespace Noggit
                 }
                 });
 
-            connect(_picker_listview, &QListWidget::itemClicked, this, [=](QListWidgetItem* item) {
-                select_entry(item->data(1).toInt());
-                });
+            QObject::connect(_picker_listview, &QListWidget::itemSelectionChanged, [this]()
+              {
+                QListWidgetItem* const item = _picker_listview->currentItem();
+                if (item)
+                {
+                  select_entry(item->data(Qt::UserRole).toInt());
+                }
+              }
+            );
 
             connect(select_entry_btn, &QPushButton::clicked, [=]() {
                 // auto selection = _picker_listview->selectedItems();
@@ -219,20 +225,20 @@ namespace Noggit
                 if (selected_item == nullptr)
                     return;
 
-            button->setProperty("id", selected_item->data(1).toInt());
-            button->setText(selected_item->text());
-            this->close();
-                });
+                button->setProperty("id", selected_item->data(Qt::UserRole).toInt());
+                button->setText(selected_item->text());
+                this->close();
+            });
 
             connect(select_entry_none_btn, &QPushButton::clicked, [=]() {
                 button->setText("-NONE-");
                 button->setProperty("id", 0);
                 this->close();
-                });
+            });
 
             connect(save_music_entry_btn, &QPushButton::clicked, [=]() {
                 save_entry(_entry_id);
-                });
+            });
 
             connect(add_file_button, &QPushButton::clicked, [=]() {
 
@@ -265,7 +271,7 @@ namespace Noggit
 
                 // add new tree item
                 auto item = new QListWidgetItem();
-                item->setData(1, new_id);
+                item->setData(Qt::UserRole, new_id);
                 std::stringstream ss;
 
                 _picker_listview->addItem(item);
@@ -286,7 +292,7 @@ namespace Noggit
                     continue;
 
                 auto item = new QListWidgetItem();
-                item->setData(1, i->getInt(SoundEntriesDB::ID));
+                item->setData(Qt::UserRole, i->getInt(SoundEntriesDB::ID));
 
                 std::stringstream ss;
                 ss << i->getInt(SoundEntriesDB::ID) << "-" << i->getString(SoundEntriesDB::Name);

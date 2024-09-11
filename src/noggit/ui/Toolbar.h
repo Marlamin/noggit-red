@@ -10,6 +10,8 @@
 #include <noggit/tool_enums.hpp>
 #include <noggit/ui/FontNoggit.hpp>
 
+#include <unordered_map>
+
 namespace Noggit
 {
   class Tool;
@@ -26,6 +28,8 @@ namespace Noggit
     private:
       std::function<void (editing_mode)> _set_editing_mode;
       QActionGroup _tool_group;
+
+      std::unordered_map<editing_mode, QAction*> _tool_actions;
 
       void add_tool_icon(editing_mode mode, const QString& name, const FontNoggit::Icons& icon);
     };

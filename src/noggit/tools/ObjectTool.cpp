@@ -75,7 +75,7 @@ namespace Noggit
             , &_move_model_snap_to_objects
             , mv
         );
-        toolPanel->registerTool(name(), _objectEditor);
+        toolPanel->registerTool(this, _objectEditor);
 
         /* Additional tools */
 

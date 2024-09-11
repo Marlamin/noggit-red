@@ -36,6 +36,7 @@ namespace Noggit
       setFlow(QListWidget::LeftToRight);
       setWrapping(true);
       setSelectionMode(QAbstractItemView::SingleSelection);
+      setSelectionBehavior(QAbstractItemView::SelectItems);
       setAcceptDrops(false);
       setMovement(Movement::Static);
       setResizeMode(QListView::Adjust);
@@ -87,7 +88,6 @@ namespace Noggit
       _object_paths = std::unordered_set<std::string>();
       _object_list = new ObjectList(this);
 
-
       layout->addWidget(_object_list, 0, 0);
 
       _preview_renderer = new Noggit::Ui::Tools::PreviewRenderer(_object_list->iconSize().width(),
@@ -100,12 +100,15 @@ namespace Noggit
       _preview_renderer->setModelOffscreen("world/wmo/azeroth/buildings/human_farm/farm.wmo");
       _preview_renderer->renderToPixmap();
 
-      connect(_object_list, &QListWidget::itemClicked, this, [=](QListWidgetItem* item)
-              {
-                emit selected(item->toolTip().toStdString());
-              }
+      QObject::connect(_object_list, &QListWidget::itemSelectionChanged, [this]()
+        {
+          QListWidgetItem* const item = _object_list->currentItem();
+          if (item)
+          {
+            emit selected(item->toolTip().toStdString());
+          }
+        }
       );
-
 
       QVBoxLayout* button_layout = new QVBoxLayout(this);
 

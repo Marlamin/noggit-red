@@ -52,7 +52,7 @@ namespace Noggit
     void WaterTool::setupUi(Ui::Tools::ToolPanel* toolPanel)
     {
         _guiWater = new Noggit::Ui::water(&_displayedWaterLayer, &_displayAllWaterLayers, mapView());
-        toolPanel->registerTool(name(), _guiWater);
+        toolPanel->registerTool(this, _guiWater);
 
         auto mv = mapView();
 

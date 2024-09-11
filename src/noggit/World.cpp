@@ -64,9 +64,12 @@ bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow
 
   // Not using the libWDT here doubles performance. You might want to look at your lib again and improve it.
   const int lFlags = *(reinterpret_cast<const int*>(lPointer + 8 + 4 + 8));
-  if (lFlags & 1)
+
+  // check for global wmo flag
+  if (lFlags & FLAG_GLOBAL_OBJECT)
     return true; // filter them later
 
+  // check if map has tiles
   const int * lData = reinterpret_cast<const int*>(lPointer + 8 + 4 + 8 + 0x20 + 8);
   for (int i = 0; i < 8192; i += 2)
   {
@@ -74,7 +77,8 @@ bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow
       return true;
   }
 
-  return false;
+  // change : still load world even if it has no tile to allow user to edit it
+  return true;
 }
 
 bool World::IsWMOWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record)

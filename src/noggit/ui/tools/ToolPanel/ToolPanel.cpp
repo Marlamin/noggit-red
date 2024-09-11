@@ -1,12 +1,14 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/Tool.hpp>
+
 #include "ToolPanel.hpp"
 #include <QScrollBar>
 
 using namespace Noggit::Ui::Tools;
 
 ToolPanel::ToolPanel(QWidget* parent)
-: QDockWidget(parent)
+  : QDockWidget(parent)
 {
   auto body = new QWidget(this);
   _ui.setupUi(body);
@@ -16,18 +18,25 @@ ToolPanel::ToolPanel(QWidget* parent)
   setFixedWidth(250 + 15);
 }
 
-void ToolPanel::setCurrentIndex(int index)
+void ToolPanel::setCurrentTool(editing_mode mode)
 {
-  for (auto& widget : _widgets)
-    widget->setVisible(false);
+  for (auto&& [tool, widget] : _tools)
+  {
+    if (tool->editingMode() == mode)
+    {
+      widget->setVisible(true);
+    }
+    else
+    {
+      widget->setVisible(false);
+    }
+  }
 
-  _widgets.at(index)->setVisible(true);
   _ui.scrollAreaWidgetContents->adjustSize();
 }
 
-void ToolPanel::registerTool(QString const& title, QWidget* widget)
+void ToolPanel::registerTool(Tool* tool, QWidget* widget)
 {
-  _widgets.push_back(widget);
   _ui.scrollAreaWidgetContents->layout()->addWidget(widget);
-  _titles.emplace_back(title);
+  _tools.emplace_back(std::make_pair(tool, widget));
 }

@@ -29,11 +29,16 @@ namespace Noggit
       });
       action->setActionGroup(&_tool_group);
       action->setCheckable(true);
+
+      _tool_actions[mode] = action;
     }
 
     void toolbar::check_tool(editing_mode mode)
     {
-      _tool_group.actions()[static_cast<std::size_t> (mode)]->setChecked(true);
+      if (auto itr = _tool_actions.find(mode); itr != _tool_actions.end())
+      {
+        itr->second->setChecked(true);
+      }
     }
   }
 }

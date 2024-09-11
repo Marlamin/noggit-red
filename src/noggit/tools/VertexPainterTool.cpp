@@ -44,7 +44,7 @@ namespace Noggit
     void VertexPainterTool::setupUi(Ui::Tools::ToolPanel* toolPanel)
     {
         _shaderTool = new Noggit::Ui::ShaderTool(mapView(), mapView());
-        toolPanel->registerTool(name(), _shaderTool);
+        toolPanel->registerTool(this, _shaderTool);
     }
 
     ToolDrawParameters VertexPainterTool::drawParameters() const

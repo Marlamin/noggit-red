@@ -135,6 +135,7 @@ MapCreationWizard::MapCreationWizard(std::shared_ptr<Project::NoggitProject> pro
   btn_row_layout->setAlignment(Qt::AlignRight);
 
   auto save_btn = new QPushButton("Save", this);
+  save_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::save));
   auto discard_btn = new QPushButton("Discard", this);
   btn_row_layout->addWidget(save_btn);
   btn_row_layout->addWidget(discard_btn);
@@ -256,6 +257,7 @@ void MapCreationWizard::createMapSettingsTab()
     _is_big_alpha = new QCheckBox(this);
     map_settings_layout->addRow("Big alpha:", _is_big_alpha);
     _is_big_alpha->setChecked(true);
+    _is_big_alpha->setToolTip("Sets the alphamaps(terrain textures) precision.\nSmall alpha uses 4 bits precision, big alpha uses 8 bits.");
 
     _sort_by_size_cat = new QCheckBox(this);
     map_settings_layout->addRow("Sort models", _sort_by_size_cat);
@@ -297,12 +299,15 @@ void MapCreationWizard::createMapSettingsTab()
     _loading_screen = new QSpinBox(_map_settings);
     map_settings_layout->addRow("Loading screen:", _loading_screen);
     _loading_screen->setMaximum(std::numeric_limits<std::int32_t>::max());
+    _loading_screen->setToolTip("Reference to LoadingScreens.dbc");
 
     _minimap_icon_scale = new QDoubleSpinBox(_map_settings);
     map_settings_layout->addRow("Minimap icon scale:", _minimap_icon_scale);
 
     _corpse_map_id->setCurrentText("None");
     map_settings_layout->addRow("Corpse map:", _corpse_map_id);
+    _corpse_map_id->setToolTip("Map in which player will spawn as a ghost.Used for dungeons spawning dead players in continents."
+                               "\nSet to -1 to spawn in this map.");
 
     _corpse_x = new QDoubleSpinBox(_map_settings);
     map_settings_layout->addRow("Corpse X:", _corpse_x);
@@ -318,6 +323,8 @@ void MapCreationWizard::createMapSettingsTab()
     _time_of_day_override->setMinimum(-1);
     _time_of_day_override->setMaximum(2880); // Time Values from 0 to 2880 where each number represents a half minute from midnight to midnight 
     _time_of_day_override->setValue(-1);
+    _time_of_day_override->setToolTip("Override map time to a static time. Set to -1 for dynamic (normal) time."
+      "Time Values from 0 to 2880 where each number represents a half minute from midnight to midnight.");
 
     map_settings_layout->addRow("Daytime override:", _time_of_day_override);
 
@@ -337,6 +344,7 @@ void MapCreationWizard::createMapSettingsTab()
     _raid_offset = new QSpinBox(_map_settings);
     _raid_offset->setMaximum(std::numeric_limits<std::int32_t>::max());
     map_settings_layout->addRow("Raid offset:", _raid_offset);
+    _raid_offset->setToolTip("Unknown. Used only by Onyxia and ZG.");
 
     _max_players = new QSpinBox(_map_settings);
     _max_players->setMaximum(std::numeric_limits<std::int32_t>::max());
@@ -954,7 +962,7 @@ void MapCreationWizard::addNewMap()
   while (id >= 0) {
       internal_map_name = base_name + std::to_string(suffix);  // Append the current suffix to the base name
       id = gMapDB.findMapName(internal_map_name);  // Check if the name exists
-      suffix++;  // Increment the suffix for the next iteration
+      suffix++;
   }
 
   _world = new World(internal_map_name, _cur_map_id, Noggit::NoggitRenderContext::MAP_VIEW, true);

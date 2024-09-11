@@ -92,9 +92,15 @@ namespace Noggit
             _files_listview->setSelectionMode(QListWidget::SingleSelection);
             layout->addWidget(_files_listview);
 
-            connect(_files_listview, &QListWidget::itemClicked, this, [=](QListWidgetItem* item) {
-                play_selected_sound();
-                });
+            QObject::connect(_files_listview, &QListWidget::itemSelectionChanged, [this]()
+              {
+                QListWidgetItem* const item = _files_listview->currentItem();
+                if (item)
+                {
+                  play_selected_sound();
+                }
+              }
+            );
 
             // connect volume
             connect(_volume_slider, &QSlider::valueChanged, [&](int v) {

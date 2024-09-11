@@ -121,24 +121,30 @@ namespace Noggit
                     // unhide all
                 }
 
-            // hide all items
-            for (int i = 0; i < _picker_listview->count(); i++)
-            {
-                auto item = _picker_listview->item(i);
-                item->setHidden(true);
-            }
-            // unhide matching items
-            auto matching_items = _picker_listview->findItems(obj, Qt::MatchContains);
+                // hide all items
+                for (int i = 0; i < _picker_listview->count(); i++)
+                {
+                    auto item = _picker_listview->item(i);
+                    item->setHidden(true);
+                }
+                // unhide matching items
+                auto matching_items = _picker_listview->findItems(obj, Qt::MatchContains);
 
-            for (auto item : matching_items)
-            {
-                item->setHidden(false);
-            }
-                });
+                for (auto item : matching_items)
+                {
+                    item->setHidden(false);
+                }
+            });
 
-            connect(_picker_listview, &QListWidget::itemClicked, this, [=](QListWidgetItem* item) {
-                select_entry(item->data(1).toInt());
-                });
+            QObject::connect(_picker_listview, &QListWidget::itemSelectionChanged, [this]()
+              {
+                QListWidgetItem* const item = _picker_listview->currentItem();
+                if (item)
+                {
+                  select_entry(item->data(Qt::UserRole).toInt());
+                }
+              }
+            );
 
             connect(select_entry_btn, &QPushButton::clicked, [=]() {
                 // auto selection = _picker_listview->selectedItems();

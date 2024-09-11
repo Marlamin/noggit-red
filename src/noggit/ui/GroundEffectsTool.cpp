@@ -344,10 +344,8 @@ namespace Noggit
                     pal.setColor(_cbbox_effect_sets->backgroundRole(), QColor::fromRgbF(_effects_colors[index].r, _effects_colors[index].g, _effects_colors[index].b));
                     _cbbox_effect_sets->setPalette(pal);
                 });
-
-            QObject::connect(_effect_sets_list, &QListWidget::itemClicked
-                , [this](QListWidgetItem* item)
-                {
+            QObject::connect(_effect_sets_list, &QListWidget::itemSelectionChanged, [this]()
+              {
                     int index = _effect_sets_list->currentIndex().row();
 
                     auto effect = getSelectedGroundEffect();

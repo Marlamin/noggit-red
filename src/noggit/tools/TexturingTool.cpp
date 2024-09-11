@@ -123,7 +123,7 @@ namespace Noggit
         auto mv = mapView();
         /* Tool */
         _texturingTool = new Ui::texturing_tool(&mv->getCamera()->position, mv, &_show_texture_palette_small_window, mv);
-        toolPanel->registerTool(name(), _texturingTool);
+        toolPanel->registerTool(this, _texturingTool);
 
         // Connects
         QObject::connect(_texturingTool->texture_swap_tool()->texture_display()
