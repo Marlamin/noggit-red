@@ -38,7 +38,7 @@ namespace Noggit
     void LightTool::setupUi(Ui::Tools::ToolPanel* toolPanel)
     {
         _lightEditor = new Noggit::Ui::Tools::LightEditor(mapView(), mapView());
-        toolPanel->registerTool(name(), _lightEditor);
+        toolPanel->registerTool(this, _lightEditor);
     }
 
     void LightTool::onTick(float deltaTime, TickParameters const& params)

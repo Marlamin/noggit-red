@@ -55,7 +55,7 @@ namespace Noggit
     void HoleTool::setupUi(Ui::Tools::ToolPanel* toolPanel)
     {
         _holeTool = new Noggit::Ui::hole_tool(mapView());
-        toolPanel->registerTool(name(), _holeTool);
+        toolPanel->registerTool(this, _holeTool);
     }
 
     ToolDrawParameters HoleTool::drawParameters() const

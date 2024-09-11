@@ -47,7 +47,7 @@ namespace Noggit
     void AreaTool::setupUi(Ui::Tools::ToolPanel* toolPanel)
     {
         _areaTool = new Noggit::Ui::zone_id_browser(mapView());
-        toolPanel->registerTool(name(), _areaTool);
+        toolPanel->registerTool(this, _areaTool);
 
         _areaTool->setMapID(mapView()->getWorld()->getMapID());
         QObject::connect(_areaTool, &Noggit::Ui::zone_id_browser::selected

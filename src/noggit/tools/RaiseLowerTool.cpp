@@ -72,7 +72,7 @@ namespace Noggit
     void RaiseLowerTool::setupUi(Ui::Tools::ToolPanel* toolPanel)
     {
         _terrainTool = new Noggit::Ui::TerrainTool{ mapView(), mapView() };
-        toolPanel->registerTool(name(), _terrainTool);
+        toolPanel->registerTool(this, _terrainTool);
 
         QObject::connect(_terrainTool
             , &Noggit::Ui::TerrainTool::updateVertices

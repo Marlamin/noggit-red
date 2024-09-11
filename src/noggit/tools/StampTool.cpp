@@ -40,7 +40,7 @@ namespace Noggit
     void StampTool::setupUi(Ui::Tools::ToolPanel* toolPanel)
     {
         _stampTool = new Noggit::Ui::Tools::BrushStack(mapView(), mapView());
-        toolPanel->registerTool(name(), _stampTool);
+        toolPanel->registerTool(this, _stampTool);
 
         QObject::connect(mapView(), &MapView::trySetBrushTexture, [=](QImage* brush, QWidget* sender) {
             auto mv = mapView();

@@ -39,7 +39,7 @@ namespace Noggit
     void ScriptingTool::setupUi(Ui::Tools::ToolPanel* toolPanel)
     {
         _scriptingTool = new Noggit::Scripting::scripting_tool(mapView(), mapView(), mapView()->settings());
-        toolPanel->registerTool(name(), _scriptingTool);
+        toolPanel->registerTool(this, _scriptingTool);
     }
 
     ToolDrawParameters ScriptingTool::drawParameters() const
