@@ -44,7 +44,7 @@ namespace Noggit
     {
         auto mv = mapView();
         _minimapTool = new Noggit::Ui::MinimapCreator(mv, mv->getWorld(), mv);
-        toolPanel->registerTool(name(), _minimapTool);
+        toolPanel->registerTool(this, _minimapTool);
 
         QObject::connect(_minimapTool, &Ui::MinimapCreator::onSave, [=] {
             saving_minimap = true;

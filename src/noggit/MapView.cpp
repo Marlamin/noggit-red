@@ -283,7 +283,7 @@ void MapView::set_editing_mode(editing_mode mode)
 
 void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
 {
-  _tool_panel_dock->setCurrentIndex(static_cast<int>(mode));
+  _tool_panel_dock->setCurrentTool(mode);
 
   switch (mode)
   {

@@ -3,14 +3,19 @@
 #ifndef NOGGIT_TOOLPANEL_HPP
 #define NOGGIT_TOOLPANEL_HPP
 
+#include <noggit/tool_enums.hpp>
+
 #include <QWidget>
 #include <QDockWidget>
 #include <ui_ToolPanelScroll.h>
 
 #include <vector>
+#include <utility>
 
 namespace Noggit
 {
+  class Tool;
+
   namespace Ui::Tools
   {
     class ToolPanel : public QDockWidget
@@ -20,13 +25,12 @@ namespace Noggit
     public:
       explicit ToolPanel(QWidget* parent = nullptr);
 
-      void setCurrentIndex(int index);
-      void registerTool(QString const& title, QWidget* widget);
+      void setCurrentTool(editing_mode mode);
+      void registerTool(Tool* tool, QWidget* widget);
 
     private:
       ::Ui::toolPanel _ui;
-      std::vector<QString> _titles;
-      std::vector<QWidget*> _widgets;
+      std::vector<std::pair<Tool*, QWidget*>> _tools;
 
     };
   }

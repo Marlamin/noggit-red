@@ -32,7 +32,7 @@ namespace Noggit
     void ImpassTool::setupUi(Ui::Tools::ToolPanel* toolPanel)
     {
         // Dummy, because the toolbar requires a widget for every tool
-        toolPanel->registerTool(name(), new  QWidget{mapView()});
+        toolPanel->registerTool(this, new  QWidget{mapView()});
     }
 
     void ImpassTool::onSelected()

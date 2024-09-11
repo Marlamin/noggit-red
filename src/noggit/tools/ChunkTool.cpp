@@ -38,6 +38,6 @@ namespace Noggit
     void ChunkTool::setupUi(Ui::Tools::ToolPanel* toolPanel)
     {
         _chunkManipulator = new Noggit::Ui::Tools::ChunkManipulator::ChunkManipulatorPanel(mapView(), mapView());
-        toolPanel->registerTool(name(), _chunkManipulator);
+        toolPanel->registerTool(this, _chunkManipulator);
     }
 }
