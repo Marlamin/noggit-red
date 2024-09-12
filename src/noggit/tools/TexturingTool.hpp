@@ -56,15 +56,19 @@ namespace Noggit
     private:
         Ui::texturing_tool* _texturingTool = nullptr;
         QDockWidget* _textureBrowserDock = nullptr;
-        Ui::tileset_chooser* _texturePalette = nullptr;
+        Ui::tileset_chooser* _textureBrowser = nullptr;
         Ui::texture_picker* _texturePicker = nullptr;
-        Ui::texture_palette_small* _texturePaletteSmall = nullptr;
+        Ui::texture_palette_small* _texturePalette = nullptr;
         QDockWidget* _texturePaletteDock = nullptr;
         QDockWidget* _texturePickerDock = nullptr;
         bool _texturePickerNeedUpdate = false;
+        Noggit::BoolToggleProperty _show_texture_browser_window = { false };
         Noggit::BoolToggleProperty _show_texture_palette_window = { false };
-        Noggit::BoolToggleProperty _show_texture_palette_small_window = { false };
 
         void randomizeTexturingRotation();
+
+        void setupTextureBrowser(MapView* mv);
+        void setupTexturePalette(MapView* mv);
+        void setupTexturePicker(MapView* mv);
     };
 }

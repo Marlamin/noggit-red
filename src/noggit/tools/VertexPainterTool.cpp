@@ -84,7 +84,7 @@ namespace Noggit
         {
             return;
         }
-
+        
         for (auto& selection : mapView()->getWorld()->current_selection())
         {
             if (selection.index() != eEntry_MapChunk)
