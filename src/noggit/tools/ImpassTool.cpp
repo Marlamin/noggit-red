@@ -47,6 +47,7 @@ namespace Noggit
 
     void ImpassTool::onTick(float deltaTime, TickParameters const& params)
     {
+        mapView()->doSelection(true);
         if (!mapView()->getWorld()->has_selection() || params.underMap || !params.left_mouse)
         {
             return;

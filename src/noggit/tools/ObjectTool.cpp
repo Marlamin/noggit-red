@@ -477,11 +477,11 @@ namespace Noggit
 
     void ObjectTool::onDeselected()
     {
-        _objectEditor->modelImport->hide();
-        _objectEditor->rotationEditor->hide();
-        _object_palette->hide();
-        _object_palette_dock->hide();
-        _moveObject = false;
+      QSignalBlocker blocker{ _object_palette_dock };
+      _objectEditor->modelImport->hide();
+      _objectEditor->rotationEditor->hide();
+      _object_palette_dock->hide();
+      _moveObject = false;
     }
 
     void ObjectTool::onTick(float deltaTime, TickParameters const& params)

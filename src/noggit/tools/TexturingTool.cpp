@@ -75,7 +75,7 @@ namespace Noggit
             });
 
         addHotkey("toggleTexturePalette"_hash, Hotkey{
-            .onPress = [=] { _show_texture_palette_small_window.toggle(); },
+            .onPress = [=] { _show_texture_palette_window.toggle(); },
             .condition = [=] { return mapView->get_editing_mode() == editing_mode::paint && !NOGGIT_CUR_ACTION; },
             });
 
@@ -83,14 +83,16 @@ namespace Noggit
             , &MapView::selectionUpdated
             , [=](std::vector<selection_type>& selection)
             {
-                if (_texturePickerNeedUpdate)
-                {
-                    _texturePickerDock->setVisible(true);
-                    _texturePicker->setMainTexture(_texturingTool->_current_texture);
-                    _texturePicker->getTextures(*selection.begin());
+              if (mapView->isUiHidden() || _texturingTool->isHidden() || !_texturePickerNeedUpdate)
+              {
+                return;
+              }
 
-                    _texturePickerNeedUpdate = false;
-                }
+              _texturePickerDock->setVisible(true);
+              _texturePicker->setMainTexture(_texturingTool->_current_texture);
+              _texturePicker->getTextures(*selection.begin());
+
+              _texturePickerNeedUpdate = false;
             }
         );
     }
@@ -122,7 +124,7 @@ namespace Noggit
     {
         auto mv = mapView();
         /* Tool */
-        _texturingTool = new Ui::texturing_tool(&mv->getCamera()->position, mv, &_show_texture_palette_small_window, mv);
+        _texturingTool = new Ui::texturing_tool(&mv->getCamera()->position, mv, &_show_texture_palette_window, mv);
         toolPanel->registerTool(this, _texturingTool);
 
         // Connects
@@ -151,196 +153,195 @@ namespace Noggit
         QObject::connect(_texturingTool->_current_texture, &Noggit::Ui::current_texture::clicked
             , [=]
             {
-                _textureBrowserDock->setVisible(!_textureBrowserDock->isVisible());
+                _show_texture_browser_window.set(!_show_texture_browser_window.get());
             }
         );
 
         QObject::connect(_texturingTool, &Ui::texturing_tool::texturePaletteToggled,
             [=]()
             {
-                _show_texture_palette_small_window.set(!_show_texture_palette_small_window.get());
+                _show_texture_palette_window.set(!_show_texture_palette_window.get());
             });
 
-        /* Additional tools */
+        setupTextureBrowser(mv);
+        setupTexturePalette(mv);
+        setupTexturePicker(mv);
+    }
 
-        /* Texture Browser */
+    void TexturingTool::setupTextureBrowser(MapView* mv)
+    {
+      // Dock
+      _textureBrowserDock = new QDockWidget("Texture Browser", mv);
+      _textureBrowserDock->setFeatures(QDockWidget::DockWidgetMovable
+        | QDockWidget::DockWidgetFloatable
+        | QDockWidget::DockWidgetClosable);
+      _textureBrowserDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
+      mv->mainWindow()->addDockWidget(Qt::BottomDockWidgetArea, _textureBrowserDock);
+      _textureBrowserDock->hide();
 
-        // Dock
-        _textureBrowserDock = new QDockWidget("Texture Browser", mv);
-        _textureBrowserDock->setFeatures(QDockWidget::DockWidgetMovable
-            | QDockWidget::DockWidgetFloatable
-            | QDockWidget::DockWidgetClosable);
-        _textureBrowserDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea | Qt::LeftDockWidgetArea);
-        mv->mainWindow()->addDockWidget(Qt::BottomDockWidgetArea, _textureBrowserDock);
-        _textureBrowserDock->hide();
+      QObject::connect(_textureBrowserDock, &QDockWidget::visibilityChanged,
+        [=](bool visible)
+        {
+          if (mv->isUiHidden())
+            return;
 
-        QObject::connect(_textureBrowserDock, &QDockWidget::visibilityChanged,
-            [=](bool visible)
-            {
-                if (mv->isUiHidden())
-                    return;
+          mv->settings()->setValue("map_view/texture_browser", visible);
+          mv->settings()->sync();
+        });
 
-                mv->settings()->setValue("map_view/texture_browser", visible);
-                mv->settings()->sync();
-            });
+      QObject::connect(mv, &QObject::destroyed, _textureBrowserDock, &QObject::deleteLater);
+      // End Dock
 
-        QObject::connect(mv, &QObject::destroyed, _textureBrowserDock, &QObject::deleteLater);
-        // End Dock
+      _textureBrowser = new Noggit::Ui::tileset_chooser(mv);
+      _textureBrowserDock->setWidget(_textureBrowser);
+      QObject::connect(mv, &QObject::destroyed, _textureBrowser, &QObject::deleteLater);
 
-        _texturePalette = new Noggit::Ui::tileset_chooser(mv);
-        _textureBrowserDock->setWidget(_texturePalette);
-        QObject::connect(mv, &QObject::destroyed, _texturePalette, &QObject::deleteLater);
+      QObject::connect(_textureBrowser, &Noggit::Ui::tileset_chooser::selected
+        , [=](std::string const& filename)
+        {
+          mv->makeCurrent();
+          OpenGL::context::scoped_setter const _(::gl, mv->context());
 
-        QObject::connect(_texturePalette, &Noggit::Ui::tileset_chooser::selected
-            , [=](std::string const& filename)
-            {
-                mv->makeCurrent();
-                OpenGL::context::scoped_setter const _(::gl, mv->context());
+          Noggit::Ui::selected_texture::set({ filename, mv->getRenderContext() });
+          _texturingTool->_current_texture->set_texture(filename);
+          _texturePicker->setMainTexture(_texturingTool->_current_texture);
+          _texturePicker->updateSelection();
+        }
+      );
 
-                Noggit::Ui::selected_texture::set({ filename, mv->getRenderContext() });
-                _texturingTool->_current_texture->set_texture(filename);
-                _texturePicker->setMainTexture(_texturingTool->_current_texture);
-                _texturePicker->updateSelection();
-            }
-        );
+      QObject::connect(&_show_texture_browser_window, &Noggit::BoolToggleProperty::changed
+        , [this, mv]
+        {
+          if (!(mv->get_editing_mode() == editing_mode::paint || mv->get_editing_mode() == editing_mode::stamp)
+            || mv->isUiHidden())
+          {
+            QSignalBlocker const _(_show_texture_browser_window);
+            _show_texture_browser_window.set(false);
+            return;
+          }
 
-        QObject::connect(_texturePalette, &Noggit::Ui::widget::visibilityChanged
-            , &_show_texture_palette_window, &Noggit::BoolToggleProperty::set
-        );
+          QSignalBlocker const _(_textureBrowser);
+          _textureBrowserDock->setVisible(_show_texture_browser_window.get());
+        }
+      );
+    }
 
-        QObject::connect(&_show_texture_palette_window, &Noggit::BoolToggleProperty::changed
-            , [this, mv]
-            {
-                if ((mv->get_editing_mode() == editing_mode::paint || mv->get_editing_mode() == editing_mode::stamp)
-                    && !mv->isUiHidden())
-                {
-                    _textureBrowserDock->setVisible(_show_texture_palette_window.get());
-                }
-                else
-                {
-                    QSignalBlocker const _(_show_texture_palette_window);
-                    _show_texture_palette_window.set(false);
-                }
-            }
-        );
+    void TexturingTool::setupTexturePalette(MapView* mv)
+    {
+      _texturePalette = new Noggit::Ui::texture_palette_small(mv->project(), mv->getWorld()->getMapID(), mv);
 
-        /* Texture Palette Small */
-        _texturePaletteSmall = new Noggit::Ui::texture_palette_small(mv->project(), mv->getWorld()->getMapID(), mv);
+      // Dock
+      _texturePaletteDock = new QDockWidget("Texture Palette", mv);
+      _texturePaletteDock->setFeatures(QDockWidget::DockWidgetMovable
+        | QDockWidget::DockWidgetFloatable
+        | QDockWidget::DockWidgetClosable
+      );
 
-        // Dock
-        _texturePaletteDock = new QDockWidget("Texture Palette", mv);
-        _texturePaletteDock->setFeatures(QDockWidget::DockWidgetMovable
-            | QDockWidget::DockWidgetFloatable
-            | QDockWidget::DockWidgetClosable
-        );
+      _texturePaletteDock->setWidget(_texturePalette);
+      _texturePaletteDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
+      _texturePaletteDock->hide();
 
-        _texturePaletteDock->setWidget(_texturePaletteSmall);
-        _texturePaletteDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
-        _texturePaletteDock->hide();
+      QObject::connect(mv, &QObject::destroyed, _texturePaletteDock, &QObject::deleteLater);
 
-        QObject::connect(mv, &QObject::destroyed, _texturePaletteDock, &QObject::deleteLater);
+      mv->mainWindow()->addDockWidget(Qt::BottomDockWidgetArea, _texturePaletteDock);
+      // End Dock
 
-        mv->mainWindow()->addDockWidget(Qt::BottomDockWidgetArea, _texturePaletteDock);
-        // End Dock
+      QObject::connect(_texturePaletteDock, &QDockWidget::visibilityChanged,
+        [=](bool visible)
+        {
+          if (mv->isUiHidden())
+            return;
 
-        QObject::connect(_texturePaletteDock, &QDockWidget::visibilityChanged,
-            [=](bool visible)
-            {
-                if (mv->isUiHidden())
-                    return;
+          mv->settings()->setValue("map_view/texture_palette", visible);
+          mv->settings()->sync();
+        });
 
-                mv->settings()->setValue("map_view/texture_palette", visible);
-                mv->settings()->sync();
-            });
+      QObject::connect(_texturePalette, &Noggit::Ui::texture_palette_small::selected
+        , [=](std::string const& filename)
+        {
+          mv->makeCurrent();
+          OpenGL::context::scoped_setter const _(::gl, mv->context());
 
-        QObject::connect(_texturePaletteSmall, &Noggit::Ui::texture_palette_small::selected
-            , [=](std::string const& filename)
-            {
-                mv->makeCurrent();
-                OpenGL::context::scoped_setter const _(::gl, mv->context());
+          Noggit::Ui::selected_texture::set({ filename, mv->getRenderContext() });
+          _texturingTool->_current_texture->set_texture(filename);
+        }
+      );
+      QObject::connect(mv, &QObject::destroyed, _texturePalette, &QObject::deleteLater);
 
-                Noggit::Ui::selected_texture::set({ filename, mv->getRenderContext() });
-                _texturingTool->_current_texture->set_texture(filename);
-            }
-        );
-        QObject::connect(mv, &QObject::destroyed, _texturePaletteSmall, &QObject::deleteLater);
+      QObject::connect(&_show_texture_palette_window, &Noggit::BoolToggleProperty::changed
+        , _texturePaletteDock, [=]
+        {
+          if (mv->get_editing_mode() != editing_mode::paint || mv->isUiHidden())
+          {
+            QSignalBlocker const _(_show_texture_palette_window);
+            _show_texture_palette_window.set(false);
+            return;
+          }
 
-        QObject::connect(&_show_texture_palette_small_window, &Noggit::BoolToggleProperty::changed
-            , _texturePaletteDock, [=]
-            {
-                QSignalBlocker const blocker(_show_texture_palette_small_window);
-                if (mv->get_editing_mode() == editing_mode::paint && !mv->isUiHidden())
-                {
-                    _texturePaletteDock->setVisible(_show_texture_palette_small_window.get());
-                }
-                else
-                {
-                    _show_texture_palette_small_window.set(false);
-                }
-            }
-        );
-        QObject::connect(_texturePaletteDock, &QDockWidget::visibilityChanged
-            , &_show_texture_palette_small_window, &Noggit::BoolToggleProperty::set
-        );
+          QSignalBlocker const _(_texturePalette);
+          _texturePaletteDock->setVisible(_show_texture_palette_window.get());
+        }
+      );
 
-        QObject::connect(_texturingTool->_current_texture, &Noggit::Ui::current_texture::texture_updated
-            , [=]()
-            {
-                mv->getWorld()->notifyTileRendererOnSelectedTextureChange();
-                _texturingTool->getGroundEffectsTool()->TextureChanged();
-            }
-        );
+      QObject::connect(_texturingTool->_current_texture, &Noggit::Ui::current_texture::texture_updated
+        , [=]()
+        {
+          mv->getWorld()->notifyTileRendererOnSelectedTextureChange();
+          _texturingTool->getGroundEffectsTool()->TextureChanged();
+        }
+      );
+    }
 
-        /* Texture Picker */
+    void TexturingTool::setupTexturePicker(MapView* mv)
+    {
+      // Dock
+      _texturePickerDock = new QDockWidget("Texture picker", mv);
+      _texturePickerDock->setFeatures(QDockWidget::DockWidgetMovable
+        | QDockWidget::DockWidgetFloatable
+        | QDockWidget::DockWidgetClosable);
+      mv->mainWindow()->addDockWidget(Qt::BottomDockWidgetArea, _texturePickerDock);
+      _texturePickerDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
+      _texturePickerDock->setFloating(true);
+      _texturePickerDock->hide();
+      QObject::connect(mv, &QObject::destroyed, _texturePickerDock, &QObject::deleteLater);
+      // End Dock
 
-        // Dock
-        _texturePickerDock = new QDockWidget("Texture picker", mv);
-        _texturePickerDock->setFeatures(QDockWidget::DockWidgetMovable
-            | QDockWidget::DockWidgetFloatable
-            | QDockWidget::DockWidgetClosable);
-        mv->mainWindow()->addDockWidget(Qt::BottomDockWidgetArea, _texturePickerDock);
-        _texturePickerDock->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::TopDockWidgetArea);
-        _texturePickerDock->setFloating(true);
-        _texturePickerDock->hide();
-        QObject::connect(mv, &QObject::destroyed, _texturePickerDock, &QObject::deleteLater);
-        // End Dock
+      _texturePicker = new Noggit::Ui::texture_picker(_texturingTool->_current_texture, mv);
+      _texturePickerDock->setWidget(_texturePicker);
+      QObject::connect(mv, &QObject::destroyed, _texturePicker, &QObject::deleteLater);
 
-        _texturePicker = new Noggit::Ui::texture_picker(_texturingTool->_current_texture, mv);
-        _texturePickerDock->setWidget(_texturePicker);
-        QObject::connect(mv, &QObject::destroyed, _texturePicker, &QObject::deleteLater);
-
-        QObject::connect(_texturePicker
-            , &Noggit::Ui::texture_picker::set_texture
-            , [=](scoped_blp_texture_reference texture)
-            {
-                mv->makeCurrent();
-                OpenGL::context::scoped_setter const _(::gl, mv->context());
-                Noggit::Ui::selected_texture::set(std::move(texture));
-            }
-        );
-        QObject::connect(_texturePicker, &Noggit::Ui::texture_picker::shift_left
-            , [=]
-            {
-                mv->makeCurrent();
-                OpenGL::context::scoped_setter const _(::gl, mv->context());
-                _texturePicker->shiftSelectedTextureLeft();
-            }
-        );
-        QObject::connect(_texturePicker, &Noggit::Ui::texture_picker::shift_right
-            , [=]
-            {
-                mv->makeCurrent();
-                OpenGL::context::scoped_setter const _(::gl, mv->context());
-                _texturePicker->shiftSelectedTextureRight();
-            }
-        );
+      QObject::connect(_texturePicker
+        , &Noggit::Ui::texture_picker::set_texture
+        , [=](scoped_blp_texture_reference texture)
+        {
+          mv->makeCurrent();
+          OpenGL::context::scoped_setter const _(::gl, mv->context());
+          Noggit::Ui::selected_texture::set(std::move(texture));
+        }
+      );
+      QObject::connect(_texturePicker, &Noggit::Ui::texture_picker::shift_left
+        , [=]
+        {
+          mv->makeCurrent();
+          OpenGL::context::scoped_setter const _(::gl, mv->context());
+          _texturePicker->shiftSelectedTextureLeft();
+        }
+      );
+      QObject::connect(_texturePicker, &Noggit::Ui::texture_picker::shift_right
+        , [=]
+        {
+          mv->makeCurrent();
+          OpenGL::context::scoped_setter const _(::gl, mv->context());
+          _texturePicker->shiftSelectedTextureRight();
+        }
+      );
     }
 
     void TexturingTool::registerMenuItems(QMenu* menu)
     {
         addMenuTitle(menu, "Texture Painter");
-        addMenuItem(menu, "Texture Browser", Qt::Key_X, _show_texture_palette_window);
-        addMenuItem(menu, "Texture palette", _show_texture_palette_small_window);
+        addMenuItem(menu, "Texture Browser", Qt::Key_X, _show_texture_browser_window);
+        addMenuItem(menu, "Texture palette", _show_texture_palette_window);
     }
 
     ToolDrawParameters TexturingTool::drawParameters() const
@@ -386,15 +387,23 @@ namespace Noggit
             }
         }
 
-        _textureBrowserDock->setVisible(!mv->isUiHidden() && mv->settings()->value("map_view/texture_browser", false).toBool());
-        _texturePaletteDock->setVisible(!mv->isUiHidden() && mv->settings()->value("map_view/texture_palette", false).toBool());
+        auto showTextureBrowser = _show_texture_browser_window.get() || mv->settings()->value("map_view/texture_browser", false).toBool();
+        auto showTexturePalette = _show_texture_palette_window.get() || mv->settings()->value("map_view/texture_palette", false).toBool();
+        _textureBrowserDock->setVisible(!mv->isUiHidden() && showTextureBrowser);
+        _texturePaletteDock->setVisible(!mv->isUiHidden() && showTexturePalette);
     }
 
     void TexturingTool::onDeselected()
     {
         _texturingTool->getGroundEffectsTool()->hide();
+
+        QSignalBlocker const blocker1(_show_texture_palette_window);
+        QSignalBlocker const blocker2(_show_texture_browser_window);
+        QSignalBlocker const blocker3(_textureBrowserDock);
         _textureBrowserDock->setVisible(false);
         _texturePaletteDock->setVisible(false);
+        _texturePickerDock->setVisible(false);
+        _texturePickerNeedUpdate = false;
     }
 
     void TexturingTool::onTick(float deltaTime, TickParameters const& params)
@@ -564,7 +573,7 @@ namespace Noggit
 
     void TexturingTool::hidePopups()
     {
-        _texturePaletteSmall->hide();
+        _texturePalette->hide();
         _texturePickerDock->hide();
         _textureBrowserDock->hide();
     }
