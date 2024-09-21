@@ -39,7 +39,7 @@ namespace Noggit
 
       _radius_slider = new Noggit::Ui::Tools::UiCommon::ExtendedSlider (this);
       _radius_slider->setPrefix("Radius:");
-      _radius_slider->setRange(0, 1000);
+      _radius_slider->setRange(0, 10000);
       _radius_slider->setDecimals(2);
       _radius_slider->setValue (15.0f);
 
