@@ -282,6 +282,11 @@ void WMOInstance::recalcExtents()
   extents[0] = wmo_aabb.min;
   extents[1] = wmo_aabb.max;
 
+  // Calculate bounding radius
+  // glm::vec3 center = (extents[0] + extents[1]) / 2.0f;
+  glm::vec3 halfExtents = (extents[1] - extents[0]) / 2.0f;
+  bounding_radius = glm::length(halfExtents);
+
   _need_recalc_extents = false;
 }
 

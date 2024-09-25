@@ -3607,9 +3607,15 @@ void World::select_objects_in_area(
             {
                 for (auto& instance : pair.second)
                 {
-                    auto model = instance->transformMatrix();
+                    // auto transform_mat = instance->transformMatrix();
                     glm::mat4 VPmatrix = projection * view;
                     glm::vec4 screenPos = VPmatrix * glm::vec4(instance->pos, 1.0f);
+
+                    // if screenPos.w < 0.0f, object is behind camera
+                    // check object bounding radius instead to compare the object's size, if it clips with the camera.
+                    if (screenPos.w < -instance->getBoundingRadius())
+                      continue;
+
                     screenPos.x /= screenPos.w;
                     screenPos.y /= screenPos.w;
 
@@ -3620,13 +3626,13 @@ void World::select_objects_in_area(
                     screenPos.x *= viewport_width;
                     screenPos.y *= viewport_height;
                     
-                    auto depth = glm::distance(camera_position, instance->pos);
+                    float depth = glm::distance(camera_position, instance->pos);
                     if (depth <= user_depth)
                     {
                         const glm::vec2 screenPos2D = glm::vec2(screenPos);
                         if (misc::pointInside(screenPos2D, selection_box))
                         {
-                            auto uid = instance->uid;
+                            unsigned int uid = instance->uid;
                             auto modelInstance = _model_instance_storage.get_instance(uid);
                             if (modelInstance && modelInstance.value().index() == eEntry_Object) {
                                 auto obj = std::get<selected_object_type>(modelInstance.value());

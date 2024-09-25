@@ -71,6 +71,9 @@ public:
   [[nodiscard]]
   virtual std::array<glm::vec3, 2> const& getExtents() { ensureExtents(); return extents; }
 
+  [[nodiscard]]
+  float const& getBoundingRadius() { ensureExtents(); return bounding_radius; }
+
   glm::vec3 const getServerPos() { return glm::vec3(ZEROPOINT - pos.z, ZEROPOINT - pos.x, pos.y); }
 
   bool _grouped = false;
@@ -89,6 +92,7 @@ protected:
   glm::mat4x4 _transform_mat = glm::mat4x4();
   glm::mat4x4 _transform_mat_inverted = glm::mat4x4();
   std::array<glm::vec3, 2> extents;
+  float bounding_radius;
 
   Noggit::NoggitRenderContext _context;
 
