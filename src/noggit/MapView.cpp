@@ -3012,34 +3012,7 @@ void MapView::tick (float dt)
   // note : selection update most commonly happens in mouseReleaseEvent, which sets leftMouse to false
   bool selection_changed = false;
 
-  Noggit::TickParameters tickParams
-  {
-      .displayMode = _display_mode,
-      .underMap = _world->isUnderMap(_cursor_pos),
-      .left_mouse = leftMouse,
-      .right_mouse = rightMouse,
-      .mod_shift_down = _mod_shift_down,
-      .mod_ctrl_down = _mod_ctrl_down,
-      .mod_alt_down = _mod_alt_down,
-      .mod_num_down = _mod_num_down,
-      .dir = dir,
-      .dirUp = dirUp,
-      .dirRight = dirRight,
-  };
-
-  activeTool()->onTick(dt, tickParams);
-
-  auto currentSelection = _world->current_selection();
-  if (_world->has_selection())
-  {
-    // update rotation editor if the selection has changed
-    if (lastSelected != currentSelection)
-    {
-      selection_changed = true;
-      emit rotationChanged();
-    }
-  }
-
+  // update camera
   if (_display_mode == display_mode::in_3D)
   {
     if (turn)
@@ -3108,7 +3081,35 @@ void MapView::tick (float dt)
     }
   }
 
-  // _minimap->update(); // causes massive performance issues
+  // _minimap->update(); // causes massive performance issues, should only be done when moving
+  Noggit::TickParameters tickParams
+  {
+      .displayMode = _display_mode,
+      .underMap = _world->isUnderMap(_cursor_pos),
+      .camera_moved_since_last_draw = _camera_moved_since_last_draw,
+      .left_mouse = leftMouse,
+      .right_mouse = rightMouse,
+      .mod_shift_down = _mod_shift_down,
+      .mod_ctrl_down = _mod_ctrl_down,
+      .mod_alt_down = _mod_alt_down,
+      .mod_num_down = _mod_num_down,
+      .dir = dir,
+      .dirUp = dirUp,
+      .dirRight = dirRight,
+  };
+
+  activeTool()->onTick(dt, tickParams);
+
+  auto currentSelection = _world->current_selection();
+  if (_world->has_selection())
+  {
+    // update rotation editor if the selection has changed
+    if (lastSelected != currentSelection)
+    {
+      selection_changed = true;
+      emit rotationChanged();
+    }
+  }
 
   _world->time += this->mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
