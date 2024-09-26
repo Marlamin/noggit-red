@@ -21,6 +21,12 @@ namespace Noggit::Application {
                 noggitApplicationConfiguration.ApplicationThemePath = noggitConfiguration["ApplicationThemePath"].toString().toStdString();
             if (noggitConfiguration.contains("ApplicationDatabaseDefinitionsPath"))
                 noggitApplicationConfiguration.ApplicationDatabaseDefinitionsPath = noggitConfiguration["ApplicationDatabaseDefinitionsPath"].toString().toStdString();
+            if (noggitConfiguration.contains("ApplicationNoggitDefinitionsPath"))
+            {
+              noggitApplicationConfiguration.ApplicationNoggitDefinitionsPath = noggitConfiguration["ApplicationNoggitDefinitionsPath"].toString().toStdString();
+            }
+            else
+
             if (noggitConfiguration.contains("ApplicationListFilePath"))
                 noggitApplicationConfiguration.ApplicationListFilePath = noggitConfiguration["ApplicationListFilePath"].toString().toStdString();
 

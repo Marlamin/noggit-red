@@ -10,6 +10,7 @@ namespace Noggit::Application {
         noggitApplicationConfiguration.ApplicationProjectPath = std::string("projects");
         noggitApplicationConfiguration.ApplicationThemePath = std::string("themes");
         noggitApplicationConfiguration.ApplicationDatabaseDefinitionsPath = std::string("definitions");
+        noggitApplicationConfiguration.ApplicationNoggitDefinitionsPath = std::string("noggit-definitions");
         noggitApplicationConfiguration.ApplicationListFilePath = std::string("listfile.csv");
 
         noggitApplicationConfiguration.GraphicsConfiguration = NoggitApplicationGraphicsConfiguration();
@@ -56,6 +57,7 @@ namespace Noggit::Application {
         rootConfiguration.insert("ApplicationProjectPath", configuration.ApplicationProjectPath.c_str());
         rootConfiguration.insert("ApplicationThemePath", configuration.ApplicationThemePath.c_str());
         rootConfiguration.insert("ApplicationDatabaseDefinitionsPath", configuration.ApplicationDatabaseDefinitionsPath.c_str());
+        rootConfiguration.insert("ApplicationNoggitDefinitionsPath", configuration.ApplicationNoggitDefinitionsPath.c_str());
         rootConfiguration.insert("ApplicationListFilePath", configuration.ApplicationListFilePath.c_str());
         rootConfiguration.insert("GraphicsConfiguration", graphicsConfiguration);
         rootConfiguration.insert("LoggingConfiguration", loggingConfiguration);

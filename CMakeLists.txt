@@ -386,6 +386,13 @@ add_custom_command(TARGET noggit POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E remove -f 
         $<TARGET_FILE_DIR:noggit>/definitions/.git)
 
+# add distribution noggit definitions tables
+# TODO : git repo
+add_custom_command(TARGET noggit POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/dist/noggit-definitions"
+        "$<TARGET_FILE_DIR:noggit>/noggit-definitions")
+
 # deploy for Qt on Windows
 IF(WIN32)
   include(windeployqt)
