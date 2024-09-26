@@ -62,7 +62,7 @@ public:
   void setType(int type, size_t layer);
   int getType(size_t layer);
 
-  std::array<glm::vec3, 2>& getExtents() { return _extents; };
+  std::array<glm::vec3, 2>& getExtents() { if (needsUpdate()){ recalcExtents(); }  return _extents; };
 
   [[nodiscard]]
   bool isVisible(const math::frustum& frustum) const;

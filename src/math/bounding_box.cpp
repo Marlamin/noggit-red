@@ -42,21 +42,22 @@ namespace math
   {
   }
 
-  aabb::aabb(std::vector<glm::vec3> points)
+  aabb::aabb(std::vector<glm::vec3> const& points)
     : aabb(min_per_dimension(points), max_per_dimension(points))
   {
+    assert(!points.empty());
   }
 
   //! \todo Optimize: iterate lazily.
-  std::vector<glm::vec3> aabb::all_corners() const
+  std::array<glm::vec3, 8> aabb::all_corners() const
   {
     return box_points(min, max);
   }
 
 
-  std::vector<glm::vec3> box_points(glm::vec3 const& box_min, glm::vec3 const& box_max)
+  std::array<glm::vec3, 8> box_points(glm::vec3 const& box_min, glm::vec3 const& box_max)
   {
-    return std::vector<glm::vec3> {
+    return std::array<glm::vec3, 8> {
         glm::vec3(box_max.x, box_max.y, box_max.z),
         glm::vec3(box_max.x, box_max.y, box_min.z),
         glm::vec3(box_max.x, box_min.y, box_max.z),
@@ -66,5 +67,26 @@ namespace math
         glm::vec3(box_min.x, box_min.y, box_max.z),
         glm::vec3(box_min.x, box_min.y, box_min.z)
     };
+  }
+
+  aabb_2d::aabb_2d(std::vector<glm::vec2> const& points)
+  {
+    assert(!points.empty());
+
+    min = glm::vec2(
+      std::numeric_limits<float>::max(),
+      std::numeric_limits<float>::max()
+    );
+
+    max = glm::vec2(
+      std::numeric_limits<float>::lowest(),
+      std::numeric_limits<float>::lowest()
+    );
+
+    for (auto const& point : points)
+    {
+      min = glm::min(min, point);
+      max = glm::max(max, point);
+    }
   }
 }

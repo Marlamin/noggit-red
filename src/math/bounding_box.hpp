@@ -3,20 +3,33 @@
 #pragma once
 
 #include <vector>
+#include <array>
 #include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 
 namespace math
 {
   struct aabb
   {
     aabb(glm::vec3 const& min_, glm::vec3 const& max_);
-    aabb(std::vector<glm::vec3> points);
+    aabb(std::vector<glm::vec3> const& points);
 
-    std::vector<glm::vec3> all_corners() const;
+    std::array<glm::vec3, 8> all_corners() const;
 
     glm::vec3 min;
     glm::vec3 max;
   };
 
-  std::vector<glm::vec3> box_points(glm::vec3 const& box_min, glm::vec3 const& box_max);
+  std::array<glm::vec3, 8> box_points(glm::vec3 const& box_min, glm::vec3 const& box_max);
+
+  // 2d bounding box, aka square
+  struct aabb_2d
+  {
+    aabb_2d(std::vector<glm::vec2> const& points);
+
+    // std::array<glm::vec2, 4> all_corners() const;
+
+    glm::vec2 min;
+    glm::vec2 max;
+  };
 }

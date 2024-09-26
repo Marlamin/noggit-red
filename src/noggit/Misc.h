@@ -56,6 +56,15 @@ namespace misc
   bool vec3d_equals(glm::vec3 const& v1, glm::vec3 const& v2);
   bool deg_vec3d_equals(math::degrees::vec3 const& v1, math::degrees::vec3 const& v2);
 
+  glm::vec4 projectPointToScreen(const glm::vec3& point, const glm::mat4& VPmatrix, float viewport_width, float viewport_height, bool& valid);
+
+  std::array<glm::vec2, 2> getAABBScreenBounds(const std::array<glm::vec3, 2>& extents
+                                              , const glm::mat4& VPmatrix
+                                              , float viewport_width
+                                              , float viewport_height
+                                              , bool& valid
+                                              , float scale = 1.0f);
+
   bool pointInside(glm::vec3 point, std::array<glm::vec3, 2> const& extents);
   bool pointInside(glm::vec2 point, std::array<glm::vec2, 2> const& extents);
   void minmax(glm::vec3* a, glm::vec3* b);

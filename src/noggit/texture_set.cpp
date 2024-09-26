@@ -1457,7 +1457,7 @@ void TextureSet::updateDoodadMapping()
     int higher_count = 0;
     int lower_count = 0;
     std::array<std::array<std::uint8_t, 8>, 8> blizzard_mapping_readable;
-    bool debug_test = true;
+    bool debug_test = false;
     if (debug_test)
         blizzard_mapping_readable = getDoodadMappingReadable();
 

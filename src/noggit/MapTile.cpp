@@ -398,12 +398,12 @@ bool MapTile::isTile(int pX, int pZ)
 
 float MapTile::getMaxHeight()
 {
-  return _extents[1].y;
+  return getExtents()[1].y;
 }
 
 float MapTile::getMinHeight()
 {
-  return _extents[0].y;
+  return getExtents()[0].y;
 }
 
 void MapTile::forceRecalcExtents()

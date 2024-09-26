@@ -27,6 +27,80 @@ namespace misc
            point.x <= extents[1].x && point.y <= extents[1].y;
   }
 
+  // project 3D point to 2d screen space.
+  // Note : When working with noggit 3D coords, need to swap Y and Z !
+  glm::vec4 projectPointToScreen(const glm::vec3& point, const glm::mat4& VPmatrix, float viewport_width, float viewport_height, bool& valid)
+  {
+    glm::vec4 clipSpacePos = VPmatrix * glm::vec4(point, 1.0f);
+
+    if (clipSpacePos.w <= 0.0f)
+    {
+      valid = false;  // not valid, point is behind camera
+      return clipSpacePos;
+    }
+
+    // Perspective division to move to normalized device coordinates (NDC)
+    float ndcX = clipSpacePos.x / clipSpacePos.w;
+    float ndcY = clipSpacePos.y / clipSpacePos.w;
+    float ndcZ = clipSpacePos.z / clipSpacePos.w;
+
+    // If the point is out of the normalized device coordinates range, it's off-screen
+    if (ndcX < -1.0f || ndcX > 1.0f || ndcY < -1.0f || ndcY > 1.0f)
+    {
+        valid = false;
+        return glm::vec4(-1.0f, -1.0f, -1.0f, -1.0f);
+    }
+
+    // Convert NDC to screen space coordinates
+    clipSpacePos.x = (ndcX + 1.0f) * 0.5f * viewport_width;
+    clipSpacePos.y = (1.0f - (ndcY + 1.0f) * 0.5f) * viewport_height;
+
+    valid = true;
+    return clipSpacePos;
+  }
+
+  std::array<glm::vec2, 2> getAABBScreenBounds(const std::array<glm::vec3, 2>& extents
+                                              , const glm::mat4& VPmatrix
+                                              , float viewport_width
+                                              , float viewport_height
+                                              , bool& valid
+                                              , float scale)
+  {
+    math::aabb obj_aabb(extents[0], extents[1]);
+    auto corners = obj_aabb.all_corners();
+
+    glm::vec2 minScreen = glm::vec2(std::numeric_limits<float>::max());
+    glm::vec2 maxScreen = glm::vec2(std::numeric_limits<float>::lowest());
+
+    for (const auto& corner : corners)
+    {
+      bool point_valid;
+      const glm::vec4 screenPos = projectPointToScreen(corner, VPmatrix, viewport_width, viewport_height, point_valid);
+
+      if (!point_valid)
+      {
+        valid = false; // one point was outside of screen space
+        return { glm::vec2(0.0f), glm::vec2(0.0f) };
+      }
+
+      // Update min and max screen bounds if the point is valid (within screen space)
+      minScreen = glm::min(minScreen, glm::vec2(screenPos.x, screenPos.y));
+      maxScreen = glm::max(maxScreen, glm::vec2(screenPos.x, screenPos.y));
+    }
+    valid = true;
+
+    if (scale != 1.0f)
+    {
+      glm::vec2 center = (minScreen + maxScreen) * 0.5f;
+      glm::vec2 halfSize = (maxScreen - minScreen) * 0.5f * scale;
+
+      minScreen = center - halfSize;
+      maxScreen = center + halfSize;
+    }
+
+    return { minScreen, maxScreen };
+  }
+
   void minmax(glm::vec3* a, glm::vec3* b)
   {
     if (a->x > b->x)

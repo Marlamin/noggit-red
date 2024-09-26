@@ -115,7 +115,7 @@ bool WMORender::drawSkybox(const glm::mat4x4& model_view, const glm::vec3& camer
                            glm::vec3 aabb_max,
                            const std::map<int, std::pair<glm::vec3, glm::vec3>>& group_extents) const
 {
-  if (!_wmo->skybox || !math::is_inside_of(camera_pos,aabb_min, aabb_max))
+  if (!_wmo->skybox || !math::is_inside_of_aabb(camera_pos,aabb_min, aabb_max))
   {
     return false;
   }
@@ -131,7 +131,7 @@ bool WMORender::drawSkybox(const glm::mat4x4& model_view, const glm::vec3& camer
 
     auto& extent(group_extents.at(i));
 
-    if (math::is_inside_of(camera_pos, extent.first, extent.second))
+    if (math::is_inside_of_aabb(camera_pos, extent.first, extent.second))
     {
       ModelInstance sky(_wmo->skybox.value()->file_key().filepath(), _wmo->_context);
       sky.pos = camera_pos;

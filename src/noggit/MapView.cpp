@@ -4231,12 +4231,28 @@ void MapView::onSettingsSave()
   _camera.fov(math::degrees(_settings->value("fov", 54.f).toFloat()));
   _debug_cam.fov(math::degrees(_settings->value("fov", 54.f).toFloat()));
 
+  int _fps_limit = _settings->value("fps_limit", 60).toInt();
+  int _frametime = static_cast<int>((1.f / static_cast<float>(_fps_limit)) * 1000.f);
+  // _update_every_event_loop.start(_frametime);
+  _update_every_event_loop.setInterval(_frametime);
+
+  bool vsync = _settings->value("vsync", false).toBool();
+  format().setSwapInterval(vsync ? 1 
+                           : Noggit::Application::NoggitApplication::instance()->getConfiguration()->GraphicsConfiguration.SwapChainInternal);
+
+  bool doAntiAliasing = _settings->value("anti_aliasing", false).toBool();
+  format().setSamples(doAntiAliasing ? 4 
+                      : Noggit::Application::NoggitApplication::instance()->getConfiguration()->GraphicsConfiguration.SamplesCount);
+
+  // force updating rendering
+  _camera_moved_since_last_draw = true;
+
 }
 
 void MapView::ShowContextMenu(QPoint pos) 
 {
     // QApplication::startDragDistance() is 10
-    auto mouse_moved = (QApplication::startDragDistance() / 5) < (_right_click_pos - pos).manhattanLength();
+    bool mouse_moved = (QApplication::startDragDistance() / 5) < (_right_click_pos - pos).manhattanLength();
 
     // don't show context menu if dragging mouse
     if (mouse_moved || ImGuizmo::IsUsing())

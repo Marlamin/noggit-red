@@ -13,7 +13,7 @@ namespace Noggit
     , _roll (0.0f)
     , _yaw (0.f)
     , _pitch (0.f)
-    , _fov (math::degrees (54.f))
+    , _fov (math::degrees (54.f)) // this seems to be vertical FOV. 60 degrees vertical FOV equals 91.49 horizontal FOV in 16:9
   {
     //! \note ensure ranges
     yaw (yaw_);
