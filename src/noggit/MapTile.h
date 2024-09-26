@@ -160,8 +160,8 @@ public:
   void recalcExtents();
   void recalcObjectInstanceExtents();
   void recalcCombinedExtents();
-  std::array<glm::vec3, 2>& getExtents() { return _extents; };
-  std::array<glm::vec3, 2>& getCombinedExtents() { return _combined_extents; };
+  std::array<glm::vec3, 2>& getExtents() { recalcExtents(); return _extents; };
+  std::array<glm::vec3, 2>& getCombinedExtents() { recalcCombinedExtents(); return _combined_extents; };
 
   World* getWorld() { return _world; };
 

@@ -105,6 +105,7 @@ namespace OpenGL
       void uniform (std::string const& name, bool);
       void uniform (GLint pos, bool);
       void uniform (std::string const& name, std::vector<glm::vec3> const& value);
+      void uniform(std::string const& name, std::array<glm::vec3, 8> const& value);
       void uniform (GLint pos, std::vector<glm::vec3> const& value);
       void uniform(std::string const& name, std::vector<glm::vec4> const& value);
       void uniform(GLint pos, std::vector<glm::vec4> const& value);

@@ -15,10 +15,10 @@ namespace Noggit::Application {
 
     struct NoggitApplicationGraphicsConfiguration
     {
-        QSurfaceFormat::SwapBehavior SwapChainDepth;
-        char SwapChainInternal;
-        char DepthBufferSize;
-        char SamplesCount;
+        QSurfaceFormat::SwapBehavior SwapChainDepth = QSurfaceFormat::TripleBuffer; // DefaultSwapBehavior = 0, SingleBuffer = 1, DoubleBuffer = 2, TripleBuffer = 3
+        char SwapChainInternal = 0; // 0 = no vsync, 1 = vsync, waits for one refresh cycle before swapping buffers. 2+ wait for more cycles.
+        char DepthBufferSize = 24;
+        char SamplesCount = 0; // No MultiSamplingAA(MSAA) = 0, Low = 2, Medium = 4, High = 8, VeryHigh = 16
     };
 
     struct NoggitApplicationConfiguration
@@ -27,6 +27,7 @@ namespace Noggit::Application {
         std::string ApplicationThemePath;
         std::string ApplicationListFilePath;
         std::string ApplicationDatabaseDefinitionsPath;
+        std::string ApplicationNoggitDefinitionsPath = "noggit-definitions"; // default for compatibility with older config files
         NoggitApplicationGraphicsConfiguration GraphicsConfiguration;
         NoggitApplicationLoggingConfiguration LoggingConfiguration;
     };

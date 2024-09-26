@@ -90,11 +90,11 @@ namespace Noggit::Application
 	  auto noggitProjectPath = applicationConfiguration.ApplicationProjectPath;
 	  if (!std::filesystem::exists(noggitProjectPath))
 	  {
-		  std::filesystem::create_directory(noggitProjectPath);
+		  // std::filesystem::create_directory(noggitProjectPath);
 		  // Log << "Noggit Project Folder Not Loaded! Creating..." << std::endl;
 	  }
 
-	  auto listFilePath = applicationConfiguration.ApplicationListFilePath;
+	  auto& listFilePath = applicationConfiguration.ApplicationListFilePath;
 	  if (!std::filesystem::exists(listFilePath))
 	  {
 		  // LogError << "Unable to find listfile! please reinstall Noggit Red, or download from wow.tools" << std::endl;
@@ -102,13 +102,21 @@ namespace Noggit::Application
 
 	  Log << "Listfile found! : " << listFilePath << std::endl;
 
-	  auto databaseDefinitionPath = applicationConfiguration.ApplicationDatabaseDefinitionsPath;
+	  auto& databaseDefinitionPath = applicationConfiguration.ApplicationDatabaseDefinitionsPath;
 	  if (!std::filesystem::exists(databaseDefinitionPath))
 	  {
 		  LogError << "Unable to find database definitions! please reinstall Noggit Red, or download from wow.tools" << std::endl;
 	  }
+		else
+		{
+			Log << "Database Definitions found! : " << databaseDefinitionPath << std::endl;
+		}
 
-	  Log << "Database Definitions found! : " << databaseDefinitionPath << std::endl;
+		auto& noggitDefinitionPath = applicationConfiguration.ApplicationNoggitDefinitionsPath;
+		if (!std::filesystem::exists(noggitDefinitionPath))
+		{
+			LogError << "Unable to find noggit definitions! " << noggitDefinitionPath << std::endl;
+		}
 
 	  // Check MSVC redistribuable version
 	  const QString registryPath = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\";
@@ -125,7 +133,7 @@ namespace Noggit::Application
 	  };
 
 	  // confirmed crashes with v14.30.30704.00 and v14.36.32532.00
-	  const int required_version = 37;
+	  const int required_version = 38;
 
 	  bool redist_found = false;
 	  foreach (const QString & version, versions) {
@@ -182,11 +190,13 @@ namespace Noggit::Application
 	  QSettings app_settings;
 	  bool vsync = app_settings.value("vsync", false).toBool();
 	  format.setSwapInterval(vsync ? 1 : applicationConfiguration.GraphicsConfiguration.SwapChainInternal);
+		if (applicationConfiguration.GraphicsConfiguration.SwapChainInternal > 1)
+			LogDebug << "WARNING : SwapChainInternal setting is set to more than 1, this will significantly slow down rendering." << std::endl;
 	  // TODO. old config files used 16 so just ignore them, could implement a version check of the config file to update it
 	  format.setDepthBufferSize(24); // applicationConfiguration.GraphicsConfiguration.DepthBufferSize
-	  auto deflt = format.depthBufferSize();
 	  bool doAntiAliasing = app_settings.value("anti_aliasing", false).toBool();
-	  format.setSamples(doAntiAliasing ? 4 : applicationConfiguration.GraphicsConfiguration.SamplesCount); // default is 0, no AA
+		// Multisample anti-aliasing (MSAA). 0x, 2x, 4x, 8x or 16x. Default is 0, no AA
+	  format.setSamples(doAntiAliasing ? 4 : applicationConfiguration.GraphicsConfiguration.SamplesCount); 
 
 	  // context creation seems to get stuck sometimes, this ensure the app is killed
 	  // otherwise it's wasting cpu resources and is annoying when developping

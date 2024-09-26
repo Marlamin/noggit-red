@@ -3016,34 +3016,7 @@ void MapView::tick (float dt)
   // note : selection update most commonly happens in mouseReleaseEvent, which sets leftMouse to false
   bool selection_changed = false;
 
-  Noggit::TickParameters tickParams
-  {
-      .displayMode = _display_mode,
-      .underMap = _world->isUnderMap(_cursor_pos),
-      .left_mouse = leftMouse,
-      .right_mouse = rightMouse,
-      .mod_shift_down = _mod_shift_down,
-      .mod_ctrl_down = _mod_ctrl_down,
-      .mod_alt_down = _mod_alt_down,
-      .mod_num_down = _mod_num_down,
-      .dir = dir,
-      .dirUp = dirUp,
-      .dirRight = dirRight,
-  };
-
-  activeTool()->onTick(dt, tickParams);
-
-  auto currentSelection = _world->current_selection();
-  if (_world->has_selection())
-  {
-    // update rotation editor if the selection has changed
-    if (lastSelected != currentSelection)
-    {
-      selection_changed = true;
-      emit rotationChanged();
-    }
-  }
-
+  // update camera
   if (_display_mode == display_mode::in_3D)
   {
     if (turn)
@@ -3112,7 +3085,35 @@ void MapView::tick (float dt)
     }
   }
 
-  // _minimap->update(); // causes massive performance issues
+  // _minimap->update(); // causes massive performance issues, should only be done when moving
+  Noggit::TickParameters tickParams
+  {
+      .displayMode = _display_mode,
+      .underMap = _world->isUnderMap(_cursor_pos),
+      .camera_moved_since_last_draw = _camera_moved_since_last_draw,
+      .left_mouse = leftMouse,
+      .right_mouse = rightMouse,
+      .mod_shift_down = _mod_shift_down,
+      .mod_ctrl_down = _mod_ctrl_down,
+      .mod_alt_down = _mod_alt_down,
+      .mod_num_down = _mod_num_down,
+      .dir = dir,
+      .dirUp = dirUp,
+      .dirRight = dirRight,
+  };
+
+  activeTool()->onTick(dt, tickParams);
+
+  auto currentSelection = _world->current_selection();
+  if (_world->has_selection())
+  {
+    // update rotation editor if the selection has changed
+    if (lastSelected != currentSelection)
+    {
+      selection_changed = true;
+      emit rotationChanged();
+    }
+  }
 
   _world->time += this->mTimespeed * dt;
   _world->animtime += dt * 1000.0f;
@@ -4238,12 +4239,28 @@ void MapView::onSettingsSave()
   _camera.fov(math::degrees(_settings->value("fov", 54.f).toFloat()));
   _debug_cam.fov(math::degrees(_settings->value("fov", 54.f).toFloat()));
 
+  int _fps_limit = _settings->value("fps_limit", 60).toInt();
+  int _frametime = static_cast<int>((1.f / static_cast<float>(_fps_limit)) * 1000.f);
+  // _update_every_event_loop.start(_frametime);
+  _update_every_event_loop.setInterval(_frametime);
+
+  bool vsync = _settings->value("vsync", false).toBool();
+  format().setSwapInterval(vsync ? 1 
+                           : Noggit::Application::NoggitApplication::instance()->getConfiguration()->GraphicsConfiguration.SwapChainInternal);
+
+  bool doAntiAliasing = _settings->value("anti_aliasing", false).toBool();
+  format().setSamples(doAntiAliasing ? 4 
+                      : Noggit::Application::NoggitApplication::instance()->getConfiguration()->GraphicsConfiguration.SamplesCount);
+
+  // force updating rendering
+  _camera_moved_since_last_draw = true;
+
 }
 
 void MapView::ShowContextMenu(QPoint pos) 
 {
     // QApplication::startDragDistance() is 10
-    auto mouse_moved = (QApplication::startDragDistance() / 5) < (_right_click_pos - pos).manhattanLength();
+    bool mouse_moved = (QApplication::startDragDistance() / 5) < (_right_click_pos - pos).manhattanLength();
 
     // don't show context menu if dragging mouse
     if (mouse_moved || ImGuizmo::IsUsing())

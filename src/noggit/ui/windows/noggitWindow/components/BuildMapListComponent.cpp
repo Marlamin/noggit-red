@@ -12,7 +12,10 @@ using namespace Noggit::Ui::Component;
 
 void BuildMapListComponent::buildMapList(Noggit::Ui::Windows::NoggitWindow* parent)
 {
-  parent->_continents_table->clear();
+  {
+    QSignalBlocker const blocker(parent->_continents_table);
+    parent->_continents_table->clear(); // // calls itemSelectionChanged
+  }
 
   const auto& table = std::string("Map");
   auto map_table = parent->_project->ClientDatabase->LoadTable(table, readFileAsIMemStream);

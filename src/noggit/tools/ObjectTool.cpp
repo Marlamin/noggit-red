@@ -755,7 +755,7 @@ namespace Noggit
         if (params.button == Qt::MouseButton::LeftButton && !params.mod_ctrl_down)
         {
             _area_selection->setGeometry(QRect(_drag_start_pos, QSize()));
-            _area_selection->show();
+            // _area_selection->show(); // instead show in mousemove when it is big enough
             _drag_start_pos = params.mouse_position;
             mapView()->invalidate();
         }
@@ -779,9 +779,10 @@ namespace Noggit
             return;
         }
 
-        auto drag_end_pos = params.mouse_position;
-
-        if (_drag_start_pos != drag_end_pos && !ImGuizmo::IsUsing())
+        QPoint drag_end_pos = params.mouse_position;
+        int drag_distance_threshold = QApplication::startDragDistance(); // QApplication::startDragDistance() is 10
+        /*_drag_start_pos != drag_end_pos*/
+        if (!ImGuizmo::IsUsing() && (_drag_start_pos - drag_end_pos).manhattanLength() > drag_distance_threshold && _area_selection->isVisible())
         {
             const std::array<glm::vec2, 2> selection_box
             {
@@ -791,7 +792,7 @@ namespace Noggit
             // _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), objectEditor->drag_selection_depth(), _camera.position);
             mapView()->selectObjects(selection_box, 3000.0f);
         }
-        else // Do normal selection when we just clicked
+        else // Do normal selection when we just clicked, or selection box is too small
         {
             mapView()->doSelection(false);
         }
@@ -826,10 +827,23 @@ namespace Noggit
                 _objectEditor->changeRadius(params.relative_movement.dx() / XSENS);
             }
 
-            if (!params.mod_alt_down && params.displayMode == display_mode::in_3D && !ImGuizmo::IsUsing())
+            if (!params.mod_alt_down && !params.mod_ctrl_down && params.displayMode == display_mode::in_3D && !ImGuizmo::IsUsing())
             {
-                _area_selection->setGeometry(QRect(_drag_start_pos, params.mouse_position).normalized());
-                mapView->invalidate();
+
+                // check if mouse moved enough to make the rectangle appear and enable selection
+                if (_area_selection->isHidden())
+                {
+                    int drag_distance_threshold = QApplication::startDragDistance(); // QApplication::startDragDistance() is 10
+                    if ((_drag_start_pos - params.mouse_position).manhattanLength() > drag_distance_threshold)
+                    {
+                        _area_selection->show();
+                    }
+                }
+                if (_area_selection->isVisible())
+                {
+                    _area_selection->setGeometry(QRect(_drag_start_pos, params.mouse_position).normalized());
+                    mapView->invalidate();
+                }
             }
 
             if (params.mod_shift_down || params.mod_ctrl_down)

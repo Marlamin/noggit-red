@@ -417,11 +417,11 @@ void AssetBrowserWidget::updateModelData()
 {
   _model->clear();
   Model::TreeManager tree_mgr =  Model::TreeManager(_model);
-  for (auto& key_pair : Noggit::Application::NoggitApplication::instance()->clientData()->listfile()->pathToFileDataIDMap())
+  for (auto const& key_pair : Noggit::Application::NoggitApplication::instance()->clientData()->listfile()->pathToFileDataIDMap())
   {
-    std::string const& filename = key_pair.first;
+    // std::string const& filename = key_pair.first;
 
-    QString q_path = QString(filename.c_str());
+    QString const q_path = QString(key_pair.first.c_str());
 
     if (!( (ui->checkBox_WMOs->isChecked() && q_path.endsWith(".wmo")  && !_wmo_group_and_lod_regex.match(q_path).hasMatch())
         || (ui->checkBox_M2s->isChecked() && q_path.endsWith(".m2")) 
@@ -431,7 +431,7 @@ void AssetBrowserWidget::updateModelData()
     if (!validateBrowseMode(q_path))
         continue;
 
-    tree_mgr.addItem(filename.c_str());
+    tree_mgr.addItem(q_path);
   }
 
 

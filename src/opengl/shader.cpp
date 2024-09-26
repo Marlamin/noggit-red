@@ -278,6 +278,14 @@ namespace OpenGL
 
       gl.uniform3fv (loc, static_cast<GLsizei>(value.size()), glm::value_ptr(value[0]));
     }
+    void use_program::uniform(std::string const& name, std::array<glm::vec3, 8> const& value)
+    {
+      GLuint loc = uniform_location(name);
+      if (loc < 0)
+        return;
+
+      gl.uniform3fv(loc, static_cast<GLsizei>(8), glm::value_ptr(value[0]));
+    }
     void use_program::uniform(std::string const& name, std::vector<glm::vec4> const& value)
     {
         GLuint loc = uniform_location(name);

@@ -209,6 +209,11 @@ void ModelInstance::recalcExtents()
 
   size_cat = glm::distance(bounding_of_rotated_points.max, bounding_of_rotated_points.min);
 
+  // Calculate bounding radius
+  // glm::vec3 center = (extents[0] + extents[1]) / 2.0f;
+  glm::vec3 halfExtents = (extents[1] - extents[0]) / 2.0f;
+  bounding_radius = glm::length(halfExtents);
+
   _need_recalc_extents = false;
 }
 

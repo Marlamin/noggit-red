@@ -448,7 +448,7 @@ void TileRender::doTileOcclusionQuery(OpenGL::Scoped::use_program& occlusion_sha
 
   _tile_occlusion_query_in_use = true;
   gl.beginQuery(GL_ANY_SAMPLES_PASSED, _tile_occlusion_query);
-  occlusion_shader.uniform("aabb", _map_tile->_combined_extents.data(), _map_tile->_combined_extents.size());
+  occlusion_shader.uniform("aabb", _map_tile->getCombinedExtents().data(), _map_tile->getCombinedExtents().size());
   gl.drawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, nullptr);
   gl.endQuery(GL_ANY_SAMPLES_PASSED);
 }
@@ -466,7 +466,7 @@ bool TileRender::getTileOcclusionQueryResult(glm::vec3 const& camera)
   if (!_uploaded)
     return !_tile_occluded;
 
-  if (misc::pointInside(camera, _map_tile->_combined_extents))
+  if (misc::pointInside(camera, _map_tile->getCombinedExtents()))
   {
     _tile_occlusion_query_in_use = false;
     return true;
