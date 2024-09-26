@@ -3,6 +3,7 @@
 #include <noggit/World.h>
 #include <noggit/World.inl>
 
+#include <math/trig.hpp>
 #include <math/frustum.hpp>
 #include <noggit/Brush.h> // brush
 #include <noggit/DBC.h>
@@ -3591,6 +3592,8 @@ void World::select_objects_in_area(
         this->reset_selection();
     }
 
+    glm::mat4 VPmatrix = projection * view;
+
     for (auto& map_object : _loaded_tiles_buffer)
     {
         MapTile* tile = map_object.second;
@@ -3600,6 +3603,30 @@ void World::select_objects_in_area(
             break;
         }
 
+        // some optimizations to see if the tile is in selection before iterating objects in it
+        {
+            // tile not in screen, skip
+            // frustum.intersects(tile_extents[1], tile_extents[0])
+            if (tile->renderer()->isFrustumCulled())
+                continue;
+
+            // skip if no objects
+            if (tile->getObjectInstances().empty())
+                continue;
+
+            // check if tile combined extents are within selection rectangle
+            bool valid = false;
+            auto screenBounds = misc::getAABBScreenBounds(tile->getCombinedExtents(), VPmatrix
+              , viewport_width, viewport_height, valid);
+
+            // this only works if all tile points are in screen space
+            if (valid && !math::boxIntersects(screenBounds[0], screenBounds[1]
+              , selection_box[0], selection_box[1]))
+            {
+                continue;
+            }
+        }
+
         for (auto& pair : tile->getObjectInstances())
         {
             auto objectType = pair.second[0]->which();
@@ -3607,8 +3634,7 @@ void World::select_objects_in_area(
             {
                 for (auto& instance : pair.second)
                 {
-                    // auto transform_mat = instance->transformMatrix();
-                    glm::mat4 VPmatrix = projection * view;
+                    //  Old code to check position point instead of bound box
                     glm::vec4 screenPos = VPmatrix * glm::vec4(instance->pos, 1.0f);
 
                     // if screenPos.w < 0.0f, object is behind camera
@@ -3619,18 +3645,34 @@ void World::select_objects_in_area(
                     screenPos.x /= screenPos.w;
                     screenPos.y /= screenPos.w;
 
-                    screenPos.x = (screenPos.x + 1.0f) / 2.0f;
-                    screenPos.y = (screenPos.y + 1.0f) / 2.0f;
-                    screenPos.y = 1 - screenPos.y;
-
-                    screenPos.x *= viewport_width;
-                    screenPos.y *= viewport_height;
+                    // Convert normalized device coordinates (NDC) to screen coordinates
+                    screenPos.x = (screenPos.x + 1.0f) * 0.5f * viewport_width;
+                    screenPos.y = (1.0f - (screenPos.y + 1.0f) * 0.5f) * viewport_height;
+                    
                     
                     float depth = glm::distance(camera_position, instance->pos);
                     if (depth <= user_depth)
                     {
+                        bool do_selection = false;
+
+                        // check if position(origin) point is within rectangle first because it is much cheaper
                         const glm::vec2 screenPos2D = glm::vec2(screenPos);
                         if (misc::pointInside(screenPos2D, selection_box))
+                          do_selection = true;
+
+                        // if it's not, check again if bounding box is within selection
+                        if (!do_selection)
+                        {
+                          bool valid = false;
+                          auto screenBounds = misc::getAABBScreenBounds(instance->getExtents(), VPmatrix
+                          , viewport_width, viewport_height, valid, 0.5f);
+                          
+                          if (valid && math::boxIntersects(screenBounds[0], screenBounds[1]
+                                                          , selection_box[0], selection_box[1]))
+                            do_selection = true;
+                        }
+
+                        if (do_selection)
                         {
                             unsigned int uid = instance->uid;
                             auto modelInstance = _model_instance_storage.get_instance(uid);
