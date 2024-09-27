@@ -100,6 +100,7 @@ public:
 
   std::atomic<bool> changed;
 
+  bool _was_rendered_last_frame = false;
 
   bool intersect (math::ray const&, selection_result*);
 
@@ -217,7 +218,6 @@ private:
   bool _load_models;
   bool _load_textures;
   World* _world;
-
 
   Noggit::Rendering::TileRender _renderer;
   Noggit::Rendering::FlightBoundsRender _fl_bounds_render;

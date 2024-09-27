@@ -558,7 +558,8 @@ void World::set_current_selection(selection_type entry)
   add_to_selection(entry);
 }
 
-void World::add_to_selection(selection_type entry, bool skip_group)
+// updating pivot is expensive, in mass selection situation, it should only be updated once after operation is done
+void World::add_to_selection(selection_type entry, bool skip_group, bool update_pivot)
 {
   ZoneScoped;
   if (entry.index() == eEntry_Object)
@@ -583,10 +584,12 @@ void World::add_to_selection(selection_type entry, bool skip_group)
     }
   }
   _current_selection.push_back(entry);
-  update_selection_pivot();
+
+  if (update_pivot)
+    update_selection_pivot();
 }
 
-void World::remove_from_selection(selection_type entry, bool skip_group)
+void World::remove_from_selection(selection_type entry, bool skip_group, bool update_pivot)
 {
   ZoneScoped;
   std::vector<selection_type>::iterator position = std::find(_current_selection.begin(), _current_selection.end(), entry);
@@ -613,11 +616,12 @@ void World::remove_from_selection(selection_type entry, bool skip_group)
     }
 
     _current_selection.erase(position);
-    update_selection_pivot();
+    if (update_pivot)
+      update_selection_pivot();
   }
 }
 
-void World::remove_from_selection(std::uint32_t uid, bool skip_group)
+void World::remove_from_selection(std::uint32_t uid, bool skip_group, bool update_pivot)
 {
   ZoneScoped;
   for (auto it = _current_selection.begin(); it != _current_selection.end(); ++it)
@@ -645,8 +649,8 @@ void World::remove_from_selection(std::uint32_t uid, bool skip_group)
                 }
             }
         }
-
-        update_selection_pivot();
+        if (update_pivot)
+          update_selection_pivot();
         return;
     }
 
@@ -2041,6 +2045,10 @@ void World::remove_models_if_needed(std::vector<uint32_t> const& uids)
   {
     reset_selection();
   }
+  else
+  {
+    update_selection_pivot();
+  }
   /*
   if (uids.size())
   {
@@ -3030,14 +3038,15 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
   {
       if (remove)
       {
-          remove_from_selection(obj);
+          remove_from_selection(obj, false, false);
       }
       else
       {
           if (!is_selected(obj))
-            add_to_selection(obj);
+            add_to_selection(obj, false, false);
       }
   }
+  update_selection_pivot();
 }
 
 float World::getMaxTileHeight(const TileIndex& tile)
@@ -3576,14 +3585,14 @@ void World::notifyTileRendererOnSelectedTextureChange()
 }
 
 void World::select_objects_in_area(
-    const std::array<glm::vec2, 2> selection_box, 
+    const std::array<glm::vec2, 2>& selection_box, 
     bool reset_selection,
-    glm::mat4x4 view,
-    glm::mat4x4 projection,
+    const glm::mat4x4& view,
+    const glm::mat4x4& projection,
     int viewport_width, 
     int viewport_height,
     float user_depth,
-    glm::vec3 camera_position)
+    const glm::vec3& camera_position)
 {
     ZoneScoped;
     
@@ -3593,6 +3602,15 @@ void World::select_objects_in_area(
     }
 
     glm::mat4 VPmatrix = projection * view;
+
+    constexpr int max_position_raycast_processing = 10000;
+    constexpr int max_bounds_raycast_processing = 5000; // when selecting large amount of objects, avoid doing complex ray calculations to not freeze
+    constexpr float bounds_check_scale = 0.8f; // size of the bounding box to use when interesecting withs election rectangle
+    constexpr float obj_raycast_min_size = 30.0f; // screen size rectangle lenght in pixels
+
+    int processed_obj_count = 0;
+    // int debug_count_obj_min_size = 0;
+    // int debug_count_obj_min_size_not = 0;
 
     for (auto& map_object : _loaded_tiles_buffer)
     {
@@ -3607,17 +3625,19 @@ void World::select_objects_in_area(
         {
             // tile not in screen, skip
             // frustum.intersects(tile_extents[1], tile_extents[0])
-            if (tile->renderer()->isFrustumCulled())
+            if (!tile->_was_rendered_last_frame)
                 continue;
 
+            // check if tile combined extents are within selection rectangle
+            // note very useful because cases where a tile is fully rendered and not selected are very rare
+ 
             // skip if no objects
             if (tile->getObjectInstances().empty())
                 continue;
 
-            // check if tile combined extents are within selection rectangle
             bool valid = false;
             auto screenBounds = misc::getAABBScreenBounds(tile->getCombinedExtents(), VPmatrix
-              , viewport_width, viewport_height, valid);
+              , viewport_width, viewport_height, valid, 1.0f);
 
             // this only works if all tile points are in screen space
             if (valid && !math::boxIntersects(screenBounds[0], screenBounds[1]
@@ -3629,81 +3649,235 @@ void World::select_objects_in_area(
 
         for (auto& pair : tile->getObjectInstances())
         {
-            auto objectType = pair.second[0]->which();
-            if (objectType == eMODEL || objectType == eWMO)
-            {
-                for (auto& instance : pair.second)
-                {
-                    //  Old code to check position point instead of bound box
-                    glm::vec4 screenPos = VPmatrix * glm::vec4(instance->pos, 1.0f);
+            [[unlikely]]
+            if (!pair.first->finishedLoading())
+              continue;
 
-                    // if screenPos.w < 0.0f, object is behind camera
-                    // check object bounding radius instead to compare the object's size, if it clips with the camera.
-                    if (screenPos.w < -instance->getBoundingRadius())
+            auto objectType = pair.second[0]->which();
+
+            [[unlikely]]
+            if (!(objectType == eMODEL || objectType == eWMO))
+              continue;
+
+            for (auto& instance : pair.second)
+            {
+                // problem : M2s have additional sized based culling with >isInRenderDist()
+                // if (!instance->_rendered_last_frame)
+                //   continue;
+
+                // unsigned int uid = instance->uid;
+                // auto modelInstance = _model_instance_storage.get_instance(uid);
+                // [[unlikely]]
+                // if (!modelInstance || !modelInstance.value().index() == eEntry_Object)
+                //   continue;
+                // auto obj = std::get<selected_object_type>(modelInstance.value());
+
+                bool do_selection = false;
+
+                //  Old code to check position point instead of bound box
+                {
+                  glm::vec4 screenPos = VPmatrix * glm::vec4(instance->pos, 1.0f);
+
+                  // if screenPos.w < 0.0f, object is behind camera
+                  // check object bounding radius instead to compare the object's size, if it clips with the camera.
+                  if (screenPos.w < -instance->getBoundingRadius())
+                    continue;
+
+                  screenPos.x /= screenPos.w;
+                  screenPos.y /= screenPos.w;
+
+                  // Convert normalized device coordinates (NDC) to screen coordinates
+                  screenPos.x = (screenPos.x + 1.0f) * 0.5f * viewport_width;
+                  screenPos.y = (1.0f - (screenPos.y + 1.0f) * 0.5f) * viewport_height;
+                  
+                  
+                  float distance = glm::distance(camera_position, instance->pos);
+                  if (distance > user_depth)
+                    continue;
+
+                  // check if position(origin) point is within rectangle first because it is much cheaper
+                  {
+                    const glm::vec2 screenPos2D = glm::vec2(screenPos);
+                    if (misc::pointInside(screenPos2D, selection_box))
+                    {
+                      processed_obj_count++;
+
+                      // check if point is occluded by terrain
+                      if (processed_obj_count < max_position_raycast_processing
+                        && !is_point_occluded_by_terrain(instance->pos, view, VPmatrix, viewport_width, viewport_height, camera_position))
+                      {
+                        do_selection = true;
+                      }
+                      // else
+                      //   bool debug_breakpoint = true;
+                    }
+                  }
+                }
+
+                // if it's not, check again if bounding box is within selection
+                if (!do_selection && instance->_rendered_last_frame && (processed_obj_count < max_bounds_raycast_processing) )
+                {
+                  bool valid = false;
+                  auto screenBounds = misc::getAABBScreenBounds(instance->getExtents(), VPmatrix
+                    , viewport_width, viewport_height, valid, 0.75f);
+                    
+                  if (valid && math::boxIntersects(screenBounds[0], screenBounds[1]
+                    , selection_box[0], selection_box[1]))
+                  {
+                    // do_selection = true;
+                  }
+                  else
+                    continue;
+
+                  // Optimization : Only do raycast bounds checks for object that take enough screen space
+                  if (!do_selection)
+                  {
+                    if (glm::distance(screenBounds[0], screenBounds[1]) < obj_raycast_min_size)
+                    {
+                      // debug_count_obj_min_size++;
+                      continue;
+                    }
+                    else
+                    {
+                      // debug_count_obj_min_size_not++;
+                    }
+                  }
+                }
+
+                // Occlusion test on object's corners (that are in selection box)
+                // uses ray casting, very expensive
+                if (!do_selection)
+                {
+                  math::aabb obj_aabb(instance->getExtents()[0], instance->getExtents()[1]);
+                  auto obj_aabb_corners = obj_aabb.all_corners();
+
+                  // int required_num_unoccluded_corers = 6; // require 6 of 8 corners to not be occluded
+                  bool object_occluded = true;
+
+                  for (const auto& corner : obj_aabb_corners)
+                  {
+                    // TODO : only need to do max top left and max top right in 2d instead of all corners?
+
+                    // only process points that are within selection rectangle
+                    bool point_valid = false;
+                    auto point_screen_pos = misc::projectPointToScreen(corner, VPmatrix, viewport_width, viewport_height, point_valid);
+                    if (!point_valid)
+                      continue;
+                    if (!misc::pointInside(point_screen_pos, selection_box))
                       continue;
 
-                    screenPos.x /= screenPos.w;
-                    screenPos.y /= screenPos.w;
 
-                    // Convert normalized device coordinates (NDC) to screen coordinates
-                    screenPos.x = (screenPos.x + 1.0f) * 0.5f * viewport_width;
-                    screenPos.y = (1.0f - (screenPos.y + 1.0f) * 0.5f) * viewport_height;
-                    
-                    
-                    float depth = glm::distance(camera_position, instance->pos);
-                    if (depth <= user_depth)
+                    bool corner_occluded = is_point_occluded_by_terrain(corner, view, VPmatrix, viewport_width, viewport_height, camera_position);
+
+                    if (!corner_occluded)
                     {
-                        bool do_selection = false;
+                      object_occluded = false;
+                      break;
+                    }
+                    // object_occluded = true;
+                  }
+                
+                  do_selection = !object_occluded;
+                }
 
-                        // check if position(origin) point is within rectangle first because it is much cheaper
-                        const glm::vec2 screenPos2D = glm::vec2(screenPos);
-                        if (misc::pointInside(screenPos2D, selection_box))
-                          do_selection = true;
+                if (!do_selection)
+                  continue;
 
-                        // if it's not, check again if bounding box is within selection
-                        if (!do_selection)
-                        {
-                          bool valid = false;
-                          auto screenBounds = misc::getAABBScreenBounds(instance->getExtents(), VPmatrix
-                          , viewport_width, viewport_height, valid, 0.5f);
-                          
-                          if (valid && math::boxIntersects(screenBounds[0], screenBounds[1]
-                                                          , selection_box[0], selection_box[1]))
-                            do_selection = true;
-                        }
+                auto& obj = instance;
+                auto which = obj->which();
+                if (which == eWMO)
+                {
+                    auto model_instance = static_cast<WMOInstance*>(obj);
 
-                        if (do_selection)
-                        {
-                            unsigned int uid = instance->uid;
-                            auto modelInstance = _model_instance_storage.get_instance(uid);
-                            if (modelInstance && modelInstance.value().index() == eEntry_Object) {
-                                auto obj = std::get<selected_object_type>(modelInstance.value());
-                                auto which = std::get<selected_object_type>(modelInstance.value())->which();
-                                if (which == eWMO)
-                                {
-                                    auto model_instance = static_cast<WMOInstance*>(obj);
+                    if (!is_selected(obj) && !model_instance->wmo->is_hidden())
+                    {
+                        this->add_to_selection(obj, false, false);
+                    }
+                }
+                else if (which == eMODEL)
+                {
+                    auto model_instance = static_cast<ModelInstance*>(obj);
 
-                                    if (!is_selected(obj) && !model_instance->wmo->is_hidden())
-                                    {
-                                        this->add_to_selection(obj);
-                                    }
-                                }
-                                else if (which == eMODEL)
-                                {
-                                    auto model_instance = static_cast<ModelInstance*>(obj);
-
-                                    if (!is_selected(obj) && !model_instance->model->is_hidden())
-                                    {
-                                        this->add_to_selection(obj);
-                                    }
-                                }
-                            }
-                        }
+                    if (!is_selected(obj) && !model_instance->model->is_hidden())
+                    {
+                        this->add_to_selection(obj, false, false);
                     }
                 }
             }
         }
     }
+
+    this->update_selection_pivot();
+}
+
+
+bool World::is_point_occluded_by_terrain(const glm::vec3& point,
+  const glm::mat4x4& view,
+  const glm::mat4& VPmatrix,
+  float viewport_width,
+  float viewport_height,
+  const glm::vec3& camera_position)
+{
+  /*
+  bool point_valid = false;
+  auto point_screen_pos = misc::projectPointToScreen(point, VPmatrix, viewport_width, viewport_height, point_valid);
+  
+  if (!point_valid)
+  {
+    return true;
+  }*/
+
+  math::ray ray(camera_position, point - camera_position); // 3d display mode only.
+
+  // intersect only terrain with a ray to object's position
+  selection_result terrain_intersect_results
+  (intersect
+  (glm::transpose(view)
+    , ray
+    , true
+    , false
+    , true
+    , false
+    , false
+    , false
+    , false
+  )
+  );
+
+  float distance = glm::distance(camera_position, point);
+
+  // bool point_occluded = false;
+  for (const auto& terrain_hit : terrain_intersect_results)
+  {
+    // if terrain hit is further, skip
+    if (terrain_hit.first + 10.0f > distance) // add some leeway, skip hits that are too close, especially for the terrain at object's origin
+      continue;
+
+    return true;
+
+    auto const& hitChunkInfo = std::get<selected_chunk_type>(terrain_hit.second);
+
+    /*
+    // check if terrain hit is higher than the object's corner in 2D screen space
+    bool point_valid = false;
+    auto terrain_hit_screen_pos = misc::projectPointToScreen(hitChunkInfo.position, VPmatrix, viewport_width, viewport_height, point_valid);
+
+    if (!point_valid)
+    {
+      continue;
+    }
+
+    // if any terrain intersection point is above point, it means point is occluded
+    if (point_screen_pos.y > terrain_hit_screen_pos.y)
+    {
+      return true;
+    }
+    */
+
+  }
+
+  // no terrain intersection point above point
+  return false;
 }
 
 void World::add_object_group_from_selection()

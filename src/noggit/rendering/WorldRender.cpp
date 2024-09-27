@@ -107,7 +107,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   unsigned tile_counter = 0;
   for (MapTile* tile : _world->mapIndex.loaded_tiles())
   {
-    tile->recalcCombinedExtents();
+    tile->_was_rendered_last_frame = false;
 
     if (minimap_render)
     {
@@ -226,6 +226,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
           , frustum
           , _cull_distance
           , _world->animtime
+          , _world->time
           , draw_skybox
           , _outdoor_light_stats
       );
@@ -304,6 +305,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
         );
 
         _world->_n_rendered_tiles++;
+        tile->_was_rendered_last_frame = true;
 
       }
 
@@ -383,10 +385,20 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     // TODO: subject to potential generalization
     for (auto& pair : tile->getObjectInstances())
     {
+      if (!pair.first->finishedLoading())
+        continue;
+
       if (pair.second[0]->which() == eMODEL)
       {
         if (!draw_models && !(minimap_render && minimap_render_settings->use_filters))
+        {
+          // can optimize this with a tile.rendered_m2s_lastframe or just check if models are enabled
+          for (auto& instance : pair.second)
+          {
+            instance->_rendered_last_frame = false;
+          }
           continue;
+        }
 
         auto& instances = models_to_draw[reinterpret_cast<Model*>(pair.first)];
 
@@ -405,9 +417,12 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
         for (auto& instance : pair.second)
         {
+          instance->_rendered_last_frame = false;
+
           // do not render twice the cross-referenced objects twice
           if (instance->frame == frame)
           {
+            instance->_rendered_last_frame = true;
             continue;
           }
 
@@ -415,9 +430,20 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           auto m2_instance = static_cast<ModelInstance*>(instance);
 
-          if ((tile->renderer()->objectsFrustumCullTest() > 1 || m2_instance->isInFrustum(frustum)) && m2_instance->isInRenderDist(_cull_distance, camera_pos, display))
+          // experimental : if camera and object haven't moved/changed since last frame, we don't need to do frustum culling again
+          if (!camera_moved && !m2_instance->extentsDirty()/* && not_moved*/)
+          {
+            if (m2_instance->_rendered_last_frame)
+            {
+              instances.push_back(m2_instance->transformMatrix());
+              m2_instance->_rendered_last_frame = true;
+              continue; // skip visibility checks
+            }
+          }
+          if (m2_instance->isInRenderDist(_cull_distance, camera_pos, display) && (tile->renderer()->objectsFrustumCullTest() > 1 || m2_instance->isInFrustum(frustum)))
           {
             instances.push_back(m2_instance->transformMatrix());
+            m2_instance->_rendered_last_frame = true;
           }
 
         }
@@ -426,7 +452,13 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       else if (pair.second[0]->which() == eWMO)
       {
         if (!draw_wmo)
-            continue;
+        {
+          for (auto& instance : pair.second)
+          {
+            instance->_rendered_last_frame = false;
+          }
+          continue;
+        }
 
         // memory allocation heuristic. all objects will pass if tile is entirely in frustum.
         // otherwise we only allocate for a half
@@ -442,9 +474,12 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
         for (auto& instance : pair.second)
         {
+          instance->_rendered_last_frame = false;
+
           // do not render twice the cross-referenced objects twice
           if (instance->frame == frame)
           {
+            instance->_rendered_last_frame = true;
             continue;
           }
 
@@ -452,9 +487,20 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           auto wmo_instance = static_cast<WMOInstance*>(instance);
 
+          // experimental : if camera and object haven't moved/changed since last frame, we don't need to do frustum culling again
+          if (!camera_moved && !wmo_instance->extentsDirty()/* && not_moved*/)
+          {
+            if (wmo_instance->_rendered_last_frame)
+            {
+              wmos_to_draw.push_back(wmo_instance);
+              wmo_instance->_rendered_last_frame = true;
+              continue; // skip visibility checks
+            }
+          }
           if (tile->renderer()->objectsFrustumCullTest() > 1 || frustum.intersects(wmo_instance->getExtents()[1], wmo_instance->getExtents()[0]))
           {
             wmos_to_draw.push_back(wmo_instance);
+            wmo_instance->_rendered_last_frame = true;
 
               if (draw_wmo_doodads)
               {
@@ -831,7 +877,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
 
 
-        if (model->isInFrustum(frustum) && model->isInRenderDist(_cull_distance, camera_pos, display))
+        if (model->isInRenderDist(_cull_distance, camera_pos, display) && model->isInFrustum(frustum))
         {
           bool is_selected = false;
           /*

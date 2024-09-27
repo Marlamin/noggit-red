@@ -111,5 +111,5 @@ private:
     // bool _need_recalc_extents = false;
 };
 
-using selection_entry = std::pair<float, selection_type>;
+using selection_entry = std::pair<float, selection_type>; // float = hit distance
 using selection_result = std::vector<selection_entry>;

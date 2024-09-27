@@ -55,6 +55,12 @@ namespace misc
     clipSpacePos.x = (ndcX + 1.0f) * 0.5f * viewport_width;
     clipSpacePos.y = (1.0f - (ndcY + 1.0f) * 0.5f) * viewport_height;
 
+    // from MapView::normalized_device_coords
+    // x 2.0f * x / viewport_width - 1.0f
+    // y 1.0f - 2.0f * y / viewport_height
+    // z 0.0f
+    // w 1.0f
+
     valid = true;
     return clipSpacePos;
   }

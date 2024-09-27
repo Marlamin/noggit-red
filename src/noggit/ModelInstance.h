@@ -90,6 +90,8 @@ public:
   bool isInFrustum(math::frustum const& frustum);
   bool isInRenderDist(const float& cull_distance, const glm::vec3& camera, display_mode display);
 
+  bool extentsDirty() { return _need_recalc_extents || !model->finishedLoading(); };
+
   [[nodiscard]]
   virtual glm::vec3 const& get_pos() const { return pos; }
 

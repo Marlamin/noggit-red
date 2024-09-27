@@ -86,6 +86,9 @@ public:
   unsigned int uid;
   int frame;
 
+  // Note : First, need to check if the tile that contained it was rendered too
+  bool _rendered_last_frame = false;
+
 protected:
   SceneObjectTypes _type;
 

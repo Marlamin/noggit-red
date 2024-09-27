@@ -11,13 +11,13 @@
 #include <noggit/TextureManager.h>
 #include <noggit/tool_enums.hpp>
 #include <noggit/ContextObject.hpp>
+#include <noggit/rendering/ModelRender.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.fwd.hpp>
 #include <ClientFile.hpp>
 #include <optional>
 #include <string>
-#include <vector>
-#include <noggit/rendering/ModelRender.hpp>
+#include <map>
 
 class Bone;
 class Model;
@@ -188,6 +188,8 @@ public:
   [[nodiscard]]
   Noggit::Rendering::ModelRender* renderer() { return &_renderer; }
 
+  uint32_t get_anim_lenght(int16_t anim_id) { return _animation_length[anim_id]; }
+
   // ===============================
   // Toggles
   // ===============================
@@ -276,5 +278,6 @@ private:
   Noggit::Rendering::ModelRender _renderer;
 
   bool _hidden = false;
+
 };
 
