@@ -35,6 +35,7 @@ namespace Noggit
     {
         display_mode displayMode = display_mode::in_3D;
         bool underMap = false;
+        bool camera_moved_since_last_draw = false;
 
         bool left_mouse = false;
         bool right_mouse = false;

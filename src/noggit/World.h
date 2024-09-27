@@ -136,9 +136,9 @@ public:
   // Unused in Red, models are now iterated by adt because of the occlusion check
   // std::unordered_map<std::string, std::vector<ModelInstance*>> get_models_by_filename() const& { return _models_by_filename;  } 
   void set_current_selection(selection_type entry);
-  void add_to_selection(selection_type entry, bool skip_group = false);
-  void remove_from_selection(selection_type entry, bool skip_group = false);
-  void remove_from_selection(std::uint32_t uid, bool skip_group = false);
+  void add_to_selection(selection_type entry, bool skip_group = false, bool update_pivot = true);
+  void remove_from_selection(selection_type entry, bool skip_group = false, bool update_pivot = true);
+  void remove_from_selection(std::uint32_t uid, bool skip_group = false, bool update_pivot = true);
   void reset_selection();
   void delete_selected_models();
   glm::vec3 get_ground_height(glm::vec3 pos);
@@ -398,20 +398,24 @@ public:
   unsigned getNumRenderedObjects() const { return _n_rendered_objects; };
 
   void select_objects_in_area(
-      const std::array<glm::vec2, 2> selection_box, 
+      const std::array<glm::vec2, 2>& selection_box, 
       bool reset_selection,
-      glm::mat4x4 view,
-      glm::mat4x4 projection,
+      const glm::mat4x4& view,
+      const glm::mat4x4& projection,
       int viewport_width,
       int viewport_height,
       float user_depth,
-      glm::vec3 camera_position
+      const glm::vec3& camera_position
   );
+
 
   void add_object_group_from_selection();
   void remove_selection_group(selection_group* group);
 
   void clear_selection_groups();
+
+private:
+  bool is_point_occluded_by_terrain(const glm::vec3& point, const glm::mat4x4& view, const glm::mat4& VPmatrix, float viewport_width, float viewport_height, const glm::vec3& camera_position);
 
 protected:
   // void update_models_by_filename();

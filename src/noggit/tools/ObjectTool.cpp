@@ -219,7 +219,7 @@ namespace Noggit
                             {
                                 if (model_instance.instance_model()->file_key().filepath() == model_name)
                                 {
-                                    world->add_to_selection(&model_instance);
+                                    world->add_to_selection(&model_instance, false, false);
                                 }
                             });
                     }
@@ -229,16 +229,11 @@ namespace Noggit
                                 if (wmo_instance.instance_model()->file_key().filepath() == model_name)
                                 {
                                     // objects_to_select.push_back(wmo_instance.uid);
-                                    world->add_to_selection(&wmo_instance);
+                                    world->add_to_selection(&wmo_instance, false, false);
                                 }
                             });
 
-                    // for (auto uid_it = objects_to_select.begin(); uid_it != objects_to_select.end(); uid_it++)
-                    // {
-                    //     auto instance = world->getObjectInstance(*uid_it);
-                    //     // if (!world->is_selected(instance))
-                    //         world->add_to_selection(instance);
-                    // }
+                    world->update_selection_pivot();
                 }
             });
 
@@ -782,7 +777,7 @@ namespace Noggit
         QPoint drag_end_pos = params.mouse_position;
         int drag_distance_threshold = QApplication::startDragDistance(); // QApplication::startDragDistance() is 10
         /*_drag_start_pos != drag_end_pos*/
-        if (!ImGuizmo::IsUsing() && (_drag_start_pos - drag_end_pos).manhattanLength() > drag_distance_threshold && _area_selection->isVisible())
+        if (!ImGuizmo::IsUsing() && (_drag_start_pos - drag_end_pos).manhattanLength() > drag_distance_threshold && _area_selection->isVisible() )
         {
             const std::array<glm::vec2, 2> selection_box
             {
@@ -790,7 +785,7 @@ namespace Noggit
                 glm::vec2(std::max(_drag_start_pos.x(), drag_end_pos.x()), std::max(_drag_start_pos.y(), drag_end_pos.y()))
             };
             // _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), objectEditor->drag_selection_depth(), _camera.position);
-            mapView()->selectObjects(selection_box, 3000.0f);
+            mapView()->selectObjects(selection_box, 10000.0f);
         }
         else // Do normal selection when we just clicked, or selection box is too small
         {
@@ -846,7 +841,7 @@ namespace Noggit
                 }
             }
 
-            if (params.mod_shift_down || params.mod_ctrl_down)
+            if (_area_selection->isHidden() && (params.mod_shift_down || params.mod_ctrl_down) )
             {
                 mapView->doSelection(false, true);
             }

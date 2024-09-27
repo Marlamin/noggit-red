@@ -197,7 +197,7 @@ namespace Noggit
 
     if (--_instance_count_per_uid.at(uid) == 0)
     {
-      _world->remove_from_selection(uid);
+      _world->remove_from_selection(uid, false, false);
 
       _instance_count_per_uid.erase(uid);
       _m2s.erase(uid);

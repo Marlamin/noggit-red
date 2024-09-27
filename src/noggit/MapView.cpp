@@ -3467,7 +3467,8 @@ glm::mat4x4 MapView::model_view(bool use_debug_cam) const
 
 glm::mat4x4 MapView::projection() const
 {
-  float far_z = _settings->value("view_distance", 2000.f).toFloat() + 1.f;
+  // float far_z = _settings->value("view_distance", 2000.f).toFloat() + 1.f;
+  float far_z = _world->renderer()->_view_distance + 1.0f;
 
   if (_display_mode == display_mode::in_2D)
   {
@@ -4019,7 +4020,7 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
                     glm::vec2(std::max(_drag_start_pos.x(), drag_end_pos.x()), std::max(_drag_start_pos.y(), drag_end_pos.y()))
                 };
                 // _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), objectEditor->drag_selection_depth(), _camera.position);
-                _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), 3000.0f, _camera.position);
+                _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), 50000.0f, _camera.position);
             }
             else // Do normal selection when we just clicked
             {
@@ -4071,7 +4072,10 @@ void MapView::save(save_mode mode)
     first_warning.setIcon(QMessageBox::Critical);
     first_warning.setWindowIcon(QIcon (":/icon"));
     first_warning.setWindowTitle("Some models couldn't be loaded");
-    first_warning.setText("Error:\nSome models could not be loaded and saving will cause collision and culling issues, would you still like to save ?");
+    first_warning.setText("Error:\nSome models could not be loaded and saving will cause collision and culling issues,"
+      " this is most likely caused by missing or corrupted models."
+      "\nCheck the log file for the list of model errors and fix them."
+      "\nWould you still like to save ?");
     // roles are swapped to force the user to pay attention and both are "accept" roles so that escape does nothing
     no = first_warning.addButton("No", QMessageBox::ButtonRole::AcceptRole);
     yes = first_warning.addButton("Yes", QMessageBox::ButtonRole::YesRole);
@@ -4230,7 +4234,7 @@ void MapView::onSettingsSave()
 
   _world->renderer()->markTerrainParamsUniformBlockDirty();
 
-  _world->renderer()->setViewDistance(_settings->value("view_distance", 2000.f).toFloat());
+  _world->renderer()->_view_distance = _settings->value("view_distance", 2000.f).toFloat();
 
   _world.get()->mapIndex.setLoadingRadius(_settings->value("loading_radius", 2).toInt());
   _world.get()->mapIndex.setUnloadDistance(_settings->value("unload_dist", 5).toInt());

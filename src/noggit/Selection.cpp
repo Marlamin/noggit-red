@@ -317,8 +317,9 @@ void selection_group::select_group()
         if (_world->is_selected(instance))
             continue;
 
-        _world->add_to_selection(obj.value(), true);
+        _world->add_to_selection(obj.value(), true, false);
     }
+    _world->update_selection_pivot();
 
     _is_selected = true;
 }
@@ -328,9 +329,9 @@ void selection_group::unselect_group()
     for (unsigned int obj_uid : _members_uid)
     {
         // don't need to check if it's not selected
-        _world->remove_from_selection(obj_uid, true);
+        _world->remove_from_selection(obj_uid, true, false);
     }
-
+    _world->update_selection_pivot();
     _is_selected = false;
 }
 

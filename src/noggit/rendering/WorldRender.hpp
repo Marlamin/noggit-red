@@ -86,7 +86,7 @@ namespace Noggit::Rendering
 
     [[nodiscard]] std::unique_ptr<Skies>& skies() { return _skies; };
 
-    void setViewDistance(float distance) { _view_distance = distance; };
+    float _view_distance;
 
   private:
 
@@ -109,7 +109,6 @@ namespace Noggit::Rendering
 
     World* _world;
     float _cull_distance;
-    float _view_distance;
 
     // shaders
     std::unique_ptr<OpenGL::program> _mcnk_program;;
@@ -134,6 +133,7 @@ namespace Noggit::Rendering
     Noggit::Rendering::Primitives::Sphere _sphere_render;
     Noggit::Rendering::Primitives::Square _square_render;
     Noggit::Rendering::Primitives::Line _line_render;
+    Noggit::Rendering::Primitives::WireBox _wirebox_render;
 
     // buffers
     OpenGL::Scoped::deferred_upload_buffers<8> _buffers;
