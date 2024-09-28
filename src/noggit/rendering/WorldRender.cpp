@@ -347,6 +347,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
   tsl::robin_map<Model*, std::vector<glm::mat4x4>> models_to_draw;
   std::vector<WMOInstance*> wmos_to_draw;
+  std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
 
   // frame counter loop. pretty hacky but works
   // this is used to make sure no object is processed more than once within a frame
@@ -426,9 +427,12 @@ void WorldRender::draw (glm::mat4x4 const& model_view
             continue;
           }
 
-          instance->frame = frame;
-
           auto m2_instance = static_cast<ModelInstance*>(instance);
+
+          if (!draw_hidden_models && m2_instance->model->is_hidden())
+            continue;
+
+          instance->frame = frame;
 
           // experimental : if camera and object haven't moved/changed since last frame, we don't need to do frustum culling again
           if (!camera_moved && !m2_instance->extentsDirty()/* && not_moved*/)
@@ -437,14 +441,21 @@ void WorldRender::draw (glm::mat4x4 const& model_view
             {
               instances.push_back(m2_instance->transformMatrix());
               m2_instance->_rendered_last_frame = true;
-              continue; // skip visibility checks
             }
           }
+
           if (m2_instance->isInRenderDist(_cull_distance, camera_pos, display) && (tile->renderer()->objectsFrustumCullTest() > 1 || m2_instance->isInFrustum(frustum)))
           {
             instances.push_back(m2_instance->transformMatrix());
             m2_instance->_rendered_last_frame = true;
           }
+
+          // if (render && !draw_models_with_box /* && !m2_instance->model->is_hidden()*/)
+          // {
+          //   // model box wasn't set in model draw(), add selection boxes
+          //   if (_world->selected_uids.contains(m2_instance->uid))
+          //     model_boxes_to_draw.emplace(m2_instance->model, instances.size());
+          // }
 
         }
 
@@ -483,9 +494,12 @@ void WorldRender::draw (glm::mat4x4 const& model_view
             continue;
           }
 
-          instance->frame = frame;
-
           auto wmo_instance = static_cast<WMOInstance*>(instance);
+
+          if (!draw_hidden_models && wmo_instance->wmo->is_hidden())
+            continue;
+
+          instance->frame = frame;
 
           // experimental : if camera and object haven't moved/changed since last frame, we don't need to do frustum culling again
           if (!camera_moved && !wmo_instance->extentsDirty()/* && not_moved*/)
@@ -618,8 +632,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
             continue;
         }
 
+        bool const is_selected = _world->selected_uids.contains(instance->uid);
 
-        if (draw_hidden_models || !is_hidden)
+        /*if (draw_hidden_models || !is_hidden)*/ // now checking when adding instances
         {
           instance->draw(wmo_program
               , model_view
@@ -630,7 +645,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
               , is_hidden
               , draw_wmo_doodads
               , draw_fog
-              , _world->current_selection()
+              , is_selected
               , _world->animtime
               , _skies->hasSkies()
               , display
@@ -722,8 +737,6 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       _world->update_models_by_filename();
     }*/
 
-    std::unordered_map<Model*, std::size_t> model_boxes_to_draw;
-
     {
       if (draw_models || draw_doodads_wmo || (minimap_render && minimap_render_settings->use_filters))
       {
@@ -773,7 +786,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
               continue;
           }
 
-          if (draw_hidden_models || !pair.first->is_hidden())
+          /*if (draw_hidden_models || !pair.first->is_hidden())*/ // now done when building models_to_draw
           {
             pair.first->renderer()->draw( model_view
                 , pair.second
@@ -863,21 +876,22 @@ void WorldRender::draw (glm::mat4x4 const& model_view
         it.first->renderer()->drawBox(m2_box_shader, it.second);
       }
     }
+    model_boxes_to_draw.clear();
 
+    // render selection boxes.
+    // TODO can try to move to m2 box shader but it requires some refactor
     for (auto& selection : _world->current_selection())
     {
       if (selection.index() == eEntry_Object)
       {
         auto obj = std::get<selected_object_type>(selection);
-
+    
         if (obj->which() != eMODEL)
           continue;
-
+    
         auto model = static_cast<ModelInstance*>(obj);
 
-
-
-        if (model->isInRenderDist(_cull_distance, camera_pos, display) && model->isInFrustum(frustum))
+        if (model->_rendered_last_frame)
         {
           bool is_selected = false;
           /*
@@ -890,7 +904,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
                           && std::get<selected_object_type>(type)->which() == SceneObjectTypes::eMODEL
                           && static_cast<ModelInstance*>(std::get<selected_object_type>(type))->uid == id;
                   }) != _world->current_selection().end();*/
-
+    
           model->draw_box(model_view, projection, is_selected); // make optional!
         }
       }

@@ -48,6 +48,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
 
   if (is_current_selection)
   {
+    // draw collision box
     Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
       , projection
       , transformMatrix()
@@ -56,6 +57,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , misc::transform_model_box_coords(model->header.collision_box_max)
       );
 
+    // draw bounding box
     Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
       , projection
       , transformMatrix()
@@ -64,6 +66,7 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , misc::transform_model_box_coords(model->header.bounding_box_max)
       );
 
+    // draw extents
     Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
       , projection
       , glm::mat4x4(1)

@@ -6,7 +6,7 @@
 #include <sstream>
 
 
-selected_chunk_type::selected_chunk_type(MapChunk* _chunk, std::tuple<int, int, int> _triangle, glm::vec3 _position)
+selected_chunk_type::selected_chunk_type(MapChunk* _chunk, const std::tuple<int, int, int>& _triangle, const glm::vec3& _position)
 : chunk(_chunk)
 , triangle(_triangle)
 , position(_position)
@@ -228,10 +228,10 @@ void selected_chunk_type::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   detail_widget->setText(select_info.str());
 }
 
-selection_group::selection_group(std::vector<SceneObject*> selected_objects, World* world)
+selection_group::selection_group(const std::vector<SceneObject*>& selected_objects, World* world)
     : _world(world)
 {
-    if (!selected_objects.size())
+    if (selected_objects.empty())
         return;
 
     // _is_selected = true;
@@ -246,14 +246,16 @@ selection_group::selection_group(std::vector<SceneObject*> selected_objects, Wor
     // save_json();
 }
 
-selection_group::selection_group(std::vector<unsigned int> objects_uids, World* world)
+// only called when initializing world before objects are loaded, so can't set selected_obj->_grouped
+selection_group::selection_group(const std::vector<unsigned int>& objects_uids, World* world)
     : _world(world)
 {
-    if (!objects_uids.size())
+    if (objects_uids.empty())
         return;
 
     // _is_selected = true;
     _members_uid = objects_uids;
+    // std::unordered_set<unsigned int> _members_uid(objects_uids.begin(), objects_uids.end());
 
     recalcExtents();
     // save_json();
@@ -313,9 +315,6 @@ void selection_group::select_group()
         SceneObject* instance = std::get<SceneObject*>(obj.value());
 
         instance->_grouped = true; // ensure grouped attribute, some models could still be unloaded when creating the group
-
-        if (_world->is_selected(instance))
-            continue;
 
         _world->add_to_selection(obj.value(), true, false);
     }

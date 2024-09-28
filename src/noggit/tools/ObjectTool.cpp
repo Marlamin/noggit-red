@@ -196,7 +196,7 @@ namespace Noggit
 
         addMenuSeperator(menu);
 
-        addMenuItem(menu, "Select all Like Selected", "Warning : Doing actions on models overlapping unloaded tiles can cause crash",
+        addMenuItem(menu, "Select all Like Selected", "",
             world->get_selected_model_count() == 1, [=] {
                 auto world = mapView()->getWorld();
 

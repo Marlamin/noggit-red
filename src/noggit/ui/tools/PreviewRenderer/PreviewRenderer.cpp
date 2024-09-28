@@ -191,7 +191,7 @@ void PreviewRenderer::draw()
         wmo_instance.draw(
             wmo_program, model_view(), projection(), frustum, culldistance,
             _camera.position, _draw_boxes.get(), _draw_models.get() 
-            , false, std::vector<selection_type>(), 0, false, display_mode::in_3D, true
+            , false, false, 0, false, display_mode::in_3D, true
         );
 
         auto doodads = wmo_instance.get_doodads(true);

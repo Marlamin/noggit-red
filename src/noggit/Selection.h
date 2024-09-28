@@ -25,7 +25,7 @@ public:
 
 struct selected_chunk_type : Selectable
 {
-    selected_chunk_type(MapChunk* _chunk, std::tuple<int, int, int> _triangle, glm::vec3 _position);
+    selected_chunk_type(MapChunk* _chunk, const std::tuple<int, int, int>& _triangle, const glm::vec3& _position);
   //   : chunk(_chunk)
   //   , triangle(_triangle)
   //   , position(_position)
@@ -61,8 +61,8 @@ enum eSelectionEntryTypes
 class selection_group
 {
 public:
-    selection_group(std::vector<SceneObject*> selected_objects, World* world);
-    selection_group(std::vector<unsigned int> objects_uids, World* world);
+    selection_group(const std::vector<SceneObject*>& selected_objects, World* world);
+    selection_group(const std::vector<unsigned int>& objects_uids, World* world);
 
     // ~selection_group();
 
@@ -71,12 +71,10 @@ public:
 
     void remove_group(bool save = true);
 
-    void add_member(SceneObject* object);
+    // void add_member(SceneObject* object);
     void remove_member(unsigned int object_uid);
 
     bool contains_object(SceneObject* object);
-
-
 
     void select_group();
     void unselect_group();
@@ -99,7 +97,8 @@ public:
     bool _is_selected = false;
 
 private:
-    std::vector<unsigned int> _members_uid; // uids
+    std::vector<unsigned int> _members_uid;
+    // std::unordered_set<unsigned int> _members_uid;
     // std::vector<SceneObject*> _object_members;
 
     std::array<glm::vec3, 2> _group_extents;

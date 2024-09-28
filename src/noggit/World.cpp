@@ -178,12 +178,13 @@ void World::update_selection_pivot()
   }
 }
 
-bool World::is_selected(selection_type selection) const
+bool World::is_selected(selection_type selection)
 {
   ZoneScoped;
   if (selection.index() != eEntry_Object)
     return false;
 
+  /*
   auto which = std::get<selected_object_type>(selection)->which();
 
   if (which == eMODEL)
@@ -222,43 +223,42 @@ bool World::is_selected(selection_type selection) const
     }
   }
 
+
   return false;
+*/
+
+  auto selected_object = std::get<selected_object_type>(selection);
+  unsigned int uid = selected_object->uid;
+
+  bool found = selected_uids.contains(uid);
+  if (!found)
+    return false;
+
+  // verify object type
+  // probably should only be done when adding or removing objects.
+  /*
+  auto instance = getObjectInstance(uid);
+  if (instance == nullptr || var_type(instance) != typeid(selected_object_type))
+    return false;
+
+  if (selected_object->which() != instance->which())
+  {
+    return false;
+  }
+  */
+  return true;
 }
 
 bool World::is_selected(std::uint32_t uid) const
 {
-  ZoneScoped;
-  for (selection_type const& entry : _current_selection)
-  {
-    if (entry.index() != eEntry_Object)
-      continue;
-
-    auto obj = std::get<selected_object_type>(entry);
-
-    if (obj->which() == eWMO)
-    {
-      if (static_cast<WMOInstance*>(obj)->uid == uid)
-      {
-        return true;
-      }
-    }
-    else if (obj->which() == eMODEL)
-    {
-      if (static_cast<ModelInstance*>(obj)->uid == uid)
-      {
-        return true;
-      }
-    }
-  }
-
-  return false;
+  return selected_uids.contains(uid);
 }
 
 std::optional<selection_type> World::get_last_selected_model() const
 {
   ZoneScoped;
   if (_current_selection.empty())
-      return std::optional<selection_type>();
+      return std::nullopt;
 
   auto const it
     ( std::find_if ( _current_selection.rbegin()
@@ -561,17 +561,27 @@ void World::set_current_selection(selection_type entry)
 }
 
 // updating pivot is expensive, in mass selection situation, it should only be updated once after operation is done
-void World::add_to_selection(selection_type entry, bool skip_group, bool update_pivot)
+// now checks if model is already selected, don't need to call is_selected anymore !
+bool World::add_to_selection(selection_type entry, bool skip_group, bool update_pivot)
 {
   ZoneScoped;
   if (entry.index() == eEntry_Object)
   {
-    _selected_model_count++;
 
+    auto obj = std::get<selected_object_type>(entry);
+
+    auto result = selected_uids.insert(obj->uid);
+
+    if (!result.second)
+    {
+      // Duplicate existed
+      return false;
+    }
+
+    _selected_model_count++;
     // check if it is in a group
     if (!skip_group)
     {
-        auto obj = std::get<selected_object_type>(entry);
         for (auto& group : _selection_groups)
         {
             if (group.contains_object(obj))
@@ -580,7 +590,7 @@ void World::add_to_selection(selection_type entry, bool skip_group, bool update_
                 _current_selection.push_back(entry);
                 // this then calls add_to_selection() with skip_group = true to avoid repetition
                 group.select_group();
-                return;
+                return true;
             }
         }
     }
@@ -589,24 +599,33 @@ void World::add_to_selection(selection_type entry, bool skip_group, bool update_
 
   if (update_pivot)
     update_selection_pivot();
+
+  return true;
 }
 
 void World::remove_from_selection(selection_type entry, bool skip_group, bool update_pivot)
 {
   ZoneScoped;
+  if (entry.index() == eEntry_Object)
+  {
+    auto obj = std::get<selected_object_type>(entry);
+    size_t erased_count = selected_uids.erase(obj->uid);
+    if (erased_count == 0)
+      return;
+  }
+
   std::vector<selection_type>::iterator position = std::find(_current_selection.begin(), _current_selection.end(), entry);
   if (position != _current_selection.end())
   {
     if (entry.index() == eEntry_Object)
     {
       _selected_model_count--;
-
       // check if it is in a group
       if (!skip_group)
       {
-        auto obj = std::get<selected_object_type>(entry);
         for (auto& group : _selection_groups)
         {
+          auto obj = std::get<selected_object_type>(entry);
           if (group.contains_object(obj))
           {
               // this then calls remove_from_selection() with skip_group = true to avoid repetition
@@ -626,6 +645,10 @@ void World::remove_from_selection(selection_type entry, bool skip_group, bool up
 void World::remove_from_selection(std::uint32_t uid, bool skip_group, bool update_pivot)
 {
   ZoneScoped;
+  size_t erased_count = selected_uids.erase(uid);
+  if (erased_count == 0)
+    return;
+
   for (auto it = _current_selection.begin(); it != _current_selection.end(); ++it)
   {
     if (it->index() != eEntry_Object)
@@ -635,27 +658,26 @@ void World::remove_from_selection(std::uint32_t uid, bool skip_group, bool updat
 
     if (obj->uid == uid)
     {
-        _selected_model_count--;
-        _current_selection.erase(it);
+      _selected_model_count--;
+      _current_selection.erase(it);
 
-        // check if it is in a group
-        if (!skip_group)
+      // check if it is in a group
+      if (!skip_group)
+      {
+        for (auto& group : _selection_groups)
         {
-            for (auto& group : _selection_groups)
-            {
-                if (group.contains_object(obj))
-                {
-                    // this then calls remove_from_selection() with skip_group = true to avoid repetition
-                    group.unselect_group();
-                    break;
-                }
-            }
+          if (group.contains_object(obj))
+          {
+            // this then calls remove_from_selection() with skip_group = true to avoid repetition
+            group.unselect_group();
+            break;
+          }
         }
-        if (update_pivot)
-          update_selection_pivot();
-        return;
+      }
+      if (update_pivot)
+        update_selection_pivot();
+      return;
     }
-
 
   }
 }
@@ -663,6 +685,7 @@ void World::remove_from_selection(std::uint32_t uid, bool skip_group, bool updat
 void World::reset_selection()
 {
   ZoneScoped;
+  selected_uids.clear();
   _current_selection.clear();
   _multi_select_pivot = std::nullopt;
   _selected_model_count = 0;
@@ -3038,15 +3061,14 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
 
   for (auto obj : objects_in_range)
   {
-      if (remove)
-      {
-          remove_from_selection(obj, false, false);
-      }
-      else
-      {
-          if (!is_selected(obj))
-            add_to_selection(obj, false, false);
-      }
+    if (remove)
+    {
+      remove_from_selection(obj, false, false);
+    }
+    else
+    {
+      add_to_selection(obj, false, false);
+    }
   }
   update_selection_pivot();
 }
@@ -3587,227 +3609,221 @@ void World::notifyTileRendererOnSelectedTextureChange()
 }
 
 void World::select_objects_in_area(
-    const std::array<glm::vec2, 2>& selection_box, 
-    bool reset_selection,
-    const glm::mat4x4& view,
-    const glm::mat4x4& projection,
-    int viewport_width, 
-    int viewport_height,
-    float user_depth,
-    const glm::vec3& camera_position)
+  const std::array<glm::vec2, 2>& selection_box, 
+  bool reset_selection,
+  const glm::mat4x4& view,
+  const glm::mat4x4& projection,
+  int viewport_width, 
+  int viewport_height,
+  float user_depth,
+  const glm::vec3& camera_position)
 {
-    ZoneScoped;
-    
-    if (reset_selection)
+  ZoneScoped;
+  
+  if (reset_selection)
+  {
+    this->reset_selection();
+  }
+
+  glm::mat4 VPmatrix = projection * view;
+
+  constexpr int max_position_raycast_processing = 10000;
+  constexpr int max_bounds_raycast_processing = 5000; // when selecting large amount of objects, avoid doing complex ray calculations to not freeze
+  constexpr float bounds_check_scale = 0.8f; // size of the bounding box to use when interesecting withs election rectangle
+  constexpr float obj_raycast_min_size = 30.0f; // screen size rectangle lenght in pixels
+
+  int processed_obj_count = 0;
+  // int debug_count_obj_min_size = 0;
+  // int debug_count_obj_min_size_not = 0;
+
+  for (auto& map_object : _loaded_tiles_buffer)
+  {
+    MapTile* tile = map_object.second;
+
+    if (!tile)
     {
-        this->reset_selection();
+      break;
     }
 
-    glm::mat4 VPmatrix = projection * view;
-
-    constexpr int max_position_raycast_processing = 10000;
-    constexpr int max_bounds_raycast_processing = 5000; // when selecting large amount of objects, avoid doing complex ray calculations to not freeze
-    constexpr float bounds_check_scale = 0.8f; // size of the bounding box to use when interesecting withs election rectangle
-    constexpr float obj_raycast_min_size = 30.0f; // screen size rectangle lenght in pixels
-
-    int processed_obj_count = 0;
-    // int debug_count_obj_min_size = 0;
-    // int debug_count_obj_min_size_not = 0;
-
-    for (auto& map_object : _loaded_tiles_buffer)
+    // some optimizations to see if the tile is in selection before iterating objects in it
     {
-        MapTile* tile = map_object.second;
+      // tile not in screen, skip
+      // frustum.intersects(tile_extents[1], tile_extents[0])
+      if (!tile->_was_rendered_last_frame)
+        continue;
 
-        if (!tile)
-        {
-            break;
-        }
-
-        // some optimizations to see if the tile is in selection before iterating objects in it
-        {
-            // tile not in screen, skip
-            // frustum.intersects(tile_extents[1], tile_extents[0])
-            if (!tile->_was_rendered_last_frame)
-                continue;
-
-            // check if tile combined extents are within selection rectangle
-            // note very useful because cases where a tile is fully rendered and not selected are very rare
+      // check if tile combined extents are within selection rectangle
+      // note very useful because cases where a tile is fully rendered and not selected are very rare
  
-            // skip if no objects
-            if (tile->getObjectInstances().empty())
-                continue;
+      // skip if no objects
+      if (tile->getObjectInstances().empty())
+        continue;
 
-            bool valid = false;
-            auto screenBounds = misc::getAABBScreenBounds(tile->getCombinedExtents(), VPmatrix
-              , viewport_width, viewport_height, valid, 1.0f);
+      bool valid = false;
+      auto screenBounds = misc::getAABBScreenBounds(tile->getCombinedExtents(), VPmatrix
+        , viewport_width, viewport_height, valid, 1.0f);
 
-            // this only works if all tile points are in screen space
-            if (valid && !math::boxIntersects(screenBounds[0], screenBounds[1]
-              , selection_box[0], selection_box[1]))
-            {
-                continue;
-            }
-        }
-
-        for (auto& pair : tile->getObjectInstances())
-        {
-            [[unlikely]]
-            if (!pair.first->finishedLoading())
-              continue;
-
-            auto objectType = pair.second[0]->which();
-
-            [[unlikely]]
-            if (!(objectType == eMODEL || objectType == eWMO))
-              continue;
-
-            for (auto& instance : pair.second)
-            {
-                // problem : M2s have additional sized based culling with >isInRenderDist()
-                // if (!instance->_rendered_last_frame)
-                //   continue;
-
-                // unsigned int uid = instance->uid;
-                // auto modelInstance = _model_instance_storage.get_instance(uid);
-                // [[unlikely]]
-                // if (!modelInstance || !modelInstance.value().index() == eEntry_Object)
-                //   continue;
-                // auto obj = std::get<selected_object_type>(modelInstance.value());
-
-                bool do_selection = false;
-
-                //  Old code to check position point instead of bound box
-                {
-                  glm::vec4 screenPos = VPmatrix * glm::vec4(instance->pos, 1.0f);
-
-                  // if screenPos.w < 0.0f, object is behind camera
-                  // check object bounding radius instead to compare the object's size, if it clips with the camera.
-                  if (screenPos.w < -instance->getBoundingRadius())
-                    continue;
-
-                  screenPos.x /= screenPos.w;
-                  screenPos.y /= screenPos.w;
-
-                  // Convert normalized device coordinates (NDC) to screen coordinates
-                  screenPos.x = (screenPos.x + 1.0f) * 0.5f * viewport_width;
-                  screenPos.y = (1.0f - (screenPos.y + 1.0f) * 0.5f) * viewport_height;
-                  
-                  
-                  float distance = glm::distance(camera_position, instance->pos);
-                  if (distance > user_depth)
-                    continue;
-
-                  // check if position(origin) point is within rectangle first because it is much cheaper
-                  {
-                    const glm::vec2 screenPos2D = glm::vec2(screenPos);
-                    if (misc::pointInside(screenPos2D, selection_box))
-                    {
-                      processed_obj_count++;
-
-                      // check if point is occluded by terrain
-                      if (processed_obj_count < max_position_raycast_processing
-                        && !is_point_occluded_by_terrain(instance->pos, view, VPmatrix, viewport_width, viewport_height, camera_position))
-                      {
-                        do_selection = true;
-                      }
-                      // else
-                      //   bool debug_breakpoint = true;
-                    }
-                  }
-                }
-
-                // if it's not, check again if bounding box is within selection
-                if (!do_selection && instance->_rendered_last_frame && (processed_obj_count < max_bounds_raycast_processing) )
-                {
-                  bool valid = false;
-                  auto screenBounds = misc::getAABBScreenBounds(instance->getExtents(), VPmatrix
-                    , viewport_width, viewport_height, valid, 0.75f);
-                    
-                  if (valid && math::boxIntersects(screenBounds[0], screenBounds[1]
-                    , selection_box[0], selection_box[1]))
-                  {
-                    // do_selection = true;
-                  }
-                  else
-                    continue;
-
-                  // Optimization : Only do raycast bounds checks for object that take enough screen space
-                  if (!do_selection)
-                  {
-                    if (glm::distance(screenBounds[0], screenBounds[1]) < obj_raycast_min_size)
-                    {
-                      // debug_count_obj_min_size++;
-                      continue;
-                    }
-                    else
-                    {
-                      // debug_count_obj_min_size_not++;
-                    }
-                  }
-                }
-
-                // Occlusion test on object's corners (that are in selection box)
-                // uses ray casting, very expensive
-                if (!do_selection)
-                {
-                  math::aabb obj_aabb(instance->getExtents()[0], instance->getExtents()[1]);
-                  auto obj_aabb_corners = obj_aabb.all_corners();
-
-                  // int required_num_unoccluded_corers = 6; // require 6 of 8 corners to not be occluded
-                  bool object_occluded = true;
-
-                  for (const auto& corner : obj_aabb_corners)
-                  {
-                    // TODO : only need to do max top left and max top right in 2d instead of all corners?
-
-                    // only process points that are within selection rectangle
-                    bool point_valid = false;
-                    auto point_screen_pos = misc::projectPointToScreen(corner, VPmatrix, viewport_width, viewport_height, point_valid);
-                    if (!point_valid)
-                      continue;
-                    if (!misc::pointInside(point_screen_pos, selection_box))
-                      continue;
-
-
-                    bool corner_occluded = is_point_occluded_by_terrain(corner, view, VPmatrix, viewport_width, viewport_height, camera_position);
-
-                    if (!corner_occluded)
-                    {
-                      object_occluded = false;
-                      break;
-                    }
-                    // object_occluded = true;
-                  }
-                
-                  do_selection = !object_occluded;
-                }
-
-                if (!do_selection)
-                  continue;
-
-                auto& obj = instance;
-                auto which = obj->which();
-                if (which == eWMO)
-                {
-                    auto model_instance = static_cast<WMOInstance*>(obj);
-
-                    if (!is_selected(obj) && !model_instance->wmo->is_hidden())
-                    {
-                        this->add_to_selection(obj, false, false);
-                    }
-                }
-                else if (which == eMODEL)
-                {
-                    auto model_instance = static_cast<ModelInstance*>(obj);
-
-                    if (!is_selected(obj) && !model_instance->model->is_hidden())
-                    {
-                        this->add_to_selection(obj, false, false);
-                    }
-                }
-            }
-        }
+      // this only works if all tile points are in screen space
+      if (valid && !math::boxIntersects(screenBounds[0], screenBounds[1]
+        , selection_box[0], selection_box[1]))
+      {
+        continue;
+      }
     }
+
+    for (auto& pair : tile->getObjectInstances())
+    {
+      [[unlikely]]
+      if (!pair.first->finishedLoading())
+        continue;
+
+      auto objectType = pair.second[0]->which();
+
+      [[unlikely]]
+      if (!(objectType == eMODEL || objectType == eWMO))
+        continue;
+
+      for (auto& instance : pair.second)
+      {
+        // problem : M2s have additional sized based culling with >isInRenderDist()
+        // if (!instance->_rendered_last_frame)
+        //   continue;
+
+        bool do_selection = false;
+
+        //  Old code to check position point instead of bound box
+        {
+          glm::vec4 screenPos = VPmatrix * glm::vec4(instance->pos, 1.0f);
+
+          // if screenPos.w < 0.0f, object is behind camera
+          // check object bounding radius instead to compare the object's size, if it clips with the camera.
+          if (screenPos.w < -instance->getBoundingRadius())
+            continue;
+
+          screenPos.x /= screenPos.w;
+          screenPos.y /= screenPos.w;
+
+          // Convert normalized device coordinates (NDC) to screen coordinates
+          screenPos.x = (screenPos.x + 1.0f) * 0.5f * viewport_width;
+          screenPos.y = (1.0f - (screenPos.y + 1.0f) * 0.5f) * viewport_height;
+          
+          
+          float distance = glm::distance(camera_position, instance->pos);
+          if (distance > user_depth)
+            continue;
+
+          // check if position(origin) point is within rectangle first because it is much cheaper
+          {
+            const glm::vec2 screenPos2D = glm::vec2(screenPos);
+            if (misc::pointInside(screenPos2D, selection_box))
+            {
+              processed_obj_count++;
+
+              // check if point is occluded by terrain
+              if (processed_obj_count < max_position_raycast_processing
+                && !is_point_occluded_by_terrain(instance->pos, view, VPmatrix, viewport_width, viewport_height, camera_position))
+              {
+                do_selection = true;
+              }
+              // else
+              //   bool debug_breakpoint = true;
+            }
+          }
+        }
+
+        // if it's not, check again if bounding box is within selection
+        // we check _rendered_last_frame because m2s that are too small on screen already don't render
+        if (!do_selection && instance->_rendered_last_frame && (processed_obj_count < max_bounds_raycast_processing) )
+        {
+          bool valid = false;
+          auto screenBounds = misc::getAABBScreenBounds(instance->getExtents(), VPmatrix
+            , viewport_width, viewport_height, valid, 0.75f);
+            
+          if (valid && math::boxIntersects(screenBounds[0], screenBounds[1]
+            , selection_box[0], selection_box[1]))
+          {
+            // do_selection = true;
+          }
+          else
+            continue;
+
+          // Optimization : Only do raycast bounds checks for object that take enough screen space
+          if (!do_selection)
+          {
+            if (glm::distance(screenBounds[0], screenBounds[1]) < obj_raycast_min_size)
+            {
+              // debug_count_obj_min_size++;
+              continue;
+            }
+            else
+            {
+              // debug_count_obj_min_size_not++;
+            }
+          }
+        }
+
+        // Occlusion test on object's corners (that are in selection box)
+        // uses ray casting, very expensive
+        if (!do_selection)
+        {
+          math::aabb obj_aabb(instance->getExtents()[0], instance->getExtents()[1]);
+          auto obj_aabb_corners = obj_aabb.all_corners();
+
+          // int required_num_unoccluded_corers = 6; // require 6 of 8 corners to not be occluded
+          bool object_occluded = true;
+
+          for (const auto& corner : obj_aabb_corners)
+          {
+            // TODO : only need to do max top left and max top right in 2d instead of all corners?
+
+            // only process points that are within selection rectangle
+            bool point_valid = false;
+            auto point_screen_pos = misc::projectPointToScreen(corner, VPmatrix, viewport_width, viewport_height, point_valid);
+            if (!point_valid)
+              continue;
+            if (!misc::pointInside(point_screen_pos, selection_box))
+              continue;
+
+
+            bool corner_occluded = is_point_occluded_by_terrain(corner, view, VPmatrix, viewport_width, viewport_height, camera_position);
+
+            if (!corner_occluded)
+            {
+              object_occluded = false;
+              break;
+            }
+            // object_occluded = true;
+          }
+        
+          do_selection = !object_occluded;
+        }
+
+        if (!do_selection)
+          continue;
+
+        auto& obj = instance;
+        auto which = obj->which();
+        if (which == eWMO)
+        {
+          auto model_instance = static_cast<WMOInstance*>(obj);
+
+          if (!model_instance->wmo->is_hidden())
+          {
+              this->add_to_selection(obj, false, false);
+          }
+        }
+        else if (which == eMODEL)
+        {
+          auto model_instance = static_cast<ModelInstance*>(obj);
+
+          if (!model_instance->model->is_hidden())
+          {
+              this->add_to_selection(obj, false, false);
+          }
+        }
+      }
+    }
+  }
 
     this->update_selection_pivot();
 }
@@ -3894,32 +3910,30 @@ void World::add_object_group_from_selection()
     saveSelectionGroups();
 }
 
+/*
 void World::remove_selection_group(selection_group* group)
 {
-    // std::vector<selection_type>::iterator position = std::find(_selection_groups.begin(), _selection_groups.end(), group);
-    // if (position != _selection_groups.end())
-    // {
-    //     _selection_groups.erase(position);
-    // }
+   std::vector<selection_type>::iterator position = std::find(_selection_groups.begin(), _selection_groups.end(), group);
+   if (position != _selection_groups.end())
+   {
+       _selection_groups.erase(position);
+   }
 
-    // for (auto it = _selection_groups.begin(); it != _selection_groups.end(); ++it)
-    // {
-    //     auto it_group = *it;
-    //     if (it_group.getMembers().size() == group->getMembers().size() && it_group.getExtents() == group->getExtents())
-    //     // if (it_group.isSelected())
-    //     {
-    //         _selection_groups.erase(it);
-    //         saveSelectionGroups();
-    //         return;
-    //     }
-    // }
-}
+   for (auto it = _selection_groups.begin(); it != _selection_groups.end(); ++it)
+   {
+       auto it_group = *it;
+       if (it_group.getMembers().size() == group->getMembers().size() && it_group.getExtents() == group->getExtents())
+       // if (it_group.isSelected())
+       {
+           _selection_groups.erase(it);
+           saveSelectionGroups();
+           return;
+       }
+   }
+}*/
 
 void World::clear_selection_groups()
 {
-    // _selection_groups.clear();
-
-    // for (auto it = _selection_groups.begin(); it != _selection_groups.end(); ++it)
     for (auto& group : _selection_groups)
     {
         // auto it_group = *it;
