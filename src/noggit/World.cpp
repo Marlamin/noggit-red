@@ -21,6 +21,8 @@
 #include <noggit/application/NoggitApplication.hpp>
 #include <noggit/project/CurrentProject.hpp>
 #include <noggit/ActionManager.hpp>
+#include <math/bounding_box.hpp>
+
 #include <external/tracy/Tracy.hpp>
 #include <QByteArray>
 #include <QImage>
