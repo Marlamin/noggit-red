@@ -64,15 +64,15 @@ WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, Nog
 
 
 void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
-                       , glm::mat4x4 const& model_view
-                       , glm::mat4x4 const& projection
+                       , const glm::mat4x4 const& model_view
+                       , const glm::mat4x4 const& projection
                        , math::frustum const& frustum
                        , const float& cull_distance
                        , const glm::vec3& camera
                        , bool force_box
                        , bool draw_doodads
                        , bool draw_fog
-                       , std::vector<selection_type> selection
+                       , bool is_selected
                        , int animtime
                        , bool world_has_skies
                        , display_mode display
@@ -86,16 +86,6 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
   }
 
   ensureExtents();
-
-  const uint id = this->uid;
-  bool const is_selected = selection.size() > 0 &&
-                           std::find_if(selection.begin(), selection.end(),
-                                        [id](selection_type type)
-                                        {
-                                          return var_type(type) == typeid(selected_object_type)
-                                          && std::get<selected_object_type>(type)->which() == SceneObjectTypes::eWMO
-                                          && static_cast<WMOInstance*>(std::get<selected_object_type>(type))->uid == id;
-                                        }) != selection.end();
 
   {
     unsigned region_visible = 0;

@@ -58,6 +58,7 @@ class World
   friend class Noggit::Rendering::WorldRender;
 
 protected:
+  std::unordered_set<unsigned int> selected_uids; // fast lookup
   std::vector<selection_type> _current_selection;
   // std::unordered_map<std::string, std::vector<ModelInstance*>> _models_by_filename;
   Noggit::world_model_instances_storage _model_instance_storage;
@@ -125,7 +126,7 @@ public:
   std::optional<glm::vec3> const& multi_select_pivot() const { return _multi_select_pivot; }
 
   // Selection related methods.
-  bool is_selected(selection_type selection) const;
+  bool is_selected(selection_type selection);
   bool is_selected(std::uint32_t uid) const;
   std::vector<selection_type> const& current_selection() const { return _current_selection; }
   std::vector<selected_object_type> const get_selected_objects() const;
@@ -136,7 +137,7 @@ public:
   // Unused in Red, models are now iterated by adt because of the occlusion check
   // std::unordered_map<std::string, std::vector<ModelInstance*>> get_models_by_filename() const& { return _models_by_filename;  } 
   void set_current_selection(selection_type entry);
-  void add_to_selection(selection_type entry, bool skip_group = false, bool update_pivot = true);
+  bool add_to_selection(selection_type entry, bool skip_group = false, bool update_pivot = true);
   void remove_from_selection(selection_type entry, bool skip_group = false, bool update_pivot = true);
   void remove_from_selection(std::uint32_t uid, bool skip_group = false, bool update_pivot = true);
   void reset_selection();
@@ -410,7 +411,7 @@ public:
 
 
   void add_object_group_from_selection();
-  void remove_selection_group(selection_group* group);
+  // void remove_selection_group(selection_group* group);
 
   void clear_selection_groups();
 

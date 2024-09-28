@@ -28,8 +28,7 @@ void AddObjectInstanceToSelectionNode::compute()
 
   SceneObject* obj = defaultPortData<ObjectInstanceData>(PortType::In, 1)->value();
 
-  if (!world->is_selected(obj))
-    world->add_to_selection(obj);
+  world->add_to_selection(obj);
 
   _out_ports[0].out_value = std::make_shared<LogicData>(true);
   _node->onDataUpdated(0);

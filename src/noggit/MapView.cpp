@@ -69,6 +69,7 @@
 #include <noggit/tools/ScriptingTool.hpp>
 #include <noggit/tools/ChunkTool.hpp>
 #include <noggit/StringHash.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 
 #ifdef USE_MYSQL_UID_STORAGE
 #include <mysql/mysql.h>

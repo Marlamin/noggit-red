@@ -587,6 +587,7 @@ bool Skies::draw(glm::mat4x4 const& model_view
                 , math::frustum const& frustum
                 , const float& cull_distance
                 , int animtime
+                , int time
                 /*, bool draw_particles*/
                 , bool draw_skybox
                 , OutdoorLightStats const& light_stats
