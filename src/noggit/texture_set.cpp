@@ -1473,11 +1473,11 @@ void TextureSet::updateDoodadMapping()
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    unsigned int base_alpha = 255;
+                    int base_alpha = 255;
 
                     for (int alpha_layer = 0; alpha_layer < (nTextures - 1); ++alpha_layer)
                     {
-                        auto alpha = static_cast<int>(alphamaps[alpha_layer]->getAlpha((unit_y * 8 + y) * 64 + (unit_x * 8 + x)));
+                        int alpha = static_cast<int>(alphamaps[alpha_layer]->getAlpha((unit_y * 8 + y) * 64 + (unit_x * 8 + x)));
 
                         layer_totals[alpha_layer+1] += alpha;
 

@@ -5,6 +5,7 @@
 #include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h>
 #include <ClientData.hpp>
+#include <math/bounding_box.hpp>
 
 #include <iomanip>
 #include <map>

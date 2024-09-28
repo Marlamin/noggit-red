@@ -12,6 +12,7 @@
 #include <vector>
 #include <glm/vec4.hpp>
 #include <glm/vec2.hpp>
+#include <glm/mat4x4.hpp>
 #include <noggit/Selection.h>
 #include <util/sExtendableArray.hpp>
 
