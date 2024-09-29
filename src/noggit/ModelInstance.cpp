@@ -1,19 +1,21 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
-#include <math/bounding_box.hpp>
-#include <math/frustum.hpp>
-#include <glm/glm.hpp>
+#include <noggit/ModelInstance.h>
 #include <noggit/Log.h>
 #include <noggit/Misc.h> // checkinside
 #include <noggit/Model.h> // Model, etc.
-#include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/ContextObject.hpp>
 #include <noggit/rendering/Primitives.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
+
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <math/bounding_box.hpp>
+#include <math/frustum.hpp>
+#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 
 #include <sstream>
 
@@ -88,12 +90,17 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
   }
 }
 
-std::vector<std::tuple<int, int, int>> ModelInstance::intersect (glm::mat4x4 const& model_view
+void ModelInstance::intersect (glm::mat4x4 const& model_view
                               , math::ray const& ray
                               , selection_result* results
                               , int animtime
                               )
 {  
+  if (!finishedLoading() || model->loading_failed())
+    return;
+
+  ensureExtents();
+
   std::vector<std::tuple<int, int, int>> triangle_indices;
   math::ray subray (_transform_mat_inverted, ray);
 
@@ -102,7 +109,7 @@ std::vector<std::tuple<int, int, int>> ModelInstance::intersect (glm::mat4x4 con
                                 )
      )
   {
-    return triangle_indices;
+    return;
   }
 
   for (auto&& result : model->intersect (model_view, subray, animtime))
@@ -112,7 +119,7 @@ std::vector<std::tuple<int, int, int>> ModelInstance::intersect (glm::mat4x4 con
     results->emplace_back (result.first * scale, this);
     triangle_indices.emplace_back(result.second);
   }
-  return triangle_indices;
+  return;
 }
 
 
@@ -189,23 +196,26 @@ void ModelInstance::recalcExtents()
   //! the model is bad itself. We *could* detect that case and explicitly
   //! assume {-1, 1} then, to be nice to fuckported models.
 
-  auto corners_in_world = std::vector<glm::vec3>();
+  std::array<glm::vec3, 8> corners_in_world;
   auto transform = misc::transform_model_box_coords;
-  auto points = relative_to_model.all_corners();
-  for (auto& point : points)
+  std::array<glm::vec3, 8> points = relative_to_model.all_corners();
+
+  for (int i = 0; i < 8; ++i)
+  // for (auto& point : points)
   {
-    point = transform(point);
-    corners_in_world.push_back(point);
+    // points[i] = transform(points[i]);
+    corners_in_world[i] = transform(points[i]);
   }
  
-  auto rotated_corners_in_world = std::vector<glm::vec3>();
-  auto transposedMat = _transform_mat;
-  for (auto const& point : corners_in_world)
+  std::array<glm::vec3, 8> rotated_corners_in_world;
+  // for (auto const& point : corners_in_world)
+  for (int i = 0; i < 8; ++i)
   {
-    rotated_corners_in_world.emplace_back(transposedMat * glm::vec4(point, 1.f));
+    rotated_corners_in_world[i] = _transform_mat * glm::vec4(corners_in_world[i], 1.f);
   }
 
-  math::aabb const bounding_of_rotated_points (rotated_corners_in_world);
+  math::aabb const bounding_of_rotated_points (std::vector<glm::vec3>(rotated_corners_in_world.begin()
+                                              , rotated_corners_in_world.end()));
 
   extents[0] = bounding_of_rotated_points.min;
   extents[1] = bounding_of_rotated_points.max;

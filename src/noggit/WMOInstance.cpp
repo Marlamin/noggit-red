@@ -136,6 +136,9 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
 
 void WMOInstance::intersect (math::ray const& ray, selection_result* results, bool do_exterior)
 {
+  if (!finishedLoading() || wmo->loading_failed())
+    return;
+
   ensureExtents();
 
   if (!ray.intersect_bounds (extents[0], extents[1]))
@@ -160,7 +163,7 @@ std::array<glm::vec3, 2> const& WMOInstance::getExtents()
 
 void WMOInstance::ensureExtents()
 {
-  if (_need_recalc_extents && wmo->finishedLoading())
+  if ( (_need_recalc_extents || _update_group_extents) && wmo->finishedLoading())
   {
     recalcExtents();
   }
@@ -234,11 +237,11 @@ void WMOInstance::recalcExtents()
   glm::vec3 wmo_max(misc::transform_model_box_coords(wmo->extents[1]));
 
   auto&& root_points = math::aabb(wmo_min, wmo_max).all_corners(); 
-  auto adjustedPoints = std::vector<glm::vec3>();
+  std::array<glm::vec3, 8> adjustedPoints;
 
-  for (auto const& point : root_points)
+  for (int i = 0; i < 8; ++i)
   {
-    adjustedPoints.push_back(_transform_mat * glm::vec4(point, 1.f));
+    adjustedPoints[i] = _transform_mat * glm::vec4(root_points[i], 1.f);
   }
 
   points.insert(points.end(), adjustedPoints.begin(), adjustedPoints.end());
@@ -248,24 +251,24 @@ void WMOInstance::recalcExtents()
     auto const& group = wmo->groups[i];
 
     auto&& group_points = math::aabb(group.BoundingBoxMin, group.BoundingBoxMax).all_corners();
-    auto adjustedGroupPoints = std::vector<glm::vec3>();
+    std::array<glm::vec3, 8> adjustedGroupPoints;
 
-    for (auto const& point : group_points)
+    for (int i = 0; i < 8; ++i)
     {
-      adjustedGroupPoints.push_back(_transform_mat * glm::vec4(point, 1.f));
+      adjustedGroupPoints[i] = _transform_mat * glm::vec4(group_points[i], 1.f);
     }
-
 
     points.insert(points.end(), adjustedGroupPoints.begin(), adjustedGroupPoints.end());
 
-    if (group.has_skybox() /* || _update_group_extents*/)
+    if (group.has_skybox() || _update_group_extents)
     {
-      math::aabb const group_aabb(adjustedGroupPoints);
+      math::aabb const group_aabb(std::vector<glm::vec3>(adjustedGroupPoints.begin()
+                                  , adjustedGroupPoints.end()));
 
       group_extents[i] = {group_aabb.min, group_aabb.max};
+      _update_group_extents = false;
     }
   }
-  _update_group_extents = false;
 
   math::aabb const wmo_aabb(points);
 

@@ -58,14 +58,14 @@ namespace math
   std::array<glm::vec3, 8> box_points(glm::vec3 const& box_min, glm::vec3 const& box_max)
   {
     return std::array<glm::vec3, 8> {
-        glm::vec3(box_max.x, box_max.y, box_max.z),
-        glm::vec3(box_max.x, box_max.y, box_min.z),
-        glm::vec3(box_max.x, box_min.y, box_max.z),
-        glm::vec3(box_max.x, box_min.y, box_min.z),
-        glm::vec3(box_min.x, box_max.y, box_max.z),
-        glm::vec3(box_min.x, box_max.y, box_min.z),
-        glm::vec3(box_min.x, box_min.y, box_max.z),
-        glm::vec3(box_min.x, box_min.y, box_min.z)
+        glm::vec3(box_max.x, box_max.y, box_max.z), // 0: Top-right-front
+        glm::vec3(box_max.x, box_max.y, box_min.z), // 1: Top-right-back
+        glm::vec3(box_max.x, box_min.y, box_max.z), // 2: Bottom-right-front
+        glm::vec3(box_max.x, box_min.y, box_min.z), // 3: Bottom-right-back
+        glm::vec3(box_min.x, box_max.y, box_max.z), // 4: Top-left-front
+        glm::vec3(box_min.x, box_max.y, box_min.z), // 5: Top-left-back
+        glm::vec3(box_min.x, box_min.y, box_max.z), // 6: Bottom-left-front
+        glm::vec3(box_min.x, box_min.y, box_min.z)  // 7: Bottom-left-back
     };
   }
 

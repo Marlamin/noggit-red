@@ -2,25 +2,32 @@
 #pragma once
 #include <glm/mat4x4.hpp>
 #include <optional>
+#include <cmath>
 
 namespace math
 {
   struct ray
   {
-    ray (glm::vec3 origin, glm::vec3 const& direction): _origin (std::move (origin)), _direction (glm::normalize(direction))
-    {}
+    ray (glm::vec3 origin, glm::vec3 const& direction)
+      : _origin (std::move (origin)), _direction (glm::normalize(direction))
+    {
+      if (std::isnan(_direction.x) || std::isnan(_direction.y) || std::isnan(_direction.z)) 
+      {
+        std::cout << "Vector contains NaN values!" << std::endl;
+      }
+    }
 
-    ray (glm::mat4x4 const& transform, ray const& other): ray (
-        glm::vec3(
-            (transform * glm::vec4(other._origin.x, other._origin.y, other._origin.z, 1.0))),
-        glm::vec3((transform * glm::vec4(other._direction.x, other._direction.y, other._direction.z, 0.0)))
+    ray (glm::mat4x4 const& transform, ray const& other)
+      : ray (
+        glm::vec3(transform * glm::vec4(other._origin, 1.0f)),
+        glm::vec3((glm::mat3(transform) * other._direction))
             )
     {}
 
     std::optional<float> intersect_bounds
-      (glm::vec3 const& _min, glm::vec3 const& _max) const;
+      (glm::vec3 const& _min, glm::vec3 const& _max) const noexcept;
     std::optional<float> intersect_triangle
-      (glm::vec3 const& _v0, glm::vec3 const& _v1, glm::vec3 const& _v2) const;
+      (glm::vec3 const& _v0, glm::vec3 const& _v1, glm::vec3 const& _v2) const noexcept;
 
     glm::vec3 position (float distance) const
     {

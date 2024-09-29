@@ -68,6 +68,12 @@ namespace misc
 
   bool pointInside(glm::vec3 point, std::array<glm::vec3, 2> const& extents);
   bool pointInside(glm::vec2 point, std::array<glm::vec2, 2> const& extents);
+
+  inline glm::vec4 normalized_device_coords(int x, int y, int screen_width, int screen_height)
+  {
+    return { 2.0f * x / screen_width - 1.0f, 1.0f - 2.0f * y / screen_height, 0.0f, 1.0f };
+  }
+
   void minmax(glm::vec3* a, glm::vec3* b);
 
   inline int rounded_int_div(int value, int div)
