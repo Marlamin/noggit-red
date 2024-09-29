@@ -434,21 +434,26 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           instance->frame = frame;
 
+          bool render = false;
           // experimental : if camera and object haven't moved/changed since last frame, we don't need to do frustum culling again
           if (!camera_moved && !m2_instance->extentsDirty()/* && not_moved*/)
           {
             if (m2_instance->_rendered_last_frame)
             {
-              instances.push_back(m2_instance->transformMatrix());
-              m2_instance->_rendered_last_frame = true;
+              render = true; // skip frustum check
             }
           }
-
-          if (m2_instance->isInRenderDist(_cull_distance, camera_pos, display) && (tile->renderer()->objectsFrustumCullTest() > 1 || m2_instance->isInFrustum(frustum)))
+          if (!render && m2_instance->isInRenderDist(_cull_distance, camera_pos, display) && (tile->renderer()->objectsFrustumCullTest() > 1 || m2_instance->isInFrustum(frustum)))
           {
-            instances.push_back(m2_instance->transformMatrix());
-            m2_instance->_rendered_last_frame = true;
+            render = true;
           }
+
+          if (!render)
+            continue;
+
+          instances.emplace_back(m2_instance->transformMatrix());
+          m2_instance->_rendered_last_frame = true;
+
 
           // if (render && !draw_models_with_box /* && !m2_instance->model->is_hidden()*/)
           // {
@@ -502,62 +507,60 @@ void WorldRender::draw (glm::mat4x4 const& model_view
           instance->frame = frame;
 
           // experimental : if camera and object haven't moved/changed since last frame, we don't need to do frustum culling again
+          bool render = false;
           if (!camera_moved && !wmo_instance->extentsDirty()/* && not_moved*/)
           {
             if (wmo_instance->_rendered_last_frame)
             {
-              wmos_to_draw.push_back(wmo_instance);
-              wmo_instance->_rendered_last_frame = true;
-              continue; // skip visibility checks
+              render = true; // skip visibility checks
             }
           }
-          if (tile->renderer()->objectsFrustumCullTest() > 1 || frustum.intersects(wmo_instance->getExtents()[1], wmo_instance->getExtents()[0]))
+          if (!render && tile->renderer()->objectsFrustumCullTest() > 1 || frustum.intersects(wmo_instance->getExtents()[1], wmo_instance->getExtents()[0]))
           {
-            wmos_to_draw.push_back(wmo_instance);
+            render = true;
+          }
+
+          if (render)
+          {
+            wmos_to_draw.emplace_back(wmo_instance);
             wmo_instance->_rendered_last_frame = true;
 
-              if (draw_wmo_doodads)
+            if (draw_wmo_doodads)
+            {
+              // auto doodads = wmo_instance->get_visible_doodads(frustum, _cull_distance, camera_pos, draw_hidden_models, display);
+              // 
+              // for (auto& doodad : doodads)
+              // {
+              //     if (doodad->frame == frame)
+              //         continue;
+              //     doodad->frame = frame;
+              // 
+              //     auto& instances = models_to_draw[doodad->model.get()];
+              // 
+              //     instances.emplace_back(doodad->transformMatrix());
+              // }
+
+              // doodad->isInFrustum(frustum);
+
+              std::map<uint32_t, std::vector<wmo_doodad_instance>>* doodads = wmo_instance->get_doodads(draw_hidden_models);
+              
+              if (!doodads)
+                continue;
+              
+              for (auto& pair : *doodads)
               {
-                  // auto doodads = wmo_instance->get_visible_doodads(frustum, _cull_distance, camera_pos, draw_hidden_models, display);
-                  // 
-                  // for (auto& doodad : doodads)
-                  // {
-                  //     if (doodad->frame == frame)
-                  //         continue;
-                  //     doodad->frame = frame;
-                  // 
-                  //     auto& instances = models_to_draw[doodad->model.get()];
-                  // 
-                  //     instances.push_back(doodad->transformMatrix());
-                  // }
-
-
-                  // doodad->isInFrustum(frustum);
-
-                  std::map<uint32_t, std::vector<wmo_doodad_instance>>* doodads = wmo_instance->get_doodads(draw_hidden_models);
-                  
-                  if (!doodads)
-                      continue;
-                  
-                  for (auto& pair : *doodads)
-                  {
-                      for (auto& doodad : pair.second)
-                      {
-                          if (doodad.frame == frame)
-                              continue;
-                          doodad.frame = frame;
-                  
-                          auto& instances = models_to_draw[doodad.model.get()];
-                  
-                          instances.push_back(doodad.transformMatrix());
-                      }
-                  }
-
-
+                for (auto& doodad : pair.second)
+                {
+                    if (doodad.frame == frame)
+                        continue;
+                    doodad.frame = frame;
+              
+                    auto& instances = models_to_draw[doodad.model.get()];
+              
+                    instances.emplace_back(doodad.transformMatrix());
+                }
               }
-
-
-              //////////////////////
+            }
           }
         }
       }
