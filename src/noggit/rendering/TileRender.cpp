@@ -156,18 +156,22 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
         }
       }
       // this isn't exactly rendering but...
-      if (flags & ChunkUpdateFlags::ALPHAMAP)
-      {
-          // recalculate doodad mapping.
-          chunk->getTextureSet()->updateDoodadMapping();
-          // update render
-          setChunkGroundEffectActiveData(chunk.get());
-      }
-      else if (_require_geffect_active_texture_update)
-      {
-          // active texture render changed, just update render
-          setChunkGroundEffectActiveData(chunk.get());
-      }
+      // TODO : this is extremely slow and shouldn't happen on initial texture loading, it's just read from file
+      // if (!_texture_not_loaded)
+      // {
+      //   if (flags & ChunkUpdateFlags::ALPHAMAP)
+      //   {
+      //       // recalculate doodad mapping.
+      //       // chunk->getTextureSet()->updateDoodadMapping();
+      //       // update render
+      //      setChunkGroundEffectActiveData(chunk.get());
+      //   }
+      //   else if (_require_geffect_active_texture_update)
+      //   {
+      //       // active texture render changed, just update render
+      //       setChunkGroundEffectActiveData(chunk.get());
+      //   }
+      // }
 
       if (!flags)
         continue;
