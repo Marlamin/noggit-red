@@ -1753,22 +1753,60 @@ void World::setHoleADT(glm::vec3 const& pos, bool hole)
   });
 }
 
-void World::loadAllTiles()
+void World::loadAllTiles(glm::vec3& camera_pos)
 {
   ZoneScoped;
 
+  // for (size_t z = 0; z < 64; z++)
+  // {
+  //   for (size_t x = 0; x < 64; x++)
+  //   {
+  //     TileIndex tile(x, z);
+  // 
+  //     MapTile* mTile = mapIndex.loadTile(tile);
+  // 
+  //     if (mTile)
+  //     {
+  //       // mTile->wait_until_loaded();
+  //     }
+  //   }
+  // }
+
+  // test loading tiles from player to outer
+  // Create a vector to hold distances and corresponding tiles
+  std::vector<std::pair<float, TileIndex>> distanceTilePairs;
+  // Fill the vector with Manhattan distances and tiles
   for (size_t z = 0; z < 64; z++)
   {
     for (size_t x = 0; x < 64; x++)
     {
       TileIndex tile(x, z);
 
-      MapTile* mTile = mapIndex.loadTile(tile);
+      if (!mapIndex.hasTile(tile))
+        continue;
 
-      if (mTile)
-      {
-        // mTile->wait_until_loaded();
-      }
+      // int distance = calculateManhattanDistance(playerRow, playerCol, tile);
+      float playerRow = /*std::floor*/(camera_pos.x / TILESIZE);
+      float playerCol = /*std::floor*/(camera_pos.z / TILESIZE);
+      float distance = std::abs(playerRow - tile.x) + std::abs(playerCol - tile.z);
+      // tile.dist()
+      distanceTilePairs.emplace_back(distance, tile);
+
+    }
+  }
+  // Sort the vector based on distance
+  std::sort(distanceTilePairs.begin(), distanceTilePairs.end(),
+    [](const auto& a, const auto& b) {
+      return a.first < b.first; // Sort by distance
+    });
+
+  for (const auto& pair : distanceTilePairs)
+  {
+    MapTile* mTile = mapIndex.loadTile(pair.second);
+
+    if (mTile)
+    {
+      // mTile->wait_until_loaded();
     }
   }
 }
@@ -3630,7 +3668,7 @@ void World::select_objects_in_area(
 
   constexpr int max_position_raycast_processing = 10000;
   constexpr int max_bounds_raycast_processing = 5000; // when selecting large amount of objects, avoid doing complex ray calculations to not freeze
-  constexpr float bounds_check_scale = 0.8f; // size of the bounding box to use when interesecting withs election rectangle
+  constexpr float bounds_check_scale = 0.8f; // size of the bounding box to use when interesecting with selection rectangle
   constexpr float obj_raycast_min_size = 30.0f; // screen size rectangle lenght in pixels
 
   int processed_obj_count = 0; // num objects that had a raycast test at least once
@@ -3793,7 +3831,8 @@ void World::select_objects_in_area(
         {
           processed_obj_count++;
 
-          // get the center of the intersectino rectangle
+          // get the center of the intersection rectangle
+          /*
           // 1 : get the intersection rectangle of screen space and bounding box
           glm::vec2 intersectionMin = glm::max(aabb_screnbounds[0], selection_box[0]);
           glm::vec2 intersectionMax = glm::min(aabb_screnbounds[1], selection_box[1]);
@@ -3811,14 +3850,14 @@ void World::select_objects_in_area(
           glm::vec4 normalisedView = invertedViewMatrix * misc::normalized_device_coords(intersectionCenter.x, intersectionCenter.y,
                                                                                 viewport_width, viewport_height);
           glm::vec3 intersectionCenter_pos = glm::vec3(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
-
+          */
 
           auto obj_aabb_corners = obj_aabb.all_corners();
 
           // Iterate key points instead of all 8 corners
           std::vector<glm::vec3> key_points = {
-            // intersectionCenter_pos,
-            // (obj_aabb_corners[0] + obj_aabb_corners[6]) * 0.5f,  // Center between top corners
+            // intersectionCenter_pos, // TODO doesn't work
+            (obj_aabb_corners[0] + obj_aabb_corners[6]) * 0.5f,  // Center between top corners
             obj_aabb_corners[0], // Top-right-front
             obj_aabb_corners[5], // Top-left-back
             obj_aabb_corners[4], // Top-left-front
