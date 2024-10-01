@@ -55,8 +55,8 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , projection
       , transformMatrix()
       , { 1.0f, 1.0f, 0.0f, 1.0f }
-      , misc::transform_model_box_coords(model->header.collision_box_min)
-      , misc::transform_model_box_coords(model->header.collision_box_max)
+      , misc::transform_model_box_coords(model->collision_box_min)
+      , misc::transform_model_box_coords(model->collision_box_max)
       );
 
     // draw bounding box
@@ -64,8 +64,8 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , projection
       , transformMatrix()
       , {1.0f, 1.0f, 1.0f, 1.0f}
-      , misc::transform_model_box_coords(model->header.bounding_box_min)
-      , misc::transform_model_box_coords(model->header.bounding_box_max)
+      , misc::transform_model_box_coords(model->bounding_box_min)
+      , misc::transform_model_box_coords(model->bounding_box_max)
       );
 
     // draw extents
@@ -84,8 +84,8 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , projection
       , transformMatrix()
       , color
-      , misc::transform_model_box_coords(model->header.bounding_box_min)
-      , misc::transform_model_box_coords(model->header.bounding_box_max)
+      , misc::transform_model_box_coords(model->bounding_box_min)
+      , misc::transform_model_box_coords(model->bounding_box_max)
       );
   }
 }
@@ -104,8 +104,8 @@ void ModelInstance::intersect (glm::mat4x4 const& model_view
   std::vector<std::tuple<int, int, int>> triangle_indices;
   math::ray subray (_transform_mat_inverted, ray);
 
-  if ( !subray.intersect_bounds ( fixCoordSystem (model->header.bounding_box_min)
-                                , fixCoordSystem (model->header.bounding_box_max)
+  if ( !subray.intersect_bounds ( fixCoordSystem (model->bounding_box_min)
+                                , fixCoordSystem (model->bounding_box_max)
                                 )
      )
   {
@@ -142,11 +142,11 @@ bool ModelInstance::isInRenderDist(const float& cull_distance, const glm::vec3& 
 
   if (display == display_mode::in_3D)
   {
-    dist = glm::distance(camera, pos) - model->rad * scale;
+    dist = glm::distance(camera, pos) - model->bounding_box_radius * scale;
   }
   else
   {
-    dist = std::abs(pos.y - camera.y) - model->rad * scale;
+    dist = std::abs(pos.y - camera.y) - model->bounding_box_radius * scale;
   }
 
   if (dist >= cull_distance)
@@ -188,8 +188,8 @@ void ModelInstance::recalcExtents()
   updateTransformMatrix();
 
   math::aabb const relative_to_model
-    ( glm::min ( model->header.collision_box_min, model->header.bounding_box_min)
-    , glm::max ( model->header.collision_box_max, model->header.bounding_box_max)
+    ( glm::min ( model->collision_box_min, model->bounding_box_min)
+    , glm::max ( model->collision_box_max, model->bounding_box_max)
     );
 
   //! \todo If both boxes are {inf, -inf}, or well, if any min.c > max.c,
@@ -259,10 +259,10 @@ void ModelInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
     << "<br><b>server position X/Y/Z: </b>{" << (ZEROPOINT - pos.z) << ", " << (ZEROPOINT - pos.x) << ", " << pos.y << "}"
     << "<br><b>server orientation:  </b>" << fabs(2 * glm::pi<float>() - glm::pi<float>() / 180.0 * (float(dir.y) < 0 ? fabs(float(dir.y)) + 180.0 : fabs(float(dir.y) - 180.0)))
 
-    << "<br><b>textures Used:</b> " << model->header.nTextures
+    << "<br><b>textures Used:</b> " << model->_textures.size()
     << "<br><b>size category:</b><span> " << size_cat;
 
-  for (unsigned j  = 0; j < model->header.nTextures; j++)
+  for (unsigned j  = 0; j < model->_textures.size(); j++)
   {
     bool stuck = !model->_textures[j]->finishedLoading();
     bool error = model->_textures[j]->finishedLoading() && !model->_textures[j]->is_uploaded();

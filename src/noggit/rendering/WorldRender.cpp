@@ -858,7 +858,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     models_to_draw.clear();
     wmos_to_draw.clear();
 
-    if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
+    // if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
+    if (!model_boxes_to_draw.empty())
     {
       OpenGL::Scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
@@ -896,17 +897,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
         if (model->_rendered_last_frame)
         {
-          bool is_selected = false;
-          /*
-          auto id = model->uid;
-          bool const is_selected = _world->current_selection().size() > 0 &&
-              std::find_if(_world->current_selection().begin(), _world->current_selection().end(),
-                  [id](selection_type type)
-                  {
-                      return var_type(type) == typeid(selected_object_type)
-                          && std::get<selected_object_type>(type)->which() == SceneObjectTypes::eMODEL
-                          && static_cast<ModelInstance*>(std::get<selected_object_type>(type))->uid == id;
-                  }) != _world->current_selection().end();*/
+          // bool is_selected = false;
+          bool is_selected = _world->is_selected(model->uid);
     
           model->draw_box(model_view, projection, is_selected); // make optional!
         }
@@ -1101,7 +1093,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
   }
 
-  if (terrainMode == editing_mode::light)
+  if (terrainMode == editing_mode::light && alpha_light_sphere > 0.0f)
   {
       // Sky* CurrentSky = skies()->findClosestSkyByDistance(camera_pos);
       Sky* CurrentSky = skies()->findClosestSkyByWeight();

@@ -19,8 +19,8 @@ ModelRender::ModelRender(Model* model)
 void ModelRender::upload()
 {
   _vertex_box_points = math::box_points(
-      misc::transform_model_box_coords(_model->header.bounding_box_min)
-      , misc::transform_model_box_coords(_model->header.bounding_box_max));
+      misc::transform_model_box_coords(_model->bounding_box_min)
+      , misc::transform_model_box_coords(_model->bounding_box_max));
 
   for (std::string const& texture : _model->_textureFilenames)
     _model->_textures.emplace_back(texture, _model->_context);
@@ -197,8 +197,12 @@ void ModelRender::draw(glm::mat4x4 const& model_view
     }
 
     // store the model count to draw the bounding boxes later
-    if (all_boxes || _model->_hidden)
+    if (all_boxes || _model->_hidden ) 
     {
+      model_boxes_to_draw.emplace(_model, instances.size());
+    }
+    else if (_model->use_fake_geometry() /*|| _model->particles_only()*/)
+    { // hackfix for rendering particle only objects bounds as they currently don't render
       model_boxes_to_draw.emplace(_model, instances.size());
     }
 
@@ -317,7 +321,7 @@ void ModelRender::fixShaderIdBlendOverride()
     }
 
     int shader = 0;
-    bool blend_mode_override = (_model->header.Flags & m2_flag_use_texture_combiner_combos);
+    bool blend_mode_override = (_model->Flags & m2_flag_use_texture_combiner_combos);
 
     // fuckporting check
     if (pass.texture_coord_combo_index + pass.texture_count - 1 >= _model->_texture_unit_lookup.size())
