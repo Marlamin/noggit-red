@@ -1774,7 +1774,7 @@ void MapView::setupAssistMenu()
     makeCurrent();
     OpenGL::context::scoped_setter const _(::gl, context());
     _unload_tiles = false;
-    _world->loadAllTiles();
+    _world->loadAllTiles(_camera.position);
   }
   );
 
