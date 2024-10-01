@@ -1776,6 +1776,56 @@ void MapTile::calcCamDist(glm::vec3 const& camera)
   _cam_dist = glm::distance(camera, _center);
 }
 
+bool MapTile::childrenFinishedLoading()
+{
+  if (!objectsFinishedLoading())
+    return false;
+
+  if (!texturesFinishedLoading())
+    return false;
+
+  return true;
+}
+
+// TODO : Is there a way for objects to notify their parent when they finish loading ?
+// TODO : we can store a cache of unloaded models/textures to check fast instead of re iterating everything.
+bool MapTile::texturesFinishedLoading()
+{
+  if (_textures_finished_loading)
+    return true;
+
+  // having a list of textures in the adt would speed this up
+  for (int i = 0; i < 16; ++i)
+  {
+    for (int j = 0; j < 16; ++j)
+    {
+      auto& chunk = *mChunks[j][i];
+      auto& chunk_textures = *(chunk.texture_set->getTextures());
+      for (int k = 0; k < chunk.texture_set->num(); ++k)
+      {
+        if (!chunk_textures[k]->finishedLoading())
+          return false;
+      }
+    }
+  }
+
+  return _textures_finished_loading = true;
+}
+
+bool MapTile::objectsFinishedLoading()
+{
+  if (_objects_finished_loading)
+    return true;
+
+  for (auto& instance : object_instances)
+  {
+    if (!instance.first->finishedLoading())
+      return false;
+  }
+
+  return _objects_finished_loading = true;
+}
+
 void MapTile::recalcCombinedExtents()
 {
   if (!_combined_extents_dirty)

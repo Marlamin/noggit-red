@@ -177,6 +177,10 @@ public:
   Noggit::Rendering::TileRender* renderer() { return &_renderer; };
   Noggit::Rendering::FlightBoundsRender* flightBoundsRenderer() { return &_fl_bounds_render; };
 
+  bool childrenFinishedLoading();
+  bool texturesFinishedLoading();
+  bool objectsFinishedLoading();
+
 private:
 
   tile_mode _mode;
@@ -198,6 +202,9 @@ private:
   glm::vec3 mMaximumValues[3 * 3] = {};
 
   unsigned _chunk_update_flags;
+
+  bool _textures_finished_loading = false;
+  bool _objects_finished_loading = false;
 
   // MHDR:
   int mFlags = 0;
