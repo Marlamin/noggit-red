@@ -87,6 +87,7 @@ namespace Noggit::Rendering
     [[nodiscard]] std::unique_ptr<Skies>& skies() { return _skies; };
 
     float _view_distance;
+    inline float cullDistance() const { return _cull_distance; }
 
   private:
 

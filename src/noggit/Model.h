@@ -180,6 +180,13 @@ public:
   bool animated_mesh() const { return (animGeometry || animBones); }
 
   [[nodiscard]]
+  bool particles_only() const 
+  { // some particle emitters like wisps in ashenvale have a few vertices but no collision, using that to detect
+    return !_particles.empty() 
+    && (_renderer.renderPasses().empty() || _vertices.empty() || !nBoundingTriangles); 
+  }
+
+  [[nodiscard]]
   bool is_required_when_saving() const override
   {
     return true;
@@ -210,10 +217,19 @@ public:
   // ===============================
   std::vector<Bone> bones;
   std::vector<glm::mat4x4> bone_matrices;
-  ModelHeader header;
+  // ModelHeader header; // we really don't need to store the offsets.
   std::vector<uint16_t> blend_override;
 
-  float rad;
+  glm::vec3 bounding_box_min;
+  glm::vec3 bounding_box_max;
+  float bounding_box_radius;
+
+  glm::vec3 collision_box_min;
+  glm::vec3 collision_box_max;
+  float collision_box_radius;
+
+  uint32_t Flags;
+
   float trans;
   bool animcalc;
 
@@ -228,6 +244,11 @@ public:
 
   std::optional<FakeGeometry> _fake_geometry;
 
+  uint32_t nBoundingTriangles;
+  // std::vector<uint16_t> collision_indices;
+  // std::vector<glm::vec3> collision_vertices;
+  // std::vector<glm::vec3> collision_normals;
+
 private:
   bool _per_instance_animation;
   int _current_anim_seq;
@@ -236,9 +257,9 @@ private:
 
   Noggit::NoggitRenderContext _context;
 
-  void initCommon(const BlizzardArchive::ClientFile& f);
-  bool isAnimated(const BlizzardArchive::ClientFile& f);
-  void initAnimated(const BlizzardArchive::ClientFile& f);
+  void initCommon(const BlizzardArchive::ClientFile& f, ModelHeader& header);
+  bool isAnimated(const BlizzardArchive::ClientFile& f, ModelHeader& header);
+  void initAnimated(const BlizzardArchive::ClientFile& f, ModelHeader& header);
 
   void animate(glm::mat4x4 const& model_view, int anim_id, int anim_time);
   void calcBones(glm::mat4x4 const& model_view, int anim, int time, int animation_time);

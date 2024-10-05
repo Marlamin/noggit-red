@@ -15,6 +15,7 @@ namespace math
     aabb(std::vector<glm::vec3> const& points);
 
     std::array<glm::vec3, 8> all_corners() const;
+    inline glm::vec3 center() const { return (min + max) * 0.5f; };
 
     glm::vec3 min;
     glm::vec3 max;

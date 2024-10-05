@@ -393,7 +393,7 @@ public:
 
   bool need_model_updates = false;
 
-  void loadAllTiles();
+  void loadAllTiles(glm::vec3& camera_pos);
   unsigned getNumLoadedTiles() const { return _n_loaded_tiles; };
   unsigned getNumRenderedTiles() const { return _n_rendered_tiles; };
   unsigned getNumRenderedObjects() const { return _n_rendered_objects; };

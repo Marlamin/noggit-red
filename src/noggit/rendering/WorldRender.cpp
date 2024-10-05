@@ -453,21 +453,26 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           instance->frame = frame;
 
+          bool render = false;
           // experimental : if camera and object haven't moved/changed since last frame, we don't need to do frustum culling again
           if (!camera_moved && !m2_instance->extentsDirty()/* && not_moved*/)
           {
             if (m2_instance->_rendered_last_frame)
             {
-              instances.push_back(m2_instance->transformMatrix());
-              m2_instance->_rendered_last_frame = true;
+              render = true; // skip frustum check
             }
           }
-
-          if (m2_instance->isInRenderDist(_cull_distance, camera_pos, display) && (tile->renderer()->objectsFrustumCullTest() > 1 || m2_instance->isInFrustum(frustum)))
+          if (!render && m2_instance->isInRenderDist(_cull_distance, camera_pos, display) && (tile->renderer()->objectsFrustumCullTest() > 1 || m2_instance->isInFrustum(frustum)))
           {
-            instances.push_back(m2_instance->transformMatrix());
-            m2_instance->_rendered_last_frame = true;
+            render = true;
           }
+
+          if (!render)
+            continue;
+
+          instances.emplace_back(m2_instance->transformMatrix());
+          m2_instance->_rendered_last_frame = true;
+
 
           // if (render && !draw_models_with_box /* && !m2_instance->model->is_hidden()*/)
           // {
@@ -521,62 +526,60 @@ void WorldRender::draw (glm::mat4x4 const& model_view
           instance->frame = frame;
 
           // experimental : if camera and object haven't moved/changed since last frame, we don't need to do frustum culling again
+          bool render = false;
           if (!camera_moved && !wmo_instance->extentsDirty()/* && not_moved*/)
           {
             if (wmo_instance->_rendered_last_frame)
             {
-              wmos_to_draw.push_back(wmo_instance);
-              wmo_instance->_rendered_last_frame = true;
-              continue; // skip visibility checks
+              render = true; // skip visibility checks
             }
           }
-          if (tile->renderer()->objectsFrustumCullTest() > 1 || frustum.intersects(wmo_instance->getExtents()[1], wmo_instance->getExtents()[0]))
+          if (!render && tile->renderer()->objectsFrustumCullTest() > 1 || frustum.intersects(wmo_instance->getExtents()[1], wmo_instance->getExtents()[0]))
           {
-            wmos_to_draw.push_back(wmo_instance);
+            render = true;
+          }
+
+          if (render)
+          {
+            wmos_to_draw.emplace_back(wmo_instance);
             wmo_instance->_rendered_last_frame = true;
 
-              if (draw_wmo_doodads)
+            if (draw_wmo_doodads)
+            {
+              // auto doodads = wmo_instance->get_visible_doodads(frustum, _cull_distance, camera_pos, draw_hidden_models, display);
+              // 
+              // for (auto& doodad : doodads)
+              // {
+              //     if (doodad->frame == frame)
+              //         continue;
+              //     doodad->frame = frame;
+              // 
+              //     auto& instances = models_to_draw[doodad->model.get()];
+              // 
+              //     instances.emplace_back(doodad->transformMatrix());
+              // }
+
+              // doodad->isInFrustum(frustum);
+
+              std::map<uint32_t, std::vector<wmo_doodad_instance>>* doodads = wmo_instance->get_doodads(draw_hidden_models);
+              
+              if (!doodads)
+                continue;
+              
+              for (auto& pair : *doodads)
               {
-                  // auto doodads = wmo_instance->get_visible_doodads(frustum, _cull_distance, camera_pos, draw_hidden_models, display);
-                  // 
-                  // for (auto& doodad : doodads)
-                  // {
-                  //     if (doodad->frame == frame)
-                  //         continue;
-                  //     doodad->frame = frame;
-                  // 
-                  //     auto& instances = models_to_draw[doodad->model.get()];
-                  // 
-                  //     instances.push_back(doodad->transformMatrix());
-                  // }
-
-
-                  // doodad->isInFrustum(frustum);
-
-                  std::map<uint32_t, std::vector<wmo_doodad_instance>>* doodads = wmo_instance->get_doodads(draw_hidden_models);
-                  
-                  if (!doodads)
-                      continue;
-                  
-                  for (auto& pair : *doodads)
-                  {
-                      for (auto& doodad : pair.second)
-                      {
-                          if (doodad.frame == frame)
-                              continue;
-                          doodad.frame = frame;
-                  
-                          auto& instances = models_to_draw[doodad.model.get()];
-                  
-                          instances.push_back(doodad.transformMatrix());
-                      }
-                  }
-
-
+                for (auto& doodad : pair.second)
+                {
+                    if (doodad.frame == frame)
+                        continue;
+                    doodad.frame = frame;
+              
+                    auto& instances = models_to_draw[doodad.model.get()];
+              
+                    instances.emplace_back(doodad.transformMatrix());
+                }
               }
-
-
-              //////////////////////
+            }
           }
         }
       }
@@ -874,7 +877,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     models_to_draw.clear();
     wmos_to_draw.clear();
 
-    if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
+    // if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
+    if (!model_boxes_to_draw.empty())
     {
       OpenGL::Scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
@@ -912,17 +916,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
         if (model->_rendered_last_frame)
         {
-          bool is_selected = false;
-          /*
-          auto id = model->uid;
-          bool const is_selected = _world->current_selection().size() > 0 &&
-              std::find_if(_world->current_selection().begin(), _world->current_selection().end(),
-                  [id](selection_type type)
-                  {
-                      return var_type(type) == typeid(selected_object_type)
-                          && std::get<selected_object_type>(type)->which() == SceneObjectTypes::eMODEL
-                          && static_cast<ModelInstance*>(std::get<selected_object_type>(type))->uid == id;
-                  }) != _world->current_selection().end();*/
+          // bool is_selected = false;
+          bool is_selected = _world->is_selected(model->uid);
     
           model->draw_box(model_view, projection, is_selected); // make optional!
         }
@@ -1117,7 +1112,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
   }
 
-  if (terrainMode == editing_mode::light)
+  if (terrainMode == editing_mode::light && alpha_light_sphere > 0.0f)
   {
       // Sky* CurrentSky = skies()->findClosestSkyByDistance(camera_pos);
       Sky* CurrentSky = skies()->findClosestSkyByWeight();

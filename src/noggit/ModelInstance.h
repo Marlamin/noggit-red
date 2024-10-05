@@ -81,7 +81,7 @@ public:
                 );
 
 
-  std::vector<std::tuple<int, int, int>> intersect(glm::mat4x4 const& model_view
+ void intersect(glm::mat4x4 const& model_view
       , math::ray const&
       , selection_result*
       , int animtime

@@ -77,7 +77,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     case WMO:
     {
       obj_instance = std::get<selected_object_type>(selection[0]);
-      obj_instance->recalcExtents();
+      obj_instance->ensureExtents();
       object_matrix = obj_instance->transformMatrix();
       ImGuizmo::Manipulate(glm::value_ptr(model_view_trs), glm::value_ptr(projection_trs), _gizmo_operation, _gizmo_mode, glm::value_ptr(object_matrix), glm::value_ptr(delta_matrix), nullptr);
       break;
@@ -115,6 +115,34 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
   new_orientation = glm::conjugate(new_orientation);
 
+  // if nothing was changed, just return early
+  switch (_gizmo_operation)
+  {
+    case ImGuizmo::TRANSLATE:
+    {
+      if (new_translation.x == 0.0f && new_translation.y == 0.0f && new_translation.z == 0.0f)
+        return;
+      break;
+    }
+    case ImGuizmo::ROTATE:
+    {
+
+      if (new_orientation.x == -0.0f && new_orientation.y == -0.0f && new_orientation.z == -0.0f)
+        return;
+      break;
+    }
+    case ImGuizmo::SCALE:
+    {
+      if (new_scale.x == 1.0f && new_scale.y == 1.0f && new_scale.z == 1.0f)
+        return;
+      break;
+    }
+    case ImGuizmo::BOUNDS:
+    {
+      throw std::logic_error("Bounds are not supported by this gizmo.");
+    }
+  }
+
   NOGGIT_ACTION_MGR->beginAction(map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                  Noggit::ActionModalityControllers::eLMB);
 
@@ -133,7 +161,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance = std::get<selected_object_type>(selected);
       NOGGIT_CUR_ACTION->registerObjectTransformed(obj_instance);
 
-      obj_instance->recalcExtents();
+      obj_instance->ensureExtents();
       object_matrix = obj_instance->transformMatrix();
 
       glm::vec3& pos = obj_instance->pos;
@@ -238,7 +266,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
           break;
         }
       }
-      obj_instance->recalcExtents();
+      obj_instance->ensureExtents();
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::add);
@@ -254,7 +282,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       obj_instance = std::get<selected_object_type>(selected);
       NOGGIT_CUR_ACTION->registerObjectTransformed(obj_instance);
 
-      obj_instance->recalcExtents();
+      obj_instance->ensureExtents();
       object_matrix = obj_instance->transformMatrix();
 
       glm::vec3& pos = obj_instance->pos;

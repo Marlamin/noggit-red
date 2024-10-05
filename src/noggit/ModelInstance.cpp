@@ -1,19 +1,21 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/euler_angles.hpp>
-#include <math/bounding_box.hpp>
-#include <math/frustum.hpp>
-#include <glm/glm.hpp>
+#include <noggit/ModelInstance.h>
 #include <noggit/Log.h>
 #include <noggit/Misc.h> // checkinside
 #include <noggit/Model.h> // Model, etc.
-#include <noggit/ModelInstance.h>
 #include <noggit/WMOInstance.h>
 #include <noggit/ContextObject.hpp>
 #include <noggit/rendering/Primitives.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
+
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <math/bounding_box.hpp>
+#include <math/frustum.hpp>
+#include <glm/glm.hpp>
+#include <glm/vec3.hpp>
 
 #include <sstream>
 
@@ -53,8 +55,8 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , projection
       , transformMatrix()
       , { 1.0f, 1.0f, 0.0f, 1.0f }
-      , misc::transform_model_box_coords(model->header.collision_box_min)
-      , misc::transform_model_box_coords(model->header.collision_box_max)
+      , misc::transform_model_box_coords(model->collision_box_min)
+      , misc::transform_model_box_coords(model->collision_box_max)
       );
 
     // draw bounding box
@@ -62,8 +64,8 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , projection
       , transformMatrix()
       , {1.0f, 1.0f, 1.0f, 1.0f}
-      , misc::transform_model_box_coords(model->header.bounding_box_min)
-      , misc::transform_model_box_coords(model->header.bounding_box_max)
+      , misc::transform_model_box_coords(model->bounding_box_min)
+      , misc::transform_model_box_coords(model->bounding_box_max)
       );
 
     // draw extents
@@ -82,27 +84,32 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
       , projection
       , transformMatrix()
       , color
-      , misc::transform_model_box_coords(model->header.bounding_box_min)
-      , misc::transform_model_box_coords(model->header.bounding_box_max)
+      , misc::transform_model_box_coords(model->bounding_box_min)
+      , misc::transform_model_box_coords(model->bounding_box_max)
       );
   }
 }
 
-std::vector<std::tuple<int, int, int>> ModelInstance::intersect (glm::mat4x4 const& model_view
+void ModelInstance::intersect (glm::mat4x4 const& model_view
                               , math::ray const& ray
                               , selection_result* results
                               , int animtime
                               )
 {  
+  if (!finishedLoading() || model->loading_failed())
+    return;
+
+  ensureExtents();
+
   std::vector<std::tuple<int, int, int>> triangle_indices;
   math::ray subray (_transform_mat_inverted, ray);
 
-  if ( !subray.intersect_bounds ( fixCoordSystem (model->header.bounding_box_min)
-                                , fixCoordSystem (model->header.bounding_box_max)
+  if ( !subray.intersect_bounds ( fixCoordSystem (model->bounding_box_min)
+                                , fixCoordSystem (model->bounding_box_max)
                                 )
      )
   {
-    return triangle_indices;
+    return;
   }
 
   for (auto&& result : model->intersect (model_view, subray, animtime))
@@ -112,7 +119,7 @@ std::vector<std::tuple<int, int, int>> ModelInstance::intersect (glm::mat4x4 con
     results->emplace_back (result.first * scale, this);
     triangle_indices.emplace_back(result.second);
   }
-  return triangle_indices;
+  return;
 }
 
 
@@ -135,11 +142,11 @@ bool ModelInstance::isInRenderDist(const float& cull_distance, const glm::vec3& 
 
   if (display == display_mode::in_3D)
   {
-    dist = glm::distance(camera, pos) - model->rad * scale;
+    dist = glm::distance(camera, pos) - model->bounding_box_radius * scale;
   }
   else
   {
-    dist = std::abs(pos.y - camera.y) - model->rad * scale;
+    dist = std::abs(pos.y - camera.y) - model->bounding_box_radius * scale;
   }
 
   if (dist >= cull_distance)
@@ -181,31 +188,34 @@ void ModelInstance::recalcExtents()
   updateTransformMatrix();
 
   math::aabb const relative_to_model
-    ( glm::min ( model->header.collision_box_min, model->header.bounding_box_min)
-    , glm::max ( model->header.collision_box_max, model->header.bounding_box_max)
+    ( glm::min ( model->collision_box_min, model->bounding_box_min)
+    , glm::max ( model->collision_box_max, model->bounding_box_max)
     );
 
   //! \todo If both boxes are {inf, -inf}, or well, if any min.c > max.c,
   //! the model is bad itself. We *could* detect that case and explicitly
   //! assume {-1, 1} then, to be nice to fuckported models.
 
-  auto corners_in_world = std::vector<glm::vec3>();
+  std::array<glm::vec3, 8> corners_in_world;
   auto transform = misc::transform_model_box_coords;
-  auto points = relative_to_model.all_corners();
-  for (auto& point : points)
+  std::array<glm::vec3, 8> points = relative_to_model.all_corners();
+
+  for (int i = 0; i < 8; ++i)
+  // for (auto& point : points)
   {
-    point = transform(point);
-    corners_in_world.push_back(point);
+    // points[i] = transform(points[i]);
+    corners_in_world[i] = transform(points[i]);
   }
  
-  auto rotated_corners_in_world = std::vector<glm::vec3>();
-  auto transposedMat = _transform_mat;
-  for (auto const& point : corners_in_world)
+  std::array<glm::vec3, 8> rotated_corners_in_world;
+  // for (auto const& point : corners_in_world)
+  for (int i = 0; i < 8; ++i)
   {
-    rotated_corners_in_world.emplace_back(transposedMat * glm::vec4(point, 1.f));
+    rotated_corners_in_world[i] = _transform_mat * glm::vec4(corners_in_world[i], 1.f);
   }
 
-  math::aabb const bounding_of_rotated_points (rotated_corners_in_world);
+  math::aabb const bounding_of_rotated_points (std::vector<glm::vec3>(rotated_corners_in_world.begin()
+                                              , rotated_corners_in_world.end()));
 
   extents[0] = bounding_of_rotated_points.min;
   extents[1] = bounding_of_rotated_points.max;
@@ -249,10 +259,10 @@ void ModelInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
     << "<br><b>server position X/Y/Z: </b>{" << (ZEROPOINT - pos.z) << ", " << (ZEROPOINT - pos.x) << ", " << pos.y << "}"
     << "<br><b>server orientation:  </b>" << fabs(2 * glm::pi<float>() - glm::pi<float>() / 180.0 * (float(dir.y) < 0 ? fabs(float(dir.y)) + 180.0 : fabs(float(dir.y) - 180.0)))
 
-    << "<br><b>textures Used:</b> " << model->header.nTextures
+    << "<br><b>textures Used:</b> " << model->_textures.size()
     << "<br><b>size category:</b><span> " << size_cat;
 
-  for (unsigned j  = 0; j < model->header.nTextures; j++)
+  for (unsigned j  = 0; j < model->_textures.size(); j++)
   {
     bool stuck = !model->_textures[j]->finishedLoading();
     bool error = model->_textures[j]->finishedLoading() && !model->_textures[j]->is_uploaded();

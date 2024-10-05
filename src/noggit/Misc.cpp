@@ -43,7 +43,7 @@ namespace misc
     // Perspective division to move to normalized device coordinates (NDC)
     float ndcX = clipSpacePos.x / clipSpacePos.w;
     float ndcY = clipSpacePos.y / clipSpacePos.w;
-    float ndcZ = clipSpacePos.z / clipSpacePos.w;
+    // float ndcZ = clipSpacePos.z / clipSpacePos.w; // unnecessary but could be used for extra checks
 
     // If the point is out of the normalized device coordinates range, it's off-screen
     if (ndcX < -1.0f || ndcX > 1.0f || ndcY < -1.0f || ndcY > 1.0f)
@@ -55,6 +55,8 @@ namespace misc
     // Convert NDC to screen space coordinates
     clipSpacePos.x = (ndcX + 1.0f) * 0.5f * viewport_width;
     clipSpacePos.y = (1.0f - (ndcY + 1.0f) * 0.5f) * viewport_height;
+    // test inverting the MapView::normalized_device_coords formula.
+    // clipSpacePos.y = (1.0f - ndcY) * 0.5f * viewport_height;
 
     // from MapView::normalized_device_coords
     // x 2.0f * x / viewport_width - 1.0f

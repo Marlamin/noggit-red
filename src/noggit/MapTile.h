@@ -180,6 +180,10 @@ public:
   const texture_heightmapping_data& GetTextureHeightMappingData(const std::string& name) const;
 
   void forceAlphaUpdate();
+  bool childrenFinishedLoading();
+  bool texturesFinishedLoading();
+  bool objectsFinishedLoading();
+
 private:
 
   tile_mode _mode;
@@ -202,6 +206,9 @@ private:
   glm::vec3 mMaximumValues[3 * 3] = {};
 
   unsigned _chunk_update_flags;
+
+  bool _textures_finished_loading = false;
+  bool _objects_finished_loading = false;
 
   // MHDR:
   int mFlags = 0;

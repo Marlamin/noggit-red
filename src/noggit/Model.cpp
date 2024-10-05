@@ -27,7 +27,7 @@ Model::Model(const std::string& filename, Noggit::NoggitRenderContext context)
   , _context(context)
   , _renderer(this)
 {
-  memset(&header, 0, sizeof(ModelHeader));
+  // memset(&header, 0, sizeof(ModelHeader));
 }
 
 void Model::finishLoading()
@@ -40,6 +40,8 @@ void Model::finishLoading()
     // finished = true;
     throw std::runtime_error("Error loading file \"" + _file_key.stringRepr() + "\". Aborting to load model.");
   }
+
+  ModelHeader header;
 
   memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
 
@@ -84,12 +86,21 @@ void Model::finishLoading()
     blend_override = M2Array<uint16_t>(f, ofs_blend_override, n_blend_override);
   }
 
-  animated = isAnimated(f);  // isAnimated will set animGeometry and animTextures
+  animated = isAnimated(f, header);  // isAnimated will set animGeometry and animTextures
 
   trans = 1.0f;
   _current_anim_seq = 0;
 
-  rad = header.bounding_box_radius;
+  bounding_box_min = header.bounding_box_min;
+  bounding_box_max = header.bounding_box_max;
+  bounding_box_radius = header.bounding_box_radius;
+
+  collision_box_min = header.collision_box_min;
+  collision_box_max = header.collision_box_max;
+  collision_box_radius = header.collision_box_radius;
+
+  Flags = header.Flags;
+
 
   if (header.nGlobalSequences)
   {
@@ -97,14 +108,20 @@ void Model::finishLoading()
   }
 
   //! \todo  This takes a biiiiiit long. Have a look at this.
-  initCommon(f);
+  initCommon(f, header);
 
   if (animated)
   {
-    initAnimated(f);
+    initAnimated(f, header);
   }
 
   f.close();
+
+  // add fake geometry for selection
+  if (_renderer.renderPasses().empty() || particles_only() /* || this->file_key().filepath() == "world/generic/passivedoodads/particleemitters/ashenvalewisps.m2"*/)
+  {
+    _fake_geometry.emplace(this);
+  }
 
   finished = true;
   _state_changed.notify_all();
@@ -124,7 +141,7 @@ void Model::waitForChildrenLoaded()
 }
 
 
-bool Model::isAnimated(const BlizzardArchive::ClientFile& f)
+bool Model::isAnimated(const BlizzardArchive::ClientFile& f, ModelHeader& header)
 {
   // see if we have any animated bones
   ModelBoneDef const* bo = reinterpret_cast<ModelBoneDef const*>(f.getBuffer() + header.ofsBones);
@@ -226,7 +243,7 @@ namespace
 }
 
 
-void Model::initCommon(const BlizzardArchive::ClientFile& f)
+void Model::initCommon(const BlizzardArchive::ClientFile& f, ModelHeader& header)
 {
   // vertices, normals, texcoords
   _vertices = M2Array<ModelVertex>(f, header.ofsVertices, header.nVertices);
@@ -236,6 +253,12 @@ void Model::initCommon(const BlizzardArchive::ClientFile& f)
     v.position = fixCoordSystem(v.position);
     v.normal = fixCoordSystem(v.normal);
   }
+
+  nBoundingTriangles = header.nBoundingTriangles;
+  // Optional, load collision
+  // collision_indices = M2Array<glm::uint16_t>(f, header.ofsBoundingTriangles, header.nBoundingTriangles);
+  // collision_vertices = M2Array<glm::vec3>(f, header.ofsBoundingVertices, header.nBoundingVertices);
+  // collision_normals = M2Array<glm::vec3>(f, header.ofsBoundingNormals, header.nBoundingNormals);
 
   // textures
   ModelTextureDef const* texdef = reinterpret_cast<ModelTextureDef const*>(f.getBuffer() + header.ofsTextures);
@@ -346,19 +369,13 @@ void Model::initCommon(const BlizzardArchive::ClientFile& f)
     _renderer.initRenderPasses(view, texture_unit, model_geosets);
 
     g.close();
-
-    // add fake geometry for selection
-    if (_renderer.renderPasses().empty())
-    {
-      _fake_geometry.emplace(this);
-    }
   }  
 }
 
 
 FakeGeometry::FakeGeometry(Model* m)
 {
-  glm::vec3 min = m->header.bounding_box_min, max = m->header.bounding_box_max;
+  glm::vec3 min = m->bounding_box_min, max = m->bounding_box_max;
 
   vertices.emplace_back(min.x, max.y, min.z);
   vertices.emplace_back(min.x, max.y, max.z);
@@ -382,7 +399,7 @@ FakeGeometry::FakeGeometry(Model* m)
 }
 
 
-void Model::initAnimated(const BlizzardArchive::ClientFile& f)
+void Model::initAnimated(const BlizzardArchive::ClientFile& f, ModelHeader& header)
 {
   std::vector<std::unique_ptr<BlizzardArchive::ClientFile>> animation_files;
 
@@ -480,12 +497,12 @@ void Model::calcBones(glm::mat4x4 const& model_view
                      , int animation_time
                      )
 {
-  for (size_t i = 0; i<header.nBones; ++i)
+  for (size_t i = 0; i< bones.size(); ++i)
   {
     bones[i].calc = false;
   }
 
-  for (size_t i = 0; i<header.nBones; ++i)
+  for (size_t i = 0; i< bones.size(); ++i)
   {
     bones[i].calcMatrix(model_view, bones.data(), _anim, time, animation_time);
   }
@@ -568,7 +585,7 @@ void Model::animate(glm::mat4x4 const& model_view, int anim_id, int anim_time)
      */
   }
 
-  for (size_t i=0; i<header.nLights; ++i) 
+  for (size_t i=0; i< _lights.size(); ++i)
   {
     if (_lights[i].parent >= 0) 
     {
@@ -842,12 +859,12 @@ std::vector<std::pair<float, std::tuple<int, int, int>>> Model::intersect (glm::
 void Model::lightsOn(OpenGL::light lbase)
 {
   // setup lights
-  for (unsigned int i=0, l=lbase; i<header.nLights; ++i) _lights[i].setup(_anim_time, l++, _global_animtime);
+  for (unsigned int i=0, l=lbase; i< _lights.size(); ++i) _lights[i].setup(_anim_time, l++, _global_animtime);
 }
 
 void Model::lightsOff(OpenGL::light lbase)
 {
-  for (unsigned int i = 0, l = lbase; i<header.nLights; ++i) gl.disable(l++);
+  for (unsigned int i = 0, l = lbase; i< _lights.size(); ++i) gl.disable(l++);
 }
 
 
