@@ -2,6 +2,7 @@
 
 #include <glm/common.hpp>
 #include <math/bounding_box.hpp>
+#include <noggit/Misc.h>
 
 namespace
 {
