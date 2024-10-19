@@ -1192,8 +1192,8 @@ Noggit::Ui::Tools::LightningInfoDialog::LightningInfoDialog(LightEditor* editor,
 	:_editor(editor)
 	, QWidget(parent)
 {
-	this->setWindowTitle("Lightning Info");
-	this->setWindowFlags(Qt::Dialog);
+	setWindowTitle("Lightning Info");
+	setWindowFlags(Qt::Dialog);
 	
 	auto main_layout = new QHBoxLayout(this);
 
