@@ -1,13 +1,8 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "LightEditor.hpp"
-#include <noggit/DBC.h>
 #include <noggit/World.h>
 #include <noggit/MapView.h>
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QFormLayout>
-// #include <QtWidgets/QLabel>
-#include <QtWidgets/qtreewidget.h>
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/application/NoggitApplication.hpp>
 
@@ -23,6 +18,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QStringList>
+
 
 using namespace Noggit::Ui::Tools;
 
@@ -1196,8 +1192,8 @@ Noggit::Ui::Tools::LightningInfoDialog::LightningInfoDialog(LightEditor* editor,
 	:_editor(editor)
 	, QWidget(parent)
 {
-	setWindowTitle("Lightning Info");
-	setWindowFlags(Qt::Dialog);
+	this->setWindowTitle("Lightning Info");
+	this->setWindowFlags(Qt::Dialog);
 	
 	auto main_layout = new QHBoxLayout(this);
 

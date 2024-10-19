@@ -80,13 +80,13 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   }
 
   // After coming out of minimap rendering mode and draw_only_normals is still on, disable it.
-  if (!minimap_render && _terrain_params_ubo_data.draw_only_normals) {
+  if (!render_settings.minimap_render && _terrain_params_ubo_data.draw_only_normals) {
       _terrain_params_ubo_data.draw_only_normals = false;
       _need_terrain_params_ubo_update = true;
   }
 
   // After coming out of minimap rendering mode and point_normals_up is still on, disable it.
-  if (!minimap_render && _terrain_params_ubo_data.point_normals_up) {
+  if (!render_settings.minimap_render && _terrain_params_ubo_data.point_normals_up) {
       _terrain_params_ubo_data.point_normals_up = false;
       _need_terrain_params_ubo_update = true;
   }

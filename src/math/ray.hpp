@@ -3,6 +3,7 @@
 #include <glm/mat4x4.hpp>
 #include <optional>
 #include <cmath>
+#include <iostream>
 
 namespace math
 {
