@@ -30,6 +30,10 @@ namespace Noggit
 
         void onTick(float deltaTime, TickParameters const& params) override;
 
+        void onSelected() override;
+
+        void onDeselected() override;
+
     private:
         Ui::Tools::LightEditor* _lightEditor = nullptr;
     };

@@ -37,6 +37,8 @@ void WMORender::draw(OpenGL::Scoped::use_program& wmo_shader
     , bool world_has_skies
     , display_mode display
     , bool interior_only
+    , bool render_group_bounds
+    , bool grouped
 )
 {
 
@@ -86,21 +88,28 @@ void WMORender::draw(OpenGL::Scoped::use_program& wmo_shader
     //OpenGL::Scoped::bool_setter<GL_BLEND, GL_TRUE> const blend;
     //gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (auto& group : _wmo->groups)
+    // group bounds
+    if (render_group_bounds && !grouped)
     {
-      Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context).draw( model_view
-          , projection
-          , transform_matrix
-          , {1.0f, 1.0f, 1.0f, 1.0f}
-          , group.BoundingBoxMin
-          , group.BoundingBoxMax
-      );
+      for (auto& group : _wmo->groups)
+      {
+        Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context).draw( model_view
+            , projection
+            , transform_matrix
+            , {0.5f, 0.5f, 0.5f, 1.0f} // grey
+            , group.BoundingBoxMin
+            , group.BoundingBoxMax
+        );
+      }
     }
 
+    glm::vec4 color = grouped ? glm::vec4(0.5f, 0.5f, 1.0f, 0.5f) // light purple-blue
+      : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // white
+    // non axis aligned bounding box
     Noggit::Rendering::Primitives::WireBox::getInstance(_wmo->_context).draw ( model_view
         , projection
         , transform_matrix
-        , {1.0f, 0.0f, 0.0f, 1.0f}
+        , color // white
         , glm::vec3(_wmo->extents[0].x, _wmo->extents[0].z, -_wmo->extents[0].y)
         , glm::vec3(_wmo->extents[1].x, _wmo->extents[1].z, -_wmo->extents[1].y)
     );
@@ -152,7 +161,17 @@ bool WMORender::drawSkybox(const glm::mat4x4& model_view, const glm::vec3& camer
       m2_shader.uniform("tex_unit_lookup_2", 0);
       m2_shader.uniform("pixel_shader", 0);
 
-      _wmo->skybox->get()->renderer()->draw(model_view, sky, m2_shader, model_render_state, frustum, cull_distance, camera_pos, animtime, display_mode::in_3D);
+      _wmo->skybox->get()->renderer()->draw(model_view
+                                           , sky
+                                           , m2_shader
+                                           , model_render_state
+                                           , frustum
+                                           , cull_distance
+                                           , camera_pos
+                                           , animtime
+                                           , display_mode::in_3D
+                                           , true
+                                           , true);
 
       return true;
     }

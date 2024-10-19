@@ -457,7 +457,7 @@ LightViewEditor::LightViewEditor(MapView* Map, SkyParam* Sky, SkyColorNames eSky
 		PreLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
 		PreLayout->addWidget(Add);
 		PreLayout->addSpacerItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Expanding));
-		PreLayout->addWidget(new QLabel(tr("Time"), this));
+		PreLayout->addWidget(new QLabel(tr("Hours"), this));
 		PreLayout->addWidget(AddHour);
 		PreLayout->addWidget(new QLabel(tr("Minutes"), this));
 		PreLayout->addWidget(AddMin);

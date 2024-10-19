@@ -37,7 +37,7 @@ namespace Noggit
         QWidget* parent ) : QWidget(parent)
     {
       setMinimumWidth(250);
-      setMaximumWidth(250);
+      // setMaximumWidth(250);
       auto layout = new QVBoxLayout(this);
       layout->setAlignment(Qt::AlignHCenter | Qt::AlignTop);
 

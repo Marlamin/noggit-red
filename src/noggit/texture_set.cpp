@@ -1301,6 +1301,7 @@ void TextureSet::uploadAlphamapData()
     return;
 
   static std::array<float, 3 * 64 * 64> amap{};
+  std::fill(amap.begin(), amap.end(), 0.0f);
 
   if (tmp_edit_values)
   {
@@ -1310,13 +1311,15 @@ void TextureSet::uploadAlphamapData()
     {
       for (int alpha_id = 0; alpha_id < 3; ++alpha_id)
       {
-        amap[i * 3 + alpha_id] = (alpha_id < nTextures - 1) ? tmp_amaps[alpha_id + 1][i] / 255.f : 0.f;
+        // amap[i * 3 + alpha_id] = (alpha_id < nTextures - 1) ? tmp_amaps[alpha_id + 1][i] / 255.f : 0.f;
+        if (alpha_id < nTextures - 1)
+          amap[i * 3 + alpha_id] = tmp_amaps[alpha_id + 1][i] / 255.f;
       }
     }
   }
   else
   {
-    uint8_t const* alpha_ptr[3];
+    uint8_t const* alpha_ptr[3]{ nullptr, nullptr, nullptr };
 
     for (int i = 0; i < nTextures - 1; ++i)
     {
@@ -1329,12 +1332,12 @@ void TextureSet::uploadAlphamapData()
       {
           if (alpha_id < nTextures - 1)
           {
-              amap[i * 3 + alpha_id] = *(alpha_ptr[alpha_id]++) / 255.0f;
+              amap[i * 3 + alpha_id] = static_cast<float>(*(alpha_ptr[alpha_id]++)) / 255.0f;
           }
-          else
-          {
-              amap[i * 3 + alpha_id] = 0.f;
-          }
+          // else
+          // {
+          //     amap[i * 3 + alpha_id] = 0.f;
+          // }
       }
     }
 

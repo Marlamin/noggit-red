@@ -112,6 +112,15 @@ namespace math
 
     // The boxes intersect
     return true;
+
+    // Note : if you need to use the inetrsection area instead use : 
+    // glm::vec2 intersectionMin = glm::max(box_a[0], box_b[0]);
+    // glm::vec2 intersectionMax = glm::min(box_a[1], box_b[1]);
+    // 
+    // if (!(intersectionMin.x < intersectionMax.x) || !(intersectionMin.y < intersectionMax.y))
+    //   continue;
+    // example using center of intersection area
+    // glm::vec2 intersectionCenter = (intersectionMin + intersectionMax) * 0.5f;
   }
 
   bool is_inside_of_polygon(const glm::vec2& pos, const std::vector<glm::vec2>& polygon);

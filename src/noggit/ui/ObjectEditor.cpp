@@ -61,7 +61,7 @@ namespace Noggit
             , _map_view(mapView)
     {
       setMinimumWidth(250);
-      setMaximumWidth(250);
+      // setMaximumWidth(250);
 
       auto layout = new QVBoxLayout (this);
       layout->setAlignment(Qt::AlignTop);

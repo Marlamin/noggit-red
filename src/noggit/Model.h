@@ -159,7 +159,7 @@ public:
 
   Model(const std::string& name, Noggit::NoggitRenderContext context );
 
-  std::vector<std::pair<float, std::tuple<int, int, int>>> intersect (glm::mat4x4 const& model_view, math::ray const&, int animtime);
+  std::vector<std::pair<float, std::tuple<int, int, int>>> intersect (glm::mat4x4 const& model_view, math::ray const&, int animtime, bool calc_anims);
 
   void updateEmitters(float dt);
 
@@ -197,6 +197,15 @@ public:
 
   uint32_t get_anim_lenght(int16_t anim_id) { return _animation_length[anim_id]; }
 
+  // only useful if model has multiple anims with varying bound sizes
+  // probably never happens with world objects, but this should be more accurate than global bounds
+  // If it's ever needed, store it instead of calculating every frame.
+  std::optional<std::array<glm::vec3, 2>> getCurrentSequenceBounds();
+
+  // bounding box of current transformed mesh
+  // if this ends up being called everyframe just store it
+  std::array<glm::vec3, 2> getAnimatedBoundingBox() const;
+
   // ===============================
   // Toggles
   // ===============================
@@ -224,6 +233,14 @@ public:
   glm::vec3 bounding_box_max;
   float bounding_box_radius;
 
+  // Used to store the size of the mesh
+  // Useful for animated models that move like birds where the bounding boxes are much larger than the mesh.
+  std::array< glm::vec3, 2> vertices_bounds; 
+
+  // size of vertex box compared to global bounds
+  float mesh_bounds_ratio = 1.0f;
+
+
   glm::vec3 collision_box_min;
   glm::vec3 collision_box_max;
   float collision_box_radius;
@@ -231,14 +248,14 @@ public:
   uint32_t Flags;
 
   float trans;
-  bool animcalc;
+  bool anim_calculated;
 
   // ===============================
   // Geometry
   // ===============================
 
   std::vector<ModelVertex> _vertices;
-  std::vector<ModelVertex> _current_vertices;
+  // std::vector<ModelVertex> _current_vertices;
 
   std::vector<uint16_t> _indices;
 
@@ -263,6 +280,11 @@ private:
 
   void animate(glm::mat4x4 const& model_view, int anim_id, int anim_time);
   void calcBones(glm::mat4x4 const& model_view, int anim, int time, int animation_time);
+
+  std::vector<ModelVertex> getTransformVertices() const;
+
+  // size of vertex box compared to global bounds
+  float calcMeshBoundsRatio() const;
 
   void lightsOn(OpenGL::light lbase);
   void lightsOff(OpenGL::light lbase);

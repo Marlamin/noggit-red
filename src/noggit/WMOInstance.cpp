@@ -67,6 +67,8 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
                        , display_mode display
                        , bool no_cull
                        , bool draw_exterior
+                       , bool render_selection_aabb
+                       , bool render_group_bounds
                        )
 {
   if (!wmo->finishedLoading() || wmo->loading_failed())
@@ -104,7 +106,7 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
               , model_view
               , projection
               , _transform_mat
-              , is_selected && !_grouped
+              , is_selected || _grouped
               , frustum
               , cull_distance
               , camera
@@ -114,16 +116,19 @@ void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
               , world_has_skies
               , display
               , !draw_exterior
+              , render_group_bounds
+              , _grouped
               );
   }
 
-  if (force_box || is_selected)
+  // axis aligned bounding box (extents)
+  if (render_selection_aabb && (force_box || is_selected) && !_grouped)
   {
     gl.enable(GL_BLEND);
     gl.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glm::vec4 color = force_box || _grouped ? glm::vec4(0.5f, 0.5f, 1.0f, 0.5f)
-        : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    glm::vec4 color = force_box || _grouped ? glm::vec4(0.5f, 0.5f, 1.0f, 0.5f) // light purple-blue
+        : glm::vec4(0.0f, 1.0f, 0.0f, 1.0f); // green
 
     Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw(model_view
        , projection
@@ -159,6 +164,25 @@ std::array<glm::vec3, 2> const& WMOInstance::getExtents()
   ensureExtents();
 
   return extents;
+}
+
+std::array<glm::vec3, 2> const& WMOInstance::getLocalExtents() const
+{
+
+  return { wmo->extents[0], wmo->extents[1] };
+}
+
+std::array<glm::vec3, 8> WMOInstance::getBoundingBox()
+{
+  // auto extents = getExtents();
+  if (_need_recalc_extents)
+    updateTransformMatrix();
+
+  // note, doesn't include group bounds like recalcExtents(), this just trusts blizzard.
+
+  math::aabb const relative_to_model(wmo->extents[0], wmo->extents[1]);
+
+  return relative_to_model.rotated_corners(_transform_mat, true);
 }
 
 void WMOInstance::ensureExtents()
@@ -233,16 +257,7 @@ void WMOInstance::recalcExtents()
 
   std::vector<glm::vec3> points;
 
-  glm::vec3 wmo_min(misc::transform_model_box_coords(wmo->extents[0]));
-  glm::vec3 wmo_max(misc::transform_model_box_coords(wmo->extents[1]));
-
-  auto&& root_points = math::aabb(wmo_min, wmo_max).all_corners(); 
-  std::array<glm::vec3, 8> adjustedPoints;
-
-  for (int i = 0; i < 8; ++i)
-  {
-    adjustedPoints[i] = _transform_mat * glm::vec4(root_points[i], 1.f);
-  }
+  std::array<glm::vec3, 8> const adjustedPoints = math::aabb(wmo->extents[0], wmo->extents[1]).rotated_corners(_transform_mat, true);
 
   points.insert(points.end(), adjustedPoints.begin(), adjustedPoints.end());
 
@@ -250,7 +265,7 @@ void WMOInstance::recalcExtents()
   {
     auto const& group = wmo->groups[i];
 
-    auto&& group_points = math::aabb(group.BoundingBoxMin, group.BoundingBoxMax).all_corners();
+    const auto&& group_points = math::aabb(group.BoundingBoxMin, group.BoundingBoxMax).all_corners();
     std::array<glm::vec3, 8> adjustedGroupPoints;
 
     for (int i = 0; i < 8; ++i)
@@ -275,10 +290,7 @@ void WMOInstance::recalcExtents()
   extents[0] = wmo_aabb.min;
   extents[1] = wmo_aabb.max;
 
-  // Calculate bounding radius
-  // glm::vec3 center = (extents[0] + extents[1]) / 2.0f;
-  glm::vec3 halfExtents = (extents[1] - extents[0]) / 2.0f;
-  bounding_radius = glm::length(halfExtents);
+  bounding_radius = glm::distance(wmo->extents[1], wmo->extents[0]) * scale / 2.0f;
 
   _need_recalc_extents = false;
 }

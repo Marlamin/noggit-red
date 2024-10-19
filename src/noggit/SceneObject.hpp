@@ -51,13 +51,13 @@ public:
   void normalizeDirection();
 
   [[nodiscard]]
-  glm::mat4x4 transformMatrix() const { return _transform_mat; };
+  inline glm::mat4x4 transformMatrix() { /*ensureExtents();*/ return _transform_mat; }; // can't recalc extent directly there because recalc extents functions call this and it causes an infinite loop
 
   [[nodiscard]]
-  glm::mat4x4 transformMatrixInverted() const { return _transform_mat_inverted; };
+  inline glm::mat4x4 transformMatrixInverted() { /*ensureExtents();*/ return _transform_mat_inverted; };
 
   [[nodiscard]]
-  SceneObjectTypes which() const { return _type; };
+  inline SceneObjectTypes which() const { return _type; };
 
   void refTile(MapTile* tile);
   void derefTile(MapTile* tile);
@@ -69,10 +69,13 @@ public:
   virtual AsyncObject* instance_model() const = 0;
 
   [[nodiscard]]
-  virtual std::array<glm::vec3, 2> const& getExtents() { ensureExtents(); return extents; }
+  virtual std::array<glm::vec3, 2> const& getExtents() { ensureExtents(); return extents; } // axis aligned
 
   [[nodiscard]]
-  float const& getBoundingRadius() { ensureExtents(); return bounding_radius; }
+  virtual std::array<glm::vec3, 8> getBoundingBox() = 0; // non axis aligned
+
+  [[nodiscard]]
+  inline float const getBoundingRadius() { ensureExtents(); return bounding_radius; }
 
   glm::vec3 const getServerPos() { return glm::vec3(ZEROPOINT - pos.z, ZEROPOINT - pos.x, pos.y); }
 
@@ -94,7 +97,7 @@ protected:
 
   glm::mat4x4 _transform_mat = glm::mat4x4();
   glm::mat4x4 _transform_mat_inverted = glm::mat4x4();
-  std::array<glm::vec3, 2> extents;
+  std::array<glm::vec3, 2> extents; // axis aligned bounding box mni and max corners
   float bounding_radius;
 
   Noggit::NoggitRenderContext _context;

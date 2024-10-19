@@ -89,7 +89,7 @@ public:
     std::vector<unsigned int> const& getMembers() const { return _members_uid; }
 
     [[nodiscard]]
-    std::array<glm::vec3, 2> const& getExtents() { return _group_extents; } // ensureExtents();
+    std::array<glm::vec3, 2> const& getExtents() const { return _group_extents; } // ensureExtents();
 
     bool isSelected() const { return _is_selected; }
     void setUnselected() { _is_selected = false; }

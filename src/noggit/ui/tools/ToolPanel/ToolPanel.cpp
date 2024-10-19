@@ -13,9 +13,9 @@ ToolPanel::ToolPanel(QWidget* parent)
   auto body = new QWidget(this);
   _ui.setupUi(body);
   setWidget(body);
-  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
+  setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
   layout()->setAlignment(Qt::AlignTop);
-  setFixedWidth(250 + 15);
+  setMinimumWidth(250 + 15);
 }
 
 void ToolPanel::setCurrentTool(editing_mode mode)

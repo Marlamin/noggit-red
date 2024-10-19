@@ -461,7 +461,13 @@ namespace Noggit
                 }
             }
             addMenuItem(menu, "Ungroup Selected Objects", QKeySequence::UnknownKey, group_selected, [=] {
-                world->clear_selection_groups();
+              for (auto& group : world->_selection_groups)
+              {
+                if (group.isSelected())
+                {
+                  group.remove_group();
+                }
+              }
                 });
     }
 

@@ -16,7 +16,7 @@ BrushStack::BrushStack(MapView* map_view, QWidget* parent)
   _ui.setupUi(this);
   layout()->setAlignment(Qt::AlignTop);
   setMinimumWidth(250);
-  setMaximumWidth(250);
+  // setMaximumWidth(250);
 
   _ui.radiusSlider->setTabletSupportEnabled(false);
   _ui.innerRadiusSlider->setTabletSupportEnabled(false);

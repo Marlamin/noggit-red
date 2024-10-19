@@ -99,14 +99,18 @@ public:
             , int animtime
             , bool world_has_skies
             , display_mode display
-            , bool no_cull = false
-            , bool draw_exterior = true
+            , bool no_cull
+            , bool draw_exterior
+            , bool render_selection_aabb
+            , bool render_group_bounds
             );
 
   void intersect (math::ray const&, selection_result*, bool do_exterior = true);
 
-  std::array<glm::vec3, 2> const& getExtents() override;
-  bool extentsDirty() { return _need_recalc_extents || !wmo->finishedLoading(); };
+  std::array<glm::vec3, 2> const& getExtents() override; // axis aligned
+  std::array<glm::vec3, 2> const& getLocalExtents() const;
+  std::array<glm::vec3, 8> getBoundingBox() override; // not axis aligned
+  inline bool extentsDirty() const { return _need_recalc_extents || !wmo->finishedLoading(); };
   void recalcExtents() override;
   void change_nameset(uint16_t name_set);
   void ensureExtents() override;

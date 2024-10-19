@@ -159,26 +159,28 @@ namespace Noggit
             /// check if needed
             select_entry(button->property("id").toInt());
 
-            connect(_tree_searchbar, &QLineEdit::textChanged, [=](QString obj) {
-                if (obj.isEmpty())
+            connect(_tree_searchbar, &QLineEdit::textChanged, [=](const QString &text)
+              {
+                if (text.isEmpty())
                 {
-                    // unhide all
+                  // Unhide all items when search text is empty
+                  for (int i = 0; i < _picker_listview->count(); ++i) {
+                    _picker_listview->item(i)->setHidden(false);
+                  }
                 }
+                else
+                {
+                  for (int i = 0; i < _picker_listview->count(); ++i) {
+                    QListWidgetItem* item = _picker_listview->item(i);
 
-            // hide all items
-            for (int i = 0; i < _picker_listview->count(); i++)
-            {
-                auto item = _picker_listview->item(i);
-                item->setHidden(true);
-            }
-            // unhide matching items
-            auto matching_items = _picker_listview->findItems(obj, Qt::MatchContains);
+                    // Case-insensitive filtering
+                    bool match = item->text().contains(text, Qt::CaseInsensitive);
 
-            for (auto item : matching_items)
-            {
-                item->setHidden(false);
-            }
-                });
+                    // Only show matching items
+                    item->setHidden(!match);
+                  }
+                }
+            });
 
             QObject::connect(_picker_listview, &QListWidget::itemSelectionChanged, [this]()
               {
@@ -193,38 +195,38 @@ namespace Noggit
             connect(select_entry_btn, &QPushButton::clicked, [=]() {
                 // auto selection = _picker_listview->selectedItems();
                 auto selected_item = _picker_listview->currentItem();
-            if (selected_item == nullptr)
-                return;
+                if (selected_item == nullptr)
+                    return;
 
-            button->setProperty("id", selected_item->data(Qt::UserRole).toInt());
-            button->setText(selected_item->text());
-            this->close();
+                button->setProperty("id", selected_item->data(Qt::UserRole).toInt());
+                button->setText(selected_item->text());
+                this->close();
                 });
 
             connect(select_entry_none_btn, &QPushButton::clicked, [=]() {
                 button->setText("-NONE-");
-            button->setProperty("id", 0);
-            this->close();
+                button->setProperty("id", 0);
+                this->close();
                 });
 
             connect(play_day_music_button, &QPushButton::clicked, [=]() {
                 auto sound_entry = _day_music_button->property("id").toInt();
-            if (sound_entry)
-            {
-                auto sound_player = new SoundEntryPlayer(this);
-                sound_player->LoadSoundsFromSoundEntry(sound_entry);
-                sound_player->show();
-            }
+                if (sound_entry)
+                {
+                    auto sound_player = new SoundEntryPlayer(this);
+                    sound_player->LoadSoundsFromSoundEntry(sound_entry);
+                    sound_player->show();
+                }
                 });
 
             connect(play_night_music_button, &QPushButton::clicked, [=]() {
                 auto sound_entry = _night_music_button->property("id").toInt();
-            if (sound_entry)
-            {
-                auto sound_player = new SoundEntryPlayer(this);
-                sound_player->LoadSoundsFromSoundEntry(sound_entry);
-                sound_player->show();
-            }
+                if (sound_entry)
+                {
+                    auto sound_player = new SoundEntryPlayer(this);
+                    sound_player->LoadSoundsFromSoundEntry(sound_entry);
+                    sound_player->show();
+                }
                 });
 
             connect(save_music_entry_btn, &QPushButton::clicked, [=]() {
@@ -236,21 +238,21 @@ namespace Noggit
 
             auto new_record = gZoneMusicDB.addRecord(new_id);
 
-            _name_ledit->setText("Noggit Unnamed entry");
+                _name_ledit->setText("Noggit Unnamed entry");
 
-            save_entry(new_id);
+                save_entry(new_id);
 
-            // add new tree item
-            auto item = new QListWidgetItem();
-            item->setData(Qt::UserRole, new_id);
-            std::stringstream ss;
+                // add new tree item
+                auto item = new QListWidgetItem();
+                item->setData(Qt::UserRole, new_id);
+                std::stringstream ss;
 
-            _picker_listview->addItem(item);
+                _picker_listview->addItem(item);
 
-            select_entry(new_id);
+                select_entry(new_id);
 
-            ss << new_id << "-" << _name_ledit->text().toStdString();
-            item->setText(ss.str().c_str());
+                ss << new_id << "-" << _name_ledit->text().toStdString();
+                item->setText(ss.str().c_str());
                 });
 
 

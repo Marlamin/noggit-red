@@ -18,51 +18,21 @@ WorldRender::WorldRender(World* world)
 : BaseRender()
 , _world(world)
 , _liquid_texture_manager(world->_context)
-, _view_distance(world->_settings->value("view_distance", 2000.f).toFloat()) // + TILE_RADIUS) // add adt radius to make sure tiles aren't culled too soon, todo: improve adt culling to prevent that from happening
+, _view_distance(world->_settings->value("view_distance", 2000.f).toFloat() + TILE_RADIUS) // add adt radius to make sure tiles aren't culled too soon, todo: improve adt culling to prevent that from happening
 , _cull_distance(0.f)
+, directional_lightning(world->_settings->value("directional_lightning", true).toBool())
+, local_lightning(world->_settings->value("local_lightning", true).toBool())
 {
 }
 
 void WorldRender::draw (glm::mat4x4 const& model_view
     , glm::mat4x4 const& projection
     , glm::vec3 const& cursor_pos
-    , float cursorRotation
     , glm::vec4 const& cursor_color
-    , CursorType cursor_type
-    , float brush_radius
-    , bool show_unpaintable_chunks
-    , bool draw_only_inside_light_sphere
-    , bool draw_wireframe_light_sphere
-    , float alpha_light_sphere
-    , float inner_radius_ratio
     , glm::vec3 const& ref_pos
-    , float angle
-    , float orientation
-    , bool use_ref_pos
-    , bool angled_mode
-    , bool draw_paintability_overlay
-    , editing_mode terrainMode
     , glm::vec3 const& camera_pos
-    , bool camera_moved
-    , bool draw_mfbo
-    , bool draw_terrain
-    , bool draw_wmo
-    , bool draw_water
-    , bool draw_wmo_doodads
-    , bool draw_models
-    , bool draw_model_animations
-    , bool draw_models_with_box
-    , bool draw_hidden_models
-    , bool draw_sky
-    , bool draw_skybox
     , MinimapRenderSettings* minimap_render_settings
-    , bool draw_fog
-    , eTerrainType ground_editing_brush
-    , int water_layer
-    , display_mode display
-    , bool draw_occlusion_boxes
-    , bool minimap_render
-    , bool draw_wmo_exterior
+    , WorldRenderParams const& render_settings
 )
 {
 
@@ -71,18 +41,26 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   glm::mat4x4 const mvp(projection * model_view);
   math::frustum const frustum (mvp);
 
-  if (camera_moved)
+  if (render_settings.camera_moved)
     updateMVPUniformBlock(model_view, projection);
 
   gl.disable(GL_DEPTH_TEST);
 
-  if (!minimap_render)
-    updateLightingUniformBlock(draw_fog, camera_pos);
+  if (!render_settings.minimap_render)
+  {
+    int daytime = static_cast<int>(_world->time) % 2880;
+    // always render local lights in sky/lightning editing mode.
+    bool render_local_lightning = render_settings.editing_mode == editing_mode::light ? true : local_lightning;
+    _skies->update_sky_colors(camera_pos, daytime, !render_local_lightning);
+    updateLightingUniformBlock(render_settings.draw_fog, camera_pos);
+  }
   else
+  {
     updateLightingUniformBlockMinimap(minimap_render_settings);
+  }
 
   // setup render settings for minimap
-  if (minimap_render)
+  if (render_settings.minimap_render)
   {
     _terrain_params_ubo_data.draw_shadows = minimap_render_settings->draw_shadows;
     _terrain_params_ubo_data.draw_lines = minimap_render_settings->draw_adt_grid;
@@ -109,7 +87,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   {
     tile->_was_rendered_last_frame = false;
 
-    if (minimap_render)
+    if (render_settings.minimap_render)
     {
       auto& tile_extents = tile->getCombinedExtents();
       tile->calcCamDist(camera_pos);
@@ -179,14 +157,14 @@ void WorldRender::draw (glm::mat4x4 const& model_view
             });
 
   // only draw the sky in 3D
-  if(!minimap_render && display == display_mode::in_3D && draw_sky)
+  if(!render_settings.minimap_render && render_settings.display_mode == display_mode::in_3D && render_settings.draw_sky)
   {
     ZoneScopedN("World::draw() : Draw skies");
     OpenGL::Scoped::use_program m2_shader {*_m2_program.get()};
 
     bool hadSky = false;
 
-    if (draw_skybox && (draw_wmo || _world->mapIndex.hasAGlobalWMO()))
+    if (render_settings.draw_skybox && (render_settings.draw_wmo || _world->mapIndex.hasAGlobalWMO()))
     {
       _world->_model_instance_storage.for_each_wmo_instance
           (
@@ -205,7 +183,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
                       , frustum
                       , _cull_distance
                       , _world->animtime
-                      , draw_model_animations
+                      , render_settings.draw_model_animations
                       , wmo.getExtents()[0]
                       , wmo.getExtents()[1]
                       , wmo.getGroupExtents()
@@ -227,19 +205,24 @@ void WorldRender::draw (glm::mat4x4 const& model_view
           , _cull_distance
           , _world->animtime
           , _world->time
-          , draw_skybox
+          , render_settings.draw_skybox
           , _outdoor_light_stats
       );
     }
   }
 
-  _cull_distance= draw_fog ? _skies->fog_distance_end() : _view_distance;
+  _cull_distance= render_settings.draw_fog ? _skies->fog_distance_end() : _view_distance;
 
   // Draw verylowres heightmap
-  if (!_world->mapIndex.hasAGlobalWMO() && draw_fog && draw_terrain)
+  if (!_world->mapIndex.hasAGlobalWMO() && render_settings.draw_fog && render_settings.draw_terrain)
   {
     ZoneScopedN("World::draw() : Draw horizon");
-    _horizon_render->draw (model_view, projection, &_world->mapIndex, _skies->color_set[FOG_COLOR], _cull_distance, frustum, camera_pos, display);
+    _horizon_render->draw (model_view, projection, 
+      &_world->mapIndex, _skies->color_set[SKY_FOG_COLOR],
+      _cull_distance,
+      frustum,
+      camera_pos,
+      render_settings.display_mode);
   }
 
   gl.enable(GL_DEPTH_TEST);
@@ -251,7 +234,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   _world->_n_rendered_tiles = 0;
   _world->_n_rendered_objects = 0;
 
-  if (draw_terrain)
+  if (render_settings.draw_terrain)
   {
     ZoneScopedN("World::draw() : Draw terrain");
 
@@ -263,13 +246,13 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       mcnk_shader.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
       mcnk_shader.uniform("animtime", static_cast<int>(_world->animtime));
 
-      if (cursor_type != CursorType::NONE)
+      if (render_settings.cursor_type != CursorType::NONE)
       {
-        mcnk_shader.uniform("draw_cursor_circle", static_cast<int>(cursor_type));
+        mcnk_shader.uniform("draw_cursor_circle", static_cast<int>(render_settings.cursor_type));
         mcnk_shader.uniform("cursor_position", glm::vec3(cursor_pos.x, cursor_pos.y, cursor_pos.z));
-        mcnk_shader.uniform("cursorRotation", cursorRotation);
-        mcnk_shader.uniform("outer_cursor_radius", brush_radius);
-        mcnk_shader.uniform("inner_cursor_ratio", inner_radius_ratio);
+        mcnk_shader.uniform("cursorRotation", render_settings.cursorRotation);
+        mcnk_shader.uniform("outer_cursor_radius", render_settings.brush_radius);
+        mcnk_shader.uniform("inner_cursor_ratio", render_settings.inner_radius_ratio);
         mcnk_shader.uniform("cursor_color", cursor_color);
       }
       else
@@ -280,7 +263,9 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       gl.bindVertexArray(_mapchunk_vao);
       gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _mapchunk_index);
 
-      for (auto& pair : _world->_loaded_tiles_buffer)
+      int num_chunks_uploaded_alphamap = 0;
+
+      for (auto const& pair : _world->_loaded_tiles_buffer)
       {
         MapTile* tile = pair.second;
 
@@ -289,20 +274,36 @@ void WorldRender::draw (glm::mat4x4 const& model_view
           break;
         }
 
-        if (minimap_render)
+        if (render_settings.minimap_render)
           tile->renderer()->setOccluded(false);
 
         if (tile->renderer()->isOccluded() && !tile->getChunkUpdateFlags() && !tile->renderer()->isOverridingOcclusionCulling())
           continue;
 
+        // skipping unfinished adts really improves performance so we don't have to reuplaod them every frame
+        if (!tile->texturesFinishedLoading())
+          continue;
+
+        // Limit rate uploading alphamap data to avoid long frame times (causes freezes)
+        // TODO make it dynamic based on target frame time and last frame times
+        bool skip_updates = false;
+        if (num_chunks_uploaded_alphamap > _frame_max_chunk_updates)
+          skip_updates = true;
+
         tile->renderer()->draw(
             mcnk_shader
             , camera_pos
-            , show_unpaintable_chunks
-            , draw_paintability_overlay
-            , terrainMode == editing_mode::minimap
+            , render_settings.show_unpaintable_chunks
+            , render_settings.draw_paintability_overlay
+            , render_settings.editing_mode == editing_mode::minimap
               && minimap_render_settings->selected_tiles.at(64 * tile->index.x + tile->index.z)
+            , skip_updates
         );
+
+        num_chunks_uploaded_alphamap += tile->renderer()->numUploadedChunkAlphamaps();
+
+        // if (tile->renderer()->alphamapUploadedLastFrame())
+        //   num_tiles_uploaded_alphamap++;
 
         _world->_n_rendered_tiles++;
         tile->_was_rendered_last_frame = true;
@@ -314,22 +315,29 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
   }
 
-  if (terrainMode == editing_mode::object && _world->has_multiple_model_selected())
+  if (render_settings.editing_mode == editing_mode::object && _world->has_multiple_model_selected())
   {
     ZoneScopedN("World::draw() : Draw pivot point");
-    OpenGL::Scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
+    if (_world->_multi_select_pivot.has_value())
+    {
+      OpenGL::Scoped::bool_setter<GL_DEPTH_TEST, GL_FALSE> const disable_depth_test;
 
-    float dist = glm::distance(camera_pos, _world->_multi_select_pivot.value());
-    _sphere_render.draw(mvp, _world->_multi_select_pivot.value(), cursor_color, std::min(2.f, std::max(0.15f, dist * 0.02f)));
+      float dist = glm::distance(camera_pos, _world->_multi_select_pivot.value());
+      _sphere_render.draw(mvp, _world->_multi_select_pivot.value(), cursor_color, std::min(2.f, std::max(0.15f, dist * 0.02f)));
+    }
+    else
+    {
+      // assert(false);
+    }
   }
 
-  if (use_ref_pos)
+  if (render_settings.use_ref_pos)
   {
     ZoneScopedN("World::draw() : Draw ref pos");
     _sphere_render.draw(mvp, ref_pos, cursor_color, 0.3f);
   }
 
-  if (terrainMode == editing_mode::ground && ground_editing_brush == eTerrainType_Vertex)
+  if (render_settings.editing_mode == editing_mode::ground && render_settings.ground_editing_brush == eTerrainType_Vertex)
   {
     ZoneScopedN("World::draw() : Draw vertex points");
     float size = glm::distance(_world->vertexCenter(), camera_pos);
@@ -362,7 +370,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     frame++;
   }
 
-  for (auto& pair : _world->_loaded_tiles_buffer)
+  for (auto const& pair : _world->_loaded_tiles_buffer)
   {
     MapTile* tile = pair.second;
 
@@ -371,7 +379,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       break;
     }
 
-    if (minimap_render)
+    if (render_settings.minimap_render)
       tile->renderer()->setOccluded(false);
 
     if (tile->renderer()->isOccluded() && !tile->getChunkUpdateFlags() && !tile->renderer()->isOverridingOcclusionCulling())
@@ -391,7 +399,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
       if (pair.second[0]->which() == eMODEL)
       {
-        if (!draw_models && !(minimap_render && minimap_render_settings->use_filters))
+        if (!render_settings.draw_models && !(render_settings.minimap_render && minimap_render_settings->use_filters))
         {
           // can optimize this with a tile.rendered_m2s_lastframe or just check if models are enabled
           for (auto& instance : pair.second)
@@ -429,21 +437,22 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           auto m2_instance = static_cast<ModelInstance*>(instance);
 
-          if (!draw_hidden_models && m2_instance->model->is_hidden())
+          if (!render_settings.draw_hidden_models && m2_instance->model->is_hidden())
             continue;
 
           instance->frame = frame;
 
           bool render = false;
           // experimental : if camera and object haven't moved/changed since last frame, we don't need to do frustum culling again
-          if (!camera_moved && !m2_instance->extentsDirty()/* && not_moved*/)
+          if (!render_settings.camera_moved && !m2_instance->extentsDirty()/* && not_moved*/)
           {
             if (m2_instance->_rendered_last_frame)
             {
               render = true; // skip frustum check
             }
           }
-          if (!render && m2_instance->isInRenderDist(_cull_distance, camera_pos, display) && (tile->renderer()->objectsFrustumCullTest() > 1 || m2_instance->isInFrustum(frustum)))
+          if (!render && m2_instance->isInRenderDist(_cull_distance, camera_pos, render_settings.display_mode)
+            && (tile->renderer()->objectsFrustumCullTest() > 1 || m2_instance->isInFrustum(frustum)))
           {
             render = true;
           }
@@ -467,7 +476,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       }
       else if (pair.second[0]->which() == eWMO)
       {
-        if (!draw_wmo)
+        if (!render_settings.draw_wmo)
         {
           for (auto& instance : pair.second)
           {
@@ -501,14 +510,14 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
           auto wmo_instance = static_cast<WMOInstance*>(instance);
 
-          if (!draw_hidden_models && wmo_instance->wmo->is_hidden())
+          if (!render_settings.draw_hidden_models && wmo_instance->wmo->is_hidden())
             continue;
 
           instance->frame = frame;
 
           // experimental : if camera and object haven't moved/changed since last frame, we don't need to do frustum culling again
           bool render = false;
-          if (!camera_moved && !wmo_instance->extentsDirty()/* && not_moved*/)
+          if (!render_settings.camera_moved && !wmo_instance->extentsDirty()/* && not_moved*/)
           {
             if (wmo_instance->_rendered_last_frame)
             {
@@ -525,7 +534,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
             wmos_to_draw.emplace_back(wmo_instance);
             wmo_instance->_rendered_last_frame = true;
 
-            if (draw_wmo_doodads)
+            if (render_settings.draw_wmo_doodads)
             {
               // auto doodads = wmo_instance->get_visible_doodads(frustum, _cull_distance, camera_pos, draw_hidden_models, display);
               // 
@@ -542,7 +551,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
               // doodad->isInFrustum(frustum);
 
-              std::map<uint32_t, std::vector<wmo_doodad_instance>>* doodads = wmo_instance->get_doodads(draw_hidden_models);
+              std::map<uint32_t, std::vector<wmo_doodad_instance>>* doodads = wmo_instance->get_doodads(render_settings.draw_hidden_models);
               
               if (!doodads)
                 continue;
@@ -554,6 +563,17 @@ void WorldRender::draw (glm::mat4x4 const& model_view
                     if (doodad.frame == frame)
                         continue;
                     doodad.frame = frame;
+
+                    // skip no geometry boxes for WMO doodads
+                    if (doodad.model->use_fake_geometry())
+                      continue;
+
+                    // apply size culling to wmo doodads?
+                    float dist = glm::distance(camera_pos, doodad.world_pos) - (doodad.model->bounding_box_radius * doodad.scale);
+
+                    if (!doodad.isInRenderDist(_cull_distance, camera_pos, render_settings.display_mode))
+                      continue;
+                    // TODO can check if in indoor group & exterior not hidden for further optimization. possibly check portals relations
               
                     auto& instances = models_to_draw[doodad.model.get()];
               
@@ -568,7 +588,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   }
 
   // WMOs / map objects
-  if (draw_wmo || _world->mapIndex.hasAGlobalWMO())
+  if (render_settings.draw_wmo || _world->mapIndex.hasAGlobalWMO())
   {
     ZoneScopedN("World::draw() : Draw WMOs");
     {
@@ -598,7 +618,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
         // minimap render exclusion filters
         // per-model
-        if (minimap_render && minimap_render_settings->use_filters)
+        if (render_settings.minimap_render && minimap_render_settings->use_filters)
         {
           if (instance->instance_model()->file_key().hasFilepath())
           {
@@ -646,14 +666,16 @@ void WorldRender::draw (glm::mat4x4 const& model_view
               , _cull_distance
               , camera_pos
               , is_hidden
-              , draw_wmo_doodads
-              , draw_fog
+              , render_settings.draw_wmo_doodads
+              , render_settings.draw_fog
               , is_selected
               , _world->animtime
               , _skies->hasSkies()
-              , display
+              , render_settings.display_mode
               , disable_cull
-              , draw_wmo_exterior
+              , render_settings.draw_wmo_exterior
+              , render_settings.render_select_wmo_aabb
+              , render_settings.render_select_wmo_groups_bounds
 
           );
         }
@@ -678,7 +700,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     gl.bindBuffer(GL_ELEMENT_ARRAY_BUFFER, _occluder_index);
     gl.disable(GL_CULL_FACE); // TODO: figure out why indices are bad and we need this
 
-    for (auto& pair : _world->_loaded_tiles_buffer)
+    for (auto const& pair : _world->_loaded_tiles_buffer)
     {
       MapTile* tile = pair.second;
 
@@ -700,10 +722,10 @@ void WorldRender::draw (glm::mat4x4 const& model_view
 
 
   // draw occlusion AABBs
-  if (draw_occlusion_boxes)
+  if (render_settings.draw_occlusion_boxes)
   {
 
-    for (auto& pair : _world->_loaded_tiles_buffer)
+    for (auto const& pair : _world->_loaded_tiles_buffer)
     {
       MapTile* tile = pair.second;
 
@@ -724,13 +746,13 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
   }
 
-  bool draw_doodads_wmo = draw_wmo && draw_wmo_doodads;
+  bool draw_doodads_wmo = render_settings.draw_wmo && render_settings.draw_wmo_doodads;
   // M2s / models
-  if (draw_models || draw_doodads_wmo || (minimap_render && minimap_render_settings->use_filters))
+  if (render_settings.draw_models || draw_doodads_wmo || (render_settings.minimap_render && minimap_render_settings->use_filters))
   {
     ZoneScopedN("World::draw() : Draw M2s");
 
-    if (draw_model_animations)
+    if (render_settings.draw_model_animations)
     {
       ModelManager::resetAnim();
     }
@@ -741,7 +763,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }*/
 
     {
-      if (draw_models || draw_doodads_wmo || (minimap_render && minimap_render_settings->use_filters))
+      if (render_settings.draw_models || draw_doodads_wmo || (render_settings.minimap_render && minimap_render_settings->use_filters))
       {
         OpenGL::Scoped::use_program m2_shader {*_m2_instanced_program.get()};
 
@@ -760,13 +782,13 @@ void WorldRender::draw (glm::mat4x4 const& model_view
         m2_shader.uniform("tex_unit_lookup_2", 0);
         m2_shader.uniform("pixel_shader", 0);
 
-        for (auto& pair : models_to_draw)
+        for (auto const& pair : models_to_draw)
         {
           bool is_inclusion_filtered = false;
 
           // minimap render inclusion filters
           // per-model
-          if (minimap_render && minimap_render_settings->use_filters)
+          if (render_settings.minimap_render && minimap_render_settings->use_filters)
           {
             if (pair.first->file_key().hasFilepath())
             {
@@ -799,12 +821,33 @@ void WorldRender::draw (glm::mat4x4 const& model_view
                 , _cull_distance
                 , camera_pos
                 , _world->animtime
-                , draw_models_with_box
+                , render_settings.draw_models_with_box
                 , model_boxes_to_draw
-                , display
+                , render_settings.display_mode
+                , false
+                , render_settings.draw_model_animations
+                , render_settings.editing_mode == editing_mode::object
             );
             _world->_n_rendered_objects += pair.second.size();
           }
+
+          // Draw animated bounding boxes for small animated models that move
+          if (render_settings.editing_mode == editing_mode::object
+            && pair.first->animated_mesh() /*&& render_settings.draw_model_animations*/ && pair.first->mesh_bounds_ratio < 0.3f)
+          {
+            auto animated_bb = pair.first->getAnimatedBoundingBox();
+            for (auto const& instance_matrix : pair.second)
+            {
+              Noggit::Rendering::Primitives::WireBox::getInstance(_world->_context).draw(model_view
+                , projection
+                , instance_matrix
+                , { 0.6f, 0.6f, 0.6f, 0.6f } // grey
+                , animated_bb[0]
+                , animated_bb[1]
+              );
+            }
+          }
+
         }
 
         /*
@@ -858,15 +901,16 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     models_to_draw.clear();
     wmos_to_draw.clear();
 
+    // draw model boxes with m2 box shader
     // if(draw_models_with_box || (draw_hidden_models && !model_boxes_to_draw.empty()))
-    if (!model_boxes_to_draw.empty())
+    if (!render_settings.minimap_render && !model_boxes_to_draw.empty())
     {
       OpenGL::Scoped::use_program m2_box_shader{ *_m2_box_program.get() };
 
       OpenGL::Scoped::bool_setter<GL_LINE_SMOOTH, GL_TRUE> const line_smooth;
       gl.hint (GL_LINE_SMOOTH_HINT, GL_NICEST);
 
-      for (auto& it : model_boxes_to_draw)
+      for (auto const& it : model_boxes_to_draw)
       {
         glm::vec4 color = it.first->is_hidden()
                           ? glm::vec4(0.f, 0.f, 1.f, 1.f)
@@ -882,45 +926,52 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
     model_boxes_to_draw.clear();
 
-    // render selection boxes.
+    // render m2 selection boxes.
     // TODO can try to move to m2 box shader but it requires some refactor
-    for (auto& selection : _world->current_selection())
+    if (!render_settings.minimap_render)
     {
-      if (selection.index() == eEntry_Object)
+      for (auto const& selection : _world->current_selection())
       {
-        auto obj = std::get<selected_object_type>(selection);
-    
-        if (obj->which() != eMODEL)
-          continue;
-    
-        auto model = static_cast<ModelInstance*>(obj);
-
-        if (model->_rendered_last_frame)
+        if (selection.index() == eEntry_Object)
         {
-          // bool is_selected = false;
-          bool is_selected = _world->is_selected(model->uid);
-    
-          model->draw_box(model_view, projection, is_selected); // make optional!
+          auto const obj = std::get<selected_object_type>(selection);
+      
+          if (obj->which() != eMODEL)
+            continue;
+      
+          ModelInstance* model = static_cast<ModelInstance*>(obj);
+
+          // if (model->_rendered_last_frame)
+          {
+            // bool is_selected = false;
+            bool is_selected = _world->is_selected(model->uid);
+      
+            model->draw_box(model_view, projection, is_selected, render_settings.render_select_m2_collission_bbox
+              , render_settings.render_select_m2_aabb, true);
+          }
         }
       }
     }
   }
 
   // render selection group boxes
-  for (auto& selection_group : _world->_selection_groups)
+  if (!render_settings.minimap_render)
   {
-      if (!selection_group.isSelected())
-          continue;
+    for (auto const& selection_group : _world->_selection_groups)
+    {
+        if (!selection_group.isSelected())
+            continue;
 
-      glm::mat4x4 identity_mtx = glm::mat4x4{ 1 };
-      auto& extents = selection_group.getExtents();
-      Noggit::Rendering::Primitives::WireBox::getInstance(_world->_context).draw(model_view
-          , projection
-          , identity_mtx
-          , { 0.0f, 0.0f, 1.0f, 1.0f } // blue
-          , extents[0]
-          , extents[1]
-      );
+        glm::mat4x4 identity_mtx = glm::mat4x4{ 1 };
+        auto const extents = selection_group.getExtents();
+        Noggit::Rendering::Primitives::WireBox::getInstance(_world->_context).draw(model_view
+            , projection
+            , identity_mtx
+            , { 0.0f, 0.0f, 1.0f, 1.0f } // blue
+            , extents[0]
+            , extents[1]
+        );
+    }
   }
 
   // set anim time only once per frame
@@ -929,8 +980,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     water_shader.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
     water_shader.uniform("animtime", _world->animtime);
 
-
-    if (draw_wmo || _world->mapIndex.hasAGlobalWMO())
+    if (render_settings.draw_wmo || _world->mapIndex.hasAGlobalWMO())
     {
       water_shader.uniform("use_transform", 1);
     }
@@ -979,23 +1029,23 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   // render before the water and enable depth right 
   // so it's visible under water
   // the checker board pattern is used to see the water under it
-  if (angled_mode || use_ref_pos)
+  if (render_settings.angled_mode || render_settings.use_ref_pos)
   {
     ZoneScopedN("World::draw() : Draw angles");
     // OpenGL::Scoped::bool_setter<GL_CULL_FACE, GL_FALSE> cull;
     OpenGL::Scoped::depth_mask_setter<GL_TRUE> const depth_mask;
 
-    math::degrees orient = math::degrees(orientation);
-    math::degrees incl = math::degrees(angle);
+    math::degrees orient = math::degrees(render_settings.orientation);
+    math::degrees incl = math::degrees(render_settings.angle);
     glm::vec4 color = cursor_color;
     // color.w = 0.5f;
     color.w = 0.75f;
 
-    float radius = 1.2f * brush_radius;
+    float radius = 1.2f * render_settings.brush_radius;
 
-    if (angled_mode && terrainMode == editing_mode::flatten_blur)
+    if (render_settings.angled_mode && render_settings.editing_mode == editing_mode::flatten_blur)
     {
-      if (angle > 49.0f) // 0.855 radian
+      if (render_settings.angle > 49.0f) // 0.855 radian
       {
         color.x = 1.f;
         color.y = 0.f;
@@ -1003,15 +1053,15 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       }
     }
 
-    if (angled_mode && !use_ref_pos)
+    if (render_settings.angled_mode && !render_settings.use_ref_pos)
     {
       glm::vec3 pos = cursor_pos;
       pos.y += 0.1f; // to avoid z-fighting with the ground
       _square_render.draw(mvp, pos, radius, incl, orient, color);
     }
-    else if (use_ref_pos)
+    else if (render_settings.use_ref_pos)
     {
-      if (angled_mode)
+      if (render_settings.angled_mode)
       {
         glm::vec3 pos = cursor_pos;
         pos.y = misc::angledHeight(ref_pos, pos, incl, orient);
@@ -1035,7 +1085,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
   }
 
-  if (draw_water)
+  if (render_settings.draw_water)
   {
     ZoneScopedN("World::draw() : Draw water");
 
@@ -1061,11 +1111,11 @@ void WorldRender::draw (glm::mat4x4 const& model_view
       tile->Water.renderer()->draw(
           frustum
           , camera_pos
-          , camera_moved
+          , render_settings.camera_moved
           , water_shader
           , _world->animtime
-          , water_layer
-          , display
+          , render_settings.water_layer
+          , render_settings.display_mode
           , &_liquid_texture_manager
       );
     }
@@ -1076,7 +1126,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   gl.enable(GL_BLEND);
 
   // draw last because of the transparency
-  if (draw_mfbo)
+  if (render_settings.draw_mfbo)
   {
     ZoneScopedN("World::draw() : Draw flight bounds");
     // don't write on the depth buffer
@@ -1093,65 +1143,132 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     }
   }
 
-  if (terrainMode == editing_mode::light && alpha_light_sphere > 0.0f)
+  if (render_settings.editing_mode == editing_mode::light && render_settings.alpha_light_sphere > 0.0f)
   {
-      // Sky* CurrentSky = skies()->findClosestSkyByDistance(camera_pos);
-      Sky* CurrentSky = skies()->findClosestSkyByWeight();
-      if (!CurrentSky)
-          return;
+    // Sky* CurrentSky = skies()->findClosestSkyByDistance(camera_pos);
+    // Sky* CurrentSky = skies()->findClosestSkyByWeight();
+    // if (!CurrentSky)
+    //     return;
 
-      int CurrentSkyID = CurrentSky->Id;
-          
-      const int MAX_TIME_VALUE_C = 2880;
-      const int CurrenTime = static_cast<int>(_world->time) % MAX_TIME_VALUE_C;
+    // bad design, there can be multiple current skies, this is only the highest one.
+    // all skies we're inside of need to be drawn with front culling
+    // int CurrentSkyID = CurrentSky->Id;
+        
+    const int MAX_TIME_VALUE_C = 2880;
+    const int CurrenTime = static_cast<int>(_world->time) % MAX_TIME_VALUE_C;
 
-      glCullFace(GL_FRONT);
-      if (!draw_only_inside_light_sphere)
+    // draw Light Zones
+    for (auto const& zoneLight : skies()->zoneLightsWotlk)
+    {
+      Sky* light = skies()->findSkyById(zoneLight.lightId);
+
+      assert(light != nullptr);
+
+      if (glm::distance(light->pos, camera_pos) > (_cull_distance + light->r2) ) // TODO: frustum cull here
+        continue;
+
+      glm::vec4 diffuse = { light->colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.f };
+      // glm::vec4 ambient = { light->colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.f };
+
+      // Render Points
+      auto const& zoneLightPoints = zoneLight.points; // skies()->zoneLightPoints[zoneLight.second.id];
+
+      // polygon must have at least 3 points
+      if (zoneLightPoints.size() < 3)
+        continue;
+
+      std::vector<glm::vec3> lineRenderPoints;
+
+      for (int point_id = 0; point_id < zoneLightPoints.size(); point_id++)
       {
-        for (Sky& sky : skies()->skies)
+        glm::vec2 const curr_point = zoneLightPoints[point_id];
+
+        // using light z/y pos to set the sphere position, those are supposed to be planes from point to point with infinite height.
+        glm::vec3 point_pos = glm::vec3(curr_point.x, light->pos.y, curr_point.y);
+        lineRenderPoints.push_back(point_pos);
+
+        // can render a sphere at each point
+        // float sphere_radius = 10.f;
+        // _sphere_render.draw(mvp, point_pos, diffuse, sphere_radius, 32, 18, alpha_light_sphere, false, false);
+
+        // Connect last point to the first
+        if (point_id == (zoneLightPoints.size() - 1))
         {
-
-          // we draw the current sky below with glCullFace(GL_BACK);
-          if (CurrentSkyID == sky.Id)
-              continue;
-
-          if (sky.global)
-              continue;
-
-          if (glm::distance(sky.pos, camera_pos) <= _cull_distance) // TODO: frustum cull here
-          {
-              glm::vec4 diffuse = { sky.colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.f };
-              glm::vec4 ambient = { sky.colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.f };
-
-              _sphere_render.draw(mvp, sky.pos, ambient, sky.r1, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
-              _sphere_render.draw(mvp, sky.pos, diffuse, sky.r2, 32, 18, alpha_light_sphere, false, draw_wireframe_light_sphere);
-          
-              // TODO Those lines tank fps by 50%
-              // std::vector<glm::vec3> linePoints;
-              // linePoints.push_back(glm::vec3(sky.pos.x, sky.pos.y, sky.pos.z - sky.r2));
-              // linePoints.push_back(glm::vec3(sky.pos.x, sky.pos.y, sky.pos.z + sky.r2));
-              // _line_render.draw(mvp, linePoints, glm::vec4(1.f), false);
-          }
+          lineRenderPoints.push_back(lineRenderPoints[0]);
         }
       }
+      _line_render.draw(mvp, lineRenderPoints, diffuse, false); // glm::vec4(1.f, 0.f, 0.f, 1.f) red
 
-      glCullFace(GL_BACK);
-      if (CurrentSky && !CurrentSky->global)
+      // debug testing, only render first zone
+      // break;
+
+      // TODO render a vertical rectangle between each points to draw the polygon in 3D
+    }
+
+    // Draw Sky/Light spheres
+    glCullFace(GL_FRONT);
+    if (!render_settings.draw_only_inside_light_sphere)
+    {
+      for (Sky const& sky : skies()->skies)
       {
-          glm::vec4 diffuse = { CurrentSky->colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.f };
-          glm::vec4 ambient = { CurrentSky->colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.f };
+        // we draw skies we're inside of later with glCullFace(GL_BACK);
+        if (/*CurrentSkyID == sky.Id || */sky.weight > 0.0f || sky.global)
+          continue;
 
-          // always render wireframe in the current light
-          // need to render outer first or it gets culled
-          _sphere_render.draw(mvp, CurrentSky->pos, diffuse, CurrentSky->r2, 32, 18, alpha_light_sphere, false, true);
-          _sphere_render.draw(mvp, CurrentSky->pos, ambient, CurrentSky->r1, 32, 18, alpha_light_sphere, false, true);
+        if (glm::distance(sky.pos, camera_pos) <= _cull_distance) // TODO: frustum cull here
+        {
+          glm::vec4 diffuse = { sky.colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.0f };
+          glm::vec4 ambient = { sky.colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.0f };
 
+          _sphere_render.draw(mvp, sky.pos, ambient, sky.r1, 32, 18
+            , render_settings.alpha_light_sphere, false, render_settings.draw_wireframe_light_sphere);
+          _sphere_render.draw(mvp, sky.pos, diffuse, sky.r2, 32, 18
+            , render_settings.alpha_light_sphere, false, render_settings.draw_wireframe_light_sphere);
+        
+          // special wirebox to highlight zone lights
+          if (sky.zone_light)
+          {
+            glm::vec3 minExtent =  glm::vec3(sky.pos.x - sky.r2, sky.pos.y - sky.r2, sky.pos.z - sky.r2);
+            glm::vec3 maxExtent = glm::vec3(sky.pos.x + sky.r2, sky.pos.y + sky.r2, sky.pos.z + sky.r2);
 
+            _wirebox_render.draw(model_view, projection, glm::mat4x4{ 1 }, { 1.0f, 1.0f, 1.0f, 1.0f },
+                        minExtent, maxExtent);
+          }
+
+          // TODO Those lines tank fps by 50%
           // std::vector<glm::vec3> linePoints;
-          // linePoints.push_back(glm::vec3(CurrentSky->pos.x, CurrentSky->pos.z, CurrentSky->pos.y - CurrentSky->r2));
-          // linePoints.push_back(glm::vec3(CurrentSky->pos.x, CurrentSky->pos.z, CurrentSky->pos.y + CurrentSky->r2));
-          // _line_render.draw(mvp, linePoints, glm::vec4(1.f, 0.f, 0.f, 1.f), false);
+          // linePoints.push_back(glm::vec3(sky.pos.x, sky.pos.y, sky.pos.z - sky.r2));
+          // linePoints.push_back(glm::vec3(sky.pos.x, sky.pos.y, sky.pos.z + sky.r2));
+          // _line_render.draw(mvp, linePoints, glm::vec4(1.f), false);
+        }
       }
+    }
+
+    // now draw the current light (light that we're inside of)
+    glCullFace(GL_BACK);
+    for (Sky const& sky : skies()->skies)
+    {
+      if (sky.global)
+        continue;
+      if (/*CurrentSky->getId() == sky.Id ||*/ sky.weight > 0.0f)
+      {
+        glm::vec4 diffuse = { sky.colorFor(LIGHT_GLOBAL_DIFFUSE, CurrenTime), 1.0f };
+        glm::vec4 ambient = { sky.colorFor(LIGHT_GLOBAL_AMBIENT, CurrenTime), 1.0f };
+
+        // always render wireframe in the current light
+        // need to render outer first or it gets culled
+        _sphere_render.draw(mvp, sky.pos, diffuse, sky.r2, 32, 18
+          , render_settings.alpha_light_sphere, true, false);
+        _sphere_render.draw(mvp, sky.pos, ambient, sky.r1, 32, 18
+          , render_settings.alpha_light_sphere, true, false);
+
+
+        // std::vector<glm::vec3> linePoints;
+        // linePoints.push_back(glm::vec3(CurrentSky->pos.x, CurrentSky->pos.z, CurrentSky->pos.y - CurrentSky->r2));
+        // linePoints.push_back(glm::vec3(CurrentSky->pos.x, CurrentSky->pos.z, CurrentSky->pos.y + CurrentSky->r2));
+        // _line_render.draw(mvp, linePoints, glm::vec4(1.f, 0.f, 0.f, 1.f), false);
+      }
+    }
   }
 }
 
@@ -1381,6 +1498,8 @@ void WorldRender::unload()
   _sphere_render.unload();
   _square_render.unload();
   _line_render.unload();
+  _wirebox_render.unload();
+
   _horizon_render.reset();
 
   _liquid_texture_manager.unload();
@@ -1410,14 +1529,11 @@ void WorldRender::updateLightingUniformBlock(bool draw_fog, glm::vec3 const& cam
 {
   ZoneScoped;
 
-  int daytime = static_cast<int>(_world->time) % 2880;
-
-  _skies->update_sky_colors(camera_pos, daytime);
   _outdoor_light_stats = _outdoor_lighting->getLightStats(static_cast<int>(_world->time));
 
   glm::vec3 diffuse = _skies->color_set[LIGHT_GLOBAL_DIFFUSE];
   glm::vec3 ambient = _skies->color_set[LIGHT_GLOBAL_AMBIENT];
-  glm::vec3 fog_color = _skies->color_set[FOG_COLOR];
+  glm::vec3 fog_color = _skies->color_set[SKY_FOG_COLOR];
   glm::vec3 ocean_color_light = _skies->color_set[OCEAN_COLOR_LIGHT];
   glm::vec3 ocean_color_dark = _skies->color_set[OCEAN_COLOR_DARK];
   glm::vec3 river_color_light = _skies->color_set[RIVER_COLOR_LIGHT];
@@ -1428,7 +1544,7 @@ void WorldRender::updateLightingUniformBlock(bool draw_fog, glm::vec3 const& cam
   _lighting_ubo_data.AmbientColor_FogEnd = {ambient.x,ambient.y,ambient.z, _skies->fog_distance_end()};
   _lighting_ubo_data.FogColor_FogOn = {fog_color.x,fog_color.y,fog_color.z, static_cast<float>(draw_fog)};
 
-  if (_world->_settings->value("directional_lightning", true).toBool())
+  if (directional_lightning)
     _lighting_ubo_data.LightDir_FogRate = { _outdoor_light_stats.dayDir.x, _outdoor_light_stats.dayDir.y, _outdoor_light_stats.dayDir.z, _skies->fogRate() };
   else
     _lighting_ubo_data.LightDir_FogRate = {0.0f, -1.0f, 0.0f, _skies->fogRate()};
@@ -1737,14 +1853,44 @@ void WorldRender::drawMinimap ( MapTile *tile
 
   }
 
-  draw(model_view, projection, glm::vec3(), 0, glm::vec4(),
-       CursorType::NONE, 0.f, false, false,
-      false, 0.3f, 0.f, glm::vec3(), 0.f, 0.f,
-      false, false, false, editing_mode::minimap, camera_pos,
-      true, false, true, settings->draw_wmo, settings->draw_water, false,
-      settings->draw_m2, false, false, true,
-      false, false, settings, false, eTerrainType::eTerrainType_Linear, 0,
-      display_mode::in_3D, false, true);
+  WorldRenderParams renderParams;
+
+  renderParams.cursorRotation = 0.0f;
+  renderParams.cursor_type = CursorType::NONE;
+  renderParams.brush_radius = 0.f;
+  renderParams.show_unpaintable_chunks = false;
+  renderParams.draw_only_inside_light_sphere = false;
+  renderParams.draw_wireframe_light_sphere = false;
+  renderParams.alpha_light_sphere = false;
+  renderParams.inner_radius_ratio = 0.3f;
+  renderParams.angle = 0.0f;
+  renderParams.orientation = 0.0f;
+  renderParams.use_ref_pos = 0.0f;
+  renderParams.angled_mode = 0.0f;
+  renderParams.draw_paintability_overlay = false;
+  renderParams.editing_mode = editing_mode::minimap;
+  renderParams.camera_moved = true;
+  renderParams.draw_mfbo = false;
+  renderParams.draw_terrain = true;
+  renderParams.draw_wmo = settings->draw_wmo;
+  renderParams.draw_water = settings->draw_water;
+  renderParams.draw_wmo_doodads = false;
+  renderParams.draw_models = settings->draw_m2;
+  renderParams.draw_model_animations = false;
+  renderParams.draw_models_with_box = false;
+  renderParams.draw_hidden_models = true;
+  renderParams.draw_sky = false;
+  renderParams.draw_skybox = false;
+  renderParams.draw_fog = false;
+  renderParams.ground_editing_brush = eTerrainType::eTerrainType_Linear;
+  renderParams.water_layer = 0;
+  renderParams.display_mode = display_mode::in_3D;
+  renderParams.draw_occlusion_boxes = false;
+  renderParams.minimap_render = true;
+  renderParams.draw_wmo_exterior = true;
+
+  draw(model_view, projection, glm::vec3(), glm::vec4(),
+  glm::vec3(), camera_pos, settings, renderParams);
 
 
   if (unload)

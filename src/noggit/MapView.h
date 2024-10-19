@@ -186,6 +186,13 @@ private:
   bool  alloff_vertex_color = false;
   bool  alloff_baked_shadows = false;
 
+  bool _render_m2_aabb = false;
+  bool _render_m2_collission_bbox = false;
+  bool _render_wmo_aabb = false;
+  bool _render_wmo_groups_bounds = false;
+
+  bool _classic_ui = false;
+
   editing_mode terrainMode = editing_mode::ground;
   editing_mode saveterrainMode = terrainMode;
 
@@ -204,7 +211,7 @@ private:
 
   void save(save_mode mode);
 
-  QSettings* _settings;
+  QSettings* _settings; // expensive, don't access it on main loop
   Noggit::Ui::Tools::ViewportGizmo::ViewportGizmo _transform_gizmo;
   ImGuiContext* _imgui_context;
 
@@ -382,6 +389,8 @@ private:
 
   OpenGL::Scoped::deferred_upload_buffers<2> _buffers;
 
+  glm::mat4x4 _model_view;
+  glm::mat4x4 _projection;
 
 public:
 

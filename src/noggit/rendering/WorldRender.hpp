@@ -22,6 +22,49 @@
 class World;
 struct MinimapRenderSettings;
 
+
+struct WorldRenderParams 
+{
+  float cursorRotation;
+  CursorType cursor_type;
+  float brush_radius;
+  bool show_unpaintable_chunks;
+  bool draw_only_inside_light_sphere;
+  bool draw_wireframe_light_sphere;
+  float alpha_light_sphere;
+  float inner_radius_ratio;
+  float angle;
+  float orientation;
+  bool use_ref_pos;
+  bool angled_mode;
+  bool draw_paintability_overlay;
+  editing_mode editing_mode;
+  bool camera_moved;
+  bool draw_mfbo;
+  bool draw_terrain;
+  bool draw_wmo;
+  bool draw_water;
+  bool draw_wmo_doodads;
+  bool draw_models;
+  bool draw_model_animations;
+  bool draw_models_with_box;
+  bool draw_hidden_models;
+  bool draw_sky;
+  bool draw_skybox;
+  bool draw_fog;
+  eTerrainType ground_editing_brush;
+  int water_layer;
+  display_mode display_mode;
+  bool draw_occlusion_boxes;
+  bool minimap_render;
+  bool draw_wmo_exterior;
+
+  bool render_select_m2_aabb;
+  bool render_select_m2_collission_bbox;
+  bool render_select_wmo_aabb;
+  bool render_select_wmo_groups_bounds;
+};
+
 namespace Noggit::Rendering
 {
   class WorldRender : public BaseRender
@@ -35,43 +78,11 @@ namespace Noggit::Rendering
     void draw (glm::mat4x4 const& model_view
         , glm::mat4x4 const& projection
         , glm::vec3 const& cursor_pos
-        , float cursorRotation
         , glm::vec4 const& cursor_color
-        , CursorType cursor_type
-        , float brush_radius
-        , bool show_unpaintable_chunks
-        , bool draw_only_inside_light_sphere
-        , bool draw_wireframe_light_sphere
-        , float alpha_light_sphere
-        , float inner_radius_ratio
         , glm::vec3 const& ref_pos
-        , float angle
-        , float orientation
-        , bool use_ref_pos
-        , bool angled_mode
-        , bool draw_paintability_overlay
-        , editing_mode terrainMode
         , glm::vec3 const& camera_pos
-        , bool camera_moved
-        , bool draw_mfbo
-        , bool draw_terrain
-        , bool draw_wmo
-        , bool draw_water
-        , bool draw_wmo_doodads
-        , bool draw_models
-        , bool draw_model_animations
-        , bool draw_models_with_box
-        , bool draw_hidden_models
-        , bool draw_sky
-        , bool draw_skybox
         , MinimapRenderSettings* minimap_render_settings
-        , bool draw_fog
-        , eTerrainType ground_editing_brush
-        , int water_layer
-        , display_mode display
-        , bool draw_occlusion_boxes = false
-        , bool minimap_render = false
-        , bool draw_wmo_exterior = true
+        , WorldRenderParams const& render_settings
     );
 
     bool saveMinimap (TileIndex const& tile_idx
@@ -88,6 +99,11 @@ namespace Noggit::Rendering
 
     float _view_distance;
     inline float cullDistance() const { return _cull_distance; }
+
+    unsigned int _frame_max_chunk_updates = 256;
+
+    bool directional_lightning;
+    bool local_lightning;
 
   private:
 

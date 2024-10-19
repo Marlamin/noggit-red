@@ -28,45 +28,57 @@ void ModelViewer::paintGL()
 
   MinimapRenderSettings _settings_unused;
 
+  WorldRenderParams renderParams;
+
+  renderParams.cursorRotation = 0.0f;
+  renderParams.cursor_type = CursorType::CIRCLE;
+  renderParams.brush_radius = 0.f;
+  renderParams.show_unpaintable_chunks = false;
+  renderParams.draw_only_inside_light_sphere = false;
+  renderParams.draw_wireframe_light_sphere = false;
+  renderParams.alpha_light_sphere = 0.3f;
+  renderParams.inner_radius_ratio = 0.0f;
+  renderParams.angle = 0.0f;
+  renderParams.orientation = 0.0f;
+  renderParams.use_ref_pos = false;
+  renderParams.angled_mode = false;
+  renderParams.draw_paintability_overlay = false;
+  renderParams.editing_mode = editing_mode::ground;
+  renderParams.camera_moved = true;
+  renderParams.draw_mfbo = false;
+  renderParams.draw_terrain = true;
+  renderParams.draw_wmo = true;
+  renderParams.draw_water = true;
+  renderParams.draw_wmo_doodads = true;
+  renderParams.draw_models = true;
+  renderParams.draw_model_animations = true;
+  renderParams.draw_models_with_box = false;
+  renderParams.draw_hidden_models = true;
+  renderParams.draw_sky = false;
+  renderParams.draw_skybox = false;
+  renderParams.draw_fog = false;
+  renderParams.ground_editing_brush = eTerrainType::eTerrainType_Flat;
+  renderParams.water_layer = 0;
+  renderParams.display_mode = display_mode::in_3D;
+  renderParams.draw_occlusion_boxes = false;
+  renderParams.minimap_render = false;
+  renderParams.draw_wmo_exterior = true;
+  renderParams.render_select_m2_aabb = false;
+  renderParams.render_select_m2_collission_bbox = false;
+  renderParams.render_select_wmo_aabb = false;
+  renderParams.render_select_wmo_groups_bounds = false;
+
+
   if (_world)
   {
     _world->renderer()->draw(world_model_view()
         , world_projection()
         , glm::vec3(0.f, 0.f, 0.f)
-        , 0.f
         , glm::vec4(1.f, 1.f, 1.f, 1.f)
-        , CursorType::CIRCLE
-        , 0.f
-        , false
-        , false
-        , false
-        , 0.3f
-        , 0.f
         , glm::vec3(0.f, 0.f, 0.f)
-        , 0.f
-        , 0.f
-        , false
-        , false
-        , false
-        , editing_mode::ground
         , _world_camera.position
-        , true
-        , false
-        , true
-        , true
-        , true
-        , true
-        , true
-        , true
-        , false
-        , true
-        , false
-        , false
         , &_settings_unused
-        , false
-        , eTerrainType::eTerrainType_Flat
-        , 0
-        , display_mode::in_3D
+        , renderParams
 
     );
   }

@@ -321,7 +321,7 @@ public:
 
   std::vector<WMOGroup> groups;
   std::vector<WMOMaterial> materials;
-  glm::vec3 extents[2];
+  glm::vec3 extents[2]; // local extents, not axis aligned
   std::vector<scoped_blp_texture_reference> textures;
   std::vector<std::string> models;
   std::vector<wmo_doodad_instance> modelis;

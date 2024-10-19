@@ -93,6 +93,7 @@ void ModelRender::draw(glm::mat4x4 const& model_view
     , int animtime
     , display_mode display
     , bool no_cull
+    , bool animate
 )
 {
   if (!_model->finishedLoading() || _model->loading_failed())
@@ -125,10 +126,10 @@ void ModelRender::draw(glm::mat4x4 const& model_view
     }
   }
 
-  if (_model->animated && (!_model->animcalc || _model->_per_instance_animation))
+  if (_model->animated && animate && (!_model->anim_calculated || _model->_per_instance_animation))
   {
     _model->animate(model_view, 0, animtime);
-    _model->animcalc = true;
+    _model->anim_calculated = true;
   }
 
   OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_indices_buffer);
@@ -152,13 +153,15 @@ void ModelRender::draw(glm::mat4x4 const& model_view
     , OpenGL::Scoped::use_program& m2_shader
     , OpenGL::M2RenderState& model_render_state
     , math::frustum const& frustum
-    , const float& cull_distance
-    , const glm::vec3& camera
+    , const float cull_distance
+    , glm::vec3 const& camera
     , int animtime
     , bool all_boxes
     , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
     , display_mode display
     , bool no_cull
+    , bool animate
+    , bool draw_fake_geometry_box
 )
 {
   ZoneScopedN(NOGGIT_CURRENT_FUNCTION);
@@ -190,10 +193,10 @@ void ModelRender::draw(glm::mat4x4 const& model_view
   {
     ZoneScopedN("Model::draw() : drawing")
 
-    if (_model->animated && (!_model->animcalc || _model->_per_instance_animation))
+    if (_model->animated && animate && (!_model->anim_calculated || _model->_per_instance_animation))
     {
       _model->animate(model_view, 0, animtime);
-      _model->animcalc = true;
+      _model->anim_calculated = true;
     }
 
     // store the model count to draw the bounding boxes later
@@ -201,7 +204,7 @@ void ModelRender::draw(glm::mat4x4 const& model_view
     {
       model_boxes_to_draw.emplace(_model, instances.size());
     }
-    else if (_model->use_fake_geometry() /*|| _model->particles_only()*/)
+    else if (draw_fake_geometry_box && _model->use_fake_geometry() /*|| _model->particles_only()*/)
     { // hackfix for rendering particle only objects bounds as they currently don't render
       model_boxes_to_draw.emplace(_model, instances.size());
     }

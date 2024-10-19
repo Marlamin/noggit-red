@@ -33,7 +33,7 @@ ModelInstance::ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
 {
 	uid = d->uniqueID;
 	pos = glm::vec3(d->pos[0], d->pos[1], d->pos[2]);
-    dir = math::degrees::vec3( math::degrees(d->rot[0])._, math::degrees(d->rot[1])._, math::degrees(d->rot[2])._);
+  dir = math::degrees::vec3( math::degrees(d->rot[0])._, math::degrees(d->rot[1])._, math::degrees(d->rot[2])._);
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	scale = d->scale / 1024.0f;
   _need_recalc_extents = true;
@@ -43,6 +43,9 @@ ModelInstance::ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
 void ModelInstance::draw_box (glm::mat4x4 const& model_view
                              , glm::mat4x4 const& projection
                              , bool is_current_selection
+                             , bool draw_collision_box
+                             , bool draw_aabb
+                             , bool draw_anim_bb
                              )
 {
   gl.enable(GL_BLEND);
@@ -50,32 +53,78 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
 
   if (is_current_selection)
   {
-    // draw collision box
-    Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
-      , projection
-      , transformMatrix()
-      , { 1.0f, 1.0f, 0.0f, 1.0f }
-      , misc::transform_model_box_coords(model->collision_box_min)
-      , misc::transform_model_box_coords(model->collision_box_max)
-      );
-
     // draw bounding box
     Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
       , projection
       , transformMatrix()
-      , {1.0f, 1.0f, 1.0f, 1.0f}
+      , {1.0f, 1.0f, 1.0f, 1.0f} // white
       , misc::transform_model_box_coords(model->bounding_box_min)
       , misc::transform_model_box_coords(model->bounding_box_max)
       );
 
+    if (draw_collision_box)
+    {
+      Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
+        , projection
+        , transformMatrix()
+        , { 1.0f, 1.0f, 0.0f, 1.0f } // yellow
+        , misc::transform_model_box_coords(model->collision_box_min)
+        , misc::transform_model_box_coords(model->collision_box_max)
+        );
+    }
+
     // draw extents
-    Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
-      , projection
-      , glm::mat4x4(1)
-      , {0.0f, 1.0f, 0.0f, 1.0f}
-      , extents[0]
-      , extents[1]
+    if (draw_aabb)
+    {
+      Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw ( model_view
+        , projection
+        , glm::mat4x4(1)
+        , {0.0f, 1.0f, 0.0f, 1.0f} // green
+        , extents[0]
+        , extents[1]
+        );
+    }
+
+    // animated bounding box
+    // worldRnder already draws it for any model with mesh_bounds_ratio < 0.3
+    if (draw_anim_bb && model->mesh_bounds_ratio > 0.3f && model->mesh_bounds_ratio < 0.5f)
+    {
+      auto animated_bb = model->getAnimatedBoundingBox();
+      Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw(model_view
+        , projection
+        , transformMatrix()
+        , { 0.6f, 0.6f, 0.6f, 0.6f } // gray
+        , animated_bb[0]
+        , animated_bb[1]
       );
+
+      // those are for debugging
+      
+      // base vertex box
+      // Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw(model_view
+      //   , projection
+      //   , transformMatrix()
+      //   , { 1.0f, 0.0f, 0.0f, 1.0f } // red
+      //   , misc::transform_model_box_coords(model->vertices_bounds[0])
+      //   , misc::transform_model_box_coords(model->vertices_bounds[1])
+      // );
+
+      // current animation bounds
+      // if (model->getCurrentSequenceBounds())
+      // {
+      //   auto curr_anim_bb = model->getCurrentSequenceBounds().value();
+      //   Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw(model_view
+      //     , projection
+      //     , transformMatrix()
+      //     , { 0.0f, 0.0f, 0.0f, 1.0f } // black
+      //     , misc::transform_model_box_coords(curr_anim_bb[0])
+      //     , misc::transform_model_box_coords(curr_anim_bb[1])
+      //   );
+      // }
+    }
+
+
+
   }
   else
   {
@@ -94,6 +143,7 @@ void ModelInstance::intersect (glm::mat4x4 const& model_view
                               , math::ray const& ray
                               , selection_result* results
                               , int animtime
+                              , bool animate
                               )
 {  
   if (!finishedLoading() || model->loading_failed())
@@ -112,7 +162,7 @@ void ModelInstance::intersect (glm::mat4x4 const& model_view
     return;
   }
 
-  for (auto&& result : model->intersect (model_view, subray, animtime))
+  for (auto&& result : model->intersect (model_view, subray, animtime, animate))
   {
     //! \todo why is only sc important? these are relative to subray,
     //! so should be inverted by model_matrix?
@@ -136,13 +186,13 @@ bool ModelInstance::isInFrustum(const math::frustum& frustum)
   return true;
 }
 
-bool ModelInstance::isInRenderDist(const float& cull_distance, const glm::vec3& camera, display_mode display)
+bool ModelInstance::isInRenderDist(const float cull_distance, const glm::vec3& camera, display_mode display)
 {
   float dist;
 
   if (display == display_mode::in_3D)
   {
-    dist = glm::distance(camera, pos) - model->bounding_box_radius * scale;
+    dist = glm::distance(camera, pos) - (model->bounding_box_radius * scale);
   }
   else
   {
@@ -153,6 +203,8 @@ bool ModelInstance::isInRenderDist(const float& cull_distance, const glm::vec3& 
   {
     return false;
   }
+
+  ensureExtents();
 
   if (size_cat < 1.f && dist > 300.f)
   {
@@ -187,32 +239,17 @@ void ModelInstance::recalcExtents()
 
   updateTransformMatrix();
 
-  math::aabb const relative_to_model
-    ( glm::min ( model->collision_box_min, model->bounding_box_min)
-    , glm::max ( model->collision_box_max, model->bounding_box_max)
-    );
+  // math::aabb const relative_to_model
+  //   ( glm::min ( model->collision_box_min, model->bounding_box_min)
+  //   , glm::max ( model->collision_box_max, model->bounding_box_max)
+  //   );
+  math::aabb const relative_to_model(model->bounding_box_min, model->bounding_box_max);
 
   //! \todo If both boxes are {inf, -inf}, or well, if any min.c > max.c,
   //! the model is bad itself. We *could* detect that case and explicitly
   //! assume {-1, 1} then, to be nice to fuckported models.
 
-  std::array<glm::vec3, 8> corners_in_world;
-  auto transform = misc::transform_model_box_coords;
-  std::array<glm::vec3, 8> points = relative_to_model.all_corners();
-
-  for (int i = 0; i < 8; ++i)
-  // for (auto& point : points)
-  {
-    // points[i] = transform(points[i]);
-    corners_in_world[i] = transform(points[i]);
-  }
- 
-  std::array<glm::vec3, 8> rotated_corners_in_world;
-  // for (auto const& point : corners_in_world)
-  for (int i = 0; i < 8; ++i)
-  {
-    rotated_corners_in_world[i] = _transform_mat * glm::vec4(corners_in_world[i], 1.f);
-  }
+  std::array<glm::vec3, 8> const rotated_corners_in_world = relative_to_model.rotated_corners(_transform_mat, true);
 
   math::aabb const bounding_of_rotated_points (std::vector<glm::vec3>(rotated_corners_in_world.begin()
                                               , rotated_corners_in_world.end()));
@@ -220,14 +257,43 @@ void ModelInstance::recalcExtents()
   extents[0] = bounding_of_rotated_points.min;
   extents[1] = bounding_of_rotated_points.max;
 
-  size_cat = glm::distance(bounding_of_rotated_points.max, bounding_of_rotated_points.min);
-
-  // Calculate bounding radius
-  // glm::vec3 center = (extents[0] + extents[1]) / 2.0f;
-  glm::vec3 halfExtents = (extents[1] - extents[0]) / 2.0f;
-  bounding_radius = glm::length(halfExtents);
-
   _need_recalc_extents = false;
+
+  // TODO We only need to recalculate size_cat if size changed
+
+  if (model->mesh_bounds_ratio < 0.80f)
+  {
+    // size cat for animated models with smaller mesh than the BB
+
+    math::aabb const vert_relative_to_model(model->vertices_bounds[0], model->vertices_bounds[1]);
+
+    std::array<glm::vec3, 8> const vert_rotated_corners_in_world = vert_relative_to_model.rotated_corners(_transform_mat, true);
+
+    math::aabb const vert_bounding_of_rotated_points(std::vector<glm::vec3>(vert_rotated_corners_in_world.begin()
+      , vert_rotated_corners_in_world.end()));
+
+    size_cat = glm::distance(vert_bounding_of_rotated_points.max, vert_bounding_of_rotated_points.min);
+  }
+  else
+  {
+    // this is basically AABB sphere diameter
+    size_cat = glm::distance(bounding_of_rotated_points.max, bounding_of_rotated_points.min);
+  }
+
+  // Reference :  Using original blizzard model BB radius
+  // TODO : No approach seems to generate the same value
+  // float reference_bounding_radius = model->bounding_box_radius * scale;
+
+  bounding_radius = glm::distance(model->bounding_box_max, model->bounding_box_min) * scale / 2.0f;
+ 
+  // glm::vec3 halfExtents = (extents[1] - extents[0]) / 2.0f;
+  // bounding_radius = glm::length(halfExtents);// Note : this is the same as (size_cat / 2.0f)
+  // float aabb_bounding_radius = size_cat / 2.0f; // using AABB means it can be bigger than the object
+
+  // how to calc it from OBB, gives a very similar result to glm::distance(model->bounding_box_max, model->bounding_box_min)
+  // float test_recalc_bounding_radius = math::calculateOBBRadius(rotated_corners_in_world);
+
+
 }
 
 void ModelInstance::ensureExtents()
@@ -243,6 +309,26 @@ std::array<glm::vec3, 2> const& ModelInstance::getExtents()
   ensureExtents();
 
   return extents;
+}
+
+std::array<glm::vec3, 2> const& ModelInstance::getLocalExtents() const
+{
+  return { model->bounding_box_min , model->bounding_box_max };
+}
+
+std::array<glm::vec3, 8> ModelInstance::getBoundingBox()
+{
+  // auto extents = getExtents();
+  if (_need_recalc_extents)
+    updateTransformMatrix();
+
+  // math::aabb const relative_to_model
+  // (glm::min(model->collision_box_min, model->bounding_box_min)
+  //   , glm::max(model->collision_box_max, model->bounding_box_max)
+  // );
+  math::aabb const relative_to_model( model->bounding_box_min, model->bounding_box_max);
+
+  return relative_to_model.rotated_corners(_transform_mat, true);
 }
 
 void ModelInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
@@ -290,6 +376,7 @@ wmo_doodad_instance::wmo_doodad_instance(BlizzardArchive::Listfile::FileKey cons
                                          , BlizzardArchive::ClientFile* f
                                          , Noggit::NoggitRenderContext context)
   : ModelInstance(file_key, context)
+  , world_pos(glm::vec3(0.0f))
 {
   float ff[4];
 
@@ -343,5 +430,41 @@ void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
   recalcExtents();
 
   _need_matrix_update = false;
+}
+
+bool wmo_doodad_instance::isInRenderDist(const float cull_distance, const glm::vec3& camera, display_mode display)
+{
+  float dist;
+
+  if (display == display_mode::in_3D)
+  {
+    dist = glm::distance(camera, world_pos) - model->bounding_box_radius * scale;
+  }
+  else
+  {
+    dist = std::abs(world_pos.y - camera.y) - model->bounding_box_radius * scale;
+  }
+
+  if (dist >= cull_distance)
+  {
+    return false;
+  }
+
+  ensureExtents();
+
+  if (size_cat < 1.f && dist > 300.f)
+  {
+    return false;
+  }
+  else if (size_cat < 4.f && dist > 500.f)
+  {
+    return false;
+  }
+  else if (size_cat < 25.f && dist > 1000.f)
+  {
+    return false;
+  }
+
+  return true;
 }
 

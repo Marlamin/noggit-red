@@ -248,6 +248,16 @@ void MapView::set_editing_mode(editing_mode mode)
 
   _left_sec_toolbar->setCurrentMode(this, mode);
 
+  // hack to hide empty tools
+  if (mode == editing_mode::impass)
+  {
+    _tool_panel_dock->hide();
+  }
+  else
+  {
+    _tool_panel_dock->show();
+  }
+
   if (context() && context()->isValid())
   {
     _world->renderer()->getTerrainParamsUniformBlock()->draw_areaid_overlay = false;
@@ -278,6 +288,8 @@ void MapView::set_editing_mode(editing_mode mode)
   terrainMode = mode;
   _toolbar->check_tool (mode);
   this->activateWindow();
+
+  _tool_panel_dock->setWindowTitle(activeTool()->name());
 
   _world->renderer()->markTerrainParamsUniformBlockDirty();
 }
@@ -812,7 +824,7 @@ void MapView::invalidate()
 
 void MapView::selectObjects(std::array<glm::vec2, 2> selection_box, float depth)
 {
-    _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), depth, _camera.position);
+    _world->select_objects_in_area(selection_box, !_mod_shift_down, _model_view, _projection, width(), height(), depth, _camera.position);
 }
 
 std::shared_ptr<Noggit::Project::NoggitProject>& MapView::project()
@@ -2072,19 +2084,19 @@ void MapView::setupHelpMenu()
 
 void MapView::setupClientMenu()
 {
-    // can add this to main menu instead in NoggitWindow()
+  // can add this to main menu instead in NoggitWindow()
 
-    auto client_menu(_main_window->_menuBar->addMenu("Client"));
-    // connect(this, &QObject::destroyed, client_menu, &QObject::deleteLater); // to remove from main menu
+  auto client_menu(_main_window->_menuBar->addMenu("Client"));
+  connect(this, &QObject::destroyed, client_menu, &QObject::deleteLater); // to remove from main menu
 
-    // ADD_ACTION_NS(client_menu, "Start Client",  [this] { _main_window->startWowClient(); });
-    auto start_client_action(client_menu->addAction("Start Client"));
-    connect(start_client_action, &QAction::triggered, [this] { _main_window->startWowClient(); });
+  // ADD_ACTION_NS(client_menu, "Start Client",  [this] { _main_window->startWowClient(); });
+  auto start_client_action(client_menu->addAction("Start Client"));
+  connect(start_client_action, &QAction::triggered, [this] { _main_window->startWowClient(); });
 
-    // ADD_ACTION_NS(client_menu, "Patch Client", [this] { _main_window->patchWowClient(); });
-    auto pack_client_action(client_menu->addAction("Patch Client"));
-    pack_client_action->setToolTip("Save content of project folder as MPQ patch in the client.");
-    connect(pack_client_action, &QAction::triggered, [this] { _main_window->patchWowClient(); });
+  // ADD_ACTION_NS(client_menu, "Patch Client", [this] { _main_window->patchWowClient(); });
+  auto pack_client_action(client_menu->addAction("Patch Client"));
+  pack_client_action->setToolTip("Save content of project folder as MPQ patch in the client.");
+  connect(pack_client_action, &QAction::triggered, [this] { _main_window->patchWowClient(); });
 
 }
 
@@ -2364,7 +2376,7 @@ void MapView::createGUI()
   _tool_panel_dock = new Noggit::Ui::Tools::ToolPanel(this);
   _tool_panel_dock->setFeatures(QDockWidget::DockWidgetMovable
                                 | QDockWidget::DockWidgetFloatable);
-  _tool_panel_dock->setAllowedAreas(Qt::RightDockWidgetArea);
+  _tool_panel_dock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::LeftDockWidgetArea);
 
   connect(this, &QObject::destroyed, _tool_panel_dock, &QObject::deleteLater);
   _main_window->addDockWidget(Qt::RightDockWidgetArea, _tool_panel_dock);
@@ -2785,8 +2797,8 @@ void MapView::paintGL()
     ImGui::Begin("Gizmo", &is_open, ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar
                                                 | ImGuiWindowFlags_::ImGuiWindowFlags_NoBackground);
 
-    auto mv = model_view();
-    auto proj = projection();
+    // auto mv = model_view();
+    // auto proj = projection();
 
     _transform_gizmo.setCurrentGizmoOperation(_gizmo_operation);
     _transform_gizmo.setCurrentGizmoMode(_gizmo_mode);
@@ -2797,9 +2809,9 @@ void MapView::paintGL()
 
     _transform_gizmo.setMultiselectionPivot(pivot);
 
-    _transform_gizmo.handleTransformGizmo(this, _world->current_selection(), mv, proj);
+    _transform_gizmo.handleTransformGizmo(this, _world->current_selection(), _model_view, _projection);
 
-    _world->update_selection_pivot();
+    // _world->update_selection_pivot();
 
     ImGui::End();
 
@@ -2963,30 +2975,6 @@ void MapView::tick (float dt)
 
   dt = std::min(dt, 1.0f);
 
-  auto cur_action = NOGGIT_CUR_ACTION;
-
-  if ((cur_action && !cur_action->getBlockCursor()) || !cur_action)
-  {
-    if (_locked_cursor_mode.get())
-    {
-      switch (terrainMode)
-      {
-        case editing_mode::areaid:
-        case editing_mode::impass:
-        case editing_mode::holes:
-        case editing_mode::object:
-          update_cursor_pos();
-          break;
-        default:
-          break;
-      }
-    }
-    else
-    {
-      update_cursor_pos();
-    }
-  }
-
   math::degrees yaw (-_camera.yaw()._);
 
   glm::vec3 dir(1.0f, 0.0f, 0.0f);
@@ -3079,6 +3067,35 @@ void MapView::tick (float dt)
       _2d_zoom *= pow(2.0f, dt * updown * 4.0f);
       _2d_zoom = std::max(0.01f, _2d_zoom);
       _camera_moved_since_last_draw = true;
+    }
+  }
+
+  // udpate MVP after moving camera
+  _model_view = model_view(_debug_cam_mode.get());
+  _projection = projection();
+
+  // update cursor pos after camera
+  auto cur_action = NOGGIT_CUR_ACTION;
+
+  if ((cur_action && !cur_action->getBlockCursor()) || !cur_action)
+  {
+    if (_locked_cursor_mode.get())
+    {
+      switch (terrainMode)
+      {
+      case editing_mode::areaid:
+      case editing_mode::impass:
+      case editing_mode::holes:
+      case editing_mode::object:
+        update_cursor_pos();
+        break;
+      default:
+        break;
+      }
+    }
+    else
+    {
+      update_cursor_pos();
     }
   }
 
@@ -3253,10 +3270,10 @@ math::ray MapView::intersect_ray() const
   {
     // during rendering we multiply perspective * view
     // so we need the same order here and then invert.
-      glm::mat4x4 const invertedViewMatrix = glm::inverse(projection() * model_view());
-      auto normalisedView = invertedViewMatrix * normalized_device_coords(mx, mz);
+    glm::mat4x4 const invertedViewMatrix = glm::inverse(_projection * _model_view);
+    auto normalisedView = invertedViewMatrix * normalized_device_coords(mx, mz);
 
-      auto pos = glm::vec3(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
+    auto pos = glm::vec3(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
 
     return { _camera.position, pos - _camera.position };
   }
@@ -3276,7 +3293,7 @@ selection_result MapView::intersect_result(bool terrain_only)
 {
   selection_result results
   ( _world->intersect 
-    ( glm::transpose(model_view())
+    ( glm::transpose(_model_view)
     , intersect_ray()
     , terrain_only
     , terrainMode == editing_mode::object || terrainMode == editing_mode::minimap
@@ -3285,6 +3302,7 @@ selection_result MapView::intersect_result(bool terrain_only)
     , _draw_models.get()
     , _draw_hidden_models.get()
     , _draw_wmo_exterior.get()
+    , _draw_model_animations.get()
     )
   );
 
@@ -3393,10 +3411,10 @@ void MapView::update_cursor_pos()
       glm::vec4 viewport = glm::vec4(0, 0, width(), height());
       glm::vec3 wincoord = glm::vec3(mx, height() - mz - 1, static_cast<float>(*ptr) / std::numeric_limits<unsigned short>::max());
 
-      glm::mat4x4 model_view_ = model_view();
-      glm::mat4x4 projection_ = projection();
+      // glm::mat4x4 model_view_ = model_view();
+      // glm::mat4x4 projection_ = projection();
 
-      glm::vec3 objcoord = glm::unProject(wincoord, model_view_,projection_, viewport);
+      glm::vec3 objcoord = glm::unProject(wincoord, _model_view, _projection, viewport);
 
 
       TileIndex tile({objcoord.x, objcoord.y, objcoord.z});
@@ -3460,8 +3478,8 @@ glm::mat4x4 MapView::model_view(bool use_debug_cam) const
 
 glm::mat4x4 MapView::projection() const
 {
-  // float far_z = _settings->value("view_distance", 2000.f).toFloat() + 1.f;
-  float far_z = _world->renderer()->_view_distance + 1.0f;
+  // float far_z = _settings->value("view_distance", 2000.f).toFloat() + 1.f; // don't access qsettings in mainloop, it's slow
+  float far_z = _world->renderer()->_view_distance - TILE_RADIUS + 1.0f;
 
   if (_display_mode == display_mode::in_2D)
   {
@@ -3519,55 +3537,64 @@ void MapView::draw_map()
       _minimap->update();
   }
 
-  bool classic_ui = _settings->value("classicUI", false).toBool();
-  bool show_unpaintable = classic_ui ? show_unpaintable_chunks : _left_sec_toolbar->showUnpaintableChunk();
+  bool show_unpaintable = _classic_ui ? show_unpaintable_chunks : _left_sec_toolbar->showUnpaintableChunk();
 
   bool debug_cam = _debug_cam_mode.get();
   // math::frustum frustum(model_view(debug_cam) * projection());
 
+  WorldRenderParams renderParams;
+
+  renderParams.cursorRotation = _cursorRotation;
+  renderParams.cursor_type = _cursorType;
+  renderParams.brush_radius = radius;
+  renderParams.show_unpaintable_chunks = show_unpaintable;
+  renderParams.draw_only_inside_light_sphere = _left_sec_toolbar->drawOnlyInsideSphereLight();
+  renderParams.draw_wireframe_light_sphere = _left_sec_toolbar->drawWireframeSphereLight();
+  renderParams.alpha_light_sphere = _left_sec_toolbar->getAlphaSphereLight();
+  renderParams.inner_radius_ratio = inner_radius;
+  renderParams.angle = angle;
+  renderParams.orientation = orientation;
+  renderParams.use_ref_pos = use_ref_pos;
+  renderParams.angled_mode = angled_mode;
+  renderParams.draw_paintability_overlay = terrainMode == editing_mode::paint;
+  renderParams.editing_mode = terrainMode;
+  renderParams.camera_moved = debug_cam ? false : _camera_moved_since_last_draw;
+  renderParams.draw_mfbo = _draw_mfbo.get();
+  renderParams.draw_terrain = _draw_terrain.get();
+  renderParams.draw_wmo = _draw_wmo.get();
+  renderParams.draw_water = _draw_water.get();
+  renderParams.draw_wmo_doodads = _draw_wmo_doodads.get();
+  renderParams.draw_models = _draw_models.get();
+  renderParams.draw_model_animations = _draw_model_animations.get();
+  renderParams.draw_models_with_box = _draw_models_with_box.get();
+  renderParams.draw_hidden_models = _draw_hidden_models.get();
+  renderParams.draw_sky = _draw_sky.get();
+  renderParams.draw_skybox = _draw_skybox.get();
+  renderParams.draw_fog = _draw_fog.get();
+  renderParams.ground_editing_brush = terrainType;
+  renderParams.water_layer = displayed_water_layer;
+  renderParams.display_mode = _display_mode;
+  renderParams.draw_occlusion_boxes = _draw_occlusion_boxes.get();
+  renderParams.minimap_render = false;
+  renderParams.draw_wmo_exterior = _draw_wmo_exterior.get();
+  renderParams.render_select_m2_aabb = _render_m2_aabb;
+  renderParams.render_select_m2_collission_bbox = _render_m2_collission_bbox;
+  renderParams.render_select_wmo_aabb = _render_wmo_aabb;
+  renderParams.render_select_wmo_groups_bounds = _render_wmo_groups_bounds;
+
+  _model_view = model_view(debug_cam);
+  _projection = projection();
 
   _world->renderer()->draw (
-                 model_view(debug_cam)
-               , projection()
-               , _cursor_pos
-               , _cursorRotation
-               , cursorColor
-               , _cursorType
-               , radius
-               , show_unpaintable
-               , _left_sec_toolbar->drawOnlyInsideSphereLight()
-               , _left_sec_toolbar->drawWireframeSphereLight()
-               , _left_sec_toolbar->getAlphaSphereLight()
-               , inner_radius
-               , ref_pos
-               , angle
-               , orientation
-               , use_ref_pos
-               , angled_mode
-               , terrainMode == editing_mode::paint
-               , terrainMode
-               , debug_cam ? _debug_cam.position : _camera.position
-               , debug_cam ? false : _camera_moved_since_last_draw
-               , _draw_mfbo.get()
-               , _draw_terrain.get()
-               , _draw_wmo.get()
-               , _draw_water.get()
-               , _draw_wmo_doodads.get()
-               , _draw_models.get()
-               , _draw_model_animations.get()
-               , _draw_models_with_box.get()
-               , _draw_hidden_models.get()
-               , _draw_sky.get()
-               , _draw_skybox.get()
-               , &minimapRenderSettings
-               , _draw_fog.get()
-               , terrainType
-               , displayed_water_layer
-               , _display_mode
-               , _draw_occlusion_boxes.get()
-               ,false
-               , _draw_wmo_exterior.get()
-               );
+                  _model_view
+                , _projection
+                , _cursor_pos
+                , cursor_color
+                , ref_pos
+                , _camera.position
+                , &minimapRenderSettings
+                , renderParams
+                );
 
   // reset after each world::draw call
   _camera_moved_since_last_draw = false;
@@ -4013,7 +4040,7 @@ void MapView::mouseReleaseEvent (QMouseEvent* event)
                     glm::vec2(std::max(_drag_start_pos.x(), drag_end_pos.x()), std::max(_drag_start_pos.y(), drag_end_pos.y()))
                 };
                 // _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), objectEditor->drag_selection_depth(), _camera.position);
-                _world->select_objects_in_area(selection_box, !_mod_shift_down, model_view(), projection(), width(), height(), 50000.0f, _camera.position);
+                _world->select_objects_in_area(selection_box, !_mod_shift_down, _model_view, _projection, width(), height(), 50000.0f, _camera.position);
             }
             else // Do normal selection when we just clicked
             {
@@ -4211,8 +4238,11 @@ void MapView::cursorPosition(glm::vec3 position)
     _cursor_pos = position;
 }
 
+// also called when loading world/viewport in MapView::initializeGL()
 void MapView::onSettingsSave()
 {
+  _classic_ui = _settings->value("classicUI", false).toBool();
+
   OpenGL::TerrainParamsUniformBlock* params = _world->renderer()->getTerrainParamsUniformBlock();
   params->wireframe_type = _settings->value("wireframe/type", false).toBool();
   params->wireframe_radius = _settings->value("wireframe/radius", 1.5f).toFloat();
@@ -4225,10 +4255,14 @@ void MapView::onSettingsSave()
   glm::vec4 wireframe_color(c.redF(), c.greenF(), c.blueF(), c.alphaF());
   params->wireframe_color = wireframe_color;
 
+  _world->renderer()->directional_lightning = _settings->value("directional_lightning", true).toBool();
+  _world->renderer()->local_lightning = _settings->value("local_lightning", true).toBool();
+
+  // refresh rendering
   _world->renderer()->markTerrainParamsUniformBlockDirty();
+  _world->renderer()->skies()->force_update();
 
-  _world->renderer()->_view_distance = _settings->value("view_distance", 2000.f).toFloat();
-
+  _world->renderer()->_view_distance = _settings->value("view_distance", 2000.f).toFloat() + TILE_RADIUS;
   _world.get()->mapIndex.setLoadingRadius(_settings->value("loading_radius", 2).toInt());
   _world.get()->mapIndex.setUnloadDistance(_settings->value("unload_dist", 5).toInt());
   _world.get()->mapIndex.setUnloadInterval(_settings->value("unload_interval", 30).toInt());
@@ -4248,6 +4282,11 @@ void MapView::onSettingsSave()
   bool doAntiAliasing = _settings->value("anti_aliasing", false).toBool();
   format().setSamples(doAntiAliasing ? 4 
                       : Noggit::Application::NoggitApplication::instance()->getConfiguration()->GraphicsConfiguration.SamplesCount);
+
+  _render_m2_aabb = _settings->value("render/m2_aabb", false).toBool();
+  _render_m2_collission_bbox = _settings->value("render/m2_coll_bb", false).toBool();
+  _render_wmo_aabb = _settings->value("render/wmo_aabb", false).toBool();
+  _render_wmo_groups_bounds = _settings->value("render/wmo_groups_bounds", false).toBool();
 
   // force updating rendering
   _camera_moved_since_last_draw = true;

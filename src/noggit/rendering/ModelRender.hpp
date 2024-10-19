@@ -117,7 +117,8 @@ namespace Noggit::Rendering
         , const glm::vec3& camera
         , int animtime
         , display_mode display
-        , bool no_cull = false
+        , bool no_cull
+        , bool animate
     );
 
     void draw (glm::mat4x4 const& model_view
@@ -125,13 +126,15 @@ namespace Noggit::Rendering
         , OpenGL::Scoped::use_program& m2_shader
         , OpenGL::M2RenderState& model_render_state
         , math::frustum const& frustum
-        , const float& cull_distance
-        , const glm::vec3& camera
+        , const float cull_distance
+        , glm::vec3 const& camera
         , int animtime
         , bool all_boxes
         , std::unordered_map<Model*, std::size_t>& model_boxes_to_draw
         , display_mode display
-        , bool no_cull = false
+        , bool no_cull
+        , bool animate
+        , bool draw_fake_geometry_box
     );
 
     void drawParticles(glm::mat4x4 const& model_view

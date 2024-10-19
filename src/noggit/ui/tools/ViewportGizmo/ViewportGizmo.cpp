@@ -258,7 +258,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
           break;
         }
       }
-      obj_instance->ensureExtents();
+      obj_instance->recalcExtents();
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::add);
@@ -326,5 +326,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
   }
   if (_world)
     _world->update_selected_model_groups();
+
+  _world->update_selection_pivot();
 }
 
