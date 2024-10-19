@@ -43,7 +43,7 @@ namespace Noggit
       , tile(0, 0)
     {
       setMinimumWidth(250);
-      setMaximumWidth(250);
+      // setMaximumWidth(250);
 
       auto layout (new QFormLayout (this));
 

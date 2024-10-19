@@ -41,9 +41,13 @@ namespace Noggit
     {
         zone_id_browser::zone_id_browser(QWidget* parent)
             : QWidget(parent)
-            , _area_tree(new QTreeWidget())
             , mapID(-1)
         {
+            setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+            setMinimumWidth(250);
+
+            QVBoxLayout* mainLayout = new QVBoxLayout(this);
+            this->setLayout(mainLayout);
 
             auto layout = new QFormLayout(this);
 
@@ -52,11 +56,16 @@ namespace Noggit
             _radius_spin->setDecimals(2);
             _radius_spin->setValue(_radius);
 
-            layout->addRow("Radius:", _radius_spin);
+            layout->addRow("Brush Radius:", _radius_spin);
 
             _radius_slider = new QSlider(Qt::Orientation::Horizontal, this);
-            _radius_slider->setRange(0, 250);
+            _radius_slider->setRange(0, 1000);
             _radius_slider->setSliderPosition(_radius);
+
+            _area_tree_filter = new QLineEdit(this);
+
+            _area_tree = new QTreeWidget(this);
+            //_area_tree->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
             QPushButton* edit_area_button = new QPushButton("Edit selected Area", this);
             edit_area_button->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::cog));
@@ -65,16 +74,82 @@ namespace Noggit
             QPushButton* add_subzone_button = new QPushButton("Add a new Subzone(selected as Parent)", this);
             add_subzone_button->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::plus));
 
-
             _area_editor = new AreaEditor(this);
 
             layout->addRow(_radius_slider);
+            layout->addRow("Filter :", _area_tree_filter);
             layout->addRow(_area_tree);
             layout->addRow(edit_area_button);
             layout->addRow(add_zone_button);
             layout->addRow(add_subzone_button);
 
-            setMinimumWidth(250);
+            mainLayout->addLayout(layout);
+
+            // mainLayout->addStretch();
+            // adjustSize();
+
+            connect(_area_tree_filter, &QLineEdit::textChanged, this, [=](const QString& text)
+              {
+                // If the search text is empty, unhide and collapse all parents and children
+                if (text.isEmpty()) {
+                  for (int i = 0; i < _area_tree->topLevelItemCount(); ++i) {
+                    QTreeWidgetItem* parentItem = _area_tree->topLevelItem(i);
+                    parentItem->setHidden(false);
+                    parentItem->setExpanded(false);
+
+                    for (int j = 0; j < parentItem->childCount(); ++j)
+                    {
+                      QTreeWidgetItem* childItem = parentItem->child(j);
+                      childItem->setHidden(false);
+                    }
+                  }
+                  return;
+                }
+
+                for (int i = 0; i < _area_tree->topLevelItemCount(); ++i)
+                {
+                    QTreeWidgetItem* parentItem = _area_tree->topLevelItem(i);
+                    bool parentMatches = parentItem->text(0).contains(text, Qt::CaseInsensitive);
+
+                    // If the parent matches, show it and all of its children
+                    if (parentMatches)
+                    {
+                        parentItem->setHidden(false);
+                        parentItem->setExpanded(true);
+
+                        // Show all children when the parent matches
+                        for (int j = 0; j < parentItem->childCount(); ++j)
+                        {
+                            QTreeWidgetItem* childItem = parentItem->child(j);
+                            childItem->setHidden(false);
+                        }
+                    }
+                    else
+                    {
+                        parentItem->setExpanded(false);
+                        bool anyChildMatches = false;
+
+                        // Check if any of the children match the filter
+                        for (int j = 0; j < parentItem->childCount(); ++j)
+                        {
+                            QTreeWidgetItem* childItem = parentItem->child(j);
+                            bool childMatches = childItem->text(0).contains(text, Qt::CaseInsensitive);
+                            childItem->setHidden(!childMatches);
+
+                            // If any child matches, the parent should remain visible
+                            if (childMatches)
+                            {
+                                anyChildMatches = true;
+                            }
+                        }
+
+                        // Show or hide the parent based on whether any child matches
+                        parentItem->setHidden(!anyChildMatches);
+
+                        parentItem->setExpanded(anyChildMatches);
+                    }
+                }
+              });
 
             connect(_area_tree, &QTreeWidget::itemSelectionChanged
                 , [this]
@@ -82,7 +157,7 @@ namespace Noggit
                     auto const& selected_items = _area_tree->selectedItems();
                     if (selected_items.size())
                     {
-                        emit selected(selected_items.back()->data(0, 1).toInt());
+                        emit selected(selected_items.back()->data(0, Qt::UserRole + 1).toInt());
                     }
                 }
             );
@@ -191,7 +266,7 @@ namespace Noggit
             auto const& selected_items = _area_tree->selectedItems();
             if (selected_items.size())
             {
-                int selected_area_id = selected_items.back()->data(0, 1).toInt();
+                int selected_area_id = selected_items.back()->data(0, Qt::UserRole + 1).toInt();
                 return selected_area_id;
             }
             return 0;
@@ -222,7 +297,7 @@ namespace Noggit
                     areaName = "Unknown location";
                 }
                 ss << area_id << "-" << areaName;
-                item->setData(0, 1, QVariant(area_id));
+                item->setData(0, Qt::UserRole + 1, QVariant(area_id));
                 item->setText(0, QString(ss.str().c_str()));
                 _items.emplace(area_id, item);
 

@@ -31,7 +31,7 @@ public:
 
   // used when flag 0x8 is set in wdt
   // longest side of an AABB transformed model's bounding box from the M2 header
-  float size_cat;
+  float size_cat = 0.0f;
 
   explicit ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
                          , Noggit::NoggitRenderContext context);
@@ -42,7 +42,7 @@ public:
   ModelInstance(ModelInstance const& other) = default;
   ModelInstance& operator= (ModelInstance const& other) = default;
 
-  ModelInstance (ModelInstance&& other)
+  ModelInstance (ModelInstance&& other) noexcept
     : SceneObject(other._type, other._context)
     , model (std::move (other.model))
     , light_color (other.light_color)
@@ -78,6 +78,9 @@ public:
   void draw_box (glm::mat4x4 const& model_view
                 , glm::mat4x4 const& projection
                 , bool is_current_selection
+                , bool draw_collision_box
+                , bool draw_aabb
+                , bool draw_anim_bb
                 );
 
 
@@ -85,10 +88,11 @@ public:
       , math::ray const&
       , selection_result*
       , int animtime
+      , bool animate
   );
 
   bool isInFrustum(math::frustum const& frustum);
-  bool isInRenderDist(const float& cull_distance, const glm::vec3& camera, display_mode display);
+  bool isInRenderDist(const float cull_distance, const glm::vec3& camera, display_mode display);
 
   bool extentsDirty() { return _need_recalc_extents || !model->finishedLoading(); };
 
@@ -98,8 +102,10 @@ public:
   void recalcExtents() override;
   void ensureExtents() override;
   bool finishedLoading() override { return model->finishedLoading(); };
-  std::array<glm::vec3, 2> const& getExtents() override;
-  // glm::vec3* getExtents();
+  std::array<glm::vec3, 2> const& getExtents() override; // axis aligned
+  std::array<glm::vec3, 2> const& getLocalExtents() const;
+
+  std::array<glm::vec3, 8> getBoundingBox() override; // not axis aligned
 
   [[nodiscard]]
   virtual bool isWMODoodad() const { return false; };
@@ -156,7 +162,7 @@ public:
   {
   }
 
-  wmo_doodad_instance& operator= (wmo_doodad_instance&& other)
+  wmo_doodad_instance& operator= (wmo_doodad_instance&& other) noexcept
   {
     ModelInstance::operator= (reinterpret_cast<ModelInstance&&>(other));
     std::swap (doodad_orientation, other.doodad_orientation);
@@ -170,6 +176,8 @@ public:
   bool need_matrix_update() const { return _need_matrix_update; }
 
   void update_transform_matrix_wmo(WMOInstance* wmo);
+
+  bool isInRenderDist(const float cull_distance, const glm::vec3& camera, display_mode display);
 
   [[nodiscard]]
   glm::vec3 const& get_pos() const override { return world_pos; };

@@ -191,7 +191,8 @@ void PreviewRenderer::draw()
         wmo_instance.draw(
             wmo_program, model_view(), projection(), frustum, culldistance,
             _camera.position, _draw_boxes.get(), _draw_models.get() 
-            , false, false, 0, false, display_mode::in_3D, true
+            , false, false, 0, false, display_mode::in_3D
+            , true, true, false, false
         );
 
         auto doodads = wmo_instance.get_doodads(true);
@@ -257,6 +258,9 @@ void PreviewRenderer::draw()
         , _draw_boxes.get()
         , model_boxes_to_draw
         , display_mode::in_3D
+        , false
+        , _draw_animated.get()
+        , true
       );
     }
 
@@ -281,6 +285,9 @@ void PreviewRenderer::draw()
           , _draw_boxes.get()
           , model_boxes_to_draw
           , display_mode::in_3D
+          , false
+          , _draw_animated.get()
+          , false
       );
     }
 
@@ -441,10 +448,10 @@ QPixmap* PreviewRenderer::renderToPixmap()
   if (async_loader->is_loading())
   {
     // wait for the loader to finish
-    do
-    {
-      std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    } while (async_loader->is_loading());
+    // do
+    // {
+    //   std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    // } while (async_loader->is_loading());
 
     // redraw
     gl.clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

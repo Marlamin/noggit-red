@@ -28,11 +28,12 @@ namespace Noggit::Rendering
     void upload() override;
     void unload() override;
 
-    void draw (OpenGL::Scoped::use_program& mcnk_shader
-        , const glm::vec3& camera
-        , bool show_unpaintable_chunks
-        , bool draw_paintability_overlay
-        , bool is_selected
+    void draw(OpenGL::Scoped::use_program& mcnk_shader
+      , const glm::vec3& camera
+      , bool show_unpaintable_chunks
+      , bool draw_paintability_overlay
+      , bool is_selected
+      , bool skip_upload_alphamap = false
     );
 
     void doTileOcclusionQuery(OpenGL::Scoped::use_program& occlusion_shader);
@@ -63,6 +64,12 @@ namespace Noggit::Rendering
     bool isOverridingOcclusionCulling() const { return _tile_occlusion_cull_override; };
     void setOverrideOcclusionCulling(bool state) { _tile_frustum_culled = state; };
 
+    [[nodiscard]]
+    bool isUploaded() const { return _uploaded; };
+    [[nodiscard]]
+    bool alphamapUploadedLastFrame() const { return _uploaded_alphamap_last_frame; };
+    int numUploadedChunkAlphamaps() const { return _num_uploaded_chunk_alphamaps; };
+
   private:
 
     void uploadTextures();
@@ -76,8 +83,11 @@ namespace Noggit::Rendering
     bool _requires_sampler_reset = false;
     bool _requires_paintability_recalc = true;
     bool _requires_ground_effect_color_recalc = true;
-    bool _texture_not_loaded = false;
+    bool _texture_not_loaded = true;
     bool _require_geffect_active_texture_update = true;
+
+    bool _uploaded_alphamap_last_frame = false;
+    int _num_uploaded_chunk_alphamaps = 0; // last frame
 
     std::string _geffect_active_texture = "";
 

@@ -120,6 +120,8 @@ namespace Noggit
       void selected (int area_id);
 
     private:
+
+      QLineEdit* _area_tree_filter;
       QTreeWidget* _area_tree;
 
       QSlider* _radius_slider;

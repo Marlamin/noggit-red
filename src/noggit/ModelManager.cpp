@@ -44,7 +44,7 @@ void ModelManager::resetAnim()
 {
   _.apply ( [&] (BlizzardArchive::Listfile::FileKey const&, Model& model)
             {
-              model.animcalc = false;
+              model.anim_calculated = false;
             }
           );
 }

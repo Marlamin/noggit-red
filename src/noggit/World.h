@@ -108,6 +108,7 @@ public:
                              , bool draw_models
                              , bool draw_hidden_models
                              , bool draw_wmo_exterior
+                             , bool animate
                              );
 
   MapChunk* getChunkAt(glm::vec3 const& pos);
@@ -338,7 +339,7 @@ public:
 
 	static bool IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
 
-    static bool IsWMOWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
+  static bool IsWMOWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record);
 
   void clearHeight(glm::vec3 const& pos);
   void clearAllModelsOnADT(TileIndex const& tile, bool action);
@@ -416,7 +417,18 @@ public:
   void clear_selection_groups();
 
 private:
-  bool is_point_occluded_by_terrain(const glm::vec3& point, const glm::mat4x4& view, const glm::mat4& VPmatrix, float viewport_width, float viewport_height, const glm::vec3& camera_position);
+  bool is_point_occluded_by_terrain(const glm::vec3& point
+    , const glm::mat4x4& view
+    , const glm::mat4& VPmatrix
+    , float viewport_width
+    , float viewport_height
+    , const glm::vec3& camera_position
+    , float distance_override = 0.0f);
+
+public:
+  bool paste_model_random_rotation = false;
+  bool paste_model_random_tilt = false;
+  bool paste_model_random_size = false;
 
 protected:
   // void update_models_by_filename();

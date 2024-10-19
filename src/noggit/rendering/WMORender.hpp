@@ -38,6 +38,8 @@ namespace Noggit::Rendering
         , bool world_has_skies
         , display_mode display
         , bool interior_only
+        , bool draw_select_group_bounds
+        , bool grouped
     );
 
     bool drawSkybox(glm::mat4x4 const& model_view

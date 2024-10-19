@@ -59,11 +59,12 @@ namespace misc
 
   glm::vec4 projectPointToScreen(const glm::vec3& point, const glm::mat4& VPmatrix, float viewport_width, float viewport_height, bool& valid);
 
-  std::array<glm::vec2, 2> getAABBScreenBounds(const std::array<glm::vec3, 2>& extents
+  std::array<glm::vec2, 2> getBoundingBoxScreenBounds(const std::array<glm::vec3, 2>& local_extents
                                               , const glm::mat4& VPmatrix
                                               , float viewport_width
                                               , float viewport_height
-                                              , bool& valid
+                                              , int& valid_points
+                                              , glm::mat4x4 const& obj_matrix
                                               , float scale = 1.0f);
 
   bool pointInside(glm::vec3 point, std::array<glm::vec3, 2> const& extents);

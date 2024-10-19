@@ -61,6 +61,7 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
     , bool show_unpaintable_chunks
     , bool draw_paintability_overlay
     , bool is_selected
+    , bool skip_upload_alphamap
 )
 {
   ZoneScopedN(NOGGIT_CURRENT_FUNCTION);
@@ -84,7 +85,16 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
   bool shadowmap_bound = false;
   bool mccv_bound = false;
 
-  _texture_not_loaded = false;
+  _uploaded_alphamap_last_frame = false;
+  _num_uploaded_chunk_alphamaps = 0;
+
+
+  // iterate all textures to check if there's one that's not loaded yet
+  if (_texture_not_loaded)
+  {
+    _texture_not_loaded = !_map_tile->texturesFinishedLoading();
+  }
+  // _texture_not_loaded = false;
 
   // figure out if we need to update based on paintability
   bool need_paintability_update = false;
@@ -112,8 +122,8 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
   }
 
   // run chunk updates. running this when splitdraw call detected unused sampler configuration as well.
-  if (_map_tile->_chunk_update_flags || is_selected != _selected || need_paintability_update || _requires_sampler_reset || _texture_not_loaded
-      || _requires_ground_effect_color_recalc || _require_geffect_active_texture_update)
+  if (!skip_upload_alphamap && (_map_tile->_chunk_update_flags || is_selected != _selected || need_paintability_update || _requires_sampler_reset || _texture_not_loaded
+    || _requires_ground_effect_color_recalc || _require_geffect_active_texture_update))
   {
 
     gl.bindBuffer(GL_UNIFORM_BUFFER, _chunk_instance_data_ubo);
@@ -144,12 +154,15 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
 
       unsigned flags = chunk->getUpdateFlags();
 
-      if (flags & ChunkUpdateFlags::ALPHAMAP || _requires_sampler_reset || _texture_not_loaded)
+      if (!skip_upload_alphamap && (flags & ChunkUpdateFlags::ALPHAMAP || _requires_sampler_reset || _texture_not_loaded))
       {
         gl.activeTexture(GL_TEXTURE0 + 3);
         gl.bindTexture(GL_TEXTURE_2D_ARRAY, _alphamap_tex);
         alphamap_bound = true;
         chunk->texture_set->uploadAlphamapData();
+
+        _uploaded_alphamap_last_frame = true;
+        _num_uploaded_chunk_alphamaps++;
 
         if (!_split_drawcall && !fillSamplers(chunk.get(), i, static_cast<unsigned int>(_draw_calls.size() - 1)))
         {
@@ -253,7 +266,7 @@ void TileRender::draw (OpenGL::Scoped::use_program& mcnk_shader
 
       chunk->endChunkUpdates();
 
-      if (_texture_not_loaded)
+      if (_texture_not_loaded || skip_upload_alphamap)
         chunk->registerChunkUpdate(ChunkUpdateFlags::ALPHAMAP);
 
     }

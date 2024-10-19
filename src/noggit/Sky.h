@@ -11,23 +11,25 @@
 #include <string>
 #include <vector>
 
+constexpr int DAY_DURATION = 2880; // Time Values from 0 to 2880 where each number represents a half minute from midnight to midnight
+
 // 3.3.5 only
 enum SkyColorNames
 {
   LIGHT_GLOBAL_DIFFUSE,
   LIGHT_GLOBAL_AMBIENT,
-  SKY_COLOR_0, // top
-  SKY_COLOR_1, // middle
-  SKY_COLOR_2, // middle to horizon
-  SKY_COLOR_3, // above horizon
-  SKY_COLOR_4, // horizon
-  FOG_COLOR, // fog and WDL mountains
-  SHADOW_OPACITY,
+  SKY_COLOR_TOP, // top
+  SKY_COLOR_MIDDLE, // middle
+  SKY_COLOR_BAND1, // middle to horizon
+  SKY_COLOR_BAND2, // above horizon
+  SKY_COLOR_SMOG, // horizon/smog
+  SKY_FOG_COLOR, // fog and WDL mountains
+  SHADOW_OPACITY, // Unknown / unused in 3.3.5 ? This value was moved to ShadowOpacity(17) in the new format
   SUN_COLOR, // sun, specular light, sunrays
-  SUN_HALO_COLOR, // bigger sun halo
-  CLOUD_EDGE_COLOR, // cloud edge
-  CLOUD_COLOR, // cloud body
-  SKY_UNKNOWN_3,
+  SUN_CLOUD_COLOR, // bigger sun halo
+  CLOUD_EMISSIVE_COLOR, // cloud edge
+  CLOUD_LAYER1_AMBIENT_COLOR, // cloud body
+  CLOUD_LAYER2_AMBIENT_COLOR, // Unknown / unused in 3.3.5 ? This value was ported to Cloud Layer 2 Ambient Color in the new format
   OCEAN_COLOR_LIGHT, // shallow ocean
   OCEAN_COLOR_DARK, // deep ocean
   RIVER_COLOR_LIGHT, // shallow river
@@ -93,68 +95,30 @@ struct ZoneLight
 {
   unsigned int id = 0;
   std::string name;
-  unsigned int mapId = 0; // map.dbc
+  // unsigned int mapId = 0; // map.dbc
   unsigned int lightId = 0; // light.dbc reference
+
+  std::vector< glm::vec2> points;
+
+  // added in 8.2
+  // float zMin = -64000.0f;
+  // float zMin = 64000.0f;
+
+  std::array<glm::vec2, 2> _extents; // 2d square corners for fast bounds check before precise polygon intersection check
+  // math::aabb_2d extents;
+
+  // Sky* light = nullptr; 
+  // std::vector<ZoneLightPoint> points;
 };
 
 struct ZoneLightPoint
 {
     unsigned int id = 0;
     unsigned int zoneLightId = 0;
-    float pos1 = 0.0f;
-    float pos2 = 0.0f;
+    float posX = 0.0f;
+    float posY = 0.0f;
     unsigned int pointOrder;
 };
-
-// hardcoded in the client in 3.3.5, they were moved to a DBC in 4.0
-// TODO : move to a definition file
-static const std::vector<ZoneLight> zoneLightsWotlk = {
-    {60, "BoreanTundra", 571, 914},
-    {61, "DragonBlight", 571, 825},
-    {62, "GrizzlyHills", 571, 959},
-    {63, "HowlingFjord", 571, 862},
-    {64, "HowlingGrizzly", 571, 1847},
-    {65, "Icecrown", 571, 1703},
-    {66, "Sholazar", 571, 1796},
-    {67, "StormPeaks", 571, 1777},
-    {68, "Wintergrasp", 571, 1792},
-    {69, "ZulDrak", 571, 1589},
-    {70, "CrystalSong", 571, 1740},
-    {187, "Shadow Moon Main", 530, 519}
-};
-
-// TODO also move to a csv file. added just borean tundra as example
-/*
-std::vector<ZoneLightPoint> zoneLightPoints = {
-    {300, 60, 4215.8745f, 3269.2654f, 1},
-    {301, 60, 4271.2856f, 4197.4040f, 2},
-    {302, 60, 4363.6377f, 4262.0503f, 3},
-    {303, 60, 4585.2827f, 4264.3594f, 4},
-    {304, 60, 4562.1950f, 4617.6060f, 5},
-    {305, 60, 4522.9450f, 4633.7670f, 6},
-    {306, 60, 4520.6360f, 4675.3257f, 7},
-    {307, 60, 4562.1950f, 4709.9580f, 8},
-    {308, 60, 4566.8125f, 4936.2207f, 9},
-    {309, 60, 4622.2236f, 4940.8380f, 10},
-    {310, 60, 4631.4585f, 5499.5680f, 11},
-    {311, 60, 4728.4280f, 5679.6550f, 12},
-    {312, 60, 4728.4280f, 5956.7110f, 13},
-    {313, 60, 4682.2524f, 6012.1226f, 14},
-    {314, 60, 4673.0170f, 6487.7354f, 15},
-    {315, 60, 6081.3860f, 8990.4780f, 16},
-    {316, 60, 3043.0032f, 9590.7660f, 17},
-    {317, 60, 826.5530f, 8247.0430f, 18},
-    {318, 60, 133.91203f, 5448.7744f, 19},
-    {319, 60, 957.1393f, 3272.8423f, 20},
-    {320, 60, 2381.5320f, 3242.5560f, 21},
-    {321, 60, 3117.2805f, 3195.2437f, 22},
-    {322, 60, 3292.0650f, 3263.7822f, 23},
-    {323, 60, 3610.3906f, 3122.0793f, 24},
-    {324, 60, 3746.0330f, 3111.1125f, 25},
-    {325, 60, 3812.3870f, 3198.4680f, 26},
-    {326, 60, 4098.6855f, 3195.5237f, 27}
-};
-*/
 
 struct SkyColor 
 {
@@ -172,8 +136,10 @@ struct SkyFloatParam
   int time;
 };
 
-// modern LightData.db
+// TODO modern LightData.db
 // unified timestamps for float and int data
+// old data should fit in it as it does in classic
+/*
 struct LightData
 {
   LightData(int paramId);
@@ -182,7 +148,7 @@ struct LightData
   unsigned int time = 0;
   glm::vec3 colorRows[NUM_SkyColorNames] = {};
   float floatParams[NUM_SkyParamsNames] = {};
-};
+};*/
 
 class SkyParam
 {
@@ -195,14 +161,9 @@ public:
     SkyParam() = default;
     explicit SkyParam(int paramId, Noggit::NoggitRenderContext context);
 
-    //array of 18 vectors(for each color), each vector item is a time/value
+    //array of 18 vectors(for each color), each vector item is a time/value. There can only be up to 16 vector items
     std::vector<SkyColor> colorRows[NUM_SkyColorNames];
     std::vector<SkyFloatParam> floatParams[NUM_SkyFloatParamsNames];
-
-    // first/min time value for each entry
-    // titi : deprecated those and replaced it by checking the time value of the first vector element
-    // int mmin[NUM_SkyColorNames];
-    // int mmin_float[NUM_SkyFloatParamsNames];
 
     // potential structure rework, more similar to retail/classic LightData.db
     // std::vector<LightData> lightData;
@@ -228,40 +189,50 @@ public:
     bool _floats_need_save = true;
     bool _is_new_param_record = false;
 
-private: // most common settings
+private: 
+    // most common settings
     bool _highlight_sky = false;
     float _river_shallow_alpha = 0.5f;
     float _river_deep_alpha = 1.0f;
     float _ocean_shallow_alpha = 0.75f;
     float _ocean_deep_alpha = 1.0f;
     float _glow = 0.5f;
+    // int _cloud_type = 0; // always 0 in 3.3.5
 
     Noggit::NoggitRenderContext _context;
 };
 
 class Sky 
 {
+private:
+  mutable SkyParam* cachedCurrentParam = nullptr;
+
 public:
   // std::optional<ModelInstance> skybox;
-
   int Id;
-  int mapId; // just for saving...
-
   glm::vec3 pos = glm::vec3(0, 0, 0);
   float r1 = 0.f, r2 = 0.f;
+  std::string name;
 
   explicit Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context);
 
-  SkyParam* skyParams[NUM_SkyParamsNames];
+  int getId() const { return Id; };
+
+  // std::unique_ptr<SkyParam> skyParams[NUM_SkyParamsNames];
+  unsigned int skyParams[NUM_SkyParamsNames];
   int curr_sky_param = SKY_PARAM_CLEAR;
 
-  std::string name;
+
+  std::optional<SkyParam*> getParam(int param_index) const;
+  std::optional<SkyParam*> getCurrentParam() const { return getParam(curr_sky_param);};
+
 
   glm::vec3 colorFor(int r, int t) const;
   float floatParamFor(int r, int t) const;
 
-  float weight;
-  bool global;
+  float weight = 0.0f;
+  bool global = false;
+  bool zone_light = false;
 
   bool is_new_record = false;
 
@@ -279,14 +250,16 @@ public:
 private:
   bool _selected;
 
+  int mapId; // just for saving...
+
   Noggit::NoggitRenderContext _context;
 };
-
-
 
 class Skies 
 {
 private:
+  void loadZoneLights(int map_id);
+
   int numSkies = 0;
   int cs = -1;
   ModelInstance stars;
@@ -295,21 +268,41 @@ private:
   int _last_time = -1;
   glm::vec3 _last_pos;
 
+  // active render settings after blending between active lights
+  // Look at Sky for individual light settings
+
   float _river_shallow_alpha = 0.5f;
   float _river_deep_alpha = 1.0f;
   float _ocean_shallow_alpha = 0.75f;
   float _ocean_deep_alpha = 1.0f;
   float _glow = 0.5f;
-  // bool _highlight_sky = false;
+  // bool _highlight_sky = false; // since it's a bool and it can't be blended, just get from highest prio sky
 
   float _fog_rate = 1.5f;
 
-  float _fog_distance = 6500;
-  float _fog_multiplier = 0.1;
+  // float params
+  float _fog_distance = 6500.0f;
+  float _fog_multiplier = 0.1f;
+  float _celestial_glow = 1.0f;
+  float _cloud_density = 1.0f;
+  float _unknown_float_param4 = 1.0f;
+  float _unknown_float_param5 = 1.0f;
 
 public:
+  // Light Zones
+  // hardcoded in the client in 3.3.5, they were moved to a DBC in 4.0
+  std::vector<ZoneLight> zoneLightsWotlk;
+  // std::unordered_map<int, std::vector<ZoneLightPoint>> zoneLightPoints; // grouped by zoneLightId. <zoneLightId, points>
+  // std::vector<ZoneLightPoint> zoneLightPoints = {
+  //     {300, 60, 4215.8745f, 3269.2654f, 1},
+  // };
+  bool using_fallback_global = false; // if map doesn't have a global
+
+  SkyParamsNames active_param;
+
   std::vector<Sky> skies;
-  std::vector<glm::vec3> color_set = std::vector<glm::vec3>(NUM_SkyColorNames, glm::vec3(1.f, 1.f, 1.f));
+  std::array<glm::vec3, NUM_SkyColorNames> color_set = { glm::vec3(1.f, 1.f, 1.f) };
+  Sky* findSkyById(int sky_id);
 
   explicit Skies(unsigned int mapid, Noggit::NoggitRenderContext context);
 
@@ -321,7 +314,7 @@ public:
   Sky* findClosestSkyByDistance(glm::vec3 pos);
 
   void setCurrentParam(int param_id);
-  void update_sky_colors(glm::vec3 pos, int time);
+  void update_sky_colors(glm::vec3 pos, int time, bool global_only);
 
   bool draw ( glm::mat4x4 const& model_view
             , glm::mat4x4 const& projection
@@ -360,7 +353,13 @@ public:
   float ocean_deep_alpha() const { return _ocean_deep_alpha; }
 
   float fog_distance_end() const { return _fog_distance / 36.f; };
-  float fog_distance_start() const { return _fog_multiplier; };
+  float fog_distance_start() const { return (_fog_distance / 36.f) * _fog_multiplier; };
+  float fog_distance_multiplier() const { return _fog_multiplier; };
+
+  float celestial_glow() const { return _celestial_glow; };
+  float cloud_density() const { return _cloud_density; };
+  float unknown_float_param4() const { return _unknown_float_param4; };
+  float unknown_float_param5() const { return _unknown_float_param5; };
 
   float glow() const { return _glow; };
 

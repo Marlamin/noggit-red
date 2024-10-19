@@ -187,27 +187,26 @@ namespace Noggit
                 }
 
                 });
-
-            connect(_tree_searchbar, &QLineEdit::textChanged, [=](QString obj) {
-                if (obj.isEmpty())
-                {
-                    // unhide all
+            
+            connect(_tree_searchbar, &QLineEdit::textChanged, [=](const QString& text)
+            {
+              if (text.isEmpty())
+              {
+                // Unhide all items when search text is empty
+                for (int i = 0; i < _picker_listview->count(); ++i) {
+                  _picker_listview->item(i)->setHidden(false);
                 }
+              }
+              else
+              {
+                for (int i = 0; i < _picker_listview->count(); ++i) {
+                  QListWidgetItem* item = _picker_listview->item(i);
 
-                // hide all items
-                for (int i = 0; i < _picker_listview->count(); i++)
-                {
-                    auto item = _picker_listview->item(i);
-                    item->setHidden(true);
+                  bool match = item->text().contains(text, Qt::CaseInsensitive);
+                  item->setHidden(!match);
                 }
-                // unhide matching items
-                auto matching_items = _picker_listview->findItems(obj, Qt::MatchContains);
-
-                for (auto item : matching_items)
-                {
-                    item->setHidden(false);
-                }
-                });
+              }
+            });
 
             QObject::connect(_picker_listview, &QListWidget::itemSelectionChanged, [this]()
               {

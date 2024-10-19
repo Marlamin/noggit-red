@@ -134,17 +134,17 @@ namespace Noggit
 
     void ObjectPalette::LoadSavedPalette()
     {
-        auto& saved_palette = _project->ObjectPalettes;
-        for (auto& palette : saved_palette)
+      unsigned int map_id = _map_view->getWorld()->getMapID();
+      for (auto const& palette : _project->ObjectPalettes)
+      {
+        if (palette.MapId == map_id)
         {
-            if (palette.MapId == _map_view->getWorld()->getMapID())
-            {
-                for (auto& filename : palette.Filepaths)
-                    addObjectByFilename(filename.c_str(), false);
-                break;
-            }
-
+          for (auto const& filename : palette.Filepaths)
+              addObjectByFilename(filename.c_str(), false);
+          break;
         }
+
+      }
     }
 
     void ObjectPalette::SavePalette()

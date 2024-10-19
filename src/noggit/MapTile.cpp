@@ -565,7 +565,7 @@ void MapTile::save(World* world, bool save_using_mclq_liquids)
   lTileExtents[1] = glm::vec3(xbase + TILESIZE, 0.0f, zbase + TILESIZE);
 
   // get every models on the tile
-  for (std::uint32_t uid : uids)
+  for (std::uint32_t const uid : uids)
   {
     auto model = world->get_model(uid);
 
@@ -604,6 +604,7 @@ void MapTile::save(World* world, bool save_using_mclq_liquids)
 
   for (auto const& model : lModelInstances)
   {
+    model->ensureExtents();
     if (lModels.find(model->model->file_key().filepath()) == lModels.end())
     {
       lModels.emplace (model->model->file_key().filepath(), nullyThing);

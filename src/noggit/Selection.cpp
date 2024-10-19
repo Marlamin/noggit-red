@@ -337,7 +337,7 @@ void selection_group::unselect_group()
 // only remove the group, not used to delete objects in it
 void selection_group::remove_group(bool save)
 {
-    // remvoe grouped attribute
+    // remove grouped attribute
     for (unsigned int member_uid : _members_uid)
     {
         std::optional<selection_type> obj = _world->get_model(member_uid);
@@ -361,8 +361,8 @@ void selection_group::remove_group(bool save)
             return;
         }
     }
+    assert(false);
     return; // if group wasn't found somehow, BAD
-    // _world->remove_selection_group(this); // saves json
 }
 
 void selection_group::recalcExtents()

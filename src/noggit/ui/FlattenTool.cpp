@@ -24,7 +24,7 @@ namespace Noggit
       , _flatten_mode(true, true)
     {
       setMinimumWidth(250);
-      setMaximumWidth(250);
+      // setMaximumWidth(250);
       auto layout (new QVBoxLayout (this));
 
       // flatten keybind

@@ -54,6 +54,44 @@ namespace math
     return box_points(min, max);
   }
 
+  float aabb::volume()
+  {
+    float length = max.x - min.x;
+    float width = max.y - min.y;
+    float height = max.z - min.z;
+    return length * width * height;
+  }
+
+  std::array<glm::vec3, 8> aabb::rotated_corners(glm::mat4x4 const& transform_mat, bool adjust_coords) const
+  {
+    std::array<glm::vec3, 8> corners_in_world;
+
+    // fix coords for bounding boxes directly from game files that don't use noggit coords system
+    if (adjust_coords)
+    {
+      auto transform = misc::transform_model_box_coords;
+      const std::array<glm::vec3, 8> corners = all_corners();
+
+      for (int i = 0; i < 8; ++i)
+      {
+        corners_in_world[i] = transform(corners[i]);
+      }
+    }
+    else
+    {
+      corners_in_world = all_corners();
+    }
+
+    std::array<glm::vec3, 8> rotated_corners_in_world;
+    // convert local to world
+    for (int i = 0; i < 8; ++i)
+    {
+      rotated_corners_in_world[i] = transform_mat * glm::vec4(corners_in_world[i], 1.f);
+    }
+
+    return rotated_corners_in_world;
+  }
+
 
   std::array<glm::vec3, 8> box_points(glm::vec3 const& box_min, glm::vec3 const& box_max)
   {
@@ -67,6 +105,27 @@ namespace math
         glm::vec3(box_min.x, box_min.y, box_max.z), // 6: Bottom-left-front
         glm::vec3(box_min.x, box_min.y, box_min.z)  // 7: Bottom-left-back
     };
+  }
+
+  float calculateOBBRadius(std::array<glm::vec3, 8> const& corners)
+  {
+    // Calculate the center point of the OBB
+    glm::vec3 center(0.0f);
+    for (const glm::vec3& corner : corners)
+    {
+      center += corner;
+    }
+    center /= 8.0f;  // Average of the corner points
+
+    // Find the maximum distance from the center to any corner
+    float maxDistance = 0.0f;
+    for (const glm::vec3& corner : corners)
+    {
+      float distance = glm::distance(center, corner);
+      maxDistance = std::max(maxDistance, distance);
+    }
+
+    return maxDistance;
   }
 
   aabb_2d::aabb_2d(std::vector<glm::vec2> const& points)

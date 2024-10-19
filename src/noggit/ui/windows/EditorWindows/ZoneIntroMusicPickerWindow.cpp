@@ -59,7 +59,7 @@ namespace Noggit
             for (DBCFile::Iterator i = gZoneIntroMusicTableDB.begin(); i != gZoneIntroMusicTableDB.end(); ++i)
             {
                 auto item = new QListWidgetItem();
-                item->setData(1, i->getInt(ZoneIntroMusicTableDB::ID));
+                item->setData(Qt::UserRole, i->getInt(ZoneIntroMusicTableDB::ID));
 
                 std::stringstream ss;
                 ss << i->getInt(ZoneIntroMusicTableDB::ID) << "-" << i->getString(ZoneIntroMusicTableDB::Name);
@@ -115,26 +115,25 @@ namespace Noggit
             /// check if needed
             select_entry(button->property("id").toInt());
 
-            connect(_tree_searchbar, &QLineEdit::textChanged, [=](QString obj) {
-                if (obj.isEmpty())
+            connect(_tree_searchbar, &QLineEdit::textChanged, [=](const QString& text)
+              {
+                if (text.isEmpty())
                 {
-                    // unhide all
+                  // Unhide all items when search text is empty
+                  for (int i = 0; i < _picker_listview->count(); ++i) {
+                    _picker_listview->item(i)->setHidden(false);
+                  }
                 }
+                else
+                {
+                  for (int i = 0; i < _picker_listview->count(); ++i) {
+                    QListWidgetItem* item = _picker_listview->item(i);
 
-                // hide all items
-                for (int i = 0; i < _picker_listview->count(); i++)
-                {
-                    auto item = _picker_listview->item(i);
-                    item->setHidden(true);
+                    bool match = item->text().contains(text, Qt::CaseInsensitive);
+                    item->setHidden(!match);
+                  }
                 }
-                // unhide matching items
-                auto matching_items = _picker_listview->findItems(obj, Qt::MatchContains);
-
-                for (auto item : matching_items)
-                {
-                    item->setHidden(false);
-                }
-            });
+              });
 
             QObject::connect(_picker_listview, &QListWidget::itemSelectionChanged, [this]()
               {
@@ -152,7 +151,7 @@ namespace Noggit
             if (selected_item == nullptr)
                 return;
 
-            button->setProperty("id", selected_item->data(1).toInt());
+            button->setProperty("id", selected_item->data(Qt::UserRole).toInt());
             button->setText(selected_item->text());
             this->close();
                 });
@@ -188,7 +187,7 @@ namespace Noggit
 
                 // add new tree item
                 auto item = new QListWidgetItem();
-                item->setData(1, new_id);
+                item->setData(Qt::UserRole, new_id);
                 std::stringstream ss;
 
                 _picker_listview->addItem(item);

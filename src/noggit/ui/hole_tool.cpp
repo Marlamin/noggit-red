@@ -13,6 +13,9 @@ namespace Noggit
     {
       auto layout = new QFormLayout(this);
 
+      setMinimumWidth(250);
+      // setMaximumWidth(250);
+
       _radius_spin = new QDoubleSpinBox (this);
       _radius_spin->setRange (0.0f, 1000.0f);
       _radius_spin->setDecimals (2);
@@ -25,9 +28,6 @@ namespace Noggit
       _radius_slider->setSliderPosition (_radius);
 
       layout->addRow (_radius_slider);
-
-      setMinimumWidth(250);
-      setMaximumWidth(250);
 
       connect ( _radius_spin, qOverload<double> (&QDoubleSpinBox::valueChanged)
           , [&] (double v)

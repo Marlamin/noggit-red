@@ -52,10 +52,29 @@ bool SceneObject::isDuplicateOf(SceneObject const& other)
 
 void SceneObject::updateTransformMatrix()
 {
-  auto matrix = glm::mat4x4(1);
-  matrix = glm::translate(matrix, pos);
-  matrix = matrix * glm::eulerAngleYZX(glm::radians(dir.y - math::degrees(90.0)._), glm::radians(-dir.x), glm::radians(dir.z));
-  matrix = glm::scale(matrix, glm::vec3(scale, scale, scale));
+  glm::mat4x4 matrix = glm::mat4x4(1);
+
+  if (pos != glm::vec3(0.0f))
+  {
+    matrix = glm::translate(matrix, pos);
+  }
+
+  // Normalize small direction values and handle -0.0f
+  glm::vec3 clamped_dir = glm::vec3(
+    (glm::abs(dir.x) < 1e-6f || dir.x == -0.0f) ? 0.0f : dir.x,
+    (glm::abs(dir.y) < 1e-6f || dir.y == -0.0f) ? 0.0f : dir.y,
+    (glm::abs(dir.z) < 1e-6f || dir.z == -0.0f) ? 0.0f : dir.z
+  );
+
+  if (clamped_dir != glm::vec3(0.0f))
+  {
+    matrix = matrix * glm::eulerAngleYZX(glm::radians(clamped_dir.y - math::degrees(90.0f)._), glm::radians(-clamped_dir.x), glm::radians(clamped_dir.z));
+  }
+
+  if (scale != 1.0f)
+  {
+    matrix = glm::scale(matrix, glm::vec3(scale, scale, scale));
+  }
 
   _transform_mat = matrix;
   _transform_mat_inverted = glm::inverse(matrix);
@@ -97,6 +116,12 @@ void SceneObject::refTile(MapTile* tile)
 void SceneObject::derefTile(MapTile* tile)
 {
   assert(tile);
+  if (_tiles.empty())
+  {
+    assert(false);
+    return;
+  }
+
   auto it = std::find(_tiles.begin(), _tiles.end(), tile);
   if (it != _tiles.end())
     _tiles.erase(it);

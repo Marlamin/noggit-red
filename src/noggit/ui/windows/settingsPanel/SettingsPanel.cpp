@@ -43,6 +43,9 @@ namespace Noggit
       setCentralWidget(body);
       setWindowTitle("Settings");
 
+      // dev QOL, selecting another tab when editing the UI file makes it the default
+      ui->tabWidget->setCurrentWidget(ui->tab_appearance);
+
       auto titlebar = new QWidget(this);
       setupFramelessWindow(titlebar, this, minimumSize(), maximumSize(), false);
       setMenuWidget(titlebar);
@@ -208,6 +211,7 @@ namespace Noggit
       ui->_fullscreen_cb->setChecked(_settings->value("fullscreen", false).toBool());
       ui->_background_fps_limit_cb->setChecked(_settings->value("background_fps_limit", true).toBool());
       ui->_directional_light_cb->setChecked(_settings->value("directional_lightning", true).toBool());
+      ui->_local_lightning_cb->setChecked(_settings->value("local_lightning", true).toBool());
       ui->_adt_unload_dist->setValue(_settings->value("unload_dist", 5).toInt());
       ui->_adt_unload_check_interval->setValue(_settings->value("unload_interval", 30).toInt());
       ui->_adt_loading_radius->setValue(_settings->value("loading_radius", 2).toInt());
@@ -236,6 +240,11 @@ namespace Noggit
                                      "world/wmo/azeroth/human/buildings/human_farm/farm.wmo").toString());
       ui->assetBrowserMoveSensitivity->setValue(_settings->value("assetBrowser/move_sensitivity", 15.0f).toFloat());
       ui->assetBrowserRenderAssetPreview->setChecked(_settings->value("assetBrowser/render_asset_preview", false).toBool());
+
+      ui->_m2_aabb_2->setChecked(_settings->value("render/m2_aabb", false).toBool());
+      ui->_m2_coll_bb->setChecked(_settings->value("render/m2_coll_bb", false).toBool());
+      ui->_wmo_aabb->setChecked(_settings->value("render/wmo_aabb", false).toBool());
+      ui->_wmo_group_bounds->setChecked(_settings->value("render/wmo_groups_bounds", false).toBool());
 
 
 #ifdef USE_MYSQL_UID_STORAGE
@@ -297,6 +306,7 @@ namespace Noggit
       _settings->setValue("fullscreen", ui->_fullscreen_cb->isChecked());
       _settings->setValue("background_fps_limit", ui->_background_fps_limit_cb->isChecked());
       _settings->setValue("directional_lightning", ui->_directional_light_cb->isChecked());
+      _settings->setValue("local_lightning", ui->_local_lightning_cb->isChecked());
       _settings->setValue("unload_dist", ui->_adt_unload_dist->value());
       _settings->setValue("unload_interval", ui->_adt_unload_check_interval->value());
       _settings->setValue("loading_radius", ui->_adt_loading_radius->value());
@@ -332,6 +342,11 @@ namespace Noggit
       _settings->setValue("assetBrowser/move_sensitivity", ui->assetBrowserMoveSensitivity->value());
       _settings->setValue("assetBrowser/render_asset_preview", ui->assetBrowserRenderAssetPreview->isChecked());
       _settings->setValue("fps_limit", ui->_fps_limit_slider->value());
+
+      _settings->setValue("render/m2_aabb", ui->_m2_aabb_2->isChecked());
+      _settings->setValue("render/m2_coll_bb", ui->_m2_coll_bb->isChecked());
+      _settings->setValue("render/wmo_aabb", ui->_wmo_aabb->isChecked());
+      _settings->setValue("render/wmo_groups_bounds", ui->_wmo_group_bounds->isChecked());
 
       _settings->sync();
 

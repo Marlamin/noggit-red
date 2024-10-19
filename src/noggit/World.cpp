@@ -1138,6 +1138,7 @@ selection_result World::intersect (glm::mat4x4 const& model_view
                                   , bool draw_models
                                   , bool draw_hidden_models
                                   , bool draw_wmo_exterior
+                                  , bool animate
                                   )
 {
   ZoneScopedN("World::intersect()");
@@ -1178,7 +1179,7 @@ selection_result World::intersect (glm::mat4x4 const& model_view
       {
         if (draw_hidden_models || !model_instance.model->is_hidden())
         {
-          model_instance.intersect(model_view, ray, &results, animtime);
+          model_instance.intersect(model_view, ray, &results, animtime, animate);
         }
       });
     }
@@ -3733,11 +3734,11 @@ void World::select_objects_in_area(
   }
 
   glm::mat4 VPmatrix = projection * view;
-  glm::mat4x4 const invertedViewMatrix = glm::inverse(VPmatrix);
+  glm::mat4x4 const invertedProjViewMatrix = glm::inverse(VPmatrix);
 
   constexpr int max_position_raycast_processing = 10000;
   constexpr int max_bounds_raycast_processing = 5000; // when selecting large amount of objects, avoid doing complex ray calculations to not freeze
-  constexpr float bounds_check_scale = 0.8f; // size of the bounding box to use when interesecting with selection rectangle
+  constexpr float bounds_check_scale = 0.9f; // size of the bounding box to use when interesecting with selection rectangle
   constexpr float obj_raycast_min_size = 30.0f; // screen size rectangle lenght in pixels
 
   int processed_obj_count = 0; // num objects that had a raycast test at least once
@@ -3767,22 +3768,22 @@ void World::select_objects_in_area(
       if (tile->getObjectInstances().empty())
         continue;
 
-      bool valid = false;
-      auto screenBounds = misc::getAABBScreenBounds(tile->getCombinedExtents(), VPmatrix
-        , viewport_width, viewport_height, valid, 1.0f);
-
-      // this only works if all tile points are in screen space
-      if (valid && !math::boxIntersects(screenBounds[0], screenBounds[1]
-        , selection_box[0], selection_box[1]))
-      {
-        continue;
-      }
+      // bool valid = false;
+      // auto screenBounds = misc::getBoundingBoxScreenBounds(tile->getCombinedExtents(), VPmatrix
+      //   , viewport_width, viewport_height, valid,  1.0f);
+      // 
+      // // this only works if all tile points are in screen space
+      // if (valid && !math::boxIntersects(screenBounds[0], screenBounds[1]
+      //   , selection_box[0], selection_box[1]))
+      // {
+      //   continue;
+      // }
     }
 
-    for (auto& pair : tile->getObjectInstances())
+    for (auto const& pair : tile->getObjectInstances())
     {
       [[unlikely]]
-      if (!pair.first->finishedLoading() || pair.first->loading_failed())
+      if (!(pair.first->finishedLoading()) || pair.first->loading_failed())
         continue;
 
       [[unlikely]]
@@ -3812,131 +3813,241 @@ void World::select_objects_in_area(
         continue;
       }
 
-      for (auto& instance : pair.second)
+      for (auto const& instance : pair.second)
       {
         // problem : M2s have additional sized based culling with >isInRenderDist()
         // if (!instance->_rendered_last_frame)
         //   continue;
 
+        // rectangle selection Pipeline
+        // 1 : regular distance checks with object's position
+        // 2 : check if oriented bounding box center is in selection rectangle (2D screen projection)
+        // 3 : If so, do a raycast that position and check if it's occluded (if any terrain is hit before object center point)
+        // if raycast succeeded it's valid !
+        // If not, continue : 
+        // 4 : check if bounding box is within selection in 2D screen space to test other points (extents screen projection + rectangles intersection)
+        //    ! if not, it definitely doesn't intersect, quit.
+        // 5 : First, check if object takes enough screenspace, if not and center point failed, it's useless to test more
+        // 6 : Now iterate a list of key points from bounding box points to check if they're occluded :
+        //    - Optional : get the center of the intersection rectangle (overlap area between obj screen bounds and selection rectangle)
+        //                 Project it to 3D and add it to the list of points to check
+        //    - First, check if each point is in the selection rectangle (screen projection)
+        //    - Now raycast each point and check if each point is occluded by terrain
+        //    - if ANY point succeeds and isn't occluded, it means the object isn't entirely occluded and we can select it
+
+        if (processed_obj_count > max_position_raycast_processing)
+          break;
+
+        // 1 : regular distance checks with object's position
         const float distance = glm::distance(camera_position, instance->pos);
         if (distance > user_depth || distance > renderer()->cullDistance())
           continue;
 
-        math::aabb obj_aabb(instance->getExtents()[0], instance->getExtents()[1]);
-        auto aabb_center = obj_aabb.center();
+        math::aabb obj_world_aabb(instance->getExtents()[0], instance->getExtents()[1]);
+        auto aabb_center = obj_world_aabb.center();
 
         bool point_valid = false;
-        auto origin_screen_pos = misc::projectPointToScreen(aabb_center, VPmatrix, viewport_width, viewport_height, point_valid);
+        auto center_screen_pos = misc::projectPointToScreen(aabb_center, VPmatrix, viewport_width, viewport_height, point_valid);
         // if screenPos.w < 0.0f, object is behind camera
         // check object bounding radius instead to compare the object's size, if it clips with the camera.
-        if (!origin_screen_pos.w < -instance->getBoundingRadius())
+        if (center_screen_pos.w < -instance->getBoundingRadius())
         {
           continue;
         }
 
         bool do_selection = false;
-        // check if position point is within rectangle first because it is much cheaper
+        // 2: check if position point is within rectangle first because it is much cheaper
         {
-          const glm::vec2 screenPos2D = glm::vec2(origin_screen_pos);
+          const glm::vec2 screenPos2D = glm::vec2(center_screen_pos);
           if (misc::pointInside(screenPos2D, selection_box))
           {
             // processed_obj_count++;
-            // check if center point is occluded by terrain
+            // 3: check if center point is occluded by terrain
             if (processed_obj_count < max_position_raycast_processing && 
               !is_point_occluded_by_terrain(aabb_center, view, VPmatrix, viewport_width, viewport_height, camera_position))
             {
-              // if not occluded, select it and skip other checks
-              do_selection = true;
+              // if not occluded success! select it and skip other checks
+              add_to_selection(instance, false, false);
+              continue;
             }
             // else
             //   bool debug_breakpoint = true;
           }
         }
         
-        // if center point raycast didn't succeed, check again if bounding box is within selection in 2D screen space to test other points
-        std::array<glm::vec2, 2> aabb_screnbounds;
-        if (!do_selection)
+        // 4 : if center point raycast didn't succeed, check again if bounding box is within selection in 2D screen space to test other points
+
+        std::array<glm::vec3, 2> local_extents;
+        if (objectType == eWMO)
         {
-          bool valid = false;
-          aabb_screnbounds = misc::getAABBScreenBounds(instance->getExtents(), VPmatrix
-            , viewport_width, viewport_height, valid, 0.75f);
-            
-          if (valid && math::boxIntersects(aabb_screnbounds[0], aabb_screnbounds[1]
-            , selection_box[0], selection_box[1]))
+          WMOInstance* wmo_instance = static_cast<WMOInstance*>(pair.second[0]);
+          local_extents = wmo_instance->getLocalExtents();
+        }
+        else if (objectType == eMODEL)
+        {
+          ModelInstance* model_instance = static_cast<ModelInstance*>(pair.second[0]);
+          local_extents = model_instance->getLocalExtents();
+        }
+
+        int num_valid_points = 0;
+        std::array<glm::vec2, 2> obj_screnbounds = misc::getBoundingBoxScreenBounds(local_extents, VPmatrix
+          , viewport_width, viewport_height, num_valid_points, instance->transformMatrix(), bounds_check_scale);
+          
+        LogError << "point A reached (" << std::endl;
+
+        if (num_valid_points < 3)
+          continue;
+
+        // Screen bounds intersection check 
+        // 
+        // if (!math::boxIntersects(obj_screnbounds[0], obj_screnbounds[1]
+        //   , selection_box[0], selection_box[1]))
+        // {
+        //   // if rectangles don't intersect, just skip
+        //   continue;
+        // }
+
+        LogError << "point B reached (" << std::endl;
+
+        // 1 : get the intersection rectangle of screen space and bounding box
+        glm::vec2 intersectionMin = glm::max(obj_screnbounds[0], selection_box[0]);
+        glm::vec2 intersectionMax = glm::min(obj_screnbounds[1], selection_box[1]);
+        // Check for Valid Intersection:
+        // if (intersectionMin.x < intersectionMax.x && intersectionMin.y < intersectionMax.y)
+        if (!(intersectionMin.x < intersectionMax.x) || !(intersectionMin.y < intersectionMax.y))
+          continue;
+
+        LogError << "point C reached (" << std::endl;
+        
+        // 2 : get center
+        glm::vec2 intersectionCenter = (intersectionMin + intersectionMax) * 0.5f;
+        // 3 : convert 2D screenspace point back to 3d
+        glm::vec4 normalisedView = invertedProjViewMatrix * misc::normalized_device_coords(intersectionCenter.x, intersectionCenter.y,
+          viewport_width, viewport_height);
+        glm::vec3 intersectionCenter_pos = glm::vec3(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
+
+        std::array<glm::vec3, 8> obj_world_bounds_corners;
+        // For animated models, recalc vertex bounding box
+        if (objectType == eMODEL)
+        {
+          ModelInstance* model_instance = static_cast<ModelInstance*>(pair.second[0]);
+          if (model_instance->model->animated_mesh() && model_instance->model->mesh_bounds_ratio < 0.8f)
           {
-            // do_selection = true;
+            auto animated_local_extents = model_instance->model->getAnimatedBoundingBox();
+
+            // hack, animated coords are already adjusted
+            animated_local_extents[0] = glm::vec3(animated_local_extents[0].x, -animated_local_extents[0].z, animated_local_extents[0].y);
+            animated_local_extents[1] = glm::vec3(animated_local_extents[1].x, -animated_local_extents[1].z, animated_local_extents[1].y);
+
+            // update screen bounds
+            num_valid_points = 0;
+            obj_screnbounds = misc::getBoundingBoxScreenBounds(animated_local_extents, VPmatrix
+              , viewport_width, viewport_height, num_valid_points, instance->transformMatrix(), bounds_check_scale);
+
+
+            // check if animated BB intersected
+            if (num_valid_points < 3)
+              continue;
+            if (!math::boxIntersects(obj_screnbounds[0], obj_screnbounds[1]
+              , selection_box[0], selection_box[1]))
+            {
+              continue;
+            }
+
+            math::aabb animated_local_aabb(animated_local_extents[0], animated_local_extents[1]);
+            // converts to world
+            obj_world_bounds_corners = animated_local_aabb.rotated_corners(instance->transformMatrix(), true);
+
+            // get extents and update bb to use
+            obj_world_aabb = math::aabb(std::vector<glm::vec3>(obj_world_bounds_corners.begin(), obj_world_bounds_corners.end()));
+
+            // raycast the center of the intersecting animated bounds
+            // 
+            // get the center of the intersection rectangle
+            // 1 : get the intersection rectangle of screen space and bounding box
+            intersectionMin = glm::max(obj_screnbounds[0], selection_box[0]);
+            intersectionMax = glm::min(obj_screnbounds[1], selection_box[1]);
+            // Check for Valid Intersection:
+            if (intersectionMin.x < intersectionMax.x && intersectionMin.y < intersectionMax.y) {
+              // Valid intersection
+            }
+            else 
+            {
+              continue;
+            }
+            // 2 : get center
+            intersectionCenter = (intersectionMin + intersectionMax) * 0.5f;
+            // 3 : convert 2D screenspace point back to 3d
+            normalisedView = invertedProjViewMatrix * misc::normalized_device_coords(intersectionCenter.x, intersectionCenter.y,
+              viewport_width, viewport_height);
+            intersectionCenter_pos = glm::vec3(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
+            //////
+
           }
           else
           {
-            // if rectangles don't intersect, just skip
+            obj_world_bounds_corners = obj_world_aabb.rotated_corners(instance->transformMatrix(), false);
+          }
+        }
+        else if (objectType == eWMO)
+        {
+          obj_world_bounds_corners = obj_world_aabb.rotated_corners(instance->transformMatrix(), false);
+        }
+
+
+        // 4.5 2nd raycast. Check if center of the intersection box is visible
+        // TODO : for WMOs this is way to generous due to their more complex shape, it would be better to iterate the bounding box of each group
+        if (!is_point_occluded_by_terrain(intersectionCenter_pos, view, VPmatrix, viewport_width, viewport_height
+          , camera_position, (distance - instance->getBoundingRadius())))
+        {
+          // if not occluded success! select it and skip other checks
+          add_to_selection(instance, false, false);
+          continue;
+        }
+
+        // 5 : Optimization : Only do raycast bounds checks for object that take enough screen space
+        // if object is too small checking other points is useless
+        // we check _rendered_last_frame because m2s that are too small or frustum culled already don't render
+        {
+          float bounds_size = glm::distance(obj_screnbounds[0], obj_screnbounds[1]);
+          if (bounds_size < obj_raycast_min_size || !instance->_rendered_last_frame)
+          {
+            // debug_count_obj_min_size_not++;
             continue;
           }
-
-
-          // Optimization : Only do raycast bounds checks for object that take enough screen space
-          // if object is too small checking other points is useless
-          if (!do_selection)
+          else if (processed_obj_count > max_bounds_raycast_processing)
           {
-
-            float bounds_size = glm::distance(aabb_screnbounds[0], aabb_screnbounds[1]);
-            if ( bounds_size < obj_raycast_min_size || !instance->_rendered_last_frame)
-            {
-              // debug_count_obj_min_size_not++;
-              continue;
-            }
-            else if (processed_obj_count > max_bounds_raycast_processing)
-            {
-              // select it anyways
-              do_selection = true;
-              // debug_count_obj_min_size++;
-            }
+            // select it anyways
+            do_selection = true;
+            // debug_count_obj_min_size++;
           }
         }
 
-        // Occlusion test on object's corners (that are in selection box)
+        constexpr bool enable_bounds_raycasts = true;
+        //6 : Occlusion test on object's corners (that are in selection box)
         // uses ray casting, very expensive
-        // // we check _rendered_last_frame because m2s that are too small on screen already don't render
-        if (!do_selection /* && instance->_rendered_last_frame && (processed_obj_count < max_bounds_raycast_processing)*/)
+        if (enable_bounds_raycasts && !do_selection /* && instance->_rendered_last_frame && (processed_obj_count < max_bounds_raycast_processing)*/)
         {
           processed_obj_count++;
 
-          // get the center of the intersection rectangle
-          /*
-          // 1 : get the intersection rectangle of screen space and bounding box
-          glm::vec2 intersectionMin = glm::max(aabb_screnbounds[0], selection_box[0]);
-          glm::vec2 intersectionMax = glm::min(aabb_screnbounds[1], selection_box[1]);
-          // Check for Valid Intersection:
-          if (intersectionMin.x < intersectionMax.x && intersectionMin.y < intersectionMax.y) {
-            // Valid intersection
-          }
-          else {
-            // No intersection, shouldn't happen
-            continue;
-          }
-          // 2 : get center
-          glm::vec2 intersectionCenter = (intersectionMin + intersectionMax) * 0.5f;
-          // 3 : convert 2D screenspace point back to 3d
-          glm::vec4 normalisedView = invertedViewMatrix * misc::normalized_device_coords(intersectionCenter.x, intersectionCenter.y,
-                                                                                viewport_width, viewport_height);
-          glm::vec3 intersectionCenter_pos = glm::vec3(normalisedView.x / normalisedView.w, normalisedView.y / normalisedView.w, normalisedView.z / normalisedView.w);
-          */
-
-          auto obj_aabb_corners = obj_aabb.all_corners();
+          // TODO : instead iterate bounds of the intersection rectangle instead of object's bounds
 
           // Iterate key points instead of all 8 corners
           std::vector<glm::vec3> key_points = {
-            // intersectionCenter_pos, // TODO doesn't work
-            (obj_aabb_corners[0] + obj_aabb_corners[6]) * 0.5f,  // Center between top corners
-            obj_aabb_corners[0], // Top-right-front
-            obj_aabb_corners[5], // Top-left-back
-            obj_aabb_corners[4], // Top-left-front
-            obj_aabb_corners[1] // Top-right-back
+            // intersectionCenter_pos, // checked in 4.5 now
+            // (obj_world_bounds_corners[0] + obj_world_bounds_corners[6]) * 0.5f,  // Center between top corners
+            // obj_world_bounds_corners[0], // Top-right-front
+            // obj_world_bounds_corners[5], // Top-left-back
+            // obj_world_bounds_corners[4], // Top-left-front
+            // obj_world_bounds_corners[1] // Top-right-back
           };
 
           // int required_num_unoccluded_corners = 2;
           bool object_occluded = true;
 
           // check if points are occluded by terrain
+          // bool first_point = true;// special for intersectionCenter_pos because it doesn't have a distance, just a direction
+
           for (const auto& corner : key_points /*obj_aabb_corners*/)
           {
             // TODO : only need to do max top left and max top right in 2d instead of all corners?
@@ -3949,8 +4060,15 @@ void World::select_objects_in_area(
             if (!misc::pointInside(point_screen_pos, selection_box))
               continue;
 
+            bool corner_occluded = is_point_occluded_by_terrain(corner
+              , view
+              , VPmatrix
+              , viewport_width
+              , viewport_height
+              , camera_position
+              /*, first_point ? distance - instance->getBoundingRadius() : 0.0f*/);
 
-            bool corner_occluded = is_point_occluded_by_terrain(corner, view, VPmatrix, viewport_width, viewport_height, camera_position);
+            // first_point = false;
 
             if (!corner_occluded)
             {
@@ -3981,7 +4099,9 @@ bool World::is_point_occluded_by_terrain(const glm::vec3& point,
   const glm::mat4& VPmatrix,
   float viewport_width,
   float viewport_height,
-  const glm::vec3& camera_position)
+  const glm::vec3& camera_position,
+  float distance_override
+  )
 {
   /*
   bool point_valid = false;
@@ -4006,10 +4126,11 @@ bool World::is_point_occluded_by_terrain(const glm::vec3& point,
     , false
     , false
     , false
+    , false
   )
   );
 
-  float distance = glm::distance(camera_position, point);
+  float distance = distance_override == 0.0f ? glm::distance(camera_position, point) : distance_override;
 
   // bool point_occluded = false;
   for (const auto& terrain_hit : terrain_intersect_results)
@@ -4019,25 +4140,6 @@ bool World::is_point_occluded_by_terrain(const glm::vec3& point,
       continue;
 
     return true;
-    /*
-    auto const& hitChunkInfo = std::get<selected_chunk_type>(terrain_hit.second);
-
-    // check if terrain hit is higher than the object's corner in 2D screen space
-    bool point_valid = false;
-    auto terrain_hit_screen_pos = misc::projectPointToScreen(hitChunkInfo.position, VPmatrix, viewport_width, viewport_height, point_valid);
-
-    if (!point_valid)
-    {
-      continue;
-    }
-
-    // if any terrain intersection point is above point, it means point is occluded
-    if (point_screen_pos.y > terrain_hit_screen_pos.y)
-    {
-      return true;
-    }
-    */
-
   }
 
   // no terrain intersection point above point

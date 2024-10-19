@@ -68,18 +68,21 @@ namespace misc
     return clipSpacePos;
   }
 
-  std::array<glm::vec2, 2> getAABBScreenBounds(const std::array<glm::vec3, 2>& extents
+  std::array<glm::vec2, 2> getBoundingBoxScreenBounds(const std::array<glm::vec3, 2>& local_extents
                                               , const glm::mat4& VPmatrix
                                               , float viewport_width
                                               , float viewport_height
-                                              , bool& valid
+                                              , int& valid_points
+                                              , glm::mat4x4 const& obj_matrix
                                               , float scale)
   {
-    math::aabb obj_aabb(extents[0], extents[1]);
-    auto corners = obj_aabb.all_corners();
+    math::aabb obj_aabb(local_extents[0], local_extents[1]);
+    auto corners = obj_aabb.rotated_corners(obj_matrix, true);
 
     glm::vec2 minScreen = glm::vec2(std::numeric_limits<float>::max());
     glm::vec2 maxScreen = glm::vec2(std::numeric_limits<float>::lowest());
+
+    valid_points = 0;
 
     for (const auto& corner : corners)
     {
@@ -88,15 +91,18 @@ namespace misc
 
       if (!point_valid)
       {
-        valid = false; // one point was outside of screen space
-        return { glm::vec2(0.0f), glm::vec2(0.0f) };
+        // valid = false; // one point was outside of screen space
+        // TODO, only require two valid points ?
+        // return { glm::vec2(0.0f), glm::vec2(0.0f) };
+        continue;
       }
 
       // Update min and max screen bounds if the point is valid (within screen space)
       minScreen = glm::min(minScreen, glm::vec2(screenPos.x, screenPos.y));
       maxScreen = glm::max(maxScreen, glm::vec2(screenPos.x, screenPos.y));
+      valid_points++;
     }
-    valid = true;
+    // valid = true;
 
     if (scale != 1.0f)
     {

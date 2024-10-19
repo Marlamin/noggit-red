@@ -44,6 +44,30 @@ namespace Noggit
     void LightTool::onTick(float deltaTime, TickParameters const& params)
     {
         if (mapView()->timeSpeed() > 0.0f)
-            _lightEditor->UpdateWorldTime();
+          _lightEditor->UpdateToolTime();
+
+        if (params.camera_moved_since_last_draw)
+          _lightEditor->updateActiveLights();
+
+        if (params.camera_moved_since_last_draw || mapView()->timeSpeed() > 0.0f)
+          _lightEditor->updateLightningInfo();
+    }
+
+    void LightTool::onSelected()
+    {
+      _lightEditor->UpdateToolTime();
+      _lightEditor->updateActiveLights();
+      _lightEditor->updateLightningInfo();
+
+      // force lightning update when swapping tool because of local lightning always rendering in light mode
+      // See : updateLightingUniformBlock()
+      mapView()->_world->renderer()->skies()->force_update();
+    }
+
+    void LightTool::onDeselected()
+    {
+      mapView()->_world->renderer()->skies()->force_update();
+      // todo, hide light info popup, or make it work in all modes
+      _lightEditor->_lightning_info_dialog->hide();
     }
 }
