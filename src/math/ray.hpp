@@ -14,7 +14,7 @@ namespace math
     {
       if (std::isnan(_direction.x) || std::isnan(_direction.y) || std::isnan(_direction.z)) 
       {
-        std::cout << "Vector contains NaN values!" << std::endl;
+        assert(false);
       }
     }
 

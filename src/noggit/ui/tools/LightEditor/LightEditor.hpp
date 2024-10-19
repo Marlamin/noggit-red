@@ -48,7 +48,9 @@ namespace Noggit::Ui::Tools
 	int constexpr blizzlikeSkiesEndWrath = 2538;
 
 	static std::unordered_map <int, std::string> light_names_map;
+
 	class LightEditor;
+
 	class LightningInfoDialog : public QWidget
 	{
 		Q_OBJECT
