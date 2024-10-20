@@ -811,6 +811,8 @@ void WorldRender::draw (glm::mat4x4 const& model_view
               continue;
           }
 
+          bool draw_animated_boxes = true;
+
           /*if (draw_hidden_models || !pair.first->is_hidden())*/ // now done when building models_to_draw
           {
             pair.first->renderer()->draw( model_view
@@ -827,13 +829,16 @@ void WorldRender::draw (glm::mat4x4 const& model_view
                 , false
                 , render_settings.draw_model_animations
                 , render_settings.editing_mode == editing_mode::object
+                , draw_animated_boxes
             );
             _world->_n_rendered_objects += pair.second.size();
           }
 
           // Draw animated bounding boxes for small animated models that move
-          if (render_settings.editing_mode == editing_mode::object
-            && pair.first->animated_mesh() /*&& render_settings.draw_model_animations*/ && pair.first->mesh_bounds_ratio < 0.3f)
+          if (/*render_settings.editing_mode == editing_mode::object*/
+            (render_settings.draw_models_with_box || pair.first->is_hidden()) // same condition to draw bounding box in draw()
+            /*&& render_settings.draw_model_animations*/
+            && pair.first->animated_mesh()  && pair.first->mesh_bounds_ratio < 0.5f)
           {
             auto animated_bb = pair.first->getAnimatedBoundingBox();
             for (auto const& instance_matrix : pair.second)
@@ -841,7 +846,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
               Noggit::Rendering::Primitives::WireBox::getInstance(_world->_context).draw(model_view
                 , projection
                 , instance_matrix
-                , { 0.6f, 0.6f, 0.6f, 0.6f } // grey
+                , { 0.6f, 0.6f, 0.6f, 1.0f } // grey
                 , animated_bb[0]
                 , animated_bb[1]
               );
@@ -945,9 +950,11 @@ void WorldRender::draw (glm::mat4x4 const& model_view
           {
             // bool is_selected = false;
             bool is_selected = _world->is_selected(model->uid);
+
+            bool draw_anim_bb = !(render_settings.draw_models_with_box || model->model->is_hidden());
       
             model->draw_box(model_view, projection, is_selected, render_settings.render_select_m2_collission_bbox
-              , render_settings.render_select_m2_aabb, true);
+              , render_settings.render_select_m2_aabb, draw_anim_bb);
           }
         }
       }

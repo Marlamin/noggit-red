@@ -135,6 +135,7 @@ namespace Noggit::Rendering
         , bool no_cull
         , bool animate
         , bool draw_fake_geometry_box
+        , bool draw_animation_box
     );
 
     void drawParticles(glm::mat4x4 const& model_view

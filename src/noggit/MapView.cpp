@@ -3525,6 +3525,12 @@ void MapView::draw_map()
   cursorColor = draw_parameters.cursor_color;
   minimapRenderSettings = draw_parameters.minimapRenderSettings;
 
+  bool debug_cam = _debug_cam_mode.get();
+
+  // math::frustum frustum(model_view(debug_cam) * projection());
+  _model_view = model_view(debug_cam);
+  _projection = projection();
+
   //! \note Select terrain below mouse, if no item selected or the item is map.
   if (!(_world->has_selection()
     || _locked_cursor_mode.get()))
@@ -3539,8 +3545,7 @@ void MapView::draw_map()
 
   bool show_unpaintable = _classic_ui ? show_unpaintable_chunks : _left_sec_toolbar->showUnpaintableChunk();
 
-  bool debug_cam = _debug_cam_mode.get();
-  // math::frustum frustum(model_view(debug_cam) * projection());
+
 
   WorldRenderParams renderParams;
 
@@ -3581,9 +3586,6 @@ void MapView::draw_map()
   renderParams.render_select_m2_collission_bbox = _render_m2_collission_bbox;
   renderParams.render_select_wmo_aabb = _render_wmo_aabb;
   renderParams.render_select_wmo_groups_bounds = _render_wmo_groups_bounds;
-
-  _model_view = model_view(debug_cam);
-  _projection = projection();
 
   _world->renderer()->draw (
                   _model_view
