@@ -45,7 +45,7 @@ struct WMOMaterial
       uint32_t unfogged : 1;
       uint32_t unculled : 1;
       uint32_t ext_light: 1; // darkened used for the intern face of windows
-      uint32_t sidn :  1;
+      uint32_t sidn :  1; // night glow
       uint32_t window :  1; // lighting related(flag checked in CMapObj::UpdateSceneMaterials)
       uint32_t clamp_s :  1;
       uint32_t clamp_t : 1;

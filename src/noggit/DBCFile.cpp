@@ -45,9 +45,14 @@ void DBCFile::open(std::shared_ptr<BlizzardArchive::ClientData> clientData)
   f.read(&recordSize, 4);
   f.read(&stringSize, 4);
 
+  if (!fieldCount || !recordSize)
+  {
+    throw std::logic_error("DBC error, field count or record size is 0 : " + filename);
+  }
+
   if (fieldCount * 4 != recordSize)
   {
-    throw std::logic_error ("non four-byte-columns not supported");
+    throw std::logic_error ("non four-byte-columns not supported : " + filename);
   }
 
   data.resize (recordSize * recordCount);
@@ -89,7 +94,8 @@ void DBCFile::save()
 
 DBCFile::Record DBCFile::addRecord(size_t id, size_t id_field)
 {
-  recordCount++;
+  assert(recordSize > 0);
+  assert(id_field < fieldCount);
 
   for (Iterator i = begin(); i != end(); ++i)
   {
@@ -100,6 +106,8 @@ DBCFile::Record DBCFile::addRecord(size_t id, size_t id_field)
   size_t old_size = data.size();
   data.resize(old_size + recordSize);
   *reinterpret_cast<unsigned int*>(data.data() + old_size + id_field * sizeof(std::uint32_t)) = static_cast<unsigned int>(id);
+
+  recordCount++;
 
   return Record(*this, data.data() + old_size);
 }
@@ -144,8 +152,12 @@ DBCFile::Record DBCFile::addRecordCopy(size_t id, size_t id_from, size_t id_fiel
 
 void DBCFile::removeRecord(size_t id, size_t id_field)
 {
-  recordCount--;
-  size_t counter = 0;
+  if (recordCount == 0)
+  {
+    throw NotFound();
+  }
+
+  size_t row_counter = 0;
 
   for (Iterator i = begin(); i != end(); ++i)
   {
@@ -153,13 +165,34 @@ void DBCFile::removeRecord(size_t id, size_t id_field)
     {
       size_t initial_size = data.size();
 
-      unsigned char* record = data.data() + counter * recordSize;
-      std::memmove(record, record + recordSize, recordSize * (recordCount - counter + 1));
+      size_t row_position = row_counter * recordSize; // position of the record to remove
+
+      size_t datasizeafterRow = recordSize * (recordCount - row_counter); // size of the data after the row that needs to be moved at the old row's position
+
+      // assert(initial_size >= (datasizeafterRow + row_position));
+      if ((row_position + datasizeafterRow) > initial_size)
+      {
+        throw std::out_of_range("Attempting to remove more data than available");
+      }
+
+      // size_t numRecordsToMove = recordCount - row_counter; // Number of records to move down
+
+      unsigned char* record = data.data() + row_position; // data to remove at position
+
+      // Move all data after the row to the row's position
+      // only do it if it wasn't the last row
+      if (row_position + recordSize < initial_size)
+      {
+        assert(row_counter < recordCount);
+        std::memmove(record, record + recordSize, datasizeafterRow);
+      }
       data.resize(initial_size - recordSize);
+
+      recordCount--;
       return;
     }
 
-    counter++;
+    row_counter++;
 
   }
 

@@ -439,6 +439,9 @@ void ModelRender::fixShaderIDLayer()
 
         first_pass = &pass;
       }
+      assert(first_pass);
+      if (first_pass == nullptr)
+        return;
 
       bool xor_unlit = ((_model->_render_flags[pass.renderflag_index].flags.unlit ^ _model->_render_flags[first_pass->renderflag_index].flags.unlit) & 1) == 0;
 
