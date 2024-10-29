@@ -50,12 +50,13 @@ namespace Noggit::Ui::Windows
 
       QToolBar* _app_toolbar;
 
+      // std::unique_ptr<World> _world;
+
       std::unordered_set<QWidget*> displayed_widgets;
       void buildMenu();
     signals:
       void exitPromptOpened();
       void mapSelected(int map_id);
-
 
     private:
     	std::unique_ptr<Component::BuildMapListComponent> _buildMapListComponent;
@@ -63,9 +64,10 @@ namespace Noggit::Ui::Windows
         std::shared_ptr<Project::NoggitProject> _project;
 
 
-        void handleEventMapListContextMenuPinMap(int mapId, std::string MapName);
-        void handleEventMapListContextMenuUnpinMap(int mapId);
+      void handleEventMapListContextMenuPinMap(int mapId, std::string MapName);
+      void handleEventMapListContextMenuUnpinMap(int mapId);
 
+      World* getWorld() { return _map_creation_wizard->getWorld(); };
 
       void loadMap (int map_id);
 
@@ -97,8 +99,6 @@ namespace Noggit::Ui::Windows
       QTabWidget* _right_side;
 
       void applyFilterSearch(const QString& name, int type, int expansion, bool wmo_maps);
-
-      std::unique_ptr<World> _world;
 
       bool map_loaded = false;
       bool exit_to_project_selection = false;
