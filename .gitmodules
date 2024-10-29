@@ -1,6 +1,7 @@
 [submodule "src/external/blizzard-database-library"]
 	path = src/external/blizzard-database-library
 	url = https://gitlab.com/T1ti/blizzard-database-library.git
+	branch = t1ti_fixes
 [submodule "src/external/blizzard-archive-library"]
 	path = src/external/blizzard-archive-library
 	url = https://gitlab.com/T1ti/blizzard-archive-library.git
