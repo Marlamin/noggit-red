@@ -261,6 +261,7 @@ void PreviewRenderer::draw()
         , false
         , _draw_animated.get()
         , true
+        , false
       );
     }
 
@@ -287,6 +288,7 @@ void PreviewRenderer::draw()
           , display_mode::in_3D
           , false
           , _draw_animated.get()
+          , false
           , false
       );
     }

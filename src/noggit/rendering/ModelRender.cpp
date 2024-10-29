@@ -162,6 +162,7 @@ void ModelRender::draw(glm::mat4x4 const& model_view
     , bool no_cull
     , bool animate
     , bool draw_fake_geometry_box
+    , bool draw_animation_box
 )
 {
   ZoneScopedN(NOGGIT_CURRENT_FUNCTION);
@@ -203,6 +204,11 @@ void ModelRender::draw(glm::mat4x4 const& model_view
     if (all_boxes || _model->_hidden ) 
     {
       model_boxes_to_draw.emplace(_model, instances.size());
+
+      if (draw_animation_box)
+      {
+      }
+
     }
     else if (draw_fake_geometry_box && _model->use_fake_geometry() /*|| _model->particles_only()*/)
     { // hackfix for rendering particle only objects bounds as they currently don't render
@@ -433,6 +439,9 @@ void ModelRender::fixShaderIDLayer()
 
         first_pass = &pass;
       }
+      assert(first_pass);
+      if (first_pass == nullptr)
+        return;
 
       bool xor_unlit = ((_model->_render_flags[pass.renderflag_index].flags.unlit ^ _model->_render_flags[first_pass->renderflag_index].flags.unlit) & 1) == 0;
 

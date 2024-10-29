@@ -87,13 +87,13 @@ void ModelInstance::draw_box (glm::mat4x4 const& model_view
 
     // animated bounding box
     // worldRnder already draws it for any model with mesh_bounds_ratio < 0.3
-    if (draw_anim_bb && model->mesh_bounds_ratio > 0.3f && model->mesh_bounds_ratio < 0.5f)
+    if (draw_anim_bb && model->mesh_bounds_ratio < 0.5f)
     {
       auto animated_bb = model->getAnimatedBoundingBox();
       Noggit::Rendering::Primitives::WireBox::getInstance(_context).draw(model_view
         , projection
         , transformMatrix()
-        , { 0.6f, 0.6f, 0.6f, 0.6f } // gray
+        , { 0.6f, 0.6f, 0.6f, 1.0f } // gray
         , animated_bb[0]
         , animated_bb[1]
       );

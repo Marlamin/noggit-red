@@ -219,8 +219,8 @@ struct ModelRenderFlags {
     uint16_t unlit : 1;
     uint16_t unfogged : 1;
     uint16_t two_sided : 1;
-    uint16_t billboard : 1;
-    uint16_t z_buffered : 1;
+    uint16_t billboard : 1; // depthTest
+    uint16_t z_buffered : 1; // depthWrite
     uint16_t unused : 11;
   }flags;
   uint16_t blend;
