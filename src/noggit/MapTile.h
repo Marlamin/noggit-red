@@ -177,6 +177,9 @@ public:
   Noggit::Rendering::TileRender* renderer() { return &_renderer; };
   Noggit::Rendering::FlightBoundsRender* flightBoundsRenderer() { return &_fl_bounds_render; };
 
+  const texture_heightmapping_data& GetTextureHeightMappingData(const std::string& name) const;
+
+  void forceAlphaUpdate();
   bool childrenFinishedLoading();
   bool texturesFinishedLoading();
   bool objectsFinishedLoading();
@@ -189,6 +192,7 @@ private:
   bool _extents_dirty = true;
   bool _combined_extents_dirty = true;
   bool _requires_object_extents_recalc = true;
+
 
 
   std::array<glm::vec3, 2> _extents;

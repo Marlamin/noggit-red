@@ -103,6 +103,7 @@
 #include <QFileDialog>
 #include <QProgressDialog>
 #include <QClipboard>
+#include <QProcess>
 
 #include <algorithm>
 #include <cmath>
@@ -267,6 +268,8 @@ void MapView::set_editing_mode(editing_mode mode)
     _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = false;
     _world->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->draw_only_normals = false;
+    _world->renderer()->getTerrainParamsUniformBlock()->point_normals_up = false;
     _minimap->use_selection(nullptr);
     
     if (terrainMode != mode)
@@ -331,6 +334,7 @@ void MapView::ResetSelectedObjectRotation()
       WMOInstance* wmo = static_cast<WMOInstance*>(obj);
       _world->updateTilesWMO(wmo, model_update::remove);
       wmo->resetDirection();
+      wmo->recalcExtents();
       _world->updateTilesWMO(wmo, model_update::add);
     }
     else if (obj->which() == eMODEL)
@@ -3148,12 +3152,12 @@ void MapView::tick (float dt)
             . arg (std::floor (_camera.position.z / TILESIZE))
             );
   status += ( QString ("; coordinates client: (%1, %2, %3), server: (%4, %5, %6)")
-            . arg (_camera.position.x)
-            . arg (_camera.position.z)
-            . arg (_camera.position.y)
-            . arg (ZEROPOINT - _camera.position.z)
-            . arg (ZEROPOINT - _camera.position.x)
-            . arg (_camera.position.y)
+            . arg (_camera.position.x, 0, 'f', 2)
+            . arg (_camera.position.z, 0, 'f', 2)
+            . arg (_camera.position.y, 0, 'f', 2)
+            . arg (ZEROPOINT - _camera.position.z, 0, 'f', 2)
+            . arg (ZEROPOINT - _camera.position.x, 0, 'f', 2)
+            . arg (_camera.position.y, 0, 'f', 2)
             );
 
   _status_position->setText (status);
@@ -3199,6 +3203,10 @@ void MapView::tick (float dt)
         break;
       }
     }
+  }
+  else
+  {
+	  _status_selection->setText(QString::number(currentSelection.size()) + " objects selected");
   }
 
   if (selection_changed || NOGGIT_CUR_ACTION)

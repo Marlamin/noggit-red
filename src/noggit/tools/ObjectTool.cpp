@@ -315,7 +315,7 @@ namespace Noggit
                         // auto replace_wmo = static_cast<WMOInstance*>(replacement_obj);
                         // auto source_wmo = static_cast<WMOInstance*>(old_obj);
 
-                        auto new_obj = world->addWMOAndGetInstance(replace_path, source_pos, source_rot, true);
+                        auto new_obj = world->addWMOAndGetInstance(replace_path, source_pos, source_rot, source_scale, true);
                         new_obj->wmo->wait_until_loaded();
                         new_obj->wmo->waitForChildrenLoaded();
                         new_obj->recalcExtents();
@@ -521,7 +521,7 @@ namespace Noggit
             {
                 NOGGIT_ACTION_MGR->beginAction(mv, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                     Noggit::ActionModalityControllers::eSCALE);
-                world->scale_selected_models(_keys * numpad_moveratio / 50.f, World::m2_scaling_type::add);
+                world->scale_selected_models(_keys * numpad_moveratio / 50.f, World::object_scaling_type::add);
                 updateRotationEditor();
             }
             if (_keyr != 0.f)
@@ -543,7 +543,7 @@ namespace Noggit
                     NOGGIT_ACTION_MGR->beginAction(mv, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                         Noggit::ActionModalityControllers::eALT
                         | Noggit::ActionModalityControllers::eMMB);
-                    world->scale_selected_models(std::pow(2.f, _mv * 4.f), World::m2_scaling_type::mult);
+                    world->scale_selected_models(std::pow(2.f, _mv * 4.f), World::object_scaling_type::mult);
                 }
                 else if (params.mod_shift_down)
                 {
@@ -688,7 +688,7 @@ namespace Noggit
                                 float min = _object_paste_params.minScale;
                                 float max = _object_paste_params.maxScale;
 
-                                world->scale_selected_models(misc::randfloat(min, max), World::m2_scaling_type::set);
+                                world->scale_selected_models(misc::randfloat(min, max), World::object_scaling_type::set);
                             }
                         }
                     }

@@ -9,6 +9,9 @@
 #include <blizzard-database-library/include/BlizzardDatabase.h>
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/ui/windows/downloadFileDialog/DownloadFileDialog.h>
+#include <noggit/TextureManager.h>
+#include <external/tsl/robin_map.h>
+#include <noggit/World.h>
 #include <noggit/Log.h>
 #include <QJsonDocument>
 #include <QMessageBox>
@@ -85,6 +88,22 @@ namespace Noggit::Project
     std::string MapName;
   };
 
+  struct NoggitExtraMapData
+  {
+  public:
+      //Mists Heightmapping
+      // Valid for every map that doesn't override its specific data
+      tsl::robin_map< std::string, texture_heightmapping_data > TextureHeightData_Global;
+      // MapID,TileX,TileY, SMTextureParams for this specific ADT, fallback to global otherwise.
+      tsl::robin_map<int, 
+            tsl::robin_map< int, tsl::robin_map<int , tsl::robin_map<std::string, texture_heightmapping_data> >>> TextureHeightData_ADT;
+      
+      void SetTextureHeightData_Global(const std::string& texture, texture_heightmapping_data data, World* worldToUpdate = nullptr); 
+      void SetTextureHeightDataForADT(int mapID, const TileIndex& ti, const std::string& texture, texture_heightmapping_data data, World* worldToUpdate = nullptr);
+
+      const texture_heightmapping_data GetTextureHeightDataForADT(int mapID, const TileIndex& ti, const std::string& texture) const;
+  };
+  
   struct NoggitProjectObjectPalette
   {
       int MapId;
@@ -120,6 +139,7 @@ namespace Noggit::Project
     std::vector<NoggitProjectTexturePalette> TexturePalettes;
     std::vector<NoggitProjectSelectionGroups> ObjectSelectionGroups;
 
+    NoggitExtraMapData ExtraMapData;
     NoggitProject()
     {
       PinnedMaps = std::vector<NoggitProjectPinnedMap>();
@@ -330,7 +350,20 @@ namespace Noggit::Project
           return {};
       }
 
+      QSettings settings;
+      bool modern_features = settings.value("modern_features", false).toBool();
+	  if (modern_features)
+	  {
+		Log << "Modern Features Enabled" << std::endl;
+        loadExtraData(project.value());
+	  }
+	  else
+	  {
+		Log << "Modern Features Disabled" << std::endl;
+	  }
       return std::make_shared<NoggitProject>(project.value());
     }
+
+    void loadExtraData(NoggitProject& project);
   };
 }

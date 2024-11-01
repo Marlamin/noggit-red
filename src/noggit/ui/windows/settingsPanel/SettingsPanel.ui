@@ -797,6 +797,29 @@
                    </item>
                   </widget>
                  </item>
+                  <item row="6" column="0">
+                    <widget class="QLabel" name="label_44">
+                      <property name="minimumSize">
+                        <size>
+                          <width>200</width>
+                          <height>0</height>
+                        </size>
+                      </property>
+                      <property name="toolTip">
+                        <string>Requires restart. This will enable modern features added in expansions after WotLK. This enables height texturing and WMO scaling. Some features may require additional tools.</string>
+                      </property>
+                      <property name="text">
+                        <string>Modern features (MoP/Legion+)</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item row="6" column="1">
+                    <widget class="QCheckBox" name="_modern_features">
+                      <property name="text">
+                        <string/>
+                      </property>
+                    </widget>
+                  </item>
                  <item row="0" column="0">
                   <widget class="QLabel" name="label_12">
                    <property name="minimumSize">

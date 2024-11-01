@@ -62,7 +62,7 @@ void AddObjectInstanceNode::compute()
   }
   else if (QString(path.c_str()).endsWith(".wmo", Qt::CaseInsensitive))
   {
-    obj = world->addWMOAndGetInstance(path, {pos.x, pos.y, pos.z}, {math::degrees(dir.x)._, math::degrees(dir.y)._, math::degrees(dir.z)._ }, false);
+    obj = world->addWMOAndGetInstance(path, {pos.x, pos.y, pos.z}, {math::degrees(dir.x)._, math::degrees(dir.y)._, math::degrees(dir.z)._ }, scale, false);
   }
   else
   {

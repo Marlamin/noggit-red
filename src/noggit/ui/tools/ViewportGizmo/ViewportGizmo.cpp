@@ -146,6 +146,9 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
   NOGGIT_ACTION_MGR->beginAction(map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                  Noggit::ActionModalityControllers::eLMB);
 
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
+
   if (gizmo_selection_type == MULTISELECTION)
   {
 
@@ -163,8 +166,13 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
-      float wmo_scale = 0.f;
-      float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
+      float& scale = obj_instance->scale;
+
+      // If modern features are disabled, we don't want to scale WMOs
+      if (obj_instance->which() == eWMO && !modern_features && _gizmo_operation == ImGuizmo::SCALE) {
+          scale = 1.0f;
+          continue;
+      }
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::remove);
@@ -279,8 +287,13 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
 
       glm::vec3& pos = obj_instance->pos;
       math::degrees::vec3& rotation = obj_instance->dir;
-      float wmo_scale = 0.f;
-      float& scale = obj_instance->which() == eMODEL ? obj_instance->scale : wmo_scale;
+      float& scale = obj_instance->scale;
+
+      // If modern features are disabled, we don't want to scale WMOs
+      if (obj_instance->which() == eWMO && !modern_features && _gizmo_operation == ImGuizmo::SCALE) {
+          scale = 1.0f;
+          continue;
+      }
 
       if (_world)
         _world->updateTilesEntry(selected, model_update::remove);

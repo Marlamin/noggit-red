@@ -67,6 +67,10 @@ namespace Noggit
       std::vector<std::string> tilesets;
       std::unordered_set<std::string> tilesets_with_specular_variant;
 
+      // If modern features are enabled, set filtering to height textures (_h), otherwise specular (_s).
+      QSettings settings;
+      bool modern_features = settings.value("modern_features", false).toBool();
+
       for (auto const& entry_pair : Application::NoggitApplication::instance()->clientData()->listfile()->pathToFileDataIDMap())
       {
         std::string const& filepath = entry_pair.first;
@@ -75,7 +79,7 @@ namespace Noggit
           && filepath.find (".blp") != std::string::npos
            )
         {
-          auto suffix_pos (filepath.find ("_s.blp"));
+          auto suffix_pos (filepath.find (modern_features ? "_h.blp" : "_s.blp"));
           if (suffix_pos == std::string::npos)
           {
             tilesets.emplace_back (filepath);
@@ -83,7 +87,7 @@ namespace Noggit
           else
           {
             std::string specular (filepath);
-            specular.erase (suffix_pos, strlen ("_s"));
+            specular.erase (suffix_pos, strlen (modern_features ? "_h" : "_s"));
             tilesets_with_specular_variant.emplace (specular);
           }
         }
@@ -107,7 +111,7 @@ namespace Noggit
               && entry.find("_h.blp") == std::string::npos // skip _h textures
                )
             {
-              auto suffix_pos (entry.find ("_s.blp"));
+              auto suffix_pos (entry.find (modern_features ? "_h.blp" : "_s.blp"));
               if (suffix_pos == std::string::npos)
               {
                 tilesets.emplace_back (entry);
@@ -115,7 +119,7 @@ namespace Noggit
               else
               {
                 std::string specular (entry);
-                specular.erase (suffix_pos, strlen ("_s"));
+                specular.erase (suffix_pos, strlen (modern_features ? "_h" : "_s"));
                 tilesets_with_specular_variant.emplace (specular);
               }
             }
@@ -138,12 +142,12 @@ namespace Noggit
         model->appendRow (item);
       }
 
-      auto specular_filter (new QSortFilterProxyModel);
-      specular_filter->setSourceModel (model);
-      specular_filter->setFilterRole (has_specular_role);
+      auto texture_filter (new QSortFilterProxyModel);
+      texture_filter->setSourceModel (model);
+      texture_filter->setFilterRole (has_specular_role);
 
       auto search_filter (new QSortFilterProxyModel);
-      search_filter->setSourceModel (specular_filter);
+      search_filter->setSourceModel (texture_filter);
       search_filter->sort (0, Qt::AscendingOrder);
 
 
@@ -165,17 +169,19 @@ namespace Noggit
                 }
               );
 
+      auto texture_filter_box(new QCheckBox("only with specular texture variant"));
 
-      auto only_specular (new QCheckBox ("only with specular texture variant"));
-      connect ( only_specular, &QCheckBox::toggled
-              , [=] (bool on)
-                {
-                  specular_filter->setFilterRegExp (on ? "true" : "");
-                }
-              );
-      only_specular->setChecked (false);
+      if (modern_features)
+          texture_filter_box->setText("only with height texture variant");
 
+      connect(texture_filter_box, &QCheckBox::toggled
+          , [=](bool on)
+          {
+              texture_filter->setFilterRegExp(on ? "true" : "");
+          }
+      );
 
+      texture_filter_box->setChecked(true);
 
       auto list = new TextureList(this);
       list->setEditTriggers (QAbstractItemView::NoEditTriggers);
@@ -214,7 +220,7 @@ namespace Noggit
       layout->addLayout (top_bar);
       top_bar->addWidget (size_slider);
       top_bar->addStretch();
-      top_bar->addWidget (only_specular);
+      top_bar->addWidget (texture_filter_box);
       top_bar->addWidget (filter);
       layout->addWidget (list);
 

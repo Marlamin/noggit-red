@@ -61,7 +61,9 @@ namespace OpenGL
     int draw_groundeffectid_overlay = false;
     int draw_groundeffect_layerid_overlay = false;
     int draw_noeffectdoodad_overlay = false;
-    // int padding[3];
+    int draw_only_normals = false;
+    int point_normals_up = false;
+    // int padding;
   };
 
   struct ChunkInstanceDataUniformBlock
@@ -74,6 +76,13 @@ namespace OpenGL
     int AreaIDColor_Pad2_DrawSelection[4];
     int ChunkXZ_TileXZ[4];
     int ChunkTexAnimDir[4];
+
+    // Mists Heightmapping
+    int ChunkHeightTextureSamplers[4];
+    int ChunkTextureUVScale[4];
+    float ChunkTextureHeightScale[4];
+    float ChunkTextureHeightOffset[4];
+
     float ChunkGroundEffectColor[4];
     int ChunkDoodadsEnabled2_ChunksLayerEnabled2[4];
   };

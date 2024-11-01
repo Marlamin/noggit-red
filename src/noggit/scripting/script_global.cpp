@@ -41,12 +41,20 @@ namespace Noggit {
       state->set_function("add_wmo",[global](
           std::string const& filename
         , glm::vec3 const& pos
+        , float scale
         , glm::vec3 const& rotation)
       {
+        // note: we set both min/max random scale and the normal scale parameter,
+        // because noggit picks one based on random scale settings in the object tool
+        object_paste_params p;
+        p.minScale = scale;
+        p.maxScale = scale;
         global->get_view()->_world.get()->addWMO(
             filename
           , pos
+          , scale
           , math::degrees::vec3(rotation)
+          , &p
           , false);
       });
 

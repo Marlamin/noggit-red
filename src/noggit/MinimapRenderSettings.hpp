@@ -13,13 +13,15 @@ enum MinimapGenMode
 {
   CURRENT_ADT,
   SELECTED_ADTS,
-  MAP
+  MAP,
+  LOD_MAPTEXTURES,
+  LOD_MAPTEXTURES_N,
 };
 
 struct MinimapRenderSettings
 {
   MinimapGenMode export_mode = CURRENT_ADT;
-  std::string file_format = ".blp";
+  std::string file_format = ".blp (DXT1)";
 
   // Render settings
   int resolution = 512;
@@ -31,11 +33,13 @@ struct MinimapRenderSettings
   bool draw_shadows = false;
   bool use_filters = false;
   bool combined_minimap = false;
+  bool draw_only_normals = false;
+  bool point_normals_up = false;
 
   // Selection
- // std::array<bool, 4096> selected_tiles = {false};
+   // std::array<bool, 4096> selected_tiles = {false};
 
-  std::vector<char> selected_tiles = std::vector<char>( size_t{4096}, false, {} );
+  std::vector<char> selected_tiles = std::vector<char>(size_t{ 4096 }, false, {});
 
   // Filtering
   QListWidget* m2_model_filter_include = nullptr;

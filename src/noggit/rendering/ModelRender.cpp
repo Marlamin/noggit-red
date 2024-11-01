@@ -1007,6 +1007,12 @@ void ModelRenderPass::bindTexture(size_t index, Model* m, OpenGL::M2RenderState&
   }
   else
   {
+    if (m->_specialTextures[tex] >= m->_replaceTextures.size())
+	{
+	  LogError << "model: special texture index out of range " << m->file_key().stringRepr() << std::endl;
+	  return;
+	}
+
     auto& texture = m->_replaceTextures.at (m->_specialTextures[tex]);
     texture->upload();
     GLuint tex_array = texture->texture_array();

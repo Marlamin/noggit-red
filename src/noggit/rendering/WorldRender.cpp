@@ -74,7 +74,21 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     _terrain_params_ubo_data.draw_groundeffectid_overlay = false;
     _terrain_params_ubo_data.draw_groundeffect_layerid_overlay = false;
     _terrain_params_ubo_data.draw_noeffectdoodad_overlay = false;
+    _terrain_params_ubo_data.draw_only_normals = minimap_render_settings->draw_only_normals;
+    _terrain_params_ubo_data.point_normals_up = minimap_render_settings->point_normals_up;
     _need_terrain_params_ubo_update = true;
+  }
+
+  // After coming out of minimap rendering mode and draw_only_normals is still on, disable it.
+  if (!render_settings.minimap_render && _terrain_params_ubo_data.draw_only_normals) {
+      _terrain_params_ubo_data.draw_only_normals = false;
+      _need_terrain_params_ubo_update = true;
+  }
+
+  // After coming out of minimap rendering mode and point_normals_up is still on, disable it.
+  if (!render_settings.minimap_render && _terrain_params_ubo_data.point_normals_up) {
+      _terrain_params_ubo_data.point_normals_up = false;
+      _need_terrain_params_ubo_update = true;
   }
 
   if (_need_terrain_params_ubo_update)
@@ -83,6 +97,10 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   // Frustum culling
   _world->_n_loaded_tiles = 0;
   unsigned tile_counter = 0;
+
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
+
   for (MapTile* tile : _world->mapIndex.loaded_tiles())
   {
     tile->_was_rendered_last_frame = false;
@@ -243,6 +261,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
     {
       OpenGL::Scoped::use_program mcnk_shader{ *_mcnk_program.get() };
 
+      mcnk_shader.uniform("enable_mists_heightmapping", modern_features);
       mcnk_shader.uniform("camera", glm::vec3(camera_pos.x, camera_pos.y, camera_pos.z));
       mcnk_shader.uniform("animtime", static_cast<int>(_world->animtime));
 
@@ -1572,10 +1591,17 @@ void WorldRender::updateLightingUniformBlockMinimap(MinimapRenderSettings* setti
   glm::vec3 diffuse = settings->diffuse_color;
   glm::vec3 ambient = settings->ambient_color;
 
-  _lighting_ubo_data.DiffuseColor_FogStart = { diffuse, 0 };
-  _lighting_ubo_data.AmbientColor_FogEnd = { ambient, 0 };
   _lighting_ubo_data.FogColor_FogOn = { 0, 0, 0, 0 };
-  _lighting_ubo_data.LightDir_FogRate = { _outdoor_light_stats.dayDir.x, _outdoor_light_stats.dayDir.y, _outdoor_light_stats.dayDir.z, _skies->fogRate() };
+  if (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES) {
+      _lighting_ubo_data.DiffuseColor_FogStart = { 0.5, 0.5, 0.5, 0 };
+      _lighting_ubo_data.AmbientColor_FogEnd = { 0.5, 0.5, 0.5, 0 };
+      _lighting_ubo_data.LightDir_FogRate = { 0.0, -1.0, 0.0, _skies->fogRate() };
+  }
+  else {
+      _lighting_ubo_data.DiffuseColor_FogStart = { diffuse, 0 };
+      _lighting_ubo_data.AmbientColor_FogEnd = { ambient, 0 };
+      _lighting_ubo_data.LightDir_FogRate = { _outdoor_light_stats.dayDir.x, _outdoor_light_stats.dayDir.y, _outdoor_light_stats.dayDir.z, _skies->fogRate() };
+  }
   _lighting_ubo_data.OceanColorLight = settings->ocean_color_light;
   _lighting_ubo_data.OceanColorDark = settings->ocean_color_dark;
   _lighting_ubo_data.RiverColorLight = settings->river_color_light;
@@ -1996,17 +2022,27 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
       str += "/";
     }
 
-    QDir dir(str + "/textures/minimap/");
+    QString target_dir = QString("/textures/minimap/");
+    if(settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES || settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES_N)
+	{
+	  target_dir = QString("/textures/maptextures/");
+	}
+
+    QDir dir(str + target_dir);
     if (!dir.exists())
       dir.mkpath(".");
 
     std::string tex_name = std::string(_world->basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".blp");
+    if (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES_N)
+    {
+        tex_name = std::string(_world->basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + "_n.blp");
+    }
 
     if (settings->file_format == ".png")
     {
       image.save(dir.filePath(std::string(_world->basename + "_" + std::to_string(tile_idx.x) + "_" + std::to_string(tile_idx.z) + ".png").c_str()));
     }
-    else if (settings->file_format == ".blp")
+    else if (settings->file_format == ".blp (DXT1)" || settings->file_format == ".blp (DXT5)")
     {
       QByteArray bytes;
       QBuffer buffer( &bytes );
@@ -2020,7 +2056,7 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
       uint32_t file_size;
       // void* blp_image = blp.createBlpDxtInMemory(true, FORMAT_DXT5, file_size);
       // this mirrors blizzards : dxt1, no mipmap
-      void* blp_image = blp.createBlpDxtInMemory(false, FORMAT_DXT1, file_size);
+      void* blp_image = blp.createBlpDxtInMemory(settings->file_format == ".blp (DXT5)" ? true : false, settings->file_format == ".blp (DXT5)" ? FORMAT_DXT5 : FORMAT_DXT1, file_size);
 
       // converts the texture name to an md5 hash like blizzard, this is used to avoid duplicates textures for ocean
       // downside is that if the file gets updated regularly there will be a lot of duplicates in the project folder

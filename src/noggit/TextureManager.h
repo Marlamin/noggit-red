@@ -13,6 +13,7 @@
 
 #include <QtGui/QOffscreenSurface>
 #include <QtGui/QOpenGLFramebufferObjectFormat>
+#include <QPainter>
 #include <QtGui/QPixmap>
 #include <optional>
 #include <map>
@@ -22,6 +23,19 @@
 #include <array>
 #include <tuple>
 
+
+struct texture_heightmapping_data
+{
+    texture_heightmapping_data(uint32_t scale = 0, float heightscale = 0, float heightoffset = 1.0f)
+    {
+        uvScale = scale;
+        heightScale = heightscale;
+        heightOffset = heightoffset;
+    }
+    uint32_t uvScale = 0;
+    float heightScale = 0.0f;
+    float heightOffset = 1.0f;
+};
 
 struct tuple_hash
 {
@@ -73,7 +87,10 @@ struct blp_texture : public AsyncObject
   {
     return async_priority::high;
   }
+  // Mists HeightMapping
+  bool hasHeightMap() {return _has_heightmap; };
 
+  blp_texture* getHeightMap() { return heightMap.get(); };
 private:
   bool _uploaded = false;
 
@@ -84,6 +101,7 @@ private:
 
   bool _is_specular = false;
   bool _is_tileset = false;
+  bool _has_heightmap = false;
 
 private:
   std::map<int, std::vector<uint32_t>> _data;
@@ -91,6 +109,8 @@ private:
   std::optional<GLint> _compression_format;
   int _array_index = -1;
   GLuint _texture_array = 0;
+
+  std::unique_ptr<blp_texture> heightMap;
 };
 
 struct TexArrayParams

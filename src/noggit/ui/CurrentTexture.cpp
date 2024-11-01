@@ -12,6 +12,7 @@
 #include <QtGui/QDrag>
 #include <QtGui/QPainter>
 #include <QMimeData>
+#include <QPainter>
 
 namespace Noggit
 {

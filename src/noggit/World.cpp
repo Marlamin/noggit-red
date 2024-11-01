@@ -772,11 +772,15 @@ void World::snap_selected_models_to_the_ground()
   update_selected_model_groups();
 }
 
-void World::scale_selected_models(float v, m2_scaling_type type)
+void World::scale_selected_models(float v, object_scaling_type type)
 {
   ZoneScoped;
   if (!_selected_model_count)
       return;
+
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
+
   for (auto& entry : _current_selection)
   {
     if (entry.index() == eEntry_Object)
@@ -784,37 +788,72 @@ void World::scale_selected_models(float v, m2_scaling_type type)
       auto obj = std::get<selected_object_type>(entry);
 
       if (obj->which() != eMODEL)
-        continue;
-
-      ModelInstance* mi = static_cast<ModelInstance*>(obj);
-
-      NOGGIT_CUR_ACTION->registerObjectTransformed(mi);
-
-      float scale = mi->scale;
-
-      switch (type)
       {
-        case World::m2_scaling_type::set:
-          scale = v;
-          break;
-        case World::m2_scaling_type::add:
-          scale += v;
-          break;
-        case World::m2_scaling_type::mult:
-          scale *= v;
-          break;
-      }
+          // If we are not using modern features, we don't want to scale WMOs
+          if(!modern_features)
+			  continue;
 
-      // if the change is too small, do nothing
-      if (std::abs(scale - mi->scale) < ModelInstance::min_scale())
-      {
-        continue;
-      }
+          WMOInstance* wi = static_cast<WMOInstance*>(obj);
 
-      updateTilesModel(mi, model_update::remove);
-      mi->scale = std::min(ModelInstance::max_scale(), std::max(ModelInstance::min_scale(), scale));
-      mi->recalcExtents();
-      updateTilesModel(mi, model_update::add);
+          NOGGIT_CUR_ACTION->registerObjectTransformed(wi);
+
+          float scale = wi->scale;
+
+          switch (type)
+          {
+          case World::object_scaling_type::set:
+              scale = v;
+              break;
+          case World::object_scaling_type::add:
+              scale += v;
+              break;
+          case World::object_scaling_type::mult:
+              scale *= v;
+              break;
+          }
+
+          // if the change is too small, do nothing
+          if (std::abs(scale - wi->scale) < ModelInstance::min_scale())
+          {
+              continue;
+          }
+
+          updateTilesWMO(wi, model_update::remove);
+          wi->scale = std::min(ModelInstance::max_scale(), std::max(ModelInstance::min_scale(), scale));
+          wi->recalcExtents();
+          updateTilesWMO(wi, model_update::add);
+      }
+      else {
+          ModelInstance* mi = static_cast<ModelInstance*>(obj);
+
+          NOGGIT_CUR_ACTION->registerObjectTransformed(mi);
+
+          float scale = mi->scale;
+
+          switch (type)
+          {
+          case World::object_scaling_type::set:
+              scale = v;
+              break;
+          case World::object_scaling_type::add:
+              scale += v;
+              break;
+          case World::object_scaling_type::mult:
+              scale *= v;
+              break;
+          }
+
+          // if the change is too small, do nothing
+          if (std::abs(scale - mi->scale) < ModelInstance::min_scale())
+          {
+              continue;
+          }
+
+          updateTilesModel(mi, model_update::remove);
+          mi->scale = std::min(ModelInstance::max_scale(), std::max(ModelInstance::min_scale(), scale));
+          mi->recalcExtents();
+          updateTilesModel(mi, model_update::add);
+      }
     }
   }
   update_selected_model_groups();
@@ -2026,7 +2065,9 @@ ModelInstance* World::addM2AndGetInstance ( BlizzardArchive::Listfile::FileKey c
 
 void World::addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
                    , glm::vec3 newPos
+                   , float scale
                    , math::degrees::vec3 rotation
+                   , Noggit::object_paste_params* paste_params
                    , bool action
                    )
 {
@@ -2036,6 +2077,32 @@ void World::addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
   wmo_instance.uid = mapIndex.newGUID();
   wmo_instance.pos = newPos;
   wmo_instance.dir = rotation;
+
+  if (paste_params)
+  {
+      if (_settings->value("model/random_rotation", false).toBool())
+      {
+          float min = paste_params->minRotation;
+          float max = paste_params->maxRotation;
+          wmo_instance.dir.y += math::degrees(misc::randfloat(min, max))._;
+      }
+
+      if (_settings->value("model/random_tilt", false).toBool())
+      {
+          float min = paste_params->minTilt;
+          float max = paste_params->maxTilt;
+          wmo_instance.dir.x += math::degrees(misc::randfloat(min, max))._;
+          wmo_instance.dir.z += math::degrees(misc::randfloat(min, max))._;
+      }
+
+      if (_settings->value("model/random_size", false).toBool())
+      {
+          float min = paste_params->minScale;
+          float max = paste_params->maxScale;
+          wmo_instance.scale = misc::randfloat(min, max);
+      }
+  }
+
 
   // to ensure the tiles are updated correctly
   wmo_instance.wmo->wait_until_loaded();
@@ -2047,6 +2114,7 @@ void World::addWMO ( BlizzardArchive::Listfile::FileKey const& file_key
 WMOInstance* World::addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey const& file_key
     , glm::vec3 newPos
     , math::degrees::vec3 rotation
+    , float scale
     , bool action
 )
 {
@@ -2056,6 +2124,7 @@ WMOInstance* World::addWMOAndGetInstance ( BlizzardArchive::Listfile::FileKey co
   wmo_instance.uid = mapIndex.newGUID();
   wmo_instance.pos = newPos;
   wmo_instance.dir = rotation;
+  wmo_instance.scale = scale;
 
   // to ensure the tiles are updated correctly
   wmo_instance.wmo->wait_until_loaded();

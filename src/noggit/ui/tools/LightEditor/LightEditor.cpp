@@ -1,7 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "LightEditor.hpp"
-#include <noggit/DBC.h>
 #include <noggit/World.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/FontAwesome.hpp>
@@ -19,6 +18,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QStringList>
+
 
 using namespace Noggit::Ui::Tools;
 
@@ -321,14 +321,14 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 	global_values_layout->addRow(name_layout);
 
 	pos_x_spin = new QDoubleSpinBox(this);
-	pos_x_spin->setRange(-17066.66656 * 2, 17066.66656 * 2); // size = ±17066.66656
+	pos_x_spin->setRange(-17066.66656 * 2, 17066.66656 * 2); // size = ï¿½17066.66656
 	pos_x_spin->setValue(0);
 	pos_x_spin->setSingleStep(50);
 	pos_x_spin->setEnabled(false);
 	global_values_layout->addRow("Position X:", pos_x_spin);
 
 	pos_y_spin = new QDoubleSpinBox(this);
-	pos_y_spin->setRange(-17066.66656 * 2, 17066.66656 * 2); // size = ±17066.66656
+	pos_y_spin->setRange(-17066.66656 * 2, 17066.66656 * 2); // size = ï¿½17066.66656
 	pos_y_spin->setValue(0);
 	pos_y_spin->setSingleStep(50);
 	pos_y_spin->setEnabled(false);
@@ -342,14 +342,14 @@ LightEditor::LightEditor(MapView* map_view, QWidget* parent)
 	global_values_layout->addRow("Position Z:", pos_z_spin);
 	
 	inner_radius_spin = new QDoubleSpinBox(this);
-	inner_radius_spin->setRange(0, 100000); // max seen in dbc is 3871 (139363 E36 )
+	inner_radius_spin->setRange(0, 100000); // max seen in dbc is 3871 (139363 ï¿½E36 )
 	inner_radius_spin->setValue(0);
 	inner_radius_spin->setSingleStep(50);
 	inner_radius_spin->setEnabled(false);
 	global_values_layout->addRow("Inner Radius:", inner_radius_spin);
 
 	outer_radius_spin = new QDoubleSpinBox(this);
-	outer_radius_spin->setRange(0, 100000); // max seen in dbc is 3871 (139363 E36 )
+	outer_radius_spin->setRange(0, 100000); // max seen in dbc is 3871 (139363 ï¿½E36 )
 	outer_radius_spin->setValue(0);
 	outer_radius_spin->setSingleStep(50);
 	outer_radius_spin->setEnabled(false);

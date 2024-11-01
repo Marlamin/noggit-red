@@ -12,18 +12,21 @@
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/DBC.h>
 #include <util/qt/overload.hpp>
+#include <noggit/TextureManager.h>
 #include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QTabWidget>
 #include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
+#include <QClipboard>
 #include <noggit/ui/tools/UiCommon/expanderwidget.h>
 #include <noggit/ui/WeightListWidgetItem.hpp>
 #include <noggit/ui/FontAwesome.hpp>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <noggit/project/CurrentProject.hpp>
 
 namespace Noggit
 {
@@ -208,8 +211,73 @@ namespace Noggit
       tool_layout->addWidget(quick_palette_btn);
       tool_layout->setAlignment(quick_palette_btn, Qt::AlignTop);
 
+      // Mists HeightMapping, only enable if modern feature setting is on
+      bool modern_features = settings.value("modern_features", false).toBool();
 
-      auto geffect_tools_btn(new QPushButton(/*"Ground Effect Tools"*/ "In developement", this));
+      // Define UI elements regardless of modern_features being enabled because they're used later on as well.
+      _heightmapping_group = new QGroupBox("Height Mapping", tool_widget);
+      _heightmapping_group->setVisible(modern_features);
+
+      auto heightmapping_scale_spin = new QDoubleSpinBox(_heightmapping_group);
+      heightmapping_scale_spin->setVisible(modern_features);
+
+      auto heightmapping_heightscale_spin = new QDoubleSpinBox(_heightmapping_group);
+      heightmapping_heightscale_spin->setVisible(modern_features);
+
+      auto heightmapping_heightoffset_spin = new QDoubleSpinBox(_heightmapping_group);
+      heightmapping_heightoffset_spin->setVisible(modern_features);
+
+      QPushButton* _heightmapping_copy_btn = new QPushButton("Copy to JSON", this);
+      _heightmapping_copy_btn->setVisible(modern_features);
+
+      if (modern_features) {
+
+          auto heightmapping_group_layout(new QFormLayout(_heightmapping_group));
+
+          heightmapping_scale_spin->setRange(0, 512);
+          heightmapping_scale_spin->setSingleStep(1);
+          heightmapping_scale_spin->setDecimals(0);
+          heightmapping_scale_spin->setValue(0);
+          heightmapping_group_layout->addRow("Scale:", heightmapping_scale_spin);
+
+          heightmapping_heightscale_spin->setRange(-512, 512);
+          heightmapping_heightscale_spin->setSingleStep(0.1);
+          heightmapping_heightscale_spin->setDecimals(3);
+          heightmapping_heightscale_spin->setValue(0);
+          heightmapping_group_layout->addRow("Height Scale:", heightmapping_heightscale_spin);
+
+          heightmapping_heightoffset_spin->setRange(-512, 512);
+          heightmapping_heightoffset_spin->setSingleStep(0.1);
+          heightmapping_heightoffset_spin->setDecimals(3);
+          heightmapping_heightoffset_spin->setValue(1);
+          heightmapping_group_layout->addRow("Height Offset:", heightmapping_heightoffset_spin);
+
+          auto heightmapping_btngroup_layout(new QVBoxLayout(_heightmapping_group));
+          auto heightmapping_buttons_widget = new QWidget(_heightmapping_group);
+          heightmapping_buttons_widget->setLayout(heightmapping_btngroup_layout);
+
+          auto wrap_label = new QLabel("Note: This doesn't save to .cfg, use copy and do it manually.", _heightmapping_group);
+          wrap_label->setWordWrap(true);
+          heightmapping_group_layout->addRow(wrap_label);
+
+          _heightmapping_apply_global_btn = new QPushButton("Apply (Global)", this);
+          _heightmapping_apply_global_btn->setFixedHeight(30);
+          heightmapping_btngroup_layout->addWidget(_heightmapping_apply_global_btn);
+
+          _heightmapping_apply_adt_btn = new QPushButton("Apply (Current ADT)", this);
+          _heightmapping_apply_adt_btn->setFixedHeight(30);
+          heightmapping_btngroup_layout->addWidget(_heightmapping_apply_adt_btn);
+
+          _heightmapping_copy_btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+          _heightmapping_copy_btn->setFixedHeight(30);
+          heightmapping_btngroup_layout->addWidget(_heightmapping_copy_btn);
+
+          heightmapping_group_layout->addRow(heightmapping_buttons_widget);
+
+          tool_layout->addWidget(_heightmapping_group);
+      }
+      
+      auto geffect_tools_btn(new QPushButton("In development", this));
       tool_layout->addWidget(geffect_tools_btn);
       tool_layout->setAlignment(geffect_tools_btn, Qt::AlignTop);
 
@@ -261,6 +329,28 @@ namespace Noggit
 
       connect (anim_speed_slider, &QSlider::valueChanged, &_anim_speed_prop, &Noggit::unsigned_int_property::set);
       connect (anim_orientation_dial, &QDial::valueChanged, &_anim_rotation_prop, &Noggit::unsigned_int_property::set);
+      
+      if (modern_features) {
+          connect(heightmapping_scale_spin, qOverload<double>(&QDoubleSpinBox::valueChanged)
+              , [&](double v)
+              {
+                  textureHeightmappingData.uvScale = v;
+              }
+          );
+
+          connect(heightmapping_heightscale_spin, qOverload<double>(&QDoubleSpinBox::valueChanged)
+              , [&](double v)
+              {
+                  textureHeightmappingData.heightScale = v;
+              }
+          );
+          connect(heightmapping_heightoffset_spin, qOverload<double>(&QDoubleSpinBox::valueChanged)
+              , [&](double v)
+              {
+                  textureHeightmappingData.heightOffset = v;
+              }
+          );
+      }
 
       connect ( tabs, &QTabWidget::currentChanged
               , [this] (int index)
@@ -377,7 +467,47 @@ namespace Noggit
       connect (_radius_slider, &Noggit::Ui::Tools::UiCommon::ExtendedSlider::valueChanged, this, &texturing_tool::updateMaskImage);
       connect(_image_mask_group, &Noggit::Ui::Tools::ImageMaskSelector::pixmapUpdated, this, &texturing_tool::updateMaskImage);
 
+      // Mists Heightmapping
 
+      if (modern_features) {
+          connect(_current_texture, &Noggit::Ui::current_texture::texture_updated
+              , [=]()
+              {
+                  auto proj = Noggit::Project::CurrentProject::get();
+                  auto foundTexture = proj->ExtraMapData.TextureHeightData_Global.find(_current_texture->filename());
+                  if (foundTexture != proj->ExtraMapData.TextureHeightData_Global.end())
+                  {
+                      heightmapping_scale_spin->setValue(foundTexture->second.uvScale);
+                      heightmapping_heightscale_spin->setValue(foundTexture->second.heightScale);
+                      heightmapping_heightoffset_spin->setValue(foundTexture->second.heightOffset);
+                  }
+
+              }
+          );
+
+          connect(_heightmapping_copy_btn, &QPushButton::pressed
+              , [=]()
+              {
+                  std::ostringstream oss;
+                  oss << "{\r\n    \"" << _current_texture->filename() << "\": {\r\n"
+                      << "    \"Scale\": " << textureHeightmappingData.uvScale << ",\r\n"
+                      << "    \"HeightScale\": " << textureHeightmappingData.heightScale << ",\r\n"
+                      << "    \"HeightOffset\": " << textureHeightmappingData.heightOffset << "\r\n"
+                      << "    }\r\n}";
+
+                  QClipboard* clip = QApplication::clipboard();
+                  clip->setText(QString::fromStdString(oss.str()));
+
+                  QMessageBox::information
+                  (nullptr
+                      , "Copied"
+                      , "JSON Copied to Clipboard",
+                      QMessageBox::Ok
+                  );
+
+              }
+          );
+      }
 
       _spray_content->hide();
       update_brush_hardness();

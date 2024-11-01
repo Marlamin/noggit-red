@@ -225,6 +225,7 @@ namespace Noggit
       ui->_keyboard_locale->setCurrentText(_settings->value("keyboard_locale", "QWERTY").toString());
       ui->_use_mclq_liquids_export->setChecked(_settings->value("use_mclq_liquids_export", false).toBool());
       ui->_theme->setCurrentText(_settings->value("theme", "Dark").toString());
+      ui->_modern_features->setChecked(_settings->value("modern_features", false).toBool());
 
       ui->assetBrowserBgCol->setColor(_settings->value("assetBrowser/background_color",
         QVariant::fromValue(QColor(127, 127, 127))).value<QColor>());
@@ -316,6 +317,7 @@ namespace Noggit
       _settings->setValue("systemWindowFrame", ui->_systemWindowFrame->isChecked());
       _settings->setValue("nativeMenubar", ui->_nativeMenubar->isChecked());
       _settings->setValue("classicUI", ui->_classic_ui->isChecked());
+      _settings->setValue("modern_features", ui->_modern_features->isChecked());
       _settings->setValue("use_mclq_liquids_export", ui->_use_mclq_liquids_export->isChecked());
 
 #ifdef USE_MYSQL_UID_STORAGE
