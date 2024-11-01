@@ -48,7 +48,7 @@ void ObjectInstanceInfoNode::compute()
 
   if (_out_ports[2].connected)
   {
-    _out_ports[2].out_value = std::make_shared<DecimalData>(obj->which() == eMODEL ? obj->scale : 1.0);
+    _out_ports[2].out_value = std::make_shared<DecimalData>(obj->scale);
     _node->onDataUpdated(2);
   }
 

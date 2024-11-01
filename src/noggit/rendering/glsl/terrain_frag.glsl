@@ -36,6 +36,8 @@ layout (std140) uniform overlay_params
   int draw_groundeffectid_overlay;
   int draw_groundeffect_layerid_overlay;
   int draw_noeffectdoodad_overlay;
+  int draw_only_normals;
+  int point_normals_up;
 };
 
 struct ChunkInstanceData
@@ -48,6 +50,14 @@ struct ChunkInstanceData
   ivec4 AreaIDColor_Pad2_DrawSelection;
   ivec4 ChunkXZ_TileXZ;
   ivec4 ChunkTexAnimDir;
+
+  // Mists Heightmapping
+
+  ivec4 ChunkHeightTextureSamplers;
+  ivec4 ChunkTextureUVScale;
+  vec4 ChunkTextureHeightScale;
+  vec4 ChunkTextureHeightOffset;
+
   vec4 ChunkGroundEffectColor;
   // pack 8x8 bools in two ints. Simplified ChunksLayerEnabled to a bool instead of 2 bits id.
   // If those modes are mutually exclusive, we can do it in ChunkGroundEffectColor for now.
@@ -71,6 +81,7 @@ uniform float cursorRotation;
 uniform float outer_cursor_radius;
 uniform float inner_cursor_ratio;
 uniform vec4 cursor_color;
+uniform bool enable_mists_heightmapping;
 
 in vec3 vary_position;
 in vec2 vary_texcoord;
@@ -188,6 +199,71 @@ vec4 get_tex_color(vec2 tex_coord, int tex_sampler, int array_index)
 
 }
 
+const int numChunks = 16;
+const int numTiles = 64;
+
+vec2 getAdjustedUV(vec2 uv, int textureScale) {
+    vec2 worldOffset = (numChunks * instances[instanceID].ChunkXZ_TileXZ.zw) + instances[instanceID].ChunkXZ_TileXZ.xy;
+
+    // Scale the UV coordinates. Wow Interprets texture scaling this way.
+    vec2 combinedUV = fract((uv + worldOffset) / ((1 << textureScale) / 8.0f));
+
+    return combinedUV;
+}
+
+vec4 mists_texture_blend()
+{
+  vec3 alpha = texture(alphamap, vec3(vary_texcoord / 8.0, instanceID)).rgb;
+
+  int layer_count = instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b;
+
+  alpha.r = mix(alpha.r, 0.0, float(layer_count < 2));
+  alpha.g = mix(alpha.g, 0.0, float(layer_count < 3));
+  alpha.b = mix(alpha.b, 0.0, float(layer_count < 4));
+
+
+  vec2 worldScaled_vary_t0_uv = getAdjustedUV(vary_t0_uv/8.0, instances[instanceID].ChunkTextureUVScale.x);
+  vec2 worldScaled_vary_t1_uv = getAdjustedUV(vary_t1_uv/8.0, instances[instanceID].ChunkTextureUVScale.y);
+  vec2 worldScaled_vary_t2_uv = getAdjustedUV(vary_t2_uv/8.0, instances[instanceID].ChunkTextureUVScale.z);
+  vec2 worldScaled_vary_t3_uv = getAdjustedUV(vary_t3_uv/8.0, instances[instanceID].ChunkTextureUVScale.w);
+
+  // Mists HeightMapping: Multi Layer Blending.
+  vec4 layer_weights = vec4(1.0 - clamp(dot(vec3(1.0),alpha), 0, 1), alpha);
+
+  vec4 t0h = get_tex_color(worldScaled_vary_t0_uv, instances[instanceID].ChunkHeightTextureSamplers.x, abs(instances[instanceID].ChunkTextureArrayIDs.x));
+  vec4 t1h = get_tex_color(worldScaled_vary_t1_uv, instances[instanceID].ChunkHeightTextureSamplers.y, abs(instances[instanceID].ChunkTextureArrayIDs.y));
+  vec4 t2h = get_tex_color(worldScaled_vary_t2_uv, instances[instanceID].ChunkHeightTextureSamplers.z, abs(instances[instanceID].ChunkTextureArrayIDs.z));
+  vec4 t3h = get_tex_color(worldScaled_vary_t3_uv, instances[instanceID].ChunkHeightTextureSamplers.w, abs(instances[instanceID].ChunkTextureArrayIDs.w));
+
+  vec4 layer_pct = vec4 ( layer_weights.x * ( t0h.a * instances[instanceID].ChunkTextureHeightScale.x + instances[instanceID].ChunkTextureHeightOffset.x)
+					 , layer_weights.y * ( t1h.a * instances[instanceID].ChunkTextureHeightScale.y + instances[instanceID].ChunkTextureHeightOffset.y)
+					 , layer_weights.z * ( t2h.a * instances[instanceID].ChunkTextureHeightScale.z + instances[instanceID].ChunkTextureHeightOffset.z)
+					 , layer_weights.w * ( t3h.a * instances[instanceID].ChunkTextureHeightScale.w + instances[instanceID].ChunkTextureHeightOffset.w)
+					 );
+  vec4 layer_pct_max = vec4( max( max(layer_pct.x, layer_pct.y) , max(layer_pct.z, layer_pct.w) ) );
+  layer_pct = layer_pct * (vec4(1.0) - clamp(layer_pct_max - layer_pct, 0, 1));
+  layer_pct = layer_pct / vec4( dot(vec4(1.0),layer_pct) );    
+
+  vec4 t0 = get_tex_color(worldScaled_vary_t0_uv, instances[instanceID].ChunkTextureSamplers.x, 
+                          abs(instances[instanceID].ChunkTextureArrayIDs.x)) * layer_pct.x;
+  t0.a = mix(t0.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.x < 0));
+
+  vec4 t1 = get_tex_color(worldScaled_vary_t1_uv, instances[instanceID].ChunkTextureSamplers.y, 
+                        abs(instances[instanceID].ChunkTextureArrayIDs.y)) * layer_pct.y;
+  //vec4 t1 = get_tex_color(vary_t1_uv / 5 , instances[instanceID].ChunkTextureSamplers.y, abs(instances[instanceID].ChunkTextureArrayIDs.y));
+  t1.a = mix(t1.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.y < 0));
+
+  vec4 t2 = get_tex_color(worldScaled_vary_t2_uv, instances[instanceID].ChunkTextureSamplers.z, 
+                        abs(instances[instanceID].ChunkTextureArrayIDs.z)) * layer_pct.z;
+  t2.a = mix(t2.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.z < 0));
+
+  vec4 t3 =get_tex_color(worldScaled_vary_t3_uv, instances[instanceID].ChunkTextureSamplers.w,
+                         abs(instances[instanceID].ChunkTextureArrayIDs.w)) * layer_pct.w;
+  t3.a = mix(t3.a, 0.f, int(instances[instanceID].ChunkTextureArrayIDs.w < 0));
+
+  return vec4 (t0 + t1 + t2 + t3);//(t0 * (1.0 - (a0 + a1 + a2)) + t1 * a0 + t2 * a1 + t3 * a2);
+}
+
 vec4 texture_blend()
 {
   vec3 alpha = texture(alphamap, vec3(vary_texcoord / 8.0, instanceID)).rgb;
@@ -243,6 +319,10 @@ void main()
   // vec3 accumlatedLight = vec3(1.0, 1.0, 1.0);
 
   vec3 normalized_normal = normalize(vary_normal);
+  if(point_normals_up == 1)
+  {
+    normalized_normal = vec3(0, 1, 0);
+  }
   float nDotL = clamp(dot(normalized_normal, -normalize(LightDir_FogRate.xyz)), 0.0, 1.0); // default LightDir = -0.6
 
   vec3 skyColor = (AmbientColor_FogEnd.xyz * 1.10000002);
@@ -255,7 +335,14 @@ void main()
   float specularFactor = max(dot(reflection, normalize(camera - vary_position)), 0.0);
 
   // blend textures
-  out_color = mix(vec4(1.0, 1.0, 1.0, 0.0), texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
+  if(enable_mists_heightmapping)
+  {
+	  out_color = mix(vec4(1.0, 1.0, 1.0, 0.0), mists_texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
+  }
+  else
+  {
+	  out_color = mix(vec4(1.0, 1.0, 1.0, 0.0), texture_blend(), int(instances[instanceID].ChunkHoles_DrawImpass_TexLayerCount_CantPaint.b > 0));
+  }
 
   vec3 spc = out_color.a * out_color.rgb * pow(specularFactor, 8);
   out_color.a = 1.0;
@@ -531,6 +618,11 @@ void main()
     && (outer_cursor_radius - diff_x <= d || outer_cursor_radius - diff_z <= d)) || (diff_x < inner_radius
     && diff_z < inner_radius && (inner_radius - diff_x <= d || inner_radius - diff_z <= d))));
     out_color.rgb = mix(cursor_color.rgb, out_color.rgb, alpha);*/
+  }
+
+  if(draw_only_normals != 0)
+  {
+    out_color.rgb = vec3(vary_normal.z * -1, vary_normal.y, vary_normal.x * -1) * 0.5 + 0.5;
   }
 
 }

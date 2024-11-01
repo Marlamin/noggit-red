@@ -3,6 +3,7 @@
 #include "WMOGroupRender.hpp"
 #include <noggit/WMO.h>
 #include <noggit/Log.h> // LogDebug
+#include <QtCore/QSettings>
 
 using namespace Noggit::Rendering;
 
@@ -21,7 +22,11 @@ void WMOGroupRender::upload()
   std::size_t batch_counter = 0;
   for (auto& batch : _wmo_group->_batches)
   {
-    WMOMaterial const& mat (_wmo_group->wmo->materials.at (batch.texture));
+    std::uint16_t material_to_use = batch.texture;
+    if (batch.flags == 2)
+        material_to_use = batch.unused[5];
+
+    WMOMaterial const& mat(_wmo_group->wmo->materials.at(material_to_use));
 
     auto& tex1 = _wmo_group->wmo->textures.at(mat.texture1);
 
@@ -33,7 +38,8 @@ void WMOGroupRender::upload()
 
     std::uint32_t tex_array1 = 0;
     std::uint32_t array_index1 = 0;
-    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
+
+    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3 || mat.shader == 21 || mat.shader == 23;
 
     if (use_tex2)
     {
@@ -61,13 +67,20 @@ void WMOGroupRender::upload()
   _draw_calls.clear();
   WMOCombinedDrawCall* draw_call = nullptr;
   std::vector<WMORenderBatch*> _used_batches;
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
 
   batch_counter = 0;
   for (auto& batch : _wmo_group->_batches)
   {
-    WMOMaterial& mat = _wmo_group->wmo->materials.at(batch.texture);
+    std::uint16_t material_to_use = batch.texture;
+    if (modern_features && batch.flags & 2)
+        material_to_use = batch.unused[5];
+
+    WMOMaterial& mat(_wmo_group->wmo->materials.at(material_to_use));
+
     bool backface_cull = !mat.flags.unculled;
-    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3;
+    bool use_tex2 = mat.shader == 6 || mat.shader == 5 || mat.shader == 3 || mat.shader == 21 || mat.shader == 23;
 
     bool create_draw_call = false;
     if (draw_call && draw_call->backface_cull == backface_cull && batch.index_start == draw_call->index_start + draw_call->index_count)
@@ -336,6 +349,9 @@ void WMOGroupRender::initRenderBatches()
 
   _render_batches.resize(_wmo_group->_batches.size());
 
+  QSettings settings;
+  bool modern_features = settings.value("modern_features", false).toBool();
+
   std::size_t batch_counter = 0;
   for (auto& batch : _wmo_group->_batches)
   {
@@ -361,7 +377,11 @@ void WMOGroupRender::initRenderBatches()
       flags |= WMORenderBatchFlags::eWMOBatch_HasMOCV;
     }
 
-    WMOMaterial const& mat (_wmo_group->wmo->materials.at (batch.texture));
+    std::uint16_t material_to_use = batch.texture;
+    if (modern_features && batch.flags == 2)
+        material_to_use = batch.unused[5];
+
+    WMOMaterial const& mat (_wmo_group->wmo->materials.at (material_to_use));
 
     if (mat.flags.unlit)
     {

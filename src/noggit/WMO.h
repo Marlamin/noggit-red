@@ -38,7 +38,7 @@ namespace Noggit::Rendering
 
 struct wmo_batch
 {
-  int8_t unused[12];
+  int16_t unused[6];
 
   uint32_t index_start;
   uint16_t index_count;

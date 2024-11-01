@@ -199,6 +199,9 @@ namespace Noggit
       QJsonObject toJSON();
       void fromJSON(QJsonObject const& json);
 
+      QPushButton* const heightmappingApplyGlobalButton() { return _heightmapping_apply_global_btn; }
+      QPushButton* const heightmappingApplyAdtButton() { return _heightmapping_apply_adt_btn; }
+      texture_heightmapping_data& getCurrentHeightMappingSetting() {return textureHeightmappingData; }
     signals:
       void texturePaletteToggled();
 
@@ -217,6 +220,8 @@ namespace Noggit
       int _brush_level;
       bool _show_unpaintable_chunks;
 
+      int* _heightinfo_group;
+
       float _spray_size;
       float _spray_pressure;
 
@@ -226,6 +231,7 @@ namespace Noggit
       BoolToggleProperty _overbright_prop;
 
       texturing_mode _texturing_mode; // use getTexturingMode() to check for ground effect mode
+      texture_heightmapping_data textureHeightmappingData;
 
     private:
       OpacitySlider* _brush_level_slider;
@@ -247,6 +253,10 @@ namespace Noggit
       QGroupBox* _anim_group;
 
       texture_swapper* _texture_switcher;
+
+      QGroupBox* _heightmapping_group;
+      QPushButton* _heightmapping_apply_global_btn;
+      QPushButton* _heightmapping_apply_adt_btn;
 
       GroundEffectsTool* _ground_effect_tool;
 

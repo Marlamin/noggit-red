@@ -150,6 +150,11 @@ private:
 
   std::vector<scoped_blp_texture_reference> textures;
   std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS> alphamaps;
+
+  // Mists Heightmapping
+  std::vector<scoped_blp_texture_reference> heightTextures;
+  std::array<texture_heightmapping_data, 4> heightMappingData;
+
   size_t nTextures;
 
   // byte[8][8] // can store the 2bits value in a byte, but might never be higher than 3 or layer count.

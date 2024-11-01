@@ -13,6 +13,7 @@
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/project/CurrentProject.hpp>
 #include <ClientFile.hpp>
 #include <opengl/scoped.hpp>
 #include <opengl/shader.hpp>
@@ -259,6 +260,8 @@ void MapTile::finishLoading()
     for (unsigned int i = 0; i < size / sizeof(ENTRY_MODF); ++i)
     {
       lWMOInstances.push_back(modf_ptr[i]);
+      if(lWMOInstances[i].scale == 0.0f)
+        lWMOInstances[i].scale = 1024.0f;
     }
   }
 
@@ -860,7 +863,7 @@ void MapTile::save(World* world, bool save_using_mclq_liquids)
     lMODF_Data[lID].flags = object->mFlags;
     lMODF_Data[lID].doodadSet = object->doodadset();
     lMODF_Data[lID].nameSet = object->mNameset;
-    lMODF_Data[lID].unknown = object->mUnknown;
+    lMODF_Data[lID].scale = (uint16_t)(object->scale * 1024);
     lID++;
   }
 
@@ -1777,6 +1780,24 @@ void MapTile::calcCamDist(glm::vec3 const& camera)
   _cam_dist = glm::distance(camera, _center);
 }
 
+const texture_heightmapping_data& MapTile::GetTextureHeightMappingData(const std::string& name) const
+{
+    return Noggit::Project::CurrentProject::get()->ExtraMapData.GetTextureHeightDataForADT(_world->mapIndex._map_id, index,name);
+}
+
+void MapTile::forceAlphaUpdate()
+{
+    for (int i = 0; i < 16; ++i)
+    {
+        for (int j = 0; j < 16; ++j)
+        {
+            auto chunk = mChunks[i][j].get();
+            auto texSet = chunk->getTextureSet();
+            texSet->markDirty();
+        }
+    }
+}
+
 bool MapTile::childrenFinishedLoading()
 {
   if (!objectsFinishedLoading())
@@ -1865,5 +1886,3 @@ void MapTile::recalcCombinedExtents()
 
   _combined_extents_dirty = false;
 }
-
-

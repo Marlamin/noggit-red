@@ -295,6 +295,13 @@ bool TextureSet::eraseUnusedTextures()
     return false;
   }
 
+  QSettings settings;
+  bool cleanup_unused_textures = settings.value("cleanup_unused_textures", true).toBool();
+  if (!cleanup_unused_textures)
+  {
+	  return false;
+  }
+
   std::set<int> visible_tex;
 
   if (tmp_edit_values)
