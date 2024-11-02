@@ -7,6 +7,7 @@
 #include <noggit/World.h>
 #include <noggit/Log.h>
 #include <noggit/project/CurrentProject.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 
 #include <util/qt/overload.hpp>
 
@@ -74,9 +75,9 @@ namespace Noggit
       generate_layout->addRow (sel_adts_btn);
       generate_layout->addRow (all_adts_btn);
 
-      QSettings settings;
-      bool modern_features = settings.value("modern_features", false).toBool();
-      if (modern_features) {
+      bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
+      if (modern_features)
+      {
           generate_layout->addRow (maptexture_btn);
           maptexture_btn->setVisible(true);
           generate_layout->addRow(maptexture_n_btn);

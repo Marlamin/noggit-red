@@ -9,6 +9,7 @@
 #include <noggit/ui/MinimapCreator.hpp>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 
 #include <QDir>
 #include <QStatusBar>
@@ -194,9 +195,9 @@ namespace Noggit
             if (!saving_minimap)
                 return false;
 
-            QSettings noggitSettings;
-            bool modern_features = noggitSettings.value("modern_features", false).toBool();
-            if (modern_features && (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES || settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES_N)) {
+            bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
+            if (modern_features && (settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES || settings->export_mode == MinimapGenMode::LOD_MAPTEXTURES_N))
+            {
                 settings->draw_m2 = false;
                 settings->draw_wmo = false;
                 settings->draw_water = false;

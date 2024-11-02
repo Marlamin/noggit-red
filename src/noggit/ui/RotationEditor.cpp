@@ -12,6 +12,7 @@
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
@@ -270,8 +271,7 @@ namespace Noggit
 
           if(obj->which() == eWMO)
           {
-            QSettings settings;
-            bool modern_features = settings.value("modern_features", false).toBool();
+            bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
             if(modern_features)
             {
               _scale->setEnabled(true);

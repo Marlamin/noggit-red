@@ -60,8 +60,8 @@ namespace Noggit::Ui::Windows
 
     private:
     	std::unique_ptr<Component::BuildMapListComponent> _buildMapListComponent;
-        std::shared_ptr<Application::NoggitApplicationConfiguration> _applicationConfiguration;
-        std::shared_ptr<Project::NoggitProject> _project;
+      std::shared_ptr<Application::NoggitApplicationConfiguration> _applicationConfiguration;
+      std::shared_ptr<Project::NoggitProject> _project;
 
 
       void handleEventMapListContextMenuPinMap(int mapId, std::string MapName);

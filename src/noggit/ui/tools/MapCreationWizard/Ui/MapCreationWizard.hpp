@@ -22,6 +22,7 @@
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/widget.hpp>
 #include <noggit/World.h>
+#include <noggit/application/NoggitApplication.hpp>
 
 
 namespace Noggit

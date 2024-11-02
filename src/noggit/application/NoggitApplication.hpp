@@ -3,6 +3,8 @@
 #ifndef NOGGIT_APPLICATION_HPP
 #define NOGGIT_APPLICATION_HPP
 
+#pragma once
+
 #include <memory>
 #include <filesystem>
 #include <ClientData.hpp>

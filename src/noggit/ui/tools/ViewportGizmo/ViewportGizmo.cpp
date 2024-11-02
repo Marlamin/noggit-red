@@ -9,6 +9,7 @@
 #include <external/glm/gtc/quaternion.hpp>
 #include <external/glm/gtx/string_cast.hpp>
 #include <noggit/MapView.h>
+#include <noggit/application/NoggitApplication.hpp>
 
 #include <limits>
 
@@ -146,8 +147,7 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
   NOGGIT_ACTION_MGR->beginAction(map_view, Noggit::ActionFlags::eOBJECTS_TRANSFORMED,
                                                  Noggit::ActionModalityControllers::eLMB);
 
-  QSettings settings;
-  bool modern_features = settings.value("modern_features", false).toBool();
+  bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
 
   if (gizmo_selection_type == MULTISELECTION)
   {
@@ -169,7 +169,8 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       float& scale = obj_instance->scale;
 
       // If modern features are disabled, we don't want to scale WMOs
-      if (obj_instance->which() == eWMO && !modern_features && _gizmo_operation == ImGuizmo::SCALE) {
+      if (obj_instance->which() == eWMO && !modern_features && _gizmo_operation == ImGuizmo::SCALE)
+      {
           scale = 1.0f;
           continue;
       }
@@ -290,7 +291,8 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
       float& scale = obj_instance->scale;
 
       // If modern features are disabled, we don't want to scale WMOs
-      if (obj_instance->which() == eWMO && !modern_features && _gizmo_operation == ImGuizmo::SCALE) {
+      if (obj_instance->which() == eWMO && !modern_features && _gizmo_operation == ImGuizmo::SCALE)
+      {
           scale = 1.0f;
           continue;
       }

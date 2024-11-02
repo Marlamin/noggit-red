@@ -427,8 +427,7 @@ void blp_texture::finishLoading()
       _is_specular = true;
     }
 
-    QSettings settings;
-    bool modern_features = settings.value("modern_features", false).toBool();
+    bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
 
     // Only load _h in map view when modern features are enabled
     if(_context == Noggit::NoggitRenderContext::MAP_VIEW && modern_features)

@@ -778,8 +778,7 @@ void World::scale_selected_models(float v, object_scaling_type type)
   if (!_selected_model_count)
       return;
 
-  QSettings settings;
-  bool modern_features = settings.value("modern_features", false).toBool();
+  bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
 
   for (auto& entry : _current_selection)
   {
@@ -790,69 +789,70 @@ void World::scale_selected_models(float v, object_scaling_type type)
       if (obj->which() != eMODEL)
       {
           // If we are not using modern features, we don't want to scale WMOs
-          if(!modern_features)
-			  continue;
+        if(!modern_features)
+			    continue;
 
-          WMOInstance* wi = static_cast<WMOInstance*>(obj);
+        WMOInstance* wi = static_cast<WMOInstance*>(obj);
 
-          NOGGIT_CUR_ACTION->registerObjectTransformed(wi);
+        NOGGIT_CUR_ACTION->registerObjectTransformed(wi);
 
-          float scale = wi->scale;
+        float scale = wi->scale;
 
-          switch (type)
-          {
-          case World::object_scaling_type::set:
-              scale = v;
-              break;
-          case World::object_scaling_type::add:
-              scale += v;
-              break;
-          case World::object_scaling_type::mult:
-              scale *= v;
-              break;
-          }
+        switch (type)
+        {
+        case World::object_scaling_type::set:
+            scale = v;
+            break;
+        case World::object_scaling_type::add:
+            scale += v;
+            break;
+        case World::object_scaling_type::mult:
+            scale *= v;
+            break;
+        }
 
-          // if the change is too small, do nothing
-          if (std::abs(scale - wi->scale) < ModelInstance::min_scale())
-          {
-              continue;
-          }
+        // if the change is too small, do nothing
+        if (std::abs(scale - wi->scale) < ModelInstance::min_scale())
+        {
+            continue;
+        }
 
-          updateTilesWMO(wi, model_update::remove);
-          wi->scale = std::min(ModelInstance::max_scale(), std::max(ModelInstance::min_scale(), scale));
-          wi->recalcExtents();
-          updateTilesWMO(wi, model_update::add);
+        updateTilesWMO(wi, model_update::remove);
+        wi->scale = std::min(ModelInstance::max_scale(), std::max(ModelInstance::min_scale(), scale));
+        wi->recalcExtents();
+        updateTilesWMO(wi, model_update::add);
       }
-      else {
-          ModelInstance* mi = static_cast<ModelInstance*>(obj);
+      else
+      {
+        ModelInstance* mi = static_cast<ModelInstance*>(obj);
 
-          NOGGIT_CUR_ACTION->registerObjectTransformed(mi);
+        NOGGIT_CUR_ACTION->registerObjectTransformed(mi);
 
-          float scale = mi->scale;
+        float scale = mi->scale;
 
-          switch (type)
-          {
-          case World::object_scaling_type::set:
-              scale = v;
-              break;
-          case World::object_scaling_type::add:
-              scale += v;
-              break;
-          case World::object_scaling_type::mult:
-              scale *= v;
-              break;
-          }
+        switch (type)
+        {
+        case World::object_scaling_type::set:
+            scale = v;
+            break;
+        case World::object_scaling_type::add:
+            scale += v;
+            break;
+        case World::object_scaling_type::mult:
+            scale *= v;
+            break;
+        }
 
-          // if the change is too small, do nothing
-          if (std::abs(scale - mi->scale) < ModelInstance::min_scale())
-          {
-              continue;
-          }
+        // if the change is too small, do nothing
+        if (std::abs(scale - mi->scale) < ModelInstance::min_scale())
+        {
+            continue;
+        }
 
-          updateTilesModel(mi, model_update::remove);
-          mi->scale = std::min(ModelInstance::max_scale(), std::max(ModelInstance::min_scale(), scale));
-          mi->recalcExtents();
-          updateTilesModel(mi, model_update::add);
+        updateTilesModel(mi, model_update::remove);
+        mi->scale = std::min(ModelInstance::max_scale(), std::max(ModelInstance::min_scale(), scale));
+        mi->recalcExtents();
+        updateTilesModel(mi, model_update::add);
       }
     }
   }

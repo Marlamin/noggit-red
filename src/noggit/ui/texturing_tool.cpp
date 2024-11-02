@@ -14,6 +14,7 @@
 #include <util/qt/overload.hpp>
 #include <noggit/TextureManager.h>
 #include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QPushButton>
@@ -212,7 +213,7 @@ namespace Noggit
       tool_layout->setAlignment(quick_palette_btn, Qt::AlignTop);
 
       // Mists HeightMapping, only enable if modern feature setting is on
-      bool modern_features = settings.value("modern_features", false).toBool();
+      bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
 
       // Define UI elements regardless of modern_features being enabled because they're used later on as well.
       _heightmapping_group = new QGroupBox("Height Mapping", tool_widget);
@@ -230,7 +231,8 @@ namespace Noggit
       QPushButton* _heightmapping_copy_btn = new QPushButton("Copy to JSON", this);
       _heightmapping_copy_btn->setVisible(modern_features);
 
-      if (modern_features) {
+      if (modern_features)
+      {
 
           auto heightmapping_group_layout(new QFormLayout(_heightmapping_group));
 
@@ -330,7 +332,8 @@ namespace Noggit
       connect (anim_speed_slider, &QSlider::valueChanged, &_anim_speed_prop, &Noggit::unsigned_int_property::set);
       connect (anim_orientation_dial, &QDial::valueChanged, &_anim_rotation_prop, &Noggit::unsigned_int_property::set);
       
-      if (modern_features) {
+      if (modern_features)
+      {
           connect(heightmapping_scale_spin, qOverload<double>(&QDoubleSpinBox::valueChanged)
               , [&](double v)
               {
@@ -469,7 +472,8 @@ namespace Noggit
 
       // Mists Heightmapping
 
-      if (modern_features) {
+      if (modern_features)
+      {
           connect(_current_texture, &Noggit::Ui::current_texture::texture_updated
               , [=]()
               {

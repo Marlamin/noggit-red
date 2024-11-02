@@ -4301,6 +4301,9 @@ void MapView::onSettingsSave()
   // force updating rendering
   _camera_moved_since_last_draw = true;
 
+  auto app_config = Noggit::Application::NoggitApplication::instance()->getConfiguration();
+  app_config->modern_features = _settings->value("modern_features", false).toBool();
+
 }
 
 void MapView::ShowContextMenu(QPoint pos) 

@@ -10,10 +10,9 @@
 #include <noggit/WMOInstance.h>
 #include <noggit/rendering/Primitives.hpp>
 #include <opengl/scoped.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 
 #include <sstream>
-
-#include <QtCore/QSettings>
 
 WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENTRY_MODF const* d, Noggit::NoggitRenderContext context)
   : SceneObject(SceneObjectTypes::eWMO, context)
@@ -27,13 +26,14 @@ WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, ENT
 
   uid = d->uniqueID;
 
-  QSettings settings;
-  bool modern_features = settings.value("modern_features", false).toBool();
+  bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
 
-  if (modern_features) {
+  if (modern_features)
+  {
       scale = static_cast<float>(d->scale) / 1024.0f;
   }
-  else {
+  else
+  {
       scale = 1.0f;
   }
 
