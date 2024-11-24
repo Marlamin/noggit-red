@@ -23,10 +23,10 @@ enum LiquidLayerUpdateFlags
 
 enum LiquidVertexFormats
 {
-    HEIGHT_DEPTH = 0,
-    HEIGHT_UV = 1,
-    DEPTH = 2,
-    HEIGHT_DEPTH_UV = 3
+    LVF_HEIGHT_DEPTH = 0,
+    LVF_HEIGHT_UV = 1,
+    LVF_DEPTH = 2,
+    LVF_HEIGHT_DEPTH_UV = 3
 };
 
 namespace BlizzardArchive

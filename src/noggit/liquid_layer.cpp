@@ -20,7 +20,7 @@ namespace
 
 liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, float height, int liquid_id)
   : _liquid_id(liquid_id)
-  , _liquid_vertex_format(HEIGHT_DEPTH)
+  , _liquid_vertex_format(LVF_HEIGHT_DEPTH)
   , _minimum(height)
   , _maximum(height)
   , _subchunks(0)
@@ -68,7 +68,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk, glm::vec3 const& base, mclq& liqui
       liquid_vertex lv;
 
       // _liquid_vertex_format is set by changeLiquidID()
-      if (_liquid_vertex_format == HEIGHT_UV)
+      if (_liquid_vertex_format == LVF_HEIGHT_UV)
       {
         lv.depth = 1.f;
         lv.uv = { static_cast<float>(v.magma.x) / 255.f, static_cast<float>(v.magma.y) / 255.f };
@@ -124,7 +124,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk
   {
     f.seek(base_pos + info.ofsHeightMap);
 
-    if (_liquid_vertex_format == HEIGHT_DEPTH || _liquid_vertex_format == HEIGHT_UV)
+    if (_liquid_vertex_format == LVF_HEIGHT_DEPTH || _liquid_vertex_format == LVF_HEIGHT_UV)
     {
 
       for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
@@ -139,7 +139,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk
       }
     }
 
-    if (_liquid_vertex_format == HEIGHT_UV)
+    if (_liquid_vertex_format == LVF_HEIGHT_UV)
     {
       for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
       {
@@ -155,7 +155,7 @@ liquid_layer::liquid_layer(ChunkWater* chunk
       }
     }
 
-    if (_liquid_vertex_format == HEIGHT_DEPTH || _liquid_vertex_format == DEPTH)
+    if (_liquid_vertex_format == LVF_HEIGHT_DEPTH || _liquid_vertex_format == LVF_DEPTH)
     {
       for (int z = info.yOffset; z <= info.yOffset + info.height; ++z)
       {
@@ -326,7 +326,7 @@ void liquid_layer::save(util::sExtendableArray& adt, int base_pos, int& info_pos
   int vertices_count = (info.width + 1) * (info.height + 1);
   info.ofsHeightMap = current_pos - base_pos;
 
-  if (_liquid_vertex_format == HEIGHT_DEPTH || _liquid_vertex_format == HEIGHT_UV)
+  if (_liquid_vertex_format == LVF_HEIGHT_DEPTH || _liquid_vertex_format == LVF_HEIGHT_UV)
   {
     adt.Extend(vertices_count * sizeof(float));
 
@@ -345,7 +345,7 @@ void liquid_layer::save(util::sExtendableArray& adt, int base_pos, int& info_pos
       info.ofsHeightMap = 0;
   }
 
-  if (_liquid_vertex_format == HEIGHT_UV)
+  if (_liquid_vertex_format == LVF_HEIGHT_UV)
   {
     adt.Extend(vertices_count * sizeof(mh2o_uv));
 
@@ -363,7 +363,7 @@ void liquid_layer::save(util::sExtendableArray& adt, int base_pos, int& info_pos
     }
   }
 
-  if (_liquid_vertex_format == HEIGHT_DEPTH || (_liquid_vertex_format == DEPTH && !_fatigue_enabled))
+  if (_liquid_vertex_format == LVF_HEIGHT_DEPTH || (_liquid_vertex_format == LVF_DEPTH && !_fatigue_enabled))
   {
     adt.Extend(vertices_count * sizeof(std::uint8_t));
 
@@ -395,20 +395,21 @@ void liquid_layer::changeLiquidID(int id)
     switch (_liquid_type)
     {
     case liquid_basic_types_magma:
-      _mclq_liquid_type = 6;
-      _liquid_vertex_format = 1;
+      _mclq_liquid_type = mclq_liquid_magma;
+      _liquid_vertex_format = LVF_HEIGHT_UV;
       break;
     case liquid_basic_types_slime:
-      _mclq_liquid_type = 3;
-      _liquid_vertex_format = HEIGHT_UV;
+      _mclq_liquid_type = mclq_liquid_slime;
+      _liquid_vertex_format = LVF_HEIGHT_UV;
       break;
     case liquid_basic_types_ocean: // ocean
-      _liquid_vertex_format = DEPTH;
-      _mclq_liquid_type = 1;
+      // lvf 2 is only used for flat water at height 0
+      _liquid_vertex_format = misc::float_equals(_minimum, 0.f) && misc::float_equals(_maximum, 0.f) ? LVF_DEPTH : LVF_HEIGHT_DEPTH;
+      _mclq_liquid_type = mclq_liquid_ocean;
       break;
     default: // river
-      _liquid_vertex_format = HEIGHT_DEPTH;
-      _mclq_liquid_type = 4;
+      _liquid_vertex_format = LVF_HEIGHT_DEPTH;
+      _mclq_liquid_type = mclq_liquid_river;
       break;
     }
   }
@@ -587,14 +588,14 @@ void liquid_layer::update_min_max()
   }
 
   // lvf = 2 means the liquid height is 0, switch to lvf 0 when that's not the case
-  if (_liquid_vertex_format == DEPTH && (!misc::float_equals(0.f, _minimum) || !misc::float_equals(0.f, _maximum)))
+  if (_liquid_vertex_format == LVF_DEPTH && (!misc::float_equals(0.f, _minimum) || !misc::float_equals(0.f, _maximum)))
   {
-    _liquid_vertex_format = HEIGHT_DEPTH;
+    _liquid_vertex_format = LVF_HEIGHT_DEPTH;
   }
   // use lvf 2 when possible to save space
-  else if (_liquid_vertex_format == HEIGHT_DEPTH && misc::float_equals(0.f, _minimum) && misc::float_equals(0.f, _maximum))
+  else if (_liquid_vertex_format == LVF_HEIGHT_DEPTH && misc::float_equals(0.f, _minimum) && misc::float_equals(0.f, _maximum))
   {
-    _liquid_vertex_format = DEPTH;
+    _liquid_vertex_format = LVF_DEPTH;
   }
 
   _fatigue_enabled = check_fatigue();
