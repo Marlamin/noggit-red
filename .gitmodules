@@ -1,12 +1,12 @@
 [submodule "src/external/blizzard-database-library"]
 	path = src/external/blizzard-database-library
-	url = https://gitlab.com/prophecy-rp/blizzard-database-library.git
+	url = https://gitlab.com/T1ti/blizzard-database-library.git
 [submodule "src/external/blizzard-archive-library"]
 	path = src/external/blizzard-archive-library
 	url = https://gitlab.com/T1ti/blizzard-archive-library.git
 [submodule "cmake"]
 	path = cmake
-	url = https://gitlab.com/prophecy-rp/build-dependencies.git
+	url = https://gitlab.com/T1ti/build-dependencies.git
 	branch = dep-cmake
 [submodule "dist/listfile"]
 	path = dist/listfile
