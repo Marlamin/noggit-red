@@ -33,7 +33,7 @@ namespace
 
 namespace Noggit::Application
 {
-  void NoggitApplication::initalize(int argc, char* argv[], std::vector<bool> Parser)
+  bool NoggitApplication::initalize(int argc, char* argv[], std::vector<bool> Parser)
   {
 	  InitLogging();
 	  Command = Parser;
@@ -133,7 +133,7 @@ namespace Noggit::Application
 	  };
 
 	  // confirmed crashes with v14.30.30704.00 and v14.36.32532.00
-	  const int required_version = 38;
+	  const int required_version = 40;
 
 	  bool redist_found = false;
 	  foreach (const QString & version, versions) {
@@ -200,11 +200,27 @@ namespace Noggit::Application
 
 	  // context creation seems to get stuck sometimes, this ensure the app is killed
 	  // otherwise it's wasting cpu resources and is annoying when developping
-	  auto failsafe = std::async(&opengl_context_creation_stuck_failsafe);
+	  // auto failsafe = std::async(&opengl_context_creation_stuck_failsafe);
 
 	  QSurfaceFormat::setDefaultFormat(format);
 	  QOpenGLContext context;
-	  context.create();
+		if (!context.create()) [[unlikely]]
+		{
+			LogError << "Failed to create OpenGL 4.1 context." << std::endl;
+
+			QMessageBox msgBox;
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.setWindowTitle("OpenGL Context Error");
+			msgBox.setText("Failed to create an OpenGL 4.1 context. Ensure your graphic device and drivers are compatible with OpenGL 4.1"
+											"\nThe application will now close.");
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.exec();
+
+			// qFatal("Noggit : Failed to create OpenGL 4.1 context.\n Ensure your graphic device and drivers are compatible with OpenGL 4.1");
+			QCoreApplication::exit(EXIT_FAILURE);
+			return false;
+			// exit(EXIT_FAILURE);
+		}
 
 	  QOffscreenSurface surface;
 	  surface.create();
@@ -227,16 +243,15 @@ namespace Noggit::Application
 	  {
 		  LogError << "Default GL minor version is less than 1" << std::endl;
 	  }
-	  
-	  QOpenGLVersionProfile profile = QOpenGLVersionProfile(format);
+		auto profile = format.profile();
 
 	  LogDebug << "GL: Version: " << gl.getString(GL_VERSION) << std::endl;
 	  LogDebug << "GL: Vendor: " << gl.getString(GL_VENDOR) << std::endl;
 	  LogDebug << "GL: Renderer: " << gl.getString(GL_RENDERER) << std::endl;
 
-	  if (!profile.isValid())
+	  if (profile != QSurfaceFormat::OpenGLContextProfile::CoreProfile) // allow compatibility profile ?
 	  {
-		  LogError << "OpenGL version profile is not valid." << std::endl;
+		  LogError << "OpenGL version profile is not valid. Profile id : " << profile << std::endl;
 		  throw std::runtime_error(
 			  "OpenGL version profile is not valid.");
 	  }
@@ -248,6 +263,8 @@ namespace Noggit::Application
 	  // TODO : thread count setting
 	  // AsyncLoader::setup(NoggitSettings.value("async_thread_count", 3).toInt());
 	  AsyncLoader::setup(3);
+
+		return true;
   }
 
   std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> NoggitApplication::getConfiguration()
