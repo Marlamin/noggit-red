@@ -351,21 +351,29 @@ namespace Noggit::Project
           return {};
       }
 
+      // Log << "Client Version: " << static_cast<int>(project->ClientData->version()) << std::endl;
+
+      Log << "Client Locale: " << project->ClientData->locale_name() << std::endl;
+
+      for (auto const loaded_achive : *project->ClientData->loadedArchives())
+      {
+        Log << "Loaded client Archive: " << loaded_achive->path() << std::endl;
+      }
       
-    // QSettings settings;
-    // bool modern_features = settings.value("modern_features", false).toBool();
-    bool modern_features = _configuration->modern_features;
-	  if (modern_features)
-	  {
-		  Log << "Modern Features Enabled" << std::endl;
-          loadExtraData(project.value());
-	  }
-	  else
-	  {
-		  Log << "Modern Features Disabled" << std::endl;
-	  }
-      return std::make_shared<NoggitProject>(project.value());
-    }
+      // QSettings settings;
+      // bool modern_features = settings.value("modern_features", false).toBool();
+      bool modern_features = _configuration->modern_features;
+	    if (modern_features)
+	    {
+		    Log << "Modern Features Enabled" << std::endl;
+            loadExtraData(project.value());
+	    }
+	    else
+	    {
+		    Log << "Modern Features Disabled" << std::endl;
+	    }
+        return std::make_shared<NoggitProject>(project.value());
+      }
 
     void loadExtraData(NoggitProject& project);
   };
