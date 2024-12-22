@@ -204,7 +204,8 @@ void Noggit::Action::undo(bool redo)
     for (auto& pair : redo ? _chunk_shadow_map_post : _chunk_shadow_map_pre)
     {
       std::memcpy(&pair.first->_shadow_map, pair.second.data(), 64 * 64 * sizeof(uint8_t));
-      pair.first->update_shadows();
+      pair.first->registerChunkUpdate(ChunkUpdateFlags::SHADOW);
+      // pair.first->update_shadows();
     }
   }
   if (_flags & ActionFlags::eCHUNK_DOODADS_EXCLUSION)
