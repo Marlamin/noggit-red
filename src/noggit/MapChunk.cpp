@@ -530,7 +530,7 @@ void MapChunk::draw ( math::frustum const& frustum
 
 }
 
-bool MapChunk::intersect (math::ray const& ray, selection_result* results)
+bool MapChunk::intersect (math::ray const& ray, selection_result* results, bool first_result)
 {
   if (!ray.intersect_bounds (vmin, vmax))
   {
@@ -602,6 +602,9 @@ bool MapChunk::intersect (math::ray const& ray, selection_result* results)
           (*distance, selected_chunk_type (this, std::make_tuple(indices[i], indices[i + 1],
                                                                  indices[i + 2]), ray.position (*distance)));
       intersection_found = true;
+
+      if (first_result)
+        return intersection_found;
     }
   }
 

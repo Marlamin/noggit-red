@@ -416,13 +416,13 @@ void World::rotate_model_to_ground_normal(SceneObject* obj, bool smoothNormals)
         {
             {
                 math::ray intersect_ray(rayPos, glm::vec3(0.f, -1.f, 0.f));
-                chunk->intersect(intersect_ray, &results);
+                chunk->intersect(intersect_ray, &results, true);
             }
             // object is below ground
             if (results.empty())
             {
                 math::ray intersect_ray(rayPos, glm::vec3(0.f, 1.f, 0.f));
-                chunk->intersect(intersect_ray, &results);
+                chunk->intersect(intersect_ray, &results, true);
             }
         });
 
@@ -724,13 +724,13 @@ glm::vec3 World::get_ground_height(glm::vec3 pos)
     {
         {
             math::ray intersect_ray(pos, glm::vec3(0.f, -1.f, 0.f));
-            chunk->intersect(intersect_ray, &hits);
+            chunk->intersect(intersect_ray, &hits, true);
         }
         // object is below ground
         if (hits.empty())
         {
             math::ray intersect_ray(pos, glm::vec3(0.f, 1.f, 0.f));
-            chunk->intersect(intersect_ray, &hits);
+            chunk->intersect(intersect_ray, &hits, true);
         }
     });
 
