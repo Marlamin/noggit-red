@@ -24,7 +24,6 @@
 #include <noggit/World.h>
 #include <noggit/application/NoggitApplication.hpp>
 
-
 namespace Noggit
 {
   namespace Ui

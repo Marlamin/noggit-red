@@ -3,7 +3,6 @@
 #include "MapCreationWizard.hpp"
 
 #include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/ui/widgets/Vector3Widget.hpp>
 #include <noggit/project/CurrentProject.hpp>
 #include <blizzard-database-library/include/structures/Types.h>
@@ -11,6 +10,7 @@
 #include <noggit/World.h>
 #include <noggit/application/Utils.hpp>
 #include <noggit/Log.h>
+#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 
 #include <util/qt/overload.hpp>
 

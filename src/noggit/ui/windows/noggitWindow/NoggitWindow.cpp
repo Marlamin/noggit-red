@@ -10,7 +10,6 @@
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/UidFixWindow.hpp>
 #include <noggit/uid_storage.hpp>
-#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/tools/UiCommon/StackedWidget.hpp>
@@ -20,6 +19,7 @@
 #include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
 #include <noggit/application/Utils.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <BlizzardDatabase.h>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
@@ -140,6 +140,8 @@ namespace Noggit::Ui::Windows
     _menuBar->adjustSize();
 
     _buildMapListComponent = std::make_unique<Component::BuildMapListComponent>();
+
+    _map_creation_wizard = new Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard(_project, this);
 
     buildMenu();
   }
@@ -486,8 +488,6 @@ namespace Noggit::Ui::Windows
     _right_side->addTab(minimap_holder, "Enter map");
     minimap_holder->setAccessibleName("main_menu_minimap_holder");
 
-    _map_creation_wizard = new Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard(_project, this);
-
     _map_wizard_connection = connect(_map_creation_wizard,
                                      &Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated, 
                                 [this](int map_id = -1)
@@ -559,6 +559,12 @@ namespace Noggit::Ui::Windows
     _project->unpinMap(mapId);
     _buildMapListComponent->buildMapList(this);
   }
+
+  World* NoggitWindow::getWorld()
+  {
+    return _map_creation_wizard->getWorld();
+  }
+
 
   void NoggitWindow::promptExit(QCloseEvent* event)
   {
