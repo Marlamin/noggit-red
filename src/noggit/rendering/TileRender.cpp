@@ -5,7 +5,7 @@
 #include <noggit/MapChunk.h>
 #include <noggit/ui/TexturingGUI.h>
 #include <external/tracy/Tracy.hpp>
-#include <QtCore/QSettings>
+#include <noggit/application/NoggitApplication.hpp>
 
 using namespace Noggit::Rendering;
 
@@ -535,8 +535,7 @@ bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned i
 
 
   auto& chunk_textures = (*chunk->texture_set->getTextures());
-  QSettings settings;
-  bool modern_features = settings.value("modern_features", false).toBool();
+  bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
 
   for (int k = 0; k < chunk->texture_set->num(); ++k)
   {

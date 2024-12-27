@@ -234,6 +234,14 @@ enum liquid_types
     LIQUID_NAXX_SLIME = LIQUID_FIRST_NONBASIC_LIQUID_TYPE,
 };
 
+enum mclq_liquid_types
+{
+  mclq_liquid_ocean = 1,
+  mclq_liquid_slime = 3,
+  mclq_liquid_river = 4,
+  mclq_liquid_magma = 6,
+};
+
 struct MH2O_Information{
   uint16_t liquid_id;
   uint16_t liquid_vertex_format;

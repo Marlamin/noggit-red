@@ -6,6 +6,7 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
@@ -39,13 +40,15 @@ void ObjectInstanceSetScaleNode::compute()
     return;
   }
 
-  if (obj->which() == eWMO) {
-      QSettings settings;
-      bool modern_features = settings.value("modern_features", false).toBool();
-      if (modern_features) {
+  if (obj->which() == eWMO)
+  {
+      bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
+      if (modern_features)
+      {
         obj->scale = scale;
       }
-      else {
+      else
+      {
         obj->scale = 1.0;
       }
   }

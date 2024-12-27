@@ -52,7 +52,7 @@ bool SceneObject::isDuplicateOf(SceneObject const& other)
 
 void SceneObject::updateTransformMatrix()
 {
-  glm::mat4x4 matrix = glm::mat4x4(1);
+  glm::mat4x4 matrix = glm::mat4x4(1.0f);
 
   if (pos != glm::vec3(0.0f))
   {
@@ -66,9 +66,14 @@ void SceneObject::updateTransformMatrix()
     (glm::abs(dir.z) < 1e-6f || dir.z == -0.0f) ? 0.0f : dir.z
   );
 
-  if (clamped_dir != glm::vec3(0.0f))
+  // always need to recalc rotation because of the angles, maybe we can initialize matrix to -90 etc...
+  // if (clamped_dir != glm::vec3(0.0f))
   {
-    matrix = matrix * glm::eulerAngleYZX(glm::radians(clamped_dir.y - math::degrees(90.0f)._), glm::radians(-clamped_dir.x), glm::radians(clamped_dir.z));
+    matrix *= glm::eulerAngleYZX(
+      glm::radians(clamped_dir.y - math::degrees(90.0f)._),
+      glm::radians(-clamped_dir.x),
+      glm::radians(clamped_dir.z)
+    );
   }
 
   if (scale != 1.0f)
@@ -118,7 +123,6 @@ void SceneObject::derefTile(MapTile* tile)
   assert(tile);
   if (_tiles.empty())
   {
-    assert(false);
     return;
   }
 

@@ -911,7 +911,8 @@ void Skies::update_sky_colors(glm::vec3 pos, int time, bool global_only)
   const float fogStart = _fog_multiplier * fogEnd;
   const float fogRange = fogEnd - fogStart;
 
-  constexpr float fogFarClip = 500.f; // Max fog farclip possible
+  // constexpr float fogFarClip = 500.f; // Max fog farclip possible
+  constexpr float fogFarClip = 1583.333374f; // 1583.333374 for wrath/tbc zones, 791.666687 for vanilla zones
 
   if (fogRange <= fogFarClip)
   {

@@ -7,6 +7,7 @@
 #include <external/PNG2BLP/Png2Blp.h>
 #include <noggit/DBC.h>
 #include <noggit/project/CurrentProject.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 
 #include <QDir>
 #include <QBuffer>
@@ -98,8 +99,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
   _world->_n_loaded_tiles = 0;
   unsigned tile_counter = 0;
 
-  QSettings settings;
-  bool modern_features = settings.value("modern_features", false).toBool();
+  bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
 
   for (MapTile* tile : _world->mapIndex.loaded_tiles())
   {
@@ -989,7 +989,7 @@ void WorldRender::draw (glm::mat4x4 const& model_view
             continue;
 
         glm::mat4x4 identity_mtx = glm::mat4x4{ 1 };
-        auto const extents = selection_group.getExtents();
+        auto const& extents = selection_group.getExtents();
         Noggit::Rendering::Primitives::WireBox::getInstance(_world->_context).draw(model_view
             , projection
             , identity_mtx
@@ -2015,7 +2015,6 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
 
     image = image.convertToFormat(QImage::Format_RGBA8888);
 
-    QSettings app_settings;
     QString str = QString(Noggit::Project::CurrentProject::get()->ProjectPath.c_str());
     if (!(str.endsWith('\\') || str.endsWith('/')))
     {
@@ -2103,7 +2102,8 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
         auto sstream = std::stringstream();
         sstream << map_name << "\\map" << tile_idx.x << "_" << std::setfill('0') << std::setw(2) << tile_idx.z << ".blp";
         std::string tilename_left = sstream.str();
-        _world->mapIndex._minimap_md5translate[map_name][tilename_left] = tex_name;
+        auto& minimap_md5translate = Noggit::Application::NoggitApplication::instance()->clientData()->_minimap_md5translate;
+        minimap_md5translate[map_name][tilename_left] = tex_name;
     }
     catch(MapDB::NotFound)
     {

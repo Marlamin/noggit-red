@@ -22,7 +22,7 @@
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/widget.hpp>
 #include <noggit/World.h>
-
+#include <noggit/application/NoggitApplication.hpp>
 
 namespace Noggit
 {
@@ -96,8 +96,12 @@ namespace Noggit
       ~MapCreationWizard();
 
       void wheelEvent(QWheelEvent *event) override;
-      void destroyFakeWorld() { if(_world) delete _world; _world = nullptr; _minimap_widget->world (nullptr); };
+      // void destroyFakeWorld() { if(_world) _world.reset(); _world = nullptr; _minimap_widget->world (nullptr); };
       void addNewMap();
+
+      World* getWorld() { return _world.get(); };
+      std::unique_ptr<World> _world;
+
     signals:
       void map_dbc_updated(int new_map = 0);
 
@@ -159,8 +163,6 @@ namespace Noggit
       QLineEdit* _difficulty_string;
 
       WmoEntryTab _wmoEntryTab;
-
-      World* _world = nullptr;
 
       bool _is_new_record = false;
       int _cur_map_id = -1;

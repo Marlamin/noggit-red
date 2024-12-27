@@ -10,7 +10,6 @@
 #include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/UidFixWindow.hpp>
 #include <noggit/uid_storage.hpp>
-#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
 #include <noggit/ui/tools/UiCommon/StackedWidget.hpp>
@@ -20,6 +19,7 @@
 #include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
 #include <noggit/application/Utils.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <BlizzardDatabase.h>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QHBoxLayout>
@@ -141,6 +141,8 @@ namespace Noggit::Ui::Windows
 
     _buildMapListComponent = std::make_unique<Component::BuildMapListComponent>();
 
+    _map_creation_wizard = new Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard(_project, this);
+
     buildMenu();
   }
 
@@ -149,6 +151,10 @@ namespace Noggit::Ui::Windows
       )
   {
     QSettings settings;
+    assert(getWorld());
+
+    unsigned int world_map_id = getWorld()->getMapID();
+
 #ifdef USE_MYSQL_UID_STORAGE
     bool use_mysql = settings.value("project/mysql/enabled", false).toBool();
 
@@ -158,23 +164,23 @@ namespace Noggit::Ui::Windows
         valid_conn = mysql::testConnection(true);
     }
 
-    if ((valid_conn && mysql::hasMaxUIDStoredDB(_world->getMapID()))
-      || uid_storage::hasMaxUIDStored(_world->getMapID())
+    if ((valid_conn && mysql::hasMaxUIDStoredDB(world_map_id))
+      || uid_storage::hasMaxUIDStored(world_map_id)
        )
     {
 
-      _world->mapIndex.loadMaxUID();
+      getWorld()->mapIndex.loadMaxUID();
       enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::none, from_bookmark);
     }
 #else
-    if (uid_storage::hasMaxUIDStored(_world->getMapID()))
+    if (uid_storage::hasMaxUIDStored(world_map_id))
     {
       if (settings.value("uid_startup_check", true).toBool())
       {
         enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::max_uid, from_bookmark);
       } else
       {
-        _world->mapIndex.loadMaxUID();
+        getWorld()->mapIndex.loadMaxUID();
         enterMapAt(pos, camera_pitch, camera_yaw, uid_fix_mode::none, from_bookmark);
       }
     }
@@ -199,30 +205,32 @@ namespace Noggit::Ui::Windows
                            bool from_bookmark
   )
   {
-      if (_world->mapIndex.hasAGlobalWMO())
-      {
-          // enter at mdoel's position
-          // pos = glm::vec3(_world->mWmoEntry[0], _world->mWmoEntry.pos[1], _world->mWmoEntry.pos[2]);
+    World* world = getWorld();
 
-          // better, enter at model's max extent, facing toward min extent
-          auto min_extent = glm::vec3(_world->mWmoEntry.extents[0][0], _world->mWmoEntry.extents[0][1], _world->mWmoEntry.extents[0][2]);
-          auto max_extent = glm::vec3(_world->mWmoEntry.extents[1][0], _world->mWmoEntry.extents[1][1] * 2, _world->mWmoEntry.extents[1][2]);
-          float dx = min_extent.x - max_extent.x;
-          float dy = min_extent.z - max_extent.z; // flipping z and y works better for some reason
-          float dz = min_extent.y - max_extent.y;
+    if (world->mapIndex.hasAGlobalWMO())
+    {
+        // enter at mdoel's position
+        // pos = glm::vec3(_world->mWmoEntry[0], _world->mWmoEntry.pos[1], _world->mWmoEntry.pos[2]);
 
-          pos = { _world->mWmoEntry.pos[0], _world->mWmoEntry.pos[1], _world->mWmoEntry.pos[2] };
+        // better, enter at model's max extent, facing toward min extent
+        auto min_extent = glm::vec3(world->mWmoEntry.extents[0][0], world->mWmoEntry.extents[0][1], world->mWmoEntry.extents[0][2]);
+        auto max_extent = glm::vec3(world->mWmoEntry.extents[1][0], world->mWmoEntry.extents[1][1] * 2, world->mWmoEntry.extents[1][2]);
+        float dx = min_extent.x - max_extent.x;
+        float dy = min_extent.z - max_extent.z; // flipping z and y works better for some reason
+        float dz = min_extent.y - max_extent.y;
 
-          camera_yaw = math::degrees(math::radians(std::atan2(dx, dy)));
+        pos = { world->mWmoEntry.pos[0], world->mWmoEntry.pos[1], world->mWmoEntry.pos[2] };
 
-          float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
-          camera_pitch = -math::degrees(math::radians(std::asin(dz / distance)));
+        camera_yaw = math::degrees(math::radians(std::atan2(dx, dy)));
 
-      }
+        float distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+        camera_pitch = -math::degrees(math::radians(std::asin(dz / distance)));
+
+    }
 
 
-    _map_creation_wizard->destroyFakeWorld();
-    _map_view = (new MapView(camera_yaw, camera_pitch, pos, this, _project, std::move(_world), uid_fix, from_bookmark));
+    // _map_creation_wizard->destroyFakeWorld();
+    _map_view = (new MapView(camera_yaw, camera_pitch, pos, this, _project, std::move(_map_creation_wizard->_world), uid_fix, from_bookmark));
     connect(_map_view, &MapView::uid_fix_failed, [this]()
     { promptUidFixFailure(); });
     connect(_settings, &settings::saved, [this]()
@@ -277,20 +285,24 @@ namespace Noggit::Ui::Windows
 
   void NoggitWindow::loadMap(int map_id)
   {
-    _minimap->world(nullptr);
+    // _minimap->world(nullptr);
 
+    // World is now created only here in
+    // void MapCreationWizard::selectMap(int map_id)
+    emit mapSelected(map_id);
+
+    /*
     _world.reset();
 
     auto table = _project->ClientDatabase->LoadTable("Map", readFileAsIMemStream);
     auto record = table.Record(map_id);
 
     _world = std::make_unique<World>(record.Columns["Directory"].Value, map_id, Noggit::NoggitRenderContext::MAP_VIEW);
-    _minimap->world(_world.get());
+    */
+
+    _minimap->world(getWorld());
 
     _project->ClientDatabase->UnloadTable("Map");
-
-    emit mapSelected(map_id);
-
   }
 
   void NoggitWindow::buildMenu()
@@ -434,13 +446,14 @@ namespace Noggit::Ui::Windows
 
                        auto& entry(_project->Bookmarks.at(item->data(Qt::UserRole).toInt()));
 
-                       _world.reset();
+                       _map_creation_wizard->_world.reset();
 
                        for (DBCFile::Iterator it = gMapDB.begin(); it != gMapDB.end(); ++it)
                        {
                          if (it->getInt(MapDB::MapID) == entry.map_id)
                          {
-                           _world = std::make_unique<World>(it->getString(MapDB::InternalName),
+                           //     emit mapSelected(map_id); to update UI
+                           _map_creation_wizard->_world = std::make_unique<World>(it->getString(MapDB::InternalName),
                                                             entry.map_id, Noggit::NoggitRenderContext::MAP_VIEW);
                            check_uid_then_enter_map(entry.position, math::degrees(entry.camera_pitch), math::degrees(entry.camera_yaw),
                                                     true
@@ -458,7 +471,7 @@ namespace Noggit::Ui::Windows
 
     QObject::connect(_minimap, &minimap_widget::map_clicked, [this](::glm::vec3 const& pos)
                      {
-                        if (_world->mapIndex.hasAGlobalWMO()) // skip uid check
+                        if (getWorld()->mapIndex.hasAGlobalWMO()) // skip uid check
                             enterMapAt(pos, math::degrees(30.f), math::degrees(90.f), uid_fix_mode::none, false);
                         else
                             check_uid_then_enter_map(pos, math::degrees(30.f), math::degrees(90.f));
@@ -474,8 +487,6 @@ namespace Noggit::Ui::Windows
 
     _right_side->addTab(minimap_holder, "Enter map");
     minimap_holder->setAccessibleName("main_menu_minimap_holder");
-
-    _map_creation_wizard = new Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard(_project, this);
 
     _map_wizard_connection = connect(_map_creation_wizard,
                                      &Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard::map_dbc_updated, 
@@ -548,6 +559,12 @@ namespace Noggit::Ui::Windows
     _project->unpinMap(mapId);
     _buildMapListComponent->buildMapList(this);
   }
+
+  World* NoggitWindow::getWorld()
+  {
+    return _map_creation_wizard->getWorld();
+  }
+
 
   void NoggitWindow::promptExit(QCloseEvent* event)
   {

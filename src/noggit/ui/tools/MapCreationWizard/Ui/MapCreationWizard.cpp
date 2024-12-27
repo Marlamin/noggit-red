@@ -3,7 +3,6 @@
 #include "MapCreationWizard.hpp"
 
 #include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/ui/widgets/Vector3Widget.hpp>
 #include <noggit/project/CurrentProject.hpp>
 #include <blizzard-database-library/include/structures/Types.h>
@@ -11,6 +10,7 @@
 #include <noggit/World.h>
 #include <noggit/application/Utils.hpp>
 #include <noggit/Log.h>
+#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 
 #include <util/qt/overload.hpp>
 
@@ -562,41 +562,66 @@ void MapCreationWizard::populateNameSet(WMOInstance& instance)
 
 std::string MapCreationWizard::getDifficultyString()
 {
-    if (_instance_type->itemData(_instance_type->currentIndex()).toInt() == 1 && _difficulty_max_players->value() == 5) // dungeon
+  int instance_type = _instance_type->itemData(_instance_type->currentIndex()).toInt();
+  int difficulty_type = _difficulty_type->currentIndex();
+  assert(instance_type == 1 || instance_type == 2);
+
+/*
+| Name               | Entry Condition      | Difficulty Entry 1      | Difficulty Entry 2      | Difficulty Entry 3      |
+|--------------------|----------------------|-------------------------|-------------------------|-------------------------|
+| Normal Creature    | Different than 0     | 0                       | 0                       | 0                       |
+| Dungeon Creature   | Normal Dungeon       | Heroic Dungeon          | 0                       | 0                       |
+| Raid Creature      | 10man Normal Raid    | 25man Normal Raid       | 10man Heroic Raid       | 25man Heroic Raid       |
+| Battleground       | 51-59                | 60-69                   | 70-79                   | 80                      |
+*/
+
+    if (instance_type == 1 && _difficulty_max_players->value() == 5) // dungeon
     {
-        if (_difficulty_type->currentIndex() == 0)
-            return "DUNGEON_DIFFICULTY_5PLAYER";
-        else
-            return "DUNGEON_DIFFICULTY_5PLAYER_HEROIC";
+      if (difficulty_type == 0)
+        return "DUNGEON_DIFFICULTY_5PLAYER";
+      else if (difficulty_type == 1)
+        return "DUNGEON_DIFFICULTY_5PLAYER_HEROIC";
+      else
+        return "Unsupported difficulty for 5 men dungeon";
     }
-    else if (_instance_type->itemData(_instance_type->currentIndex()).toInt() == 2)
+    else if (instance_type == 2) // raid
     {
         switch (_difficulty_max_players->value())
         {
         case 10:
-            if (_difficulty_type->currentIndex() == 0)
+            if (difficulty_type == 0)
                 return "RAID_DIFFICULTY_10PLAYER";
-            else
+            else if (difficulty_type == 2)
                 return "RAID_DIFFICULTY_10PLAYER_HEROIC";
+            break;
         case 20:
-            if (_difficulty_type->currentIndex() == 0)
+            if (difficulty_type == 0)
                 return "RAID_DIFFICULTY_20PLAYER";
+            break;
         case 25:
             // in BC 25men was difficulty 0, after the 10men mode in wrath it is difficulty 1
-            if (_difficulty_type->currentIndex() == (0 || 1)) // maybe instead check if a difficulty 25 already exists
+            if (difficulty_type == 0 || difficulty_type == 1) // maybe instead check if a difficulty 25 already exists
                 return "RAID_DIFFICULTY_25PLAYER";
-            else
+            else if (difficulty_type == 3)
                 return "RAID_DIFFICULTY_25PLAYER_HEROIC";
+            break;
         case 40:
+          if (difficulty_type == 0)
             return "RAID_DIFFICULTY_40PLAYER";
+          break;
+        default:
+          return "invalid player count";
         }
     }
+    assert(false);
     return "";
 }
 
 void MapCreationWizard::selectMap(int map_id)
 {
   _is_new_record = false;
+
+  // int map_id = world->getMapID();
 
   auto table = _project->ClientDatabase->LoadTable("Map", readFileAsIMemStream);
   auto record = table.Record(map_id);
@@ -605,8 +630,13 @@ void MapCreationWizard::selectMap(int map_id)
 
   if (_world)
   {
-    delete _world;
+    // delete _world;
+    _world.reset();
   }
+
+  // auto noggitWindow = reinterpret_cast<Noggit::Ui::Windows::NoggitWindow*>(parent());
+  // _world = world;
+
 
   auto directoryName = record.Columns["Directory"].Value;
   auto instanceType = record.Columns["InstanceType"].Value;
@@ -622,7 +652,8 @@ void MapCreationWizard::selectMap(int map_id)
   // auto timeOffset = record.Columns["TimeOffset"].Value;
   auto raidOffset = record.Columns["RaidOffset"].Value;
 
-  _world = new World(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW);
+  // _world = new World(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW);
+  _world = std::make_unique<World>(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW);
 
   // check if map has a wdl and prompt to create a new one
   std::stringstream filename;
@@ -637,13 +668,13 @@ void MapCreationWizard::selectMap(int map_id)
      bool answer = prompt.exec() == QMessageBox::StandardButton::Yes;
      if (answer)
      {
-        _world->horizon.save_wdl(_world, true);
+        _world->horizon.save_wdl(_world.get(), true);
         _world->horizon.set_minimap(&_world->mapIndex);
         // _world = new World(directoryName, map_id, Noggit::NoggitRenderContext::MAP_VIEW); // refresh minimap
      }
   }
 
-  _minimap_widget->world(_world);
+  _minimap_widget->world(_world.get());
 
   _directory->setText(QString::fromStdString(directoryName));
   _directory->setEnabled(false);
@@ -837,7 +868,7 @@ void MapCreationWizard::saveCurrentEntry()
   {
       _world->mapIndex.removeGlobalWmo();
   }
-  _world->mapIndex.saveChanged(_world, true);
+  _world->mapIndex.saveChanged(_world.get(), true);
   _world->mapIndex.save(); // save wdt file
   
   if (_is_new_record)
@@ -939,7 +970,7 @@ void MapCreationWizard::discardChanges()
 
 MapCreationWizard::~MapCreationWizard()
 {
-  delete _world;
+  // delete _world;
   disconnect(_connection);
 }
 
@@ -950,7 +981,8 @@ void MapCreationWizard::addNewMap()
 
   if (_world)
   {
-    delete _world;
+    // delete _world;
+    _world.reset();
   }
 
   // default to a new internal map name that isn't already used, or default world will load existing files
@@ -965,11 +997,13 @@ void MapCreationWizard::addNewMap()
       suffix++;
   }
 
-  _world = new World(internal_map_name, _cur_map_id, Noggit::NoggitRenderContext::MAP_VIEW, true);
+  // _world = new World(internal_map_name, _cur_map_id, Noggit::NoggitRenderContext::MAP_VIEW, true);
+  _world = std::make_unique<World>(internal_map_name, _cur_map_id, Noggit::NoggitRenderContext::MAP_VIEW, true);
+
   // hack to reset the minimap if there is an existing WDL with the same path(happens when removing a map from map.dbc but not the files
   _world->horizon.set_minimap(&_world->mapIndex, true);
 
-  _minimap_widget->world(_world);
+  _minimap_widget->world(_world.get());
 
   _directory->setText(internal_map_name.c_str());
   _directory->setEnabled(true);
@@ -1167,14 +1201,14 @@ void LocaleDBCEntry::toRecord(DBCFile::Record &record, size_t field)
 
 void LocaleDBCEntry::setDefaultLocValue(const std::string& text)
 {
-    // set the default locale's widget text and select it, but don't write data.
+  // set the default locale's widget text and select it, but don't write data.
 
-    int locale_id = Noggit::Application::NoggitApplication::instance()->clientData()->getLocaleId();
-    _current_locale->setCurrentIndex(locale_id);
-    setCurrentLocale(_locale_names[locale_id]);
+  int locale_id = Noggit::Application::NoggitApplication::instance()->clientData()->getLocaleId();
+  _current_locale->setCurrentIndex(locale_id);
+  setCurrentLocale(_locale_names[locale_id]);
 
-    // fill default locale's line edit
-    setValue(text, locale_id);
+  // fill default locale's line edit
+  setValue(text, locale_id);
 }
 
 void LocaleDBCEntry::clear()

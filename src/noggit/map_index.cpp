@@ -114,6 +114,7 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
   /// this is the theory. Sadly, we are also compiling on 64 bit machines with size_t being 8 byte, not 4. Therefore, we can't do the same thing, Blizzard does in its 32bit executable.
   //theFile.read( &(mTiles[0][0]), sizeof( 8 * 64 * 64 ) );
 
+  // We could skip for WMO only maps
   for (int j = 0; j < 64; ++j)
   {
     for (int i = 0; i < 64; ++i)
@@ -121,13 +122,17 @@ MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
       theFile.read(&mTiles[j][i].flags, 4);
       theFile.seekRelative(4);
 
+      mTiles[j][i].tile = nullptr;
+
+      if (!(mTiles[j][i].flags & 1))
+        continue;
+
       std::stringstream adt_filename;
       adt_filename << "World\\Maps\\" << basename << "\\" << basename << "_" << i << "_" << j << ".adt";
 
-      mTiles[j][i].tile = nullptr;
       mTiles[j][i].onDisc = Noggit::Application::NoggitApplication::instance()->clientData()->existsOnDisk(adt_filename.str());
 
-			if (mTiles[j][i].onDisc && !(mTiles[j][i].flags & 1))
+			if (mTiles[j][i].onDisc)
 			{
 				mTiles[j][i].flags |= 1;
 				changed = true;
@@ -1080,6 +1085,12 @@ void MapIndex::loadMaxUID()
 
 void MapIndex::loadMinimapMD5translate()
 {
+  auto& minimap_md5translate = Noggit::Application::NoggitApplication::instance()->clientData()->_minimap_md5translate;
+
+  // already loaded.
+  if (minimap_md5translate.empty())
+    return;
+
   if (!Noggit::Application::NoggitApplication::instance()->clientData()->exists("textures/minimap/md5translate.trs"))
   {
     LogError << "md5translate.trs was not found. "
@@ -1125,7 +1136,7 @@ void MapIndex::loadMinimapMD5translate()
 
     if (cur_dir.length())
     {
-      _minimap_md5translate[cur_dir.toStdString()][line_split[0].toStdString()] = line_split[1].toStdString();
+      minimap_md5translate[cur_dir.toStdString()][line_split[0].toStdString()] = line_split[1].toStdString();
     }
 
   }
@@ -1147,7 +1158,9 @@ void MapIndex::saveMinimapMD5translate()
   {
     QTextStream out(&file);
 
-    for (auto it = _minimap_md5translate.begin(); it != _minimap_md5translate.end(); ++it)
+    auto const& minimap_md5translate = Noggit::Application::NoggitApplication::instance()->clientData()->_minimap_md5translate;
+
+    for (auto it = minimap_md5translate.begin(); it != minimap_md5translate.end(); ++it)
     {
       out << "dir: " << it->first.c_str() << "\n"; // save dir
 

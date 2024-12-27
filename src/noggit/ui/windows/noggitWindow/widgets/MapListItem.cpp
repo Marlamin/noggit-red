@@ -11,24 +11,19 @@ namespace Noggit::Ui::Widget
     auto layout = QGridLayout();
 
     QIcon icon;
-    if (_map_data.expansion_id == 0)
-      icon = QIcon(":/icon-classic");
-    if (_map_data.expansion_id == 1)
-      icon = QIcon(":/icon-burning");
-    if (_map_data.expansion_id == 2)
-      icon = QIcon(":/icon-wrath");
-    if (_map_data.expansion_id == 3)
-      icon = QIcon(":/icon-cata");
-    if (_map_data.expansion_id == 4)
-      icon = QIcon(":/icon-panda");
-    if (_map_data.expansion_id == 5)
-      icon = QIcon(":/icon-warlords");
-    if (_map_data.expansion_id == 6)
-      icon = QIcon(":/icon-legion");
-    if (_map_data.expansion_id == 7)
-      icon = QIcon(":/icon-battle");
-    if (_map_data.expansion_id == 8)
-      icon = QIcon(":/icon-shadow");
+    switch (_map_data.expansion_id)
+    {
+      case 0: icon = QIcon(":/icon-classic"); break;
+      case 1: icon = QIcon(":/icon-burning"); break;
+      case 2: icon = QIcon(":/icon-wrath"); break;
+      case 3: icon = QIcon(":/icon-cata"); break;
+      case 4: icon = QIcon(":/icon-panda"); break;
+      case 5: icon = QIcon(":/icon-warlords"); break;
+      case 6: icon = QIcon(":/icon-legion"); break;
+      case 7: icon = QIcon(":/icon-battle"); break;
+      case 8: icon = QIcon(":/icon-shadow"); break;
+      default: break;
+    }
 
     _map_icon = new QLabel("", parent);
     _map_icon->setPixmap(icon.pixmap(QSize(32, 32)));
@@ -54,18 +49,16 @@ namespace Noggit::Ui::Widget
     _map_id->setAutoFillBackground(true);
 
     auto instance_type = QString("Unknown");
-    if (_map_data.map_type_id == 0)
-      instance_type = QString("Continent");
-    if (_map_data.map_type_id == 1)
-      instance_type = QString("Dungeon");
-    if (_map_data.map_type_id == 2)
-      instance_type = QString("Raid");
-    if (_map_data.map_type_id == 3)
-      instance_type = QString("Battleground");
-    if (_map_data.map_type_id == 4)
-      instance_type = QString("Arena");
-    if (_map_data.map_type_id == 5)
-      instance_type = QString("Scenario");
+    switch (_map_data.map_type_id)
+    {
+      case 0: instance_type = "Continent"; break;
+      case 1: instance_type = "Dungeon"; break;
+      case 2: instance_type = "Raid"; break;
+      case 3: instance_type = "Battleground"; break;
+      case 4: instance_type = "Arena"; break;
+      case 5: instance_type = "Scenario"; break;
+      default: instance_type = "Unknown"; break;
+    }
 
     _map_instance_type = new QLabel(instance_type, this);
     _map_instance_type->setGeometry(150, 15, 125, 20);

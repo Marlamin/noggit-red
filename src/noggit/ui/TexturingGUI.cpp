@@ -68,8 +68,7 @@ namespace Noggit
       std::unordered_set<std::string> tilesets_with_specular_variant;
 
       // If modern features are enabled, set filtering to height textures (_h), otherwise specular (_s).
-      QSettings settings;
-      bool modern_features = settings.value("modern_features", false).toBool();
+      bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
 
       for (auto const& entry_pair : Application::NoggitApplication::instance()->clientData()->listfile()->pathToFileDataIDMap())
       {

@@ -53,7 +53,12 @@ int main(int argc, char *argv[])
   Command.push_back(parser->isSet("force-changelog"));
 
   auto noggit = Noggit::Application::NoggitApplication::instance();
-  noggit->initalize(argc, argv, Command);
+  bool initialized = noggit->initalize(argc, argv, Command);
+
+  if (!initialized) [[unlikely]]
+  {
+    return EXIT_FAILURE;
+  }
 
   auto project_selection = new Noggit::Ui::Windows::NoggitProjectSelectionWindow(noggit);
   // project_selection->show();

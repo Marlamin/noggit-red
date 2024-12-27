@@ -30,6 +30,9 @@ namespace Noggit::Application {
         std::string ApplicationNoggitDefinitionsPath = "noggit-definitions"; // default for compatibility with older config files
         NoggitApplicationGraphicsConfiguration GraphicsConfiguration;
         NoggitApplicationLoggingConfiguration LoggingConfiguration;
+
+        // TODO move setting panel variables here
+        bool modern_features = false;
     };
 }
 

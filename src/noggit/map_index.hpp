@@ -272,7 +272,7 @@ private:
 
 public:
   int const _map_id;
-  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _minimap_md5translate;
+  // std::unordered_map<std::string, std::unordered_map<std::string, std::string>> _minimap_md5translate;
   std::string globalWMOName;
   ENTRY_MODF wmoEntry;
 public:

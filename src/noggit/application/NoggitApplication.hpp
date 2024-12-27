@@ -3,6 +3,8 @@
 #ifndef NOGGIT_APPLICATION_HPP
 #define NOGGIT_APPLICATION_HPP
 
+#pragma once
+
 #include <memory>
 #include <filesystem>
 #include <ClientData.hpp>
@@ -48,7 +50,7 @@ namespace Noggit::Application {
         bool hasClientData() const { return _client_data != nullptr; }
         void setClientData(std::shared_ptr<BlizzardArchive::ClientData> data) { _client_data = data; }
 
-        void initalize(int argc, char* argv[], std::vector<bool> Parser);
+        bool initalize(int argc, char* argv[], std::vector<bool> Parser);
         std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> getConfiguration();
         static void terminationHandler();
         bool GetCommand(int index);

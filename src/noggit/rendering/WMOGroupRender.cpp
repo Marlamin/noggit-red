@@ -3,7 +3,7 @@
 #include "WMOGroupRender.hpp"
 #include <noggit/WMO.h>
 #include <noggit/Log.h> // LogDebug
-#include <QtCore/QSettings>
+#include <noggit/application/NoggitApplication.hpp>
 
 using namespace Noggit::Rendering;
 
@@ -67,8 +67,7 @@ void WMOGroupRender::upload()
   _draw_calls.clear();
   WMOCombinedDrawCall* draw_call = nullptr;
   std::vector<WMORenderBatch*> _used_batches;
-  QSettings settings;
-  bool modern_features = settings.value("modern_features", false).toBool();
+  bool modern_features = Noggit::Application::NoggitApplication::instance()->getConfiguration()->modern_features;
 
   batch_counter = 0;
   for (auto& batch : _wmo_group->_batches)

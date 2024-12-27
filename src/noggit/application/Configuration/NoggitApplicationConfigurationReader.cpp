@@ -1,17 +1,26 @@
 #include <noggit/application/Configuration/NoggitApplicationConfigurationReader.hpp>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QtCore/QSettings>
 
 namespace Noggit::Application {
 
     NoggitApplicationConfiguration NoggitApplicationConfigurationReader::ReadConfigurationState(QFile& inputFile)
     {
+        auto noggitApplicationConfiguration = NoggitApplicationConfiguration();
+
+        // TODO move qsetting stuff to config file
+        QSettings settings;
+        noggitApplicationConfiguration.modern_features = settings.value("modern_features", false).toBool();
+
+        settings.sync();
+        //
+
         inputFile.open(QIODevice::ReadOnly);
 
         auto document = QJsonDocument().fromJson(inputFile.readAll());
         auto root = document.object();
 
-        auto noggitApplicationConfiguration = NoggitApplicationConfiguration();
         if (root.contains("Noggit") && root["Noggit"].isObject())
         {
             auto noggitConfiguration = root["Noggit"].toObject();
