@@ -12,6 +12,7 @@
 #include <QtWidgets/QSlider>
 #include <QtWidgets/qcombobox.h>
 #include <QtWidgets/qgroupbox.h>
+#include "LightObjectEditor.h"
 
 class MapView;
 class QButtonGroup;
@@ -80,6 +81,7 @@ namespace Noggit
 
       model_import *modelImport;
       rotation_editor* rotationEditor;
+      light_object_editor* lightObjectEditor;
       helper_models* helper_models_widget;
       QSize sizeHint() const override;
 
@@ -87,6 +89,7 @@ namespace Noggit
 
     signals:
       void objectPaletteBtnPressed();
+      void lightOptionsBtnPressed();
 
     private:
       float _radius = 0.01f;
@@ -102,6 +105,8 @@ namespace Noggit
       QGroupBox* _wmo_group;
       QComboBox* _doodadSetSelector;
       QComboBox* _nameSetSelector;
+
+      QGroupBox* _light_group;
 
       QSettings* _settings;
 

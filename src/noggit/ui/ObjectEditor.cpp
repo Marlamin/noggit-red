@@ -53,6 +53,7 @@ namespace Noggit
             : QWidget(parent)
             , modelImport (new model_import(this))
             , rotationEditor (new rotation_editor(mapView, world))
+            , lightObjectEditor(new light_object_editor(mapView, world))
             , helper_models_widget(new helper_models(this))
             , _settings (new QSettings (this))
             , _copy_model_stats (true)
@@ -116,6 +117,15 @@ namespace Noggit
 
       wmo_layout->addRow("Doodad Set:", _doodadSetSelector);
       wmo_layout->addRow("Name Set:", _nameSetSelector);
+
+      _light_group = new QGroupBox("Selected Light Options");
+      layout->addWidget(_light_group);
+
+      auto light_group_layout = new QFormLayout(_light_group);
+
+      QPushButton* light_options_btn = new QPushButton("Light options", this);
+      light_options_btn->setIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::lightbulb));
+      light_group_layout->addWidget(light_options_btn);
 
       auto clipboard_box = new QGroupBox("Clipboard");
       // clipboard_box->setWindowIcon(Noggit::Ui::FontAwesomeIcon(Noggit::Ui::FontAwesome::clipboard));
@@ -495,6 +505,11 @@ namespace Noggit
       connect(rotEditorButton, &QPushButton::clicked, [=]() {
           rotationEditor->show();
       });
+
+      connect(light_options_btn, &QPushButton::clicked, [=]() {
+          lightObjectEditor->show();
+      });
+
       /*
       connect(visToggleButton, &QPushButton::clicked, [=]() {
           mapView->_draw_hidden_models.set
@@ -935,6 +950,9 @@ namespace Noggit
         _wmo_group->setDisabled(true);
         _wmo_group->hide();
 
+        _light_group->setDisabled(true);
+        _light_group->hide();
+
         auto last_entry = world->get_last_selected_model();
         // for (auto& selection : selected)
         if (last_entry)
@@ -947,7 +965,13 @@ namespace Noggit
 
             if (obj->which() == eMODEL)
             {
-                // ModelInstance* mi = static_cast<ModelInstance*>(obj);
+                ModelInstance* mi = static_cast<ModelInstance*>(obj);
+                if (mi->model->file_key().filepath().find("noggit_light") != std::string::npos)
+                {
+                    _light_group->setDisabled(false);
+                    _light_group->setHidden(false);
+                    return;
+                }
             }
             else if (obj->which() == eWMO)
             {
