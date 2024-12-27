@@ -18,6 +18,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QStringList>
+#include <noggit/DBC.h>
 
 
 using namespace Noggit::Ui::Tools;
