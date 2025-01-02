@@ -1,5 +1,6 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <math/sphere.hpp>
 #include <math/frustum.hpp>
 
 #include <array>
@@ -116,7 +117,7 @@ namespace math
   {
     for (auto const& plane : _planes)
     {
-      const float distance = glm::dot(plane.normal(), position+ plane.distance());
+      const float distance = glm::dot(position, plane.normal()) + plane.distance();
       if (distance < -radius)
       {
         return false;
@@ -127,5 +128,10 @@ namespace math
       }
     }
     return true;
+  }
+
+  bool frustum::intersectsSphere(sphere const& sphere) const
+  {
+      return intersectsSphere(sphere.position, sphere.radius);
   }
 }

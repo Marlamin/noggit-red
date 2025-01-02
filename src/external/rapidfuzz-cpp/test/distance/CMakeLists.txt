@@ -1,0 +1,22 @@
+function(rapidfuzz_add_test test)
+    add_executable(test_${test} ../tests-main.cpp tests-${test}.cpp examples/ocr.cpp examples/pythonLevenshteinIssue9.cpp)
+    target_link_libraries(test_${test} PRIVATE ${PROJECT_NAME})
+    target_link_libraries(test_${test} PRIVATE Catch2::Catch2)
+    if (RAPIDFUZZ_ENABLE_LINTERS)
+        target_link_libraries(test_${test} PRIVATE project_warnings)
+    endif()
+
+    #target_compile_options(test_${test} PRIVATE -g -fsanitize=address)
+    #target_link_libraries(test_${test} PRIVATE -fsanitize=address)
+
+    add_test(NAME ${test} COMMAND test_${test})
+endfunction()
+
+rapidfuzz_add_test(Hamming)
+rapidfuzz_add_test(Indel)
+rapidfuzz_add_test(LCSseq)
+rapidfuzz_add_test(Levenshtein)
+rapidfuzz_add_test(DamerauLevenshtein)
+rapidfuzz_add_test(OSA)
+rapidfuzz_add_test(Jaro)
+rapidfuzz_add_test(JaroWinkler)

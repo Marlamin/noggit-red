@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <external/tsl/robin_map.h>
 #include <optional>
+#include <noggit/area_trigger.hpp>
 #include <noggit/TextureManager.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/SceneObject.hpp>
@@ -25,25 +26,25 @@ class MapChunk;
 
 namespace Noggit
 {
-
     enum ActionFlags
     {
-        eNO_FLAG               = 0,
-        eCHUNKS_TERRAIN      = 0x1,
-        eCHUNKS_AREAID       = 0x2,
-        eCHUNKS_HOLES        = 0x4,
-        eCHUNKS_VERTEX_COLOR = 0x8,
-        eCHUNKS_WATER        = 0x10,
-        eCHUNKS_TEXTURE      = 0x20,
-        eOBJECTS_REMOVED     = 0x40,
-        eOBJECTS_ADDED       = 0x80,
-        eOBJECTS_TRANSFORMED = 0x100,
-        eCHUNKS_FLAGS        = 0x200,
-        eVERTEX_SELECTION    = 0x400,
-        eCHUNK_SHADOWS       = 0x800,
-        eDO_NOT_WRITE_HISTORY= 0x1000,
-        eCHUNK_DOODADS_EXCLUSION = 0x2000, // ground effects exclusion mapping
-        eCHUNKS_LAYERINFO = 0x4000 // ground effect id and texture flags
+        eNO_FLAG                  = 0,
+        eCHUNKS_TERRAIN           = 0x1,
+        eCHUNKS_AREAID            = 0x2,
+        eCHUNKS_HOLES             = 0x4,
+        eCHUNKS_VERTEX_COLOR      = 0x8,
+        eCHUNKS_WATER             = 0x10,
+        eCHUNKS_TEXTURE           = 0x20,
+        eOBJECTS_REMOVED          = 0x40,
+        eOBJECTS_ADDED            = 0x80,
+        eOBJECTS_TRANSFORMED      = 0x100,
+        eCHUNKS_FLAGS             = 0x200,
+        eVERTEX_SELECTION         = 0x400,
+        eCHUNK_SHADOWS            = 0x800,
+        eDO_NOT_WRITE_HISTORY     = 0x1000,
+        eCHUNK_DOODADS_EXCLUSION  = 0x2000, // ground effects exclusion mapping
+        eCHUNKS_LAYERINFO         = 0x4000, // ground effect id and texture flags
+        eAREA_TRIGGER_TRANSFORMED = 0x8000,
     };
 
     enum ActionModalityControllers
@@ -142,6 +143,7 @@ namespace Noggit
         void registerChunkLayerInfoChange(MapChunk* chunk);
         void registerChunkDetailDoodadExclusionChange(MapChunk* chunk);
         void registerAllChunkChanges(MapChunk* chunk);
+        void registerAreaTriggerTransformed(area_trigger* trigger);
 
 
     private:
@@ -175,6 +177,8 @@ namespace Noggit
         std::vector<std::pair<MapChunk*, mcnk_flags>> _chunk_flags_post;
         std::vector<std::pair<MapChunk*, std::vector<liquid_layer>>> _chunk_liquid_pre;
         std::vector<std::pair<MapChunk*, std::vector<liquid_layer>>> _chunk_liquid_post;
+        std::vector<std::pair<uint32_t, area_trigger>> _transformed_area_trigger_pre;
+        std::vector<std::pair<uint32_t, area_trigger>> _transformed_area_trigger_post;
 
         VertexSelectionCache _vertex_selection_pre;
         VertexSelectionCache _vertex_selection_post;

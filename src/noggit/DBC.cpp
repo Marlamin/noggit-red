@@ -8,6 +8,7 @@
 #include <Exception.hpp>
 
 AreaDB gAreaDB;
+AreaTriggerDB gAreaTriggerDB;
 MapDB gMapDB;
 LoadingScreensDB gLoadingScreensDB;
 LightDB gLightDB;
@@ -33,6 +34,7 @@ void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData)
   try
   {
     gAreaDB.open(clientData);
+    gAreaTriggerDB.open(clientData);
     gMapDB.open(clientData);
     gLoadingScreensDB.open(clientData);
     gLightDB.open(clientData);

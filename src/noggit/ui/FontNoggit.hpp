@@ -139,6 +139,8 @@ namespace Noggit
         CAMERA = 0xf8dd,
         WINDOW = 0xf8de,
         VISIBILITY_FLIGHT_BOUNDS = 0xf8df,
+        AREA_TRIGGER = 0xf8e0,
+        AREA_TRIGGER_SPHERE = 0xf8e1,
 
       };
     };

@@ -68,6 +68,7 @@
 #include <noggit/tools/LightTool.hpp>
 #include <noggit/tools/ScriptingTool.hpp>
 #include <noggit/tools/ChunkTool.hpp>
+#include <noggit/tools/AreaTriggerTool.hpp>
 #include <noggit/StringHash.hpp>
 #include <noggit/application/NoggitApplication.hpp>
 
@@ -942,12 +943,30 @@ void MapView::setupEditMenu()
   edit_menu->addSeparator();
   edit_menu->addAction(createTextSeparator("Selected object"));
   edit_menu->addSeparator();
-  ADD_ACTION (edit_menu, "Delete", Qt::Key_Delete, [this]
-  {
-    NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
-    DeleteSelectedObjects();
-    NOGGIT_ACTION_MGR->endAction();
-  });
+  ADD_ACTION(edit_menu, "Delete", Qt::Key_Delete, [this]
+    {
+      if (get_editing_mode() == editing_mode::object)
+      {
+        NOGGIT_ACTION_MGR->beginAction(this, Noggit::ActionFlags::eOBJECTS_REMOVED);
+        DeleteSelectedObjects();
+        NOGGIT_ACTION_MGR->endAction();
+      }
+      else
+      {
+        for (auto&& hotkey : hotkeys)
+        {
+          if (Qt::Key_Delete == hotkey.key && hotkey.condition())
+          {
+            makeCurrent();
+            OpenGL::context::scoped_setter const _(::gl, context());
+
+            hotkey.onPress();
+            return;
+          }
+        }
+      }
+    }
+  );
 
   ADD_ACTION (edit_menu, "Reset rotation", "Ctrl+R",
               [this]
@@ -2304,6 +2323,8 @@ void MapView::setupHotkeys()
   addHotkey(Qt::Key_Minus, MOD_num, "decreaseSelectedScale"_hash);
 
   addHotkey(Qt::Key_F, MOD_none, "setAreaId"_hash);
+
+  addHotkey(Qt::Key_Delete, MOD_none, "deleteSelection"_hash);
 }
 
 void MapView::setupMinimap()
@@ -2399,8 +2420,9 @@ void MapView::createGUI()
   _tools.emplace_back(std::make_unique<Noggit::MinimapTool>(this))->setupUi(_tool_panel_dock);
   _tools.emplace_back(std::make_unique<Noggit::StampTool>(this))->setupUi(_tool_panel_dock);
   _tools.emplace_back(std::make_unique<Noggit::LightTool>(this))->setupUi(_tool_panel_dock);
-  // _tools.emplace_back(std::make_unique<Noggit::ScriptingTool>(this))->setupUi(_tool_panel_dock);
-  // _tools.emplace_back(std::make_unique<Noggit::ChunkTool>(this))->setupUi(_tool_panel_dock);
+  _tools.emplace_back(std::make_unique<Noggit::ScriptingTool>(this))->setupUi(_tool_panel_dock);
+  _tools.emplace_back(std::make_unique<Noggit::ChunkTool>(this))->setupUi(_tool_panel_dock);
+  _tools.emplace_back(std::make_unique<Noggit::AreaTriggerTool>(this))->setupUi(_tool_panel_dock);
 
   // End combined dock
 
@@ -2780,15 +2802,12 @@ void MapView::paintGL()
   {
     lock = true;
     draw_map();
+    activeTool()->postRender();
     lock = false;
     tick (now - _last_update);
   }
 
   _last_update = now;
-
-  lock = true;
-  activeTool()->postRender();
-  lock = false;
 
   if (_gizmo_on.get() && _world->has_selection())
   {
@@ -2816,6 +2835,7 @@ void MapView::paintGL()
     _transform_gizmo.handleTransformGizmo(this, _world->current_selection(), _model_view, _projection);
 
     // _world->update_selection_pivot();
+    activeTool()->renderImGui(_gizmo_mode, _gizmo_operation);
 
     ImGui::End();
 
@@ -4167,10 +4187,13 @@ void MapView::save(save_mode mode)
     // write wdl, we update wdl data prior in the mapIndex saving fucntions above
     _world->horizon.save_wdl(_world.get());
 
+    for (auto&& dbc : _dirty_dbcs)
+    {
+      dbc->save();
+    }
 
     NOGGIT_ACTION_MGR->purge();
     AsyncLoader::instance->reset_object_fail();
-
 
     _main_window->statusBar()->showMessage("Map saved", 2000);
 
@@ -4246,6 +4269,29 @@ glm::vec3 MapView::cursorPosition() const
 void MapView::cursorPosition(glm::vec3 position)
 {
     _cursor_pos = position;
+}
+
+void MapView::enableGizmoBar()
+{
+  _viewport_overlay_ui->gizmoBar->show();
+}
+
+void MapView::disableGizmoBar()
+{
+  _viewport_overlay_ui->gizmoBar->hide();
+}
+
+void MapView::setDbcDirty(DBCFile* dbc)
+{
+  for (auto&& dirty_dbc : _dirty_dbcs)
+  {
+    if (dirty_dbc == dbc)
+    {
+      return;
+    }
+  }
+
+  _dirty_dbcs.emplace_back(dbc);
 }
 
 // also called when loading world/viewport in MapView::initializeGL()

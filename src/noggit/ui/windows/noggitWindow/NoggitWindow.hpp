@@ -27,6 +27,11 @@ namespace Noggit::Ui
     class minimap_widget;
     class settings;
     class about;
+
+    namespace Tools::MapCreationWizard::Ui
+    {
+      class MapCreationWizard;
+    }
 }
 
 namespace Noggit::Ui::Windows

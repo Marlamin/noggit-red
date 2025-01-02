@@ -2,6 +2,7 @@
 
 #include "LightEditor.hpp"
 #include <noggit/World.h>
+#include <noggit/DBC.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/application/NoggitApplication.hpp>

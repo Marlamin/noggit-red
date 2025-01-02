@@ -102,6 +102,10 @@ namespace Noggit
     {
     }
 
+    void Tool::renderImGui(ImGuizmo::MODE mode, ImGuizmo::OPERATION operation)
+    {
+    }
+
     void Tool::onMousePress(MousePressParameters const& params)
     {
     }
