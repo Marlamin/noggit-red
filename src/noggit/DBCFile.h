@@ -22,6 +22,10 @@ public:
   void open(std::shared_ptr<BlizzardArchive::ClientData> clientData);
   void save();
 
+  void overwriteWith(DBCFile const& file);
+
+  static DBCFile createNew(std::string filename, std::uint32_t fieldCount, std::uint32_t recordSize);
+
   class NotFound : public std::runtime_error
   {
   public:
@@ -173,8 +177,10 @@ public:
     return Iterator(*this, data.data() + data.size());
   }
 
-  inline size_t getRecordCount()  { return recordCount; }
-  inline size_t getFieldCount()  { return fieldCount; }
+  inline size_t getRecordCount() const { return recordCount; }
+  inline size_t getFieldCount() const { return fieldCount; }
+  inline size_t getRecordSize() const { return recordSize; }
+
   inline Record getByID(unsigned int id, size_t field = 0)
   {
       for (Iterator i = begin(); i != end(); ++i)
@@ -214,11 +220,13 @@ public:
   int getEmptyRecordID(size_t id_field = 0);
 
 private:
+  DBCFile() = default;
+
   std::string filename;
-  std::uint32_t recordSize;
-  std::uint32_t recordCount;
-  std::uint32_t fieldCount;
-  std::uint32_t stringSize;
+  std::uint32_t recordSize = 0;
+  std::uint32_t recordCount = 0;
+  std::uint32_t fieldCount = 0;
+  std::uint32_t stringSize = 0;
   std::vector<unsigned char> data;
   std::vector<char> stringTable;
 };

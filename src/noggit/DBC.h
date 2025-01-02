@@ -37,6 +37,28 @@ public:
   static std::uint32_t get_new_areabit();
 };
 
+class AreaTriggerDB : public DBCFile
+{
+public:
+    AreaTriggerDB() :
+        DBCFile{ "DBFilesClient\\AreaTrigger.dbc" }
+    {
+    }
+
+    static const size_t Id = 0; // uint
+    static const size_t MapId = 1; // uint
+    static const size_t X = 2; // float
+    static const size_t Y = 3; // float
+    static const size_t Z = 4; // float
+    static const size_t Radius = 5; // float
+    static const size_t Length = 6; // float
+    static const size_t Width = 7; // float
+    static const size_t Height = 8; // float
+    static const size_t Orientation = 9; // float
+
+    static const uint32_t FieldCount = 10;
+};
+
 class MapDB : public DBCFile
 {
 public:
@@ -360,6 +382,7 @@ void OpenDBs(std::shared_ptr<BlizzardArchive::ClientData> clientData);
 const char * getGroundEffectDoodad(unsigned int effectID, int DoodadNum);
 
 extern AreaDB gAreaDB;
+extern AreaTriggerDB gAreaTriggerDB;
 extern MapDB gMapDB;
 extern LoadingScreensDB gLoadingScreensDB;
 extern LightDB gLightDB;

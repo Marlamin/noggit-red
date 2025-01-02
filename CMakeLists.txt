@@ -142,6 +142,7 @@ ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/NodeEditor")
 option(BUILD_LIBNOISE_EXAMPLES "Build libnoise examples" OFF)
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/libnoise")
 ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/glm")
+ADD_SUBDIRECTORY("${EXTERNAL_SOURCE_DIR}/rapidfuzz-cpp")
 
 # Add the found include directories to our include list.
 INCLUDE_DIRECTORIES(SYSTEM "${CMAKE_SOURCE_DIR}/include/")
@@ -360,6 +361,7 @@ TARGET_LINK_LIBRARIES (noggit
   sol2::sane
   blizzard-archive-library
   blizzard-database-library
+  rapidfuzz::rapidfuzz
 )
 
 #add distribution themes

@@ -6,6 +6,8 @@
 
 namespace math
 {
+  struct sphere;
+
   class frustum
   {
     enum SIDES
@@ -32,7 +34,7 @@ namespace math
 
       void normalize()
       {
-        const float recip (1.0f / _normal.length());
+        constexpr float recip (1.0f / glm::vec3::length());
         _normal *= recip;
         _distance *= recip;
       }
@@ -64,5 +66,7 @@ namespace math
     bool intersectsSphere ( const glm::vec3& position
                           , const float& radius
                           ) const;
+
+    bool intersectsSphere(sphere const& sphere) const;
   };
 }

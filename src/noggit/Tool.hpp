@@ -8,6 +8,9 @@
 
 #include <noggit/ui/FontNoggit.hpp>
 
+#include <external/qtimgui/imgui/imgui.h>
+#include <external/imguizmo/ImGuizmo.h>
+
 #include <glm/vec3.hpp>
 
 #include <QLineF>
@@ -168,6 +171,9 @@ namespace Noggit
 
         // will be called after the map got drawn
         virtual void postRender();
+
+        // Imgui specific draw-calls (e.g. gizmo related stuff) can be made here
+        virtual void renderImGui(ImGuizmo::MODE mode, ImGuizmo::OPERATION operation);
 
         // will be called whenever a mouse button is pressed
         virtual void onMousePress(MousePressParameters const& params);
