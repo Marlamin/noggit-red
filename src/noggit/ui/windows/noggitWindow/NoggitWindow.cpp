@@ -302,7 +302,7 @@ namespace Noggit::Ui::Windows
 
     _minimap->world(getWorld());
 
-    _project->ClientDatabase->UnloadTable("Map");
+    //_project->ClientDatabase->UnloadTable("Map");
   }
 
   void NoggitWindow::buildMenu()

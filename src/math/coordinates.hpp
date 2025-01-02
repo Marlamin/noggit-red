@@ -22,6 +22,11 @@ namespace math
     vector[2] = -x + ZEROPOINT;
   }
 
+  inline glm::vec3 to_client(float x, float y, float z)
+  {
+    return { -y + ZEROPOINT, z, -x + ZEROPOINT };
+  }
+
   inline void to_server(glm::vec3& vector)
   {
     float x = vector.x;
@@ -36,5 +41,10 @@ namespace math
     vector[0] = ZEROPOINT - vector[2];
     vector[2] = vector[1];
     vector[1] = ZEROPOINT - x;
+  }
+
+  inline glm::vec3 to_server(float x, float y, float z)
+  {
+    return { ZEROPOINT - z, ZEROPOINT - x, y, };
   }
 }

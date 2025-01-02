@@ -148,12 +148,6 @@ private:
 
   display_mode _display_mode;
 
-  [[nodiscard]]
-  glm::mat4x4 model_view(bool use_debug_cam = false) const;
-
-  [[nodiscard]]
-  glm::mat4x4 projection() const;
-
   void draw_map();
 
   void createGUI();
@@ -278,6 +272,11 @@ public:
   glm::vec3 cursorPosition() const;
   void cursorPosition(glm::vec3 position);
 
+  void enableGizmoBar();
+  void disableGizmoBar();
+
+  void setDbcDirty(DBCFile* dbc);
+
 private:
   enum Modifier
   {
@@ -355,8 +354,6 @@ private:
   Noggit::Ui::minimap_widget* _minimap;
   QDockWidget* _minimap_dock;
 
-  void move_camera_with_auto_height (glm::vec3 const&);
-
   void setToolPropertyWidgetVisibility(editing_mode mode);
 
   void unloadOpenglData() override;
@@ -391,6 +388,8 @@ private:
 
   glm::mat4x4 _model_view;
   glm::mat4x4 _projection;
+
+  std::vector<DBCFile*> _dirty_dbcs;
 
 public:
 
@@ -464,4 +463,12 @@ private:
 
   [[nodiscard]]
   float timeSpeed() const;
+
+  [[nodiscard]]
+  glm::mat4x4 model_view(bool use_debug_cam = false) const;
+
+  [[nodiscard]]
+  glm::mat4x4 projection() const;
+
+  void move_camera_with_auto_height(glm::vec3 const&);
 };

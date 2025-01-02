@@ -23,11 +23,12 @@ auto write(std::ostream& stream, T const& val) -> void
 
 DBCFile::DBCFile(const std::string& _filename)
   : filename(_filename)
-{}
+{
+}
 
 void DBCFile::open(std::shared_ptr<BlizzardArchive::ClientData> clientData)
 {
-  BlizzardArchive::ClientFile f (filename, clientData.get());
+  BlizzardArchive::ClientFile f(filename, clientData.get());
 
   if (f.isEof())
   {
@@ -52,14 +53,14 @@ void DBCFile::open(std::shared_ptr<BlizzardArchive::ClientData> clientData)
 
   if (fieldCount * 4 != recordSize)
   {
-    throw std::logic_error ("non four-byte-columns not supported : " + filename);
+    throw std::logic_error("non four-byte-columns not supported : " + filename);
   }
 
-  data.resize (recordSize * recordCount);
-  f.read (data.data(), data.size());
+  data.resize(recordSize * recordCount);
+  f.read(data.data(), data.size());
 
-  stringTable.resize (stringSize);
-  f.read (stringTable.data(), stringTable.size());
+  stringTable.resize(stringSize);
+  f.read(stringTable.data(), stringTable.size());
 
   f.close();
 }
@@ -90,6 +91,26 @@ void DBCFile::save()
   stream.write(reinterpret_cast<char*>(data.data()), data.size());
   stream.write(stringTable.data(), stringSize);
   stream.close();
+}
+
+void DBCFile::overwriteWith(DBCFile const& file)
+{
+  filename = file.filename;
+  recordSize = file.recordSize;
+  recordCount = file.recordCount;
+  fieldCount = file.fieldCount;
+  stringSize = file.stringSize;
+  data = file.data;
+  stringTable = file.stringTable;
+}
+
+DBCFile DBCFile::createNew(std::string filename, std::uint32_t fieldCount, std::uint32_t recordSize)
+{
+  DBCFile file{};
+  file.filename = std::move(filename);
+  file.recordSize = recordSize;
+  file.fieldCount = fieldCount;
+  return file;
 }
 
 DBCFile::Record DBCFile::addRecord(size_t id, size_t id_field)
