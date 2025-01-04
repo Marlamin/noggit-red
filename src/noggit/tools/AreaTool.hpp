@@ -37,9 +37,9 @@ namespace Noggit
 
         virtual void onDeselected();
 
-        void onTick(float deltaTime, TickParameters const& params) override;
-
         void onMouseMove(MouseMoveParameters const& params) override;
+
+        void onMousePress(MousePressParameters const& params) override;
 
     private:
         Ui::zone_id_browser* _areaTool = nullptr;

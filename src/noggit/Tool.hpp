@@ -56,7 +56,11 @@ namespace Noggit
     {
         Qt::MouseButton button = Qt::MouseButton::NoButton;
         QPoint mouse_position;
+        bool mod_shift_down = false;
         bool mod_ctrl_down = false;
+        bool mod_alt_down = false;
+        bool mod_num_down = false;
+        bool mod_space_down = false;
     };
 
     struct MouseReleaseParameters
