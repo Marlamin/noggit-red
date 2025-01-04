@@ -3972,7 +3972,11 @@ void MapView::mousePressEvent(QMouseEvent* event)
   activeTool()->onMousePress({
       .button = event->button(),
       .mouse_position = event->pos(),
+      .mod_shift_down = _mod_shift_down,
       .mod_ctrl_down = _mod_ctrl_down,
+      .mod_alt_down = _mod_alt_down,
+      .mod_num_down = _mod_num_down,
+      .mod_space_down = _mod_space_down,
       });
 
   switch (event->button())
