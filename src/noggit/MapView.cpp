@@ -3619,7 +3619,7 @@ void MapView::draw_map()
                   _model_view
                 , _projection
                 , _cursor_pos
-                , cursor_color
+                , cursorColor
                 , ref_pos
                 , _camera.position
                 , &minimapRenderSettings
