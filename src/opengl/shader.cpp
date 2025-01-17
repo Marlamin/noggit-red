@@ -5,7 +5,8 @@
 #include <opengl/shader.hpp>
 #include <opengl/texture.hpp>
 #include <noggit/Misc.h>
-#include <glm/vec3.hpp>
+
+#include <glm/gtc/type_ptr.hpp>
 
 #include <QFile>
 #include <QTextStream>

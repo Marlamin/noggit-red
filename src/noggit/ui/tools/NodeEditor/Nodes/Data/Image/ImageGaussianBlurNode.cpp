@@ -5,6 +5,7 @@
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 

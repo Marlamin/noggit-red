@@ -1,16 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ChunkWater.hpp>
-#include <noggit/Log.h>
+#include <noggit/MapHeaders.h>
+#include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
 #include <noggit/TileWater.hpp>
-#include <noggit/liquid_layer.hpp>
-#include <noggit/World.h>
-#include <noggit/rendering/LiquidTextureManager.hpp>
 #include <ClientFile.hpp>
 
-#include <stdexcept>
 #include <limits>
 
 TileWater::TileWater(MapTile *pTile, float pXbase, float pZbase, bool use_mclq_green_lava)
@@ -118,6 +115,11 @@ bool TileWater::hasData(size_t layer)
   return false;
 }
 
+bool TileWater::hasData() const
+{
+  return _has_data;
+}
+
 void TileWater::CropMiniChunk(int x, int z, MapChunk* chunkTerrain)
 {
   chunks[z][x]->CropWater(chunkTerrain);
@@ -147,6 +149,15 @@ int TileWater::getType(size_t layer)
     }
   }
   return 0;
+}
+
+std::array<glm::vec3, 2>& TileWater::getExtents()
+{
+  if (needsUpdate())
+  {
+    recalcExtents();
+  }
+  return _extents;
 }
 
 void TileWater::recalcExtents()
@@ -355,4 +366,25 @@ void TileWater::setWatermapImage(QImage const& baseimage, float min_height, floa
     //         );
     //     }
     // }
+}
+
+void TileWater::tagExtents(bool state)
+{
+  _extents_changed = state;
+}
+
+void TileWater::tagUpdate()
+{
+  _renderer.tagUpdate();
+}
+
+Noggit::Rendering::LiquidRender* TileWater::renderer()
+{
+  return &_renderer;
+}
+
+[[nodiscard]]
+bool TileWater::needsUpdate()
+{
+  return _renderer.needsUpdate() || _extents_changed;
 }

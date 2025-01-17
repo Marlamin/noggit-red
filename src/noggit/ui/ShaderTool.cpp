@@ -1,29 +1,26 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/World.h>
 #include <noggit/MapView.h>
 #include <noggit/ui/ShaderTool.hpp>
 #include <noggit/ui/tools/UiCommon/expanderwidget.h>
-#include <util/qt/overload.hpp>
-#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
+#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
+#include <noggit/World.h>
 
+#include <qt-color-widgets/color_list_widget.hpp>
 #include <qt-color-widgets/color_selector.hpp>
 #include <qt-color-widgets/color_wheel.hpp>
-#include <qt-color-widgets/hue_slider.hpp>
 #include <qt-color-widgets/gradient_slider.hpp>
-#include <qt-color-widgets/color_list_widget.hpp>
-#include <external/qtgradienteditor/qtgradienteditor.h>
+#include <qt-color-widgets/hue_slider.hpp>
 
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDial>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QToolButton>
-#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QSpinBox>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-
-#include <functional>
 
 namespace Noggit
 {
@@ -202,6 +199,11 @@ namespace Noggit
       _speed_slider->setValue(speed);
     }
 
+    float ShaderTool::brushRadius() const
+    {
+      return _radius_slider->value();
+    }
+
     void ShaderTool::pickColor(World* world, glm::vec3 const& pos)
     {
       glm::vec3 color = world->pickShaderColor(pos);
@@ -265,6 +267,16 @@ namespace Noggit
       return QSize(215, height());
     }
 
+    Noggit::Ui::Tools::ImageMaskSelector* ShaderTool::getImageMaskSelector()
+    {
+      return _image_mask_group;
+    }
+
+    QImage* ShaderTool::getMaskImage()
+    {
+      return &_mask_image;
+    }
+
     void ShaderTool::updateMaskImage()
     {
 
@@ -274,6 +286,26 @@ namespace Noggit
       _mask_image = pixmap->toImage().transformed(matrix, Qt::SmoothTransformation);
 
       emit _map_view->trySetBrushTexture(&_mask_image, this);
+    }
+
+    glm::vec4& ShaderTool::shaderColor()
+    {
+      return _color;
+    }
+
+    Noggit::Ui::Tools::UiCommon::ExtendedSlider* ShaderTool::getRadiusSlider()
+    {
+      return _radius_slider;
+    }
+
+    Noggit::Ui::Tools::UiCommon::ExtendedSlider* ShaderTool::getSpeedSlider()
+    {
+      return _speed_slider;
+    }
+
+    QDial* ShaderTool::getMaskOrientationDial()
+    {
+      return _image_mask_group->getMaskOrientationDial();
     }
 
     QJsonObject ShaderTool::toJSON()

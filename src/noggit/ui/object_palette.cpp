@@ -2,26 +2,27 @@
 
 #include "object_palette.hpp"
 
-#include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/TexturingGUI.h>
-#include <noggit/ui/CurrentTexture.h>
-#include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/MapView.h>
+#include <noggit/project/ApplicationProject.h>
+#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
+#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
+#include <noggit/World.h>
 
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QListWidget>
-#include <QtWidgets/QListWidgetItem>
-#include <QtWidgets/QApplication>
+#include <QDockWidget>
+#include <QMimeData>
+#include <QtGui/QDrag>
+#include <QtGui/QDragEnterEvent>
 #include <QtGui/QDropEvent>
 #include <QtGui/QMouseEvent>
-#include <QtGui/QDragEnterEvent>
-#include <QtGui/QDrag>
-#include <QMimeData>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QListWidgetItem>
+#include <QtWidgets/QPushButton>
 
-#include <unordered_set>
 #include <string>
-#include <algorithm>
+#include <unordered_set>
 
 
 namespace Noggit

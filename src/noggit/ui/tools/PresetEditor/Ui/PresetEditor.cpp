@@ -1,8 +1,18 @@
 #include "PresetEditor.hpp"
-#include <noggit/ui/FramelessWindow.hpp>
-#include <noggit/ui/FontNoggit.hpp>
-#include <noggit/DBC.h>
+
+#include <ui_PresetEditor.h>
+#include <ui_PresetEditorOverlay.h>
+
 #include <noggit/application/Utils.hpp>
+#include <noggit/project/ApplicationProject.h>
+#include <noggit/ui/FontNoggit.hpp>
+#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
+#include <noggit/World.h>
+
+#include <blizzard-database-library/include/BlizzardDatabase.h>
+
+#include <QFileSystemModel>
+#include <QSortFilterProxyModel>
 
 using namespace Noggit::Ui::Tools::PresetEditor::Ui;
 using namespace Noggit::Ui;

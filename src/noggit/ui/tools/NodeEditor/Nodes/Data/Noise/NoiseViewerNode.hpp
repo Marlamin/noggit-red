@@ -4,8 +4,6 @@
 #define NOGGIT_NOISEVIEWERNODE_HPP
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp>
-#include <QPushButton>
-#include <QLabel>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -14,6 +12,8 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QLabel;
+class QPushButton;
 
 namespace Noggit
 {
@@ -32,9 +32,7 @@ namespace Noggit
           QPushButton* _update_btn;
           QLabel* _image;
         };
-
     }
-
 }
 
 #endif //NOGGIT_NOISEVIEWERNODE_HPP

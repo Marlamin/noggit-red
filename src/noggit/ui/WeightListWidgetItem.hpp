@@ -1,14 +1,13 @@
 #pragma once
 
-#include <QListWidget>
-#include <QLabel>
-#include <QLineEdit>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QSpinBox>
-#include <QFrame>
-#include <QPushButton>
 #include <QWidget>
+
+class QHBoxLayout;
+class QFrame;
+class QLabel;
+class QPushButton;
+class QSpinBox;
+class QVBoxLayout;
 
 namespace noggit
 {

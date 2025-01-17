@@ -4,7 +4,6 @@
 #define NOGGIT_CONTEXTLOGICNODEBASE_HPP
 
 #include <noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp>
-#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -23,46 +22,15 @@ namespace Noggit
     Q_OBJECT
 
     public:
-      ContextLogicNodeBase() {};
-      NodeValidationState validate() override
-      {
-        if (!gCurrentContext->getWorld() || !gCurrentContext->getViewport())
-        {
-          setValidationState(NodeValidationState::Error);
-          setValidationMessage("Error: this node requires a world context to run.");
-          return _validation_state;
-        }
+      ContextLogicNodeBase();
 
-        return LogicNodeBase::validate();
-      };
+      NodeValidationState validate() override;
 
-      QJsonObject save() const override
-      {
-        QJsonObject json_obj = BaseNode::save();
+      QJsonObject save() const override;
 
-        for (int i = 0; i < _in_ports.size(); ++i)
-        {
-          defaultWidgetToJson(PortType::In, i, json_obj, _in_ports[i].caption);
-        }
-
-        return json_obj;
-      };
-
-      void restore(QJsonObject const& json_obj) override
-      {
-        BaseNode::restore(json_obj);
-
-        for (int i = 0; i < _in_ports.size(); ++i)
-        {
-          defaultWidgetFromJson(PortType::In, i, json_obj, _in_ports[i].caption);
-        }
-
-      };
-
+      void restore(QJsonObject const& json_obj) override;
     };
-
   }
-
 }
 
 #endif //NOGGIT_CONTEXTLOGICNODEBASE_HPP

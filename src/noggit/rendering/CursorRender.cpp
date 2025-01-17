@@ -4,6 +4,8 @@
 #include "math/trig.hpp"
 #include "opengl/shader.hpp"
 
+#include <glm/gtx/transform.hpp>
+
 namespace Noggit
 {
   void CursorRender::draw(Mode cursor_mode, glm::mat4x4 const& mvp, glm::vec4 color, glm::vec3 const& pos, float radius, float inner_radius_ratio)

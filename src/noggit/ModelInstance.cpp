@@ -1,21 +1,22 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ModelInstance.h>
-#include <noggit/Log.h>
+#include <noggit/ContextObject.hpp>
+#include <noggit/MapHeaders.h> // ENTRY_MDDF
 #include <noggit/Misc.h> // checkinside
 #include <noggit/Model.h> // Model, etc.
-#include <noggit/WMOInstance.h>
-#include <noggit/ContextObject.hpp>
+#include <noggit/ModelInstance.h>
 #include <noggit/rendering/Primitives.hpp>
-#include <opengl/scoped.hpp>
-#include <opengl/shader.hpp>
+#include <noggit/TextureManager.h>
+#include <noggit/WMOInstance.h>
 
-#include <glm/gtx/quaternion.hpp>
+#include <ClientFile.hpp>
+#include <glm/glm.hpp>
 #include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/vec3.hpp>
 #include <math/bounding_box.hpp>
 #include <math/frustum.hpp>
-#include <glm/glm.hpp>
-#include <glm/vec3.hpp>
+#include <math/ray.hpp>
 
 #include <sstream>
 
@@ -37,6 +38,39 @@ ModelInstance::ModelInstance(BlizzardArchive::Listfile::FileKey const& file_key
 	// scale factor - divide by 1024. blizzard devs must be on crack, why not just use a float?
 	scale = d->scale / 1024.0f;
   _need_recalc_extents = true;
+}
+
+ModelInstance::ModelInstance(ModelInstance&& other) noexcept
+  : SceneObject(other._type, other._context)
+  , model(std::move(other.model))
+  , light_color(other.light_color)
+  , size_cat(other.size_cat)
+  , _need_recalc_extents(other._need_recalc_extents)
+{
+  pos = other.pos;
+  dir = other.dir;
+  scale = other.scale;
+  extents[0] = other.extents[0];
+  extents[1] = other.extents[1];
+  _transform_mat_inverted = other._transform_mat_inverted;
+  _context = other._context;
+  uid = other.uid;
+}
+
+ModelInstance& ModelInstance::operator= (ModelInstance&& other) noexcept
+{
+  std::swap(model, other.model);
+  std::swap(pos, other.pos);
+  std::swap(dir, other.dir);
+  std::swap(light_color, other.light_color);
+  std::swap(uid, other.uid);
+  std::swap(scale, other.scale);
+  std::swap(size_cat, other.size_cat);
+  std::swap(_need_recalc_extents, other._need_recalc_extents);
+  std::swap(extents, other.extents);
+  std::swap(_transform_mat_inverted, other._transform_mat_inverted);
+  std::swap(_context, other._context);
+  return *this;
 }
 
 
@@ -222,6 +256,17 @@ bool ModelInstance::isInRenderDist(const float cull_distance, const glm::vec3& c
   return true;
 }
 
+bool ModelInstance::extentsDirty() const
+{
+  return _need_recalc_extents || !model->finishedLoading();
+}
+
+[[nodiscard]]
+glm::vec3 const& ModelInstance::get_pos() const
+{
+  return pos;
+}
+
 void ModelInstance::recalcExtents()
 {
   if (!model->finishedLoading())
@@ -304,6 +349,11 @@ void ModelInstance::ensureExtents()
   }
 }
 
+bool ModelInstance::finishedLoading()
+{
+  return model->finishedLoading();
+}
+
 std::array<glm::vec3, 2> const& ModelInstance::getExtents()
 {
   ensureExtents();
@@ -329,6 +379,18 @@ std::array<glm::vec3, 8> ModelInstance::getBoundingBox()
   math::aabb const relative_to_model( model->bounding_box_min, model->bounding_box_max);
 
   return relative_to_model.rotated_corners(_transform_mat, true);
+}
+
+[[nodiscard]]
+bool ModelInstance::isWMODoodad() const
+{
+  return false;
+}
+
+[[nodiscard]]
+AsyncObject* ModelInstance::instance_model() const
+{
+  return model.get();
 }
 
 void ModelInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
@@ -372,6 +434,12 @@ void ModelInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   detail_widget->setText(select_info.str());
 }
 
+[[nodiscard]]
+std::uint32_t ModelInstance::gpuTransformUid() const
+{
+  return _gpu_transform_uid;
+}
+
 wmo_doodad_instance::wmo_doodad_instance(BlizzardArchive::Listfile::FileKey const& file_key
                                          , BlizzardArchive::ClientFile* f
                                          , Noggit::NoggitRenderContext context)
@@ -403,6 +471,44 @@ wmo_doodad_instance::wmo_doodad_instance(BlizzardArchive::Listfile::FileKey cons
   f->read(&color.packed, 4);
 
   light_color = glm::vec3(color.bgra.r / 255.f, color.bgra.g / 255.f, color.bgra.b / 255.f);
+}
+
+// titi : issue with those constructors: ModelInstance data is lost (scale, pos...)
+/**/
+wmo_doodad_instance::wmo_doodad_instance(wmo_doodad_instance const& other)
+// : ModelInstance(other.model->file_key(), other._context)
+  : ModelInstance(other)  // titi : Use the copy constructor of ModelInstance instead
+  , doodad_orientation(other.doodad_orientation)
+  , world_pos(other.world_pos)
+  , _need_matrix_update(other._need_matrix_update)
+{
+  // titi: added those.
+  // pos = other.pos;
+  // scale = other.scale;
+  // frame = other.frame;
+}
+
+wmo_doodad_instance::wmo_doodad_instance(wmo_doodad_instance&& other) noexcept
+  : ModelInstance(reinterpret_cast<ModelInstance&&>(other))
+  , doodad_orientation(other.doodad_orientation)
+  , world_pos(other.world_pos)
+  , _need_matrix_update(other._need_matrix_update)
+{
+}
+
+wmo_doodad_instance& wmo_doodad_instance::operator= (wmo_doodad_instance&& other) noexcept
+{
+  ModelInstance::operator= (reinterpret_cast<ModelInstance&&>(other));
+  std::swap(doodad_orientation, other.doodad_orientation);
+  std::swap(world_pos, other.world_pos);
+  std::swap(_need_matrix_update, other._need_matrix_update);
+  return *this;
+}
+
+[[nodiscard]]
+bool wmo_doodad_instance::need_matrix_update() const
+{
+  return _need_matrix_update;
 }
 
 void wmo_doodad_instance::update_transform_matrix_wmo(WMOInstance* wmo)
@@ -468,3 +574,19 @@ bool wmo_doodad_instance::isInRenderDist(const float cull_distance, const glm::v
   return true;
 }
 
+[[nodiscard]]
+glm::vec3 const& wmo_doodad_instance::get_pos() const
+{
+  return world_pos;
+}
+
+[[nodiscard]]
+bool wmo_doodad_instance::isWMODoodad() const
+{
+  return true;
+}
+
+// to avoid redefining recalcExtents
+void wmo_doodad_instance::updateTransformMatrix()
+{
+}

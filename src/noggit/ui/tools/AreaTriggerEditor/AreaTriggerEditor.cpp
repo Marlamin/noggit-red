@@ -2,29 +2,32 @@
 
 #include "AreaTriggerEditor.hpp"
 
-#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/ActionManager.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/area_trigger.hpp>
-#include <noggit/StringHash.hpp>
 #include <noggit/MapView.h>
+#include <noggit/StringHash.hpp>
 #include <noggit/ui/FontNoggit.hpp>
 #include <noggit/ui/widgets/Vector3Widget.hpp>
+#include <noggit/World.h>
 
 #include <rapidfuzz/fuzz.hpp>
 
+#include <QDialog>
+#include <QFile>
 #include <QFormLayout>
 #include <QGroupBox>
+#include <QLabel>
+#include <QLineEdit>
 #include <QListWidget>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSpinBox>
+#include <QTextStream>
 #include <QVBoxLayout>
-#include <QDialog>
 
-#include <concepts>
 #include <format>
 #include <fstream>
-#include <functional>
-#include <string_view>
-#include <system_error>
-#include <tuple>
 #include <vector>
 
 namespace Noggit::Ui::Tools

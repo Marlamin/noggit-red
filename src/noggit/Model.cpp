@@ -1,27 +1,20 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/bounding_box.hpp>
-#include <noggit/AsyncLoader.h>
+#include <math/ray.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/Log.h>
 #include <noggit/Model.h>
-#include <noggit/ModelInstance.h>
-#include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/World.h>
-#include <opengl/scoped.hpp>
-#include <opengl/shader.hpp>
-#include <external/tracy/Tracy.hpp>
-#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/Particle.h>
 #include <noggit/project/CurrentProject.hpp>
-#include <util/CurrentFunction.hpp>
-#include <math/bounding_box.hpp>
+#include <noggit/scoped_blp_texture_reference.hpp>
+#include <noggit/TextureManager.h> // TextureManager, Texture
 
-#include <algorithm>
 #include <cassert>
-#include <map>
-#include <string>
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include <math/trig.hpp>
+#include <map>
+#include <string>
 
 Model::Model(const std::string& filename, Noggit::NoggitRenderContext context)
   : AsyncObject(filename)
@@ -142,6 +135,62 @@ void Model::waitForChildrenLoaded()
   }
 }
 
+[[nodiscard]]
+bool Model::is_hidden() const
+{
+  return _hidden;
+}
+
+void Model::toggle_visibility()
+{
+  _hidden = !_hidden;
+}
+
+void Model::show()
+{
+  _hidden = false;
+}
+
+void Model::hide()
+{
+  _hidden = true;
+}
+
+[[nodiscard]]
+bool Model::use_fake_geometry() const
+{
+  return !!_fake_geometry;
+}
+
+[[nodiscard]]
+bool Model::animated_mesh() const
+{
+  return (animGeometry || animBones);
+}
+
+[[nodiscard]]
+bool Model::particles_only() const
+{ // some particle emitters like wisps in ashenvale have a few vertices but no collision, using that to detect
+  return !_particles.empty()
+    && (_renderer.renderPasses().empty() || _vertices.empty() || !nBoundingTriangles);
+}
+
+[[nodiscard]]
+bool Model::is_required_when_saving() const
+{
+  return true;
+}
+
+[[nodiscard]]
+Noggit::Rendering::ModelRender* Model::renderer()
+{
+  return &_renderer;
+}
+
+uint32_t Model::get_anim_lenght(int16_t anim_id)
+{
+  return _animation_length[anim_id];
+}
 
 bool Model::isAnimated(const BlizzardArchive::ClientFile& f, ModelHeader& header)
 {

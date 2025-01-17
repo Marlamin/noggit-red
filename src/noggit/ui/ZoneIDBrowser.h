@@ -2,24 +2,25 @@
 
 #pragma once
 
-#include <noggit/DBC.h>
-#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
-
 #include <QtWidgets/QWidget>
-#include <QtWidgets/QTreeWidget>
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QSlider>
-#include <QtWidgets/QCheckBox.h>
-#include <QtWidgets/QComboBox.h>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QListWidget>
-#include <QtWidgets/QListView>
-#include <QtWidgets/QTableView>
-#include <QtWidgets/QPushButton>
-#include <QMediaPlayer>
 
-#include <functional>
 #include <string>
+
+class QCheckBox;
+class QComboBox;
+class QDoubleSpinBox;
+class QLabel;
+class QLineEdit;
+class QPushButton;
+class QSlider;
+class QSpinBox;
+class QTreeWidget;
+class QTreeWidgetItem;
+
+namespace Noggit::Ui::Tools::MapCreationWizard::Ui
+{
+  class LocaleDBCEntry;
+}
 
 namespace Noggit
 {

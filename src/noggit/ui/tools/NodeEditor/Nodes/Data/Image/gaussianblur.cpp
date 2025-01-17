@@ -1,5 +1,7 @@
 #include "gaussianblur.h"
 
+#include <qmath.h>
+
 double GaussianBlur::GetNumberOnNormalDistribution(int i, int j, const int center, double sigma) const
 {
     return (1.0 / (2 * M_PI * pow(sigma, 2)) * exp ( - (pow(i - center, 2) + pow(j - center, 2)) / (2 * pow(sigma, 2))));
@@ -61,7 +63,7 @@ GaussianBlur::GaussianBlur(int radius, double sigma) :
             diviation_ (sigma),
             values_is_set_ (false)
 {
-    if (true == (radius_ % 2))
+    if (1 == (radius_ % 2))
     {
         size_   = 2 * radius_ + 1;
         matrix_ = new double* [size_];

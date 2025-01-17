@@ -353,6 +353,16 @@ void ChunkWater::update_layers()
   _layer_count = _layers.size();
 }
 
+float ChunkWater::getMinHeight() const
+{
+  return vmin.y;
+}
+
+float ChunkWater::getMaxHeight() const
+{
+  return vmax.y;
+}
+
 bool ChunkWater::hasData(size_t layer) const
 {
   return _layer_count > layer;
@@ -438,6 +448,31 @@ void ChunkWater::paintLiquid( glm::vec3 const& pos
   update_layers();
 }
 
+MapChunk* ChunkWater::getChunk()
+{
+  return _chunk;
+}
+
+TileWater* ChunkWater::getWaterTile()
+{
+  return _water_tile;
+}
+
+MH2O_Attributes const&  ChunkWater::getAttributes() const
+{
+  return attributes;
+}
+
+MH2O_Attributes& ChunkWater::getAttributes()
+{
+  return attributes;
+}
+
+int ChunkWater::layer_count() const
+{
+  return _layers.size();
+}
+
 void ChunkWater::cleanup()
 {
   for (int i = static_cast<int>(_layer_count - 1); i >= 0; --i)
@@ -490,5 +525,10 @@ void ChunkWater::update_attributes()
 void ChunkWater::tagUpdate()
 {
   _water_tile->tagUpdate();
+}
+
+std::vector<liquid_layer>* ChunkWater::getLayers()
+{
+  return &_layers;
 }
 

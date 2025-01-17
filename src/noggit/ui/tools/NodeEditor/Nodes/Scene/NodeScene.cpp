@@ -12,6 +12,11 @@
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 
+NodeScene::NodeScene(std::shared_ptr<DataModelRegistry> registry, QObject* parent)
+  : FlowScene(std::move(registry), parent)
+{
+}
+
 bool NodeScene::execute()
 {
   if (!validate())
@@ -73,4 +78,19 @@ bool NodeScene::validate()
   }
 
   return true;
+}
+
+Node* NodeScene::getBeginNode()
+{
+  return _begin_node;
+}
+
+Node* NodeScene::getReturnNode()
+{
+  return _return_node;
+}
+
+VariableMap* NodeScene::getVariableMap()
+{
+  return &_variables;
 }

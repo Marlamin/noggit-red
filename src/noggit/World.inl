@@ -4,6 +4,7 @@
 #define NOGGIT_WORLD_INL
 
 #include "World.h"
+#include "MapTile.h"
 #include <forward_list>
 
 template<typename Fun>

@@ -1,7 +1,8 @@
 #ifndef NOGGIT_CONDITIONNODE_HPP
 #define NOGGIT_CONDITIONNODE_HPP
 
-#include "noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp"
+#include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
 
 #include <QComboBox>
 
@@ -12,6 +13,8 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QDoubleSpinBox;
+class QComboBox;
 
 namespace Noggit
 {

@@ -7,12 +7,13 @@
 #include "LogicReturnNode.hpp"
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include "noggit/ui/tools/NodeEditor/Nodes/Widgets/ProcedureSelector.hpp"
-
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodeScene.hpp>
 #include <noggit/ui/tools/NodeEditor/NodeRegistry.hpp>
-#include <sstream>
 
 #include <QComboBox>
 #include <QDir>
+
+#include <sstream>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 

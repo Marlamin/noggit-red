@@ -1,19 +1,24 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ui/ModelImport.h>
-
 #include <noggit/MapView.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
-#include <noggit/WMOInstance.h>
+#include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
+#include <noggit/WMOInstance.h>
+
+#include <ClientData.hpp>
 
 #include <fstream>
 #include <regex>
 #include <string>
 
-#include <QtWidgets/QVBoxLayout>
+#include <QSettings>
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QVBoxLayout>
 
 namespace Noggit
 {

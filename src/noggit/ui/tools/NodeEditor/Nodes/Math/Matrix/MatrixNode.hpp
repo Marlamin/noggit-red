@@ -4,7 +4,6 @@
 #define NOGGIT_MATRIXNODE_HPP
 
 #include "noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp"
-#include <QComboBox>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -13,6 +12,7 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QComboBox;
 
 namespace Noggit
 {
@@ -30,11 +30,8 @@ namespace Noggit
 
         private:
             QComboBox* _operation;
-
         };
-
     }
-
 }
 
 #endif //NOGGIT_MATRIXNODE_HPP

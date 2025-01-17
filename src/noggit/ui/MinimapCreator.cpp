@@ -1,32 +1,36 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include "MinimapCreator.hpp"
 #include "FontAwesome.hpp"
+#include "MinimapCreator.hpp"
 
-#include <noggit/MapView.h>
-#include <noggit/World.h>
-#include <noggit/Log.h>
-#include <noggit/project/CurrentProject.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/Log.h>
+#include <noggit/MapView.h>
+#include <noggit/Model.h>
+#include <noggit/project/CurrentProject.hpp>
+#include <noggit/World.h>
 
-#include <util/qt/overload.hpp>
+#include <qt-color-widgets/color_selector.hpp>
 
+#include <QByteArray>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QFile>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
-#include <QCheckBox>
-#include <QButtonGroup>
-#include <QPushButton>
-#include <QTabWidget>
-#include <QScrollArea>
-#include <QWheelEvent>
-#include <QApplication>
-#include <QComboBox>
-#include <QJsonObject>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <QByteArray>
+#include <QJsonObject>
+#include <QLabel>
+#include <QLineEdit>
+#include <QListWidget>
 #include <QPalette>
+#include <QPushButton>
+#include <QSlider>
+#include <QTabWidget>
 
 namespace Noggit
 {
@@ -872,6 +876,22 @@ namespace Noggit
       _radius_spin->setValue (_radius + change);
     }
 
+    float MinimapCreator::brushRadius() const
+    {
+      return _radius;
+    }
+
+    //std::array<bool, 4096>* getSelectedTiles() { return &_render_settings.selected_tiles; };
+    std::vector<char>* MinimapCreator::getSelectedTiles()
+    {
+      return &_render_settings.selected_tiles;
+    }
+
+    MinimapRenderSettings* MinimapCreator::getMinimapRenderSettings()
+    {
+      return &_render_settings;
+    }
+
     QSize MinimapCreator::sizeHint() const
     {
       return QSize(width(), height());
@@ -1207,7 +1227,27 @@ namespace Noggit
 
     }
 
-     MinimapWMOModelFilterEntry::MinimapWMOModelFilterEntry(QWidget* parent) : QWidget(parent)
+    QString MinimapM2ModelFilterEntry::getFileName() const
+    {
+      return _filename->text();
+    }
+
+    void MinimapM2ModelFilterEntry::setFileName(const std::string& filename)
+    {
+      _filename->setText(QString(filename.c_str()));
+    }
+
+    void MinimapM2ModelFilterEntry::setSizeCategory(float size_cat)
+    {
+      _size_category_spin->setValue(size_cat);
+    }
+
+    float MinimapM2ModelFilterEntry::getSizeCategory() const
+    {
+      return static_cast<float>(_size_category_spin->value());
+    }
+
+    MinimapWMOModelFilterEntry::MinimapWMOModelFilterEntry(QWidget* parent) : QWidget(parent)
     {
       setAttribute(Qt::WA_TranslucentBackground);
       auto layout = new QHBoxLayout(this);
@@ -1216,6 +1256,16 @@ namespace Noggit
       layout->setContentsMargins(5, 2, 5, 2);
       _filename->setEnabled(false);
     }
+
+    QString MinimapWMOModelFilterEntry::getFileName() const
+     {
+       return _filename->text();
+     }
+
+    void MinimapWMOModelFilterEntry::setFileName(const std::string& filename)
+     {
+       _filename->setText(QString(filename.c_str()));
+     }
 
     MinimapInstanceFilterEntry::MinimapInstanceFilterEntry(QWidget* parent) : QWidget(parent)
     {
@@ -1226,5 +1276,15 @@ namespace Noggit
       layout->setContentsMargins(5, 2, 5, 2);
     }
 
+    uint32_t MinimapInstanceFilterEntry::getUid() const
+    {
+      return _uid;
+    }
+
+    void MinimapInstanceFilterEntry::setUid(uint32_t uid)
+    {
+      _uid = uid;
+      _uid_label->setText(QString::fromStdString(std::to_string(uid)));
+    }
   }
 }

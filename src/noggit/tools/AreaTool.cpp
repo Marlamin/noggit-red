@@ -3,10 +3,12 @@
 #include "AreaTool.hpp"
 
 #include <noggit/ActionManager.hpp>
+#include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
 #include <noggit/Input.hpp>
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/World.h>
 
 namespace Noggit
 {

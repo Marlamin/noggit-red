@@ -17,7 +17,7 @@ namespace Noggit
       help(QWidget* parent = nullptr);
 
     private:
-      inline void generate_hotkey_row(std::initializer_list<FontNoggit::Icons>&& hotkeys, const char* description, QFormLayout* layout);
+      void generate_hotkey_row(std::initializer_list<FontNoggit::Icons>&& hotkeys, const char* description, QFormLayout* layout);
     };
   }
 }

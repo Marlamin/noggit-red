@@ -1,34 +1,26 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #pragma once
-#include <QLabel>
-#include <QWidget>
-#include <QSlider>
-#include <QDoubleSpinBox>
-#include <QSpinBox>
-#include <QLineEdit>
-#include <QListWidget>
-#include <QApplication>
-#include <qt-color-widgets/color_selector.hpp>
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <array>
-#include <glm/vec4.hpp>
-
 #include <noggit/MinimapRenderSettings.hpp>
-#include <noggit/ui/minimap_widget.hpp>
 
+#include <QWidget>
+
+#include <string>
+#include <vector>
 
 class MapView;
 class World;
 
-
+class QDoubleSpinBox;
+class QLabel;
+class QLineEdit;
+class QListWidget;
+class QSlider;
 
 namespace Noggit
 {
-
   namespace Ui
   {
+    class minimap_widget;
 
     class MinimapCreator : public QWidget
     {
@@ -38,12 +30,12 @@ namespace Noggit
 
       void changeRadius(float change);
 
-      float brushRadius() const { return _radius; }
+      float brushRadius() const;
 
       //std::array<bool, 4096>* getSelectedTiles() { return &_render_settings.selected_tiles; };
-      std::vector<char>* getSelectedTiles() { return &_render_settings.selected_tiles; };
+      std::vector<char>* getSelectedTiles();;
 
-      MinimapRenderSettings* getMinimapRenderSettings() { return &_render_settings; };
+      MinimapRenderSettings* getMinimapRenderSettings();;
 
       QSize sizeHint() const override;
 
@@ -81,10 +73,10 @@ namespace Noggit
     public:
       MinimapM2ModelFilterEntry(QWidget* parent = nullptr);
 
-      QString getFileName() { return _filename->text(); };
-      void setFileName(const std::string& filename) { _filename->setText(QString(filename.c_str())); };
-      void setSizeCategory(float size_cat) {_size_category_spin->setValue(size_cat); };
-      float getSizeCategory() { return static_cast<float>(_size_category_spin->value()); };
+      QString getFileName() const;;
+      void setFileName(const std::string& filename);;
+      void setSizeCategory(float size_cat);;
+      float getSizeCategory() const;;
 
     private:
       QLineEdit* _filename;
@@ -96,8 +88,8 @@ namespace Noggit
     public:
       MinimapWMOModelFilterEntry(QWidget* parent = nullptr);
 
-      QString getFileName() { return _filename->text(); };
-      void setFileName(const std::string& filename) { _filename->setText(QString(filename.c_str())); };
+      QString getFileName() const;;
+      void setFileName(const std::string& filename);;
 
     private:
       QLineEdit* _filename;
@@ -108,8 +100,8 @@ namespace Noggit
     public:
       MinimapInstanceFilterEntry(QWidget* parent = nullptr);
 
-      uint32_t getUid() { return _uid; };
-      void setUid(uint32_t uid) { _uid = uid; _uid_label->setText(QString::fromStdString(std::to_string(uid))); };
+      uint32_t getUid() const;;
+      void setUid(uint32_t uid);;
 
     private:
       uint32_t _uid;

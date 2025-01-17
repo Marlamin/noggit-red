@@ -3,11 +3,9 @@
 
 #include "noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp"
 
-#include <unordered_map>
-#include <QComboBox>
 #include <array>
-#include <string_view>
-#include <functional>
+
+class QComboBox;
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;

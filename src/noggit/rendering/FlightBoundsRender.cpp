@@ -3,6 +3,8 @@
 #include "FlightBoundsRender.hpp"
 #include <noggit/MapTile.h>
 
+#include <opengl/shader.hpp>
+
 #include <array>
 
 using namespace Noggit::Rendering;

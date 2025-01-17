@@ -1,14 +1,25 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ui/windows/downloadFileDialog/DownloadFileDialog.h>
-#include "revision.h"
 #include <noggit/Log.h>
-#include <sstream>
+#include <noggit/ui/windows/downloadFileDialog/DownloadFileDialog.h>
+
+#include <ui_DownloadFileDialog.h>
+
+#include "revision.h"
+
+#include <QFile>
+#include <QNetworkRequest>
+#include <QtNetwork/QNetworkReply>
+
 #include <map>
+#include <sstream>
 
 namespace Noggit::Ui
 {
-    DownloadFileDialog::DownloadFileDialog(QString url, QString fileDownloadPath, QWidget* parent) : QDialog(parent), ui(new ::Ui::DownloadFileDialog)
+    DownloadFileDialog::DownloadFileDialog(QString url, QString fileDownloadPath, QWidget* parent)
+      : QDialog(parent)
+      , ui(new ::Ui::DownloadFileDialog)
+      , _response{nullptr}
     {
         ui->setupUi(this);
 

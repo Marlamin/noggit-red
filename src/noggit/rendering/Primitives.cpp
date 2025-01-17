@@ -3,19 +3,34 @@
 #include <noggit/rendering/Primitives.hpp>
 
 #include <math/bounding_box.hpp>
-#include <noggit/Misc.h>
 #include <opengl/scoped.hpp>
 #include <opengl/context.hpp>
-#include <opengl/types.hpp>
-#include <noggit/World.h>
+#include <opengl/shader.hpp>
 
-#include <numbers>
+#include <glm/gtc/constants.hpp>
+
 #include <array>
 #include <vector>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 using namespace Noggit::Rendering::Primitives;
+
+WireBox& WireBox::operator=(WireBox& box)
+{
+  return *this;
+}
+
+WireBox& Noggit::Rendering::Primitives::WireBox::getInstance(Noggit::NoggitRenderContext context)
+{
+  static std::unordered_map<Noggit::NoggitRenderContext, WireBox> instances;
+
+  if (instances.find(context) == instances.end())
+  {
+    WireBox instance;
+    instances[context] = instance;
+  }
+
+  return instances.at(context);
+}
 
 void WireBox::draw ( glm::mat4x4 const& model_view
                     , glm::mat4x4 const& projection

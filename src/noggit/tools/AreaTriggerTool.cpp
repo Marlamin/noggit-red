@@ -5,16 +5,18 @@
 #include <math/coordinates.hpp>
 #include <math/sphere.hpp>
 #include <noggit/ActionManager.hpp>
-#include <noggit/MapView.h>
+#include <noggit/DBC.h>
 #include <noggit/Input.hpp>
-#include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/MapView.h>
 #include <noggit/ui/tools/AreaTriggerEditor/AreaTriggerEditor.hpp>
+#include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/World.h>
 
-#include <external/glm/gtx/matrix_decompose.hpp>
 #include <external/glm/gtc/type_ptr.hpp>
+#include <external/glm/gtx/matrix_decompose.hpp>
 
-#include <variant>
 #include <type_traits>
+#include <variant>
 
 size_t get_closest_hit(MapView* map_view, std::vector<Noggit::area_trigger> const& hits)
 {

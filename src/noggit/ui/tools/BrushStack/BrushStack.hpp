@@ -4,20 +4,22 @@
 #define NOGGIT_BRUSHSTACK_HPP
 
 #include <ui_BrushStack.h>
-#include "BrushStackItem.hpp"
 
 #include <QWidget>
-#include <QComboBox>
-#include <QButtonGroup>
-
 #include <QJsonObject>
 
+#include <glm/vec3.hpp>
 
 class MapView;
 class World;
 
+class QButtonGroup;
+class QComboBox;
+
 namespace Noggit::Ui::Tools
 {
+  class BrushStackItem;
+
   class BrushStack : public QWidget
   {
   public:
@@ -33,9 +35,9 @@ namespace Noggit::Ui::Tools
     float getRadius();
     float getInnerRadius();
     float getSpeed();
-    bool getBrushMode() { return _ui.sculptRadio->isChecked(); };
-    bool getRandomizeRotation() { return _ui.randomizeRotation->isChecked(); };
-    BrushStackItem* getActiveBrushItem() { return _active_item; };
+    bool getBrushMode() const;;
+    bool getRandomizeRotation() const;;
+    BrushStackItem* getActiveBrushItem();;
 
     QJsonObject toJSON();
     void fromJSON(QJsonObject const& json);

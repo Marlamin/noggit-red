@@ -1,15 +1,16 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-#include <string>
-#include <iostream>
-#include <vector>
-#include <cmath>
 #include <glm/common.hpp>
 #include <glm/trigonometric.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
 #include <glm/ext/scalar_constants.hpp>
+
+#include <string>
+#include <ostream>
+#include <vector>
+#include <cmath>
 
 namespace math
 {

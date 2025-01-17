@@ -1,29 +1,41 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
-#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
 
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
-#include <QtWidgets/QDial>
-
-#include <qt-color-widgets/color_selector.hpp>
-#include <qt-color-widgets/color_wheel.hpp>
-#include <qt-color-widgets/hue_slider.hpp>
-#include <qt-color-widgets/gradient_slider.hpp>
-#include <qt-color-widgets/color_list_widget.hpp>
 
 #include <QJsonObject>
 
+namespace color_widgets
+{
+  class ColorListWidget;
+  class ColorSelector;
+  class ColorWheel;
+  class GradientSlider;
+  class HueSlider;
+}
+
 class World;
 class MapView;
+
+class QCheckBox;
+class QDial;
+class QSpinBox;
 
 namespace Noggit
 {
   namespace Ui
   {
+    namespace Tools
+    {
+      namespace UiCommon
+      {
+        class ExtendedSlider;
+      }
+
+      class ImageMaskSelector;
+    }
+
     class ShaderTool : public QWidget
     {
       Q_OBJECT
@@ -39,19 +51,19 @@ namespace Noggit
       void changeSpeed(float change);
       void setSpeed(float speed);
 
-      float brushRadius() const { return _radius_slider->value(); }
+      float brushRadius() const;
 
       QSize sizeHint() const override;
 
-      Noggit::Ui::Tools::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
-      QImage* getMaskImage() { return &_mask_image; }
+      Noggit::Ui::Tools::ImageMaskSelector* getImageMaskSelector();;
+      QImage* getMaskImage();
       void updateMaskImage();
 
-      glm::vec4& shaderColor() { return _color; };
+      glm::vec4& shaderColor();;
 
-      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
-      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
-      QDial* getMaskOrientationDial() { return _image_mask_group->getMaskOrientationDial(); };
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getRadiusSlider();;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getSpeedSlider();;
+      QDial* getMaskOrientationDial();;
 
       QJsonObject toJSON();
       void fromJSON(QJsonObject const& json);

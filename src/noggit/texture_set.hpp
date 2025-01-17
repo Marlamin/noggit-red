@@ -3,7 +3,6 @@
 #pragma once
 
 #include <noggit/Alphamap.hpp>
-#include <noggit/MapHeaders.h>
 #include <noggit/ContextObject.hpp>
 #include <noggit/TextureManager.h>
 
@@ -13,6 +12,7 @@
 class Brush;
 class MapTile;
 class MapChunk;
+struct MapChunkHeader;
 
 namespace BlizzardArchive
 {
@@ -69,7 +69,7 @@ public:
 
   const std::string& filename(size_t id);
 
-  size_t const& num() const { return nTextures; }
+  size_t const& num() const;
   unsigned int flag(size_t id);
   unsigned int effect(size_t id);
   bool is_animated(std::size_t id) const;
@@ -99,38 +99,28 @@ public:
 
   std::array<std::uint16_t, 8> lod_texture_map();
 
-  std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS>* getAlphamaps() { return &alphamaps; };
-  std::unique_ptr<tmp_edit_alpha_values>& getTempAlphamaps() { return tmp_edit_values; };
+  std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS>* getAlphamaps();;
+  std::unique_ptr<tmp_edit_alpha_values>& getTempAlphamaps();;
 
-  void setAlphamaps(const std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS>& newAlphamaps) {
-      for (int i = 0; i < MAX_ALPHAMAPS; ++i) 
-      {
-          if (newAlphamaps[i])
-          {
-            alphamaps[i] = std::make_unique<Alphamap>(*newAlphamaps[i]);
-          }
-          else
-              alphamaps[i].reset();
-      }
-  }
+  void setAlphamaps(const std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS>& newAlphamaps);
 
   int get_texture_index_or_add (scoped_blp_texture_reference texture, float target);
 
-  auto getDoodadMappingBase(void) -> std::uint16_t* { return _doodadMapping.data(); }
-  std::array<std::uint16_t, 8> const& getDoodadMapping() { return _doodadMapping; }
+  auto getDoodadMappingBase(void) -> std::uint16_t*;
+  std::array<std::uint16_t, 8> const& getDoodadMapping();
   std::array<std::array<std::uint8_t, 8>, 8> const getDoodadMappingReadable(); // get array of readable values
   uint8_t const getDoodadActiveLayerIdAt(unsigned int unit_x, unsigned int unit_y);
 
   std::array<std::uint8_t, 8> _doodadStencil; // doodads disabled if 1; WoD: may be an explicit MCDD chunk
                                                 // this is actually uint1_t[8][8] (8*8 -> 1 bit each)
-  auto getDoodadStencilBase(void) -> std::uint8_t* { return _doodadStencil.data(); }
+  auto getDoodadStencilBase(void) -> std::uint8_t*;
   bool const getDoodadDisabledAt(int x, int y); // max is 8
   void setDetailDoodadsExclusion(float xbase, float zbase, glm::vec3 const& pos, float radius, bool big, bool add);
 
-  auto getEffectForLayer(std::size_t idx) const -> unsigned { return _layers_info[idx].effectID; }
-  layer_info* getMCLYEntries() { return &_layers_info[0]; };
-  void setNTextures(size_t n) { nTextures = n; };
-  std::vector<scoped_blp_texture_reference>* getTextures() { return &textures; };
+  auto getEffectForLayer(std::size_t idx) const -> unsigned;
+  layer_info* getMCLYEntries();;
+  void setNTextures(size_t n);;
+  std::vector<scoped_blp_texture_reference>* getTextures();;
 
   // get the weight of each texture in a chunk unit
   std::array<float, 4> get_textures_weight_for_unit(unsigned int unit_x, unsigned int unit_y);
@@ -171,17 +161,7 @@ private:
 
   bool _do_not_convert_alphamaps;
 
-  static constexpr std::array<std::uint8_t, 256 * 256> make_alpha_lookup_array()
-  {
-      std::array<std::uint8_t, 256 * 256> array{};
-
-      for (int i = 0; i < 256 * 256; ++i)
-      {
-          array[i] = i / 255 + (i % 255 <= 127 ? 0 : 1);
-      }
-
-      return array;
-  }
+  static constexpr std::array<std::uint8_t, 256 * 256> make_alpha_lookup_array();
 
   static std::array<std::uint8_t, 256 * 256> alpha_convertion_lookup;
 

@@ -2,15 +2,14 @@
 
 #pragma once
 
-#include <functional>
+#include <noggit/tool_enums.hpp>
+#include <noggit/ui/FontNoggit.hpp>
 
 #include <QtWidgets/QActionGroup>
 #include <QtWidgets/QToolBar>
 
-#include <noggit/tool_enums.hpp>
-#include <noggit/ui/FontNoggit.hpp>
-
 #include <unordered_map>
+#include <functional>
 
 namespace Noggit
 {

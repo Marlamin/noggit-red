@@ -1,6 +1,10 @@
-#include <QListWidget>
-#include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
 #include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
+
+#include <QGraphicsOpacityEffect>
+#include <QGridLayout>
+#include <QLabel>
+#include <QListWidget>
 
 namespace Noggit::Ui::Widget
 {
@@ -103,6 +107,31 @@ namespace Noggit::Ui::Widget
   QSize MapListItem::minimumSizeHint() const
   {
     return QSize(300, 32);
+  }
+
+  const QString MapListItem::name() const
+  {
+    return _map_data.map_name;
+  }
+
+  int MapListItem::id() const
+  {
+    return _map_data.map_id;
+  }
+
+  int MapListItem::type() const
+  {
+    return _map_data.map_type_id;
+  }
+
+  int MapListItem::expansion() const
+  {
+    return _map_data.expansion_id;
+  }
+
+  bool MapListItem::wmo_map() const
+  {
+    return _map_data.wmo_map;
   }
 
   QString MapListItem::toCamelCase(const QString& s)

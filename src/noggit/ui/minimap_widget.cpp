@@ -1,18 +1,14 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ui/minimap_widget.hpp>
-
-
-#include <QPaintEvent>
-#include <QPainter>
-#include <QToolTip>
-#include <QFormLayout>
-#include <QApplication>
-
-#include <noggit/Sky.h>
-#include <noggit/World.h>
 #include <noggit/Camera.hpp>
-#include <QTransform>
+#include <noggit/Sky.h>
+#include <noggit/ui/minimap_widget.hpp>
+#include <noggit/World.h>
+
+#include <QApplication>
+#include <QPainter>
+#include <QPaintEvent>
+#include <QToolTip>
 
 namespace Noggit
 {
@@ -113,6 +109,65 @@ namespace Noggit
     QSize minimap_widget::sizeHint() const
     {
       return QSize (512, 512);
+    }
+
+    const World* minimap_widget::world(World* const world_)
+    {
+      _world = world_;
+      update();
+      return _world;
+    }
+
+    const World* minimap_widget::world() const
+    {
+      return _world;
+    }
+
+    const bool& minimap_widget::draw_skies(const bool& draw_skies_)
+    {
+      _draw_skies = draw_skies_;
+      update();
+      return _draw_skies;
+    }
+
+    const bool& minimap_widget::draw_skies() const
+    {
+      return _draw_skies;
+    }
+
+    const bool& minimap_widget::draw_boundaries(const bool& draw_boundaries_)
+    {
+      _draw_boundaries = draw_boundaries_;
+      update();
+      return _draw_boundaries;
+    }
+
+    const bool& minimap_widget::draw_boundaries() const
+    {
+      return _draw_boundaries;
+    }
+
+    const std::vector<char>* minimap_widget::use_selection(std::vector<char>* selection_)
+    {
+      _use_selection = selection_;
+      _selected_tiles = selection_;
+      update();
+      return _selected_tiles;
+    }
+
+    const std::vector<char>* minimap_widget::selection() const
+    {
+      return _selected_tiles;
+    }
+
+    void minimap_widget::camera(Noggit::Camera* camera)
+    {
+      _camera = camera;
+    }
+
+    void minimap_widget::set_resizeable(bool state)
+    {
+      _resizeable = state;
     }
 
     //! \todo Only redraw stuff as told in event.

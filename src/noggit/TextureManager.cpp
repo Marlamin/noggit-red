@@ -2,10 +2,11 @@
 #include <noggit/TextureManager.h>
 #include <noggit/Log.h> // LogDebug
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <ClientFile.hpp>
 
-#include <QtCore/QString>
-#include <QtGui/QPixmap>
+#include <QtGui/QOffscreenSurface>
+#include <QtGui/QOpenGLFramebufferObjectFormat>
 
 #include <algorithm>
 #include <glm/vec2.hpp>
@@ -284,6 +285,68 @@ void blp_texture::unload()
   finishLoading();
 }
 
+bool blp_texture::is_uploaded() const
+{
+  return _uploaded;
+}
+
+GLuint blp_texture::texture_array() const
+{
+  return _texture_array;
+}
+
+int blp_texture::array_index() const
+{
+  return _array_index;
+}
+
+bool blp_texture::is_specular() const
+{
+  return _is_specular;
+}
+
+unsigned blp_texture::mip_level() const
+{
+  return static_cast<unsigned>(!_compression_format ? _data.size() : _compressed_data.size());
+}
+
+std::map<int, std::vector<uint32_t>>& blp_texture::data()
+{
+  return _data;
+}
+
+std::map<int, std::vector<uint8_t>>& blp_texture::compressed_data()
+{
+  return _compressed_data;
+}
+
+std::optional<GLint> const& blp_texture::compression_format() const
+{
+  return _compression_format;
+}
+
+Noggit::NoggitRenderContext blp_texture::getContext() const
+{
+  return _context;
+}
+
+[[nodiscard]]
+async_priority blp_texture::loading_priority() const
+{
+  return async_priority::high;
+}
+
+// Mists HeightMapping
+bool blp_texture::hasHeightMap() const
+{
+  return _has_heightmap;
+}
+
+blp_texture* blp_texture::getHeightMap()
+{
+  return heightMap.get();
+}
+
 void blp_texture::loadFromUncompressedData(BLPHeader const* lHeader, char const* lData)
 {
   unsigned int const* pal = reinterpret_cast<unsigned int const*>(lData + sizeof(BLPHeader));
@@ -398,6 +461,16 @@ void blp_texture::loadFromCompressedData(BLPHeader const* lHeader, char const* l
   }
 }
 
+int blp_texture::width() const
+{
+  return _width;
+}
+
+int blp_texture::height() const
+{
+  return _height;
+}
+
 blp_texture::blp_texture(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRenderContext context)
   : AsyncObject(file_key)
   , _context(context)
@@ -500,8 +573,13 @@ void blp_texture::finishLoading()
 
 namespace Noggit
 {
+    BLPRenderer& BLPRenderer::getInstance()
+    {
+        static BLPRenderer  instance;
+        return instance;
+    }
 
-  QPixmap* BLPRenderer::render_blp_to_pixmap ( std::string const& blp_filename
+    QPixmap* BLPRenderer::render_blp_to_pixmap ( std::string const& blp_filename
                                                , int width
                                                , int height
                                                )
@@ -695,34 +773,4 @@ namespace Noggit
     _uploaded = false;
   }
 
-}
-
-scoped_blp_texture_reference::scoped_blp_texture_reference (std::string const& filename, Noggit::NoggitRenderContext context)
-  : _blp_texture(TextureManager::_.emplace(filename, context))
-  , _context(context)
-{}
-
-scoped_blp_texture_reference::scoped_blp_texture_reference (scoped_blp_texture_reference const& other)
-  : _blp_texture(other._blp_texture ? TextureManager::_.emplace(other._blp_texture->file_key().filepath(), other._context) : nullptr)
-  , _context(other._context)
-{}
-
-void scoped_blp_texture_reference::Deleter::operator() (blp_texture* texture) const
-{
-  TextureManager::_.erase(texture->file_key().filepath(), texture->getContext());
-}
-
-blp_texture* scoped_blp_texture_reference::operator->() const
-{
-  return _blp_texture.get();
-}
-
-blp_texture* scoped_blp_texture_reference::get() const
-{
-  return _blp_texture.get();
-}
-
-bool scoped_blp_texture_reference::operator== (scoped_blp_texture_reference const& other) const
-{
-  return std::tie(_blp_texture) == std::tie(other._blp_texture);
 }

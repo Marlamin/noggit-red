@@ -1,23 +1,25 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-#include <noggit/ui/CurrentTexture.h>
 #include <noggit/TextureManager.h>
 
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QSlider>
 #include <QtWidgets/QWidget>
 #include <optional>
 
 class World;
 class MapView;
 
+class QCheckBox;
+class QDoubleSpinBox;
+class QGroupBox;
+class QSlider;
+
 namespace Noggit
 {
   namespace Ui
   {
+    class current_texture;
+
     class texture_swapper : public QWidget
     {
     public:
@@ -26,41 +28,23 @@ namespace Noggit
                       , MapView* map_view
                       );
 
-      std::optional<scoped_blp_texture_reference> const& texture_to_swap() const
-      {
-        return _texture_to_swap;
-      }
+      std::optional<scoped_blp_texture_reference> const& texture_to_swap() const;
 
-      float radius() const
-      {
-        return _radius;
-      }
+      float radius() const;
 
-      bool entireChunk() const
-      {
-          return _swap_entire_chunk->isChecked();
-      }
+      bool entireChunk() const;
 
-      bool entireTile() const
-      {
-          return _swap_entire_tile->isChecked();
-      }
+      bool entireTile() const;
 
       void change_radius(float change);
 
-      bool brush_mode() const
-      {
-        return _brush_mode_group->isChecked();
-      }
+      bool brush_mode() const;
 
-      void toggle_brush_mode()
-      {
-        _brush_mode_group->setChecked(!_brush_mode_group->isChecked());
-      }
+      void toggle_brush_mode();
 
       void set_texture(std::string const& filename);
 
-      current_texture* const texture_display() { return _texture_to_swap_display; }
+      current_texture* const texture_display();
 
     private:
       std::optional<scoped_blp_texture_reference> _texture_to_swap;

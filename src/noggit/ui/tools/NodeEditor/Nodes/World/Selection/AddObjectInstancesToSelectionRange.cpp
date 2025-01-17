@@ -6,6 +6,10 @@
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
+#include <noggit/World.h>
+
+#include <external/NodeEditor/include/nodes/Node>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 

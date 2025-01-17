@@ -1,6 +1,9 @@
-#include <noggit/Selection.h>
-#include <noggit/MapChunk.h>
+#include <noggit/ChunkWater.hpp>
 #include <noggit/DBC.h>
+#include <noggit/MapChunk.h>
+#include <noggit/MapTile.h>
+#include <noggit/Selection.h>
+#include <noggit/texture_set.hpp>
 #include <noggit/World.h>
 
 #include <sstream>
@@ -397,4 +400,25 @@ void selection_group::recalcExtents()
         if (instance->getExtents()[1].z > _group_extents[1].z)
             _group_extents[1].z = instance->getExtents()[1].z;
     }
+}
+
+std::vector<unsigned int> const& selection_group::getMembers() const
+{
+  return _members_uid;
+}
+
+[[nodiscard]]
+std::array<glm::vec3, 2> const& selection_group::getExtents() const
+{
+  return _group_extents;
+}
+
+bool selection_group::isSelected() const
+{
+  return _is_selected;
+}
+
+void selection_group::setUnselected()
+{
+  _is_selected = false;
 }

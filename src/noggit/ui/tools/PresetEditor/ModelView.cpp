@@ -1,6 +1,12 @@
 #include "ModelView.hpp"
-#include <external/qtimgui/imgui/imgui.h>
-#include <external/imguizmo/ImGuizmo.h>
+
+#include <noggit/MinimapRenderSettings.hpp>
+#include <noggit/World.h>
+
+#include <external/QtImGui/QtImGui.h>
+
+#include <QMouseEvent>
+#include <QSettings>
 
 #include <vector>
 
@@ -136,6 +142,21 @@ void ModelViewer::loadWorldUnderlay(const std::string& internal_name, int map_id
                                       Noggit::NoggitRenderContext::PRESET_EDITOR);
   }
 
+}
+
+World* Noggit::Ui::Tools::PresetEditor::ModelViewer::getWorld()
+{
+  return _world.get();
+}
+
+Noggit::Camera* Noggit::Ui::Tools::PresetEditor::ModelViewer::getCamera()
+{
+  return &_camera;
+}
+
+Noggit::Camera* Noggit::Ui::Tools::PresetEditor::ModelViewer::getWorldCamera()
+{
+  return &_world_camera;
 }
 
 glm::mat4x4 ModelViewer::world_model_view() const

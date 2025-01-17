@@ -4,6 +4,8 @@
 
 #include <math/coordinates.hpp>
 
+#include <glm/gtx/transform.hpp>
+
 #include <format>
 
 namespace Noggit

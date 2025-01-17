@@ -3,37 +3,45 @@
 #ifndef NOGGIT_NODEEDITOR_HPP
 #define NOGGIT_NODEEDITOR_HPP
 
-#include <ui_NodeEditor.h>
-#include "../NodeRegistry.hpp"
 
-#include <QWidget>
 #include <QMainWindow>
-#include <QFileSystemModel>
-#include <QSortFilterProxyModel>
 
-#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
+
+class QFileSystemModel;
+class QSortFilterProxyModel;
+class QWidget;
+
+namespace Ui
+{
+  class NodeEditor;
+}
 
 namespace Noggit
 {
-    namespace Ui::Tools::NodeEditor::Ui
+  namespace Ui::Tools
+  {
+    class PreviewRenderer;
+  }
+
+  namespace Ui::Tools::NodeEditor::Ui
+  {
+    class NodeEditorWidget : public QMainWindow
     {
-        class NodeEditorWidget : public QMainWindow
-        {
-        public:
-            explicit NodeEditorWidget(QWidget* parent = nullptr);
-            ~NodeEditorWidget() override;
+    public:
+      explicit NodeEditorWidget(QWidget* parent = nullptr);
+      ~NodeEditorWidget() override;
 
-            void loadScene(QString const& filepath);
+      void loadScene(QString const& filepath);
 
-        private:
+    private:
 
-            ::Ui::NodeEditor* ui;
+      ::Ui::NodeEditor* ui;
 
-            QFileSystemModel* _model;
-            QSortFilterProxyModel* _sort_model;
-            PreviewRenderer* _preview_renderer;
-        };
-    }
+      QFileSystemModel* _model;
+      QSortFilterProxyModel* _sort_model;
+      PreviewRenderer* _preview_renderer;
+    };
+  }
 }
 
 #endif //NOGGIT_NODEEDITOR_HPP

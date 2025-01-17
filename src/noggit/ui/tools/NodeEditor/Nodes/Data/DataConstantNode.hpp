@@ -6,8 +6,6 @@
 #include "noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp"
 #include <external/tsl/robin_map.h>
 
-#include <QComboBox>
-
 using QtNodes::PortType;
 using QtNodes::PortIndex;
 using QtNodes::NodeData;
@@ -15,6 +13,7 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QComboBox;
 
 namespace Noggit
 {
@@ -42,9 +41,7 @@ namespace Noggit
                                                                         {"Vector4D", "vec4"},
                                                                         {"Color", "color"}};
         };
-
     }
-
 }
 
 #endif //NOGGIT_DATACONSTANTNODE_HPP

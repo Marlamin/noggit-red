@@ -2,23 +2,20 @@
 
 #pragma once
 
-#include <opengl/shader.fwd.hpp>
-#include <opengl/types.hpp>
 #include <opengl/texture.hpp>
+
+#include <external/tsl/robin_map.h>
+
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+
 #include <initializer_list>
-#include <map>
 #include <set>
 #include <string>
 #include <vector>
 #include <array>
-#include <cstdint>
 #include <optional>
-#include <unordered_map>
-#include <external/tsl/robin_map.h>
-#include <glm/vec2.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 namespace math
 {
@@ -29,6 +26,11 @@ namespace math
 
 namespace OpenGL
 {
+  namespace Scoped
+  {
+    struct use_program;
+  }
+
   struct shader
   {
     shader(GLenum type, std::string const& source);
@@ -65,9 +67,9 @@ namespace OpenGL
     tsl::robin_map<GLuint, bool> const* getUniformsBoolCache() const { return &_uniforms_bool_cache; };
 
   private:
-    inline GLuint uniform_location (std::string const& name) const;
-    inline GLuint uniform_block_location (std::string const& name) const;
-    inline GLuint attrib_location (std::string const& name) const;
+    GLuint uniform_location (std::string const& name) const;
+    GLuint uniform_block_location (std::string const& name) const;
+    GLuint attrib_location (std::string const& name) const;
 
     friend struct Scoped::use_program;
 

@@ -4,6 +4,11 @@
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+
+#include <external/NodeEditor/include/nodes/Node>
+
+#include <QComboBox>
+
 #include <external/glm/gtx/transform.hpp>
 #include <external/glm/gtx/euler_angles.hpp>
 

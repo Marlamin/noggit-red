@@ -2,20 +2,33 @@
 
 #pragma once
 
-#include <math/ray.hpp>
-#include <ClientFile.hpp>
-#include <noggit/MapHeaders.h> // ENTRY_MDDF
 #include <noggit/ModelManager.h>
 #include <noggit/Selection.h>
 #include <noggit/SceneObject.hpp>
-#include <noggit/rendering/Primitives.hpp>
-#include <noggit/TileIndex.hpp>
 #include <noggit/tool_enums.hpp>
-#include <opengl/shader.fwd.hpp>
-#include <optional>
+
+#include <glm/vec3.hpp>
+#include <glm/ext.hpp>
+
 #include <cstdint>
 
-namespace math { class frustum; }
+namespace math
+{
+  class frustum;
+  struct ray;
+}
+
+namespace BlizzardArchive
+{
+  class ClientFile;
+
+  namespace Listfile
+  {
+    class FileKey;
+  }
+}
+
+struct ENTRY_MDDF;
 class Model;
 class WMOInstance;
 
@@ -42,38 +55,9 @@ public:
   ModelInstance(ModelInstance const& other) = default;
   ModelInstance& operator= (ModelInstance const& other) = default;
 
-  ModelInstance (ModelInstance&& other) noexcept
-    : SceneObject(other._type, other._context)
-    , model (std::move (other.model))
-    , light_color (other.light_color)
-    , size_cat (other.size_cat)
-    , _need_recalc_extents(other._need_recalc_extents)
-  {
-    pos = other.pos;
-    dir = other.dir;
-    scale = other.scale;
-    extents[0] = other.extents[0];
-    extents[1] = other.extents[1];
-    _transform_mat_inverted =  other._transform_mat_inverted;
-    _context = other._context;
-    uid = other.uid;
-  }
+  ModelInstance (ModelInstance&& other) noexcept;
 
-  ModelInstance& operator= (ModelInstance&& other) noexcept
-  {
-    std::swap (model, other.model);
-    std::swap (pos, other.pos);
-    std::swap (dir, other.dir);
-    std::swap (light_color, other.light_color);
-    std::swap (uid, other.uid);
-    std::swap (scale, other.scale);
-    std::swap (size_cat, other.size_cat);
-    std::swap (_need_recalc_extents, other._need_recalc_extents);
-    std::swap (extents, other.extents);
-    std::swap(_transform_mat_inverted, other._transform_mat_inverted);
-    std::swap(_context, other._context);
-    return *this;
-  }
+  ModelInstance& operator= (ModelInstance&& other) noexcept;
 
   void draw_box (glm::mat4x4 const& model_view
                 , glm::mat4x4 const& projection
@@ -94,29 +78,29 @@ public:
   bool isInFrustum(math::frustum const& frustum);
   bool isInRenderDist(const float cull_distance, const glm::vec3& camera, display_mode display);
 
-  bool extentsDirty() { return _need_recalc_extents || !model->finishedLoading(); };
+  bool extentsDirty() const;;
 
   [[nodiscard]]
-  virtual glm::vec3 const& get_pos() const { return pos; }
+  virtual glm::vec3 const& get_pos() const;
 
   void recalcExtents() override;
   void ensureExtents() override;
-  bool finishedLoading() override { return model->finishedLoading(); };
+  bool finishedLoading() override;;
   std::array<glm::vec3, 2> const& getExtents() override; // axis aligned
   std::array<glm::vec3, 2> const& getLocalExtents() const;
 
   std::array<glm::vec3, 8> getBoundingBox() override; // not axis aligned
 
   [[nodiscard]]
-  virtual bool isWMODoodad() const { return false; };
+  virtual bool isWMODoodad() const;;
 
   [[nodiscard]]
-  AsyncObject* instance_model() const override { return model.get(); };
+  AsyncObject* instance_model() const override;;
 
   void updateDetails(Noggit::Ui::detail_infos* detail_widget) override;
 
   [[nodiscard]]
-  std::uint32_t gpuTransformUid() const { return _gpu_transform_uid; }
+  std::uint32_t gpuTransformUid() const;
 
 protected:
   bool _need_recalc_extents = true;
@@ -139,55 +123,30 @@ public:
 
   // titi : issue with those constructors: ModelInstance data is lost (scale, pos...)
   /**/
-  wmo_doodad_instance(wmo_doodad_instance const& other)
-  // : ModelInstance(other.model->file_key(), other._context)
-  : ModelInstance(other)  // titi : Use the copy constructor of ModelInstance instead
-  , doodad_orientation(other.doodad_orientation)
-  , world_pos(other.world_pos)
-  , _need_matrix_update(other._need_matrix_update)
-  {
-      // titi: added those.
-      // pos = other.pos;
-      // scale = other.scale;
-      // frame = other.frame;
-  };
+  wmo_doodad_instance(wmo_doodad_instance const& other);;
 
   wmo_doodad_instance& operator= (wmo_doodad_instance const& other) = delete;
 
-  wmo_doodad_instance(wmo_doodad_instance&& other) noexcept
-    : ModelInstance(reinterpret_cast<ModelInstance&&>(other))
-    , doodad_orientation(other.doodad_orientation)
-    , world_pos(other.world_pos)
-    , _need_matrix_update(other._need_matrix_update)
-  {
-  }
+  wmo_doodad_instance(wmo_doodad_instance&& other) noexcept;
 
-  wmo_doodad_instance& operator= (wmo_doodad_instance&& other) noexcept
-  {
-    ModelInstance::operator= (reinterpret_cast<ModelInstance&&>(other));
-    std::swap (doodad_orientation, other.doodad_orientation);
-    std::swap (world_pos, other.world_pos);
-    std::swap (_need_matrix_update, other._need_matrix_update);
-    return *this;
-  }
-  
+  wmo_doodad_instance& operator= (wmo_doodad_instance&& other) noexcept;
 
   [[nodiscard]]
-  bool need_matrix_update() const { return _need_matrix_update; }
+  bool need_matrix_update() const;
 
   void update_transform_matrix_wmo(WMOInstance* wmo);
 
   bool isInRenderDist(const float cull_distance, const glm::vec3& camera, display_mode display);
 
   [[nodiscard]]
-  glm::vec3 const& get_pos() const override { return world_pos; };
+  glm::vec3 const& get_pos() const override;;
 
   [[nodiscard]]
-  bool isWMODoodad() const override { return true; };
+  bool isWMODoodad() const override;;
 
 protected:
   // to avoid redefining recalcExtents
-  void updateTransformMatrix() override { }
+  void updateTransformMatrix() override;
 
 private:
   bool _need_matrix_update = true;

@@ -1,9 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 #include "hole_tool.hpp"
-#include <cmath>
 
-#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QFormLayout>
+#include <QtWidgets/QSlider>
+
+#include <cmath>
 
 namespace Noggit
 {
@@ -51,6 +53,11 @@ namespace Noggit
     void hole_tool::changeRadius(float change)
     {
       _radius_spin->setValue (_radius + change);
+    }
+
+    float hole_tool::brushRadius() const
+    {
+      return _radius;
     }
 
     void hole_tool::setRadius(float radius)

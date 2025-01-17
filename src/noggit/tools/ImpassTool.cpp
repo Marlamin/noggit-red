@@ -6,6 +6,7 @@
 #include <noggit/MapView.h>
 #include <noggit/Input.hpp>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/World.h>
 
 namespace Noggit
 {

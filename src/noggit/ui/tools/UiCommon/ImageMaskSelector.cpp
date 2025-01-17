@@ -1,8 +1,9 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "ImageMaskSelector.hpp"
+
 #include <noggit/MapView.h>
-#include <noggit/ui/TerrainTool.hpp>
+#include <noggit/ui/tools/UiCommon/ImageBrowser.hpp>
 
 using namespace Noggit::Ui::Tools;
 
@@ -63,6 +64,16 @@ ImageMaskSelector::ImageMaskSelector( MapView* map_view, QWidget* parent)
 
 }
 
+bool Noggit::Ui::Tools::ImageMaskSelector::isEnabled() const
+{
+  return _ui.groupBox->isChecked();
+}
+
+int Noggit::Ui::Tools::ImageMaskSelector::getRotation() const
+{
+  return _ui.dial->value();
+}
+
 void ImageMaskSelector::setImageMask(QString const& path)
 {
   _pixmap = QPixmap(path, "PNG");
@@ -73,6 +84,17 @@ void ImageMaskSelector::setImageMask(QString const& path)
   _image_path = path;
 
   emit pixmapUpdated(&_pixmap);
+}
+
+QString const& Noggit::Ui::Tools::ImageMaskSelector::getImageMaskPath() const
+{
+  return _image_path;
+}
+
+void Noggit::Ui::Tools::ImageMaskSelector::enableControls(bool state)
+{
+  _ui.dial->setEnabled(!state);
+  _ui.randomizeRotation->setEnabled(!state);
 }
 
 void ImageMaskSelector::setRotation(int value)
@@ -90,8 +112,56 @@ void ImageMaskSelector::setRotation(int value)
   _ui.dial->setSliderPosition(orientation);
 }
 
+void Noggit::Ui::Tools::ImageMaskSelector::setRotationRaw(int value)
+{
+  _ui.dial->setValue(value);
+}
+
+int Noggit::Ui::Tools::ImageMaskSelector::getBrushMode() const
+{
+  return  _ui.brushMode->checkedId();
+}
+
+void Noggit::Ui::Tools::ImageMaskSelector::setBrushMode(int mode)
+{
+  if (mode)
+  {
+    _ui.sculptRadio->setChecked(true);
+  }
+  else
+  {
+    _ui.stampRadio->setChecked(true);
+  }
+}
+
+QPixmap* Noggit::Ui::Tools::ImageMaskSelector::getPixmap()
+{
+  return &_pixmap;
+}
+
 void ImageMaskSelector::setContinuousActionName(QString const& name)
 {
   _ui.sculptRadio->setText(name);
+}
+
+bool Noggit::Ui::Tools::ImageMaskSelector::getRandomizeRotation() const
+{
+  return _ui.randomizeRotation->isChecked();
+}
+
+void Noggit::Ui::Tools::ImageMaskSelector::setRandomizeRotation(bool state)
+{
+  _ui.randomizeRotation->setChecked(state);
+}
+
+void Noggit::Ui::Tools::ImageMaskSelector::setBrushModeVisible(bool state)
+{
+  _ui.sculptRadio->setVisible(state);
+  _ui.stampRadio->setVisible(state);
+}
+
+QDial* Noggit::Ui::Tools::ImageMaskSelector::getMaskOrientationDial()
+{
+  return _ui.dial;
 }
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QApplication>
-#include <QMouseEvent>
 #include <QWidget>
-#include <QEvent>
+
+class QEvent;
+class QMouseEvent;
 
 class DynamicMouseWidget : public QWidget
 {

@@ -1,7 +1,13 @@
-#include <QListWidget>
-#include <noggit/ui/windows/noggitWindow/widgets/MapBookmarkListItem.hpp>
 #include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/windows/noggitWindow/widgets/MapBookmarkListItem.hpp>
+
+#include <QGraphicsColorizeEffect>
+#include <QGridLayout>
+#include <QLabel>
+#include <QListWidget>
+
 #include <sstream>
+
 namespace Noggit::Ui::Widget
 {
     MapListBookmarkItem::MapListBookmarkItem(const MapListBookmarkData& data, QWidget* parent = nullptr) : QWidget(parent)

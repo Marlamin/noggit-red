@@ -4,7 +4,6 @@
 #define NOGGIT_LISTDECLARENODE_HPP
 
 #include "ListNodeBase.hpp"
-#include <QComboBox>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -13,6 +12,7 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QComboBox;
 
 namespace Noggit
 {
@@ -32,11 +32,8 @@ namespace Noggit
 
         private:
             QComboBox* _type;
-
         };
-
     }
-
 }
 
 #endif //NOGGIT_LISTDECLARENODE_HPP

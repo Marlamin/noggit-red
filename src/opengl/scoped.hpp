@@ -5,7 +5,6 @@
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <optional>
-#include <stdexcept>
 
 namespace OpenGL
 {

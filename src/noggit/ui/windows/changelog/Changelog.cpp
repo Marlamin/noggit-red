@@ -1,14 +1,16 @@
 #include "Changelog.hpp"
+#include "ui_Changelog.h"
+
 #include <qdir.h>
 #include <qtextstream.h>
-#include "ui_Changelog.h"
 
 namespace Noggit
 {
     namespace Ui
     {
-        CChangelog::CChangelog(QWidget* parent) :
-            QDialog(parent)
+        CChangelog::CChangelog(QWidget* parent)
+          : QDialog(parent)
+          , ui{nullptr}
         {
             /*setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
             ui = new ::Ui::Changelog;

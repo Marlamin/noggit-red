@@ -1,27 +1,40 @@
-#include <noggit/ui/windows/about/About.h>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/ContextObject.hpp>
 #include <noggit/DBC.h>
 #include <noggit/DBCFile.h>
 #include <noggit/Log.h>
-#include <noggit/World.h>
-#include <noggit/ContextObject.hpp>
-#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
 #include <noggit/MapView.h>
-#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
-#include <noggit/ui/minimap_widget.hpp>
-#include <noggit/ui/UidFixWindow.hpp>
-#include <noggit/uid_storage.hpp>
+#include <noggit/project/ApplicationProject.h>
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
-#include <noggit/ui/tools/UiCommon/StackedWidget.hpp>
-#include <noggit/project/ApplicationProject.h>
-#include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
-#include <noggit/ui/windows/noggitWindow/widgets/MapBookmarkListItem.hpp>
-#include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
-#include <noggit/application/Utils.hpp>
-#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
-#include <BlizzardDatabase.h>
+#include <noggit/ui/tools/UiCommon/StackedWidget.hpp>
+#include <noggit/ui/UidFixWindow.hpp>
+#include <noggit/ui/windows/about/About.h>
+#include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
+#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <noggit/ui/windows/noggitWindow/widgets/MapBookmarkListItem.hpp>
+#include <noggit/ui/windows/noggitWindow/widgets/MapListItem.hpp>
+#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
+#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
+#include <noggit/uid_storage.hpp>
+#include <noggit/World.h>
+
+#include <string>
+#include <blizzard-archive-library/include/Exception.hpp>
+
+#include <QCheckBox>
+#include <QFileInfo>
+#include <QFormLayout>
+#include <QGroupBox>
+#include <QIcon>
+#include <QLineEdit>
+#include <QProcess>
+#include <QScrollArea>
 #include <QtGui/QCloseEvent>
+#include <QtWidgets/QComboBox>
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QListWidget>
 #include <QtWidgets/QMenuBar>
@@ -30,17 +43,9 @@
 #include <QtWidgets/QTabWidget>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-#include <QtWidgets/QStackedWidget>
-#include <QtWidgets/QComboBox>
-#include <QtNetwork/QTcpSocket>
-#include <QSysInfo>
-#include <QStandardPaths>
-#include <QDir>
-#include <QIcon>
-#include <QScrollArea>
 
-#include <sstream>
 #include <chrono>
+#include <sstream>
 
 #ifdef USE_MYSQL_UID_STORAGE
 #include <mysql/mysql.h>
@@ -51,7 +56,6 @@
 #include "revision.h"
 
 #include "ui_TitleBar.h"
-#include <external/framelesshelper/framelesswindowsmanager.h>
 #include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
 
 namespace Noggit::Ui::Windows

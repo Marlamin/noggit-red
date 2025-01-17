@@ -2,6 +2,13 @@
 
 #include <noggit/ui/FontAwesome.hpp>
 
+#include <QFrame>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QVBoxLayout>
+
 namespace noggit 
 {
     namespace Ui 

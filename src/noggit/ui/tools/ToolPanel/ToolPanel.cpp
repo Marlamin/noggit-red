@@ -3,7 +3,6 @@
 #include <noggit/Tool.hpp>
 
 #include "ToolPanel.hpp"
-#include <QScrollBar>
 
 using namespace Noggit::Ui::Tools;
 

@@ -12,6 +12,8 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QPushButton;
+
 
 namespace Noggit
 {

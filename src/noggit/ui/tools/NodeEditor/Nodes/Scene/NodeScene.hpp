@@ -4,7 +4,12 @@
 #include <external/NodeEditor/include/nodes/FlowScene>
 #include <external/tsl/robin_map.h>
 
-#include "../DataTypes/GenericData.hpp"
+namespace QtNodes
+{
+  class DataModelRegistry;
+  class Node;
+  class NodeData;
+}
 
 using QtNodes::DataModelRegistry;
 using QtNodes::FlowScene;
@@ -14,18 +19,18 @@ namespace Noggit
 {
     namespace Ui::Tools::NodeEditor::Nodes
     {
-      using VariableMap = tsl::robin_map<std::string, std::pair<std::string, std::shared_ptr<NodeData>>>;
+      using VariableMap = tsl::robin_map<std::string, std::pair<std::string, std::shared_ptr<QtNodes::NodeData>>>;
       class NodeScene : public FlowScene
       {
       public:
           NodeScene(std::shared_ptr<DataModelRegistry> registry,
-                    QObject* parent = Q_NULLPTR) : FlowScene(std::move(registry), parent) {};
+                    QObject* parent = Q_NULLPTR);
           bool execute();
           bool validate();
 
-          Node* getBeginNode() { return _begin_node; };
-          Node* getReturnNode() { return _return_node; };
-          VariableMap* getVariableMap() { return &_variables; };
+          Node* getBeginNode();
+          Node* getReturnNode();
+          VariableMap* getVariableMap();
 
 
       private:

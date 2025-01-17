@@ -1,16 +1,17 @@
 #pragma once
 
-#include <qpushbutton.h>
-#include "qprocess.h"
-#include <qfile.h>
-#include <qdir.h>
-#include <qdiriterator.h>
-#include <QtWidgets/QDialog>
-#include <QtNetwork/qnetworkreply.h>
-#include <QtNetwork/qnetworkrequest.h>
-#include <QtNetwork/qnetworkaccessmanager.h>
+#include <QByteArray>
+#include <QCryptographicHash>
+#include <QDialog>
+#include <QMap>
+#include <QString>
+#include <QUrl>
+#include <QVector>
 
-#include "ui_Updater.h"
+namespace Ui
+{
+  class Updater;
+}
 
 namespace Noggit
 {
@@ -19,7 +20,7 @@ namespace Noggit
         class CUpdater : public QDialog
         {
             Q_OBJECT
-            ::Ui::Updater* ui;
+            ::Ui::Updater* ui = nullptr;
 
         public:
             CUpdater(QWidget* parent = nullptr);
@@ -47,11 +48,11 @@ namespace Noggit
             const QString FileURL = "%1%2/%3";
             const QString ExternalProcess = "/noggit-updater.exe";
 
-            int FileNeededCount;
-            int FileMissingCount;
+            int FileNeededCount = 0;
+            int FileMissingCount = 0;
 
-            bool NeedUpdate;
-            bool LocalCheck, OnlineCheck;
+            bool NeedUpdate = false;
+            bool LocalCheck = false, OnlineCheck = false;
 
             QMap<QString, QString> LocalMD5;
             QMap<QString, QString> OnlineMD5;
@@ -59,6 +60,4 @@ namespace Noggit
             QVector<QString> FileNeeded;
         };
     }
-
 }
-

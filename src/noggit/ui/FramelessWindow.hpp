@@ -5,6 +5,7 @@
 #include <noggit/ui/FontAwesome.hpp>
 #include <ui_TitleBar.h>
 
+#include <QSettings>
 #include <QWidget>
 
 

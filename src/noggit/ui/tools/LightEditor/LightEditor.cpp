@@ -1,24 +1,39 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "LightEditor.hpp"
-#include <noggit/World.h>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/DBC.h>
 #include <noggit/MapView.h>
+#include <noggit/Model.h>
 #include <noggit/ui/FontAwesome.hpp>
-#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/ui/widgets/LightViewWidget.h>
+#include <noggit/World.h>
 
 #include <format>
-#include <string>
 #include <map>
+#include <string>
 
-#include <QGridLayout>
-#include <QFormLayout>
-#include <QTreeWidget>
-#include <QGroupBox>
+#include <QApplication>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QDial>
+#include <QDoubleSpinBox>
 #include <QFile>
-#include <QTextStream>
+#include <QFormLayout>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QLineEdit>
+#include <QListWidget>
+#include <QMessageBox>
+#include <QPainter>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QStandardItemModel>
 #include <QStringList>
+#include <QTabWidget>
+#include <QTextStream>
+#include <QTreeWidget>
 
 
 using namespace Noggit::Ui::Tools;

@@ -2,14 +2,13 @@
 
 #include <noggit/ui/TexturePicker.h>
 
-#include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/FontNoggit.hpp>
+#include <noggit/MapChunk.h>
+#include <noggit/MapTile.h>
 #include <noggit/Selection.h>
 #include <noggit/texture_set.hpp>
 #include <noggit/ui/CurrentTexture.h>
+#include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/TexturingGUI.h>
-#include <noggit/World.h>
-#include <noggit/tool_enums.hpp>
 #include <noggit/ui/tools/UiCommon/expanderwidget.h>
 
 #include <QtWidgets/QGridLayout>

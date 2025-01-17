@@ -3,10 +3,12 @@
 #include "StampTool.hpp"
 
 #include <noggit/ActionManager.hpp>
-#include <noggit/MapView.h>
 #include <noggit/Input.hpp>
+#include <noggit/MapView.h>
 #include <noggit/ui/tools/BrushStack/BrushStack.hpp>
+#include <noggit/ui/tools/BrushStack/BrushStackItem.hpp>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/World.h>
 
 #include <random>
 

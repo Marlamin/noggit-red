@@ -1,4 +1,6 @@
 #include <noggit/application/Configuration/NoggitApplicationConfigurationWriter.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <QFile>
 #include <QJsonObject>
 #include <QJsonDocument>
 
@@ -6,7 +8,7 @@ namespace Noggit::Application {
 
     void NoggitApplicationConfigurationWriter::PersistDefaultConfigurationState(QFile& outputFile)
     {
-        auto noggitApplicationConfiguration = NoggitApplicationConfiguration();
+        NoggitApplicationConfiguration noggitApplicationConfiguration;
         noggitApplicationConfiguration.ApplicationProjectPath = std::string("projects");
         noggitApplicationConfiguration.ApplicationThemePath = std::string("themes");
         noggitApplicationConfiguration.ApplicationDatabaseDefinitionsPath = std::string("definitions");

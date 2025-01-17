@@ -1,5 +1,9 @@
 #include "DynamicMouseWidget.h"
 
+#include <QApplication>
+#include <QEvent>
+#include <QMouseEvent>
+
 DynamicMouseWidget::DynamicMouseWidget(QWidget* parent)
 	: QWidget(parent)
 { }

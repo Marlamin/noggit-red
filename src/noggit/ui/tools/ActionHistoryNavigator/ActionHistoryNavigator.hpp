@@ -4,10 +4,10 @@
 #define NOGGIT_ACTIONHISTORYNAVIGATOR_HPP
 
 #include <QWidget>
-#include <QListWidget>
-#include <QButtonGroup>
-#include <QLabel>
 
+class QListWidget;
+class QButtonGroup;
+class QLabel;
 
 namespace Noggit
 {

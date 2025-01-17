@@ -10,6 +10,7 @@
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
 #include <noggit/MapView.h>
+#include <noggit/texture_set.hpp>
 #include <noggit/World.h>
 #include <noggit/ChunkWater.hpp>
 #include <noggit/ContextObject.hpp>

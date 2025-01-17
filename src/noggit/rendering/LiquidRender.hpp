@@ -4,14 +4,20 @@
 #define NOGGIT_LIQUIDRENDER_HPP
 
 #include <noggit/rendering/BaseRender.hpp>
-#include <opengl/scoped.hpp>
-#include <opengl/shader.hpp>
-#include <glm/glm.hpp>
 #include <noggit/tool_enums.hpp>
+
+#include <opengl/types.hpp>
+
+#include <glm/glm.hpp>
 
 namespace math
 {
   class frustum;
+}
+
+namespace OpenGL::Scoped
+{
+  struct use_program;
 }
 
 class MapTile;

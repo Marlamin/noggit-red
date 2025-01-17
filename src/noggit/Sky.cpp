@@ -2,11 +2,12 @@
 
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
+#include <noggit/MapHeaders.h>
 #include <noggit/Model.h> // Model
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/Sky.h>
-#include <noggit/World.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <opengl/shader.hpp>
 #include <glm/glm.hpp>
 #include <noggit/project/CurrentProject.hpp>
@@ -210,6 +211,66 @@ SkyParam::SkyParam(int paramId, Noggit::NoggitRenderContext context)
 
 }
 
+bool SkyParam::highlight_sky() const
+{
+  return _highlight_sky;
+}
+
+float SkyParam::river_shallow_alpha() const
+{
+  return _river_shallow_alpha;
+}
+
+float SkyParam::river_deep_alpha() const
+{
+  return _river_deep_alpha;
+}
+
+float SkyParam::ocean_shallow_alpha() const
+{
+  return _ocean_shallow_alpha;
+}
+
+float SkyParam::ocean_deep_alpha() const
+{
+  return _ocean_deep_alpha;
+}
+
+float SkyParam::glow() const
+{
+  return _glow;
+}
+
+void SkyParam::set_glow(float glow)
+{
+  _glow = glow;
+}
+
+void SkyParam::set_highlight_sky(bool state)
+{
+  _highlight_sky = state;
+}
+
+void SkyParam::set_river_shallow_alpha(float alpha)
+{
+  _river_shallow_alpha = alpha;
+}
+
+void SkyParam::set_river_deep_alpha(float alpha)
+{
+  _river_deep_alpha = alpha;
+}
+
+ void SkyParam::set_ocean_shallow_alpha(float alpha)
+{
+  _ocean_shallow_alpha = alpha;
+}
+
+void SkyParam::set_ocean_deep_alpha(float alpha)
+{
+  _ocean_deep_alpha = alpha;
+}
+
 
 Sky::Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context)
 : _context(context)
@@ -237,6 +298,11 @@ Sky::Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context)
   }
 }
 
+int Sky::getId() const
+{
+  return Id;
+}
+
 std::optional<SkyParam*> Sky::getParam(int param_index) const
 {
   unsigned int param_id = skyParams[param_index];
@@ -259,6 +325,11 @@ std::optional<SkyParam*> Sky::getParam(int param_index) const
     cachedCurrentParam = nullptr;
     return std::nullopt;
   }
+}
+
+std::optional<SkyParam*> Sky::getCurrentParam() const
+{
+  return getParam(curr_sky_param);
 }
 
 float Sky::floatParamFor(int r, int t) const
@@ -1124,6 +1195,75 @@ void Skies::drawLightingSphereHandles (glm::mat4x4 const& model_view
   }
 }
 
+bool Skies::hasSkies() const
+{
+  return numSkies > 0;
+}
+
+float Skies::river_shallow_alpha() const
+{
+  return _river_shallow_alpha;
+}
+
+float Skies::river_deep_alpha() const
+{
+  return _river_deep_alpha;
+}
+
+float Skies::ocean_shallow_alpha() const
+{
+  return _ocean_shallow_alpha;
+}
+
+float Skies::ocean_deep_alpha() const
+{
+  return _ocean_deep_alpha;
+}
+
+float Skies::fog_distance_end() const
+{
+  return _fog_distance / 36.f;
+}
+
+float Skies::fog_distance_start() const
+{
+  return (_fog_distance / 36.f) * _fog_multiplier;
+}
+
+float Skies::fog_distance_multiplier() const
+{
+  return _fog_multiplier;
+}
+
+float Skies::celestial_glow() const
+{
+  return _celestial_glow;
+}
+
+float Skies::cloud_density() const
+{
+  return _cloud_density;
+}
+
+float Skies::unknown_float_param4() const
+{
+  return _unknown_float_param4;
+}
+
+float Skies::unknown_float_param5() const
+{
+  return _unknown_float_param5;
+}
+
+float Skies::glow() const
+{
+  return _glow;
+}
+
+float Skies::fogRate() const
+{
+  return _fog_rate;
+}
 
 void Skies::unload()
 {
@@ -1135,6 +1275,11 @@ void Skies::unload()
   _uploaded = false;
   _need_vao_update = true;
 
+}
+
+void Skies::force_update()
+{
+  _force_update = true;
 }
 
 void Skies::upload()
@@ -1356,6 +1501,18 @@ OutdoorLightStats OutdoorLighting::getLightStats(int time)
   out.interpolate(a, b, progressDayAndNight);
 
   return out;
+}
+
+bool Sky::operator<(const Sky& s) const
+{
+  if (global) return false;
+  else if (s.global) return true;
+  else return r2 < s.r2;
+}
+
+bool Sky::selected() const
+{
+  return _selected;
 }
 
 void Sky::save_to_dbc()

@@ -5,7 +5,6 @@
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp>
 #include <external/libnoise/src/noise/noise.h>
-#include <QComboBox>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -14,6 +13,7 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QComboBox;
 
 namespace Noggit
 {

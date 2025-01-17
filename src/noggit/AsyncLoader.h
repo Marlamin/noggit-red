@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <noggit/AsyncObject.h>
+#include <noggit/async_priority.hpp>
 
 #include <array>
 #include <atomic>
@@ -10,6 +10,8 @@
 #include <list>
 #include <memory>
 #include <thread>
+
+class AsyncObject;
 
 class AsyncLoader
 {
@@ -37,8 +39,8 @@ public:
   AsyncLoader(int numThreads);
   ~AsyncLoader();
 
-  bool important_object_failed_loading() const { return _important_object_failed_loading; }
-  void reset_object_fail() { _important_object_failed_loading = false; }
+  bool important_object_failed_loading() const;
+  void reset_object_fail();
 
 private:
   void process();

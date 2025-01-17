@@ -4,11 +4,14 @@
 #include <QtWidgets/QDialog>
 #include <QObject>
 #include <QtNetwork/QNetworkAccessManager>
-#include <QtNetwork/QNetworkReply>
-#include <QtNetwork/QNetworkRequest>
-#include <QtNetwork/QNetworkReply>
-#include <QFile>
-#include <ui_DownloadFileDialog.h>
+
+namespace Ui
+{
+  class DownloadFileDialog;
+}
+
+class QFile;
+class QNetworkReply;
 
 namespace Noggit::Ui
 {

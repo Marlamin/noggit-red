@@ -2,20 +2,22 @@
 
 #include <noggit/ui/TerrainTool.hpp>
 
-#include <noggit/tool_enums.hpp>
-#include <noggit/World.h>
-#include <noggit/MapView.h>
-#include <util/qt/overload.hpp>
-
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/QGridLayout>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QRadioButton>
-#include <QtWidgets/QVBoxLayout>
-#include <noggit/ui/tools/UiCommon/expanderwidget.h>
-
 #include <noggit/ActionManager.hpp>
-#include <noggit/Action.hpp>
+#include <noggit/MapView.h>
+#include <noggit/tool_enums.hpp>
+#include <noggit/ui/tools/UiCommon/expanderwidget.h>
+#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
+#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
+#include <noggit/World.h>
+
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/qcheckbox.h>
+#include <QtWidgets/QDial>
+#include <QtWidgets/QGridLayout>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QSlider>
+#include <QtWidgets/QVBoxLayout>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -345,6 +347,31 @@ namespace Noggit
       _speed_slider->setValue(speed);
     }
 
+    float TerrainTool::getSpeed() const
+    {
+      return _speed_slider->value();
+    }
+
+    Noggit::Ui::Tools::UiCommon::ExtendedSlider* TerrainTool::getRadiusSlider()
+    {
+      return _radius_slider;
+    }
+
+    Noggit::Ui::Tools::UiCommon::ExtendedSlider* TerrainTool::getInnerRadiusSlider()
+    {
+      return _inner_radius_slider;
+    }
+
+    Noggit::Ui::Tools::UiCommon::ExtendedSlider* TerrainTool::getSpeedSlider()
+    {
+      return _speed_slider;
+    }
+
+    QDial* TerrainTool::getMaskOrientationDial()
+    {
+      return _image_mask_group->getMaskOrientationDial();
+    }
+
     void TerrainTool::changeOrientation (float change)
     {
       setOrientation (_vertex_orientation._ + change);
@@ -380,6 +407,31 @@ namespace Noggit
         _vertex_orientation = math::radians (std::atan2(center.z - pos.z, center.x - pos.x));
         emit updateVertices(_vertex_mode, _vertex_angle, _vertex_orientation);
       }
+    }
+
+    float TerrainTool::brushRadius() const
+    {
+      return static_cast<float>(_radius_slider->value());
+    }
+
+    float TerrainTool::innerRadius() const
+    {
+      return static_cast<float>(_inner_radius_slider->value());
+    }
+
+    void TerrainTool::storeCursorPos(glm::vec3* cursor_pos)
+    {
+      _cursor_pos = cursor_pos;
+    }
+
+    Noggit::Ui::Tools::ImageMaskSelector* TerrainTool::getImageMaskSelector()
+    {
+      return _image_mask_group;
+    }
+
+    QImage* TerrainTool::getMaskImage()
+    {
+      return &_mask_image;
     }
 
     void TerrainTool::changeAngle (float change)

@@ -3,16 +3,14 @@
 #pragma once
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
-#include <noggit/TileIndex.hpp>
 #include <noggit/WMOInstance.h>
 #include <opengl/scoped.hpp>
-#include <variant>
 #include <atomic>
-#include <functional>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
 
+struct TileIndex;
 class World;
 
 using m2_instance_umap = std::unordered_map<std::uint32_t, ModelInstance>;
@@ -49,18 +47,15 @@ namespace Noggit
 
     void clear_duplicates(bool action);
 
-    bool uid_duplicates_found() const
-    {
-      return _uid_duplicates_found.load();
-    }
+    bool uid_duplicates_found() const;
 
     void upload();
     void unload();
 
-    unsigned int getTotalModelsCount() const { return _m2s.size() + _wmos.size(); };
+    unsigned int getTotalModelsCount() const;;
 
   private: // private functions aren't thread safe
-    inline bool unsafe_uid_is_used(std::uint32_t uid) const;
+    bool unsafe_uid_is_used(std::uint32_t uid) const;
 
     std::uint32_t unsafe_add_model_instance_no_world_upd(ModelInstance instance, bool action);
     std::uint32_t unsafe_add_wmo_instance_no_world_upd(WMOInstance instance, bool action);

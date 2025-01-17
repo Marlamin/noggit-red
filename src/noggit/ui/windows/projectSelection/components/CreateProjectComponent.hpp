@@ -3,10 +3,12 @@
 #ifndef NOGGIT_COMPONENT_CREATE_PROJECT_HPP
 #define NOGGIT_COMPONENT_CREATE_PROJECT_HPP
 
-#include <noggit/project/ApplicationProject.h>
-#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
+namespace Noggit::Ui::Windows
+{
+  class NoggitProjectSelectionWindow;
+}
 
-#include <QMessageBox>
+struct ProjectInformation;
 
 namespace Noggit::Ui::Component
 {

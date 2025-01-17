@@ -5,6 +5,9 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/MapHeaders.h>
+
+#include <external/NodeEditor/include/nodes/Node>
+
 #include <cmath>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;

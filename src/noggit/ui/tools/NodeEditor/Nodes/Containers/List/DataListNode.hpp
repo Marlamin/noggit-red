@@ -5,9 +5,7 @@
 
 #include "noggit/ui/tools/NodeEditor/Nodes/Containers/List/ListNodeBase.hpp"
 
-#include <QComboBox>
 #include <vector>
-#include <external/tsl/robin_map.h>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -16,6 +14,7 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QComboBox;
 
 namespace Noggit
 {
@@ -36,9 +35,7 @@ namespace Noggit
 
             std::vector<std::shared_ptr<NodeData>> _data;
         };
-
     }
-
 }
 
 #endif //NOGGIT_DATALISTNODE_HPP
