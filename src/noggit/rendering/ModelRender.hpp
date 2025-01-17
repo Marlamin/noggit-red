@@ -7,8 +7,16 @@
 #include <noggit/ModelHeaders.h>
 #include <noggit/tool_enums.hpp>
 #include <opengl/scoped.hpp>
-#include <opengl/shader.hpp>
-#include <math/frustum.hpp>
+
+namespace math
+{
+  class frustum;
+}
+
+namespace OpenGL::Scoped
+{
+  struct use_program;
+}
 
 class Model;
 class ModelInstance;
@@ -81,21 +89,7 @@ namespace Noggit::Rendering
     void bindTexture(size_t index, Model* m, OpenGL::M2RenderState& model_render_state, OpenGL::Scoped::use_program& m2_shader);
     void initUVTypes(Model* m);
 
-    bool operator< (const ModelRenderPass &m) const
-    {
-      if (priority_plane < m.priority_plane)
-      {
-        return true;
-      }
-      else if (priority_plane > m.priority_plane)
-      {
-        return false;
-      }
-      else
-      {
-        return blend_mode == m.blend_mode ? (ordering_thingy < m.ordering_thingy) : blend_mode < m.blend_mode;
-      }
-    }
+    bool operator< (const ModelRenderPass& m) const;
   };
 
   class ModelRender : public BaseRender
@@ -150,7 +144,7 @@ namespace Noggit::Rendering
     void drawBox(OpenGL::Scoped::use_program& m2_box_shader, std::size_t box_count);
 
     [[nodiscard]]
-    std::vector<ModelRenderPass> const& renderPasses() const { return _render_passes; };
+    std::vector<ModelRenderPass> const& renderPasses() const;;
 
     void updateBoneMatrices();
 

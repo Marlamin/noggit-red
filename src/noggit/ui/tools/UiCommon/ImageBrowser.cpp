@@ -2,12 +2,12 @@
 
 #include "ImageBrowser.hpp"
 
-#include <QStringList>
 #include <QCoreApplication>
-#include <QImage>
-#include <QPixmap>
 #include <QDir>
 #include <QKeyEvent>
+#include <QPixmap>
+#include <QSortFilterProxyModel>
+#include <QStringList>
 
 using namespace  Noggit::Ui::Tools;
 

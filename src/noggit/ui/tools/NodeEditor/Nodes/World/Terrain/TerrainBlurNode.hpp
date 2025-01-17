@@ -4,7 +4,6 @@
 #define NOGGIT_TERRAINBLURNODE_HPP
 
 #include <noggit/ui/tools/NodeEditor/Nodes/ContextLogicNodeBase.hpp>
-#include <QComboBox>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -12,6 +11,8 @@ using QtNodes::NodeData;
 using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
+
+class QComboBox;
 
 namespace Noggit
 {

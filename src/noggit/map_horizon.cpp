@@ -2,16 +2,18 @@
 
 #include "map_horizon.h"
 
-#include <noggit/Log.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/Log.h>
 #include <noggit/map_index.hpp>
+#include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/World.h>
+
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 
-#include <sstream>
 #include <bitset>
+#include <sstream>
 
 struct color
 {

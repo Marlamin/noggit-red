@@ -6,8 +6,19 @@
 #include <QWidget>
 #include <noggit/MapView.h>
 #include <QtWidgets/qtreewidget.h>
-#include <noggit/ui/widgets/LightViewWidget.h>
-#include <QTabWidget>
+
+class LightViewPreview;
+class LightViewEditor;
+class Sky;
+
+class QPushButton;
+class QDoubleSpinBox;
+class QDial;
+class QSpinBox;
+class QListWidget;
+class QComboBox;
+class QTabWidget;
+class QCheckBox;
 
 namespace Noggit::Ui::Tools
 {

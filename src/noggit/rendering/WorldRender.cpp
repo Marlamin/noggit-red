@@ -1,17 +1,34 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "WorldRender.hpp"
+#include <external/PNG2BLP/Png2Blp.h>
 #include <external/tracy/Tracy.hpp>
 #include <math/frustum.hpp>
-#include <noggit/World.h>
-#include <external/PNG2BLP/Png2Blp.h>
-#include <noggit/DBC.h>
-#include <noggit/project/CurrentProject.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/DBC.h>
+#include <noggit/MapChunk.h>
+#include <noggit/MapTile.h>
+#include <noggit/TileIndex.hpp>
+#include <noggit/MinimapRenderSettings.hpp>
+#include <noggit/Misc.h>
+#include <noggit/Model.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/project/CurrentProject.hpp>
+#include <noggit/World.h>
 
-#include <QDir>
+#include <noggit/ui/MinimapCreator.hpp>
+
+#include <opengl/shader.hpp>
+
 #include <QBuffer>
 #include <QCryptographicHash>
+#include <QDir>
+#include <QListWidget>
+#include <QOpenGLFramebufferObjectFormat>
+#include <QSettings>
+
+#include <algorithm>
 
 using namespace Noggit::Rendering;
 
@@ -1619,6 +1636,22 @@ void WorldRender::updateTerrainParamsUniformBlock()
   _need_terrain_params_ubo_update = false;
 }
 
+void Noggit::Rendering::WorldRender::markTerrainParamsUniformBlockDirty()
+{
+  _need_terrain_params_ubo_update = true;
+}
+
+[[nodiscard]]
+std::unique_ptr<Skies>& Noggit::Rendering::WorldRender::skies()
+{
+  return _skies;
+}
+
+float Noggit::Rendering::WorldRender::cullDistance() const
+{
+  return _cull_distance;
+}
+
 void WorldRender::setupChunkVAO(OpenGL::Scoped::use_program& mcnk_shader)
 {
   ZoneScoped;
@@ -2121,4 +2154,10 @@ bool WorldRender::saveMinimap(TileIndex const& tile_idx, MinimapRenderSettings* 
   pixel_buffer.release();
 
   return true;
+}
+
+[[nodiscard]]
+OpenGL::TerrainParamsUniformBlock* Noggit::Rendering::WorldRender::getTerrainParamsUniformBlock()
+{
+  return &_terrain_params_ubo_data;
 }

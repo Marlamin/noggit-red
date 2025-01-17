@@ -1,15 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/Misc.h>
-#include <noggit/Selection.h>
-#include <noggit/ModelInstance.h>
-#include <noggit/WMOInstance.h>
-#include <ClientData.hpp>
 #include <math/bounding_box.hpp>
+#include <util/sExtendableArray.hpp>
 
-#include <iomanip>
-#include <map>
-#include <sstream>
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -26,6 +21,11 @@ namespace misc
   {
     return point.x >= extents[0].x && point.y >= extents[0].y &&
            point.x <= extents[1].x && point.y <= extents[1].y;
+  }
+
+  glm::vec4 normalized_device_coords(int x, int y, int screen_width, int screen_height)
+  {
+    return { 2.0f * x / screen_width - 1.0f, 1.0f - 2.0f * y / screen_height, 0.0f, 1.0f };
   }
 
   // project 3D point to 2d screen space.
@@ -129,6 +129,31 @@ namespace misc
     if (a->z > b->z)
     {
       std::swap(a->z, b->z);
+    }
+  }
+
+  int rounded_int_div(int value, int div)
+  {
+    return value / div + (value % div <= (div >> 1) ? 0 : 1);
+  }
+
+  int rounded_255_int_div(int value)
+  {
+    return value / 255 + (value % 255 <= 127 ? 0 : 1);
+  }
+
+  // treat the value as an 8x8 array of bit
+  void set_bit(std::uint64_t& value, int x, int y, bool on)
+  {
+    std::uint64_t bit = std::uint64_t(1) << (y * 8 + x);
+    value = on ? (value | bit) : (value & ~bit);
+  }
+
+  void bit_or(std::uint64_t& value, int x, int y, bool on)
+  {
+    if (on)
+    {
+      value |= (std::uint64_t(1) << (y * 8 + x));
     }
   }
 
@@ -284,6 +309,13 @@ namespace misc
                      }
                    );
     return filename;
+  }
+
+
+  // see http://realtimecollisiondetection.net/blog/?p=89 for more info
+  bool float_equals(float const& a, float const& b)
+  {
+      return std::abs(a - b) < (std::max(1.f, std::max(a, b)) * std::numeric_limits<float>::epsilon());
   }
 
   bool vec3d_equals(glm::vec3 const& v1, glm::vec3 const& v2)

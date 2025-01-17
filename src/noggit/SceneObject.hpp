@@ -4,12 +4,8 @@
 #define NOGGIT_3DOBJECT_HPP
 
 #include <glm/mat4x4.hpp>
-#include <math/ray.hpp>
 #include <noggit/Selection.h>
 #include <noggit/ContextObject.hpp>
-#include <noggit/MapHeaders.h>
-#include <cstdint>
-#include <unordered_set>
 #include <array>
 
 namespace BlizzardArchive::Listfile
@@ -51,33 +47,33 @@ public:
   void normalizeDirection();
 
   [[nodiscard]]
-  inline glm::mat4x4 transformMatrix() { /*ensureExtents();*/ return _transform_mat; }; // can't recalc extent directly there because recalc extents functions call this and it causes an infinite loop
+  glm::mat4x4 transformMatrix() const;; // can't recalc extent directly there because recalc extents functions call this and it causes an infinite loop
 
   [[nodiscard]]
-  inline glm::mat4x4 transformMatrixInverted() { /*ensureExtents();*/ return _transform_mat_inverted; };
+  glm::mat4x4 transformMatrixInverted() const;;
 
   [[nodiscard]]
-  inline SceneObjectTypes which() const { return _type; };
+  SceneObjectTypes which() const;;
 
   void refTile(MapTile* tile);
   void derefTile(MapTile* tile);
 
   [[nodiscard]]
-  std::vector<MapTile*> const& getTiles() const { return _tiles; };
+  std::vector<MapTile*> const& getTiles() const;;
 
   [[nodiscard]]
   virtual AsyncObject* instance_model() const = 0;
 
   [[nodiscard]]
-  virtual std::array<glm::vec3, 2> const& getExtents() { ensureExtents(); return extents; } // axis aligned
+  virtual std::array<glm::vec3, 2> const& getExtents(); // axis aligned
 
   [[nodiscard]]
   virtual std::array<glm::vec3, 8> getBoundingBox() = 0; // non axis aligned
 
   [[nodiscard]]
-  inline float const getBoundingRadius() { ensureExtents(); return bounding_radius; }
+  float getBoundingRadius();
 
-  glm::vec3 const getServerPos() { return glm::vec3(ZEROPOINT - pos.z, ZEROPOINT - pos.x, pos.y); }
+  glm::vec3 const getServerPos() const;
 
   bool _grouped = false;
 

@@ -3,10 +3,12 @@
 #include "AreaTool.hpp"
 
 #include <noggit/ActionManager.hpp>
+#include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
 #include <noggit/Input.hpp>
 #include <noggit/ui/ZoneIDBrowser.h>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/World.h>
 
 namespace Noggit
 {
@@ -85,38 +87,41 @@ namespace Noggit
         mapView()->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_areaid_overlay = false;
     }
 
-    void AreaTool::onTick(float deltaTime, TickParameters const& params)
-    {
-        if (!mapView()->getWorld()->has_selection() || params.underMap || !params.left_mouse)
-        {
-            return;
-        }
-
-        if (params.mod_shift_down)
-        {
-            NOGGIT_ACTION_MGR->beginAction(mapView(), Noggit::ActionFlags::eCHUNKS_AREAID,
-                Noggit::ActionModalityControllers::eSHIFT
-                | Noggit::ActionModalityControllers::eLMB);
-            // draw the selected AreaId on current selected chunk
-            mapView()->getWorld()->setAreaID(mapView()->cursorPosition(), _selectedAreaId, false, _areaTool->brushRadius());
-        }
-        else if (params.mod_ctrl_down)
-        {
-            for (auto&& selection : mapView()->getWorld()->current_selection())
-            {
-                MapChunk* chnk(std::get<selected_chunk_type>(selection).chunk);
-                int newID = chnk->getAreaID();
-                _selectedAreaId = newID;
-                _areaTool->setZoneID(newID);
-            }
-        }
-    }
-
     void AreaTool::onMouseMove(MouseMoveParameters const& params)
     {
         if (params.left_mouse && params.mod_alt_down && !params.mod_shift_down && !params.mod_ctrl_down)
         {
             _areaTool->changeRadius(params.relative_movement.dx() / XSENS);
         }
+    }
+
+    void AreaTool::onMousePress(MousePressParameters const& params)
+    {
+      if (params.button != Qt::LeftButton)
+      {
+        return;
+      }
+
+      if (params.mod_shift_down)
+      {
+        NOGGIT_ACTION_MGR->beginAction(mapView(), Noggit::ActionFlags::eCHUNKS_AREAID,
+          Noggit::ActionModalityControllers::eSHIFT
+          | Noggit::ActionModalityControllers::eLMB);
+        // draw the selected AreaId on current selected chunk
+        mapView()->getWorld()->setAreaID(mapView()->cursorPosition(), _selectedAreaId, false, _areaTool->brushRadius());
+      }
+      else if(params.mod_ctrl_down)
+      {
+        mapView()->doSelection(true);
+
+        for (auto&& selection : mapView()->getWorld()->current_selection())
+        {
+          MapChunk* chnk(std::get<selected_chunk_type>(selection).chunk);
+          int newID = chnk->getAreaID();
+          _selectedAreaId = newID;
+          _areaTool->setZoneID(newID);
+        }
+        return;
+      }
     }
 }

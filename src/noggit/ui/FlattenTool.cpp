@@ -2,15 +2,22 @@
 
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/FontNoggit.hpp>
-
+#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
 #include <noggit/World.h>
-#include <util/qt/overload.hpp>
-#include <QtCore/QSettings>
 
+#include <util/qt/overload.hpp>
+
+#include <QtCore/QSettings>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDial>
+#include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGridLayout>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QRadioButton>
+#include <QtWidgets/QSlider>
 
 namespace Noggit
 {
@@ -392,6 +399,46 @@ namespace Noggit
       }
       _orientation_dial->setSliderPosition(_orientation - 90.0f);
       _orientation_info->setText(QString::number(_orientation_dial->value()));
+    }
+
+    float flatten_blur_tool::brushRadius() const
+    {
+      return _radius_slider->value();
+    }
+
+    float flatten_blur_tool::angle() const
+    {
+      return _angle;
+    }
+
+    float flatten_blur_tool::orientation() const
+    {
+      return _orientation;
+    }
+
+    bool flatten_blur_tool::angled_mode() const
+    {
+      return _angle_group->isChecked();
+    }
+
+    bool flatten_blur_tool::use_ref_pos() const
+    {
+      return _lock_group->isChecked();
+    }
+
+    glm::vec3 flatten_blur_tool::ref_pos() const
+    {
+      return _lock_pos;
+    }
+
+    Noggit::Ui::Tools::UiCommon::ExtendedSlider* flatten_blur_tool::getRadiusSlider()
+    {
+      return _radius_slider;
+    }
+
+    Noggit::Ui::Tools::UiCommon::ExtendedSlider* flatten_blur_tool::getSpeedSlider()
+    {
+      return _speed_slider;
     }
 
     void flatten_blur_tool::changeAngle(float change)

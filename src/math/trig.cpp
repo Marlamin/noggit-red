@@ -1,7 +1,7 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <math/trig.hpp>
-#include <glm/vec2.hpp>
+
 #include <vector>
 
 bool math::is_inside_of_polygon(const glm::vec2& pos, const std::vector<glm::vec2>& polygon) {

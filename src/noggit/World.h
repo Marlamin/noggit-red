@@ -2,51 +2,39 @@
 
 #pragma once
 
-#include <math/frustum.hpp>
 #include <math/trig.hpp>
-#include <noggit/rendering/CursorRender.hpp>
-#include <noggit/Misc.h>
-#include <noggit/Model.h> // ModelManager
 #include <noggit/Selection.h>
-#include <noggit/Sky.h> // Skies, OutdoorLighting, OutdoorLightStats
-#include <noggit/WMO.h> // WMOManager
 #include <noggit/map_horizon.h>
 #include <noggit/map_index.hpp>
-#include <noggit/TileIndex.hpp>
-#include <noggit/tool_enums.hpp>
 #include <noggit/world_tile_update_queue.hpp>
 #include <noggit/world_model_instances_storage.hpp>
-#include <noggit/ui/MinimapCreator.hpp>
 #include <noggit/ContextObject.hpp>
-#include <noggit/rendering/Primitives.hpp>
-#include <opengl/shader.fwd.hpp>
-#include <opengl/types.hpp>
-#include <noggit/rendering/LiquidTextureManager.hpp>
 #include <optional>
-#include <QtCore/QSettings>
-#include <map>
 #include <string>
 #include <unordered_set>
 #include <vector>
 #include <array>
-#include <noggit/project/ApplicationProject.h>
 #include <noggit/rendering/WorldRender.hpp>
-#include <QProgressDialog>
 
 namespace Noggit
 {
   struct object_paste_params;
   struct VertexSelectionCache;
-
-  namespace Rendering
-  {
-    class WorldRender;
-  }
 }
+
+namespace BlizzardDatabaseLib::Structures
+{
+  struct BlizzardDatabaseRow;
+}
+
+struct TileIndex;
+struct flatten_mode;
 
 class Brush;
 class MapTile;
 class QPixmap;
+class QProgressDialog;
+class QSettings;
 
 static const float detail_size = 8.0f;
 
@@ -97,7 +85,7 @@ public:
   unsigned int getAreaID (glm::vec3 const&);
   void setAreaID(glm::vec3 const& pos, int id, bool adt,  float radius = -1.0f);
 
-  Noggit::NoggitRenderContext getRenderContext() { return _context; };
+  Noggit::NoggitRenderContext getRenderContext() const;;
 
   selection_result intersect (glm::mat4x4 const& model_view
                              , math::ray const&
@@ -121,20 +109,20 @@ protected:
   std::optional<glm::vec3> _multi_select_pivot;
 public:
 
-  Noggit::Rendering::WorldRender* renderer() { return &_renderer; }
+  Noggit::Rendering::WorldRender* renderer();
 
   void update_selection_pivot();
-  std::optional<glm::vec3> const& multi_select_pivot() const { return _multi_select_pivot; }
+  std::optional<glm::vec3> const& multi_select_pivot() const;
 
   // Selection related methods.
   bool is_selected(selection_type selection);
   bool is_selected(std::uint32_t uid) const;
-  std::vector<selection_type> const& current_selection() const { return _current_selection; }
+  std::vector<selection_type> const& current_selection() const;
   std::vector<selected_object_type> const get_selected_objects() const;
   std::optional<selection_type> get_last_selected_model() const;
-  bool has_selection() const { return !_current_selection.empty(); }
-  bool has_multiple_model_selected() const { return _selected_model_count > 1; }
-  int get_selected_model_count() const { return _selected_model_count; }
+  bool has_selection() const;
+  bool has_multiple_model_selected() const;
+  int get_selected_model_count() const;
   // Unused in Red, models are now iterated by adt because of the occlusion check
   // std::unordered_map<std::string, std::vector<ModelInstance*>> get_models_by_filename() const& { return _models_by_filename;  } 
   void set_current_selection(selection_type entry);
@@ -145,7 +133,7 @@ public:
   void delete_selected_models();
   glm::vec3 get_ground_height(glm::vec3 pos);
   void range_add_to_selection(glm::vec3 const& pos, float radius, bool remove);
-  Noggit::world_model_instances_storage& getModelInstanceStorage() { return _model_instance_storage; };
+  Noggit::world_model_instances_storage& getModelInstanceStorage();;
 
   enum class object_scaling_type
   {
@@ -158,14 +146,8 @@ public:
   void scale_selected_models(float v, object_scaling_type type);
   void move_selected_models(float dx, float dy, float dz);
   void move_model(selection_type entry, float dx, float dy, float dz);
-  void move_selected_models(glm::vec3 const& delta)
-  {
-    move_selected_models(delta.x, delta.y, delta.z);
-  }
-  void set_selected_models_pos(float x, float y, float z, bool change_height = true)
-  {
-    return set_selected_models_pos({x,y,z}, change_height);
-  }
+  void move_selected_models(glm::vec3 const& delta);
+  void set_selected_models_pos(float x, float y, float z, bool change_height = true);
   void set_selected_models_pos(glm::vec3 const& pos, bool change_height = true);
   void set_model_pos(selection_type entry, glm::vec3 const& pos, bool change_height = true);
   void rotate_selected_models(math::degrees rx, math::degrees ry, math::degrees rz, bool use_pivot);
@@ -395,9 +377,9 @@ public:
   bool need_model_updates = false;
 
   void loadAllTiles(glm::vec3& camera_pos);
-  unsigned getNumLoadedTiles() const { return _n_loaded_tiles; };
-  unsigned getNumRenderedTiles() const { return _n_rendered_tiles; };
-  unsigned getNumRenderedObjects() const { return _n_rendered_objects; };
+  unsigned getNumLoadedTiles() const;;
+  unsigned getNumRenderedTiles() const;;
+  unsigned getNumRenderedObjects() const;;
 
   void select_objects_in_area(
       const std::array<glm::vec2, 2>& selection_box, 

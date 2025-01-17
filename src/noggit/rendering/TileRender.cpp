@@ -3,9 +3,14 @@
 #include <noggit/rendering/TileRender.hpp>
 #include <noggit/MapTile.h>
 #include <noggit/MapChunk.h>
+#include <noggit/texture_set.hpp>
 #include <noggit/ui/TexturingGUI.h>
-#include <external/tracy/Tracy.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+
+#include <opengl/shader.hpp>
+
+#include <external/tracy/Tracy.hpp>
 
 using namespace Noggit::Rendering;
 
@@ -512,8 +517,18 @@ bool TileRender::getTileOcclusionQueryResult(glm::vec3 const& camera)
   return static_cast<bool>(result);
 }
 
+void Noggit::Rendering::TileRender::discardTileOcclusionQuery()
+{
+  _tile_occlusion_query_in_use = false;
+}
 
-bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned int draw_call_index)
+void Noggit::Rendering::TileRender::notifyTileRendererOnSelectedTextureChange()
+{
+  _requires_paintability_recalc = true;
+}
+
+
+bool TileRender::fillSamplers(MapChunk* chunk, unsigned chunk_index,  unsigned draw_call_index)
 {
   MapTileDrawCall& draw_call = _draw_calls[draw_call_index];
 
@@ -751,4 +766,65 @@ void Noggit::Rendering::TileRender::setActiveRenderGEffectTexture(std::string ac
 
     _require_geffect_active_texture_update = true;
 
+}
+
+[[nodiscard]]
+unsigned Noggit::Rendering::TileRender::objectsFrustumCullTest() const
+{
+  return _objects_frustum_cull_test;
+}
+
+void Noggit::Rendering::TileRender::setObjectsFrustumCullTest(unsigned state)
+{
+  _objects_frustum_cull_test = state;
+}
+
+[[nodiscard]]
+bool Noggit::Rendering::TileRender::isOccluded() const
+{
+  return _tile_occluded;
+}
+
+void Noggit::Rendering::TileRender::setOccluded(bool state)
+{
+  _tile_occluded = state;
+}
+
+[[nodiscard]]
+bool Noggit::Rendering::TileRender::isFrustumCulled() const
+{
+  return _tile_frustum_culled;
+}
+
+void Noggit::Rendering::TileRender::setFrustumCulled(bool state)
+{
+  _tile_frustum_culled = state;
+}
+
+[[nodiscard]]
+bool Noggit::Rendering::TileRender::isOverridingOcclusionCulling() const
+{
+  return _tile_occlusion_cull_override;
+}
+
+void Noggit::Rendering::TileRender::setOverrideOcclusionCulling(bool state)
+{
+  _tile_frustum_culled = state;
+}
+
+[[nodiscard]]
+bool Noggit::Rendering::TileRender::isUploaded() const
+{
+  return _uploaded;
+}
+
+[[nodiscard]]
+bool Noggit::Rendering::TileRender::alphamapUploadedLastFrame() const
+{
+  return _uploaded_alphamap_last_frame;
+}
+
+int Noggit::Rendering::TileRender::numUploadedChunkAlphamaps() const
+{
+  return _num_uploaded_chunk_alphamaps;
 }

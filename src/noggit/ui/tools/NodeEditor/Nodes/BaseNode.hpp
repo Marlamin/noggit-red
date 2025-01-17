@@ -2,23 +2,17 @@
 #define NOGGIT_BASENODE_HPP
 
 #include <external/NodeEditor/include/nodes/NodeDataModel>
-#include <external/NodeEditor/include/nodes/NodeData>
-#include <external/NodeEditor/include/nodes/Node>
-#include <external/NodeEditor/include/nodes/Connection>
 
 #include <vector>
 #include <memory>
-#include <unordered_map>
 
-#include <QObject>
-#include <QJsonObject>
-#include <QLabel>
-#include <QLineEdit>
-#include <QDoubleSpinBox>
-#include <QSpinBox>
-#include <QCheckBox>
+namespace QtNodes
+{
+  class Connection;
+  class NodeData;
+}
 
-#include <QVBoxLayout>
+class QVBoxLayout;
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -77,12 +71,12 @@ namespace Noggit
 
         public:
             BaseNode();
-            virtual ~BaseNode() {}
+            virtual ~BaseNode();
 
         public:
 
-            NodeInterpreterTokens getInterpreterToken() { return _token; };
-            void setInterpreterToken(NodeInterpreterTokens token) { _token = token; };
+            NodeInterpreterTokens getInterpreterToken() const;
+            void setInterpreterToken(NodeInterpreterTokens token);
 
             unsigned int nPorts(PortType port_type) const override;
 
@@ -94,19 +88,19 @@ namespace Noggit
 
             std::unique_ptr<NodeData>& dataModel(PortType port_type, PortIndex port_index);
 
-            QWidget* embeddedWidget() override { return &_embedded_widget; }
+            QWidget* embeddedWidget() override;
 
-            NodeValidationState validationState() const override { return _validation_state; };
+            NodeValidationState validationState() const override;
 
-            QString validationMessage() const override { return _validation_error; };
+            QString validationMessage() const override;
 
             QString portCaption(PortType port_type, PortIndex port_index) const override;
 
-            QString name() const override { return _name; }
+            QString name() const override;
 
-            QString caption() const override { return _caption; };
+            QString caption() const override;
 
-            void setCaption(QString const& caption){_caption = caption;};
+            void setCaption(QString const& caption);
 
             bool portCaptionVisible(PortType port_type, PortIndex port_index) const override;
 
@@ -117,16 +111,16 @@ namespace Noggit
             QJsonObject save() const override;
             void restore(QJsonObject const& json_obj) override;
 
-            virtual bool isLogicNode() { return false; };
+            virtual bool isLogicNode();
 
-            void setValidationMessage(QString const& message){_validation_error = message; Q_EMIT visualsNeedUpdate();};
-            void setValidationState(NodeValidationState state){_validation_state = state;};
+            void setValidationMessage(QString const& message);
+            void setValidationState(NodeValidationState state);
 
             virtual void compute() = 0;
-            virtual NodeValidationState validate() { return _validation_state; };
+            virtual NodeValidationState validate();
 
-            bool isComputed() { return _is_computed; };
-            void setComputed(bool state) { _is_computed = state; };
+            bool isComputed() const;
+            void setComputed(bool state);
 
         public Q_SLOTS:
 
@@ -139,7 +133,7 @@ namespace Noggit
 
         protected:
 
-            void setName(QString const& name) {_name = name;};
+            void setName(QString const& name);
 
             void addWidgetTop(QWidget* widget);
             void addWidgetBottom(QWidget* widget);

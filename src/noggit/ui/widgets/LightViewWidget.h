@@ -1,16 +1,22 @@
 #pragma once
 
 #include <noggit/Sky.h>
-#include <noggit/MapView.h>
-#include <QApplication>
-#include <QMouseEvent>
-#include <QPainterPath>
-#include <QFrame>
-#include <QEvent>
-#include <QLayout>
+
 #include <QLabel>
 #include <QPixmap>
 #include "DynamicMouseWidget.h"
+
+namespace color_widgets
+{
+  class ColorSelector;
+}
+
+class MapView;
+
+class QMouseEvent;
+class QPushButton;
+class QSpinBox;
+class QVBoxLayout;
 
 #define MAX_TIME_VALUE  2880
 
@@ -52,8 +58,8 @@ class LightViewPixmap : public QLabel
 public:
     LightViewPixmap(QSize Size = QSize(LIGHT_VIEW_PREVIEW_WIDTH, LIGHT_VIEW_PREVIEW_HEIGHT), QWidget* parent = nullptr);
     void ShowLines(bool show);
-    void EnableEvent() { bEvent = true; };
-    void DisableEvent() { bEvent = false; };
+    void EnableEvent();;
+    void DisableEvent();;
     void SetPreview(std::vector<SkyColor>& data, int Index = -1);
 
 protected:
@@ -217,7 +223,7 @@ public:
 
     static QColor InterpolateColor(QColor& a, QColor& b, float t);
     static QImage FillImagePart(QImage Image, int X, QColor Color);
-    static inline int ClampColor(int Value);
+    static int ClampColor(int Value);
     static QColor GetColorFromStyleSheet();
     static void SortSkyColorVector(std::vector<SkyColor>& Vector);
 };

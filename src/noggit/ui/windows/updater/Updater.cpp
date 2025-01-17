@@ -1,5 +1,14 @@
-#include "Updater.h"
 #include "ui_Updater.h"
+#include "Updater.h"
+
+#include "qprocess.h"
+#include <qdir.h>
+#include <qdiriterator.h>
+#include <qfile.h>
+#include <QtNetwork/qnetworkaccessmanager.h>
+#include <QtNetwork/qnetworkreply.h>
+#include <QtNetwork/qnetworkrequest.h>
+
 
 namespace Noggit
 {

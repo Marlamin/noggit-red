@@ -2,11 +2,16 @@
 
 #include "AddObjectInstance.hpp"
 
+#include <noggit/Action.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/object_paste_params.hpp>
+#include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <noggit/ui/ObjectEditor.h>
-#include <noggit/ActionManager.hpp>
-#include <noggit/Action.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
+#include <noggit/World.h>
+
+#include <external/NodeEditor/include/nodes/Node>
 
 #include <typeinfo>
 

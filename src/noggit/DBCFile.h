@@ -6,12 +6,8 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
-#include <cstring>
-#include <algorithm>
 #include <memory>
-#include <iostream>
 #include <blizzard-archive-library/include/ClientData.hpp>
-#include <noggit/Log.h>
 
 class DBCFile
 {
@@ -44,47 +40,15 @@ public:
   class Record
   {
   public:
-     const float& getFloat(size_t field) const
-    {
-      assert(field < file.fieldCount);
-      return *reinterpret_cast<float*>(offset + field * 4);
-    }
-    const unsigned int& getUInt(size_t field) const
-    {
-      assert(field < file.fieldCount);
-      return *reinterpret_cast<unsigned int*>(offset + field * 4);
-    }
-    const int& getInt(size_t field) const
-    {
-      assert(field < file.fieldCount);
-      return *reinterpret_cast<int*>(offset + field * 4);
-    }
-    const char *getString(size_t field) const
-    {
-      assert(field < file.fieldCount);
-      size_t stringOffset = getUInt(field);
-      assert(stringOffset < file.stringSize);
-      return file.stringTable.data() + stringOffset;
-    }
-    const char *getLocalizedString(size_t field, int locale = -1) const
-    {
-      int loc = locale;
-      if (locale == -1)
-      {
-        assert(field < file.fieldCount - 8);
-        for (loc = 0; loc < 15; loc++)
-        {
-          size_t stringOffset = getUInt(field + loc);
-          if (stringOffset != 0)
-            break;
-        }
-      }
+     const float& getFloat(size_t field) const;
 
-      assert(field + loc < file.fieldCount);
-      size_t stringOffset = getUInt(field + loc);
-      assert(stringOffset < file.stringSize);
-      return file.stringTable.data() + stringOffset;
-    }
+    const unsigned int& getUInt(size_t field) const;
+
+    const int& getInt(size_t field) const;
+
+    const char *getString(size_t field) const;
+
+    const char *getLocalizedString(size_t field, int locale = -1) const;
 
     template<typename T> inline
     void write(size_t field, T val)
@@ -94,40 +58,9 @@ public:
       *reinterpret_cast<T*>(offset + field * 4) = val;
     }
 
-    void writeString(size_t field, const std::string& val)
-    {
-      assert(field < file.fieldCount);
+    void writeString(size_t field, const std::string& val);
 
-      if (!val.size())
-      {
-        *reinterpret_cast<unsigned int*>(offset + field * 4) = 0;
-        return;
-      }
-
-      size_t old_size = file.stringTable.size();
-      *reinterpret_cast<unsigned int*>(offset + field * 4) = static_cast<unsigned int>(file.stringTable.size());
-      file.stringTable.resize(old_size + val.size() + 1);
-      std::copy(val.c_str(), val.c_str() + val.size() + 1, file.stringTable.data() + old_size);
-      file.stringSize += static_cast<std::uint32_t>(val.size() + 1);
-    }
-
-    void writeLocalizedString(size_t field, const std::string& val, unsigned int locale)
-    {
-      assert(field < file.fieldCount);
-      assert(locale < 16);
-
-      if (!val.size())
-      {
-        *reinterpret_cast<unsigned int*>(offset + ((field + locale) * 4)) = 0;
-        return;
-      }
-
-      size_t old_size = file.stringTable.size();
-      *reinterpret_cast<unsigned int*>(offset + ((field + locale) * 4)) = static_cast<unsigned int>(file.stringTable.size());
-      file.stringTable.resize(old_size + val.size() + 1);
-      std::copy(val.c_str(), val.c_str() + val.size() + 1, file.stringTable.data() + old_size);
-      file.stringSize += static_cast<std::uint32_t>(val.size() + 1);
-    }
+    void writeLocalizedString(size_t field, const std::string& val, unsigned int locale);
 
   private:
     Record(DBCFile &pfile, unsigned char *poffset) : file(pfile), offset(poffset) {}
@@ -163,56 +96,18 @@ public:
     Record record;
   };
 
-  inline Record getRecord(size_t id)
-  {
-    return Record(*this, data.data() + id*recordSize);
-  }
+  Record getRecord(size_t id);
 
-  inline Iterator begin()
-  {
-    return Iterator(*this, data.data());
-  }
-  inline Iterator end()
-  {
-    return Iterator(*this, data.data() + data.size());
-  }
+  Iterator begin();
+  Iterator end();
 
-  inline size_t getRecordCount() const { return recordCount; }
-  inline size_t getFieldCount() const { return fieldCount; }
-  inline size_t getRecordSize() const { return recordSize; }
+  size_t getRecordCount() const;
+  size_t getFieldCount() const;
+  size_t getRecordSize() const;
 
-  inline Record getByID(unsigned int id, size_t field = 0)
-  {
-      for (Iterator i = begin(); i != end(); ++i)
-      {
-        if (i->getUInt(field) == id)
-          return (*i);
-      }
-      LogDebug << "Tried to get a not existing row in " << filename << " (ID = " << id << ")!" << std::endl;
-      throw NotFound();
-  }
-  inline bool CheckIfIdExists(unsigned int id, size_t field = 0)
-  {
-      for (Iterator i = begin(); i != end(); ++i)
-      {
-          if (i->getUInt(field) == id)
-              return (true);
-      }
-      return (false);
-  }
-  inline int getRecordRowId(unsigned int id, size_t field = 0)
-  {
-      int row_id = 0;
-      for (Iterator i = begin(); i != end(); ++i)
-      {
-          if (i->getUInt(field) == id)
-              return row_id;
-
-          row_id++;
-      }
-      LogError << "Tried to get a not existing row in " << filename << " (ID = " << id << ")!" << std::endl;
-      throw NotFound();
-  }
+  Record getByID(unsigned int id, size_t field = 0);
+  bool CheckIfIdExists(unsigned int id, size_t field = 0);
+  int getRecordRowId(unsigned int id, size_t field = 0);
 
   Record addRecord(size_t id, size_t id_field = 0);
   Record addRecordCopy(size_t id, size_t id_from, size_t id_field = 0);

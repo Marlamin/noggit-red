@@ -4,23 +4,15 @@
 #define NOGGIT_LOGICPROCEDURENODE_HPP
 
 #include "noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp"
-#include "noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp"
-#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodeScene.hpp>
 
-#include <vector>
-
-using QtNodes::PortType;
-using QtNodes::PortIndex;
-using QtNodes::NodeData;
-using QtNodes::NodeDataType;
-using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
-
 
 namespace Noggit
 {
     namespace Ui::Tools::NodeEditor::Nodes
     {
+        class NodeScene;
+
         class LogicProcedureNode : public LogicNodeBase
         {
         Q_OBJECT
@@ -41,9 +33,7 @@ namespace Noggit
           NodeScene* _scene;
           QString _scene_path;
         };
-
     }
-
 }
 
 #endif //NOGGIT_LOGICPROCEDURENODE_HPP

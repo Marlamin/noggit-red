@@ -7,7 +7,11 @@
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
+#include <noggit/MapTile.h>
 #include <noggit/map_index.hpp>
+#include <noggit/TabletManager.hpp>
+#include <opengl/texture.hpp>
+#include <noggit/Tool.hpp>
 #include <noggit/uid_storage.hpp>
 #include <noggit/ui/CurrentTexture.h>
 #include <noggit/ui/DetailInfos.h> // detailInfos
@@ -46,6 +50,7 @@
 #include <external/tracy/Tracy.hpp>
 #include <noggit/ui/object_palette.hpp>
 #include <external/glm/gtc/type_ptr.hpp>
+#include <external/qtimgui/QtImGui.h>
 #include <opengl/types.hpp>
 #include <limits>
 #include <variant>
@@ -75,8 +80,8 @@
 #ifdef USE_MYSQL_UID_STORAGE
 #include <mysql/mysql.h>
 
-#include <QtCore/QSettings>
 #endif
+#include <QtCore/QSettings>
 
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_settings.hpp>
@@ -86,12 +91,17 @@
 
 #include <noggit/ui/FontNoggit.hpp>
 
+#include <ui_MapViewOverlay.h>
+
 #include "revision.h"
 
 #include <QtCore/QTimer>
 #include <QtGui/QMouseEvent>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QDockWidget>
+#include <QtWidgets/QLabel>
 #include <QtWidgets/QMenuBar>
+#include <QtWidgets/QOpenGLWidget>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QWidgetAction>
@@ -104,14 +114,16 @@
 #include <QFileDialog>
 #include <QProgressDialog>
 #include <QClipboard>
+#include <QOpenGLContext>
 #include <QProcess>
+#include <QWidgetAction>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
-
+#include <fstream>
 #include <vector>
 #include <random>
 #include <format>
@@ -296,6 +308,11 @@ void MapView::set_editing_mode(editing_mode mode)
   _tool_panel_dock->setWindowTitle(activeTool()->name());
 
   _world->renderer()->markTerrainParamsUniformBlockDirty();
+}
+
+editing_mode MapView::get_editing_mode() const
+{
+  return terrainMode;
 }
 
 void MapView::setToolPropertyWidgetVisibility(editing_mode mode)
@@ -2651,6 +2668,11 @@ auto MapView::setBrushTexture(QImage const* img) -> void
   gl.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
+Noggit::Camera* MapView::getCamera()
+{
+  return &_camera;
+}
+
 void MapView::move_camera_with_auto_height (glm::vec3 const& pos)
 {
   makeCurrent();
@@ -3619,7 +3641,7 @@ void MapView::draw_map()
                   _model_view
                 , _projection
                 , _cursor_pos
-                , cursor_color
+                , cursorColor
                 , ref_pos
                 , _camera.position
                 , &minimapRenderSettings
@@ -3972,7 +3994,11 @@ void MapView::mousePressEvent(QMouseEvent* event)
   activeTool()->onMousePress({
       .button = event->button(),
       .mouse_position = event->pos(),
+      .mod_shift_down = _mod_shift_down,
       .mod_ctrl_down = _mod_ctrl_down,
+      .mod_alt_down = _mod_alt_down,
+      .mod_num_down = _mod_num_down,
+      .mod_space_down = _mod_space_down,
       });
 
   switch (event->button())
@@ -4261,6 +4287,30 @@ QWidget* MapView::getLeftSecondaryToolbar()
     return _viewport_overlay_ui->leftSecondaryToolbarHolder;
 }
 
+[[nodiscard]]
+Noggit::NoggitRenderContext MapView::getRenderContext()
+{
+  return _context;
+}
+
+[[nodiscard]]
+World* MapView::getWorld() const
+{
+  return _world.get();
+}
+
+[[nodiscard]]
+QDockWidget* MapView::getAssetBrowser()
+{
+  return _asset_browser_dock;
+}
+
+[[nodiscard]]
+Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget* MapView::getAssetBrowserWidget()
+{
+  return _asset_browser;
+}
+
 glm::vec3 MapView::cursorPosition() const
 {
     return _cursor_pos;
@@ -4350,6 +4400,17 @@ void MapView::onSettingsSave()
   auto app_config = Noggit::Application::NoggitApplication::instance()->getConfiguration();
   app_config->modern_features = _settings->value("modern_features", false).toBool();
 
+}
+
+void MapView::setCameraDirty()
+{
+  _camera_moved_since_last_draw = true;
+}
+
+[[nodiscard]]
+Noggit::Ui::minimap_widget* MapView::getMinimapWidget() const
+{
+  return _minimap;
 }
 
 void MapView::ShowContextMenu(QPoint pos) 

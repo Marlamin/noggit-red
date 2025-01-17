@@ -1,33 +1,37 @@
 ﻿// This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ui/texturing_tool.hpp>
-#include <noggit/TabletManager.hpp>
-
-#include <noggit/Misc.h>
-#include <noggit/World.h>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/MapView.h>
-#include <noggit/tool_enums.hpp>
+#include <noggit/project/CurrentProject.hpp>
+#include <noggit/TabletManager.hpp>
+#include <noggit/TextureManager.h>
 #include <noggit/ui/Checkbox.hpp>
 #include <noggit/ui/CurrentTexture.h>
+#include <noggit/ui/GroundEffectsTool.hpp>
 #include <noggit/ui/texture_swapper.hpp>
-#include <noggit/DBC.h>
-#include <util/qt/overload.hpp>
-#include <noggit/TextureManager.h>
-#include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
-#include <noggit/application/NoggitApplication.hpp>
-
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QTabWidget>
-#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
-#include <QClipboard>
+#include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/tools/UiCommon/expanderwidget.h>
-#include <noggit/ui/WeightListWidgetItem.hpp>
-#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
+#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
+#include <noggit/World.h>
+
+#include <QClipboard>
+#include <QMessageBox>
+#include <QPainter>
+#include <QSettings>
+#include <QStyle>
+#include <QStyleOptionSlider>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpinBox>
+#include <QtWidgets/QTabWidget>
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include <noggit/project/CurrentProject.hpp>
 
 namespace Noggit
 {
@@ -576,6 +580,11 @@ namespace Noggit
       }
     }
 
+    GroundEffectsTool* texturing_tool::getGroundEffectsTool()
+    {
+      return _ground_effect_tool;
+    }
+
     void texturing_tool::setRadius(float radius)
     {
       _radius_slider->setValue(radius);
@@ -657,6 +666,26 @@ namespace Noggit
       {
         _spray_pressure_spin->setValue(_spray_pressure + change);
       }
+    }
+
+    Noggit::Ui::Tools::UiCommon::ExtendedSlider* texturing_tool::getRadiusSlider()
+    {
+      return _radius_slider;
+    }
+
+    Noggit::Ui::Tools::UiCommon::ExtendedSlider* texturing_tool::getInnerRadiusSlider()
+    {
+      return _hardness_slider;
+    }
+
+    Noggit::Ui::Tools::UiCommon::ExtendedSlider* texturing_tool::getSpeedSlider()
+    {
+      return _pressure_slider;
+    }
+
+    QDial* texturing_tool::getMaskOrientationDial()
+    {
+      return _image_mask_group->getMaskOrientationDial();
     }
 
     void texturing_tool::set_pressure(float pressure)
@@ -777,6 +806,16 @@ namespace Noggit
       }
     }
 
+    Brush const& texturing_tool::texture_brush() const
+    {
+      return _texture_brush;
+    }
+
+    float texturing_tool::alpha_target() const
+    {
+      return static_cast<float>(_brush_level);
+    }
+
     void texturing_tool::change_tex_flag(World* world, glm::vec3 const& pos, bool add, scoped_blp_texture_reference texture)
     {
       std::uint32_t flag = 0;
@@ -802,9 +841,32 @@ namespace Noggit
       world->change_texture_flag(pos, texture, flag, add);
     }
 
+    texture_swapper* const texturing_tool::texture_swap_tool()
+    {
+      return _texture_switcher;
+    }
+
     QSize texturing_tool::sizeHint() const
     {
       return QSize(215, height());
+    }
+
+    Noggit::Ui::Tools::ImageMaskSelector* texturing_tool::getImageMaskSelector()
+    {
+      return _image_mask_group;
+    }
+
+    QImage* texturing_tool::getMaskImage()
+    {
+      return &_mask_image;
+    }
+
+    texturing_mode texturing_tool::getTexturingMode() const
+    {
+      if (_ground_effect_tool->isVisible())
+        return texturing_mode::ground_effect;
+      else
+        return _texturing_mode;
     }
 
     QJsonObject texturing_tool::toJSON()
@@ -878,5 +940,90 @@ namespace Noggit
         _texture_switcher->set_texture(tex_to_swap_path.toStdString());
 
     }
-  }
+
+    QPushButton* const texturing_tool::heightmappingApplyGlobalButton()
+    {
+      return _heightmapping_apply_global_btn;
+    }
+
+    QPushButton* const texturing_tool::heightmappingApplyAdtButton()
+    {
+      return _heightmapping_apply_adt_btn;
+    }
+
+    texture_heightmapping_data& texturing_tool::getCurrentHeightMappingSetting()
+    {
+      return textureHeightmappingData;
+    }
+
+    OpacitySlider::OpacitySlider(Qt::Orientation orientation, QWidget* parent)
+      : QSlider(orientation, parent)
+    {
+      setFixedWidth(35);
+    }
+
+    void OpacitySlider::paintEvent(QPaintEvent* event)
+    {
+      // QSlider::paintEvent(event);
+
+      // chat-gpt code, can probably be improved...
+
+      QPainter p(this);
+      QStyleOptionSlider opt;
+      initStyleOption(&opt);
+      opt.subControls = QStyle::SC_SliderGroove | QStyle::SC_SliderHandle;
+      if (tickPosition() != NoTicks)
+        opt.subControls |= QStyle::SC_SliderTickmarks;
+      if (isSliderDown()) {
+        opt.activeSubControls = QStyle::SC_SliderHandle;
+        opt.state |= QStyle::State_Sunken;
+      }
+      else {
+        opt.activeSubControls = QStyle::SC_None;
+      }
+
+      // Draw the groove with a linear gradient
+      QRect grooveRect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderGroove, this);
+      grooveRect.setLeft((width() - 35) / 2);
+      grooveRect.setRight((width() + 35) / 2);
+      QLinearGradient gradient(grooveRect.topLeft(), grooveRect.bottomLeft());
+      gradient.setColorAt(0, Qt::black);
+      gradient.setColorAt(1, Qt::white);
+      p.fillRect(grooveRect.adjusted(0, 0, -1, -1), gradient);
+
+      // Draw the handle with red color
+      QRect handleRect = style()->subControlRect(QStyle::CC_Slider, &opt, QStyle::SC_SliderHandle, this);
+      handleRect.setLeft((width() - 35) / 2);
+      handleRect.setRight((width() + 35) / 2);
+      handleRect.setHeight(5); // Set handle height to 5
+      p.setBrush(Qt::red);
+      p.setPen(Qt::NoPen);
+      p.drawRect(handleRect);
+
+      // Draw the ticks if needed
+      if (tickPosition() != NoTicks) {
+        opt.subControls = QStyle::SC_SliderTickmarks;
+        style()->drawComplexControl(QStyle::CC_Slider, &opt, &p, this);
+      }
+
+      // QSlider::paintEvent() source code :
+      /*
+      Q_D(QSlider);
+      QPainter p(this);
+      QStyleOptionSlider opt;
+      initStyleOption(&opt);
+      opt.subControls = QStyle::SC_SliderGroove | QStyle::SC_SliderHandle;
+      if (d->tickPosition != NoTicks)
+      opt.subControls |= QStyle::SC_SliderTickmarks;
+      if (d->pressedControl) {
+      opt.activeSubControls = d->pressedControl;
+      opt.state |= QStyle::State_Sunken;
+      }
+      else {
+      opt.activeSubControls = d->hoverControl;
+      }
+      style()->drawComplexControl(QStyle::CC_Slider, &opt, &p, this);
+      */
+    }
+}
 }

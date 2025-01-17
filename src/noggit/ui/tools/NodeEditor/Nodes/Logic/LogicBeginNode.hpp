@@ -2,7 +2,6 @@
 #define NOGGIT_LOGICBEGINNODE_HPP
 
 #include "noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp"
-#include <external/NodeEditor/include/nodes/Node>
 #include <vector>
 
 using QtNodes::PortType;
@@ -39,11 +38,8 @@ namespace Noggit
 
         private:
             std::vector<QWidget*> _default_widgets;
-
         };
-
     }
-
 }
 
 #endif //NOGGIT_LOGICBEGINNODE_HPP

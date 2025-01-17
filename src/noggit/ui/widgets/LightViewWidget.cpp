@@ -1,5 +1,18 @@
 #include "LightViewWidget.h"
+
+#include <noggit/MapView.h>
+#include <noggit/World.h>
+
+#include <qt-color-widgets/color_selector.hpp>
+
+#include <QApplication>
+#include <QMouseEvent>
 #include <QPainter>
+#include <QPainterPath>
+#include <QPushButton>
+#include <QRegularExpression>
+#include <QSpinBox>
+#include <QVBoxLayout>
 
 LightViewWidget::LightViewWidget(QWidget* parent)
 	: QWidget(parent)
@@ -133,6 +146,16 @@ void LightViewPixmap::ShowLines(bool Show)
 {
 	bShowLines = Show;
 	SetPreview(Data);
+}
+
+void LightViewPixmap::EnableEvent()
+{
+  bEvent = true;
+}
+
+void LightViewPixmap::DisableEvent()
+{
+  bEvent = false;
 }
 
 void LightViewPixmap::SetPreview(std::vector<SkyColor>& data, int Index)

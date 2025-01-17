@@ -1,7 +1,14 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "CreateProjectComponent.hpp"
+
+#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/project/ApplicationProject.h>
+#include <noggit/ui/windows/projectCreation/NoggitProjectCreationDialog.h>
 #include <noggit/ui/windows/projectSelection/components/RecentProjectsComponent.hpp>
+#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
+
+#include <QMessageBox>
 
 using namespace Noggit::Ui::Component;
 

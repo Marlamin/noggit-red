@@ -2,7 +2,8 @@
 #define NOGGIT_APPLICATION_CONFIGURATION_READER_HPP
 
 #include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
-#include <QFile>
+
+class QFile;
 
 namespace Noggit::Application {
 

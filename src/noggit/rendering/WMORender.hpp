@@ -5,12 +5,19 @@
 
 #include <noggit/rendering/BaseRender.hpp>
 #include <noggit/tool_enums.hpp>
-#include <opengl/scoped.hpp>
-#include <opengl/shader.hpp>
 #include <glm/glm.hpp>
-#include <math/frustum.hpp>
 
 #include <map>
+
+namespace OpenGL::Scoped
+{
+  struct use_program;
+}
+
+namespace math
+{
+  class frustum;
+}
 
 class WMO;
 

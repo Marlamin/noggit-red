@@ -2,32 +2,37 @@
 
 #include "MapCreationWizard.hpp"
 
-#include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/widgets/Vector3Widget.hpp>
-#include <noggit/project/CurrentProject.hpp>
-#include <blizzard-database-library/include/structures/Types.h>
-#include <noggit/MapView.h>
-#include <noggit/World.h>
 #include <noggit/application/Utils.hpp>
+#include <noggit/DBC.h>
 #include <noggit/Log.h>
+#include <noggit/MapChunk.h>
+#include <noggit/project/CurrentProject.hpp>
+#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/minimap_widget.hpp>
+#include <noggit/ui/widgets/Vector3Widget.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <noggit/World.h>
 
-#include <util/qt/overload.hpp>
+#include <blizzard-database-library/include/BlizzardDatabase.h>
 
+#include <QApplication>
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDir>
+#include <QDoubleSpinBox>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
-#include <QCheckBox>
-#include <QButtonGroup>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QScrollArea>
-#include <QWheelEvent>
-#include <QApplication>
-#include <QComboBox>
-#include <QCheckBox>
+#include <QSpinBox>
 #include <QStackedWidget>
-#include <QDir>
-#include <QMessageBox>
+#include <QWheelEvent>
 
 #include <filesystem>
 
@@ -1035,6 +1040,11 @@ void MapCreationWizard::addNewMap()
   _max_players->setValue(0);
 }
 
+World* Noggit::Ui::Tools::MapCreationWizard::Ui::MapCreationWizard::getWorld() const
+{
+  return _world.get();
+}
+
 void MapCreationWizard::removeMap()
 {
   QMessageBox prompt;
@@ -1156,6 +1166,21 @@ LocaleDBCEntry::LocaleDBCEntry(QWidget* parent) : QWidget(parent)
 void LocaleDBCEntry::setCurrentLocale(const std::string& locale)
 {
   _show_entry->setCurrentWidget(_widget_map.at(locale));
+}
+
+void Noggit::Ui::Tools::MapCreationWizard::Ui::LocaleDBCEntry::setValue(const std::string& val, int locale)
+{
+  _widget_map.at(_locale_names[locale])->setText(QString::fromStdString(val));
+
+  if (!val.empty() && _flags->value() == 0)
+  {
+    _flags->setValue(16712190); // default flags when there is text
+  }
+}
+
+std::string Noggit::Ui::Tools::MapCreationWizard::Ui::LocaleDBCEntry::getValue(int locale)
+{
+  return  _widget_map.at(_locale_names[locale])->text().toStdString();
 }
 
 void LocaleDBCEntry::fill(DBCFile::Record& record, size_t field)

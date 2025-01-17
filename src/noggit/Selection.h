@@ -4,9 +4,7 @@
 #include <noggit/ui/DetailInfos.h>
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
-#include <string>
 #include <vector>
-#include <QString>
 #include <array>
 
 // #include <noggit/World.h>
@@ -86,13 +84,13 @@ public:
     // void scale_group();
     // void rotate_group();
 
-    std::vector<unsigned int> const& getMembers() const { return _members_uid; }
+    std::vector<unsigned int> const& getMembers() const;
 
     [[nodiscard]]
-    std::array<glm::vec3, 2> const& getExtents() const { return _group_extents; } // ensureExtents();
+    std::array<glm::vec3, 2> const& getExtents() const; // ensureExtents();
 
-    bool isSelected() const { return _is_selected; }
-    void setUnselected() { _is_selected = false; }
+    bool isSelected() const;
+    void setUnselected();
 
     bool _is_selected = false;
 

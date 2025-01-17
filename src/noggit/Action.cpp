@@ -1,13 +1,15 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "Action.hpp"
+#include <noggit/ChunkWater.hpp>
+#include <noggit/ContextObject.hpp>
 #include <noggit/MapChunk.h>
 #include <noggit/MapView.h>
+#include <noggit/SceneObject.hpp>
 #include <noggit/texture_set.hpp>
-#include <noggit/ContextObject.hpp>
-#include <noggit/Log.h>
+#include <noggit/World.h>
+
 #include <cstring>
-#include <ranges>
 
 
 Noggit::Action::Action(MapView* map_view)
@@ -619,6 +621,26 @@ bool Noggit::Action::getBlockCursor() const
 void Noggit::Action::setPostCallback(std::function<void()> function)
 {
   _post = function;
+}
+
+ bool Noggit::Action::getTag()
+{
+  return _tag;
+}
+
+ void Noggit::Action::setTag(bool tag)
+{
+  _tag = tag;
+}
+
+ bool Noggit::Action::checkAdressTag(std::uintptr_t address)
+{
+  return std::find(_address_tag.begin(), _address_tag.end(), address) != _address_tag.end();
+}
+
+ void Noggit::Action::tagAdress(std::uintptr_t address)
+{
+  _address_tag.push_back(address);
 }
 
 

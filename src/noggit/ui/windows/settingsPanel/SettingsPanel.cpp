@@ -1,34 +1,22 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
 #include <noggit/Log.h>
-
-#include <noggit/TextureManager.h>
-#include <util/qt/overload.hpp>
 #include <noggit/ui/FramelessWindow.hpp>
-#include <sstream>
+#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
 
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QFileDialog>
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/QHBoxLayout>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QPushButton>
-#include <QtWidgets/QRadioButton>
-#include <QtWidgets/QComboBox>
 #include <QDir>
-#include <QApplication>
+#include <QtCore/QSettings>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QPushButton>
 
 #ifdef USE_MYSQL_UID_STORAGE
 #include <mysql/mysql.h>
 #endif
 
 #include <ui_SettingsPanel.h>
-#include <ui_TitleBar.h>
 
-
-#include <algorithm>
-#include <qmessagebox.h>
+#include <sstream>
 
 
 namespace Noggit

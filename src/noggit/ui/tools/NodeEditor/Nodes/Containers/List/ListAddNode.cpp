@@ -8,6 +8,8 @@
 
 #include <external/NodeEditor/include/nodes/Node>
 
+#include <QComboBox>
+
 using QtNodes::Node;
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;

@@ -1,19 +1,19 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <ClientFile.hpp>
 #include <math/frustum.hpp>
-#include <noggit/AsyncLoader.h>
+#include <math/ray.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/Log.h> // LogDebug
+#include <noggit/Model.h>
+#include <noggit/ModelInstance.h>
 #include <noggit/ModelManager.h> // ModelManager
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/WMO.h>
-#include <noggit/World.h>
-#include <noggit/rendering/Primitives.hpp>
-#include <noggit/application/NoggitApplication.hpp>
-#include <opengl/scoped.hpp>
+#include <noggit/wmo_liquid.hpp>
 
 #include <algorithm>
 #include <iomanip>
-#include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
@@ -24,6 +24,10 @@ WMO::WMO(BlizzardArchive::Listfile::FileKey const& file_key, Noggit::NoggitRende
   : AsyncObject(file_key)
   , _context(context)
   , _renderer(this)
+{
+}
+
+WMO::~WMO()
 {
 }
 
@@ -390,8 +394,6 @@ std::vector<float> WMO::intersect (math::ray const& ray, bool do_exterior) const
   return results;
 }
 
-
-
 std::map<uint32_t, std::vector<wmo_doodad_instance>> WMO::doodads_per_group(uint16_t doodadset) const
 {
   std::map<uint32_t, std::vector<wmo_doodad_instance>> doodads;
@@ -417,6 +419,39 @@ std::map<uint32_t, std::vector<wmo_doodad_instance>> WMO::doodads_per_group(uint
   }
 
   return doodads;
+}
+
+[[nodiscard]]
+bool WMO::is_hidden() const
+{
+  return _hidden;
+}
+
+void WMO::toggle_visibility()
+{
+  _hidden = !_hidden;
+}
+
+void WMO::show()
+{
+  _hidden = false;
+}
+
+void WMO::hide()
+{
+  _hidden = true;
+}
+
+[[nodiscard]]
+bool WMO::is_required_when_saving() const
+{
+  return true;
+}
+
+[[nodiscard]]
+Noggit::Rendering::WMORender* WMO::renderer()
+{
+  return &_renderer;
 }
 
 void WMOLight::init(BlizzardArchive::ClientFile* f)
@@ -1115,6 +1150,29 @@ bool WMOGroup::is_visible( glm::mat4x4 const& transform
   return true;
 }
 
+[[nodiscard]]
+std::vector<uint16_t> WMOGroup::doodad_ref() const
+{
+  return _doodad_ref;
+}
+
+[[nodiscard]]
+bool WMOGroup::has_skybox() const
+{
+  return header.flags.skybox;
+}
+
+[[nodiscard]]
+bool WMOGroup::is_indoor() const
+{
+  return header.flags.indoor;
+}
+
+[[nodiscard]]
+Noggit::Rendering::WMOGroupRender* WMOGroup::renderer()
+{
+  return &_renderer;
+}
 
 void WMOGroup::intersect (math::ray const& ray, std::vector<float>* results) const
 {
@@ -1223,4 +1281,29 @@ void WMOManager::unload_all(Noggit::NoggitRenderContext context)
         }
         , context
     );
+}
+
+bool wmo_triangle_material_info::isTransFace() const
+{
+  return flags.flag_0x01 && (flags.detail || flags.render);
+}
+
+bool wmo_triangle_material_info::isColor() const
+{
+  return !flags.collision;
+}
+
+bool wmo_triangle_material_info::isRenderFace() const
+{
+  return flags.render && !flags.detail;
+}
+
+bool wmo_triangle_material_info::isCollidable() const
+{
+  return flags.collision || isRenderFace();
+}
+
+bool wmo_triangle_material_info::isCollision() const
+{
+  return texture == 0xff;
 }

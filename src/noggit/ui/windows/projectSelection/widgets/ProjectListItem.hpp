@@ -1,13 +1,12 @@
 #ifndef NOGGIT_WIGDET_PROJECT_LIST_ITEM_HPP
 #define NOGGIT_WIGDET_PROJECT_LIST_ITEM_HPP
 
-#include <QMenuBar>
-#include <QAction>
-#include <qgraphicseffect.h>
-#include <QGridLayout>
 #include <QString>
+#include <QSize>
 #include <QWidget>
 #include <noggit/project/ApplicationProject.h>
+
+class QLabel;
 
 namespace Noggit::Ui::Widget
 {

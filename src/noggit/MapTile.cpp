@@ -1,36 +1,35 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <noggit/Alphamap.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
+#include <noggit/Model.h>
 #include <noggit/ModelInstance.h> // ModelInstance
 #include <noggit/ModelManager.h> // ModelManager
+#include <noggit/project/CurrentProject.hpp>
+#include <noggit/texture_set.hpp>
 #include <noggit/TileWater.hpp>
 #include <noggit/WMOInstance.h> // WMOInstance
 #include <noggit/World.h>
-#include <noggit/Alphamap.hpp>
-#include <noggit/texture_set.hpp>
-#include <noggit/ui/TexturingGUI.h>
-#include <noggit/application/NoggitApplication.hpp>
-#include <noggit/project/CurrentProject.hpp>
+#include <noggit/World.inl>
+
+#include <math/ray.hpp>
+
 #include <ClientFile.hpp>
-#include <opengl/scoped.hpp>
-#include <opengl/shader.hpp>
-#include <external/tracy/Tracy.hpp>
-#include <util/CurrentFunction.hpp>
+
 #include <util/sExtendableArray.hpp>
 
-#include <noggit/World.inl>
 #include <QtCore/QSettings>
 
 #include <cassert>
-#include <list>
+#include <limits>
 #include <map>
 #include <string>
 #include <utility>
 #include <vector>
-#include <limits>
 
 
 MapTile::MapTile( int pX
@@ -397,6 +396,21 @@ void MapTile::finishLoading()
 bool MapTile::isTile(int pX, int pZ)
 {
   return pX == index.x && pZ == index.z;
+}
+
+bool MapTile::hasFlightBounds() const
+{
+  return mFlags & 1;
+}
+
+async_priority MapTile::loading_priority() const
+{
+  return async_priority::high;
+}
+
+bool MapTile::has_model(uint32_t uid) const
+{
+  return std::find(uids.begin(), uids.end(), uid) != uids.end();
 }
 
 float MapTile::getMaxHeight()
@@ -1092,6 +1106,16 @@ void MapTile::add_model(SceneObject* instance)
   }
 }
 
+bool MapTile::tile_is_being_reloaded() const
+{
+  return _tile_is_being_reloaded;
+}
+
+std::vector<uint32_t>* MapTile::get_uids()
+{
+  return &uids;
+}
+
 void MapTile::initEmptyChunks()
 {
   for (int nextChunk = 0; nextChunk < 256; ++nextChunk)
@@ -1694,6 +1718,26 @@ void MapTile::setVertexColorImage(QImage const& baseimage, int mode, bool tiledE
   }
 }
 
+void MapTile::registerChunkUpdate(unsigned flags)
+{
+  _chunk_update_flags |= flags;
+}
+
+void MapTile::endChunkUpdates()
+{
+  _chunk_update_flags = 0;
+}
+
+std::array<float, 145 * 256 * 4>& MapTile::getChunkHeightmapBuffer()
+{
+  return _chunk_heightmap_buffer;
+}
+
+unsigned MapTile::getChunkUpdateFlags() const
+{
+  return _chunk_update_flags;
+}
+
 void MapTile::recalcExtents()
 {
   if (!_extents_dirty)
@@ -1775,9 +1819,34 @@ void MapTile::recalcObjectInstanceExtents()
 
 }
 
+float MapTile::camDist() const
+{
+  return _cam_dist;
+}
+
 void MapTile::calcCamDist(glm::vec3 const& camera)
 {
   _cam_dist = glm::distance(camera, _center);
+}
+
+void MapTile::markExtentsDirty()
+{
+  _extents_dirty = true;
+}
+
+void MapTile::tagCombinedExtents(bool state)
+{
+  _combined_extents_dirty = state;
+}
+
+Noggit::Rendering::TileRender* MapTile::renderer()
+{
+  return &_renderer;
+}
+
+Noggit::Rendering::FlightBoundsRender* MapTile::flightBoundsRenderer()
+{
+  return &_fl_bounds_render;
 }
 
 const texture_heightmapping_data& MapTile::GetTextureHeightMappingData(const std::string& name) const
@@ -1885,4 +1954,25 @@ void MapTile::recalcCombinedExtents()
   }
 
   _combined_extents_dirty = false;
+}
+
+std::array<glm::vec3, 2>& MapTile::getExtents()
+{
+  recalcExtents(); return _extents;
+}
+
+std::array<glm::vec3, 2>& MapTile::getCombinedExtents()
+{
+  recalcCombinedExtents(); return _combined_extents;
+}
+
+World* MapTile::getWorld()
+{
+  return _world;
+}
+
+[[nodiscard]]
+tsl::robin_map<AsyncObject*, std::vector<SceneObject*>> const& MapTile::getObjectInstances() const
+{
+  return object_instances;
 }

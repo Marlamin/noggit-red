@@ -2,11 +2,12 @@
 
 #pragma once
 
-#include <QtWidgets/QLineEdit>
-#include <QtWidgets/QListWidget>
 #include <QtWidgets/QWidget>
 
 class MapView;
+
+class QLineEdit;
+class QListWidget;
 
 namespace Noggit
 {

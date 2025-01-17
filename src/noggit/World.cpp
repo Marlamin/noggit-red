@@ -1,46 +1,51 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/World.h>
-#include <noggit/World.inl>
-
 #include <math/trig.hpp>
-#include <math/frustum.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/Brush.h> // brush
-#include <noggit/DBC.h>
+#include <noggit/ChunkWater.hpp>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
+#include <noggit/Model.h>
+#include <noggit/ModelInstance.h>
 #include <noggit/ModelManager.h> // ModelManager
-#include <noggit/TextureManager.h>
-#include <noggit/WMOInstance.h> // WMOInstance
-#include <noggit/texture_set.hpp>
-#include <noggit/tool_enums.hpp>
-#include <noggit/ui/ObjectEditor.h>
-#include <noggit/ui/TexturingGUI.h>
-#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/object_paste_params.hpp>
 #include <noggit/project/CurrentProject.hpp>
-#include <noggit/ActionManager.hpp>
+#include <noggit/texture_set.hpp>
+#include <noggit/TextureManager.h>
+#include <noggit/TileIndex.hpp>
+#include <noggit/tool_enums.hpp>
+#include <noggit/ui/TexturingGUI.h>
+#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/World.h>
+#include <noggit/World.inl>
+
 #include <math/bounding_box.hpp>
 
+#include <blizzard-database-library/include/structures/FileStructures.h>
+
 #include <external/tracy/Tracy.hpp>
-#include <QByteArray>
+
+#include <QDir>
+#include <QFileInfo>
 #include <QImage>
+#include <QMessageBox>
+#include <QProgressDialog>
+#include <QSettings>
+
+#include <glm/gtx/quaternion.hpp>
+
 #include <algorithm>
+#include <array>
 #include <cassert>
-#include <ctime>
-#include <iostream>
+#include <limits>
 #include <map>
 #include <string>
 #include <unordered_set>
 #include <utility>
-#include <limits>
-#include <array>
-#include <cstdint>
-#include <QProgressBar>
-
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
 
 
 bool World::IsEditableWorld(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record)
@@ -153,6 +158,11 @@ void World::saveSelectionGroups()
     Noggit::Project::CurrentProject::get()->saveObjectSelectionGroups(proj_selection_map_group);
 }
 
+Noggit::Rendering::WorldRender* World::renderer()
+{
+  return &_renderer;
+}
+
 void World::update_selection_pivot()
 {
   ZoneScoped;
@@ -176,6 +186,11 @@ void World::update_selection_pivot()
   {
     _multi_select_pivot = std::nullopt;
   }
+}
+
+std::optional<glm::vec3> const& World::multi_select_pivot() const
+{
+  return _multi_select_pivot;
 }
 
 bool World::is_selected(selection_type selection)
@@ -254,6 +269,11 @@ bool World::is_selected(std::uint32_t uid) const
   return selected_uids.contains(uid);
 }
 
+std::vector<selection_type> const& World::current_selection() const
+{
+  return _current_selection;
+}
+
 std::optional<selection_type> World::get_last_selected_model() const
 {
   ZoneScoped;
@@ -272,6 +292,21 @@ std::optional<selection_type> World::get_last_selected_model() const
 
   return it == _current_selection.rend()
     ? std::optional<selection_type>() : std::optional<selection_type> (*it);
+}
+
+bool World::has_selection() const
+{
+  return !_current_selection.empty();
+}
+
+bool World::has_multiple_model_selected() const
+{
+  return _selected_model_count > 1;
+}
+
+int World::get_selected_model_count() const
+{
+  return _selected_model_count;
 }
 
 std::vector<selected_object_type> const World::get_selected_objects() const
@@ -915,6 +950,16 @@ void World::move_model(selection_type entry, float dx, float dy, float dz)
 
 }
 
+void World::move_selected_models(glm::vec3 const& delta)
+{
+  move_selected_models(delta.x, delta.y, delta.z);
+}
+
+void World::set_selected_models_pos(float x, float y, float z, bool change_height)
+{
+  return set_selected_models_pos({ x,y,z }, change_height);
+}
+
 void World::set_selected_models_pos(glm::vec3 const& pos, bool change_height)
 {
   ZoneScoped;
@@ -1285,6 +1330,11 @@ void World::setAreaID(glm::vec3 const& pos, int id, bool adt, float radius)
       });
     }
   }
+}
+
+Noggit::NoggitRenderContext World::getRenderContext() const
+{
+  return _context;
 }
 
 bool World::GetVertex(float x, float z, glm::vec3 *V) const
@@ -1849,6 +1899,21 @@ void World::loadAllTiles(glm::vec3& camera_pos)
       // mTile->wait_until_loaded();
     }
   }
+}
+
+unsigned World::getNumLoadedTiles() const
+{
+  return _n_loaded_tiles;
+}
+
+unsigned World::getNumRenderedTiles() const
+{
+  return _n_rendered_tiles;
+}
+
+unsigned World::getNumRenderedObjects() const
+{
+  return _n_rendered_objects;
 }
 
 void World::convert_alphamap(QProgressDialog* progress_dialog, bool to_big_alpha)
@@ -3179,6 +3244,11 @@ void World::range_add_to_selection(glm::vec3 const& pos, float radius, bool remo
     }
   }
   update_selection_pivot();
+}
+
+Noggit::world_model_instances_storage& World::getModelInstanceStorage()
+{
+  return _model_instance_storage;
 }
 
 float World::getMaxTileHeight(const TileIndex& tile)

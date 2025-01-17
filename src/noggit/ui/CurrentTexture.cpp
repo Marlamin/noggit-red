@@ -1,18 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/CurrentTexture.h>
-#include <noggit/ui/TexturingGUI.h>
-#include <noggit/ui/texture_swapper.hpp>
+#include <noggit/TextureManager.h>
 
-#include <noggit/tool_enums.hpp>
-
-#include <QtWidgets/QGridLayout>
 #include <QtGui/QMouseEvent>
 #include <QtWidgets/QApplication>
 #include <QtGui/QDrag>
 #include <QtGui/QPainter>
 #include <QMimeData>
-#include <QPainter>
 
 namespace Noggit
 {

@@ -2,22 +2,16 @@
 #define NOGGIT_ModelView_HPP
 
 #include <QWidget>
-#include <QOpenGLWidget>
-#include <QSettings>
-#include <QMouseEvent>
-#include <QWheelEvent>
-#include <QKeyEvent>
-#include <QFocusEvent>
 #include <QPointF>
 #include <QElapsedTimer>
 #include <QTimer>
 #include <QStringList>
-#include <noggit/Camera.hpp>
-#include <noggit/WMOInstance.h>
-#include <noggit/Selection.h>
-#include <noggit/WMO.h>
-#include <noggit/Model.h>
 #include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
+
+class QWheelEvent;
+class QMouseEvent;
+class QFocusEvent;
+class QKeyEvent;
 
 namespace Noggit
 {
@@ -33,14 +27,14 @@ namespace Noggit
           , Noggit::NoggitRenderContext context = Noggit::NoggitRenderContext::ASSET_BROWSER);
 
       void setModel(std::string const& filename) override;
-      void setMoveSensitivity(float s) { _move_sensitivity = s / 30.0f; };
-      float getMoveSensitivity() { return _move_sensitivity; };
+      void setMoveSensitivity(float s);;
+      float getMoveSensitivity() const;;
       QStringList getDoodadSetNames(std::string const& filename);
       void setActiveDoodadSet(std::string const& filename, std::string const& doodadset_name);
-      std::string& getLastSelectedModel() { return _last_selected_model; };
+      std::string& getLastSelectedModel();;
 
-      bool hasHeightForWidth() const override { return true; };
-      int heightForWidth(int w) const override { return w; };
+      bool hasHeightForWidth() const override;;
+      int heightForWidth(int w) const override;;
 
       ~ModelViewer() override;
 

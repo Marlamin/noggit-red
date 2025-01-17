@@ -1,16 +1,21 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <math/bounding_box.hpp>
-#include <noggit/Log.h>
-#include <noggit/MapHeaders.h>
-#include <noggit/Misc.h> // checkinside
-#include <noggit/ModelInstance.h>
-#include <noggit/WMO.h> // WMO
-#include <noggit/MapTile.h>
-#include <noggit/WMOInstance.h>
-#include <noggit/rendering/Primitives.hpp>
-#include <opengl/scoped.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/MapHeaders.h>
+#include <noggit/MapTile.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/rendering/Primitives.hpp>
+#include <noggit/scoped_blp_texture_reference.hpp>
+#include <noggit/TextureManager.h>
+#include <noggit/WMO.h> // WMO
+#include <noggit/WMOInstance.h>
+
+#include <opengl/shader.hpp>
+
+#include <math/bounding_box.hpp>
+#include <math/frustum.hpp>
+#include <math/ray.hpp>
 
 #include <sstream>
 
@@ -64,6 +69,48 @@ WMOInstance::WMOInstance(BlizzardArchive::Listfile::FileKey const& file_key, Nog
   updateTransformMatrix();
 }
 
+WMOInstance::WMOInstance(WMOInstance&& other) noexcept
+  : SceneObject(other._type, other._context)
+  , wmo(std::move(other.wmo))
+  , group_extents(other.group_extents)
+  , mFlags(other.mFlags)
+  , mNameset(other.mNameset)
+  , _doodadset(other._doodadset)
+  , _doodads_per_group(other._doodads_per_group)
+  , _need_doodadset_update(other._need_doodadset_update)
+  , _need_recalc_extents(other._need_recalc_extents)
+{
+  std::swap(extents, other.extents);
+  pos = other.pos;
+  scale = other.scale;
+  dir = other.dir;
+  _context = other._context;
+  uid = other.uid;
+
+  _transform_mat = other._transform_mat;
+  _transform_mat_inverted = other._transform_mat_inverted;
+}
+
+WMOInstance& WMOInstance::operator= (WMOInstance&& other) noexcept
+{
+  std::swap(wmo, other.wmo);
+  std::swap(pos, other.pos);
+  std::swap(extents, other.extents);
+  std::swap(group_extents, other.group_extents);
+  std::swap(dir, other.dir);
+  std::swap(uid, other.uid);
+  std::swap(scale, other.scale);
+  std::swap(mFlags, other.mFlags);
+  std::swap(mNameset, other.mNameset);
+  std::swap(_doodadset, other._doodadset);
+  std::swap(_doodads_per_group, other._doodads_per_group);
+  std::swap(_need_doodadset_update, other._need_doodadset_update);
+  std::swap(_transform_mat, other._transform_mat);
+  std::swap(_transform_mat_inverted, other._transform_mat_inverted);
+  std::swap(_context, other._context);
+  std::swap(_need_recalc_extents, other._need_recalc_extents);
+  return *this;
+}
 
 void WMOInstance::draw ( OpenGL::Scoped::use_program& wmo_shader
                        , const glm::mat4x4 const& model_view
@@ -198,12 +245,23 @@ std::array<glm::vec3, 8> WMOInstance::getBoundingBox()
   return relative_to_model.rotated_corners(_transform_mat, true);
 }
 
+// not axis aligned
+bool WMOInstance::extentsDirty() const
+{
+  return _need_recalc_extents || !wmo->finishedLoading();
+}
+
 void WMOInstance::ensureExtents()
 {
   if ( (_need_recalc_extents || _update_group_extents) && wmo->finishedLoading())
   {
     recalcExtents();
   }
+}
+
+bool WMOInstance::finishedLoading()
+{
+  return wmo->finishedLoading();
 }
 
 void WMOInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
@@ -247,6 +305,12 @@ void WMOInstance::updateDetails(Noggit::Ui::detail_infos* detail_widget)
   select_info << "<br></span>";
 
   detail_widget->setText(select_info.str());
+}
+
+[[nodiscard]]
+AsyncObject* WMOInstance::instance_model() const
+{
+  return wmo.get();
 }
 
 void WMOInstance::recalcExtents()
@@ -313,6 +377,11 @@ void WMOInstance::change_nameset(uint16_t name_set)
     mNameset = name_set;
 }
 
+uint16_t WMOInstance::doodadset() const
+{
+  return _doodadset;
+}
+
 void WMOInstance::change_doodadset(uint16_t doodad_set)
 {
   if (!wmo->finishedLoading())
@@ -333,6 +402,14 @@ void WMOInstance::change_doodadset(uint16_t doodad_set)
 
   ensureExtents();
   update_doodads();
+}
+
+[[nodiscard]]
+std::map<int, std::pair<glm::vec3, glm::vec3>> const& WMOInstance::getGroupExtents()
+{
+  _update_group_extents = true;
+  ensureExtents();
+  return group_extents;
 }
 
 void WMOInstance::update_doodads()

@@ -1,6 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ui/widget.hpp>
 #include <QtWidgets/QListView>
 
 class QMouseEvent;

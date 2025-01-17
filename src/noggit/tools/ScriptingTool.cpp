@@ -2,12 +2,12 @@
 
 #include "ScriptingTool.hpp"
 
-#include <noggit/ActionManager.hpp>
 #include <noggit/MapView.h>
 #include <noggit/Input.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_settings.hpp>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/World.h>
 
 namespace Noggit
 {

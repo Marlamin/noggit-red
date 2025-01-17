@@ -4,13 +4,16 @@
 
 #include <math/trig.hpp>
 #include <noggit/MapHeaders.h>
-#include <opengl/scoped.hpp>
 #include <array>
 #include <glm/vec2.hpp>
-#include <util/sExtendableArray.hpp>
 
 class MapChunk;
 class ChunkWater;
+
+namespace util
+{
+  class sExtendableArray;
+}
 
 enum LiquidLayerUpdateFlags
 {
@@ -44,7 +47,7 @@ struct liquid_vertex
     float depth;
 
     liquid_vertex() = default;
-    liquid_vertex(glm::vec3 const& pos, glm::vec2 const& uv, float depth) : position(pos), uv(uv), depth(depth) {}
+    liquid_vertex(glm::vec3 const& pos, glm::vec2 const& uv, float depth);
 };
 
 public:
@@ -69,14 +72,14 @@ public:
   void update_opacity(MapChunk* chunk, float factor);
   void update_underground_vertices_depth(MapChunk* chunk);
 
-  std::array<liquid_vertex, 9 * 9>& getVertices() { return _vertices; };
+  std::array<liquid_vertex, 9 * 9>& getVertices();
   // std::array<float, 9 * 9>& getDepth() { return _depth; };
   // std::array<glm::vec2, 9 * 9>& getTexCoords() { return _tex_coords; };
 
-  float min() const { return _minimum; }
-  float max() const { return _maximum; }
-  int liquidID() const { return _liquid_id; }
-  int mclq_liquid_type() const { return _mclq_liquid_type; }
+  float min() const;
+  float max() const;
+  int liquidID() const;
+  int mclq_liquid_type() const;
   // order of the flag corresponding to the liquid type in the mcnk header
   int mclq_flag_ordering() const;
 
@@ -86,11 +89,11 @@ public:
   bool hasSubchunk(int x, int z, int size = 1) const;
   void setSubchunk(int x, int z, bool water);
 
-  std::uint64_t getSubchunks() { return _subchunks; };
+  std::uint64_t getSubchunks();
 
-  bool empty() const { return !_subchunks; }
-  bool full() const { return _subchunks == std::uint64_t(-1); }
-  void clear() { _subchunks = std::uint64_t(0); }
+  bool empty() const;
+  bool full() const;
+  void clear();
 
   void paintLiquid(glm::vec3 const& pos
                   , float radius
@@ -106,9 +109,9 @@ public:
 
   void copy_subchunk_height(int x, int z, liquid_layer const& from);
 
-  ChunkWater* getChunk() { return _chunk; };
+  ChunkWater* getChunk();
 
-  bool has_fatigue() const { return _fatigue_enabled; }
+  bool has_fatigue() const;
 
 private:
   void create_vertices(float height);

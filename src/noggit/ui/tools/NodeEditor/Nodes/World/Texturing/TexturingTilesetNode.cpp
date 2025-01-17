@@ -6,6 +6,11 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/TextureManager.h>
 
+#include <external/NodeEditor/include/nodes/Node>
+
+#include <QLabel>
+#include <QPushButton>
+
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 TexturingTilesetNode::TexturingTilesetNode()

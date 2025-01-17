@@ -4,9 +4,9 @@
 
 #include <noggit/ui/widget.hpp>
 
-#include <QtWidgets/QLabel>
-
 #include <string>
+
+class QLabel;
 
 namespace Noggit
 {

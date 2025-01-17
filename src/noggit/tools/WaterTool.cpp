@@ -7,6 +7,9 @@
 #include <noggit/Input.hpp>
 #include <noggit/ui/Water.h>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/World.h>
+
+#include <QWheelEvent>
 
 namespace Noggit
 {

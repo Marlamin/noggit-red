@@ -1,18 +1,15 @@
 #include "BrowserModelView.hpp"
-#include <opengl/scoped.hpp>
-#include <noggit/Selection.h>
-#include <noggit/tool_enums.hpp>
+
 #include <noggit/ContextObject.hpp>
+#include <noggit/WMOInstance.h>
 
-#include <vector>
-#include <cmath>
-#include <stdexcept>
-#include <QMatrix4x4>
-#include <QVector3D>
-
+#include <QFocusEvent>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QSettings>
+#include <QWheelEvent>
 
 using namespace Noggit::Ui::Tools::AssetBrowser;
-
 
 ModelViewer::ModelViewer(QWidget* parent, Noggit::NoggitRenderContext context)
  : PreviewRenderer(0, 0, context, parent)
@@ -113,6 +110,16 @@ void ModelViewer::setModel(std::string const& filename)
   PreviewRenderer::setModel(filename);
   emit model_set(filename);
   _last_selected_model = filename;
+}
+
+void Noggit::Ui::Tools::AssetBrowser::ModelViewer::setMoveSensitivity(float s)
+{
+  _move_sensitivity = s / 30.0f;
+}
+
+float Noggit::Ui::Tools::AssetBrowser::ModelViewer::getMoveSensitivity() const
+{
+  return _move_sensitivity;
 }
 
 float ModelViewer::aspect_ratio() const
@@ -291,6 +298,21 @@ void ModelViewer::setActiveDoodadSet(const std::string& filename, const std::str
 
     break;
   }
+}
+
+std::string& Noggit::Ui::Tools::AssetBrowser::ModelViewer::getLastSelectedModel()
+{
+  return _last_selected_model;
+}
+
+bool Noggit::Ui::Tools::AssetBrowser::ModelViewer::hasHeightForWidth() const
+{
+  return true;
+}
+
+int Noggit::Ui::Tools::AssetBrowser::ModelViewer::heightForWidth(int w) const
+{
+  return w;
 }
 
 ModelViewer::~ModelViewer()

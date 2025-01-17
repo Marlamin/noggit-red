@@ -1,11 +1,24 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "RecentProjectsComponent.hpp"
+#include "ui_NoggitProjectSelectionWindow.h"
 
-#include <QList>
-#include <filesystem>
+#include <noggit/project/ApplicationProjectReader.h>
+#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
+#include <noggit/ui/windows/projectSelection/widgets/ProjectListItem.hpp>
+
+#include <QDateTime>
 #include <QDesktopServices>
+#include <QDir>
+#include <QFileInfo>
+#include <QList>
+#include <QMenu>
+#include <QProcess>
 #include <QSettings>
+#include <QUrl>
+
+#include <filesystem>
 
 using namespace Noggit::Ui::Component;
 

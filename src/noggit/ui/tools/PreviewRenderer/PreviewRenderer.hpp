@@ -2,18 +2,12 @@
 #define NOGGIT_PREVIEWRENDERER_HPP
 
 #include <noggit/Camera.hpp>
-#include <noggit/WMOInstance.h>
-#include <noggit/ModelInstance.h>
-#include <noggit/WMO.h>
-#include <noggit/Model.h>
 #include <noggit/ContextObject.hpp>
 #include <noggit/BoolToggleProperty.hpp>
 #include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
 #include <noggit/rendering/Primitives.hpp>
 #include "noggit/rendering/LiquidTextureManager.hpp"
 
-#include <QOpenGLWidget>
-#include <QSettings>
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObjectFormat>
 #include <QOffscreenSurface>
@@ -21,6 +15,10 @@
 
 #include <vector>
 
+class ModelInstance;
+class WMOInstance;
+
+class QSettings;
 
 namespace Noggit::Ui::Tools
 {
@@ -31,6 +29,7 @@ class PreviewRenderer : public Noggit::Ui::Tools::ViewportManager::Viewport
 
   public:
     explicit PreviewRenderer(int width, int height, Noggit::NoggitRenderContext context, QWidget* parent = nullptr);
+    ~PreviewRenderer();
 
     void resetCamera(float x = 0.f, float y = 0.f, float z = 0.f, float roll = 0.f, float yaw = 120.f, float pitch = 20.f);
     QPixmap* renderToPixmap();

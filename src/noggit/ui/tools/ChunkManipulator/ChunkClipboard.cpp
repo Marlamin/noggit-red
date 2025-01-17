@@ -2,7 +2,13 @@
 
 
 #include "ChunkClipboard.hpp"
+#include <noggit/Alphamap.hpp>
+#include <noggit/ChunkWater.hpp>
+#include <noggit/MapChunk.h>
+#include <noggit/MapTile.h>
+#include <noggit/texture_set.hpp>
 #include <noggit/World.h>
+#include <noggit/liquid_layer.hpp>
 #include <noggit/World.inl>
 
 #include <cassert>
@@ -19,7 +25,6 @@ ChunkClipboard::ChunkClipboard(World* world, QObject* parent)
 
 void ChunkClipboard::selectRange(glm::vec3 const& cursor_pos, float radius, ChunkSelectionMode mode)
 {
-
   switch (mode)
   {
     case ChunkSelectionMode::SELECT:
@@ -204,4 +209,21 @@ void ChunkClipboard::clearSelection()
 void ChunkClipboard::pasteSelection(glm::vec3 const& pos, ChunkPasteFlags flags)
 {
 
+}
+
+[[nodiscard]]
+ChunkCopyFlags Noggit::Ui::Tools::ChunkManipulator::ChunkClipboard::copyParams() const
+{
+  return _copy_flags;
+}
+
+void Noggit::Ui::Tools::ChunkManipulator::ChunkClipboard::setCopyParams(ChunkCopyFlags flags)
+{
+  _copy_flags = flags;
+}
+
+[[nodiscard]]
+std::set<SelectedChunkIndex> const& Noggit::Ui::Tools::ChunkManipulator::ChunkClipboard::selectedChunks() const
+{
+  return _selected_chunks;
 }

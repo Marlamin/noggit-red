@@ -1,8 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
-#include <noggit/scripting/script_vert.hpp>
-#include <noggit/scripting/script_exception.hpp>
+#include <noggit/ChunkWater.hpp>
 #include <noggit/scripting/script_context.hpp>
+#include <noggit/scripting/script_exception.hpp>
+#include <noggit/scripting/script_vert.hpp>
 #include <noggit/scripting/scripting_tool.hpp>
+#include <noggit/texture_set.hpp>
 
 #include <sol/sol.hpp>
 

@@ -3,12 +3,14 @@
 #ifndef NOGGIT_LIQUIDTEXTUREMANAGER_HPP
 #define NOGGIT_LIQUIDTEXTUREMANAGER_HPP
 
-#include <noggit/TextureManager.h>
 #include <noggit/ContextObject.hpp>
+
+#include <opengl/types.hpp>
+
 #include <external/tsl/robin_map.h>
+#include <external/glm/vec2.hpp>
 
 #include <tuple>
-#include <external/glm/vec2.hpp>
 
 /*
 template<typename ... Args>

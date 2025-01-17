@@ -5,18 +5,14 @@
 
 #include <QWidget>
 #include <QPoint>
-#include <QRect>
 
 namespace Noggit::Ui::Tools
 {
-
-
   class ReorderableVerticalBox : public QWidget
   {
-
   public:
 
-    ReorderableVerticalBox(QWidget* parent = nullptr) : QWidget(parent) {};
+    ReorderableVerticalBox(QWidget* parent = nullptr);;
 
     void mouseMoveEvent(QMouseEvent* event) override;
 

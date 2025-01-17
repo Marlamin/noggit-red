@@ -4,6 +4,10 @@
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
 #include <noggit/ui/FontAwesome.hpp>
+
+#include <QLabel>
+#include <QListWidget>
+#include <QButtonGroup>
 #include <QVBoxLayout>
 #include <QRadioButton>
 #include <QDateTime>

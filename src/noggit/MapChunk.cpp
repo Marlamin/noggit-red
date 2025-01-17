@@ -1,28 +1,28 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
+#include <ClientFile.hpp>
+#include <external/tracy/Tracy.hpp>
 #include <math/frustum.hpp>
+#include <noggit/Action.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/Alphamap.hpp>
 #include <noggit/Brush.h>
-#include <noggit/TileWater.hpp>
+#include <noggit/ChunkWater.hpp>
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/MapHeaders.h>
+#include <noggit/MapTile.h> // MapTile
 #include <noggit/Misc.h>
-#include <noggit/World.h>
-#include <noggit/Alphamap.hpp>
+#include <noggit/ModelInstance.h>
 #include <noggit/texture_set.hpp>
+#include <noggit/TileWater.hpp>
 #include <noggit/tool_enums.hpp>
-#include <noggit/ui/TexturingGUI.h>
-#include <noggit/ActionManager.hpp>
-#include <noggit/Action.hpp>
-#include <opengl/scoped.hpp>
-#include <external/tracy/Tracy.hpp>
-#include <glm/glm.hpp>
-#include <ClientFile.hpp>
+#include <noggit/WMOInstance.h>
+#include <noggit/World.h>
+#include <util/sExtendableArray.hpp>
 
-#include <algorithm>
-#include <iostream>
+#include <limits>
 #include <map>
 #include <QImage>
-#include <limits>
 
 MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAlpha,tile_mode mode
                     , Noggit::NoggitRenderContext context, bool init_empty, int chunk_idx, bool load_textures)
@@ -343,6 +343,11 @@ MapChunk::MapChunk(MapTile* maintile, BlizzardArchive::ClientFile* f, bool bigAl
   }
 }
 
+auto MapChunk::getHoleMask(void) const -> unsigned
+{
+  return static_cast<unsigned>(holes);
+}
+
 int MapChunk::indexLoD(int x, int y)
 {
   return (x + 1) * 9 + x * 8 + y;
@@ -423,6 +428,21 @@ float MapChunk::getHeight(int x, int z)
   return mVertices[indexNoLoD(x, z)].y;
 }
 
+float MapChunk::getMinHeight() const
+{
+  return vmin.y;
+}
+
+float MapChunk::getMaxHeight() const
+{
+  return vmax.y;
+}
+
+glm::vec3 MapChunk::getCenter() const
+{
+  return vcenter;
+}
+
 void MapChunk::clearHeight()
 {
   for (int i = 0; i < mapbufsize; ++i)
@@ -438,6 +458,11 @@ void MapChunk::clearHeight()
   registerChunkUpdate(ChunkUpdateFlags::VERTEX);
 }
 
+
+TextureSet* MapChunk::getTextureSet() const
+{
+  return texture_set.get();
+}
 
 void MapChunk::draw ( math::frustum const& frustum
                     , OpenGL::Scoped::use_program& mcnk_shader
@@ -1859,6 +1884,21 @@ bool MapChunk::fixGapAbove(const MapChunk* chunk)
   return changed;
 }
 
+glm::vec3* MapChunk::getHeightmap()
+{
+  return &mVertices[0];
+}
+
+glm::vec3 const* MapChunk::getNormals() const
+{
+  return &mNormals[0];
+}
+
+glm::vec3* MapChunk::getVertexColors()
+{
+  return &mccv[0];
+}
+
 
 void MapChunk::selectVertex(glm::vec3 const& pos, float radius, std::unordered_set<glm::vec3*>& vertices)
 {
@@ -2008,9 +2048,19 @@ void MapChunk::setHeightmapImage(QImage const& image, float multiplier, int mode
   registerChunkUpdate(ChunkUpdateFlags::VERTEX);
 }
 
-ChunkWater* MapChunk::liquid_chunk() const
+ChunkWater const* MapChunk::liquid_chunk() const
 {
   return mt->Water.getChunk(px, py);
+}
+
+ChunkWater* MapChunk::liquid_chunk()
+{
+  return mt->Water.getChunk(px, py);
+}
+
+bool MapChunk::hasColors() const
+{
+  return hasMCCV;
 }
 
 void MapChunk::unload()
@@ -2115,4 +2165,12 @@ void MapChunk::registerChunkUpdate(unsigned flags)
   mt->registerChunkUpdate(flags);
 }
 
+void MapChunk::endChunkUpdates()
+{
+  _chunk_update_flags = 0;
+}
 
+unsigned MapChunk::getUpdateFlags() const
+{
+  return _chunk_update_flags;
+}

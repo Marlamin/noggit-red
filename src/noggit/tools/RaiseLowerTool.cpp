@@ -7,6 +7,8 @@
 #include <noggit/MapView.h>
 #include <noggit/ui/TerrainTool.hpp>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
+#include <noggit/World.h>
 
 #include <random>
 

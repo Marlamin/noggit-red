@@ -1,8 +1,19 @@
 #include "TreeManager.hpp"
 
+#include <QStandardItemModel>
 
 using namespace Noggit::Ui::Tools::AssetBrowser::Ui::Model;
 
+
+Noggit::Ui::Tools::AssetBrowser::Ui::Model::TreeManager::TreeManager(QStandardItem* root)
+  : root(root), sep(QLatin1Char('/'))
+{
+}
+
+Noggit::Ui::Tools::AssetBrowser::Ui::Model::TreeManager::TreeManager(QStandardItemModel* model)
+  : root(model->invisibleRootItem()), sep(QLatin1Char('/'))
+{
+}
 
 QStandardItem* TreeManager::addItem(QString path)
 {

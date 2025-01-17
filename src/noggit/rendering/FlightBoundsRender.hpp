@@ -5,9 +5,13 @@
 
 #include <noggit/rendering/BaseRender.hpp>
 #include <opengl/scoped.hpp>
-#include <opengl/shader.hpp>
 
 class MapTile;
+
+namespace OpenGL::Scoped
+{
+  struct use_program;
+}
 
 namespace Noggit::Rendering
 {

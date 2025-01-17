@@ -2,9 +2,7 @@
 
 #pragma once
 
-#include <math/trig.hpp>
 #include <glm/glm.hpp>
-#include <type_traits>
 
 namespace math
 {

@@ -8,6 +8,9 @@
 #include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
 #include <noggit/ui/tools/ViewToolbar/Ui/ViewToolbar.hpp>
+#include <noggit/World.h>
+
+#include <QWheelEvent>
 
 namespace Noggit
 {

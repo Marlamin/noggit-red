@@ -1,6 +1,5 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <glm/common.hpp>
 #include <math/bounding_box.hpp>
 #include <noggit/Misc.h>
 

@@ -1,15 +1,18 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/Brush.h>
-#include <noggit/Log.h>
+#include <noggit/MapChunk.h>
+#include <noggit/MapHeaders.h>
 #include <noggit/MapTile.h>
 #include <noggit/Misc.h>
-#include <noggit/TextureManager.h> // TextureManager, Texture
-#include <noggit/World.h>
 #include <noggit/texture_set.hpp>
+#include <noggit/TextureManager.h> // TextureManager, Texture
+
 #include <ClientFile.hpp>
+
+#include <QSettings>
+
 #include <algorithm>    // std::min
-#include <array>
 #include <sstream>
 
 TextureSet::TextureSet (MapChunk* chunk, BlizzardArchive::ClientFile* f, size_t base
@@ -398,6 +401,16 @@ int TextureSet::get_texture_index_or_add (scoped_blp_texture_reference texture, 
   return addTexture (std::move (texture));
 }
 
+auto TextureSet::getDoodadMappingBase(void) -> std::uint16_t*
+{
+  return _doodadMapping.data();
+}
+
+std::array<std::uint16_t, 8> const& TextureSet::getDoodadMapping()
+{
+  return _doodadMapping;
+}
+
 std::array<std::array<std::uint8_t, 8>, 8> const TextureSet::getDoodadMappingReadable()
 {
     std::array<std::array<std::uint8_t, 8>, 8> doodad_mapping{};
@@ -425,6 +438,13 @@ uint8_t const TextureSet::getDoodadActiveLayerIdAt(unsigned int x, unsigned int 
     uint8_t layer_id = (_doodadMapping[y] >> firstbit_pos) & 0x03;
 
     return layer_id;
+}
+
+
+// this is actually uint1_t[8][8] (8*8 -> 1 bit each)
+auto TextureSet::getDoodadStencilBase(void) -> std::uint8_t*
+{
+  return _doodadStencil.data();
 }
 
 bool const TextureSet::getDoodadDisabledAt(int x, int y)
@@ -466,6 +486,26 @@ void TextureSet::setDetailDoodadsExclusion(float xbase, float zbase, glm::vec3 c
         }
     }
     _chunk->registerChunkUpdate(ChunkUpdateFlags::DETAILDOODADS_EXCLUSION);
+}
+
+auto TextureSet::getEffectForLayer(std::size_t idx) const -> unsigned
+{
+  return _layers_info[idx].effectID;
+}
+
+layer_info* TextureSet::getMCLYEntries()
+{
+  return &_layers_info[0];
+}
+
+void TextureSet::setNTextures(size_t n)
+{
+  nTextures = n;
+}
+
+std::vector<scoped_blp_texture_reference>* TextureSet::getTextures()
+{
+  return &textures;
 }
 
 bool TextureSet::stampTexture(float xbase, float zbase, float x, float z, Brush* brush, float strength, float pressure, scoped_blp_texture_reference texture, QImage* image, bool paint)
@@ -1032,6 +1072,11 @@ bool TextureSet::replace_texture( float xbase
   return changed;
 }
 
+ size_t const& TextureSet::num() const
+{
+  return nTextures;
+}
+
 unsigned int TextureSet::flag(size_t id)
 {
   return _layers_info[id].flags;
@@ -1396,6 +1441,18 @@ void TextureSet::update_lod_texture_map()
   _need_lod_texture_map_update = false;
 }
 
+ constexpr std::array<std::uint8_t, 256 * 256> TextureSet::make_alpha_lookup_array()
+{
+  std::array<std::uint8_t, 256 * 256> array{};
+
+  for (int i = 0; i < 256 * 256; ++i)
+  {
+    array[i] = i / 255 + (i % 255 <= 127 ? 0 : 1);
+  }
+
+  return array;
+}
+
 
 
 std::array<float, 4> TextureSet::get_textures_weight_for_unit(unsigned int unit_x, unsigned int unit_y)
@@ -1578,7 +1635,7 @@ uint8_t TextureSet::sum_alpha(size_t offset) const
 
 namespace
 {
-  inline std::uint8_t float_alpha_to_uint8(float a)
+   std::uint8_t float_alpha_to_uint8(float a)
   {
     return static_cast<std::uint8_t>(std::max(0.f, std::min(255.f, std::round(a))));
   }
@@ -1674,6 +1731,29 @@ std::array<std::uint16_t, 8> TextureSet::lod_texture_map()
   }
 
   return _doodadMapping;
+}
+
+ std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS>* TextureSet::getAlphamaps()
+{
+  return &alphamaps;
+}
+
+ std::unique_ptr<tmp_edit_alpha_values>& TextureSet::getTempAlphamaps()
+{
+  return tmp_edit_values;
+}
+
+ void TextureSet::setAlphamaps(const std::array<std::unique_ptr<Alphamap>, MAX_ALPHAMAPS>& newAlphamaps)
+{
+  for (int i = 0; i < MAX_ALPHAMAPS; ++i)
+  {
+    if (newAlphamaps[i])
+    {
+      alphamaps[i] = std::make_unique<Alphamap>(*newAlphamaps[i]);
+    }
+    else
+      alphamaps[i].reset();
+  }
 }
 
 std::array<std::uint8_t, 256 * 256> TextureSet::alpha_convertion_lookup = TextureSet::make_alpha_lookup_array();

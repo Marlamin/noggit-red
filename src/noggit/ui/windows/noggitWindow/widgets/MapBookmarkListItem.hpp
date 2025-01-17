@@ -1,13 +1,13 @@
 #ifndef NOGGIT_WIGDET_MAP_BOOKMARK_LIST_ITEM_HPP
 #define NOGGIT_WIGDET_MAP_BOOKMARK_LIST_ITEM_HPP
 
-#include <QMenuBar>
-#include <QAction>
-#include <qgraphicseffect.h>
-#include <QGridLayout>
+#include <glm/vec3.hpp>
+
+#include <QSize>
 #include <QString>
 #include <QWidget>
-#include <noggit/project/ApplicationProject.h>
+
+class QLabel;
 
 namespace Noggit::Ui::Widget
 {

@@ -3,12 +3,11 @@
 #pragma once
 
 #include <noggit/ui/widget.hpp>
-#include <noggit/project/ApplicationProject.h>
+
 #include <QtWidgets/QListWidget>
-#include <unordered_set>
+
 #include <string>
-
-
+#include <unordered_set>
 
 class QGridLayout;
 class QPushButton;
@@ -18,9 +17,13 @@ class QMouseEvent;
 class QListWidget;
 class QPoint;
 
-
 namespace Noggit
 {
+  namespace Project
+  {
+    class NoggitProject;
+  }
+
   namespace Ui
   {
     class current_texture;

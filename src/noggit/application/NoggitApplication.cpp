@@ -1,14 +1,28 @@
 #include <noggit/application/NoggitApplication.hpp>
-#include <noggit/project/ApplicationProject.h>
+#include <noggit/AsyncLoader.h>
+#include <noggit/application/Configuration/NoggitApplicationConfigurationWriter.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfigurationReader.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <opengl/context.hpp>
+#include <opengl/context.inl>
 #include <noggit/Log.h>
+#include <revision.h>
+#include <util/exception_to_string.hpp>
+#include <ClientData.hpp>
 
 #include <chrono>
-#include <future>
 #include <thread>
+#include <filesystem>
 
+#include <QCoreApplication>
 #include <QDateTime>
+#include <QFile>
+#include <QLocale>
 #include <QMessageBox>
 #include <QString>
+#include <QSettings>
+#include <QOffscreenSurface>
+#include <QOpenGLContext>
 
 namespace
 {
@@ -33,6 +47,27 @@ namespace
 
 namespace Noggit::Application
 {
+	NoggitApplication* NoggitApplication::instance()
+	{
+		static NoggitApplication inst{};
+		return &inst;
+	}
+
+	BlizzardArchive::ClientData* NoggitApplication::clientData()
+  {
+    return _client_data.get();
+  }
+
+  bool NoggitApplication::hasClientData() const
+  {
+    return _client_data != nullptr;
+  }
+
+  void NoggitApplication::setClientData(std::shared_ptr<BlizzardArchive::ClientData> data)
+  {
+    _client_data = data;
+  }
+
   bool NoggitApplication::initalize(int argc, char* argv[], std::vector<bool> Parser)
   {
 	  InitLogging();

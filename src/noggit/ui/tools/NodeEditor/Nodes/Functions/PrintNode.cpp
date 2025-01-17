@@ -4,6 +4,10 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/Log.h>
 
+#include <external/NodeEditor/include/nodes/Node>
+
+#include <QLineEdit>
+
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 
 PrintNode::PrintNode()

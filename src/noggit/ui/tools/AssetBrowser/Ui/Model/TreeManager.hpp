@@ -3,10 +3,11 @@
 
 #include <external/tsl/robin_map.h>
 
-#include <chrono>
-
+#include <QMap>
 #include <QWidget>
-#include <QStandardItemModel>
+
+class QStandardItemModel;
+class QStandardItem;
 
 namespace Noggit
 {
@@ -17,8 +18,8 @@ namespace Noggit
       Q_DISABLE_COPY(TreeManager)
 
     public:
-      explicit TreeManager(QStandardItem* root) : root(root), sep(QLatin1Char('/')) {}
-      explicit  TreeManager(QStandardItemModel* model) : root(model->invisibleRootItem()), sep(QLatin1Char('/')) {}
+      explicit TreeManager(QStandardItem* root);
+      explicit  TreeManager(QStandardItemModel* model);
 
       QStandardItem* addItem(QString path);
 
@@ -32,9 +33,6 @@ namespace Noggit
       QStandardItem* find(QString path);
     };
   }
-  
 }
-
-
 
 #endif //NOGGIT_TREEMANAGER_HPP

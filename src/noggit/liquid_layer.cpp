@@ -5,7 +5,10 @@
 #include <noggit/Log.h>
 #include <noggit/MapChunk.h>
 #include <noggit/Misc.h>
+#include <opengl/scoped.hpp>
 #include <ClientFile.hpp>
+
+#include <util/sExtendableArray.hpp>
 
 #include <algorithm>
 #include <string>
@@ -492,6 +495,31 @@ void liquid_layer::update_underground_vertices_depth(MapChunk* chunk)
   }
 }
 
+std::array<liquid_layer::liquid_vertex, 9 * 9>& liquid_layer::getVertices()
+{
+  return _vertices;
+}
+
+float liquid_layer::min() const
+{
+  return _minimum;
+}
+
+float liquid_layer::max() const
+{
+  return _maximum;
+}
+
+int liquid_layer::liquidID() const
+{
+  return _liquid_id;
+}
+
+int liquid_layer::mclq_liquid_type() const
+{
+  return _mclq_liquid_type;
+}
+
 bool liquid_layer::hasSubchunk(int x, int z, int size) const
 {
   for (int pz = z; pz < z + size; ++pz)
@@ -510,6 +538,26 @@ bool liquid_layer::hasSubchunk(int x, int z, int size) const
 void liquid_layer::setSubchunk(int x, int z, bool water)
 {
   misc::set_bit(_subchunks, x, z, water);
+}
+
+std::uint64_t liquid_layer::getSubchunks()
+{
+  return _subchunks;
+}
+
+bool liquid_layer::empty() const
+{
+  return !_subchunks;
+}
+
+bool liquid_layer::full() const
+{
+  return _subchunks == std::uint64_t(-1);
+}
+
+void liquid_layer::clear()
+{
+  _subchunks = std::uint64_t(0);
 }
 
 void liquid_layer::paintLiquid( glm::vec3 const& cursor_pos
@@ -613,6 +661,16 @@ void liquid_layer::copy_subchunk_height(int x, int z, liquid_layer const& from)
   }
 
   setSubchunk(x, z, true);
+}
+
+ChunkWater* liquid_layer::getChunk()
+{
+  return _chunk;
+}
+
+bool liquid_layer::has_fatigue() const
+{
+  return _fatigue_enabled;
 }
 
 void liquid_layer::update_vertex_opacity(int x, int z, MapChunk* chunk, float factor)
@@ -763,3 +821,4 @@ bool liquid_layer::subchunk_at_max_depth(int x, int z) const
     return true;
 }
 
+liquid_layer::liquid_vertex::liquid_vertex(glm::vec3 const& pos, glm::vec2 const& uv, float depth) : position(pos), uv(uv), depth(depth) {}

@@ -1,16 +1,26 @@
-#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
-#include <noggit/ui/windows/projectSelection/components/RecentProjectsComponent.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/Log.h>
+#include <noggit/project/ApplicationProjectReader.h>
+#include <noggit/project/CurrentProject.hpp>
+#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <noggit/ui/windows/projectCreation/NoggitProjectCreationDialog.h>
 #include <noggit/ui/windows/projectSelection/components/CreateProjectComponent.hpp>
 #include <noggit/ui/windows/projectSelection/components/LoadProjectComponent.hpp>
-#include <noggit/project/CurrentProject.hpp>
-#include <noggit/Log.h>
+#include <noggit/ui/windows/projectSelection/components/RecentProjectsComponent.hpp>
+#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
+#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
 
-#include <filesystem>
-#include <QString>
+
 #include <QFile>
-#include <noggit/ui/FontNoggit.hpp>
+#include <QFileDialog>
+#include <QSettings>
+#include <QString>
 
 #include "ui_NoggitProjectSelectionWindow.h"
+
+#include <filesystem>
 
 
 using namespace Noggit::Ui::Windows;

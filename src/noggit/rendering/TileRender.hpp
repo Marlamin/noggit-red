@@ -5,8 +5,12 @@
 
 #include <noggit/rendering/BaseRender.hpp>
 #include <opengl/scoped.hpp>
-#include <opengl/shader.hpp>
 #include <array>
+
+namespace OpenGL::Scoped
+{
+  struct use_program;
+}
 
 class MapTile;
 class MapChunk;
@@ -38,8 +42,8 @@ namespace Noggit::Rendering
 
     void doTileOcclusionQuery(OpenGL::Scoped::use_program& occlusion_shader);
     bool getTileOcclusionQueryResult(glm::vec3 const& camera);
-    void discardTileOcclusionQuery() { _tile_occlusion_query_in_use = false; }
-    void notifyTileRendererOnSelectedTextureChange() { _requires_paintability_recalc = true; };
+    void discardTileOcclusionQuery();
+    void notifyTileRendererOnSelectedTextureChange();;
     void setChunkGroundEffectColor(unsigned int chunkid, glm::vec3 color);
 
     void initChunkData(MapChunk* chunk);
@@ -49,26 +53,26 @@ namespace Noggit::Rendering
     void setActiveRenderGEffectTexture(std::string active_texture);
 
     [[nodiscard]]
-    unsigned objectsFrustumCullTest() const { return _objects_frustum_cull_test; };
-    void setObjectsFrustumCullTest(unsigned state) { _objects_frustum_cull_test = state; };
+    unsigned objectsFrustumCullTest() const;;
+    void setObjectsFrustumCullTest(unsigned state);;
 
     [[nodiscard]]
-    bool isOccluded() const { return _tile_occluded; } ;
-    void setOccluded(bool state) { _tile_occluded = state; };
+    bool isOccluded() const; ;
+    void setOccluded(bool state);;
 
     [[nodiscard]]
-    bool isFrustumCulled() const{ return _tile_frustum_culled; };
-    void setFrustumCulled(bool state) {_tile_frustum_culled = state; };
+    bool isFrustumCulled() const;;
+    void setFrustumCulled(bool state);;
 
     [[nodiscard]]
-    bool isOverridingOcclusionCulling() const { return _tile_occlusion_cull_override; };
-    void setOverrideOcclusionCulling(bool state) { _tile_frustum_culled = state; };
+    bool isOverridingOcclusionCulling() const;;
+    void setOverrideOcclusionCulling(bool state);;
 
     [[nodiscard]]
-    bool isUploaded() const { return _uploaded; };
+    bool isUploaded() const;;
     [[nodiscard]]
-    bool alphamapUploadedLastFrame() const { return _uploaded_alphamap_last_frame; };
-    int numUploadedChunkAlphamaps() const { return _num_uploaded_chunk_alphamaps; };
+    bool alphamapUploadedLastFrame() const;;
+    int numUploadedChunkAlphamaps() const;;
 
   private:
 

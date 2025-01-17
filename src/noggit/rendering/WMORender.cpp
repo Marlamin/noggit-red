@@ -1,7 +1,15 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "WMORender.hpp"
+#include <noggit/Model.h>
+#include <noggit/ModelInstance.h>
 #include <noggit/WMO.h>
+#include <noggit/rendering/Primitives.hpp>
+
+#include <math/frustum.hpp>
+
+#include <opengl/shader.hpp>
+
 
 using namespace Noggit::Rendering;
 

@@ -1,7 +1,10 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "NodesContext.hpp"
+#include "NodeScene.hpp"
 #include "../../NodeRegistry.hpp"
+
+#include <noggit/World.h>
 
 #include <QDir>
 #include <QFileInfo>
@@ -54,8 +57,38 @@ NodeScene* Context::getScene(const QString& path, QObject* parent)
 
 }
 
+NodeExecutionContext Context::getContextType() const
+{
+  return _context_type;
+}
+
 void Context::makeCurrent()
 {
   gCurrentContext = this;
+}
+
+Noggit::Ui::Tools::NodeEditor::Nodes::VariableMap* Context::getVariableMap()
+{
+  return &_variable_map;
+}
+
+World* Context::getWorld()
+{
+  return _world;
+}
+
+Noggit::Ui::Tools::ViewportManager::Viewport* Context::getViewport()
+{
+  return _viewport;
+}
+
+void Context::setWorld(World* world)
+{
+  _world = world;
+}
+
+void Context::setViewport(ViewportManager::Viewport* viewport)
+{
+  _viewport = viewport;
 }
 

@@ -1,58 +1,32 @@
 #ifndef NOGGIT_ASSETBROWSER_HPP
 #define NOGGIT_ASSETBROWSER_HPP
 
-#include <ui_AssetBrowser.h>
-#include <ui_AssetBrowserOverlay.h>
-#include <noggit/ui/tools/AssetBrowser/Ui/Model/TreeManager.hpp>
-#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
-
 #include <QWidget>
-#include <QStandardItemModel>
 #include <QSortFilterProxyModel>
 #include <QRegularExpression>
 #include <QMainWindow>
 #include <QMap>
 
+namespace Ui
+{
+  class AssetBrowser;
+  class AssetBrowserOverlay;
+}
+
 class MapView;
+
+class QStandardItemModel;
 
 // custom model that makes the searched children expend, credit to https://stackoverflow.com/questions/56781145/expand-specific-items-in-a-treeview-during-filtering
 class NoggitExpendableFilterProxyModel : public QSortFilterProxyModel
 {
     Q_OBJECT
 public:
-    QList<QModelIndex> findIndices() const
-    {
-        QList<QModelIndex> ret;
-        for (auto iter = 0; iter < rowCount(); iter++)
-        {
-            auto childIndex = index(iter, 0, QModelIndex());
-            ret << recursivelyFindIndices(childIndex);
-        }
-        return ret;
-    }
+    QList<QModelIndex> findIndices() const;
 
-
-    bool rowAccepted(int source_row, const QModelIndex& source_parent) const
-    {
-        return filterAcceptsRow(source_row, source_parent);
-    }
+    bool rowAccepted(int source_row, const QModelIndex& source_parent) const;
 private:
-    QList<QModelIndex> recursivelyFindIndices(const QModelIndex& ind) const
-    {
-        QList<QModelIndex> ret;
-        if (rowAccepted(ind.row(), ind.parent()))
-        {
-            ret << ind;
-        }
-        else
-        {
-            for (auto iter = 0; iter < rowCount(ind); iter++)
-            {
-                ret << recursivelyFindIndices(index(iter, 0, ind));
-            }
-        }
-        return ret;
-    }
+    QList<QModelIndex> recursivelyFindIndices(const QModelIndex& ind) const;
 };
 
 namespace Noggit::Ui::Tools::AssetBrowser
@@ -74,9 +48,15 @@ namespace Noggit::Ui::Tools::AssetBrowser
 
 namespace Noggit
 {
-  namespace Ui::Tools::AssetBrowser::Ui
+  namespace Ui::Tools
   {
-
+    class PreviewRenderer;
+  namespace AssetBrowser::Ui
+  {
+    namespace Model
+    {
+      class TreeManager;
+    }
 
     class AssetBrowserWidget : public QMainWindow
     {
@@ -84,7 +64,7 @@ namespace Noggit
     public:
       AssetBrowserWidget(MapView* map_view, QWidget* parent = nullptr);
       ~AssetBrowserWidget();
-      std::string const& getFilename() { return _selected_path; };
+      std::string const& getFilename() const;;
 
       void set_browse_mode(asset_browse_mode browse_mode);
 
@@ -105,7 +85,7 @@ namespace Noggit
 
       void updateModelData();
       void recurseDirectory(Model::TreeManager& tree_mgr, const QString& s_dir, const QString& project_dir);
-      inline bool validateBrowseMode(const QString& wow_file_path);
+      bool validateBrowseMode(const QString& wow_file_path);
 
       // commented objects that shouldn't be placed on the map, still accessible through Show all
       const QMap<QString, asset_browse_mode> brosweModeLabels =  {
@@ -127,6 +107,7 @@ namespace Noggit
       void setupConnectsCommon();
 
     };
+  }
   }
 }
 

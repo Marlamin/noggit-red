@@ -1,30 +1,20 @@
-#include <noggit/ui/windows/SoundPlayer/SoundEntryPlayer.h>
 #include "ZoneIntroMusicPickerWindow.h"
+#include <noggit/ui/windows/SoundPlayer/SoundEntryPlayer.h>
 // #include <noggit/ui/ZoneIDBrowser.h>
 #include "SoundEntryPickerWindow.h"
-
 #include <noggit/DBC.h>
-#include <noggit/Log.h>
-#include <noggit/Misc.h>
-#include <ClientFile.hpp>
-#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/qpushbutton.h>
 #include <QtWidgets/qgroupbox.h>
-#include <QtWidgets/qcheckbox.h>
 #include <QtWidgets/qlineedit.h>
-#include <QtWidgets/QTableView>
-#include <QStandardItemModel>
-#include <QTableWidgetItem>
-#include <QSound>
-#include <qtemporaryfile>
-#include <QMediaPlayer>
 #include <QListWidget>
+#include <QLabel>
+#include <QSpinBox>
 #include <QToolButton>
 
-#include <iostream>
 #include <sstream>
 #include <string>
 

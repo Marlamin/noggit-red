@@ -1,8 +1,13 @@
 #include "MathNode.hpp"
+
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodeScene.hpp>
+
 #include <external/NodeEditor/include/nodes/Node>
+
+#include <QComboBox>
+
 #include <cmath>
 #include <algorithm>
 

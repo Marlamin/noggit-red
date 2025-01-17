@@ -8,7 +8,6 @@
 #include <noggit/ContextObject.hpp>
 
 #include <memory>
-#include <unordered_map>
 
 namespace math
 {
@@ -22,23 +21,12 @@ namespace Noggit::Rendering::Primitives
   class WireBox
   {
   public:
-    WireBox() {}
-    WireBox(const WireBox&);
-    WireBox& operator=(WireBox& box ) { return *this; };
+    WireBox() = default;
+    WireBox(const WireBox&) = delete;
+    WireBox& operator=(WireBox& box );
 
   public:
-    static WireBox& getInstance(Noggit::NoggitRenderContext context)
-    {
-      static std::unordered_map<Noggit::NoggitRenderContext, WireBox> instances;
-
-      if (instances.find(context) == instances.end())
-      {
-        WireBox instance;
-        instances[context] = instance;
-      }
-
-      return instances.at(context);
-    }
+    static WireBox& getInstance(Noggit::NoggitRenderContext context);
 
     void draw ( glm::mat4x4 const& model_view
               , glm::mat4x4 const& projection

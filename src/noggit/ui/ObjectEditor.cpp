@@ -1,38 +1,46 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/MapView.h>
+#include "noggit/Action.hpp"
+#include "noggit/ActionManager.hpp"
 #include <noggit/application/NoggitApplication.hpp>
-#include <noggit/Misc.h>
+#include <noggit/BoolToggleProperty.hpp>
+#include <noggit/DBC.h>
+#include <noggit/MapChunk.h>
+#include <noggit/MapView.h>
+#include <noggit/Model.h>
 #include <noggit/ModelInstance.h>
-#include <noggit/WMOInstance.h> // WMOInstance
-#include <noggit/World.h>
+#include <noggit/object_paste_params.hpp>
+#include <noggit/ui/Checkbox.hpp>
+#include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/HelperModels.h>
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
-#include <noggit/ui/Checkbox.hpp>
+#include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/ui/tools/UiCommon/expanderwidget.h>
-#include <util/qt/overload.hpp>
-#include <noggit/DBC.h>
-#include "noggit/ActionManager.hpp"
-#include "noggit/Action.hpp"
-#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/WMOInstance.h> // WMOInstance
+#include <noggit/World.h>
 
+#include <QButtonGroup>
+#include <QCheckBox>
+#include <QDockWidget>
 #include <QFormLayout>
 #include <QGridLayout>
 #include <QGroupBox>
-#include <QCheckBox>
-#include <QRadioButton>
-#include <QButtonGroup>
-#include <QLineEdit>
+#include <QLabel>
 #include <QPushButton>
+#include <QRadioButton>
+#include <QSettings>
+#include <QtWidgets/qcombobox.h>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/qgroupbox.h>
 #include <QtWidgets/QMessageBox>
+#include <QtWidgets/QSlider>
 
 #include <fstream>
-#include <iostream>
 #include <regex>
-#include <string>
 #include <sstream>
+#include <string>
 
 namespace Noggit
 {
@@ -610,6 +618,26 @@ namespace Noggit
     void object_editor::changeRadius(float change)
     {
       _radius_spin->setValue (_radius + change);
+    }
+
+    float object_editor::brushRadius() const
+    {
+      return _radius;
+    }
+
+    float object_editor::drag_selection_depth() const
+    {
+      return _drag_selection_depth;
+    }
+
+    int object_editor::clipboardSize() const
+    {
+      return _model_instance_created.size();
+    }
+
+    std::vector<selection_type> object_editor::getClipboard() const&
+    {
+      return _model_instance_created;
     }
 
     void object_editor::showImportModels()

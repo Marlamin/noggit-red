@@ -2,38 +2,32 @@
 
 #pragma once
 
-#include <math/ray.hpp>
-#include <noggit/map_enums.hpp>
-#include <noggit/MapChunk.h>
-#include <noggit/MapHeaders.h>
-#include <noggit/Selection.h>
-#include <noggit/TileWater.hpp>
-#include <noggit/TileIndex.hpp>
-#include <noggit/tool_enums.hpp>
-#include <opengl/shader.fwd.hpp>
+#include <noggit/AsyncObject.h>
 #include <noggit/ContextObject.hpp>
-#include <noggit/Misc.h>
-#include <external/tsl/robin_map.h>
-#include <noggit/rendering/TileRender.hpp>
+#include <noggit/map_enums.hpp>
+#include <noggit/MapHeaders.h>
 #include <noggit/rendering/FlightBoundsRender.hpp>
+#include <noggit/rendering/TileRender.hpp>
+#include <noggit/Selection.h>
+#include <noggit/TileIndex.hpp>
+#include <noggit/TileWater.hpp>
 
+#include <external/tsl/robin_map.h>
+
+#include <array>
 #include <map>
 #include <string>
 #include <vector>
-#include <array>
 
 namespace math
 {
   class frustum;
   struct vector_3d;
+  struct ray;
 }
 
-namespace Noggit::Rendering
-{
-  class TileRender;
-  class FlightBoundsRender;
-}
-
+class MapChunk;
+struct texture_heightmapping_data;
 class World;
 
 
@@ -118,17 +112,11 @@ public:
 
   bool isTile(int pX, int pZ);
 
-  bool hasFlightBounds() const { return mFlags & 1; };
+  bool hasFlightBounds() const;;
 
-  async_priority loading_priority() const override
-  {
-    return async_priority::high;
-  }
+  async_priority loading_priority() const override;
 
-  bool has_model(uint32_t uid) const
-  {
-    return std::find(uids.begin(), uids.end(), uid) != uids.end();
-  }
+  bool has_model(uint32_t uid) const;
 
   void remove_model(uint32_t uid);
   void remove_model(SceneObject* instance);
@@ -137,9 +125,9 @@ public:
 
   TileWater Water;
 
-  bool tile_is_being_reloaded() const { return _tile_is_being_reloaded; }
+  bool tile_is_being_reloaded() const;
 
-  std::vector<uint32_t>* get_uids() { return &uids; }
+  std::vector<uint32_t>* get_uids();
 
   void initEmptyChunks();
 
@@ -151,31 +139,31 @@ public:
   QImage getVertexColorsImage();
   QImage getNormalmapImage();
   void setHeightmapImage(QImage const& baseimage, float min_height, float max_height, int mode, bool tiledEdges);
-  void setWatermapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges);
+  // void setWatermapImage(QImage const& baseimage, float multiplier, int mode, bool tiledEdges);
   void setAlphaImage(QImage const& image, unsigned layer, bool cleanup);
   void setVertexColorImage(QImage const& image, int mode, bool tiledEdges);
-  void registerChunkUpdate(unsigned flags) { _chunk_update_flags |= flags; };
-  void endChunkUpdates() { _chunk_update_flags = 0; };
-  std::array<float, 145 * 256 * 4>& getChunkHeightmapBuffer() { return _chunk_heightmap_buffer; };
-  unsigned getChunkUpdateFlags() { return _chunk_update_flags; }
+  void registerChunkUpdate(unsigned flags);;
+  void endChunkUpdates();;
+  std::array<float, 145 * 256 * 4>& getChunkHeightmapBuffer();;
+  unsigned getChunkUpdateFlags() const;
   void recalcExtents();
   void recalcObjectInstanceExtents();
   void recalcCombinedExtents();
-  std::array<glm::vec3, 2>& getExtents() { recalcExtents(); return _extents; };
-  std::array<glm::vec3, 2>& getCombinedExtents() { recalcCombinedExtents(); return _combined_extents; };
+  std::array<glm::vec3, 2>& getExtents();;
+  std::array<glm::vec3, 2>& getCombinedExtents();;
 
-  World* getWorld() { return _world; };
+  World* getWorld();;
 
   [[nodiscard]]
-  tsl::robin_map<AsyncObject*, std::vector<SceneObject*>> const& getObjectInstances() const { return object_instances; };
+  tsl::robin_map<AsyncObject*, std::vector<SceneObject*>> const& getObjectInstances() const;;
 
-  float camDist() { return _cam_dist; }
+  float camDist() const;
   void calcCamDist(glm::vec3 const& camera);
-  void markExtentsDirty() { _extents_dirty = true; }
-  void tagCombinedExtents(bool state) { _combined_extents_dirty = state; };
+  void markExtentsDirty();
+  void tagCombinedExtents(bool state);;
 
-  Noggit::Rendering::TileRender* renderer() { return &_renderer; };
-  Noggit::Rendering::FlightBoundsRender* flightBoundsRenderer() { return &_fl_bounds_render; };
+  Noggit::Rendering::TileRender* renderer();;
+  Noggit::Rendering::FlightBoundsRender* flightBoundsRenderer();;
 
   const texture_heightmapping_data& GetTextureHeightMappingData(const std::string& name) const;
 

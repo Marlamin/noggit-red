@@ -1,10 +1,16 @@
 #include "BaseNode.hpp"
 
-#include <stdexcept>
+#include <external/NodeEditor/include/nodes/Connection>
 #include <external/NodeEditor/include/nodes/Node>
+#include <external/NodeEditor/include/nodes/NodeData>
 
 #include <QHBoxLayout>
 #include <QInputDialog>
+#include <QLabel>
+#include <QLineEdit>
+
+
+#include <stdexcept>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 using QtNodes::Node;
@@ -12,12 +18,14 @@ using QtNodes::Node;
 InNodePort::InNodePort(QString const& caption_, bool caption_visible_)
 : caption(caption_)
 , caption_visible(caption_visible_)
-{}
+{
+}
 
 OutNodePort::OutNodePort(QString const& caption_, bool caption_visible_)
 : caption(caption_)
 , caption_visible(caption_visible_)
-{}
+{
+}
 
 BaseNode::BaseNode()
 : NodeDataModel()
@@ -43,6 +51,10 @@ BaseNode::BaseNode()
   _embedded_widget_layout_bottom->setContentsMargins(5, 5, 5, 5);
 }
 
+BaseNode::~BaseNode()
+{
+}
+
 std::shared_ptr<NodeData> BaseNode::outData(PortIndex port_index)
 {
   return std::static_pointer_cast<NodeData>(_out_ports[port_index].out_value);
@@ -62,6 +74,21 @@ std::unique_ptr<NodeData>& BaseNode::dataModel(PortType port_type, PortIndex por
   {
     throw std::logic_error("Incorrect port type.");
   }
+}
+
+QWidget* BaseNode::embeddedWidget()
+{
+  return &_embedded_widget;
+}
+
+NodeValidationState BaseNode::validationState() const
+{
+  return _validation_state;
+}
+
+QString BaseNode::validationMessage() const
+{
+  return _validation_error;
 }
 
 void BaseNode::setInData(std::shared_ptr<NodeData> data, PortIndex port_index)
@@ -123,6 +150,21 @@ QString BaseNode::portCaption(PortType port_type, PortIndex port_index) const
   }
 }
 
+QString BaseNode::name() const
+{
+  return _name;
+}
+
+QString BaseNode::caption() const
+{
+  return _caption;
+}
+
+void BaseNode::setCaption(QString const& caption)
+{
+  _caption = caption;
+}
+
 NodeDataType BaseNode::dataType(PortType port_type, PortIndex port_index) const
 {
   if (port_type == PortType::In)
@@ -135,6 +177,16 @@ NodeDataType BaseNode::dataType(PortType port_type, PortIndex port_index) const
   }
 
   return NodeDataType {"invalid", "Invalid"};
+}
+
+NodeInterpreterTokens BaseNode::getInterpreterToken() const
+{
+  return _token;
+}
+
+void BaseNode::setInterpreterToken(NodeInterpreterTokens token)
+{
+  _token = token;
 }
 
 unsigned int BaseNode::nPorts(PortType port_type) const
@@ -227,6 +279,37 @@ void BaseNode::restore(const QJsonObject& json_obj)
   setCaption(json_obj["caption"].toString());
 }
 
+bool BaseNode::isLogicNode()
+{
+  return false;
+}
+
+void BaseNode::setValidationMessage(QString const& message)
+{
+  _validation_error = message;
+  Q_EMIT visualsNeedUpdate();
+}
+
+void BaseNode::setValidationState(NodeValidationState state)
+{
+  _validation_state = state;
+}
+
+NodeValidationState BaseNode::validate()
+{
+  return _validation_state;
+}
+
+bool BaseNode::isComputed() const
+{
+  return _is_computed;
+}
+
+void BaseNode::setComputed(bool state)
+{
+  _is_computed = state;
+}
+
 void BaseNode::deletePort(PortType port_type, PortIndex port_index)
 {
   deleteDefaultWidget(port_type, port_index);
@@ -273,6 +356,11 @@ void BaseNode::deleteDefaultWidget(PortType port_type, PortIndex port_index)
   _embedded_widget.layout()->itemAt(1)->layout()->removeItem(item);
 
   _embedded_widget.adjustSize();
+}
+
+void BaseNode::setName(QString const& name)
+{
+  _name = name;
 }
 
 void BaseNode::addWidgetTop(QWidget* widget)
@@ -322,11 +410,3 @@ void BaseNode::captionDoubleClicked()
   }
 
 }
-
-
-
-
-
-
-
-

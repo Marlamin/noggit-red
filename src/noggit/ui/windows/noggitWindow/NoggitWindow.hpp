@@ -1,21 +1,38 @@
 #ifndef NOGGIT_WINDOW_NOGGIT_HPP
 #define NOGGIT_WINDOW_NOGGIT_HPP
 
-#include <math/trig.hpp>
-#include <noggit/World.h>
-#include <noggit/MapView.h>
-#include <noggit/ui/UidFixWindow.hpp>
-#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
-#include <noggit/ui/windows/noggitWindow/components/BuildMapListComponent.hpp>
-#include <noggit/project/ApplicationProject.h>
-#include <QtWidgets/QMainWindow>
-#include <QtWidgets/QStackedWidget>
-#include <string>
-#include <memory>
-#include <unordered_set>
-#include <QWidget>
+#include <noggit/ui/uid_fix_mode.hpp>
 
+#include <math/trig.hpp>
+
+#include <QtWidgets/QMainWindow>
+#include <QWidget>
+#include <QMetaObject>
+
+#include <memory>
+#include <string>
+#include <unordered_set>
+
+class MapView;
 class StackedWidget;
+class World;
+
+class QListWidget;
+
+namespace Noggit::Application
+{
+  struct NoggitApplicationConfiguration;
+}
+
+namespace Noggit::Ui::Component
+{
+  class BuildMapListComponent;
+}
+
+namespace Noggit::Project
+{
+  class NoggitProject;
+}
 
 namespace Noggit::Ui::Tools::MapCreationWizard::Ui
 {

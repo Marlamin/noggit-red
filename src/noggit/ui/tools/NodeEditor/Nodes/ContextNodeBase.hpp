@@ -4,7 +4,6 @@
 #define NOGGIT_CONTEXTNODEBASE_HPP
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp>
-#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -23,18 +22,9 @@ namespace Noggit
         Q_OBJECT
 
         public:
-            ContextNodeBase() {};
+            ContextNodeBase();
 
-            NodeValidationState validate() override
-            {
-              if (!gCurrentContext->getWorld() || !gCurrentContext->getViewport())
-              {
-                setValidationState(NodeValidationState::Error);
-                setValidationMessage("Error: this node requires a world context to run.");
-              }
-
-              return _validation_state;
-            };
+            NodeValidationState validate() override;;
         };
 
     }

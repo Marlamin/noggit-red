@@ -5,8 +5,9 @@
 
 #include <QWidget>
 #include <QFileSystemModel>
-#include <QSortFilterProxyModel>
 #include <ui_ImageBrowser.h>
+
+class QSortFilterProxyModel;
 
 namespace Noggit::Ui::Tools
 {

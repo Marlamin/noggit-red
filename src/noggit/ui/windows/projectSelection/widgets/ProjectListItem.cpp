@@ -1,5 +1,10 @@
-#include <noggit/ui/windows/projectSelection/widgets/ProjectListItem.hpp>
 #include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/windows/projectSelection/widgets/ProjectListItem.hpp>
+
+#include <qgraphicseffect.h>
+#include <QGridLayout>
+#include <QLabel>
+
 
 namespace Noggit::Ui::Widget
 {

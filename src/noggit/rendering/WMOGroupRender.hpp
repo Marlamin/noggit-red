@@ -4,9 +4,17 @@
 #define NOGGIT_WMOGROUPRENDER_HPP
 
 #include <noggit/rendering/BaseRender.hpp>
-#include <opengl/shader.hpp>
 #include <opengl/scoped.hpp>
-#include <math/frustum.hpp>
+
+namespace OpenGL::Scoped
+{
+  struct use_program;
+}
+
+namespace math
+{
+  class frustum;
+}
 
 class WMOGroup;
 

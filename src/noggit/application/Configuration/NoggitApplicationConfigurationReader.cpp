@@ -1,4 +1,5 @@
 #include <noggit/application/Configuration/NoggitApplicationConfigurationReader.hpp>
+#include <QFile>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QtCore/QSettings>

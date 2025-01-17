@@ -2,29 +2,26 @@
 #define NOGGITREDPROJECTPAGE_H
 
 #include <QMainWindow>
-#include <QMenuBar>
-#include <QAction>
-#include <qgraphicseffect.h>
-#include <QString>
-#include <QToolButton>
-#include <QSettings>
-#include <noggit/application/NoggitApplication.hpp>
-#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
-#include <noggit/ui/windows/projectCreation/NoggitProjectCreationDialog.h>
-#include <noggit/ui/windows/settingsPanel/SettingsPanel.h>
-#include <noggit/ui/windows/updater/Updater.h>
-#include <noggit/ui/windows/changelog/Changelog.hpp>
-#include <ui_NoggitProjectSelectionWindow.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class NoggitProjectSelectionWindow; }
 QT_END_NAMESPACE
+
+namespace Noggit::Ui
+{
+  class settings;
+}
 
 namespace Noggit::Ui::Component
 {
     class RecentProjectsComponent;
     class CreateProjectComponent;
     class LoadProjectComponent;
+}
+
+namespace Noggit::Ui::Windows
+{
+  class NoggitWindow;
 }
 
 namespace Noggit::Application

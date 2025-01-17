@@ -4,6 +4,7 @@
 
 #include <noggit/ActionManager.hpp>
 #include <noggit/MapView.h>
+#include <noggit/Misc.h>
 #include <noggit/Input.hpp>
 #include <noggit/ui/ObjectEditor.h>
 #include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
@@ -13,6 +14,12 @@
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
 #include <noggit/ui/object_palette.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <noggit/World.h>
+
+#include <QDateTime>
+#include <QSettings>
+
+#include <fstream>
 
 namespace Noggit
 {

@@ -4,21 +4,13 @@
 
 #include <noggit/map_enums.hpp>
 #include <noggit/MapHeaders.h>
-#include <noggit/MapTile.h>
-#include <noggit/Misc.h>
+#include <noggit/SceneObject.hpp>
 #include <noggit/TileIndex.hpp>
 #include <noggit/ContextObject.hpp>
 
-#include <ranges>
-#include <cassert>
 #include <cstdint>
-#include <ctime>
-#include <fstream>
 #include <mutex>
-#include <sstream>
 #include <string>
-#include <unordered_map>
-#include <limits>
 
 
 enum class uid_fix_status
@@ -28,18 +20,20 @@ enum class uid_fix_status
   failed
 };
 
+class MapTile;
+
 /*!
 \brief This class is only a holder to have easier access to MapTiles and their flags for easier WDT parsing. This is private and for the class World only.
 */
 class MapTileEntry
 {
+  ~MapTileEntry();
 private:
   uint32_t flags;
   std::unique_ptr<MapTile> tile;
   bool onDisc;
 
-
-  MapTileEntry() : flags(0), tile(nullptr), onDisc(false) {}
+  MapTileEntry();
 
   friend class MapIndex;
 };
@@ -151,41 +145,11 @@ public:
         return  TileRange<Load>(tile_iterator<Load> {this, { 0, 0 }, pred}, tile_iterator<Load>{});
   }
 
-  auto loaded_tiles()
-  {
-    return tiles<false>
-      ([] (TileIndex const&, MapTile* tile) { return !!tile && tile->finishedLoading(); });
-  }
+  TileRange<false> loaded_tiles();
 
-  auto tiles_in_range (glm::vec3 const& pos, float radius)
-  {
-    return tiles<true>
-      ( [this, pos, radius] (TileIndex const& index, MapTile*)
-        {
-          return hasTile(index) && misc::getShortestDist
-            (pos.x, pos.z, index.x * TILESIZE, index.z * TILESIZE, TILESIZE) <= radius;
-        }
-      );
-  }
+  TileRange<true> tiles_in_range (glm::vec3 const& pos, float radius);
 
-  auto tiles_in_rect (glm::vec3 const& pos, float radius)
-  {
-    glm::vec2 l_chunk{pos.x - radius, pos.z - radius};
-    glm::vec2 r_chunk{pos.x + radius, pos.z + radius};
-
-    return tiles<true>
-      ( [this, pos, radius, l_chunk, r_chunk] (TileIndex const& index, MapTile*)
-        {
-          if (!hasTile(index) || radius == 0.f)
-            return false;
-
-          glm::vec2 l_tile{index.x * TILESIZE, index.z * TILESIZE};
-          glm::vec2 r_tile{index.x * TILESIZE + TILESIZE, index.z * TILESIZE + TILESIZE};
-
-          return ((l_chunk.x  <  r_tile.x)  &&  (r_chunk.x  >=  l_tile.x) && (l_chunk.y  <  r_tile.y)  && (r_chunk.y  >=  l_tile.y));
-        }
-      );
-  }
+  TileRange<true> tiles_in_rect (glm::vec3 const& pos, float radius);
 
   MapIndex(const std::string& pBasename, int map_id, World*, Noggit::NoggitRenderContext context, bool create_empty = false);
 
@@ -227,12 +191,12 @@ public:
   uint32_t getFlag(const TileIndex& tile) const;
 
   void convert_alphamap(bool to_big_alpha);
-  bool hasBigAlpha() const { return mBigAlpha; }
-  void setBigAlpha(bool state) { mBigAlpha = state; };
-  unsigned getNLoadedTiles() { return _n_loaded_tiles; }
+  bool hasBigAlpha() const;
+  void setBigAlpha(bool state);;
+  unsigned getNLoadedTiles() const;
 
-  bool sort_models_by_size_class() const { return _sort_models_by_size_class; }
-  void set_sort_models_by_size_class(bool state) { _sort_models_by_size_class = state; }
+  bool sort_models_by_size_class() const;
+  void set_sort_models_by_size_class(bool state);
 
   uint32_t newGUID();
 
@@ -250,15 +214,9 @@ public:
   unsigned getNumExistingTiles();
 
   // todo: find out how wow choose to use the green lava in outland
-  inline bool use_mclq_green_lava() const
-  {
-    return _map_id == 530;
-  }
+  bool use_mclq_green_lava() const;
 
-  bool uid_fix_all_in_progress() const
-  {
-    return _uid_fix_all_in_progress;
-  }
+  bool uid_fix_all_in_progress() const;
 
   void loadMinimapMD5translate();
   void saveMinimapMD5translate();
@@ -277,19 +235,11 @@ public:
   ENTRY_MODF wmoEntry;
 public:
   // reloadable settings
-  void setLoadingRadius(int value)
-  {
-      if (value < _unload_dist)
-          _loading_radius = value;
-  }
+  void setLoadingRadius(int value);
 
-  void setUnloadDistance(int value)
-  {
-      if (value > _loading_radius)
-          _unload_dist = value;
-  }
+  void setUnloadDistance(int value);
 
-  void setUnloadInterval(int value) { _unload_interval = value; };
+  void setUnloadInterval(int value);;
 private:
   int _last_unload_time;
   int _unload_interval;

@@ -3,19 +3,27 @@
 #ifndef NOGGIT_CONTEXT_HPP
 #define NOGGIT_CONTEXT_HPP
 
-#include <noggit/World.h>
 #include <noggit/ui/tools/ViewportManager/ViewportManager.hpp>
-#include "NodeScene.hpp"
 #include <external/tsl/robin_map.h>
 
-#include <QObject>
 #include <QJsonDocument>
+
+namespace QtNodes
+{
+  class DataModelRegistry;
+  class NodeData;
+}
+
+class World;
 
 namespace Noggit
 {
     namespace Ui::Tools::NodeEditor::Nodes
     {
-        using VariableMap = tsl::robin_map<std::string, std::pair<std::string, std::shared_ptr<NodeData>>>;
+        class Context;
+        class NodeScene;
+
+        using VariableMap = tsl::robin_map<std::string, std::pair<std::string, std::shared_ptr<QtNodes::NodeData>>>;
 
         enum NodeExecutionContext
         {
@@ -32,14 +40,14 @@ namespace Noggit
             Context(NodeExecutionContext context_type, QObject* parent = nullptr);
 
             NodeScene* getScene(QString const& path, QObject* parent = nullptr);
-            NodeExecutionContext getContextType() { return _context_type; };
+            NodeExecutionContext getContextType() const;
             void makeCurrent();
-            VariableMap* getVariableMap() { return &_variable_map; };
-            World* getWorld() { return _world; };
-            ViewportManager::Viewport* getViewport() { return _viewport; };
+            Nodes::VariableMap* getVariableMap();
+            World* getWorld();
+            ViewportManager::Viewport* getViewport();
 
-            void setWorld(World* world) { _world = world; };
-            void setViewport(ViewportManager::Viewport* viewport) { _viewport = viewport; };
+            void setWorld(World* world);
+            void setViewport(ViewportManager::Viewport* viewport);
 
         private:
             World* _world;
@@ -47,11 +55,10 @@ namespace Noggit
             tsl::robin_map<std::string, QJsonDocument> _scene_cache;
             NodeExecutionContext _context_type;
             VariableMap _variable_map;
-
         };
 
         extern Context* gCurrentContext;
-        extern std::shared_ptr<DataModelRegistry> gDataModelRegistry;
+        extern std::shared_ptr<QtNodes::DataModelRegistry> gDataModelRegistry;
     }
 }
 
