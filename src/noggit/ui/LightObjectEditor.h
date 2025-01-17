@@ -3,10 +3,8 @@
 #pragma once
 
 #include <noggit/ui/widget.hpp>
-#include <QtWidgets/qcombobox.h>
-#include <QPushButton>
-
 #include <noggit/World.h>
+#include <qt-color-widgets/color_selector.hpp>
 
 namespace Noggit
 {

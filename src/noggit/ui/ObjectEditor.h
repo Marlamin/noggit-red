@@ -4,6 +4,7 @@
 #include <noggit/Selection.h>
 
 #include <QWidget>
+#include <noggit/ui/LightObjectEditor.h>
 
 class MapView;
 class QButtonGroup;

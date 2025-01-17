@@ -3,6 +3,12 @@
 #include <noggit/ui/LightObjectEditor.h>
 #include <QVBoxLayout>
 #include <QScrollArea>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QLabel>
+#include <QLineEdit>
+#include <qt-color-widgets/color_list_widget.hpp>
+#include <qt-color-widgets/color_selector.hpp>
 namespace Noggit
 {
     namespace Ui

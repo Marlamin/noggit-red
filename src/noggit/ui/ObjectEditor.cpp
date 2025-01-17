@@ -15,6 +15,7 @@
 #include <noggit/ui/HelperModels.h>
 #include <noggit/ui/ModelImport.h>
 #include <noggit/ui/ObjectEditor.h>
+#include <noggit/ui/LightObjectEditor.h>
 #include <noggit/ui/RotationEditor.h>
 #include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
 #include <noggit/ui/tools/UiCommon/expanderwidget.h>
