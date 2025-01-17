@@ -6,7 +6,6 @@
 #include <noggit/rendering/BaseRender.hpp>
 
 #include <external/glm/glm.hpp>
-#include <math/trig.hpp>
 
 #include <noggit/tool_enums.hpp>
 #include <noggit/rendering/CursorRender.hpp>
@@ -14,11 +13,16 @@
 #include <noggit/map_horizon.h>
 #include <noggit/Sky.h>
 
-#include <opengl/shader.hpp>
 #include <noggit/rendering/Primitives.hpp>
 
 #include <memory>
 
+namespace OpenGL
+{
+  struct program;
+}
+
+struct TileIndex;
 class World;
 struct MinimapRenderSettings;
 
@@ -90,15 +94,15 @@ namespace Noggit::Rendering
                       , std::optional<QImage>& combined_image);
 
     [[nodiscard]]
-    OpenGL::TerrainParamsUniformBlock* getTerrainParamsUniformBlock() { return &_terrain_params_ubo_data; };
+    OpenGL::TerrainParamsUniformBlock* getTerrainParamsUniformBlock();;
 
     void updateTerrainParamsUniformBlock();
-    void markTerrainParamsUniformBlockDirty() { _need_terrain_params_ubo_update = true; };
+    void markTerrainParamsUniformBlockDirty();;
 
-    [[nodiscard]] std::unique_ptr<Skies>& skies() { return _skies; };
+    [[nodiscard]] std::unique_ptr<Skies>& skies();;
 
     float _view_distance;
-    inline float cullDistance() const { return _cull_distance; }
+    float cullDistance() const;
 
     unsigned int _frame_max_chunk_updates = 256;
 
@@ -167,7 +171,6 @@ namespace Noggit::Rendering
     OpenGL::MVPUniformBlock _mvp_ubo_data;
     OpenGL::LightingUniformBlock _lighting_ubo_data;
     OpenGL::TerrainParamsUniformBlock _terrain_params_ubo_data;
-
 
     // VAOs
     OpenGL::Scoped::deferred_upload_vertex_arrays<3> _vertex_arrays;

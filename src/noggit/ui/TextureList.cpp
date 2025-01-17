@@ -2,14 +2,11 @@
 
 #include <noggit/ui/TextureList.hpp>
 
-#include <noggit/Misc.h>
-
-#include <QtWidgets/QListView>
+#include <QMimeData>
+#include <QtGui/QDrag>
 #include <QtGui/QMouseEvent>
 #include <QtWidgets/QApplication>
-#include <QtGui/QDrag>
-#include <QMimeData>
-
+#include <QtWidgets/QListView>
 
 namespace Noggit
 {

@@ -3,7 +3,6 @@
 #pragma once
 
 #include <QWidget>
-#include <array>
 #include <glm/vec3.hpp>
 
 namespace math
@@ -29,24 +28,20 @@ namespace Noggit
 
       virtual QSize sizeHint() const override;
 
-      inline const World* world (World* const world_)
-        { _world = world_; update(); return _world; }
-      inline const World* world() const { return _world; }
+      const World* world (World* const world_);
+      const World* world() const;
 
-      inline const bool& draw_skies (const bool& draw_skies_)
-        { _draw_skies = draw_skies_; update(); return _draw_skies; }
-      inline const bool& draw_skies() const { return _draw_skies; }
+      const bool& draw_skies (const bool& draw_skies_);
+      const bool& draw_skies() const;
 
-      inline const bool& draw_boundaries (const bool& draw_boundaries_)
-        { _draw_boundaries = draw_boundaries_; update(); return _draw_boundaries; }
-      inline const bool& draw_boundaries() const { return _draw_boundaries; }
+      const bool& draw_boundaries (const bool& draw_boundaries_);
+      const bool& draw_boundaries() const;
 
-      inline const std::vector<char>* use_selection (std::vector<char>* selection_)
-      { _use_selection = selection_; _selected_tiles = selection_; update(); return _selected_tiles; }
-      inline const std::vector<char>* selection() const { return _selected_tiles; }
+      const std::vector<char>* use_selection (std::vector<char>* selection_);
+      const std::vector<char>* selection() const;
 
-      inline void camera (Noggit::Camera* camera) { _camera = camera; }
-      void set_resizeable(bool state) { _resizeable = state; };
+      void camera (Noggit::Camera* camera);
+      void set_resizeable(bool state);;
 
     protected:
       virtual void paintEvent (QPaintEvent* paint_event) override;

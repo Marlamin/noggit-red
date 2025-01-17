@@ -6,6 +6,8 @@
 #include "noggit/ui/tools/NodeEditor/Nodes/Logic/LogicContinueNode.hpp"
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 
+#include <external/NodeEditor/include/nodes/Node>
+
 #include <stdexcept>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
@@ -263,4 +265,19 @@ void LogicBranch::markNodeLeavesComputed(Node* start_node, Node* source_node, bo
       markNodeLeavesComputed(connected_node, start_node, state);
     }
   }
+}
+
+void LogicBranch::setCurrentLoop(Node* node)
+{
+  _loop_stack.push(node);
+}
+
+void LogicBranch::unsetCurrentLoop()
+{
+  _loop_stack.pop();
+}
+
+Node* LogicBranch::getCurrentLoop()
+{
+  return _loop_stack.empty() ? nullptr : _loop_stack.top();
 }

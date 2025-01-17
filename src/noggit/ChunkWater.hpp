@@ -4,11 +4,8 @@
 #include <noggit/liquid_layer.hpp>
 #include <noggit/MapHeaders.h>
 #include <noggit/tool_enums.hpp>
-#include <util/sExtendableArray.hpp>
 
 #include <vector>
-#include <set>
-#include <optional>
 
 class MapChunk;
 class TileWater;
@@ -16,6 +13,11 @@ class TileWater;
 namespace BlizzardArchive
 {
   class ClientFile;
+}
+
+namespace util
+{
+  class sExtendableArray;
 }
 
 class ChunkWater
@@ -49,12 +51,12 @@ public:
   bool hasData(size_t layer) const;
   void tagUpdate();
 
-  std::vector<liquid_layer>* getLayers() { return &_layers; };
+  std::vector<liquid_layer>* getLayers();
 
   // update every layer's render
   void update_layers();
-  float getMinHeight() { return vmin.y; };
-  float getMaxHeight() { return vmax.y; }
+  float getMinHeight() const;
+  float getMaxHeight() const;
 
   void paintLiquid( glm::vec3 const& pos
                   , float radius
@@ -70,14 +72,15 @@ public:
                   , float opacity_factor
                   );
 
-  MapChunk* getChunk() { return _chunk; };
-  TileWater* getWaterTile() { return _water_tile; };
+  MapChunk* getChunk();
+  TileWater* getWaterTile();
 
-  MH2O_Attributes& const getAttributes() { return attributes; };
+  MH2O_Attributes const& getAttributes() const;
+  MH2O_Attributes& getAttributes();
 
   float xbase, zbase;
 
-  int layer_count() const { return _layers.size(); }
+  int layer_count() const;
 
 private:
   MH2O_Attributes attributes;

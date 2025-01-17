@@ -3,12 +3,9 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
-#include <QtWidgets/QTreeWidget>
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QSlider>
 
-#include <functional>
-#include <string>
+class QDoubleSpinBox;
+class QSlider;
 
 namespace Noggit
 {
@@ -23,7 +20,7 @@ namespace Noggit
 
       void changeRadius(float change);
 
-      float brushRadius() const { return _radius; }
+      float brushRadius() const;
 
       void setRadius(float radius);
 

@@ -5,6 +5,9 @@
 
 #include "noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp"
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+
+#include <external/NodeEditor/include/nodes/Node>
+
 #include <QComboBox>
 
 using QtNodes::PortType;

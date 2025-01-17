@@ -7,6 +7,7 @@
 #include <noggit/Input.hpp>
 #include <noggit/ui/hole_tool.hpp>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/World.h>
 
 namespace Noggit
 {

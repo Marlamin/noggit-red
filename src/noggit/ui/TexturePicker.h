@@ -2,12 +2,13 @@
 
 #pragma once
 
-#include <noggit/MapChunk.h>
+#include <noggit/scoped_blp_texture_reference.hpp>
 #include <noggit/Selection.h>
 #include <noggit/ui/widget.hpp>
 
 #include <vector>
 
+class MapChunk;
 class QGridLayout;
 
 namespace Noggit

@@ -2,21 +2,12 @@
 
 #pragma once
 
+#include <noggit/async_priority.hpp>
 #include <Listfile.hpp>
-#include <noggit/Log.h>
 
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
-#include <string>
-
-enum class async_priority : int
-{
-  high,
-  medium,
-  low,
-  count
-};
 
 class AsyncObject
 {
@@ -30,67 +21,31 @@ protected:
 
   BlizzardArchive::Listfile::FileKey _file_key;
 
-  AsyncObject(BlizzardArchive::Listfile::FileKey file_key) : _file_key(std::move(file_key)) {}
+  AsyncObject(BlizzardArchive::Listfile::FileKey file_key);
 
 public:
 
   [[nodiscard]]
-  BlizzardArchive::Listfile::FileKey const& file_key() const { return _file_key; };
+  BlizzardArchive::Listfile::FileKey const& file_key() const;
 
   AsyncObject() = delete;
   virtual ~AsyncObject() = default;
 
   [[nodiscard]]
-  virtual bool finishedLoading() const
-  {
-    return finished.load();
-  }
+  virtual bool finishedLoading() const;
 
   [[nodiscard]]
-  bool loading_failed() const
-  {
-    return _loading_failed;
-  }
+  bool loading_failed() const;
 
-  void wait_until_loaded()
-  {
-    if (finished.load())
-    {
-      return;
-    }
+  void wait_until_loaded();
 
-    std::unique_lock<std::mutex> lock (_mutex);
-
-    _state_changed.wait 
-    ( lock
-    , [&]
-      {
-        return finished.load();
-      }
-    );
-  }
-
-  void error_on_loading()
-  {
-    LogError << "File " <<  (_file_key.hasFilepath() ? _file_key.filepath() : std::to_string(_file_key.fileDataID()))
-      << " could not be loaded" << std::endl;
-
-    _loading_failed = true;
-    finished = true;
-    _state_changed.notify_all();
-  }
+  void error_on_loading();
 
   [[nodiscard]]
-  virtual bool is_required_when_saving() const
-  {
-    return false;
-  }
+  virtual bool is_required_when_saving() const;
 
   [[nodiscard]]
-  virtual async_priority loading_priority() const
-  {
-    return async_priority::medium;
-  }
+  virtual async_priority loading_priority() const;
 
   virtual void finishLoading() = 0;
   virtual void waitForChildrenLoaded() = 0;

@@ -1,23 +1,23 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
-#include <math/frustum.hpp>
-#include <glm/mat4x4.hpp>
-#include <math/ray.hpp>
 #include <noggit/Animated.h> // Animation::M2Value
 #include <noggit/AsyncObject.h> // AsyncObject
+#include <noggit/ContextObject.hpp>
 #include <noggit/ModelHeaders.h>
 #include <noggit/Particle.h>
-#include <noggit/TextureManager.h>
-#include <noggit/tool_enums.hpp>
-#include <noggit/ContextObject.hpp>
 #include <noggit/rendering/ModelRender.hpp>
-#include <opengl/scoped.hpp>
-#include <opengl/shader.fwd.hpp>
+#include <noggit/scoped_blp_texture_reference.hpp>
+
+#include <opengl/types.hpp>
+
 #include <ClientFile.hpp>
+
+#include <glm/mat4x4.hpp>
+
+#include <map>
 #include <optional>
 #include <string>
-#include <map>
 
 class Bone;
 class Model;
@@ -27,8 +27,12 @@ class RibbonEmitter;
 
 namespace Noggit::Rendering
 {
-  class ModelRender;
   struct ModelRenderPass;
+}
+
+namespace math
+{
+  struct ray;
 }
 
 enum M2Versions
@@ -167,35 +171,28 @@ public:
   void waitForChildrenLoaded() override;
 
   [[nodiscard]]
-  bool is_hidden() const { return _hidden; }
+  bool is_hidden() const;
 
-  void toggle_visibility() { _hidden = !_hidden; }
-  void show() { _hidden = false ; }
-  void hide() { _hidden = true; }
-
-  [[nodiscard]]
-  bool use_fake_geometry() const { return !!_fake_geometry; }
+  void toggle_visibility();
+  void show();
+  void hide();
 
   [[nodiscard]]
-  bool animated_mesh() const { return (animGeometry || animBones); }
+  bool use_fake_geometry() const;
 
   [[nodiscard]]
-  bool particles_only() const 
-  { // some particle emitters like wisps in ashenvale have a few vertices but no collision, using that to detect
-    return !_particles.empty() 
-    && (_renderer.renderPasses().empty() || _vertices.empty() || !nBoundingTriangles); 
-  }
+  bool animated_mesh() const;
 
   [[nodiscard]]
-  bool is_required_when_saving() const override
-  {
-    return true;
-  }
+  bool particles_only() const;
 
   [[nodiscard]]
-  Noggit::Rendering::ModelRender* renderer() { return &_renderer; }
+  bool is_required_when_saving() const override;
 
-  uint32_t get_anim_lenght(int16_t anim_id) { return _animation_length[anim_id]; }
+  [[nodiscard]]
+  Noggit::Rendering::ModelRender* renderer();
+
+  uint32_t get_anim_lenght(int16_t anim_id);
 
   // only useful if model has multiple anims with varying bound sizes
   // probably never happens with world objects, but this should be more accurate than global bounds

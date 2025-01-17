@@ -2,8 +2,6 @@
 #pragma once
 #include <glm/mat4x4.hpp>
 #include <optional>
-#include <cmath>
-#include <iostream>
 
 namespace math
 {
@@ -18,14 +16,7 @@ namespace math
 
   struct ray
   {
-    ray (glm::vec3 origin, glm::vec3 const& direction)
-      : _origin (std::move (origin)), _direction (glm::normalize(direction))
-    {
-      if (std::isnan(_direction.x) || std::isnan(_direction.y) || std::isnan(_direction.z)) 
-      {
-        assert(false);
-      }
-    }
+    ray (glm::vec3 origin, glm::vec3 const& direction);
 
     ray (glm::mat4x4 const& transform, ray const& other)
       : ray (

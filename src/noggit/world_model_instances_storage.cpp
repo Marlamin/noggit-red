@@ -4,6 +4,7 @@
 #include <noggit/World.h>
 #include <noggit/ActionManager.hpp>
 #include <noggit/Action.hpp>
+#include <noggit/TileIndex.hpp>
 
 namespace Noggit
 {
@@ -363,6 +364,11 @@ namespace Noggit
     Log << "Deleted " << deleted_uids << " duplicate Model/WMO" << std::endl;
   }
 
+  bool world_model_instances_storage::uid_duplicates_found() const
+  {
+    return _uid_duplicates_found.load();
+  }
+
   void world_model_instances_storage::upload()
   {
     if (_transform_storage_uploaded)
@@ -389,5 +395,10 @@ namespace Noggit
     _buffers.unload();
 
     _transform_storage_uploaded = false;
+  }
+
+  unsigned int world_model_instances_storage::getTotalModelsCount() const
+  {
+    return _m2s.size() + _wmos.size();
   }
 }

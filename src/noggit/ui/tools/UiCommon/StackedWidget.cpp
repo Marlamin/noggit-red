@@ -5,15 +5,18 @@
 #include <QVBoxLayout>
 
 StackedWidget::StackedWidget(QWidget * parent, Qt::WindowFlags f)
-  : QWidget(parent, f),
-    curr_index(0)
+  : QWidget(parent, f)
+  , auto_resize{false}
+  , curr_index(0)
 {
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
 }
 
 int StackedWidget::count()
-{ return widgets.count(); }
+{
+  return widgets.count();
+}
 
 void StackedWidget::addWidget(QWidget* w)
 {

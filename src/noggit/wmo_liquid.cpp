@@ -1,17 +1,13 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/DBC.h>
-#include <noggit/Log.h>
-#include <noggit/World.h>
 #include <noggit/wmo_liquid.hpp>
-#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/MapHeaders.h>
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <opengl/shader.hpp>
+#include <ClientFile.hpp>
 
 #include <algorithm>
-#include <string>
 
 namespace
 {

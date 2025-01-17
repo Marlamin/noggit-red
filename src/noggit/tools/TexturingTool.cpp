@@ -2,25 +2,27 @@
 
 #include "FlattenBlurTool.hpp"
 
+#include "TexturingTool.hpp"
 #include <noggit/ActionManager.hpp>
 #include <noggit/Input.hpp>
 #include <noggit/MapView.h>
 #include <noggit/Selection.h>
-#include <noggit/ui/texturing_tool.hpp>
-#include <noggit/ui/texture_swapper.hpp>
+#include <noggit/ui/CurrentTexture.h>
+#include <noggit/ui/GroundEffectsTool.hpp>
+#include <noggit/ui/texture_palette_small.hpp>
 #include <noggit/ui/texture_swapper.hpp>
 #include <noggit/ui/TexturePicker.h>
-#include <noggit/ui/texture_palette_small.hpp>
-#include <noggit/ui/CurrentTexture.h>
+#include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/TexturingGUI.h>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
-#include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
-#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
-#include "TexturingTool.hpp"
+#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
 #include <noggit/ui/tools/ViewToolbar/Ui/ViewToolbar.hpp>
+#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
+#include <noggit/World.h>
 
 #include <QDockWidget>
 #include <QMenu>
+#include <QSettings>
 
 #include <random>
 

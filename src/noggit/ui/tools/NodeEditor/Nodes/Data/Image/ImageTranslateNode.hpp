@@ -5,8 +5,6 @@
 
 #include <noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp>
 
-#include <QComboBox>
-
 using QtNodes::PortType;
 using QtNodes::PortIndex;
 using QtNodes::NodeData;
@@ -14,6 +12,7 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QComboBox;
 
 namespace Noggit
 {
@@ -33,9 +32,7 @@ namespace Noggit
         private:
             QComboBox* _mode;
         };
-
     }
-
 }
 
 #endif //NOGGIT_IMAGETRANSLATENODE_HPP

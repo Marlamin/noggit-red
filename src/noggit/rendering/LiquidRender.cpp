@@ -1,7 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "LiquidRender.hpp"
+#include <noggit/ChunkWater.hpp>
 #include <noggit/MapTile.h>
+#include <noggit/rendering/LiquidTextureManager.hpp>
+
+#include <opengl/shader.hpp>
 
 using namespace Noggit::Rendering;
 

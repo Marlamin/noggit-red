@@ -4,10 +4,9 @@
 #include <math/sphere.hpp>
 
 #include <glm/gtx/euler_angles.hpp>
-#include <glm/matrix.hpp>
 
+#include <cmath>
 #include <limits>
-#include <algorithm>
 
 namespace math
 {
@@ -23,6 +22,15 @@ namespace math
       float t2 = (max - origin) / direction;
       tmin = std::max(tmin, std::min(t1, t2));
       tmax = std::min(tmax, std::max(t1, t2));
+    }
+  }
+
+  ray::ray(glm::vec3 origin, glm::vec3 const& direction)
+    : _origin(std::move(origin)), _direction(glm::normalize(direction))
+  {
+    if (std::isnan(_direction.x) || std::isnan(_direction.y) || std::isnan(_direction.z))
+    {
+      assert(false);
     }
   }
 

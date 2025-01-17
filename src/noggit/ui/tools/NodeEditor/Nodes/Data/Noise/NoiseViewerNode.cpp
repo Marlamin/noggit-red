@@ -6,7 +6,13 @@
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
 #include <noggit/ui/tools/NodeEditor/Nodes/Scene/LogicBranch.hpp>
 
+#include <external/NodeEditor/include/nodes/Node>
+
 #include <external/libnoise/noiseutils/noiseutils.h>
+
+#include <QPushButton>
+#include <QLabel>
+
 #include <QSize>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;

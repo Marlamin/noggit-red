@@ -2,18 +2,27 @@
 
 #pragma once
 #include <noggit/tool_enums.hpp>
-#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
-#include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QCheckBox>
-#include <QtWidgets/QDial>
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QSlider>
-#include <QtWidgets/QWidget>
-#include <QJsonObject>
+
 #include <glm/vec3.hpp>
 
+#include <QJsonObject>
+#include <QtWidgets/QWidget>
+
+namespace Noggit::Ui::Tools::UiCommon
+{
+  class ExtendedSlider;
+}
+
 class World;
+
+class QButtonGroup;
+class QCheckBox;
+class QLabel;
+class QDial;
+class QDoubleSpinBox;
+class QGroupBox;
+class QSlider;
+
 namespace Noggit
 {
   namespace Ui
@@ -42,15 +51,15 @@ namespace Noggit
       void setSpeed(float speed);
       void setOrientation(float orientation);
 
-      float brushRadius() const { return _radius_slider->value(); }
-      float angle() const { return _angle; }
-      float orientation() const { return _orientation; }
-      bool angled_mode() const { return _angle_group->isChecked(); }
-      bool use_ref_pos() const  { return _lock_group->isChecked(); }
-      glm::vec3 ref_pos() const { return _lock_pos; }
+      float brushRadius() const;
+      float angle() const;
+      float orientation() const;
+      bool angled_mode() const;
+      bool use_ref_pos() const;
+      glm::vec3 ref_pos() const;
 
-      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
-      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getRadiusSlider();;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getSpeedSlider();;
 
       QSize sizeHint() const override;
       flatten_mode _flatten_mode;

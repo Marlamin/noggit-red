@@ -3,7 +3,6 @@
 #pragma once
 
 #include <noggit/area_trigger.hpp>
-#include <noggit/DBC.h>
 #include <noggit/Tool.hpp>
 #include <noggit/rendering/Primitives.hpp>
 

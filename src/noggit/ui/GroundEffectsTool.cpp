@@ -1,22 +1,31 @@
-﻿#include <noggit/ui/GroundEffectsTool.hpp>
-#include <noggit/ui/texturing_tool.hpp>
-#include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/Checkbox.hpp>
+﻿#include <noggit/DBC.h>
+#include <noggit/MapChunk.h>
+#include <noggit/MapTile.h>
+#include <noggit/MapView.h>
+#include <noggit/texture_set.hpp>
 #include <noggit/ui/CurrentTexture.h>
-#include <noggit/ui/texture_swapper.hpp>
+#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/GroundEffectsTool.hpp>
+#include <noggit/ui/texturing_tool.hpp>
 #include <noggit/ui/tools/AssetBrowser/Ui/AssetBrowser.hpp>
-#include <noggit/tool_enums.hpp>
-#include <noggit/Misc.h>
+#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
+#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
 #include <noggit/World.h>
-#include <noggit/DBC.h>
 
-#include <util/qt/overload.hpp>
 
+#include <QDockWidget>
+#include <QFileInfo>
 #include <QFormLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QGroupBox>
+#include <QtWidgets/QListWidget>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QSpinBox>
 #include <QVBoxLayout>
-#include <QFileInfo>
 
 namespace Noggit
 {
@@ -627,6 +636,42 @@ namespace Noggit
             }
         }
 
+        bool GroundEffectsTool::render_active_sets_overlay() const
+        {
+          return isVisible() && !render_exclusion_map_overlay() && _render_active_sets->isChecked() && render_mode();
+        }
+
+        bool GroundEffectsTool::render_placement_map_overlay() const
+        {
+          return isVisible() && !render_exclusion_map_overlay() && _render_placement_map->isChecked() && render_mode();
+        }
+
+        bool GroundEffectsTool::render_exclusion_map_overlay() const
+        {
+          // return isVisible() && _render_exclusion_map->isChecked() && render_mode();
+          return isVisible() && brush_mode() == ground_effect_brush_mode::exclusion;
+        }
+
+        void GroundEffectsTool::change_radius(float change)
+        {
+          _effect_radius_slider->setValue(static_cast<float>(_effect_radius_slider->value()) + change);
+        }
+
+
+        //Close event triggers, hide event.
+        void GroundEffectsTool::hideEvent(QHideEvent* event)
+        {
+          if (_map_view->_world)
+          {
+            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffectid_overlay = false;
+            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_groundeffect_layerid_overlay = false;
+            _map_view->getWorld()->renderer()->getTerrainParamsUniformBlock()->draw_noeffectdoodad_overlay = false;
+            _map_view->getWorld()->renderer()->markTerrainParamsUniformBlockDirty();
+          }
+
+          QWidget::hideEvent(event);
+        }
+
         void GroundEffectsTool::setDoodadSlotFromBrowser(QString doodad_path)
         {
             const QFileInfo info(doodad_path);
@@ -667,6 +712,11 @@ namespace Noggit
             delete _preview_renderer;
         }
 
+        float GroundEffectsTool::radius() const
+        {
+          return _effect_radius_slider->value();
+        }
+
         ground_effect_brush_mode GroundEffectsTool::brush_mode() const
         {
             if (!_brush_grup_box->isChecked())
@@ -682,6 +732,22 @@ namespace Noggit
                 return ground_effect_brush_mode::exclusion;
             }
             return ground_effect_brush_mode::none;
+        }
+
+        bool GroundEffectsTool::render_mode() const
+        {
+          return _render_group_box->isChecked();
+        }
+
+        void GroundEffectsTool::delete_renderer()
+        {
+          delete _preview_renderer;
+        }
+
+        void GroundEffectsTool::showEvent(QShowEvent* event)
+        {
+          QWidget::showEvent(event);
+          updateTerrainUniformParams();
         }
 
         std::optional<ground_effect_set> GroundEffectsTool::getSelectedGroundEffect()
@@ -787,5 +853,30 @@ namespace Noggit
                 LogError << "Couldn't find ground effect Id : " << effect_id << "in GroundEffectTexture.dbc" << std::endl;
             }
         }
-    }
+
+        bool ground_effect_set::empty() const
+        {
+          return !ID;
+        }
+
+        bool ground_effect_set::operator== (ground_effect_set* effect2)
+        {
+          return (TerrainType == effect2->TerrainType && Amount == effect2->Amount
+            && Doodads[0] == &effect2->Doodads[0] && Doodads[1] == &effect2->Doodads[1]
+            && Doodads[2] == &effect2->Doodads[2] && Doodads[3] == &effect2->Doodads[3]
+            && Weights[0] == effect2->Weights[0] && Weights[1] == effect2->Weights[1]
+            && Weights[2] == effect2->Weights[2] && Weights[3] == effect2->Weights[3]
+            );
+        }
+
+        bool ground_effect_doodad::empty() const
+        {
+          return filename.empty();
+        }
+
+        bool ground_effect_doodad::operator== (ground_effect_doodad* doodad2)
+        {
+          return filename == doodad2->filename;
+        }
+}
 }

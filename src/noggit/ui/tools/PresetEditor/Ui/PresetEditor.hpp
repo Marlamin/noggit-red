@@ -1,20 +1,30 @@
 #ifndef NOGGIT_PRESETEDITOR_HPP
 #define NOGGIT_PRESETEDITOR_HPP
 
-#include <ui_PresetEditor.h>
-#include <ui_PresetEditorOverlay.h>
-
-#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
-#include <noggit/ui/tools/PresetEditor/ModelView.hpp>
-
 #include <QWidget>
 #include <QMainWindow>
-#include <QFileSystemModel>
-#include <QSortFilterProxyModel>
+
+class QFileSystemModel;
+class QSortFilterProxyModel;
+
+namespace Ui
+{
+  class PresetEditor;
+  class PresetEditorOverlay;
+}
 
 namespace Noggit
 {
-    namespace Ui::Tools::PresetEditor::Ui
+  namespace Project
+  {
+    class NoggitProject;
+  }
+
+  namespace Ui::Tools
+  {
+    class PreviewRenderer;
+
+    namespace PresetEditor::Ui
     {
       class PresetEditorWidget : public QMainWindow
       {
@@ -30,10 +40,9 @@ namespace Noggit
         QFileSystemModel* _model;
         QSortFilterProxyModel* _sort_model;
         PreviewRenderer* _preview_renderer;
-
-
       };
     }
+  }
 }
 
 #endif //NOGGIT_PRESETEDITOR_HPP

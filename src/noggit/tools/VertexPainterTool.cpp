@@ -3,10 +3,12 @@
 #include "VertexPainterTool.hpp"
 
 #include <noggit/ActionManager.hpp>
-#include <noggit/MapView.h>
 #include <noggit/Input.hpp>
+#include <noggit/MapView.h>
 #include <noggit/ui/ShaderTool.hpp>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
+#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
+#include <noggit/World.h>
 
 #include <random>
 

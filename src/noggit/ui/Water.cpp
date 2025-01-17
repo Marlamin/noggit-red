@@ -1,22 +1,19 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/DBC.h>
-#include <noggit/Log.h>
-#include <noggit/Misc.h>
-#include <noggit/World.h>
+#include <noggit/MapHeaders.h>
+#include <noggit/ui/Checkbox.hpp>
 #include <noggit/ui/pushbutton.hpp>
 #include <noggit/ui/Water.h>
-#include <noggit/MapHeaders.h>
-#include <util/qt/overload.hpp>
+#include <noggit/unsigned_int_property.hpp>
+#include <noggit/World.h>
 
 #include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QGroupBox>
-#include <QtWidgets/QComboBox>
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QListWidget>
 #include <QtWidgets/QRadioButton>
 
 namespace Noggit
@@ -365,6 +362,36 @@ namespace Noggit
     void water::toggle_angled_mode()
     {
       _angled_mode.toggle();
+    }
+
+    float water::brushRadius() const
+    {
+      return _radius;
+    }
+
+    float water::angle() const
+    {
+      return _angle;
+    }
+
+    float water::orientation() const
+    {
+      return _orientation;
+    }
+
+    bool water::angled_mode() const
+    {
+      return _angled_mode.get();
+    }
+
+    bool water::use_ref_pos() const
+    {
+      return _locked.get();
+    }
+
+    glm::vec3 water::ref_pos() const
+    {
+      return _lock_pos;
     }
 
     float water::get_opacity_factor() const

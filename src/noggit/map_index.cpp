@@ -24,7 +24,43 @@
 #include <QFile>
 
 #include <forward_list>
-#include <cstdlib>
+#include <sstream>
+
+MapIndex::TileRange<false> MapIndex::loaded_tiles()
+{
+  return tiles<false>
+    ([](TileIndex const&, MapTile* tile) { return !!tile && tile->finishedLoading(); });
+}
+
+MapIndex::TileRange<true> MapIndex::tiles_in_range(glm::vec3 const& pos, float radius)
+{
+  return tiles<true>
+    ([this, pos, radius](TileIndex const& index, MapTile*)
+      {
+        return hasTile(index) && misc::getShortestDist
+        (pos.x, pos.z, index.x * TILESIZE, index.z * TILESIZE, TILESIZE) <= radius;
+      }
+    );
+}
+
+MapIndex::TileRange<true> MapIndex::tiles_in_rect(glm::vec3 const& pos, float radius)
+{
+  glm::vec2 l_chunk{ pos.x - radius, pos.z - radius };
+  glm::vec2 r_chunk{ pos.x + radius, pos.z + radius };
+
+  return tiles<true>
+    ([this, pos, radius, l_chunk, r_chunk](TileIndex const& index, MapTile*)
+      {
+        if (!hasTile(index) || radius == 0.f)
+          return false;
+
+        glm::vec2 l_tile{ index.x * TILESIZE, index.z * TILESIZE };
+        glm::vec2 r_tile{ index.x * TILESIZE + TILESIZE, index.z * TILESIZE + TILESIZE };
+
+        return ((l_chunk.x  <  r_tile.x) && (r_chunk.x >= l_tile.x) && (l_chunk.y  <  r_tile.y) && (r_chunk.y >= l_tile.y));
+      }
+    );
+}
 
 MapIndex::MapIndex (const std::string &pBasename, int map_id, World* world,
                     Noggit::NoggitRenderContext context, bool create_empty)
@@ -626,6 +662,31 @@ void MapIndex::convert_alphamap(bool to_big_alpha)
   }
 }
 
+bool MapIndex::hasBigAlpha() const
+{
+  return mBigAlpha;
+}
+
+void MapIndex::setBigAlpha(bool state)
+{
+  mBigAlpha = state;
+}
+
+unsigned MapIndex::getNLoadedTiles() const
+{
+  return _n_loaded_tiles;
+}
+
+bool MapIndex::sort_models_by_size_class() const
+{
+  return _sort_models_by_size_class;
+}
+
+void MapIndex::set_sort_models_by_size_class(bool state)
+{
+  _sort_models_by_size_class = state;
+}
+
 
 uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
 {
@@ -691,6 +752,24 @@ uint32_t MapIndex::getHighestGUIDFromFile(const std::string& pFilename) const
     theFile.close();
 
     return highGUID;
+}
+
+// reloadable settings
+void MapIndex::setLoadingRadius(int value)
+{
+  if (value < _unload_dist)
+    _loading_radius = value;
+}
+
+void MapIndex::setUnloadDistance(int value)
+{
+  if (value > _loading_radius)
+    _unload_dist = value;
+}
+
+void MapIndex::setUnloadInterval(int value)
+{
+  _unload_interval = value;
 }
 
 uint32_t MapIndex::newGUID()
@@ -1248,6 +1327,17 @@ unsigned MapIndex::getNumExistingTiles()
   return _n_existing_tiles;
 }
 
+// todo: find out how wow choose to use the green lava in outland
+bool MapIndex::use_mclq_green_lava() const
+{
+  return _map_id == 530;
+}
+
+bool MapIndex::uid_fix_all_in_progress() const
+{
+  return _uid_fix_all_in_progress;
+}
+
 void MapIndex::set_basename(const std::string &pBasename)
 {
   basename = pBasename;
@@ -1379,4 +1469,15 @@ void MapIndex::create_empty_wdl() const
     f.setBuffer(wdlFile.all_data());
     f.save();
     f.close();
+}
+
+MapTileEntry::~MapTileEntry()
+{
+}
+
+MapTileEntry::MapTileEntry()
+  : flags(0)
+  , tile(nullptr)
+  , onDisc(false)
+{
 }

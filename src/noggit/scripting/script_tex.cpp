@@ -5,6 +5,7 @@
 #include <noggit/scripting/script_context.hpp>
 #include <noggit/scripting/script_math.hpp>
 #include <noggit/scripting/script_image.hpp>
+#include <noggit/texture_set.hpp>
 
 #include <sol/sol.hpp>
 

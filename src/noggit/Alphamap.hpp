@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include <noggit/Log.h>
-#include <opengl/texture.hpp>
+#include <cstdint>
+#include <vector>
 
 namespace BlizzardArchive
 {

@@ -2,22 +2,14 @@
 
 #pragma once
 
-#include <noggit/DBC.h>
-
 #include <QtWidgets/QWidget>
-#include <QtWidgets/QTreeWidget>
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QSlider>
-#include <QtWidgets/QCheckBox.h>
-#include <QtWidgets/QComboBox.h>
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QListWidget>
-#include <QtWidgets/QListView>
-#include <QtWidgets/QPushButton>
-#include <QMediaPlayer>
 
 #include <string>
 
+class QLabel;
+class QListWidget;
+class QMediaPlayer;
+class QSlider;
 
 namespace Noggit
 {

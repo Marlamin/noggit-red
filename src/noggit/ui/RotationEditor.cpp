@@ -2,18 +2,16 @@
 
 #include <noggit/ui/RotationEditor.h>
 
-#include <noggit/Misc.h>
+#include <noggit/Action.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/MapView.h>
 #include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
-#include <noggit/WMOInstance.h>
 #include <noggit/World.h>
-#include <noggit/MapView.h>
-#include <util/qt/overload.hpp>
-#include <noggit/ui/ObjectEditor.h>
-#include <noggit/ActionManager.hpp>
-#include <noggit/Action.hpp>
-#include <noggit/application/NoggitApplication.hpp>
 
+#include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
 

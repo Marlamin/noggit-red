@@ -3,6 +3,7 @@
 #include <noggit/ui/DetailInfos.h>
 
 #include <QVBoxLayout>
+#include <QtWidgets/QLabel>
 #include <QScrollArea>
 
 namespace Noggit

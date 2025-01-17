@@ -4,8 +4,6 @@
 #define NOGGIT_LOGICNODEBASE_HPP
 
 #include "BaseNode.hpp"
-#include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <external/NodeEditor/include/nodes/Node>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -25,46 +23,27 @@ namespace Noggit
         Q_OBJECT
 
         public:
-            LogicNodeBase() {};
-            void resetInterationIndex() { _iteration_index = 0; };
-            unsigned getIterationindex() { return _iteration_index; };
+            LogicNodeBase();
+            void resetInterationIndex();
+            unsigned getIterationindex() const;
 
-            virtual bool isLogicNode() override { return true; };
+            virtual bool isLogicNode() override;
 
-            bool isIterable() { return _is_iterable; };
+            bool isIterable() const;
 
-            void setNIterations(unsigned n_iterations) { _n_iterations = n_iterations; };
-            unsigned getNIteraitons() { return _n_iterations; };
-            void setIterationIndex(unsigned index) { _iteration_index = index; };
+            void setNIterations(unsigned n_iterations);
+            unsigned getNIteraitons() const;
+            void setIterationIndex(unsigned index);
 
-            NodeValidationState validate() override
-            {
-              setValidationState(NodeValidationState::Valid);
-              auto logic = static_cast<LogicData*>(_in_ports[0].in_value.lock().get());
-
-              if (!logic)
-              {
-                setValidationState(NodeValidationState::Error);
-                setValidationMessage("Error: Failed to evaluate logic input");
-
-                _out_ports[0].out_value = std::make_shared<LogicData>(false);
-                _node->onDataUpdated(0);
-              }
-
-              return _validation_state;
-            };
-
+            NodeValidationState validate() override;
 
         protected:
-
-            void setIsIterable(bool is_iterable) { _is_iterable = is_iterable; };
+            void setIsIterable(bool is_iterable);
 
             unsigned _iteration_index = 0;
             unsigned _n_iterations = 0;
 
             bool _is_iterable = false;
-
-
         };
 
     }

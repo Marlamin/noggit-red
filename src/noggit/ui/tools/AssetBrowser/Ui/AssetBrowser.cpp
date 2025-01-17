@@ -1,24 +1,30 @@
 #include "AssetBrowser.hpp"
 
-#include <noggit/Log.h>
-#include <noggit/ContextObject.hpp>
-#include <noggit/ui/FramelessWindow.hpp>
-#include <noggit/ui/FontNoggit.hpp>
-#include <noggit/ui/GroundEffectsTool.hpp>
-#include <noggit/MapView.h>
-#include <noggit/ui/texturing_tool.hpp>
-#include <noggit/application/NoggitApplication.hpp>
-#include <noggit/project/CurrentProject.hpp>
+#include <ui_AssetBrowser.h>
+#include <ui_AssetBrowserOverlay.h>
 
-#include <QStandardItemModel>
-#include <QItemSelectionModel>
-#include <QDir>
-#include <QSettings>
-#include <QPixmap>
-#include <QIcon>
-#include <QDialog>
+#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/ContextObject.hpp>
+#include <noggit/Log.h>
+#include <noggit/MapView.h>
+#include <noggit/project/CurrentProject.hpp>
+#include <noggit/ui/FontNoggit.hpp>
+#include <noggit/ui/FramelessWindow.hpp>
+#include <noggit/ui/GroundEffectsTool.hpp>
+#include <noggit/ui/texturing_tool.hpp>
+#include <noggit/ui/tools/AssetBrowser/Ui/Model/TreeManager.hpp>
+#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
+
 #include <QDial>
+#include <QDialog>
+#include <QDir>
+#include <QIcon>
+#include <QItemSelectionModel>
+#include <QKeyEvent>
+#include <QPixmap>
+#include <QSettings>
 #include <QSlider>
+#include <QStandardItemModel>
 
 using namespace Noggit::Ui::Tools::AssetBrowser::Ui;
 using namespace Noggit::Ui;
@@ -466,6 +472,11 @@ AssetBrowserWidget::~AssetBrowserWidget()
   delete _preview_renderer;
 }
 
+std::string const& Noggit::Ui::Tools::AssetBrowser::Ui::AssetBrowserWidget::getFilename() const
+{
+  return _selected_path;
+}
+
 void AssetBrowserWidget::set_browse_mode(asset_browse_mode browse_mode)
 {    
     if (_browse_mode == browse_mode)
@@ -528,4 +539,37 @@ void AssetBrowserWidget::keyPressEvent(QKeyEvent *event)
     // }
 
   }
+}
+
+QList<QModelIndex> NoggitExpendableFilterProxyModel::findIndices() const
+{
+  QList<QModelIndex> ret;
+  for (auto iter = 0; iter < rowCount(); iter++)
+  {
+    auto childIndex = index(iter, 0, QModelIndex());
+    ret << recursivelyFindIndices(childIndex);
+  }
+  return ret;
+}
+
+bool NoggitExpendableFilterProxyModel::rowAccepted(int source_row, const QModelIndex& source_parent) const
+{
+  return filterAcceptsRow(source_row, source_parent);
+}
+
+QList<QModelIndex> NoggitExpendableFilterProxyModel::recursivelyFindIndices(const QModelIndex& ind) const
+{
+  QList<QModelIndex> ret;
+  if (rowAccepted(ind.row(), ind.parent()))
+  {
+    ret << ind;
+  }
+  else
+  {
+    for (auto iter = 0; iter < rowCount(ind); iter++)
+    {
+      ret << recursivelyFindIndices(index(iter, 0, ind));
+    }
+  }
+  return ret;
 }

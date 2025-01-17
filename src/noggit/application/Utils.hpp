@@ -4,6 +4,8 @@
 #define NOGGIT_UTILS_HPP
 
 #include <noggit/application/NoggitApplication.hpp>
+
+#include <ClientFile.hpp>
 #include <stream/StreamReader.h>
 
 

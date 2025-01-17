@@ -9,6 +9,16 @@
 
 using namespace Noggit::Ui::Tools;
 
+ReorderableVerticalBox::ReorderableVerticalBox(QWidget* parent)
+  : QWidget(parent)
+  , oldX{0}
+  , oldY{0}
+  , mouseClickX{0}
+  , mouseClickY{0}
+  , activeRectWidget{nullptr}
+{
+}
+
 void ReorderableVerticalBox::mouseMoveEvent(QMouseEvent* event)
 {
   if (!dragInitiated)

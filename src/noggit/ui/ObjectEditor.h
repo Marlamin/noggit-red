@@ -2,19 +2,17 @@
 
 #pragma once
 #include <noggit/Selection.h>
-#include <noggit/BoolToggleProperty.hpp>
-#include <noggit/object_paste_params.hpp>
 
-#include <QLabel>
 #include <QWidget>
-#include <QSettings>
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QSlider>
-#include <QtWidgets/qcombobox.h>
-#include <QtWidgets/qgroupbox.h>
 
 class MapView;
 class QButtonGroup;
+class QComboBox;
+class QDoubleSpinBox;
+class QGroupBox;
+class QLabel;
+class QSettings;
+class QSlider;
 class World;
 
 namespace Noggit
@@ -37,6 +35,9 @@ enum ModelPasteMode
 
 namespace Noggit
 {
+  struct BoolToggleProperty;
+  struct object_paste_params;
+
   namespace Ui
   {
     class object_editor : public QWidget
@@ -70,13 +71,13 @@ namespace Noggit
 
       void changeRadius(float change);
 
-      float brushRadius() const { return _radius; }
+      float brushRadius() const;
 
-      float drag_selection_depth() const { return _drag_selection_depth; }
+      float drag_selection_depth() const;
 
-      int clipboardSize() const { return _model_instance_created.size(); }
+      int clipboardSize() const;
 
-      std::vector<selection_type> getClipboard() const& { return _model_instance_created; }
+      std::vector<selection_type> getClipboard() const&;
 
       model_import *modelImport;
       rotation_editor* rotationEditor;

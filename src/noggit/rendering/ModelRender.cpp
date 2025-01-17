@@ -3,9 +3,16 @@
 #include "ModelRender.hpp"
 #include <noggit/Model.h>
 #include <noggit/ModelInstance.h>
-#include <external/tracy/Tracy.hpp>
-#include <math/bounding_box.hpp>
 #include <noggit/Misc.h>
+#include <noggit/Particle.h>
+#include <noggit/TextureManager.h>
+
+#include <math/bounding_box.hpp>
+#include <math/frustum.hpp>
+
+#include <opengl/shader.hpp>
+
+#include <external/tracy/Tracy.hpp>
 
 
 using namespace Noggit::Rendering;
@@ -294,6 +301,12 @@ void ModelRender::drawBox(OpenGL::Scoped::use_program& m2_box_shader, std::size_
   OpenGL::Scoped::buffer_binder<GL_ELEMENT_ARRAY_BUFFER> indices_binder(_box_indices_buffer);
 
   gl.drawElementsInstanced (GL_LINE_STRIP, static_cast<GLsizei>(_box_indices.size()), GL_UNSIGNED_SHORT, nullptr, static_cast<GLsizei>(box_count));
+}
+
+[[nodiscard]]
+std::vector<ModelRenderPass> const& Noggit::Rendering::ModelRender::renderPasses() const
+{
+  return _render_passes;
 }
 
 void ModelRender::setupVAO(OpenGL::Scoped::use_program& m2_shader)
@@ -1074,5 +1087,21 @@ void ModelRenderPass::initUVTypes(Model* m)
       case 0: tu_lookups[i] = texture_unit_lookup::t1; break;
       case 1: tu_lookups[i] = texture_unit_lookup::t2; break;
     }
+  }
+}
+
+bool ModelRenderPass::operator< (const ModelRenderPass& m) const
+{
+  if (priority_plane < m.priority_plane)
+  {
+    return true;
+  }
+  else if (priority_plane > m.priority_plane)
+  {
+    return false;
+  }
+  else
+  {
+    return blend_mode == m.blend_mode ? (ordering_thingy < m.ordering_thingy) : blend_mode < m.blend_mode;
   }
 }

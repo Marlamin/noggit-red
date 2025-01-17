@@ -2,8 +2,17 @@
 
 #include "WMOGroupRender.hpp"
 #include <noggit/WMO.h>
+#include <noggit/wmo_liquid.hpp>
 #include <noggit/Log.h> // LogDebug
+#include <noggit/TextureManager.h>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+
+#include <math/frustum.hpp>
+
+#include <opengl/shader.hpp>
+
+#include <QSettings>
 
 using namespace Noggit::Rendering;
 

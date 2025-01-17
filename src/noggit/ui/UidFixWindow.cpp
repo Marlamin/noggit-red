@@ -2,7 +2,6 @@
 
 #include <noggit/ui/UidFixWindow.hpp>
 
-#include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QFormLayout>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>

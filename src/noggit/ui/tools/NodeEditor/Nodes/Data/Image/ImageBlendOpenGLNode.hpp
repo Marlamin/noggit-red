@@ -4,7 +4,6 @@
 #define NOGGIT_IMAGEBLENDOPENGLNODE_HPP
 
 #include <noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp>
-#include <QComboBox>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -13,6 +12,7 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QComboBox;
 
 namespace Noggit
 {
@@ -37,9 +37,7 @@ namespace Noggit
             QComboBox* _sfactor;
             QComboBox* _dfactor;
         };
-
     }
-
 }
 
 #endif //NOGGIT_IMAGEBLENDOPENGLNODE_HPP

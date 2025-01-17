@@ -2,9 +2,12 @@
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
-#include <sstream>
+
+#include <external/NodeEditor/include/nodes/Node>
 
 #include <QInputDialog>
+
+#include <sstream>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;
 

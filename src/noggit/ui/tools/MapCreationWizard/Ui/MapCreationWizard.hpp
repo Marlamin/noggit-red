@@ -2,33 +2,44 @@
 
 #pragma once
 
-#include <unordered_map>
-#include <vector>
-#include <memory>
+#include <noggit/DBCFile.h>
+#include <noggit/MapHeaders.h>
+#include <noggit/ui/widget.hpp>
 
 #include <QWidget>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QGroupBox>
-#include <QSpinBox>
-#include <QCheckBox>
-#include <QDoubleSpinBox>
-#include <QHBoxLayout>
-#include <QStackedWidget>
 
-#include <noggit/DBC.h>
-#include <noggit/DBCFile.h>
+#include <memory>
+#include <unordered_map>
+#include <vector>
 
-#include <noggit/ui/minimap_widget.hpp>
-#include <noggit/ui/widget.hpp>
-#include <noggit/World.h>
-#include <noggit/application/NoggitApplication.hpp>
+namespace BlizzardDatabaseLib::Structures
+{
+  struct BlizzardDatabaseRow;
+}
+
+class WMOInstance;
+class World;
+
+class QLineEdit;
+class QDoubleSpinBox;
+class QComboBox;
+class QGroupBox;
+class QSpinBox;
+class QCheckBox;
+class QStackedWidget;
+class QTabWidget;
 
 namespace Noggit
 {
+  namespace Project
+  {
+    class NoggitProject;
+  }
+
   namespace Ui
   {
     class Vector3fWidget;
+    class minimap_widget;
   }
 
   namespace Ui::Tools::MapCreationWizard::Ui
@@ -41,17 +52,9 @@ namespace Noggit
 
         void setCurrentLocale(const std::string& locale);
 
-        void setValue(const std::string& val, int locale)
-        {
-          _widget_map.at(_locale_names[locale])->setText(QString::fromStdString(val));
+        void setValue(const std::string& val, int locale);
 
-          if (!val.empty() && _flags->value() == 0)
-          {
-              _flags->setValue(16712190); // default flags when there is text
-          }
-        }
-
-        std::string getValue(int locale) { return  _widget_map.at(_locale_names[locale])->text().toStdString(); };
+        std::string getValue(int locale);;
 
         void fill(DBCFile::Record& record, size_t field);
         void fill(BlizzardDatabaseLib::Structures::BlizzardDatabaseRow& record, std::string columnName);
@@ -99,7 +102,7 @@ namespace Noggit
       // void destroyFakeWorld() { if(_world) _world.reset(); _world = nullptr; _minimap_widget->world (nullptr); };
       void addNewMap();
 
-      World* getWorld() { return _world.get(); };
+      World* getWorld() const;;
       std::unique_ptr<World> _world;
 
     signals:

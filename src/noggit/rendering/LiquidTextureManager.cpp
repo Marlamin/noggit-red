@@ -4,6 +4,7 @@
 #include "opengl/context.inl"
 #include "noggit/DBC.h"
 #include "noggit/application/NoggitApplication.hpp"
+#include <noggit/TextureManager.h>
 
 using namespace Noggit::Rendering;
 

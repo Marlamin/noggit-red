@@ -4,7 +4,6 @@
 #include <opengl/context.hpp>
 #include <opengl/context.inl>
 #include <QtGui/QOpenGLFunctions>
-#include <memory>
 
 
 OpenGL::context gl;

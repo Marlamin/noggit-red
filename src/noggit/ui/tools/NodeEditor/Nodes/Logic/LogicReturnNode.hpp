@@ -4,7 +4,6 @@
 #define NOGGIT_LOGICRETURNNODE_HPP
 
 #include "noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp"
-#include <external/NodeEditor/include/nodes/Node>
 
 using QtNodes::PortType;
 using QtNodes::Node;

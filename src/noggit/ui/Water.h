@@ -4,8 +4,6 @@
 
 #include <noggit/BoolToggleProperty.hpp>
 #include <noggit/TileIndex.hpp>
-#include <noggit/ui/Checkbox.hpp>
-#include <noggit/unsigned_int_property.hpp>
 
 class QDoubleSpinBox;
 class QGroupBox;
@@ -19,6 +17,8 @@ class QButtonGroup;
 
 namespace Noggit
 {
+  struct unsigned_int_property;
+
   namespace Ui
   {
     class water : public QWidget
@@ -48,12 +48,12 @@ namespace Noggit
       void toggle_lock();
       void toggle_angled_mode();
 
-      float brushRadius() const { return _radius; }
-      float angle() const { return _angle; }
-      float orientation() const { return _orientation; }
-      bool angled_mode() const { return _angled_mode.get(); }
-      bool use_ref_pos() const { return _locked.get(); }
-      glm::vec3 ref_pos() const { return _lock_pos; }
+      float brushRadius() const;
+      float angle() const;
+      float orientation() const;
+      bool angled_mode() const;
+      bool use_ref_pos() const;
+      glm::vec3 ref_pos() const;
 
       QSize sizeHint() const override;
 

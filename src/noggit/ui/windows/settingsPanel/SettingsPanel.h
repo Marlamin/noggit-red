@@ -2,12 +2,14 @@
 
 #pragma once
 
-#include <qt-color-widgets/color_selector.hpp>
-
-#include <QtCore/QSettings>
 #include <QMainWindow>
-#include <ui_SettingsPanel.h>
 
+namespace Ui
+{
+  class SettingsPanel;
+}
+
+class QSettings;
 
 namespace Noggit
 {

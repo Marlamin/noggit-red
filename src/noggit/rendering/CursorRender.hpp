@@ -2,9 +2,18 @@
 
 #pragma once
 #include "opengl/scoped.hpp"
-#include "opengl/shader.fwd.hpp"
 
 #include <memory>
+
+namespace OpenGL
+{
+  struct program;
+
+  namespace Scoped
+  {
+    struct use_program;
+  }
+}
 
 namespace Noggit
 {

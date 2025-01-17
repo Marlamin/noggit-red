@@ -1,13 +1,11 @@
 #ifndef NOGGIT_WIGDET_MAP_LIST_ITEM_HPP
 #define NOGGIT_WIGDET_MAP_LIST_ITEM_HPP
 
-#include <QMenuBar>
-#include <QAction>
-#include <qgraphicseffect.h>
-#include <QGridLayout>
+#include <QSize>
 #include <QString>
 #include <QWidget>
-#include <noggit/project/ApplicationProject.h>
+
+class QLabel;
 
 namespace Noggit::Ui::Widget
 {
@@ -37,11 +35,11 @@ namespace Noggit::Ui::Widget
         MapListItem(const MapListData& data, QWidget* parent);
         QSize minimumSizeHint() const override;
 
-        const QString name() { return _map_data.map_name; };
-        int id() { return _map_data.map_id; };
-        int type() { return _map_data.map_type_id; };
-        int expansion() { return _map_data.expansion_id; };
-        bool wmo_map() { return _map_data.wmo_map; };
+        const QString name() const;;
+        int id() const;;
+        int type() const;;
+        int expansion() const;;
+        bool wmo_map() const;;
 
     private:
         QString toCamelCase(const QString& s);

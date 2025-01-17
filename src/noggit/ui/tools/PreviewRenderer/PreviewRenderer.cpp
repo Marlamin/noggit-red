@@ -1,21 +1,24 @@
 #include "PreviewRenderer.hpp"
 
-#include <opengl/scoped.hpp>
-#include <noggit/rendering/Primitives.hpp>
-#include <noggit/Selection.h>
-#include <noggit/tool_enums.hpp>
 #include <noggit/AsyncLoader.h>
+#include <noggit/Model.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/rendering/Primitives.hpp>
+#include <noggit/TextureManager.h>
+#include <noggit/tool_enums.hpp>
+#include <noggit/WMO.h>
+#include <noggit/WMOInstance.h>
 
-#include <vector>
+#include <math/frustum.hpp>
+
 #include <cmath>
-#include <stdexcept>
 #include <limits>
-#include <thread>
-#include <chrono>
+#include <stdexcept>
+#include <vector>
 
-#include <QSettings>
 #include <QColor>
 #include <QMatrix4x4>
+#include <QSettings>
 #include <QVector3D>
 
 
@@ -46,6 +49,10 @@ PreviewRenderer::PreviewRenderer(int width, int height, Noggit::NoggitRenderCont
   OpenGL::context::scoped_setter const context_set (::gl, &_offscreen_context);
 
   _light_dir = glm::vec3(0.0f, 1.0f, 0.0f);
+}
+
+Noggit::Ui::Tools::PreviewRenderer::~PreviewRenderer()
+{
 }
 
 void PreviewRenderer::setModel(std::string const &filename)

@@ -3,10 +3,12 @@
 #ifndef NOGGIT_COMPONENT_EXISTING_PROJECT_ENUMERATION_HPP
 #define NOGGIT_COMPONENT_EXISTING_PROJECT_ENUMERATION_HPP
 
-#include <noggit/project/ApplicationProject.h>
-#include <noggit/ui/windows/projectSelection/widgets/ProjectListItem.hpp>
-#include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
-#include "ui_NoggitProjectSelectionWindow.h"
+#include <string>
+
+namespace Noggit::Ui::Windows
+{
+  class NoggitProjectSelectionWindow;
+}
 
 namespace Noggit::Ui::Component
 {
@@ -20,7 +22,6 @@ namespace Noggit::Ui::Component
     static void registerProjectRemove(std::string const& project_path);
   private:
       static void openDirectory(std::string const& directory_path);
-
   };
 }
 

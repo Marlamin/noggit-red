@@ -4,8 +4,6 @@
 #define NOGGIT_TEXTURINGTILESETNODE_HPP
 
 #include <noggit/ui/tools/NodeEditor/Nodes/ContextNodeBase.hpp>
-#include <QLabel>
-#include <QPushButton>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -14,6 +12,8 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QLabel;
+class QPushButton;
 
 namespace Noggit
 {

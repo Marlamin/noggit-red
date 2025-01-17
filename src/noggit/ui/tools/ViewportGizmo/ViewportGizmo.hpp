@@ -1,16 +1,16 @@
 #ifndef NOGGIT_VIEWPORTGIZMO_HPP
 #define NOGGIT_VIEWPORTGIZMO_HPP
 
-#include <external/qtimgui/QtImGui.h>
 #include <external/qtimgui/imgui/imgui.h>
 #include <external/imguizmo/ImGuizmo.h>
 #include <noggit/Selection.h>
-#include <noggit/World.h>
 
+#include <glm/mat4x4.hpp>
 
 #include <vector>
 
 class MapView;
+class World;
 
 namespace Noggit
 {
@@ -43,13 +43,13 @@ namespace Noggit
                 , glm::mat4x4 const& model_view
                 , glm::mat4x4 const& projection);
 
-            void setCurrentGizmoOperation(ImGuizmo::OPERATION operation) { _gizmo_operation = operation; }
-            void setCurrentGizmoMode(ImGuizmo::MODE mode) { _gizmo_mode = mode; }
-            bool isOver() {ImGuizmo::SetID(_gizmo_context); return ImGuizmo::IsOver();};
-            bool isUsing() {ImGuizmo::SetID(_gizmo_context); return ImGuizmo::IsUsing();};
-            void setUseMultiselectionPivot(bool use_pivot) { _use_multiselection_pivot = use_pivot; };
-            void setMultiselectionPivot(glm::vec3 const& pivot) { _multiselection_pivot = pivot; };
-            void setWorld(World* world) { _world = world; }
+            void setCurrentGizmoOperation(ImGuizmo::OPERATION operation);
+            void setCurrentGizmoMode(ImGuizmo::MODE mode);
+            bool isOver() const;;
+            bool isUsing() const;;
+            void setUseMultiselectionPivot(bool use_pivot);;
+            void setMultiselectionPivot(glm::vec3 const& pivot);;
+            void setWorld(World* world);
 
         private:
 

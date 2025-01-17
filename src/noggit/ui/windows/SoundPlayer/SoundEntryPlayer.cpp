@@ -1,27 +1,22 @@
 #include "SoundEntryPlayer.h"
 
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/DBC.h>
 #include <noggit/Log.h>
-#include <noggit/Misc.h>
+#include <noggit/ui/FontAwesome.hpp>
+
 #include <ClientFile.hpp>
-#include <noggit/application/NoggitApplication.hpp>
 
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/qpushbutton.h>
-#include <QtWidgets/qgroupbox.h>
-#include <QtWidgets/qcheckbox.h>
-#include <QtWidgets/qlineedit.h>
-#include <QtWidgets/QTableView>
-#include <QStandardItemModel>
-#include <QTableWidgetItem>
-#include <QSound>
-#include <qtemporaryfile>
-#include <QMediaPlayer>
+#include <QCloseEvent>
 #include <QListWidget>
+#include <QMediaPlayer>
+#include <QMessageBox>
+#include <qtemporaryfile>
 #include <QToolButton>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QSlider>
+#include <QtWidgets/QVBoxLayout>
 
-#include <iostream>
 #include <sstream>
 #include <string>
 

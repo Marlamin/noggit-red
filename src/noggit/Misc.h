@@ -3,19 +3,20 @@
 #pragma once
 #include <math/trig.hpp>
 
-#include <algorithm>
-#include <cassert>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <string>
-#include <vector>
-#include <glm/vec4.hpp>
-#include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
-#include <noggit/Selection.h>
-#include <util/sExtendableArray.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec4.hpp>
 
+#include <string>
+#include <typeinfo>
+#include <variant>
+#include <vector>
+
+
+namespace util
+{
+  class sExtendableArray;
+}
 
 // namespace for static helper functions.
 
@@ -49,10 +50,7 @@ namespace misc
   std::string normalize_adt_filename(std::string filename);
 
   // see http://realtimecollisiondetection.net/blog/?p=89 for more info
-  inline bool float_equals(float const& a, float const& b)
-  {
-    return std::abs(a - b) < (std::max(1.f, std::max(a, b)) * std::numeric_limits<float>::epsilon());
-  }
+  bool float_equals(float const& a, float const& b);
 
   bool vec3d_equals(glm::vec3 const& v1, glm::vec3 const& v2);
   bool deg_vec3d_equals(math::degrees::vec3 const& v1, math::degrees::vec3 const& v2);
@@ -70,35 +68,16 @@ namespace misc
   bool pointInside(glm::vec3 point, std::array<glm::vec3, 2> const& extents);
   bool pointInside(glm::vec2 point, std::array<glm::vec2, 2> const& extents);
 
-  inline glm::vec4 normalized_device_coords(int x, int y, int screen_width, int screen_height)
-  {
-    return { 2.0f * x / screen_width - 1.0f, 1.0f - 2.0f * y / screen_height, 0.0f, 1.0f };
-  }
+  glm::vec4 normalized_device_coords(int x, int y, int screen_width, int screen_height);
 
   void minmax(glm::vec3* a, glm::vec3* b);
 
-  inline int rounded_int_div(int value, int div)
-  {
-    return value / div + (value % div <= (div >> 1) ? 0 : 1);
-  }
-  inline int rounded_255_int_div(int value)
-  {
-    return value / 255 + (value % 255 <= 127 ? 0 : 1);
-  }
+  int rounded_int_div(int value, int div);
+  int rounded_255_int_div(int value);
 
   // treat the value as an 8x8 array of bit
-  inline void set_bit(std::uint64_t& value, int x, int y, bool on)
-  {
-    std::uint64_t bit = std::uint64_t(1) << (y * 8 + x);
-    value = on ? (value | bit) : (value & ~bit);
-  }
-  inline void bit_or(std::uint64_t& value, int x, int y, bool on)
-  {
-    if (on)
-    {
-      value |= (std::uint64_t(1) << (y * 8 + x));
-    }
-  }
+  void set_bit(std::uint64_t& value, int x, int y, bool on);
+  void bit_or(std::uint64_t& value, int x, int y, bool on);
 
   struct random_color : glm::vec4
   {

@@ -1,15 +1,17 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "ExtendedSlider.hpp"
+#include <noggit/TabletManager.hpp>
 #include <noggit/ui/FontAwesome.hpp>
+
 #include <cfloat>
 
-#include <QPushButton>
-#include <QSlider>
 #include <QCheckBox>
-#include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QPushButton>
 #include <QSignalBlocker>
+#include <QSlider>
+#include <QVBoxLayout>
 
 using namespace Noggit::Ui::Tools::UiCommon;
 using namespace Noggit::Ui;

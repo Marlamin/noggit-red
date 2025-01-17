@@ -4,6 +4,9 @@
 
 #include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.inl>
 #include <noggit/ui/tools/NodeEditor/Nodes/DataTypes/GenericData.hpp>
+
+#include <external/NodeEditor/include/nodes/Node>
+
 #include <external/glm/gtx/matrix_decompose.hpp>
 #include <external/glm/gtx/euler_angles.hpp>
 #include <external/glm/gtx/quaternion.hpp>

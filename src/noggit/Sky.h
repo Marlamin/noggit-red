@@ -5,7 +5,6 @@
 #include <noggit/ContextObject.hpp>
 #include <noggit/rendering/Primitives.hpp>
 #include <opengl/scoped.hpp>
-#include <opengl/shader.fwd.hpp>
 
 #include <memory>
 #include <string>
@@ -168,19 +167,19 @@ public:
     // potential structure rework, more similar to retail/classic LightData.db
     // std::vector<LightData> lightData;
 
-    bool highlight_sky() const { return _highlight_sky; }
-    float river_shallow_alpha() const { return _river_shallow_alpha; }
-    float river_deep_alpha() const { return _river_deep_alpha; }
-    float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
-    float ocean_deep_alpha() const { return _ocean_deep_alpha; }
-    float glow() const { return _glow; }
+    bool highlight_sky() const;
+    float river_shallow_alpha() const;
+    float river_deep_alpha() const;
+    float ocean_shallow_alpha() const;
+    float ocean_deep_alpha() const;
+    float glow() const;
 
-    void set_glow(float glow) { _glow = glow; }
-    void set_highlight_sky(bool state) { _highlight_sky = state; }
-    void set_river_shallow_alpha(float alpha) { _river_shallow_alpha = alpha; }
-    void set_river_deep_alpha(float alpha) { _river_deep_alpha = alpha; }
-    void set_ocean_shallow_alpha(float alpha) { _ocean_shallow_alpha = alpha; }
-    void set_ocean_deep_alpha(float alpha) { _ocean_deep_alpha = alpha; }
+    void set_glow(float glow);
+    void set_highlight_sky(bool state);
+    void set_river_shallow_alpha(float alpha);
+    void set_river_deep_alpha(float alpha);
+    void set_ocean_shallow_alpha(float alpha);
+    void set_ocean_deep_alpha(float alpha);
 
     // always save them for now
     // later we can have a system to only save modified dbcs
@@ -216,7 +215,7 @@ public:
 
   explicit Sky(DBCFile::Iterator data, Noggit::NoggitRenderContext context);
 
-  int getId() const { return Id; };
+  int getId() const;;
 
   // std::unique_ptr<SkyParam> skyParams[NUM_SkyParamsNames];
   unsigned int skyParams[NUM_SkyParamsNames];
@@ -224,7 +223,7 @@ public:
 
 
   std::optional<SkyParam*> getParam(int param_index) const;
-  std::optional<SkyParam*> getCurrentParam() const { return getParam(curr_sky_param);};
+  std::optional<SkyParam*> getCurrentParam() const;;
 
 
   glm::vec3 colorFor(int r, int t) const;
@@ -236,14 +235,9 @@ public:
 
   bool is_new_record = false;
 
-  bool operator<(const Sky& s) const
-  {
-    if (global) return false;
-    else if (s.global) return true;
-    else return r2 < s.r2;
-  }
+  bool operator<(const Sky& s) const;
 
-  bool selected() const { return _selected; }
+  bool selected() const;
 
   void save_to_dbc();
 
@@ -345,29 +339,29 @@ public:
   );
 
 
-  bool hasSkies() { return numSkies > 0; }
+  bool hasSkies() const;
 
-  float river_shallow_alpha() const { return _river_shallow_alpha; }
-  float river_deep_alpha() const { return _river_deep_alpha; }
-  float ocean_shallow_alpha() const { return _ocean_shallow_alpha; }
-  float ocean_deep_alpha() const { return _ocean_deep_alpha; }
+  float river_shallow_alpha() const;
+  float river_deep_alpha() const;
+  float ocean_shallow_alpha() const;
+  float ocean_deep_alpha() const;
 
-  float fog_distance_end() const { return _fog_distance / 36.f; };
-  float fog_distance_start() const { return (_fog_distance / 36.f) * _fog_multiplier; };
-  float fog_distance_multiplier() const { return _fog_multiplier; };
+  float fog_distance_end() const;;
+  float fog_distance_start() const;;
+  float fog_distance_multiplier() const;;
 
-  float celestial_glow() const { return _celestial_glow; };
-  float cloud_density() const { return _cloud_density; };
-  float unknown_float_param4() const { return _unknown_float_param4; };
-  float unknown_float_param5() const { return _unknown_float_param5; };
+  float celestial_glow() const;;
+  float cloud_density() const;;
+  float unknown_float_param4() const;;
+  float unknown_float_param5() const;;
 
-  float glow() const { return _glow; };
+  float glow() const;;
 
-  float fogRate() const { return _fog_rate; }
+  float fogRate() const;
 
   void unload();
 
-  void force_update() { _force_update = true; }
+  void force_update();
 
 private:
   bool _uploaded = false;

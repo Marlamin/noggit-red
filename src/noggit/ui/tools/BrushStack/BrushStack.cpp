@@ -1,10 +1,17 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "BrushStack.hpp"
+#include "BrushStackItem.hpp"
 #include <noggit/MapView.h>
+#include <noggit/ui/FlattenTool.hpp>
+#include <noggit/ui/ShaderTool.hpp>
+#include <noggit/ui/TerrainTool.hpp>
+#include <noggit/ui/texturing_tool.hpp>
 
-#include <QPushButton>
+#include <QButtonGroup>
+#include <QComboBox>
 #include <QJsonArray>
+#include <QPushButton>
 
 using namespace Noggit::Ui::Tools;
 
@@ -270,6 +277,21 @@ float BrushStack::getInnerRadius()
 float BrushStack::getSpeed()
 {
   return _ui.speedSlider->value();
+}
+
+bool Noggit::Ui::Tools::BrushStack::getBrushMode() const
+{
+  return _ui.sculptRadio->isChecked();
+}
+
+bool Noggit::Ui::Tools::BrushStack::getRandomizeRotation() const
+{
+  return _ui.randomizeRotation->isChecked();
+}
+
+BrushStackItem* Noggit::Ui::Tools::BrushStack::getActiveBrushItem()
+{
+  return _active_item;
 }
 
 void BrushStack::changeRotation(int change)

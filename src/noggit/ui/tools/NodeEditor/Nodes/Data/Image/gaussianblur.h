@@ -3,7 +3,6 @@
 
 #include <QTextStream>
 #include <QImage>
-#include <qmath.h>
 
 class GaussianBlur
 {

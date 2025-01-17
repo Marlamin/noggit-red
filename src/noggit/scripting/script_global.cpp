@@ -2,6 +2,7 @@
 #include <noggit/scripting/scripting_tool.hpp>
 #include <noggit/scripting/script_global.hpp>
 #include <noggit/MapView.h>
+#include <noggit/object_paste_params.hpp>
 #include <noggit/World.h>
 
 #include <noggit/scripting/script_context.hpp>

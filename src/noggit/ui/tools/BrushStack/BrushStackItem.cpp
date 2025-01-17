@@ -1,12 +1,22 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include "BrushStackItem.hpp"
+#include <noggit/Action.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/ui/CurrentTexture.h>
+#include <noggit/ui/FlattenTool.hpp>
 #include <noggit/ui/FontAwesome.hpp>
 #include <noggit/ui/FontNoggit.hpp>
+#include <noggit/ui/ShaderTool.hpp>
+#include <noggit/ui/TerrainTool.hpp>
+#include <noggit/ui/texturing_tool.hpp>
+#include <noggit/ui/TexturingGUI.h>
+#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
+#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
 #include <noggit/World.h>
-#include <noggit/ui/CurrentTexture.h>
-#include <noggit/ActionManager.hpp>
-#include <noggit/Action.hpp>
+
+#include <QCheckBox>
+#include <QToolButton>
 
 using namespace Noggit::Ui::Tools;
 
@@ -319,6 +329,36 @@ void BrushStackItem::syncSliders(double radius, double inner_radius, double spee
         break;
       }
     }
+}
+
+bool Noggit::Ui::Tools::BrushStackItem::isRadiusAffecting() const
+{
+  return _is_radius_affecting->isChecked();
+}
+
+bool Noggit::Ui::Tools::BrushStackItem::isInnerRadiusAffecting() const
+{
+  return _is_inner_radius_affecting->isChecked();
+}
+
+bool Noggit::Ui::Tools::BrushStackItem::isMaskRotationAffecting() const
+{
+  return _is_mask_rotation_affecting->isChecked();
+}
+
+bool Noggit::Ui::Tools::BrushStackItem::isSpeedAffecting() const
+{
+  return _is_speed_affecting->isChecked();
+}
+
+QToolButton* Noggit::Ui::Tools::BrushStackItem::getActiveButton()
+{
+  return _ui.brushNameLabel;
+}
+
+bool Noggit::Ui::Tools::BrushStackItem::isAffecting() const
+{
+  return _ui.contentWidget->isEnabled();
 }
 
 void BrushStackItem::setRadius(float radius)

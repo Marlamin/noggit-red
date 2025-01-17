@@ -1,7 +1,11 @@
 #pragma once
 
 #include <QDialog>
-#include "ui_Changelog.h"
+
+namespace Ui
+{
+  class Changelog;
+}
 
 namespace Noggit
 {

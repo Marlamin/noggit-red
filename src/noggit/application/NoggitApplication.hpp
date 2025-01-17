@@ -5,68 +5,44 @@
 
 #pragma once
 
-#include <memory>
-#include <filesystem>
-#include <ClientData.hpp>
-#include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
-#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
-#include <noggit/application/Configuration/NoggitApplicationConfigurationReader.hpp>
-#include <noggit/application/Configuration/NoggitApplicationConfigurationWriter.hpp>
 #include <noggit/ui/windows/projectSelection/NoggitProjectSelectionWindow.hpp>
-#include <memory>
-#include <string>
-#include <vector>
-#include <string_view>
-#include <QtCore/QSettings>
-#include <QtGui/QOffscreenSurface>
-#include <QtCore/QDir>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QFileDialog>
-#include <QtWidgets/QMessageBox>
-#include <QSplashScreen>
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <string>
-#include <revision.h>
-#include <util/exception_to_string.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 
-namespace Noggit::Ui::Windows
+#include <memory>
+#include <vector>
+
+namespace BlizzardArchive
 {
-    class NoggitProjectSelectionWindow;
+  class ClientData;
 }
 
-namespace Noggit::Application {
+namespace Noggit::Application
+{
+  class NoggitApplication
+  {
+  public:
+      static NoggitApplication* instance();
 
-    class NoggitApplication
-    {
-    public:
-        static NoggitApplication* instance()
-        {
-            static NoggitApplication inst{};
-            return &inst;
-        }
+      BlizzardArchive::ClientData* clientData();
+      bool hasClientData() const;
+      void setClientData(std::shared_ptr<BlizzardArchive::ClientData> data);
 
-        BlizzardArchive::ClientData* clientData() { return _client_data.get(); }
-        bool hasClientData() const { return _client_data != nullptr; }
-        void setClientData(std::shared_ptr<BlizzardArchive::ClientData> data) { _client_data = data; }
+      bool initalize(int argc, char* argv[], std::vector<bool> Parser);
+      std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> getConfiguration();
+      static void terminationHandler();
+      bool GetCommand(int index);
 
-        bool initalize(int argc, char* argv[], std::vector<bool> Parser);
-        std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> getConfiguration();
-        static void terminationHandler();
-        bool GetCommand(int index);
+  protected:
+      std::vector<bool> Command;
 
-    protected:
-        std::vector<bool> Command;
+  private:
+      NoggitApplication() = default;
 
-    private:
-        NoggitApplication() = default;
+      std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> _application_configuration;
+      std::unique_ptr<Noggit::Ui::Windows::NoggitProjectSelectionWindow> _project_selection_page;
+      std::shared_ptr<BlizzardArchive::ClientData> _client_data;
 
-        std::shared_ptr<Noggit::Application::NoggitApplicationConfiguration> _application_configuration;
-        std::unique_ptr<Noggit::Ui::Windows::NoggitProjectSelectionWindow> _project_selection_page;
-        std::shared_ptr<BlizzardArchive::ClientData> _client_data;
-
-    };
-
+  };
 }
 
 #endif //NOGGIT_APPLICATION_HPP

@@ -1,25 +1,27 @@
 #include "ViewportGizmo.hpp"
-#include "noggit/ModelInstance.h"
-#include "noggit/WMOInstance.h"
-#include "noggit/ActionManager.hpp"
-#include "noggit/Action.hpp"
-#include "external/glm/glm.hpp"
-#include <external/glm/gtx/matrix_decompose.hpp>
-#include <external/glm/gtc/type_ptr.hpp>
-#include <external/glm/gtc/quaternion.hpp>
-#include <external/glm/gtx/string_cast.hpp>
-#include <noggit/MapView.h>
+
+#include <noggit/Action.hpp>
+#include <noggit/ActionManager.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
 #include <noggit/application/NoggitApplication.hpp>
+#include <noggit/MapView.h>
+#include <noggit/ModelInstance.h>
+#include <noggit/WMOInstance.h>
+#include <noggit/World.h>
 
-#include <limits>
-
+#include <external/glm/glm.hpp>
+#include <external/glm/gtc/quaternion.hpp>
+#include <external/glm/gtc/type_ptr.hpp>
+#include <external/glm/gtx/matrix_decompose.hpp>
+#include <external/glm/gtx/string_cast.hpp>
 
 using namespace Noggit::Ui::Tools::ViewportGizmo;
 
 ViewportGizmo::ViewportGizmo(Noggit::Ui::Tools::ViewportGizmo::GizmoContext gizmo_context, World* world)
 : _gizmo_context(gizmo_context)
 , _world(world)
-{}
+{
+}
 
 void ViewportGizmo::handleTransformGizmo(MapView* map_view
                                         , const std::vector<selection_type>& selection
@@ -343,5 +345,42 @@ void ViewportGizmo::handleTransformGizmo(MapView* map_view
     _world->update_selected_model_groups();
 
   _world->update_selection_pivot();
+}
+
+void ViewportGizmo::ViewportGizmo::setCurrentGizmoOperation(ImGuizmo::OPERATION operation)
+{
+  _gizmo_operation = operation;
+}
+
+void ViewportGizmo::ViewportGizmo::setCurrentGizmoMode(ImGuizmo::MODE mode)
+{
+  _gizmo_mode = mode;
+}
+
+bool ViewportGizmo::ViewportGizmo::isOver() const
+{
+  ImGuizmo::SetID(_gizmo_context);
+  return ImGuizmo::IsOver();
+}
+
+bool ViewportGizmo::ViewportGizmo::isUsing() const
+{
+  ImGuizmo::SetID(_gizmo_context);
+  return ImGuizmo::IsUsing();
+}
+
+void ViewportGizmo::ViewportGizmo::setUseMultiselectionPivot(bool use_pivot)
+{
+  _use_multiselection_pivot = use_pivot;
+}
+
+void ViewportGizmo::ViewportGizmo::setMultiselectionPivot(glm::vec3 const& pivot)
+{
+  _multiselection_pivot = pivot;
+}
+
+void ViewportGizmo::ViewportGizmo::setWorld(World* world)
+{
+  _world = world;
 }
 

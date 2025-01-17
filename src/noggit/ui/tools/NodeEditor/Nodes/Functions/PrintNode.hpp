@@ -2,7 +2,6 @@
 #define NOGGIT_PRINTNODE_HPP
 
 #include "noggit/ui/tools/NodeEditor/Nodes/LogicNodeBase.hpp"
-#include <QLineEdit>
 
 using QtNodes::PortType;
 using QtNodes::PortIndex;
@@ -11,6 +10,7 @@ using QtNodes::NodeDataType;
 using QtNodes::NodeDataModel;
 using QtNodes::NodeValidationState;
 
+class QLineEdit;
 
 namespace Noggit
 {
@@ -29,11 +29,8 @@ namespace Noggit
 
         private:
             QLineEdit* _text;
-
         };
-
     }
-
 }
 
 #endif //NOGGIT_PRINTNODE_HPP

@@ -3,26 +3,35 @@
 #pragma once
 #include <math/trig.hpp>
 #include <noggit/tool_enums.hpp>
-#include <noggit/ui/tools/UiCommon/ExtendedSlider.hpp>
-#include <noggit/ui/tools/UiCommon/ImageMaskSelector.hpp>
-#include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QDial>
-#include <QtWidgets/QDoubleSpinBox>
-#include <QtWidgets/QGroupBox>
-#include <QtWidgets/QSlider>
-#include <QtWidgets/QWidget>
-#include <QtWidgets/qcheckbox.h>
+
 #include <QImage>
 #include <QJsonObject>
+#include <QtWidgets/QWidget>
 
 class World;
 class MapView;
+
+class QButtonGroup;
+class QCheckBox;
+class QDial;
+class QGroupBox;
+class QSlider;
 
 namespace Noggit
 {
 
   namespace Ui
   {
+    namespace Tools
+    {
+      namespace UiCommon
+      {
+        class ExtendedSlider;
+      }
+
+      class ImageMaskSelector;
+    }
+
     class TerrainTool : public QWidget
     {
       Q_OBJECT
@@ -42,12 +51,12 @@ namespace Noggit
       void setOrientation (float orientation);
       void setAngle (float angle);
       void setSpeed (float speed);
-      float getSpeed () { return _speed_slider->value(); };
+      float getSpeed () const;;
 
-      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getRadiusSlider() { return _radius_slider; };
-      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getInnerRadiusSlider() { return _inner_radius_slider; };
-      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getSpeedSlider() { return _speed_slider; };
-      QDial* getMaskOrientationDial() { return _image_mask_group->getMaskOrientationDial(); };
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getRadiusSlider();;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getInnerRadiusSlider();;
+      Noggit::Ui::Tools::UiCommon::ExtendedSlider* getSpeedSlider();;
+      QDial* getMaskOrientationDial();;
 
       // vertex edit only functions
       void moveVertices (World*, float dt);
@@ -57,14 +66,14 @@ namespace Noggit
       void changeAngle (float change);
       void setOrientRelativeTo (World*, glm::vec3 const& pos);
 
-      float brushRadius() const { return static_cast<float>(_radius_slider->value()); }
-      float innerRadius() const { return static_cast<float>(_inner_radius_slider->value());  }
+      float brushRadius() const;
+      float innerRadius() const;
 
-      void storeCursorPos (glm::vec3* cursor_pos) { _cursor_pos = cursor_pos; }
+      void storeCursorPos (glm::vec3* cursor_pos);
 
-      Noggit::Ui::Tools::ImageMaskSelector* getImageMaskSelector() { return _image_mask_group; };
+      Noggit::Ui::Tools::ImageMaskSelector* getImageMaskSelector();;
 
-      QImage* getMaskImage() { return &_mask_image; };
+      QImage* getMaskImage();;
 
       QSize sizeHint() const override;
 

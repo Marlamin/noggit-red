@@ -16,7 +16,6 @@
 #include <QLineF>
 #include <QPoint>
 
-#include <string>
 #include <functional>
 #include <unordered_map>
 

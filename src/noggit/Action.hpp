@@ -6,23 +6,18 @@
 #include <vector>
 #include <array>
 #include <string>
-#include <set>
-#include <algorithm>
 #include <external/tsl/robin_map.h>
-#include <optional>
 #include <noggit/area_trigger.hpp>
-#include <noggit/TextureManager.h>
 #include <noggit/texture_set.hpp>
-#include <noggit/SceneObject.hpp>
 #include <noggit/liquid_layer.hpp>
-#include <noggit/ChunkWater.hpp>
 #include <QObject>
-#include <ClientData.hpp>
 
 #include <functional>
+#include <unordered_set>
 
 class MapView;
 class MapChunk;
+class SceneObject;
 
 namespace Noggit
 {
@@ -119,11 +114,11 @@ namespace Noggit
         void setBlockCursor(bool state);
         bool getBlockCursor() const;
         void setPostCallback(std::function<void()> function);
-        bool getTag() { return _tag; };
-        void setTag(bool tag) { _tag = tag; };
+        bool getTag();
+        void setTag(bool tag);
 
-        bool checkAdressTag(std::uintptr_t address) { return std::find(_address_tag.begin(), _address_tag.end(), address) != _address_tag.end(); };
-        void tagAdress(std::uintptr_t address) { _address_tag.push_back(address); }
+        bool checkAdressTag(std::uintptr_t address);
+        void tagAdress(std::uintptr_t address);
 
         float* getChunkTerrainOriginalData(MapChunk* chunk);
 

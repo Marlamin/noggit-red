@@ -3,15 +3,19 @@
 #include "MinimapTool.hpp"
 
 #include <noggit/ActionManager.hpp>
-#include <noggit/MapView.h>
+#include <noggit/application/NoggitApplication.hpp>
 #include <noggit/Input.hpp>
+#include <noggit/MapView.h>
 #include <noggit/project/CurrentProject.hpp>
+#include <noggit/ui/minimap_widget.hpp>
 #include <noggit/ui/MinimapCreator.hpp>
 #include <noggit/ui/tools/ToolPanel/ToolPanel.hpp>
 #include <noggit/ui/windows/noggitWindow/NoggitWindow.hpp>
-#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/World.h>
 
 #include <QDir>
+#include <QProgressBar>
+#include <QPushButton>
 #include <QStatusBar>
 
 namespace Noggit

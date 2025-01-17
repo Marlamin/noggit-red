@@ -1,23 +1,31 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
+#include <ui_NodeEditor.h>
+
+#include "../NodeRegistry.hpp"
 #include "NodeEditor.hpp"
-#include <noggit/ui/FramelessWindow.hpp>
-#include <noggit/ui/FontAwesome.hpp>
-#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
-#include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp>
 #include <noggit/Log.h>
 #include <noggit/MapView.h>
+#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/FramelessWindow.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/BaseNode.hpp>
+#include <noggit/ui/tools/NodeEditor/Nodes/Scene/NodesContext.hpp>
+#include <noggit/ui/tools/PreviewRenderer/PreviewRenderer.hpp>
+
+#include <external/NodeEditor/include/nodes/FlowScene>
 #include <external/NodeEditor/include/nodes/internal/NodeGraphicsObject.hpp>
 #include <external/NodeEditor/include/nodes/Node>
 #include <external/NodeEditor/include/nodes/NodeDataModel>
-#include <external/NodeEditor/include/nodes/FlowScene>
 
-#include <QFileDialog>
-#include <QTabWidget>
-#include <QMessageBox>
-#include <QTime>
 #include <QElapsedTimer>
+#include <QFileDialog>
+#include <QFileSystemModel>
+#include <QMessageBox>
 #include <QModelIndex>
+#include <QSortFilterProxyModel>
+#include <QTabWidget>
+#include <QTime>
+#include <QWidget>
 
 using namespace Noggit::Ui::Tools::NodeEditor::Ui;
 using namespace Noggit::Ui::Tools::NodeEditor::Nodes;

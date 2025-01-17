@@ -1,8 +1,11 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/AsyncLoader.h>
-#include <noggit/errorHandling.h>
+#include <string>
 #include <Exception.hpp>
+#include <noggit/AsyncLoader.h>
+#include <noggit/AsyncObject.h>
+#include <noggit/errorHandling.h>
+#include <noggit/Log.h>
 
 #include <QtCore/QSettings>
 
@@ -175,4 +178,14 @@ AsyncLoader::~AsyncLoader()
   {
     thread.join();
   }
+}
+
+bool AsyncLoader::important_object_failed_loading() const
+{
+  return _important_object_failed_loading;
+}
+
+void AsyncLoader::reset_object_fail()
+{
+  _important_object_failed_loading = false;
 }

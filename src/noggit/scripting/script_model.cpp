@@ -5,8 +5,10 @@
 #include <noggit/scripting/script_exception.hpp>
 #include <noggit/World.h>
 #include <noggit/ModelInstance.h>
+#include <noggit/object_paste_params.hpp>
 #include <noggit/WMOInstance.h>
 #include <noggit/ui/ObjectEditor.h>
+
 #include <sol/sol.hpp>
 
 namespace Noggit

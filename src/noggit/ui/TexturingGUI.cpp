@@ -1,30 +1,23 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #include <noggit/ui/TexturingGUI.h>
-
-#include <algorithm>
-#include <list>
-#include <map>
-#include <sstream>
-#include <string>
-#include <vector>
-
-#include <noggit/DBC.h>
-#include <noggit/Misc.h>
-
+#include <noggit/application/NoggitApplication.hpp>
+#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+#include <noggit/project/CurrentProject.hpp>
 #include <noggit/TextureManager.h> // TextureManager, Texture
 #include <noggit/ui/TextureList.hpp>
-#include <noggit/application/NoggitApplication.hpp>
-#include <noggit/project/CurrentProject.hpp>
 
-#include <unordered_set>
+#include <ClientData.hpp>
 
-#include <QtCore/QSettings>
 #include <QtCore/QSortFilterProxyModel>
 #include <QtGui/QStandardItemModel>
 #include <QtWidgets/QCheckBox>
 #include <QtWidgets/QComboBox>
 #include <QtWidgets/QVBoxLayout>
+
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 namespace Noggit
 {

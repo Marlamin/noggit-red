@@ -3,8 +3,6 @@
 #include <noggit/world_tile_update_queue.hpp>
 
 #include <noggit/Log.h>
-#include <noggit/ModelInstance.h>
-#include <noggit/WMOInstance.h>
 #include <noggit/World.h>
 
 

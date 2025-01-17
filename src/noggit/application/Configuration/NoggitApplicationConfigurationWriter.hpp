@@ -1,10 +1,10 @@
-#ifndef NOGGIT_APPLICATION_CONFIGURATION_WRITER_HPP
-#define NOGGIT_APPLICATION_CONFIGURATION_WRITER_HPP
+#pragma once
 
-#include <QFile>
-#include <noggit/application/Configuration/NoggitApplicationConfiguration.hpp>
+class QFile;
 
-namespace Noggit::Application {
+namespace Noggit::Application
+{
+  struct NoggitApplicationConfiguration;
 
     class NoggitApplicationConfigurationWriter
     {
@@ -13,4 +13,3 @@ namespace Noggit::Application {
         void PersistConfigurationState(QFile& outputFile, const NoggitApplicationConfiguration& configuration);
     };
 }
-#endif // NOGGIT_APPLICATION_CONFIGURATION_WRITER_HPP

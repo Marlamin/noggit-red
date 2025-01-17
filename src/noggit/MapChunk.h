@@ -1,26 +1,20 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
 #pragma once
+#include <noggit/ContextObject.hpp>
 #include <noggit/map_enums.hpp>
-#include <noggit/MapTile.h> // MapTile
+#include <noggit/MapHeaders.h>
 #include <noggit/Misc.h>
-#include <noggit/ModelInstance.h>
 #include <noggit/Selection.h>
 #include <noggit/TextureManager.h>
-#include <noggit/WMOInstance.h>
-#include <noggit/map_enums.hpp>
-#include <noggit/texture_set.hpp>
 #include <noggit/tool_enums.hpp>
-#include <noggit/ContextObject.hpp>
-#include <opengl/scoped.hpp>
-#include <opengl/texture.hpp>
-#include <util/sExtendableArray.hpp>
 
-#include <optional>
+#include <QImage>
+
+#include <array>
 #include <map>
 #include <memory>
-#include <array>
-#include <QImage>
+#include <unordered_set>
 
 namespace BlizzardArchive
 {
@@ -30,10 +24,22 @@ namespace BlizzardArchive
 namespace math
 {
   class frustum;
+  struct ray;
   struct vector_4d;
 }
+
+namespace util
+{
+  class sExtendableArray;
+}
+
 class Brush;
 class ChunkWater;
+class MapTile;
+class ModelInstance;
+class TextureSet;
+class WMOInstance;
+
 class QPixmap;
 
 using StripType = uint16_t;
@@ -70,7 +76,7 @@ public:
   MapChunk(MapTile* mt, BlizzardArchive::ClientFile* f, bool bigAlpha, tile_mode mode, Noggit::NoggitRenderContext context
            , bool init_empty = false, int chunk_idx = 0, bool load_textures = true);
 
-  auto getHoleMask(void) const -> unsigned { return static_cast<unsigned>(holes); }
+  auto getHoleMask(void) const -> unsigned;
   MapTile *mt;
   glm::vec3 vmin, vmax, vcenter;
   int px, py;
@@ -113,7 +119,7 @@ private:
 
 public:
 
-    TextureSet* getTextureSet() const { return texture_set.get(); };
+    TextureSet* getTextureSet() const;
 
   void draw ( math::frustum const& frustum
             , OpenGL::Scoped::use_program& mcnk_shader
@@ -136,9 +142,10 @@ public:
   bool stampMCCV(glm::vec3 const& pos, glm::vec4 const& color, float change, float radius, bool editMode, QImage* img, bool paint, bool use_image_colors);
   glm::vec3 pickMCCV(glm::vec3 const& pos);
 
-  ChunkWater* liquid_chunk() const;
+  ChunkWater const* liquid_chunk() const;
+  ChunkWater* liquid_chunk();
 
-  bool hasColors() const { return hasMCCV; };
+  bool hasColors() const;;
 
   void updateVerticesData();
   void recalcExtents();
@@ -189,9 +196,9 @@ public:
   bool GetVertex(float x, float z, glm::vec3 *V);
   void getVertexInternal(float x, float z, glm::vec3 * v);
   float getHeight(int x, int z);
-  float getMinHeight() { return vmin.y; };
-  float getMaxHeight() { return vmax.y; };
-  glm::vec3 getCenter() { return vcenter; };
+  float getMinHeight() const;;
+  float getMaxHeight() const;;
+  glm::vec3 getCenter() const;;
 
   void clearHeight();
 
@@ -210,9 +217,9 @@ public:
   // fix the gaps with the chunk above
   bool fixGapAbove(const MapChunk* chunk);
 
-  glm::vec3* getHeightmap() { return &mVertices[0]; };
-  glm::vec3 const* getNormals() const { return &mNormals[0]; }
-  glm::vec3* getVertexColors() { return &mccv[0]; };
+  glm::vec3* getHeightmap();;
+  glm::vec3 const* getNormals() const;
+  glm::vec3* getVertexColors();;
 
   void update_vertex_colors();
 
@@ -220,11 +227,11 @@ public:
   QImage getAlphamapImage(unsigned layer);
   QImage getVertexColorImage();
   void setHeightmapImage(QImage const& image, float multiplier, int mode);
-  void setAlphamapImage(QImage const& image, unsigned layer);
+  void setAlphamapImage(QImage const& image, unsigned int layer);
   void setVertexColorImage(QImage const& image);
   void initMCCV();
 
   void registerChunkUpdate(unsigned flags);
-  void endChunkUpdates() { _chunk_update_flags = 0; }
-  unsigned getUpdateFlags() { return _chunk_update_flags; }
+  void endChunkUpdates();
+  unsigned getUpdateFlags() const;
 };

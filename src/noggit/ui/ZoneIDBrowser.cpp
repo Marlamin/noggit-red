@@ -1,39 +1,34 @@
 // This file is part of Noggit3, licensed under GNU General Public License (version 3).
 
-#include <noggit/ui/ZoneIDBrowser.h>
-#include <noggit/ui/windows/SoundPlayer/SoundEntryPlayer.h>
-#include <noggit/ui/windows/EditorWindows/ZoneIntroMusicPickerWindow.h>
-#include <noggit/ui/windows/EditorWindows/SoundEntryPickerWindow.h>
-#include <noggit/ui/windows/EditorWindows/ZoneMusicPickerWindow.h>
-#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
-
-#include <noggit/DBC.h>
-#include <noggit/Log.h>
-#include <noggit/Misc.h>
-#include <ClientFile.hpp>
 #include <noggit/application/NoggitApplication.hpp>
-
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QFormLayout>
-#include <QtWidgets/qpushbutton.h>
-#include <QtWidgets/qgroupbox.h>
-#include <QtWidgets/qcheckbox.h>
-#include <QtWidgets/qlineedit.h>
-#include <QtWidgets/QTableView>
-#include <QStandardItemModel>
-#include <QTableWidgetItem>
-#include <QSound>
-#include <qtemporaryfile>
-#include <QMediaPlayer>
-#include <QListWidget>
-#include <QToolButton>
+#include <noggit/DBC.h>
+#include <noggit/ui/FontAwesome.hpp>
+#include <noggit/ui/tools/MapCreationWizard/Ui/MapCreationWizard.hpp>
 #include <noggit/ui/tools/UiCommon/expanderwidget.h>
+#include <noggit/ui/windows/EditorWindows/SoundEntryPickerWindow.h>
+#include <noggit/ui/windows/EditorWindows/ZoneIntroMusicPickerWindow.h>
+#include <noggit/ui/windows/EditorWindows/ZoneMusicPickerWindow.h>
+#include <noggit/ui/ZoneIDBrowser.h>
 
+#include <QDialog>
+#include <QMessageBox>
+#include <QtWidgets/QCheckBox.h>
+#include <QtWidgets/QComboBox.h>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QFormLayout>
+#include <QtWidgets/qgroupbox.h>
+#include <QtWidgets/QLabel.h>
+#include <QtWidgets/qlineedit.h>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSlider>
+#include <QtWidgets/QSpinBox.h>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QVBoxLayout>
 
+#include <bitset>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <bitset>
 
 namespace Noggit
 {

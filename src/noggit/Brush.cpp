@@ -16,20 +16,24 @@ void Brush::setHardness(float H)
   iradius = hardness * radius;
   oradius = radius - iradius;
 }
+
 void Brush::setRadius(float R)
 {
   radius = R;
   iradius = hardness * radius;
   oradius = radius - iradius;
 }
+
 float Brush::getHardness() const
 {
   return hardness;
 }
+
 float Brush::getRadius() const
 {
   return radius;
 }
+
 float Brush::getValue(float dist) const
 {
   if (dist > radius)

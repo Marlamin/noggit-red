@@ -3,29 +3,29 @@
 #ifndef NOGGIT_CHUNKCLIPBOARD_HPP
 #define NOGGIT_CHUNKCLIPBOARD_HPP
 
+#include <noggit/MapHeaders.h>
+#include <noggit/TileIndex.hpp>
+
+#include <blizzard-archive-library/include/Listfile.hpp>
+
 #include <QObject>
+
 #include <glm/glm.hpp>
 
-#include <set>
 #include <array>
-#include <vector>
 #include <cstdint>
 #include <optional>
+#include <set>
 #include <tuple>
+#include <vector>
 
-#include <noggit/TileIndex.hpp>
-#include <noggit/Alphamap.hpp>
-#include <noggit/texture_set.hpp>
-#include <noggit/MapHeaders.h>
-#include <noggit/liquid_layer.hpp>
-#include <ClientData.hpp>
-
-
+class Alphamap;
+class liquid_layer;
+struct tmp_edit_alpha_values;
 class World;
 
 namespace Noggit::Ui::Tools::ChunkManipulator
 {
-
   enum class ChunkCopyFlags
   {
     TERRAIN = 0x1,
@@ -127,11 +127,11 @@ namespace Noggit::Ui::Tools::ChunkManipulator
     void pasteSelection(glm::vec3 const& pos, ChunkPasteFlags flags);
 
     [[nodiscard]]
-    ChunkCopyFlags copyParams() const { return _copy_flags; };
-    void setCopyParams(ChunkCopyFlags flags) { _copy_flags = flags; };
+    ChunkCopyFlags copyParams() const;;
+    void setCopyParams(ChunkCopyFlags flags);;
 
     [[nodiscard]]
-    std::set<SelectedChunkIndex> const& selectedChunks() const { return _selected_chunks; };
+    std::set<SelectedChunkIndex> const& selectedChunks() const;;
 
   signals:
     void selectionChanged(std::set<SelectedChunkIndex> const& selected_chunks);

@@ -6,33 +6,34 @@
 #include <QWidget>
 #include <QPixmap>
 #include <ui_ImageMaskSelector.h>
-#include <noggit/ui/tools/UiCommon/ImageBrowser.hpp>
 
 class MapView;
 
 namespace Noggit::Ui::Tools
 {
+  class ImageBrowser;
+
   class ImageMaskSelector : public QWidget
   {
     Q_OBJECT
   public:
     ImageMaskSelector(MapView* map_view, QWidget* parent = nullptr);
 
-    bool isEnabled() { return _ui.groupBox->isChecked(); };
-    int getRotation() { return _ui.dial->value(); };
+    bool isEnabled() const;;
+    int getRotation() const;;
     void setRotation(int value);
-    void setRotationRaw(int value) { _ui.dial->setValue(value); };
-    int getBrushMode() { return  _ui.brushMode->checkedId(); };
-    void setBrushMode(int mode) { if (mode) _ui.sculptRadio->setChecked(true); else _ui.stampRadio->setChecked(true); };
-    QPixmap* getPixmap() { return &_pixmap; };
+    void setRotationRaw(int value);;
+    int getBrushMode() const;;
+    void setBrushMode(int mode);;
+    QPixmap* getPixmap();;
     void setContinuousActionName(QString const& name);
-    bool getRandomizeRotation() { return _ui.randomizeRotation->isChecked();};
-    void setRandomizeRotation(bool state) { _ui.randomizeRotation->setChecked(state);};
-    void setBrushModeVisible(bool state) { _ui.sculptRadio->setVisible(state); _ui.stampRadio->setVisible(state);};
-    QDial* getMaskOrientationDial() { return _ui.dial; };
+    bool getRandomizeRotation() const;;
+    void setRandomizeRotation(bool state);;
+    void setBrushModeVisible(bool state);;
+    QDial* getMaskOrientationDial();;
     void setImageMask(QString const& path);
-    QString const& getImageMaskPath() { return _image_path; };
-    void enableControls(bool state) {_ui.dial->setEnabled(!state); _ui.randomizeRotation->setEnabled(!state); };
+    QString const& getImageMaskPath() const;;
+    void enableControls(bool state);;
 
   signals:
     void pixmapUpdated(QPixmap* pixmap);
